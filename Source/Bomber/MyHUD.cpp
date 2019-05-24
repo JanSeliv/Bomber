@@ -8,7 +8,7 @@
 // Sets default values for this HUD's properties
 AMyHUD::AMyHUD()
 {
-	
+
 	// ___ Create UMG widget
 	TSubclassOf<UUserWidget> umgMenuClass, umgHudClass, umgCurrentClass;
 	// Find UMenuUserWidgetUMG 
@@ -23,7 +23,7 @@ AMyHUD::AMyHUD()
 	umgCurrentClass = (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "MenuLevel" ? umgMenuClass : umgHudClass);
 	umgCurrentObj = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), umgCurrentClass);
 	//___ ___
-	
+
 }
 
 
@@ -31,6 +31,8 @@ void AMyHUD::BeginPlay()
 {
 	//Add to viewport selected UMG
 	if (IsValid(umgCurrentObj))
+	{
 		umgCurrentObj->AddToViewport();
+	}
 }
 

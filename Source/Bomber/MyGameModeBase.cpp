@@ -10,7 +10,7 @@ AMyGameModeBase::AMyGameModeBase()
 	//tell custom game mode to use custom defaults
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = 0;
-	HUDClass = 0;//AMyHUD::StaticClass();
+	HUDClass = nullptr;//AMyHUD::StaticClass();
 }
 
 void AMyGameModeBase::BeginPlay()

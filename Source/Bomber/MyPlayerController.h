@@ -9,8 +9,10 @@ UCLASS()
 class BOMBER_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
+
+	void testfun(int a, bool b);
 	AMyPlayerController();
 
 	void BeginPlay() override;
@@ -18,7 +20,6 @@ public:
 	void SetupInputComponent() override;
 
 	//widgets
-	DECLARE_DELEGATE_OneParam(FEscapeDelegate, UObject*); //for templated delegate
 	UPROPERTY(BlueprintReadWrite, Category = "C++")
 		class AMyHUD* MyCustomHUD;
 };

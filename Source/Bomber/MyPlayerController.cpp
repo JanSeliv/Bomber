@@ -23,10 +23,11 @@ void AMyPlayerController::BeginPlay()
 void AMyPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	
+
 	MyCustomHUD = GetWorld()->SpawnActor<AMyHUD>(AMyHUD::StaticClass());
 	//Call UInGameUserWidget::ShowInGameState function when the escape was pressed
-	InputComponent->BindAction<FEscapeDelegate>("EscapeEvent", IE_Pressed, Cast<UInGameUserWidget>(MyCustomHUD->umgCurrentObj), &UInGameUserWidget::ShowInGameState, NewObject<UObject>());
+	InputComponent->BindAction("EscapeEvent", IE_Pressed, Cast<UInGameUserWidget>(MyCustomHUD->umgCurrentObj), &UInGameUserWidget::ShowInGameState);
 }
+
 
 
