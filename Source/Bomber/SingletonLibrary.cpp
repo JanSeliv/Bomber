@@ -9,7 +9,11 @@ USingletonLibrary::USingletonLibrary()
 
 }
 
-AGeneratedMap* const USingletonLibrary::GetGeneratedMap()
+USingletonLibrary* const USingletonLibrary::GetSingleton()
 {
-	return nullptr;
+	if (IsValid(GEngine) == false) return nullptr;
+	USingletonLibrary* singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
+
+	if (IsValid(singleton) == false) return nullptr;
+	return singleton;
 }

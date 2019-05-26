@@ -6,21 +6,17 @@
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	
+	if (IsValid(USingletonLibrary::GetSingleton()))
+	{
+		USingletonLibrary::GetSingleton()->levelMap = this;
+	}
+
 }
+
 
 // Called when the game starts or when spawned
 void AGeneratedMap::BeginPlay()
 {
 	Super::BeginPlay();
-
-}
-
-// Called every frame
-void AGeneratedMap::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
 }

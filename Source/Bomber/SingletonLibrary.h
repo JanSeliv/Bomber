@@ -14,8 +14,9 @@ public:
 	USingletonLibrary();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-		static class AGeneratedMap* const GetGeneratedMap();
+		static USingletonLibrary* const GetSingleton();
 
-	static class AGeneratedMap* levelMap;
+	UPROPERTY(BlueprintReadWrite)
+		class AGeneratedMap* levelMap;
 
 };
