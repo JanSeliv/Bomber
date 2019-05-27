@@ -17,3 +17,4 @@ USingletonLibrary* const USingletonLibrary::GetSingleton()
 	if (IsValid(singleton) == false) return nullptr;
 	return singleton;
 }
+

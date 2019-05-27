@@ -14,6 +14,41 @@ enum class EPathTypesEnum : uint8
 	Secure
 };
 
+UENUM(BlueprintType)
+enum class EActorTypeEnum : uint8
+{
+	None,
+	Bomb,
+	Item,
+	Wall,
+	Floor,
+	Box,
+	Player
+};
+
+USTRUCT(BlueprintType)
+struct FCell
+{
+	GENERATED_BODY()
+
+public:
+	FCell() {}
+	FCell(FVector vector);
+
+	UPROPERTY(BlueprintReadWrite, Category = "C++")
+		FVector cell;
+
+	// Uses USTUCT in TSet
+	bool operator== (const FCell& other)
+	{
+		return cell == other.cell;
+	}
+	friend uint32 GetTypeHash(const FCell& other)
+	{
+		return GetTypeHash(other.cell);
+	}
+};
+
 UCLASS()
 class BOMBER_API AGeneratedMap : public AActor
 {
@@ -24,9 +59,11 @@ public:
 	AGeneratedMap();
 
 	// Pathfinding
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "C++")
-		void GetSideLocations(FVector vector, int32 sideLength, EPathTypesEnum pathfinder, TSet<FVector>& result);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+		TSet<FCell> GetSidesCells(FCell cellLocation, int32 sideLength, EPathTypesEnum pathfinder) const;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+		AActor* AddActorOnMap(FCell cellLocation, AActor* updateActor, EActorTypeEnum actorType);
 
 protected:
 	// Called when the game starts or when spawned

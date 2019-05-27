@@ -16,7 +16,20 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 		static USingletonLibrary* const GetSingleton();
 
-	UPROPERTY(BlueprintReadWrite)
-		class AGeneratedMap* levelMap;
+
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "C++")
+		static FORCEINLINE float GetVectorsLength(FVector x, FVector y)
+	{
+		return FGenericPlatformMath::Abs((x - y).Size());
+	}
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+		static FORCEINLINE class AGeneratedMap* const GetLevelMap()
+	{
+		return GetSingleton()->levelMap;
+	}
+
+	class AGeneratedMap* levelMap;
 
 };
