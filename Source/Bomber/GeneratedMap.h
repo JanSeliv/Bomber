@@ -8,21 +8,21 @@
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EPathTypesEnum : uint8
 {
-	Explosion = 1 << 0,
-	Free = 1 << 1,
-	Safe = 1 << 2,
-	Secure = 1 << 3
+	Explosion = 1 << 0, // to the first wall
+	Free = 1 << 1,		// to the first obstacle
+	Safe = 1 << 2,		// to the first obstacle+explosion
+	Secure = 1 << 3		// to the first obstacle+explosion+player
 };
 
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EActorTypeEnum : uint8
 {
 	None = 1 << 0,
-	Bomb = 1 << 1,
+	Bomb = 1 << 1,  // obstacle
 	Item = 1 << 2,
-	Wall = 1 << 3,
+	Wall = 1 << 3,	// obstacle
 	Floor = 1 << 4,
-	Box = 1 << 5,
+	Box = 1 << 5,	// obstacle
 	Player = 1 << 6
 };
 
@@ -74,7 +74,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 		bool DestroyActorFromMap(const FCell& cell);
 
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -83,6 +82,7 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 		void GenerateLevelMap();
 
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	//	TArray<TSubclassOf<AActor>> bpClasses; UPR
+	// Storage of cells and their actors
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Generated Map"))
+		TMap<FCell, AActor*> GeneratedMap_;
 };

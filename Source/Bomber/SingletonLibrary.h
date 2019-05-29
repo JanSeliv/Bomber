@@ -18,18 +18,27 @@ public:
 		static USingletonLibrary* const GetSingleton();
 
 
+	/* Cell funs */
 	// Creates a cell from the vector
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
-		static FCell MakeCell(const FVector& cellLocation);
+		static FCell MakeCell(const FVector& cellLocation, bool bShoudForce);
 
-
-	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "C++")
-		static FORCEINLINE float GetVectorsLength(FVector x, FVector y)
+	// Bound of floor
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+		static FORCEINLINE float GetFloorLength()
 	{
-		return FGenericPlatformMath::Abs((x - y).Size());
+		return 200.0;
+	}
+
+	// The length between two cells
+	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "C++")
+		static FORCEINLINE float CalculateCellsLength(FCell x, FCell y)
+	{
+		return (fabsf((x.location - y.location).Size()) / GetFloorLength());
 	}
 
 
+	/* GeneratedMap funs*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 		static FORCEINLINE class AGeneratedMap* const GetLevelMap()
 	{
