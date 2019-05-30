@@ -58,6 +58,10 @@ public:
 	// Sets default values for this actor's properties
 	AGeneratedMap();
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPushNongeneratedToMap);
+	UPROPERTY(BlueprintAssignable, Category = "C++")
+		FPushNongeneratedToMap onActorsUpdateDelegate;
+
 	// Pathfinding
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++")
 		TSet<FCell> GetSidesCells(const FCell& cell, int32 sideLength, EPathTypesEnum pathfinder) const;
