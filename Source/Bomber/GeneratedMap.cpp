@@ -11,10 +11,7 @@ FCell::FCell()
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
-	if (IsValid(USingletonLibrary::GetSingleton()))
-	{
-		USingletonLibrary::GetSingleton()->levelMap = this;
-	}
+
 }
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32 sideLength, EPathTypesEnum pathfinder) const
@@ -49,7 +46,26 @@ void AGeneratedMap::BeginPlay()
 
 }
 
-void AGeneratedMap::GenerateLevelMap_Implementation()
+
+bool AGeneratedMap::GenerateLevelMap_Implementation()
 {
+	if (IsValid(USingletonLibrary::GetSingleton()) == false) return false;
+	if (IsValid(USingletonLibrary::GetSingleton()->levelMap) == false)
+	{
+		USingletonLibrary::GetSingleton()->levelMap = this;
+	}
+	GeneratedMap_.Empty();
+
+	return true;
+}
+
+
+void AGeneratedMap::ShowTMap(FCell cell, int cellNo)
+{
+	PRINT(
+		FString::FromInt(cellNo) + " "
+		+ (cell.location).ToString()
+		+ (IsValid(mapActor) ? mapActor->GetFullName() : "nullptr")
+	);
 
 }

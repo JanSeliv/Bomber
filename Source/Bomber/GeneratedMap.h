@@ -34,16 +34,15 @@ struct FCell
 public:
 	FCell();
 
-	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FVector location;
 
-	bool operator== (const FCell& other)
+	bool operator== (const FCell& other) const
 	{
 		return (this->location == other.location);
 	}
-	// Uses USTUCT in TSet
 	// Hash Function
-	friend uint32 GetTypeHash(const FCell& other)
+	friend FORCEINLINE uint32 GetTypeHash(const FCell& other)
 	{
 		return GetTypeHash(other.location);
 	}
@@ -84,7 +83,10 @@ protected:
 
 	// Create LevelMap on Scene and fill TMap
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-		void GenerateLevelMap();
+		bool GenerateLevelMap();
+
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+		void ShowTMap(FCell cell, int cellNo);
 
 	// Storage of cells and their actors
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Generated Map"))

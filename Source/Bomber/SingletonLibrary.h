@@ -21,7 +21,7 @@ public:
 	/* Cell funs */
 	// Creates a cell from the vector
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
-		static FCell MakeCell(const FVector& cellLocation, bool bShoudForce);
+		static FCell MakeCell(const FVector& cellLocation);
 
 	// Bound of floor
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

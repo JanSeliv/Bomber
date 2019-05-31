@@ -31,14 +31,11 @@ USingletonLibrary* const USingletonLibrary::GetSingleton()
 	return singleton;
 }
 
-FCell USingletonLibrary::MakeCell(const FVector& cellLocation, bool bShoudForce = false)
+FCell USingletonLibrary::MakeCell(const FVector& cellLocation)
 {
 	FCell cell;
 	cell.location = cellLocation;
-	if (bShoudForce == true) return cell;
 
-	//Find nearest
-	/* ... */
 	return cell;
 }
 
