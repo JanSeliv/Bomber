@@ -21,7 +21,10 @@ public:
 	/* Cell funs */
 	// Creates a cell from the vector
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
-		static FCell MakeCell(const FVector& cellLocation);
+		static FORCEINLINE FCell MakeCell(const FVector& cellLocation)
+	{
+		return FCell(cellLocation);
+	}
 
 	// Bound of floor
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -32,7 +35,7 @@ public:
 
 	// The length between two cells
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "C++")
-		static FORCEINLINE float CalculateCellsLength(FCell x, FCell y)
+		static FORCEINLINE float CalculateCellsLength(const FCell& x, const FCell& y)
 	{
 		return (fabsf((x.location - y.location).Size()) / GetFloorLength());
 	}

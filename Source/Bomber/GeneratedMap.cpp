@@ -3,10 +3,26 @@
 #include "GeneratedMap.h"
 #include "Bomber.h"
 
-FCell::FCell()
+FCell::FCell(const FVector& cellLocation)
+	: location(cellLocation)
 {
+	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Contains(*this))
+	{
+		return;
+	}
 
+	FCell foundedCell;
+	for (auto i : USingletonLibrary::GetLevelMap()->GeneratedMap_)
+	{
+		if (USingletonLibrary::CalculateCellsLength(i.Key, *this)
+			< USingletonLibrary::CalculateCellsLength(foundedCell, *this))
+		{
+			foundedCell = i.Key.location;
+		}
+	}
+	this->location = foundedCell.location;
 }
+
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
@@ -57,15 +73,4 @@ bool AGeneratedMap::GenerateLevelMap_Implementation()
 	GeneratedMap_.Empty();
 
 	return true;
-}
-
-
-void AGeneratedMap::ShowTMap(FCell cell, int cellNo)
-{
-	PRINT(
-		FString::FromInt(cellNo) + " "
-		+ (cell.location).ToString()
-		+ (IsValid(mapActor) ? mapActor->GetFullName() : "nullptr")
-	);
-
 }

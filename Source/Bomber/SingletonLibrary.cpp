@@ -31,11 +31,4 @@ USingletonLibrary* const USingletonLibrary::GetSingleton()
 	return singleton;
 }
 
-FCell USingletonLibrary::MakeCell(const FVector& cellLocation)
-{
-	FCell cell;
-	cell.location = cellLocation;
-
-	return cell;
-}
 

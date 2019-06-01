@@ -32,7 +32,9 @@ struct FCell
 	GENERATED_BODY()
 
 public:
-	FCell();
+	FCell() {};
+
+	FCell(const FVector& cellLocation);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FVector location;
@@ -78,6 +80,8 @@ public:
 		bool DestroyActorFromMap(const FCell& cell);
 
 protected:
+	friend FCell;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -85,10 +89,8 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 		bool GenerateLevelMap();
 
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-		void ShowTMap(FCell cell, int cellNo);
-
 	// Storage of cells and their actors
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Generated Map"))
 		TMap<FCell, AActor*> GeneratedMap_;
+
 };
