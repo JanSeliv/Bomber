@@ -3,9 +3,15 @@
 #include "GeneratedMap.h"
 #include "Bomber.h"
 
-FCell::FCell(const FVector& cellLocation)
-	: location(cellLocation)
+FCell::FCell(const AActor* actor)
 {
+	CHECKMAP();
+	if (IsValid(actor) == false) return;
+	this->location = actor->GetActorLocation();
+
+	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0) return;
+
+	// Already exist?
 	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Contains(*this))
 	{
 		return;
@@ -17,7 +23,7 @@ FCell::FCell(const FVector& cellLocation)
 		if (USingletonLibrary::CalculateCellsLength(i.Key, *this)
 			< USingletonLibrary::CalculateCellsLength(foundedCell, *this))
 		{
-			foundedCell = i.Key.location;
+			foundedCell.location = i.Key.location;
 		}
 	}
 	this->location = foundedCell.location;
@@ -43,17 +49,21 @@ TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& 
 	return foundedLocations;
 }
 
-AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, AActor* updateActor, EActorTypeEnum actorType = EActorTypeEnum::None)
+AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, EActorTypeEnum actorType)
 {
 
 	return nullptr;
+}
+
+void AGeneratedMap::AddActorOnMapByObj_Implementation(const AActor* updateActor)
+{
+
 }
 
 bool AGeneratedMap::DestroyActorFromMap_Implementation(const FCell& cell)
 {
 	return true;
 }
-
 
 // Called when the game starts or when spawned
 void AGeneratedMap::BeginPlay()
@@ -62,15 +72,15 @@ void AGeneratedMap::BeginPlay()
 
 }
 
-
 bool AGeneratedMap::GenerateLevelMap_Implementation()
 {
 	if (IsValid(USingletonLibrary::GetSingleton()) == false) return false;
-	if (IsValid(USingletonLibrary::GetSingleton()->levelMap) == false)
+	if (IsValid(USingletonLibrary::GetLevelMap()) == false)
 	{
-		USingletonLibrary::GetSingleton()->levelMap = this;
+		USingletonLibrary::GetSingleton()->levelMap_ = this;
 	}
 	GeneratedMap_.Empty();
+	charactersOnMap_.Empty();
 
 	return true;
 }

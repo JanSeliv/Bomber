@@ -21,9 +21,9 @@ public:
 	/* Cell funs */
 	// Creates a cell from the vector
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
-		static FORCEINLINE FCell MakeCell(const FVector& cellLocation)
+		static FORCEINLINE FCell MakeCell(const AActor* actor)
 	{
-		return FCell(cellLocation);
+		return FCell(actor);
 	}
 
 	// Bound of floor
@@ -45,13 +45,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 		static FORCEINLINE class AGeneratedMap* const GetLevelMap()
 	{
-		return GetSingleton()->levelMap;
+		return (IsValid(GetSingleton()->levelMap_) ? GetSingleton()->levelMap_ : nullptr);
 	}
 
-	class AGeneratedMap* levelMap;
+
 
 
 	// All used blueprints
 	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintBaseOnly))
 		TArray<TSubclassOf<AActor>> bpClasses;
+
+protected:
+	friend class AGeneratedMap;
+	class AGeneratedMap* levelMap_;
 };

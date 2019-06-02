@@ -17,13 +17,12 @@ enum class EPathTypesEnum : uint8
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EActorTypeEnum : uint8
 {
-	None = 1 << 0,
-	Bomb = 1 << 1,  // obstacle
-	Item = 1 << 2,
-	Wall = 1 << 3,	// obstacle
+	Wall = 1 << 0,	// obstacle
+	Box = 1 << 1,	// obstacle
+	Bomb = 1 << 2,  // obstacle
+	Item = 1 << 3,
 	Floor = 1 << 4,
-	Box = 1 << 5,	// obstacle
-	Player = 1 << 6
+	Player = 1 << 5
 };
 
 USTRUCT(BlueprintType, meta = (HasNativeMake = "Bomber.SingletonLibrary.MakeCell"))
@@ -34,7 +33,7 @@ struct FCell
 public:
 	FCell() {};
 
-	FCell(const FVector& cellLocation);
+	FCell(const AActor* actor);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		FVector location;
@@ -73,7 +72,10 @@ public:
 
 	// Spawn or update actor by type on cell
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-		AActor* AddActorOnMap(const FCell& cell, AActor* updateActor, EActorTypeEnum actorType);
+		AActor* AddActorOnMap(const FCell& cell, EActorTypeEnum actorType);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+		void AddActorOnMapByObj(const AActor* updateActor);
 
 	// Delete actor from cell and TMap
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
@@ -90,7 +92,10 @@ protected:
 		bool GenerateLevelMap();
 
 	// Storage of cells and their actors
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Generated Map"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 		TMap<FCell, AActor*> GeneratedMap_;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+		TArray<ACharacter*> charactersOnMap_;
 
 };

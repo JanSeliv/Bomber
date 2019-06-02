@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "Engine/Engine.h"//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT(" "));
 #define PRINT(string) GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, string, true, FVector2D(2,2));
+#define CHECKMAP() if (IsValid(USingletonLibrary::GetLevelMap()) == false) return;
 #include "MyGameModeBase.h"
 #include "MyPlayerController.h"
 #include "GeneratedMap.h"
 #include "SingletonLibrary.h"
+#include "MapComponent.h"
 #include "Engine/World.h"//GetWorld()
 #include "UObject/ConstructorHelpers.h"//ConstructorHelpers::FObjectFinder<UBlueprint> Blueprint_Effect_Fire()
 #include "Kismet/GameplayStatics.h" // UGameplayStatics::
