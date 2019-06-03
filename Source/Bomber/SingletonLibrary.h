@@ -45,7 +45,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 		static FORCEINLINE class AGeneratedMap* const GetLevelMap()
 	{
-		return (IsValid(GetSingleton()->levelMap_) ? GetSingleton()->levelMap_ : nullptr);
+		return (IsValid(GetSingleton()) ? GetSingleton()->levelMap_ : nullptr);
 	}
 
 

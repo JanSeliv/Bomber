@@ -3,13 +3,13 @@
 
 #include "MyCharacter.h"
 #include "Bomber.h"
+#include "Components/SkeletalMeshComponent.h" //ACharacter::GetMesh();
 
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 
 	// Initialize mapComponent
 	mapComponent = CreateDefaultSubobject<UMapComponent>("Map Component");
@@ -22,6 +22,17 @@ void AMyCharacter::BeginPlay()
 	Super::BeginPlay();
 
 }
+
+void AMyCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	if (ISVALID(mapComponent) == false) return;
+
+	mapComponent->UpdateSelfOnMap();
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+
+}
+
 
 // Called to bind functionality to input
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

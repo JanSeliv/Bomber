@@ -30,7 +30,7 @@ AMyHUD::AMyHUD()
 void AMyHUD::BeginPlay()
 {
 	//Add to viewport selected UMG
-	if (IsValid(umgCurrentObj))
+	if (ISVALID(umgCurrentObj))
 	{
 		umgCurrentObj->AddToViewport();
 	}

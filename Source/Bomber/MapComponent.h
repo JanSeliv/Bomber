@@ -24,9 +24,11 @@ public:
 		struct FCell cellLocation;
 
 protected:
+	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */
+	virtual void OnComponentCreated() final;
 
-	void OnRegister() final;
+	//	Called before destroying the object
+	virtual void BeginDestroy() final;
 
-	void BeginDestroy() final;
 
 };

@@ -15,25 +15,35 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	CHECKMAP();
+	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap())) return;
+
 	cellLocation = FCell(GetOwner());
 	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(GetOwner());
 }
 
-void UMapComponent::OnRegister()
+void UMapComponent::OnComponentCreated()
 {
-	Super::OnRegister();
+	Super::OnComponentCreated();
+	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap())) return;
 
-	CHECKMAP();
-	if (IsValid(GetOwner()) == false) return;
+	// Component instance will be dynamically created 
+	//CreationMethod = EComponentCreationMethod::UserConstructionScript;
 
+	// Shouldt call OnConsturction on drag events
+	GetOwner()->bRunConstructionScriptOnDrag = false;
+
+	// Push owner to regenerated TMap
 	USingletonLibrary::GetLevelMap()->onActorsUpdateDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
-	UpdateSelfOnMap();
+
+	PRINT("ComponentCreated");
 }
 
 void UMapComponent::BeginDestroy()
 {
 	Super::BeginDestroy();
-	CHECKMAP();
+
+	if (!ISVALID(USingletonLibrary::GetLevelMap())) return;
+
 	USingletonLibrary::GetLevelMap()->DestroyActorFromMap(cellLocation);
+	PRINT("ComponentDestroyed");
 }

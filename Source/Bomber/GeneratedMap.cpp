@@ -5,8 +5,8 @@
 
 FCell::FCell(const AActor* actor)
 {
-	CHECKMAP();
-	if (IsValid(actor) == false) return;
+	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap())) return;
+
 	this->location = actor->GetActorLocation();
 
 	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0) return;
@@ -74,8 +74,8 @@ void AGeneratedMap::BeginPlay()
 
 bool AGeneratedMap::GenerateLevelMap_Implementation()
 {
-	if (IsValid(USingletonLibrary::GetSingleton()) == false) return false;
-	if (IsValid(USingletonLibrary::GetLevelMap()) == false)
+	if (!ISVALID(USingletonLibrary::GetSingleton())) return false;
+	if (!ISVALID(USingletonLibrary::GetLevelMap()))
 	{
 		USingletonLibrary::GetSingleton()->levelMap_ = this;
 	}

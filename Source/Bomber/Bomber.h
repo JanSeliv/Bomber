@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/Engine.h"//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT(" "));
 #define PRINT(string) GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, string, true, FVector2D(2,2));
-#define CHECKMAP() if (IsValid(USingletonLibrary::GetLevelMap()) == false) return;
+#define ISVALID(obj) ( (obj != nullptr) && IsValid(obj) && !obj->IsPendingKill() )
 #include "MyGameModeBase.h"
 #include "MyPlayerController.h"
 #include "GeneratedMap.h"
