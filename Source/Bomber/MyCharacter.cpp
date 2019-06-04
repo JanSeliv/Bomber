@@ -31,6 +31,7 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	mapComponent->UpdateSelfOnMap();
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 
+
 }
 
 

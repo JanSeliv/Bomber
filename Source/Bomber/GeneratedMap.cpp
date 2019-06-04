@@ -18,7 +18,7 @@ FCell::FCell(const AActor* actor)
 	}
 
 	FCell foundedCell;
-	for (auto i : USingletonLibrary::GetLevelMap()->GeneratedMap_)
+	for (const auto& i : USingletonLibrary::GetLevelMap()->GeneratedMap_)
 	{
 		if (USingletonLibrary::CalculateCellsLength(i.Key, *this)
 			< USingletonLibrary::CalculateCellsLength(foundedCell, *this))
@@ -33,7 +33,8 @@ FCell::FCell(const AActor* actor)
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
-
+	// Shouldt call OnConsturction on drag events
+	bRunConstructionScriptOnDrag = false;
 }
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32 sideLength, EPathTypesEnum pathfinder) const
@@ -60,9 +61,9 @@ void AGeneratedMap::AddActorOnMapByObj_Implementation(const AActor* updateActor)
 
 }
 
-bool AGeneratedMap::DestroyActorFromMap_Implementation(const FCell& cell)
+void AGeneratedMap::DestroyActorFromMap_Implementation(const FCell& cell)
 {
-	return true;
+
 }
 
 // Called when the game starts or when spawned
@@ -72,15 +73,22 @@ void AGeneratedMap::BeginPlay()
 
 }
 
-bool AGeneratedMap::GenerateLevelMap_Implementation()
+void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
-	if (!ISVALID(USingletonLibrary::GetSingleton())) return false;
+	// Update LevelMap obj;
+	if (!ISVALID(USingletonLibrary::GetSingleton())) return;
 	if (!ISVALID(USingletonLibrary::GetLevelMap()))
 	{
 		USingletonLibrary::GetSingleton()->levelMap_ = this;
 	}
+
+	//Regenerate map;
+	GenerateLevelMap();
+}
+
+void AGeneratedMap::GenerateLevelMap_Implementation()
+{
 	GeneratedMap_.Empty();
 	charactersOnMap_.Empty();
 
-	return true;
 }

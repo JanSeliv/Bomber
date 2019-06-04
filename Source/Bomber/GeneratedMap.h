@@ -59,7 +59,7 @@ public:
 	AGeneratedMap();
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPushNongeneratedToMap);
-	UPROPERTY(BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "C++")
 		FPushNongeneratedToMap onActorsUpdateDelegate;
 
 	// Pathfinding
@@ -79,7 +79,7 @@ public:
 
 	// Delete actor from cell and TMap
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-		bool DestroyActorFromMap(const FCell& cell);
+		void DestroyActorFromMap(const FCell& cell);
 
 protected:
 	friend FCell;
@@ -87,9 +87,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//Called when an instance of this class is placed (in editor) or spawned.
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 	// Create LevelMap on Scene and fill TMap
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-		bool GenerateLevelMap();
+		void GenerateLevelMap();
 
 	// Storage of cells and their actors
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")

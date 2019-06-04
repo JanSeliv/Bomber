@@ -16,9 +16,12 @@ UMapComponent::UMapComponent()
 void UMapComponent::UpdateSelfOnMap()
 {
 	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap())) return;
+	// Actor should not have transient instances 
+	if (GetOwner()->HasAllFlags(RF_Transient) == true) return;
 
 	cellLocation = FCell(GetOwner());
 	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(GetOwner());
+	PRINT(GetOwner()->GetName() + " UPDATED");
 }
 
 void UMapComponent::OnComponentCreated()
@@ -41,7 +44,6 @@ void UMapComponent::OnComponentCreated()
 void UMapComponent::BeginDestroy()
 {
 	Super::BeginDestroy();
-
 	if (!ISVALID(USingletonLibrary::GetLevelMap())) return;
 
 	USingletonLibrary::GetLevelMap()->DestroyActorFromMap(cellLocation);
