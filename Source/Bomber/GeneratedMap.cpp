@@ -2,20 +2,23 @@
 
 #include "GeneratedMap.h"
 #include "Bomber.h"
+//#include "Kismet\KismetMathLibrary.h"
 
 FCell::FCell(const AActor* actor)
 {
 	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap())) return;
-
-	this->location = actor->GetActorLocation();
-
 	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0) return;
 
-	// Already exist?
+	this->location = actor->GetActorLocation().GridSnap(USingletonLibrary::GetFloorLength());
+	// UKismetMathLibrary::Vector_SnappedToGrid(actor->GetActorLocation(), USingletonLibrary::GetFloorLength());
+
+	// #2 Try snap and search
 	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Contains(*this))
 	{
+		PRINT("FCell::#2 successfully snap: " + actor->GetFName().ToString());
 		return;
 	}
+
 
 	FCell foundedCell;
 	for (const auto& i : USingletonLibrary::GetLevelMap()->GeneratedMap_)

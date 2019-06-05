@@ -98,7 +98,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 		TMap<FCell, AActor*> GeneratedMap_;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-		TArray<ACharacter*> charactersOnMap_;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
+		TSet<ACharacter*> charactersOnMap_;
+
 
 };

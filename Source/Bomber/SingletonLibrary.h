@@ -27,7 +27,7 @@ public:
 	}
 
 	// Bound of floor
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Grid Size"))
 		static FORCEINLINE float GetFloorLength()
 	{
 		return 200.0;

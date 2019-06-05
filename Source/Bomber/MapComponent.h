@@ -27,8 +27,7 @@ protected:
 	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */
 	virtual void OnComponentCreated() final;
 
-	//	Called before destroying the object
-	virtual void BeginDestroy() final;
-
+	// Called when a component is destroyed
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
 
 };
