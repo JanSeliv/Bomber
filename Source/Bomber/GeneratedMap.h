@@ -95,10 +95,10 @@ protected:
 		void GenerateLevelMap();
 
 	// Storage of cells and their actors
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
 		TMap<FCell, AActor*> GeneratedMap_;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 		TSet<ACharacter*> charactersOnMap_;
 
 
