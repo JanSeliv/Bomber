@@ -16,5 +16,5 @@
 #include "GameFramework/Character.h" //UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
 #define PRINT(string) GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, string, true, FVector2D(2,2));
-#define ISVALID(obj) ( (obj != nullptr) && IsValid(obj) && !obj->IsPendingKill() )
+#define ISVALID(obj) ( (obj != nullptr) && IsValid(obj) && ((obj)->IsPendingKill() == false) )
 #define ISTRANSIENT (HasAllFlags(RF_Transient) || UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Transient")

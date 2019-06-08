@@ -101,5 +101,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 		TSet<ACharacter*> charactersOnMap_;
 
-
+	// Debug function to find nearest cell
+	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DevelopmentOnly))
+		FCell GetNearestCell(const AActor* actor);
 };

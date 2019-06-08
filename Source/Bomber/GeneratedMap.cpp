@@ -9,38 +9,38 @@ FCell::FCell(const AActor* actor)
 	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap())) return;
 	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0) return;
 
-	for (int32 i = 0; i < 3; ++i)
-	{
-		switch (i)
+	this->location = USingletonLibrary::GetLevelMap()->GetNearestCell(actor).location;
+	/*
+		for (int32 i = 0; i < 3; ++i)
 		{
-		case 0:
-			location = actor->GetActorLocation();
-			break;
-		case 1:
-			location = actor->GetActorLocation().GridSnap(USingletonLibrary::GetFloorLength());
-			break;
-		case 2:
-			FCell foundedCell;
-			for (const auto& j : USingletonLibrary::GetLevelMap()->GeneratedMap_)
+			switch (i)
 			{
-				if (USingletonLibrary::CalculateCellsLength(j.Key, *this)
-					< USingletonLibrary::CalculateCellsLength(foundedCell, *this))
+			case 0:
+				location = actor->GetActorLocation();
+				break;
+			case 1:
+				location = actor->GetActorLocation().GridSnap(USingletonLibrary::GetFloorLength());
+				break;
+			case 2:
+				FCell foundedCell;
+				for (const auto& j : USingletonLibrary::GetLevelMap()->GeneratedMap_)
 				{
-					foundedCell.location = j.Key.location;
+					if (USingletonLibrary::CalculateCellsLength(j.Key, *this)
+						< USingletonLibrary::CalculateCellsLength(foundedCell, *this))
+					{
+						foundedCell.location = j.Key.location;
+					}
 				}
+				location = foundedCell.location;
+				break;
 			}
-			location = foundedCell.location;
-			break;
-		}
 
-		if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Contains(*this)
-			&&
-			!IsValid(*USingletonLibrary::GetLevelMap()->GeneratedMap_.Find(*this)))
-		{
-			PRINT("FCell::Empty cell: " + FString::FromInt(i) + " - " + actor->GetFName().ToString());
-			return;
-		}
-	}
+			if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Contains(*this) == true
+				&& ISVALID(*USingletonLibrary::GetLevelMap()->GeneratedMap_.Find(*this)) == false)
+			{
+				break;
+			}
+		}*/
 
 }
 
