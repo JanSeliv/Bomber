@@ -21,13 +21,11 @@ public:
 
 	// Current location of Actor
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-		struct FCell cellLocation;
+		struct FCell cell;
 
 protected:
 	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */
 	virtual void OnComponentCreated() final;
 
-	// Called when a component is destroyed
-	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
 
 };

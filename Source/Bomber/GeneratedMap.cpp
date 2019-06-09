@@ -71,7 +71,7 @@ AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, EActorTyp
 	return nullptr;
 }
 
-void AGeneratedMap::AddActorOnMapByObj_Implementation(const AActor* updateActor)
+void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const AActor* updateActor)
 {
 
 }
@@ -85,7 +85,8 @@ void AGeneratedMap::DestroyActorFromMap_Implementation(const FCell& cell)
 void AGeneratedMap::BeginPlay()
 {
 	Super::BeginPlay();
-
+	charactersOnMap_.CompactStable();
+	charactersOnMap_.Shrink();
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -99,6 +100,19 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 	//Regenerate map;
 	GenerateLevelMap();
+}
+
+void AGeneratedMap::Destroyed()
+{
+	// Destroying attached actors 
+	TArray<AActor*> attachedActors;
+	GetAttachedActors(attachedActors);
+	for (AActor* attachedActor : attachedActors)
+	{
+		attachedActor->Destroy();
+	}
+
+	Super::Destroyed();
 }
 
 void AGeneratedMap::GenerateLevelMap_Implementation()

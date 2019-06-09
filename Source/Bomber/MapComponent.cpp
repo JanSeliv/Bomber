@@ -17,8 +17,12 @@ void UMapComponent::UpdateSelfOnMap()
 {
 	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
 
-	cellLocation = FCell(GetOwner());
-	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(GetOwner());
+	if (GetOwner()->IsA(ACharacter::StaticClass()))
+	{
+		cell = FCell(GetOwner()); // !!! Update character location again
+		PRINT("Character");
+	}
+	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(cell, GetOwner());
 	PRINT(GetOwner()->GetName() + " UPDATED");
 }
 
@@ -27,23 +31,17 @@ void UMapComponent::OnComponentCreated()
 	Super::OnComponentCreated();
 	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
 
-	// Component instance will be dynamically created 
-	//CreationMethod = EComponentCreationMethod::UserConstructionScript;
+	cell = FCell(GetOwner());
 
 	// Shouldt call OnConsturction on drag events
 	GetOwner()->bRunConstructionScriptOnDrag = false;
 
 	// Push owner to regenerated TMap
-	USingletonLibrary::GetLevelMap()->onActorsUpdateDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
+	USingletonLibrary::GetLevelMap()->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 
 	PRINT("Component created");
 }
 
-void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
-{
-	Super::OnComponentDestroyed(bDestroyingHierarchy);
-	if (!ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
 
-	USingletonLibrary::GetLevelMap()->DestroyActorFromMap(cellLocation);
-	PRINT("Component destroyed");
-}
+
+

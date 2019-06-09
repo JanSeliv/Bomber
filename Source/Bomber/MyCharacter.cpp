@@ -11,6 +11,8 @@ AMyCharacter::AMyCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+
 	// Initialize mapComponent
 	mapComponent = CreateDefaultSubobject<UMapComponent>("Map Component");
 
@@ -29,8 +31,6 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	if (ISVALID(mapComponent) == false) return;
 
 	mapComponent->UpdateSelfOnMap();
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
-
 
 }
 

@@ -60,7 +60,7 @@ public:
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPushNongeneratedToMap);
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "C++")
-		FPushNongeneratedToMap onActorsUpdateDelegate;
+		FPushNongeneratedToMap onActorsUpdatedDelegate;
 
 	// Pathfinding
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++")
@@ -70,14 +70,15 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2))
 		TSet<FCell> FilterCellsByTypes(const TSet<FCell>& keys, const TArray<EActorTypeEnum>& filterTypes, const ACharacter* excludePlayer) const;
 
-	// Spawn or update actor by type on cell
+	// Spawn actor by type
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 		AActor* AddActorOnMap(const FCell& cell, EActorTypeEnum actorType);
 
+	// Blueprint-overriding AddActorOnMap, update actor by obj
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-		void AddActorOnMapByObj(const AActor* updateActor);
+		void AddActorOnMapByObj(const FCell& cell, const AActor* updateActor);
 
-	// Delete actor from cell and TMap
+	// Delete all actors from cell and TMap by cell
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 		void DestroyActorFromMap(const FCell& cell);
 
@@ -87,8 +88,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//Called when an instance of this class is placed (in editor) or spawned.
+	// Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	// Called when this actor is explicitly being destroyed in the editor
+	virtual void Destroyed() override;
 
 	// Create LevelMap on Scene and fill TMap
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
