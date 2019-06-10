@@ -7,7 +7,7 @@
 #include "MyGameInstance.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class BOMBER_API UMyGameInstance : public UGameInstance
@@ -15,11 +15,11 @@ class BOMBER_API UMyGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
-	
+
 	void Init() override {
 		Super::Init();
 
-		//Start MenuLevel
-		UGameplayStatics::OpenLevel(this, "/Game/Bomber/GameLevels/MenuLevel", false);
+		// Start MenuLevel
+		//UGameplayStatics::OpenLevel(this, "/Game/Bomber/GameLevels/MenuLevel", false);
 	}
 };

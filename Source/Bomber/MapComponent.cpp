@@ -20,10 +20,10 @@ void UMapComponent::UpdateSelfOnMap()
 	if (GetOwner()->IsA(ACharacter::StaticClass()))
 	{
 		cell = FCell(GetOwner()); // !!! Update character location again
-		PRINT("Character");
+		UE_LOG_STR("%s: Character cell updating", *GetOwner()->GetName());
 	}
 	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(cell, GetOwner());
-	PRINT(GetOwner()->GetName() + " UPDATED");
+	UE_LOG_STR("%s UPDATED", *GetOwner()->GetName());
 }
 
 void UMapComponent::OnComponentCreated()
@@ -39,7 +39,7 @@ void UMapComponent::OnComponentCreated()
 	// Push owner to regenerated TMap
 	USingletonLibrary::GetLevelMap()->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 
-	PRINT("Component created");
+	UE_LOG_STR("%s", "OnComponentCreated");
 }
 
 

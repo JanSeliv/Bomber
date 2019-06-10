@@ -6,6 +6,7 @@
 
 USingletonLibrary::USingletonLibrary()
 {
+	/*
 	TArray<TCHAR*> pathes{
 	TEXT("/Game/Bomber/Blueprints/BPCameraActor"),	// EActorTypeEnum::None
 	TEXT("/Game/Bomber/Blueprints/BpBomb"),			// EActorTypeEnum::Bomb
@@ -20,6 +21,7 @@ USingletonLibrary::USingletonLibrary()
 		ConstructorHelpers::FClassFinder<AActor> classFinder(path);
 		bpClasses.Add(classFinder.Class);
 	}
+	*/
 }
 
 USingletonLibrary* const USingletonLibrary::GetSingleton()

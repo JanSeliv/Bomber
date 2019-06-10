@@ -15,6 +15,6 @@
 #include "TimerManager.h" // FTimerHandle timerHandle; 
 #include "GameFramework/Character.h" //UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
-#define PRINT(string) GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, string, true, FVector2D(2,2));
+#define UE_LOG_STR(message, string) UE_LOG(LogTemp, Warning, TEXT(message), string)
 #define ISVALID(obj) ( (obj != nullptr) && IsValid(obj) && ((obj)->IsPendingKill() == false) )
 #define ISTRANSIENT (HasAllFlags(RF_Transient) || UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Transient")
