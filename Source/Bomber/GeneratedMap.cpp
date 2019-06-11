@@ -54,19 +54,10 @@ void AGeneratedMap::DestroyActorFromMap_Implementation(const FCell& cell)
 void AGeneratedMap::BeginPlay()
 {
 	Super::BeginPlay();
-	charactersOnMap_.CompactStable();
-	charactersOnMap_.Shrink();
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
-	// Update LevelMap obj;
-	if (!ISVALID(USingletonLibrary::GetSingleton())) return;
-	if (!ISVALID(USingletonLibrary::GetLevelMap()))
-	{
-		USingletonLibrary::GetSingleton()->levelMap_ = this;
-	}
-
 	//Regenerate map;
 	GenerateLevelMap();
 }
@@ -86,6 +77,13 @@ void AGeneratedMap::Destroyed()
 
 void AGeneratedMap::GenerateLevelMap_Implementation()
 {
+	// Update LevelMap obj before generating child actors;
+	if (!ISVALID(USingletonLibrary::GetSingleton())) return;
+	if (!ISVALID(USingletonLibrary::GetLevelMap()))
+	{
+		USingletonLibrary::GetSingleton()->levelMap_ = this;
+	}
+
 	GeneratedMap_.Empty();
 	charactersOnMap_.Empty();
 

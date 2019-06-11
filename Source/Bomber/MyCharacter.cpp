@@ -22,7 +22,17 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	ACharacter* character = Cast<ACharacter>(mapComponent->owner);
+	if (USingletonLibrary::GetLevelMap()->charactersOnMap_.Contains(character))
+	{
+		UE_LOG_STR("MyCharacter: %s founded in TSet", *this->GetFName().ToString());
+	}
 
+	for (auto i : USingletonLibrary::GetLevelMap()->charactersOnMap_)
+	{
+		FString str = (i == character ? "true" : "false");
+		UE_LOG_STR("MyCharacter: i == this - %s", *str);
+	}
 }
 
 void AMyCharacter::OnConstruction(const FTransform& Transform)
@@ -34,6 +44,22 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 
 }
 
+void AMyCharacter::Destroyed()
+{
+	/*
+	// remove character from charactersOnMap_
+	if (USingletonLibrary::GetLevelMap()->charactersOnMap_.Contains(this))
+	{
+		USingletonLibrary::GetLevelMap()->charactersOnMap_.Remove(this);
+	}
+	// fix null keys
+	USingletonLibrary::GetLevelMap()->charactersOnMap_.CompactStable();
+	USingletonLibrary::GetLevelMap()->charactersOnMap_.Shrink();
+	UE_LOG_STR("Num of characters: %s", *FString::FromInt(USingletonLibrary::GetLevelMap()->charactersOnMap_.Num()));
+	*/
+
+	Super::Destroyed();
+}
 
 // Called to bind functionality to input
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

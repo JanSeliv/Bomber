@@ -15,31 +15,41 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
+	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
 
-	if (GetOwner()->IsA(ACharacter::StaticClass()))
+	if (owner->IsA(ACharacter::StaticClass()))
 	{
-		cell = FCell(GetOwner()); // !!! Update character location again
-		UE_LOG_STR("%s: Character cell updating", *GetOwner()->GetName());
+		cell = FCell(owner); // !!! Update character location again
+		UE_LOG_STR("UpdateSelfOnMap: %s: Character cell updating", *owner->GetName());
 	}
-	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(cell, GetOwner());
-	UE_LOG_STR("%s UPDATED", *GetOwner()->GetName());
+	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(cell, owner);
+	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", *owner->GetName());
 }
 
 void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
-	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
+	owner = GetOwner();
+	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
 
-	cell = FCell(GetOwner());
+	cell = FCell(owner);
 
-	// Shouldt call OnConsturction on drag events
-	GetOwner()->bRunConstructionScriptOnDrag = false;
+	// Shouldt call OnConstruction on drag events
+	owner->bRunConstructionScriptOnDrag = false;
 
 	// Push owner to regenerated TMap
 	USingletonLibrary::GetLevelMap()->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 
-	UE_LOG_STR("%s", "OnComponentCreated");
+	UE_LOG_STR("OnComponentCreated: %s", *owner->GetName());
+}
+
+void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	if (owner != nullptr && ISVALID(USingletonLibrary::GetLevelMap()) && !ISTRANSIENT)
+	{
+		UE_LOG_STR("OnComponentDestroyed %s:", *owner->GetName());
+	}
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
 
 

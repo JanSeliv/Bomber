@@ -82,6 +82,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 		void DestroyActorFromMap(const FCell& cell);
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+		TSet<ACharacter*> charactersOnMap_;
+
 protected:
 	friend FCell;
 
@@ -91,7 +94,7 @@ protected:
 	// Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	// Called when this actor is explicitly being destroyed in the editor
+	// Called when this actor is explicitly being destroyed
 	virtual void Destroyed() override;
 
 	// Create LevelMap on Scene and fill TMap
@@ -101,9 +104,6 @@ protected:
 	// Storage of cells and their actors
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
 		TMap<FCell, AActor*> GeneratedMap_;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-		TSet<ACharacter*> charactersOnMap_;
 
 	// Debug function to find nearest cell
 	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DevelopmentOnly))

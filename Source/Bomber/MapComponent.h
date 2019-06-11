@@ -23,9 +23,19 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 		struct FCell cell;
 
+	// Parent actor of component
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+		AActor* owner;
+
 protected:
 	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */
 	virtual void OnComponentCreated() final;
 
+	/**
+	 * Called when a component is destroyed
+	 *
+	 * @param	bDestroyingHierarchy  - True if the entire component hierarchy is being torn down, allows avoiding expensive operations
+	 */
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
 
 };

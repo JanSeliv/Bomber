@@ -26,4 +26,7 @@ protected:
 
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	// Called when this actor is explicitly being destroyed
+	virtual void Destroyed() override;
 };
