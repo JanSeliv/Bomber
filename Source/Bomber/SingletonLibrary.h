@@ -48,14 +48,25 @@ public:
 		return (IsValid(GetSingleton()) ? GetSingleton()->levelMap_ : nullptr);
 	}
 
-
-
+	UFUNCTION(BlueprintCallable, Category = "C++")
+		static FORCEINLINE bool SetLevelMap(class AGeneratedMap* levelMap)
+	{
+		if (GetLevelMap() == levelMap
+			|| IsValid(levelMap) == false
+			|| IsValid(USingletonLibrary::GetSingleton()) == false)
+		{
+			return false;
+		}
+		GetSingleton()->levelMap_ = levelMap;
+		return true;
+	}
 
 	// All used blueprints
 	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintBaseOnly))
 		TArray<TSubclassOf<AActor>> bpClasses;
 
 protected:
-	friend class AGeneratedMap;
+
 	class AGeneratedMap* levelMap_;
+
 };

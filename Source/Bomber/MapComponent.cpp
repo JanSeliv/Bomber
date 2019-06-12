@@ -15,7 +15,7 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
+	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(owner)) return;
 
 	if (owner->IsA(ACharacter::StaticClass()))
 	{
@@ -30,7 +30,7 @@ void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 	owner = GetOwner();
-	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT) return;
+	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(owner)) return;
 
 	cell = FCell(owner);
 
@@ -45,10 +45,11 @@ void UMapComponent::OnComponentCreated()
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (owner != nullptr && ISVALID(USingletonLibrary::GetLevelMap()) && !ISTRANSIENT)
+	if (owner != nullptr && ISVALID(USingletonLibrary::GetLevelMap()) && !ISTRANSIENT(owner))
 	{
 		UE_LOG_STR("OnComponentDestroyed %s:", *owner->GetName());
 	}
+
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
 

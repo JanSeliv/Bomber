@@ -17,4 +17,4 @@
 
 #define UE_LOG_STR(message, string) UE_LOG(LogTemp, Warning, TEXT(message), string)
 #define ISVALID(obj) ( (obj != nullptr) && IsValid(obj) && ((obj)->IsPendingKill() == false) )
-#define ISTRANSIENT (HasAllFlags(RF_Transient) || UGameplayStatics::GetCurrentLevelName(GetWorld()) == "Transient")
+#define ISTRANSIENT(obj) (obj->HasAllFlags(RF_Transient) || UGameplayStatics::GetCurrentLevelName(obj->GetWorld()) == "Transient")

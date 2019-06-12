@@ -42,10 +42,26 @@ AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, EActorTyp
 
 void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const AActor* updateActor)
 {
+	if (ISVALID(updateActor) == false || !GeneratedMap_.Contains(cell) || ISTRANSIENT(updateActor)) return;
 
+	const ACharacter* updateCharacter = Cast<ACharacter>(updateActor);
+	if (updateCharacter != nullptr)
+	{
+		charactersOnMap_.Add(updateCharacter); // Add this character
+	}
+	else
+	{
+		const FCell* cellOfExistingActor = GeneratedMap_.FindKey(updateActor);
+		if (cellOfExistingActor != nullptr && cellOfExistingActor->location != cell.location)
+		{
+			GeneratedMap_.Add(*cellOfExistingActor); // remove this actor from previous cell
+			UE_LOG_STR("AddActorOnMapByObj: %s was existed", *updateActor->GetFName().ToString());
+		}
+		GeneratedMap_.Add(cell, updateActor); // Add this actor to his cell
+	}
 }
 
-void AGeneratedMap::DestroyActorFromMap_Implementation(const FCell& cell)
+void AGeneratedMap::DestroyActorsFromMap_Implementation(const FCell& cell)
 {
 
 }
@@ -54,6 +70,17 @@ void AGeneratedMap::DestroyActorFromMap_Implementation(const FCell& cell)
 void AGeneratedMap::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Update UEDPIE_LevelMap obj;
+	USingletonLibrary::SetLevelMap(this);
+
+	// fix null keys
+	USingletonLibrary::GetLevelMap()->charactersOnMap_.Compact();
+	USingletonLibrary::GetLevelMap()->charactersOnMap_.Shrink();
+
+	//onActorsUpdatedDelegate.Broadcast();
+	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", *this->GetFullName());
+
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -78,11 +105,7 @@ void AGeneratedMap::Destroyed()
 void AGeneratedMap::GenerateLevelMap_Implementation()
 {
 	// Update LevelMap obj before generating child actors;
-	if (!ISVALID(USingletonLibrary::GetSingleton())) return;
-	if (!ISVALID(USingletonLibrary::GetLevelMap()))
-	{
-		USingletonLibrary::GetSingleton()->levelMap_ = this;
-	}
+	USingletonLibrary::SetLevelMap(this);
 
 	GeneratedMap_.Empty();
 	charactersOnMap_.Empty();

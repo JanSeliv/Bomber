@@ -78,12 +78,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 		void AddActorOnMapByObj(const FCell& cell, const AActor* updateActor);
 
-	// Delete all actors from cell and TMap by cell
+	// Destro all actors from scene by cell
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-		void DestroyActorFromMap(const FCell& cell);
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-		TSet<ACharacter*> charactersOnMap_;
+		void DestroyActorsFromMap(const FCell& cell);
 
 protected:
 	friend FCell;
@@ -103,7 +100,11 @@ protected:
 
 	// Storage of cells and their actors
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
-		TMap<FCell, AActor*> GeneratedMap_;
+		TMap<FCell, const AActor*> GeneratedMap_;
+
+	// Storage of spawned characters
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+		TSet<const ACharacter*> charactersOnMap_;
 
 	// Debug function to find nearest cell
 	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DevelopmentOnly))
