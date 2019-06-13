@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MapComponent.h"
 #include "Bomber.h"
 
@@ -10,12 +9,12 @@ UMapComponent::UMapComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(owner)) return;
+	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(owner))
+		return;
 
 	if (owner->IsA(ACharacter::StaticClass()))
 	{
@@ -30,7 +29,8 @@ void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 	owner = GetOwner();
-	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(owner)) return;
+	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(owner))
+		return;
 
 	cell = FCell(owner);
 
@@ -52,7 +52,3 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
-
-
-
-

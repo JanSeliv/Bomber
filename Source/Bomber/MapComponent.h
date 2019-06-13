@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "GeneratedMap.h"
 #include "Components/ActorComponent.h"
+#include "GeneratedMap.h"
 #include "MapComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -17,15 +17,15 @@ public:
 
 	// Callback function to the delegate
 	UFUNCTION(BlueprintCallable, Category = "C++")
-		void UpdateSelfOnMap();
+	void UpdateSelfOnMap();
 
 	// Current location of Actor
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-		struct FCell cell;
+	struct FCell cell;
 
 	// Parent actor of component
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-		AActor* owner;
+	AActor* owner;
 
 protected:
 	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */
@@ -37,5 +37,4 @@ protected:
 	 * @param	bDestroyingHierarchy  - True if the entire component hierarchy is being torn down, allows avoiding expensive operations
 	 */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
-
 };

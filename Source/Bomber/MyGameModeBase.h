@@ -11,11 +11,10 @@ class BOMBER_API AMyGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-
 	AMyGameModeBase();
 
 	void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "C++")
-		void PossessController(AController* controller, APawn* pawn) const;
+	void PossessController(AController* controller, APawn* pawn) const;
 };

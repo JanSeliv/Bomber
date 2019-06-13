@@ -3,16 +3,15 @@
 #include "GeneratedMap.h"
 #include "Bomber.h"
 
-
 FCell::FCell(const AActor* actor)
 {
-	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap())) return;
-	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0) return;
+	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap()))
+		return;
+	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0)
+		return;
 
 	this->location = USingletonLibrary::GetLevelMap()->GetNearestCell(actor).location;
-
 }
-
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
@@ -42,7 +41,8 @@ AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, EActorTyp
 
 void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const AActor* updateActor)
 {
-	if (ISVALID(updateActor) == false || !GeneratedMap_.Contains(cell) || ISTRANSIENT(updateActor)) return;
+	if (ISVALID(updateActor) == false || !GeneratedMap_.Contains(cell) || ISTRANSIENT(updateActor))
+		return;
 
 	const ACharacter* updateCharacter = Cast<ACharacter>(updateActor);
 	if (updateCharacter != nullptr)
@@ -63,7 +63,6 @@ void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const A
 
 void AGeneratedMap::DestroyActorsFromMap_Implementation(const FCell& cell)
 {
-
 }
 
 // Called when the game starts or when spawned
@@ -80,7 +79,6 @@ void AGeneratedMap::BeginPlay()
 
 	//onActorsUpdatedDelegate.Broadcast();
 	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", *this->GetFullName());
-
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -91,7 +89,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 void AGeneratedMap::Destroyed()
 {
-	// Destroying attached actors 
+	// Destroying attached actors
 	TArray<AActor*> attachedActors;
 	GetAttachedActors(attachedActors);
 	for (AActor* attachedActor : attachedActors)
@@ -109,5 +107,4 @@ void AGeneratedMap::GenerateLevelMap_Implementation()
 
 	GeneratedMap_.Empty();
 	charactersOnMap_.Empty();
-
 }

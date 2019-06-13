@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MyCharacter.h"
 #include "Bomber.h"
 #include "Components/SkeletalMeshComponent.h" //ACharacter::GetMesh();
@@ -15,29 +14,25 @@ AMyCharacter::AMyCharacter()
 
 	// Initialize mapComponent
 	mapComponent = CreateDefaultSubobject<UMapComponent>("Map Component");
-
 }
 
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	if (ISVALID(mapComponent) == false) return;
+	if (ISVALID(mapComponent) == false)
+		return;
 
 	mapComponent->UpdateSelfOnMap();
-
 }
 
 // Called to bind functionality to input
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
-

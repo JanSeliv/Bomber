@@ -18,7 +18,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(BlueprintReadWrite, Category = "C++")
-		class UMapComponent* mapComponent;
+	class UMapComponent* mapComponent;
 
 protected:
 	// Called when the game starts or when spawned
