@@ -17,8 +17,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(BlueprintReadWrite, Category = "C++")
-		class UMapComponent* mapComponent;
+	UPROPERTY(BlueprintReadOnly, Category = "C++")
+	class UMapComponent* mapComponent;
 
 protected:
 	// Called when the game starts or when spawned

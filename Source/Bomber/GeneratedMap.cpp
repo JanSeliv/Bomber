@@ -3,16 +3,15 @@
 #include "GeneratedMap.h"
 #include "Bomber.h"
 
-
 FCell::FCell(const AActor* actor)
 {
-	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap())) return;
-	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0) return;
+	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(actor))
+		return;
+	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0)
+		return;
 
 	this->location = USingletonLibrary::GetLevelMap()->GetNearestCell(actor).location;
-
 }
-
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
@@ -23,7 +22,6 @@ AGeneratedMap::AGeneratedMap()
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32 sideLength, EPathTypesEnum pathfinder) const
 {
-
 	TSet<FCell> foundedLocations;
 	return foundedLocations;
 }
@@ -42,38 +40,60 @@ AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, EActorTyp
 
 void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const AActor* updateActor)
 {
+	if (ISVALID(updateActor) == false || !GeneratedMap_.Contains(cell) || ISTRANSIENT(updateActor))
+		return;
 
+	// Add to specific array
+	const ACharacter* updateCharacter = Cast<ACharacter>(updateActor);
+	if (updateCharacter != nullptr)
+	{
+		charactersOnMap_.Add(updateCharacter); // Add this character
+	}
+	else
+	{
+		const FCell* cellOfExistingActor = GeneratedMap_.FindKey(updateActor);
+		if (cellOfExistingActor != nullptr && cellOfExistingActor->location != cell.location)
+		{
+			GeneratedMap_.Add(*cellOfExistingActor); // remove this actor from previous cell
+			UE_LOG_STR("AddActorOnMapByObj: %s was existed", *updateActor->GetFName().ToString());
+		}
+		GeneratedMap_.Add(cell, updateActor); // Add this actor to his cell
+	}
 }
 
-void AGeneratedMap::DestroyActorFromMap_Implementation(const FCell& cell)
+void AGeneratedMap::DestroyActorsFromMap_Implementation(const FCell& cell)
 {
-
 }
 
 // Called when the game starts or when spawned
 void AGeneratedMap::BeginPlay()
 {
 	Super::BeginPlay();
-	charactersOnMap_.CompactStable();
-	charactersOnMap_.Shrink();
+
+	// Update UEDPIE_LevelMap obj;
+	USingletonLibrary::SetLevelMap(this);
+
+	// fix null keys
+	USingletonLibrary::GetLevelMap()->charactersOnMap_.Compact();
+	USingletonLibrary::GetLevelMap()->charactersOnMap_.Shrink();
+
+	//onActorsUpdatedDelegate.Broadcast();
+	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", *this->GetFullName());
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
-	// Update LevelMap obj;
-	if (!ISVALID(USingletonLibrary::GetSingleton())) return;
-	if (!ISVALID(USingletonLibrary::GetLevelMap()))
+	if (ISTRANSIENT(this) == true)
 	{
-		USingletonLibrary::GetSingleton()->levelMap_ = this;
+		return;
 	}
-
 	//Regenerate map;
 	GenerateLevelMap();
 }
 
 void AGeneratedMap::Destroyed()
 {
-	// Destroying attached actors 
+	// Destroying attached actors
 	TArray<AActor*> attachedActors;
 	GetAttachedActors(attachedActors);
 	for (AActor* attachedActor : attachedActors)
@@ -86,7 +106,9 @@ void AGeneratedMap::Destroyed()
 
 void AGeneratedMap::GenerateLevelMap_Implementation()
 {
+	// Update LevelMap obj before generating child actors;
+	USingletonLibrary::SetLevelMap(this);
+
 	GeneratedMap_.Empty();
 	charactersOnMap_.Empty();
-
 }

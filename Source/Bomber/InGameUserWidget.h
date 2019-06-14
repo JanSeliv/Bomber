@@ -20,11 +20,10 @@ public:
 	virtual void SynchronizeProperties() override;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++")
-		void ShowInGameState();
+	void ShowInGameState();
 
 	/*
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		class UTextBlock* test;
 	*/
-
 };

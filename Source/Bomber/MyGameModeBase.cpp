@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MyGameModeBase.h"
 #include "Bomber.h"
 #include "MyHUD.h"
@@ -10,7 +9,7 @@ AMyGameModeBase::AMyGameModeBase()
 	//tell custom game mode to use custom defaults
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = 0;
-	HUDClass = nullptr;//AMyHUD::StaticClass();
+	HUDClass = nullptr; //AMyHUD::StaticClass();
 }
 
 void AMyGameModeBase::BeginPlay()

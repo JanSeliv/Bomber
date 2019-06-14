@@ -1,0 +1,29 @@
+# Visual Studio generated .clang-format file
+
+# The style options in this file are a best effort attempt to replicate the
+# current IDE formatting configuration from Tools > Options. The following
+# style options, however, should be verified:
+# AfterClass; AfterControlStatement; AfterEnum; AfterFunction; AfterNamespace; 
+# AfterStruct; AfterUnion
+
+---
+Language:                                       Cpp
+BasedOnStyle:                                   LLVM
+IndentWidth:                                    4
+TabWidth:                                       4
+UseTab:                                         Always
+Standard:                                       Cpp11
+AccessModifierOffset:                           -4
+AlignAfterOpenBracket:                          DontAlign
+AlignEscapedNewlines:                           Right
+AlignTrailingComments:                          true
+AllowShortCaseLabelsOnASingleLine:              true
+AllowShortFunctionsOnASingleLine:               InlineOnly
+BreakBeforeBraces:                              Allman
+BreakConstructorInitializersBeforeComma:        true
+ColumnLimit:                                    0
+PointerAlignment:                               Left
+SpacesInAngles:                                 false
+...
+---
+Language:                                       ObjC

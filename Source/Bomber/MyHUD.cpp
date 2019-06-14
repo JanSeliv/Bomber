@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MyHUD.h"
 #include "Bomber.h"
 #include "InGameUserWidget.h"
@@ -11,7 +10,7 @@ AMyHUD::AMyHUD()
 
 	// ___ Create UMG widget
 	TSubclassOf<UUserWidget> umgMenuClass, umgHudClass, umgCurrentClass;
-	// Find UMenuUserWidgetUMG 
+	// Find UMenuUserWidgetUMG
 	static ConstructorHelpers::FClassFinder<UUserWidget> umgMenuFinder(TEXT("/Game/Bomber/HUDs/Menu/UI_Menu"));
 	if (umgMenuFinder.Succeeded()) // Check to make sure the blueprint widget HP_bar was actually found
 		umgMenuClass = umgMenuFinder.Class;
@@ -23,9 +22,7 @@ AMyHUD::AMyHUD()
 	umgCurrentClass = (UGameplayStatics::GetCurrentLevelName(GetWorld()) == "MenuLevel" ? umgMenuClass : umgHudClass);
 	umgCurrentObj = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), umgCurrentClass);
 	//___ ___
-
 }
-
 
 void AMyHUD::BeginPlay()
 {
@@ -35,4 +32,3 @@ void AMyHUD::BeginPlay()
 		umgCurrentObj->AddToViewport();
 	}
 }
-
