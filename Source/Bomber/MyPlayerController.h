@@ -19,6 +19,6 @@ public:
 	void SetupInputComponent() override;
 
 	//widgets
-	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Category = "C++")
 	class AMyHUD* MyCustomHUD;
 };

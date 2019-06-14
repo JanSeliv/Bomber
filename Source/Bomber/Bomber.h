@@ -16,5 +16,5 @@
 #include "UObject/ConstructorHelpers.h" //ConstructorHelpers::FObjectFinder<UBlueprint> Blueprint_Effect_Fire()
 
 #define UE_LOG_STR(message, string) UE_LOG(LogTemp, Warning, TEXT(message), string)
-#define ISVALID(obj) ((obj != nullptr) && IsValid(obj) && ((obj)->IsPendingKill() == false))
+#define ISVALID(obj) ((obj != nullptr) && IsValid(obj) && !(obj)->IsPendingKill() && (obj)->IsValidLowLevel())
 #define ISTRANSIENT(obj) (obj->HasAllFlags(RF_Transient) || UGameplayStatics::GetCurrentLevelName(obj->GetWorld()) == "Transient")

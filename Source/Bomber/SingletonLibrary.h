@@ -20,21 +20,21 @@ public:
 	/* Cell funs */
 	// Creates a cell from the vector
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
-	static FORCEINLINE FCell MakeCell(const AActor* actor)
+	static const FORCEINLINE FCell MakeCell(const AActor* actor)
 	{
 		return FCell(actor);
 	}
 
 	// Bound of floor
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Grid Size"))
-	static FORCEINLINE float GetFloorLength()
+	static const FORCEINLINE float GetFloorLength()
 	{
 		return 200.0;
 	}
 
 	// The length between two cells
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "C++")
-	static FORCEINLINE float CalculateCellsLength(const FCell& x, const FCell& y)
+	static const FORCEINLINE float CalculateCellsLength(const FCell& x, const FCell& y)
 	{
 		return (fabsf((x.location - y.location).Size()) / GetFloorLength());
 	}
@@ -58,8 +58,8 @@ public:
 	}
 
 	// All used blueprints
-	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintBaseOnly))
-	TArray<TSubclassOf<AActor>> bpClasses;
+	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintBaseOnly))
+	TArray<const TSubclassOf<AActor>> bpClasses;
 
 protected:
 	class AGeneratedMap* levelMap_;

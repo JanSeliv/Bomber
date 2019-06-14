@@ -19,6 +19,6 @@ public:
 
 	void BeginPlay() override;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Ñ++")
+	UPROPERTY(BlueprintReadOnly, Category = "Ñ++")
 	class UUserWidget* umgCurrentObj;
 };

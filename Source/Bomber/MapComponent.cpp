@@ -13,42 +13,45 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(owner))
-		return;
-
-	if (owner->IsA(ACharacter::StaticClass()))
+	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(GetOwner()))
 	{
-		cell = FCell(owner); // !!! Update character location again
-		UE_LOG_STR("UpdateSelfOnMap: %s: Character cell updating", *owner->GetName());
+		return;
 	}
-	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(cell, owner);
-	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", *owner->GetName());
+
+	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(FCell(GetOwner()), GetOwner());
+	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", *GetOwner()->GetName());
 }
 
 void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
-	owner = GetOwner();
-	if (!ISVALID(owner) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(owner))
+	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(GetOwner()))
+	{
 		return;
-
-	cell = FCell(owner);
+	}
 
 	// Shouldt call OnConstruction on drag events
-	owner->bRunConstructionScriptOnDrag = false;
+	GetOwner()->bRunConstructionScriptOnDrag = false;
 
 	// Push owner to regenerated TMap
 	USingletonLibrary::GetLevelMap()->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 
-	UE_LOG_STR("OnComponentCreated: %s", *owner->GetName());
+	UE_LOG_STR("OnComponentCreated: %s", *GetOwner()->GetName());
 }
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (owner != nullptr && ISVALID(USingletonLibrary::GetLevelMap()) && !ISTRANSIENT(owner))
+	if (ISVALID(USingletonLibrary::GetLevelMap()) && !ISTRANSIENT(this))
 	{
-		UE_LOG_STR("OnComponentDestroyed %s:", *owner->GetName());
-	}
+		const ACharacter* character = Cast<ACharacter>(GetOwner());
+		if (character != nullptr &&
+			USingletonLibrary::GetLevelMap()->charactersOnMap_.Contains(character))
+		{
 
+			USingletonLibrary::GetLevelMap()->charactersOnMap_.Remove(character);
+			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", *GetOwner()->GetName());
+		}
+		UE_LOG_STR("OnComponentDestroyed: %s", *GetOwner()->GetName());
+	}
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }

@@ -5,7 +5,7 @@
 
 FCell::FCell(const AActor* actor)
 {
-	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap()))
+	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(actor))
 		return;
 	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0)
 		return;
@@ -22,7 +22,6 @@ AGeneratedMap::AGeneratedMap()
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32 sideLength, EPathTypesEnum pathfinder) const
 {
-
 	TSet<FCell> foundedLocations;
 	return foundedLocations;
 }
@@ -44,6 +43,7 @@ void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const A
 	if (ISVALID(updateActor) == false || !GeneratedMap_.Contains(cell) || ISTRANSIENT(updateActor))
 		return;
 
+	// Add to specific array
 	const ACharacter* updateCharacter = Cast<ACharacter>(updateActor);
 	if (updateCharacter != nullptr)
 	{
@@ -83,6 +83,10 @@ void AGeneratedMap::BeginPlay()
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
+	if (ISTRANSIENT(this) == true)
+	{
+		return;
+	}
 	//Regenerate map;
 	GenerateLevelMap();
 }

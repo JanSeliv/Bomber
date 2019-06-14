@@ -35,7 +35,7 @@ public:
 
 	FCell(const AActor* actor);
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	FVector location;
 
 	bool operator==(const FCell& other) const
@@ -82,6 +82,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void DestroyActorsFromMap(const FCell& cell);
 
+	// Storage of spawned characters
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
+	TSet<const ACharacter*> charactersOnMap_;
+
 protected:
 	friend FCell;
 
@@ -99,12 +103,8 @@ protected:
 	void GenerateLevelMap();
 
 	// Storage of cells and their actors
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
 	TMap<FCell, const AActor*> GeneratedMap_;
-
-	// Storage of spawned characters
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	TSet<const ACharacter*> charactersOnMap_;
 
 	// Debug function to find nearest cell
 	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DevelopmentOnly))
