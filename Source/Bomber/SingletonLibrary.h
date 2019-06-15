@@ -15,47 +15,52 @@ public:
 	USingletonLibrary();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-		static USingletonLibrary* const GetSingleton();
-
+	static USingletonLibrary* const GetSingleton();
 
 	/* Cell funs */
 	// Creates a cell from the vector
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
-		static FORCEINLINE FCell MakeCell(const AActor* actor)
+	static const FORCEINLINE FCell MakeCell(const AActor* actor)
 	{
 		return FCell(actor);
 	}
 
 	// Bound of floor
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Grid Size"))
-		static FORCEINLINE float GetFloorLength()
+	static const FORCEINLINE float GetFloorLength()
 	{
 		return 200.0;
 	}
 
 	// The length between two cells
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "C++")
-		static FORCEINLINE float CalculateCellsLength(const FCell& x, const FCell& y)
+	static const FORCEINLINE float CalculateCellsLength(const FCell& x, const FCell& y)
 	{
 		return (fabsf((x.location - y.location).Size()) / GetFloorLength());
 	}
 
-
 	/* GeneratedMap funs*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-		static FORCEINLINE class AGeneratedMap* const GetLevelMap()
+	static FORCEINLINE class AGeneratedMap* const GetLevelMap()
 	{
 		return (IsValid(GetSingleton()) ? GetSingleton()->levelMap_ : nullptr);
 	}
 
-
-
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static FORCEINLINE bool SetLevelMap(class AGeneratedMap* levelMap)
+	{
+		if (GetLevelMap() == levelMap || IsValid(levelMap) == false || IsValid(USingletonLibrary::GetSingleton()) == false)
+		{
+			return false;
+		}
+		GetSingleton()->levelMap_ = levelMap;
+		return true;
+	}
 
 	// All used blueprints
-	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintBaseOnly))
-		TArray<TSubclassOf<AActor>> bpClasses;
+	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintBaseOnly))
+	TArray<const TSubclassOf<AActor>> bpClasses;
 
 protected:
-	friend class AGeneratedMap;
 	class AGeneratedMap* levelMap_;
 };

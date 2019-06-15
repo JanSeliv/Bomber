@@ -15,8 +15,8 @@ class BOMBER_API UMyGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
-
-	void Init() override {
+	void Init() override
+	{
 		Super::Init();
 
 		// Start MenuLevel

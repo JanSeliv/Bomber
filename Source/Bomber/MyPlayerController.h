@@ -11,7 +11,6 @@ class BOMBER_API AMyPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-
 	void testfun(int a, bool b);
 	AMyPlayerController();
 
@@ -20,6 +19,6 @@ public:
 	void SetupInputComponent() override;
 
 	//widgets
-	UPROPERTY(BlueprintReadWrite, Category = "C++")
-		class AMyHUD* MyCustomHUD;
+	UPROPERTY(BlueprintReadOnly, Category = "C++")
+	class AMyHUD* MyCustomHUD;
 };

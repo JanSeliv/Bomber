@@ -3,4 +3,4 @@
 #include "Bomber.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Bomber, "Bomber" );
+IMPLEMENT_PRIMARY_GAME_MODULE(FDefaultGameModuleImpl, Bomber, "Bomber");
