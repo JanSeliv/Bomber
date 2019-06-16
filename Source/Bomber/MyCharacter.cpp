@@ -20,6 +20,7 @@ AMyCharacter::AMyCharacter()
 		GetMesh()->SetSkeletalMesh(skeletalMeshFinder.Object); // Set default skeletal mesh for character
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	}
+
 }
 
 // Called when the game starts or when spawned

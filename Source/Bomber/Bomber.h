@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/Engine.h"			 //GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT(" "));
+//#include "Engine/Engine.h"			 //GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT(" "));
 #include "Engine/World.h"			 //GetWorld()
 #include "GameFramework/Character.h" //UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 #include "GeneratedMap.h"

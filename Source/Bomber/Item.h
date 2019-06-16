@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
@@ -10,17 +9,18 @@ UCLASS()
 class BOMBER_API AItem : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AItem();
+
+	UPROPERTY(BlueprintReadOnly, Category = "C++")
+	class UMapComponent* mapComponent;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	//Called when an instance of this class is placed (in editor) or spawned.
+	virtual void OnConstruction(const FTransform& Transform) override;
 };

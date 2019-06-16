@@ -8,7 +8,7 @@
 
 ---
 Language:                                       Cpp
-BasedOnStyle:                                   LLVM
+BasedOnStyle:                                   Google
 IndentWidth:                                    4
 TabWidth:                                       4
 UseTab:                                         Always
