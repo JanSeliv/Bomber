@@ -13,20 +13,17 @@ struct FPowerUp
 public:
 	FPowerUp(){};
 
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	FVector location;
-
 	// Increase the movement speed of the character
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int skateNo = 1;
+	int skateN = 1;
 
 	// Increase the number of bombs that can be set at one time
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int bombNo = 1;
+	int bombN = 1;
 
 	//  Increase the bomb blast radius
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int fireNo = 1;
+	int fireN = 1;
 };
 
 UCLASS()
@@ -41,9 +38,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(BlueprintReadOnly, Category = "C++")
-	class UMapComponent* mapComponent;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -51,7 +45,17 @@ protected:
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SpawnBomb();
+
+	UPROPERTY()
+	class UMapComponent* mapComponent_;
+
 	// Count of items that affect the abilities of a player during gameplay
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	FPowerUp powerups;
+	FPowerUp powerups_;
+	friend class AItem;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
+	int32 characterID_;
 };

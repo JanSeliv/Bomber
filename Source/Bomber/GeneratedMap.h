@@ -2,51 +2,29 @@
 
 #pragma once
 
+#include "Cell.h"
 #include "GameFramework/Actor.h"
+
 #include "GeneratedMap.generated.h"
 
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EPathTypesEnum : uint8
 {
-	Explosion = 1 << 0, // to the first wall
-	Free = 1 << 1,		// to the first obstacle
-	Safe = 1 << 2,		// to the first obstacle+explosion
-	Secure = 1 << 3		// to the first obstacle+explosion+player
+	Explosion = 1 << 0,  // to the first wall
+	Free = 1 << 1,		 // to the first obstacle
+	Safe = 1 << 2,		 // to the first obstacle+explosion
+	Secure = 1 << 3		 // to the first obstacle+explosion+player
 };
 
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EActorTypeEnum : uint8
 {
-	Wall = 1 << 0, // obstacle
-	Box = 1 << 1,  // obstacle
-	Bomb = 1 << 2, // obstacle
+	Wall = 1 << 0,  // obstacle
+	Box = 1 << 1,   // obstacle
+	Bomb = 1 << 2,  // obstacle
 	Item = 1 << 3,
 	Floor = 1 << 4,
 	Player = 1 << 5
-};
-
-USTRUCT(BlueprintType, meta = (HasNativeMake = "Bomber.SingletonLibrary.MakeCell"))
-struct FCell
-{
-	GENERATED_BODY()
-
-public:
-	FCell(){};
-
-	FCell(const AActor* actor);
-
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	FVector location;
-
-	bool operator==(const FCell& other) const
-	{
-		return (this->location == other.location);
-	}
-	// Hash Function
-	friend FORCEINLINE uint32 GetTypeHash(const FCell& other)
-	{
-		return GetTypeHash(other.location);
-	}
 };
 
 UCLASS()
@@ -68,7 +46,7 @@ public:
 
 	// Return TSet of actor cells by types
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2))
-	TSet<FCell> FilterCellsByTypes(const TSet<FCell>& keys, const TArray<EActorTypeEnum>& filterTypes, const ACharacter* excludePlayer) const;
+	TSet<FCell> FilterCellsByTypes(const TSet<FCell>& keys, TArray<EActorTypeEnum>& filterTypes, const class ACharacter* excludePlayer) const;
 
 	// Spawn actor by type
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
@@ -84,10 +62,10 @@ public:
 
 	// Storage of spawned characters
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	TSet<const ACharacter*> charactersOnMap_;
+	TSet<const class ACharacter*> charactersOnMap_;
 
 protected:
-	friend FCell;
+	friend struct FCell;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

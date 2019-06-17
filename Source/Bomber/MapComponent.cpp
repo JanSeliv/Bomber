@@ -2,6 +2,7 @@
 
 #include "MapComponent.h"
 #include "Bomber.h"
+#include "GeneratedMap.h"
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()
@@ -47,7 +48,6 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		if (character != nullptr &&
 			USingletonLibrary::GetLevelMap()->charactersOnMap_.Contains(character))
 		{
-
 			USingletonLibrary::GetLevelMap()->charactersOnMap_.Remove(character);
 			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", *GetOwner()->GetName());
 		}

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+
 #include "Bomb.generated.h"
 
 UCLASS()
@@ -14,8 +15,10 @@ public:
 	// Sets default values for this actor's properties
 	ABomb();
 
-	UPROPERTY(BlueprintReadOnly, Category = "C++")
-	class UMapComponent* mapComponent;
+	void InitializeBombProperties(int32* outBombN, const int32& fireN, const int32& playerID);
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	class UStaticMeshComponent* bombMesh;
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,17 +31,29 @@ protected:
 	virtual void Destroyed() override;
 
 	/** 
-	 *	Event when an actor no longer overlaps another actor, and they have separated. 
+	 *	Event when an actor no longer overlaps another actor and can to block collision. 
 	 *	@note Components on both this and the other Actor must have bGenerateOverlapEvents set to true to generate overlap events.
 	 */
-	virtual void NotifyActorEndOverlap(AActor* OtherActor);
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
+	UPROPERTY()
+	class UMapComponent* mapComponent_;
+
+	UPROPERTY(EditAnywhere, Category = "C++")
+	float lifeSpan_ = 2.f;
+
+	// character's number of bombs (MyCharacter::powerups.fireN)
+	UPROPERTY(EditAnywhere, Category = "C++", meta = (DisplayName = "Explosion Length"))
+	int32 characterFireN_ = 1;
+
+	// Amount of character bombs at current time
+	int32* characterBombN_;
+
+	// All used bomb materials
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	float lifeSpan = 2.f;
+	TArray<class UMaterialInterface*> bombMaterials_;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int32 explosionLen = 1;
-
-	struct FPowerUp* characterPowerUps;
-
+	//UPROPERTY(BlueprintReadOnly, Catergory = "C++")
+	//TSet<struct FCell*> explosionCells;
+	friend class AGeneratedMap;
 };

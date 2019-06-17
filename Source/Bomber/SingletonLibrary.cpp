@@ -5,22 +5,6 @@
 
 USingletonLibrary::USingletonLibrary()
 {
-	/*
-	TArray<TCHAR*> pathes{
-	TEXT("/Game/Bomber/Blueprints/BPCameraActor"),	// EActorTypeEnum::None
-	TEXT("/Game/Bomber/Blueprints/BpBomb"),			// EActorTypeEnum::Bomb
-	TEXT("/Game/Bomber/Blueprints/BpItem"),			// EActorTypeEnum::Item
-	TEXT("/Game/Bomber/Assets/Wall"),				// EActorTypeEnum::Wall
-	TEXT("/Game/Bomber/Assets/floor"),				// EActorTypeEnum::Floor
-	TEXT("/Game/Bomber/Assets/Box"),				// EActorTypeEnum::Box
-	TEXT("/Game/Bomber/Blueprints/BpPlayer"),		// EActorTypeEnum::Player
-	};
-	for (auto path : pathes)
-	{
-		ConstructorHelpers::FClassFinder<AActor> classFinder(path);
-		bpClasses.Add(classFinder.Class);
-	}
-	*/
 }
 
 USingletonLibrary* const USingletonLibrary::GetSingleton()

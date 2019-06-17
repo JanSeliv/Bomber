@@ -1,18 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GeneratedMap.h"
+
 #include "Bomber.h"
-
-FCell::FCell(const AActor* actor)
-{
-	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(actor))
-		return;
-	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0)
-		return;
-
-	this->location = USingletonLibrary::GetLevelMap()->GetNearestCell(actor).location;
-}
-
+#include "Cell.h"
+#include "GameFramework/Character.h"
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
@@ -26,7 +18,7 @@ TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32
 	return foundedLocations;
 }
 
-TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& keys, const TArray<EActorTypeEnum>& filterTypes, const ACharacter* excludePlayer) const
+TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& keys, TArray<EActorTypeEnum>& filterTypes, const ACharacter* excludePlayer) const
 {
 	TSet<FCell> foundedLocations;
 	return foundedLocations;
@@ -34,7 +26,6 @@ TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& 
 
 AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, EActorTypeEnum actorType)
 {
-
 	return nullptr;
 }
 
@@ -47,17 +38,17 @@ void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const A
 	const ACharacter* updateCharacter = Cast<ACharacter>(updateActor);
 	if (updateCharacter != nullptr)
 	{
-		charactersOnMap_.Add(updateCharacter); // Add this character
+		charactersOnMap_.Add(updateCharacter);  // Add this character
 	}
 	else
 	{
 		const FCell* cellOfExistingActor = GeneratedMap_.FindKey(updateActor);
 		if (cellOfExistingActor != nullptr && cellOfExistingActor->location != cell.location)
 		{
-			GeneratedMap_.Add(*cellOfExistingActor); // remove this actor from previous cell
+			GeneratedMap_.Add(*cellOfExistingActor);  // remove this actor from previous cell
 			UE_LOG_STR("AddActorOnMapByObj: %s was existed", *updateActor->GetFName().ToString());
 		}
-		GeneratedMap_.Add(cell, updateActor); // Add this actor to his cell
+		GeneratedMap_.Add(cell, updateActor);  // Add this actor to his cell
 	}
 }
 

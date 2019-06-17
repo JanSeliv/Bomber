@@ -14,13 +14,16 @@ public:
 	// Sets default values for this actor's properties
 	AItem();
 
-	UPROPERTY(BlueprintReadOnly, Category = "C++")
-	class UMapComponent* mapComponent;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	UFUNCTION()
+	void OnItemBeginOverlap(AActor* overlappedItem, AActor* otherActor);
+
+	UPROPERTY()
+	class UMapComponent* mapComponent_;
 };
