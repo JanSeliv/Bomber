@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MapComponent.h"
+
 #include "Bomber.h"
+#include "GameFramework/Character.h"
 #include "GeneratedMap.h"
 
 // Sets default values for this component's properties
@@ -14,19 +16,23 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(GetOwner()))
+	if (ISVALID(GetOwner()) == false							// owner is not valid
+		|| ISVALID(USingletonLibrary::GetLevelMap()) == false)  // levelMap is not valid
 	{
 		return;
 	}
 
-	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(FCell(GetOwner()), GetOwner());
+	cell = FCell(GetOwner());  // Find new location at dragging and update-delegate
+	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(cell, GetOwner());
 	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", *GetOwner()->GetName());
 }
 
 void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
-	if (!ISVALID(GetOwner()) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(GetOwner()))
+
+	if (ISVALID(GetOwner()) == false							// owner is not valid
+		|| ISVALID(USingletonLibrary::GetLevelMap()) == false)  // levelMap is not valid
 	{
 		return;
 	}
@@ -42,7 +48,7 @@ void UMapComponent::OnComponentCreated()
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (ISVALID(USingletonLibrary::GetLevelMap()) && !ISTRANSIENT(this))
+	if (ISVALID(USingletonLibrary::GetLevelMap()) == true)
 	{
 		const ACharacter* character = Cast<ACharacter>(GetOwner());
 		if (character != nullptr &&
@@ -53,5 +59,6 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		}
 		UE_LOG_STR("OnComponentDestroyed: %s", *GetOwner()->GetName());
 	}
+
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }

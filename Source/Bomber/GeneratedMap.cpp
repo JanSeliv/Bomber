@@ -18,7 +18,7 @@ TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32
 	return foundedLocations;
 }
 
-TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& keys, TArray<EActorTypeEnum>& filterTypes, const ACharacter* excludePlayer) const
+TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& keys, const TArray<EActorTypeEnum>& filterTypes, const ACharacter* excludePlayer) const
 {
 	TSet<FCell> foundedLocations;
 	return foundedLocations;
@@ -31,7 +31,8 @@ AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, EActorTyp
 
 void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const AActor* updateActor)
 {
-	if (ISVALID(updateActor) == false || !GeneratedMap_.Contains(cell) || ISTRANSIENT(updateActor))
+	if (ISVALID(updateActor) == false			   // Updating actor is not valid
+		|| GeneratedMap_.Contains(cell) == false)  // Not existing cell
 		return;
 
 	// Add to specific array
@@ -65,8 +66,8 @@ void AGeneratedMap::BeginPlay()
 	USingletonLibrary::SetLevelMap(this);
 
 	// fix null keys
-	USingletonLibrary::GetLevelMap()->charactersOnMap_.Compact();
-	USingletonLibrary::GetLevelMap()->charactersOnMap_.Shrink();
+	charactersOnMap_.Compact();
+	charactersOnMap_.Shrink();
 
 	//onActorsUpdatedDelegate.Broadcast();
 	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", *this->GetFullName());

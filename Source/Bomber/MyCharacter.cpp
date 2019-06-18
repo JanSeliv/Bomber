@@ -14,11 +14,11 @@ AMyCharacter::AMyCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Initialize mapComponent
-	mapComponent_ = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	mapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	// Set skeletal mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> skeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
-	if (skeletalMeshFinder.Succeeded() && ISVALID(GetMesh()))  // Check to make sure the default skeletal mesh for character was actually found
+	if (skeletalMeshFinder.Succeeded())  // Check to make sure the default skeletal mesh for character was actually found
 	{
 		GetMesh()->SetSkeletalMesh(skeletalMeshFinder.Object);  // Set default skeletal mesh for character
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
@@ -34,27 +34,28 @@ void AMyCharacter::BeginPlay()
 void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	if (ISVALID(mapComponent_) == false || ISTRANSIENT(this) == true)
+
+	if (ISVALID(mapComponent) == false)
 	{
 		return;
 	}
-	mapComponent_->UpdateSelfOnMap();
 
-	// Raise up character over cell
-	if (ISVALID(GetRootComponent()) == true)
-	{
-		const float ACTOR_HEIGHT = GetRootComponent()->Bounds.BoxExtent.Z;
-		//GetRootComponent()->AddRelativeLocation(FVector(0, 0, ACTOR_HEIGHT));
-	}
+	mapComponent->UpdateSelfOnMap();
 }
 
-void AMyCharacter::SpawnBomb()
+void AMyCharacter::SpawnBomb(FCell cell)
 {
-	if (powerups_.fireN == 0 || HasActorBegunPlay() == false)
+	if (powerups_.fireN == 0				// Null length of explosion
+		|| HasActorBegunPlay() == false		// Shouldt spawn bomb in PIE
+		|| ISVALID(mapComponent) == false)  // Map component is not valid
 	{
 		return;
 	}
-	ABomb* const bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap()->AddActorOnMap(FCell(this), EActorTypeEnum::Bomb));
+
+	// Spawn bomb
+	ABomb* const bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap()->AddActorOnMap(cell, EActorTypeEnum::Bomb));
+
+	// Update material of mesh
 	if (bomb != nullptr)
 	{
 		bomb->InitializeBombProperties(&powerups_.bombN, powerups_.fireN, characterID_);
@@ -66,5 +67,11 @@ void AMyCharacter::SpawnBomb()
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	PlayerInputComponent->BindAction("SpaceEvent", EInputEvent::IE_Pressed, this, &AMyCharacter::SpawnBomb);
+
+	if (ISVALID(mapComponent) == false)
+	{
+		return;
+	}
+	FCell cell{this};
+	PlayerInputComponent->BindAction<FCellDelegate>("SpaceEvent", EInputEvent::IE_Pressed, this, &AMyCharacter::SpawnBomb, cell);
 }

@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include "Cell.h"
 #include "GameFramework/Character.h"
+
 #include "MyCharacter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -38,6 +40,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	class UMapComponent* mapComponent;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,11 +50,9 @@ protected:
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	DECLARE_DELEGATE_OneParam(FCellDelegate, FCell);  //templated BindAction
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SpawnBomb();
-
-	UPROPERTY()
-	class UMapComponent* mapComponent_;
+	void SpawnBomb(FCell cell);
 
 	// Count of items that affect the abilities of a player during gameplay
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")

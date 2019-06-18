@@ -8,10 +8,12 @@
 
 FCell::FCell(const AActor* actor)
 {
-	if (!ISVALID(actor) || !ISVALID(USingletonLibrary::GetLevelMap()) || ISTRANSIENT(actor))
+	if (ISVALID(actor) == false											// cell actor is not valid
+		|| ISVALID(USingletonLibrary::GetLevelMap()) == false			// levelMap is not valid
+		|| USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0)  // empty Grid Array
+	{
 		return;
-	if (USingletonLibrary::GetLevelMap()->GeneratedMap_.Num() == 0)
-		return;
+	}
 
 	this->location = USingletonLibrary::GetLevelMap()->GetNearestCell(actor).location;
 }

@@ -4,7 +4,7 @@
 
 #include "Bomber.h"
 #include "Components/StaticMeshComponent.h"
-#include "Materials/Material.h"
+#include "GeneratedMap.h"
 #include "MyCharacter.h"
 
 // Sets default values
@@ -14,8 +14,9 @@ ABomb::ABomb()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Initialize components
-	mapComponent_ = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	mapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 	bombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bomb Mesh"));
+	SetRootComponent(bombMesh);
 
 	// Find materials
 	const TArray<TCHAR*> pathes{
@@ -37,11 +38,13 @@ void ABomb::InitializeBombProperties(
 	int32* outBombN, const int32& fireN, const int32& characterID)
 {
 	characterBombN_ = outBombN;
-	characterFireN_ = fireN;
 
 	// Set material
 	const int32 BOMB_MATERIAL_NO = characterID % bombMaterials_.Num();
 	bombMesh->SetMaterial(0, bombMaterials_[BOMB_MATERIAL_NO]);
+
+	// Update explosion information
+	explosionCells_ = USingletonLibrary::GetLevelMap()->GetSidesCells(mapComponent->cell, fireN, EPathTypesEnum::Explosion);
 }
 
 // Called when the game starts or when spawned
@@ -54,11 +57,22 @@ void ABomb::BeginPlay()
 void ABomb::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	if (ISVALID(mapComponent_) == false || ISTRANSIENT(this) == true)
+
+	AGeneratedMap* levelMap = USingletonLibrary::GetLevelMap();
+
+	if (ISVALID(mapComponent) == false  // map component was not initialized
+		|| ISVALID(levelMap) == false)  // level map is not valid
 	{
 		return;
 	}
-	mapComponent_->UpdateSelfOnMap();
+
+	mapComponent->UpdateSelfOnMap();
+
+	// Updating explosions for nongenerated gragged bombs in PIE
+	if (HasActorBegunPlay() == false)
+	{
+		explosionCells_ = USingletonLibrary::GetLevelMap()->GetSidesCells(mapComponent->cell, 1, EPathTypesEnum::Explosion);
+	}
 }
 
 void ABomb::Destroyed()

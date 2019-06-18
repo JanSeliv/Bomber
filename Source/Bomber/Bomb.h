@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Cell.h"
 #include "GameFramework/Actor.h"
 
 #include "Bomb.generated.h"
@@ -17,8 +18,14 @@ public:
 
 	void InitializeBombProperties(int32* outBombN, const int32& fireN, const int32& playerID);
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	class UMapComponent* mapComponent;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UStaticMeshComponent* bombMesh;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	TSet<FCell> explosionCells_;
 
 protected:
 	// Called when the game starts or when spawned
@@ -36,15 +43,8 @@ protected:
 	 */
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
-	UPROPERTY()
-	class UMapComponent* mapComponent_;
-
 	UPROPERTY(EditAnywhere, Category = "C++")
 	float lifeSpan_ = 2.f;
-
-	// character's number of bombs (MyCharacter::powerups.fireN)
-	UPROPERTY(EditAnywhere, Category = "C++", meta = (DisplayName = "Explosion Length"))
-	int32 characterFireN_ = 1;
 
 	// Amount of character bombs at current time
 	int32* characterBombN_;
@@ -52,8 +52,4 @@ protected:
 	// All used bomb materials
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	TArray<class UMaterialInterface*> bombMaterials_;
-
-	//UPROPERTY(BlueprintReadOnly, Catergory = "C++")
-	//TSet<struct FCell*> explosionCells;
-	friend class AGeneratedMap;
 };

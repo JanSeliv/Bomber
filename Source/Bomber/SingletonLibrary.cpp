@@ -9,11 +9,11 @@ USingletonLibrary::USingletonLibrary()
 
 USingletonLibrary* const USingletonLibrary::GetSingleton()
 {
-	if (ISVALID(GEngine) == false)
+	if (IsValid(GEngine) == false)
 		return nullptr;
 	USingletonLibrary* singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
 
-	if (ISVALID(singleton) == false)
+	if (IsValid(singleton) == false)
 		return nullptr;
 	return singleton;
 }

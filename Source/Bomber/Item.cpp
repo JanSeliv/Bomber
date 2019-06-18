@@ -11,7 +11,7 @@ AItem::AItem()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Initialize mapComponent
-	mapComponent_ = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	mapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	OnActorBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
 }
@@ -25,16 +25,17 @@ void AItem::BeginPlay()
 void AItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	if (ISVALID(mapComponent_) == false || ISTRANSIENT(this) == true)
+	if (ISVALID(mapComponent) == false)
 	{
 		return;
 	}
-	mapComponent_->UpdateSelfOnMap();
+	mapComponent->UpdateSelfOnMap();
 }
 
 void AItem::OnItemBeginOverlap(AActor* overlappedItem, AActor* otherActor)
 {
-	if (overlappedItem == this || Cast<AMyCharacter>(otherActor) == nullptr)
+	if (overlappedItem == this						   // self triggering
+		|| Cast<AMyCharacter>(otherActor) == nullptr)  // other actor is not myCharacter
 	{
 		return;
 	}

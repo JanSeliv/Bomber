@@ -46,7 +46,7 @@ public:
 
 	// Return TSet of actor cells by types
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2))
-	TSet<FCell> FilterCellsByTypes(const TSet<FCell>& keys, TArray<EActorTypeEnum>& filterTypes, const class ACharacter* excludePlayer) const;
+	TSet<FCell> FilterCellsByTypes(const TSet<FCell>& keys, const TArray<EActorTypeEnum>& filterTypes, const class ACharacter* excludePlayer) const;
 
 	// Spawn actor by type
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")

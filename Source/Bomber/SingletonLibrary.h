@@ -50,7 +50,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static FORCEINLINE bool SetLevelMap(class AGeneratedMap* levelMap)
 	{
-		if (GetLevelMap() == levelMap || levelMap == nullptr || IsValid(USingletonLibrary::GetSingleton()) == false)
+		if (GetLevelMap() == levelMap || IsValid(USingletonLibrary::GetSingleton()) == false)
 		{
 			return false;
 		}

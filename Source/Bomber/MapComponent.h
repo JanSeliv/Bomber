@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include "Cell.h"
 #include "Components/ActorComponent.h"
+
 #include "MapComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -15,8 +17,11 @@ public:
 	UMapComponent();
 
 	// Callback function to the delegate
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION()
 	void UpdateSelfOnMap();
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	FCell cell;
 
 protected:
 	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */

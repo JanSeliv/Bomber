@@ -14,6 +14,9 @@ public:
 	// Sets default values for this actor's properties
 	AItem();
 
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	class UMapComponent* mapComponent;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -23,7 +26,4 @@ protected:
 
 	UFUNCTION()
 	void OnItemBeginOverlap(AActor* overlappedItem, AActor* otherActor);
-
-	UPROPERTY()
-	class UMapComponent* mapComponent_;
 };
