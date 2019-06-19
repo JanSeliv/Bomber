@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Cell.h"
 #include "GameFramework/Character.h"
 
 #include "MyCharacter.generated.h"
@@ -40,6 +39,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+#if WITH_EDITORONLY_DATA
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	bool bShouldShowRenders;
+#endif
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void UpdateAI();
+
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* mapComponent;
 
@@ -50,9 +57,8 @@ protected:
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	DECLARE_DELEGATE_OneParam(FCellDelegate, FCell);  //templated BindAction
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SpawnBomb(FCell cell);
+	void SpawnBomb();
 
 	// Count of items that affect the abilities of a player during gameplay
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")

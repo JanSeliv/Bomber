@@ -2,16 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Engine/Engine.h"			 //GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT(" "));
-#include "Engine/World.h"			 //GetWorld()
-#include "Kismet/GameplayStatics.h"  // UGameplayStatics::
-#include "MapComponent.h"
-#include "MyGameModeBase.h"
-#include "MyPlayerController.h"
-#include "SingletonLibrary.h"
-#include "TimerManager.h"				 // FTimerHandle timerHandle;
-#include "UObject/ConstructorHelpers.h"  //ConstructorHelpers::FObjectFinder<UBlueprint> Blueprint_Effect_Fire()
+#include "Engine/World.h"  //GetWorld()
+#include "Kismet/GameplayStatics.h"
 
 #define UE_LOG_STR(message, string) UE_LOG(LogTemp, Warning, TEXT(message), string)
 

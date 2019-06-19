@@ -4,7 +4,9 @@
 
 #include "Bomber.h"
 #include "Cell.h"
+#include "Editor.h"
 #include "GameFramework/Character.h"
+
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
@@ -33,7 +35,9 @@ void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const A
 {
 	if (ISVALID(updateActor) == false			   // Updating actor is not valid
 		|| GeneratedMap_.Contains(cell) == false)  // Not existing cell
+	{
 		return;
+	}
 
 	// Add to specific array
 	const ACharacter* updateCharacter = Cast<ACharacter>(updateActor);
@@ -63,13 +67,12 @@ void AGeneratedMap::BeginPlay()
 	Super::BeginPlay();
 
 	// Update UEDPIE_LevelMap obj;
-	USingletonLibrary::SetLevelMap(this);
+	USingletonLibrary::GetSingleton()->levelMap_ = this;
 
 	// fix null keys
 	charactersOnMap_.Compact();
 	charactersOnMap_.Shrink();
 
-	//onActorsUpdatedDelegate.Broadcast();
 	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", *this->GetFullName());
 }
 
@@ -98,9 +101,6 @@ void AGeneratedMap::Destroyed()
 
 void AGeneratedMap::GenerateLevelMap_Implementation()
 {
-	// Update LevelMap obj before generating child actors;
-	USingletonLibrary::SetLevelMap(this);
-
 	GeneratedMap_.Empty();
 	charactersOnMap_.Empty();
 }

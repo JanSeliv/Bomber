@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Item.h"
+
 #include "Bomber.h"
+#include "MapComponent.h"
 #include "MyCharacter.h"
 
 // Sets default values

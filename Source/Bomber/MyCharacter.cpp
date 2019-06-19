@@ -6,6 +6,8 @@
 #include "Bomber.h"
 #include "Components/SkeletalMeshComponent.h"  //ACharacter::GetMesh();
 #include "GeneratedMap.h"
+#include "MapComponent.h"
+#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -40,20 +42,28 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
+#if WITH_EDITOR
+	if (bShouldShowRenders == true)
+	{
+		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddDynamic(this, &AMyCharacter::UpdateAI);
+	}
+#endif
+
 	mapComponent->UpdateSelfOnMap();
 }
 
-void AMyCharacter::SpawnBomb(FCell cell)
+void AMyCharacter::SpawnBomb()
 {
-	if (powerups_.fireN == 0				// Null length of explosion
-		|| HasActorBegunPlay() == false		// Shouldt spawn bomb in PIE
-		|| ISVALID(mapComponent) == false)  // Map component is not valid
+	if (!ISVALID(USingletonLibrary::GetLevelMap(GetWorld()))  // level map is not valid
+		|| powerups_.fireN == 0								  // Null length of explosion
+		|| HasActorBegunPlay() == false						  // Shouldt spawn bomb in PIE
+		|| ISVALID(mapComponent) == false)					  // Map component is not valid
 	{
 		return;
 	}
 
 	// Spawn bomb
-	ABomb* const bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap()->AddActorOnMap(cell, EActorTypeEnum::Bomb));
+	ABomb* const bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMap(FCell(this), EActorTypeEnum::Bomb));
 
 	// Update material of mesh
 	if (bomb != nullptr)
@@ -63,15 +73,15 @@ void AMyCharacter::SpawnBomb(FCell cell)
 	}
 }
 
+void AMyCharacter::UpdateAI_Implementation()
+{
+	UE_LOG_STR("%s", *"AMyCharacter::AI updated");
+}
+
 // Called to bind functionality to input
 void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (ISVALID(mapComponent) == false)
-	{
-		return;
-	}
-	FCell cell{this};
-	PlayerInputComponent->BindAction<FCellDelegate>("SpaceEvent", EInputEvent::IE_Pressed, this, &AMyCharacter::SpawnBomb, cell);
+	PlayerInputComponent->BindAction("SpaceEvent", IE_Pressed, this, &AMyCharacter::SpawnBomb);
 }

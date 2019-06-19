@@ -5,7 +5,9 @@
 #include "Bomber.h"
 #include "Components/StaticMeshComponent.h"
 #include "GeneratedMap.h"
+#include "MapComponent.h"
 #include "MyCharacter.h"
+#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 ABomb::ABomb()
@@ -44,7 +46,7 @@ void ABomb::InitializeBombProperties(
 	bombMesh->SetMaterial(0, bombMaterials_[BOMB_MATERIAL_NO]);
 
 	// Update explosion information
-	explosionCells_ = USingletonLibrary::GetLevelMap()->GetSidesCells(mapComponent->cell, fireN, EPathTypesEnum::Explosion);
+	explosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(mapComponent->cell, fireN, EPathTypesEnum::Explosion);
 }
 
 // Called when the game starts or when spawned
@@ -58,7 +60,7 @@ void ABomb::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	AGeneratedMap* levelMap = USingletonLibrary::GetLevelMap();
+	AGeneratedMap* levelMap = USingletonLibrary::GetLevelMap(GetWorld());
 
 	if (ISVALID(mapComponent) == false  // map component was not initialized
 		|| ISVALID(levelMap) == false)  // level map is not valid
@@ -71,7 +73,7 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	// Updating explosions for nongenerated gragged bombs in PIE
 	if (HasActorBegunPlay() == false)
 	{
-		explosionCells_ = USingletonLibrary::GetLevelMap()->GetSidesCells(mapComponent->cell, 1, EPathTypesEnum::Explosion);
+		explosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(mapComponent->cell, 1, EPathTypesEnum::Explosion);
 	}
 }
 

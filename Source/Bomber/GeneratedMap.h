@@ -4,6 +4,7 @@
 
 #include "Cell.h"
 #include "GameFramework/Actor.h"
+#include "SingletonLibrary.h"
 
 #include "GeneratedMap.generated.h"
 

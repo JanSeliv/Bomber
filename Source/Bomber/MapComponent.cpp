@@ -3,8 +3,8 @@
 #include "MapComponent.h"
 
 #include "Bomber.h"
-#include "GameFramework/Character.h"
 #include "GeneratedMap.h"
+#include "MyCharacter.h"
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()
@@ -16,14 +16,21 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	if (ISVALID(GetOwner()) == false							// owner is not valid
-		|| ISVALID(USingletonLibrary::GetLevelMap()) == false)  // levelMap is not valid
+	if (ISVALID(GetOwner()) == false							   // owner is not valid
+		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null
 	{
 		return;
 	}
 
 	cell = FCell(GetOwner());  // Find new location at dragging and update-delegate
-	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(cell, GetOwner());
+
+	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(cell, GetOwner());
+
+#if WITH_EDITOR
+	// Update AI Renders
+	USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+#endif
+
 	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", *GetOwner()->GetName());
 }
 
@@ -31,8 +38,8 @@ void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-	if (ISVALID(GetOwner()) == false							// owner is not valid
-		|| ISVALID(USingletonLibrary::GetLevelMap()) == false)  // levelMap is not valid
+	if (ISVALID(GetOwner()) == false							   // owner is not valid
+		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null
 	{
 		return;
 	}
@@ -41,23 +48,29 @@ void UMapComponent::OnComponentCreated()
 	GetOwner()->bRunConstructionScriptOnDrag = false;
 
 	// Push owner to regenerated TMap
-	USingletonLibrary::GetLevelMap()->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
+	USingletonLibrary::GetLevelMap(GetWorld())->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 
 	UE_LOG_STR("OnComponentCreated: %s", *GetOwner()->GetName());
 }
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (ISVALID(USingletonLibrary::GetLevelMap()) == true)
+	if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr)
 	{
 		const ACharacter* character = Cast<ACharacter>(GetOwner());
 		if (character != nullptr &&
-			USingletonLibrary::GetLevelMap()->charactersOnMap_.Contains(character))
+			USingletonLibrary::GetLevelMap(GetWorld())->charactersOnMap_.Contains(character))
 		{
-			USingletonLibrary::GetLevelMap()->charactersOnMap_.Remove(character);
+			USingletonLibrary::GetLevelMap(GetWorld())->charactersOnMap_.Remove(character);
 			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", *GetOwner()->GetName());
 		}
-		UE_LOG_STR("OnComponentDestroyed: %s", *GetOwner()->GetName());
+
+#if WITH_EDITOR
+		// Update AI Renders
+		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+#endif
+
+		UE_LOG_STR("OnComponentDestroyed: %s call updating", *GetOwner()->GetName());
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
