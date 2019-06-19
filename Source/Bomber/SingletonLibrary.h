@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "GeneratedMap.h"
+#include "Cell.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "SingletonLibrary.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
@@ -40,27 +41,15 @@ public:
 	}
 
 	/* GeneratedMap funs*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class AGeneratedMap* const GetLevelMap()
-	{
-		return (IsValid(GetSingleton()) ? GetSingleton()->levelMap_ : nullptr);
-	}
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static class AGeneratedMap* const GetLevelMap(UObject* WorldContextObject);
 
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static FORCEINLINE bool SetLevelMap(class AGeneratedMap* levelMap)
-	{
-		if (GetLevelMap() == levelMap || IsValid(levelMap) == false || IsValid(USingletonLibrary::GetSingleton()) == false)
-		{
-			return false;
-		}
-		GetSingleton()->levelMap_ = levelMap;
-		return true;
-	}
+#if WITH_EDITORONLY_DATA
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAiWithRenderParam);
+	FUpdateAiWithRenderParam OnRenderAiUpdatedDelegate;
+#endif
 
-	// All used blueprints
-	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintBaseOnly))
-	TArray<const TSubclassOf<AActor>> bpClasses;
-
-protected:
+private:
 	class AGeneratedMap* levelMap_;
+	friend class AGeneratedMap;
 };

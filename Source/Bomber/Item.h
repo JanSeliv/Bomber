@@ -14,7 +14,7 @@ public:
 	// Sets default values for this actor's properties
 	AItem();
 
-	UPROPERTY(BlueprintReadOnly, Category = "C++")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* mapComponent;
 
 protected:
@@ -23,4 +23,7 @@ protected:
 
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	UFUNCTION()
+	void OnItemBeginOverlap(AActor* overlappedItem, AActor* otherActor);
 };
