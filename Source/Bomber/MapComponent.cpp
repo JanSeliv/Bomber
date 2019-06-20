@@ -26,9 +26,13 @@ void UMapComponent::UpdateSelfOnMap()
 
 	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(cell, GetOwner());
 
+// Update renders after adding obj on map
 #if WITH_EDITOR
-	// Update AI Renders
-	USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+	if (GetWorld()->HasBegunPlay() == false)  // for editor only
+	{
+		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+		UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", *GetOwner()->GetName());
+	}
 #endif
 
 	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", *GetOwner()->GetName());
@@ -65,12 +69,16 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", *GetOwner()->GetName());
 		}
 
+// Update AI renders after destroying obj from map
 #if WITH_EDITOR
-		// Update AI Renders
-		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+		if (GetWorld()->HasBegunPlay() == false)  // for editor only
+		{
+			USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+			UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", *GetOwner()->GetName());
+		}
 #endif
 
-		UE_LOG_STR("OnComponentDestroyed: %s call updating", *GetOwner()->GetName());
+		UE_LOG_STR("OnComponentDestroyed: %s was destroyed", *GetOwner()->GetName());
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);

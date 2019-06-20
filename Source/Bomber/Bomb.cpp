@@ -69,12 +69,16 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	}
 
 	mapComponent->UpdateSelfOnMap();
+	SetActorScale3D(FVector(2.f, 2.f, 2.f));
 
-	// Updating explosions for nongenerated gragged bombs in PIE
-	if (HasActorBegunPlay() == false)
+// Updating own explosions for nongenerated gragged bombs in PIE
+#if WITH_EDITOR
+	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
 		explosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(mapComponent->cell, 1, EPathTypesEnum::Explosion);
+		UE_LOG_STR("PIE: %s updated own explosions", *GetName());
 	}
+#endif
 }
 
 void ABomb::Destroyed()

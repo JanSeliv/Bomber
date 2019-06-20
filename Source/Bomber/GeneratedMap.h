@@ -20,11 +20,11 @@ enum class EPathTypesEnum : uint8
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EActorTypeEnum : uint8
 {
-	Wall = 1 << 0,  // obstacle
-	Box = 1 << 1,   // obstacle
-	Bomb = 1 << 2,  // obstacle
-	Item = 1 << 3,
-	Floor = 1 << 4,
+	Floor = 1 << 0,
+	Wall = 1 << 1,  // obstacle
+	Box = 1 << 2,   // obstacle
+	Bomb = 1 << 3,  // obstacle
+	Item = 1 << 4,
 	Player = 1 << 5
 };
 
@@ -47,7 +47,7 @@ public:
 
 	// Return TSet of actor cells by types
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2))
-	TSet<FCell> FilterCellsByTypes(const TSet<FCell>& keys, const TArray<EActorTypeEnum>& filterTypes, const class ACharacter* excludePlayer) const;
+	TSet<FCell> FilterCellsByTypes(const TSet<FCell>& keys, const EActorTypeEnum& filterTypes, const class ACharacter* excludePlayer) const;
 
 	// Spawn actor by type
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
@@ -81,11 +81,14 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void GenerateLevelMap();
 
+	// Debug function to find nearest cell
+	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DevelopmentOnly))
+	FCell GetNearestCell(const AActor* actor);
+
 	// Storage of cells and their actors
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
 	TMap<FCell, const AActor*> GeneratedMap_;
 
-	// Debug function to find nearest cell
-	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DevelopmentOnly))
-	FCell GetNearestCell(const AActor* actor);
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
+	TMap<EActorTypeEnum, TSubclassOf<AActor>> typesByClassesMap_;
 };
