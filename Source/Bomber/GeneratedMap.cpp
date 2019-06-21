@@ -4,14 +4,29 @@
 
 #include "Bomber.h"
 #include "Cell.h"
-#include "Editor.h"
 #include "GameFramework/Character.h"
+#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
 	// Shouldt call OnConsturction on drag events
 	bRunConstructionScriptOnDrag = false;
+
+	// Find materials
+	const TArray<TCHAR*> pathes{
+		TEXT("/Game/Bomber/Assets/floor"),			//EPathTypesEnum::Floor
+		TEXT("/Game/Bomber/Assets/Wall"),			//EPathTypesEnum::Wall
+		TEXT("/Game/Bomber/Assets/Box"),			//EPathTypesEnum::Box
+		TEXT("/Game/Bomber/Blueprints/BpBomb"),		//EPathTypesEnum::Bomb
+		TEXT("/Game/Bomber/Blueprints/BpItem"),		//EPathTypesEnum::Item
+		TEXT("/Game/Bomber/Blueprints/BpPlayer")};  //EPathTypesEnum::Player
+	for (int32 i = 0; i < pathes.Num(); ++i)
+	{
+		ConstructorHelpers::FClassFinder<AActor> classFinder(pathes[i]);
+		typesByClassesMap_.Add(
+			EActorTypeEnum(1 << i), (classFinder.Succeeded() ? classFinder.Class : nullptr));
+	}
 }
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32 sideLength, EPathTypesEnum pathfinder) const
@@ -20,7 +35,7 @@ TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32
 	return foundedLocations;
 }
 
-TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& keys, const TArray<EActorTypeEnum>& filterTypes, const ACharacter* excludePlayer) const
+TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& keys, const EActorTypeEnum& filterTypes, const ACharacter* excludePlayer) const
 {
 	TSet<FCell> foundedLocations;
 	return foundedLocations;
@@ -39,13 +54,14 @@ void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const A
 		return;
 	}
 
-	// Add to specific array
+	// if it is character, add to array of characters
 	const ACharacter* updateCharacter = Cast<ACharacter>(updateActor);
 	if (updateCharacter != nullptr)
 	{
 		charactersOnMap_.Add(updateCharacter);  // Add this character
 	}
-	else
+	else  // else if it is not the floor, add to TMap
+		if (~(int32)EActorTypeEnum::Floor & (int32)*typesByClassesMap_.FindKey(updateActor->GetClass()))
 	{
 		const FCell* cellOfExistingActor = GeneratedMap_.FindKey(updateActor);
 		if (cellOfExistingActor != nullptr && cellOfExistingActor->location != cell.location)
@@ -57,7 +73,7 @@ void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const A
 	}
 }
 
-void AGeneratedMap::DestroyActorsFromMap_Implementation(const FCell& cell)
+void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& keys)
 {
 }
 
@@ -73,7 +89,7 @@ void AGeneratedMap::BeginPlay()
 	charactersOnMap_.Compact();
 	charactersOnMap_.Shrink();
 
-	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", *this->GetFullName());
+	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", *this->GetName());
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)

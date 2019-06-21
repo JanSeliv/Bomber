@@ -21,6 +21,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* mapComponent;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	class UParticleSystem* explosionParticle;
+
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UStaticMeshComponent* bombMesh;
 

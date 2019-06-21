@@ -24,22 +24,24 @@ USingletonLibrary* const USingletonLibrary::GetSingleton()
 
 AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 {
-	UWorld* const world = GEngine->GetWorldFromContextObjectChecked(WorldContextObject);
-	if (world == nullptr					  // World context is null
-		|| IsValid(GetSingleton()) == false)  // Singleton is not valid
+	UWorld* const world = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
+	if (world == nullptr			   // World context is null
+		|| GetSingleton() == nullptr)  // Singleton is null
 	{
 		return nullptr;
 	}
 
-	// Find editor level map
+// Find editor level map
 #if WITH_EDITOR
-	if (ISVALID(GetSingleton()->levelMap_) == false)
+	if (world->HasBegunPlay() == false					 // for editor only
+		&& ISVALID(GetSingleton()->levelMap_) == false)  // current map is not valid
 	{
 		TArray<AActor*> levelMapArray;
 		UGameplayStatics::GetAllActorsOfClass(world, AGeneratedMap::StaticClass(), levelMapArray);
 		if (levelMapArray.Num() > 0)
 		{
 			GetSingleton()->levelMap_ = Cast<AGeneratedMap>(levelMapArray[0]);
+			UE_LOG_STR("SingletonLibrary:GetLevelMap: %s UPDATED", *levelMapArray[0]->GetName())
 		}
 	}
 #endif

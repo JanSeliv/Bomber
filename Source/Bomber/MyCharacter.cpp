@@ -37,25 +37,32 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (ISVALID(mapComponent) == false)
+	if (ISVALID(mapComponent) == false)  // Map component is not valid
 	{
 		return;
 	}
 
+	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
+	{
+		mapComponent->UpdateSelfOnMap();
+	}
+
+// Binding to update renders of render AI on creating\destroying elements
 #if WITH_EDITOR
-	if (bShouldShowRenders == true)
+	if (GetWorld()->HasBegunPlay() == false  // for editor only
+		&& bShouldShowRenders == true)		 // only for AI with render statement
 	{
 		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddDynamic(this, &AMyCharacter::UpdateAI);
+		UE_LOG_STR("PIE: %s BINDING to UpdateAI", *GetName());
 	}
 #endif
-
-	mapComponent->UpdateSelfOnMap();
 }
 
 void AMyCharacter::SpawnBomb()
 {
 	if (!ISVALID(USingletonLibrary::GetLevelMap(GetWorld()))  // level map is not valid
-		|| powerups_.fireN == 0								  // Null length of explosion
+		|| powerups_.fireN <= 0								  // Null length of explosion
+		|| powerups_.bombN <= 0								  // No more bombs
 		|| HasActorBegunPlay() == false						  // Shouldt spawn bomb in PIE
 		|| ISVALID(mapComponent) == false)					  // Map component is not valid
 	{
@@ -75,7 +82,13 @@ void AMyCharacter::SpawnBomb()
 
 void AMyCharacter::UpdateAI_Implementation()
 {
-	UE_LOG_STR("%s", *"AMyCharacter::AI updated");
+// Check who answered the call
+#if WITH_EDITOR
+	if (GetWorld()->HasBegunPlay() == false)  // for editor only
+	{
+		UE_LOG_STR("PIE:UpdateAI: %s answered", *GetName());
+	}
+#endif
 }
 
 // Called to bind functionality to input

@@ -27,11 +27,16 @@ void AItem::BeginPlay()
 void AItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	if (ISVALID(mapComponent) == false)
+
+	if (ISVALID(mapComponent) == false)  // Map component is not valid
 	{
 		return;
 	}
-	mapComponent->UpdateSelfOnMap();
+
+	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
+	{
+		mapComponent->UpdateSelfOnMap();
+	}
 }
 
 void AItem::OnItemBeginOverlap(AActor* overlappedItem, AActor* otherActor)
