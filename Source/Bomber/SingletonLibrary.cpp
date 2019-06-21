@@ -25,8 +25,8 @@ USingletonLibrary* const USingletonLibrary::GetSingleton()
 AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 {
 	UWorld* const world = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
-	if (world == nullptr					  // World context is null
-		|| IsValid(GetSingleton()) == false)  // Singleton is not valid
+	if (world == nullptr			   // World context is null
+		|| GetSingleton() == nullptr)  // Singleton is null
 	{
 		return nullptr;
 	}

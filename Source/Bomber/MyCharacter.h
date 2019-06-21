@@ -66,5 +66,5 @@ protected:
 	friend class AItem;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	int32 characterID_;
+	int32 characterID_ = -1;
 };

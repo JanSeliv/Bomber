@@ -73,7 +73,7 @@ void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const A
 	}
 }
 
-void AGeneratedMap::DestroyActorsFromMap_Implementation(const FCell& cell)
+void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& keys)
 {
 }
 

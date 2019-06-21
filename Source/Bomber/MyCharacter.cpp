@@ -37,9 +37,14 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (ISVALID(mapComponent) == false)
+	if (ISVALID(mapComponent) == false)  // Map component is not valid
 	{
 		return;
+	}
+
+	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
+	{
+		mapComponent->UpdateSelfOnMap();
 	}
 
 // Binding to update renders of render AI on creating\destroying elements
@@ -51,8 +56,6 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 		UE_LOG_STR("PIE: %s BINDING to UpdateAI", *GetName());
 	}
 #endif
-
-	mapComponent->UpdateSelfOnMap();
 }
 
 void AMyCharacter::SpawnBomb()

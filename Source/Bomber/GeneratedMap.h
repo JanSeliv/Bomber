@@ -57,9 +57,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void AddActorOnMapByObj(const FCell& cell, const AActor* updateActor);
 
-	// Destro all actors from scene by cell
+	// Destroy all actors from array of cells
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void DestroyActorsFromMap(const FCell& cell);
+	void DestroyActorsFromMap(const TSet<FCell>& keys);
 
 	// Storage of spawned characters
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
