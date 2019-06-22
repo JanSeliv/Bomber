@@ -5,6 +5,7 @@
 #include "Bomber.h"
 #include "GameFramework/Actor.h"
 #include "GeneratedMap.h"
+#include "SingletonLibrary.h"
 
 FCell::FCell(const AActor* actor)
 {

@@ -4,9 +4,11 @@
 
 #include "Bomb.h"
 #include "Bomber.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"  //ACharacter::GetMesh();
 #include "GeneratedMap.h"
 #include "MapComponent.h"
+#include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
@@ -19,7 +21,8 @@ AMyCharacter::AMyCharacter()
 	mapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	// Set skeletal mesh
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> skeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
+		skeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
 	if (skeletalMeshFinder.Succeeded())  // Check to make sure the default skeletal mesh for character was actually found
 	{
 		GetMesh()->SetSkeletalMesh(skeletalMeshFinder.Object);  // Set default skeletal mesh for character
@@ -47,13 +50,20 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 		mapComponent->UpdateSelfOnMap();
 	}
 
+	// Raise up character over cell
+	const float ACTOR_HEIGHT = GetRootComponent()->Bounds.BoxExtent.Z;
+	AddActorWorldOffset(FVector(0.f, 0.f, ACTOR_HEIGHT));
+	SetActorRotation(FRotator(0, -90, 0));
+
+	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
+
 // Binding to update renders of render AI on creating\destroying elements
 #if WITH_EDITOR
 	if (GetWorld()->HasBegunPlay() == false  // for editor only
 		&& bShouldShowRenders == true)		 // only for AI with render statement
 	{
 		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddDynamic(this, &AMyCharacter::UpdateAI);
-		UE_LOG_STR("PIE: %s BINDING to UpdateAI", *GetName());
+		UE_LOG_STR("PIE: %s BINDING to UpdateAI", this);
 	}
 #endif
 }
@@ -86,7 +96,7 @@ void AMyCharacter::UpdateAI_Implementation()
 #if WITH_EDITOR
 	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
-		UE_LOG_STR("PIE:UpdateAI: %s answered", *GetName());
+		UE_LOG_STR("PIE:UpdateAI: %s answered", this);
 	}
 #endif
 }

@@ -19,10 +19,10 @@ public:
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	void BeginPlay() override;
 
 	//Called when an instance of this class is placed (in editor) or spawned.
-	virtual void OnConstruction(const FTransform& Transform) override;
+	void OnConstruction(const FTransform& Transform) override;
 
 	UFUNCTION()
 	void OnItemBeginOverlap(AActor* overlappedItem, AActor* otherActor);

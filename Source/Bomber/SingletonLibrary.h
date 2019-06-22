@@ -46,6 +46,7 @@ public:
 
 #if WITH_EDITORONLY_DATA
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAiWithRenderParam);
+
 	FUpdateAiWithRenderParam OnRenderAiUpdatedDelegate;
 #endif
 

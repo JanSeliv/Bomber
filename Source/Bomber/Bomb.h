@@ -32,19 +32,19 @@ public:
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	void BeginPlay() override;
 
 	//Called when an instance of this class is placed (in editor) or spawned.
-	virtual void OnConstruction(const FTransform& Transform) override;
+	void OnConstruction(const FTransform& Transform) override;
 
 	// Called when this actor is explicitly being destroyed
-	virtual void Destroyed() override;
+	void Destroyed() override;
 
 	/** 
 	 *	Event when an actor no longer overlaps another actor and can to block collision. 
 	 *	@note Components on both this and the other Actor must have bGenerateOverlapEvents set to true to generate overlap events.
 	 */
-	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+	void NotifyActorEndOverlap(AActor* OtherActor) override;
 
 	UPROPERTY(EditAnywhere, Category = "C++")
 	float lifeSpan_ = 2.f;

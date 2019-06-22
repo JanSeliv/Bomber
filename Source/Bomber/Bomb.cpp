@@ -8,6 +8,7 @@
 #include "MapComponent.h"
 #include "MyCharacter.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
@@ -67,7 +68,7 @@ void ABomb::InitializeBombProperties(
 	// Set material
 	if (ISVALID(bombMesh) == true)
 	{
-		const int32 BOMB_MATERIAL_NO = characterID % bombMaterials_.Num();
+		const int32 BOMB_MATERIAL_NO = FMath::Abs(characterID) % bombMaterials_.Num();
 		bombMesh->SetMaterial(0, bombMaterials_[BOMB_MATERIAL_NO]);
 	}
 
@@ -102,7 +103,7 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
 		explosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(mapComponent->cell, 1, EPathTypesEnum::Explosion);
-		UE_LOG_STR("PIE: %s updated own explosions", *GetName());
+		UE_LOG_STR("PIE: %s updated own explosions", this);
 	}
 #endif
 }

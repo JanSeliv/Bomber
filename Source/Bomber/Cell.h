@@ -20,6 +20,7 @@ struct FCell
 	{
 		return (this->location == other.location);
 	}
+
 	// Hash Function
 	friend FORCEINLINE uint32 GetTypeHash(const FCell& other)
 	{

@@ -25,12 +25,12 @@ public:
 
 protected:
 	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */
-	virtual void OnComponentCreated() final;
+	void OnComponentCreated() override final;
 
 	/**
 	 * Called when a component is destroyed
 	 *
 	 * @param	bDestroyingHierarchy  - True if the entire component hierarchy is being torn down, allows avoiding expensive operations
 	 */
-	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
+	void OnComponentDestroyed(bool bDestroyingHierarchy) override final;
 };

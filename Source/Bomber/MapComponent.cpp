@@ -5,6 +5,7 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "MyCharacter.h"
+#include "SingletonLibrary.h"
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()
@@ -31,11 +32,11 @@ void UMapComponent::UpdateSelfOnMap()
 	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
 		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
-		UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", *GetOwner()->GetName());
+		UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", GetOwner());
 	}
 #endif
 
-	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", *GetOwner()->GetName());
+	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", GetOwner());
 }
 
 void UMapComponent::OnComponentCreated()
@@ -54,7 +55,7 @@ void UMapComponent::OnComponentCreated()
 	// Push owner to regenerated TMap
 	USingletonLibrary::GetLevelMap(GetWorld())->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 
-	UE_LOG_STR("OnComponentCreated: %s", *GetOwner()->GetName());
+	UE_LOG_STR("OnComponentCreated: %s", GetOwner());
 }
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
@@ -66,7 +67,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 			USingletonLibrary::GetLevelMap(GetWorld())->charactersOnMap_.Contains(character))
 		{
 			USingletonLibrary::GetLevelMap(GetWorld())->charactersOnMap_.Remove(character);
-			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", *GetOwner()->GetName());
+			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", GetOwner());
 		}
 
 // Update AI renders after destroying obj from map
@@ -74,11 +75,11 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		if (GetWorld()->HasBegunPlay() == false)  // for editor only
 		{
 			USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
-			UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", *GetOwner()->GetName());
+			UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", GetOwner());
 		}
 #endif
 
-		UE_LOG_STR("OnComponentDestroyed: %s was destroyed", *GetOwner()->GetName());
+		UE_LOG_STR("OnComponentDestroyed: %s was destroyed", GetOwner());
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
