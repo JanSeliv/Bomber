@@ -4,28 +4,32 @@
 
 #include "Cell.h"
 #include "GameFramework/Actor.h"
-#include "SingletonLibrary.h"
 
 #include "GeneratedMap.generated.h"
 
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EPathTypesEnum : uint8
 {
-	Explosion = 1 << 0,  // to the first wall
-	Free = 1 << 1,		 // to the first obstacle
-	Safe = 1 << 2,		 // to the first obstacle+explosion
-	Secure = 1 << 3		 // to the first obstacle+explosion+player
+	Explosion = 1 << 0,
+	// to the first wall
+	Free = 1 << 1,
+	// to the first obstacle
+	Safe = 1 << 2,
+	// to the first obstacle+explosion
+	Secure = 1 << 3  // to the first obstacle+explosion+player
 };
 
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EActorTypeEnum : uint8
 {
-	Floor = 1 << 0,
-	Wall = 1 << 1,  // obstacle
-	Box = 1 << 2,   // obstacle
-	Bomb = 1 << 3,  // obstacle
-	Item = 1 << 4,
-	Player = 1 << 5
+	Wall = 1 << 0,
+	// obstacle
+	Box = 1 << 1,
+	// obstacle
+	Bomb = 1 << 2,
+	// obstacle
+	Item = 1 << 3,
+	Player = 1 << 4
 };
 
 UCLASS()
@@ -38,6 +42,7 @@ public:
 	AGeneratedMap();
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPushNongeneratedToMap);
+
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "C++")
 	FPushNongeneratedToMap onActorsUpdatedDelegate;
 
@@ -50,12 +55,12 @@ public:
 	TSet<FCell> FilterCellsByTypes(const TSet<FCell>& keys, const EActorTypeEnum& filterTypes, const class ACharacter* excludePlayer) const;
 
 	// Spawn actor by type
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	AActor* AddActorOnMap(const FCell& cell, EActorTypeEnum actorType);
 
 	// Blueprint-overriding AddActorOnMap, update actor by obj
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void AddActorOnMapByObj(const FCell& cell, const AActor* updateActor);
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void AddActorOnMapByObj(const FCell& cell, AActor* updateActor);
 
 	// Destroy all actors from array of cells
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
@@ -69,13 +74,13 @@ protected:
 	friend struct FCell;
 
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	void BeginPlay() override;
 
 	// Called when an instance of this class is placed (in editor) or spawned.
-	virtual void OnConstruction(const FTransform& Transform) override;
+	void OnConstruction(const FTransform& Transform) override;
 
 	// Called when this actor is explicitly being destroyed
-	virtual void Destroyed() override;
+	void Destroyed() override;
 
 	// Create LevelMap on Scene and fill TMap
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
