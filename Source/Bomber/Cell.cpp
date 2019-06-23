@@ -5,14 +5,15 @@
 #include "Bomber.h"
 #include "GameFramework/Actor.h"
 #include "GeneratedMap.h"
+#include "SingletonLibrary.h"
 
-FCell::FCell(const AActor* actor)
+FCell::FCell(const AActor* Actor)
 {
-	check(actor);
-	AGeneratedMap* const levelMap = USingletonLibrary::GetLevelMap(actor->GetWorld());
+	check(Actor);
+	AGeneratedMap* const levelMap = USingletonLibrary::GetLevelMap(Actor->GetWorld());
 	if (levelMap == nullptr)  // levelMap is null
 	{
 		return;
 	}
-	this->location = levelMap->GetNearestCell(actor).location;
+	this->Location = levelMap->GetNearestCell(Actor).Location;
 }

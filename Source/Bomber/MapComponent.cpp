@@ -5,6 +5,7 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "MyCharacter.h"
+#include "SingletonLibrary.h"
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()
@@ -16,57 +17,57 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	if (ISVALID(GetOwner()) == false							   // owner is not valid
+	if (IS_VALID(GetOwner()) == false							   // owner is not valid
 		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null
 	{
 		return;
 	}
 
-	cell = FCell(GetOwner());  // Find new location at dragging and update-delegate
+	Cell = FCell(GetOwner());  // Find new Location at dragging and update-delegate
 
-	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(cell, GetOwner());
+	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(Cell, GetOwner());
 
 // Update renders after adding obj on map
 #if WITH_EDITOR
 	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
 		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
-		UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", *GetOwner()->GetName());
+		UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", GetOwner());
 	}
 #endif
 
-	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", *GetOwner()->GetName());
+	UE_LOG_STR("UpdateSelfOnMap: %s UPDATED", GetOwner());
 }
 
 void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-	if (ISVALID(GetOwner()) == false							   // owner is not valid
+	if (IS_VALID(GetOwner()) == false							   // owner is not valid
 		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null
 	{
 		return;
 	}
 
-	// Shouldt call OnConstruction on drag events
+	// Should not call OnConstruction on drag events
 	GetOwner()->bRunConstructionScriptOnDrag = false;
 
 	// Push owner to regenerated TMap
-	USingletonLibrary::GetLevelMap(GetWorld())->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
+	USingletonLibrary::GetLevelMap(GetWorld())->OnActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 
-	UE_LOG_STR("OnComponentCreated: %s", *GetOwner()->GetName());
+	UE_LOG_STR("OnComponentCreated: %s", GetOwner());
 }
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr)
 	{
-		const ACharacter* character = Cast<ACharacter>(GetOwner());
-		if (character != nullptr &&
-			USingletonLibrary::GetLevelMap(GetWorld())->charactersOnMap_.Contains(character))
+		const ACharacter* Character = Cast<ACharacter>(GetOwner());
+		if (Character != nullptr &&
+			USingletonLibrary::GetLevelMap(GetWorld())->CharactersOnMap_.Contains(Character))
 		{
-			USingletonLibrary::GetLevelMap(GetWorld())->charactersOnMap_.Remove(character);
-			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", *GetOwner()->GetName());
+			USingletonLibrary::GetLevelMap(GetWorld())->CharactersOnMap_.Remove(Character);
+			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", GetOwner());
 		}
 
 // Update AI renders after destroying obj from map
@@ -74,11 +75,11 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		if (GetWorld()->HasBegunPlay() == false)  // for editor only
 		{
 			USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
-			UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", *GetOwner()->GetName());
+			UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", GetOwner());
 		}
 #endif
 
-		UE_LOG_STR("OnComponentDestroyed: %s was destroyed", *GetOwner()->GetName());
+		UE_LOG_STR("OnComponentDestroyed: %s was destroyed", GetOwner());
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);

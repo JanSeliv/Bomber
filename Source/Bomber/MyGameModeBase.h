@@ -6,15 +6,15 @@
 #include "MyGameModeBase.generated.h"
 
 UCLASS()
-class BOMBER_API AMyGameModeBase : public AGameModeBase
+class BOMBER_API AMyGameModeBase final : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
 	AMyGameModeBase();
 
-	void BeginPlay() override;
+	void BeginPlay() final;
 
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void PossessController(AController* controller, APawn* pawn) const;
+	void PossessController(AController* Controller, APawn* Pawn) const;
 };

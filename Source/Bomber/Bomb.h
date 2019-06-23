@@ -8,7 +8,7 @@
 #include "Bomb.generated.h"
 
 UCLASS()
-class BOMBER_API ABomb : public AActor
+class BOMBER_API ABomb final : public AActor
 {
 	GENERATED_BODY()
 
@@ -16,43 +16,43 @@ public:
 	// Sets default values for this actor's properties
 	ABomb();
 
-	void InitializeBombProperties(int32* outBombN, const int32& fireN, const int32& playerID);
+	void InitializeBombProperties(int32* OutBombN, const int32& FireN, const int32& CharacterID);
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UMapComponent* mapComponent;
+	class UMapComponent* MapComponent;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	class UParticleSystem* explosionParticle;
+	class UParticleSystem* ExplosionParticle;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UStaticMeshComponent* bombMesh;
+	class UStaticMeshComponent* BombMesh;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	TSet<FCell> explosionCells_;
+	TSet<FCell> ExplosionCells_;
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void BeginPlay() final;
 
 	//Called when an instance of this class is placed (in editor) or spawned.
-	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void OnConstruction(const FTransform& Transform) final;
 
 	// Called when this actor is explicitly being destroyed
-	virtual void Destroyed() override;
+	virtual void Destroyed() final;
 
 	/** 
 	 *	Event when an actor no longer overlaps another actor and can to block collision. 
 	 *	@note Components on both this and the other Actor must have bGenerateOverlapEvents set to true to generate overlap events.
 	 */
-	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) final;
 
 	UPROPERTY(EditAnywhere, Category = "C++")
-	float lifeSpan_ = 2.f;
+	float LifeSpan_ = 2.f;
 
 	// Amount of character bombs at current time
-	int32* characterBombN_;
+	int32* CharacterBombN_;
 
 	// All used bomb materials
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	TArray<class UMaterialInterface*> bombMaterials_;
+	TArray<class UMaterialInterface*> BombMaterials_;
 };

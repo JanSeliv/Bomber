@@ -3,14 +3,13 @@
 #include "MyGameModeBase.h"
 
 #include "Bomber.h"
-#include "MyHUD.h"
 #include "MyPlayerController.h"
 
 AMyGameModeBase::AMyGameModeBase()
 {
 	//tell custom game mode to use custom defaults
 	PlayerControllerClass = AMyPlayerController::StaticClass();
-	DefaultPawnClass = 0;
+	DefaultPawnClass = nullptr;
 	HUDClass = nullptr;  //AMyHUD::StaticClass();
 }
 
@@ -19,10 +18,10 @@ void AMyGameModeBase::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AMyGameModeBase::PossessController(AController* controller, APawn* pawn) const
+void AMyGameModeBase::PossessController(AController* Controller, APawn* Pawn) const
 {
-	controller->Possess(pawn);
+	Controller->Possess(Pawn);
 
 	//focus to game
-	Cast<APlayerController>(controller)->SetInputMode(FInputModeGameOnly());
+	Cast<APlayerController>(Controller)->SetInputMode(FInputModeGameOnly());
 }

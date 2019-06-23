@@ -8,6 +8,7 @@
 #include "MapComponent.h"
 #include "MyCharacter.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
@@ -21,65 +22,65 @@ ABomb::ABomb()
 	sceneComponent->SetMobility(EComponentMobility::Movable);
 	SetRootComponent(sceneComponent);
 
-	// Initializeze bomb mesh
-	bombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bomb Mesh"));
-	bombMesh->SetupAttachment(sceneComponent);
-	bombMesh->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
+	// Initialize bomb mesh
+	BombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bomb Mesh"));
+	BombMesh->SetupAttachment(sceneComponent);
+	BombMesh->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
 
 	// Initialize map component
-	mapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	// Initialize explosion particle component
-	ConstructorHelpers::FObjectFinder<UParticleSystem> particleFinder(TEXT("/Game/VFX_Toolkit_V1/ParticleSystems/356Days/Par_CrescentBoom2_OLD"));
-	explosionParticle = CreateDefaultSubobject<UParticleSystem>(TEXT("Explosion Particle"));
-	if (particleFinder.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleFinder(TEXT("/Game/VFX_Toolkit_V1/ParticleSystems/356Days/Par_CrescentBoom2_OLD"));
+	ExplosionParticle = CreateDefaultSubobject<UParticleSystem>(TEXT("Explosion Particle"));
+	if (ParticleFinder.Succeeded())
 	{
-		explosionParticle = particleFinder.Object;
+		ExplosionParticle = ParticleFinder.Object;
 	}
 
 	// Find materials
-	const TArray<TCHAR*> pathes{
+	const TArray<TCHAR*> Pathes{
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Yellow"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Blue"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Silver"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Pink")};
-	for (const auto& path : pathes)
+	for (const auto& Path : Pathes)
 	{
-		ConstructorHelpers::FObjectFinder<UMaterialInterface> materialFinder(path);
-		if (materialFinder.Succeeded() == true)
+		ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(Path);
+		if (MaterialFinder.Succeeded() == true)
 		{
-			bombMaterials_.Add(materialFinder.Object);
+			BombMaterials_.Add(MaterialFinder.Object);
 		}
 	}
 }
 
 void ABomb::InitializeBombProperties(
-	int32* outBombN, const int32& fireN, const int32& characterID)
+	int32* OutBombN, const int32& FireN, const int32& CharacterID)
 {
 	if (USingletonLibrary::GetLevelMap(GetWorld()) == nullptr  // levelMap is null
-		|| ISVALID(mapComponent) == false)					   // Map component is not valid
+		|| IS_VALID(MapComponent) == false)					   // Map component is not valid
 	{
 		return;
 	}
 
-	characterBombN_ = outBombN;
+	CharacterBombN_ = OutBombN;
 
 	// Set material
-	if (ISVALID(bombMesh) == true)
+	if (IS_VALID(BombMesh) == true)
 	{
-		const int32 BOMB_MATERIAL_NO = characterID % bombMaterials_.Num();
-		bombMesh->SetMaterial(0, bombMaterials_[BOMB_MATERIAL_NO]);
+		const int32 Bomb_Material_No = FMath::Abs(CharacterID) % BombMaterials_.Num();
+		BombMesh->SetMaterial(0, BombMaterials_[Bomb_Material_No]);
 	}
 
 	// Update explosion information
-	explosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(mapComponent->cell, fireN, EPathTypesEnum::Explosion);
+	ExplosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(MapComponent->Cell, FireN, EPathTypesEnum::Explosion);
 }
 
 // Called when the game starts or when spawned
 void ABomb::BeginPlay()
 {
 	Super::BeginPlay();
-	SetLifeSpan(lifeSpan_);
+	SetLifeSpan(LifeSpan_);
 }
 
 void ABomb::OnConstruction(const FTransform& Transform)
@@ -87,22 +88,22 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	if (USingletonLibrary::GetLevelMap(GetWorld()) == nullptr  // levelMap is null
-		|| ISVALID(mapComponent) == false)					   //map component is not valid
+		|| IS_VALID(MapComponent) == false)					   //map component is not valid
 	{
 		return;
 	}
 
 	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
 	{
-		mapComponent->UpdateSelfOnMap();
+		MapComponent->UpdateSelfOnMap();
 	}
 
-// Updating own explosions for nongenerated gragged bombs in PIE
+// Updating own explosions for non generated dragged bombs in PIE
 #if WITH_EDITOR
 	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
-		explosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(mapComponent->cell, 1, EPathTypesEnum::Explosion);
-		UE_LOG_STR("PIE: %s updated own explosions", *GetName());
+		ExplosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(MapComponent->Cell, 1, EPathTypesEnum::Explosion);
+		UE_LOG_STR("PIE: %s updated own explosions", this);
 	}
 #endif
 }
@@ -110,24 +111,24 @@ void ABomb::OnConstruction(const FTransform& Transform)
 void ABomb::Destroyed()
 {
 	if (USingletonLibrary::GetLevelMap(GetWorld()) == nullptr  // levelMap is null
-		|| ISVALID(mapComponent) == false)					   //map component is not valid
+		|| IS_VALID(MapComponent) == false)					   //map component is not valid
 	{
 		return;
 	}
 
-	if (characterBombN_ != nullptr)
+	if (CharacterBombN_ != nullptr)
 	{
-		(*characterBombN_)++;  // Return to the character +1 of bombs
+		(*CharacterBombN_)++;  // Return to the character +1 of bombs
 	}
 
 	// Spawn emitters
-	for (const FCell& cell : explosionCells_)
+	for (const FCell& Cell : ExplosionCells_)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionParticle, FTransform(cell.location));
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, FTransform(Cell.Location));
 	}
 
 	// Destroy all actors from array of cells
-	USingletonLibrary::GetLevelMap(GetWorld())->DestroyActorsFromMap(explosionCells_);
+	USingletonLibrary::GetLevelMap(GetWorld())->DestroyActorsFromMap(ExplosionCells_);
 
 	Super::Destroyed();
 }

@@ -5,75 +5,100 @@
 #include "Bomber.h"
 #include "Cell.h"
 #include "GameFramework/Character.h"
+#include "Math/UnrealMathUtility.h"
+#include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
-	// Shouldt call OnConsturction on drag events
+	// Should not call OnConstruction on drag events
 	bRunConstructionScriptOnDrag = false;
 
 	// Find materials
-	const TArray<TCHAR*> pathes{
-		TEXT("/Game/Bomber/Assets/floor"),			//EPathTypesEnum::Floor
+	const TArray<TCHAR*> Pathes{
 		TEXT("/Game/Bomber/Assets/Wall"),			//EPathTypesEnum::Wall
 		TEXT("/Game/Bomber/Assets/Box"),			//EPathTypesEnum::Box
 		TEXT("/Game/Bomber/Blueprints/BpBomb"),		//EPathTypesEnum::Bomb
 		TEXT("/Game/Bomber/Blueprints/BpItem"),		//EPathTypesEnum::Item
 		TEXT("/Game/Bomber/Blueprints/BpPlayer")};  //EPathTypesEnum::Player
-	for (int32 i = 0; i < pathes.Num(); ++i)
+	for (int32 i = 0; i < Pathes.Num(); ++i)
 	{
-		ConstructorHelpers::FClassFinder<AActor> classFinder(pathes[i]);
-		typesByClassesMap_.Add(
-			EActorTypeEnum(1 << i), (classFinder.Succeeded() ? classFinder.Class : nullptr));
+		ConstructorHelpers::FClassFinder<AActor> ClassFinder(Pathes[i]);
+		TypesByClassesMap_.Add(
+			EActorTypeEnum(1 << i), (ClassFinder.Succeeded() ? ClassFinder.Class : nullptr));
 	}
 }
 
-TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& cell, int32 sideLength, EPathTypesEnum pathfinder) const
+TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& Cell, int32 SideLength, EPathTypesEnum Pathfinder) const
 {
-	TSet<FCell> foundedLocations;
-	return foundedLocations;
+	TSet<FCell> FoundedLocations;
+	return FoundedLocations;
 }
 
-TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& keys, const EActorTypeEnum& filterTypes, const ACharacter* excludePlayer) const
+TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& Keys, const EActorTypeEnum& FilterTypes, const ACharacter* excludePlayer) const
 {
-	TSet<FCell> foundedLocations;
-	return foundedLocations;
+	TSet<FCell> FoundedLocations;
+	return FoundedLocations;
 }
 
-AActor* AGeneratedMap::AddActorOnMap_Implementation(const FCell& cell, EActorTypeEnum actorType)
+AActor* AGeneratedMap::AddActorOnMap(const FCell& Cell, const EActorTypeEnum& ActorType)
 {
-	return nullptr;
+	const TSubclassOf<AActor> ActorClass = *TypesByClassesMap_.Find(ActorType);
+	UChildActorComponent* ChildActorComponent = NewObject<UChildActorComponent>(this);
+	ChildActorComponent->SetupAttachment(GetRootComponent());
+	ChildActorComponent->bEditableWhenInherited = true;
+	ChildActorComponent->RegisterComponent();
+	ChildActorComponent->SetChildActorClass(ActorClass);
+	ChildActorComponent->CreateChildActor();
+
+	AddActorOnMapByObj(Cell, ChildActorComponent->GetChildActor());
+	return ChildActorComponent->GetChildActor();
 }
 
-void AGeneratedMap::AddActorOnMapByObj_Implementation(const FCell& cell, const AActor* updateActor)
+void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 {
-	if (ISVALID(updateActor) == false			   // Updating actor is not valid
-		|| GeneratedMap_.Contains(cell) == false)  // Not existing cell
+	if (IS_VALID(UpdateActor) == false			   // Updating actor is not valid
+		|| GeneratedMap_.Contains(Cell) == false)  // Not existing cell
 	{
 		return;
 	}
 
-	// if it is character, add to array of characters
-	const ACharacter* updateCharacter = Cast<ACharacter>(updateActor);
-	if (updateCharacter != nullptr)
+	// Add actor to specific array
+	const ACharacter* UpdateCharacter = Cast<ACharacter>(UpdateActor);
+	if (UpdateCharacter != nullptr)  // if it is character, add to array of characters
 	{
-		charactersOnMap_.Add(updateCharacter);  // Add this character
+		CharactersOnMap_.Add(UpdateCharacter);  // Add this character
 	}
-	else  // else if it is not the floor, add to TMap
-		if (~(int32)EActorTypeEnum::Floor & (int32)*typesByClassesMap_.FindKey(updateActor->GetClass()))
+	else  // else if this class can be added
+		if (TypesByClassesMap_.FindKey(UpdateActor->GetClass()) != nullptr)
 	{
-		const FCell* cellOfExistingActor = GeneratedMap_.FindKey(updateActor);
-		if (cellOfExistingActor != nullptr && cellOfExistingActor->location != cell.location)
+		const FCell* cellOfExistingActor = GeneratedMap_.FindKey(UpdateActor);
+		if (cellOfExistingActor != nullptr && cellOfExistingActor->Location != Cell.Location)
 		{
 			GeneratedMap_.Add(*cellOfExistingActor);  // remove this actor from previous cell
-			UE_LOG_STR("AddActorOnMapByObj: %s was existed", *updateActor->GetFName().ToString());
+			UE_LOG_STR("AddActorOnMapByObj: %s was existed", UpdateActor);
 		}
-		GeneratedMap_.Add(cell, updateActor);  // Add this actor to his cell
+		GeneratedMap_.Add(Cell, UpdateActor);  // Add this actor to his cell
 	}
+
+	UpdateActor->GetRootComponent()->SetAbsolute(true, true, true);
+
+	// Locate actor on cell
+	const FRotator Rotator{0.f, FMath::RandRange(int32(0), int32(3)) * 90.f, 0.f};
+	const FVector Scale{1.f, 1.f, 1.f};
+	UpdateActor->SetActorTransform(FTransform(Rotator, Cell.Location, Scale));
+
+	// Attach non generated dragged actor
+	if (UpdateActor->IsChildActor() == false)
+	{
+		UpdateActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+	}
+
+	UE_LOG_STR("AddActorOnMapByObj: %s ADDED", UpdateActor);
 }
 
-void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& keys)
+void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& Keys)
 {
 }
 
@@ -86,15 +111,15 @@ void AGeneratedMap::BeginPlay()
 	USingletonLibrary::GetSingleton()->levelMap_ = this;
 
 	// fix null keys
-	charactersOnMap_.Compact();
-	charactersOnMap_.Shrink();
+	CharactersOnMap_.Compact();
+	CharactersOnMap_.Shrink();
 
-	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", *this->GetName());
+	UE_LOG_STR("AGeneratedMap::BeginPlay: %s", this);
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
-	if (ISTRANSIENT(this) == true)
+	if (IS_TRANSIENT(this) == true)
 	{
 		return;
 	}
@@ -105,11 +130,11 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 void AGeneratedMap::Destroyed()
 {
 	// Destroying attached actors
-	TArray<AActor*> attachedActors;
-	GetAttachedActors(attachedActors);
-	for (AActor* attachedActor : attachedActors)
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+	for (AActor* AttachedActor : AttachedActors)
 	{
-		attachedActor->Destroy();
+		AttachedActor->Destroy();
 	}
 
 	Super::Destroyed();
@@ -117,6 +142,14 @@ void AGeneratedMap::Destroyed()
 
 void AGeneratedMap::GenerateLevelMap_Implementation()
 {
+	TArray<AActor*> ChildActors;
+	GetAllChildActors(ChildActors);
+
+	for (int32 i = ChildActors.Num() - 1; i >= 0; --i)
+	{
+		ChildActors[i]->Destroy();
+	}
+
 	GeneratedMap_.Empty();
-	charactersOnMap_.Empty();
+	CharactersOnMap_.Empty();
 }

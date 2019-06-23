@@ -11,24 +11,23 @@ struct FPowerUp
 {
 	GENERATED_BODY()
 
-public:
 	FPowerUp(){};
 
 	// Increase the movement speed of the character
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int skateN = 1;
+	int SkateN = 1;
 
 	// Increase the number of bombs that can be set at one time
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int bombN = 1;
+	int BombN = 1;
 
 	//  Increase the bomb blast radius
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int fireN = 1;
+	int FireN = 1;
 };
 
 UCLASS()
-class BOMBER_API AMyCharacter : public ACharacter
+class BOMBER_API AMyCharacter final : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -37,7 +36,7 @@ public:
 	AMyCharacter();
 
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
@@ -48,23 +47,23 @@ public:
 	void UpdateAI();
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UMapComponent* mapComponent;
+	class UMapComponent* MapComponent;
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void BeginPlay() final;
 
 	//Called when an instance of this class is placed (in editor) or spawned.
-	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void OnConstruction(const FTransform& Transform) final;
 
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SpawnBomb();
 
 	// Count of items that affect the abilities of a player during gameplay
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	FPowerUp powerups_;
+	FPowerUp Powerups_;
 	friend class AItem;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	int32 characterID_ = -1;
+	int32 CharacterID_ = -1;
 };

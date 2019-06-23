@@ -13,11 +13,11 @@ USingletonLibrary::USingletonLibrary()
 
 USingletonLibrary* const USingletonLibrary::GetSingleton()
 {
-	if (IsValid(GEngine) == false)
+	if (IS_VALID(GEngine) == false)
 		return nullptr;
 	USingletonLibrary* singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
 
-	if (IsValid(singleton) == false)
+	if (IS_VALID(singleton) == false)
 		return nullptr;
 	return singleton;
 }
@@ -33,15 +33,15 @@ AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 
 // Find editor level map
 #if WITH_EDITOR
-	if (world->HasBegunPlay() == false					 // for editor only
-		&& ISVALID(GetSingleton()->levelMap_) == false)  // current map is not valid
+	if (world->HasBegunPlay() == false					  // for editor only
+		&& IS_VALID(GetSingleton()->levelMap_) == false)  // current map is not valid
 	{
 		TArray<AActor*> levelMapArray;
 		UGameplayStatics::GetAllActorsOfClass(world, AGeneratedMap::StaticClass(), levelMapArray);
 		if (levelMapArray.Num() > 0)
 		{
 			GetSingleton()->levelMap_ = Cast<AGeneratedMap>(levelMapArray[0]);
-			UE_LOG_STR("SingletonLibrary:GetLevelMap: %s UPDATED", *levelMapArray[0]->GetName())
+			UE_LOG_STR("SingletonLibrary:GetLevelMap: %s UPDATED", levelMapArray[0])
 		}
 	}
 #endif

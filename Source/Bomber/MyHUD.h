@@ -9,7 +9,7 @@
  * 
  */
 UCLASS()
-class BOMBER_API AMyHUD : public AHUD
+class BOMBER_API AMyHUD final : public AHUD
 {
 	GENERATED_BODY()
 
@@ -17,8 +17,8 @@ public:
 	// Sets default values for this HUD's properties
 	AMyHUD();
 
-	void BeginPlay() override;
+	virtual void BeginPlay() final;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Ñ++")
-	class UUserWidget* umgCurrentObj;
+	class UUserWidget* UmgCurrentObj;
 };
