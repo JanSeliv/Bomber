@@ -7,7 +7,7 @@
 
 AMyPlayerController::AMyPlayerController()
 {
-	//use level 2D-camera withous switches
+	// Use level 2D-camera without switches
 	bAutoManageActiveCameraTarget = false;
 }
 
@@ -21,5 +21,5 @@ void AMyPlayerController::SetupInputComponent()
 
 	MyCustomHUD = GetWorld()->SpawnActor<AMyHUD>(AMyHUD::StaticClass());
 	//Call UInGameUserWidget::ShowInGameState function when the escape was pressed
-	InputComponent->BindAction("EscapeEvent", IE_Pressed, Cast<UInGameUserWidget>(MyCustomHUD->umgCurrentObj), &UInGameUserWidget::ShowInGameState);
+	InputComponent->BindAction("EscapeEvent", IE_Pressed, Cast<UInGameUserWidget>(MyCustomHUD->UmgCurrentObj), &UInGameUserWidget::ShowInGameState);
 }

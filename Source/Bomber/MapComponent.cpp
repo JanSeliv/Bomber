@@ -17,15 +17,15 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::UpdateSelfOnMap()
 {
-	if (ISVALID(GetOwner()) == false							   // owner is not valid
+	if (IS_VALID(GetOwner()) == false							   // owner is not valid
 		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null
 	{
 		return;
 	}
 
-	cell = FCell(GetOwner());  // Find new location at dragging and update-delegate
+	Cell = FCell(GetOwner());  // Find new Location at dragging and update-delegate
 
-	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(cell, GetOwner());
+	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(Cell, GetOwner());
 
 // Update renders after adding obj on map
 #if WITH_EDITOR
@@ -43,17 +43,17 @@ void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-	if (ISVALID(GetOwner()) == false							   // owner is not valid
+	if (IS_VALID(GetOwner()) == false							   // owner is not valid
 		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null
 	{
 		return;
 	}
 
-	// Shouldt call OnConstruction on drag events
+	// Should not call OnConstruction on drag events
 	GetOwner()->bRunConstructionScriptOnDrag = false;
 
 	// Push owner to regenerated TMap
-	USingletonLibrary::GetLevelMap(GetWorld())->onActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
+	USingletonLibrary::GetLevelMap(GetWorld())->OnActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 
 	UE_LOG_STR("OnComponentCreated: %s", GetOwner());
 }
@@ -62,11 +62,11 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr)
 	{
-		const ACharacter* character = Cast<ACharacter>(GetOwner());
-		if (character != nullptr &&
-			USingletonLibrary::GetLevelMap(GetWorld())->charactersOnMap_.Contains(character))
+		const ACharacter* Character = Cast<ACharacter>(GetOwner());
+		if (Character != nullptr &&
+			USingletonLibrary::GetLevelMap(GetWorld())->CharactersOnMap_.Contains(Character))
 		{
-			USingletonLibrary::GetLevelMap(GetWorld())->charactersOnMap_.Remove(character);
+			USingletonLibrary::GetLevelMap(GetWorld())->CharactersOnMap_.Remove(Character);
 			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", GetOwner());
 		}
 

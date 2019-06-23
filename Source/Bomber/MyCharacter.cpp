@@ -17,15 +17,14 @@ AMyCharacter::AMyCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Initialize mapComponent
-	mapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	// Initialize MapComponent
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	// Set skeletal mesh
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
-		skeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
-	if (skeletalMeshFinder.Succeeded())  // Check to make sure the default skeletal mesh for character was actually found
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
+	if (SkeletalMeshFinder.Succeeded())  // Check to make sure the default skeletal mesh for character was actually found
 	{
-		GetMesh()->SetSkeletalMesh(skeletalMeshFinder.Object);  // Set default skeletal mesh for character
+		GetMesh()->SetSkeletalMesh(SkeletalMeshFinder.Object);  // Set default skeletal mesh for character
 		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
 	}
 }
@@ -40,19 +39,19 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (ISVALID(mapComponent) == false)  // Map component is not valid
+	if (IS_VALID(MapComponent) == false)  // Map component is not valid
 	{
 		return;
 	}
 
 	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
 	{
-		mapComponent->UpdateSelfOnMap();
+		MapComponent->UpdateSelfOnMap();
 	}
 
 	// Raise up character over cell
-	const float ACTOR_HEIGHT = GetRootComponent()->Bounds.BoxExtent.Z;
-	AddActorWorldOffset(FVector(0.f, 0.f, ACTOR_HEIGHT));
+	const float ActorHeight = GetRootComponent()->Bounds.BoxExtent.Z;
+	AddActorWorldOffset(FVector(0.f, 0.f, ActorHeight));
 	SetActorRotation(FRotator(0, -90, 0));
 
 	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
@@ -70,23 +69,23 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 
 void AMyCharacter::SpawnBomb()
 {
-	if (!ISVALID(USingletonLibrary::GetLevelMap(GetWorld()))  // level map is not valid
-		|| powerups_.fireN <= 0								  // Null length of explosion
-		|| powerups_.bombN <= 0								  // No more bombs
-		|| HasActorBegunPlay() == false						  // Shouldt spawn bomb in PIE
-		|| ISVALID(mapComponent) == false)					  // Map component is not valid
+	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // level map is not valid
+		|| Powerups_.FireN <= 0								   // Null length of explosion
+		|| Powerups_.BombN <= 0								   // No more bombs
+		|| HasActorBegunPlay() == false						   // Should not spawn bomb in PIE
+		|| IS_VALID(MapComponent) == false)					   // Map component is not valid
 	{
 		return;
 	}
 
 	// Spawn bomb
-	ABomb* const bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMap(FCell(this), EActorTypeEnum::Bomb));
+	ABomb* const Bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMap(FCell(this), EActorTypeEnum::Bomb));
 
 	// Update material of mesh
-	if (bomb != nullptr)
+	if (Bomb != nullptr)
 	{
-		bomb->InitializeBombProperties(&powerups_.bombN, powerups_.fireN, characterID_);
-		powerups_.bombN--;
+		Bomb->InitializeBombProperties(&Powerups_.BombN, Powerups_.FireN, CharacterID_);
+		Powerups_.BombN--;
 	}
 }
 

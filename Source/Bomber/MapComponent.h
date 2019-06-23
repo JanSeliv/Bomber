@@ -8,7 +8,7 @@
 #include "MapComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BOMBER_API UMapComponent : public UActorComponent
+class BOMBER_API UMapComponent final : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -21,16 +21,16 @@ public:
 	void UpdateSelfOnMap();
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	FCell cell;
+	FCell Cell;
 
 protected:
 	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */
-	void OnComponentCreated() override final;
+	virtual void OnComponentCreated() final;
 
 	/**
 	 * Called when a component is destroyed
 	 *
 	 * @param	bDestroyingHierarchy  - True if the entire component hierarchy is being torn down, allows avoiding expensive operations
 	 */
-	void OnComponentDestroyed(bool bDestroyingHierarchy) override final;
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
 };

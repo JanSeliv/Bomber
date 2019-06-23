@@ -12,8 +12,8 @@ AItem::AItem()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Initialize mapComponent
-	mapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	// Initialize MapComponent
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	OnActorBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
 }
@@ -28,25 +28,22 @@ void AItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (ISVALID(mapComponent) == false)  // Map component is not valid
+	if (IS_VALID(MapComponent) == false)  // Map component is not valid
 	{
 		return;
 	}
 
 	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
 	{
-		mapComponent->UpdateSelfOnMap();
+		MapComponent->UpdateSelfOnMap();
 	}
 }
 
-void AItem::OnItemBeginOverlap(AActor* overlappedItem, AActor* otherActor)
+void AItem::OnItemBeginOverlap(AActor* OverlappedItem, AActor* OtherActor)
 {
-	if (overlappedItem == this						   // self triggering
-		|| Cast<AMyCharacter>(otherActor) == nullptr)  // other actor is not myCharacter
+	if (OverlappedItem == this						   // self triggering
+		|| Cast<AMyCharacter>(OtherActor) == nullptr)  // other actor is not myCharacter
 	{
 		return;
 	}
-
-	AMyCharacter* character = Cast<AMyCharacter>(otherActor);
-	character->powerups_;
 }

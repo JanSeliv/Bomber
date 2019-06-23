@@ -8,7 +8,7 @@
 #include "SingletonLibrary.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API USingletonLibrary : public UBlueprintFunctionLibrary
+class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -35,9 +35,9 @@ public:
 
 	// The length between two cells
 	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "C++")
-	static const FORCEINLINE float CalculateCellsLength(const FCell& x, const FCell& y)
+	static const FORCEINLINE float CalculateCellsLength(const FCell& X, const FCell& Y)
 	{
-		return (fabsf((x.location - y.location).Size()) / GetFloorLength());
+		return (fabsf((X.Location - Y.Location).Size()) / GetFloorLength());
 	}
 
 	/* GeneratedMap funs*/
@@ -46,7 +46,6 @@ public:
 
 #if WITH_EDITORONLY_DATA
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAiWithRenderParam);
-
 	FUpdateAiWithRenderParam OnRenderAiUpdatedDelegate;
 #endif
 

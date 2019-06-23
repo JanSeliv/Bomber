@@ -11,19 +11,19 @@ struct FCell
 
 	FCell(){};
 
-	FCell(const AActor* actor);
+	explicit FCell(const AActor* Actor);
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	FVector location;
+	FVector Location;
 
-	bool operator==(const FCell& other) const
+	bool operator==(const FCell& Other) const
 	{
-		return (this->location == other.location);
+		return (this->Location == Other.Location);
 	}
 
 	// Hash Function
-	friend FORCEINLINE uint32 GetTypeHash(const FCell& other)
+	friend FORCEINLINE uint32 GetTypeHash(const FCell& Other)
 	{
-		return GetTypeHash(other.location);
+		return GetTypeHash(Other.Location);
 	}
 };
