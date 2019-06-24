@@ -58,8 +58,8 @@ AActor* AGeneratedMap::AddActorOnMap(const FCell& Cell, const EActorTypeEnum& Ac
 
 void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 {
-	if (IS_VALID(UpdateActor) == false			   // Updating actor is not valid
-		|| GeneratedMap_.Contains(Cell) == false)  // Not existing cell
+	if (IS_VALID(UpdateActor) == false			// Updating actor is not valid
+		|| GridArray_.Contains(Cell) == false)  // Not existing cell
 	{
 		return;
 	}
@@ -73,13 +73,13 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 	else  // else if this class can be added
 		if (TypesByClassesMap_.FindKey(UpdateActor->GetClass()) != nullptr)
 	{
-		const FCell* cellOfExistingActor = GeneratedMap_.FindKey(UpdateActor);
+		const FCell* cellOfExistingActor = GridArray_.FindKey(UpdateActor);
 		if (cellOfExistingActor != nullptr && cellOfExistingActor->Location != Cell.Location)
 		{
-			GeneratedMap_.Add(*cellOfExistingActor);  // remove this actor from previous cell
+			GridArray_.Add(*cellOfExistingActor);  // remove this actor from previous cell
 			UE_LOG_STR("AddActorOnMapByObj: %s was existed", UpdateActor);
 		}
-		GeneratedMap_.Add(Cell, UpdateActor);  // Add this actor to his cell
+		GridArray_.Add(Cell, UpdateActor);  // Add this actor to his cell
 	}
 
 	UpdateActor->GetRootComponent()->SetAbsolute(true, true, true);
@@ -150,6 +150,6 @@ void AGeneratedMap::GenerateLevelMap_Implementation()
 		ChildActors[i]->Destroy();
 	}
 
-	GeneratedMap_.Empty();
+	GridArray_.Empty();
 	CharactersOnMap_.Empty();
 }

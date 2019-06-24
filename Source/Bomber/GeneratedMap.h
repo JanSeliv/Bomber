@@ -36,7 +36,8 @@ enum class EActorTypeEnum : uint8
 };
 
 /**
- * 
+ * Level Map Actor on Scene that generates a grid of cells, and manages the actors
+ * @see USingletonLibrary::LevelMap_ reference to this actor
  */
 UCLASS()
 class BOMBER_API AGeneratedMap final : public AActor
@@ -44,22 +45,27 @@ class BOMBER_API AGeneratedMap final : public AActor
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
+	/**
+	 * Sets default values for this actor's properties
+	 * Fill an array with associative classes and generate the level map 
+	 * @see TypesByClasses_
+	 * @see GenerateLevelMap()
+	 */
 	AGeneratedMap();
 
 	/** @ingroup path_types
-	 *   
+	 * 
 	 * @param Cell 
 	 * @param SideLength 
 	 * @param Pathfinder 
-	 * @return 
+	 * @return Found cells
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++")
 	TSet<FCell> GetSidesCells(const FCell& Cell, int32 SideLength, EPathTypesEnum Pathfinder) const;
 
 	// Return TSet of actor cells by types
 	/**
-	 *   
+	 * 
 	 * @param Keys 
 	 * @param FilterTypes 
 	 * @param ExcludePlayer 
@@ -68,28 +74,32 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2))
 	TSet<FCell> FilterCellsByTypes(const TSet<FCell>& Keys, const EActorTypeEnum& FilterTypes, const class ACharacter* ExcludePlayer) const;
 
-	/** @defgroup actors_management
+	/** @ingroup actor_types
+	 * @defgroup actors_management Storing, adding and deleting actors
 	 * @{
-	 * @ingroup actor_types
-	 * Spawn actor by type
-	 * @param Cell 
-	 * @param ActorType 
-	 * @return 
+	 * Spawn specific actor by type on the given cell as child actor component of Level Map 
+	 * First step of adding actors to level map
+	 * @param Cell The location where the child actor will be standing on
+	 * @param ActorType Type of actor that will be spawned
+	 * @return Spawned child actor
+	 * @see AddACtorOnMapByObj(...)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	AActor* AddActorOnMap(const FCell& Cell, const EActorTypeEnum& ActorType);
 
 	// Blueprint-overriding AddActorOnMap, update actor by obj
 	/**
-	 *   
+	 * 
+	 * Second step of adding actors to level map
 	 * @param Cell 
-	 * @param UpdateActor 
+	 * @param UpdateActor
+	 * @see AddActorOnMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor);
 
 	/**
-	 * Destroy all actors from array of cells
+	 * Destroy all actors from container of cells
 	 * @param Keys An array of actors cells to be destroyed
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
@@ -100,8 +110,7 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "C++")
 	FPushNongeneratedToMap OnActorsUpdatedDelegate;
 
-	//  of spawned characters
-	/** 
+	/**
 	 * Container of unique characters
 	 * @see EActorTypeEnum::Player
 	 * @} 
@@ -110,20 +119,22 @@ public:
 	TSet<const class ACharacter*> CharactersOnMap_;
 
 protected:
-	friend struct FCell;
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() final;
 
 	// Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) final;
 
-	// Called when this actor is explicitly being destroyed
+	/**
+	 * Called when this actor is explicitly being destroyed
+	 */
 	virtual void Destroyed() final;
 
-	// Create LevelMap on Scene and fill TMap
-	/**
-	 *   
+	/** @ingroup actors_management
+	 * Generating the grid of cells and the actors on it
+	 * @see AGeneratedMap::GridArray_
+	 * @see AGeneratedMap::CharactersOnMap_
+	 * @see struct FCell: Makes a grid of cells
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void GenerateLevelMap();
@@ -138,15 +149,15 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DevelopmentOnly))
 	FCell GetNearestCell(const AActor* Actor);
 
-	/** Storage of cells and their actors
-	 *
+	/** @ingroup actors_management
+	 * Storage of cells and their actors
 	 * @see GenerateLevelMap()
 	 */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
-	TMap<FCell, const AActor*> GeneratedMap_;
+	TMap<FCell, const AActor*> GridArray_;
+	friend struct FCell;
 
-	/** 
-	 * @addtogroup actor_types
+	/** @ingroup actor_types
 	 * Type and its class as associated pairs 
 	 */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
