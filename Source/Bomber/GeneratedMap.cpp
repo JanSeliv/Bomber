@@ -17,11 +17,12 @@ AGeneratedMap::AGeneratedMap()
 
 	// Find materials
 	const TArray<TCHAR*> Pathes{
-		TEXT("/Game/Bomber/Assets/Wall"),			//EPathTypesEnum::Wall
-		TEXT("/Game/Bomber/Assets/Box"),			//EPathTypesEnum::Box
-		TEXT("/Game/Bomber/Blueprints/BpBomb"),		//EPathTypesEnum::Bomb
-		TEXT("/Game/Bomber/Blueprints/BpItem"),		//EPathTypesEnum::Item
-		TEXT("/Game/Bomber/Blueprints/BpPlayer")};  //EPathTypesEnum::Player
+		TEXT("/Game/Bomber/Assets/Wall"),		  //EPathTypesEnum::Wall
+		TEXT("/Game/Bomber/Assets/Box"),		  //EPathTypesEnum::Box
+		TEXT("/Game/Bomber/Blueprints/BpBomb"),   //EPathTypesEnum::Bomb
+		TEXT("/Game/Bomber/Blueprints/BpItem"),   //EPathTypesEnum::Item
+		TEXT("/Game/Bomber/Blueprints/BpPlayer")  //EPathTypesEnum::Player
+	};
 	for (int32 i = 0; i < Pathes.Num(); ++i)
 	{
 		ConstructorHelpers::FClassFinder<AActor> ClassFinder(Pathes[i]);
@@ -30,13 +31,19 @@ AGeneratedMap::AGeneratedMap()
 	}
 }
 
-TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(const FCell& Cell, int32 SideLength, EPathTypesEnum Pathfinder) const
+TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
+	const FCell& Cell,
+	int32 SideLength,
+	EPathTypesEnum Pathfinder) const
 {
 	TSet<FCell> FoundedLocations;
 	return FoundedLocations;
 }
 
-TSet<FCell> AGeneratedMap::FilterCellsByTypes_Implementation(const TSet<FCell>& Keys, const EActorTypeEnum& FilterTypes, const ACharacter* excludePlayer) const
+TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
+	const TSet<FCell>& Keys,
+	EActorTypeEnum FilterTypes,
+	const ACharacter* ExcludePlayer) const
 {
 	TSet<FCell> FoundedLocations;
 	return FoundedLocations;
@@ -73,10 +80,10 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 	else  // else if this class can be added
 		if (TypesByClassesMap_.FindKey(UpdateActor->GetClass()) != nullptr)
 	{
-		const FCell* cellOfExistingActor = GridArray_.FindKey(UpdateActor);
-		if (cellOfExistingActor != nullptr && cellOfExistingActor->Location != Cell.Location)
+		const FCell* CellOfExistingActor = GridArray_.FindKey(UpdateActor);
+		if (CellOfExistingActor != nullptr && CellOfExistingActor->Location != Cell.Location)
 		{
-			GridArray_.Add(*cellOfExistingActor);  // remove this actor from previous cell
+			GridArray_.Add(*CellOfExistingActor);  // remove this actor from previous cell
 			UE_LOG_STR("AddActorOnMapByObj: %s was existed", UpdateActor);
 		}
 		GridArray_.Add(Cell, UpdateActor);  // Add this actor to his cell
@@ -108,7 +115,7 @@ void AGeneratedMap::BeginPlay()
 	Super::BeginPlay();
 
 	// Update UEDPIE_LevelMap obj;
-	USingletonLibrary::GetSingleton()->levelMap_ = this;
+	USingletonLibrary::GetSingleton()->LevelMap_ = this;
 
 	// fix null keys
 	CharactersOnMap_.Compact();
@@ -123,6 +130,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	{
 		return;
 	}
+
 	//Regenerate map;
 	GenerateLevelMap();
 }
