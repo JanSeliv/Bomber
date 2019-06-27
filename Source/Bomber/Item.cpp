@@ -12,16 +12,19 @@ AItem::AItem()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// Initialize root component
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
-
-	OnActorBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
 }
 
 // Called when the game starts or when spawned
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
+
+	OnActorBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
 }
 
 void AItem::OnConstruction(const FTransform& Transform)

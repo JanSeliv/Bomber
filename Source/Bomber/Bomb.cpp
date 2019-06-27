@@ -17,14 +17,12 @@ ABomb::ABomb()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Initialize root components
-	USceneComponent* sceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	sceneComponent->SetMobility(EComponentMobility::Movable);
-	SetRootComponent(sceneComponent);
+	// Initialize root component
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
 	// Initialize bomb mesh
 	BombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bomb Mesh"));
-	BombMesh->SetupAttachment(sceneComponent);
+	BombMesh->SetupAttachment(RootComponent);
 	BombMesh->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
 
 	// Initialize map component

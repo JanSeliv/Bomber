@@ -43,17 +43,24 @@ void UMapComponent::OnComponentCreated()
 {
 	Super::OnComponentCreated();
 
-	if (IS_VALID(GetOwner()) == false							   // owner is not valid
-		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null
+	if (IS_VALID(GetOwner()) == false)  // owner is not valid
 	{
 		return;
 	}
 
+	GetOwner()->GetRootComponent()->SetMobility(EComponentMobility::Movable);
+
 	// Should not call OnConstruction on drag events
 	GetOwner()->bRunConstructionScriptOnDrag = false;
 
-	// Push owner to regenerated TMap
-	USingletonLibrary::GetLevelMap(GetWorld())->OnActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
+// Binds to updating on the Level Map
+#if WITH_EDITOR
+	if (GetWorld()->HasBegunPlay() == false				  // for editor only
+		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is valid
+	{
+		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
+	}
+#endif
 
 	UE_LOG_STR("OnComponentCreated: %s", GetOwner());
 }
