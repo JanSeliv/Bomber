@@ -48,8 +48,6 @@ void UMapComponent::OnComponentCreated()
 		return;
 	}
 
-	GetOwner()->GetRootComponent()->SetMobility(EComponentMobility::Movable);
-
 	// Should not call OnConstruction on drag events
 	GetOwner()->bRunConstructionScriptOnDrag = false;
 

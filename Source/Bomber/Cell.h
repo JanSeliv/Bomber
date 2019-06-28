@@ -9,8 +9,13 @@ struct FCell
 {
 	GENERATED_BODY()
 
+	/** Sets default values */
 	FCell(){};
 
+	/** @defgroup cell_functions Group with cell functions
+	 * 
+	 * @param Actor 
+	 */
 	explicit FCell(const AActor* Actor);
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)

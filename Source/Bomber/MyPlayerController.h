@@ -6,12 +6,11 @@
 #include "MyPlayerController.generated.h"
 
 UCLASS()
-class BOMBER_API AMyPlayerController : public APlayerController
+class BOMBER_API AMyPlayerController final : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
-	void testfun(int a, bool b);
 	AMyPlayerController();
 
 	void BeginPlay() override;

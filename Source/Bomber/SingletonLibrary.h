@@ -27,7 +27,7 @@ public:
 	 * @param Actor Finding the closest cell by actor
 	 * @return The found cell
 	 */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
 	static const FORCEINLINE FCell MakeCell(const AActor* Actor)
 	{
 		return FCell(Actor);

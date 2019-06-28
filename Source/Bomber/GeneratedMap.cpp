@@ -15,6 +15,11 @@ AGeneratedMap::AGeneratedMap()
 	// Should not call OnConstruction on drag events
 	bRunConstructionScriptOnDrag = false;
 
+	// Initialize root component
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+	RootComponent->SetRelativeScale3D(FVector(5.f, 5.f, 1.f));
+	RootComponent->SetMobility(EComponentMobility::Static);
+
 	// Find materials
 	const TArray<TCHAR*> Pathes{
 		TEXT("/Game/Bomber/Assets/Wall"),		  //EPathTypesEnum::Wall
@@ -33,8 +38,8 @@ AGeneratedMap::AGeneratedMap()
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 	const FCell& Cell,
-	int32 SideLength,
-	EPathTypesEnum Pathfinder) const
+	const int32 SideLength,
+	const EPathTypesEnum Pathfinder) const
 {
 	TSet<FCell> FoundedLocations;
 	return FoundedLocations;
@@ -42,25 +47,24 @@ TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 
 TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
 	const TSet<FCell>& Keys,
-	EActorTypeEnum FilterTypes,
+	const EActorTypeEnum FilterTypes,
 	const ACharacter* ExcludePlayer) const
 {
 	TSet<FCell> FoundedLocations;
 	return FoundedLocations;
 }
 
-AActor* AGeneratedMap::AddActorOnMap(const FCell& Cell, const EActorTypeEnum& ActorType)
+AActor* AGeneratedMap::AddActorOnMap(const FCell& Cell, const EActorTypeEnum ActorType)
 {
 	const TSubclassOf<AActor> ActorClass = *TypesByClassesMap_.Find(ActorType);
-	UChildActorComponent* ChildActorComponent = NewObject<UChildActorComponent>(this);
-	ChildActorComponent->SetupAttachment(GetRootComponent());
-	ChildActorComponent->bEditableWhenInherited = true;
-	ChildActorComponent->RegisterComponent();
-	ChildActorComponent->SetChildActorClass(ActorClass);
-	ChildActorComponent->CreateChildActor();
+	if (ActorClass == nullptr)  // is not valid class for generation
+	{
+		return nullptr;
+	}
 
-	AddActorOnMapByObj(Cell, ChildActorComponent->GetChildActor());
-	return ChildActorComponent->GetChildActor();
+	AActor* const SpawnedActor = GetWorld()->SpawnActor(ActorClass);
+	AddActorOnMapByObj(Cell, SpawnedActor);
+	return SpawnedActor;
 }
 
 void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
@@ -137,27 +141,35 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 void AGeneratedMap::Destroyed()
 {
-	// Destroying attached actors
-	TArray<AActor*> AttachedActors;
-	GetAttachedActors(AttachedActors);
-	for (AActor* AttachedActor : AttachedActors)
-	{
-		AttachedActor->Destroy();
-	}
+	//Destroy all attached actors and remove all elements of arrays
+	ClearLevelMap();
+
+	// Clear Singleton Level Map obj
+	USingletonLibrary::GetSingleton()->LevelMap_ = nullptr;
 
 	Super::Destroyed();
 }
 
-void AGeneratedMap::GenerateLevelMap_Implementation()
+void AGeneratedMap::ClearLevelMap()
 {
-	TArray<AActor*> ChildActors;
-	GetAllChildActors(ChildActors);
-
-	for (int32 i = ChildActors.Num() - 1; i >= 0; --i)
+	// Destroy all attached actors
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+	if (AttachedActors.Num() > 0)
 	{
-		ChildActors[i]->Destroy();
+		for (int32 i = AttachedActors.Num() - 1; i >= 0; --i)
+		{
+			AttachedActors[i]->Destroy();
+		}
+		UE_LOG(LogTemp, Warning, TEXT("ClearLevelMap: %i components left"), AttachedActors.Num());
 	}
 
+	// Remove all elements of arrays
 	GridArray_.Empty();
 	CharactersOnMap_.Empty();
+}
+
+void AGeneratedMap::GenerateLevelMap_Implementation()
+{
+	ClearLevelMap();
 }

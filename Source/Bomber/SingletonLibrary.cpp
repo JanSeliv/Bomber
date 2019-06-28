@@ -44,6 +44,10 @@ AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 			GetSingleton()->LevelMap_ = Cast<AGeneratedMap>(LevelMapArray[0]);
 			UE_LOG_STR("SingletonLibrary:GetLevelMap: %s UPDATED", LevelMapArray[0]);
 		}
+		else
+		{
+			return nullptr;
+		}
 	}
 #endif
 
