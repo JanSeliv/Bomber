@@ -3,7 +3,7 @@
 #include "SingletonLibrary.h"
 
 #include "Bomber.h"
-#include "Engine/Engine.h"
+#include "Engine.h"
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -13,19 +13,17 @@ USingletonLibrary::USingletonLibrary()
 
 USingletonLibrary* const USingletonLibrary::GetSingleton()
 {
-	if (IS_VALID(GEngine) == false)
+	if (GEngine == nullptr)
+	{
 		return nullptr;
-	USingletonLibrary* singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
+	}
 
-	if (IS_VALID(singleton) == false)
-		return nullptr;
-	return singleton;
+	return Cast<USingletonLibrary>(GEngine->GameSingleton);
 }
 
 AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 {
-	UWorld* const world = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
-	if (world == nullptr			   // World context is null
+	if (GEngine == nullptr			   // Global engine pointer is null
 		|| GetSingleton() == nullptr)  // Singleton is null
 	{
 		return nullptr;
@@ -33,18 +31,25 @@ AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 
 // Find editor level map
 #if WITH_EDITOR
-	if (world->HasBegunPlay() == false					  // for editor only
-		&& IS_VALID(GetSingleton()->levelMap_) == false)  // current map is not valid
+	UWorld* const World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
+
+	if (World != nullptr &&								  // World is null
+		World->HasBegunPlay() == false					  // for editor only
+		&& IS_VALID(GetSingleton()->LevelMap_) == false)  // current map is not valid
 	{
-		TArray<AActor*> levelMapArray;
-		UGameplayStatics::GetAllActorsOfClass(world, AGeneratedMap::StaticClass(), levelMapArray);
-		if (levelMapArray.Num() > 0)
+		TArray<AActor*> LevelMapArray;
+		UGameplayStatics::GetAllActorsOfClass(World, AGeneratedMap::StaticClass(), LevelMapArray);
+		if (LevelMapArray.Num() > 0)
 		{
-			GetSingleton()->levelMap_ = Cast<AGeneratedMap>(levelMapArray[0]);
-			UE_LOG_STR("SingletonLibrary:GetLevelMap: %s UPDATED", levelMapArray[0])
+			GetSingleton()->LevelMap_ = Cast<AGeneratedMap>(LevelMapArray[0]);
+			UE_LOG_STR("SingletonLibrary:GetLevelMap: %s UPDATED", LevelMapArray[0]);
+		}
+		else
+		{
+			return nullptr;
 		}
 	}
 #endif
 
-	return GetSingleton()->levelMap_;
+	return GetSingleton()->LevelMap_;
 }

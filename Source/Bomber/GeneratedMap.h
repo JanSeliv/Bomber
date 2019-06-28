@@ -37,7 +37,7 @@ enum class EActorTypeEnum : uint8
 
 /**
  * Level Map Actor on Scene that generates a grid of cells, and manages the actors
- * @see USingletonLibrary::LevelMap_L reference to this Level Map
+ * @see USingletonLibrary::LevelMap_ reference to this Level Map
  */
 UCLASS()
 class BOMBER_API AGeneratedMap final : public AActor
@@ -59,12 +59,13 @@ public:
 	 * @param SideLength Length of each side
 	 * @param Pathfinder Type of cells searching
 	 * @return Found cells
+	 * @todo to C++ GetSidesCells(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++")
 	TSet<FCell> GetSidesCells(
 		const FCell& Cell,
-		int32 SideLength,
-		EPathTypesEnum Pathfinder) const;
+		const int32 SideLength,
+		const EPathTypesEnum Pathfinder) const;
 
 	/** @ingroup actor_types
 	 * The intersection of input cells and actors of the specific type on these cells
@@ -73,11 +74,12 @@ public:
 	 * @param FilterTypes Types of actors to intersect
 	 * @param ExcludePlayer 
 	 * @return The set that contains all cells by actor types
+	 * @todo to C++ DestroyActorsFromMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2))
 	TSet<FCell> IntersectionCellsByTypes(
 		const TSet<FCell>& Keys,
-		EActorTypeEnum FilterTypes,
+		const EActorTypeEnum FilterTypes,
 		const class ACharacter* ExcludePlayer) const;
 
 	/** @ingroup actor_types
@@ -91,7 +93,7 @@ public:
 	 * @see AddACtorOnMapByObj(...)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	AActor* AddActorOnMap(const FCell& Cell, const EActorTypeEnum& ActorType);
+	AActor* AddActorOnMap(const FCell& Cell, const EActorTypeEnum ActorType);
 
 	/**
 	 * The overloaded function that places the actor on the Level Map, attaches a non-child actor and writes this actor to the GridArray_
@@ -106,6 +108,7 @@ public:
 	/**
 	 * Destroy all actors from set of cells
 	 * @param Keys The set of cells for destroying the found actors
+	 * @todo to C++ DestroyActorsFromMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void DestroyActorsFromMap(const TSet<FCell>& Keys);
@@ -118,13 +121,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	TSet<const class ACharacter*> CharactersOnMap_;
 
-#if WITH_EDITORONLY_DATA
-	/** Access to the Grid Array to create a free cell without an actor
-	 * @warning PIE only
-	 * @see GridArray_
+	/** @ingroup actor_types
+	 * Type and its class as associated pairs 
 	 */
-	friend struct FCell;
-#endif
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
+	TMap<EActorTypeEnum, TSubclassOf<AActor>> TypesByClassesMap_;
 
 protected:
 	/** Called when the game starts or when spawned */
@@ -136,24 +137,29 @@ protected:
 	/** Called when this actor is explicitly being destroyed */
 	virtual void Destroyed() final;
 
+	/** Destroy all attached actors and remove all elements of arrays */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ClearLevelMap();
+
 	/** @ingroup actors_management
 	 * Generating the grid of cells and the actors on it
 	 * @see AGeneratedMap::GridArray_
 	 * @see AGeneratedMap::CharactersOnMap_
 	 * @see struct FCell: Makes a grid of cells
+	 * @todo to C++ GenerateLevelMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void GenerateLevelMap();
 
-	/**
+	/** @addtogroup cell_functions
 	 * Find nearest location as cell on Grid Array
 	 * @param Actor Target to find cell location
 	 * @return The cell that was found
 	 * @warning Transient function for blueprint realization
-	 * @todo Rewrite to code as FCell::FCell()
+	 * @todo to C++ GetNearestCell(...) as FCell::FCell()
 	 */
-	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DevelopmentOnly))
-	FCell GetNearestCell(const AActor* Actor);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
+	FCell GetNearestCell(const AActor* Actor) const;
 
 	/** @ingroup actors_management
 	 * Storage of cells and their actors
@@ -162,9 +168,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
 	TMap<FCell, const AActor*> GridArray_;
 
-	/** @ingroup actor_types
-	 * Type and its class as associated pairs 
+#if WITH_EDITORONLY_DATA
+	/** Access to the Grid Array to create a free cell without an actor
+	 * @warning PIE only
+	 * @see GridArray_
 	 */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
-	TMap<EActorTypeEnum, TSubclassOf<AActor>> TypesByClassesMap_;
+	friend struct FCell;
+#endif
 };
