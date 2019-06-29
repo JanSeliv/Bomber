@@ -20,13 +20,13 @@ ABomb::ABomb()
 	// Initialize root component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
+	// Initialize map component
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+
 	// Initialize bomb mesh
 	BombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bomb Mesh"));
 	BombMesh->SetupAttachment(RootComponent);
 	BombMesh->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
-
-	// Initialize map component
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	// Initialize explosion particle component
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleFinder(TEXT("/Game/VFX_Toolkit_V1/ParticleSystems/356Days/Par_CrescentBoom2_OLD"));
@@ -85,49 +85,48 @@ void ABomb::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (USingletonLibrary::GetLevelMap(GetWorld()) == nullptr  // levelMap is null
-		|| IS_VALID(MapComponent) == false)					   //map component is not valid
-	{
-		return;
-	}
-
-	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
-	{
-		MapComponent->UpdateSelfOnMap();
-	}
-
-// Updating own explosions for non generated dragged bombs in PIE
 #if WITH_EDITOR
 	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
-		ExplosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(MapComponent->Cell, 1, EPathTypesEnum::Explosion);
-		UE_LOG_STR("PIE: %s updated own explosions", this);
+		// Update dragged actor
+		if (IS_VALID(MapComponent) == true)  // Map component is valid
+		{
+			MapComponent->UpdateSelfOnMap();
+		}
+
+		// Updating own explosions for non generated dragged bombs in PIE
+		if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr)  // levelMap is null
+		{
+			ExplosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(MapComponent->Cell, 1, EPathTypesEnum::Explosion);
+			UE_LOG_STR("PIE: %s updated own explosions", this);
+		}
 	}
-#endif
+#endif  //WITH_EDITOR
+
+	// Raise up bomb over cell
+	const float ActorHeight = 100.f;
+	AddActorWorldOffset(FVector(0.f, 0.f, ActorHeight));
 }
 
 void ABomb::Destroyed()
 {
-	if (USingletonLibrary::GetLevelMap(GetWorld()) == nullptr  // levelMap is null
-		|| IS_VALID(MapComponent) == false)					   //map component is not valid
+	if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr  // levelMap is not null
+		&& HasActorBegunPlay() == true)						   // in-game only
 	{
-		return;
+		if (CharacterBombN_ != nullptr)
+		{
+			(*CharacterBombN_)++;  // Return to the character +1 of bombs
+		}
+
+		// Spawn emitters
+		for (const FCell& Cell : ExplosionCells_)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, FTransform(Cell.Location));
+		}
+
+		// Destroy all actors from array of cells
+		USingletonLibrary::GetLevelMap(GetWorld())->DestroyActorsFromMap(ExplosionCells_);
 	}
-
-	if (CharacterBombN_ != nullptr)
-	{
-		(*CharacterBombN_)++;  // Return to the character +1 of bombs
-	}
-
-	// Spawn emitters
-	for (const FCell& Cell : ExplosionCells_)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, FTransform(Cell.Location));
-	}
-
-	// Destroy all actors from array of cells
-	USingletonLibrary::GetLevelMap(GetWorld())->DestroyActorsFromMap(ExplosionCells_);
-
 	Super::Destroyed();
 }
 

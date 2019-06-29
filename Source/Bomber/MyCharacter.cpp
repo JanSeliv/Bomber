@@ -39,15 +39,23 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)  // Map component is not valid
+#if WITH_EDITOR
+	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
-		return;
-	}
+		// Update dragged actor
+		if (IS_VALID(MapComponent) == true)  // Map component is valid
+		{
+			MapComponent->UpdateSelfOnMap();
+		}
 
-	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
-	{
-		MapComponent->UpdateSelfOnMap();
+		// Binding to update renders of render AI on creating\destroying elements
+		if (bShouldShowRenders == true)  // only for AI with render statement
+		{
+			USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddDynamic(this, &AMyCharacter::UpdateAI);
+			UE_LOG_STR("PIE: %s BINDING to UpdateAI", this);
+		}
 	}
+#endif  //WITH_EDITOR
 
 	// Raise up character over cell
 	const float ActorHeight = GetRootComponent()->Bounds.BoxExtent.Z;
@@ -55,16 +63,6 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	SetActorRotation(FRotator(0, -90, 0));
 
 	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
-
-// Binding to update renders of render AI on creating\destroying elements
-#if WITH_EDITOR
-	if (GetWorld()->HasBegunPlay() == false  // for editor only
-		&& bShouldShowRenders == true)		 // only for AI with render statement
-	{
-		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddDynamic(this, &AMyCharacter::UpdateAI);
-		UE_LOG_STR("PIE: %s BINDING to UpdateAI", this);
-	}
-#endif
 }
 
 void AMyCharacter::SpawnBomb()
@@ -72,8 +70,7 @@ void AMyCharacter::SpawnBomb()
 	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // level map is not valid
 		|| Powerups_.FireN <= 0								   // Null length of explosion
 		|| Powerups_.BombN <= 0								   // No more bombs
-		|| HasActorBegunPlay() == false						   // Should not spawn bomb in PIE
-		|| IS_VALID(MapComponent) == false)					   // Map component is not valid
+		|| HasActorBegunPlay() == false)					   // Should not spawn bomb in PIE
 	{
 		return;
 	}

@@ -31,15 +31,16 @@ void AItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)  // Map component is not valid
+#if WITH_EDITOR
+	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
-		return;
+		// Update dragged actor
+		if (IS_VALID(MapComponent) == true)  // Map component is valid
+		{
+			MapComponent->UpdateSelfOnMap();
+		}
 	}
-
-	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
-	{
-		MapComponent->UpdateSelfOnMap();
-	}
+#endif  //WITH_EDITOR
 }
 
 void AItem::OnItemBeginOverlap(AActor* OverlappedItem, AActor* OtherActor)
