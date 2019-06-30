@@ -49,6 +49,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "C++")
 	float LifeSpan_ = 2.f;
 
+	UPROPERTY(EditAnywhere, Category = "C++")
+	int32 ExplosionLength = 1;
+
 	// Amount of character bombs at current time
 	int32* CharacterBombN_;
 

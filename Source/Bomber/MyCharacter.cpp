@@ -40,26 +40,29 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 #if WITH_EDITOR
-	if (GetWorld()->HasBegunPlay() == false)  // for editor only
+	if (HasActorBegunPlay() == false)  // for editor only
 	{
 		// Update dragged actor
 		if (IS_VALID(MapComponent) == true)  // Map component is valid
 		{
 			MapComponent->UpdateSelfOnMap();
 		}
+		else  // Transient actor
+		{
+			return;
+		}
 
 		// Binding to update renders of render AI on creating\destroying elements
 		if (bShouldShowRenders == true)  // only for AI with render statement
 		{
 			USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddDynamic(this, &AMyCharacter::UpdateAI);
+			UpdateAI();  // Update AI
 			UE_LOG_STR("PIE: %s BINDING to UpdateAI", this);
 		}
 	}
 #endif  //WITH_EDITOR
 
-	// Raise up character over cell
-	const float ActorHeight = GetRootComponent()->Bounds.BoxExtent.Z;
-	AddActorWorldOffset(FVector(0.f, 0.f, ActorHeight));
+	// Rotate character
 	SetActorRotation(FRotator(0, -90, 0));
 
 	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
@@ -90,7 +93,7 @@ void AMyCharacter::UpdateAI_Implementation()
 {
 // Check who answered the call
 #if WITH_EDITOR
-	if (GetWorld()->HasBegunPlay() == false)  // for editor only
+	if (HasActorBegunPlay() == false)  // for editor only
 	{
 		UE_LOG_STR("PIE:UpdateAI: %s answered", this);
 	}

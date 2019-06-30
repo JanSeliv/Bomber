@@ -37,12 +37,12 @@ ABomb::ABomb()
 	}
 
 	// Find materials
-	const TArray<TCHAR*> Pathes{
+	const TArray<TCHAR*> Paths{
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Yellow"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Blue"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Silver"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Pink")};
-	for (const auto& Path : Pathes)
+	for (const auto& Path : Paths)
 	{
 		ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(Path);
 		if (MaterialFinder.Succeeded() == true)
@@ -85,27 +85,29 @@ void ABomb::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	RootComponent->SetMobility(EComponentMobility::Movable);
+
 #if WITH_EDITOR
-	if (GetWorld()->HasBegunPlay() == false)  // for editor only
+	if (HasActorBegunPlay() == false)  // for editor only
 	{
 		// Update dragged actor
 		if (IS_VALID(MapComponent) == true)  // Map component is valid
 		{
 			MapComponent->UpdateSelfOnMap();
 		}
+		else  // Transient actor
+		{
+			return;
+		}
 
 		// Updating own explosions for non generated dragged bombs in PIE
 		if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr)  // levelMap is null
 		{
-			ExplosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(MapComponent->Cell, 1, EPathTypesEnum::Explosion);
+			InitializeBombProperties(nullptr, ExplosionLength, 0);
 			UE_LOG_STR("PIE: %s updated own explosions", this);
 		}
 	}
 #endif  //WITH_EDITOR
-
-	// Raise up bomb over cell
-	const float ActorHeight = 100.f;
-	AddActorWorldOffset(FVector(0.f, 0.f, ActorHeight));
 }
 
 void ABomb::Destroyed()

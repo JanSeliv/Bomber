@@ -54,7 +54,7 @@ public:
 		return (fabsf((X.Location - Y.Location).Size()) / GetFloorLength());
 	}
 
-	/* The Level Map getter */
+	/** The Level Map getter */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class AGeneratedMap* const GetLevelMap(UObject* WorldContextObject);
 

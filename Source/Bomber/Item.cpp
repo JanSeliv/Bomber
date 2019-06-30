@@ -32,12 +32,16 @@ void AItem::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 #if WITH_EDITOR
-	if (GetWorld()->HasBegunPlay() == false)  // for editor only
+	if (HasActorBegunPlay() == false)  // for editor only
 	{
 		// Update dragged actor
 		if (IS_VALID(MapComponent) == true)  // Map component is valid
 		{
 			MapComponent->UpdateSelfOnMap();
+		}
+		else  // Transient actor
+		{
+			return;
 		}
 	}
 #endif  //WITH_EDITOR
