@@ -10,7 +10,7 @@
 AItem::AItem()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	// Initialize root component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
@@ -31,20 +31,13 @@ void AItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-#if WITH_EDITOR
-	if (HasActorBegunPlay() == false)  // for editor only
+	if (IS_VALID(MapComponent) == false)
 	{
-		// Update dragged actor
-		if (IS_VALID(MapComponent) == true)  // Map component is valid
-		{
-			MapComponent->UpdateSelfOnMap();
-		}
-		else  // Transient actor
-		{
-			return;
-		}
+		return;
 	}
-#endif  //WITH_EDITOR
+
+	// Update this actor
+	MapComponent->UpdateSelfOnMap();
 }
 
 void AItem::OnItemBeginOverlap(AActor* OverlappedItem, AActor* OtherActor)

@@ -15,7 +15,7 @@
 AMyCharacter::AMyCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
@@ -39,33 +39,43 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-#if WITH_EDITOR
-	if (HasActorBegunPlay() == false)  // for editor only
+	if (IS_VALID(MapComponent) == false)
 	{
-		// Update dragged actor
-		if (IS_VALID(MapComponent) == true)  // Map component is valid
-		{
-			MapComponent->UpdateSelfOnMap();
-		}
-		else  // Transient actor
-		{
-			return;
-		}
+		return;
+	}
 
-		// Binding to update renders of render AI on creating\destroying elements
-		if (bShouldShowRenders == true)  // only for AI with render statement
-		{
-			USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddDynamic(this, &AMyCharacter::UpdateAI);
-			UpdateAI();  // Update AI
-			UE_LOG_STR("PIE: %s BINDING to UpdateAI", this);
-		}
+// Binding to update renders of render AI on creating\destroying elements
+#if WITH_EDITOR
+	if (HasActorBegunPlay() == false					  // for editor only
+		&& bShouldShowRenders == true					  // only for AI with render statement
+		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
+	{
+		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddUniqueDynamic(this, &AMyCharacter::UpdateAI);
+		UE_LOG_STR("PIE: %s BINDING to UpdateAI", this);
 	}
 #endif  //WITH_EDITOR
 
+	// Update this actor
+	MapComponent->UpdateSelfOnMap();
+
 	// Rotate character
-	SetActorRotation(FRotator(0, -90, 0));
+	SetActorRotation(FRotator(0.f, -90.f, 0.f));
 
 	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
+}
+
+void AMyCharacter::Destroyed()
+{
+	UWorld* const World = GetWorld();
+	if (World != nullptr									 // World is not null
+		&& USingletonLibrary::GetLevelMap(World) != nullptr  // LevelMap_ is valid
+		&& IS_TRANSIENT(this) == false)						 // Component is not transient
+	{
+		USingletonLibrary::GetLevelMap(World)->CharactersOnMap_.Remove(this);
+		UE_LOG_STR("Destroyed: %s removed from TSet", this);
+	}
+
+	Super::Destroyed();
 }
 
 void AMyCharacter::SpawnBomb()
@@ -79,7 +89,8 @@ void AMyCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	ABomb* const Bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMap(FCell(this), EActorTypeEnum::Bomb));
+	ABomb* const Bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap(GetWorld())
+										->AddActorOnMap(GetActorTransform(), EActorTypeEnum::Bomb));
 
 	// Update material of mesh
 	if (Bomb != nullptr)
@@ -95,6 +106,7 @@ void AMyCharacter::UpdateAI_Implementation()
 #if WITH_EDITOR
 	if (HasActorBegunPlay() == false)  // for editor only
 	{
+		AiMoveTo = FCell();
 		UE_LOG_STR("PIE:UpdateAI: %s answered", this);
 	}
 #endif

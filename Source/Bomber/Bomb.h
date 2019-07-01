@@ -18,6 +18,7 @@ public:
 
 	void InitializeBombProperties(int32* OutBombN, const int32& FireN, const int32& CharacterID);
 
+	/** The Map Component manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
@@ -37,8 +38,9 @@ protected:
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) final;
 
-	// Called when this actor is explicitly being destroyed
-	virtual void Destroyed() final;
+	/** Event triggered when the actor has been explicitly destroyed */
+	UFUNCTION()
+	void OnBombDestroyed(AActor* DestroyedActor);
 
 	/** 
 	 *	Event when an actor no longer overlaps another actor and can to block collision. 

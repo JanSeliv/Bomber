@@ -12,7 +12,7 @@ UMapComponent::UMapComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UMapComponent::UpdateSelfOnMap()
@@ -25,20 +25,20 @@ void UMapComponent::UpdateSelfOnMap()
 		return;
 	}
 
-	Cell = FCell(GetOwner());  // Find new Location at dragging and update-delegate
+	// Find new Location at dragging and update-delegate
+	Cell = FCell(GetOwner());
 
 	USingletonLibrary::GetLevelMap(World)->AddActorOnMapByObj(Cell, GetOwner());
 
 // Update AI renders after adding obj to map
 #if WITH_EDITOR
-	if (World->HasBegunPlay() == false)  // for editor only
+	if (World->HasBegunPlay() == false					  // for editor only
+		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
 	{
 		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
 		UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", GetOwner());
 	}
 #endif  //WITH_EDITOR
-
-	UE_LOG(LogTemp, Warning, TEXT("UpdateSelfOnMap: %s UPDATED (%s)"), *GetOwner()->GetName(), *Cell.Location.ToString());
 }
 
 void UMapComponent::OnComponentCreated()
@@ -68,30 +68,14 @@ void UMapComponent::OnComponentCreated()
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	UWorld* const World = GetWorld();
-	if (World != nullptr									 // World is not null
-		&& USingletonLibrary::GetLevelMap(World) != nullptr  // LevelMap_ is valid
-		&& IS_TRANSIENT(this) == false)						 // Component is not transient
-	{
-		const ACharacter* Character = Cast<ACharacter>(GetOwner());
-		if (Character != nullptr &&
-			USingletonLibrary::GetLevelMap(World)->CharactersOnMap_.Contains(Character))
-		{
-			USingletonLibrary::GetLevelMap(World)->CharactersOnMap_.Remove(Character);
-			UE_LOG_STR("OnComponentDestroyed: %s removed from TSet", GetOwner());
-		}
-
 // Update AI renders after destroying obj from map
 #if WITH_EDITOR
-		if (World->HasBegunPlay() == false)  // for editor only
-		{
-			USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
-			UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", GetOwner());
-		}
-#endif  //WITH_EDITOR
-
-		UE_LOG_STR("OnComponentDestroyed: %s was destroyed", GetOwner());
+	if (GetWorld() != nullptr					// World is not null
+		&& GetWorld()->HasBegunPlay() == false  // for editor only
+		&& IS_TRANSIENT(this) == false)			// Component is not transient
+	{
+		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+		UE_LOG_STR("PIE:OnComponentDestroyed: %s BROADCAST AI updating", GetOwner());
 	}
-
-	Super::OnComponentDestroyed(bDestroyingHierarchy);
+#endif  //WITH_EDITOR
 }
