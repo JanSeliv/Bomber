@@ -21,16 +21,16 @@ AGeneratedMap::AGeneratedMap()
 	RootComponent->SetMobility(EComponentMobility::Static);
 
 	// Find materials
-	const TArray<TCHAR*> Pathes{
+	const TArray<TCHAR*> Paths{
 		TEXT("/Game/Bomber/Assets/Wall"),		  //EPathTypesEnum::Wall
 		TEXT("/Game/Bomber/Assets/Box"),		  //EPathTypesEnum::Box
 		TEXT("/Game/Bomber/Blueprints/BpBomb"),   //EPathTypesEnum::Bomb
 		TEXT("/Game/Bomber/Blueprints/BpItem"),   //EPathTypesEnum::Item
 		TEXT("/Game/Bomber/Blueprints/BpPlayer")  //EPathTypesEnum::Player
 	};
-	for (int32 i = 0; i < Pathes.Num(); ++i)
+	for (int32 i = 0; i < Paths.Num(); ++i)
 	{
-		ConstructorHelpers::FClassFinder<AActor> ClassFinder(Pathes[i]);
+		ConstructorHelpers::FClassFinder<AActor> ClassFinder(Paths[i]);
 		TypesByClassesMap_.Add(
 			EActorTypeEnum(1 << i), (ClassFinder.Succeeded() ? ClassFinder.Class : nullptr));
 	}
@@ -93,12 +93,14 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 		GridArray_.Add(Cell, UpdateActor);  // Add this actor to his cell
 	}
 
-	UpdateActor->GetRootComponent()->SetAbsolute(true, true, true);
+	UpdateActor->GetRootComponent()->SetAbsolute(false, true, true);
 
 	// Locate actor on cell
-	const FRotator Rotator{0.f, FMath::RandRange(int32(0), int32(3)) * 90.f, 0.f};
+	const FRotator Rotation{0.f, FMath::RandRange(int32(0), int32(3)) * 90.f, 0.f};
+	const FVector Translation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + 100.f};
 	const FVector Scale{1.f, 1.f, 1.f};
-	UpdateActor->SetActorTransform(FTransform(Rotator, Cell.Location, Scale));
+
+	UpdateActor->SetActorTransform(FTransform(Rotation, Translation, Scale));
 
 	// Attach non generated dragged actor
 	if (UpdateActor->IsChildActor() == false)

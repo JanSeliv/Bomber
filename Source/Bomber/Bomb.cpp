@@ -15,18 +15,18 @@
 ABomb::ABomb()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	// Initialize root component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+
+	// Initialize map component
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	// Initialize bomb mesh
 	BombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bomb Mesh"));
 	BombMesh->SetupAttachment(RootComponent);
 	BombMesh->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
-
-	// Initialize map component
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
 
 	// Initialize explosion particle component
 	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleFinder(TEXT("/Game/VFX_Toolkit_V1/ParticleSystems/356Days/Par_CrescentBoom2_OLD"));
@@ -37,12 +37,12 @@ ABomb::ABomb()
 	}
 
 	// Find materials
-	const TArray<TCHAR*> Pathes{
+	const TArray<TCHAR*> Paths{
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Yellow"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Blue"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Silver"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Pink")};
-	for (const auto& Path : Pathes)
+	for (const auto& Path : Paths)
 	{
 		ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(Path);
 		if (MaterialFinder.Succeeded() == true)
@@ -78,6 +78,10 @@ void ABomb::InitializeBombProperties(
 void ABomb::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Binding to the event, that triggered when the actor has been explicitly destroyed
+	OnDestroyed.AddDynamic(this, &ABomb::OnBombDestroyed);
+
 	SetLifeSpan(LifeSpan_);
 }
 
@@ -85,31 +89,34 @@ void ABomb::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (USingletonLibrary::GetLevelMap(GetWorld()) == nullptr  // levelMap is null
-		|| IS_VALID(MapComponent) == false)					   //map component is not valid
+	if (IS_VALID(MapComponent) == false)
 	{
 		return;
 	}
 
-	if (IsChildActor() == false)  // Was dragged to PIE and it needs to update
-	{
-		MapComponent->UpdateSelfOnMap();
-	}
+	RootComponent->SetMobility(EComponentMobility::Movable);
 
-// Updating own explosions for non generated dragged bombs in PIE
+	// Update this actor
+	MapComponent->UpdateSelfOnMap();
+
 #if WITH_EDITOR
-	if (GetWorld()->HasBegunPlay() == false)  // for editor only
+	if (HasActorBegunPlay() == false)  // for editor only
 	{
-		ExplosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(MapComponent->Cell, 1, EPathTypesEnum::Explosion);
-		UE_LOG_STR("PIE: %s updated own explosions", this);
+		// Updating own explosions for non generated dragged bombs in PIE
+		if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr)  // levelMap is null
+		{
+			InitializeBombProperties(nullptr, ExplosionLength, 0);
+			UE_LOG_STR("PIE: %s updated own explosions", this);
+		}
 	}
-#endif
+#endif  //WITH_EDITOR
 }
 
-void ABomb::Destroyed()
+void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 {
-	if (USingletonLibrary::GetLevelMap(GetWorld()) == nullptr  // levelMap is null
-		|| IS_VALID(MapComponent) == false)					   //map component is not valid
+	UWorld* const World = GetWorld();
+	if (World == nullptr									  // World is null
+		&& USingletonLibrary::GetLevelMap(World) == nullptr)  // levelMap is null
 	{
 		return;
 	}
@@ -122,13 +129,11 @@ void ABomb::Destroyed()
 	// Spawn emitters
 	for (const FCell& Cell : ExplosionCells_)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, FTransform(Cell.Location));
+		UGameplayStatics::SpawnEmitterAtLocation(World, ExplosionParticle, FTransform(Cell.Location));
 	}
 
 	// Destroy all actors from array of cells
-	USingletonLibrary::GetLevelMap(GetWorld())->DestroyActorsFromMap(ExplosionCells_);
-
-	Super::Destroyed();
+	USingletonLibrary::GetLevelMap(World)->DestroyActorsFromMap(ExplosionCells_);
 }
 
 void ABomb::NotifyActorEndOverlap(AActor* OtherActor)

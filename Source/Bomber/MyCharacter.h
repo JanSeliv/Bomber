@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Cell.h"
 #include "GameFramework/Character.h"
 
 #include "MyCharacter.generated.h"
@@ -46,6 +47,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void UpdateAI();
 
+	/** The Map Component manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
@@ -55,6 +57,9 @@ protected:
 
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) final;
+
+	/** Called when this actor is explicitly being destroyed */
+	virtual void Destroyed() final;
 
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SpawnBomb();
@@ -66,4 +71,7 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	int32 CharacterID_ = -1;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
+	FCell AiMoveTo;
 };
