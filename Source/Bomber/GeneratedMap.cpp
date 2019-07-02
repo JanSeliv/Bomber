@@ -4,14 +4,17 @@
 
 #include "Bomber.h"
 #include "Cell.h"
+#include "ConstructorHelpers.h"
 #include "GameFramework/Character.h"
 #include "Math/UnrealMathUtility.h"
 #include "SingletonLibrary.h"
-#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
+
 	// Should not call OnConstruction on drag events
 	bRunConstructionScriptOnDrag = false;
 
@@ -20,7 +23,7 @@ AGeneratedMap::AGeneratedMap()
 	RootComponent->SetRelativeScale3D(FVector(5.f, 5.f, 1.f));
 	RootComponent->SetMobility(EComponentMobility::Static);
 
-	// Find materials
+	// Find blueprints
 	const TArray<TCHAR*> Paths{
 		TEXT("/Game/Bomber/Assets/Wall"),		  //EPathTypesEnum::Wall
 		TEXT("/Game/Bomber/Assets/Box"),		  //EPathTypesEnum::Box
@@ -36,6 +39,15 @@ AGeneratedMap::AGeneratedMap()
 	}
 }
 
+TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
+	const TSet<FCell>& Cells,
+	const uint8 ActorsTypesBitmask,
+	const ACharacter* ExcludePlayer) const
+{
+	TSet<FCell> FoundedLocations;
+	return FoundedLocations;
+}
+
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 	const FCell& Cell,
 	const int32 SideLength,
@@ -45,25 +57,16 @@ TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 	return FoundedLocations;
 }
 
-TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
-	const TSet<FCell>& Keys,
-	const EActorTypeEnum FilterTypes,
-	const ACharacter* ExcludePlayer) const
-{
-	TSet<FCell> FoundedLocations;
-	return FoundedLocations;
-}
-
-AActor* AGeneratedMap::AddActorOnMap(const FCell& Cell, const EActorTypeEnum ActorType)
+AActor* AGeneratedMap::AddActorOnMap(const FTransform& Transform, const EActorTypeEnum ActorType)
 {
 	const TSubclassOf<AActor> ActorClass = *TypesByClassesMap_.Find(ActorType);
-	if (ActorClass == nullptr)  // is not valid class for generation
+	if (ActorClass == nullptr	  // is not valid class for generation
+		|| GetWorld() == nullptr)  // World is null
 	{
 		return nullptr;
 	}
 
-	AActor* const SpawnedActor = GetWorld()->SpawnActor(ActorClass);
-	AddActorOnMapByObj(Cell, SpawnedActor);
+	AActor* const SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, Transform);
 	return SpawnedActor;
 }
 
@@ -93,26 +96,23 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 		GridArray_.Add(Cell, UpdateActor);  // Add this actor to his cell
 	}
 
-	UpdateActor->GetRootComponent()->SetAbsolute(false, true, true);
+	UpdateActor->GetRootComponent()->SetAbsolute(true, true, true);
 
 	// Locate actor on cell
 	const FRotator Rotation{0.f, FMath::RandRange(int32(0), int32(3)) * 90.f, 0.f};
 	const FVector Translation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + 100.f};
 	const FVector Scale{1.f, 1.f, 1.f};
-
 	UpdateActor->SetActorTransform(FTransform(Rotation, Translation, Scale));
 
-	// Attach non generated dragged actor
-	if (UpdateActor->IsChildActor() == false)
-	{
-		UpdateActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-	}
+	// Attach to the Level Map actor
+	UpdateActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 
-	UE_LOG_STR("AddActorOnMapByObj: %s ADDED", UpdateActor);
+	UE_LOG(LogTemp, Warning, TEXT("AddActorOnMapByObj: %s ADDED (%s)"), *UpdateActor->GetName(), *Cell.Location.ToString());
 }
 
 void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& Keys)
 {
+	UE_LOG(LogTemp, Warning, TEXT("DestroyActorsFromMap for %i keys"), Keys.Num());
 }
 
 // Called when the game starts or when spawned
