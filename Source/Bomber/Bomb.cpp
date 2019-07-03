@@ -100,7 +100,7 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	MapComponent->UpdateSelfOnMap();
 
 #if WITH_EDITOR
-	if (HasActorBegunPlay() == false)  // for editor only
+	if (GetWorld()->HasBegunPlay() == false)  // for editor only
 	{
 		// Updating own explosions for non generated dragged bombs in PIE
 		if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr)  // levelMap is null
@@ -133,6 +133,7 @@ void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 	}
 
 	// Destroy all actors from array of cells
+	UE_LOG_STR("OnBombDestroyed:: %s", this);
 	USingletonLibrary::GetLevelMap(World)->DestroyActorsFromMap(ExplosionCells_);
 }
 

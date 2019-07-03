@@ -24,7 +24,7 @@ void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OnActorBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
+	OnActorBeginOverlap.AddUniqueDynamic(this, &AItem::OnItemBeginOverlap);
 }
 
 void AItem::OnConstruction(const FTransform& Transform)
@@ -40,11 +40,19 @@ void AItem::OnConstruction(const FTransform& Transform)
 	MapComponent->UpdateSelfOnMap();
 }
 
-void AItem::OnItemBeginOverlap(AActor* OverlappedItem, AActor* OtherActor)
+void AItem::OnItemBeginOverlap_Implementation(AActor* OverlappedItem, AActor* OtherActor)
 {
-	if (OverlappedItem == this						   // self triggering
-		|| Cast<AMyCharacter>(OtherActor) == nullptr)  // other actor is not myCharacter
+	/*
+	if (OtherActor == nullptr   //is the actor that triggered the event
+		|| OtherActor == this)  //is not ourself
 	{
 		return;
 	}
+
+	AMyCharacter* const MyCharacter = Cast<AMyCharacter>(OtherActor);
+	if (MyCharacter != nullptr)  // other actor is not myCharacter
+	{
+		MyCharacter->Powerups_;
+	}
+	*/
 }
