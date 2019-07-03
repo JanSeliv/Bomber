@@ -42,12 +42,18 @@ void ABoxActor::BeginPlay()
 
 void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 {
-	// Spawn item with the chance
-	if (FMath::RandRange(int32(0), int32(100)) < 30)
+	if (GetWorld() == nullptr									   // World is null
+		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // level map is not valid
 	{
+		return;
+	}
+
+	// Spawn item with the chance
+	if (FMath::RandRange(int32(0), int32(30)) < 100)
+	{
+		// Spawn Item
+		UE_LOG_STR("OnBoxDestroyed: %s spawning item", this);
 		USingletonLibrary::GetLevelMap(GetWorld())
 			->AddActorOnMap(GetActorTransform(), EActorTypeEnum::Item);
 	}
-
-	UE_LOG_STR("OnBoxDestroyed: %s", this);
 }
