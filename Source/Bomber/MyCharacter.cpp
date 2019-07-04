@@ -43,25 +43,13 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	{
 		return;
 	}
-
-// Binding to update renders of render AI on creating\destroying elements
-#if WITH_EDITOR
-	if (HasActorBegunPlay() == false					  // for editor only
-		&& bShouldShowRenders == true					  // only for AI with render statement
-		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
-	{
-		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddUniqueDynamic(this, &AMyCharacter::UpdateAI);
-		UE_LOG_STR("PIE: %s BINDING to UpdateAI", this);
-	}
-#endif  //WITH_EDITOR
+	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
 
 	// Update this actor
 	MapComponent->UpdateSelfOnMap();
 
 	// Rotate character
 	SetActorRotation(FRotator(0.f, -90.f, 0.f));
-
-	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
 }
 
 void AMyCharacter::Destroyed()
@@ -73,8 +61,19 @@ void AMyCharacter::Destroyed()
 	{
 		USingletonLibrary::GetLevelMap(World)->CharactersOnMap_.Remove(this);
 		UE_LOG_STR("Destroyed: %s removed from TSet", this);
+
+		//Unbinding render updates of render AI on creating\destroying elements
+#if WITH_EDITOR
+		if (IS_PIE(World) == true			// For editor only
+			&& bShouldShowRenders == true)  // Is the render AI
+		{
+			USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.RemoveDynamic(this, &AMyCharacter::UpdateAI);
+			UE_LOG_STR("PIE:Destroyed: %s unbounded from OnRenderAiUpdatedDelegate", this);
+		}
+#endif  //WITH_EDITOR
 	}
 
+	// Call the base class version
 	Super::Destroyed();
 }
 
@@ -83,7 +82,7 @@ void AMyCharacter::SpawnBomb()
 	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // level map is not valid
 		|| Powerups_.FireN <= 0								   // Null length of explosion
 		|| Powerups_.BombN <= 0								   // No more bombs
-		|| HasActorBegunPlay() == false)					   // Should not spawn bomb in PIE
+		|| IS_PIE(GetWorld()) == true)						   // Should not spawn bomb in PIE
 	{
 		return;
 	}
@@ -100,11 +99,45 @@ void AMyCharacter::SpawnBomb()
 	}
 }
 
+#if WITH_EDITOR
+void AMyCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	if (IS_PIE(GetWorld()) == true						  // For editor only
+		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
+	{
+		//Get the name of the property that was changed
+		const FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+
+		// We test using GET_MEMBER_NAME_CHECKED so that if someone changes the property name
+		// in the future this will fail to compile and we can update it.
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(AMyCharacter, bShouldShowRenders))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PIE:PostEditChangeProperty: %s bShouldShowRenders: %s"), *this->GetName(), (bShouldShowRenders ? TEXT("true") : TEXT("false")));
+
+			// Binding or unbinding render updates of render AI on creating\destroying elements
+			auto& Delegate = USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate;
+			if (bShouldShowRenders == true											 // Is the render AI
+				&& Delegate.IsAlreadyBound(this, &AMyCharacter::UpdateAI) == false)  // Is not bound
+			{
+				Delegate.AddDynamic(this, &AMyCharacter::UpdateAI);
+			}
+			else
+			{
+				Delegate.RemoveDynamic(this, &AMyCharacter::UpdateAI);
+			}
+		}
+	}
+
+	// Call the base class version
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+#endif  // WITH_EDITOR
+
 void AMyCharacter::UpdateAI_Implementation()
 {
 // Check who answered the call
 #if WITH_EDITOR
-	if (HasActorBegunPlay() == false)  // for editor only
+	if (IS_PIE(GetWorld()) == true)  // for editor only
 	{
 		AiMoveTo = FCell();
 		UE_LOG_STR("PIE:UpdateAI: %s answered", this);
