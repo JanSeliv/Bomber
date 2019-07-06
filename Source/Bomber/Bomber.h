@@ -5,7 +5,9 @@
 #include "Engine/World.h"  //GetWorld()
 #include "Kismet/GameplayStatics.h"
 
-#define UE_LOG_STR(message, obj) UE_LOG(LogTemp, Warning, TEXT(message), *obj->GetName())
+#define UE_LOG_STR(message, Obj) UE_LOG(LogTemp, Warning, TEXT(message), *Obj->GetName())
 
-#define IS_TRANSIENT(obj) (obj->HasAllFlags(RF_Transient) || (UGameplayStatics::GetCurrentLevelName(obj->GetWorld()) == "Transient"))
-#define IS_VALID(obj) ((obj != nullptr) && IsValid(obj) && !(obj)->IsPendingKill() && (obj)->IsValidLowLevel() && !IS_TRANSIENT(obj))
+#define IS_TRANSIENT(Obj) ((Obj->HasAllFlags(RF_Transient) || (Obj->GetWorld() == nullptr) || (UGameplayStatics::GetCurrentLevelName(Obj->GetWorld()) == "Transient")))
+#define IS_VALID(Obj) ((Obj != nullptr) && IsValid(Obj) && !(Obj)->IsPendingKill() && (Obj)->IsValidLowLevel() && !IS_TRANSIENT(Obj))
+
+#define IS_PIE(World) (World != nullptr && World->HasBegunPlay() == false)
