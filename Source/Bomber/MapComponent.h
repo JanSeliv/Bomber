@@ -21,7 +21,7 @@ public:
 	void UpdateSelfOnMap();
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	FCell Cell;
+	struct FCell Cell;
 
 protected:
 	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */

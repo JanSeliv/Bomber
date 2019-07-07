@@ -3,6 +3,7 @@
 #include "MapComponent.h"
 
 #include "Bomber.h"
+#include "BoxActor.h"
 #include "GeneratedMap.h"
 #include "MyCharacter.h"
 #include "SingletonLibrary.h"
@@ -32,11 +33,11 @@ void UMapComponent::UpdateSelfOnMap()
 
 // Update AI renders after adding obj to map
 #if WITH_EDITOR
-	if (World->HasBegunPlay() == false					  // for editor only
+	if (IS_PIE(GetWorld()) == true						  // for editor only
 		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
 	{
-		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
 		UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", GetOwner());
+		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
 	}
 #endif  //WITH_EDITOR
 }
@@ -49,33 +50,33 @@ void UMapComponent::OnComponentCreated()
 	{
 		return;
 	}
+	UE_LOG_STR("OnComponentCreated: %s", GetOwner());
 
-	// Should not call OnConstruction on drag events
-	GetOwner()->bRunConstructionScriptOnDrag = false;
+	// Disable tick
+	GetOwner()->SetActorTickEnabled(false);
 
-// Binds to updating actors on the Level Map
 #if WITH_EDITOR
-	if (GetWorld() != nullptr							  // World is not null
-		&& GetWorld()->HasBegunPlay() == false			  // for editor only
+	if (IS_PIE(GetWorld()) == true						  // for editor only
 		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is valid
 	{
+		// Should not call OnConstruction on drag events
+		GetOwner()->bRunConstructionScriptOnDrag = false;
+
+		// Binds to updating actors on the Level Map
 		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
 	}
 #endif  //WITH_EDITOR
-
-	UE_LOG_STR("OnComponentCreated: %s", GetOwner());
 }
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 // Update AI renders after destroying obj from map
 #if WITH_EDITOR
-	if (GetWorld() != nullptr					// World is not null
-		&& GetWorld()->HasBegunPlay() == false  // for editor only
-		&& IS_TRANSIENT(this) == false)			// Component is not transient
+	if (IS_PIE(GetWorld()) == true		 // for editor only
+		&& IS_TRANSIENT(this) == false)  // Component is not transient
 	{
-		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
 		UE_LOG_STR("PIE:OnComponentDestroyed: %s BROADCAST AI updating", GetOwner());
+		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
 	}
 #endif  //WITH_EDITOR
 }
