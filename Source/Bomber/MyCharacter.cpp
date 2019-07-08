@@ -43,25 +43,13 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	{
 		return;
 	}
-
-// Binding to update renders of render AI on creating\destroying elements
-#if WITH_EDITOR
-	if (HasActorBegunPlay() == false					  // for editor only
-		&& bShouldShowRenders == true					  // only for AI with render statement
-		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
-	{
-		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.AddUniqueDynamic(this, &AMyCharacter::UpdateAI);
-		UE_LOG_STR("PIE: %s BINDING to UpdateAI", this);
-	}
-#endif  //WITH_EDITOR
+	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
 
 	// Update this actor
 	MapComponent->UpdateSelfOnMap();
 
 	// Rotate character
 	SetActorRotation(FRotator(0.f, -90.f, 0.f));
-
-	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
 }
 
 void AMyCharacter::Destroyed()
@@ -71,10 +59,11 @@ void AMyCharacter::Destroyed()
 		&& USingletonLibrary::GetLevelMap(World) != nullptr  // LevelMap_ is valid
 		&& IS_TRANSIENT(this) == false)						 // Component is not transient
 	{
-		USingletonLibrary::GetLevelMap(World)->CharactersOnMap_.Remove(this);
+		USingletonLibrary::GetLevelMap(World)->CharactersOnMap.Remove(this);
 		UE_LOG_STR("Destroyed: %s removed from TSet", this);
 	}
 
+	// Call the base class version
 	Super::Destroyed();
 }
 
@@ -83,7 +72,7 @@ void AMyCharacter::SpawnBomb()
 	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // level map is not valid
 		|| Powerups_.FireN <= 0								   // Null length of explosion
 		|| Powerups_.BombN <= 0								   // No more bombs
-		|| HasActorBegunPlay() == false)					   // Should not spawn bomb in PIE
+		|| IS_PIE(GetWorld()) == true)						   // Should not spawn bomb in PIE
 	{
 		return;
 	}
@@ -98,18 +87,6 @@ void AMyCharacter::SpawnBomb()
 		Bomb->InitializeBombProperties(&Powerups_.BombN, Powerups_.FireN, CharacterID_);
 		Powerups_.BombN--;
 	}
-}
-
-void AMyCharacter::UpdateAI_Implementation()
-{
-// Check who answered the call
-#if WITH_EDITOR
-	if (HasActorBegunPlay() == false)  // for editor only
-	{
-		AiMoveTo = FCell();
-		UE_LOG_STR("PIE:UpdateAI: %s answered", this);
-	}
-#endif
 }
 
 // Called to bind functionality to input
