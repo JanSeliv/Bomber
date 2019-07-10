@@ -35,31 +35,42 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void BroadcastAiUpdating(AActor* Owner);
 
+	/** Remove all text renders of the Owner */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
+	static void ClearOwnerTextRenders(class AActor* Owner);
+
 	/**
 	 * Debug visualization by text renders
 	 * @warning PIE only
-	 * @warning Is not static for Blueprint realization
-	 * @todo Don't remove nameplate render of AI
+	 * @warning Has blueprint implementation
      */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, AdvancedDisplay = 2, AutoCreateRefTerm = "RenderText"))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderText,CoordinatePosition"))
 	void AddDebugTextRenders(
-		class AActor* Owner,										  ///<
-		const TSet<struct FCell>& Cells,							  ///<
-		struct FLinearColor TextColor,								  ///<
-		float TextHeight,											  ///<
-		float TextSize,												  ///<
-		const FText& RenderText,									  ///<
-		FVector CoordinatePosition,									  ///<
-		bool bShouldClearChildRenders,								  ///<
-		TArray<class UTextRenderComponent*>& OutTextRenderComponents  ///<
-		) const;
+		class AActor* Owner,
+		const TSet<struct FCell>& Cells,
+		bool& bOutHasCoordinateRenders,
+		TArray<class UTextRenderComponent*>& OutTextRenderComponents,
+		const struct FLinearColor& TextColor = FLinearColor::Black,
+		float TextHeight = 261.0f,
+		float TextSize = 124.0f,
+		const FText& RenderText = FText::GetEmpty(),
+		const FVector& CoordinatePosition = FVector(0.f)) const;
+#if WITH_EDITOR
+	/** Shortest overloading of debugging visualization */
+	FORCEINLINE void AddDebugTextRenders(class AActor* Owner, const TSet<struct FCell>& Cells) const
+	{
+		bool bOutBool = false;
+		TArray<class UTextRenderComponent*> OutArray{};
+		AddDebugTextRenders(Owner, Cells, bOutBool, OutArray);
+	}
+#endif
 
 	/** @addtogroup cell_functions
 	 * The custom make node of the FCell struct that used as a blueprint implementation of the default MakeStruct node
 	 * @param Actor Finding the closest cell by actor
 	 * @return The found cell
 	 * @warning Deprecated, temporary function
-	 * @warning Is not static for Blueprint realization
+	 * @warning Has blueprint implementation
 	 * @todo Rewrite to C++ FCell()
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))

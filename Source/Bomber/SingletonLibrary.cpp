@@ -28,16 +28,29 @@ void USingletonLibrary::BroadcastAiUpdating(AActor* Owner)
 	}
 }
 
+void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
+{
+	const TArray<UActorComponent*> TextRendersArray = Owner->GetComponentsByClass(UTextRenderComponent::StaticClass());
+	if (TextRendersArray.Num() > 0)
+	{
+		for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
+		{
+			UE_LOG_STR("ClearOwnerTextRenders: %s destroyed", TextRendersArray[i]);
+			TextRendersArray[i]->DestroyComponent();
+		}
+	}
+}
+
 void USingletonLibrary::AddDebugTextRenders_Implementation(
 	AActor* Owner,
 	const TSet<FCell>& Cells,
-	FLinearColor TextColor,
+	bool& bOutHasCoordinateRenders,
+	TArray<UTextRenderComponent*>& OutTextRenderComponents,
+	const FLinearColor& TextColor,
 	float TextHeight,
 	float TextSize,
 	const FText& RenderText,
-	FVector CoordinatePosition,
-	bool bShouldClearChildRenders,
-	TArray<UTextRenderComponent*>& OutTextRenderComponents) const
+	const FVector& CoordinatePosition) const
 {
 	AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(Owner);
 	if ((MyAiCharacter != nullptr							// Successfully cast to AI
@@ -48,18 +61,13 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		return;
 	}
 
-	if (bShouldClearChildRenders == true)  // Should remove all text renders
-		for (auto& RenderIt : Owner->GetComponentsByClass(UTextRenderComponent::StaticClass()))
-		{
-			RenderIt->DestroyComponent();
-		}
-
-	const int32 ArrayNum = (CoordinatePosition == FVector(0.f) ? Cells.Num() : Cells.Num() * 2);
-	for (int32 i = 0; i < ArrayNum; ++i)
+	bOutHasCoordinateRenders = (CoordinatePosition != FVector(0.f) && RenderText.IsEmpty() == false);
+	OutTextRenderComponents.SetNum(bOutHasCoordinateRenders ? Cells.Num() * 2 : Cells.Num());
+	for (UTextRenderComponent*& TextRenderIt : OutTextRenderComponents)
 	{
-		OutTextRenderComponents.Add(NewObject<UTextRenderComponent>(Owner));
+		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
+		TextRenderIt->RegisterComponent();
 	}
-
 	UE_LOG(LogTemp, Warning, TEXT("%s's num of renders: %d (%s)"), *RenderText.ToString(), Owner->GetComponentsByClass(UTextRenderComponent::StaticClass()).Num(), *CoordinatePosition.ToString());
 }
 
