@@ -43,13 +43,13 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	{
 		return;
 	}
-	UE_LOG_STR("OnConstruction:LocationAndRotation: %s", this);
 
 	// Update this actor
 	MapComponent->UpdateSelfOnMap();
 
 	// Rotate character
 	SetActorRotation(FRotator(0.f, -90.f, 0.f));
+	UE_LOG_STR(this, "OnConstruction", *(FString("New rotation: ") + GetActorRotation().ToString()));
 }
 
 void AMyCharacter::Destroyed()
@@ -60,7 +60,7 @@ void AMyCharacter::Destroyed()
 		&& IS_TRANSIENT(this) == false)						 // Component is not transient
 	{
 		USingletonLibrary::GetLevelMap(World)->CharactersOnMap.Remove(this);
-		UE_LOG_STR("Destroyed: %s removed from TSet", this);
+		UE_LOG_STR(this, "Destroyed", ":Removed from TSet");
 	}
 
 	// Call the base class version
@@ -84,8 +84,7 @@ void AMyCharacter::SpawnBomb()
 	// Update material of mesh
 	if (Bomb != nullptr)
 	{
-		Bomb->InitializeBombProperties(&Powerups_.BombN, Powerups_.FireN, CharacterID_);
-		Powerups_.BombN--;
+		Bomb->InitializeBombProperties(Powerups_.BombN, Powerups_.FireN, CharacterID_);
 	}
 }
 

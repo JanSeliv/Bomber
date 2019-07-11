@@ -26,16 +26,8 @@ public:
 #endif  //WITH_EDITORONLY_DATA
 
 protected:
-	///[AiDelegate]#if WITH_EDITOR
-	///[AiDelegate]	/** @addtogroup AI
-	///[AiDelegate] 	 * Called when the bShouldShowRenders on this character has been modified externally
-	///[AiDelegate] 	 * Binding or unbinding render updates of render AI on creating\destroying elements
-	///[AiDelegate] 	 * @param PropertyChangedEvent The property that was modified
-	///[AiDelegate] 	 * @see USingletonLibrary::OnRenderAiUpdatedDelegate
-	///[AiDelegate] 	 * @warning Editor only
-	///[AiDelegate] 	 */
-	///[AiDelegate]	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) final;
-	///[AiDelegate]#endif
+	/** Called when an instance of this class is placed (in editor) or spawned */
+	virtual void OnConstruction(const FTransform& Transform) final;
 
 	/** @addtogroup AI
 	 * Cell position of current path segment's end */
