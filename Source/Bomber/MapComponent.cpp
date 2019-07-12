@@ -5,7 +5,6 @@
 #include "Bomber.h"
 #include "BoxActor.h"
 #include "GeneratedMap.h"
-#include "MyCharacter.h"
 #include "SingletonLibrary.h"
 
 // Sets default values for this component's properties
@@ -25,21 +24,22 @@ void UMapComponent::UpdateSelfOnMap()
 	{
 		return;
 	}
-
+	UE_LOG_STR(GetOwner(), "UpdateSelfOnMap", "Starts updating");
 	// Find new Location at dragging and update-delegate
 	Cell = FCell(GetOwner());
 
 	USingletonLibrary::GetLevelMap(World)->AddActorOnMapByObj(Cell, GetOwner());
 
-// Update AI renders after adding obj to map
 #if WITH_EDITOR
-	if (IS_PIE(GetWorld()) == true						  // for editor only
-		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
+	if (IS_PIE(GetWorld()) == true)  // for editor only
 	{
-		UE_LOG_STR("PIE:UpdateSelfOnMap: %s BROADCAST AI updating", GetOwner());
-		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+		// Remove all text renders of the Owner
+		USingletonLibrary::ClearOwnerTextRenders(GetOwner());
+
+		// Update AI renders after adding obj to map
+		USingletonLibrary::GetSingleton()->BroadcastAiUpdating(GetOwner());
 	}
-#endif  //WITH_EDITOR
+#endif  //WITH_EDITOR [PIE]
 }
 
 void UMapComponent::OnComponentCreated()
@@ -50,7 +50,8 @@ void UMapComponent::OnComponentCreated()
 	{
 		return;
 	}
-	UE_LOG_STR("OnComponentCreated: %s", GetOwner());
+
+	UE_LOG_STR(GetOwner(), "OnComponentCreated", "Starts creating");
 
 	// Disable tick
 	GetOwner()->SetActorTickEnabled(false);
@@ -64,19 +65,9 @@ void UMapComponent::OnComponentCreated()
 
 		// Binds to updating actors on the Level Map
 		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
-	}
-#endif  //WITH_EDITOR
-}
 
-void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
-{
-// Update AI renders after destroying obj from map
-#if WITH_EDITOR
-	if (IS_PIE(GetWorld()) == true		 // for editor only
-		&& IS_TRANSIENT(this) == false)  // Component is not transient
-	{
-		UE_LOG_STR("PIE:OnComponentDestroyed: %s BROADCAST AI updating", GetOwner());
-		USingletonLibrary::GetSingleton()->OnRenderAiUpdatedDelegate.Broadcast();
+		// Binds to updating AI renders on owner destroying
+		GetOwner()->OnDestroyed.AddDynamic(USingletonLibrary::GetSingleton(), &USingletonLibrary::BroadcastAiUpdating);
 	}
-#endif  //WITH_EDITOR
+#endif  //WITH_EDITOR [PIE]
 }

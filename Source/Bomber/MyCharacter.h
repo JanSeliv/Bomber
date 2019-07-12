@@ -16,19 +16,19 @@ struct FPowerUp
 
 	// Increase the movement speed of the character
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int SkateN = 1;
+	int32 SkateN = 1;
 
 	// Increase the number of bombs that can be set at one time
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int BombN = 1;
+	int32 BombN = 1;
 
 	//  Increase the bomb blast radius
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int FireN = 1;
+	int32 FireN = 1;
 };
 
 UCLASS()
-class BOMBER_API AMyCharacter final : public ACharacter
+class BOMBER_API AMyCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -39,22 +39,19 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void UpdateAI();
-
 	/** The Map Component manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() final;
+	virtual void BeginPlay() override;
 
 	//Called when an instance of this class is placed (in editor) or spawned.
-	virtual void OnConstruction(const FTransform& Transform) final;
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 	/** Called when this actor is explicitly being destroyed */
-	virtual void Destroyed() final;
+	virtual void Destroyed() override;
 
 	/** Spawn bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -85,7 +82,4 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	int32 CharacterID_ = -1;
-
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	struct FCell AiMoveTo;
 };
