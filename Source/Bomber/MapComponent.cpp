@@ -50,6 +50,7 @@ void UMapComponent::OnComponentCreated()
 	{
 		return;
 	}
+
 	UE_LOG_STR(GetOwner(), "OnComponentCreated", "Starts creating");
 
 	// Disable tick

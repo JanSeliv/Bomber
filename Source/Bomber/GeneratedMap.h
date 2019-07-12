@@ -11,13 +11,13 @@
  * @defgroup path_types Receiving cells for their type of danger
  * Types of breaks during cells searching on each side
  */
-UENUM(BlueprintType, meta = (Bitflags))
+UENUM(BlueprintType)
 enum class EPathTypesEnum : uint8
 {
-	Explosion = 1 << 0,  ///< Break to the first EActorTypeEnum::Wall without obstacles
-	Free = 1 << 1,		 ///< Break to the first EActorTypeEnum::WallWall + obstacles
-	Safe = 1 << 2,		 ///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions
-	Secure = 1 << 3		 ///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions + EActorTypeEnum::Player
+	Explosion,  ///< Break to the first EActorTypeEnum::Wall without obstacles
+	Free,		///< Break to the first EActorTypeEnum::WallWall + obstacles
+	Safe,		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions
+	Secure		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions + EActorTypeEnum::Player
 };
 
 /**
@@ -28,6 +28,7 @@ enum class EPathTypesEnum : uint8
 UENUM(BlueprintType, meta = (Bitflags))
 enum class EActorTypeEnum : uint8
 {
+	None = 0,		 ///< None of the types for comparisons
 	Wall = 1 << 0,   ///< An absolute static and unchangeable block throughout the game
 	Box = 1 << 1,	///< A destroyable Obstacle
 	Bomb = 1 << 2,   ///< A destroyable exploding Obstacle
@@ -70,30 +71,46 @@ public:
 	/** @ingroup actor_types
 	 * The intersection of input cells and actors of the specific type on these cells
 	 * (Cells ∩ Actors type)  
-	 * @param Keys The cells set to intersect
-	 * @param FilterTypes Types of actors to intersect
+	 * @param Cells The cells set to intersect
+	 * @param ActorsTypesBitmask EActorTypeEnum bitmask to intersect
 	 * @param ExcludePlayer 
 	 * @return The set that contains all cells by actor types
-	 * @todo to C++ DestroyActorsFromMap(...)
+	 * @todo to C++ IntersectionCellsByTypes(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2))
 	TSet<FCell> IntersectionCellsByTypes(
-		const TSet<FCell>& Keys,
-		const EActorTypeEnum FilterTypes,
-		const class ACharacter* ExcludePlayer) const;
+		const TSet<FCell>& Cells,
+		const uint8 ActorsTypesBitmask,
+		UPARAM(meta = (DefaultToSelf)) const class ACharacter* ExcludePlayer) const;
+
+	/**
+	 * Find the actor type by key of TypesByClassesMap_
+	 * @param ActorClass Class to find
+	 * @return Actor type
+	 * @warning Deprecated, temporary function
+	 * @todo Rewrite FindTypeByClass() to C++ IntersectionCellsByTypes() 
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (HidePin = "Target [Self]", DeprecatedNode))
+	FORCEINLINE EActorTypeEnum FindTypeByClass(const TSubclassOf<AActor>& ActorClass) const
+	{
+		const EActorTypeEnum* FoundedActorType = TypesByClassesMap_.FindKey(ActorClass);
+		return (FoundedActorType != nullptr ? *FoundedActorType : EActorTypeEnum::None);
+	}
 
 	/** @ingroup actor_types
 	 * @defgroup actors_management Storing, adding and deleting actors from GridArray_
 	 * @{
 	 * Spawn specific actor by type on the given cell as child actor component of Level Map 
 	 * First step of adding actors to level map
-	 * @param Cell The location where the child actor will be standing on
+	 * @param Transform The location where the child actor will be standing on
 	 * @param ActorType Type of actor that will be spawned
 	 * @return Spawned child actor
 	 * @see AddACtorOnMapByObj(...)
+	 * @warning Deprecated, temporary function
+	 * @todo Don't call AddActorOnMap(...) and just use SpawnActor<AActor>(ActorClass, Transform)
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	AActor* AddActorOnMap(const FCell& Cell, const EActorTypeEnum ActorType);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DeprecatedNode))
+	AActor* AddActorOnMap(const FTransform& Transform, const EActorTypeEnum ActorType);
 
 	/**
 	 * The overloaded function that places the actor on the Level Map, attaches a non-child actor and writes this actor to the GridArray_
