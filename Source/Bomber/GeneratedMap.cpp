@@ -19,8 +19,8 @@ AGeneratedMap::AGeneratedMap()
 	// Initialize root component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	RootComponent->SetRelativeScale3D(FVector(5.f, 5.f, 1.f));
-	RootComponent->SetMobility(EComponentMobility::Static);
-	RootComponent->SetAbsolute(true, true, true);
+	RootComponent->SetMobility(EComponentMobility::Movable);
+	//RootComponent->SetAbsolute(true, true, true);
 
 	// Find blueprints
 	const TArray<TCHAR*> Paths{
@@ -87,13 +87,14 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 		GridArray_.Add(Cell, UpdateActor);  // Add this actor to his cell
 	}
 
-	UpdateActor->GetRootComponent()->SetAbsolute(false, true, true);
+	UpdateActor->GetRootComponent()->SetAbsolute(false, false, true);
 
 	// Locate actor on cell
-	const FRotator Rotation{0.f, FMath::RandRange(int32(0), int32(3)) * 90.f, 0.f};
-	const FVector Translation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + 100.f};
+	FRotator ActorRotation{GetActorRotation()};
+	ActorRotation.Yaw += FMath::RandRange(int32(1), int32(4)) * 90.f;
+	const FVector ActorLocation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + 100.f};
 	const FVector Scale{1.f, 1.f, 1.f};
-	UpdateActor->SetActorTransform(FTransform(Rotation, Translation, Scale));
+	UpdateActor->SetActorTransform(FTransform(ActorRotation, ActorLocation, Scale));
 
 	// Attach to the Level Map actor
 	UpdateActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
@@ -130,7 +131,8 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 
 	// Align the Transform
-	const FVector MapLocation(GetActorLocation().GridSnap(USingletonLibrary::GetFloorLength()));
+	SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
+	SetActorLocation(GetActorLocation().GridSnap(USingletonLibrary::GetFloorLength()));
 	FIntVector MapScale(GetActorScale3D());
 	if (MapScale.X % 2 != 1)  // Length must be unpaired
 	{
@@ -141,8 +143,8 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		MapScale.Y += 1;
 	}
 	MapScale.Z = 1;  //Height must be 1
-	SetActorTransform(FTransform(FRotator::ZeroRotator, MapLocation, FVector(MapScale)));
-	UE_LOG_STR(this, "OnConstruction \t Scale:", GetActorTransform().ToString());
+	SetActorScale3D(FVector(MapScale));
+	UE_LOG_STR(this, "OnConstruction \t Scale:", MapScale.ToString());
 
 	// Loopy cell-filling of the grid array
 	GridArray_.Empty();
@@ -159,10 +161,25 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 			CellIt.Location -= (GetActorScale3D() / 2 * USingletonLibrary::GetFloorLength());
 			// Snap to the cell
 			CellIt.Location = CellIt.Location.GridSnap(USingletonLibrary::GetFloorLength());
+			// Rotate the cell around center
+			const FVector RelativePos{(CellIt.Location - GetActorLocation())};
+			CellIt.Location += RelativePos.RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 0, 1)) - RelativePos;
+			// Round the cell
+			CellIt.Location = FVector(FIntVector(CellIt.Location));
 
 			GridArray_.Add(CellIt, nullptr);
 		}
 	}
+#if WITH_EDITOR						 //[PIE-DEBUG]
+	if (IS_PIE(GetWorld()) == true)  // For editor only
+	{
+		USingletonLibrary::ClearOwnerTextRenders(this);
+		TArray<FCell> ArrayRenders;
+		GridArray_.GetKeys(ArrayRenders);
+		const TSet<FCell> SetRenders(ArrayRenders);
+		USingletonLibrary::AddDebugTextRenders(this, SetRenders);
+	}
+#endif  // WITH_EDITOR [PIE-DEBUG]
 }
 
 #if WITH_EDITOR
