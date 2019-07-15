@@ -3,10 +3,12 @@
 #include "BoxActor.h"
 
 #include "Bomber.h"
+#include "Components/StaticMeshComponent.h"
 #include "GeneratedMap.h"
 #include "MapComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "SingletonLibrary.h"
+#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 ABoxActor::ABoxActor()
@@ -14,8 +16,21 @@ ABoxActor::ABoxActor()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Initialize map component
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	// Initialize Root Component
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+	RootComponent->SetMobility(EComponentMobility::Movable);
+
+	// Initialize MapComponent
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+
+	// Initialize box mesh
+	BoxMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMesh"));
+	BoxMesh->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BoxMesh"));
+	if (BombMeshFinder.Succeeded())
+	{
+		BoxMesh->SetStaticMesh(BombMeshFinder.Object);
+	}
 }
 
 void ABoxActor::OnConstruction(const FTransform& Transform)
@@ -42,18 +57,13 @@ void ABoxActor::BeginPlay()
 
 void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 {
-	if (GetWorld() == nullptr									   // World is null
-		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // level map is not valid
-	{
-		return;
-	}
-
 	// Spawn item with the chance
-	if (FMath::RandRange(int32(0), int32(30)) < 100)
+	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 30;
+	if (ItemChance)
 	{
-		// Spawn Item
-		UE_LOG_STR("OnBoxDestroyed: %s spawning item", this);
 		USingletonLibrary::GetLevelMap(GetWorld())
 			->AddActorOnMap(GetActorTransform(), EActorTypeEnum::Item);
 	}
+
+	UE_LOG_STR(this, "OnBoxDestroyed", (ItemChance ? "Item spawned" : ""));
 }

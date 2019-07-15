@@ -16,20 +16,30 @@ public:
 	// Sets default values for this actor's properties
 	ABomb();
 
-	void InitializeBombProperties(int32* OutBombN, const int32& FireN, const int32& CharacterID);
+	/**
+	 * Sets the defaults of the bomb
+	 * @param RefBombsN Reference to the character's bombs count to change an amount after bomb putting(--) and destroying(++)
+	 * @param FireN Setting explosion length of this bomb
+	 * @param CharacterID Setting a mesh material of bomb by the character ID
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void InitializeBombProperties(
+		UPARAM(ref) int32& RefBombsN,
+		const int32& FireN,
+		const int32& CharacterID);
 
-	/** The Map Component manages this actor on the Level Map */
+	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	class UParticleSystem* ExplosionParticle;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UStaticMeshComponent* BombMesh;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	TSet<FCell> ExplosionCells_;
+	class UBoxComponent* BombCollisionComponent;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	class UParticleSystem* ExplosionParticle;
 
 protected:
 	// Called when the game starts or when spawned
@@ -38,15 +48,19 @@ protected:
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) final;
 
-	/** Event triggered when the actor has been explicitly destroyed */
-	UFUNCTION()
+	/** 
+	 * Event triggered when the actor has been explicitly destroyed
+	 * Destroys all actors from array of cells
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnBombDestroyed(AActor* DestroyedActor);
 
-	/** 
-	 *	Event when an actor no longer overlaps another actor and can to block collision. 
-	 *	@note Components on both this and the other Actor must have bGenerateOverlapEvents set to true to generate overlap events.
+	/**
+	 * Called when character end to overlaps the BombCollisionComponent component
+	 * Sets the collision preset to block all dynamics
 	 */
-	virtual void NotifyActorEndOverlap(AActor* OtherActor) final;
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UPROPERTY(EditAnywhere, Category = "C++")
 	float LifeSpan_ = 2.f;
@@ -55,9 +69,12 @@ protected:
 	int32 ExplosionLength = 1;
 
 	// Amount of character bombs at current time
-	int32* CharacterBombN_;
+	int32* CharacterBombsN_;
 
 	// All used bomb materials
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	TArray<class UMaterialInterface*> BombMaterials_;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	TSet<FCell> ExplosionCells_;
 };

@@ -3,15 +3,31 @@
 #include "WallActor.h"
 
 #include "Bomber.h"
+#include "Components/StaticMeshComponent.h"
 #include "MapComponent.h"
+#include "UObject/ConstructorHelpers.h"
+
 // Sets default values
 AWallActor::AWallActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Initialize map component
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	// Initialize Root Component
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+	RootComponent->SetMobility(EComponentMobility::Movable);
+
+	// Initialize MapComponent
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+
+	// Initialize wall mesh
+	WallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMesh"));
+	WallMesh->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> WallMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/WallMesh"));
+	if (WallMeshFinder.Succeeded())
+	{
+		WallMesh->SetStaticMesh(WallMeshFinder.Object);
+	}
 }
 
 void AWallActor::OnConstruction(const FTransform& Transform)
