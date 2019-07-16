@@ -2,8 +2,8 @@
 
 #include "SingletonLibrary.h"
 
-#include "Bomber.h"
 #include "Components/TextRenderComponent.h"
+
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/Color.h"
@@ -35,18 +35,18 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 	{
 		for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
 		{
-			UE_LOG_STR("ClearOwnerTextRenders: %s destroyed", TextRendersArray[i]);
 			TextRendersArray[i]->DestroyComponent();
 		}
+		UE_LOG_STR(Owner, "[Dev]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
 }
 
 void USingletonLibrary::AddDebugTextRenders_Implementation(
 	AActor* Owner,
 	const TSet<FCell>& Cells,
+	const FLinearColor& TextColor,
 	bool& bOutHasCoordinateRenders,
 	TArray<UTextRenderComponent*>& OutTextRenderComponents,
-	const FLinearColor& TextColor,
 	float TextHeight,
 	float TextSize,
 	const FText& RenderText,
@@ -61,17 +61,17 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		return;
 	}
 
-	bOutHasCoordinateRenders = (CoordinatePosition != FVector(0.f) && RenderText.IsEmpty() == false);
+	bOutHasCoordinateRenders = (CoordinatePosition.IsZero() == false && RenderText.IsEmpty() == false);
 	OutTextRenderComponents.SetNum(bOutHasCoordinateRenders ? Cells.Num() * 2 : Cells.Num());
 	for (UTextRenderComponent*& TextRenderIt : OutTextRenderComponents)
 	{
 		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
 		TextRenderIt->RegisterComponent();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%s's num of renders: %d (%s)"), *RenderText.ToString(), Owner->GetComponentsByClass(UTextRenderComponent::StaticClass()).Num(), *CoordinatePosition.ToString());
+	UE_LOG_STR(Owner, "[Dev]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 }
 
-#endif
+#endif  // WITH_EDITOR [Dev]
 
 AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 {
@@ -85,44 +85,23 @@ AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 // Find editor level map
 #if WITH_EDITOR
 	UWorld* const World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
-	if (IS_PIE(World) == true)  // for editor only
+	if (IS_PIE(World) == true  // for editor only
+		&& IS_VALID(GetSingleton()->LevelMap_) == false)
 	{
-		// Debug IS_VALID(Obj) and IS_TRANSIENT(Obj) macros
-		int Counter = 0;
-		AGeneratedMap* Obj = GetSingleton()->LevelMap_;
-		if (IsValid(Obj))
-		{
-			++Counter;  // #1
-			if ((Obj)->IsValidLowLevel())
-			{
-				++Counter;  // #2
-				if (!Obj->HasAllFlags(RF_Transient))
-				{
-					++Counter;  // #3
-					if (UGameplayStatics::GetCurrentLevelName(Obj->GetWorld()) != "Transient")
-					{
-						return GetSingleton()->LevelMap_;
-					}
-				}
-			}
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT("Exit state: %i"), Counter);
-
 		// Find and update the Level Map
 		TArray<AActor*> LevelMapArray;
 		UGameplayStatics::GetAllActorsOfClass(World, AGeneratedMap::StaticClass(), LevelMapArray);
 		if (LevelMapArray.Num() > 0)
 		{
 			GetSingleton()->LevelMap_ = Cast<AGeneratedMap>(LevelMapArray[0]);
-			UE_LOG_STR("PIE:SingletonLibrary:GetLevelMap: %s UPDATED", LevelMapArray[0]);
+			UE_LOG_STR(LevelMapArray[0], "[PIE]SingletonLibrary:GetLevelMap", "UPDATED");
 		}
 		else
 		{
 			return nullptr;
 		}
 	}
-#endif
+#endif  //WITH_EDITOR [PIE]
 
 	return GetSingleton()->LevelMap_;
 }

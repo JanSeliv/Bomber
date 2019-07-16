@@ -2,40 +2,13 @@
 
 #pragma once
 
+#include "Bomber.h"
 #include "Cell.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "SingletonLibrary.h"
 
 #include "GeneratedMap.generated.h"
-
-/**
- * @defgroup path_types Receiving cells for their type of danger
- * Types of breaks during cells searching on each side
- */
-UENUM(BlueprintType)
-enum class EPathTypesEnum : uint8
-{
-	Explosion,  ///< Break to the first EActorTypeEnum::Wall without obstacles
-	Free,		///< Break to the first EActorTypeEnum::WallWall + obstacles
-	Safe,		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions
-	Secure		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions + EActorTypeEnum::Player
-};
-
-/**
- * @defgroup actor_types Group where used types of actors
- * Types of all actors on the Level Map
- * Where Walls, Boxes and Bombs are the physical barrier for players
- */
-UENUM(BlueprintType, meta = (Bitflags))
-enum class EActorTypeEnum : uint8
-{
-	None = 0,		 ///< None of the types for comparisons
-	Wall = 1 << 0,   ///< An absolute static and unchangeable block throughout the game
-	Box = 1 << 1,	///< A destroyable Obstacle
-	Bomb = 1 << 2,   ///< A destroyable exploding Obstacle
-	Item = 1 << 3,   ///< A picked element giving power-up (FPowerUp struct)
-	Player = 1 << 4  ///< A character that is controlled by a person or bot
-};
 
 /**
  * Procedurally generated grid of cells and actors on the scene
@@ -85,7 +58,7 @@ public:
 		const class AMyCharacter* ExcludePlayer) const;
 
 	/**
-	 * Find the actor type by key of TypesByClassesMap
+	 * Find the actor type by key of ActorTypesByClasses
 	 * @param ActorClass Class to find
 	 * @return Actor type
 	 * @warning Deprecated, temporary function
@@ -94,7 +67,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DeprecatedNode))
 	FORCEINLINE EActorTypeEnum FindTypeByClass(const TSubclassOf<AActor>& ActorClass) const
 	{
-		const EActorTypeEnum* FoundedActorType = TypesByClassesMap.FindKey(ActorClass);
+		const EActorTypeEnum* FoundedActorType = USingletonLibrary::GetSingleton()->ActorTypesByClasses.FindKey(ActorClass);
 		return (FoundedActorType != nullptr ? *FoundedActorType : EActorTypeEnum::None);
 	}
 
@@ -111,7 +84,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "ActorType"))
 	FORCEINLINE AActor* AddActorOnMap(const FTransform& Transform, const EActorTypeEnum& ActorType) const
 	{
-		const TSubclassOf<AActor>* ActorClass = TypesByClassesMap.Find(ActorType);
+		const TSubclassOf<AActor>* ActorClass = USingletonLibrary::GetSingleton()->ActorTypesByClasses.Find(ActorType);
 		return (ActorClass && GetWorld() ? GetWorld()->SpawnActor<AActor>(*ActorClass, Transform) : nullptr);
 	}
 
@@ -140,12 +113,6 @@ public:
 	 */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	TSet<class AMyCharacter*> CharactersOnMap;
-
-	/** @ingroup actor_types
-	 * Type and its class as associated pairs 
-	 */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
-	TMap<EActorTypeEnum, TSubclassOf<AActor>> TypesByClassesMap;
 
 protected:
 	/** Called when the game starts or when spawned */
@@ -184,5 +151,12 @@ protected:
 	 * @see GridArray_
 	 */
 	friend struct FCell;
-#endif
+
+	/** @addtogroup AI
+	 * Mark updating visualization(text renders) of the bot's movements in the editor
+	 * @warning Editor only
+	 */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	bool bShouldShowRenders;
+#endif  //WITH_EDITORONLY_DATA [Editor]
 };

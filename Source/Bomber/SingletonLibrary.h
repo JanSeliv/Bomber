@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Bomber.h"
 #include "Cell.h"
 #include "Engine.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
@@ -16,30 +17,30 @@ class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 public:
 #if WITH_EDITORONLY_DATA
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPushNongeneratedToMap);
-	/** 
+	/** @defgroup [Dev]Editor Runs only in editor
 	 * Owners Map Components binds to updating on the Level Map to this delegate
 	 * The Level Map broadcasts this delegate after own generation
 	 * @see class UMapComponent
-	 * @warning PIE only
 	 */
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "C++")
+	UPROPERTY(BlueprintCallable, Category = "C++")
 	FPushNongeneratedToMap OnActorsUpdatedDelegate;
 #endif  // WITH_EDITORONLY_DATA
 
 	/** @addtogroup AI
+	 * @addtogroup [Dev]Editor
 	 * Call all signed as bShouldShowRenders AI characters
 	 * @param Owner The called owner
-	 * @warning PIE only
 	 * @warning Is not static for OnDestroyed binding
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void BroadcastAiUpdating(AActor* Owner);
 
-	/** Remove all text renders of the Owner */
+	/** @addtogroup [Dev]Editor
+	 *Remove all text renders of the Owner */
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
 	static void ClearOwnerTextRenders(class AActor* Owner);
 
-	/**
+	/** @addtogroup [Dev]Editor
 	 * Debug visualization by text renders
 	 * @warning PIE only
 	 * @warning Has blueprint implementation
@@ -48,22 +49,26 @@ public:
 	void AddDebugTextRenders(
 		class AActor* Owner,
 		const TSet<struct FCell>& Cells,
+		const struct FLinearColor& TextColor,
 		bool& bOutHasCoordinateRenders,
 		TArray<class UTextRenderComponent*>& OutTextRenderComponents,
-		const struct FLinearColor& TextColor = FLinearColor::Black,
 		float TextHeight = 261.0f,
 		float TextSize = 124.0f,
 		const FText& RenderText = FText::GetEmpty(),
 		const FVector& CoordinatePosition = FVector(0.f)) const;
 #if WITH_EDITOR
-	/** Shortest overloading of debugging visualization */
-	FORCEINLINE void AddDebugTextRenders(class AActor* Owner, const TSet<struct FCell>& Cells) const
+	/** @addtogroup [Dev]Editor
+	 *Shortest overloading of debugging visualization*/
+	static FORCEINLINE void AddDebugTextRenders(
+		class AActor* Owner,
+		const TSet<struct FCell>& Cells,
+		const struct FLinearColor& TextColor = FLinearColor::Black)
 	{
 		bool bOutBool = false;
 		TArray<class UTextRenderComponent*> OutArray{};
-		AddDebugTextRenders(Owner, Cells, bOutBool, OutArray);
+		GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray);
 	}
-#endif
+#endif  //WITH_EDITOR [Dev]
 
 	/** @addtogroup cell_functions
 	 * The custom make node of the FCell struct that used as a blueprint implementation of the default MakeStruct node
@@ -112,9 +117,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class AGeneratedMap* const GetLevelMap(UObject* WorldContextObject);
 
+	/** @addtogroup actor_types
+	 * Type and its class as associated pairs  */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
+	TMap<EActorTypeEnum, TSubclassOf<AActor>> ActorTypesByClasses;
+
 protected:
 	/** The reference to the AGeneratedMap actor*/
-	UPROPERTY(BlueprintReadOnly, Category = "C++")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	class AGeneratedMap* LevelMap_;
 
 	/** Access to the Level Map to keep an in gaming valid reference */

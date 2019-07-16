@@ -4,8 +4,6 @@
 
 #include "Bomber.h"
 #include "Cell.h"
-#include "ConstructorHelpers.h"
-#include "GameFramework/Character.h"
 #include "Math/UnrealMathUtility.h"
 #include "MyCharacter.h"
 #include "SingletonLibrary.h"
@@ -20,22 +18,6 @@ AGeneratedMap::AGeneratedMap()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	RootComponent->SetRelativeScale3D(FVector(5.f, 5.f, 1.f));
 	RootComponent->SetMobility(EComponentMobility::Movable);
-	//RootComponent->SetAbsolute(true, true, true);
-
-	// Find blueprints
-	const TArray<TCHAR*> Paths{
-		TEXT("/Game/Bomber/Assets/Wall"),		  //EPathTypesEnum::Wall
-		TEXT("/Game/Bomber/Assets/Box"),		  //EPathTypesEnum::Box
-		TEXT("/Game/Bomber/Blueprints/BpBomb"),   //EPathTypesEnum::Bomb
-		TEXT("/Game/Bomber/Blueprints/BpItem"),   //EPathTypesEnum::Item
-		TEXT("/Game/Bomber/Blueprints/BpPlayer")  //EPathTypesEnum::Player
-	};
-	for (int32 i = 0; i < Paths.Num(); ++i)
-	{
-		ConstructorHelpers::FClassFinder<AActor> ClassFinder(Paths[i]);
-		TypesByClassesMap.Add(
-			EActorTypeEnum(1 << i), (ClassFinder.Succeeded() ? ClassFinder.Class : nullptr));
-	}
 
 // Should not call OnConstruction on drag events
 #if WITH_EDITOR
@@ -76,7 +58,7 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 		CharactersOnMap.Add(UpdateCharacter);  // Add this character
 	}
 	else  // else if this class can be added
-		if (TypesByClassesMap.FindKey(UpdateActor->GetClass()) != nullptr)
+		if (USingletonLibrary::GetSingleton()->ActorTypesByClasses.FindKey(UpdateActor->GetClass()) != nullptr)
 	{
 		const FCell* CellOfExistingActor = GridArray_.FindKey(UpdateActor);
 		if (CellOfExistingActor != nullptr && CellOfExistingActor->Location != Cell.Location)
@@ -144,7 +126,6 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 	MapScale.Z = 1;  //Height must be 1
 	SetActorScale3D(FVector(MapScale));
-	UE_LOG_STR(this, "OnConstruction \t Scale:", MapScale.ToString());
 
 	// Loopy cell-filling of the grid array
 	GridArray_.Empty();
@@ -170,16 +151,20 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 			GridArray_.Add(CellIt, nullptr);
 		}
 	}
-#if WITH_EDITOR						 //[PIE-DEBUG]
-	if (IS_PIE(GetWorld()) == true)  // For editor only
+
+	// Call to updating of all added to the Level Map actors
+	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
+
+#if WITH_EDITOR
+	USingletonLibrary::ClearOwnerTextRenders(this);
+	if (bShouldShowRenders == true)
 	{
-		USingletonLibrary::ClearOwnerTextRenders(this);
 		TArray<FCell> ArrayRenders;
 		GridArray_.GetKeys(ArrayRenders);
 		const TSet<FCell> SetRenders(ArrayRenders);
 		USingletonLibrary::AddDebugTextRenders(this, SetRenders);
 	}
-#endif  // WITH_EDITOR [PIE-DEBUG]
+#endif  // WITH_EDITOR [Editor]
 }
 
 #if WITH_EDITOR
