@@ -57,6 +57,24 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SpawnBomb();
 
+#if WITH_EDITOR
+	/**
+	 * Called when the bShouldShowRenders on this character has been modified externally
+	 * Binding or unbinding render updates of render AI on creating\destroying elements
+	 * @param PropertyChangedEvent The property that was modified
+	 * @see USingletonLibrary::OnRenderAiUpdatedDelegate
+	 * @warning Editor only
+	 */
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) final;
+#endif
+
+#if WITH_EDITORONLY_DATA
+	/** Mark updating visualization(text renders) of the bot's movements in the editor
+	 * @warning Editor only */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	bool bShouldShowRenders;
+#endif  //WITH_EDITORONLY_DATA
+
 	// Count of items that affect the abilities of a player during gameplay
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	struct FPowerUp Powerups_;

@@ -99,15 +99,12 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	// Update this actor
 	MapComponent->UpdateSelfOnMap();
 
+// Updating own explosions for non generated dragged bombs in PIE
 #if WITH_EDITOR
-	if (HasActorBegunPlay() == false)  // for editor only
+	if (IS_PIE(GetWorld()) == true)  // for editor only
 	{
-		// Updating own explosions for non generated dragged bombs in PIE
-		if (USingletonLibrary::GetLevelMap(GetWorld()) != nullptr)  // levelMap is null
-		{
-			InitializeBombProperties(nullptr, ExplosionLength, 0);
-			UE_LOG_STR("PIE: %s updated own explosions", this);
-		}
+		UE_LOG_STR("PIE: %s updates own explosions", this);
+		InitializeBombProperties(nullptr, ExplosionLength, 0);
 	}
 #endif  //WITH_EDITOR
 }
@@ -120,6 +117,7 @@ void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 	{
 		return;
 	}
+	UE_LOG_STR("OnBombDestroyed:: %s", this);
 
 	if (CharacterBombN_ != nullptr)
 	{

@@ -59,6 +59,7 @@ void AMyCharacter::Destroyed()
 		&& USingletonLibrary::GetLevelMap(World) != nullptr  // LevelMap_ is valid
 		&& IS_TRANSIENT(this) == false)						 // Component is not transient
 	{
+
 		USingletonLibrary::GetLevelMap(World)->CharactersOnMap.Remove(this);
 		UE_LOG_STR(this, "Destroyed", ":Removed from TSet");
 	}
