@@ -3,7 +3,6 @@
 #include "MapComponent.h"
 
 #include "Bomber.h"
-#include "BoxActor.h"
 #include "GeneratedMap.h"
 #include "SingletonLibrary.h"
 
@@ -25,6 +24,7 @@ void UMapComponent::UpdateSelfOnMap()
 		return;
 	}
 	UE_LOG_STR(GetOwner(), "UpdateSelfOnMap", "Starts updating");
+
 	// Find new Location at dragging and update-delegate
 	Cell = FCell(GetOwner());
 
@@ -50,7 +50,6 @@ void UMapComponent::OnComponentCreated()
 	{
 		return;
 	}
-
 	UE_LOG_STR(GetOwner(), "OnComponentCreated", "Starts creating");
 
 	// Disable tick
