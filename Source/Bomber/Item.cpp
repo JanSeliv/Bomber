@@ -17,13 +17,12 @@ AItem::AItem()
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	RootComponent->SetMobility(EComponentMobility::Movable);
 
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize item mesh
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMesh"));
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	ItemMesh->SetupAttachment(RootComponent);
 
 	// Find and fill item meshes array
@@ -57,26 +56,43 @@ void AItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)
+	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
 	{
 		return;
 	}
+
+	// Construct the actor's map component
+	MapComponent->OnMapComponentConstruction();
 
 	// Rand the item type
 	if (ItemType == EItemTypeEnum::None)
 	{
 		TArray<EItemTypeEnum> ItemTypesArray;
 		ItemTypesByMeshes.GetKeys(ItemTypesArray);
-		const int32 RandTypeNo = FMath::RandRange(int32(0), ItemTypesArray.Num() - 1);
-		ItemType = ItemTypesArray[RandTypeNo];
+		const int32 RandItemTypeNo = FMath::RandRange(int32(0), ItemTypesArray.Num() - 1);
+		ItemType = ItemTypesArray[RandItemTypeNo];
 	}
 	UStaticMesh* FoundMesh = *ItemTypesByMeshes.Find(ItemType);
 	ensureMsgf(FoundMesh != nullptr, TEXT("The item mesh of this type was not found"));
 	ItemMesh->SetStaticMesh(FoundMesh);
+}
 
-	// Update this actor
+#if WITH_EDITOR
+void AItem::PostEditMove(bool bFinished)
+{
+	Super::PostEditMove(bFinished);
+
+	if (bFinished == false					 // Not yet finished
+		|| IS_VALID(MapComponent) == false)  // is not valid for updates on the map
+	{
+		return;
+	}
+	UE_LOG_STR(this, "[Editor]PostEditMove", "-> \t UpdateSelfOnMap");
+
+	// Update this actor on the Level Map
 	MapComponent->UpdateSelfOnMap();
 }
+#endif  //WITH_EDITOR [Editor]
 
 void AItem::OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

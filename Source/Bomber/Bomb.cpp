@@ -18,15 +18,18 @@ ABomb::ABomb()
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	RootComponent->SetMobility(EComponentMobility::Movable);
 
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize bomb mesh
-	BombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bomb Mesh"));
+	BombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMesh"));
 	BombMesh->SetupAttachment(RootComponent);
-	BombMesh->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BombMesh"));
+	if (BombMeshFinder.Succeeded())
+	{
+		BombMesh->SetStaticMesh(BombMeshFinder.Object);
+	}
 
 	// Initialize explosion particle component
 	ExplosionParticle = CreateDefaultSubobject<UParticleSystem>(TEXT("Explosion Particle"));
@@ -105,24 +108,42 @@ void ABomb::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)
+	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
 	{
 		return;
 	}
 
-	// Update this actor
-	MapComponent->UpdateSelfOnMap();
+	// Construct the actor's map component
+	MapComponent->OnMapComponentConstruction();
 
 #if WITH_EDITOR
 	if (IS_PIE(GetWorld()) == true						  // for editor only
 		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
 	{
+		UE_LOG_STR(this, "[PIE]OnConstruction", "-> \t InitializeBombProperties");
 		InitializeBombProperties(*CharacterBombsN_, ExplosionLength, -1);
+		UE_LOG_STR(this, "[PIE]OnConstruction", "-> \t AddDebugTextRenders");
 		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
-		UE_LOG_STR(this, "[PIE]OnConstruction", "Updated own explosions");
 	}
 #endif  //WITH_EDITOR [PIE]
 }
+
+#if WITH_EDITOR
+void ABomb::PostEditMove(bool bFinished)
+{
+	Super::PostEditMove(bFinished);
+
+	if (bFinished == false					 // Not yet finished
+		|| IS_VALID(MapComponent) == false)  // is not valid for updates on the map
+	{
+		return;
+	}
+	UE_LOG_STR(this, "[Editor]PostEditMove", "-> \t UpdateSelfOnMap");
+
+	// Update this actor on the Level Map
+	MapComponent->UpdateSelfOnMap();
+}
+#endif  //WITH_EDITOR [Editor]
 
 void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 {

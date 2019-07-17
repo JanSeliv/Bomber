@@ -48,6 +48,11 @@ protected:
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) final;
 
+#if WITH_EDITOR
+	/** Called after an actor has been moved in the editor */
+	virtual void PostEditMove(bool bFinished) final;
+#endif  //WITH_EDITOR [Editor]
+
 	/** 
 	 * Event triggered when the actor has been explicitly destroyed
 	 * Destroys all actors from array of cells

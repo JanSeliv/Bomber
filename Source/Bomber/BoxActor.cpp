@@ -18,13 +18,12 @@ ABoxActor::ABoxActor()
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	RootComponent->SetMobility(EComponentMobility::Movable);
 
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize box mesh
-	BoxMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMesh"));
+	BoxMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxMesh"));
 	BoxMesh->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BoxMesh"));
 	if (BombMeshFinder.Succeeded())
@@ -37,14 +36,31 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)
+	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
 	{
 		return;
 	}
 
-	// Update this actor
+	// Construct the actor's map component
+	MapComponent->OnMapComponentConstruction();
+}
+
+#if WITH_EDITOR
+void ABoxActor::PostEditMove(bool bFinished)
+{
+	Super::PostEditMove(bFinished);
+
+	if (bFinished == false					 // Not yet finished
+		|| IS_VALID(MapComponent) == false)  // is not valid for updates on the map
+	{
+		return;
+	}
+	UE_LOG_STR(this, "[Editor]PostEditMove", "-> \t UpdateSelfOnMap");
+
+	// Update this actor on the Level Map
 	MapComponent->UpdateSelfOnMap();
 }
+#endif  //WITH_EDITOR [Editor]
 
 // Called when the game starts or when spawned
 void ABoxActor::BeginPlay()
