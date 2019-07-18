@@ -15,21 +15,29 @@ public:
 	/** Sets default values for this actor's properties */
 	ABoxActor();
 
-	/** The Map Component manages this actor on the Level Map */
+	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
-	/** Called when an instance of this class is placed (in editor) or spawned */
-	virtual void OnConstruction(const FTransform& Transform) final;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	class UStaticMeshComponent* BoxMesh;
 
 protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() final;
 
+	/** Called when an instance of this class is placed (in editor) or spawned */
+	virtual void OnConstruction(const FTransform& Transform) final;
+
+#if WITH_EDITOR
+	/** Called after an actor has been moved in the editor */
+	virtual void PostEditMove(bool bFinished) final;
+#endif  //WITH_EDITOR [Editor]
+
 	/** 
 	 * Event triggered when the actor has been explicitly destroyed
 	 * Spawn item with the chance 
 	 */
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnBoxDestroyed(AActor* DestroyedActor);
 };

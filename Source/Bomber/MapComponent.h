@@ -7,6 +7,7 @@
 
 #include "MapComponent.generated.h"
 
+/** Same calls and initializations for each of the level map actors */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BOMBER_API UMapComponent final : public UActorComponent
 {
@@ -16,14 +17,28 @@ public:
 	// Sets default values for this component's properties
 	UMapComponent();
 
-	// Callback function to the delegate
-	UFUNCTION()
+	/**
+	 * Should be called in the owner's OnConstruction event
+	 * Updates a owner's state */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnMapComponentConstruction();
+
+	/** 
+	 * The callback function of the delegate for owner updating on the Level Map
+	 * Additional calls on post edit move owner's events 
+	 * @see USingletonLibrary::OnActorsUpdatedDelegate
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void UpdateSelfOnMap();
 
+	/** Owner's cell location on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	struct FCell Cell;
 
 protected:
-	/** Called when a component is created (not loaded). This can happen in the editor or during gameplay */
+	/**
+	 *Called when a component is created (not loaded)
+	 * Sets owner's defaults
+	 */
 	virtual void OnComponentCreated() final;
 };
