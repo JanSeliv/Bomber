@@ -77,8 +77,7 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 30;
 	if (ItemChance)
 	{
-		USingletonLibrary::GetLevelMap(GetWorld())
-			->AddActorOnMap(GetActorTransform(), EActorTypeEnum::Item);
+		GetWorld()->SpawnActor<AActor>(*USingletonLibrary::FindClassByActorType(EActorTypeEnum::Item), GetActorTransform());
 	}
 
 	UE_LOG_STR(this, "OnBoxDestroyed", (ItemChance ? "Item spawned" : ""));

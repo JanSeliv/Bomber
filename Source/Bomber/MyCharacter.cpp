@@ -18,7 +18,7 @@ AMyCharacter::AMyCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Initialize MapComponent
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Set skeletal mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
@@ -39,18 +39,35 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)
+	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
 	{
 		return;
 	}
 
-	// Update this actor
-	MapComponent->UpdateSelfOnMap();
+	// Construct the actor's map component
+	MapComponent->OnMapComponentConstruction();
 
 	// Rotate character
 	SetActorRotation(FRotator(0.f, -90.f, 0.f));
-	UE_LOG_STR(this, "OnConstruction", *(FString("New rotation: ") + GetActorRotation().ToString()));
+	UE_LOG_STR(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
 }
+
+#if WITH_EDITOR
+void AMyCharacter::PostEditMove(bool bFinished)
+{
+	Super::PostEditMove(bFinished);
+
+	if (bFinished == false					 // Not yet finished
+		|| IS_VALID(MapComponent) == false)  // is not valid for updates on the map
+	{
+		return;
+	}
+	UE_LOG_STR(this, "[Editor]PostEditMove", "-> \t UpdateSelfOnMap");
+
+	// Update this actor on the Level Map
+	MapComponent->UpdateSelfOnMap();
+}
+#endif  //WITH_EDITOR [Editor]
 
 void AMyCharacter::Destroyed()
 {
@@ -59,9 +76,8 @@ void AMyCharacter::Destroyed()
 		&& USingletonLibrary::GetLevelMap(World) != nullptr  // LevelMap_ is valid
 		&& IS_TRANSIENT(this) == false)						 // Component is not transient
 	{
-
 		USingletonLibrary::GetLevelMap(World)->CharactersOnMap.Remove(this);
-		UE_LOG_STR(this, "Destroyed", ":Removed from TSet");
+		UE_LOG_STR(this, "Destroyed", "Removed from TSet");
 	}
 
 	// Call the base class version
@@ -79,8 +95,7 @@ void AMyCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	ABomb* const Bomb = Cast<ABomb>(USingletonLibrary::GetLevelMap(GetWorld())
-										->AddActorOnMap(GetActorTransform(), EActorTypeEnum::Bomb));
+	ABomb* const Bomb = GetWorld()->SpawnActor<ABomb>(*USingletonLibrary::FindClassByActorType(EActorTypeEnum::Bomb), GetActorTransform());
 
 	// Update material of mesh
 	if (Bomb != nullptr)

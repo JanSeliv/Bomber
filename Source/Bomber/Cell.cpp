@@ -2,18 +2,21 @@
 
 #include "Cell.h"
 
-#include "Bomber.h"
 #include "GameFramework/Actor.h"
-#include "GeneratedMap.h"
 #include "SingletonLibrary.h"
+
+FCell::FCell()
+	: Location(FVector::ZeroVector)
+{
+}
 
 FCell::FCell(const AActor* Actor)
 {
 	check(Actor);
-	AGeneratedMap* const levelMap = USingletonLibrary::GetLevelMap(Actor->GetWorld());
-	if (levelMap == nullptr)  // levelMap is null
+	if (USingletonLibrary::GetSingleton() == nullptr)  // Singleton is null
 	{
 		return;
 	}
-	this->Location = levelMap->GetNearestCell(Actor).Location;
+
+	this->Location = USingletonLibrary::GetSingleton()->MakeCell(Actor).Location;
 }

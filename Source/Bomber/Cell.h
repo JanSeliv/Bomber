@@ -4,17 +4,19 @@
 
 #include "Cell.generated.h"
 
+/** The structure that contains the location vector of each element on the Level Map */
 USTRUCT(BlueprintType, meta = (HasNativeMake = "Bomber.SingletonLibrary.MakeCell"))
 struct FCell
 {
 	GENERATED_BODY()
 
 	/** Sets default values */
-	FCell(){};
+	FCell();
 
 	/** @defgroup cell_functions Group with cell functions
-	 * 
-	 * @param Actor 
+	 * Find nearest location as cell on Grid Array
+	 * @param Actor Target to find cell location
+	 * @return The cell that was found
 	 */
 	explicit FCell(const AActor* Actor);
 

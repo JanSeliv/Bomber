@@ -16,20 +16,9 @@ void AMyAiCharacter::UpdateAI_Implementation()
 #if WITH_EDITOR
 	if (IS_PIE(GetWorld()) == true)  // for editor only
 	{
-		UE_LOG_STR(this, "[PIE]UpdateAI", "Answered");
+		UE_LOG_STR(this, "[PIE]UpdateAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(this);
 		AiMoveTo = FCell();
 	}
-#endif
-}
-
-void AMyAiCharacter::OnConstruction(const FTransform& Transform)
-{
-	if (IS_TRANSIENT(this) == true)
-	{
-		return;
-	}
-
-	// Call the AMyCharacter parent
-	Super::OnConstruction(Transform);
+#endif  //WITH_EDITOR [PIE]
 }

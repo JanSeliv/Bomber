@@ -30,6 +30,11 @@ void USingletonLibrary::BroadcastAiUpdating(AActor* Owner)
 
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
+	if (IS_VALID(Owner) == false)  // The owner is not valid
+	{
+		return;
+	}
+
 	const TArray<UActorComponent*> TextRendersArray = Owner->GetComponentsByClass(UTextRenderComponent::StaticClass());
 	if (TextRendersArray.Num() > 0)
 	{
@@ -37,7 +42,8 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 		{
 			TextRendersArray[i]->DestroyComponent();
 		}
-		UE_LOG_STR(Owner, "[Dev]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
+
+		if (IS_PIE(Owner->GetWorld())) UE_LOG_STR(Owner, "[Editor]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
 }
 
@@ -68,19 +74,15 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
 		TextRenderIt->RegisterComponent();
 	}
-	UE_LOG_STR(Owner, "[Dev]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+
+	if (IS_PIE(Owner->GetWorld())) UE_LOG_STR(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 }
 
-#endif  // WITH_EDITOR [Dev]
+#endif  // WITH_EDITOR [Editor]
 
 AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 {
-	if (GEngine == nullptr				   // Global engine pointer is null
-		|| GetSingleton() == nullptr	   // Singleton is null
-		|| WorldContextObject == nullptr)  // WorldContext is null
-	{
-		return nullptr;
-	}
+	ensureMsgf(GEngine && GetSingleton() && WorldContextObject, TEXT("GetLevelMap error"));
 
 // Find editor level map
 #if WITH_EDITOR
@@ -91,14 +93,12 @@ AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 		// Find and update the Level Map
 		TArray<AActor*> LevelMapArray;
 		UGameplayStatics::GetAllActorsOfClass(World, AGeneratedMap::StaticClass(), LevelMapArray);
-		if (LevelMapArray.Num() > 0)
+
+		if (ensure(LevelMapArray.Num() == 1)  // There should not be less or more than one Level Map instance
+			&& IS_VALID(LevelMapArray[0]))	// This level map is valid and is not transient
 		{
 			GetSingleton()->LevelMap_ = Cast<AGeneratedMap>(LevelMapArray[0]);
 			UE_LOG_STR(LevelMapArray[0], "[PIE]SingletonLibrary:GetLevelMap", "UPDATED");
-		}
-		else
-		{
-			return nullptr;
 		}
 	}
 #endif  //WITH_EDITOR [PIE]

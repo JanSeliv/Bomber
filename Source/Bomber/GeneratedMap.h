@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -58,38 +58,7 @@ public:
 		const class AMyCharacter* ExcludePlayer) const;
 
 	/**
-	 * Find the actor type by key of ActorTypesByClasses
-	 * @param ActorClass Class to find
-	 * @return Actor type
-	 * @warning Deprecated, temporary function
-	 * @todo Rewrite FindTypeByClass() to C++ IntersectionCellsByTypes() 
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DeprecatedNode))
-	FORCEINLINE EActorTypeEnum FindTypeByClass(const TSubclassOf<AActor>& ActorClass) const
-	{
-		const EActorTypeEnum* FoundedActorType = USingletonLibrary::GetSingleton()->ActorTypesByClasses.FindKey(ActorClass);
-		return (FoundedActorType != nullptr ? *FoundedActorType : EActorTypeEnum::None);
-	}
-
-	/** @ingroup actor_types
-	 * @defgroup actors_management Storing, adding and deleting actors from GridArray_
-	 * @{
-	 * Spawn specific actor by type on the given cell as child actor component of Level Map 
-	 * First step of adding actors to level map
-	 * @param Transform The location where the child actor will be standing on
-	 * @param ActorType Type of actor that will be spawned
-	 * @return Spawned child actor
-	 * @see AddACtorOnMapByObj(...)
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "ActorType"))
-	FORCEINLINE AActor* AddActorOnMap(const FTransform& Transform, const EActorTypeEnum& ActorType) const
-	{
-		const TSubclassOf<AActor>* ActorClass = USingletonLibrary::GetSingleton()->ActorTypesByClasses.Find(ActorType);
-		return (ActorClass && GetWorld() ? GetWorld()->SpawnActor<AActor>(*ActorClass, Transform) : nullptr);
-	}
-
-	/**
-	 * The overloaded function that places the actor on the Level Map, attaches a non-child actor and writes this actor to the GridArray_
+	 * The function that places the actor on the Level Map, attaches a non-child actor and writes this actor to the GridArray_
 	 * Second step of adding actors to level map
 	 * @param Cell The location where the child actor will be standing on
 	 * @param UpdateActor The spawned or dragged PIE actor

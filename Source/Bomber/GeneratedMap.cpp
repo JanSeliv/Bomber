@@ -17,12 +17,11 @@ AGeneratedMap::AGeneratedMap()
 	// Initialize root component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	RootComponent->SetRelativeScale3D(FVector(5.f, 5.f, 1.f));
-	RootComponent->SetMobility(EComponentMobility::Movable);
 
 // Should not call OnConstruction on drag events
 #if WITH_EDITOR
 	bRunConstructionScriptOnDrag = false;
-#endif  //WITH_EDITOR [Dev]
+#endif  //WITH_EDITOR [Editor]
 }
 
 TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
@@ -152,10 +151,8 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		}
 	}
 
-	// Call to updating of all added to the Level Map actors
-	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
-
 #if WITH_EDITOR
+	// Show cell coordinated of the Grid array
 	USingletonLibrary::ClearOwnerTextRenders(this);
 	if (bShouldShowRenders == true)
 	{
@@ -164,7 +161,17 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		const TSet<FCell> SetRenders(ArrayRenders);
 		USingletonLibrary::AddDebugTextRenders(this, SetRenders);
 	}
+
+	// Log bounded actors to the delegate for updating
+	for (const auto& It : USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.GetAllObjects())
+	{
+		UActorComponent* const MapComponent = Cast<UActorComponent>(It);
+		UE_LOG_STR(this, "[Editor]OnConstruction: \t OnActorsUpdatedDelegate broadcasts", *MapComponent->GetOwner()->GetName());
+	}
 #endif  // WITH_EDITOR [Editor]
+
+	// Call to updating of all added to the Level Map actors
+	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 }
 
 #if WITH_EDITOR
@@ -182,21 +189,16 @@ void AGeneratedMap::Destroyed()
 			{
 				AttachedActors[i]->Destroy();
 			}
-			UE_LOG_STR(this, "ClearLevelMap \t Actors removed:", FString::FromInt(AttachedActors.Num()));
+			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Clear();
+			UE_LOG_STR(this, "[PIE]ClearLevelMap \t Actors removed:", FString::FromInt(AttachedActors.Num()));
 		}
 
 		// Remove all elements of arrays
 		GridArray_.Empty();
 		CharactersOnMap.Empty();
 
-		// Clear Singleton properties
-		USingletonLibrary* const Singleton = USingletonLibrary::GetSingleton();
-		if (Singleton != nullptr)  // Singleton is not null
-		{
-			Singleton->LevelMap_ = nullptr;
-			Singleton->OnActorsUpdatedDelegate.Clear();
-			UE_LOG_STR(this, "[PIE]Destroyed", "Cleared the Singleton's properties");
-		}
+		// Remove from the singleton
+		USingletonLibrary::GetSingleton()->LevelMap_ = nullptr;
 	}
 
 	// Call the base class version
