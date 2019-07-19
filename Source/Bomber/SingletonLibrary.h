@@ -15,13 +15,12 @@ class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPushNongeneratedToMap);
+	DECLARE_MULTICAST_DELEGATE(FPushNongeneratedToMap);
 	/** @defgroup [Editor]Editor Runs only in editor
 	 * Owners Map Components binds to updating on the Level Map to this delegate
 	 * The Level Map broadcasts this delegate after own generation
 	 * @see class UMapComponent
 	 */
-	UPROPERTY(BlueprintCallable, Category = "C++")
 	FPushNongeneratedToMap OnActorsUpdatedDelegate;
 
 	/** @addtogroup AI

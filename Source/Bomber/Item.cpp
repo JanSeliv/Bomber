@@ -77,23 +77,6 @@ void AItem::OnConstruction(const FTransform& Transform)
 	ItemMesh->SetStaticMesh(FoundMesh);
 }
 
-#if WITH_EDITOR
-void AItem::PostEditMove(bool bFinished)
-{
-	Super::PostEditMove(bFinished);
-
-	if (bFinished == false					 // Not yet finished
-		|| IS_VALID(MapComponent) == false)  // is not valid for updates on the map
-	{
-		return;
-	}
-	UE_LOG_STR(this, "[Editor]PostEditMove", "-> \t UpdateSelfOnMap");
-
-	// Update this actor on the Level Map
-	MapComponent->UpdateSelfOnMap();
-}
-#endif  //WITH_EDITOR [Editor]
-
 void AItem::OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AMyCharacter* const OverlappedCharacter = Cast<AMyCharacter>(OtherActor);

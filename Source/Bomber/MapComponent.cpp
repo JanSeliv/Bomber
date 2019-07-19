@@ -14,12 +14,10 @@ UMapComponent::UMapComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UMapComponent::UpdateSelfOnMap()
+void UMapComponent::OnMapComponentConstruction()
 {
-	UWorld* const World = GetWorld();
-	if (World == nullptr									  // World is null
-		|| IS_VALID(GetOwner()) == false					  // owner is not valid
-		|| USingletonLibrary::GetLevelMap(World) == nullptr)  // levelMap is null
+	if (IS_VALID(GetOwner()) == false							   // The owner is not valid
+		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null)  // The Singleton is null
 	{
 		return;
 	}
@@ -29,23 +27,13 @@ void UMapComponent::UpdateSelfOnMap()
 
 	// Owner updating
 	UE_LOG_STR(GetOwner(), "UpdateSelfOnMap", "-> \t AddActorOnMapByObj");
-	USingletonLibrary::GetLevelMap(World)->AddActorOnMapByObj(Cell, GetOwner());
-
-	// Rerun owner's construction scripts
-	UE_LOG_STR(GetOwner(), "UpdateSelfOnMap", "-> \t RerunConstructionScripts");
-	GetOwner()->RerunConstructionScripts();
-}
-
-void UMapComponent::OnMapComponentConstruction()
-{
-	if (IS_VALID(GetOwner()) == false					  // The owner is not valid
-		|| USingletonLibrary::GetSingleton() == nullptr)  // The Singleton is null
-	{
-		return;
-	}
+	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(Cell, GetOwner());
 
 	// Binds to updating non-generated actors on the Level Map
-	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUniqueDynamic(this, &UMapComponent::UpdateSelfOnMap);
+	if (USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.IsBoundToObject(GetOwner()) == false)
+	{
+		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
+	}
 
 #if WITH_EDITOR
 	if (IS_PIE(GetWorld()) == true)  // PIE only

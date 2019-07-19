@@ -49,11 +49,6 @@ protected:
 	//Called when an instance of this class is placed (in editor) or spawned.
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-#if WITH_EDITOR
-	/** Called after an actor has been moved in the editor */
-	virtual void PostEditMove(bool bFinished) override;
-#endif  //WITH_EDITOR [Editor]
-
 	/** Called when this actor is explicitly being destroyed */
 	virtual void Destroyed() override;
 

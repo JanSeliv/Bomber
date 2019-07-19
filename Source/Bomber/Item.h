@@ -41,11 +41,6 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) final;
 
-#if WITH_EDITOR
-	/** Called after an actor has been moved in the editor */
-	virtual void PostEditMove(bool bFinished) final;
-#endif  //WITH_EDITOR [Editor]
-
 	/**
 	 * Called when character starts to overlaps the ItemCollisionComponent component
 	 * Increases +1 to skate\fire\bomb amount to the character
