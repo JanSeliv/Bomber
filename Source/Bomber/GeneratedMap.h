@@ -4,7 +4,6 @@
 
 #include "Bomber.h"
 #include "Cell.h"
-#include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "SingletonLibrary.h"
 

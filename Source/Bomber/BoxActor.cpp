@@ -45,23 +45,6 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 	MapComponent->OnMapComponentConstruction();
 }
 
-#if WITH_EDITOR
-void ABoxActor::PostEditMove(bool bFinished)
-{
-	Super::PostEditMove(bFinished);
-
-	if (bFinished == false					 // Not yet finished
-		|| IS_VALID(MapComponent) == false)  // is not valid for updates on the map
-	{
-		return;
-	}
-	UE_LOG_STR(this, "[Editor]PostEditMove", "-> \t UpdateSelfOnMap");
-
-	// Update this actor on the Level Map
-	MapComponent->UpdateSelfOnMap();
-}
-#endif  //WITH_EDITOR [Editor]
-
 // Called when the game starts or when spawned
 void ABoxActor::BeginPlay()
 {

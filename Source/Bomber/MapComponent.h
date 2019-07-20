@@ -23,14 +23,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnMapComponentConstruction();
 
-	/** 
-	 * The callback function of the delegate for owner updating on the Level Map
-	 * Additional calls on post edit move owner's events 
-	 * @see USingletonLibrary::OnActorsUpdatedDelegate
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void UpdateSelfOnMap();
-
 	/** Owner's cell location on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	struct FCell Cell;

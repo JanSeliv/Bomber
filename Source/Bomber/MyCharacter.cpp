@@ -52,23 +52,6 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	UE_LOG_STR(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
 }
 
-#if WITH_EDITOR
-void AMyCharacter::PostEditMove(bool bFinished)
-{
-	Super::PostEditMove(bFinished);
-
-	if (bFinished == false					 // Not yet finished
-		|| IS_VALID(MapComponent) == false)  // is not valid for updates on the map
-	{
-		return;
-	}
-	UE_LOG_STR(this, "[Editor]PostEditMove", "-> \t UpdateSelfOnMap");
-
-	// Update this actor on the Level Map
-	MapComponent->UpdateSelfOnMap();
-}
-#endif  //WITH_EDITOR [Editor]
-
 void AMyCharacter::Destroyed()
 {
 	UWorld* const World = GetWorld();

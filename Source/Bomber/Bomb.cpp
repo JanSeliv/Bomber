@@ -128,23 +128,6 @@ void ABomb::OnConstruction(const FTransform& Transform)
 #endif  //WITH_EDITOR [PIE]
 }
 
-#if WITH_EDITOR
-void ABomb::PostEditMove(bool bFinished)
-{
-	Super::PostEditMove(bFinished);
-
-	if (bFinished == false					 // Not yet finished
-		|| IS_VALID(MapComponent) == false)  // is not valid for updates on the map
-	{
-		return;
-	}
-	UE_LOG_STR(this, "[Editor]PostEditMove", "-> \t UpdateSelfOnMap");
-
-	// Update this actor on the Level Map
-	MapComponent->UpdateSelfOnMap();
-}
-#endif  //WITH_EDITOR [Editor]
-
 void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 {
 	UWorld* const World = GetWorld();

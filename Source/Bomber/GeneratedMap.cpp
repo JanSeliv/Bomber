@@ -161,13 +161,6 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		const TSet<FCell> SetRenders(ArrayRenders);
 		USingletonLibrary::AddDebugTextRenders(this, SetRenders);
 	}
-
-	// Log bounded actors to the delegate for updating
-	for (const auto& It : USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.GetAllObjects())
-	{
-		UActorComponent* const MapComponent = Cast<UActorComponent>(It);
-		UE_LOG_STR(this, "[Editor]OnConstruction: \t OnActorsUpdatedDelegate broadcasts", *MapComponent->GetOwner()->GetName());
-	}
 #endif  // WITH_EDITOR [Editor]
 
 	// Call to updating of all added to the Level Map actors
