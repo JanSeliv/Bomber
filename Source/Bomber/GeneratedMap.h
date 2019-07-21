@@ -90,21 +90,21 @@ protected:
 	 * @todo Generate only platform without boxes*/
 	virtual void OnConstruction(const FTransform& Transform) final;
 
-#if WITH_EDITOR
+#if WITH_EDITOR  // [PIE] Destroyed()
 	/** @defgroup [PIE]PlayInEditor Runs only in the editor before beginning play
 	 * Called when this actor is explicitly being destroyed*/
 	virtual void Destroyed() override;
 #endif  //WITH_EDITOR [PIE]
 
 	/** @ingroup actors_management
-	 * Actors generation
+	 * Fills the Grid Array with cells as keys and level actors as values
 	 * @see AGeneratedMap::GridArray_
 	 * @see AGeneratedMap::CharactersOnMap
 	 * @see struct FCell: Makes a grid of cells
 	 * @todo to C++ GenerateLevelMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask"))
-	void GenerateLevelMap(const uint8& ActorsTypesBitmask);
+	void GenerateLevelMap();
 
 	/** @ingroup actors_management
 	 * Storage of cells and their actors

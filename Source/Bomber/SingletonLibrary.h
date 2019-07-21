@@ -67,16 +67,32 @@ public:
 	}
 #endif  //WITH_EDITOR [Editor]
 
-	/** @addtogroup cell_functions
-	 * The custom make node of the FCell struct that used as a blueprint implementation of the default MakeStruct node
+	/** @defgroup Cell_BP_Functions The group with cell functions that used in blueprints
+	 * The custom make node of the FCell struct
+	 * Used as a blueprint implementation of the default MakeStruct node
+	 * 
 	 * @param Actor Finding the closest cell by actor
 	 * @return The found cell
 	 * @warning Deprecated, temporary function
 	 * @warning Has blueprint implementation
 	 * @todo Rewrite to C++ FCell()
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "MakeCell"))
 	FORCEINLINE struct FCell MakeCell(const class AActor* Actor) const;
+
+	/** @addtogroup Cell_BP_Functions
+	 * Calculate the length between two cells
+	 * @param C1 The first cell
+	 * @param C2 The other one cell
+	 * @return The distance between to cells
+	 * @todo FVector::Dist(X, Y);
+	 * @todo Function and Math library to .cpp file
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE float CalculateCellsLength(const struct FCell& C1, const struct FCell& C2)
+	{
+		return fabsf((C1.Location - C2.Location).Size()) / GetFloorLength();
+	}
 
 	/** 
 	 * The singleton getter
@@ -97,20 +113,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Grid Size"))
 	static FORCEINLINE float GetFloorLength()
 	{
-		return 200.0;
-	}
-
-	/** @addtogroup cell_functions
-	 * Calculate the length between two cells
-	 * @param X The first cell
-	 * @param Y The other one cell
-	 * @return The distance between to cells
-	 * @todo FVector::Dist(X, Y);
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE float CalculateCellsLength(const struct FCell& X, const struct FCell& Y)
-	{
-		return (fabsf((X.Location - Y.Location).Size()) / GetFloorLength());
+		return 200.f;
 	}
 
 	/** The Level Map getter */

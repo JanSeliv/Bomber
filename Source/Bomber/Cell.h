@@ -10,27 +10,55 @@ struct FCell
 {
 	GENERATED_BODY()
 
-	/** Sets default values */
-	FCell();
+	/** Holds the cell's FVector-coordinate. */
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	FVector Location = FVector::ZeroVector;
 
-	/** @defgroup cell_functions Group with cell functions
+	/** Default constructor (zero initialization). */
+	FCell() {}
+
+	/**
+	 * Constructor
 	 * Find nearest location as cell on Grid Array
+	 * 
 	 * @param Actor Target to find cell location
 	 * @return The cell that was found
 	 */
-	explicit FCell(const AActor* Actor);
+	explicit FCell(const class AActor* Actor);
 
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	FVector Location;
+	/**
+	* Constructor
+	* Round another FVector into this cell
+	*
+	* @param Vector The other vector.
+	* @return Reference to cell after copy.
+	*/
+	explicit FORCEINLINE FCell(struct FVector Vector)
+	{
+		this->Location.X = FMath::RoundToFloat(Vector.X);
+		this->Location.Y = FMath::RoundToFloat(Vector.Y);
+		this->Location.Z = FMath::RoundToFloat(Vector.Z);
+	}
 
-	bool operator==(const FCell& Other) const
+	/**
+	 * Compares points for equality.
+	 *
+	 * @param Other The other cell being compared.
+	 * @return true if the points are equal, false otherwise..
+	 */
+	FORCEINLINE bool operator==(const FCell& Other) const
 	{
 		return (this->Location == Other.Location);
 	}
 
-	// Hash Function
-	friend FORCEINLINE uint32 GetTypeHash(const FCell& Other)
+	/**
+	* Creates a hash value from a FCell. 
+	*
+	* @param Vector the cell to create a hash value for
+	* @return The hash value from the components
+	*/
+	friend FORCEINLINE uint32 GetTypeHash(const FCell& Vector)
 	{
-		return GetTypeHash(Other.Location);
+		return GetTypeHash(Vector.Location);
 	}
 };
