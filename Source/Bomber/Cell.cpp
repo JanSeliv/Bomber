@@ -5,11 +5,6 @@
 #include "GameFramework/Actor.h"
 #include "SingletonLibrary.h"
 
-FCell::FCell()
-	: Location(FVector::ZeroVector)
-{
-}
-
 FCell::FCell(const AActor* Actor)
 {
 	check(Actor);
@@ -18,5 +13,5 @@ FCell::FCell(const AActor* Actor)
 		return;
 	}
 
-	this->Location = USingletonLibrary::GetSingleton()->MakeCell(Actor).Location;
+	*this = USingletonLibrary::GetSingleton()->MakeCell(Actor);
 }

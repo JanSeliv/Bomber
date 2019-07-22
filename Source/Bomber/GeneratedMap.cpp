@@ -19,7 +19,7 @@ AGeneratedMap::AGeneratedMap()
 	RootComponent->SetRelativeScale3D(FVector(5.f, 5.f, 1.f));
 
 // Should not call OnConstruction on drag events
-#if WITH_EDITOR
+#if WITH_EDITOR  // [Editor] bRunConstructionScriptOnDrag
 	bRunConstructionScriptOnDrag = false;
 #endif  //WITH_EDITOR [Editor]
 }
@@ -60,7 +60,7 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 		if (USingletonLibrary::GetSingleton()->ActorTypesByClasses.FindKey(UpdateActor->GetClass()) != nullptr)
 	{
 		const FCell* CellOfExistingActor = GridArray_.FindKey(UpdateActor);
-		if (CellOfExistingActor != nullptr && CellOfExistingActor->Location != Cell.Location)
+		if (CellOfExistingActor != nullptr && !(*CellOfExistingActor == Cell))
 		{
 			GridArray_.Add(*CellOfExistingActor);  // remove this actor from previous cell
 			UE_LOG_STR(UpdateActor, "AddActorOnMapByObj", "Removed existed actor from cell");
@@ -101,7 +101,7 @@ void AGeneratedMap::BeginPlay()
 	CharactersOnMap.Shrink();
 
 	// Loopy walls generation
-	GenerateLevelMap((uint8)EActorTypeEnum::Wall & (uint8)EActorTypeEnum::Box & (uint8)EActorTypeEnum::Player);
+	GenerateLevelMap();
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -126,32 +126,10 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	MapScale.Z = 1;  //Height must be 1
 	SetActorScale3D(FVector(MapScale));
 
-	// Loopy cell-filling of the grid array
-	GridArray_.Empty();
-	for (int32 x = 0; x < MapScale.X; ++x)
-	{
-		for (int32 y = 0; y < MapScale.Y; ++y)
-		{
-			FCell CellIt;
-			// Calculate a length of iteration cell
-			CellIt.Location = FVector(x, y, 0.f) * USingletonLibrary::GetFloorLength();
-			// Locate the cell relative to the Level Map
-			CellIt.Location += GetActorLocation();
-			// Subtract the deviation from the center
-			CellIt.Location -= (GetActorScale3D() / 2 * USingletonLibrary::GetFloorLength());
-			// Snap to the cell
-			CellIt.Location = CellIt.Location.GridSnap(USingletonLibrary::GetFloorLength());
-			// Rotate the cell around center
-			const FVector RelativePos{(CellIt.Location - GetActorLocation())};
-			CellIt.Location += RelativePos.RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 0, 1)) - RelativePos;
-			// Round the cell
-			CellIt.Location = FVector(FIntVector(CellIt.Location));
+	//
+	GenerateLevelMap();
 
-			GridArray_.Add(CellIt, nullptr);
-		}
-	}
-
-#if WITH_EDITOR
+#if WITH_EDITOR  // [Editor] Map's text renders
 	// Show cell coordinated of the Grid array
 	USingletonLibrary::ClearOwnerTextRenders(this);
 	if (bShouldShowRenders == true)
@@ -167,7 +145,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 }
 
-#if WITH_EDITOR
+#if WITH_EDITOR  // [PIE] Destroyed()
 void AGeneratedMap::Destroyed()
 {
 	if (IS_PIE(GetWorld()) == true		 // For editor only
@@ -200,7 +178,32 @@ void AGeneratedMap::Destroyed()
 
 #endif  //WITH_EDITOR [PIE]
 
-void AGeneratedMap::GenerateLevelMap_Implementation(const uint8& ActorsTypesBitmask)
+void AGeneratedMap::GenerateLevelMap_Implementation()
 {
+	const FIntVector ActorScale(GetActorScale3D() - 1);
+
+	// Loopy cell-filling of the grid array
+	GridArray_.Empty();
+	for (int32 Y = 0; Y <= ActorScale.Y; ++Y)
+	{
+		for (int32 X = 0; X <= ActorScale.X; ++X)
+		{
+			FVector FoundVector;
+			// Calculate a length of iteration cell
+			FoundVector = FVector(X, Y, 0.f) * USingletonLibrary::GetFloorLength();
+			// Locate the cell relative to the Level Map
+			FoundVector += GetActorLocation();
+			// Subtract the deviation from the center
+			FoundVector -= (GetActorScale3D() / 2 * USingletonLibrary::GetFloorLength());
+			// Snap to the cell
+			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetFloorLength());
+			// Rotate the cell around center
+			const FVector RelativePos(FoundVector - GetActorLocation());
+			FoundVector += RelativePos.RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 0, 1)) - RelativePos;
+
+			const FCell FoundCell(FoundVector);
+			GridArray_.Add(FoundCell, nullptr);
+		}
+	}
 	//Generation on free from actors cells
 }
