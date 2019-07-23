@@ -121,13 +121,34 @@ public:
 	static class AGeneratedMap* const GetLevelMap(UObject* WorldContextObject);
 
 	/** @addtogroup actor_types
-	 * Find the actor type key by class value in the ActorTypesByClasses dictionary */
+	 * Find the actor type key by class value in the ActorTypesByClasses dictionary
+	 * @todo BitmaskContainsBit if((bit != 0) && (Bitmask & bit == bit))
+	 */
+	/* // Deprecated
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
 	static FORCEINLINE EActorTypeEnum FindActorTypeByClass(const TSubclassOf<AActor>& ActorClass)
 	{
 		const EActorTypeEnum* FoundActorType = GetSingleton()->ActorTypesByClasses.FindKey(ActorClass);
 		return (FoundActorType != nullptr ? *FoundActorType : EActorTypeEnum::None);
 	}
+	*/
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType,Bitmask", CompactNodeTitle = "&"))
+	static bool IsBitmaskContainsBit(
+		const EActorTypeEnum& ActorType,
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& Bitmask);
+
+	/** @addtogroup actor_types
+	 * Check for the content of the actor type among incoming types
+	 * 
+	 * @param Actor The level actor for comparison
+	 * @param Bitmask Enumerations of actors types
+	 * @return true if bitmask contains the actor's type
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Bitmask"))
+	static bool IsActorInTypes(
+		const AActor* Actor,
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& Bitmask);
 
 	/** @addtogroup actor_types
 	 * Find the class value by actor type key in the ActorTypesByClasses dictionary */
