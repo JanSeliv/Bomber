@@ -7,6 +7,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "MyCharacter.h"
 #include "SingletonLibrary.h"
+#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
@@ -14,24 +15,41 @@ AGeneratedMap::AGeneratedMap()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	// Should not call OnConstruction on drag events
+#if WITH_EDITOR  // [Editor] bRunConstructionScriptOnDrag
+	bRunConstructionScriptOnDrag = false;
+#endif  //WITH_EDITOR [Editor]
+
 	// Initialize root component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	RootComponent->SetRelativeScale3D(FVector(5.f, 5.f, 1.f));
-	RootComponent->SetMobility(EComponentMobility::Movable);
 
-// Should not call OnConstruction on drag events
-#if WITH_EDITOR
-	bRunConstructionScriptOnDrag = false;
-#endif  //WITH_EDITOR [Dev]
+	// Initialize background mesh component
+	BackgroundMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BackgroundMeshComponent"));
+	BackgroundMeshComponent->SetupAttachment(RootComponent);
+	BackgroundMeshComponent->bAbsoluteScale = true;
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BackgroundMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BackgroundMesh"));
+	if (BackgroundMeshFinder.Succeeded())
+	{
+		BackgroundMeshComponent->SetStaticMesh(BackgroundMeshFinder.Object);
+	}
+
+	// Initialize platform component
+	auto PlatformComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("PlatformComponent"));
+	PlatformComponent->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FClassFinder<AActor> PlatformClassFinder(TEXT("/Game/Bomber/Assets/PlatformAsset"));
+	if (PlatformClassFinder.Succeeded())
+	{
+		PlatformComponent->SetChildActorClass(PlatformClassFinder.Class);
+	}
 }
 
 TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
 	const TSet<FCell>& Cells,
-	const uint8& ActorsTypesBitmask,
+	const int32& ActorsTypesBitmask,
 	const AMyCharacter* ExcludePlayer) const
 {
-	TSet<FCell> FoundedLocations;
-	return FoundedLocations;
+	return Cells;
 }
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
@@ -61,7 +79,7 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 		if (USingletonLibrary::GetSingleton()->ActorTypesByClasses.FindKey(UpdateActor->GetClass()) != nullptr)
 	{
 		const FCell* CellOfExistingActor = GridArray_.FindKey(UpdateActor);
-		if (CellOfExistingActor != nullptr && CellOfExistingActor->Location != Cell.Location)
+		if (CellOfExistingActor != nullptr && !(*CellOfExistingActor == Cell))
 		{
 			GridArray_.Add(*CellOfExistingActor);  // remove this actor from previous cell
 			UE_LOG_STR(UpdateActor, "AddActorOnMapByObj", "Removed existed actor from cell");
@@ -101,8 +119,8 @@ void AGeneratedMap::BeginPlay()
 	CharactersOnMap.Compact();
 	CharactersOnMap.Shrink();
 
-	// Loopy walls generation
-	GenerateLevelMap((uint8)EActorTypeEnum::Wall & (uint8)EActorTypeEnum::Box & (uint8)EActorTypeEnum::Player);
+	// Boxes generation
+	GenerateLevelActors(1 << int32(EActorTypeEnum::Box));
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -129,33 +147,30 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 	// Loopy cell-filling of the grid array
 	GridArray_.Empty();
-	for (int32 x = 0; x < MapScale.X; ++x)
+	for (int32 Y = 0; Y < MapScale.Y; ++Y)
 	{
-		for (int32 y = 0; y < MapScale.Y; ++y)
+		for (int32 X = 0; X < MapScale.X; ++X)
 		{
-			FCell CellIt;
+			FVector FoundVector(X, Y, 0.f);
 			// Calculate a length of iteration cell
-			CellIt.Location = FVector(x, y, 0.f) * USingletonLibrary::GetFloorLength();
+			FoundVector *= USingletonLibrary::GetFloorLength();
 			// Locate the cell relative to the Level Map
-			CellIt.Location += GetActorLocation();
+			FoundVector += GetActorLocation();
 			// Subtract the deviation from the center
-			CellIt.Location -= (GetActorScale3D() / 2 * USingletonLibrary::GetFloorLength());
+			FoundVector -= (GetActorScale3D() / 2 * USingletonLibrary::GetFloorLength());
 			// Snap to the cell
-			CellIt.Location = CellIt.Location.GridSnap(USingletonLibrary::GetFloorLength());
+			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetFloorLength());
 			// Rotate the cell around center
-			const FVector RelativePos{(CellIt.Location - GetActorLocation())};
-			CellIt.Location += RelativePos.RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 0, 1)) - RelativePos;
-			// Round the cell
-			CellIt.Location = FVector(FIntVector(CellIt.Location));
-
-			GridArray_.Add(CellIt, nullptr);
+			const FVector RelativePos(FoundVector - GetActorLocation());
+			FoundVector += RelativePos.RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 0, 1)) - RelativePos;
+			// Cell was found, add it to the array
+			const FCell FoundCell(FoundVector);
+			GridArray_.Add(FoundCell);
 		}
 	}
 
-	// Call to updating of all added to the Level Map actors
-	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
-
-#if WITH_EDITOR
+#if WITH_EDITOR  // [Editor] Map's text renders
+	// Show cell coordinated of the Grid array
 	USingletonLibrary::ClearOwnerTextRenders(this);
 	if (bShouldShowRenders == true)
 	{
@@ -165,9 +180,18 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		USingletonLibrary::AddDebugTextRenders(this, SetRenders);
 	}
 #endif  // WITH_EDITOR [Editor]
+
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+	UE_LOG_STR(this, "OnConstruction: \t Num of attached actors", FString::FromInt(AttachedActors.Num()));
+	if (AttachedActors.Num() == 1)  // There is only a platform
+	{
+		// Walls and Players generation
+		GenerateLevelActors(1 << int32(EActorTypeEnum::Wall) | 1 << int32(EActorTypeEnum::Player));
+	}
 }
 
-#if WITH_EDITOR
+#if WITH_EDITOR  // [PIE] Destroyed()
 void AGeneratedMap::Destroyed()
 {
 	if (IS_PIE(GetWorld()) == true		 // For editor only
@@ -176,27 +200,22 @@ void AGeneratedMap::Destroyed()
 		// Destroy all attached actors
 		TArray<AActor*> AttachedActors;
 		GetAttachedActors(AttachedActors);
-		if (AttachedActors.Num() > 0)
+		if (AttachedActors.Num() > 1)  //
 		{
 			for (int32 i = AttachedActors.Num() - 1; i >= 0; --i)
 			{
 				AttachedActors[i]->Destroy();
 			}
-			UE_LOG_STR(this, "ClearLevelMap \t Actors removed:", FString::FromInt(AttachedActors.Num()));
+			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Clear();
+			UE_LOG_STR(this, "[PIE]ClearLevelMap \t Actors removed:", FString::FromInt(AttachedActors.Num()));
 		}
 
 		// Remove all elements of arrays
 		GridArray_.Empty();
 		CharactersOnMap.Empty();
 
-		// Clear Singleton properties
-		USingletonLibrary* const Singleton = USingletonLibrary::GetSingleton();
-		if (Singleton != nullptr)  // Singleton is not null
-		{
-			Singleton->LevelMap_ = nullptr;
-			Singleton->OnActorsUpdatedDelegate.Clear();
-			UE_LOG_STR(this, "[PIE]Destroyed", "Cleared the Singleton's properties");
-		}
+		// Remove from the singleton
+		USingletonLibrary::GetSingleton()->LevelMap_ = nullptr;
 	}
 
 	// Call the base class version
@@ -205,7 +224,8 @@ void AGeneratedMap::Destroyed()
 
 #endif  //WITH_EDITOR [PIE]
 
-void AGeneratedMap::GenerateLevelMap_Implementation(const uint8& ActorsTypesBitmask)
+void AGeneratedMap::GenerateLevelActors_Implementation(const int32& ActorsTypesBitmask)
 {
-	//Generation on free from actors cells
+	// Call to updating of all added to the Level Map actors
+	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 }
