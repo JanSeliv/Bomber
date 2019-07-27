@@ -95,6 +95,13 @@ protected:
 	virtual void Destroyed() override;
 #endif  //WITH_EDITOR [PIE]
 
+	/**
+	 * Destroy all attached level actors
+	 * @param bIsEditorOnlyActors Should destroy editor-only actors that were spawned in the PIE world, otherwise will be destroyed all the level map's actors
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly))
+	void DestroyAttachedActors(bool bIsEditorOnlyActors = false) const;
+
 	/** @ingroup actors_management
 	 * Spawns and fills the Grid Array values by level actors
 	 * @see AGeneratedMap::GridArray_
@@ -104,7 +111,8 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask"))
 	void GenerateLevelActors(
-		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask,
+		UPARAM(ref) const FCell& Cell);
 
 	/** @ingroup actors_management
 	 * Storage of cells and their actors

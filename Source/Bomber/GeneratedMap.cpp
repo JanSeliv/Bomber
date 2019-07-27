@@ -120,7 +120,7 @@ void AGeneratedMap::BeginPlay()
 	CharactersOnMap.Shrink();
 
 	// Boxes generation
-	GenerateLevelActors(1 << int32(EActorTypeEnum::Box));
+	GenerateLevelActors(1 << int32(EActorTypeEnum::Box), FCell::ZeroCell);
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -169,26 +169,31 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		}
 	}
 
-#if WITH_EDITOR  // [Editor] Map's text renders
-	// Show cell coordinated of the Grid array
-	USingletonLibrary::ClearOwnerTextRenders(this);
-	if (bShouldShowRenders == true)
+#if WITH_EDITOR						 // [PIE] Map's text renders
+	if (IS_PIE(GetWorld()) == true)  // For editor only
 	{
-		TArray<FCell> ArrayRenders;
-		GridArray_.GetKeys(ArrayRenders);
-		const TSet<FCell> SetRenders(ArrayRenders);
-		USingletonLibrary::AddDebugTextRenders(this, SetRenders);
+		// Destroy editor-only actors that were spawned in the PIE
+		DestroyAttachedActors(true);
+
+		// Show cell coordinated of the Grid array
+		USingletonLibrary::ClearOwnerTextRenders(this);
+		if (bShouldShowRenders == true)
+		{
+			TArray<FCell> ArrayRenders;
+			GridArray_.GetKeys(ArrayRenders);
+			const TSet<FCell> SetRenders(ArrayRenders);
+			USingletonLibrary::AddDebugTextRenders(this, SetRenders);
+		}
 	}
+
 #endif  // WITH_EDITOR [Editor]
 
-	TArray<AActor*> AttachedActors;
-	GetAttachedActors(AttachedActors);
-	UE_LOG_STR(this, "OnConstruction: \t Num of attached actors", FString::FromInt(AttachedActors.Num()));
-	if (AttachedActors.Num() == 1)  // There is only a platform
-	{
-		// Walls and Players generation
-		GenerateLevelActors(1 << int32(EActorTypeEnum::Wall) | 1 << int32(EActorTypeEnum::Player));
-	}
+	// After destroying PIE actors and before their generation,
+	// calling to updating of all dragged to the Level Map actors
+	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
+
+	// Walls and Players generation
+	GenerateLevelActors(1 << int32(EActorTypeEnum::Wall) | 1 << int32(EActorTypeEnum::Player), FCell::ZeroCell);
 }
 
 #if WITH_EDITOR  // [PIE] Destroyed()
@@ -197,18 +202,9 @@ void AGeneratedMap::Destroyed()
 	if (IS_PIE(GetWorld()) == true		 // For editor only
 		&& IS_TRANSIENT(this) == false)  // Component is not transient
 	{
-		// Destroy all attached actors
-		TArray<AActor*> AttachedActors;
-		GetAttachedActors(AttachedActors);
-		if (AttachedActors.Num() > 1)  //
-		{
-			for (int32 i = AttachedActors.Num() - 1; i >= 0; --i)
-			{
-				AttachedActors[i]->Destroy();
-			}
-			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Clear();
-			UE_LOG_STR(this, "[PIE]ClearLevelMap \t Actors removed:", FString::FromInt(AttachedActors.Num()));
-		}
+		DestroyAttachedActors();
+
+		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Clear();
 
 		// Remove all elements of arrays
 		GridArray_.Empty();
@@ -222,10 +218,43 @@ void AGeneratedMap::Destroyed()
 	Super::Destroyed();
 }
 
+void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors) const
+{
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+	if (AttachedActors.Num() == 0)
+	{
+		return;
+	}
+
+	for (int32 i = AttachedActors.Num() - 1; i >= 0; --i)
+	{
+		if (bIsEditorOnlyActors == false		   // Should destroy all actors
+			|| AttachedActors[i]->IsEditorOnly())  // Should destroy editor-only actors
+		{
+			UE_LOG_STR(AttachedActors[i], "DestroyAttachedActors", "Will be removed")
+			AttachedActors[i]->Destroy();
+		}
+	}
+}
+
 #endif  //WITH_EDITOR [PIE]
 
-void AGeneratedMap::GenerateLevelActors_Implementation(const int32& ActorsTypesBitmask)
+void AGeneratedMap::GenerateLevelActors_Implementation(const int32& ActorsTypesBitmask, const FCell& Cell)
 {
-	// Call to updating of all added to the Level Map actors
-	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
+	const auto ActorClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum(ActorsTypesBitmask));
+	if (ActorClass == nullptr)
+	{
+		return;
+	}
+
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, Cell.Location, FRotator::ZeroRotator);
+
+// If PIE world, mark this spawned actor as bIsEditorOnlyActor
+#if WITH_EDITOR  // [PIE]
+	if (IS_PIE(GetWorld()))
+	{
+		SpawnedActor->bIsEditorOnlyActor = true;
+	}
+#endif  // WITH_EDITOR [PIE]
 }
