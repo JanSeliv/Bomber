@@ -30,6 +30,11 @@ void USingletonLibrary::BroadcastAiUpdating(AActor* Owner)
 
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
+	if (IS_VALID(Owner) == false)  // The owner is not valid
+	{
+		return;
+	}
+
 	const TArray<UActorComponent*> TextRendersArray = Owner->GetComponentsByClass(UTextRenderComponent::StaticClass());
 	if (TextRendersArray.Num() > 0)
 	{
@@ -37,7 +42,8 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 		{
 			TextRendersArray[i]->DestroyComponent();
 		}
-		UE_LOG_STR(Owner, "[Dev]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
+
+		if (IS_PIE(Owner->GetWorld())) UE_LOG_STR(Owner, "[Editor]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
 }
 
@@ -56,7 +62,8 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	if ((MyAiCharacter != nullptr							// Successfully cast to AI
 			&& MyAiCharacter->bShouldShowRenders == false)  // Is not render AI
 		|| Cells.Num() == NULL								// Null length
-		|| IS_VALID(Owner) == false)						// Owner is not valid
+		|| IS_VALID(Owner) == false							// Owner is not valid
+		|| IS_VALID(GetLevelMap(Owner->GetWorld())) == false)
 	{
 		return;
 	}
@@ -68,19 +75,35 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
 		TextRenderIt->RegisterComponent();
 	}
-	UE_LOG_STR(Owner, "[Dev]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+
+	if (IS_PIE(Owner->GetWorld())) UE_LOG_STR(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 }
 
-#endif  // WITH_EDITOR [Dev]
+void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor)
+{
+	bool bOutBool = false;
+	TArray<class UTextRenderComponent*> OutArray{};
+	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray);
+}
+
+#endif  // WITH_EDITOR [Editor]
+
+FCell USingletonLibrary::MakeCell_Implementation(const AActor* Actor) const
+{
+	return FCell::ZeroCell;
+}
+
+USingletonLibrary* USingletonLibrary::GetSingleton()
+{
+	USingletonLibrary* Singleton = nullptr;
+	if (GEngine) Singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
+	ensureMsgf(Singleton != nullptr, TEXT("The Singleton is null"));
+	return Singleton;
+}
 
 AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 {
-	if (GEngine == nullptr				   // Global engine pointer is null
-		|| GetSingleton() == nullptr	   // Singleton is null
-		|| WorldContextObject == nullptr)  // WorldContext is null
-	{
-		return nullptr;
-	}
+	ensureMsgf(GEngine && GetSingleton() && WorldContextObject, TEXT("GetLevelMap error"));
 
 // Find editor level map
 #if WITH_EDITOR
@@ -91,17 +114,31 @@ AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 		// Find and update the Level Map
 		TArray<AActor*> LevelMapArray;
 		UGameplayStatics::GetAllActorsOfClass(World, AGeneratedMap::StaticClass(), LevelMapArray);
-		if (LevelMapArray.Num() > 0)
+
+		if (ensure(LevelMapArray.Num() == 1)  // There should not be less or more than one Level Map instance
+			&& IS_VALID(LevelMapArray[0]))	// This level map is valid and is not transient
 		{
 			GetSingleton()->LevelMap_ = Cast<AGeneratedMap>(LevelMapArray[0]);
 			UE_LOG_STR(LevelMapArray[0], "[PIE]SingletonLibrary:GetLevelMap", "UPDATED");
-		}
-		else
-		{
-			return nullptr;
 		}
 	}
 #endif  //WITH_EDITOR [PIE]
 
 	return GetSingleton()->LevelMap_;
+}
+
+bool USingletonLibrary::IsActorInTypes(const AActor* Actor, const int32& Bitmask)
+{
+	if (IS_VALID(Actor) == false) return false;  // The actor is null
+
+	const EActorTypeEnum* FoundActorType = GetSingleton()->ActorTypesByClasses.FindKey(Actor->GetClass());
+	if (FoundActorType == nullptr) return false;
+
+	return ContainsActorType(*FoundActorType, Bitmask);
+}
+
+TSubclassOf<AActor> USingletonLibrary::FindClassByActorType(const EActorTypeEnum& ActorType)
+{
+	const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses.Find(ActorType);
+	return (ActorClass != nullptr ? *ActorClass : nullptr);
 }

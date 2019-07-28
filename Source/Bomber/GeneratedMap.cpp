@@ -120,7 +120,7 @@ void AGeneratedMap::BeginPlay()
 	CharactersOnMap.Shrink();
 
 	// Boxes generation
-	GenerateLevelActors(1 << int32(EActorTypeEnum::Box), FCell::ZeroCell);
+	GenerateLevelActors(TO_FLAG(EActorTypeEnum::Box), FCell::ZeroCell);
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -132,7 +132,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 	// Align the Transform
 	SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
-	SetActorLocation(GetActorLocation().GridSnap(USingletonLibrary::GetFloorLength()));
+	SetActorLocation(GetActorLocation().GridSnap(USingletonLibrary::GetGridSize()));
 	FIntVector MapScale(GetActorScale3D());
 	if (MapScale.X % 2 != 1)  // Length must be unpaired
 	{
@@ -153,13 +153,13 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		{
 			FVector FoundVector(X, Y, 0.f);
 			// Calculate a length of iteration cell
-			FoundVector *= USingletonLibrary::GetFloorLength();
+			FoundVector *= USingletonLibrary::GetGridSize();
 			// Locate the cell relative to the Level Map
 			FoundVector += GetActorLocation();
 			// Subtract the deviation from the center
-			FoundVector -= (GetActorScale3D() / 2 * USingletonLibrary::GetFloorLength());
+			FoundVector -= (GetActorScale3D() / 2 * USingletonLibrary::GetGridSize());
 			// Snap to the cell
-			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetFloorLength());
+			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetGridSize());
 			// Rotate the cell around center
 			const FVector RelativePos(FoundVector - GetActorLocation());
 			FoundVector += RelativePos.RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 0, 1)) - RelativePos;
@@ -193,7 +193,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 
 	// Walls and Players generation
-	GenerateLevelActors(1 << int32(EActorTypeEnum::Wall) | 1 << int32(EActorTypeEnum::Player), FCell::ZeroCell);
+	GenerateLevelActors(EActorTypeEnum::Wall | EActorTypeEnum::Player, FCell::ZeroCell);
 }
 
 #if WITH_EDITOR  // [PIE] Destroyed()
@@ -251,8 +251,9 @@ void AGeneratedMap::GenerateLevelActors_Implementation(const int32& ActorsTypesB
 	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, Cell.Location, FRotator::ZeroRotator);
 
 // If PIE world, mark this spawned actor as bIsEditorOnlyActor
-#if WITH_EDITOR  // [PIE]
-	if (IS_PIE(GetWorld()))
+#if WITH_EDITOR						// [PIE]
+	if (IS_PIE(GetWorld())			// PIE only
+		&& IS_VALID(SpawnedActor))  // Successfully spawn
 	{
 		SpawnedActor->bIsEditorOnlyActor = true;
 	}

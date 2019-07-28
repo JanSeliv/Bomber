@@ -15,19 +15,16 @@ class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-#if WITH_EDITORONLY_DATA
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPushNongeneratedToMap);
-	/** @defgroup [Dev]Editor Runs only in editor
+	DECLARE_MULTICAST_DELEGATE(FPushNongeneratedToMap);
+	/** @defgroup [Editor]Editor Runs only in editor
 	 * Owners Map Components binds to updating on the Level Map to this delegate
 	 * The Level Map broadcasts this delegate after own generation
 	 * @see class UMapComponent
 	 */
-	UPROPERTY(BlueprintCallable, Category = "C++")
 	FPushNongeneratedToMap OnActorsUpdatedDelegate;
-#endif  // WITH_EDITORONLY_DATA
 
 	/** @addtogroup AI
-	 * @addtogroup [Dev]Editor
+	 * @addtogroup [Editor]Editor
 	 * Call all signed as bShouldShowRenders AI characters
 	 * @param Owner The called owner
 	 * @warning Is not static for OnDestroyed binding
@@ -35,12 +32,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void BroadcastAiUpdating(AActor* Owner);
 
-	/** @addtogroup [Dev]Editor
+	/** @addtogroup [Editor]Editor
 	 *Remove all text renders of the Owner */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
 	static void ClearOwnerTextRenders(class AActor* Owner);
 
-	/** @addtogroup [Dev]Editor
+	/** @addtogroup [Editor]Editor
 	 * Debug visualization by text renders
 	 * @warning PIE only
 	 * @warning Has blueprint implementation
@@ -56,76 +53,99 @@ public:
 		float TextSize = 124.0f,
 		const FText& RenderText = FText::GetEmpty(),
 		const FVector& CoordinatePosition = FVector(0.f)) const;
+
 #if WITH_EDITOR
-	/** @addtogroup [Dev]Editor
+	/** @addtogroup [Editor]Editor
 	 *Shortest overloading of debugging visualization*/
-	static FORCEINLINE void AddDebugTextRenders(
+	static void AddDebugTextRenders(
 		class AActor* Owner,
 		const TSet<struct FCell>& Cells,
-		const struct FLinearColor& TextColor = FLinearColor::Black)
-	{
-		bool bOutBool = false;
-		TArray<class UTextRenderComponent*> OutArray{};
-		GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray);
-	}
-#endif  //WITH_EDITOR [Dev]
-
-	/** @addtogroup cell_functions
-	 * The custom make node of the FCell struct that used as a blueprint implementation of the default MakeStruct node
-	 * @param Actor Finding the closest cell by actor
-	 * @return The found cell
-	 * @warning Deprecated, temporary function
-	 * @warning Has blueprint implementation
-	 * @todo Rewrite to C++ FCell()
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "toCell"))
-	FORCEINLINE struct FCell MakeCell(const class AActor* Actor) const;
+		const struct FLinearColor& TextColor = FLinearColor::Black);
+#endif  //WITH_EDITOR [Editor]
 
 	/** 
 	 * The singleton getter
 	 * @return The singleton, nullptr otherwise
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE USingletonLibrary* GetSingleton()
-	{
-		if (GEngine == nullptr) return nullptr;
-		return Cast<USingletonLibrary>(GEngine->GameSingleton);
-	}
-
-	/** @addtogroup cell_functions
-	 * @return The length of one cell (a floor bound)
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Grid Size"))
-	static FORCEINLINE float GetFloorLength()
-	{
-		return 200.0;
-	}
-
-	/** @addtogroup cell_functions
-	 * Calculate the length between two cells
-	 * @param X The first cell
-	 * @param Y The other one cell
-	 * @return The distance between to cells
-	 */
-	UFUNCTION(BlueprintPure, BlueprintCallable, Category = "C++")
-	static FORCEINLINE float CalculateCellsLength(const struct FCell& X, const struct FCell& Y)
-	{
-		return (fabsf((X.Location - Y.Location).Size()) / GetFloorLength());
-	}
+	static USingletonLibrary* GetSingleton();
 
 	/** The Level Map getter */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class AGeneratedMap* const GetLevelMap(UObject* WorldContextObject);
 
+	/** @defgroup Cell_BP_Functions The group with cell functions that used in blueprints
+	 * The custom make node of the FCell struct
+	 * Used as a blueprint implementation of the default MakeStruct node
+	 * 
+	 * @param Actor Finding the closest cell by actor
+	 * @return The found cell
+	 * @warning Deprecated, temporary function
+	 * @warning Has blueprint implementation
+	 * @todo Rewrite to C++ FCell()
+	 * @todo #5 Nearest cell: replace thisCell to the FoundCell and with_editor things
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "MakeCell"))
+	struct FCell MakeCell(const class AActor* Actor) const;
+
+	/** @addtogroup cell_functions
+	 * @return The length of one cell (a floor bound)
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE float GetGridSize()
+	{
+		return 200.f;
+	}
+
+	/** @addtogroup Cell_BP_Functions
+	 * Calculate the length between two cells
+	 * @param C1 The first cell
+	 * @param C2 The other one cell
+	 * @return The distance between to cells
+	 * @todo FVector::Dist(X, Y);
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE float CalculateCellsLength(const struct FCell& C1, const struct FCell& C2)
+	{
+		return fabsf((C1.Location - C2.Location).Size()) / GetGridSize();
+	}
+
 	/** @addtogroup actor_types
-	 * Type and its class as associated pairs  */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
-	TMap<EActorTypeEnum, TSubclassOf<AActor>> ActorTypesByClasses;
+	 * Bitwise and(&) operation with the bitmask of actor types*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType,Bitmask", CompactNodeTitle = "&"))
+	static FORCEINLINE bool ContainsActorType(
+		const EActorTypeEnum& ActorType,
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& Bitmask)
+	{
+		return (TO_FLAG(ActorType) & Bitmask) != 0;
+	}
+
+	/** @addtogroup actor_types
+	 * Check for the content of the actor type among incoming types
+	 * 
+	 * @param Actor The level actor for comparison
+	 * @param Bitmask Enumerations of actors types
+	 * @return true if bitmask contains the actor's type
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Bitmask"))
+	static bool IsActorInTypes(
+		const AActor* Actor,
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& Bitmask);
+
+	/** @addtogroup actor_types
+	 * Find the class value by actor type key in the ActorTypesByClasses dictionary */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType"))
+	static TSubclassOf<AActor> FindClassByActorType(const EActorTypeEnum& ActorType);
 
 protected:
 	/** The reference to the AGeneratedMap actor*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	class AGeneratedMap* LevelMap_;
+
+	/** @addtogroup actor_types
+	 * Type and its class as associated pairs  */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
+	TMap<EActorTypeEnum, TSubclassOf<AActor>> ActorTypesByClasses;
 
 	/** Access to the Level Map to keep an in gaming valid reference */
 	friend class AGeneratedMap;
