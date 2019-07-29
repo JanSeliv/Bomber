@@ -13,9 +13,9 @@ class BOMBER_API AMyPlayerController final : public APlayerController
 public:
 	AMyPlayerController();
 
-	void BeginPlay() override;
+	void BeginPlay() final;
 
-	void SetupInputComponent() override;
+	void SetupInputComponent() final;
 
 	//widgets
 	UPROPERTY(BlueprintReadOnly, Category = "C++")

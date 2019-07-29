@@ -5,8 +5,6 @@
 #include "Engine\World.h"
 #include "Kismet/GameplayStatics.h"
 
-#define UE_LOG_STR(UObj, FunctionChars, String) UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), *UObj->GetName(), *FString(FunctionChars), *FString(String))
-
 #define IS_TRANSIENT(Obj) ((Obj->HasAllFlags(RF_Transient) || (Obj->GetWorld() == nullptr) || (UGameplayStatics::GetCurrentLevelName(Obj->GetWorld()) == "Transient")))
 #define IS_VALID(Obj) (IsValid(Obj) && (Obj)->IsValidLowLevel() && !IS_TRANSIENT(Obj))
 

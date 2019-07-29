@@ -32,6 +32,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void BroadcastAiUpdating(AActor* Owner);
 
+	/** Blueprint debug function, that prints messages to the log */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))  //
+	static FORCEINLINE int32 PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), *UObj->GetName(), *FunctionName, *Message);
+		return 0;
+	}
+
 	/** @addtogroup [Editor]Editor
 	 *Remove all text renders of the Owner */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
@@ -88,7 +96,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "MakeCell"))
 	struct FCell MakeCell(const class AActor* Actor) const;
 
-	/** @addtogroup cell_functions
+	/** @addtogroup Cell_BP_Functions
 	 * @return The length of one cell (a floor bound)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

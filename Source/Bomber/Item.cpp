@@ -3,8 +3,11 @@
 #include "Item.h"
 
 #include "Bomber.h"
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "MapComponent.h"
 #include "MyCharacter.h"
+#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AItem::AItem()
@@ -12,11 +15,33 @@ AItem::AItem()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Initialize root component
+	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
 	// Initialize MapComponent
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("Map Component"));
+	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+
+	// Initialize item mesh component
+	ItemMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
+	ItemMeshComponent->SetupAttachment(RootComponent);
+
+	// Find and fill item meshes array
+	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>> ItemMeshFinderArray{
+		TEXT("/Game/Bomber/Assets/Meshes/SkateItemMesh"),
+		TEXT("/Game/Bomber/Assets/Meshes/BombItemMesh"),
+		TEXT("/Game/Bomber/Assets/Meshes/FireItemMesh")};
+	for (int32 i = 0; i < ItemMeshFinderArray.Num(); ++i)
+	{
+		if (ItemMeshFinderArray[i].Succeeded())
+		{
+			ItemTypesByMeshes.Add(static_cast<EItemTypeEnum>(i + 1), ItemMeshFinderArray[i].Object);
+		}
+	}
+
+	// Initialize Item Collision Component
+	ItemCollisionComponent = CreateDefaultSubobject<UBoxComponent>("ItemCollisionComponent");
+	ItemCollisionComponent->SetupAttachment(RootComponent);
+	ItemCollisionComponent->SetBoxExtent(FVector(50.f));
 }
 
 // Called when the game starts or when spawned
@@ -24,35 +49,55 @@ void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OnActorBeginOverlap.AddUniqueDynamic(this, &AItem::OnItemBeginOverlap);
+	ItemCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
 }
 
 void AItem::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)
+	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
 	{
 		return;
 	}
 
-	// Update this actor
-	MapComponent->UpdateSelfOnMap();
+	// Construct the actor's map component
+	MapComponent->OnMapComponentConstruction();
+
+	// Rand the item type
+	if (ItemType == EItemTypeEnum::None)
+	{
+		TArray<EItemTypeEnum> ItemTypesArray;
+		ItemTypesByMeshes.GetKeys(ItemTypesArray);
+		const int32 RandItemTypeNo = FMath::RandRange(int32(0), ItemTypesArray.Num() - 1);
+		ItemType = ItemTypesArray[RandItemTypeNo];
+	}
+	UStaticMesh* FoundMesh = *ItemTypesByMeshes.Find(ItemType);
+	ensureMsgf(FoundMesh != nullptr, TEXT("The item mesh of this type was not found"));
+	ItemMeshComponent->SetStaticMesh(FoundMesh);
 }
 
-void AItem::OnItemBeginOverlap_Implementation(AActor* OverlappedItem, AActor* OtherActor)
+void AItem::OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	/*
-	if (OtherActor == nullptr   //is the actor that triggered the event
-		|| OtherActor == this)  //is not ourself
+	AMyCharacter* const OverlappedCharacter = Cast<AMyCharacter>(OtherActor);
+	if (OverlappedCharacter == nullptr				// Other actor is not myCharacter
+		|| IS_VALID(OverlappedCharacter) == false)  // Character is not valid
 	{
 		return;
 	}
 
-	AMyCharacter* const MyCharacter = Cast<AMyCharacter>(OtherActor);
-	if (MyCharacter != nullptr)  // other actor is not myCharacter
+	switch (ItemType)
 	{
-		MyCharacter->Powerups_;
+		case EItemTypeEnum::Skate:
+			OverlappedCharacter->Powerups_.SkateN++;
+		case EItemTypeEnum::Bomb:
+			OverlappedCharacter->Powerups_.BombN++;
+		case EItemTypeEnum::Fire:
+			OverlappedCharacter->Powerups_.FireN++;
+		default:
+			break;
 	}
-	*/
+
+	// Destroy itself on overlapping
+	this->Destroy();
 }

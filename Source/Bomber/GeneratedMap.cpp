@@ -4,6 +4,7 @@
 
 #include "Bomber.h"
 #include "Cell.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
 #include "MyCharacter.h"
 #include "SingletonLibrary.h"
@@ -82,7 +83,7 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 		if (CellOfExistingActor != nullptr && !(*CellOfExistingActor == Cell))
 		{
 			GridArray_.Add(*CellOfExistingActor);  // remove this actor from previous cell
-			UE_LOG_STR(UpdateActor, "AddActorOnMapByObj", "Removed existed actor from cell");
+			USingletonLibrary::PrintToLog(UpdateActor, "AddActorOnMapByObj", "Removed existed actor from cell");
 		}
 		GridArray_.Add(Cell, UpdateActor);  // Add this actor to his cell
 	}
@@ -99,12 +100,12 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 	// Attach to the Level Map actor
 	UpdateActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 
-	UE_LOG_STR(UpdateActor, "AddActorOnMapByObj \t ADDED:", Cell.Location.ToString());
+	USingletonLibrary::PrintToLog(UpdateActor, "AddActorOnMapByObj \t ADDED:", Cell.Location.ToString());
 }
 
 void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& Keys)
 {
-	UE_LOG_STR(this, "DestroyActorsFromMap \t Keys will be destroyed:", FString::FromInt(Keys.Num()));
+	USingletonLibrary::PrintToLog(this, "DestroyActorsFromMap \t Keys will be destroyed:", FString::FromInt(Keys.Num()));
 }
 
 // Called when the game starts or when spawned
@@ -120,7 +121,7 @@ void AGeneratedMap::BeginPlay()
 	CharactersOnMap.Shrink();
 
 	// Boxes generation
-	GenerateLevelActors(TO_FLAG(EActorTypeEnum::Box), FCell::ZeroCell);
+	//GenerateLevelActors(TO_FLAG(EActorTypeEnum::Box), FCell::ZeroCell);
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -131,7 +132,8 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 
 	// Align the Transform
-	SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
+	const float MapYaw(GetActorRotation().Yaw);
+	SetActorRotation(FRotator(0.f, MapYaw, 0.f));
 	SetActorLocation(GetActorLocation().GridSnap(USingletonLibrary::GetGridSize()));
 	FIntVector MapScale(GetActorScale3D());
 	if (MapScale.X % 2 != 1)  // Length must be unpaired
@@ -162,10 +164,9 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetGridSize());
 			// Rotate the cell around center
 			const FVector RelativePos(FoundVector - GetActorLocation());
-			FoundVector += RelativePos.RotateAngleAxis(GetActorRotation().Yaw, FVector(0, 0, 1)) - RelativePos;
+			FoundVector += RelativePos.RotateAngleAxis(MapYaw, FVector(0, 0, 1)) - RelativePos;
 			// Cell was found, add it to the array
-			const FCell FoundCell(FoundVector);
-			GridArray_.Add(FoundCell);
+			GridArray_.Add(FCell(FoundVector));
 		}
 	}
 
@@ -193,7 +194,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 
 	// Walls and Players generation
-	GenerateLevelActors(EActorTypeEnum::Wall | EActorTypeEnum::Player, FCell::ZeroCell);
+	//GenerateLevelActors(EActorTypeEnum::Wall | EActorTypeEnum::Player, FCell::ZeroCell);
 }
 
 #if WITH_EDITOR  // [PIE] Destroyed()
@@ -232,7 +233,7 @@ void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors) const
 		if (bIsEditorOnlyActors == false		   // Should destroy all actors
 			|| AttachedActors[i]->IsEditorOnly())  // Should destroy editor-only actors
 		{
-			UE_LOG_STR(AttachedActors[i], "DestroyAttachedActors", "Will be removed")
+			USingletonLibrary::PrintToLog(AttachedActors[i], "DestroyAttachedActors", "Will be removed");
 			AttachedActors[i]->Destroy();
 		}
 	}

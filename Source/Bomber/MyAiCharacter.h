@@ -23,12 +23,9 @@ public:
 	 */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	bool bShouldShowRenders;
-#endif  //WITH_EDITORONLY_DATA
+#endif  //WITH_EDITORONLY_DATA [Editor}
 
 protected:
-	/** Called when an instance of this class is placed (in editor) or spawned */
-	virtual void OnConstruction(const FTransform& Transform) final;
-
 	/** @addtogroup AI
 	 * Cell position of current path segment's end */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")

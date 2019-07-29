@@ -14,29 +14,40 @@ UMapComponent::UMapComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UMapComponent::UpdateSelfOnMap()
+void UMapComponent::OnMapComponentConstruction()
 {
-	UWorld* const World = GetWorld();
-	if (World == nullptr									  // World is null
-		|| IS_VALID(GetOwner()) == false					  // owner is not valid
-		|| USingletonLibrary::GetLevelMap(World) == nullptr)  // levelMap is null
+	if (IS_VALID(GetOwner()) == false							   // The owner is not valid
+		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // The Level Map is not valid
 	{
 		return;
 	}
-	UE_LOG_STR(GetOwner(), "UpdateSelfOnMap", "Starts updating");
 
 	// Find new Location at dragging and update-delegate
+	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t FCell()");
 	Cell = FCell(GetOwner());
 
-	USingletonLibrary::GetLevelMap(World)->AddActorOnMapByObj(Cell, GetOwner());
+	// Owner updating
+	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddActorOnMapByObj");
+	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(Cell, GetOwner());
 
-#if WITH_EDITOR
-	if (IS_PIE(GetWorld()) == true)  // for editor only
+	// Binds to Owner's OnConstruction to reruncalls the non-generated actors on the Level Map
+	if (USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.IsBoundToObject(GetOwner()) == false)
+	{
+		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
+	}
+
+#if WITH_EDITOR  // [PIE]
+	if (IS_PIE(GetWorld()) == true)
 	{
 		// Remove all text renders of the Owner
+		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(GetOwner());
 
+		// Binds to updating AI renders on owner destroying
+		GetOwner()->OnDestroyed.AddUniqueDynamic(USingletonLibrary::GetSingleton(), &USingletonLibrary::BroadcastAiUpdating);
+
 		// Update AI renders after adding obj to map
+		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
 		USingletonLibrary::GetSingleton()->BroadcastAiUpdating(GetOwner());
 	}
 #endif  //WITH_EDITOR [PIE]
@@ -50,23 +61,22 @@ void UMapComponent::OnComponentCreated()
 	{
 		return;
 	}
-	UE_LOG_STR(GetOwner(), "OnComponentCreated", "Starts creating");
+	USingletonLibrary::PrintToLog(GetOwner(), "OnComponentCreated", "Set's defaults");
 
-	// Disable tick
+	// Disable the tick
 	GetOwner()->SetActorTickEnabled(false);
 
-#if WITH_EDITOR
-	if (IS_PIE(GetWorld()) == true						  // for editor only
-		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is valid
+	// Set the movable mobility for in-game attaching
+	if (GetOwner()->GetRootComponent() != nullptr)
 	{
-		// Should not call OnConstruction on drag events
+		GetOwner()->GetRootComponent()->SetMobility(EComponentMobility::Movable);
+	}
+
+// Should not call OnConstruction on drag events
+#if WITH_EDITOR
+	if (IS_PIE(GetWorld()) == true)  // PIE only
+	{
 		GetOwner()->bRunConstructionScriptOnDrag = false;
-
-		// Binds to updating actors on the Level Map
-		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddDynamic(this, &UMapComponent::UpdateSelfOnMap);
-
-		// Binds to updating AI renders on owner destroying
-		GetOwner()->OnDestroyed.AddDynamic(USingletonLibrary::GetSingleton(), &USingletonLibrary::BroadcastAiUpdating);
 	}
 #endif  //WITH_EDITOR [PIE]
 }
