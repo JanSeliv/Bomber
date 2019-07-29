@@ -3,12 +3,13 @@
 #include "MyAiCharacter.h"
 
 #include "Bomber.h"
+#include "GeneratedMap.h"
 #include "SingletonLibrary.h"
 
 void AMyAiCharacter::UpdateAI_Implementation()
 {
 	AGeneratedMap* const LevelMap = USingletonLibrary::GetLevelMap(GetWorld());
-	if (LevelMap == nullptr)  // Level Map is null
+	if (IS_VALID(LevelMap) == false)  // The Level Map is not valid
 	{
 		return;
 	}
@@ -16,9 +17,9 @@ void AMyAiCharacter::UpdateAI_Implementation()
 #if WITH_EDITOR
 	if (IS_PIE(GetWorld()) == true)  // for editor only
 	{
-		UE_LOG_STR(this, "[PIE]UpdateAI", "-> \t ClearOwnerTextRenders");
+		USingletonLibrary::PrintToLog(this, "[PIE]UpdateAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(this);
-		AiMoveTo = FCell();
+		AiMoveTo = FCell::ZeroCell;
 	}
 #endif  //WITH_EDITOR [PIE]
 }

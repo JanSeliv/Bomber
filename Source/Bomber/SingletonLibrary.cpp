@@ -3,7 +3,6 @@
 #include "SingletonLibrary.h"
 
 #include "Components/TextRenderComponent.h"
-
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/Color.h"
@@ -43,7 +42,7 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 			TextRendersArray[i]->DestroyComponent();
 		}
 
-		if (IS_PIE(Owner->GetWorld())) UE_LOG_STR(Owner, "[Editor]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
+		if (IS_PIE(Owner->GetWorld())) USingletonLibrary::PrintToLog(Owner, "[Editor]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
 }
 
@@ -59,10 +58,11 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FVector& CoordinatePosition) const
 {
 	AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(Owner);
-	if ((MyAiCharacter != nullptr							// Successfully cast to AI
-			&& MyAiCharacter->bShouldShowRenders == false)  // Is not render AI
-		|| Cells.Num() == NULL								// Null length
-		|| IS_VALID(Owner) == false)						// Owner is not valid
+	if ((MyAiCharacter != nullptr								   // Successfully cast to AI
+			&& MyAiCharacter->bShouldShowRenders == false)		   // Is not render AI
+		|| Cells.Num() == NULL									   // Null length
+		|| IS_VALID(Owner) == false								   // Owner is not valid
+		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // The Level Map is not valid
 	{
 		return;
 	}
@@ -75,10 +75,30 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		TextRenderIt->RegisterComponent();
 	}
 
-	if (IS_PIE(Owner->GetWorld())) UE_LOG_STR(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+	if (IS_PIE(Owner->GetWorld())) USingletonLibrary::PrintToLog(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+}
+
+void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor)
+{
+	bool bOutBool = false;
+	TArray<class UTextRenderComponent*> OutArray{};
+	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray);
 }
 
 #endif  // WITH_EDITOR [Editor]
+
+FCell USingletonLibrary::MakeCell_Implementation(const AActor* Actor) const
+{
+	return FCell::ZeroCell;
+}
+
+USingletonLibrary* USingletonLibrary::GetSingleton()
+{
+	USingletonLibrary* Singleton = nullptr;
+	if (GEngine) Singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
+	ensureMsgf(Singleton != nullptr, TEXT("The Singleton is null"));
+	return Singleton;
+}
 
 AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 {
@@ -98,10 +118,26 @@ AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 			&& IS_VALID(LevelMapArray[0]))	// This level map is valid and is not transient
 		{
 			GetSingleton()->LevelMap_ = Cast<AGeneratedMap>(LevelMapArray[0]);
-			UE_LOG_STR(LevelMapArray[0], "[PIE]SingletonLibrary:GetLevelMap", "UPDATED");
+			PrintToLog(LevelMapArray[0], "[PIE]SingletonLibrary:GetLevelMap", "UPDATED");
 		}
 	}
 #endif  //WITH_EDITOR [PIE]
 
 	return GetSingleton()->LevelMap_;
+}
+
+bool USingletonLibrary::IsActorInTypes(const AActor* Actor, const int32& Bitmask)
+{
+	if (IS_VALID(Actor) == false) return false;  // The actor is null
+
+	const EActorTypeEnum* FoundActorType = GetSingleton()->ActorTypesByClasses.FindKey(Actor->GetClass());
+	if (FoundActorType == nullptr) return false;
+
+	return ContainsActorType(*FoundActorType, Bitmask);
+}
+
+TSubclassOf<AActor> USingletonLibrary::FindClassByActorType(const EActorTypeEnum& ActorType)
+{
+	const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses.Find(ActorType);
+	return (ActorClass != nullptr ? *ActorClass : nullptr);
 }

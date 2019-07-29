@@ -32,9 +32,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void BroadcastAiUpdating(AActor* Owner);
 
+	/** Blueprint debug function, that prints messages to the log */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))  //
+	static FORCEINLINE int32 PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), *UObj->GetName(), *FunctionName, *Message);
+		return 0;
+	}
+
 	/** @addtogroup [Editor]Editor
 	 *Remove all text renders of the Owner */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
 	static void ClearOwnerTextRenders(class AActor* Owner);
 
 	/** @addtogroup [Editor]Editor
@@ -53,19 +61,26 @@ public:
 		float TextSize = 124.0f,
 		const FText& RenderText = FText::GetEmpty(),
 		const FVector& CoordinatePosition = FVector(0.f)) const;
+
 #if WITH_EDITOR
 	/** @addtogroup [Editor]Editor
 	 *Shortest overloading of debugging visualization*/
-	static FORCEINLINE void AddDebugTextRenders(
+	static void AddDebugTextRenders(
 		class AActor* Owner,
 		const TSet<struct FCell>& Cells,
-		const struct FLinearColor& TextColor = FLinearColor::Black)
-	{
-		bool bOutBool = false;
-		TArray<class UTextRenderComponent*> OutArray{};
-		GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray);
-	}
+		const struct FLinearColor& TextColor = FLinearColor::Black);
 #endif  //WITH_EDITOR [Editor]
+
+	/** 
+	 * The singleton getter
+	 * @return The singleton, nullptr otherwise
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static USingletonLibrary* GetSingleton();
+
+	/** The Level Map getter */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static class AGeneratedMap* const GetLevelMap(UObject* WorldContextObject);
 
 	/** @defgroup Cell_BP_Functions The group with cell functions that used in blueprints
 	 * The custom make node of the FCell struct
@@ -76,9 +91,19 @@ public:
 	 * @warning Deprecated, temporary function
 	 * @warning Has blueprint implementation
 	 * @todo Rewrite to C++ FCell()
+	 * @todo #5 Nearest cell: replace thisCell to the FoundCell and with_editor things
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "MakeCell"))
-	FORCEINLINE struct FCell MakeCell(const class AActor* Actor) const;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "MakeCell"))
+	struct FCell MakeCell(const class AActor* Actor) const;
+
+	/** @addtogroup Cell_BP_Functions
+	 * @return The length of one cell (a floor bound)
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE float GetGridSize()
+	{
+		return 200.f;
+	}
 
 	/** @addtogroup Cell_BP_Functions
 	 * Calculate the length between two cells
@@ -86,57 +111,22 @@ public:
 	 * @param C2 The other one cell
 	 * @return The distance between to cells
 	 * @todo FVector::Dist(X, Y);
-	 * @todo Function and Math library to .cpp file
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FORCEINLINE float CalculateCellsLength(const struct FCell& C1, const struct FCell& C2)
 	{
-		return fabsf((C1.Location - C2.Location).Size()) / GetFloorLength();
+		return fabsf((C1.Location - C2.Location).Size()) / GetGridSize();
 	}
-
-	/** 
-	 * The singleton getter
-	 * @return The singleton, nullptr otherwise
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE USingletonLibrary* GetSingleton()
-	{
-		USingletonLibrary* Singleton = nullptr;
-		if (GEngine) Singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
-		ensureMsgf(Singleton != nullptr, TEXT("The Singleton is null"));
-		return Singleton;
-	}
-
-	/** @addtogroup cell_functions
-	 * @return The length of one cell (a floor bound)
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Grid Size"))
-	static FORCEINLINE float GetFloorLength()
-	{
-		return 200.f;
-	}
-
-	/** The Level Map getter */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class AGeneratedMap* const GetLevelMap(UObject* WorldContextObject);
 
 	/** @addtogroup actor_types
-	 * Find the actor type key by class value in the ActorTypesByClasses dictionary
-	 * @todo BitmaskContainsBit if((bit != 0) && (Bitmask & bit == bit))
-	 */
-	/* // Deprecated
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
-	static FORCEINLINE EActorTypeEnum FindActorTypeByClass(const TSubclassOf<AActor>& ActorClass)
-	{
-		const EActorTypeEnum* FoundActorType = GetSingleton()->ActorTypesByClasses.FindKey(ActorClass);
-		return (FoundActorType != nullptr ? *FoundActorType : EActorTypeEnum::None);
-	}
-	*/
-
+	 * Bitwise and(&) operation with the bitmask of actor types*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType,Bitmask", CompactNodeTitle = "&"))
-	static bool IsBitmaskContainsBit(
+	static FORCEINLINE bool ContainsActorType(
 		const EActorTypeEnum& ActorType,
-		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& Bitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& Bitmask)
+	{
+		return (TO_FLAG(ActorType) & Bitmask) != 0;
+	}
 
 	/** @addtogroup actor_types
 	 * Check for the content of the actor type among incoming types
@@ -153,11 +143,7 @@ public:
 	/** @addtogroup actor_types
 	 * Find the class value by actor type key in the ActorTypesByClasses dictionary */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType"))
-	static FORCEINLINE TSubclassOf<AActor> FindClassByActorType(const EActorTypeEnum& ActorType)
-	{
-		const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses.Find(ActorType);
-		return (ActorClass != nullptr ? *ActorClass : nullptr);
-	}
+	static TSubclassOf<AActor> FindClassByActorType(const EActorTypeEnum& ActorType);
 
 protected:
 	/** The reference to the AGeneratedMap actor*/

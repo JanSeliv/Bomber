@@ -21,18 +21,17 @@ public:
 	class UMapComponent* MapComponent;
 
 	UPROPERTY(BlueprintReadOnly, Category = "C++")
-	class UStaticMeshComponent* ItemMesh;
+	class UStaticMeshComponent* ItemMeshComponent;
+
+	/** Type and its class as associated pairs  */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
+	TMap<EItemTypeEnum, class UStaticMesh*> ItemTypesByMeshes;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UBoxComponent* ItemCollisionComponent;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	EItemTypeEnum ItemType = EItemTypeEnum::None;
-
-	/** @addtogroup actor_types
-	 * Type and its class as associated pairs  */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
-	TMap<EItemTypeEnum, class UStaticMesh*> ItemTypesByMeshes;
 
 protected:
 	// Called when the game starts or when spawned

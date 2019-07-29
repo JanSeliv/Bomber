@@ -17,36 +17,37 @@ UMapComponent::UMapComponent()
 void UMapComponent::OnMapComponentConstruction()
 {
 	if (IS_VALID(GetOwner()) == false							   // The owner is not valid
-		|| USingletonLibrary::GetLevelMap(GetWorld()) == nullptr)  // levelMap is null)  // The Singleton is null
+		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // The Level Map is not valid
 	{
 		return;
 	}
 
 	// Find new Location at dragging and update-delegate
+	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t FCell()");
 	Cell = FCell(GetOwner());
 
 	// Owner updating
-	UE_LOG_STR(GetOwner(), "UpdateSelfOnMap", "-> \t AddActorOnMapByObj");
+	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddActorOnMapByObj");
 	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(Cell, GetOwner());
 
-	// Binds to updating non-generated actors on the Level Map
+	// Binds to Owner's OnConstruction to reruncalls the non-generated actors on the Level Map
 	if (USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.IsBoundToObject(GetOwner()) == false)
 	{
 		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
 	}
 
-#if WITH_EDITOR
-	if (IS_PIE(GetWorld()) == true)  // PIE only
+#if WITH_EDITOR  // [PIE]
+	if (IS_PIE(GetWorld()) == true)
 	{
 		// Remove all text renders of the Owner
-		UE_LOG_STR(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
+		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(GetOwner());
 
 		// Binds to updating AI renders on owner destroying
 		GetOwner()->OnDestroyed.AddUniqueDynamic(USingletonLibrary::GetSingleton(), &USingletonLibrary::BroadcastAiUpdating);
 
 		// Update AI renders after adding obj to map
-		UE_LOG_STR(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
+		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
 		USingletonLibrary::GetSingleton()->BroadcastAiUpdating(GetOwner());
 	}
 #endif  //WITH_EDITOR [PIE]
@@ -60,7 +61,7 @@ void UMapComponent::OnComponentCreated()
 	{
 		return;
 	}
-	UE_LOG_STR(GetOwner(), "OnComponentCreated", "Set's defaults");
+	USingletonLibrary::PrintToLog(GetOwner(), "OnComponentCreated", "Set's defaults");
 
 	// Disable the tick
 	GetOwner()->SetActorTickEnabled(false);

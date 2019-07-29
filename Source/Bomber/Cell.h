@@ -10,12 +10,16 @@ struct FCell
 {
 	GENERATED_BODY()
 
+	/** A zero cell (0,0,0) */
+	static const FCell ZeroCell;
+
 	/** Holds the cell's FVector-coordinate. */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	FVector Location = FVector::ZeroVector;
+	FVector Location;
 
 	/** Default constructor (zero initialization). */
-	FCell() {}
+	FCell()
+		: Location(FVector::ZeroVector) {}
 
 	/**
 	 * Constructor
@@ -23,6 +27,8 @@ struct FCell
 	 * 
 	 * @param Actor Target to find cell location
 	 * @return The cell that was found
+	 * @bug #4 Length between two cells is not exactly equal 200
+   	 * @todo Round to 200*(cos(fi)|sin(fi)
 	 */
 	explicit FCell(const class AActor* Actor);
 
@@ -31,13 +37,13 @@ struct FCell
 	* Round another FVector into this cell
 	*
 	* @param Vector The other vector.
-	* @return Reference to cell after copy.
+
 	*/
 	explicit FORCEINLINE FCell(struct FVector Vector)
 	{
-		this->Location.X = FMath::RoundToFloat(Vector.X);
-		this->Location.Y = FMath::RoundToFloat(Vector.Y);
-		this->Location.Z = FMath::RoundToFloat(Vector.Z);
+		Location.X = FMath::RoundToFloat((Vector.X));
+		Location.Y = FMath::RoundToFloat(Vector.Y);
+		Location.Z = FMath::RoundToFloat(Vector.Z);
 	}
 
 	/**

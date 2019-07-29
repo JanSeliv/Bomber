@@ -20,7 +20,7 @@ public:
 	class UMapComponent* MapComponent;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UStaticMeshComponent* WallMesh;
+	class UStaticMeshComponent* WallMeshComponent;
 
 protected:
 	/** Called when the game starts or when spawned */

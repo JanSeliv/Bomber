@@ -20,12 +20,21 @@ AMyCharacter::AMyCharacter()
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
-	// Set skeletal mesh
+	// Initialize skeletal mesh
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+
+	// Set the skeletal mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
 	if (SkeletalMeshFinder.Succeeded())  // Check to make sure the default skeletal mesh for character was actually found
 	{
 		GetMesh()->SetSkeletalMesh(SkeletalMeshFinder.Object);  // Set default skeletal mesh for character
-		GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+	}
+
+	// Set the animation
+	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimationFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP"));
+	if (AnimationFinder.Succeeded())  // The animation was found
+	{
+		GetMesh()->AnimClass = AnimationFinder.Object->GeneratedClass;
 	}
 }
 
@@ -49,18 +58,18 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 
 	// Rotate character
 	SetActorRotation(FRotator(0.f, -90.f, 0.f));
-	UE_LOG_STR(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
+	USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
 }
 
 void AMyCharacter::Destroyed()
 {
 	UWorld* const World = GetWorld();
-	if (World != nullptr									 // World is not null
-		&& USingletonLibrary::GetLevelMap(World) != nullptr  // LevelMap_ is valid
-		&& IS_TRANSIENT(this) == false)						 // Component is not transient
+	if (World != nullptr										 // World is not null
+		&& IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // The Level Map is valid
+		&& IS_TRANSIENT(this) == false)							 // Component is not transient
 	{
 		USingletonLibrary::GetLevelMap(World)->CharactersOnMap.Remove(this);
-		UE_LOG_STR(this, "Destroyed", "Removed from TSet");
+		USingletonLibrary::PrintToLog(this, "Destroyed", "Removed from TSet");
 	}
 
 	// Call the base class version
@@ -69,7 +78,7 @@ void AMyCharacter::Destroyed()
 
 void AMyCharacter::SpawnBomb()
 {
-	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // level map is not valid
+	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // The Level Map is not valid
 		|| Powerups_.FireN <= 0								   // Null length of explosion
 		|| Powerups_.BombN <= 0								   // No more bombs
 		|| IS_PIE(GetWorld()) == true)						   // Should not spawn bomb in PIE

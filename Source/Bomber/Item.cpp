@@ -21,9 +21,9 @@ AItem::AItem()
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
-	// Initialize item mesh
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
-	ItemMesh->SetupAttachment(RootComponent);
+	// Initialize item mesh component
+	ItemMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
+	ItemMeshComponent->SetupAttachment(RootComponent);
 
 	// Find and fill item meshes array
 	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>> ItemMeshFinderArray{
@@ -34,7 +34,7 @@ AItem::AItem()
 	{
 		if (ItemMeshFinderArray[i].Succeeded())
 		{
-			ItemTypesByMeshes.Add(EItemTypeEnum(1 << i), ItemMeshFinderArray[i].Object);
+			ItemTypesByMeshes.Add(static_cast<EItemTypeEnum>(i + 1), ItemMeshFinderArray[i].Object);
 		}
 	}
 
@@ -74,7 +74,7 @@ void AItem::OnConstruction(const FTransform& Transform)
 	}
 	UStaticMesh* FoundMesh = *ItemTypesByMeshes.Find(ItemType);
 	ensureMsgf(FoundMesh != nullptr, TEXT("The item mesh of this type was not found"));
-	ItemMesh->SetStaticMesh(FoundMesh);
+	ItemMeshComponent->SetStaticMesh(FoundMesh);
 }
 
 void AItem::OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

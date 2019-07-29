@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -23,9 +23,16 @@ public:
 	 * Sets default values for this actor's properties
 	 * Fill an array with associative classes and generate the level map 
 	 * @see TypesByClasses_
-	 * @see GenerateLevelMap()
+	 * @see GenerateLevelActors()
 	 */
 	AGeneratedMap();
+
+	UPROPERTY(BlueprintReadOnly, Category = "C++")
+	class UStaticMeshComponent* BackgroundMeshComponent;
+
+	/** Set of unique player characters  */
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
+	TSet<class AMyCharacter*> CharactersOnMap;
 
 	/** @ingroup path_types
 	 * Getting an array of cells by four sides of a input center cell and type of breaks
@@ -41,7 +48,7 @@ public:
 		const int32 SideLength,
 		const EPathTypesEnum Pathfinder) const;
 
-	/** @ingroup actor_types
+	/** @addtogroup actor_types
 	 * The intersection of input cells and actors of the specific type on these cells
 	 * (Cells ∩ Actors type)  
 	 * @param Cells The cells set to intersect
@@ -50,10 +57,10 @@ public:
 	 * @return The set that contains all cells by actor types
 	 * @todo to C++ IntersectionCellsByTypes(...)
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2, AutoCreateRefTerm = "ActorsTypesBitmask"))
 	TSet<FCell> IntersectionCellsByTypes(
 		const TSet<FCell>& Cells,
-		const uint8& ActorsTypesBitmask,
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask,
 		const class AMyCharacter* ExcludePlayer) const;
 
 	/**
@@ -74,14 +81,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void DestroyActorsFromMap(const TSet<FCell>& Keys);
 
-	/**
-	 * Set of unique characters
-	 * @see EActorTypeEnum::Player
-	 * @} 
-	 */
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	TSet<class AMyCharacter*> CharactersOnMap;
-
 protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() final;
@@ -96,15 +95,24 @@ protected:
 	virtual void Destroyed() override;
 #endif  //WITH_EDITOR [PIE]
 
+	/**
+	 * Destroy all attached level actors
+	 * @param bIsEditorOnlyActors Should destroy editor-only actors that were spawned in the PIE world, otherwise will be destroyed all the level map's actors
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly))
+	void DestroyAttachedActors(bool bIsEditorOnlyActors = false) const;
+
 	/** @ingroup actors_management
-	 * Fills the Grid Array with cells as keys and level actors as values
+	 * Spawns and fills the Grid Array values by level actors
 	 * @see AGeneratedMap::GridArray_
 	 * @see AGeneratedMap::CharactersOnMap
 	 * @see struct FCell: Makes a grid of cells
-	 * @todo to C++ GenerateLevelMap(...)
+	 * @todo to C++ GenerateLevelActors(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask"))
-	void GenerateLevelMap();
+	void GenerateLevelActors(
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask,
+		UPARAM(ref) const FCell& Cell);
 
 	/** @ingroup actors_management
 	 * Storage of cells and their actors

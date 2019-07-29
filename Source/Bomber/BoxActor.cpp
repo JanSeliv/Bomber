@@ -22,13 +22,13 @@ ABoxActor::ABoxActor()
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
-	// Initialize box mesh
-	BoxMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxMesh"));
-	BoxMesh->SetupAttachment(RootComponent);
+	// Initialize box mesh component
+	BoxMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxMeshComponent"));
+	BoxMeshComponent->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BoxMesh"));
 	if (BombMeshFinder.Succeeded())
 	{
-		BoxMesh->SetStaticMesh(BombMeshFinder.Object);
+		BoxMeshComponent->SetStaticMesh(BombMeshFinder.Object);
 	}
 }
 
@@ -60,8 +60,8 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 30;
 	if (ItemChance)
 	{
-		GetWorld()->SpawnActor<AActor>(*USingletonLibrary::FindClassByActorType(EActorTypeEnum::Item), GetActorTransform());
+		GetWorld()->SpawnActor<AActor>(USingletonLibrary::FindClassByActorType(EActorTypeEnum::Item), GetActorTransform());
 	}
 
-	UE_LOG_STR(this, "OnBoxDestroyed", (ItemChance ? "Item spawned" : ""));
+	USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", (ItemChance ? "Item spawned" : ""));
 }

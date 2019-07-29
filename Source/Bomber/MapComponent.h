@@ -24,12 +24,12 @@ public:
 	void OnMapComponentConstruction();
 
 	/** Owner's cell location on the Level Map */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	struct FCell Cell;
 
 protected:
 	/**
-	 *Called when a component is created (not loaded)
+	 * Called when a component is created (not loaded)
 	 * Sets owner's defaults
 	 */
 	virtual void OnComponentCreated() final;

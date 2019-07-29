@@ -19,13 +19,13 @@ AWallActor::AWallActor()
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
-	// Initialize wall mesh
-	WallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WallMesh"));
-	WallMesh->SetupAttachment(RootComponent);
+	// Initialize wall mesh component
+	WallMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WallMeshComponent"));
+	WallMeshComponent->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> WallMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/WallMesh"));
 	if (WallMeshFinder.Succeeded())
 	{
-		WallMesh->SetStaticMesh(WallMeshFinder.Object);
+		WallMeshComponent->SetStaticMesh(WallMeshFinder.Object);
 	}
 }
 

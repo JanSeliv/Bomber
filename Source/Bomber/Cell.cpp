@@ -5,6 +5,8 @@
 #include "GameFramework/Actor.h"
 #include "SingletonLibrary.h"
 
+const FCell FCell::ZeroCell = FCell();
+
 FCell::FCell(const AActor* Actor)
 {
 	check(Actor);
@@ -12,6 +14,6 @@ FCell::FCell(const AActor* Actor)
 	{
 		return;
 	}
-
-	*this = USingletonLibrary::GetSingleton()->MakeCell(Actor);
+	USingletonLibrary::PrintToLog(Actor, "FCell()", "Start finding the cell");
+	this->Location = USingletonLibrary::GetSingleton()->MakeCell(Actor).Location;
 }

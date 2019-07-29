@@ -33,7 +33,7 @@ public:
 	class UMapComponent* MapComponent;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UStaticMeshComponent* BombMesh;
+	class UStaticMeshComponent* BombMeshComponent;
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UBoxComponent* BombCollisionComponent;

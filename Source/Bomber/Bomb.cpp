@@ -22,13 +22,13 @@ ABomb::ABomb()
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
-	// Initialize bomb mesh
-	BombMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMesh"));
-	BombMesh->SetupAttachment(RootComponent);
+	// Initialize bomb mesh component
+	BombMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMeshComponent"));
+	BombMeshComponent->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BombMesh"));
 	if (BombMeshFinder.Succeeded())
 	{
-		BombMesh->SetStaticMesh(BombMeshFinder.Object);
+		BombMeshComponent->SetStaticMesh(BombMeshFinder.Object);
 	}
 
 	// Initialize explosion particle component
@@ -64,7 +64,7 @@ void ABomb::InitializeBombProperties(
 	const int32& FireN,
 	const int32& CharacterID)
 {
-	if (USingletonLibrary::GetLevelMap(GetWorld()) == nullptr  // levelMap is null
+	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // // The Level Map is not valid
 		|| IS_VALID(MapComponent) == false					   // MapComponent is not valid
 		|| FireN < 0)										   // Negative length of the explosion
 	{
@@ -78,11 +78,11 @@ void ABomb::InitializeBombProperties(
 	}
 
 	// Set material
-	if (IS_VALID(BombMesh) == true  // Mesh of the bomb is not valid
-		&& CharacterID > 0)			// No materials for the negative ID
+	if (IS_VALID(BombMeshComponent) == true  // Mesh of the bomb is not valid
+		&& CharacterID > 0)					 // No materials for the negative ID
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials_.Num();
-		BombMesh->SetMaterial(0, BombMaterials_[BombMaterialNo]);
+		BombMeshComponent->SetMaterial(0, BombMaterials_[BombMaterialNo]);
 	}
 
 	// Update explosion information
@@ -120,9 +120,8 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	if (IS_PIE(GetWorld()) == true						  // for editor only
 		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
 	{
-		UE_LOG_STR(this, "[PIE]OnConstruction", "-> \t InitializeBombProperties");
 		InitializeBombProperties(*CharacterBombsN_, ExplosionLength, -1);
-		UE_LOG_STR(this, "[PIE]OnConstruction", "-> \t AddDebugTextRenders");
+		USingletonLibrary::PrintToLog(this, "[PIE]OnConstruction", "-> \t AddDebugTextRenders");
 		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
 	}
 #endif  //WITH_EDITOR [PIE]
@@ -131,8 +130,8 @@ void ABomb::OnConstruction(const FTransform& Transform)
 void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 {
 	UWorld* const World = GetWorld();
-	if (World == nullptr									  // World is null
-		&& USingletonLibrary::GetLevelMap(World) == nullptr)  // levelMap is null
+	if (World == nullptr										   // World is null
+		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // The Level Map is not valid
 	{
 		return;
 	}
