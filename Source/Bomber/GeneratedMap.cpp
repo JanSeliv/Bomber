@@ -121,7 +121,7 @@ void AGeneratedMap::BeginPlay()
 	CharactersOnMap.Shrink();
 
 	// Boxes generation
-	//GenerateLevelActors(TO_FLAG(EActorTypeEnum::Box), FCell::ZeroCell);
+	GenerateLevelActors(TO_FLAG(EActorTypeEnum::Box), FCell::ZeroCell);
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -194,7 +194,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 
 	// Walls and Players generation
-	//GenerateLevelActors(EActorTypeEnum::Wall | EActorTypeEnum::Player, FCell::ZeroCell);
+	GenerateLevelActors(EActorTypeEnum::Wall | EActorTypeEnum::Player, FCell::ZeroCell);
 }
 
 #if WITH_EDITOR  // [PIE] Destroyed()

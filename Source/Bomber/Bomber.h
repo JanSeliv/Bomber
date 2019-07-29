@@ -2,79 +2,61 @@
 
 #pragma once
 
-#include "Cell.h"
-#include "GameFramework/Actor.h"
+#include "Engine\World.h"
+#include "Kismet/GameplayStatics.h"
 
-#include "Bomb.generated.h"
+#define IS_TRANSIENT(Obj) ((Obj->HasAllFlags(RF_Transient) || (Obj->GetWorld() == nullptr) || (UGameplayStatics::GetCurrentLevelName(Obj->GetWorld()) == "Transient")))
+#define IS_VALID(Obj) (IsValid(Obj) && (Obj)->IsValidLowLevel() && !IS_TRANSIENT(Obj))
 
-UCLASS()
-class BOMBER_API ABomb final : public AActor
+#define IS_PIE(World) (ensureMsgf(World != nullptr, TEXT("World is null")) && World->HasBegunPlay() == false && (World->WorldType == EWorldType::Editor))
+#define TO_FLAG(Enum) static_cast<int32>(Enum)
+
+/**
+ * @defgroup path_types Receiving cells for their type of danger
+ * Types of breaks during cells searching on each side
+ */
+UENUM(BlueprintType)
+enum class EPathTypesEnum : uint8
 {
-	GENERATED_BODY()
+	Explosion,  ///< Break to the first EActorTypeEnum::Wall without obstacles
+	Free,		///< Break to the first EActorTypeEnum::WallWall + obstacles
+	Safe,		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions
+	Secure		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions + EActorTypeEnum::Player
+};
 
-public:
-	// Sets default values for this actor's properties
-	ABomb();
+/**
+ * @defgroup actor_types The group where used types of actors
+ * Types of all actors on the Level Map
+ * Where Walls, Boxes and Bombs are the physical barrier for players
+ * It is possible to make a bitmask of actors types
+ */
+UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
+enum class EActorTypeEnum : uint8
+{
+	None = 0,		  ///< None of the types for comparisons
+	Bomb = 1 << 0,	///< A destroyable exploding Obstacle
+	Item = 1 << 1,	///< A picked element giving power-up (FPowerUp struct)
+	Player = 1 << 2,  ///< A character that is controlled by a person or bot
+	Wall = 1 << 3,	///< An absolute static and unchangeable block throughout the game
+	Box = 1 << 4,	 ///< A destroyable Obstacle
+};
 
-	/**
-	 * Sets the defaults of the bomb
-	 * @param RefBombsN Reference to the character's bombs count to change an amount after bomb putting(--) and destroying(++)
-	 * @param FireN Setting explosion length of this bomb
-	 * @param CharacterID Setting a mesh material of bomb by the character ID
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void InitializeBombProperties(
-		UPARAM(ref) int32& RefBombsN,
-		const int32& FireN,
-		const int32& CharacterID);
+/** @addtogroup actor_types
+ * Using EActorTypeEnum as bitmask*/
+inline int32 operator|(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
+{
+	return TO_FLAG(LType) | TO_FLAG(RType);
+}
 
-	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UMapComponent* MapComponent;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UStaticMeshComponent* BombMeshComponent;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UBoxComponent* BombCollisionComponent;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	class UParticleSystem* ExplosionParticle;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() final;
-
-	//Called when an instance of this class is placed (in editor) or spawned.
-	virtual void OnConstruction(const FTransform& Transform) final;
-
-	/** 
-	 * Event triggered when the actor has been explicitly destroyed
-	 * Destroys all actors from array of cells
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void OnBombDestroyed(AActor* DestroyedActor);
-
-	/**
-	 * Called when character end to overlaps the BombCollisionComponent component
-	 * Sets the collision preset to block all dynamics
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UPROPERTY(EditAnywhere, Category = "C++")
-	float LifeSpan_ = 2.f;
-
-	UPROPERTY(EditAnywhere, Category = "C++")
-	int32 ExplosionLength = 1;
-
-	// Amount of character bombs at current time
-	int32* CharacterBombsN_;
-
-	// All used bomb materials
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	TArray<class UMaterialInterface*> BombMaterials_;
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	TSet<FCell> ExplosionCells_;
+/**
+ * @defgroup item_types The group where used types of items
+ * Types of items
+ */
+UENUM(BlueprintType)
+enum class EItemTypeEnum : uint8
+{
+	None,
+	Skate,  ///< Increases speed
+	Bomb,   ///< increases the amount of bombs
+	Fire	///< Increases the range of explosion
 };
