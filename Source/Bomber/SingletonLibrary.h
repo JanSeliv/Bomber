@@ -107,6 +107,7 @@ public:
 
 	/** @addtogroup Cell_BP_Functions
 	 * Calculate the length between two cells
+	 *
 	 * @param C1 The first cell
 	 * @param C2 The other one cell
 	 * @return The distance between to cells
@@ -117,6 +118,18 @@ public:
 	{
 		return fabsf((C1.Location - C2.Location).Size()) / GetGridSize();
 	}
+
+	/** @addtogroup Cell_BP_Functions
+	 * Rotation of the input vector around the center of the Level Map to the same yaw degree
+	 * 
+	 * @param VectorToRotate The vector, that will be rotated
+	 * @param AxisZ The Z param of the axis to rotate around
+	 * @return Rotated to the Level Map cell
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "VectorToRotate,AxisZ"))
+	static FCell CalculateVectorAsRotatedCell(
+		const FVector& VectorToRotate,
+		const float& AxisZ);
 
 	/** @addtogroup actor_types
 	 * Bitwise and(&) operation with the bitmask of actor types*/

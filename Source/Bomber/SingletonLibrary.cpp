@@ -2,6 +2,7 @@
 
 #include "SingletonLibrary.h"
 
+#include "Bomber.h"
 #include "Components/TextRenderComponent.h"
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
@@ -42,7 +43,7 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 			TextRendersArray[i]->DestroyComponent();
 		}
 
-		if (IS_PIE(Owner->GetWorld())) USingletonLibrary::PrintToLog(Owner, "[Editor]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
+		if (IS_PIE(Owner->GetWorld())) PrintToLog(Owner, "[Editor]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
 }
 
@@ -58,11 +59,11 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FVector& CoordinatePosition) const
 {
 	AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(Owner);
-	if ((MyAiCharacter != nullptr								   // Successfully cast to AI
-			&& MyAiCharacter->bShouldShowRenders == false)		   // Is not render AI
-		|| Cells.Num() == NULL									   // Null length
-		|| IS_VALID(Owner) == false								   // Owner is not valid
-		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // The Level Map is not valid
+	if ((MyAiCharacter != nullptr							// Successfully cast to AI
+			&& MyAiCharacter->bShouldShowRenders == false)  // Is not render AI
+		|| Cells.Num() == NULL								// Null length
+		|| IS_VALID(Owner) == false							// Owner is not valid
+		|| !IS_VALID(GetLevelMap(Owner->GetWorld())))		// The Level Map is not valid
 	{
 		return;
 	}
@@ -75,7 +76,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		TextRenderIt->RegisterComponent();
 	}
 
-	if (IS_PIE(Owner->GetWorld())) USingletonLibrary::PrintToLog(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+	if (IS_PIE(Owner->GetWorld())) PrintToLog(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 }
 
 void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor)
@@ -102,7 +103,10 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 
 AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 {
-	ensureMsgf(GEngine && GetSingleton() && WorldContextObject, TEXT("GetLevelMap error"));
+	if (!ensureMsgf(GEngine && GetSingleton() && WorldContextObject, TEXT("GetLevelMap error")))
+	{
+		return nullptr;
+	}
 
 // Find editor level map
 #if WITH_EDITOR
@@ -124,6 +128,19 @@ AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
 #endif  //WITH_EDITOR [PIE]
 
 	return GetSingleton()->LevelMap_;
+}
+
+FCell USingletonLibrary::CalculateVectorAsRotatedCell(const FVector& VectorToRotate, const float& AxisZ)
+{
+	if (!ensureMsgf(IS_VALID(GetSingleton()->LevelMap_), TEXT("The Level Map is not valid"))  //
+		|| !ensureMsgf(AxisZ != abs(0.f), TEXT("The axis is zero")))
+	{
+		return FCell::ZeroCell;
+	}
+
+	const FVector Dimensions = VectorToRotate - GetSingleton()->LevelMap_->GetActorLocation();
+	const FVector RotatedVector = Dimensions.RotateAngleAxis(GetSingleton()->LevelMap_->GetActorRotation().Yaw, FVector(0, 0, AxisZ));
+	return FCell(VectorToRotate + RotatedVector - Dimensions);
 }
 
 bool USingletonLibrary::IsActorInTypes(const AActor* Actor, const int32& Bitmask)
