@@ -27,9 +27,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	TMap<EItemTypeEnum, class UStaticMesh*> ItemTypesByMeshes;
 
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UBoxComponent* ItemCollisionComponent;
-
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	EItemTypeEnum ItemType = EItemTypeEnum::None;
 
@@ -45,5 +42,5 @@ protected:
 	 * Increases +1 to skate\fire\bomb amount to the character
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 };

@@ -3,6 +3,7 @@
 #include "SingletonLibrary.h"
 
 #include "Components/TextRenderComponent.h"
+#include "Engine.h"
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/Color.h"
