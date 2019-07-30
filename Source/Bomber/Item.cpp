@@ -38,10 +38,11 @@ AItem::AItem()
 		}
 	}
 
-	// Initialize Item Collision Component
-	ItemCollisionComponent = CreateDefaultSubobject<UBoxComponent>("ItemCollisionComponent");
+	// Initialize the Item Collision Component to allow players moving through this item to pick up it
+	UBoxComponent* ItemCollisionComponent = CreateDefaultSubobject<UBoxComponent>("ItemCollisionComponent");
 	ItemCollisionComponent->SetupAttachment(RootComponent);
 	ItemCollisionComponent->SetBoxExtent(FVector(50.f));
+	ItemCollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
 // Called when the game starts or when spawned
@@ -49,7 +50,7 @@ void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ItemCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
+	this->OnActorBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
 }
 
 void AItem::OnConstruction(const FTransform& Transform)
@@ -77,11 +78,12 @@ void AItem::OnConstruction(const FTransform& Transform)
 	ItemMeshComponent->SetStaticMesh(FoundMesh);
 }
 
-void AItem::OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AItem::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	AMyCharacter* const OverlappedCharacter = Cast<AMyCharacter>(OtherActor);
 	if (OverlappedCharacter == nullptr				// Other actor is not myCharacter
 		|| IS_VALID(OverlappedCharacter) == false)  // Character is not valid
+
 	{
 		return;
 	}
@@ -90,11 +92,15 @@ void AItem::OnItemBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	{
 		case EItemTypeEnum::Skate:
 			OverlappedCharacter->Powerups_.SkateN++;
+			break;
 		case EItemTypeEnum::Bomb:
 			OverlappedCharacter->Powerups_.BombN++;
+			break;
 		case EItemTypeEnum::Fire:
 			OverlappedCharacter->Powerups_.FireN++;
+			break;
 		default:
+			ensureMsgf(ItemType != EItemTypeEnum::None, TEXT("None type of the item"));
 			break;
 	}
 
