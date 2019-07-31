@@ -3,6 +3,7 @@
 #include "Bomb.h"
 
 #include "Bomber.h"
+#include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GeneratedMap.h"
 #include "MapComponent.h"
@@ -53,10 +54,11 @@ ABomb::ABomb()
 		}
 	}
 
-	// Initialize Bomb Collision Component
+	// Initialize the Bomb Collision Component to prevent players from moving through the bomb after they moved away
 	BombCollisionComponent = CreateDefaultSubobject<UBoxComponent>("BombCollisionComponent");
 	BombCollisionComponent->SetupAttachment(RootComponent);
 	BombCollisionComponent->SetBoxExtent(FVector(100.f));
+	BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
 void ABomb::InitializeBombProperties(
@@ -160,9 +162,10 @@ void ABomb::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* O
 
 	//Sets the collision preset to block all dynamics
 	TArray<AActor*> OverlappingActors;
-	BombCollisionComponent->GetOverlappingActors(OverlappingActors, ACharacter::StaticClass());
+	const TSubclassOf<AActor> PlayerClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum::Player);
+	BombCollisionComponent->GetOverlappingActors(OverlappingActors, PlayerClass);
 	if (OverlappingActors.Num() > 0)  // There are no more characters on the bomb
 	{
-		BombCollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
 	}
 }

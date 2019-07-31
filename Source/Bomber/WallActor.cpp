@@ -3,6 +3,7 @@
 #include "WallActor.h"
 
 #include "Bomber.h"
+#include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "MapComponent.h"
 #include "UObject/ConstructorHelpers.h"
@@ -27,6 +28,12 @@ AWallActor::AWallActor()
 	{
 		WallMeshComponent->SetStaticMesh(WallMeshFinder.Object);
 	}
+
+	// Initialize the Wall Collision Component to prevent players from moving through the wall
+	UBoxComponent* const WallCollisionComponent = CreateDefaultSubobject<UBoxComponent>("ItemCollisionComponent");
+	WallCollisionComponent->SetupAttachment(RootComponent);
+	WallCollisionComponent->SetBoxExtent(FVector(100.f));
+	WallCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
 }
 
 void AWallActor::OnConstruction(const FTransform& Transform)

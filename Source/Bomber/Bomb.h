@@ -35,6 +35,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UStaticMeshComponent* BombMeshComponent;
 
+	/** Prevents players from moving through the bomb after they moved away */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UBoxComponent* BombCollisionComponent;
 
