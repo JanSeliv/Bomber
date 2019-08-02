@@ -130,10 +130,11 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	{
 		return;
 	}
+	// Update constructed LevelMap obj;
+	USingletonLibrary::GetSingleton()->LevelMap_ = this;
 
 	// Align the Transform
-	const float MapYaw(GetActorRotation().Yaw);
-	SetActorRotation(FRotator(0.f, MapYaw, 0.f));
+	SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
 	SetActorLocation(GetActorLocation().GridSnap(USingletonLibrary::GetGridSize()));
 	FIntVector MapScale(GetActorScale3D());
 	if (MapScale.X % 2 != 1)  // Length must be unpaired
@@ -159,14 +160,12 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 			// Locate the cell relative to the Level Map
 			FoundVector += GetActorLocation();
 			// Subtract the deviation from the center
-			FoundVector -= (GetActorScale3D() / 2 * USingletonLibrary::GetGridSize());
+			FoundVector -= GetActorScale3D() / 2 * USingletonLibrary::GetGridSize();
 			// Snap to the cell
 			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetGridSize());
-			// Rotate the cell around center
-			const FVector RelativePos(FoundVector - GetActorLocation());
-			FoundVector += RelativePos.RotateAngleAxis(MapYaw, FVector(0, 0, 1)) - RelativePos;
-			// Cell was found, add it to the array
-			GridArray_.Add(FCell(FoundVector));
+			// Cell was found, add rotated cell to the array
+			const FCell FoundCell = USingletonLibrary::CalculateVectorAsRotatedCell(FoundVector, 1.f);
+			GridArray_.Add(FoundCell);
 		}
 	}
 
@@ -194,7 +193,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 
 	// Walls and Players generation
-	GenerateLevelActors(EActorTypeEnum::Wall | EActorTypeEnum::Player, FCell::ZeroCell);
+	GenerateLevelActors(TO_FLAG(EActorTypeEnum::Wall | EActorTypeEnum::Player | EActorTypeEnum::Box), FCell::ZeroCell);
 }
 
 #if WITH_EDITOR  // [PIE] Destroyed()

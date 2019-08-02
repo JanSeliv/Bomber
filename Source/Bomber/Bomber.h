@@ -43,9 +43,9 @@ enum class EActorTypeEnum : uint8
 
 /** @addtogroup actor_types
  * Using EActorTypeEnum as bitmask*/
-inline int32 operator|(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
+inline EActorTypeEnum operator|(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
 {
-	return TO_FLAG(LType) | TO_FLAG(RType);
+	return static_cast<EActorTypeEnum>(TO_FLAG(LType) | TO_FLAG(RType));
 }
 
 /**
