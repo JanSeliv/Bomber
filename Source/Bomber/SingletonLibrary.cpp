@@ -10,15 +10,16 @@
 #include "Math/Color.h"
 #include "MyAiCharacter.h"
 
-#if WITH_EDITOR
-void USingletonLibrary::BroadcastAiUpdating(AActor* Owner)
+void USingletonLibrary::BroadcastAiUpdating()
 {
-	if (LevelMap_ == nullptr)  // The Level map is null
+#if WITH_EDITOR  // [Editor]
+	const auto LevelMap = GetSingleton()->LevelMap_;
+	if (LevelMap == nullptr)  // The Level map is null
 	{
 		return;
 	}
 
-	for (AMyCharacter* const MyCharacterIt : LevelMap_->CharactersOnMap)
+	for (AMyCharacter* const MyCharacterIt : LevelMap->CharactersOnMap)
 	{
 		AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(MyCharacterIt);
 		if (MyAiCharacter != nullptr					   // Successfully cast to AI
@@ -27,10 +28,12 @@ void USingletonLibrary::BroadcastAiUpdating(AActor* Owner)
 			MyAiCharacter->UpdateAI();
 		}
 	}
+#endif  // WITH_EDITOR [Editor]
 }
 
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
+#if WITH_EDITOR					   // [Editor]
 	if (IS_VALID(Owner) == false)  // The owner is not valid
 	{
 		return;
@@ -46,6 +49,7 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 
 		if (IS_PIE(Owner->GetWorld())) PrintToLog(Owner, "[Editor]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
+#endif  // WITH_EDITOR [Editor]
 }
 
 void USingletonLibrary::AddDebugTextRenders_Implementation(
@@ -59,6 +63,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FText& RenderText,
 	const FVector& CoordinatePosition) const
 {
+#if WITH_EDITOR  // [Editor]
 	AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(Owner);
 	if ((MyAiCharacter != nullptr							// Successfully cast to AI
 			&& MyAiCharacter->bShouldShowRenders == false)  // Is not render AI
@@ -78,15 +83,16 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	}
 
 	if (IS_PIE(Owner->GetWorld())) PrintToLog(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+#endif  // WITH_EDITOR [Editor]
 }
 
+#if WITH_EDITOR  // [Editor] AddDebugTextRenders()
 void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor)
 {
 	bool bOutBool = false;
 	TArray<class UTextRenderComponent*> OutArray{};
 	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray);
 }
-
 #endif  // WITH_EDITOR [Editor]
 
 FCell USingletonLibrary::MakeCell_Implementation(const AActor* Actor) const
@@ -156,6 +162,13 @@ bool USingletonLibrary::IsActorInTypes(const AActor* Actor, const int32& Bitmask
 
 TSubclassOf<AActor> USingletonLibrary::FindClassByActorType(const EActorTypeEnum& ActorType)
 {
-	const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses.Find(ActorType);
-	return (ActorClass != nullptr ? *ActorClass : nullptr);
+	if (ActorType != EActorTypeEnum::None)
+	{
+		const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses.Find(ActorType);
+		if (ActorClass != nullptr)
+		{
+			return *ActorClass;
+		}
+	}
+	return nullptr;
 }

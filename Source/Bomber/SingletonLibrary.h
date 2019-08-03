@@ -22,14 +22,20 @@ public:
 	 */
 	FPushNongeneratedToMap OnActorsUpdatedDelegate;
 
+	/** The blueprint function that runs owners OnConstruction and updates of all Level Map actors */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static void BroadcastOnActorsUpdatedDelegate()
+	{
+		GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
+	}
+
 	/** @addtogroup AI
 	 * @addtogroup [Editor]Editor
 	 * Call all signed as bShouldShowRenders AI characters
-	 * @param Owner The called owner
-	 * @warning Is not static for OnDestroyed binding
+	 * @todo Need also calls after map component destroying
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	void BroadcastAiUpdating(AActor* Owner);
+	static void BroadcastAiUpdating();
 
 	/** Blueprint debug function, that prints messages to the log */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))  //
@@ -68,7 +74,7 @@ public:
 		class AActor* Owner,
 		const TSet<struct FCell>& Cells,
 		const struct FLinearColor& TextColor = FLinearColor::Black);
-#endif  //WITH_EDITOR [Editor]
+#endif  //WITH_EDITOR [Editor]On
 
 	/** 
 	 * The singleton getter

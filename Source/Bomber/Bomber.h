@@ -5,7 +5,7 @@
 #include "Engine\World.h"
 #include "Kismet/GameplayStatics.h"
 
-#define IS_TRANSIENT(Obj) ((Obj->HasAllFlags(RF_Transient) || (Obj->GetWorld() == nullptr) || (UGameplayStatics::GetCurrentLevelName(Obj->GetWorld()) == "Transient")))
+#define IS_TRANSIENT(Obj) ((Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
 #define IS_VALID(Obj) (IsValid(Obj) && (Obj)->IsValidLowLevel() && !IS_TRANSIENT(Obj))
 
 #define IS_PIE(World) (ensureMsgf(World != nullptr, TEXT("World is null")) && World->HasBegunPlay() == false && (World->WorldType == EWorldType::Editor))

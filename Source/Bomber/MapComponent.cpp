@@ -43,12 +43,9 @@ void UMapComponent::OnMapComponentConstruction()
 		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(GetOwner());
 
-		// Binds to updating AI renders on owner destroying
-		GetOwner()->OnDestroyed.AddUniqueDynamic(USingletonLibrary::GetSingleton(), &USingletonLibrary::BroadcastAiUpdating);
-
 		// Update AI renders after adding obj to map
 		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
-		USingletonLibrary::GetSingleton()->BroadcastAiUpdating(GetOwner());
+		USingletonLibrary::BroadcastAiUpdating();
 	}
 #endif  //WITH_EDITOR [PIE]
 }
