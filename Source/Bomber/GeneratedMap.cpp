@@ -4,6 +4,7 @@
 
 #include "Bomber.h"
 #include "Cell.h"
+#include "Components/StaticMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
 #include "MyCharacter.h"
@@ -32,11 +33,11 @@ AGeneratedMap::AGeneratedMap()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> BackgroundMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BackgroundMesh"));
 	if (BackgroundMeshFinder.Succeeded())
 	{
-		BackgroundMeshComponent->SetStaticMesh(BackgroundMeshFinder.Object);
+		BackgroundMesh = BackgroundMeshFinder.Object;
 	}
 
 	// Initialize platform component
-	auto PlatformComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("PlatformComponent"));
+	PlatformComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("PlatformComponent"));
 	PlatformComponent->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FClassFinder<AActor> PlatformClassFinder(TEXT("/Game/Bomber/Assets/PlatformAsset"));
 	if (PlatformClassFinder.Succeeded())
@@ -79,13 +80,8 @@ void AGeneratedMap::AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor)
 	else  // else if this class can be added
 		if (USingletonLibrary::GetSingleton()->ActorTypesByClasses.FindKey(UpdateActor->GetClass()) != nullptr)
 	{
-		const FCell* CellOfExistingActor = GridArray_.FindKey(UpdateActor);
-		if (CellOfExistingActor != nullptr && !(*CellOfExistingActor == Cell))
-		{
-			GridArray_.Add(*CellOfExistingActor);  // remove this actor from previous cell
-			USingletonLibrary::PrintToLog(UpdateActor, "AddActorOnMapByObj", "Removed existed actor from cell");
-		}
-		GridArray_.Add(Cell, UpdateActor);  // Add this actor to his cell
+		RemoveActorFromGridArray(UpdateActor);
+		GridArray_.Add(Cell, UpdateActor);  // Add this actor to his new cell
 	}
 
 	UpdateActor->GetRootComponent()->SetAbsolute(false, false, true);
@@ -120,8 +116,8 @@ void AGeneratedMap::BeginPlay()
 	CharactersOnMap.Compact();
 	CharactersOnMap.Shrink();
 
-	// Boxes generation
-	GenerateLevelActors(TO_FLAG(EActorTypeEnum::Box), FCell::ZeroCell);
+	// Actors generation
+	GenerateLevelActors();
 }
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -130,8 +126,17 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	{
 		return;
 	}
-	// Update constructed LevelMap obj;
+	// Update the constructed LevelMap obj;
 	USingletonLibrary::GetSingleton()->LevelMap_ = this;
+
+	// Update the background static mesh
+	BackgroundMeshComponent->SetStaticMesh(BackgroundMesh);
+
+	// Create the platform blueprint child actor
+	if (PlatformComponent == nullptr)
+	{
+		PlatformComponent->CreateChildActor();
+	}
 
 	// Align the Transform
 	SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
@@ -172,9 +177,6 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 #if WITH_EDITOR						 // [PIE] Map's text renders
 	if (IS_PIE(GetWorld()) == true)  // For editor only
 	{
-		// Destroy editor-only actors that were spawned in the PIE
-		DestroyAttachedActors(true);
-
 		// Show cell coordinated of the Grid array
 		USingletonLibrary::ClearOwnerTextRenders(this);
 		if (bShouldShowRenders == true)
@@ -184,16 +186,11 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 			const TSet<FCell> SetRenders(ArrayRenders);
 			USingletonLibrary::AddDebugTextRenders(this, SetRenders);
 		}
+
+		// Preview generation
+		GenerateLevelActors();
 	}
-
 #endif  // WITH_EDITOR [Editor]
-
-	// After destroying PIE actors and before their generation,
-	// calling to updating of all dragged to the Level Map actors
-	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
-
-	// Walls and Players generation
-	GenerateLevelActors(TO_FLAG(EActorTypeEnum::Wall | EActorTypeEnum::Player | EActorTypeEnum::Box), FCell::ZeroCell);
 }
 
 #if WITH_EDITOR  // [PIE] Destroyed()
@@ -217,9 +214,11 @@ void AGeneratedMap::Destroyed()
 	// Call the base class version
 	Super::Destroyed();
 }
+#endif  //WITH_EDITOR [PIE]
 
-void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors) const
+void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors)
 {
+#if WITH_EDITOR  // [PIE]
 	TArray<AActor*> AttachedActors;
 	GetAttachedActors(AttachedActors);
 	if (AttachedActors.Num() == 0)
@@ -232,30 +231,82 @@ void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors) const
 		if (bIsEditorOnlyActors == false		   // Should destroy all actors
 			|| AttachedActors[i]->IsEditorOnly())  // Should destroy editor-only actors
 		{
-			USingletonLibrary::PrintToLog(AttachedActors[i], "DestroyAttachedActors", "Will be removed");
+			RemoveActorFromGridArray(AttachedActors[i]);
 			AttachedActors[i]->Destroy();
 		}
+#endif  //WITH_EDITOR [PIE]
 	}
 }
 
-#endif  //WITH_EDITOR [PIE]
-
-void AGeneratedMap::GenerateLevelActors_Implementation(const int32& ActorsTypesBitmask, const FCell& Cell)
+void AGeneratedMap::RemoveActorFromGridArray(const AActor* Actor)
 {
-	const auto ActorClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum(ActorsTypesBitmask));
-	if (ActorClass == nullptr)
+	const FCell* Cell = GridArray_.FindKey(Actor);
+	if (Cell == nullptr)  // The actor was not found on anyone cell
 	{
 		return;
 	}
 
-	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, Cell.Location, FRotator::ZeroRotator);
+	GridArray_.Add(*Cell);  // remove this actor from this cell
+	USingletonLibrary::PrintToLog(this, "RemoveActorFromGridArray", Actor->GetName());
+}
 
-// If PIE world, mark this spawned actor as bIsEditorOnlyActor
-#if WITH_EDITOR						// [PIE]
-	if (IS_PIE(GetWorld())			// PIE only
-		&& IS_VALID(SpawnedActor))  // Successfully spawn
+void AGeneratedMap::GenerateLevelActors_Implementation()
+{
+	if (GridArray_.Num() == 0)  // Is no cell to generate an actor
 	{
-		SpawnedActor->bIsEditorOnlyActor = true;
+		return;
 	}
-#endif  // WITH_EDITOR [PIE]
+
+	//  Destroy editor-only actors that were spawned in the PIE
+	DestroyAttachedActors(true);
+
+	// After destroying PIE actors and before their generation,
+	// calling to updating of all dragged to the Level Map actors
+	USingletonLibrary::BroadcastOnActorsUpdatedDelegate();
+
+	TArray<FCell> CellsArray;
+	GridArray_.GetKeys(CellsArray);
+
+	const FIntVector MapScale(GetActorScale3D());
+	for (int32 Y = 0; Y < MapScale.Y; ++Y)
+	{
+		for (int32 X = 0; X < MapScale.X; ++X)
+		{
+			const FCell KeyIt = CellsArray[MapScale.X * Y + X];
+			const AActor** ValueIt = GridArray_.Find(KeyIt);
+			if (ValueIt != nullptr						 // Was found actor
+				&& IS_VALID(*ValueIt) == true			 // this actor is valid
+				&& (*ValueIt)->IsEditorOnly() == false)  // is not the editor actor
+			{
+				continue;  // The actor on the cell has already existed
+			}
+
+			EActorTypeEnum ActorTypeToSpawn = EActorTypeEnum::None;
+
+			if (X % 2 == 1 && Y % 2 == 1)
+			{
+				ActorTypeToSpawn = EActorTypeEnum::Wall;
+			}
+
+			// if (...) ActorTypeToSpawn = EActorTypeEnum::Box;
+
+			// if (...) ActorTypeToSpawn = EActorTypeEnum::Player;
+
+			// --- The spawn part ---
+			const auto ActorClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum(ActorTypeToSpawn));
+			if (ActorClass != nullptr)  // There is type to spawn
+			{
+				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, KeyIt.Location, FRotator::ZeroRotator);
+
+#if WITH_EDITOR									 // [PIE]
+				if (IS_PIE(GetWorld())			 // PIE only
+					&& SpawnedActor != nullptr)  // Successfully spawn
+				{
+					// If PIE world, mark this spawned actor as bIsEditorOnlyActor
+					SpawnedActor->bIsEditorOnlyActor = true;
+				}
+#endif		   // WITH_EDITOR [PIE]
+			}  // End of the spawn part
+		}
+	}
 }
