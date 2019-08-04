@@ -11,6 +11,8 @@
 #include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
+#include "Editor.h"
+
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
@@ -20,6 +22,17 @@ AGeneratedMap::AGeneratedMap()
 	// Should not call OnConstruction on drag events
 #if WITH_EDITOR  // [Editor] bRunConstructionScriptOnDrag
 	bRunConstructionScriptOnDrag = false;
+
+	// Updating the level map reference in the singleton library
+	auto LevelMapUpdatingLambda = [this](bool bIsSimulating) {
+		USingletonLibrary::PrintToLog(this, "LevelMapUpdatingLambda", "LevelMap updated");
+		USingletonLibrary::GetSingleton()->LevelMap_ = this;
+	};
+	// Register callback to updating the level map reference on PIE events
+	FEditorDelegates::PreBeginPIE.AddLambda(LevelMapUpdatingLambda);
+	FEditorDelegates::PostPIEStarted.AddLambda(LevelMapUpdatingLambda);
+	FEditorDelegates::PrePIEEnded.AddLambda(LevelMapUpdatingLambda);
+	FEditorDelegates::EndPIE.AddLambda(LevelMapUpdatingLambda);
 #endif  //WITH_EDITOR [Editor]
 
 	// Initialize root component
@@ -127,7 +140,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		return;
 	}
 	// Update the constructed LevelMap obj;
-	USingletonLibrary::GetSingleton()->LevelMap_ = this;
+	//USingletonLibrary::GetSingleton()->LevelMap_ = this;
 
 	// Update the background static mesh
 	BackgroundMeshComponent->SetStaticMesh(BackgroundMesh);
@@ -231,11 +244,10 @@ void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors)
 		if (bIsEditorOnlyActors == false		   // Should destroy all actors
 			|| AttachedActors[i]->IsEditorOnly())  // Should destroy editor-only actors
 		{
-			RemoveActorFromGridArray(AttachedActors[i]);
 			AttachedActors[i]->Destroy();
 		}
-#endif  //WITH_EDITOR [PIE]
 	}
+#endif  //WITH_EDITOR [PIE]
 }
 
 void AGeneratedMap::RemoveActorFromGridArray(const AActor* Actor)
@@ -272,13 +284,14 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 	{
 		for (int32 X = 0; X < MapScale.X; ++X)
 		{
-			const FCell KeyIt = CellsArray[MapScale.X * Y + X];
-			const AActor** ValueIt = GridArray_.Find(KeyIt);
-			if (ValueIt != nullptr						 // Was found actor
-				&& IS_VALID(*ValueIt) == true			 // this actor is valid
-				&& (*ValueIt)->IsEditorOnly() == false)  // is not the editor actor
+			const FCell CellIt = CellsArray[MapScale.X * Y + X];
+			const AActor** ActorIt = GridArray_.Find(CellIt);
+			if (ActorIt != nullptr				// Was found actor
+				&& IS_VALID(*ActorIt) == true)  // this actor is valid
+
 			{
-				continue;  // The actor on the cell has already existed
+				USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t The actor on the cell has already existed", (*ActorIt)->GetName());
+				continue;
 			}
 
 			EActorTypeEnum ActorTypeToSpawn = EActorTypeEnum::None;
@@ -296,7 +309,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 			const auto ActorClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum(ActorTypeToSpawn));
 			if (ActorClass != nullptr)  // There is type to spawn
 			{
-				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, KeyIt.Location, FRotator::ZeroRotator);
+				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, CellIt.Location, FRotator::ZeroRotator);
 
 #if WITH_EDITOR									 // [PIE]
 				if (IS_PIE(GetWorld())			 // PIE only
@@ -304,6 +317,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 				{
 					// If PIE world, mark this spawned actor as bIsEditorOnlyActor
 					SpawnedActor->bIsEditorOnlyActor = true;
+					USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.RemoveAll(SpawnedActor);
 				}
 #endif		   // WITH_EDITOR [PIE]
 			}  // End of the spawn part

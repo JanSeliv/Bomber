@@ -8,7 +8,7 @@
 
 void AMyAiCharacter::UpdateAI_Implementation()
 {
-	AGeneratedMap* const LevelMap = USingletonLibrary::GetLevelMap(GetWorld());
+	AGeneratedMap* const LevelMap = USingletonLibrary::GetLevelMap();
 	if (IS_VALID(LevelMap) == false)  // The Level Map is not valid
 	{
 		return;

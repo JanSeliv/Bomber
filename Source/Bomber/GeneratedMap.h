@@ -81,6 +81,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor);
 
+	/** Find and remove only this input actor-value of the cell-key from the Grid Array */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void RemoveActorFromGridArray(const AActor* Actor);
+
 	/**
 	 * Destroy all actors from set of cells
 	 * @param Keys The set of cells for destroying the found actors
@@ -109,10 +113,6 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void DestroyAttachedActors(bool bIsEditorOnlyActors = false);
-
-	/** Find and remove only this input actor-value of the cell-key from the Grid Array */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void RemoveActorFromGridArray(const AActor* Actor);
 
 	/** @ingroup actors_management
 	 * Spawns and fills the Grid Array values by level actors

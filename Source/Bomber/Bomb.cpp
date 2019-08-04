@@ -64,9 +64,9 @@ void ABomb::InitializeBombProperties(
 	const int32& FireN,
 	const int32& CharacterID)
 {
-	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // // The Level Map is not valid
-		|| IS_VALID(MapComponent) == false					   // MapComponent is not valid
-		|| FireN < 0)										   // Negative length of the explosion
+	if (!IS_VALID(USingletonLibrary::GetLevelMap())  // // The Level Map is not valid
+		|| IS_VALID(MapComponent) == false			 // MapComponent is not valid
+		|| FireN < 0)								 // Negative length of the explosion
 	{
 		return;
 	}
@@ -86,7 +86,7 @@ void ABomb::InitializeBombProperties(
 	}
 
 	// Update explosion information
-	ExplosionCells_ = USingletonLibrary::GetLevelMap(GetWorld())->GetSidesCells(MapComponent->Cell, FireN, EPathTypesEnum::Explosion);
+	ExplosionCells_ = USingletonLibrary::GetLevelMap()->GetSidesCells(MapComponent->Cell, FireN, EPathTypesEnum::Explosion);
 }
 
 // Called when the game starts or when spawned
@@ -130,8 +130,8 @@ void ABomb::OnConstruction(const FTransform& Transform)
 void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 {
 	UWorld* const World = GetWorld();
-	if (World == nullptr										   // World is null
-		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // The Level Map is not valid
+	if (World == nullptr								 // World is null
+		|| !IS_VALID(USingletonLibrary::GetLevelMap()))  // The Level Map is not valid
 	{
 		return;
 	}
@@ -148,7 +148,7 @@ void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 	}
 
 	// Destroy all actors from array of cells
-	USingletonLibrary::GetLevelMap(World)->DestroyActorsFromMap(ExplosionCells_);
+	USingletonLibrary::GetLevelMap()->DestroyActorsFromMap(ExplosionCells_);
 }
 
 void ABomb::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
