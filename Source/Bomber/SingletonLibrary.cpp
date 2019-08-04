@@ -69,7 +69,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 			&& MyAiCharacter->bShouldShowRenders == false)  // Is not render AI
 		|| Cells.Num() == NULL								// Null length
 		|| IS_VALID(Owner) == false							// Owner is not valid
-		|| !IS_VALID(GetLevelMap(Owner->GetWorld())))		// The Level Map is not valid
+		|| !IS_VALID(GetLevelMap()))						// The Level Map is not valid
 	{
 		return;
 	}
@@ -80,6 +80,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	{
 		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
 		TextRenderIt->RegisterComponent();
+		//TextRenderIt->MarkAsEditorOnlySubobject();
 	}
 
 	if (IS_PIE(Owner->GetWorld())) PrintToLog(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
@@ -106,35 +107,6 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 	if (GEngine) Singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
 	ensureMsgf(Singleton != nullptr, TEXT("The Singleton is null"));
 	return Singleton;
-}
-
-AGeneratedMap* const USingletonLibrary::GetLevelMap(UObject* WorldContextObject)
-{
-	if (!ensureMsgf(GEngine && GetSingleton() && WorldContextObject, TEXT("GetLevelMap error")))
-	{
-		return nullptr;
-	}
-
-// Find editor level map
-#if WITH_EDITOR
-	UWorld* const World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
-	if (IS_PIE(World) == true  // for editor only
-		&& IS_VALID(GetSingleton()->LevelMap_) == false)
-	{
-		// Find and update the Level Map
-		TArray<AActor*> LevelMapArray;
-		UGameplayStatics::GetAllActorsOfClass(World, AGeneratedMap::StaticClass(), LevelMapArray);
-
-		if (ensure(LevelMapArray.Num() == 1)  // There should not be less or more than one Level Map instance
-			&& IS_VALID(LevelMapArray[0]))	// This level map is valid and is not transient
-		{
-			GetSingleton()->LevelMap_ = Cast<AGeneratedMap>(LevelMapArray[0]);
-			PrintToLog(LevelMapArray[0], "[PIE]SingletonLibrary:GetLevelMap", "UPDATED");
-		}
-	}
-#endif  //WITH_EDITOR [PIE]
-
-	return GetSingleton()->LevelMap_;
 }
 
 FCell USingletonLibrary::CalculateVectorAsRotatedCell(const FVector& VectorToRotate, const float& AxisZ)

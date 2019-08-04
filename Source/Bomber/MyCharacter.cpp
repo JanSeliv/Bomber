@@ -64,11 +64,11 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 void AMyCharacter::Destroyed()
 {
 	UWorld* const World = GetWorld();
-	if (World != nullptr										 // World is not null
-		&& IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // The Level Map is valid
-		&& IS_TRANSIENT(this) == false)							 // Component is not transient
+	if (World != nullptr							   // World is not null
+		&& IS_VALID(USingletonLibrary::GetLevelMap())  // The Level Map is valid
+		&& IS_TRANSIENT(this) == false)				   // Component is not transient
 	{
-		USingletonLibrary::GetLevelMap(World)->CharactersOnMap.Remove(this);
+		USingletonLibrary::GetLevelMap()->CharactersOnMap.Remove(this);
 		USingletonLibrary::PrintToLog(this, "Destroyed", "Removed from TSet");
 	}
 
@@ -78,10 +78,10 @@ void AMyCharacter::Destroyed()
 
 void AMyCharacter::SpawnBomb()
 {
-	if (!IS_VALID(USingletonLibrary::GetLevelMap(GetWorld()))  // The Level Map is not valid
-		|| Powerups_.FireN <= 0								   // Null length of explosion
-		|| Powerups_.BombN <= 0								   // No more bombs
-		|| IS_PIE(GetWorld()) == true)						   // Should not spawn bomb in PIE
+	if (!IS_VALID(USingletonLibrary::GetLevelMap())  // The Level Map is not valid
+		|| Powerups_.FireN <= 0						 // Null length of explosion
+		|| Powerups_.BombN <= 0						 // No more bombs
+		|| IS_PIE(GetWorld()) == true)				 // Should not spawn bomb in PIE
 	{
 		return;
 	}

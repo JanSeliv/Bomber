@@ -32,7 +32,6 @@ public:
 	/** @addtogroup AI
 	 * @addtogroup [Editor]Editor
 	 * Call all signed as bShouldShowRenders AI characters
-	 * @todo Need also calls after map component destroying
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	static void BroadcastAiUpdating();
@@ -41,7 +40,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))  //
 	static FORCEINLINE int32 PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), *UObj->GetName(), *FunctionName, *Message);
+		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("")), *FunctionName, *Message);
 		return 0;
 	}
 
@@ -85,7 +84,10 @@ public:
 
 	/** The Level Map getter */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class AGeneratedMap* const GetLevelMap(UObject* WorldContextObject);
+	static FORCEINLINE class AGeneratedMap* const GetLevelMap()
+	{
+		return ensure(GEngine && GetSingleton()) ? GetSingleton()->LevelMap_ : nullptr;
+	}
 
 	/** @defgroup Cell_BP_Functions The group with cell functions that used in blueprints
 	 * The custom make node of the FCell struct

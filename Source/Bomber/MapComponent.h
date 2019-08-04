@@ -33,4 +33,7 @@ protected:
 	 * Sets owner's defaults
 	 */
 	virtual void OnComponentCreated() final;
+
+	/* Called when a component is destroyed */
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 };
