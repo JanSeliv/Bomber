@@ -94,8 +94,8 @@ public:
 	void DestroyActorsFromMap(const TSet<FCell>& Keys);
 
 protected:
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() final;
+	/** The level map initializing and actors generation after all of his components have been initialized, only called during gameplay */
+	virtual void PostInitializeComponents() final;
 
 	/** Called when an instance of this class is placed (in editor) or spawned
 	 * @todo Generate only platform without boxes*/
@@ -104,7 +104,7 @@ protected:
 #if WITH_EDITOR  // [PIE] Destroyed()
 	/** @defgroup [PIE]PlayInEditor Runs only in the editor before beginning play
 	 * Called when this actor is explicitly being destroyed*/
-	virtual void Destroyed() override;
+	virtual void Destroyed() final;
 #endif  //WITH_EDITOR
 
 	/** @addtogroup [Editor]Editor
@@ -146,4 +146,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	bool bShouldShowRenders;
 #endif  //WITH_EDITORONLY_DATA [Editor]
+
+	/** The chance of boxes generation */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	int32 BoxesChance_ = 50;
 };

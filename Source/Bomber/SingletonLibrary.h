@@ -14,20 +14,15 @@ class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+#if WITH_EDITOR
 	DECLARE_MULTICAST_DELEGATE(FPushNongeneratedToMap);
-	/** @defgroup [Editor]Editor Runs only in editor
+	/** @defgroup [PIE] Runs only in editor
 	 * Owners Map Components binds to updating on the Level Map to this delegate
 	 * The Level Map broadcasts this delegate after own generation
 	 * @see class UMapComponent
 	 */
 	FPushNongeneratedToMap OnActorsUpdatedDelegate;
-
-	/** The blueprint function that runs owners OnConstruction and updates of all Level Map actors */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static void BroadcastOnActorsUpdatedDelegate()
-	{
-		GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
-	}
+#endif  //WITH_EDITOR [PIE]
 
 	/** @addtogroup AI
 	 * @addtogroup [Editor]Editor
@@ -73,7 +68,7 @@ public:
 		class AActor* Owner,
 		const TSet<struct FCell>& Cells,
 		const struct FLinearColor& TextColor = FLinearColor::Black);
-#endif  //WITH_EDITOR [Editor]On
+#endif  //WITH_EDITOR [Editor]
 
 	/** 
 	 * The singleton getter

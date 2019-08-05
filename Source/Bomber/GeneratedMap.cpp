@@ -24,15 +24,14 @@ AGeneratedMap::AGeneratedMap()
 	bRunConstructionScriptOnDrag = false;
 
 	// Updating the level map reference in the singleton library
-	auto LevelMapUpdatingLambda = [this](bool bIsSimulating) {
-		USingletonLibrary::PrintToLog(this, "LevelMapUpdatingLambda", "LevelMap updated");
-		USingletonLibrary::GetSingleton()->LevelMap_ = this;
-	};
-	// Register callback to updating the level map reference on PIE events
-	FEditorDelegates::PreBeginPIE.AddLambda(LevelMapUpdatingLambda);
-	FEditorDelegates::PostPIEStarted.AddLambda(LevelMapUpdatingLambda);
-	FEditorDelegates::PrePIEEnded.AddLambda(LevelMapUpdatingLambda);
-	FEditorDelegates::EndPIE.AddLambda(LevelMapUpdatingLambda);
+	// Register callback to updating the level map reference and listening actors on PIE events
+	FEditorDelegates::EndPIE.AddLambda([this](bool bIsSimulating) {
+		if (IsValidLowLevel() && !IS_TRANSIENT(this))
+		{
+			USingletonLibrary::GetSingleton()->LevelMap_ = this;
+			USingletonLibrary::PrintToLog(this, "EndPIE", "");
+		}
+	});
 #endif  //WITH_EDITOR [Editor]
 
 	// Initialize root component
@@ -117,10 +116,14 @@ void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& Keys)
 	USingletonLibrary::PrintToLog(this, "DestroyActorsFromMap \t Keys will be destroyed:", FString::FromInt(Keys.Num()));
 }
 
-// Called when the game starts or when spawned
-void AGeneratedMap::BeginPlay()
+void AGeneratedMap::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
+
+	if (IS_TRANSIENT(this) == true)  // the level map is transient
+	{
+		return;
+	}
 
 	// Update UEDPIE_LevelMap obj;
 	USingletonLibrary::GetSingleton()->LevelMap_ = this;
@@ -140,7 +143,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		return;
 	}
 	// Update the constructed LevelMap obj;
-	//USingletonLibrary::GetSingleton()->LevelMap_ = this;
+	USingletonLibrary::GetSingleton()->LevelMap_ = this;
 
 	// Update the background static mesh
 	BackgroundMeshComponent->SetStaticMesh(BackgroundMesh);
@@ -247,7 +250,16 @@ void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors)
 			AttachedActors[i]->Destroy();
 		}
 	}
-#endif  //WITH_EDITOR [PIE]
+
+	// After destroying PIE actors and before their generation,
+	// calling to updating of all dragged to the Level Map actors
+	if (IS_PIE(GetWorld())  //
+		&& bIsEditorOnlyActors)
+	{
+		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
+	}  // [PIE]
+
+#endif  //WITH_EDITOR [Editor]
 }
 
 void AGeneratedMap::RemoveActorFromGridArray(const AActor* Actor)
@@ -269,12 +281,10 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 		return;
 	}
 
+#if WITH_EDITOR  // [Editor]
 	//  Destroy editor-only actors that were spawned in the PIE
 	DestroyAttachedActors(true);
-
-	// After destroying PIE actors and before their generation,
-	// calling to updating of all dragged to the Level Map actors
-	USingletonLibrary::BroadcastOnActorsUpdatedDelegate();
+#endif  // [Editor]
 
 	TArray<FCell> CellsArray;
 	GridArray_.GetKeys(CellsArray);
@@ -287,23 +297,39 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 			const FCell CellIt = CellsArray[MapScale.X * Y + X];
 			const AActor** ActorIt = GridArray_.Find(CellIt);
 			if (ActorIt != nullptr				// Was found actor
-				&& IS_VALID(*ActorIt) == true)  // this actor is valid
-
+				&& IS_VALID(*ActorIt) == true)  // and this actor is valid
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t The actor on the cell has already existed", (*ActorIt)->GetName());
 				continue;
 			}
 
+			// --- The spawn part ---
+
+			// In case all next conditions will be false
 			EActorTypeEnum ActorTypeToSpawn = EActorTypeEnum::None;
 
+			// Wall condition
 			if (X % 2 == 1 && Y % 2 == 1)
 			{
 				ActorTypeToSpawn = EActorTypeEnum::Wall;
 			}
 
-			// if (...) ActorTypeToSpawn = EActorTypeEnum::Box;
+			// Player condition
+			const bool bIsCornerX = (X == 0 || X == MapScale.X - 1);
+			const bool bIsCornerY = (Y == 0 || Y == MapScale.Y - 1);
+			if (bIsCornerX && bIsCornerY)
+			{
+				ActorTypeToSpawn = EActorTypeEnum::Player;
+			}
 
-			// if (...) ActorTypeToSpawn = EActorTypeEnum::Player;
+			// Box condition
+			if (ActorTypeToSpawn == EActorTypeEnum::None				  // all previous conditions are false
+				&& FMath::RandRange(int32(0), int32(99)) < BoxesChance_   // Chance of boxes
+				&& (!bIsCornerX && X != 1 && X != MapScale.X - 2		  // X corner zone
+					   || !bIsCornerY && Y != 1 && Y != MapScale.Y - 2))  // Y corner zone
+			{
+				ActorTypeToSpawn = EActorTypeEnum::Box;
+			}
 
 			// --- The spawn part ---
 			const auto ActorClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum(ActorTypeToSpawn));
@@ -321,6 +347,6 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 				}
 #endif		   // WITH_EDITOR [PIE]
 			}  // End of the spawn part
-		}
-	}
+		}	  // X iterations
+	}		   // Y iterations
 }

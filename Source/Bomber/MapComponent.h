@@ -35,5 +35,6 @@ protected:
 	virtual void OnComponentCreated() final;
 
 	/* Called when a component is destroyed */
-	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
+	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
+	;
 };
