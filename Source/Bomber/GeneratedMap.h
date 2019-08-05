@@ -5,7 +5,6 @@
 #include "Bomber.h"
 #include "Cell.h"
 #include "GameFramework/Actor.h"
-#include "SingletonLibrary.h"
 
 #include "GeneratedMap.generated.h"
 
@@ -27,8 +26,17 @@ public:
 	 */
 	AGeneratedMap();
 
-	UPROPERTY(BlueprintReadOnly, Category = "C++")
+	/** The background of the Level Map */
+	UPROPERTY(BlueprintReadWrite, Category = "C++")
 	class UStaticMeshComponent* BackgroundMeshComponent;
+
+	/** The static mesh of the background. Can be changed in the editor */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	class UStaticMesh* BackgroundMesh;
+
+	/** The blueprint with the collision cage and floor  */
+	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	UChildActorComponent* PlatformComponent;
 
 	/** Set of unique player characters  */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
@@ -73,6 +81,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor);
 
+	/** Find and remove only this input actor-value of the cell-key from the Grid Array */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void RemoveActorFromGridArray(const AActor* Actor);
+
 	/**
 	 * Destroy all actors from set of cells
 	 * @param Keys The set of cells for destroying the found actors
@@ -82,8 +94,8 @@ public:
 	void DestroyActorsFromMap(const TSet<FCell>& Keys);
 
 protected:
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() final;
+	/** The level map initializing and actors generation after all of his components have been initialized, only called during gameplay */
+	virtual void PostInitializeComponents() final;
 
 	/** Called when an instance of this class is placed (in editor) or spawned
 	 * @todo Generate only platform without boxes*/
@@ -92,27 +104,26 @@ protected:
 #if WITH_EDITOR  // [PIE] Destroyed()
 	/** @defgroup [PIE]PlayInEditor Runs only in the editor before beginning play
 	 * Called when this actor is explicitly being destroyed*/
-	virtual void Destroyed() override;
-#endif  //WITH_EDITOR [PIE]
+	virtual void Destroyed() final;
+#endif  //WITH_EDITOR
 
-	/**
+	/** @addtogroup [Editor]Editor
 	 * Destroy all attached level actors
 	 * @param bIsEditorOnlyActors Should destroy editor-only actors that were spawned in the PIE world, otherwise will be destroyed all the level map's actors
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly))
-	void DestroyAttachedActors(bool bIsEditorOnlyActors = false) const;
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+	void DestroyAttachedActors(bool bIsEditorOnlyActors = false);
 
 	/** @ingroup actors_management
 	 * Spawns and fills the Grid Array values by level actors
+	 *
 	 * @see AGeneratedMap::GridArray_
 	 * @see AGeneratedMap::CharactersOnMap
 	 * @see struct FCell: Makes a grid of cells
-	 * @todo to C++ GenerateLevelActors(...)
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask"))
-	void GenerateLevelActors(
-		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask,
-		UPARAM(ref) const FCell& Cell);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask,ActorLocationToSpawn"))
+	void GenerateLevelActors();
 
 	/** @ingroup actors_management
 	 * Storage of cells and their actors
@@ -135,4 +146,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	bool bShouldShowRenders;
 #endif  //WITH_EDITORONLY_DATA [Editor]
+
+	/** The chance of boxes generation */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	int32 BoxesChance_ = 50;
 };

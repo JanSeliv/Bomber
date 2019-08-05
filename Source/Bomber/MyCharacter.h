@@ -44,13 +44,13 @@ public:
 
 protected:
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	virtual void BeginPlay() final;
 
 	//Called when an instance of this class is placed (in editor) or spawned.
-	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void OnConstruction(const FTransform& Transform) final;
 
 	/** Called when this actor is explicitly being destroyed */
-	virtual void Destroyed() override;
+	virtual void Destroyed() final;
 
 	/** Spawn bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++")

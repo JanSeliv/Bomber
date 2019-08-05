@@ -16,8 +16,8 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::OnMapComponentConstruction()
 {
-	if (IS_VALID(GetOwner()) == false							   // The owner is not valid
-		|| !IS_VALID(USingletonLibrary::GetLevelMap(GetWorld())))  // The Level Map is not valid
+	if (IS_VALID(GetOwner()) == false					 // The owner is not valid
+		|| !IS_VALID(USingletonLibrary::GetLevelMap()))  // The Level Map is not valid
 	{
 		return;
 	}
@@ -28,12 +28,14 @@ void UMapComponent::OnMapComponentConstruction()
 
 	// Owner updating
 	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddActorOnMapByObj");
-	USingletonLibrary::GetLevelMap(GetWorld())->AddActorOnMapByObj(Cell, GetOwner());
+	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(Cell, GetOwner());
 
-	// Binds to Owner's OnConstruction to reruncalls the non-generated actors on the Level Map
-	if (USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.IsBoundToObject(GetOwner()) == false)
+	// Binds to Owner's OnConstruction to rerun calls the non-generated actors on the Level Map
+	if (GetOwner()->IsEditorOnly() == false  // is not the editor actor
+		&& USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.IsBoundToObject(GetOwner()) == false)
 	{
 		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
+		USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "Listening OnActorUpdatedDelegate");
 	}
 
 #if WITH_EDITOR  // [PIE]
@@ -43,12 +45,9 @@ void UMapComponent::OnMapComponentConstruction()
 		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(GetOwner());
 
-		// Binds to updating AI renders on owner destroying
-		GetOwner()->OnDestroyed.AddUniqueDynamic(USingletonLibrary::GetSingleton(), &USingletonLibrary::BroadcastAiUpdating);
-
 		// Update AI renders after adding obj to map
 		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
-		USingletonLibrary::GetSingleton()->BroadcastAiUpdating(GetOwner());
+		USingletonLibrary::BroadcastAiUpdating();
 	}
 #endif  //WITH_EDITOR [PIE]
 }
@@ -79,4 +78,23 @@ void UMapComponent::OnComponentCreated()
 		GetOwner()->bRunConstructionScriptOnDrag = false;
 	}
 #endif  //WITH_EDITOR [PIE]
+}
+
+void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	if (IS_TRANSIENT(this) == false  //
+		&& IS_VALID(USingletonLibrary::GetLevelMap()))
+	{
+		USingletonLibrary::PrintToLog(GetOwner(), "OnComponentDestroyed", "-> \t RemoveActorFromGridArray");
+		USingletonLibrary::GetLevelMap()->RemoveActorFromGridArray(GetOwner());
+
+#if WITH_EDITOR  // [PIE]
+		if (IS_PIE(GetWorld()) == true)
+		{
+			USingletonLibrary::BroadcastAiUpdating();
+		}
+#endif  //WITH_EDITOR [PIE]
+	}
+
+	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
