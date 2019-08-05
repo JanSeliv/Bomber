@@ -110,10 +110,10 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 
 FCell USingletonLibrary::CalculateVectorAsRotatedCell(const FVector& VectorToRotate, const float& AxisZ)
 {
-	if (!ensureMsgf(IS_VALID(GetSingleton()->LevelMap_), TEXT("The Level Map is not valid"))  //
+	if (!ensureMsgf(GetSingleton()->LevelMap_, TEXT("The Level Map is not valid"))  //
 		|| !ensureMsgf(AxisZ != abs(0.f), TEXT("The axis is zero")))
 	{
-		return FCell::ZeroCell;
+		return FCell(VectorToRotate);
 	}
 
 	const FVector Dimensions = VectorToRotate - GetSingleton()->LevelMap_->GetActorLocation();

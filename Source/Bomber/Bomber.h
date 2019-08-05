@@ -5,6 +5,7 @@
 #include "Engine\World.h"
 #include "Kismet/GameplayStatics.h"
 
+//@todo Is includes the transient world as IsGameWorld() ? //!(Obj)->GetWorld()->IsGameWorld()
 #define IS_TRANSIENT(Obj) ((Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
 #define IS_VALID(Obj) (IsValid(Obj) && (Obj)->IsValidLowLevel() && !IS_TRANSIENT(Obj))
 
