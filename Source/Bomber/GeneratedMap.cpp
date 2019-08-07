@@ -11,7 +11,9 @@
 #include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
-#include "Editor.h"
+#if WITH_EDITOR		 // [Editor]
+#include "Editor.h"  // FEditorDelegates::EndPIE
+#endif				 //WITH_EDITOR [Editor]
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
@@ -45,7 +47,7 @@ AGeneratedMap::AGeneratedMap()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> BackgroundMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BackgroundMesh"));
 	if (BackgroundMeshFinder.Succeeded())
 	{
-		BackgroundMesh = BackgroundMeshFinder.Object;
+		BackgroundMesh = BackgroundMeshFinder.Object;  // Default mesh of the BackgroundMeshComponent
 	}
 
 	// Initialize platform component
@@ -54,7 +56,7 @@ AGeneratedMap::AGeneratedMap()
 	static ConstructorHelpers::FClassFinder<AActor> PlatformClassFinder(TEXT("/Game/Bomber/Assets/PlatformAsset"));
 	if (PlatformClassFinder.Succeeded())
 	{
-		PlatformComponent->SetChildActorClass(PlatformClassFinder.Class);
+		PlatformClass = PlatformClassFinder.Class;  // Default class of the PlatformComponent
 	}
 }
 
@@ -146,11 +148,15 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::GetSingleton()->LevelMap_ = this;
 
 	// Update the background static mesh
-	BackgroundMeshComponent->SetStaticMesh(BackgroundMesh);
+	if (BackgroundMesh != nullptr)
+	{
+		BackgroundMeshComponent->SetStaticMesh(BackgroundMesh);
+	}
 
 	// Create the platform blueprint child actor
-	if (PlatformComponent == nullptr)
+	if (PlatformClass != nullptr)
 	{
+		PlatformComponent->SetChildActorClass(PlatformClass);
 		PlatformComponent->CreateChildActor();
 	}
 

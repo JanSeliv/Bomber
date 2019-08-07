@@ -38,6 +38,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "C++")
 	UChildActorComponent* PlatformComponent;
 
+	/** The owner's class of the blueprint child actor as the PlatformComponent. Can be changed in the editor */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	TSubclassOf<AActor> PlatformClass;
+
 	/** Set of unique player characters  */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	TSet<class AMyCharacter*> CharactersOnMap;

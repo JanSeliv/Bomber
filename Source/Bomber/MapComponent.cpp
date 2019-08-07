@@ -30,17 +30,17 @@ void UMapComponent::OnMapComponentConstruction()
 	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddActorOnMapByObj");
 	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(Cell, GetOwner());
 
-	// Binds to Owner's OnConstruction to rerun calls the non-generated actors on the Level Map
-	if (GetOwner()->IsEditorOnly() == false  // is not the editor actor
-		&& USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.IsBoundToObject(GetOwner()) == false)
-	{
-		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
-		USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "Listening OnActorUpdatedDelegate");
-	}
-
 #if WITH_EDITOR  // [PIE]
 	if (IS_PIE(GetWorld()) == true)
 	{
+		// Binds to Owner's OnConstruction to rerun calls the non-generated actors on the Level Map
+		if (GetOwner()->IsEditorOnly() == false  // is not the editor actor
+			&& USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.IsBoundToObject(GetOwner()) == false)
+		{
+			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
+			USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "Listening OnActorUpdatedDelegate");
+		}
+
 		// Remove all text renders of the Owner
 		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(GetOwner());
