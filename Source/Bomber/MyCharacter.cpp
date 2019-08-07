@@ -2,10 +2,10 @@
 
 #include "MyCharacter.h"
 
+#include "Animation/AnimBlueprint.h"  // UAnimBlueprint
 #include "Bomb.h"
 #include "Bomber.h"
-#include "Components/CapsuleComponent.h"
-#include "Components/SkeletalMeshComponent.h"  //ACharacter::GetMesh();
+#include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
 #include "GeneratedMap.h"
 #include "MapComponent.h"
 #include "SingletonLibrary.h"

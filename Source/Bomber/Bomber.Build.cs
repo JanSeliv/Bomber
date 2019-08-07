@@ -11,11 +11,19 @@ public class Bomber : ModuleRules
         PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject", "Engine", "InputCore", // Default
             "HeadMountedDisplay", "UMG", "Slate", "SlateCore", // UMG
-            "Http", "Json", "JsonUtilities", // HTTP and JSON
-             "UnrealEd" //FEditorDelegates 
+            "Http", "Json", "JsonUtilities" // HTTP and JSON
             });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });
+
+        if (Target.Type == TargetType.Editor)
+        {
+            PrivateDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "UnrealEd" // FEditorDelegates::EndPIE 
+                });
+        }
 
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
