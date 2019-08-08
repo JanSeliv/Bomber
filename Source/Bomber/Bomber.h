@@ -5,11 +5,10 @@
 #include "Engine\World.h"
 #include "Kismet/GameplayStatics.h"
 
-//@todo Is includes the transient world as IsGameWorld() ? //!(Obj)->GetWorld()->IsGameWorld()
-#define IS_TRANSIENT(Obj) ((Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
-#define IS_VALID(Obj) (IsValid(Obj) && (Obj)->IsValidLowLevel() && !IS_TRANSIENT(Obj))
+//@todo Is includes the transient world as IsEditorWorld() ? //!(Obj)->GetWorld()->IsGameWorld()
+#define IS_TRANSIENT(Obj) (!(Obj)->IsValidLowLevel() || (Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
+#define IS_VALID(Obj) (IsValid(Obj) && !IS_TRANSIENT(Obj))
 
-#define IS_PIE(World) (ensureMsgf(World != nullptr, TEXT("World is null")) && World->HasBegunPlay() == false && (World->WorldType == EWorldType::Editor))
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
 
 /**
@@ -34,12 +33,13 @@ enum class EPathTypesEnum : uint8
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EActorTypeEnum : uint8
 {
-	None = 0,		  ///< None of the types for comparisons
-	Bomb = 1 << 0,	///< A destroyable exploding Obstacle
-	Item = 1 << 1,	///< A picked element giving power-up (FPowerUp struct)
-	Player = 1 << 2,  ///< A character that is controlled by a person or bot
-	Wall = 1 << 3,	///< An absolute static and unchangeable block throughout the game
-	Box = 1 << 4,	 ///< A destroyable Obstacle
+	None = 0,								 ///< None of the types for comparisons
+	Bomb = 1 << 0,							 ///< A destroyable exploding Obstacle
+	Item = 1 << 1,							 ///< A picked element giving power-up (FPowerUp struct)
+	Player = 1 << 2,						 ///< A character that is controlled by a person or bot
+	Wall = 1 << 3,							 ///< An absolute static and unchangeable block throughout the game
+	Box = 1 << 4,							 ///< A destroyable Obstacle
+	All = Bomb | Item | Player | Wall | Box  ///< All level actors
 };
 
 /** @addtogroup actor_types

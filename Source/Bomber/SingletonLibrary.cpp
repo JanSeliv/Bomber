@@ -10,9 +10,27 @@
 #include "Math/Color.h"
 #include "MyAiCharacter.h"
 
+/* ---------------------------------------------------
+ *			Editor development functions
+* --------------------------------------------------- */
+
+void USingletonLibrary::BroadcastActorsUpdating()
+{
+#if WITH_EDITOR  // [IsEditorNotPieWorld]
+
+	if (ensureMsgf(IsEditorNotPieWorld(GetLevelMap()), TEXT("IsEditorNotPieWorld only!!!")))
+	{
+		PrintToLog(GetSingleton(), "----- [IsEditorNotPieWorld]OnActorsUpdatedDelegate ----->", "-----> RerunConstructionScripts -----");
+		GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
+	}
+
+#endif  // WITH_EDITOR [IsEditorNotPieWorld]
+}
+
 void USingletonLibrary::BroadcastAiUpdating()
 {
 #if WITH_EDITOR  // [Editor]
+
 	const auto LevelMap = GetSingleton()->LevelMap_;
 	if (LevelMap == nullptr)  // The Level map is null
 	{
@@ -28,12 +46,14 @@ void USingletonLibrary::BroadcastAiUpdating()
 			MyAiCharacter->UpdateAI();
 		}
 	}
+
 #endif  // WITH_EDITOR [Editor]
 }
 
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
-#if WITH_EDITOR					   // [Editor]
+#if WITH_EDITOR  // [Editor]
+
 	if (IS_VALID(Owner) == false)  // The owner is not valid
 	{
 		return;
@@ -47,8 +67,9 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 			TextRendersArray[i]->DestroyComponent();
 		}
 
-		if (IS_PIE(Owner->GetWorld())) PrintToLog(Owner, "[Editor]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
+		if (IsEditorNotPieWorld(Owner)) PrintToLog(Owner, "[IsEditorNotPieWorld]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
+
 #endif  // WITH_EDITOR [Editor]
 }
 
@@ -64,6 +85,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FVector& CoordinatePosition) const
 {
 #if WITH_EDITOR  // [Editor]
+
 	AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(Owner);
 	if ((MyAiCharacter != nullptr							// Successfully cast to AI
 			&& MyAiCharacter->bShouldShowRenders == false)  // Is not render AI
@@ -83,7 +105,8 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		//TextRenderIt->MarkAsEditorOnlySubobject();
 	}
 
-	if (IS_PIE(Owner->GetWorld())) PrintToLog(Owner, "[Editor]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+	if (IsEditorNotPieWorld(Owner)) PrintToLog(Owner, "[IsEditorNotPieWorld]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+
 #endif  // WITH_EDITOR [Editor]
 }
 
@@ -96,10 +119,9 @@ void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TSet<FCell>& Ce
 }
 #endif  // WITH_EDITOR [Editor]
 
-FCell USingletonLibrary::MakeCell_Implementation(const AActor* Actor) const
-{
-	return FCell::ZeroCell;
-}
+/* ---------------------------------------------------
+ *			Static library functions
+ * --------------------------------------------------- */
 
 USingletonLibrary* USingletonLibrary::GetSingleton()
 {
@@ -107,6 +129,24 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 	if (GEngine) Singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
 	ensureMsgf(Singleton != nullptr, TEXT("The Singleton is null"));
 	return Singleton;
+}
+
+void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
+{
+	if (ensureMsgf(IS_VALID(LevelMap), TEXT("ERROR: SetLevelMap is not valid")))
+	{
+		GetSingleton()->LevelMap_ = LevelMap;
+		PrintToLog(LevelMap, "SetLevelMap", "- - - UPDATED - - -");
+	}
+}
+
+/* ---------------------------------------------------
+ *			FCell blueprint functions
+ * --------------------------------------------------- */
+
+FCell USingletonLibrary::MakeCell_Implementation(const AActor* Actor) const
+{
+	return FCell::ZeroCell;
 }
 
 FCell USingletonLibrary::CalculateVectorAsRotatedCell(const FVector& VectorToRotate, const float& AxisZ)
@@ -121,6 +161,10 @@ FCell USingletonLibrary::CalculateVectorAsRotatedCell(const FVector& VectorToRot
 	const FVector RotatedVector = Dimensions.RotateAngleAxis(GetSingleton()->LevelMap_->GetActorRotation().Yaw, FVector(0, 0, AxisZ));
 	return FCell(VectorToRotate + RotatedVector - Dimensions);
 }
+
+/* ---------------------------------------------------
+ *			EActorTypeEnum bitmask functions
+ * --------------------------------------------------- */
 
 bool USingletonLibrary::IsActorInTypes(const AActor* Actor, const int32& Bitmask)
 {

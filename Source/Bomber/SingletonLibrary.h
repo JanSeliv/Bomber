@@ -14,22 +14,33 @@ class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-#if WITH_EDITOR
+	/* ---------------------------------------------------
+	 *			Editor development functions
+	 * --------------------------------------------------- */
+
+#if WITH_EDITOR  // OnActorsUpdatedDelegate [IsEditorNotPieWorld]
 	DECLARE_MULTICAST_DELEGATE(FPushNongeneratedToMap);
-	/** @defgroup [PIE] Runs only in editor
+	/**
 	 * Owners Map Components binds to updating on the Level Map to this delegate
-	 * The Level Map broadcasts this delegate after own generation
-	 * @see class UMapComponent
 	 */
 	FPushNongeneratedToMap OnActorsUpdatedDelegate;
-#endif  //WITH_EDITOR [PIE]
+#endif  //WITH_EDITOR OnActorsUpdatedDelegate [IsEditorNotPieWorld]
 
-	/** @addtogroup AI
-	 * @addtogroup [Editor]Editor
-	 * Call all signed as bShouldShowRenders AI characters
-	 */
+	/** Calls before generation preview actors to updating of all dragged to the Level Map actors. PIE only*/
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+	static void BroadcastActorsUpdating();
+
+	/** Calls all signed as bShouldShowRenders AI characters  */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	static void BroadcastAiUpdating();
+
+	/** Checks, that this actor placed in the editor world and the game is not started yet */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
+	static FORCEINLINE bool IsEditorNotPieWorld(const AActor* Actor)
+	{
+		UWorld* World = Actor ? Actor->GetWorld() : nullptr;
+		return ensure(World) && !World->HasBegunPlay() && (World->WorldType == EWorldType::Editor);
+	}
 
 	/** Blueprint debug function, that prints messages to the log */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))  //
@@ -39,12 +50,11 @@ public:
 		return 0;
 	}
 
-	/** @addtogroup [Editor]Editor
-	 *Remove all text renders of the Owner */
+	/** Remove all text renders of the Owner */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
 	static void ClearOwnerTextRenders(class AActor* Owner);
 
-	/** @addtogroup [Editor]Editor
+	/** 
 	 * Debug visualization by text renders
 	 * @warning PIE only
 	 * @warning Has blueprint implementation
@@ -61,14 +71,17 @@ public:
 		const FText& RenderText = FText::GetEmpty(),
 		const FVector& CoordinatePosition = FVector(0.f)) const;
 
-#if WITH_EDITOR
-	/** @addtogroup [Editor]Editor
-	 *Shortest overloading of debugging visualization*/
+#if WITH_EDITOR  // AddDebugTextRenders
+	/** Shortest overloading of debugging visualization*/
 	static void AddDebugTextRenders(
 		class AActor* Owner,
 		const TSet<struct FCell>& Cells,
 		const struct FLinearColor& TextColor = FLinearColor::Black);
-#endif  //WITH_EDITOR [Editor]
+#endif  //WITH_EDITOR AddDebugTextRenders
+
+	/* ---------------------------------------------------
+	 *			Static library functions
+	 * --------------------------------------------------- */
 
 	/** 
 	 * The singleton getter
@@ -78,11 +91,19 @@ public:
 	static USingletonLibrary* GetSingleton();
 
 	/** The Level Map getter */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FORCEINLINE class AGeneratedMap* const GetLevelMap()
 	{
 		return ensure(GEngine && GetSingleton()) ? GetSingleton()->LevelMap_ : nullptr;
 	}
+
+	/** The Level Map setter */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static void SetLevelMap(class AGeneratedMap* LevelMap);
+
+	/* ---------------------------------------------------
+	 *			FCell blueprint functions
+	 * --------------------------------------------------- */
 
 	/** @defgroup Cell_BP_Functions The group with cell functions that used in blueprints
 	 * The custom make node of the FCell struct
@@ -133,6 +154,10 @@ public:
 		const FVector& VectorToRotate,
 		const float& AxisZ);
 
+	/* ---------------------------------------------------
+	*			EActorTypeEnum bitmask functions
+	* --------------------------------------------------- */
+
 	/** @addtogroup actor_types
 	 * Bitwise and(&) operation with the bitmask of actor types*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType,Bitmask", CompactNodeTitle = "&"))
@@ -169,7 +194,4 @@ protected:
 	 * Type and its class as associated pairs  */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	TMap<EActorTypeEnum, TSubclassOf<AActor>> ActorTypesByClasses;
-
-	/** Access to the Level Map to keep an in gaming valid reference */
-	friend class AGeneratedMap;
 };

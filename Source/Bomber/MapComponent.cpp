@@ -27,40 +27,31 @@ void UMapComponent::OnMapComponentConstruction()
 	Cell = FCell(GetOwner());
 
 	// Owner updating
-	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddActorOnMapByObj");
-	USingletonLibrary::GetLevelMap()->AddActorOnMapByObj(Cell, GetOwner());
+	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddActorToGridArray");
+	USingletonLibrary::GetLevelMap()->AddActorToGridArray(Cell, GetOwner());
 
-#if WITH_EDITOR  // [PIE]
-	if (IS_PIE(GetWorld()) == true)
+#if WITH_EDITOR  // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld(GetOwner()))
 	{
-		// Binds to Owner's OnConstruction to rerun calls the non-generated actors on the Level Map
-		if (GetOwner()->IsEditorOnly() == false  // is not the editor actor
-			&& USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.IsBoundToObject(GetOwner()) == false)
-		{
-			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
-			USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "Listening OnActorUpdatedDelegate");
-		}
-
 		// Remove all text renders of the Owner
-		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
+		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(GetOwner());
 
 		// Update AI renders after adding obj to map
-		USingletonLibrary::PrintToLog(GetOwner(), "[PIE]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
+		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
 		USingletonLibrary::BroadcastAiUpdating();
 	}
-#endif  //WITH_EDITOR [PIE]
+#endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
 
-void UMapComponent::OnComponentCreated()
+void UMapComponent::OnRegister()
 {
-	Super::OnComponentCreated();
-
+	Super::OnRegister();
 	if (IS_VALID(GetOwner()) == false)  // owner is not valid
 	{
 		return;
 	}
-	USingletonLibrary::PrintToLog(GetOwner(), "OnComponentCreated", "Set's defaults");
+	USingletonLibrary::PrintToLog(GetOwner(), "OnRegister", "");
 
 	// Disable the tick
 	GetOwner()->SetActorTickEnabled(false);
@@ -71,29 +62,36 @@ void UMapComponent::OnComponentCreated()
 		GetOwner()->GetRootComponent()->SetMobility(EComponentMobility::Movable);
 	}
 
-// Should not call OnConstruction on drag events
-#if WITH_EDITOR
-	if (IS_PIE(GetWorld()) == true)  // PIE only
+#if WITH_EDITOR												 // [Editor]
+	if (USingletonLibrary::IsEditorNotPieWorld(GetOwner()))  // PIE only
 	{
+		// Should not call OnConstruction on drag events
 		GetOwner()->bRunConstructionScriptOnDrag = false;
 	}
-#endif  //WITH_EDITOR [PIE]
+
+	// Binds to Owner's OnConstruction to rerun calls the non-generated actors on the Level Map
+	// don't call OnActorsUpdatedDelegate in gameplay
+	if (GetOwner() != nullptr)
+	{
+		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
+	}
+#endif  //WITH_EDITOR [Editor]
 }
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (IS_TRANSIENT(this) == false  //
-		&& IS_VALID(USingletonLibrary::GetLevelMap()))
+	if (IS_VALID(USingletonLibrary::GetLevelMap()))
 	{
 		USingletonLibrary::PrintToLog(GetOwner(), "OnComponentDestroyed", "-> \t RemoveActorFromGridArray");
 		USingletonLibrary::GetLevelMap()->RemoveActorFromGridArray(GetOwner());
 
-#if WITH_EDITOR  // [PIE]
-		if (IS_PIE(GetWorld()) == true)
+#if WITH_EDITOR  // [IsEditorNotPieWorld]
+		if (USingletonLibrary::IsEditorNotPieWorld(GetOwner()))
 		{
+			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.RemoveAll(GetOwner());
 			USingletonLibrary::BroadcastAiUpdating();
 		}
-#endif  //WITH_EDITOR [PIE]
+#endif  //WITH_EDITOR [IsEditorNotPieWorld]
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);

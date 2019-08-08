@@ -15,11 +15,11 @@ void AMyAiCharacter::UpdateAI_Implementation()
 	}
 
 #if WITH_EDITOR
-	if (IS_PIE(GetWorld()) == true)  // for editor only
+	if (USingletonLibrary::IsEditorNotPieWorld(this))  // for editor only
 	{
-		USingletonLibrary::PrintToLog(this, "[PIE]UpdateAI", "-> \t ClearOwnerTextRenders");
+		USingletonLibrary::PrintToLog(this, "IsEditorNotPieWorldUpdateAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(this);
 		AiMoveTo = FCell::ZeroCell;
 	}
-#endif  //WITH_EDITOR [PIE]
+#endif  //WITH_EDITOR IsEditorNotPieWorld
 }

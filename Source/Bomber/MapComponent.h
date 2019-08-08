@@ -28,13 +28,9 @@ public:
 	struct FCell Cell;
 
 protected:
-	/**
-	 * Called when a component is created (not loaded)
-	 * Sets owner's defaults
-	 */
-	virtual void OnComponentCreated() final;
+	/** Called when a component is registered (not loaded) */
+	virtual void OnRegister() final;
 
 	/* Called when a component is destroyed */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
-	;
 };
