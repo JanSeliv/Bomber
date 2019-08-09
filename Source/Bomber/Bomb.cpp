@@ -118,8 +118,8 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	// Construct the actor's map component
 	MapComponent->OnMapComponentConstruction();
 
-#if WITH_EDITOR										   // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld(this))  // for editor only
+#if WITH_EDITOR									   // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld())  // for editor only
 	{
 		InitializeBombProperties(*CharacterBombsN_, ExplosionLength, -1);
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t AddDebugTextRenders");

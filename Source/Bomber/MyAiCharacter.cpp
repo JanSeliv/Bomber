@@ -15,7 +15,7 @@ void AMyAiCharacter::UpdateAI_Implementation()
 	}
 
 #if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld(this))  // for editor only
+	if (USingletonLibrary::IsEditorNotPieWorld())  // for editor only
 	{
 		USingletonLibrary::PrintToLog(this, "IsEditorNotPieWorldUpdateAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(this);
