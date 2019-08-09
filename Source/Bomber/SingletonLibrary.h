@@ -36,11 +36,7 @@ public:
 
 	/** Checks, that this actor placed in the editor world and the game is not started yet */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
-	static FORCEINLINE bool IsEditorNotPieWorld(const AActor* Actor)
-	{
-		UWorld* World = Actor ? Actor->GetWorld() : nullptr;
-		return ensure(World) && !World->HasBegunPlay() && (World->WorldType == EWorldType::Editor);
-	}
+	static bool IsEditorNotPieWorld(const class AActor* Actor);
 
 	/** Blueprint debug function, that prints messages to the log */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))  //

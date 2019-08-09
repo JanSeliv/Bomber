@@ -18,7 +18,7 @@ void USingletonLibrary::BroadcastActorsUpdating()
 {
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 
-	if (ensureMsgf(IsEditorNotPieWorld(GetLevelMap()), TEXT("IsEditorNotPieWorld only!!!")))
+	if (IsEditorNotPieWorld(GetLevelMap()))  // [IsEditorNotPieWorld] only!!!
 	{
 		PrintToLog(GetSingleton(), "----- [IsEditorNotPieWorld]OnActorsUpdatedDelegate ----->", "-----> RerunConstructionScripts -----");
 		GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
@@ -50,6 +50,16 @@ void USingletonLibrary::BroadcastAiUpdating()
 #endif  // WITH_EDITOR [Editor]
 }
 
+bool USingletonLibrary::IsEditorNotPieWorld(const AActor* Actor)
+{
+	bool ReturnValue = false;
+#if WITH_EDITOR
+	UWorld* World = Actor ? Actor->GetWorld() : nullptr;
+	ReturnValue = ensure(World) && !World->HasBegunPlay() && (World->WorldType == EWorldType::Editor);
+#endif
+	return ReturnValue;
+}
+
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
 #if WITH_EDITOR  // [Editor]
@@ -64,7 +74,11 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 	{
 		for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
 		{
-			TextRendersArray[i]->DestroyComponent();
+			FString StringIt = Cast<UTextRenderComponent>(TextRendersArray[i])->Text.ToString();
+			if (StringIt != "Player" && StringIt != "AI")  // is not nickname
+			{
+				TextRendersArray[i]->DestroyComponent();
+			}
 		}
 
 		if (IsEditorNotPieWorld(Owner)) PrintToLog(Owner, "[IsEditorNotPieWorld]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
@@ -133,7 +147,8 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 
 void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
-	if (ensureMsgf(IS_VALID(LevelMap), TEXT("ERROR: SetLevelMap is not valid")))
+	if (ensureMsgf(LevelMap && !IS_TRANSIENT(LevelMap) && LevelMap->IsValidLowLevel(),
+			TEXT("ERROR: SetLevelMap is not valid")))
 	{
 		GetSingleton()->LevelMap_ = LevelMap;
 		PrintToLog(LevelMap, "SetLevelMap", "- - - UPDATED - - -");
