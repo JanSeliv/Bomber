@@ -26,21 +26,13 @@ public:
 	 */
 	AGeneratedMap();
 
-	/** The background of the Level Map */
+	/** The blueprint background actor  */
 	UPROPERTY(BlueprintReadWrite, Category = "C++")
-	class UStaticMeshComponent* BackgroundMeshComponent;
+	UChildActorComponent* BackgroundBlueprintComponent;
 
-	/** The static mesh of the background. Can be changed in the editor */
+	/** The blueprint class with the background, collision cage and floor. Can be changed in the editor */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	class UStaticMesh* BackgroundMesh;
-
-	/** The blueprint with the collision cage and floor  */
-	UPROPERTY(BlueprintReadWrite, Category = "C++")
-	UChildActorComponent* PlatformComponent;
-
-	/** The owner's class of the blueprint child actor as the PlatformComponent. Can be changed in the editor */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	TSubclassOf<AActor> PlatformClass;
+	TSubclassOf<AActor> BackgroundBlueprintClass;
 
 	/** Set of unique player characters  */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
@@ -76,14 +68,13 @@ public:
 		const class AMyCharacter* ExcludePlayer) const;
 
 	/**
-	 * The function that places the actor on the Level Map, attaches a non-child actor and writes this actor to the GridArray_
-	 * Second step of adding actors to level map
+	 * The function that places the actor on the Level Map, attaches it and writes this actor to the GridArray_
+
 	 * @param Cell The location where the child actor will be standing on
 	 * @param UpdateActor The spawned or dragged PIE actor
-	 * @see AddActorOnMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void AddActorOnMapByObj(const FCell& Cell, AActor* UpdateActor);
+	void AddActorToGridArray(const FCell& Cell, AActor* UpdateActor);
 
 	/** Find and remove only this input actor-value of the cell-key from the Grid Array */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -98,25 +89,12 @@ public:
 	void DestroyActorsFromMap(const TSet<FCell>& Keys);
 
 protected:
-	/** The level map initializing and actors generation after all of his components have been initialized, only called during gameplay */
-	virtual void PostInitializeComponents() final;
-
 	/** Called when an instance of this class is placed (in editor) or spawned
 	 * @todo Generate only platform without boxes*/
 	virtual void OnConstruction(const FTransform& Transform) final;
 
-#if WITH_EDITOR  // [PIE] Destroyed()
-	/** @defgroup [PIE]PlayInEditor Runs only in the editor before beginning play
-	 * Called when this actor is explicitly being destroyed*/
-	virtual void Destroyed() final;
-#endif  //WITH_EDITOR
-
-	/** @addtogroup [Editor]Editor
-	 * Destroy all attached level actors
-	 * @param bIsEditorOnlyActors Should destroy editor-only actors that were spawned in the PIE world, otherwise will be destroyed all the level map's actors
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	void DestroyAttachedActors(bool bIsEditorOnlyActors = false);
+	/** This is called only in the gameplay before calling begin play to generate level actors */
+	virtual void PostInitializeComponents() final;
 
 	/** @ingroup actors_management
 	 * Spawns and fills the Grid Array values by level actors
@@ -125,7 +103,6 @@ protected:
 	 * @see AGeneratedMap::CharactersOnMap
 	 * @see struct FCell: Makes a grid of cells
 	 */
-
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask,ActorLocationToSpawn"))
 	void GenerateLevelActors();
 
@@ -135,6 +112,27 @@ protected:
 	 */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
 	TMap<struct FCell, const AActor*> GridArray_;
+
+	/** The chance of boxes generation */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	int32 BoxesChance_ = 50;
+
+	/* ---------------------------------------------------
+	 *					Editor development
+	 * --------------------------------------------------- */
+
+#if WITH_EDITOR  // [Editor]
+	/** Called when this actor is explicitly being destroyed */
+	virtual void Destroyed() final;
+#endif  //WITH_EDITOR [Editor]
+
+	/**
+	 * Destroy all attached level actors
+	 * 
+	 * @param bIsEditorOnlyActors Should destroy editor-only actors that were spawned in the PIE world, otherwise will be destroyed all the level map's actors
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+	void DestroyAttachedActors(bool bIsEditorOnlyActors = false);
 
 #if WITH_EDITORONLY_DATA
 	/** Access to the Grid Array to create a free cell without an actor
@@ -150,8 +148,4 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	bool bShouldShowRenders;
 #endif  //WITH_EDITORONLY_DATA [Editor]
-
-	/** The chance of boxes generation */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int32 BoxesChance_ = 50;
 };

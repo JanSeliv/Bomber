@@ -21,7 +21,7 @@ AMyCharacter::AMyCharacter()
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize skeletal mesh
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
 
 	// Set the skeletal mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
@@ -31,7 +31,7 @@ AMyCharacter::AMyCharacter()
 	}
 
 	// Set the animation
-	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimationFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP"));
+	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimationFinder(TEXT("AnimBlueprint'/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP.IggyScorch_AnimBP'"));
 	if (AnimationFinder.Succeeded())  // The animation was found
 	{
 		GetMesh()->AnimClass = AnimationFinder.Object->GeneratedClass;
@@ -57,7 +57,8 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	MapComponent->OnMapComponentConstruction();
 
 	// Rotate character
-	SetActorRotation(FRotator(0.f, -90.f, 0.f));
+	const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;
+	SetActorRotation(FRotator(0.f, YawRotation, 0.f));
 	USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
 }
 
@@ -78,10 +79,10 @@ void AMyCharacter::Destroyed()
 
 void AMyCharacter::SpawnBomb()
 {
-	if (!IS_VALID(USingletonLibrary::GetLevelMap())  // The Level Map is not valid
-		|| Powerups_.FireN <= 0						 // Null length of explosion
-		|| Powerups_.BombN <= 0						 // No more bombs
-		|| IS_PIE(GetWorld()) == true)				 // Should not spawn bomb in PIE
+	if (!IS_VALID(USingletonLibrary::GetLevelMap())		  // The Level Map is not valid
+		|| Powerups_.FireN <= 0							  // Null length of explosion
+		|| Powerups_.BombN <= 0							  // No more bombs
+		|| USingletonLibrary::IsEditorNotPieWorld(this))  // Should not spawn bomb in PIE
 	{
 		return;
 	}

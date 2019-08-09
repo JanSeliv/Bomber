@@ -33,8 +33,8 @@ ABomb::ABomb()
 	}
 
 	// Initialize explosion particle component
-	ExplosionParticle = CreateDefaultSubobject<UParticleSystem>(TEXT("Explosion Particle"));
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleFinder(TEXT("/Game/VFX_Toolkit_V1/ParticleSystems/356Days/Par_CrescentBoom2_OLD"));
+	ExplosionParticle = CreateDefaultSubobject<UParticleSystem>(TEXT("ExplosionParticle"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleFinder(TEXT("/Game/FXVarietyPack/Particles/P_ky_explosion"));
 	if (ParticleFinder.Succeeded())
 	{
 		ExplosionParticle = ParticleFinder.Object;
@@ -81,7 +81,7 @@ void ABomb::InitializeBombProperties(
 
 	// Set material
 	if (IS_VALID(BombMeshComponent) == true  // Mesh of the bomb is not valid
-		&& CharacterID > 0)					 // No materials for the negative ID
+		&& CharacterID != -1)				 // is not debug character
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials_.Num();
 		BombMeshComponent->SetMaterial(0, BombMaterials_[BombMaterialNo]);
@@ -118,15 +118,14 @@ void ABomb::OnConstruction(const FTransform& Transform)
 	// Construct the actor's map component
 	MapComponent->OnMapComponentConstruction();
 
-#if WITH_EDITOR
-	if (IS_PIE(GetWorld()) == true						  // for editor only
-		&& USingletonLibrary::GetSingleton() != nullptr)  // Singleton is not null
+#if WITH_EDITOR										   // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld(this))  // for editor only
 	{
 		InitializeBombProperties(*CharacterBombsN_, ExplosionLength, -1);
-		USingletonLibrary::PrintToLog(this, "[PIE]OnConstruction", "-> \t AddDebugTextRenders");
+		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t AddDebugTextRenders");
 		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
 	}
-#endif  //WITH_EDITOR [PIE]
+#endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 void ABomb::OnBombDestroyed(AActor* DestroyedActor)
