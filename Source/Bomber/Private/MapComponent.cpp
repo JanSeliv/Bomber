@@ -31,7 +31,7 @@ void UMapComponent::OnMapComponentConstruction()
 	USingletonLibrary::GetLevelMap()->AddActorToGridArray(Cell, GetOwner());
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld(GetOwner()))
+	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
 		// Remove all text renders of the Owner
 		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
@@ -62,8 +62,8 @@ void UMapComponent::OnRegister()
 		GetOwner()->GetRootComponent()->SetMobility(EComponentMobility::Movable);
 	}
 
-#if WITH_EDITOR												 // [Editor]
-	if (USingletonLibrary::IsEditorNotPieWorld(GetOwner()))  // PIE only
+#if WITH_EDITOR									   // [Editor]
+	if (USingletonLibrary::IsEditorNotPieWorld())  // PIE only
 	{
 		// Should not call OnConstruction on drag events
 		GetOwner()->bRunConstructionScriptOnDrag = false;
@@ -80,13 +80,14 @@ void UMapComponent::OnRegister()
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (IS_VALID(USingletonLibrary::GetLevelMap()))
+	if (IS_TRANSIENT(GetOwner()) == false				// Is not transient owner
+		&& IS_VALID(USingletonLibrary::GetLevelMap()))  // is valid and is not transient the level map
 	{
 		USingletonLibrary::PrintToLog(GetOwner(), "OnComponentDestroyed", "-> \t RemoveActorFromGridArray");
 		USingletonLibrary::GetLevelMap()->RemoveActorFromGridArray(GetOwner());
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
-		if (USingletonLibrary::IsEditorNotPieWorld(GetOwner()))
+		if (USingletonLibrary::IsEditorNotPieWorld())
 		{
 			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.RemoveAll(GetOwner());
 			USingletonLibrary::BroadcastAiUpdating();

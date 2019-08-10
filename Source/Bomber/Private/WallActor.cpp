@@ -49,11 +49,6 @@ void AWallActor::BeginPlay()
 	Super::BeginPlay();
 
 	// Binding to the event, that triggered when the actor has been explicitly destroyed
-	OnDestroyed.AddDynamic(this, &AWallActor::OnBoxDestroyed);
-}
 
-void AWallActor::OnBoxDestroyed(AActor* DestroyedActor)
-{
-	// Should not be destroyed in game
-	checkNoEntry();
+	OnDestroyed.AddDynamic(this, &AWallActor::OnWallDestroyed);
 }

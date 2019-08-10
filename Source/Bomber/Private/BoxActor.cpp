@@ -63,5 +63,5 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 		GetWorld()->SpawnActor<AActor>(USingletonLibrary::FindClassByActorType(EActorTypeEnum::Item), GetActorTransform());
 	}
 
-	USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", (ItemChance ? "Item spawned" : ""));
+	USingletonLibrary::PrintToLog(this, "OnWallDestroyed", (ItemChance ? "Item spawned" : ""));
 }

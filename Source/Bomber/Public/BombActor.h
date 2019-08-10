@@ -5,16 +5,16 @@
 #include "Cell.h"
 #include "GameFramework/Actor.h"
 
-#include "Bomb.generated.h"
+#include "BombActor.generated.h"
 
 UCLASS()
-class BOMBER_API ABomb final : public AActor
+class BOMBER_API ABombActor final : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ABomb();
+	ABombActor();
 
 	/**
 	 * Sets the defaults of the bomb

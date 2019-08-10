@@ -10,6 +10,10 @@
 #include "Math/Color.h"
 #include "MyAiCharacter.h"
 
+#if WITH_EDITOR		 // [Editor]
+#include "Editor.h"  // GEditor
+#endif				 //WITH_EDITOR [Editor]
+
 /* ---------------------------------------------------
  *			Editor development functions
 * --------------------------------------------------- */
@@ -18,9 +22,9 @@ void USingletonLibrary::BroadcastActorsUpdating()
 {
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 
-	if (IsEditorNotPieWorld(GetLevelMap()))  // [IsEditorNotPieWorld] only!!!
+	if (IsEditorNotPieWorld())  // [IsEditorNotPieWorld] only!!!
 	{
-		PrintToLog(GetSingleton(), "----- [IsEditorNotPieWorld]OnActorsUpdatedDelegate ----->", "-----> RerunConstructionScripts -----");
+		PrintToLog(GetSingleton(), "----- [IsEditorNotPieWorld]OnActorsUpdatedDelegate ----->", "RerunConstructionScripts");
 		GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 	}
 
@@ -50,14 +54,12 @@ void USingletonLibrary::BroadcastAiUpdating()
 #endif  // WITH_EDITOR [Editor]
 }
 
-bool USingletonLibrary::IsEditorNotPieWorld(const AActor* Actor)
+bool USingletonLibrary::IsEditorNotPieWorld()
 {
-	bool ReturnValue = false;
-#if WITH_EDITOR
-	UWorld* World = Actor ? Actor->GetWorld() : nullptr;
-	ReturnValue = ensure(World) && !World->HasBegunPlay() && (World->WorldType == EWorldType::Editor);
-#endif
-	return ReturnValue;
+#if WITH_EDITOR  // [IsEditorNotPieWorld]
+	if (GEditor) return GEditor->GetPIEWorldContext() == nullptr;
+#endif  // [IsEditorNotPieWorld]
+	return false;
 }
 
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
@@ -81,7 +83,7 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 			}
 		}
 
-		if (IsEditorNotPieWorld(Owner)) PrintToLog(Owner, "[IsEditorNotPieWorld]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
+		if (IsEditorNotPieWorld()) PrintToLog(Owner, "[IsEditorNotPieWorld]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
 
 #endif  // WITH_EDITOR [Editor]
@@ -119,7 +121,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		//TextRenderIt->MarkAsEditorOnlySubobject();
 	}
 
-	if (IsEditorNotPieWorld(Owner)) PrintToLog(Owner, "[IsEditorNotPieWorld]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+	if (IsEditorNotPieWorld()) PrintToLog(Owner, "[IsEditorNotPieWorld]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 
 #endif  // WITH_EDITOR [Editor]
 }
@@ -145,13 +147,49 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 	return Singleton;
 }
 
+AGeneratedMap* USingletonLibrary::GetLevelMap()
+{
+	if (GetSingleton() == nullptr)
+	{
+		return nullptr;
+	}
+
+#if WITH_EDITOR  // [IsEditorNotPieWorld]
+
+	if (IsEditorNotPieWorld() == true			  // IsEditorNotPieWorld only
+		&& !IS_VALID(GetSingleton()->LevelMap_))  // Is not valid or transient
+	{
+		SetLevelMap(nullptr);  // Find the Level Map
+	}
+#endif  // WITH_EDITOR [IsEditorNotPieWorld]
+
+	return GetSingleton()->LevelMap_;
+}
+
 void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
-	if (ensureMsgf(LevelMap && !IS_TRANSIENT(LevelMap) && LevelMap->IsValidLowLevel(),
-			TEXT("ERROR: SetLevelMap is not valid")))
+#if WITH_EDITOR  // [IsEditorNotPieWorld]
+
+	if (IsEditorNotPieWorld() == true  // IsEditorNotPieWorld only
+		&& IS_VALID(LevelMap) == false)
+	{
+		UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
+		if (EditorWorld)
+		{
+			TArray<AActor*> LevelMapsArray;
+			UGameplayStatics::GetAllActorsOfClass(EditorWorld, AGeneratedMap::StaticClass(), LevelMapsArray);
+			if (LevelMapsArray.Num() > 0)
+			{
+				LevelMap = Cast<AGeneratedMap>(LevelMapsArray[0]);
+			}
+		}
+	}
+#endif  // WITH_EDITOR [IsEditorNotPieWorld]
+
+	if (ensureMsgf(IS_VALID(LevelMap), TEXT("ERROR: SetLevelMap is not valid")))
 	{
 		GetSingleton()->LevelMap_ = LevelMap;
-		PrintToLog(LevelMap, "SetLevelMap", "- - - UPDATED - - -");
+		PrintToLog(LevelMap, "SetLevelMap", "----- UPDATED -----");
 	}
 }
 
@@ -166,14 +204,15 @@ FCell USingletonLibrary::MakeCell_Implementation(const AActor* Actor) const
 
 FCell USingletonLibrary::CalculateVectorAsRotatedCell(const FVector& VectorToRotate, const float& AxisZ)
 {
-	if (!ensureMsgf(GetSingleton()->LevelMap_, TEXT("The Level Map is not valid"))  //
+	const AGeneratedMap* LevelMap = GetLevelMap();
+	if (!ensureMsgf(LevelMap, TEXT("The Level Map is not valid"))  //
 		|| !ensureMsgf(AxisZ != abs(0.f), TEXT("The axis is zero")))
 	{
 		return FCell(VectorToRotate);
 	}
 
-	const FVector Dimensions = VectorToRotate - GetSingleton()->LevelMap_->GetActorLocation();
-	const FVector RotatedVector = Dimensions.RotateAngleAxis(GetSingleton()->LevelMap_->GetActorRotation().Yaw, FVector(0, 0, AxisZ));
+	const FVector Dimensions = VectorToRotate - LevelMap->GetActorLocation();
+	const FVector RotatedVector = Dimensions.RotateAngleAxis(LevelMap->GetActorRotation().Yaw, FVector(0, 0, AxisZ));
 	return FCell(VectorToRotate + RotatedVector - Dimensions);
 }
 
@@ -185,7 +224,7 @@ bool USingletonLibrary::IsActorInTypes(const AActor* Actor, const int32& Bitmask
 {
 	if (IS_VALID(Actor) == false) return false;  // The actor is null
 
-	const EActorTypeEnum* FoundActorType = GetSingleton()->ActorTypesByClasses.FindKey(Actor->GetClass());
+	const EActorTypeEnum* FoundActorType = GetSingleton()->ActorTypesByClasses_.FindKey(Actor->GetClass());
 	if (FoundActorType == nullptr) return false;
 
 	return ContainsActorType(*FoundActorType, Bitmask);
@@ -195,7 +234,7 @@ TSubclassOf<AActor> USingletonLibrary::FindClassByActorType(const EActorTypeEnum
 {
 	if (ActorType != EActorTypeEnum::None)
 	{
-		const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses.Find(ActorType);
+		const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses_.Find(ActorType);
 		if (ActorClass != nullptr)
 		{
 			return *ActorClass;

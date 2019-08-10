@@ -11,10 +11,6 @@
 #include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
-#if WITH_EDITOR		 // [Editor]
-#include "Editor.h"  // FEditorDelegates::EndPIE
-#endif				 //WITH_EDITOR [Editor]
-
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
@@ -24,15 +20,6 @@ AGeneratedMap::AGeneratedMap()
 #if WITH_EDITOR  //[Editor]
 	// Should not call OnConstruction on drag events
 	bRunConstructionScriptOnDrag = false;
-
-	// Register callback to updating the level map reference and listening actors on PIE events
-	FEditorDelegates::EndPIE.AddLambda([this](bool) {
-		if (!IS_TRANSIENT(this))
-		{
-			USingletonLibrary::PrintToLog(this, "OnPie delegate", "-> \t SetLevelMap");
-			USingletonLibrary::SetLevelMap(this);
-		}
-	});
 #endif  //WITH_EDITOR [Editor]
 
 	// Initialize the Root Component
@@ -133,11 +120,6 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 	USingletonLibrary::PrintToLog(this, "----- OnConstruction -----", "");
 
-#if WITH_EDITOR
-	// Update the LevelMap reference in the singleton library;
-	USingletonLibrary::SetLevelMap(this);
-#endif
-
 	// Create the background blueprint child actor
 	if (BackgroundBlueprintClass != nullptr							  // There is some background class
 		&& BackgroundBlueprintComponent != nullptr					  // Is accessible
@@ -183,8 +165,8 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		}
 	}
 
-#if WITH_EDITOR										   // [IsEditorNotPieWorld] Map's text renders
-	if (USingletonLibrary::IsEditorNotPieWorld(this))  // For editor only
+#if WITH_EDITOR									   // [IsEditorNotPieWorld] Map's text renders
+	if (USingletonLibrary::IsEditorNotPieWorld())  // For editor only
 	{
 		// Show cell coordinated of the Grid array
 		USingletonLibrary::ClearOwnerTextRenders(this);
@@ -232,7 +214,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 #if WITH_EDITOR  // [Editor]
 	//  Destroy editor-only actors that were spawned in the PIE
 	USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "-> [Editor]DestroyAttachedActors");
-	DestroyAttachedActors(true);
+	DestroyEditorActors();
 
 	// After destroying PIE actors and before their generation,
 	// calling to updating of all dragged to the Level Map actors
@@ -294,9 +276,9 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 			{
 				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, CellIt.Location, FRotator::ZeroRotator);
 
-#if WITH_EDITOR													  // [IsEditorNotPieWorld]
-				if (USingletonLibrary::IsEditorNotPieWorld(this)  // PIE only
-					&& SpawnedActor != nullptr)					  // Successfully spawn
+#if WITH_EDITOR												  // [IsEditorNotPieWorld]
+				if (USingletonLibrary::IsEditorNotPieWorld()  // PIE only
+					&& SpawnedActor != nullptr)				  // Successfully spawn
 				{
 					// If PIE world, mark this spawned actor as bIsEditorOnlyActor
 					SpawnedActor->bIsEditorOnlyActor = true;
@@ -312,26 +294,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
  *					Editor development
  * --------------------------------------------------- */
 
-#if WITH_EDITOR  // [Editor]
-void AGeneratedMap::Destroyed()
-{
-	if (IS_TRANSIENT(this) == false)  // Component is not transient
-	{
-		DestroyAttachedActors();
-
-		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Clear();
-
-		// Remove all elements of arrays
-		GridArray_.Empty();
-		CharactersOnMap.Empty();
-	}
-
-	// Call the base class version
-	Super::Destroyed();
-}
-#endif  //WITH_EDITOR [Editor]
-
-void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors)
+void AGeneratedMap::DestroyEditorActors()
 {
 #if WITH_EDITOR  // [Editor]
 	USingletonLibrary::PrintToLog(this, "----- [Editor]DestroyAttachedActors -----", "");
@@ -344,8 +307,7 @@ void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnlyActors)
 
 	for (int32 i = AttachedActors.Num() - 1; i >= 0; --i)
 	{
-		if (bIsEditorOnlyActors == false		   // Should destroy all actors
-			|| AttachedActors[i]->IsEditorOnly())  // Should destroy editor-only actors
+		if (AttachedActors[i]->IsEditorOnly())  // Should destroy editor-only actors
 		{
 			AttachedActors[i]->Destroy();
 		}

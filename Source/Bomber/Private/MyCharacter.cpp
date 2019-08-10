@@ -3,7 +3,7 @@
 #include "MyCharacter.h"
 
 #include "Animation/AnimBlueprint.h"  // UAnimBlueprint
-#include "Bomb.h"
+#include "BombActor.h"
 #include "Bomber.h"
 #include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
 #include "GeneratedMap.h"
@@ -57,9 +57,12 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	MapComponent->OnMapComponentConstruction();
 
 	// Rotate character
-	const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;
-	SetActorRotation(FRotator(0.f, YawRotation, 0.f));
-	USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
+	if (IS_VALID(USingletonLibrary::GetLevelMap()))
+	{
+		const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;
+		SetActorRotation(FRotator(0.f, YawRotation, 0.f));
+		USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
+	}
 }
 
 void AMyCharacter::Destroyed()
@@ -79,16 +82,16 @@ void AMyCharacter::Destroyed()
 
 void AMyCharacter::SpawnBomb()
 {
-	if (!IS_VALID(USingletonLibrary::GetLevelMap())		  // The Level Map is not valid
-		|| Powerups_.FireN <= 0							  // Null length of explosion
-		|| Powerups_.BombN <= 0							  // No more bombs
-		|| USingletonLibrary::IsEditorNotPieWorld(this))  // Should not spawn bomb in PIE
+	if (!IS_VALID(USingletonLibrary::GetLevelMap())   // The Level Map is not valid
+		|| Powerups_.FireN <= 0						  // Null length of explosion
+		|| Powerups_.BombN <= 0						  // No more bombs
+		|| USingletonLibrary::IsEditorNotPieWorld())  // Should not spawn bomb in PIE
 	{
 		return;
 	}
 
 	// Spawn bomb
-	ABomb* const Bomb = GetWorld()->SpawnActor<ABomb>(*USingletonLibrary::FindClassByActorType(EActorTypeEnum::Bomb), GetActorTransform());
+	auto Bomb = GetWorld()->SpawnActor<ABombActor>(USingletonLibrary::FindClassByActorType(EActorTypeEnum::Bomb), GetActorTransform());
 
 	// Update material of mesh
 	if (Bomb != nullptr)

@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Item.h"
+#include "ItemActor.h"
 
 #include "Bomber.h"
 #include "Components/BoxComponent.h"
@@ -10,7 +10,7 @@
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
-AItem::AItem()
+AItemActor::AItemActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -46,14 +46,14 @@ AItem::AItem()
 }
 
 // Called when the game starts or when spawned
-void AItem::BeginPlay()
+void AItemActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	this->OnActorBeginOverlap.AddDynamic(this, &AItem::OnItemBeginOverlap);
+	this->OnActorBeginOverlap.AddDynamic(this, &AItemActor::OnItemBeginOverlap);
 }
 
-void AItem::OnConstruction(const FTransform& Transform)
+void AItemActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
@@ -78,7 +78,7 @@ void AItem::OnConstruction(const FTransform& Transform)
 	ItemMeshComponent->SetStaticMesh(FoundMesh);
 }
 
-void AItem::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	AMyCharacter* const OverlappedCharacter = Cast<AMyCharacter>(OtherActor);
 	if (OverlappedCharacter == nullptr				// Other actor is not myCharacter

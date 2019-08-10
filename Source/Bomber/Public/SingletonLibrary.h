@@ -8,6 +8,9 @@
 
 #include "SingletonLibrary.generated.h"
 
+/**
+ * 	The static functions library  
+ */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 {
@@ -36,10 +39,10 @@ public:
 
 	/** Checks, that this actor placed in the editor world and the game is not started yet */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
-	static bool IsEditorNotPieWorld(const class AActor* Actor);
+	static bool IsEditorNotPieWorld();
 
 	/** Blueprint debug function, that prints messages to the log */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))  //
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))
 	static FORCEINLINE int32 PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("")), *FunctionName, *Message);
@@ -88,12 +91,14 @@ public:
 
 	/** The Level Map getter */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class AGeneratedMap* const GetLevelMap()
-	{
-		return ensure(GEngine && GetSingleton()) ? GetSingleton()->LevelMap_ : nullptr;
-	}
+	static class AGeneratedMap* GetLevelMap();
 
-	/** The Level Map setter */
+	/**
+	 * The Level Map setter
+	 * if input Level Map is no valid or is transient, find and set another one
+	 * 
+	 * @param LevelMap The level map to set in the Library
+	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetLevelMap(class AGeneratedMap* LevelMap);
 
@@ -177,7 +182,7 @@ public:
 		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& Bitmask);
 
 	/** @addtogroup actor_types
-	 * Find the class value by actor type key in the ActorTypesByClasses dictionary */
+	 * Find the class value by actor type key in the ActorTypesByClasses_ dictionary */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType"))
 	static TSubclassOf<AActor> FindClassByActorType(const EActorTypeEnum& ActorType);
 
@@ -186,8 +191,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	class AGeneratedMap* LevelMap_;
 
-	/** @addtogroup actor_types
-	 * Type and its class as associated pairs  */
+	/** Type and its class as associated pairs  */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
-	TMap<EActorTypeEnum, TSubclassOf<AActor>> ActorTypesByClasses;
+	TMap<EActorTypeEnum, TSubclassOf<AActor>> ActorTypesByClasses_;
 };

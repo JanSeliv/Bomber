@@ -18,12 +18,7 @@ class BOMBER_API AGeneratedMap final : public AActor
 	GENERATED_BODY()
 
 public:
-	/**
-	 * Sets default values for this actor's properties
-	 * Fill an array with associative classes and generate the level map 
-	 * @see TypesByClasses_
-	 * @see GenerateLevelActors()
-	 */
+	/** Sets default values for this actor's properties */
 	AGeneratedMap();
 
 	/** The blueprint background actor  */
@@ -121,18 +116,9 @@ protected:
 	 *					Editor development
 	 * --------------------------------------------------- */
 
-#if WITH_EDITOR  // [Editor]
-	/** Called when this actor is explicitly being destroyed */
-	virtual void Destroyed() final;
-#endif  //WITH_EDITOR [Editor]
-
-	/**
-	 * Destroy all attached level actors
-	 * 
-	 * @param bIsEditorOnlyActors Should destroy editor-only actors that were spawned in the PIE world, otherwise will be destroyed all the level map's actors
-	 */
+	/** Destroy all editor-only attached level actors that were spawned in the PIE world */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	void DestroyAttachedActors(bool bIsEditorOnlyActors = false);
+	void DestroyEditorActors();
 
 #if WITH_EDITORONLY_DATA
 	/** Access to the Grid Array to create a free cell without an actor
