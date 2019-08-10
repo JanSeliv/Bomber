@@ -46,8 +46,8 @@ TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 	const FCell& Cell,
-	const int32 SideLength,
-	const EPathTypesEnum Pathfinder) const
+	const int32& SideLength,
+	EPathTypesEnum Pathfinder) const
 {
 	TSet<FCell> FoundedLocations;
 	return FoundedLocations;
@@ -119,6 +119,10 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		return;
 	}
 	USingletonLibrary::PrintToLog(this, "----- OnConstruction -----", "");
+
+#if WITH_EDITOR  // [Editor]
+	USingletonLibrary::SetLevelMap(this);
+#endif  // WITH_EDITOR [Editor]
 
 	// Create the background blueprint child actor
 	if (BackgroundBlueprintClass != nullptr							  // There is some background class
@@ -219,7 +223,8 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 	// After destroying PIE actors and before their generation,
 	// calling to updating of all dragged to the Level Map actors
 	USingletonLibrary::BroadcastActorsUpdating();  // [IsEditorNotPieWorld]
-#endif											   // [Editor]
+
+#endif  // [Editor]
 
 	TArray<FCell> CellsArray;
 	GridArray_.GetKeys(CellsArray);

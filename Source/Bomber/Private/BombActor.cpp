@@ -121,7 +121,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 #if WITH_EDITOR									   // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())  // for editor only
 	{
-		InitializeBombProperties(*CharacterBombsN_, ExplosionLength, -1);
+		InitializeBombProperties(*CharacterBombsN_, ExplosionLength_, -1);
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t AddDebugTextRenders");
 		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
 	}

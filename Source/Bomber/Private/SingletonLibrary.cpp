@@ -57,7 +57,11 @@ void USingletonLibrary::BroadcastAiUpdating()
 bool USingletonLibrary::IsEditorNotPieWorld()
 {
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
-	if (GEditor) return GEditor->GetPIEWorldContext() == nullptr;
+	if (GIsEditor && GEditor)
+	{
+		return GEditor->GetEditorWorldContext().World() == GWorld;
+		// return GEditor->GetPIEWorldContext() == nullptr;
+	}
 #endif  // [IsEditorNotPieWorld]
 	return false;
 }
@@ -156,8 +160,9 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 
-	if (IsEditorNotPieWorld() == true			  // IsEditorNotPieWorld only
-		&& !IS_VALID(GetSingleton()->LevelMap_))  // Is not valid or transient
+	if (IsEditorNotPieWorld() == true						 // IsEditorNotPieWorld only
+		&& (GetSingleton()->LevelMap_ == nullptr			 // is nullptr
+			   || IS_TRANSIENT(GetSingleton()->LevelMap_)))  // Is transient
 	{
 		SetLevelMap(nullptr);  // Find the Level Map
 	}
@@ -170,8 +175,8 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 
-	if (IsEditorNotPieWorld() == true  // IsEditorNotPieWorld only
-		&& IS_VALID(LevelMap) == false)
+	if (IsEditorNotPieWorld()  // IsEditorNotPieWorld only
+		&& LevelMap == nullptr)
 	{
 		UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
 		if (EditorWorld)
@@ -186,10 +191,10 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 	}
 #endif  // WITH_EDITOR [IsEditorNotPieWorld]
 
-	if (ensureMsgf(IS_VALID(LevelMap), TEXT("ERROR: SetLevelMap is not valid")))
+	if (ensureMsgf(IS_VALID(LevelMap), TEXT("ERROR: SetLevelMap: The Level Map is not valid!")))
 	{
 		GetSingleton()->LevelMap_ = LevelMap;
-		PrintToLog(LevelMap, "SetLevelMap", "----- UPDATED -----");
+		PrintToLog(LevelMap, "----- SetLevelMap", "UPDATED -----");
 	}
 }
 

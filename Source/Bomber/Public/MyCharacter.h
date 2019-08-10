@@ -14,9 +14,10 @@ struct FPowerUp
 {
 	GENERATED_BODY()
 
+	/** Empty constructor */
 	FPowerUp(){};
 
-	/** The number of items, that increase the movement speed of the character */
+	/** The number of items, that increases the movement speed of the character */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	int32 SkateN = 1;
 
@@ -24,7 +25,7 @@ struct FPowerUp
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	int32 BombN = 1;
 
-	/** The number of items, that increase the bomb blast radius */
+	/** The number of items, that increases the bomb blast radius */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	int32 FireN = 1;
 };
@@ -65,6 +66,7 @@ protected:
 	/** Count of items that affect the abilities of a player during gameplay */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	struct FPowerUp Powerups_;
+	/** Items have access */
 	friend class AItemActor;
 
 	/** The ID identification of each character */

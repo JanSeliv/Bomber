@@ -19,12 +19,13 @@ class BOMBER_API UMapComponent final : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
+	/** Sets default values for this component's properties */
 	UMapComponent();
 
 	/**
 	 * Should be called in the owner's OnConstruction event
-	 * Updates a owner's state */
+	 * Updates a owner's state
+	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnMapComponentConstruction();
 
@@ -36,6 +37,6 @@ protected:
 	/** Called when a component is registered (not loaded) */
 	virtual void OnRegister() final;
 
-	/* Called when a component is destroyed */
+	/** Called when a component is destroyed */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
 };

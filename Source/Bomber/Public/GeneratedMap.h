@@ -33,19 +33,20 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	TSet<class AMyCharacter*> CharactersOnMap;
 
-	/** @ingroup path_types
-	 * Getting an array of cells by four sides of a input center cell and type of breaks
+	/** @addtogroup path_types
+	 * Getting an array of cells by four sides of an input center cell and type of breaks
+	 * 
 	 * @param Cell The start of searching by the sides
 	 * @param SideLength Length of each side
 	 * @param Pathfinder Type of cells searching
 	 * @return Found cells
 	 * @todo to C++ GetSidesCells(...)
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++")
-	TSet<FCell> GetSidesCells(
-		const FCell& Cell,
-		const int32 SideLength,
-		const EPathTypesEnum Pathfinder) const;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SideLength"))
+	TSet<struct FCell> GetSidesCells(
+		const struct FCell& Cell,
+		const int32& SideLength,
+		EPathTypesEnum Pathfinder) const;
 
 	/** @addtogroup actor_types
 	 * The intersection of input cells and actors of the specific type on these cells
@@ -57,8 +58,8 @@ public:
 	 * @todo to C++ IntersectionCellsByTypes(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2, AutoCreateRefTerm = "ActorsTypesBitmask"))
-	TSet<FCell> IntersectionCellsByTypes(
-		const TSet<FCell>& Cells,
+	TSet<struct FCell> IntersectionCellsByTypes(
+		const TSet<struct FCell>& Cells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask,
 		const class AMyCharacter* ExcludePlayer) const;
 
@@ -69,7 +70,7 @@ public:
 	 * @param UpdateActor The spawned or dragged PIE actor
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void AddActorToGridArray(const FCell& Cell, AActor* UpdateActor);
+	void AddActorToGridArray(const struct FCell& Cell, AActor* UpdateActor);
 
 	/** Find and remove only this input actor-value of the cell-key from the Grid Array */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -81,7 +82,7 @@ public:
 	 * @todo to C++ DestroyActorsFromMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void DestroyActorsFromMap(const TSet<FCell>& Keys);
+	void DestroyActorsFromMap(const TSet<struct FCell>& Keys);
 
 protected:
 	/** Called when an instance of this class is placed (in editor) or spawned

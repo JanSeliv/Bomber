@@ -133,7 +133,7 @@ public:
 	 * Calculate the length between two cells
 	 *
 	 * @param C1 The first cell
-	 * @param C2 The other one cell
+	 * @param C2 The other cell
 	 * @return The distance between to cells
 	 * @todo FVector::Dist(X, Y);
 	 */
@@ -151,7 +151,7 @@ public:
 	 * @return Rotated to the Level Map cell
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "VectorToRotate,AxisZ"))
-	static FCell CalculateVectorAsRotatedCell(
+	static struct FCell CalculateVectorAsRotatedCell(
 		const FVector& VectorToRotate,
 		const float& AxisZ);
 

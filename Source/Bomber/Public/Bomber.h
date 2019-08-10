@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 
 //@todo Is includes the transient world as IsEditorWorld() ? //!(Obj)->GetWorld()->IsGameWorld()
-#define IS_TRANSIENT(Obj) (!(Obj)->IsValidLowLevel() || (Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
+#define IS_TRANSIENT(Obj) (!(Obj)->IsValidLowLevelFast() || (Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
 #define IS_VALID(Obj) (IsValid(Obj) && !IS_TRANSIENT(Obj))
 
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
@@ -27,7 +27,7 @@ enum class EPathTypesEnum : uint8
 /**
  * @defgroup actor_types The group where used types of actors
  * Types of all actors on the Level Map
- * Where Walls, Boxes and Bombs are the physical barrier for players
+ * Where Walls, Boxes and Bombs are the physical barriers for players
  * It is possible to make a bitmask of actors types
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
@@ -43,7 +43,7 @@ enum class EActorTypeEnum : uint8
 };
 
 /** @addtogroup actor_types
- * Using EActorTypeEnum as bitmask*/
+ * Using EActorTypeEnum as a bitmask*/
 inline EActorTypeEnum operator|(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
 {
 	return static_cast<EActorTypeEnum>(TO_FLAG(LType) | TO_FLAG(RType));
