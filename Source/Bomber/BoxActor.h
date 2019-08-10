@@ -6,6 +6,9 @@
 
 #include "BoxActor.generated.h"
 
+/**
+ * Boxes on destruction with some chances spawns an item.
+ */
 UCLASS()
 class BOMBER_API ABoxActor final : public AActor
 {
@@ -19,6 +22,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
+	/** The static mesh component of the this actor */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UStaticMeshComponent* BoxMeshComponent;
 
@@ -31,7 +35,7 @@ protected:
 
 	/** 
 	 * Event triggered when the actor has been explicitly destroyed
-	 * Spawn item with the chance 
+	 * on destruction with some chances spawns an item
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnBoxDestroyed(AActor* DestroyedActor);

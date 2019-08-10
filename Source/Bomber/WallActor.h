@@ -6,6 +6,9 @@
 
 #include "WallActor.generated.h"
 
+/**
+ * Walls are not destroyed by a bomb explosion and stop the explosion.
+ */
 UCLASS()
 class BOMBER_API AWallActor final : public AActor
 {
@@ -19,6 +22,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
+	/** The static mesh component of the this actor */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UStaticMeshComponent* WallMeshComponent;
 
@@ -31,8 +35,8 @@ protected:
 
 	/** 
 	 * Event triggered when the actor has been explicitly destroyed
-	 * @warning Should not be destroyed in game
+	 * @warning Should not be destroyed in the game
 	 */
 	UFUNCTION()
-	void OnBoxDestroyed(AActor* DestroyedActor);
+	void OnWallDestroyed(AActor* DestroyedActor) { check(!"The wall should never be destroyed"); }
 };

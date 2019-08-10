@@ -7,7 +7,12 @@
 
 #include "MapComponent.generated.h"
 
-/** Same calls and initializations for each of the level map actors */
+/** 
+ * These components manage their level actors updates on the level map in case of any changes that allow to:
+ * -  Free location and rotation of the level map in the editor time:
+ * - Prepare in advance the level actors in the editor time:
+ * Same calls and initializations for each of the level map actors
+ */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BOMBER_API UMapComponent final : public UActorComponent
 {

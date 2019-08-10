@@ -18,12 +18,7 @@ class BOMBER_API AGeneratedMap final : public AActor
 	GENERATED_BODY()
 
 public:
-	/**
-	 * Sets default values for this actor's properties
-	 * Fill an array with associative classes and generate the level map 
-	 * @see TypesByClasses_
-	 * @see GenerateLevelActors()
-	 */
+	/** Sets default values for this actor's properties */
 	AGeneratedMap();
 
 	/** The blueprint background actor  */

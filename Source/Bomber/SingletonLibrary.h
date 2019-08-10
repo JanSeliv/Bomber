@@ -8,6 +8,9 @@
 
 #include "SingletonLibrary.generated.h"
 
+/**
+ * 	The static functions library  
+ */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 {
@@ -179,7 +182,7 @@ public:
 		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& Bitmask);
 
 	/** @addtogroup actor_types
-	 * Find the class value by actor type key in the ActorTypesByClasses dictionary */
+	 * Find the class value by actor type key in the ActorTypesByClasses_ dictionary */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType"))
 	static TSubclassOf<AActor> FindClassByActorType(const EActorTypeEnum& ActorType);
 
@@ -188,8 +191,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	class AGeneratedMap* LevelMap_;
 
-	/** @addtogroup actor_types
-	 * Type and its class as associated pairs  */
+	/** Type and its class as associated pairs  */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
-	TMap<EActorTypeEnum, TSubclassOf<AActor>> ActorTypesByClasses;
+	TMap<EActorTypeEnum, TSubclassOf<AActor>> ActorTypesByClasses_;
 };

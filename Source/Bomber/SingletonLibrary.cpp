@@ -224,7 +224,7 @@ bool USingletonLibrary::IsActorInTypes(const AActor* Actor, const int32& Bitmask
 {
 	if (IS_VALID(Actor) == false) return false;  // The actor is null
 
-	const EActorTypeEnum* FoundActorType = GetSingleton()->ActorTypesByClasses.FindKey(Actor->GetClass());
+	const EActorTypeEnum* FoundActorType = GetSingleton()->ActorTypesByClasses_.FindKey(Actor->GetClass());
 	if (FoundActorType == nullptr) return false;
 
 	return ContainsActorType(*FoundActorType, Bitmask);
@@ -234,7 +234,7 @@ TSubclassOf<AActor> USingletonLibrary::FindClassByActorType(const EActorTypeEnum
 {
 	if (ActorType != EActorTypeEnum::None)
 	{
-		const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses.Find(ActorType);
+		const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses_.Find(ActorType);
 		if (ActorClass != nullptr)
 		{
 			return *ActorClass;

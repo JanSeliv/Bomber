@@ -10,7 +10,7 @@ struct FCell
 {
 	GENERATED_BODY()
 
-	/** A zero cell (0,0,0) */
+	/** The zero cell (0,0,0) */
 	static const FCell ZeroCell;
 
 	/** Holds the cell's FVector-coordinate. */
