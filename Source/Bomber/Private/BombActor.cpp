@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Bomb.h"
+#include "BombActor.h"
 
 #include "Bomber.h"
 #include "Components/BoxComponent.h"
@@ -12,7 +12,7 @@
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
-ABomb::ABomb()
+ABombActor::ABombActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -61,7 +61,7 @@ ABomb::ABomb()
 	BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
-void ABomb::InitializeBombProperties(
+void ABombActor::InitializeBombProperties(
 	int32& RefBombsN,
 	const int32& FireN,
 	const int32& CharacterID)
@@ -92,21 +92,21 @@ void ABomb::InitializeBombProperties(
 }
 
 // Called when the game starts or when spawned
-void ABomb::BeginPlay()
+void ABombActor::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// Binding to the event, that triggered when the actor has been explicitly destroyed
-	OnDestroyed.AddDynamic(this, &ABomb::OnBombDestroyed);
+	OnDestroyed.AddDynamic(this, &ABombActor::OnBombDestroyed);
 
 	// Binding to the event, that triggered when character end to overlaps the ItemCollisionComponent component
-	BombCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ABomb::OnBombEndOverlap);
+	BombCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ABombActor::OnBombEndOverlap);
 
 	// Destroy itself after N seconds
 	SetLifeSpan(LifeSpan_);
 }
 
-void ABomb::OnConstruction(const FTransform& Transform)
+void ABombActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
@@ -128,7 +128,7 @@ void ABomb::OnConstruction(const FTransform& Transform)
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
 
-void ABomb::OnBombDestroyed(AActor* DestroyedActor)
+void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 {
 	UWorld* const World = GetWorld();
 	if (World == nullptr								 // World is null
@@ -152,7 +152,7 @@ void ABomb::OnBombDestroyed(AActor* DestroyedActor)
 	USingletonLibrary::GetLevelMap()->DestroyActorsFromMap(ExplosionCells_);
 }
 
-void ABomb::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void ABombActor::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (OtherActor == this)  // Self triggering
 	{

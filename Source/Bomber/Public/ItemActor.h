@@ -5,19 +5,19 @@
 #include "Bomber.h"
 #include "GameFramework/Actor.h"
 
-#include "Item.generated.h"
+#include "ItemActor.generated.h"
 
 /** 
  * Affects the abilities of a player during gameplay
  */
 UCLASS()
-class BOMBER_API AItem final : public AActor
+class BOMBER_API AItemActor final : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	AItem();
+	AItemActor();
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")

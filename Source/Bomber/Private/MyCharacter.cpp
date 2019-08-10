@@ -3,7 +3,7 @@
 #include "MyCharacter.h"
 
 #include "Animation/AnimBlueprint.h"  // UAnimBlueprint
-#include "Bomb.h"
+#include "BombActor.h"
 #include "Bomber.h"
 #include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
 #include "GeneratedMap.h"
@@ -91,7 +91,7 @@ void AMyCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	ABomb* const Bomb = GetWorld()->SpawnActor<ABomb>(*USingletonLibrary::FindClassByActorType(EActorTypeEnum::Bomb), GetActorTransform());
+	auto Bomb = GetWorld()->SpawnActor<ABombActor>(USingletonLibrary::FindClassByActorType(EActorTypeEnum::Bomb), GetActorTransform());
 
 	// Update material of mesh
 	if (Bomb != nullptr)

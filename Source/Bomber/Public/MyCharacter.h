@@ -65,7 +65,7 @@ protected:
 	/** Count of items that affect the abilities of a player during gameplay */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	struct FPowerUp Powerups_;
-	friend class AItem;
+	friend class AItemActor;
 
 	/** The ID identification of each character */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
