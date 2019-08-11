@@ -23,9 +23,7 @@ public:
 
 #if WITH_EDITOR  // OnActorsUpdatedDelegate [IsEditorNotPieWorld]
 	DECLARE_MULTICAST_DELEGATE(FPushNongeneratedToMap);
-	/**
-	 * Owners Map Components binds to updating on the Level Map to this delegate
-	 */
+	/* Owners Map Components binds to updating on the Level Map to this delegate */
 	FPushNongeneratedToMap OnActorsUpdatedDelegate;
 #endif  //WITH_EDITOR OnActorsUpdatedDelegate [IsEditorNotPieWorld]
 
@@ -43,14 +41,14 @@ public:
 
 	/** Blueprint debug function, that prints messages to the log */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message"))
-	static FORCEINLINE int32 PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message)
+	static FORCEINLINE int32 PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message = "")
 	{
 		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("")), *FunctionName, *Message);
 		return 0;
 	}
 
 	/** Remove all text renders of the Owner */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner"))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
 	static void ClearOwnerTextRenders(class AActor* Owner);
 
 	/** 
@@ -58,7 +56,7 @@ public:
 	 * @warning PIE only
 	 * @warning Has blueprint implementation
      */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, HidePin = "Owner", DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderText,CoordinatePosition"))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderText,CoordinatePosition"))
 	void AddDebugTextRenders(
 		class AActor* Owner,
 		const TSet<struct FCell>& Cells,

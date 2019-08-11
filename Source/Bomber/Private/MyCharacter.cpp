@@ -42,6 +42,15 @@ AMyCharacter::AMyCharacter()
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (CharacterID_ == 0)
+	{
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (PlayerController)
+		{
+			PlayerController->Possess(this);
+		}
+	}
 }
 
 void AMyCharacter::OnConstruction(const FTransform& Transform)
@@ -51,6 +60,13 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
 	{
 		return;
+	}
+
+	if (CharacterID_ > 0				// Positives ID of bots
+		&& GetController() == nullptr)  // The ai controller is not created yet
+	{
+		SpawnDefaultController();
+		if (GetController()) GetController()->Possess(this);
 	}
 
 	// Construct the actor's map component

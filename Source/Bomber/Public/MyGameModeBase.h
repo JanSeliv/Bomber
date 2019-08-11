@@ -11,10 +11,10 @@ class BOMBER_API AMyGameModeBase final : public AGameModeBase
 	GENERATED_BODY()
 
 public:
+	/** Sets default values for this character's properties */
 	AMyGameModeBase();
 
+protected:
+	/** Called when the game starts or when spawned */
 	void BeginPlay() final;
-
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void PossessController(AController* Controller, APawn* Pawn) const;
 };

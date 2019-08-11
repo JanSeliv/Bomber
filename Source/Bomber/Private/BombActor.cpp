@@ -118,10 +118,13 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	// Construct the actor's map component
 	MapComponent->OnMapComponentConstruction();
 
-#if WITH_EDITOR									   // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld())  // for editor only
+#if WITH_EDITOR
+	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 	{
+		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t InitializeBombProperties");
 		InitializeBombProperties(*CharacterBombsN_, ExplosionLength_, -1);
+		USingletonLibrary::BroadcastAiUpdating();
+
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t AddDebugTextRenders");
 		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
 	}

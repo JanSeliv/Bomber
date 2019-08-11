@@ -49,6 +49,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
+#if WITH_EDITORONLY_DATA  // bShouldShowRenders [Editor]
+	/** Mark updating visualization(text renders) of the bot's movements in the editor */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	bool bShouldShowRenders;
+#endif  //WITH_EDITORONLY_DATA bShouldShowRenders [Editor]
+
 protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() final;

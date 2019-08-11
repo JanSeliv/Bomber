@@ -16,12 +16,11 @@ AMyGameModeBase::AMyGameModeBase()
 void AMyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
-}
 
-void AMyGameModeBase::PossessController(AController* Controller, APawn* Pawn) const
-{
-	Controller->Possess(Pawn);
-
-	//focus to game
-	Cast<APlayerController>(Controller)->SetInputMode(FInputModeGameOnly());
+	//focus to the game
+	const auto PlayerController = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (PlayerController)
+	{
+		PlayerController->SetInputMode(FInputModeGameOnly());
+	}
 }
