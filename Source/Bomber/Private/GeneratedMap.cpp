@@ -5,11 +5,14 @@
 #include "Bomber.h"
 #include "Cell.h"
 #include "Components/StaticMeshComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
 #include "MyCharacter.h"
 #include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
+
+/* ---------------------------------------------------
+ *					Level map public functions
+ * --------------------------------------------------- */
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()
@@ -107,7 +110,7 @@ void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& Keys)
 }
 
 /* ---------------------------------------------------
- *					Protected
+ *					Level map protected functions
  * --------------------------------------------------- */
 
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -125,9 +128,9 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 #endif  // WITH_EDITOR [Editor]
 
 	// Create the background blueprint child actor
-	if (BackgroundBlueprintClass != nullptr							  // There is some background class
-		&& BackgroundBlueprintComponent != nullptr					  // Is accessible
-		&& BackgroundBlueprintComponent->GetChildActor() == nullptr)  // Is not created yet
+	if (BackgroundBlueprintClass									 // There is some background class
+		&& BackgroundBlueprintComponent								 // Is accessible
+		&& !IsValid(BackgroundBlueprintComponent->GetChildActor()))  // Is not created yet
 	{
 		BackgroundBlueprintComponent->SetChildActorClass(BackgroundBlueprintClass);
 		BackgroundBlueprintComponent->CreateChildActor();
@@ -218,7 +221,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 #if WITH_EDITOR  // [Editor]
 	//  Destroy editor-only actors that were spawned in the PIE
 	USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "-> [Editor]DestroyAttachedActors");
-	DestroyEditorActors();
+	DestroyAttachedActors(true);
 
 	// After destroying PIE actors and before their generation,
 	// calling to updating of all dragged to the Level Map actors
@@ -229,6 +232,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 	TArray<FCell> CellsArray;
 	GridArray_.GetKeys(CellsArray);
 
+	int32 SpawnedCharactersN = 0;
 	const FIntVector MapScale(GetActorScale3D());
 	for (int32 Y = 0; Y < MapScale.Y; ++Y)
 	{
@@ -259,10 +263,12 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 			// Player condition
 			const bool bIsCornerX = (X == 0 || X == MapScale.X - 1);
 			const bool bIsCornerY = (Y == 0 || Y == MapScale.Y - 1);
-			if (bIsCornerX && bIsCornerY)
+			if (bIsCornerX && bIsCornerY  //
+				&& SpawnedCharactersN < CharactersNumber)
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "PLAYER will be spawned");
 				ActorTypeToSpawn = EActorTypeEnum::Player;
+				SpawnedCharactersN++;
 			}
 
 			// Box condition
@@ -299,23 +305,35 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
  *					Editor development
  * --------------------------------------------------- */
 
-void AGeneratedMap::DestroyEditorActors()
+void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnly)
 {
 #if WITH_EDITOR  // [Editor]
-	USingletonLibrary::PrintToLog(this, "----- [Editor]DestroyAttachedActors -----", "");
-	TArray<AActor*> AttachedActors;
-	GetAttachedActors(AttachedActors);
-	if (AttachedActors.Num() == 0)
+	if (IS_TRANSIENT(this))
 	{
 		return;
 	}
 
-	for (int32 i = AttachedActors.Num() - 1; i >= 0; --i)
+	USingletonLibrary::PrintToLog(this, "----- [Editor]DestroyAttachedActors -----", "");
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+	if (AttachedActors.Num() > 0)
 	{
-		if (AttachedActors[i]->IsEditorOnly())  // Should destroy editor-only actors
+		for (int32 i = AttachedActors.Num() - 1; i >= 0; --i)
 		{
-			AttachedActors[i]->Destroy();
+			if (bIsEditorOnly == false				  // All attached actors
+				|| AttachedActors[i]->IsEditorOnly()  // Should destroy editor only actors
+			)
+
+				AttachedActors[i]->Destroy();
 		}
 	}
 #endif  //WITH_EDITOR [Editor]
 }
+
+#if WITH_EDITOR  // Destroyed() [Editor]
+void AGeneratedMap::Destroyed()
+{
+	DestroyAttachedActors();
+	Super::Destroyed();
+}
+#endif  // Destroyed() [Editor]

@@ -3,7 +3,6 @@
 #include "WallActor.h"
 
 #include "Bomber.h"
-#include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "MapComponent.h"
 #include "UObject/ConstructorHelpers.h"

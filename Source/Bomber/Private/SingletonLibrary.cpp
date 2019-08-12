@@ -7,6 +7,7 @@
 #include "Engine.h"
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
+#include "MapComponent.h"
 #include "Math/Color.h"
 #include "MyAIController.h"
 #include "MyCharacter.h"
@@ -42,14 +43,15 @@ void USingletonLibrary::BroadcastAiUpdating()
 		return;
 	}
 
-	for (const AMyCharacter* MyCharacterIt : LevelMap->CharactersOnMap)
+	for (AMyCharacter* MyCharacterIt : LevelMap->CharactersOnMap)
 	{
-		if (MyCharacterIt && MyCharacterIt->bShouldShowRenders)
+		if (MyCharacterIt && MyCharacterIt->MapComponent  // is accessible
+			&& MyCharacterIt->MapComponent->bShouldShowRenders)
 		{
-			auto MyAiCharacter = Cast<AMyAIController>(MyCharacterIt->GetController());
-			if (MyAiCharacter)
+			auto MyAIController = Cast<AMyAIController>(MyCharacterIt->GetController());
+			if (MyAIController)
 			{
-				MyAiCharacter->UpdateAI();
+				MyAIController->UpdateAI();
 			}
 		}
 	}

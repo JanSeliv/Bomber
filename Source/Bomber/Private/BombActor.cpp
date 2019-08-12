@@ -40,7 +40,7 @@ ABombActor::ABombActor()
 		ExplosionParticle = ParticleFinder.Object;
 	}
 
-	// Find materials
+	// Find bomb materials
 	static TArray<ConstructorHelpers::FObjectFinder<UMaterialInterface>> MaterialsFinderArray{
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Yellow"),
 		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Blue"),
@@ -50,7 +50,7 @@ ABombActor::ABombActor()
 	{
 		if (MaterialsFinderArray[i].Succeeded())
 		{
-			BombMaterials_.Add(MaterialsFinderArray[i].Object);
+			BombMaterials.Add(MaterialsFinderArray[i].Object);
 		}
 	}
 
@@ -66,9 +66,9 @@ void ABombActor::InitializeBombProperties(
 	const int32& FireN,
 	const int32& CharacterID)
 {
-	if (!IS_VALID(USingletonLibrary::GetLevelMap())  // // The Level Map is not valid
-		|| IS_VALID(MapComponent) == false			 // MapComponent is not valid
-		|| FireN < 0)								 // Negative length of the explosion
+	if (!IsValid(USingletonLibrary::GetLevelMap())  // // The Level Map is not valid
+		|| IS_VALID(MapComponent) == false			// MapComponent is not valid
+		|| FireN < 0)								// Negative length of the explosion
 	{
 		return;
 	}
@@ -83,12 +83,19 @@ void ABombActor::InitializeBombProperties(
 	if (IS_VALID(BombMeshComponent) == true  // Mesh of the bomb is not valid
 		&& CharacterID != -1)				 // is not debug character
 	{
-		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials_.Num();
-		BombMeshComponent->SetMaterial(0, BombMaterials_[BombMaterialNo]);
+		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
+		BombMeshComponent->SetMaterial(0, BombMaterials[BombMaterialNo]);
 	}
 
 	// Update explosion information
 	ExplosionCells_ = USingletonLibrary::GetLevelMap()->GetSidesCells(MapComponent->Cell, FireN, EPathTypesEnum::Explosion);
+#if WITH_EDITOR  // [Editor]
+	if (MapComponent->bShouldShowRenders)
+	{
+		USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
+		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
+	}
+#endif
 }
 
 // Called when the game starts or when spawned
@@ -123,10 +130,8 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	{
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t InitializeBombProperties");
 		InitializeBombProperties(*CharacterBombsN_, ExplosionLength_, -1);
-		USingletonLibrary::BroadcastAiUpdating();
 
-		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t AddDebugTextRenders");
-		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
+		USingletonLibrary::BroadcastAiUpdating();
 	}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
@@ -134,8 +139,8 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 {
 	UWorld* const World = GetWorld();
-	if (World == nullptr								 // World is null
-		|| !IS_VALID(USingletonLibrary::GetLevelMap()))  // The Level Map is not valid
+	if (World == nullptr								// World is null
+		|| !IsValid(USingletonLibrary::GetLevelMap()))  // The Level Map is not valid
 	{
 		return;
 	}
@@ -163,10 +168,10 @@ void ABombActor::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	}
 
 	//Sets the collision preset to block all dynamics
-	TArray<AActor*> OverlappingActors;
 	const TSubclassOf<AActor> PlayerClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum::Player);
+	TArray<AActor*> OverlappingActors;
 	BombCollisionComponent->GetOverlappingActors(OverlappingActors, PlayerClass);
-	if (OverlappingActors.Num() > 0)  // There are no more characters on the bomb
+	if (OverlappingActors.Num() == 0)  // There are no more characters on the bomb
 	{
 		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
 	}

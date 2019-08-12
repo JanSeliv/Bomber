@@ -6,7 +6,7 @@
 #include "MyHUD.generated.h"
 
 /**
- * 
+ * The HUD class
  */
 UCLASS()
 class BOMBER_API AMyHUD final : public AHUD
@@ -14,11 +14,11 @@ class BOMBER_API AMyHUD final : public AHUD
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this HUD's properties
+	UPROPERTY(BlueprintReadOnly, Category = "Ñ++")
+	class UUserWidget* UmgCurrentObj;
+
+	/* Sets default values for this HUD's properties */
 	AMyHUD();
 
 	virtual void BeginPlay() final;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Ñ++")
-	class UUserWidget* UmgCurrentObj;
 };

@@ -39,21 +39,32 @@ class BOMBER_API AMyCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	/** Sets default values for this character's properties */
-	AMyCharacter();
-
-	/** Called to bind functionality to input */
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
-
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
-#if WITH_EDITORONLY_DATA  // bShouldShowRenders [Editor]
-	/** Mark updating visualization(text renders) of the bot's movements in the editor */
+	/** All skeletal meshes of the character */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	bool bShouldShowRenders;
-#endif  //WITH_EDITORONLY_DATA bShouldShowRenders [Editor]
+	TArray<class USkeletalMesh*> SkeletalMeshes;
+
+	/** The static mesh nameplate */
+	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	class UStaticMeshComponent* NameplateMeshComponent;
+
+	/** All materials that used by nameplate meshes */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	TArray<class UMaterialInterface*> NameplateMaterials;
+
+	/** The nickname of the character */
+	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	class UTextRenderComponent* NicknameTextRender;
+
+	/** Sets default values for this character's properties */
+	AMyCharacter();
+
+	/** Called to bind functionality to input */
+	virtual void
+	SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
 
 protected:
 	/** Called when the game starts or when spawned */

@@ -5,6 +5,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "MyGameModeBase.generated.h"
 
+/**
+ * The custom game mode class
+ */
 UCLASS()
 class BOMBER_API AMyGameModeBase final : public AGameModeBase
 {

@@ -16,8 +16,8 @@ UMapComponent::UMapComponent()
 
 void UMapComponent::OnMapComponentConstruction()
 {
-	if (IS_VALID(GetOwner()) == false					 // The owner is not valid
-		|| !IS_VALID(USingletonLibrary::GetLevelMap()))  // The Level Map is not valid
+	if (IS_VALID(GetOwner()) == false					// The owner is not valid
+		|| !IsValid(USingletonLibrary::GetLevelMap()))  // The Level Map is not valid
 	{
 		return;
 	}
@@ -80,8 +80,8 @@ void UMapComponent::OnRegister()
 
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (IS_TRANSIENT(GetOwner()) == false				// Is not transient owner
-		&& IS_VALID(USingletonLibrary::GetLevelMap()))  // is valid and is not transient the level map
+	if (IS_TRANSIENT(GetOwner()) == false			   // Is not transient owner
+		&& IsValid(USingletonLibrary::GetLevelMap()))  // is valid and is not transient the level map
 	{
 		USingletonLibrary::PrintToLog(GetOwner(), "OnComponentDestroyed", "-> \t RemoveActorFromGridArray");
 		USingletonLibrary::GetLevelMap()->RemoveActorFromGridArray(GetOwner());

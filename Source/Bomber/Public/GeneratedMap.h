@@ -18,8 +18,9 @@ class BOMBER_API AGeneratedMap final : public AActor
 	GENERATED_BODY()
 
 public:
-	/** Sets default values for this actor's properties */
-	AGeneratedMap();
+	/* ---------------------------------------------------
+	 *					Level map public functions
+	 * --------------------------------------------------- */
 
 	/** The blueprint background actor  */
 	UPROPERTY(BlueprintReadWrite, Category = "C++")
@@ -29,9 +30,16 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	TSubclassOf<AActor> BackgroundBlueprintClass;
 
-	/** Set of unique player characters  */
+	/** The unique set of player characters */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	TSet<class AMyCharacter*> CharactersOnMap;
+
+	/** Number of characters on the Level Map */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	int32 CharactersNumber = 4;
+
+	/** Sets default values for this actor's properties */
+	AGeneratedMap();
 
 	/** @addtogroup path_types
 	 * Getting an array of cells by four sides of an input center cell and type of breaks
@@ -85,6 +93,10 @@ public:
 	void DestroyActorsFromMap(const TSet<struct FCell>& Keys);
 
 protected:
+	/* ---------------------------------------------------
+	 *					Level map protected functions
+	 * --------------------------------------------------- */
+
 	/** Called when an instance of this class is placed (in editor) or spawned
 	 * @todo Generate only platform without boxes*/
 	virtual void OnConstruction(const FTransform& Transform) final;
@@ -117,9 +129,16 @@ protected:
 	 *					Editor development
 	 * --------------------------------------------------- */
 
-	/** Destroy all editor-only attached level actors that were spawned in the PIE world */
+	/** Destroys all attached level actors 
+	 * @param bIsEditorOnly if should destroy editor-only actors that were spawned in the PIE world
+	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	void DestroyEditorActors();
+	void DestroyAttachedActors(bool bIsEditorOnly = false);
+
+#if WITH_EDITOR  // Destroyed() [Editor]
+	/** Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending */
+	virtual void Destroyed() final;
+#endif  // Destroyed() [Editor]
 
 #if WITH_EDITORONLY_DATA
 	/** Access to the Grid Array to create a free cell without an actor
@@ -128,10 +147,7 @@ protected:
 	 */
 	friend struct FCell;
 
-	/** @addtogroup AI
-	 * Mark updating visualization(text renders) of the bot's movements in the editor
-	 * @warning Editor only
-	 */
+	/** Mark the editor updating visualization(text renders) */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	bool bShouldShowRenders;
 #endif  //WITH_EDITORONLY_DATA [Editor]

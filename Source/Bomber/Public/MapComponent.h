@@ -33,6 +33,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	struct FCell Cell;
 
+#if WITH_EDITORONLY_DATA  // [Editor]
+	/** Mark the editor updating visualization(text renders) */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	bool bShouldShowRenders = false;
+#endif  //WITH_EDITORONLY_DATA [Editor]
+
 protected:
 	/** Called when a component is registered (not loaded) */
 	virtual void OnRegister() final;

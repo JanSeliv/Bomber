@@ -15,9 +15,6 @@ class BOMBER_API ABoxActor final : public AActor
 	GENERATED_BODY()
 
 public:
-	/** Sets default values for this actor's properties */
-	ABoxActor();
-
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
@@ -25,6 +22,9 @@ public:
 	/** The static mesh component of the this actor */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UStaticMeshComponent* BoxMeshComponent;
+
+	/** Sets default values for this actor's properties */
+	ABoxActor();
 
 protected:
 	/** Called when the game starts or when spawned */

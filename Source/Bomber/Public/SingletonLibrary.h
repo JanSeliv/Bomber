@@ -185,6 +185,10 @@ public:
 	static TSubclassOf<AActor> FindClassByActorType(const EActorTypeEnum& ActorType);
 
 protected:
+	/* ---------------------------------------------------
+	*			Protected properties of the Singleton
+	* --------------------------------------------------- */
+
 	/** The reference to the AGeneratedMap actor*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	class AGeneratedMap* LevelMap_;

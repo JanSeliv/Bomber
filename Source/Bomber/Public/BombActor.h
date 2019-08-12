@@ -14,6 +14,26 @@ class BOMBER_API ABombActor final : public AActor
 	GENERATED_BODY()
 
 public:
+	/** The MapComponent manages this actor on the Level Map */
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	class UMapComponent* MapComponent;
+
+	/** The static mesh component of this actor */
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	class UStaticMeshComponent* BombMeshComponent;
+
+	/** All materials that used by bomb meshes */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	TArray<class UMaterialInterface*> BombMaterials;
+
+	/** Prevents players from moving through the bomb after they moved away */
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	class UBoxComponent* BombCollisionComponent;
+
+	/** The emitter of the bomb explosion */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	class UParticleSystem* ExplosionParticle;
+
 	/** Sets default values for this actor's properties */
 	ABombActor();
 
@@ -29,23 +49,22 @@ public:
 		const int32& FireN,
 		const int32& CharacterID);
 
-	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UMapComponent* MapComponent;
-
-	/** The static mesh component of this actor */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UStaticMeshComponent* BombMeshComponent;
-
-	/** Prevents players from moving through the bomb after they moved away */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UBoxComponent* BombCollisionComponent;
-
-	/** The emitter of the bomb explosion */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	class UParticleSystem* ExplosionParticle;
-
 protected:
+	/** The lifetime of a bomb*/
+	UPROPERTY(EditAnywhere, Category = "C++")
+	float LifeSpan_ = 2.f;
+
+	/** The blast length on each side */
+	UPROPERTY(EditAnywhere, Category = "C++")
+	int32 ExplosionLength_ = 1;
+
+	/** Amount of character bombs at the current time */
+	int32* CharacterBombsN_;
+
+	/** The bomb blast path */
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	TSet<FCell> ExplosionCells_;
+
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() final;
 
@@ -65,23 +84,4 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	/** The lifetime of a bomb*/
-	UPROPERTY(EditAnywhere, Category = "C++")
-	float LifeSpan_ = 2.f;
-
-	/** The blast length on each side */
-	UPROPERTY(EditAnywhere, Category = "C++")
-	int32 ExplosionLength_ = 1;
-
-	/** Amount of character bombs at the current time */
-	int32* CharacterBombsN_;
-
-	/** All used bomb materials */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	TArray<class UMaterialInterface*> BombMaterials_;
-
-	/** The bomb blast path */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	TSet<FCell> ExplosionCells_;
 };
