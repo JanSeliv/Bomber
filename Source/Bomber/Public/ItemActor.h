@@ -16,9 +16,6 @@ class BOMBER_API AItemActor final : public AActor
 	GENERATED_BODY()
 
 public:
-	/** Sets default values for this actor's properties */
-	AItemActor();
-
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
@@ -38,6 +35,9 @@ public:
 	 */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	EItemTypeEnum ItemType = EItemTypeEnum::None;
+
+	/** Sets default values for this actor's properties */
+	AItemActor();
 
 protected:
 	/** Called when the game starts or when spawned */

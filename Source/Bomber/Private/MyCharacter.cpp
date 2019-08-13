@@ -2,14 +2,17 @@
 
 #include "MyCharacter.h"
 
-#include "Animation/AnimBlueprint.h"  // UAnimBlueprint
+#include "Animation/AnimBlueprint.h"		   // UAnimBlueprint
+#include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
+#include "Components/StaticMeshComponent.h"	// UStaticMeshComponent
+#include "Components/TextRenderComponent.h"	//UTextRenderComponent
+#include "UObject/ConstructorHelpers.h"		   // ConstructorHelpers
+
 #include "BombActor.h"
 #include "Bomber.h"
-#include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
 #include "GeneratedMap.h"
 #include "MapComponent.h"
 #include "SingletonLibrary.h"
-#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AMyCharacter::AMyCharacter()
@@ -23,11 +26,18 @@ AMyCharacter::AMyCharacter()
 	// Initialize skeletal mesh
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
 
-	// Set the skeletal mesh
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMeshFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Meshes/IggyScorch"));
-	if (SkeletalMeshFinder.Succeeded())  // Check to make sure the default skeletal mesh for character was actually found
+	// Find skeletal meshes
+	static TArray<ConstructorHelpers::FObjectFinder<USkeletalMesh>> SkeletalMeshFinderArray{
+		TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/Phoenix/Meshes/IggyScorch_Phoenix"),
+		TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/MechaTerror/Meshes/IggyScorch_MechaTerror"),
+		TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/JingleBombs/Meshes/IggyScorch_JingleBombs"),
+		TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/Fireball/Meshes/IggyScorch_Fireball")};
+	for (int32 i = 0; i < SkeletalMeshFinderArray.Num(); ++i)
 	{
-		GetMesh()->SetSkeletalMesh(SkeletalMeshFinder.Object);  // Set default skeletal mesh for character
+		if (SkeletalMeshFinderArray[i].Succeeded())
+		{
+			SkeletalMeshes.Add(SkeletalMeshFinderArray[i].Object);
+		}
 	}
 
 	// Set the animation
@@ -36,19 +46,66 @@ AMyCharacter::AMyCharacter()
 	{
 		GetMesh()->AnimClass = AnimationFinder.Object->GeneratedClass;
 	}
+
+	// Initialize the nameplate mesh component
+	NameplateMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
+	NameplateMeshComponent->SetupAttachment(RootComponent);
+	NameplateMeshComponent->SetRelativeLocation(FVector(-60.f, 0.f, 150.f));
+	NameplateMeshComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	NameplateMeshComponent->SetRelativeScale3D(FVector(1.75f, 1.f, 1.f));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> NameplateMeshFinder(TEXT("/Engine/BasicShapes/Plane"));
+	if (NameplateMeshFinder.Succeeded())
+	{
+		NameplateMeshComponent->SetStaticMesh(NameplateMeshFinder.Object);
+	}
+
+	// Find nameplate materials
+	static TArray<ConstructorHelpers::FObjectFinder<UMaterialInterface>> MaterialsFinderArray{
+		TEXT("/Game/Bomber/Assets/MI_NamePlates/MI_NamePlateYellow"),
+		TEXT("/Game/Bomber/Assets/MI_NamePlates/MI_NamePlateBlue"),
+		TEXT("/Game/Bomber/Assets/MI_NamePlates/MI_NamePlateWhite"),
+		TEXT("/Game/Bomber/Assets/MI_NamePlates/MI_NamePlatePink")};
+	for (int32 i = 0; i < MaterialsFinderArray.Num(); ++i)
+	{
+		if (MaterialsFinderArray[i].Succeeded())
+		{
+			NameplateMaterials.Add(MaterialsFinderArray[i].Object);
+		}
+	}
+
+	// Initialize the nickname text render component
+	NicknameTextRender = CreateDefaultSubobject<UTextRenderComponent>(TEXT("NicknameTextRender"));
+	NicknameTextRender->SetupAttachment(NameplateMeshComponent);
+	NicknameTextRender->SetRelativeLocation(FVector(0.f, 0.f, 10.f));
+	NicknameTextRender->SetRelativeRotation(FRotator(90.f, -90.f, 180.f));
+	NicknameTextRender->SetHorizontalAlignment(EHTA_Center);
+	NicknameTextRender->SetVerticalAlignment(EVRTA_TextCenter);
+	NicknameTextRender->SetTextRenderColor(FColor::Black);
+	NicknameTextRender->SetWorldSize(56.f);
+	NicknameTextRender->SetText(TEXT("Player"));
 }
 
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (CharacterID_ == 0)
+	{
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (PlayerController)
+		{
+			PlayerController->Possess(this);
+		}
+	}
 }
 
 void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
+	if (!IsValid(USingletonLibrary::GetLevelMap())  //
+		|| IS_VALID(MapComponent) == false)			// this component is not valid for owner construction
 	{
 		return;
 	}
@@ -56,21 +113,51 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	// Construct the actor's map component
 	MapComponent->OnMapComponentConstruction();
 
-	// Rotate character
-	if (IS_VALID(USingletonLibrary::GetLevelMap()))
+	// Set the character ID
+	CharacterID_ = USingletonLibrary::GetLevelMap()->CharactersOnMap.IndexOfByKey(this);
+
+	// Set a character skeletal mesh
+	if (GetMesh())
 	{
-		const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;
-		SetActorRotation(FRotator(0.f, YawRotation, 0.f));
-		USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
+		const int32 SkeletalNo = CharacterID_ < SkeletalMeshes.Num() ? CharacterID_ : CharacterID_ % SkeletalMeshes.Num();
+		GetMesh()->SetSkeletalMesh(SkeletalMeshes[SkeletalNo]);
 	}
+
+	// Set a nameplate material
+	if (NameplateMeshComponent)
+	{
+		const int32 MaterialNo = CharacterID_ < NameplateMaterials.Num() ? CharacterID_ : CharacterID_ % NameplateMaterials.Num();
+		NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
+	}
+
+	// Set the nickname
+	if (NicknameTextRender)
+	{
+		NicknameTextRender->SetText(CharacterID_ == 0 ? TEXT("Player") : TEXT("AI"));
+	}
+
+	// The bots construction
+	if (CharacterID_ > 0)  // Is a bot
+	{
+		if (GetController() == nullptr)  // The ai controller is not created yet
+		{
+			SpawnDefaultController();
+			if (GetController()) GetController()->Possess(this);
+		}
+	}
+
+	// Rotate this character
+	const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;
+	SetActorRotation(FRotator(0.f, YawRotation, 0.f));
+	USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
 }
 
 void AMyCharacter::Destroyed()
 {
 	UWorld* const World = GetWorld();
-	if (World != nullptr							   // World is not null
-		&& IS_VALID(USingletonLibrary::GetLevelMap())  // The Level Map is valid
-		&& IS_TRANSIENT(this) == false)				   // Component is not transient
+	if (World != nullptr							  // World is not null
+		&& IsValid(USingletonLibrary::GetLevelMap())  // The Level Map is valid
+		&& IS_TRANSIENT(this) == false)				  // Component is not transient
 	{
 		USingletonLibrary::GetLevelMap()->CharactersOnMap.Remove(this);
 		USingletonLibrary::PrintToLog(this, "Destroyed", "Removed from TSet");
@@ -82,7 +169,7 @@ void AMyCharacter::Destroyed()
 
 void AMyCharacter::SpawnBomb()
 {
-	if (!IS_VALID(USingletonLibrary::GetLevelMap())   // The Level Map is not valid
+	if (!IsValid(USingletonLibrary::GetLevelMap())	// The Level Map is not valid
 		|| Powerups_.FireN <= 0						  // Null length of explosion
 		|| Powerups_.BombN <= 0						  // No more bombs
 		|| USingletonLibrary::IsEditorNotPieWorld())  // Should not spawn bomb in PIE

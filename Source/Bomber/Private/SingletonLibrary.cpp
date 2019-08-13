@@ -7,8 +7,10 @@
 #include "Engine.h"
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
+#include "MapComponent.h"
 #include "Math/Color.h"
-#include "MyAiCharacter.h"
+#include "MyAIController.h"
+#include "MyCharacter.h"
 
 #if WITH_EDITOR		 // [Editor]
 #include "Editor.h"  // GEditor
@@ -41,13 +43,16 @@ void USingletonLibrary::BroadcastAiUpdating()
 		return;
 	}
 
-	for (AMyCharacter* const MyCharacterIt : LevelMap->CharactersOnMap)
+	for (AMyCharacter* MyCharacterIt : LevelMap->CharactersOnMap)
 	{
-		AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(MyCharacterIt);
-		if (MyAiCharacter != nullptr					   // Successfully cast to AI
-			&& MyAiCharacter->bShouldShowRenders == true)  // Is render AI
+		if (MyCharacterIt && MyCharacterIt->MapComponent  // is accessible
+			&& MyCharacterIt->MapComponent->bShouldShowRenders)
 		{
-			MyAiCharacter->UpdateAI();
+			auto MyAIController = Cast<AMyAIController>(MyCharacterIt->GetController());
+			if (MyAIController)
+			{
+				MyAIController->UpdateAI();
+			}
 		}
 	}
 
@@ -106,12 +111,9 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 {
 #if WITH_EDITOR  // [Editor]
 
-	AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(Owner);
-	if ((MyAiCharacter != nullptr							// Successfully cast to AI
-			&& MyAiCharacter->bShouldShowRenders == false)  // Is not render AI
-		|| Cells.Num() == NULL								// Null length
-		|| IS_VALID(Owner) == false							// Owner is not valid
-		|| !IS_VALID(GetLevelMap()))						// The Level Map is not valid
+	if (Cells.Num() == NULL			  // Null length
+		|| !IS_VALID(Owner)			  // Owner is not valid
+		|| !IS_VALID(GetLevelMap()))  // The Level Map is not valid
 	{
 		return;
 	}

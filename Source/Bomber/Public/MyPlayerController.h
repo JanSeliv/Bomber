@@ -5,19 +5,21 @@
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
 
+/**
+ * The player controller class
+ */
 UCLASS()
 class BOMBER_API AMyPlayerController final : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
+	/** Sets default values for this character's properties */
 	AMyPlayerController();
 
-	void BeginPlay() final;
+	/** Called when the game starts or when spawned */
+	virtual void BeginPlay() final;
 
-	void SetupInputComponent() final;
-
-	//widgets
-	UPROPERTY(BlueprintReadOnly, Category = "C++")
-	class AMyHUD* MyCustomHUD;
+	/** Allows the PlayerController to set up custom input bindings. */
+	virtual void SetupInputComponent() final;
 };

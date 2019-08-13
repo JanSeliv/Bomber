@@ -39,15 +39,32 @@ class BOMBER_API AMyCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
+	/** The MapComponent manages this actor on the Level Map */
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	class UMapComponent* MapComponent;
+
+	/** All skeletal meshes of the character */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	TArray<class USkeletalMesh*> SkeletalMeshes;
+
+	/** The static mesh nameplate */
+	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	class UStaticMeshComponent* NameplateMeshComponent;
+
+	/** All materials that used by nameplate meshes */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	TArray<class UMaterialInterface*> NameplateMaterials;
+
+	/** The nickname of the character */
+	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	class UTextRenderComponent* NicknameTextRender;
+
 	/** Sets default values for this character's properties */
 	AMyCharacter();
 
 	/** Called to bind functionality to input */
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
-
-	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UMapComponent* MapComponent;
+	virtual void
+	SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
 
 protected:
 	/** Called when the game starts or when spawned */
