@@ -82,7 +82,7 @@ AMyCharacter::AMyCharacter()
 	NicknameTextRender->SetVerticalAlignment(EVRTA_TextCenter);
 	NicknameTextRender->SetTextRenderColor(FColor::Black);
 	NicknameTextRender->SetWorldSize(56.f);
-	NicknameTextRender->SetText(FString("Player"));
+	NicknameTextRender->SetText(TEXT("Player"));
 }
 
 // Called when the game starts or when spawned
@@ -114,10 +114,7 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	MapComponent->OnMapComponentConstruction();
 
 	// Set the character ID
-	if (CharacterID_ == -1)  // The character has not the ID yet
-	{
-		CharacterID_ = USingletonLibrary::GetLevelMap()->CharactersOnMap.Num() - 1;
-	}
+	CharacterID_ = USingletonLibrary::GetLevelMap()->CharactersOnMap.IndexOfByKey(this);
 
 	// Set a character skeletal mesh
 	if (GetMesh())
@@ -132,14 +129,16 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 		const int32 MaterialNo = CharacterID_ < NameplateMaterials.Num() ? CharacterID_ : CharacterID_ % NameplateMaterials.Num();
 		NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
 	}
+
+	// Set the nickname
+	if (NicknameTextRender)
+	{
+		NicknameTextRender->SetText(CharacterID_ == 0 ? TEXT("Player") : TEXT("AI"));
+	}
+
 	// The bots construction
 	if (CharacterID_ > 0)  // Is a bot
 	{
-		if (NicknameTextRender)
-		{
-			NicknameTextRender->SetText(FString("AI"));
-		}
-
 		if (GetController() == nullptr)  // The ai controller is not created yet
 		{
 			SpawnDefaultController();

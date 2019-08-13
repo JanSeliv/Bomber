@@ -18,10 +18,6 @@ class BOMBER_API AGeneratedMap final : public AActor
 	GENERATED_BODY()
 
 public:
-	/* ---------------------------------------------------
-	 *					Level map public functions
-	 * --------------------------------------------------- */
-
 	/** The blueprint background actor  */
 	UPROPERTY(BlueprintReadWrite, Category = "C++")
 	UChildActorComponent* BackgroundBlueprintComponent;
@@ -32,11 +28,15 @@ public:
 
 	/** The unique set of player characters */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	TSet<class AMyCharacter*> CharactersOnMap;
+	TArray<class AMyCharacter*> CharactersOnMap;
 
 	/** Number of characters on the Level Map */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	int32 CharactersNumber = 4;
+
+	/* ---------------------------------------------------
+	 *					Level map public functions
+	 * --------------------------------------------------- *
 
 	/** Sets default values for this actor's properties */
 	AGeneratedMap();
@@ -93,6 +93,17 @@ public:
 	void DestroyActorsFromMap(const TSet<struct FCell>& Keys);
 
 protected:
+	/** @ingroup actors_management
+	 * Storage of cells and their actors
+	 * @see GenerateLevelMapGe()
+	 */
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
+	TMap<struct FCell, const AActor*> GridArray_;
+
+	/** The chance of boxes generation */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	int32 BoxesChance_ = 50;
+
 	/* ---------------------------------------------------
 	 *					Level map protected functions
 	 * --------------------------------------------------- */
@@ -113,17 +124,6 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask,ActorLocationToSpawn"))
 	void GenerateLevelActors();
-
-	/** @ingroup actors_management
-	 * Storage of cells and their actors
-	 * @see GenerateLevelMapGe()
-	 */
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
-	TMap<struct FCell, const AActor*> GridArray_;
-
-	/** The chance of boxes generation */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int32 BoxesChance_ = 50;
 
 	/* ---------------------------------------------------
 	 *					Editor development
