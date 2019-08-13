@@ -19,12 +19,13 @@ class BOMBER_API UMapComponent final : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
+	/** Sets default values for this component's properties */
 	UMapComponent();
 
 	/**
 	 * Should be called in the owner's OnConstruction event
-	 * Updates a owner's state */
+	 * Updates a owner's state
+	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnMapComponentConstruction();
 
@@ -32,10 +33,16 @@ public:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	struct FCell Cell;
 
+#if WITH_EDITORONLY_DATA  // [Editor]
+	/** Mark the editor updating visualization(text renders) */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	bool bShouldShowRenders = false;
+#endif  //WITH_EDITORONLY_DATA [Editor]
+
 protected:
 	/** Called when a component is registered (not loaded) */
 	virtual void OnRegister() final;
 
-	/* Called when a component is destroyed */
+	/** Called when a component is destroyed */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) final;
 };

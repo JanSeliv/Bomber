@@ -18,9 +18,6 @@ class BOMBER_API AGeneratedMap final : public AActor
 	GENERATED_BODY()
 
 public:
-	/** Sets default values for this actor's properties */
-	AGeneratedMap();
-
 	/** The blueprint background actor  */
 	UPROPERTY(BlueprintReadWrite, Category = "C++")
 	UChildActorComponent* BackgroundBlueprintComponent;
@@ -29,23 +26,35 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	TSubclassOf<AActor> BackgroundBlueprintClass;
 
-	/** Set of unique player characters  */
+	/** The unique set of player characters */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	TSet<class AMyCharacter*> CharactersOnMap;
+	TArray<class AMyCharacter*> CharactersOnMap;
 
-	/** @ingroup path_types
-	 * Getting an array of cells by four sides of a input center cell and type of breaks
+	/** Number of characters on the Level Map */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	int32 CharactersNumber = 4;
+
+	/* ---------------------------------------------------
+	 *					Level map public functions
+	 * --------------------------------------------------- *
+
+	/** Sets default values for this actor's properties */
+	AGeneratedMap();
+
+	/** @addtogroup path_types
+	 * Getting an array of cells by four sides of an input center cell and type of breaks
+	 * 
 	 * @param Cell The start of searching by the sides
 	 * @param SideLength Length of each side
 	 * @param Pathfinder Type of cells searching
 	 * @return Found cells
 	 * @todo to C++ GetSidesCells(...)
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++")
-	TSet<FCell> GetSidesCells(
-		const FCell& Cell,
-		const int32 SideLength,
-		const EPathTypesEnum Pathfinder) const;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SideLength"))
+	TSet<struct FCell> GetSidesCells(
+		const struct FCell& Cell,
+		const int32& SideLength,
+		EPathTypesEnum Pathfinder) const;
 
 	/** @addtogroup actor_types
 	 * The intersection of input cells and actors of the specific type on these cells
@@ -57,8 +66,8 @@ public:
 	 * @todo to C++ IntersectionCellsByTypes(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 2, AutoCreateRefTerm = "ActorsTypesBitmask"))
-	TSet<FCell> IntersectionCellsByTypes(
-		const TSet<FCell>& Cells,
+	TSet<struct FCell> IntersectionCellsByTypes(
+		const TSet<struct FCell>& Cells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask,
 		const class AMyCharacter* ExcludePlayer) const;
 
@@ -69,7 +78,7 @@ public:
 	 * @param UpdateActor The spawned or dragged PIE actor
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void AddActorToGridArray(const FCell& Cell, AActor* UpdateActor);
+	void AddActorToGridArray(const struct FCell& Cell, AActor* UpdateActor);
 
 	/** Find and remove only this input actor-value of the cell-key from the Grid Array */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -81,9 +90,24 @@ public:
 	 * @todo to C++ DestroyActorsFromMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void DestroyActorsFromMap(const TSet<FCell>& Keys);
+	void DestroyActorsFromMap(const TSet<struct FCell>& Keys);
 
 protected:
+	/** @ingroup actors_management
+	 * Storage of cells and their actors
+	 * @see GenerateLevelMapGe()
+	 */
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
+	TMap<struct FCell, const AActor*> GridArray_;
+
+	/** The chance of boxes generation */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	int32 BoxesChance_ = 50;
+
+	/* ---------------------------------------------------
+	 *					Level map protected functions
+	 * --------------------------------------------------- */
+
 	/** Called when an instance of this class is placed (in editor) or spawned
 	 * @todo Generate only platform without boxes*/
 	virtual void OnConstruction(const FTransform& Transform) final;
@@ -101,24 +125,20 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask,ActorLocationToSpawn"))
 	void GenerateLevelActors();
 
-	/** @ingroup actors_management
-	 * Storage of cells and their actors
-	 * @see GenerateLevelMapGe()
-	 */
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++", meta = (DisplayName = "Grid Array"))
-	TMap<struct FCell, const AActor*> GridArray_;
-
-	/** The chance of boxes generation */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int32 BoxesChance_ = 50;
-
 	/* ---------------------------------------------------
 	 *					Editor development
 	 * --------------------------------------------------- */
 
-	/** Destroy all editor-only attached level actors that were spawned in the PIE world */
+	/** Destroys all attached level actors 
+	 * @param bIsEditorOnly if should destroy editor-only actors that were spawned in the PIE world
+	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	void DestroyEditorActors();
+	void DestroyAttachedActors(bool bIsEditorOnly = false);
+
+#if WITH_EDITOR  // Destroyed() [Editor]
+	/** Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending */
+	virtual void Destroyed() final;
+#endif  // Destroyed() [Editor]
 
 #if WITH_EDITORONLY_DATA
 	/** Access to the Grid Array to create a free cell without an actor
@@ -127,10 +147,7 @@ protected:
 	 */
 	friend struct FCell;
 
-	/** @addtogroup AI
-	 * Mark updating visualization(text renders) of the bot's movements in the editor
-	 * @warning Editor only
-	 */
+	/** Mark the editor updating visualization(text renders) */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	bool bShouldShowRenders;
 #endif  //WITH_EDITORONLY_DATA [Editor]

@@ -16,14 +16,11 @@ class BOMBER_API AItemActor final : public AActor
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
-	AItemActor();
-
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
-	/** The static mesh component of the this actor */
+	/** The static mesh component of this actor */
 	UPROPERTY(BlueprintReadOnly, Category = "C++")
 	class UStaticMeshComponent* ItemMeshComponent;
 
@@ -39,6 +36,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
 	EItemTypeEnum ItemType = EItemTypeEnum::None;
 
+	/** Sets default values for this actor's properties */
+	AItemActor();
+
 protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() final;
@@ -47,7 +47,7 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) final;
 
 	/**
-	 * Called when character starts to overlaps the ItemCollisionComponent component
+	 * Called when a character starts to overlaps the ItemCollisionComponent component
 	 * Increases +1 to numbers of character's powerups (Skate/Bomb/Fire)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")

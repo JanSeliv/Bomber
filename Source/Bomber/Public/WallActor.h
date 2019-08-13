@@ -15,14 +15,14 @@ class BOMBER_API AWallActor final : public AActor
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
+	/** Sets default values for this actor's properties */
 	AWallActor();
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UMapComponent* MapComponent;
 
-	/** The static mesh component of the this actor */
+	/** The static mesh component of this actor */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
 	class UStaticMeshComponent* WallMeshComponent;
 

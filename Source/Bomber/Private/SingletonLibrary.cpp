@@ -7,8 +7,10 @@
 #include "Engine.h"
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
+#include "MapComponent.h"
 #include "Math/Color.h"
-#include "MyAiCharacter.h"
+#include "MyAIController.h"
+#include "MyCharacter.h"
 
 #if WITH_EDITOR		 // [Editor]
 #include "Editor.h"  // GEditor
@@ -41,13 +43,16 @@ void USingletonLibrary::BroadcastAiUpdating()
 		return;
 	}
 
-	for (AMyCharacter* const MyCharacterIt : LevelMap->CharactersOnMap)
+	for (AMyCharacter* MyCharacterIt : LevelMap->CharactersOnMap)
 	{
-		AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(MyCharacterIt);
-		if (MyAiCharacter != nullptr					   // Successfully cast to AI
-			&& MyAiCharacter->bShouldShowRenders == true)  // Is render AI
+		if (MyCharacterIt && MyCharacterIt->MapComponent  // is accessible
+			&& MyCharacterIt->MapComponent->bShouldShowRenders)
 		{
-			MyAiCharacter->UpdateAI();
+			auto MyAIController = Cast<AMyAIController>(MyCharacterIt->GetController());
+			if (MyAIController)
+			{
+				MyAIController->UpdateAI();
+			}
 		}
 	}
 
@@ -57,7 +62,11 @@ void USingletonLibrary::BroadcastAiUpdating()
 bool USingletonLibrary::IsEditorNotPieWorld()
 {
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
-	if (GEditor) return GEditor->GetPIEWorldContext() == nullptr;
+	if (GIsEditor && GEditor)
+	{
+		return GEditor->GetEditorWorldContext().World() == GWorld;
+		// return GEditor->GetPIEWorldContext() == nullptr;
+	}
 #endif  // [IsEditorNotPieWorld]
 	return false;
 }
@@ -102,12 +111,9 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 {
 #if WITH_EDITOR  // [Editor]
 
-	AMyAiCharacter* const MyAiCharacter = Cast<AMyAiCharacter>(Owner);
-	if ((MyAiCharacter != nullptr							// Successfully cast to AI
-			&& MyAiCharacter->bShouldShowRenders == false)  // Is not render AI
-		|| Cells.Num() == NULL								// Null length
-		|| IS_VALID(Owner) == false							// Owner is not valid
-		|| !IS_VALID(GetLevelMap()))						// The Level Map is not valid
+	if (Cells.Num() == NULL			  // Null length
+		|| !IS_VALID(Owner)			  // Owner is not valid
+		|| !IS_VALID(GetLevelMap()))  // The Level Map is not valid
 	{
 		return;
 	}
@@ -156,8 +162,9 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 
-	if (IsEditorNotPieWorld() == true			  // IsEditorNotPieWorld only
-		&& !IS_VALID(GetSingleton()->LevelMap_))  // Is not valid or transient
+	if (IsEditorNotPieWorld() == true						 // IsEditorNotPieWorld only
+		&& (GetSingleton()->LevelMap_ == nullptr			 // is nullptr
+			   || IS_TRANSIENT(GetSingleton()->LevelMap_)))  // Is transient
 	{
 		SetLevelMap(nullptr);  // Find the Level Map
 	}
@@ -170,8 +177,8 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 
-	if (IsEditorNotPieWorld() == true  // IsEditorNotPieWorld only
-		&& IS_VALID(LevelMap) == false)
+	if (IsEditorNotPieWorld()  // IsEditorNotPieWorld only
+		&& LevelMap == nullptr)
 	{
 		UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
 		if (EditorWorld)
@@ -186,10 +193,10 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 	}
 #endif  // WITH_EDITOR [IsEditorNotPieWorld]
 
-	if (ensureMsgf(IS_VALID(LevelMap), TEXT("ERROR: SetLevelMap is not valid")))
+	if (ensureMsgf(IS_VALID(LevelMap), TEXT("ERROR: SetLevelMap: The Level Map is not valid!")))
 	{
 		GetSingleton()->LevelMap_ = LevelMap;
-		PrintToLog(LevelMap, "SetLevelMap", "----- UPDATED -----");
+		PrintToLog(LevelMap, "----- SetLevelMap", "UPDATED -----");
 	}
 }
 
