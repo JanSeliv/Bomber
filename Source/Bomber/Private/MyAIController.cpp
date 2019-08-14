@@ -16,14 +16,15 @@ bool AMyAIController::UpdateAI_Implementation()
 		return false;
 	}
 	USingletonLibrary::PrintToLog(this, "----- UpdateAI -----", "Parent started");
+
 #if WITH_EDITOR
 	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 	{
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]UpdateAI", "-> \t ClearOwnerTextRenders");
-		USingletonLibrary::ClearOwnerTextRenders(this);
+		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
 		AiMoveTo = FCell::ZeroCell;
 	}
-#endif  //WITH_EDITOR [IsEditorNotPieWorld]
+#endif  // WITH_EDITOR [IsEditorNotPieWorld]
 
 	return true;
 }

@@ -12,6 +12,7 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "MapComponent.h"
+#include "MyAIController.h"
 #include "SingletonLibrary.h"
 
 // Sets default values
@@ -19,6 +20,9 @@ AMyCharacter::AMyCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	// Set the default AI controller class
+	AIControllerClass = AMyAIController::StaticClass();
 
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
@@ -106,6 +110,11 @@ void AMyCharacter::BeginPlay()
 			PlayerController->Possess(this);
 		}
 	}
+	else
+	{
+		auto MyAIController = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+		MyAIController->Possess(this);
+	}
 }
 
 void AMyCharacter::OnConstruction(const FTransform& Transform)
@@ -144,15 +153,24 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 		NicknameTextRender->SetText(CharacterID_ == 0 ? TEXT("Player") : TEXT("AI"));
 	}
 
-	// The bots construction
-	if (CharacterID_ > 0)  // Is a bot
+	// Spawn or destroy controller of specific ai with enabled visualization
+#if WITH_EDITOR
+	if (USingletonLibrary::IsEditorNotPieWorld()  // [IsEditorNotPieWorld] only
+		&& CharacterID_ > 0)					  // Is a bot
 	{
-		if (GetController() == nullptr)  // The ai controller is not created yet
+		const auto MyAIController = Cast<AMyAIController>(GetController());
+		if (MapComponent->bShouldShowRenders == false)
+		{
+			if (MyAIController) MyAIController->Destroy();
+		}
+		else								// Is a bot with debug visualization
+			if (MyAIController == nullptr)  // AI controller is not created yet
 		{
 			SpawnDefaultController();
-			if (GetController()) GetController()->Possess(this);
+			if (GetController()) GetController()->bIsEditorOnlyActor = true;
 		}
 	}
+#endif  // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Rotate this character
 	const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;
