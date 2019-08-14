@@ -2,7 +2,7 @@
 
 #include "MyCharacter.h"
 
-#include "Animation/AnimBlueprint.h"		   // UAnimBlueprint
+#include "Animation/AnimInstance.h"			   //UAnimInstance
 #include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
 #include "Components/StaticMeshComponent.h"	// UStaticMeshComponent
 #include "Components/TextRenderComponent.h"	//UTextRenderComponent
@@ -41,10 +41,10 @@ AMyCharacter::AMyCharacter()
 	}
 
 	// Set the animation
-	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimationFinder(TEXT("AnimBlueprint'/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP.IggyScorch_AnimBP'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimationFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP"));
 	if (AnimationFinder.Succeeded())  // The animation was found
 	{
-		GetMesh()->AnimClass = AnimationFinder.Object->GeneratedClass;
+		MyAnimClass = AnimationFinder.Class;
 	}
 
 	// Initialize the nameplate mesh component
@@ -90,7 +90,15 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (CharacterID_ == 0)
+	// Set the animation
+	if (GetMesh()->GetAnimInstance() == nullptr  // Is not created yet
+		&& MyAnimClass != nullptr)				 // The animation class is set
+	{
+		GetMesh()->SetAnimInstanceClass(MyAnimClass);
+	}
+
+	// Posses the player controller
+	if (CharacterID_ == 0)  // Is the player (not AI)
 	{
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		if (PlayerController)

@@ -67,6 +67,19 @@ public:
 	SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) final;
 
 protected:
+	/** Count of items that affect the abilities of a player during gameplay */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	struct FPowerUp Powerups_;
+	/** Items have access */
+	friend class AItemActor;
+
+	/** The ID identification of each character */
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
+	int32 CharacterID_ = -1;
+
+	/* The AnimBlueprint class to use */
+	class TSubclassOf<UAnimInstance> MyAnimClass;
+
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() final;
 
@@ -79,14 +92,4 @@ protected:
 	/** Spawn bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SpawnBomb();
-
-	/** Count of items that affect the abilities of a player during gameplay */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	struct FPowerUp Powerups_;
-	/** Items have access */
-	friend class AItemActor;
-
-	/** The ID identification of each character */
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	int32 CharacterID_ = -1;
 };
