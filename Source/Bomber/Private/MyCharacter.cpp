@@ -41,6 +41,7 @@ AMyCharacter::AMyCharacter()
 		if (SkeletalMeshFinderArray[i].Succeeded())
 		{
 			SkeletalMeshes.Add(SkeletalMeshFinderArray[i].Object);
+			if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);  // preview
 		}
 	}
 
