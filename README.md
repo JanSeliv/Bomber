@@ -13,8 +13,11 @@ The first rule is just to be the best bomber and do not let bots to bomb player!
 
 ## Level actors
 - **Items** that affect the abilities of a player during gameplay:
+
 Skate:  Increase the movement speed of the character.
+
 Bomb: Increase the number of bombs that can be set at one time.
+
 Fire: Increase the bomb blast radius.
 - **Bombs:** are left by the character to destroy the level actors. Triggers other bombs and prevents players from moving through the bomb after it has been left behind.
 - **Walls**: are not destroyed by a bomb explosion and stop the explosion.
@@ -66,6 +69,7 @@ The game menu is shown the result of the games match (win, lose, draw). If the m
 These components manage their owners and update this level actors in case of any changes on the map that allow to:
 
 - Prepare in advance the level actors in the editor time: 
+
 _(Dragged from the Content Browser the wall, the character, the item, the box, and the bomb, that correctly exploded due to Maps Components)_
 
 ![GIF10](https://user-images.githubusercontent.com/20540872/63053411-f5aa2b80-bee1-11e9-9328-79cf77609ec7.gif)
@@ -96,11 +100,15 @@ _(The bot runs for the item, the player otherwise set the bomb. Meanwhile, the b
 
 - The editor preview visualization for selected bot automatically updates upon any changes on the map including addition from the Content Browser or drag-and-drop.
 
-_Where is :
-Green +: a safe crossway.
-Red  +: crossway which has at least one enemy character.
-Yellow F: filtered cells for moving.
-Grey Х: the selected cell on which the bot moves to._
+_Where is :_
+
+_Green +: a safe crossway._
+
+_Red  +: crossway which has at least one enemy character._
+
+_Yellow F: filtered cells for moving._
+
+_Grey Х: the selected cell on which the bot moves to._
 
 ![GIF15](https://user-images.githubusercontent.com/20540872/63063848-aa524600-befe-11e9-93fb-ece39892ace5.gif)
 
