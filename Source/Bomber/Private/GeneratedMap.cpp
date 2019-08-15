@@ -155,9 +155,8 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	MapScale.Z = 1;  //Height must be 1
 	SetActorScale3D(FVector(MapScale));
 
-	// Clear old arrays
+	// Clear old grid array
 	GridArray_.Empty();
-	CharactersOnMap.Empty();
 
 	// Loopy cell-filling of the grid array
 	for (int32 Y = 0; Y < MapScale.Y; ++Y)
@@ -221,18 +220,6 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 	}
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
 
-#if WITH_EDITOR  // [Editor]
-	//  Destroy editor-only actors that were spawned in the PIE
-	USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "-> [Editor]DestroyAttachedActors");
-	DestroyAttachedActors(true);
-
-	// After destroying PIE actors and before their generation,
-	// calling to updating of all dragged to the Level Map actors
-	USingletonLibrary::BroadcastActorsUpdating();  // [IsEditorNotPieWorld]
-	USingletonLibrary::PrintToLog(this, "_____ [Editor]BroadcastActorsUpdating _____", "_____ END _____");
-
-#endif  // [Editor]
-
 	// fix null keys before characters regeneration
 	if (CharactersOnMap.Num() > 0)
 	{
@@ -244,6 +231,18 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 			}
 		}
 	}
+
+#if WITH_EDITOR  // [Editor]
+	//  Destroy editor-only actors that were spawned in the PIE
+	USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "-> [Editor]DestroyAttachedActors");
+	DestroyAttachedActors(true);
+
+	// After destroying PIE actors and before their generation,
+	// calling to updating of all dragged to the Level Map actors
+	USingletonLibrary::BroadcastActorsUpdating();  // [IsEditorNotPieWorld]
+	USingletonLibrary::PrintToLog(this, "_____ [Editor]BroadcastActorsUpdating _____", "_____ END _____");
+
+#endif  // [Editor]
 
 	int32 SpawnedCharactersN = 0;				   // The numbers of spawned characters in the loop
 	TArray<FCell> CellsArray;					   // Access to keys of the dictionary by ...
@@ -314,6 +313,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 			}  // End of the spawn part
 		}	  // X iterations
 	}		   // Y iterations
+
 	USingletonLibrary::PrintToLog(this, "_____ GenerateLevelActors _____", "_____ END _____");
 }
 

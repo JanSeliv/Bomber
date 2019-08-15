@@ -2,7 +2,7 @@
 
 #include "MyCharacter.h"
 
-#include "Animation/AnimBlueprint.h"		   // UAnimBlueprint
+#include "Animation/AnimInstance.h"			   //UAnimInstance
 #include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
 #include "Components/StaticMeshComponent.h"	// UStaticMeshComponent
 #include "Components/TextRenderComponent.h"	//UTextRenderComponent
@@ -12,6 +12,7 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "MapComponent.h"
+#include "MyAIController.h"
 #include "SingletonLibrary.h"
 
 // Sets default values
@@ -19,6 +20,9 @@ AMyCharacter::AMyCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	// Set the default AI controller class
+	AIControllerClass = AMyAIController::StaticClass();
 
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
@@ -37,14 +41,15 @@ AMyCharacter::AMyCharacter()
 		if (SkeletalMeshFinderArray[i].Succeeded())
 		{
 			SkeletalMeshes.Add(SkeletalMeshFinderArray[i].Object);
+			if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);  // preview
 		}
 	}
 
 	// Set the animation
-	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> AnimationFinder(TEXT("AnimBlueprint'/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP.IggyScorch_AnimBP'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimationFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP"));
 	if (AnimationFinder.Succeeded())  // The animation was found
 	{
-		GetMesh()->AnimClass = AnimationFinder.Object->GeneratedClass;
+		MyAnimClass = AnimationFinder.Class;
 	}
 
 	// Initialize the nameplate mesh component
@@ -90,13 +95,26 @@ void AMyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (CharacterID_ == 0)
+	// Set the animation
+	if (GetMesh()->GetAnimInstance() == nullptr  // Is not created yet
+		&& MyAnimClass != nullptr)				 // The animation class is set
+	{
+		GetMesh()->SetAnimInstanceClass(MyAnimClass);
+	}
+
+	// Posses the player controller
+	if (CharacterID_ == 0)  // Is the player (not AI)
 	{
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		if (PlayerController)
 		{
 			PlayerController->Possess(this);
 		}
+	}
+	else
+	{
+		auto MyAIController = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+		MyAIController->Possess(this);
 	}
 }
 
@@ -136,15 +154,24 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 		NicknameTextRender->SetText(CharacterID_ == 0 ? TEXT("Player") : TEXT("AI"));
 	}
 
-	// The bots construction
-	if (CharacterID_ > 0)  // Is a bot
+	// Spawn or destroy controller of specific ai with enabled visualization
+#if WITH_EDITOR
+	if (USingletonLibrary::IsEditorNotPieWorld()  // [IsEditorNotPieWorld] only
+		&& CharacterID_ > 0)					  // Is a bot
 	{
-		if (GetController() == nullptr)  // The ai controller is not created yet
+		const auto MyAIController = Cast<AMyAIController>(GetController());
+		if (MapComponent->bShouldShowRenders == false)
+		{
+			if (MyAIController) MyAIController->Destroy();
+		}
+		else								// Is a bot with debug visualization
+			if (MyAIController == nullptr)  // AI controller is not created yet
 		{
 			SpawnDefaultController();
-			if (GetController()) GetController()->Possess(this);
+			if (GetController()) GetController()->bIsEditorOnlyActor = true;
 		}
 	}
+#endif  // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Rotate this character
 	const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;

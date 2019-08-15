@@ -35,6 +35,7 @@ AItemActor::AItemActor()
 		if (ItemMeshFinderArray[i].Succeeded())
 		{
 			ItemTypesByMeshes.Add(static_cast<EItemTypeEnum>(i + 1), ItemMeshFinderArray[i].Object);
+			if (i == 0) ItemMeshComponent->SetStaticMesh(ItemMeshFinderArray[i].Object);  // Preview
 		}
 	}
 
