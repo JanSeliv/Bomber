@@ -191,7 +191,7 @@ protected:
 
 	/** The reference to the AGeneratedMap actor*/
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")
-	class AGeneratedMap* LevelMap_;
+	TSoftObjectPtr<class AGeneratedMap> LevelMap_;
 
 	/** Type and its class as associated pairs  */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "C++")

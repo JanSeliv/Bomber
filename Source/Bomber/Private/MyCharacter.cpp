@@ -122,8 +122,8 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (!IsValid(USingletonLibrary::GetLevelMap())  //
-		|| IS_VALID(MapComponent) == false)			// this component is not valid for owner construction
+	if (IS_VALID(MapComponent) == false					// this component is not valid for owner construction
+		|| !IsValid(USingletonLibrary::GetLevelMap()))  // the level map is not valid
 	{
 		return;
 	}
