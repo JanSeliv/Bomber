@@ -2,13 +2,15 @@
 
 #include "GeneratedMap.h"
 
-#include "Bomber.h"
-#include "Cell.h"
 #include "Components/StaticMeshComponent.h"
 #include "Math/UnrealMathUtility.h"
-#include "MyCharacter.h"
-#include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
+
+#include "Bomber.h"
+#include "Cell.h"
+#include "MyCharacter.h"
+#include "MyGameInstance.h"
+#include "SingletonLibrary.h"
 
 /* ---------------------------------------------------
  *					Level map public functions
@@ -207,6 +209,19 @@ void AGeneratedMap::PostInitializeComponents()
 
 	// Update the gameplay LevelMap reference in the singleton library;
 	USingletonLibrary::SetLevelMap(this);
+
+	// Cells regeneration if the level map's size was changed
+	UMyGameInstance* MyGameInstance = USingletonLibrary::GetMyGameInstance(this);
+	if (MyGameInstance)
+	{
+		const FVector MapScale = MyGameInstance->LevelMapScale;
+		if (MapScale.IsZero() == false  // is not zero
+			&& MapScale != GetActorScale3D())
+		{
+			SetActorScale3D(MapScale);
+			RerunConstructionScripts();
+		}
+	}
 
 	// Actors generation
 	GenerateLevelActors();

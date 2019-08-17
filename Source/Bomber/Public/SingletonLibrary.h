@@ -91,6 +91,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AGeneratedMap* GetLevelMap();
 
+	/** Contains a data of standalone and PIE games */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static class UMyGameInstance* GetMyGameInstance(const UObject* WorldContextObject);
+
 	/**
 	 * The Level Map setter
 	 * if input Level Map is no valid or is transient, find and set another one

@@ -2,15 +2,17 @@
 
 #include "SingletonLibrary.h"
 
-#include "Bomber.h"
 #include "Components/TextRenderComponent.h"
 #include "Engine.h"
+#include "Math/Color.h"
+
+#include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Kismet/GameplayStatics.h"
 #include "MapComponent.h"
-#include "Math/Color.h"
 #include "MyAIController.h"
 #include "MyCharacter.h"
+#include "MyGameInstance.h"
 
 #if WITH_EDITOR		 // [Editor]
 #include "Editor.h"  // GEditor
@@ -170,7 +172,12 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 	}
 #endif  // WITH_EDITOR [IsEditorNotPieWorld]
 
-	return GetSingleton()->LevelMap_;
+	return GetSingleton()->LevelMap_.Get();
+}
+
+UMyGameInstance* USingletonLibrary::GetMyGameInstance(const UObject* WorldContextObject)
+{
+	return Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(WorldContextObject));
 }
 
 void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
