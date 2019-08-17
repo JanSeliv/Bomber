@@ -13,6 +13,7 @@
 #include "GeneratedMap.h"
 #include "MapComponent.h"
 #include "MyAIController.h"
+#include "MyGameInstance.h"
 #include "SingletonLibrary.h"
 
 // Sets default values
@@ -87,7 +88,7 @@ AMyCharacter::AMyCharacter()
 	NicknameTextRender->SetVerticalAlignment(EVRTA_TextCenter);
 	NicknameTextRender->SetTextRenderColor(FColor::Black);
 	NicknameTextRender->SetWorldSize(56.f);
-	NicknameTextRender->SetText(TEXT("Player"));
+	NicknameTextRender->SetText(DEFAULT_NICKNAME);
 }
 
 // Called when the game starts or when spawned
@@ -122,8 +123,8 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (!IsValid(USingletonLibrary::GetLevelMap())  //
-		|| IS_VALID(MapComponent) == false)			// this component is not valid for owner construction
+	if (IS_VALID(MapComponent) == false					// this component is not valid for owner construction
+		|| !IsValid(USingletonLibrary::GetLevelMap()))  // the level map is not valid
 	{
 		return;
 	}
@@ -151,7 +152,15 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	// Set the nickname
 	if (NicknameTextRender)
 	{
-		NicknameTextRender->SetText(CharacterID_ == 0 ? TEXT("Player") : TEXT("AI"));
+		if (CharacterID_ == 0)  // is a player
+		{
+			UMyGameInstance* MyGameInstance = USingletonLibrary::GetMyGameInstance(this);
+			NicknameTextRender->SetText(MyGameInstance ? MyGameInstance->Nickname : DEFAULT_NICKNAME);
+		}
+		else  // is a bot
+		{
+			NicknameTextRender->SetText(TEXT("AI"));
+		}
 	}
 
 	// Spawn or destroy controller of specific ai with enabled visualization
