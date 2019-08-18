@@ -20,9 +20,13 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	class AMyCharacter* MyCharacter;
 
-	/** @defgroup AI Functions of AI-characters */
+	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	bool UpdateAI();
+
+	/** Makes AI go toward specified destination cell */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void MoveToCell(const struct FCell& DestinationCell);
 
 protected:
 	/** Called when an instance of this class is placed (in editor) or spawned */

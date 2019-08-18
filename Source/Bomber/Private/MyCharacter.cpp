@@ -159,7 +159,7 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 		}
 		else  // is a bot
 		{
-			NicknameTextRender->SetText(TEXT("AI"));
+			NicknameTextRender->SetText(FText::FromString(TEXT("AI")));
 		}
 	}
 
