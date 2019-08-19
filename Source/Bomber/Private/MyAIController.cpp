@@ -10,9 +10,12 @@
 #include "MyCharacter.h"
 #include "SingletonLibrary.h"
 
-bool AMyAIController::UpdateAI_Implementation()
+bool AMyAIController::UpdateAI_Implementation(
+	FCell& F0,
+	TSet<FCell>& Free,
+	bool& bIsDangerous)
 {
-	AGeneratedMap* const LevelMap = USingletonLibrary::GetLevelMap();
+	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (IS_VALID(LevelMap) == false			// The Level Map is not valid
 		|| IS_VALID(MyCharacter) == false)  // The controller character is not valid
 	{
@@ -28,6 +31,42 @@ bool AMyAIController::UpdateAI_Implementation()
 		AiMoveTo = FCell::ZeroCell;
 	}
 #endif  // WITH_EDITOR [IsEditorNotPieWorld]
+
+	// ----- Part 0: Before iterations -----
+
+	// Set the START cell searching bot location
+	//const FCell F0(MyCharacter);
+
+	// Searching 'SAFE NEIGHBORS'
+	// TSet<FCell> Free;
+	// bool bIsDangerous
+	for (int32 i = 0; i < 2; ++i)  // two searches (safe and free)
+	{
+		bIsDangerous = static_cast<bool>(i);
+		Free = LevelMap->GetSidesCells(F0, bIsDangerous ? EPathTypesEnum::Free : EPathTypesEnum::Safe);
+		if (!bIsDangerous && Free.Num() > 0)
+		{
+			break;
+		}
+	}
+
+	// Remove this cell from array
+	bIsDangerous = !Free.Remove(F0);  // if it can't be removed - the bot is standing in the explosion
+
+	// Is there an item nearby?
+	if (bIsDangerous == false)
+	{
+		TSet<FCell> ItemsFromF0 = LevelMap->GetSidesCells(F0, EPathTypesEnum::Safe, 2);
+		ItemsFromF0 = LevelMap->IntersectionCellsByTypes(ItemsFromF0, TO_FLAG(EActorTypeEnum::Item));
+		if (ItemsFromF0.Num() > 0)
+		{
+			MoveToCell(ItemsFromF0.Array()[0]);
+			return true;
+		}
+	}
+	// ----- Part 1: Cells iterations -----
+
+	// ...
 
 	return true;
 }

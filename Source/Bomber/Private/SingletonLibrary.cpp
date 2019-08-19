@@ -53,7 +53,10 @@ void USingletonLibrary::BroadcastAiUpdating()
 			auto MyAIController = Cast<AMyAIController>(MyCharacterIt->GetController());
 			if (MyAIController)
 			{
-				MyAIController->UpdateAI();
+				FCell OutCell;			// temporary param
+				bool bOutIsDangerous;   // temporary param
+				TSet<FCell> OutFree{};  // temporary param
+				MyAIController->UpdateAI(OutCell, OutFree, bOutIsDangerous);
 			}
 		}
 	}
@@ -138,7 +141,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition)
 {
 	bool bOutBool = false;
-	TArray<class UTextRenderComponent*> OutArray{};
+	TArray<UTextRenderComponent*> OutArray{};
 	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray, TextHeight, TextSize, FText::FromString(RenderString), CoordinatePosition);
 }
 #endif  // WITH_EDITOR [Editor]

@@ -22,7 +22,10 @@ public:
 
 	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	bool UpdateAI();
+	bool UpdateAI(
+		struct FCell& F0,		   ///< temporary param: the bot location
+		TSet<struct FCell>& Free,  ///< temporary param: sides iterated cells
+		bool& bIsDangerous);	   ///< temporary param: state meaning whether the bot is in an explosion
 
 	/** Makes AI go toward specified destination cell */
 	UFUNCTION(BlueprintCallable, Category = "C++")

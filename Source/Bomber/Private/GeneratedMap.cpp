@@ -51,8 +51,8 @@ TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 	const FCell& Cell,
-	const int32& SideLength,
-	EPathTypesEnum Pathfinder) const
+	EPathTypesEnum Pathfinder,
+	const int32& SideLength) const
 {
 	TSet<FCell> FoundedLocations;
 	return FoundedLocations;
