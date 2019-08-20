@@ -23,9 +23,13 @@ public:
 	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	bool UpdateAI(
-		struct FCell& F0,		   ///< temporary param: the bot location
-		TSet<struct FCell>& Free,  ///< temporary param: sides iterated cells
-		bool& bIsDangerous);	   ///< temporary param: state meaning whether the bot is in an explosion
+		struct FCell& F0,					  ///< temporary param: the bot location
+		TSet<struct FCell>& Free,			  ///< temporary param: sides iterated cells
+		bool& bIsDangerous,					  ///< temporary param: state meaning whether the bot is in an explosion
+		TSet<struct FCell>& AllCrossways,	 ///< temporary param:are cells of all crossways
+		TSet<struct FCell>& SecureCrossways,  ///< temporary param:are cells, which are crossways without players
+		TSet<struct FCell>& FoundItems,		  ///< temporary param
+		bool& bIsItemInDirect);				  ///< temporary param
 
 	/** Makes AI go toward specified destination cell */
 	UFUNCTION(BlueprintCallable, Category = "C++")

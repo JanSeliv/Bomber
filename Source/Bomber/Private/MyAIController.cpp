@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyAIController.h"
 
@@ -13,7 +13,11 @@
 bool AMyAIController::UpdateAI_Implementation(
 	FCell& F0,
 	TSet<FCell>& Free,
-	bool& bIsDangerous)
+	bool& bIsDangerous,
+	TSet<FCell>& AllCrossways,
+	TSet<FCell>& SecureCrossways,
+	TSet<FCell>& FoundItems,
+	bool& bIsItemInDirect)
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (IS_VALID(LevelMap) == false			// The Level Map is not valid
@@ -36,6 +40,7 @@ bool AMyAIController::UpdateAI_Implementation(
 
 	// Set the START cell searching bot location
 	//const FCell F0(MyCharacter);
+	F0 = FCell(MyCharacter);
 
 	// Searching 'SAFE NEIGHBORS'
 	// TSet<FCell> Free;
@@ -64,8 +69,59 @@ bool AMyAIController::UpdateAI_Implementation(
 			return true;
 		}
 	}
-	// ----- Part 1: Cells iterations -----
+	// ----- Part 1: Cells iteration -----
 
+	for (const FCell& F : Free)
+	{
+		if (bIsDangerous  // is not dangerous situation
+			&& USingletonLibrary::CalculateCellsLength(F0, F) > 3.0F)
+		{
+			Free.Remove(F);  // removing distant cells
+			continue;
+		}
+
+		// Way = Safe / (Free + F0)
+		TSet<FCell> ThisCrossway = LevelMap->GetSidesCells(F, EPathTypesEnum::Safe, 2);
+		TSet<FCell> Way = Free;
+		Way.Add(F0);						 // Way = Free + F0
+		Way = ThisCrossway.Difference(Way);  // Way = Safe / Way
+
+		if (Way.Num() > 0)  // Are there any cells?
+		{
+			// Finding crossways
+			AllCrossways.Add(F);  // is the crossway
+			if (LevelMap->IntersectionCellsByTypes(ThisCrossway, TO_FLAG(EActorTypeEnum::Player), MyCharacter).Num() == 0)
+			{
+				SecureCrossways.Add(F);
+			}
+
+			// Finding items
+			ThisCrossway = LevelMap->IntersectionCellsByTypes(ThisCrossway, TO_FLAG(EActorTypeEnum::Item));
+			if (ThisCrossway.Num() > 0)  // Is there items in this crossway?
+			{
+				ThisCrossway = ThisCrossway.Intersect(Free);  // ThisCrossway = ThisCrossway ∪ Free
+				if (ThisCrossway.Num() > 0)					  // Is there direct items in this crossway?
+				{
+					if (bIsItemInDirect == false)  // is the first found direct item
+					{
+						bIsItemInDirect = true;
+						FoundItems.Empty();  // clear all previously found corner items
+					}
+					FoundItems = FoundItems.Union(ThisCrossway);  // Add found direct items
+				}												  // item around the corner
+				else if (bIsItemInDirect == false)				  // Need corner item?
+				{
+					FoundItems.Add(F);  // Add found corner item
+				}
+			}  // [has items]
+		}	  // [is crossway]
+		else if (bIsDangerous && ThisCrossway.Contains(F) == false)
+		{
+			Free.Remove(F);  // In the dangerous situation delete a non-crossway cell
+		}
+	}
+
+	// ----- Part 2: Cells filtration -----
 	// ...
 
 	return true;
