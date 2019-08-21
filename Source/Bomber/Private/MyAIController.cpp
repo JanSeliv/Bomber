@@ -17,7 +17,9 @@ bool AMyAIController::UpdateAI_Implementation(
 	TSet<FCell>& AllCrossways,
 	TSet<FCell>& SecureCrossways,
 	TSet<FCell>& FoundItems,
-	bool& bIsItemInDirect)
+	bool& bIsItemInDirect,
+	TSet<FCell>& Filtered,
+	bool& bIsFilteringFailed)
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (IS_VALID(LevelMap) == false			// The Level Map is not valid
@@ -121,8 +123,52 @@ bool AMyAIController::UpdateAI_Implementation(
 		}
 	}
 
+	if (Free.Num() == 0)
+	{
+		return false;
+	}
+
 	// ----- Part 2: Cells filtration -----
-	// ...
+
+	Filtered = (FoundItems.Num() > 0 ? FoundItems : Free);  //TSet<FCell> Filtered;
+	for (int32 i = 0; i < 4; ++i)
+	{
+		TSet<FCell> FilteringStep;
+		switch (i)  // 4 filtering steps
+		{
+			case 0:  // All crossways: Filtered ∪ AllCrossways
+				FilteringStep = Filtered.Intersect(AllCrossways);
+				break;
+			case 1:  // Without players
+				FilteringStep = Filtered.Intersect(LevelMap->GetSidesCells(F0, EPathTypesEnum::Secure));
+				break;
+			case 2:  // Without crossways with another players
+				FilteringStep = Filtered.Intersect(SecureCrossways);
+				break;
+			case 3:  // Only nearest cells ( length <= 3 cells)
+				for (const FCell& It : Filtered)
+				{
+					if (USingletonLibrary::CalculateCellsLength(F0, It) <= 3.0F)
+					{
+						FilteringStep.Add(It);
+					}
+				}
+				break;
+			default:
+				break;
+		}  //[4 filtering steps]
+
+		if (FilteringStep.Num() > 0)
+		{
+			Filtered = FilteringStep;
+		}
+		else
+		{
+			bIsFilteringFailed = true;
+		}
+	}  // [Filtering]
+
+	// ----- Part 2: Deciding whether to put the bomb -----
 
 	return true;
 }

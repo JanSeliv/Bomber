@@ -29,7 +29,9 @@ public:
 		TSet<struct FCell>& AllCrossways,	 ///< temporary param:are cells of all crossways
 		TSet<struct FCell>& SecureCrossways,  ///< temporary param:are cells, which are crossways without players
 		TSet<struct FCell>& FoundItems,		  ///< temporary param
-		bool& bIsItemInDirect);				  ///< temporary param
+		bool& bIsItemInDirect,				  ///< temporary param
+		TSet<struct FCell>& Filtered,		  ///< temporary param: selected cells
+		bool& bIsFilteringFailed);			  ///< temporary param
 
 	/** Makes AI go toward specified destination cell */
 	UFUNCTION(BlueprintCallable, Category = "C++")

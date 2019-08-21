@@ -60,7 +60,9 @@ void USingletonLibrary::BroadcastAiUpdating()
 				TSet<FCell> OutSecureCrossways;  ///< temporary param
 				TSet<FCell> OutFoundItems;		 ///< temporary param
 				bool bOutIsItemInDirect;		 ///< temporary param
-				MyAIController->UpdateAI(OutCell, OutFree, bOutIsDangerous, OutAllCrossways, OutSecureCrossways, OutFoundItems, bOutIsItemInDirect);
+				TSet<FCell> OutFiltered;		 ///< temporary param
+				bool bIsFilteringFailed;		 ///< temporary param
+				MyAIController->UpdateAI(OutCell, OutFree, bOutIsDangerous, OutAllCrossways, OutSecureCrossways, OutFoundItems, bOutIsItemInDirect, OutFiltered, bIsFilteringFailed);
 			}
 		}
 	}
