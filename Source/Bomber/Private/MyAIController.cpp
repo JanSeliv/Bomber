@@ -154,8 +154,7 @@ bool AMyAIController::UpdateAI_Implementation(
 					}
 				}
 				break;
-			default:
-				break;
+			default: break;
 		}  //[4 filtering steps]
 
 		if (FilteringStep.Num() > 0)
@@ -166,9 +165,63 @@ bool AMyAIController::UpdateAI_Implementation(
 		{
 			bIsFilteringFailed = true;
 		}
-	}  // [Filtering]
+	}  // [Loopy filtering]
 
 	// ----- Part 2: Deciding whether to put the bomb -----
+	if (bIsDangerous == false			// is not dangerous situation
+		&& bIsFilteringFailed == false  // filtering was not failed
+		&& bIsItemInDirect == false)	// was not found direct items
+	{
+		TSet<FCell> BoxesAndPlayers = LevelMap->GetSidesCells(F0, EPathTypesEnum::Explosion, MyCharacter->Powerups_.FireN);
+		BoxesAndPlayers = LevelMap->IntersectionCellsByTypes(BoxesAndPlayers, TO_FLAG(EActorTypeEnum::Player | EActorTypeEnum::Box), MyCharacter);
+		if (BoxesAndPlayers.Num() > 0)  // Are bombs or players in own bomb radius
+		{
+			MyCharacter->SpawnBomb();
+			Free.Empty();  // Delete all cells to make new choice
+
+#if WITH_EDITOR  // [Editor]
+			USingletonLibrary::AddDebugTextRenders(MyCharacter, TSet<FCell>{F0}, FLinearColor::Red, 263, 95, "Attack");
+#endif  // [Editor]
+		}
+	}
+
+	// ----- Part 3: Making choice-----
+
+	if (Free.Contains(AiMoveTo))
+	{
+		return false;
+	}
+
+	MoveToCell(Filtered.Array()[FMath::RandRange(NULL, Filtered.Num() - 1)]);
+
+#if WITH_EDITOR  // [Editor]
+	for (int32 i = 0; i < 3; ++i)
+	{
+		TSet<FCell> VisualizingStep;
+		FLinearColor Color;
+		FString String = "+";
+		FVector Position = FVector::ZeroVector;
+		switch (i)  // 3 types of visualization
+		{
+			case 0:
+				VisualizingStep = AllCrossways.Difference(SecureCrossways);
+				Color = FLinearColor::Red;
+				break;
+			case 1:
+				VisualizingStep = Free;
+				Color = FLinearColor::Green;
+				break;
+			case 2:
+				VisualizingStep = Filtered;
+				Color = FLinearColor::Yellow;
+				String = "F";
+				Position = FVector(-50.0F, -50.0F, 0.0F);
+				break;
+			default: break;
+		}  // [3 visualization types]
+		USingletonLibrary::AddDebugTextRenders(MyCharacter, VisualizingStep, Color, 263, 124, String, Position);
+	}   // [Loopy visualization]
+#endif  // [Editor]
 
 	return true;
 }

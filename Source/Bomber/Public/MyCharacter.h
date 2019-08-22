@@ -72,6 +72,8 @@ protected:
 	struct FPowerUp Powerups_;
 	/** Items have access */
 	friend class AItemActor;
+	/** AI controller has access */
+	friend class AMyAIController;
 
 	/** The ID identification of each character */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
