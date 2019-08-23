@@ -24,6 +24,7 @@ AMyCharacter::AMyCharacter()
 
 	// Set the default AI controller class
 	AIControllerClass = AMyAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::Disabled;
 
 	// Initialize MapComponent
 	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
@@ -91,6 +92,18 @@ AMyCharacter::AMyCharacter()
 	NicknameTextRender->SetText(DEFAULT_NICKNAME);
 }
 
+// Called to bind functionality to input
+void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("SpaceEvent", IE_Pressed, this, &AMyCharacter::SpawnBomb);
+}
+
+/* ---------------------------------------------------
+ *					Protected functions
+ * --------------------------------------------------- */
+
 // Called when the game starts or when spawned
 void AMyCharacter::BeginPlay()
 {
@@ -119,6 +132,7 @@ void AMyCharacter::BeginPlay()
 	}
 }
 
+// Called when an instance of this class is placed (in editor) or spawned
 void AMyCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -159,7 +173,7 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 		}
 		else  // is a bot
 		{
-			NicknameTextRender->SetText(TEXT("AI"));
+			NicknameTextRender->SetText(FText::FromString(TEXT("AI")));
 		}
 	}
 
@@ -188,6 +202,7 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
 }
 
+// Called when this actor is explicitly being destroyed
 void AMyCharacter::Destroyed()
 {
 	UWorld* const World = GetWorld();
@@ -203,6 +218,7 @@ void AMyCharacter::Destroyed()
 	Super::Destroyed();
 }
 
+// Spawns bomb on character position
 void AMyCharacter::SpawnBomb()
 {
 	if (!IsValid(USingletonLibrary::GetLevelMap())	// The Level Map is not valid
@@ -221,12 +237,4 @@ void AMyCharacter::SpawnBomb()
 	{
 		Bomb->InitializeBombProperties(Powerups_.BombN, Powerups_.FireN, CharacterID_);
 	}
-}
-
-// Called to bind functionality to input
-void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("SpaceEvent", IE_Pressed, this, &AMyCharacter::SpawnBomb);
 }

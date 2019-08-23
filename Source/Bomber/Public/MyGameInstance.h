@@ -5,7 +5,7 @@
 #include "Engine/GameInstance.h"
 #include "MyGameInstance.generated.h"
 
-#define DEFAULT_NICKNAME FText::FromString(ANSI_TO_TCHAR("Player"))
+#define DEFAULT_NICKNAME FText::FromString(TEXT("Player"))
 
 /**
  * Contains a data of standalone and PIE games

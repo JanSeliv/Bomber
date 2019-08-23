@@ -63,17 +63,21 @@ public:
 		const struct FLinearColor& TextColor,
 		bool& bOutHasCoordinateRenders,
 		TArray<class UTextRenderComponent*>& OutTextRenderComponents,
-		float TextHeight = 261.0f,
-		float TextSize = 124.0f,
-		const FText& RenderText = FText::GetEmpty(),
-		const FVector& CoordinatePosition = FVector(0.f)) const;
+		float TextHeight,
+		float TextSize,
+		const FText& RenderText,
+		const FVector& CoordinatePosition) const;
 
 #if WITH_EDITOR  // AddDebugTextRenders
-	/** Shortest overloading of debugging visualization*/
+	/** Shortest static overloading of debugging visualization without outer params */
 	static void AddDebugTextRenders(
 		class AActor* Owner,
 		const TSet<struct FCell>& Cells,
-		const struct FLinearColor& TextColor = FLinearColor::Black);
+		const struct FLinearColor& TextColor = FLinearColor::Black,
+		float TextHeight = 261.0f,
+		float TextSize = 124.0f,
+		const FString& RenderString = "",
+		const FVector& CoordinatePosition = FVector::ZeroVector);
 #endif  //WITH_EDITOR AddDebugTextRenders
 
 	/* ---------------------------------------------------

@@ -72,6 +72,8 @@ protected:
 	struct FPowerUp Powerups_;
 	/** Items have access */
 	friend class AItemActor;
+	/** AI controller has access */
+	friend class AMyAIController;
 
 	/** The ID identification of each character */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
@@ -89,7 +91,7 @@ protected:
 	/** Called when this actor is explicitly being destroyed */
 	virtual void Destroyed() final;
 
-	/** Spawn bomb on character position */
+	/** Spawns bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SpawnBomb();
 };

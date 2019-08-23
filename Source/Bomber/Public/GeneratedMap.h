@@ -53,8 +53,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SideLength"))
 	TSet<struct FCell> GetSidesCells(
 		const struct FCell& Cell,
-		const int32& SideLength,
-		EPathTypesEnum Pathfinder) const;
+		EPathTypesEnum Pathfinder,
+		const int32& SideLength = 100) const;
 
 	/** @addtogroup actor_types
 	 * The intersection of input cells and actors of the specific type on these cells
@@ -69,7 +69,7 @@ public:
 	TSet<struct FCell> IntersectionCellsByTypes(
 		const TSet<struct FCell>& Cells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask,
-		const class AMyCharacter* ExcludePlayer) const;
+		const class AMyCharacter* ExcludePlayer = nullptr) const;
 
 	/**
 	 * The function that places the actor on the Level Map, attaches it and writes this actor to the GridArray_

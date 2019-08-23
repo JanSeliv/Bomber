@@ -51,8 +51,8 @@ TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
 
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 	const FCell& Cell,
-	const int32& SideLength,
-	EPathTypesEnum Pathfinder) const
+	EPathTypesEnum Pathfinder,
+	const int32& SideLength) const
 {
 	TSet<FCell> FoundedLocations;
 	return FoundedLocations;
@@ -277,7 +277,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 				continue;
 			}
 
-			// --- The spawn part ---
+			// --- Part 0: Selection ---
 
 			// In case all next conditions will be false
 			EActorTypeEnum ActorTypeToSpawn = EActorTypeEnum::None;
@@ -310,7 +310,8 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 				ActorTypeToSpawn = EActorTypeEnum::Box;
 			}
 
-			// --- The spawn part ---
+			// --- Part 1: Spawning ---
+
 			const auto ActorClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum(ActorTypeToSpawn));
 			if (ActorClass != nullptr)  // There is type to spawn
 			{

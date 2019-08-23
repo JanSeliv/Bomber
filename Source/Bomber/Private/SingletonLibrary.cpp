@@ -135,11 +135,11 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 }
 
 #if WITH_EDITOR  // [Editor] AddDebugTextRenders()
-void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor)
+void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition)
 {
 	bool bOutBool = false;
-	TArray<class UTextRenderComponent*> OutArray{};
-	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray);
+	TArray<UTextRenderComponent*> OutArray{};
+	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray, TextHeight, TextSize, FText::FromString(RenderString), CoordinatePosition);
 }
 #endif  // WITH_EDITOR [Editor]
 
