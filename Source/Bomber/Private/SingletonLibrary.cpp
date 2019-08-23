@@ -53,16 +53,7 @@ void USingletonLibrary::BroadcastAiUpdating()
 			auto MyAIController = Cast<AMyAIController>(MyCharacterIt->GetController());
 			if (MyAIController)
 			{
-				FCell OutCell;					 // temporary param
-				TSet<FCell> OutFree{};			 // temporary param
-				bool bOutIsDangerous;			 // temporary param
-				TSet<FCell> OutAllCrossways;	 ///< temporary param
-				TSet<FCell> OutSecureCrossways;  ///< temporary param
-				TSet<FCell> OutFoundItems;		 ///< temporary param
-				bool bOutIsItemInDirect;		 ///< temporary param
-				TSet<FCell> OutFiltered;		 ///< temporary param
-				bool bIsFilteringFailed;		 ///< temporary param
-				MyAIController->UpdateAI(OutCell, OutFree, bOutIsDangerous, OutAllCrossways, OutSecureCrossways, OutFoundItems, bOutIsItemInDirect, OutFiltered, bIsFilteringFailed);
+				MyAIController->UpdateAI();
 			}
 		}
 	}

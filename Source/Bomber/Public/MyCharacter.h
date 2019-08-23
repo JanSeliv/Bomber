@@ -91,7 +91,7 @@ protected:
 	/** Called when this actor is explicitly being destroyed */
 	virtual void Destroyed() final;
 
-	/** Spawn bomb on character position */
+	/** Spawns bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SpawnBomb();
 };

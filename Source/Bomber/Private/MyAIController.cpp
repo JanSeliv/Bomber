@@ -10,16 +10,19 @@
 #include "MyCharacter.h"
 #include "SingletonLibrary.h"
 
-bool AMyAIController::UpdateAI_Implementation(
-	FCell& F0,
-	TSet<FCell>& Free,
-	bool& bIsDangerous,
-	TSet<FCell>& AllCrossways,
-	TSet<FCell>& SecureCrossways,
-	TSet<FCell>& FoundItems,
-	bool& bIsItemInDirect,
-	TSet<FCell>& Filtered,
-	bool& bIsFilteringFailed)
+// Sets default values for this character's properties
+AMyAIController::AMyAIController()
+{
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.TickInterval = 0.25F;
+
+	bAttachToPawn = true;
+}
+
+// The main AI logic
+bool AMyAIController::UpdateAI_Implementation()
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (IS_VALID(LevelMap) == false			// The Level Map is not valid
@@ -41,12 +44,11 @@ bool AMyAIController::UpdateAI_Implementation(
 	// ----- Part 0: Before iterations -----
 
 	// Set the START cell searching bot location
-	//const FCell F0(MyCharacter);
-	F0 = FCell(MyCharacter);
+	const FCell F0(MyCharacter);
 
 	// Searching 'SAFE NEIGHBORS'
-	// TSet<FCell> Free;
-	// bool bIsDangerous
+	TSet<FCell> Free;
+	bool bIsDangerous;
 	for (int32 i = 0; i < 2; ++i)  // two searches (safe and free)
 	{
 		bIsDangerous = static_cast<bool>(i);
@@ -73,28 +75,32 @@ bool AMyAIController::UpdateAI_Implementation(
 	}
 	// ----- Part 1: Cells iteration -----
 
-	for (const FCell& F : Free)
+	TSet<FCell> AllCrossways;	 //  cells of all crossways
+	TSet<FCell> SecureCrossways;  // crossways without players
+	TSet<FCell> FoundItems;
+	bool bIsItemInDirect = false;
+
+	for (auto F = Free.CreateIterator(); F; ++F)
 	{
 		if (bIsDangerous  // is not dangerous situation
-			&& USingletonLibrary::CalculateCellsLength(F0, F) > 3.0F)
+			&& USingletonLibrary::CalculateCellsLength(F0, *F) > 3.0F)
 		{
-			Free.Remove(F);  // removing distant cells
+			Free.Remove(*F);  // removing distant cells
 			continue;
 		}
 
-		// Way = Safe / (Free + F0)
-		TSet<FCell> ThisCrossway = LevelMap->GetSidesCells(F, EPathTypesEnum::Safe, 2);
-		TSet<FCell> Way = Free;
+		TSet<FCell> ThisCrossway = LevelMap->GetSidesCells(*F, EPathTypesEnum::Safe, 2);
+		TSet<FCell> Way = Free;				 // Way = Safe / (Free + F0)
 		Way.Add(F0);						 // Way = Free + F0
 		Way = ThisCrossway.Difference(Way);  // Way = Safe / Way
 
 		if (Way.Num() > 0)  // Are there any cells?
 		{
 			// Finding crossways
-			AllCrossways.Add(F);  // is the crossway
+			AllCrossways.Add(*F);  // is the crossway
 			if (LevelMap->IntersectionCellsByTypes(ThisCrossway, TO_FLAG(EActorTypeEnum::Player), MyCharacter).Num() == 0)
 			{
-				SecureCrossways.Add(F);
+				SecureCrossways.Add(*F);
 			}
 
 			// Finding items
@@ -113,16 +119,18 @@ bool AMyAIController::UpdateAI_Implementation(
 				}												  // item around the corner
 				else if (bIsItemInDirect == false)				  // Need corner item?
 				{
-					FoundItems.Add(F);  // Add found corner item
+					FoundItems.Add(*F);  // Add found corner item
 				}
 			}  // [has items]
 		}	  // [is crossway]
-		else if (bIsDangerous && ThisCrossway.Contains(F) == false)
+		else if (bIsDangerous && ThisCrossway.Contains(*F) == false)
 		{
-			Free.Remove(F);  // In the dangerous situation delete a non-crossway cell
+			Free.Remove(*F);  // In the dangerous situation delete a non-crossway cell
 		}
 	}
 
+	Free.Compact();
+	Free.Shrink();
 	if (Free.Num() == 0)
 	{
 		return false;
@@ -130,7 +138,8 @@ bool AMyAIController::UpdateAI_Implementation(
 
 	// ----- Part 2: Cells filtration -----
 
-	Filtered = (FoundItems.Num() > 0 ? FoundItems : Free);  //TSet<FCell> Filtered;
+	TSet<FCell> Filtered = FoundItems.Num() > 0 ? FoundItems : Free;  // selected cells
+	bool bIsFilteringFailed = false;
 	for (int32 i = 0; i < 4; ++i)
 	{
 		TSet<FCell> FilteringStep;
@@ -180,7 +189,10 @@ bool AMyAIController::UpdateAI_Implementation(
 			Free.Empty();  // Delete all cells to make new choice
 
 #if WITH_EDITOR  // [Editor]
-			USingletonLibrary::AddDebugTextRenders(MyCharacter, TSet<FCell>{F0}, FLinearColor::Red, 263, 95, "Attack");
+			if (MyCharacter->MapComponent->bShouldShowRenders)
+			{
+				USingletonLibrary::AddDebugTextRenders(MyCharacter, TSet<FCell>{F0}, FLinearColor::Red, 263, 95, "Attack");
+			}
 #endif  // [Editor]
 		}
 	}
@@ -219,13 +231,17 @@ bool AMyAIController::UpdateAI_Implementation(
 				break;
 			default: break;
 		}  // [3 visualization types]
-		USingletonLibrary::AddDebugTextRenders(MyCharacter, VisualizingStep, Color, 263, 124, String, Position);
+		if (MyCharacter->MapComponent->bShouldShowRenders)
+		{
+			USingletonLibrary::AddDebugTextRenders(MyCharacter, VisualizingStep, Color, 263, 124, String, Position);
+		}
 	}   // [Loopy visualization]
 #endif  // [Editor]
 
 	return true;
 }
 
+// Makes AI go toward specified destination cell
 void AMyAIController::MoveToCell(const FCell& DestinationCell)
 {
 	if (IS_VALID(MyCharacter) == false)  // The controlled character is not valid or is transient
@@ -257,6 +273,11 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 #endif
 }
 
+/* ---------------------------------------------------
+ *					Protected functions
+ * --------------------------------------------------- */
+
+// Called when an instance of this class is placed (in editor) or spawned
 void AMyAIController::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -268,6 +289,23 @@ void AMyAIController::OnConstruction(const FTransform& Transform)
 	Possess(MyCharacter);
 }
 
+//  Called when the game starts or when spawned
+void AMyAIController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	AiMoveTo = FCell::ZeroCell;
+}
+
+// Function called every frame on this AI controller to update movement
+void AMyAIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	UpdateAI();
+}
+
+// Allows the PlayerController to set up custom input bindings
 void AMyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
