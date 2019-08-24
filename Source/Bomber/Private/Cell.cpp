@@ -9,11 +9,15 @@ const FCell FCell::ZeroCell = FCell();
 
 FCell::FCell(const AActor* Actor)
 {
-	check(Actor);
-	if (USingletonLibrary::GetSingleton() == nullptr)  // Singleton is null
+	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	if (LevelMap == nullptr  // The Level Map is valid and is not transient
+		&& !ensureMsgf(IS_VALID(Actor), TEXT("FCell:: Actor is not valid")))
 	{
 		return;
 	}
+
 	USingletonLibrary::PrintToLog(Actor, "FCell()", "Start finding the cell");
-	this->Location = USingletonLibrary::GetSingleton()->MakeCell(Actor).Location;
+	this->Location = USingletonLibrary::GetSingleton()->MakeCell(Actor).Location;  // BP implementation
+
+	// ...
 }

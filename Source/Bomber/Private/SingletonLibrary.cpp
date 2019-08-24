@@ -213,7 +213,7 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 
 FCell USingletonLibrary::MakeCell_Implementation(const AActor* Actor) const
 {
-	return FCell::ZeroCell;
+	return FCell(Actor);
 }
 
 FCell USingletonLibrary::CalculateVectorAsRotatedCell(const FVector& VectorToRotate, const float& AxisZ)
