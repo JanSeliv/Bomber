@@ -148,6 +148,10 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 
 	// Set the character ID
 	CharacterID_ = USingletonLibrary::GetLevelMap()->CharactersOnMap.IndexOfByKey(this);
+	if (CharacterID_ == INDEX_NONE)
+	{
+		return;  // The character was not found in characters array
+	}
 
 	// Set a character skeletal mesh
 	if (GetMesh())
