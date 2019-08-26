@@ -41,8 +41,8 @@ public:
 	/** Sets default values for this actor's properties */
 	AGeneratedMap();
 
-	/** @addtogroup path_types
-	 * Getting an array of cells by four sides of an input center cell and type of breaks
+	/**
+	 * Getting an array of cells by four sides of an input center cell and type of breaks.
 	 * 
 	 * @param Cell The start of searching by the sides
 	 * @param SideLength Length of each side
@@ -56,9 +56,10 @@ public:
 		EPathTypesEnum Pathfinder,
 		const int32& SideLength = 100) const;
 
-	/** @addtogroup actor_types
-	 * The intersection of input cells and actors of the specific type on these cells
+	/**
+	 * The intersection of input cells and actors of the specific type on these cells.
 	 * (Cells ∩ Actors type)  
+	 *
 	 * @param Cells The cells set to intersect
 	 * @param ActorsTypesBitmask EActorTypeEnum bitmask to intersect
 	 * @param ExcludePlayer 
@@ -70,6 +71,16 @@ public:
 		const TSet<struct FCell>& Cells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = EActorTypeEnum)) const int32& ActorsTypesBitmask,
 		const class AMyCharacter* ExcludePlayer = nullptr) const;
+
+	/**
+	 * Spawns a level actor on the Level Map by the specified type. Then calls AddActorToGridArray().
+	 * 
+	 * @param Type Which type of level actors
+	 * @param Cell Actors location
+	 * @return Spawned actor on the Level Map, nullptr otherwise.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Type,Cell"))
+	AActor* SpawnActorByType(const EActorTypeEnum& Type, const FCell& Cell);
 
 	/**
 	 * The function that places the actor on the Level Map, attaches it and writes this actor to the GridArray_
@@ -85,12 +96,28 @@ public:
 	void RemoveActorFromGridArray(const AActor* Actor);
 
 	/**
-	 * Destroy all actors from set of cells
+	 * Destroy all actors from the set of cells
 	 * @param Keys The set of cells for destroying the found actors
 	 * @todo to C++ DestroyActorsFromMap(...)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void DestroyActorsFromMap(const TSet<struct FCell>& Keys);
+
+	/**
+	 * Check if the Level Map contains the specified cell.
+	 *
+	 * @param Cell The Cell to check for.
+	 * @param ExcludeActor The Cell can contains this actor.
+	 * @return true if the Level Map contains the cell.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AdvancedDisplay = 1, AutoCreateRefTerm = "Cell"))
+	FORCEINLINE bool IsEmptyCell(const struct FCell& Cell, const AActor* ExcludeActor = nullptr) const
+	{
+		const auto FoundActor = GridArray_.Find(Cell);
+		return FoundActor						   // The key contains in the level map
+			   && (*FoundActor == ExcludeActor	 // Is the same exclude actor
+					  || !IS_VALID(*FoundActor));  // The level map value is empty
+	}
 
 protected:
 	/** @ingroup actors_management
@@ -115,13 +142,7 @@ protected:
 	/** This is called only in the gameplay before calling begin play to generate level actors */
 	virtual void PostInitializeComponents() final;
 
-	/** @ingroup actors_management
-	 * Spawns and fills the Grid Array values by level actors
-	 *
-	 * @see AGeneratedMap::GridArray_
-	 * @see AGeneratedMap::CharactersOnMap
-	 * @see struct FCell: Makes a grid of cells
-	 */
+	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask,ActorLocationToSpawn"))
 	void GenerateLevelActors();
 
@@ -129,7 +150,14 @@ protected:
 	 *					Editor development
 	 * --------------------------------------------------- */
 
-	/** Destroys all attached level actors 
+#if WITH_EDITORONLY_DATA
+	/** Mark the editor updating visualization(text renders) */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	bool bShouldShowRenders;
+#endif  //WITH_EDITORONLY_DATA [Editor]
+
+	/** Destroys all attached level actors
+	 *
 	 * @param bIsEditorOnly if should destroy editor-only actors that were spawned in the PIE world
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
@@ -139,16 +167,4 @@ protected:
 	/** Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending */
 	virtual void Destroyed() final;
 #endif  // Destroyed() [Editor]
-
-#if WITH_EDITORONLY_DATA
-	/** Access to the Grid Array to create a free cell without an actor
-	 * @warning PIE only
-	 * @see GridArray_
-	 */
-	friend struct FCell;
-
-	/** Mark the editor updating visualization(text renders) */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	bool bShouldShowRenders;
-#endif  //WITH_EDITORONLY_DATA [Editor]
 };

@@ -84,20 +84,13 @@ public:
 	 *			Static library functions
 	 * --------------------------------------------------- */
 
-	/** 
-	 * The singleton getter
-	 * @return The singleton, nullptr otherwise
-	 */
+	/** Returns the singleton, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static USingletonLibrary* GetSingleton();
 
-	/** The Level Map getter */
+	/** The Level Map getter, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AGeneratedMap* GetLevelMap();
-
-	/** Contains a data of standalone and PIE games */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class UMyGameInstance* GetMyGameInstance(const UObject* WorldContextObject);
 
 	/**
 	 * The Level Map setter
@@ -107,6 +100,10 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetLevelMap(class AGeneratedMap* LevelMap);
+
+	/** Contains a data of standalone and PIE games, nullptr otherwise */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static class UMyGameInstance* GetMyGameInstance(const UObject* WorldContextObject);
 
 	/* ---------------------------------------------------
 	 *			FCell blueprint functions

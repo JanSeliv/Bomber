@@ -56,11 +56,18 @@ void ABoxActor::BeginPlay()
 
 void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 {
+	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	if (LevelMap == nullptr					 // The Level Map is not accessible
+		|| IS_VALID(MapComponent) == false)  // The Map Component is not valid or transient
+	{
+		return;
+	}
+
 	// Spawn item with the chance
 	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 30;
 	if (ItemChance)
 	{
-		GetWorld()->SpawnActor<AActor>(USingletonLibrary::FindClassByActorType(EActorTypeEnum::Item), GetActorTransform());
+		LevelMap->SpawnActorByType(EActorTypeEnum::Item, MapComponent->Cell);
 	}
 
 	USingletonLibrary::PrintToLog(this, "OnWallDestroyed", (ItemChance ? "Item spawned" : ""));

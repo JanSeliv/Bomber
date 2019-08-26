@@ -41,14 +41,7 @@ AGeneratedMap::AGeneratedMap()
 	}
 }
 
-TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
-	const TSet<FCell>& Cells,
-	const int32& ActorsTypesBitmask,
-	const AMyCharacter* ExcludePlayer) const
-{
-	return Cells;
-}
-
+// Getting an array of cells by four sides of an input center cell and type of breaks
 TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 	const FCell& Cell,
 	EPathTypesEnum Pathfinder,
@@ -58,6 +51,31 @@ TSet<FCell> AGeneratedMap::GetSidesCells_Implementation(
 	return FoundedLocations;
 }
 
+// The intersection of input cells and actors of the specific type on these cells
+TSet<FCell> AGeneratedMap::IntersectionCellsByTypes_Implementation(
+	const TSet<FCell>& Cells,
+	const int32& ActorsTypesBitmask,
+	const AMyCharacter* ExcludePlayer) const
+{
+	return Cells;
+}
+
+// Spawns level actor on the Level Map by the specified type
+AActor* AGeneratedMap::SpawnActorByType(const EActorTypeEnum& Type, const FCell& Cell)
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr  //
+		|| Cell == FCell::ZeroCell)
+	{
+		return nullptr;
+	}
+
+	AActor* SpawnedActor = World->SpawnActorAbsolute(USingletonLibrary::FindClassByActorType(Type), FTransform(Cell.Location));
+	AddActorToGridArray(Cell, SpawnedActor);
+	return SpawnedActor;
+}
+
+// The function that places the actor on the Level Map, attaches it and writes this actor to the GridArray_
 void AGeneratedMap::AddActorToGridArray(const FCell& Cell, AActor* UpdateActor)
 {
 	if (IS_VALID(UpdateActor) == false			// Updating actor is not valid
@@ -98,6 +116,7 @@ void AGeneratedMap::AddActorToGridArray(const FCell& Cell, AActor* UpdateActor)
 	USingletonLibrary::PrintToLog(UpdateActor, "AddActorToGridArray \t ADDED:", Cell.Location.ToString());
 }
 
+// Find and remove only this input actor-value of the cell-key from the Grid Array
 void AGeneratedMap::RemoveActorFromGridArray(const AActor* Actor)
 {
 	const FCell* Cell = GridArray_.FindKey(Actor);
@@ -110,6 +129,7 @@ void AGeneratedMap::RemoveActorFromGridArray(const AActor* Actor)
 	USingletonLibrary::PrintToLog(this, "RemoveActorFromGridArray", Actor->GetName());
 }
 
+// Destroy all actors from the set of cells
 void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& Keys)
 {
 	USingletonLibrary::PrintToLog(this, "DestroyActorsFromMap \t Keys will be destroyed:", FString::FromInt(Keys.Num()));
@@ -119,6 +139,7 @@ void AGeneratedMap::DestroyActorsFromMap_Implementation(const TSet<FCell>& Keys)
  *					Level map protected functions
  * --------------------------------------------------- */
 
+// Called when an instance of this class is placed (in editor) or spawned
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -199,6 +220,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 #endif  // WITH_EDITOR [Editor]
 }
 
+// This is called only in the gameplay before calling begin play to generate level actors
 void AGeneratedMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -227,6 +249,7 @@ void AGeneratedMap::PostInitializeComponents()
 	GenerateLevelActors();
 }
 
+// Spawns and fills the Grid Array values by level actors
 void AGeneratedMap::GenerateLevelActors_Implementation()
 {
 	if (GridArray_.Num() == 0)  // Is no cell to generate an actor
@@ -269,11 +292,9 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 		{
 			const FCell CellIt = CellsArray[MapScale.X * Y + X];
 			USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t Iterated cell:", CellIt.Location.ToString());
-			const AActor** ActorIt = GridArray_.Find(CellIt);
-			if (ActorIt != nullptr				// Was found actor
-				&& IS_VALID(*ActorIt) == true)  // and this actor is valid
+			if (IsEmptyCell(CellIt) == false)
 			{
-				USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t The actor on the cell has already existed", (*ActorIt)->GetName());
+				USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t The actor on the cell has already existed");
 				continue;
 			}
 
@@ -312,13 +333,11 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 
 			// --- Part 1: Spawning ---
 
-			const auto ActorClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum(ActorTypeToSpawn));
-			if (ActorClass != nullptr)  // There is type to spawn
+			if (ActorTypeToSpawn != EActorTypeEnum::None)  // There is type to spawn
 			{
-				AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, CellIt.Location, FRotator::ZeroRotator);
-
-#if WITH_EDITOR												  // [IsEditorNotPieWorld]
-				if (USingletonLibrary::IsEditorNotPieWorld()  // PIE only
+				AActor* SpawnedActor = SpawnActorByType(ActorTypeToSpawn, CellIt);
+#if WITH_EDITOR
+				if (USingletonLibrary::IsEditorNotPieWorld()  // [IsEditorNotPieWorld]
 					&& SpawnedActor != nullptr)				  // Successfully spawn
 				{
 					// If PIE world, mark this spawned actor as bIsEditorOnlyActor
@@ -337,6 +356,7 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
  *					Editor development
  * --------------------------------------------------- */
 
+// Destroys all attached level actors
 void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnly)
 {
 #if WITH_EDITOR  // [Editor]
@@ -363,6 +383,7 @@ void AGeneratedMap::DestroyAttachedActors(bool bIsEditorOnly)
 #endif  //WITH_EDITOR [Editor]
 }
 
+// Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending
 #if WITH_EDITOR  // Destroyed() [Editor]
 void AGeneratedMap::Destroyed()
 {

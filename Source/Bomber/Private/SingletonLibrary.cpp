@@ -213,13 +213,14 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 
 FCell USingletonLibrary::MakeCell_Implementation(const AActor* Actor) const
 {
-	return FCell(Actor);
+	if (IS_VALID(Actor)) return FCell(Actor->GetActorLocation());
+	return FCell::ZeroCell;
 }
 
 FCell USingletonLibrary::CalculateVectorAsRotatedCell(const FVector& VectorToRotate, const float& AxisZ)
 {
 	const AGeneratedMap* LevelMap = GetLevelMap();
-	if (!ensureMsgf(LevelMap, TEXT("The Level Map is not valid"))  //
+	if (LevelMap == nullptr  //
 		|| !ensureMsgf(AxisZ != abs(0.f), TEXT("The axis is zero")))
 	{
 		return FCell(VectorToRotate);

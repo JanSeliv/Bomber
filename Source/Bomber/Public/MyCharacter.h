@@ -77,7 +77,7 @@ protected:
 
 	/** The ID identification of each character */
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	int32 CharacterID_ = -1;
+	int32 CharacterID_ = INDEX_NONE;
 
 	/* The AnimBlueprint class to use */
 	class TSubclassOf<UAnimInstance> MyAnimClass;

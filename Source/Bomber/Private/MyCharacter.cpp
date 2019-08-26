@@ -225,7 +225,9 @@ void AMyCharacter::Destroyed()
 // Spawns bomb on character position
 void AMyCharacter::SpawnBomb()
 {
-	if (!IsValid(USingletonLibrary::GetLevelMap())	// The Level Map is not valid
+	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	if (LevelMap == nullptr							  // The Level Map is not accessible
+		|| IS_VALID(MapComponent) == false			  // The Map Component is not valid or transient
 		|| Powerups_.FireN <= 0						  // Null length of explosion
 		|| Powerups_.BombN <= 0						  // No more bombs
 		|| USingletonLibrary::IsEditorNotPieWorld())  // Should not spawn bomb in PIE
@@ -234,7 +236,7 @@ void AMyCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto Bomb = GetWorld()->SpawnActor<ABombActor>(USingletonLibrary::FindClassByActorType(EActorTypeEnum::Bomb), GetActorTransform());
+	auto Bomb = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorTypeEnum::Bomb, FCell(this)));
 
 	// Update material of mesh
 	if (Bomb != nullptr)
