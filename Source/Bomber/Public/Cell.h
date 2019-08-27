@@ -39,12 +39,7 @@ struct FCell
 	* @param Vector The other vector.
 
 	*/
-	explicit FORCEINLINE FCell(struct FVector Vector)
-	{
-		Location.X = FMath::RoundToFloat((Vector.X));
-		Location.Y = FMath::RoundToFloat(Vector.Y);
-		Location.Z = FMath::RoundToFloat(Vector.Z);
-	}
+	explicit FCell(struct FVector Vector);
 
 	/**
 	 * Compares points for equality.
