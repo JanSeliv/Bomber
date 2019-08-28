@@ -7,7 +7,7 @@
 
 //@todo Is includes the transient world as IsEditorWorld() ? //!(Obj)->GetWorld()->IsGameWorld()
 #define IS_TRANSIENT(Obj) (!(Obj)->IsValidLowLevelFast() || (Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
-#define IS_VALID(Obj) (IsValid(Obj) && !IS_TRANSIENT(Obj))
+#define IS_VALID(Obj) (IsValid(Obj) && !(Obj)->IsPendingKillPending() && !IS_TRANSIENT(Obj))
 
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
 
