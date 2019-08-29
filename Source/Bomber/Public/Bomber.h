@@ -12,8 +12,8 @@
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
 
 /**
- * @defgroup path_types Receiving cells for their type of danger
- * Types of breaks during cells searching on each side
+ * Cell's types of danger
+ * Breaks during cells searching on each side
  */
 UENUM(BlueprintType)
 enum class EPathTypesEnum : uint8
@@ -25,7 +25,6 @@ enum class EPathTypesEnum : uint8
 };
 
 /**
- * @defgroup actor_types The group where used types of actors
  * Types of all actors on the Level Map
  * Where Walls, Boxes and Bombs are the physical barriers for players
  * It is possible to make a bitmask of actors types
@@ -42,15 +41,20 @@ enum class EActorTypeEnum : uint8
 	All = Bomb | Item | Player | Wall | Box  ///< All level actors
 };
 
-/** @addtogroup actor_types
- * Using EActorTypeEnum as a bitmask*/
+/** Using EActorTypeEnum as a bitmask */
 inline EActorTypeEnum operator|(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
 {
 	return static_cast<EActorTypeEnum>(TO_FLAG(LType) | TO_FLAG(RType));
 }
 
+/** Checks the actors types among each other between themselves
+ * @see USingletonLibrary::BitwiseActorTypes: blueprint analog */
+inline bool operator&(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
+{
+	return (TO_FLAG(LType) & TO_FLAG(RType)) != 0;
+}
+
 /**
- * @defgroup item_types The group where used types of items
  * Types of items
  */
 UENUM(BlueprintType)
