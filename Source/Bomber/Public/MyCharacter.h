@@ -44,20 +44,24 @@ public:
 	class UMapComponent* MapComponent;
 
 	/** All skeletal meshes of the character */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++")
 	TArray<class USkeletalMesh*> SkeletalMeshes;
 
 	/** The static mesh nameplate */
-	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "C++")
 	class UStaticMeshComponent* NameplateMeshComponent;
 
 	/** All materials that used by nameplate meshes */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "C++")
 	TArray<class UMaterialInterface*> NameplateMaterials;
 
 	/** The nickname of the character */
-	UPROPERTY(BlueprintReadWrite, Category = "C++")
+	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "C++")
 	class UTextRenderComponent* NicknameTextRender;
+
+	/* ---------------------------------------------------
+	 *	MyCharacter's public functions
+	 * --------------------------------------------------- */
 
 	/** Sets default values for this character's properties */
 	AMyCharacter();
@@ -79,17 +83,22 @@ protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
 	int32 CharacterID_ = INDEX_NONE;
 
-	/* The AnimBlueprint class to use */
+	/* The AnimBlueprint class to use, can set it only in gameplay */
 	class TSubclassOf<UAnimInstance> MyAnimClass;
+
+	/** The character's AI controller */
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
+	class AMyAIController* MyAIController;
+
+	/* ---------------------------------------------------
+	 *	MyCharacter's protected functions
+	 * --------------------------------------------------- */
 
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() final;
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) final;
-
-	/** Called when this actor is explicitly being destroyed */
-	virtual void Destroyed() final;
 
 	/** Spawns bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++")
