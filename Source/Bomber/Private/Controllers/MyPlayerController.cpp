@@ -7,13 +7,11 @@
 
 AMyPlayerController::AMyPlayerController()
 {
-	// Set this character to don't call Tick()
-	PrimaryActorTick.bCanEverTick = false;
+	// Set this controller to call the Tick()
+	PrimaryActorTick.bCanEverTick = true;
 
 	// Use level 2D-camera without switches
 	bAutoManageActiveCameraTarget = false;
-
-	bAttachToPawn = true;
 }
 
 //  Allows the PlayerController to set up custom input bindings
