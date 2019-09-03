@@ -34,10 +34,10 @@ enum class EActorTypeEnum : uint8
 {
 	None = 0,								 ///< None of the types for comparisons
 	Bomb = 1 << 0,							 ///< A destroyable exploding Obstacle
-	Item = 1 << 1,							 ///< A picked element giving power-up (FPowerUp struct)
-	Player = 1 << 2,						 ///< A character that is controlled by a person or bot
-	Wall = 1 << 3,							 ///< An absolute static and unchangeable block throughout the game
-	Box = 1 << 4,							 ///< A destroyable Obstacle
+	Box = 1 << 1,							 ///< A destroyable Obstacle
+	Item = 1 << 2,							 ///< A picked element giving power-up (FPowerUp struct)
+	Player = 1 << 3,						 ///< A character that is controlled by a person or bot
+	Wall = 1 << 4,							 ///< An absolute static and unchangeable block throughout the game
 	All = Bomb | Item | Player | Wall | Box  ///< All level actors
 };
 
@@ -49,9 +49,9 @@ inline EActorTypeEnum operator|(const EActorTypeEnum& LType, const EActorTypeEnu
 
 /** Checks the actors types among each other between themselves
  * @see USingletonLibrary::BitwiseActorTypes: blueprint analog */
-inline bool operator&(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
+inline bool operator&(const EActorTypeEnum& LType, const int32& Bitmask)
 {
-	return (TO_FLAG(LType) & TO_FLAG(RType)) != 0;
+	return (TO_FLAG(LType) & Bitmask) != 0;
 }
 
 /**
