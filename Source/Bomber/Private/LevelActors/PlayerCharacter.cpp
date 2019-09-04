@@ -8,9 +8,9 @@
 #include "Components/TextRenderComponent.h"	//UTextRenderComponent
 #include "UObject/ConstructorHelpers.h"		   // ConstructorHelpers
 
-#include "LevelActors/BombActor.h"
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "LevelActors/BombActor.h"
 #include "MapComponent.h"
 #include "MyAIController.h"
 #include "MyGameInstance.h"
@@ -21,6 +21,7 @@ APlayerCharacter::APlayerCharacter()
 {
 	// Set this character to don't call Tick()
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Set the default AI controller class
 	AIControllerClass = AMyAIController::StaticClass();
@@ -226,7 +227,7 @@ void APlayerCharacter::SpawnBomb()
 	// Spawn bomb
 	auto Bomb = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorTypeEnum::Bomb, MapComponent->GetCell()));
 
-	// Update material of mesh
+	// Updating explosion cells
 	if (Bomb != nullptr)
 	{
 		Bomb->InitializeBombProperties(Powerups_.BombN, Powerups_.FireN, CharacterID_);
