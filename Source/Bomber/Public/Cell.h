@@ -25,12 +25,11 @@ struct FCell
 	 * Constructor
 	 * Finds the nearest cell in the Grid Array for this level  actor
 	 * 
-	 * @param Actor Target to find cell location
+	 * @param MapComponent Target to find cell location
 	 * @return The cell that was found
 	 * @bug #4 Length between two cells is not exactly equal 200
-   	 * @todo Round to 200*(cos(fi)|sin(fi)
 	 */
-	explicit FCell(const AActor* Actor);
+	explicit FCell(const class UMapComponent* MapComponent);
 
 	/**
 	* Constructor

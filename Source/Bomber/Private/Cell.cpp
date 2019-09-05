@@ -5,21 +5,22 @@
 #include "GameFramework/Actor.h"
 
 #include "GeneratedMap.h"
+#include "MapComponent.h"
 #include "SingletonLibrary.h"
 
 const FCell FCell::ZeroCell = FCell();
 
-FCell::FCell(const AActor* Actor)
+FCell::FCell(const UMapComponent* MapComponent)
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (LevelMap == nullptr  // The Level Map is valid and is not transient
-		&& !ensureMsgf(IS_VALID(Actor), TEXT("FCell:: Actor is not valid")))
+		&& !ensureMsgf(IsValid(MapComponent), TEXT("FCell:: Actor is not valid")))
 	{
 		return;
 	}
 
-	USingletonLibrary::PrintToLog(Actor, "FCell()", "Start finding the cell");
-	this->Location = USingletonLibrary::GetSingleton()->MakeCell(Actor).Location;  // BP implementation
+	USingletonLibrary::PrintToLog(MapComponent->GetOwner(), "FCell()", "Start finding the cell");
+	this->Location = USingletonLibrary::GetSingleton()->MakeCell(MapComponent).Location;  // BP implementation
 
 	// ...
 }
