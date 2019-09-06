@@ -20,7 +20,7 @@ public:
 	class UMapComponent* MapComponent;
 
 	/** The static mesh component of the this actor */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++")
 	class UStaticMeshComponent* BoxMeshComponent;
 
 	/** Sets default values for this actor's properties */
@@ -28,10 +28,10 @@ public:
 
 protected:
 	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() final;
+	virtual void BeginPlay() override;
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
-	virtual void OnConstruction(const FTransform& Transform) final;
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 	/** 
 	 * Event triggered when the actor has been explicitly destroyed

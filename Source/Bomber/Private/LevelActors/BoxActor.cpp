@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "BoxActor.h"
+#include "LevelActors/BoxActor.h"
 
 #include "Bomber.h"
 #include "Components/StaticMeshComponent.h"
@@ -15,6 +15,7 @@ ABoxActor::ABoxActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
@@ -36,7 +37,7 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
+	if (IsValid(MapComponent) == false)  // this component is not valid for owner construction
 	{
 		return;
 	}
@@ -57,8 +58,8 @@ void ABoxActor::BeginPlay()
 void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (LevelMap == nullptr					 // The Level Map is not accessible
-		|| IS_VALID(MapComponent) == false)  // The Map Component is not valid or transient
+	if (LevelMap == nullptr					// The Level Map is not accessible
+		|| IsValid(MapComponent) == false)  // The Map Component is not valid or transient
 	{
 		return;
 	}
@@ -67,7 +68,7 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 30;
 	if (ItemChance)
 	{
-		LevelMap->SpawnActorByType(EActorTypeEnum::Item, MapComponent->Cell);
+		LevelMap->SpawnActorByType(EActorTypeEnum::Item, MapComponent->GetCell());
 	}
 
 	USingletonLibrary::PrintToLog(this, "OnWallDestroyed", (ItemChance ? "Item spawned" : ""));
