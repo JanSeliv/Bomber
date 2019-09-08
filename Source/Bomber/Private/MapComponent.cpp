@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #include "MapComponent.h"
 
@@ -12,8 +12,10 @@ UMapComponent::UMapComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
+// Updates a owner's state. Should be called in the owner's OnConstruction event.
 void UMapComponent::OnMapComponentConstruction()
 {
 	if (IS_VALID(GetOwner()) == false					// The owner is not valid
@@ -24,11 +26,11 @@ void UMapComponent::OnMapComponentConstruction()
 
 	// Find new Location at dragging and update-delegate
 	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t FCell()");
-	Cell = FCell(GetOwner());
+	UpdateCell();
 
 	// Owner updating
-	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddActorToGridArray");
-	USingletonLibrary::GetLevelMap()->AddActorToGridArray(Cell, GetOwner());
+	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddToGrid");
+	USingletonLibrary::GetLevelMap()->AddToGrid(Cell, this);
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())
@@ -39,11 +41,12 @@ void UMapComponent::OnMapComponentConstruction()
 
 		// Update AI renders after adding obj to map
 		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
-		USingletonLibrary::BroadcastAiUpdating();
+		USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
 	}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
 
+//  Called when a component is registered (not loaded
 void UMapComponent::OnRegister()
 {
 	Super::OnRegister();
@@ -52,6 +55,10 @@ void UMapComponent::OnRegister()
 		return;
 	}
 	USingletonLibrary::PrintToLog(GetOwner(), "OnRegister", "");
+
+	// Finding the actor type
+	ActorType = USingletonLibrary::GetActorTypeByClass(GetOwner()->GetClass());
+	check(ActorType != EActorType::None && "Is not valid the specified class");
 
 	// Disable the tick
 	GetOwner()->SetActorTickEnabled(false);
@@ -78,19 +85,22 @@ void UMapComponent::OnRegister()
 #endif  //WITH_EDITOR [Editor]
 }
 
+// Called when a component is destroyed for removing the owner from the Level Map.
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	if (IS_TRANSIENT(GetOwner()) == false			   // Is not transient owner
+	AActor* const ComponentOwner = GetOwner();
+	if (IS_TRANSIENT(ComponentOwner) == false		   // Is not transient owner
 		&& IsValid(USingletonLibrary::GetLevelMap()))  // is valid and is not transient the level map
 	{
-		USingletonLibrary::PrintToLog(GetOwner(), "OnComponentDestroyed", "-> \t RemoveActorFromGridArray");
-		USingletonLibrary::GetLevelMap()->RemoveActorFromGridArray(GetOwner());
+		USingletonLibrary::PrintToLog(ComponentOwner, "OnComponentDestroyed", "-> \t DestroyActorsFromMap");
+		USingletonLibrary::GetLevelMap()->DestroyActorsFromMap(Cell);  // During a game: destroyed bombs, pickup-ed items
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
-		if (USingletonLibrary::IsEditorNotPieWorld())
+		// Editor delegates
+		if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 		{
-			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.RemoveAll(GetOwner());
-			USingletonLibrary::BroadcastAiUpdating();
+			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.RemoveAll(ComponentOwner);
+			USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
 		}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 	}
