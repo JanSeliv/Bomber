@@ -27,7 +27,7 @@ AMyHUD::AMyHUD()
 void AMyHUD::BeginPlay()
 {
 	// Widget creating and adding it to viewport
-	const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(AActor::GetWorld());
+	const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 	const TSubclassOf<UUserWidget> UmgCurrentClass = CurrentLevelName == "MenuLevel" ? UmgMenuClass : UmgLevelClass;
 	CreatedWidget = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UmgCurrentClass);
 	if (IsValid(CreatedWidget))  // successfully created

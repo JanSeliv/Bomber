@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -6,22 +6,21 @@
 #include "Kismet/GameplayStatics.h"
 
 //@todo Is includes the transient world as IsEditorWorld() ? //!(Obj)->GetWorld()->IsGameWorld()
-#define IS_TRANSIENT(Obj) (!(Obj)->IsValidLowLevelFast() || (Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
+#define IS_TRANSIENT(Obj) (!(Obj) || !(Obj)->IsValidLowLevelFast() || (Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
 #define IS_VALID(Obj) (IsValid(Obj) && !(Obj)->IsPendingKillPending() && !IS_TRANSIENT(Obj))
 
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
 
 /**
- * Cell's types of danger
- * Breaks during cells searching on each side
+ * Pathfinding types by danger extents.
  */
 UENUM(BlueprintType)
-enum class EPathTypesEnum : uint8
+enum class EPathType : uint8
 {
-	Explosion,  ///< Break to the first EActorTypeEnum::Wall without obstacles
-	Free,		///< Break to the first EActorTypeEnum::WallWall + obstacles
-	Safe,		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions
-	Secure		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions + EActorTypeEnum::Player
+	Explosion,  ///< Break to the first EActorType::Wall without obstacles
+	Free,		///< Break to the first EActorType::Wall + obstacles
+	Safe,		///< Break to the first EActorType::Wall + obstacles + explosions
+	Secure		///< Break to the first EActorType::Wall + obstacles + explosions + EActorType::Player
 };
 
 /**
@@ -30,7 +29,7 @@ enum class EPathTypesEnum : uint8
  * It is possible to make a bitmask of actors types
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class EActorTypeEnum : uint8
+enum class EActorType : uint8
 {
 	None = 0,								 ///< None of the types for comparisons
 	Bomb = 1 << 0,							 ///< A destroyable exploding Obstacle
@@ -41,26 +40,32 @@ enum class EActorTypeEnum : uint8
 	All = Bomb | Item | Player | Wall | Box  ///< All level actors
 };
 
-/** Using EActorTypeEnum as a bitmask */
-inline EActorTypeEnum operator|(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
+/** Bitwise OR operator for setting a bitmask of actors types. */
+FORCEINLINE EActorType operator|(const EActorType& LType, const EActorType& RType)
 {
-	return static_cast<EActorTypeEnum>(TO_FLAG(LType) | TO_FLAG(RType));
+	return static_cast<EActorType>(TO_FLAG(LType) | TO_FLAG(RType));
 }
 
-/** Checks the actors types among each other between themselves
- * @see USingletonLibrary::BitwiseActorTypes: blueprint analog */
-inline bool operator&(const EActorTypeEnum& LType, const int32& Bitmask)
+/** Bitwise NOT operator for turning off actors types. */
+FORCEINLINE EActorType operator~(const EActorType& RType)
+{
+	return static_cast<EActorType>(TO_FLAG(EActorType::All) & ~TO_FLAG(RType));
+}
+
+/** Checks the actors types among each other between themselves.
+ * @see USingletonLibrary::BitwiseActorTypes: blueprint analog. */
+FORCEINLINE bool operator&(const EActorType& LType, const int32& Bitmask)
 {
 	return (TO_FLAG(LType) & Bitmask) != 0;
 }
 
 /**
- * Types of items
+ * Types of items.
  */
 UENUM(BlueprintType)
-enum class EItemTypeEnum : uint8
+enum class EItemType : uint8
 {
-	None,
+	None,   ///< The type was not selected
 	Skate,  ///< Increases speed
 	Bomb,   ///< increases the amount of bombs
 	Fire	///< Increases the range of explosion

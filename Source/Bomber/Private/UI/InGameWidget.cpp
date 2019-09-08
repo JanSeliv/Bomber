@@ -3,8 +3,9 @@
 #include "InGameWidget.h"
 
 // Shows the in game menu.
-void UInGameWidget::ShowInGameState_Implementation()
+void UInGameWidget::ShowInGameState_Implementation(const UWidget* DisplayedWidget)
 {
+	// Blueprint realization
 	// ...
 }
 

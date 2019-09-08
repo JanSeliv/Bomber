@@ -16,9 +16,12 @@ class BOMBER_API UInGameWidget : public UUserWidget
 public:
 	/** The in game menu is shown the result of the games match (win, lose, draw).
 	 *	If the match has not yet finished, it could be minimized or opened out by ESC button in order to
-	 *	continue watching the game or restart the play, or to return to the main menu: */
+	 *	continue watching the game or restart the play, or to return to the main menu:
+	 *	@param DisplayedWidget The widget that will be shown.
+	 *	@todo Rewrite to C++
+	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++")
-	void ShowInGameState();
+	void ShowInGameState(const class UWidget* DisplayedWidget = nullptr);
 
 protected:
 	/**

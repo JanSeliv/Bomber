@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -15,7 +15,7 @@ class BOMBER_API AMyPlayerController final : public APlayerController
 	GENERATED_BODY()
 
 public:
-	/** Sets default values for this character's properties */
+	/** Sets default values for this controller's properties. */
 	AMyPlayerController();
 
 protected:

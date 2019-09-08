@@ -1,10 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #include "MyPlayerController.h"
 
-#include "InGameUserWidget.h"
+#include "InGameWidget.h"
 #include "MyHUD.h"
 
+// Sets default values for this controller's properties
 AMyPlayerController::AMyPlayerController()
 {
 	// Set this controller to call the Tick()
@@ -22,10 +23,15 @@ void AMyPlayerController::SetupInputComponent()
 	// Focus to the game
 	SetInputMode(FInputModeGameOnly());
 
-	const auto MyCustomHUD = GetWorld()->SpawnActor<AMyHUD>(AMyHUD::StaticClass());
-	if (MyCustomHUD)
-	{
-		//Call UInGameUserWidget::ShowInGameState function when the escape was pressed
-		InputComponent->BindAction("EscapeEvent", IE_Pressed, Cast<UInGameUserWidget>(MyCustomHUD->UmgCurrentObj), &UInGameUserWidget::ShowInGameState);
-	}
+	// Call UInGameWidget::ShowInGameState function when the escape was pressed
+	FInputActionBinding EscapeWasPressedLambda("EscapeEvent", IE_Pressed);
+	EscapeWasPressedLambda.ActionDelegate.GetDelegateForManualSet().BindLambda([this]() {
+		const auto MyCustomHUD = Cast<AMyHUD>(GetHUD());
+		const auto InGameWidget = MyCustomHUD ? Cast<UInGameWidget>(MyCustomHUD->CreatedWidget) : nullptr;
+		if (InGameWidget)
+		{
+			InGameWidget->ShowInGameState();
+		}
+	});
+	InputComponent->AddActionBinding(EscapeWasPressedLambda);
 }

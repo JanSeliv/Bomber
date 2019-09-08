@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #include "LevelActors/BoxActor.h"
 
@@ -10,7 +10,7 @@
 #include "SingletonLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
-// Sets default values
+// Sets default values.
 ABoxActor::ABoxActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -33,6 +33,7 @@ ABoxActor::ABoxActor()
 	}
 }
 
+// Called when an instance of this class is placed (in editor) or spawned.
 void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -42,7 +43,7 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
-	// Construct the actor's map component
+	// Construct the actor's map component.
 	MapComponent->OnMapComponentConstruction();
 }
 
@@ -55,6 +56,7 @@ void ABoxActor::BeginPlay()
 	OnDestroyed.AddDynamic(this, &ABoxActor::OnBoxDestroyed);
 }
 
+// Event triggered when the actor has been explicitly destroyed. With some chances spawns an item.
 void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
@@ -68,7 +70,7 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 30;
 	if (ItemChance)
 	{
-		LevelMap->SpawnActorByType(EActorTypeEnum::Item, MapComponent->GetCell());
+		LevelMap->SpawnActorByType(EActorType::Item, MapComponent->GetCell());
 	}
 
 	USingletonLibrary::PrintToLog(this, "OnWallDestroyed", (ItemChance ? "Item spawned" : ""));

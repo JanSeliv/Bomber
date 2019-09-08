@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -77,15 +77,16 @@ protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
+
 	/** Count of items that affect the abilities of a player during gameplay */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	struct FPowerUp Powerups_;  //[AW]
-	/** Items have access */
+	/** Items have access to increase it */
 	friend class AItemActor;
-	/** AI controller has access */
+	/** Owned AI controller has access to his pawn to see a blast radius */
 	friend class AMyAIController;
 
-	/** The ID identification of the each character */
+	/** The ID identification of each character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	int32 CharacterID_ = INDEX_NONE;  //[G]
 

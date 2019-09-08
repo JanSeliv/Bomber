@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -16,27 +16,27 @@ class BOMBER_API ABoxActor final : public AActor
 
 public:
 	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UMapComponent* MapComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
+	class UMapComponent* MapComponent;  //[C.AW]
 
 	/** The static mesh component of the this actor */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++")
-	class UStaticMeshComponent* BoxMeshComponent;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	class UStaticMeshComponent* BoxMeshComponent;  //[C.DO]
 
 	/** Sets default values for this actor's properties */
 	ABoxActor();
 
 protected:
+	/** Called when an instance of this class is placed (in editor) or spawned. */
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
-	/** Called when an instance of this class is placed (in editor) or spawned */
-	virtual void OnConstruction(const FTransform& Transform) override;
-
 	/** 
-	 * Event triggered when the actor has been explicitly destroyed
-	 * on destruction with some chances spawns an item
+	 * Event triggered when the actor has been explicitly destroyed.
+	 * With some chances spawns an item.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBoxDestroyed(AActor* DestroyedActor);
 };

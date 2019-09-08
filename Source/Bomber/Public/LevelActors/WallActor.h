@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -19,22 +19,22 @@ public:
 	AWallActor();
 
 	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UMapComponent* MapComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
+	class UMapComponent* MapComponent;  //[C.AW]
 
 	/** The static mesh component of this actor */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++")
-	class UStaticMeshComponent* WallMeshComponent;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	class UStaticMeshComponent* WallMeshComponent;  //[C.DO]
 
 protected:
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() final;
+	/** Called when an instance of this class is placed (in editor) or spawned. */
+	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Called when an instance of this class is placed (in editor) or spawned */
-	virtual void OnConstruction(const FTransform& Transform) final;
+	/** Called when the game starts or when spawned */
+	virtual void BeginPlay() override;
 
 	/** 
-	 * Event triggered when the actor has been explicitly destroyed
+	 * Event triggered when the actor has been explicitly destroyed.
 	 * @warning Should not be destroyed in the game
 	 */
 	UFUNCTION()

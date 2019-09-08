@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #include "LevelActors/PlayerCharacter.h"
 
@@ -43,7 +43,7 @@ APlayerCharacter::APlayerCharacter()
 	{
 		if (SkeletalMeshFinderArray[i].Succeeded())
 		{
-			SkeletalMeshes.Add(SkeletalMeshFinderArray[i].Object);
+			SkeletalMeshes.Emplace(SkeletalMeshFinderArray[i].Object);
 			if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);  // preview
 		}
 	}
@@ -77,7 +77,7 @@ APlayerCharacter::APlayerCharacter()
 	{
 		if (MaterialsFinderArray[i].Succeeded())
 		{
-			NameplateMaterials.Add(MaterialsFinderArray[i].Object);
+			NameplateMaterials.Emplace(MaterialsFinderArray[i].Object);
 		}
 	}
 
@@ -149,14 +149,10 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// Construct the actor's map component
 	MapComponent->OnMapComponentConstruction();
 
-	// Set the character ID
-
-	// The character is initialized for the first time.
-	if (CharacterID_ == INDEX_NONE)
-	{
-		CharacterID_ = LevelMap->GetCharactersNum() - 1;
-		check(CharacterID_ > INDEX_NONE && "The LevelMap is valid, by no characters in the array");
-	}
+	// Setting an ID to the player character as his position in the array
+	FCells PlayersCells;
+	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EActorType::Player));
+	CharacterID_ = PlayersCells.FindId(MapComponent->GetCell()).AsInteger();
 
 	// Set a character skeletal mesh
 	if (GetMesh())
@@ -225,7 +221,7 @@ void APlayerCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto Bomb = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorTypeEnum::Bomb, MapComponent->GetCell()));
+	auto Bomb = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorType::Bomb, MapComponent->GetCell()));
 
 	// Updating explosion cells
 	if (Bomb != nullptr)

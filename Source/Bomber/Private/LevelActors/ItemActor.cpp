@@ -1,12 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
-#include "ItemActor.h"
+#include "LevelActors/ItemActor.h"
 
 #include "Bomber.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "MapComponent.h"
-#include "MyCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
@@ -14,6 +14,7 @@ AItemActor::AItemActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
@@ -34,7 +35,7 @@ AItemActor::AItemActor()
 	{
 		if (ItemMeshFinderArray[i].Succeeded())
 		{
-			ItemTypesByMeshes.Add(static_cast<EItemTypeEnum>(i + 1), ItemMeshFinderArray[i].Object);
+			ItemTypesByMeshes.Emplace(static_cast<EItemType>(i + 1), ItemMeshFinderArray[i].Object);
 			if (i == 0) ItemMeshComponent->SetStaticMesh(ItemMeshFinderArray[i].Object);  // Preview
 		}
 	}
@@ -46,19 +47,13 @@ AItemActor::AItemActor()
 	ItemCollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
-// Called when the game starts or when spawned
-void AItemActor::BeginPlay()
-{
-	Super::BeginPlay();
-
-	this->OnActorBeginOverlap.AddDynamic(this, &AItemActor::OnItemBeginOverlap);
-}
-
+// Called when an instance of this class is placed (in editor) or spawned
 void AItemActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
+	if (IS_TRANSIENT(this)			// This actor is transient
+		|| !IsValid(MapComponent))  // Is not valid for map construction
 	{
 		return;
 	}
@@ -67,21 +62,30 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	MapComponent->OnMapComponentConstruction();
 
 	// Rand the item type
-	if (ItemType == EItemTypeEnum::None)
+	if (ItemType == EItemType::None)
 	{
-		TArray<EItemTypeEnum> ItemTypesArray;
+		TArray<EItemType> ItemTypesArray;
 		ItemTypesByMeshes.GetKeys(ItemTypesArray);
 		const int32 RandItemTypeNo = FMath::RandRange(int32(0), ItemTypesArray.Num() - 1);
 		ItemType = ItemTypesArray[RandItemTypeNo];
 	}
 	UStaticMesh* FoundMesh = *ItemTypesByMeshes.Find(ItemType);
-	ensureMsgf(FoundMesh != nullptr, TEXT("The item mesh of this type was not found"));
+	ensureAlwaysMsgf(FoundMesh != nullptr, TEXT("The item mesh of this type was not found"));
 	ItemMeshComponent->SetStaticMesh(FoundMesh);
 }
 
+// Called when the game starts or when spawned
+void AItemActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	this->OnActorBeginOverlap.AddDynamic(this, &AItemActor::OnItemBeginOverlap);
+}
+
+// Increases +1 to numbers of character's powerups (Skate/Bomb/Fire)
 void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	AMyCharacter* const OverlappedCharacter = Cast<AMyCharacter>(OtherActor);
+	APlayerCharacter* const OverlappedCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (OverlappedCharacter == nullptr				// Other actor is not myCharacter
 		|| IS_VALID(OverlappedCharacter) == false)  // Character is not valid
 
@@ -91,17 +95,17 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 
 	switch (ItemType)
 	{
-		case EItemTypeEnum::Skate:
+		case EItemType::Skate:
 			OverlappedCharacter->Powerups_.SkateN++;
 			break;
-		case EItemTypeEnum::Bomb:
+		case EItemType::Bomb:
 			OverlappedCharacter->Powerups_.BombN++;
 			break;
-		case EItemTypeEnum::Fire:
+		case EItemType::Fire:
 			OverlappedCharacter->Powerups_.FireN++;
 			break;
 		default:
-			ensureMsgf(ItemType != EItemTypeEnum::None, TEXT("None type of the item"));
+			ensureAlwaysMsgf(ItemType != EItemType::None, TEXT("None type of the item"));
 			break;
 	}
 
