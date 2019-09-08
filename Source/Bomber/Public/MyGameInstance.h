@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -17,10 +17,10 @@ class BOMBER_API UMyGameInstance final : public UGameInstance
 
 public:
 	/** A size of the level map */
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	FVector LevelMapScale = FVector::ZeroVector;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
+	FVector LevelMapScale = FVector::ZeroVector;  //[B]
 
 	/** A player nickname*/
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	FText Nickname = DEFAULT_NICKNAME;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
+	FText Nickname = DEFAULT_NICKNAME;  //[B]
 };

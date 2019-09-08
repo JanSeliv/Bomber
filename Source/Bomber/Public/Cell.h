@@ -1,10 +1,15 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
 #include "Cell.generated.h"
 
-/** The structure that contains the location vector of each element on the Level Map */
+/** Typedef to allow for some nicer looking sets of cells */
+typedef TSet<struct FCell> FCells;
+
+/**
+ * The structure that contains a location of an one cell on a grid of the Level Map.
+ */
 USTRUCT(BlueprintType, meta = (HasNativeMake = "Bomber.SingletonLibrary.MakeCell"))
 struct FCell
 {
@@ -13,48 +18,67 @@ struct FCell
 	/** The zero cell (0,0,0) */
 	static const FCell ZeroCell;
 
-	/** Holds the cell's FVector-coordinate. */
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	FVector Location;
+	/** The length of the one cell */
+	static const float CellSize;
+
+	/** Always holds the free cell's FVector-coordinate.
+	 * If it is not empty or not found, holds the last succeeded due to copy operator. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FVector Location = FVector::ZeroVector;  //[AW]
+
+	/** Marks when the cell is contained in the grid and free from other level actors. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
+	bool bWasFound = false;  //[B]
 
 	/** Default constructor (zero initialization). */
-	FCell()
-		: Location(FVector::ZeroVector) {}
+	FCell() {}
 
 	/**
-	 * Constructor
-	 * Finds the nearest cell in the Grid Array for this level  actor
+	 * The main constructor.
+	 * Finds the nearest free cell in the Grid Array for the specified Map Component's owner. 
 	 * 
-	 * @param Actor Target to find cell location
-	 * @return The cell that was found
-	 * @bug #4 Length between two cells is not exactly equal 200
-   	 * @todo Round to 200*(cos(fi)|sin(fi)
+	 * @param MapComponent Target to find the cell.
 	 */
-	explicit FCell(const AActor* Actor);
+	explicit FCell(const class UMapComponent* MapComponent);
 
 	/**
-	* Constructor
-	* Round another FVector into this cell
+	* Initial constructor for cells filling into the array.
+	* Round another FVector into this cell.
 	*
 	* @param Vector The other vector.
-
 	*/
-	explicit FORCEINLINE FCell(struct FVector Vector)
+	explicit FCell(struct FVector Vector);
+
+	/** Rotates around the center of the Level Map to the same yaw degree.
+	 * 
+	 * @param AxisZ The Z param of the axis to rotate around
+	 * @return Rotated to the Level Map cell, the same cell otherwise
+	 */
+	FCell RotateAngleAxis(const float& AxisZ) const;
+
+	/* Set the cell to zero value. */
+	FORCEINLINE void SetToZero()
 	{
-		Location.X = FMath::RoundToFloat((Vector.X));
-		Location.Y = FMath::RoundToFloat(Vector.Y);
-		Location.Z = FMath::RoundToFloat(Vector.Z);
+		Location = ZeroCell.Location;
 	}
 
 	/**
-	 * Compares points for equality.
+	* Copy another non-zero cell into this one.
+	*
+	* @param Other The other cell.
+	* @return Reference to cell after copy.
+	*/
+	FCell& operator=(const FCell& Other);
+
+	/**
+	 * Compares cells for equality.
 	 *
 	 * @param Other The other cell being compared.
 	 * @return true if the points are equal, false otherwise
 	 */
 	FORCEINLINE bool operator==(const FCell& Other) const
 	{
-		return (this->Location == Other.Location);
+		return this->Location == Other.Location;
 	}
 
 	/**

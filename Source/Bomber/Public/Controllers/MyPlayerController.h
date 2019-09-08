@@ -1,8 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+
 #include "MyPlayerController.generated.h"
 
 /**
@@ -14,12 +15,10 @@ class BOMBER_API AMyPlayerController final : public APlayerController
 	GENERATED_BODY()
 
 public:
-	/** Sets default values for this character's properties */
+	/** Sets default values for this controller's properties. */
 	AMyPlayerController();
 
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() final;
-
+protected:
 	/** Allows the PlayerController to set up custom input bindings. */
-	virtual void SetupInputComponent() final;
+	virtual void SetupInputComponent() override;
 };

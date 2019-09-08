@@ -1,14 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 using UnrealBuildTool;
 using System.Collections.Generic;
 
 public class BomberTarget : TargetRules
 {
-	public BomberTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
+    public BomberTarget(TargetInfo Target) : base(Target)
+    {
+        Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "Bomber" } );
-	}
+        ExtraModuleNames.AddRange(new string[] { "Bomber" });
+    }
 }

@@ -1,6 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
-#include "BombActor.h"
+#include "LevelActors/BombActor.h"
 
 #include "Bomber.h"
 #include "Components/BoxComponent.h"
@@ -16,6 +16,7 @@ ABombActor::ABombActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
@@ -50,7 +51,7 @@ ABombActor::ABombActor()
 	{
 		if (MaterialsFinderArray[i].Succeeded())
 		{
-			BombMaterials.Add(MaterialsFinderArray[i].Object);
+			BombMaterials.Emplace(MaterialsFinderArray[i].Object);
 		}
 	}
 
@@ -67,28 +68,29 @@ void ABombActor::InitializeBombProperties(
 	const int32& CharacterID)
 {
 	if (!IsValid(USingletonLibrary::GetLevelMap())  // // The Level Map is not valid
-		|| IS_VALID(MapComponent) == false			// MapComponent is not valid
+		|| IsValid(MapComponent) == false			// The Map Component is not valid
 		|| FireN < 0)								// Negative length of the explosion
 	{
 		return;
 	}
 
-	CharacterBombsN_ = &RefBombsN;
-	if (CharacterBombsN_ != nullptr)
+	PlayerBombsN_ = &RefBombsN;
+	if (PlayerBombsN_ != nullptr)
 	{
-		(*CharacterBombsN_)--;
+		(*PlayerBombsN_)--;
 	}
 
 	// Set material
-	if (IS_VALID(BombMeshComponent) == true  // Mesh of the bomb is not valid
-		&& CharacterID != -1)				 // is not debug character
+	if (IsValid(BombMeshComponent)  // Mesh of the bomb is not valid
+		&& CharacterID != -1)		// is not debug character
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
 		BombMeshComponent->SetMaterial(0, BombMaterials[BombMaterialNo]);
 	}
 
 	// Update explosion information
-	ExplosionCells_ = USingletonLibrary::GetLevelMap()->GetSidesCells(MapComponent->Cell, EPathTypesEnum::Explosion, FireN);
+	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCells_, MapComponent->GetCell(), EPathType::Explosion, FireN);
+
 #if WITH_EDITOR  // [Editor]
 	if (MapComponent->bShouldShowRenders)
 	{
@@ -96,6 +98,31 @@ void ABombActor::InitializeBombProperties(
 		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
 	}
 #endif
+}
+
+// Called when an instance of this class is placed (in editor) or spawned.
+void ABombActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (IS_TRANSIENT(this)			// This actor is transient
+		|| !IsValid(MapComponent))  // Is not valid for map construction
+	{
+		return;
+	}
+
+	// Construct the actor's map component
+	MapComponent->OnMapComponentConstruction();
+
+#if WITH_EDITOR
+	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
+	{
+		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t InitializeBombProperties");
+		InitializeBombProperties(*PlayerBombsN_, ExplosionLength_, -1);
+
+		USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
+	}
+#endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 // Called when the game starts or when spawned
@@ -113,29 +140,7 @@ void ABombActor::BeginPlay()
 	SetLifeSpan(LifeSpan_);
 }
 
-void ABombActor::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
-	{
-		return;
-	}
-
-	// Construct the actor's map component
-	MapComponent->OnMapComponentConstruction();
-
-#if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
-	{
-		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t InitializeBombProperties");
-		InitializeBombProperties(*CharacterBombsN_, ExplosionLength_, -1);
-
-		USingletonLibrary::BroadcastAiUpdating();
-	}
-#endif  //WITH_EDITOR [IsEditorNotPieWorld]
-}
-
+// Calls destroying request of all actors by cells in explosion cells array.
 void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 {
 	UWorld* const World = GetWorld();
@@ -146,9 +151,9 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 	}
 
 	// Return to the character +1 of bombs
-	if (CharacterBombsN_ != nullptr)
+	if (PlayerBombsN_ != nullptr)
 	{
-		(*CharacterBombsN_)++;
+		(*PlayerBombsN_)++;
 	}
 	// Spawn emitters
 	for (const FCell& Cell : ExplosionCells_)
@@ -160,17 +165,16 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 	USingletonLibrary::GetLevelMap()->DestroyActorsFromMap(ExplosionCells_);
 }
 
+// Sets the collision preset to block all dynamics.
 void ABombActor::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (OtherActor == this)  // Self triggering
 	{
 		return;
 	}
-
 	//Sets the collision preset to block all dynamics
-	const TSubclassOf<AActor> PlayerClass = USingletonLibrary::FindClassByActorType(EActorTypeEnum::Player);
 	TArray<AActor*> OverlappingActors;
-	BombCollisionComponent->GetOverlappingActors(OverlappingActors, PlayerClass);
+	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetClassByActorType(EActorType::Player));
 	if (OverlappingActors.Num() == 0)  // There are no more characters on the bomb
 	{
 		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
