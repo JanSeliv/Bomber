@@ -1,6 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
-#include "WallActor.h"
+#include "LevelActors/WallActor.h"
 
 #include "Bomber.h"
 #include "Components/StaticMeshComponent.h"
@@ -12,6 +12,7 @@ AWallActor::AWallActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
@@ -29,11 +30,13 @@ AWallActor::AWallActor()
 	}
 }
 
+// Called when an instance of this class is placed (in editor) or spawned
 void AWallActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false)  // this component is not valid for owner construction
+	if (IS_TRANSIENT(this)			// This actor is transient
+		|| !IsValid(MapComponent))  // Is not valid for map construction
 	{
 		return;
 	}

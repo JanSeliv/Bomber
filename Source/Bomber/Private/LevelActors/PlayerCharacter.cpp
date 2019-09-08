@@ -1,6 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
-#include "MyCharacter.h"
+#include "LevelActors/PlayerCharacter.h"
 
 #include "Animation/AnimInstance.h"			   //UAnimInstance
 #include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
@@ -8,19 +8,20 @@
 #include "Components/TextRenderComponent.h"	//UTextRenderComponent
 #include "UObject/ConstructorHelpers.h"		   // ConstructorHelpers
 
-#include "BombActor.h"
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "LevelActors/BombActor.h"
 #include "MapComponent.h"
 #include "MyAIController.h"
 #include "MyGameInstance.h"
 #include "SingletonLibrary.h"
 
 // Sets default values
-AMyCharacter::AMyCharacter()
+APlayerCharacter::APlayerCharacter()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to don't call Tick()
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Set the default AI controller class
 	AIControllerClass = AMyAIController::StaticClass();
@@ -42,7 +43,7 @@ AMyCharacter::AMyCharacter()
 	{
 		if (SkeletalMeshFinderArray[i].Succeeded())
 		{
-			SkeletalMeshes.Add(SkeletalMeshFinderArray[i].Object);
+			SkeletalMeshes.Emplace(SkeletalMeshFinderArray[i].Object);
 			if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);  // preview
 		}
 	}
@@ -76,7 +77,7 @@ AMyCharacter::AMyCharacter()
 	{
 		if (MaterialsFinderArray[i].Succeeded())
 		{
-			NameplateMaterials.Add(MaterialsFinderArray[i].Object);
+			NameplateMaterials.Emplace(MaterialsFinderArray[i].Object);
 		}
 	}
 
@@ -93,11 +94,11 @@ AMyCharacter::AMyCharacter()
 }
 
 // Called to bind functionality to input
-void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("SpaceEvent", IE_Pressed, this, &AMyCharacter::SpawnBomb);
+	PlayerInputComponent->BindAction("SpaceEvent", IE_Pressed, this, &APlayerCharacter::SpawnBomb);
 }
 
 /* ---------------------------------------------------
@@ -105,7 +106,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
  * --------------------------------------------------- */
 
 // Called when the game starts or when spawned
-void AMyCharacter::BeginPlay()
+void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -116,7 +117,7 @@ void AMyCharacter::BeginPlay()
 		GetMesh()->SetAnimInstanceClass(MyAnimClass);
 	}
 
-	// Posses the player controller
+	// Posses the controller
 	if (CharacterID_ == 0)  // Is the player (not AI)
 	{
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
@@ -125,33 +126,33 @@ void AMyCharacter::BeginPlay()
 			PlayerController->Possess(this);
 		}
 	}
-	else
+	else								// has AI controller
+		if (!IS_VALID(MyAIController))  // was not spawned early
 	{
-		auto MyAIController = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+		MyAIController = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		MyAIController->Possess(this);
 	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
-void AMyCharacter::OnConstruction(const FTransform& Transform)
+void APlayerCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_VALID(MapComponent) == false					// this component is not valid for owner construction
-		|| !IsValid(USingletonLibrary::GetLevelMap()))  // the level map is not valid
+	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	if (IS_TRANSIENT(this)		   // This actor is transient
+		|| !IsValid(MapComponent)  // Is not valid for map construction
+		|| !LevelMap)			   // the level map is not valid or transient
 	{
 		return;
 	}
-
 	// Construct the actor's map component
 	MapComponent->OnMapComponentConstruction();
 
-	// Set the character ID
-	CharacterID_ = USingletonLibrary::GetLevelMap()->CharactersOnMap.IndexOfByKey(this);
-	if (CharacterID_ == INDEX_NONE)
-	{
-		return;  // The character was not found in characters array
-	}
+	// Setting an ID to the player character as his position in the array
+	FCells PlayersCells;
+	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EActorType::Player));
+	CharacterID_ = PlayersCells.FindId(MapComponent->GetCell()).AsInteger();
 
 	// Set a character skeletal mesh
 	if (GetMesh())
@@ -186,7 +187,7 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	if (USingletonLibrary::IsEditorNotPieWorld()  // [IsEditorNotPieWorld] only
 		&& CharacterID_ > 0)					  // Is a bot
 	{
-		const auto MyAIController = Cast<AMyAIController>(GetController());
+		MyAIController = Cast<AMyAIController>(GetController());
 		if (MapComponent->bShouldShowRenders == false)
 		{
 			if (MyAIController) MyAIController->Destroy();
@@ -206,28 +207,12 @@ void AMyCharacter::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
 }
 
-// Called when this actor is explicitly being destroyed
-void AMyCharacter::Destroyed()
-{
-	UWorld* const World = GetWorld();
-	if (World != nullptr							  // World is not null
-		&& IsValid(USingletonLibrary::GetLevelMap())  // The Level Map is valid
-		&& IS_TRANSIENT(this) == false)				  // Component is not transient
-	{
-		USingletonLibrary::GetLevelMap()->CharactersOnMap.Remove(this);
-		USingletonLibrary::PrintToLog(this, "Destroyed", "Removed from TSet");
-	}
-
-	// Call the base class version
-	Super::Destroyed();
-}
-
 // Spawns bomb on character position
-void AMyCharacter::SpawnBomb()
+void APlayerCharacter::SpawnBomb()
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (LevelMap == nullptr							  // The Level Map is not accessible
-		|| IS_VALID(MapComponent) == false			  // The Map Component is not valid or transient
+		|| IsValid(MapComponent) == false			  // The Map Component is not valid or transient
 		|| Powerups_.FireN <= 0						  // Null length of explosion
 		|| Powerups_.BombN <= 0						  // No more bombs
 		|| USingletonLibrary::IsEditorNotPieWorld())  // Should not spawn bomb in PIE
@@ -236,9 +221,9 @@ void AMyCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto Bomb = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorTypeEnum::Bomb, FCell(this)));
+	auto Bomb = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorType::Bomb, MapComponent->GetCell()));
 
-	// Update material of mesh
+	// Updating explosion cells
 	if (Bomb != nullptr)
 	{
 		Bomb->InitializeBombProperties(Powerups_.BombN, Powerups_.FireN, CharacterID_);

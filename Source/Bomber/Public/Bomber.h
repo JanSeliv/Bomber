@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -6,57 +6,66 @@
 #include "Kismet/GameplayStatics.h"
 
 //@todo Is includes the transient world as IsEditorWorld() ? //!(Obj)->GetWorld()->IsGameWorld()
-#define IS_TRANSIENT(Obj) (!(Obj)->IsValidLowLevelFast() || (Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
+#define IS_TRANSIENT(Obj) (!(Obj) || !(Obj)->IsValidLowLevelFast() || (Obj)->HasAllFlags(RF_Transient) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
 #define IS_VALID(Obj) (IsValid(Obj) && !(Obj)->IsPendingKillPending() && !IS_TRANSIENT(Obj))
 
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
 
 /**
- * @defgroup path_types Receiving cells for their type of danger
- * Types of breaks during cells searching on each side
+ * Pathfinding types by danger extents.
  */
 UENUM(BlueprintType)
-enum class EPathTypesEnum : uint8
+enum class EPathType : uint8
 {
-	Explosion,  ///< Break to the first EActorTypeEnum::Wall without obstacles
-	Free,		///< Break to the first EActorTypeEnum::WallWall + obstacles
-	Safe,		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions
-	Secure		///< Break to the first EActorTypeEnum::WallWall + obstacles + explosions + EActorTypeEnum::Player
+	Explosion,  ///< Break to the first EActorType::Wall without obstacles
+	Free,		///< Break to the first EActorType::Wall + obstacles
+	Safe,		///< Break to the first EActorType::Wall + obstacles + explosions
+	Secure		///< Break to the first EActorType::Wall + obstacles + explosions + EActorType::Player
 };
 
 /**
- * @defgroup actor_types The group where used types of actors
  * Types of all actors on the Level Map
  * Where Walls, Boxes and Bombs are the physical barriers for players
  * It is possible to make a bitmask of actors types
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class EActorTypeEnum : uint8
+enum class EActorType : uint8
 {
 	None = 0,								 ///< None of the types for comparisons
 	Bomb = 1 << 0,							 ///< A destroyable exploding Obstacle
-	Item = 1 << 1,							 ///< A picked element giving power-up (FPowerUp struct)
-	Player = 1 << 2,						 ///< A character that is controlled by a person or bot
-	Wall = 1 << 3,							 ///< An absolute static and unchangeable block throughout the game
-	Box = 1 << 4,							 ///< A destroyable Obstacle
+	Box = 1 << 1,							 ///< A destroyable Obstacle
+	Item = 1 << 2,							 ///< A picked element giving power-up (FPowerUp struct)
+	Player = 1 << 3,						 ///< A character that is controlled by a person or bot
+	Wall = 1 << 4,							 ///< An absolute static and unchangeable block throughout the game
 	All = Bomb | Item | Player | Wall | Box  ///< All level actors
 };
 
-/** @addtogroup actor_types
- * Using EActorTypeEnum as a bitmask*/
-inline EActorTypeEnum operator|(const EActorTypeEnum& LType, const EActorTypeEnum& RType)
+/** Bitwise OR operator for setting a bitmask of actors types. */
+FORCEINLINE EActorType operator|(const EActorType& LType, const EActorType& RType)
 {
-	return static_cast<EActorTypeEnum>(TO_FLAG(LType) | TO_FLAG(RType));
+	return static_cast<EActorType>(TO_FLAG(LType) | TO_FLAG(RType));
+}
+
+/** Bitwise NOT operator for turning off actors types. */
+FORCEINLINE EActorType operator~(const EActorType& RType)
+{
+	return static_cast<EActorType>(TO_FLAG(EActorType::All) & ~TO_FLAG(RType));
+}
+
+/** Checks the actors types among each other between themselves.
+ * @see USingletonLibrary::BitwiseActorTypes: blueprint analog. */
+FORCEINLINE bool operator&(const EActorType& LType, const int32& Bitmask)
+{
+	return (TO_FLAG(LType) & Bitmask) != 0;
 }
 
 /**
- * @defgroup item_types The group where used types of items
- * Types of items
+ * Types of items.
  */
 UENUM(BlueprintType)
-enum class EItemTypeEnum : uint8
+enum class EItemType : uint8
 {
-	None,
+	None,   ///< The type was not selected
 	Skate,  ///< Increases speed
 	Bomb,   ///< increases the amount of bombs
 	Fire	///< Increases the range of explosion

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -16,16 +16,12 @@ class BOMBER_API AMyAIController final : public AAIController
 	GENERATED_BODY()
 
 public:
-	/** Controlled character */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	class AMyCharacter* MyCharacter;
-
 	/** Sets default values for this character's properties */
 	AMyAIController();
 
 	/** The main AI logic */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	bool UpdateAI();
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdateAI();
 
 	/** Makes AI go toward specified destination cell */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -33,18 +29,19 @@ public:
 
 protected:
 	/** Cell position of current path segment's end */
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
-	struct FCell AiMoveTo;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	struct FCell AiMoveTo;  //[G]
+
+	/** Controlled character */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
+	class APlayerCharacter* MyCharacter;  //[G]
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
-	virtual void OnConstruction(const FTransform& Transform) final;
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() final;
-
-	/** Function called every frame on this AI controller to update movement */
-	virtual void Tick(float DeltaTime) final;
+	virtual void BeginPlay() override;
 
 	/** Allows the PlayerController to set up custom input bindings. */
-	virtual void OnPossess(APawn* InPawn) final;
+	virtual void OnPossess(APawn* InPawn) override;
 };
