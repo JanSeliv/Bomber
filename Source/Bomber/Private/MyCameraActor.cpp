@@ -3,7 +3,6 @@
 #include "MyCameraActor.h"
 
 #include "Camera/CameraComponent.h"
-#include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -78,17 +77,19 @@ void AMyCameraActor::BeginPlay()
 		return;
 	}
 
-	// Set view
-	const auto PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PlayerController)
-	{
-		PlayerController->SetViewTargetWithBlend(this);
-	}
-
-	// Set the start location
-	SetActorRotation(LevelMap->GetActorRotation());
-	SetActorLocation(LevelMap->GetActorLocation());
-
 	// Set the max distance
 	MaxHeight = FCell::CellSize * LevelMap->GetActorScale3D().GetMax();
+
+	// Set the start location and rotation
+	FVector NewLocation = LevelMap->GetActorLocation();
+	NewLocation.Z = MaxHeight;
+	SetActorLocation(NewLocation);
+	SetActorRotation(LevelMap->GetActorRotation());
+
+	// Set view
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	if (PlayerController)
+	{
+		PlayerController->SetViewTarget(this);
+	}
 }

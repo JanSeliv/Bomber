@@ -28,6 +28,6 @@ void AMyGameModeBase::BeginPlay()
 	UWorld* const World = GetWorld();
 	if (UGameplayStatics::GetCurrentLevelName(World) == "BomberLevel")
 	{
-		World->SpawnActor(AMyCameraActor::StaticClass());
+		World->SpawnActor(CameraActorClass);
 	}
 }
