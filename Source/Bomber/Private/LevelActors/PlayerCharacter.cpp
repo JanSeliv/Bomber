@@ -93,14 +93,6 @@ APlayerCharacter::APlayerCharacter()
 	NicknameTextRender->SetText(DEFAULT_NICKNAME);
 }
 
-// Called to bind functionality to input
-void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("SpaceEvent", IE_Pressed, this, &APlayerCharacter::SpawnBomb);
-}
-
 /* ---------------------------------------------------
  *					Protected functions
  * --------------------------------------------------- */
@@ -205,6 +197,40 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;
 	SetActorRotation(FRotator(0.f, YawRotation, 0.f));
 	USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
+}
+
+// Called to bind functionality to input
+void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis("MoveUpDown", this, &APlayerCharacter::OnMoveUpDown);
+	PlayerInputComponent->BindAxis("MoveRightLeft", this, &APlayerCharacter::OnMoveRightLeft);
+	PlayerInputComponent->BindAction("SpaceEvent", IE_Pressed, this, &APlayerCharacter::SpawnBomb);
+}
+
+// Adds the movement input along the given world direction vector.
+void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue, bool bForce)
+{
+	if (ScaleValue == 0)
+	{
+		return;
+	}
+
+	// Move the player
+	Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
+
+	// Set the body rotation
+	float YawRotation = 0.0F;
+	if (WorldDirection == GetActorForwardVector())
+	{
+		YawRotation = ScaleValue * -90.0F;
+	}
+	else if (WorldDirection == GetActorRightVector())
+	{
+		YawRotation = ScaleValue > 0 ? 0.0F : -180.0F;
+	}
+	GetMesh()->SetRelativeRotation(FRotator(0.0F, YawRotation, 0.0f));
 }
 
 // Spawns bomb on character position

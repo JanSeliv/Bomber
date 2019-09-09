@@ -69,10 +69,6 @@ public:
 	/** Sets default values for this character's properties */
 	APlayerCharacter();
 
-	/** Called to bind functionality to input */
-	virtual void
-	SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -106,6 +102,24 @@ protected:
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/* Called to bind functionality to input */
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	/** Virtual overriding of the UFUNCTION. 
+	 * Adds the movement input along the given world direction vector.
+	 * 
+	 * @param WorldDirection Direction in world space to apply input
+	 * @param ScaleValue Scale to apply to input. This can be used for analog input, ie a value of 0.5 applies half the normal value, while -1.0 would reverse the direction.
+	 * @param bForce If true always add the input, ignoring the result of IsMoveInputIgnored().
+	 */
+	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.0f, bool bForce = false) override;
+
+	/* Move the player character by the forward vector. */
+	FORCEINLINE void OnMoveUpDown(float ScaleValue) { AddMovementInput(GetActorForwardVector(), ScaleValue); }
+
+	/* Move the player character by the right vector. */
+	FORCEINLINE void OnMoveRightLeft(float ScaleValue) { AddMovementInput(GetActorRightVector(), ScaleValue); }
 
 	/** Spawns bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

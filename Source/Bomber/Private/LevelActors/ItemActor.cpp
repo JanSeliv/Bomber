@@ -2,12 +2,14 @@
 
 #include "LevelActors/ItemActor.h"
 
-#include "Bomber.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "UObject/ConstructorHelpers.h"
+
+#include "Bomber.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "MapComponent.h"
-#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 AItemActor::AItemActor()
@@ -85,7 +87,7 @@ void AItemActor::BeginPlay()
 // Increases +1 to numbers of character's powerups (Skate/Bomb/Fire)
 void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	APlayerCharacter* const OverlappedCharacter = Cast<APlayerCharacter>(OtherActor);
+	const auto OverlappedCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (OverlappedCharacter == nullptr				// Other actor is not myCharacter
 		|| IS_VALID(OverlappedCharacter) == false)  // Character is not valid
 
@@ -96,8 +98,16 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	switch (ItemType)
 	{
 		case EItemType::Skate:
-			OverlappedCharacter->Powerups_.SkateN++;
+		{
+			const int32 SkateN = ++OverlappedCharacter->Powerups_.SkateN * 100.F + 500.F;
+			UCharacterMovementComponent* MovementComponent = OverlappedCharacter->GetCharacterMovement();
+			if (MovementComponent	 //  is accessible
+				&& SkateN <= 1000.F)  // is lower than the max speed value (5x skate items)
+			{
+				MovementComponent->MaxWalkSpeed = SkateN;
+			}
 			break;
+		}
 		case EItemType::Bomb:
 			OverlappedCharacter->Powerups_.BombN++;
 			break;
@@ -105,7 +115,7 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 			OverlappedCharacter->Powerups_.FireN++;
 			break;
 		default:
-			ensureAlwaysMsgf(ItemType != EItemType::None, TEXT("None type of the item"));
+			check("None type of the item");
 			break;
 	}
 
