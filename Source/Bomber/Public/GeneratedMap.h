@@ -31,7 +31,7 @@ public:
 
 #if WITH_EDITORONLY_DATA  // bShouldShowRenders
 	/** Mark the editor updating visualization(text renders) */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++", meta = (DevelopmentOnly))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly))
 	bool bShouldShowRenders = false;
 #endif  //WITH_EDITORONLY_DATA [Editor] bShouldShowRenders
 

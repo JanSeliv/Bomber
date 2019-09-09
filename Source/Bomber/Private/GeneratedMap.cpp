@@ -32,7 +32,7 @@ AGeneratedMap::AGeneratedMap()
 
 	// Initialize the Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	RootComponent->SetRelativeScale3D(FVector(5.f, 5.f, 1.f));
+	RootComponent->RelativeScale3D = FVector(5.f, 5.f, 1.f);
 
 	// Find blueprint class of the background
 	BackgroundBlueprintComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("BackgroundBlueprintComponent"));

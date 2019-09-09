@@ -30,7 +30,7 @@ FCell::FCell(const UMapComponent* MapComponent)
 	const FCell OwnerCell(ComponentOwner->GetActorLocation());  // The owner location
 	// Check if the owner already standing on:
 	FCells CellsToIterate({OwnerCell,																   // 0: exactly the current his cell
-		FCell(OwnerCell.Location.GridSnap(CellSize)).RotateAngleAxis(1.F)});						   // 1: within the radius of one cell
+		FCell(OwnerCell.RotateAngleAxis(-1.F).Location.GridSnap(CellSize)).RotateAngleAxis(1.F)});	 // 1: within the radius of one cell
 	const int32 InitialCellsNum = CellsToIterate.Num();												   // The number of initial cells
 	FCells NonEmptyCells;																			   // all cells of each level actor
 	LevelMap->IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EActorType::Player), true, MapComponent);  //EActorType::Bomb | EActorType::Item | EActorType::Wall | EActorType::Box
