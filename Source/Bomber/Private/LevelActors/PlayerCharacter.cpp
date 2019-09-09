@@ -6,6 +6,7 @@
 #include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
 #include "Components/StaticMeshComponent.h"	// UStaticMeshComponent
 #include "Components/TextRenderComponent.h"	//UTextRenderComponent
+#include "Kismet/KismetMathLibrary.h"		   //test character rotation ----
 #include "UObject/ConstructorHelpers.h"		   // ConstructorHelpers
 
 #include "Bomber.h"
@@ -91,6 +92,18 @@ APlayerCharacter::APlayerCharacter()
 	NicknameTextRender->SetTextRenderColor(FColor::Black);
 	NicknameTextRender->SetWorldSize(56.f);
 	NicknameTextRender->SetText(DEFAULT_NICKNAME);
+}
+
+// Finds and rotates the self at the current character's location to point at the specified location.
+void APlayerCharacter::RotateToLocation(const FVector& Location) const
+{
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (MeshComponent)
+	{
+		FRotator NewRotation = FRotator::ZeroRotator;
+		NewRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location).Yaw;
+		MeshComponent->SetRelativeRotation(NewRotation);
+	}
 }
 
 /* ---------------------------------------------------
@@ -212,25 +225,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 // Adds the movement input along the given world direction vector.
 void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue, bool bForce)
 {
-	if (ScaleValue == 0)
+	if (ScaleValue != 0)
 	{
-		return;
-	}
+		// Move the character
+		Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
 
-	// Move the player
-	Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
-
-	// Set the body rotation
-	float YawRotation = 0.0F;
-	if (WorldDirection == GetActorForwardVector())
-	{
-		YawRotation = ScaleValue * -90.0F;
+		// Rotate the character
+		RotateToLocation(GetActorLocation() + ScaleValue * WorldDirection);
 	}
-	else if (WorldDirection == GetActorRightVector())
-	{
-		YawRotation = ScaleValue > 0 ? 0.0F : -180.0F;
-	}
-	GetMesh()->SetRelativeRotation(FRotator(0.0F, YawRotation, 0.0f));
 }
 
 // Spawns bomb on character position

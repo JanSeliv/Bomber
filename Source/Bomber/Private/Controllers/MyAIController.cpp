@@ -2,8 +2,6 @@
 
 #include "MyAIController.h"
 
-#include "Kismet/KismetMathLibrary.h"
-
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -256,9 +254,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	MoveToLocation(AiMoveTo.Location, -1.0f, false, false);
 
 	// Rotate the character
-	FRotator NewRotation = FRotator::ZeroRotator;
-	NewRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(MyCharacter->GetActorLocation(), AiMoveTo.Location).Yaw;
-	MyCharacter->SetActorRotation(NewRotation);
+	MyCharacter->RotateToLocation(AiMoveTo.Location);
 
 #if WITH_EDITOR  // [Editor]
 	// Visualize and show destination cell

@@ -82,7 +82,7 @@ void AMyCameraActor::BeginPlay()
 
 	// Set the start location and rotation
 	FVector NewLocation = LevelMap->GetActorLocation();
-	NewLocation.Z = MaxHeight;
+	NewLocation.Z += MaxHeight;
 	SetActorLocation(NewLocation);
 	SetActorRotation(LevelMap->GetActorRotation());
 

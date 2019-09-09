@@ -69,6 +69,11 @@ public:
 	/** Sets default values for this character's properties */
 	APlayerCharacter();
 
+	/**  Finds and rotates the self at the current character's location to point at the specified location.
+	 * @param Location the character is looking at. */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Location"))
+	void RotateToLocation(const FVector& Location) const;
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
