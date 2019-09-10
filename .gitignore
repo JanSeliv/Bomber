@@ -338,15 +338,11 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-/Config
 /Binaries/Win64
 /Content/ArchVisPolishPack02/Meshes/Decoration
-/Content
 /Intermediate
 /Saved
 /Bomber.uproject
 /Bomber.sln
 /Source/Bomber/doxygen.tag
-/Source/Documentation/html
-/docs/html
 /docs
