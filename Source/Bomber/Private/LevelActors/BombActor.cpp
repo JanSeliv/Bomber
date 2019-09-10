@@ -35,7 +35,7 @@ ABombActor::ABombActor()
 
 	// Initialize explosion particle component
 	ExplosionParticle = CreateDefaultSubobject<UParticleSystem>(TEXT("ExplosionParticle"));
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleFinder(TEXT("/Game/FXVarietyPack/Particles/P_ky_explosion"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleFinder(TEXT("/Game/VFX_Toolkit_V1/ParticleSystems/356Days/Par_CrescentBoom2_OLD"));
 	if (ParticleFinder.Succeeded())
 	{
 		ExplosionParticle = ParticleFinder.Object;

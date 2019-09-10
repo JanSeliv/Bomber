@@ -58,10 +58,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
 	TArray<class UMaterialInterface*> NameplateMaterials;  //[M.DO]
 
-	/** The nickname of the character */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UTextRenderComponent* NicknameTextRender;  //[C.DO]
-
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */

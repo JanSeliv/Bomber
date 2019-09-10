@@ -81,17 +81,6 @@ APlayerCharacter::APlayerCharacter()
 			NameplateMaterials.Emplace(MaterialsFinderArray[i].Object);
 		}
 	}
-
-	// Initialize the nickname text render component
-	NicknameTextRender = CreateDefaultSubobject<UTextRenderComponent>(TEXT("NicknameTextRender"));
-	NicknameTextRender->SetupAttachment(NameplateMeshComponent);
-	NicknameTextRender->SetRelativeLocation(FVector(0.f, 0.f, 10.f));
-	NicknameTextRender->SetRelativeRotation(FRotator(90.f, -90.f, 180.f));
-	NicknameTextRender->SetHorizontalAlignment(EHTA_Center);
-	NicknameTextRender->SetVerticalAlignment(EVRTA_TextCenter);
-	NicknameTextRender->SetTextRenderColor(FColor::Black);
-	NicknameTextRender->SetWorldSize(56.f);
-	NicknameTextRender->SetText(DEFAULT_NICKNAME);
 }
 
 // Finds and rotates the self at the current character's location to point at the specified location.
@@ -171,20 +160,6 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	{
 		const int32 MaterialNo = CharacterID_ < NameplateMaterials.Num() ? CharacterID_ : CharacterID_ % NameplateMaterials.Num();
 		NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
-	}
-
-	// Set the nickname
-	if (NicknameTextRender)
-	{
-		if (CharacterID_ == 0)  // is a player
-		{
-			UMyGameInstance* MyGameInstance = USingletonLibrary::GetMyGameInstance(this);
-			NicknameTextRender->SetText(MyGameInstance ? MyGameInstance->Nickname : DEFAULT_NICKNAME);
-		}
-		else  // is a bot
-		{
-			NicknameTextRender->SetText(FText::FromString(TEXT("AI")));
-		}
 	}
 
 	// Spawn or destroy controller of specific ai with enabled visualization
