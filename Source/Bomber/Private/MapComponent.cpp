@@ -50,38 +50,36 @@ void UMapComponent::OnMapComponentConstruction()
 void UMapComponent::OnRegister()
 {
 	Super::OnRegister();
-	if (IS_VALID(GetOwner()) == false)  // owner is not valid
+	AActor* Owner = GetOwner();
+	if (!IS_VALID(Owner))  // owner is not valid
 	{
 		return;
 	}
-	USingletonLibrary::PrintToLog(GetOwner(), "OnRegister", "");
+	USingletonLibrary::PrintToLog(Owner, "OnRegister", "");
 
 	// Finding the actor type
-	ActorType = USingletonLibrary::GetActorTypeByClass(GetOwner()->GetClass());
+	ActorType = USingletonLibrary::GetActorTypeByClass(Owner->GetClass());
 	check(ActorType != EActorType::None && "Is not valid the specified class");
 
 	// Disable the tick
-	GetOwner()->SetActorTickEnabled(false);
+	Owner->SetActorTickEnabled(false);
 
 	// Set the movable mobility for in-game attaching
-	if (GetOwner()->GetRootComponent() != nullptr)
+	if (Owner->GetRootComponent() != nullptr)
 	{
-		GetOwner()->GetRootComponent()->SetMobility(EComponentMobility::Movable);
+		Owner->GetRootComponent()->SetMobility(EComponentMobility::Movable);
 	}
 
 #if WITH_EDITOR									   // [Editor]
 	if (USingletonLibrary::IsEditorNotPieWorld())  // PIE only
 	{
 		// Should not call OnConstruction on drag events
-		GetOwner()->bRunConstructionScriptOnDrag = false;
+		Owner->bRunConstructionScriptOnDrag = false;
 	}
 
 	// Binds to Owner's OnConstruction to rerun calls the non-generated actors on the Level Map
 	// don't call OnActorsUpdatedDelegate in gameplay
-	if (GetOwner() != nullptr)
-	{
-		USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
-	}
+	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
 #endif  //WITH_EDITOR [Editor]
 }
 

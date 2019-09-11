@@ -57,6 +57,14 @@ public:
 		return Cell.bWasFound;
 	}
 
+	/** Returns the map component of the specified owner. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner)
+	{
+		check(Owner && "The specified owner is not accessible");
+		return Owner->FindComponentByClass<UMapComponent>();
+	}
+
 protected:
 	/** Owner's cell location on the Level Map */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))

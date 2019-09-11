@@ -227,11 +227,11 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 		return;
 	}
 
-	for (int32 i = 0; i < MapComponents_.Num(); i++)
+	for (int32 i = MapComponents_.Num() - 1; i >= 0; --i)
 	{
 		UMapComponent* const MapComponentIt = MapComponents_[i];
 		AActor* const ComponentOwner = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
-		const bool IsValidOwner = IS_VALID(ComponentOwner);
+		const bool IsValidOwner = IsValid(ComponentOwner);
 
 		// if bIsNotValidOnly param: should destroy only not valid or editor non-PIE owners, otherwise continue
 		if (bIsNotValidOnly && IsValidOwner && !ComponentOwner->IsEditorOnly())
@@ -243,6 +243,10 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 			|| bIsNotValidOnly)											 //  if true, not-valid component should be deleted anyway
 		{
 			USingletonLibrary::PrintToLog(ComponentOwner, "DestroyActorsFromMap");
+
+			// Remove from the array
+			// First remove, because after the box destroying the item can be spawned and starts searching for an empty cell
+			MapComponents_.RemoveAt(i, 1, false);
 
 			// Destroy the iterated owner
 			if (IsValidOwner)
@@ -256,10 +260,6 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 			{
 				PlayerCharactersNum--;
 			}
-
-			// Remove from the array
-			MapComponents_.Remove(MapComponentIt);
-			i--;
 		}
 	}  // Map components iteration
 
@@ -353,17 +353,17 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		}
 	}
 
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
+#if WITH_EDITOR  // [IsEditorNotPieWorld] \
+	// Show cells coordinates of the Grid array
+	if (bShouldShowRenders == true)
+	{
+		USingletonLibrary::ClearOwnerTextRenders(this);
+		USingletonLibrary::AddDebugTextRenders(this, FCells(GridCells_));
+	}
+
+	// Preview generation
 	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
-		// Show cells coordinates of the Grid array
-		USingletonLibrary::ClearOwnerTextRenders(this);
-		if (bShouldShowRenders == true)
-		{
-			USingletonLibrary::AddDebugTextRenders(this, FCells(GridCells_));
-		}
-
-		// Preview generation
 		GenerateLevelActors();
 	}
 #endif  // WITH_EDITOR [IsEditorNotPieWorld]
@@ -482,6 +482,7 @@ void AGeneratedMap::GenerateLevelActors()
 				{
 					// If PIE world, mark this spawned actor as bIsEditorOnlyActor
 					SpawnedActor->bIsEditorOnlyActor = true;
+					UMapComponent::GetMapComponent(SpawnedActor)->bIsEditorOnly = true;
 					USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.RemoveAll(SpawnedActor);
 				}
 #endif		   // WITH_EDITOR [IsEditorNotPieWorld]
