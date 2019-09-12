@@ -35,14 +35,13 @@ FCell::FCell(const UMapComponent* MapComponent)
 	FCells NonEmptyCells;																			   // all cells of each level actor
 	LevelMap->IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EActorType::Player), true, MapComponent);  //EActorType::Bomb | EActorType::Item | EActorType::Wall | EActorType::Box
 
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
-	// Editor locals to find a nearest cell
+	// Pre gameplay locals to find a nearest cell
+	const bool bHasNotBegunPlay = !MapComponent->HasBegunPlay();
 	float LastFoundEditorLen = MAX_FLT;
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (bHasNotBegunPlay)
 	{
 		CellsToIterate.Append(LevelMap->GridCells_);  // union of two sets(initials+all) for finding a nearest cell
 	}
-#endif  // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// ----- Part 1:  Cells iteration
 
@@ -65,10 +64,9 @@ FCell::FCell(const UMapComponent* MapComponent)
 			break;
 		}
 
-#if WITH_EDITOR
-		//	Finding a nearest cell
-		if (Counter >= InitialCellsNum)  // [IsEditorNotPieWorld]-Cell
-
+		//	Finding the nearest cell before starts the game
+		if (bHasNotBegunPlay				// the game was not started
+			&& Counter >= InitialCellsNum)  // if iterated cell is not initial
 		{
 			const float EditorLenIt = USingletonLibrary::CalculateCellsLength(OwnerCell, CellIt);
 			if (EditorLenIt < LastFoundEditorLen)  // Distance closer
@@ -78,8 +76,7 @@ FCell::FCell(const UMapComponent* MapComponent)
 			}
 		}
 
-#endif  // WITH_EDITOR [IsEditorNotPieWorld]
-	}   //[Cells Iteration]
+	}  //[Cells Iteration]
 
 	// Checks the cell is contained in the grid and free from other level actors.
 	bWasFound = !(*this == ZeroCell);
