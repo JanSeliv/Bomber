@@ -67,7 +67,7 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 	}
 
 	// Spawn item with the chance
-	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 100;
+	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 30;
 	if (ItemChance)
 	{
 		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");

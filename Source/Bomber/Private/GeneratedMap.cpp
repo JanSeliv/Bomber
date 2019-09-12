@@ -229,7 +229,13 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 
 	for (int32 i = MapComponents_.Num() - 1; i >= 0; --i)
 	{
+		if (!MapComponents_.IsValidIndex(i))  // the element already was removed
+		{
+			continue;
+		}
+
 		UMapComponent* const MapComponentIt = MapComponents_[i];
+
 		AActor* const ComponentOwner = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		const bool IsValidOwner = IsValid(ComponentOwner);
 
@@ -401,22 +407,20 @@ void AGeneratedMap::PostInitializeComponents()
 // Spawns and fills the Grid Array values by level actors
 void AGeneratedMap::GenerateLevelActors()
 {
-	if (GridCells_.Num() == 0)
-	{
-		check("Is no cells for the actors generation");
-		return;
-	}
+	check(GridCells_.Num() > 0 && "Is no cells for the actors generation");
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
 
 	// Destroy all editor-only non-PIE actors
 	DestroyActorsFromMap(FCells(GridCells_), true);
 
-#if WITH_EDITOR  // [Editor]
-	// After destroying PIE actors and before their generation,
-	// calling to updating of all dragged to the Level Map actors
-	USingletonLibrary::BroadcastActorsUpdating();  // [IsEditorNotPieWorld]
+	//  Calls before generation preview actors to updating of all dragged to the Level Map actors
+	// After destroying only editor actors and before their generation
+	//USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
+	for (const auto& MapComponentIt : MapComponents_)
+	{
+		MapComponentIt->RerunOwnerConstruction();
+	}
 	USingletonLibrary::PrintToLog(this, "_____ [Editor]BroadcastActorsUpdating _____", "_____ END _____");
-#endif  // [Editor]
 
 	// Set number of existed player characters
 	FMapComponents PlayersMapComponents;
@@ -483,7 +487,6 @@ void AGeneratedMap::GenerateLevelActors()
 					// If PIE world, mark this spawned actor as bIsEditorOnlyActor
 					SpawnedActor->bIsEditorOnlyActor = true;
 					UMapComponent::GetMapComponent(SpawnedActor)->bIsEditorOnly = true;
-					USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.RemoveAll(SpawnedActor);
 				}
 #endif		   // WITH_EDITOR [IsEditorNotPieWorld]
 			}  // End of the spawn part

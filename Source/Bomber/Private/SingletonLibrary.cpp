@@ -37,20 +37,6 @@ USingletonLibrary::USingletonLibrary()
  *		Editor development functions
  * --------------------------------------------------- */
 
-//  Calls before generation preview actors to updating of all dragged to the Level Map actors
-void USingletonLibrary::BroadcastActorsUpdating()
-{
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
-
-	if (IsEditorNotPieWorld())  // [IsEditorNotPieWorld] only!!!
-	{
-		PrintToLog(GetSingleton(), "----- [IsEditorNotPieWorld]OnActorsUpdatedDelegate ----->", "RerunConstructionScripts");
-		GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
-	}
-
-#endif  // WITH_EDITOR [IsEditorNotPieWorld]
-}
-
 // Checks, that this actor placed in the editor world and the game is not started yet
 bool USingletonLibrary::IsEditorNotPieWorld()
 {

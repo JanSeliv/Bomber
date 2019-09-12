@@ -70,17 +70,13 @@ void UMapComponent::OnRegister()
 		Owner->GetRootComponent()->SetMobility(EComponentMobility::Movable);
 	}
 
-#if WITH_EDITOR									   // [Editor]
-	if (USingletonLibrary::IsEditorNotPieWorld())  // PIE only
+#if WITH_EDITOR  // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
 		// Should not call OnConstruction on drag events
 		Owner->bRunConstructionScriptOnDrag = false;
 	}
-
-	// Binds to Owner's OnConstruction to rerun calls the non-generated actors on the Level Map
-	// don't call OnActorsUpdatedDelegate in gameplay
-	USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.AddUObject(GetOwner(), &AActor::RerunConstructionScripts);
-#endif  //WITH_EDITOR [Editor]
+#endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 // Called when a component is destroyed for removing the owner from the Level Map.
@@ -97,7 +93,6 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		// Editor delegates
 		if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 		{
-			USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.RemoveAll(ComponentOwner);
 			USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
 		}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]

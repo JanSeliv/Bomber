@@ -5,7 +5,6 @@
 #include "Animation/AnimInstance.h"			   //UAnimInstance
 #include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
 #include "Components/StaticMeshComponent.h"	// UStaticMeshComponent
-#include "Components/TextRenderComponent.h"	//UTextRenderComponent
 #include "Kismet/KismetMathLibrary.h"		   //test character rotation ----
 #include "UObject/ConstructorHelpers.h"		   // ConstructorHelpers
 
@@ -14,7 +13,6 @@
 #include "LevelActors/BombActor.h"
 #include "MapComponent.h"
 #include "MyAIController.h"
-#include "MyGameInstance.h"
 #include "SingletonLibrary.h"
 
 // Sets default values
@@ -147,6 +145,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	FCells PlayersCells;
 	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EActorType::Player));
 	CharacterID_ = PlayersCells.FindId(MapComponent->GetCell()).AsInteger();
+	check(CharacterID_ != INDEX_NONE && "The character was not found on the Level Map");
 
 	// Set a character skeletal mesh
 	if (GetMesh())

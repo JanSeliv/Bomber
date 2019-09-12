@@ -65,6 +65,14 @@ public:
 		return Owner->FindComponentByClass<UMapComponent>();
 	}
 
+	/**  Rerun owner's construction scripts. The temporary only editor owner will not be updated. */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
+	void RerunOwnerConstruction() const
+	{
+		if (IsEditorOnly() || !ensureMsgf(GetOwner(), TEXT("The specified owner is not accessible"))) return;
+		GetOwner()->RerunConstructionScripts();
+	}
+
 protected:
 	/** Owner's cell location on the Level Map */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))

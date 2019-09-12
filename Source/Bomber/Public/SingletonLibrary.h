@@ -29,16 +29,6 @@ public:
 	 *		Editor development functions
 	 * --------------------------------------------------- */
 
-#if WITH_EDITOR  // [Editor]
-	DECLARE_MULTICAST_DELEGATE(FPushNongeneratedToMap);
-	/* Owners Map Components binds to updating on the Level Map to this delegate */
-	FPushNongeneratedToMap OnActorsUpdatedDelegate;
-#endif  //WITH_EDITOR [IsEditorNotPieWorld]
-
-	/** Calls before generation preview actors to updating of all dragged to the Level Map actors*/
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	static void BroadcastActorsUpdating();
-
 	/** Checks, that this actor placed in the editor world and the game is not started yet */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
 	static bool IsEditorNotPieWorld();
