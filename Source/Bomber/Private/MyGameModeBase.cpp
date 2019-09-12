@@ -1,26 +1,33 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright 2019 Yevhenii Selivanov.
 
 #include "MyGameModeBase.h"
 
-#include "Bomber.h"
+#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+
+#include "MyCameraActor.h"
+#include "MyHUD.h"
 #include "MyPlayerController.h"
 
+// Sets default values for this actor's properties
 AMyGameModeBase::AMyGameModeBase()
 {
-	//tell custom game mode to use custom defaults
+	// Custom defaults classes
+	HUDClass = AMyHUD::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = nullptr;
-	HUDClass = nullptr;  //AMyHUD::StaticClass();
+	CameraActorClass = AMyCameraActor::StaticClass();
 }
 
+// Called when the game starts or when spawned
 void AMyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//focus to the game
-	const auto PlayerController = Cast<APlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	if (PlayerController)
+	// Camera spawning
+	UWorld* const World = GetWorld();
+	if (UGameplayStatics::GetCurrentLevelName(World) == "BomberLevel")
 	{
-		PlayerController->SetInputMode(FInputModeGameOnly());
+		World->SpawnActor(CameraActorClass);
 	}
 }
