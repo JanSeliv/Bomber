@@ -37,6 +37,9 @@ USingletonLibrary::USingletonLibrary()
  *		Editor development functions
  * --------------------------------------------------- */
 
+// Binds to update movements of each AI controller.
+USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
+
 // Checks, that this actor placed in the editor world and the game is not started yet
 bool USingletonLibrary::IsEditorNotPieWorld()
 {

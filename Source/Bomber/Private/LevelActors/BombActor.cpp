@@ -120,7 +120,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t InitializeBombProperties");
 		InitializeBombProperties(*PlayerBombsN_, ExplosionLength_, -1);
 
-		USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
+		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }

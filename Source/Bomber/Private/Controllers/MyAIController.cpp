@@ -305,5 +305,9 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	}
 
 	MyCharacter = Cast<APlayerCharacter>(InPawn);
-	USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.AddUniqueDynamic(this, &ThisClass::UpdateAI);
+
+	if (USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this) == false)
+	{
+		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+	}
 }

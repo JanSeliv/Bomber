@@ -41,7 +41,7 @@ void UMapComponent::OnMapComponentConstruction()
 
 		// Update AI renders after adding obj to map
 		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
-		USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
+		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
@@ -93,7 +93,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		// Editor delegates
 		if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 		{
-			USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
+			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 		}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 	}

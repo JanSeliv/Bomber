@@ -17,10 +17,9 @@ class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAI);
-	/** Calls to update movements of each AI controller  */
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "C++")
-	FUpdateAI OnAIUpdatedDelegate;
+	DECLARE_MULTICAST_DELEGATE(FUpdateAI);
+	/** Binds to update movements of each AI controller. */
+	static FUpdateAI GOnAIUpdatedDelegate;
 
 	/** Sets default values for this actor's properties */
 	USingletonLibrary();
