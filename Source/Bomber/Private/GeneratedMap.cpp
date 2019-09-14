@@ -293,7 +293,7 @@ void AGeneratedMap::Tick(float DeltaTime)
 	}
 
 	// AI moving
-	USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
+	USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -361,9 +361,9 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld] \
 	// Show cells coordinates of the Grid array
-	if (bShouldShowRenders == true)
+	USingletonLibrary::ClearOwnerTextRenders(this);
+	if (bShouldShowRenders)
 	{
-		USingletonLibrary::ClearOwnerTextRenders(this);
 		USingletonLibrary::AddDebugTextRenders(this, FCells(GridCells_));
 	}
 

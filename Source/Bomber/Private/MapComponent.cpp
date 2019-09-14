@@ -41,7 +41,7 @@ void UMapComponent::OnMapComponentConstruction()
 
 		// Update AI renders after adding obj to map
 		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
-		USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
+		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 }
@@ -87,13 +87,13 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		&& IsValid(USingletonLibrary::GetLevelMap()))  // is valid and is not transient the level map
 	{
 		USingletonLibrary::PrintToLog(ComponentOwner, "OnComponentDestroyed", "-> \t DestroyActorsFromMap");
-		USingletonLibrary::GetLevelMap()->DestroyActorsFromMap(Cell);  // During a game: destroyed bombs, pickup-ed items
+		USingletonLibrary::GetLevelMap()->RemoveMapComponent(this);  // During a game: destroyed bombs, pickup-ed items
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 		// Editor delegates
 		if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 		{
-			USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.Broadcast();
+			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 		}
 #endif  //WITH_EDITOR [IsEditorNotPieWorld]
 	}

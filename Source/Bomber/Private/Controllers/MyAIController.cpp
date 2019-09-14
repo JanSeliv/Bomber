@@ -49,14 +49,13 @@ void AMyAIController::UpdateAI()
 	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous)  // two searches (safe and free)
 	{
 		LevelMap->GetSidesCells(Free, F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MAX_int32);
-		if (Free.Num() > 0)
+		if (!bIsDangerous && Free.Num() > 0)
 		{
+			// Remove this cell from array
+			bIsDangerous = !Free.Remove(F0);  // if it can't be removed - the bot is standing in the explosion
 			break;
 		}
 	}
-
-	// Remove this cell from array
-	bIsDangerous = !Free.Remove(F0);  // if it can't be removed - the bot is standing in the explosion
 
 	// Is there an item nearby?
 	if (bIsDangerous == false)
@@ -258,7 +257,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 
 #if WITH_EDITOR  // [Editor]
 	// Visualize and show destination cell
-	if (!USingletonLibrary::IsEditorNotPieWorld())  // [PIE]
+	if (HasActorBegunPlay())  // [PIE]
 	{
 		USingletonLibrary::PrintToLog(this, "MoveAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
@@ -305,5 +304,9 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	}
 
 	MyCharacter = Cast<APlayerCharacter>(InPawn);
-	USingletonLibrary::GetSingleton()->OnAIUpdatedDelegate.AddUniqueDynamic(this, &ThisClass::UpdateAI);
+
+	if (USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this) == false)
+	{
+		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+	}
 }

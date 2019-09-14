@@ -51,7 +51,8 @@ FCell::FCell(const UMapComponent* MapComponent)
 		Counter++;
 		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter));
 
-		if (NonEmptyCells.Contains(CellIt))  // the cell is not free from other level actors
+		if (NonEmptyCells.Contains(CellIt)					   // the cell is not free from other level actors
+			&& MapComponent->ActorType != EActorType::Player)  // the player can be placed with other actor
 		{
 			continue;
 		}
