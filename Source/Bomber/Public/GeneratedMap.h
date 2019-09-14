@@ -95,12 +95,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void DestroyActorsFromMap(const TSet<struct FCell>& Cells, bool bIsNotValidOnly = false);
 
-	/** Shorter overloaded version to destroying actor of the specified cell */
-	FORCEINLINE void DestroyActorsFromMap(const FCell& Cell)
-	{
-		const TSet<struct FCell> Keys{Cell};
-		DestroyActorsFromMap(Keys);
-	}
+	/** Removes the specified map component from the array without an owner destroying.
+	 * @returns Number of removed elements. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	FORCEINLINE int32 RemoveMapComponent(class UMapComponent* MapComponent) { return MapComponents_.Remove(MapComponent); }
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
