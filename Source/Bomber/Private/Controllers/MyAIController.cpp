@@ -257,8 +257,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 
 #if WITH_EDITOR  // [Editor]
 	// Visualize and show destination cell
-	if (HasActorBegunPlay()
-			MyCharacter->)  // [PIE]
+	if (HasActorBegunPlay())  // [PIE]
 	{
 		USingletonLibrary::PrintToLog(this, "MoveAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
