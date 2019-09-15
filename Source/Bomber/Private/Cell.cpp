@@ -36,7 +36,7 @@ FCell::FCell(const UMapComponent* MapComponent)
 	LevelMap->IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EActorType::Player), true, MapComponent);  //EActorType::Bomb | EActorType::Item | EActorType::Wall | EActorType::Box
 
 	// Pre gameplay locals to find a nearest cell
-	const bool bHasNotBegunPlay = !MapComponent->HasBegunPlay();
+	const bool bHasNotBegunPlay = !LevelMap->HasActorBegunPlay();  // the game was not started
 	float LastFoundEditorLen = MAX_FLT;
 	if (bHasNotBegunPlay)
 	{
@@ -80,7 +80,7 @@ FCell::FCell(const UMapComponent* MapComponent)
 	}  //[Cells Iteration]
 
 	// Checks the cell is contained in the grid and free from other level actors.
-	bWasFound = !(*this == ZeroCell);
+	bWasFound = !(*this == ZeroCell) && !NonEmptyCells.Contains(*this);
 }
 
 // Initial constructor for cells filling into the array. Round another FVector into this cell.
