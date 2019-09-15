@@ -23,7 +23,7 @@ AGeneratedMap::AGeneratedMap()
 	// Set this actor to call Tick() every time to update characters locations
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
-	PrimaryActorTick.TickInterval = 0.25F;
+	PrimaryActorTick.TickInterval = 0.1F;
 
 #if WITH_EDITOR  //[Editor]
 	// Should not call OnConstruction on drag events
