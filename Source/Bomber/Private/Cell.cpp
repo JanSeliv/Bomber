@@ -49,7 +49,7 @@ FCell::FCell(const UMapComponent* MapComponent)
 	for (const auto& CellIt : CellsToIterate)
 	{
 		Counter++;
-		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter));
+		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter) + ":" + CellIt.Location.ToString());
 
 		if (NonEmptyCells.Contains(CellIt)					   // the cell is not free from other level actors
 			&& MapComponent->ActorType != EActorType::Player)  // the player can be placed with other actor
@@ -111,10 +111,10 @@ FCell FCell::RotateAngleAxis(const float& AxisZ) const
 // Copy another non-zero cell into this one.
 FCell& FCell::operator=(const FCell& Other)
 {
-	bWasFound = Other.bWasFound;
-	if (Other.Location != FVector::ZeroVector)
+	if (!(Other == ZeroCell))
 	{
 		Location = Other.Location;
+		bWasFound = Other.bWasFound;
 	}
 	return *this;
 }
