@@ -24,10 +24,10 @@ struct FCell
 	/** Always holds the free cell's FVector-coordinate.
 	 * If it is not empty or not found, holds the last succeeded due to copy operator. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FVector Location = FVector::ZeroVector;  //[AW]
+	FVector Location = FVector::DownVector;  //[AW]
 
 	/** Marks when the cell is contained in the grid and free from other level actors. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	bool bWasFound = false;  //[B]
 
 	/** Default constructor (zero initialization). */
