@@ -4,8 +4,11 @@
 
 #include "Cell.generated.h"
 
-/** Typedef to allow for some nicer looking sets of cells */
+/** Typedef to allow for some nicer looking sets of cells. */
 typedef TSet<struct FCell> FCells;
+
+/** Typedef to allow for some nicer looking shared pointer of cell.*/
+typedef TSharedPtr<struct FCell> FSharedCell;
 
 /**
  * The structure that contains a location of an one cell on a grid of the Level Map.
@@ -34,14 +37,6 @@ struct FCell
 	FCell() {}
 
 	/**
-	 * The main constructor.
-	 * Finds the nearest free cell in the Grid Array for the specified Map Component's owner. 
-	 * 
-	 * @param MapComponent Target to find the cell.
-	 */
-	explicit FCell(const class UMapComponent* MapComponent);
-
-	/**
 	* Initial constructor for cells filling into the array.
 	* Round another FVector into this cell.
 	*
@@ -55,20 +50,6 @@ struct FCell
 	 * @return Rotated to the Level Map cell, the same cell otherwise
 	 */
 	FCell RotateAngleAxis(const float& AxisZ) const;
-
-	/* Set the cell to zero value. */
-	FORCEINLINE void SetToZero()
-	{
-		Location = ZeroCell.Location;
-	}
-
-	/**
-	* Copy another non-zero cell into this one.
-	*
-	* @param Other The other cell.
-	* @return Reference to cell after copy.
-	*/
-	FCell& operator=(const FCell& Other);
 
 	/**
 	 * Compares cells for equality.

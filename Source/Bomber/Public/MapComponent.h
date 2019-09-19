@@ -23,6 +23,9 @@ class BOMBER_API UMapComponent final : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	/** Owner's cell location on the Level Map */
+	FSharedCell Cell;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++")
 	EActorType ActorType = EActorType::None;  //[i]
 
@@ -46,16 +49,13 @@ public:
 	/** Getter of the Cell.
 	 * @return the cell location of an owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE struct FCell GetCell() const { return Cell; }
+	FORCEINLINE struct FCell GetCell() const { return Cell.IsValid() ? *Cell : FCell::ZeroCell; }
 
-	/** Finds and sets to the owner's map component a non-zero cell.
-	 * @return true if the cell is free from other level actors. */
+	/** Finds the nearest free cell in the Grid Array for the specified Map Component's owner.
+	 * @param NonEmptyCells Skip this cells.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	FORCEINLINE bool UpdateCell()
-	{
-		Cell = FCell(this);
-		return Cell.bWasFound;
-	}
+	FORCEINLINE bool UpdateCell(const TSet<struct FCell>& NonEmptyCells);
 
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -74,10 +74,6 @@ public:
 	}
 
 protected:
-	/** Owner's cell location on the Level Map */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	struct FCell Cell;  //[G]
-
 	/* ---------------------------------------------------
 	 *	Map Component's protected functions
 	 * --------------------------------------------------- */
