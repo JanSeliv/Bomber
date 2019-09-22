@@ -95,6 +95,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void DestroyActorsFromMap(const TSet<struct FCell>& Cells, bool bIsNotValidOnly = false);
 
+	/** Find the nearest cell pointer to the specified Map Component 
+	 * 
+	 * @param MapComponent 
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category="C++")
+	static void SetNearestCell(class UMapComponent* MapComponent);
+	
 	/** Removes the specified map component from the array without an owner destroying.
 	 * @returns Number of removed elements. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -110,8 +117,7 @@ protected:
 	 * --------------------------------------------------- *
 
 	/** Cells storage. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	TArray<struct FCell> GridCells_;  //[M.IO]
+	TArray<TSharedPtr<struct FCell>> GridCells_;  //[M.IO]
 	/** The cell structure has access to AGeneratedMap::GridCells_ */
 	friend struct FCell;
 
