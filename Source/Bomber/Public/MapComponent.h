@@ -51,12 +51,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE struct FCell GetCell() const { return Cell.IsValid() ? *Cell : FCell::ZeroCell; }
 
-	/** Finds the nearest free cell in the Grid Array for the specified Map Component's owner.
-	 * @param NonEmptyCells Skip this cells.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	FORCEINLINE bool UpdateCell(const TSet<struct FCell>& NonEmptyCells);
-
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner)

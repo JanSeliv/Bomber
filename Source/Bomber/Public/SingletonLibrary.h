@@ -107,18 +107,6 @@ public:
 		return FCell::ZeroCell;
 	}
 
-	/** The custom make node of the FCell constructor.
-	 * Used as a blueprint implementation of the default MakeStruct node
-	 * 
-	 * @param MapComponent Finding the closest cell to the Map Component's owner
-	 * @return The found cell
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "MakeCell"))
-	static FORCEINLINE struct FCell MakeCell(const class UMapComponent* MapComponent)
-	{
-		return FCell(MapComponent);
-	}
-
 	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
 	 * 
 	 * @param Cell The cell, that will be rotated
