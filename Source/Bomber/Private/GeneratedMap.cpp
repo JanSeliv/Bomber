@@ -272,6 +272,81 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 	MapComponents_.Shrink();
 }
 
+void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
+{
+	AActor* const ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
+	if (!ensureMsgf(IS_VALID(ComponentOwner), TEXT("FCell:: The specified actor is not valid")))
+	{
+		return;
+	}
+
+	// ----- Part 0: Locals -----
+	FSharedCell FoundCell;
+	const FCell OwnerCell(ComponentOwner->GetActorLocation());  // The owner location
+	// Check if the owner already standing on:
+	FCells InitialCells({OwnerCell,																		   // 0: exactly the current his cell
+		FCell(OwnerCell.RotateAngleAxis(-1.F).Location.GridSnap(FCell::CellSize)).RotateAngleAxis(1.F)});  // 1: within the radius of one cell
+
+	TSet<FSharedCell> CellsToIterate(GridCells_.FilterByPredicate([InitialCells](FSharedCell Cell) {
+		return InitialCells.Contains(*Cell);
+	}));
+
+	const int32 InitialCellsNum = CellsToIterate.Num();										 // The number of initial cells
+	FCells NonEmptyCells;																	 // all cells of each level actor
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EActorType::Player), true, MapComponent);  //EActorType::Bomb | EActorType::Item | EActorType::Wall | EActorType::Box
+
+	// Pre gameplay locals to find a nearest cell
+	const bool bHasNotBegunPlay = !HasActorBegunPlay();  // the game was not started
+	float LastFoundEditorLen = MAX_FLT;
+	if (bHasNotBegunPlay)
+	{
+		CellsToIterate.Append(GridCells_);  // union of two sets(initials+all) for finding a nearest cell
+	}
+
+	// ----- Part 1:  Cells iteration
+
+	int32 Counter = -1;
+	for (const auto& CellIt : CellsToIterate)
+	{
+		Counter++;
+		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter) + ":" + CellIt->Location.ToString());
+
+		if (NonEmptyCells.Contains(*CellIt)					   // the cell is not free from other level actors
+			&& MapComponent->ActorType != EActorType::Player)  // the player can be placed with other actor
+		{
+			continue;
+		}
+
+		// if the cell was found among initial cells without searching a nearest
+		if (Counter < InitialCellsNum		 // is the initial cell
+			&& GridCells_.Contains(CellIt))  // is contained on the grid
+		{
+			FoundCell = CellIt;
+			break;
+		}
+
+		//	Finding the nearest cell before starts the game
+		if (bHasNotBegunPlay				// the game was not started
+			&& Counter >= InitialCellsNum)  // if iterated cell is not initial
+		{
+			const float EditorLenIt = USingletonLibrary::CalculateCellsLength(OwnerCell, *CellIt);
+			if (EditorLenIt < LastFoundEditorLen)  // Distance closer
+			{
+				LastFoundEditorLen = EditorLenIt;
+				FoundCell = CellIt;
+			}
+		}
+
+	}  //[Cells Iteration]
+
+	// Checks the cell is contained in the grid and free from other level actors.
+	if (FoundCell.IsValid())
+	{
+		FoundCell->bWasFound = !NonEmptyCells.Contains(*FoundCell);
+		MapComponent->Cell = FoundCell;
+	}
+}
+
 /* ---------------------------------------------------
  *		Level map protected functions
  * --------------------------------------------------- */
@@ -289,7 +364,7 @@ void AGeneratedMap::Tick(float DeltaTime)
 	GetMapComponents(PlayersMapComponents, TO_FLAG(EActorType::Player));
 	for (const auto& MapCompIt : PlayersMapComponents)
 	{
-		if (MapCompIt) MapCompIt->UpdateCell();
+		if (MapCompIt) SetNearestCell(MapCompIt);
 	}
 
 	// AI moving
