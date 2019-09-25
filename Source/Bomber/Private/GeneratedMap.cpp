@@ -123,7 +123,7 @@ void AGeneratedMap::GetSidesCells(
 					break;  // to the next side
 				}
 
-				const FCell FoundCell = GridCells_[FoundIndex];
+				const FCell FoundCell = *GridCells_[FoundIndex];
 
 				if (Walls.Contains(FoundCell)									  // cell contains a wall
 					|| bWithoutObstacles && Obstacles.Contains(FoundCell)		  // cell contains an obstacle (Bombs/Boxes)
@@ -411,6 +411,10 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	SetActorScale3D(FVector(MapScale));
 
 	// Clear the old grid array
+	for (auto& SharedCell : GridCells_)
+	{
+		SharedCell.Reset();
+	}
 	GridCells_.Empty();
 	GridCells_.Reserve(MapScale.X * MapScale.Y);
 
@@ -430,7 +434,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetCellSize());
 			// Cell was found, add rotated cell to the array
 			const FCell FoundCell(FCell(FoundVector).RotateAngleAxis(1.0F));
-			GridCells_.AddUnique(FoundCell);
+			GridCells_.AddUnique(MakeShared<FCell>(FoundCell));
 		}
 	}
 
@@ -439,7 +443,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::ClearOwnerTextRenders(this);
 	if (bShouldShowRenders)
 	{
-		USingletonLibrary::AddDebugTextRenders(this, FCells(GridCells_));
+		USingletonLibrary::AddDebugTextRenders(this, GridCells_);
 	}
 
 	// Preview generation
@@ -486,7 +490,9 @@ void AGeneratedMap::GenerateLevelActors()
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
 
 	// Destroy all editor-only non-PIE actors
-	DestroyActorsFromMap(FCells(GridCells_), true);
+	FCells NonEmptyCells;
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::All));
+	DestroyActorsFromMap(NonEmptyCells, true);
 
 	//  Calls before generation preview actors to updating of all dragged to the Level Map actors
 	// After destroying only editor actors and before their generation
@@ -503,7 +509,6 @@ void AGeneratedMap::GenerateLevelActors()
 	PlayerCharactersNum = PlayersMapComponents.Num();
 
 	// Getting all non empty cells of each actor.
-	FCells NonEmptyCells;
 	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::All));
 
 	// Cells iterating by rows
@@ -512,7 +517,7 @@ void AGeneratedMap::GenerateLevelActors()
 	{
 		for (int32 X = 0; X < MapScale.X; ++X)
 		{
-			const FCell CellIt = GridCells_[MapScale.X * Y + X];
+			const FCell CellIt = *GridCells_[MapScale.X * Y + X];
 			USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t Iterated cell:", CellIt.Location.ToString());
 			if (NonEmptyCells.Contains(CellIt))
 			{
@@ -594,7 +599,9 @@ void AGeneratedMap::Destroyed()
 {
 	if (!IS_TRANSIENT(this))
 	{
-		DestroyActorsFromMap(FCells(GridCells_));
+		FCells NonEmptyCells;
+		IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::All));
+		DestroyActorsFromMap(NonEmptyCells);
 	}
 	Super::Destroyed();
 }
