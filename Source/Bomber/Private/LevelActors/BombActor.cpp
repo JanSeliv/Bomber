@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #include "LevelActors/BombActor.h"
 
@@ -91,13 +91,13 @@ void ABombActor::InitializeBombProperties(
 	// Update explosion information
 	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCells_, MapComponent->GetCell(), EPathType::Explosion, FireN);
 
-#if WITH_EDITOR  // [Editor]
-	if (MapComponent->bShouldShowRenders)
-	{
-		USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
-		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
-	}
-#endif
+	//#if WITH_EDITOR  // [Editor]
+	//	if (MapComponent->bShouldShowRenders)
+	//	{
+	//		USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
+	//		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
+	//	}
+	//#endif
 }
 
 // Called when an instance of this class is placed (in editor) or spawned.

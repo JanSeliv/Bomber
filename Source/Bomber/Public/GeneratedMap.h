@@ -99,9 +99,9 @@ public:
 	 * 
 	 * @param MapComponent
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category="C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
 	void SetNearestCell(class UMapComponent* MapComponent) const;
-	
+
 	/** Removes the specified map component from the array without an owner destroying.
 	 * @returns Number of removed elements. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -117,7 +117,7 @@ protected:
 	 * --------------------------------------------------- *
 
 	/** Cells storage. */
-	TArray<TSharedPtr<struct FCell>> GridCells_;  //[M.IO]
+	TArray<FSharedCell> GridCells_;  //[M.IO]
 
 	/** Storage of alive players and their current locations */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))

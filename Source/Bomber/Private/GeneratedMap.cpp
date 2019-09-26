@@ -56,8 +56,10 @@ void AGeneratedMap::GetSidesCells(
 	// ----- Locals -----
 	FCells Walls;
 	IntersectCellsByTypes(Walls, TO_FLAG(EActorType::Wall));
-	const int32 C0 = GridCells_.IndexOfByKey(Cell);  // the index of the specified cell
-	if (C0 == INDEX_NONE)							 // if index was found and cell is contained in the array
+
+	// the index of the specified cell
+	const int32 C0 = GridCells_.IndexOfByPredicate([Cell](FSharedCell SharedCell) { return *SharedCell == Cell; });
+	if (C0 == INDEX_NONE)  // if index was found and cell is contained in the array
 	{
 		return;
 	}

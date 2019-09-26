@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #include "SingletonLibrary.h"
 
@@ -100,7 +100,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	TArray<UTextRenderComponent*>& OutTextRenderComponents,
 	float TextHeight,
 	float TextSize,
-	const FText& RenderText,
+	const FString& RenderString,
 	const FVector& CoordinatePosition) const
 {
 #if WITH_EDITOR  // [Editor]
@@ -112,7 +112,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		return;
 	}
 
-	bOutHasCoordinateRenders = (CoordinatePosition.IsZero() == false && RenderText.IsEmpty() == false);
+	bOutHasCoordinateRenders = (CoordinatePosition.IsZero() == false && RenderString.IsEmpty() == false);
 	OutTextRenderComponents.SetNum(bOutHasCoordinateRenders ? Cells.Num() * 2 : Cells.Num());
 	for (UTextRenderComponent*& TextRenderIt : OutTextRenderComponents)
 	{
@@ -121,18 +121,24 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		//TextRenderIt->MarkAsEditorOnlySubobject();
 	}
 
-	if (IsEditorNotPieWorld()) PrintToLog(Owner, "[IsEditorNotPieWorld]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderText.ToString() + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
+	if (IsEditorNotPieWorld()) PrintToLog(Owner, "[IsEditorNotPieWorld]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderString + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 
 #endif  // WITH_EDITOR [Editor]
 }
 
 // Shortest static overloading of debugging visualization without outer params
 #if WITH_EDITOR  // [Editor] AddDebugTextRenders()
-void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const FCells& Cells, const FLinearColor& TextColor, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition)
+void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TArray<FSharedCell>& SharedCells, const FLinearColor& TextColor, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition)
 {
 	bool bOutBool = false;
 	TArray<UTextRenderComponent*> OutArray{};
-	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray, TextHeight, TextSize, FText::FromString(RenderString), CoordinatePosition);
+	FCells Cells;
+	Cells.Reserve(SharedCells.Num());
+	for (const auto& SharedCell : SharedCells)
+	{
+		Cells.Emplace(*SharedCell);
+	}
+	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray, TextHeight, TextSize, RenderString, CoordinatePosition);
 }
 #endif  // WITH_EDITOR [Editor]
 
