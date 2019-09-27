@@ -504,6 +504,7 @@ void AGeneratedMap::GenerateLevelActors()
 		MapComponentIt->RerunOwnerConstruction();
 	}
 	USingletonLibrary::PrintToLog(this, "_____ [Editor]BroadcastActorsUpdating _____", "_____ END _____");
+	/** @bug after rerunning constructions: too much shared refs. */
 
 	// Set number of existed player characters
 	FMapComponents PlayersMapComponents;
