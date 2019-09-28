@@ -65,7 +65,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Type,Cell"))
 	AActor* SpawnActorByType(const EActorType& Type, const FCell& Cell);
 
-	/** Adding the specified Map Component to the Level Map
+	/** Adding and attaching the specified Map Component to the MapComponents_ array
 
 	 * @param Cell The location where the owner will be standing on
 	 * @param AddedComponent The Map Component of the generated or dragged level actor
@@ -87,25 +87,26 @@ public:
 		bool bIntersectAllIfEmpty = true,
 		const class UMapComponent* ExceptedComponent = nullptr) const;
 
-	/** Destroy all actors from the set of cells
-	 *
+	/** Destroy all actors from the scene
+	 * Removes elements from the MapComponents_ array by specified cells.
+	 * 
 	 * @param Cells The set of cells for destroying the found actors
 	 * @param bIsNotValidOnly If should destroy editor-only actors that were spawned in the PIE world
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void DestroyActorsFromMap(const TSet<struct FCell>& Cells, bool bIsNotValidOnly = false);
 
-	/** Finds the nearest cell pointer to the specified Map Component 
-	 * 
-	 * @param MapComponent
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
-	void SetNearestCell(class UMapComponent* MapComponent) const;
-
-	/** Removes the specified map component from the array without an owner destroying.
+	/** Removes the specified map component from the MapComponents_ array without an owner destroying.
 	 * @returns Number of removed elements. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	FORCEINLINE int32 RemoveMapComponent(class UMapComponent* MapComponent) { return MapComponents_.Remove(MapComponent); }
+
+	/** Finds the nearest cell pointer to the specified Map Component 
+	 * 
+	 * @param MapComponent The component whose owner is being searched
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
+	void SetNearestCell(class UMapComponent* MapComponent) const;
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

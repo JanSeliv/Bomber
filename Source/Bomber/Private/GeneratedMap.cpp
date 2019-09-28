@@ -264,9 +264,14 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 			}
 
 			// Decrement the players number
-			if (MapComponentIt && MapComponentIt->ActorType == EActorType::Player)  // Is a player
+			if (MapComponentIt)
 			{
-				PlayerCharactersNum--;
+				MapComponentIt->Cell.Reset();
+
+				if (MapComponentIt->ActorType == EActorType::Player)  // Is a player
+				{
+					PlayerCharactersNum--;
+				}
 			}
 		}
 	}  // Map components iteration
@@ -477,8 +482,9 @@ void AGeneratedMap::PostInitializeComponents()
 			&& MapScale != GetActorScale3D())
 		{
 			SetActorScale3D(MapScale);
-			RerunConstructionScripts();
 		}
+
+		RerunConstructionScripts();
 	}
 
 	// Actors generation
@@ -496,23 +502,18 @@ void AGeneratedMap::GenerateLevelActors()
 	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::All));
 	DestroyActorsFromMap(NonEmptyCells, true);
 
-	//  Calls before generation preview actors to updating of all dragged to the Level Map actors
+	// Calls before generation preview actors to updating of all dragged to the Level Map actors
 	// After destroying only editor actors and before their generation
-	//USingletonLibrary::GetSingleton()->OnActorsUpdatedDelegate.Broadcast();
 	for (const auto& MapComponentIt : MapComponents_)
 	{
 		MapComponentIt->RerunOwnerConstruction();
 	}
 	USingletonLibrary::PrintToLog(this, "_____ [Editor]BroadcastActorsUpdating _____", "_____ END _____");
-	/** @bug after rerunning constructions: too much shared refs. */
 
 	// Set number of existed player characters
 	FMapComponents PlayersMapComponents;
 	GetMapComponents(PlayersMapComponents, TO_FLAG(EActorType::Player));
 	PlayerCharactersNum = PlayersMapComponents.Num();
-
-	// Getting all non empty cells of each actor.
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::All));
 
 	// Cells iterating by rows
 	const FIntVector MapScale(GetActorScale3D());  // Iterating by sizes (strings and columns)
@@ -522,6 +523,7 @@ void AGeneratedMap::GenerateLevelActors()
 		{
 			const FCell CellIt = *GridCells_[MapScale.X * Y + X];
 			USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t Iterated cell:", CellIt.Location.ToString());
+			//if (GridCells_.ContainsByPredicate([CellIt](const FSharedCell& SharedCell){return *SharedCell == CellIt;}))
 			if (NonEmptyCells.Contains(CellIt))
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t The actor on the cell has already existed");
