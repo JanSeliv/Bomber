@@ -18,10 +18,9 @@ const float FCell::CellSize = 200.0F;
 FCell::FCell(FVector Vector)
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	bWasFound = IsValid(LevelMap);
 	Location.X = FMath::RoundToFloat((Vector.X));
 	Location.Y = FMath::RoundToFloat(Vector.Y);
-	Location.Z = FMath::RoundToFloat(bWasFound ? LevelMap->GetActorLocation().Z : Vector.Z);
+	Location.Z = FMath::RoundToFloat(LevelMap ? LevelMap->GetActorLocation().Z : Vector.Z);
 }
 
 // Rotates around the center of the Level Map to the same yaw degree

@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -28,10 +28,6 @@ struct FCell
 	 * If it is not empty or not found, holds the last succeeded due to copy operator. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FVector Location = FVector::DownVector;  //[AW]
-
-	/** Marks when the cell is contained in the grid and free from other level actors. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	bool bWasFound = false;  //[B]
 
 	/** Default constructor (zero initialization). */
 	FCell() {}

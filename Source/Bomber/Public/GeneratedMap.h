@@ -87,19 +87,33 @@ public:
 		bool bIntersectAllIfEmpty = true,
 		const class UMapComponent* ExceptedComponent = nullptr) const;
 
-	/** Destroy all actors from the scene
-	 * Removes elements from the MapComponents_ array by specified cells.
+	/** Checking the containing of the specified cell among owners locations of MapComponents_ array.
+	 *
+	 * @param Cell The cell to check.
+	 * @param ActorsTypesBitmask Bitmask of actors types to check.
+	 * @return true if at least one level actor is contained.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool ContainsMapComponents(
+		const struct FCell& Cell,
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& ActorsTypesBitmask) const
+	{
+		FCells NonEmptyCells;
+		IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask);
+		return NonEmptyCells.Contains(Cell);
+	}
+
+	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
 	 * 
-	 * @param Cells The set of cells for destroying the found actors
+	 * @param Cells The set of cells for destroying the found actors.
 	 * @param bIsNotValidOnly If should destroy editor-only actors that were spawned in the PIE world
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void DestroyActorsFromMap(const TSet<struct FCell>& Cells, bool bIsNotValidOnly = false);
 
-	/** Removes the specified map component from the MapComponents_ array without an owner destroying.
-	 * @returns Number of removed elements. */
+	/** Removes the specified map component from the MapComponents_ array without an owner destroying. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	FORCEINLINE int32 RemoveMapComponent(class UMapComponent* MapComponent) { return MapComponents_.Remove(MapComponent); }
+	void RemoveMapComponent(class UMapComponent* MapComponent);
 
 	/** Finds the nearest cell pointer to the specified Map Component 
 	 * 

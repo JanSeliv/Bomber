@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -24,7 +24,7 @@ class BOMBER_API UMapComponent final : public UActorComponent
 
 public:
 	/** Owner's cell location on the Level Map */
-	FSharedCell Cell;
+	TWeakPtr<struct FCell> Cell;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++")
 	EActorType ActorType = EActorType::None;  //[i]
@@ -49,7 +49,7 @@ public:
 	/** Getter of the Cell.
 	 * @return the cell location of an owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE struct FCell GetCell() const { return Cell.IsValid() ? *Cell : FCell::ZeroCell; }
+	FORCEINLINE struct FCell GetCell() const { return Cell.IsValid() ? *Cell.Pin() : FCell::ZeroCell; }
 
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
