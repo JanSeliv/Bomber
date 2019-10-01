@@ -190,7 +190,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 }
 
 // The intersection of (OutCells ∩ ActorsTypesBitmask).
-void AGeneratedMap::IntersectCells(
+void AGeneratedMap::IntersectCellsByTypes(
 	FCells& OutCells,
 	const int32& ActorsTypesBitmask,
 	bool bIntersectAllIfEmpty,
@@ -268,7 +268,13 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 // Removes the specified map component from the MapComponents_ array without an owner destroying
 void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 {
-	check(MapComponent && "Map Component is null");
+	// Remove from the array
+	MapComponents_.Remove(MapComponent);
+
+	if (MapComponent == nullptr)  // the Map Component is null
+	{
+		return;
+	}
 
 	// Remove the weak reference
 	MapComponent->Cell.Reset();
@@ -278,9 +284,6 @@ void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 	{
 		PlayerCharactersNum--;
 	}
-
-	// Remove from the array
-	MapComponents_.Remove(MapComponent);
 }
 
 void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
