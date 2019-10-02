@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -23,6 +23,9 @@ class BOMBER_API UMapComponent final : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	/** Owner's cell location on the Level Map */
+	TWeakPtr<struct FCell> Cell;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++")
 	EActorType ActorType = EActorType::None;  //[i]
 
@@ -46,16 +49,7 @@ public:
 	/** Getter of the Cell.
 	 * @return the cell location of an owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE struct FCell GetCell() const { return Cell; }
-
-	/** Finds and sets to the owner's map component a non-zero cell.
-	 * @return true if the cell is free from other level actors. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	FORCEINLINE bool UpdateCell()
-	{
-		Cell = FCell(this);
-		return Cell.bWasFound;
-	}
+	FORCEINLINE struct FCell GetCell() const { return Cell.IsValid() ? *Cell.Pin() : FCell::ZeroCell; }
 
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -74,10 +68,6 @@ public:
 	}
 
 protected:
-	/** Owner's cell location on the Level Map */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	struct FCell Cell;  //[G]
-
 	/* ---------------------------------------------------
 	 *	Map Component's protected functions
 	 * --------------------------------------------------- */

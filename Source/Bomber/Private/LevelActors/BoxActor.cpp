@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #include "LevelActors/BoxActor.h"
 
@@ -71,6 +71,6 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 	if (ItemChance)
 	{
 		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");
-		LevelMap->SpawnActorByType(EActorType::Item, MapComponent->GetCell());
+		LevelMap->SpawnActorByType(EActorType::Item, FCell(GetActorLocation()));
 	}
 }

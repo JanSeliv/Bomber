@@ -65,7 +65,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Type,Cell"))
 	AActor* SpawnActorByType(const EActorType& Type, const FCell& Cell);
 
-	/** Adding the specified Map Component to the Level Map
+	/** Adding and attaching the specified Map Component to the MapComponents_ array
 
 	 * @param Cell The location where the owner will be standing on
 	 * @param AddedComponent The Map Component of the generated or dragged level actor
@@ -87,18 +87,40 @@ public:
 		bool bIntersectAllIfEmpty = true,
 		const class UMapComponent* ExceptedComponent = nullptr) const;
 
-	/** Destroy all actors from the set of cells
+	/** Checking the containing of the specified cell among owners locations of MapComponents_ array.
 	 *
-	 * @param Cells The set of cells for destroying the found actors
+	 * @param Cell The cell to check.
+	 * @param ActorsTypesBitmask Bitmask of actors types to check.
+	 * @return true if at least one level actor is contained.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool ContainsMapComponents(
+		const struct FCell& Cell,
+		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& ActorsTypesBitmask) const
+	{
+		FCells NonEmptyCells;
+		IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask);
+		return NonEmptyCells.Contains(Cell);
+	}
+
+	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
+	 * 
+	 * @param Cells The set of cells for destroying the found actors.
 	 * @param bIsNotValidOnly If should destroy editor-only actors that were spawned in the PIE world
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void DestroyActorsFromMap(const TSet<struct FCell>& Cells, bool bIsNotValidOnly = false);
 
-	/** Removes the specified map component from the array without an owner destroying.
-	 * @returns Number of removed elements. */
+	/** Removes the specified map component from the MapComponents_ array without an owner destroying. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	FORCEINLINE int32 RemoveMapComponent(class UMapComponent* MapComponent) { return MapComponents_.Remove(MapComponent); }
+	void RemoveMapComponent(class UMapComponent* MapComponent);
+
+	/** Finds the nearest cell pointer to the specified Map Component 
+	 * 
+	 * @param MapComponent The component whose owner is being searched
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
+	void SetNearestCell(class UMapComponent* MapComponent) const;
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -110,10 +132,7 @@ protected:
 	 * --------------------------------------------------- *
 
 	/** Cells storage. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	TArray<struct FCell> GridCells_;  //[M.IO]
-	/** The cell structure has access to AGeneratedMap::GridCells_ */
-	friend struct FCell;
+	TArray<FSharedCell> GridCells_;  //[M.IO]
 
 	/** Storage of alive players and their current locations */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))

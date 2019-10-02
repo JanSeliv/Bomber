@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -49,16 +49,16 @@ public:
 		const struct FLinearColor& TextColor,
 		bool& bOutHasCoordinateRenders,
 		TArray<class UTextRenderComponent*>& OutTextRenderComponents,
-		float TextHeight,
-		float TextSize,
-		const FText& RenderText,
-		const FVector& CoordinatePosition) const;
+		float TextHeight = 261.0f,
+		float TextSize = 124.0f,
+		const FString& RenderString = "",
+		const FVector& CoordinatePosition = FVector::ZeroVector) const;
 
 #if WITH_EDITOR  // AddDebugTextRenders
 	/** Shortest static overloading of debugging visualization without outer params */
 	static void AddDebugTextRenders(
 		class AActor* Owner,
-		const FCells& Cells,
+		const TArray<FSharedCell>& Cells,
 		const struct FLinearColor& TextColor = FLinearColor::Black,
 		float TextHeight = 261.0f,
 		float TextSize = 124.0f,
@@ -105,18 +105,6 @@ public:
 	static FORCEINLINE FCell GetZeroCell()
 	{
 		return FCell::ZeroCell;
-	}
-
-	/** The custom make node of the FCell constructor.
-	 * Used as a blueprint implementation of the default MakeStruct node
-	 * 
-	 * @param MapComponent Finding the closest cell to the Map Component's owner
-	 * @return The found cell
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "MakeCell"))
-	static FORCEINLINE struct FCell MakeCell(const class UMapComponent* MapComponent)
-	{
-		return FCell(MapComponent);
 	}
 
 	/** Rotation of the input vector around the center of the Level Map to the same yaw degree

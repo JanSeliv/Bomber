@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #include "LevelActors/PlayerCharacter.h"
 
@@ -88,8 +88,8 @@ void APlayerCharacter::RotateToLocation(const FVector& Location) const
 	if (MeshComponent)
 	{
 		FRotator NewRotation = FRotator::ZeroRotator;
-		NewRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location).Yaw;
-		MeshComponent->SetRelativeRotation(NewRotation);
+		NewRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location).Yaw - 90.F;
+		MeshComponent->SetWorldRotation(NewRotation);
 	}
 }
 

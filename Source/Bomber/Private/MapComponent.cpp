@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #include "MapComponent.h"
 
@@ -18,19 +18,20 @@ UMapComponent::UMapComponent()
 // Updates a owner's state. Should be called in the owner's OnConstruction event.
 void UMapComponent::OnMapComponentConstruction()
 {
-	if (IS_VALID(GetOwner()) == false					// The owner is not valid
-		|| !IsValid(USingletonLibrary::GetLevelMap()))  // The Level Map is not valid
+	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	if (IS_VALID(GetOwner()) == false  // The owner is not valid
+		|| !IsValid(LevelMap))		   // The Level Map is not valid
 	{
 		return;
 	}
 
 	// Find new Location at dragging and update-delegate
 	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t FCell()");
-	UpdateCell();
+	LevelMap->SetNearestCell(this);
 
 	// Owner updating
 	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddToGrid");
-	USingletonLibrary::GetLevelMap()->AddToGrid(Cell, this);
+	USingletonLibrary::GetLevelMap()->AddToGrid(GetCell(), this);
 
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())

@@ -34,7 +34,7 @@ void AMyAIController::UpdateAI()
 	{
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]UpdateAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
-		AiMoveTo.SetToZero();
+		AiMoveTo = FCell::ZeroCell;
 	}
 #endif  // WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -192,7 +192,9 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR  // [Editor]
 			if (MyCharacter->MapComponent->bShouldShowRenders)
 			{
-				USingletonLibrary::AddDebugTextRenders(MyCharacter, FCells{F0}, FLinearColor::Red, 263, 95, "Attack");
+				bool bOutBool = false;
+				TArray<UTextRenderComponent*> OutArray{};
+				USingletonLibrary::GetSingleton()->AddDebugTextRenders(MyCharacter, FCells{F0}, FLinearColor::Red, bOutBool, OutArray, 261.F, 95.F, "Attack");
 			}
 #endif  // [Editor]
 		}
@@ -234,8 +236,9 @@ void AMyAIController::UpdateAI()
 					break;
 				default: break;
 			}  // 3 visualization types
-
-			USingletonLibrary::AddDebugTextRenders(MyCharacter, VisualizingStep, Color, 263, 124, String, Position);
+			bool bOutBool = false;
+			TArray<UTextRenderComponent*> OutArray{};
+			USingletonLibrary::GetSingleton()->AddDebugTextRenders(MyCharacter, VisualizingStep, Color, bOutBool, OutArray, 263, 124, String, Position);
 		}  // [Loopy visualization]
 	}
 #endif  // [Editor]
@@ -266,7 +269,9 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	if (MyCharacter->MapComponent  // is accessible map component
 		&& MyCharacter->MapComponent->bShouldShowRenders)
 	{
-		USingletonLibrary::AddDebugTextRenders(MyCharacter, FCells{AiMoveTo}, FLinearColor::Gray, 255, 300, "x");
+		bool bOutBool = false;
+		TArray<UTextRenderComponent*> OutArray{};
+		USingletonLibrary::GetSingleton()->AddDebugTextRenders(MyCharacter, FCells{AiMoveTo}, FLinearColor::Gray, bOutBool, OutArray, 255, 300, "x");
 	}
 #endif
 }
