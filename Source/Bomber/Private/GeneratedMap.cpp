@@ -325,8 +325,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 		Counter++;
 		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter) + ":" + CellIt->Location.ToString());
 
-		if (NonEmptyCells.Contains(*CellIt)					   // the cell is not free from other level actors
-			&& MapComponent->ActorType != EActorType::Player)  // the player can be placed with other actor
+		if (NonEmptyCells.Contains(*CellIt))  // the cell is not free from other level actors
 		{
 			continue;
 		}
