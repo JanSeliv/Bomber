@@ -4,6 +4,7 @@ The last alive character is the winner. The gameplay includes strategically plac
 Player competes with bots that will do everything but not let them win.
 The first rule is just to be the best bomber and do not let bots to bomb player!
 
+>  **To download and play the game go to the [LINK](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi).**
 
 # Features
 **The level camera** that moves and zooms lens depending on the distance between players:
