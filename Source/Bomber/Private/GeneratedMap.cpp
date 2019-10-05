@@ -497,7 +497,7 @@ void AGeneratedMap::PostInitializeComponents()
 }
 
 // Spawns and fills the Grid Array values by level actors
-void AGeneratedMap::GenerateLevelActors()
+void AGeneratedMap::GenerateLevelActors_Implementation()
 {
 	check(GridCells_.Num() > 0 && "Is no cells for the actors generation");
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
