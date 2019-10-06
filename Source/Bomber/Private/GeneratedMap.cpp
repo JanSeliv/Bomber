@@ -497,7 +497,7 @@ void AGeneratedMap::PostInitializeComponents()
 }
 
 // Spawns and fills the Grid Array values by level actors
-void AGeneratedMap::GenerateLevelActors_Implementation()
+void AGeneratedMap::GenerateLevelActors()
 {
 	check(GridCells_.Num() > 0 && "Is no cells for the actors generation");
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
@@ -526,6 +526,23 @@ void AGeneratedMap::GenerateLevelActors_Implementation()
 	{
 		for (int32 X = 0; X < MapScale.X; ++X)
 		{
+			/* Steps:
+			 * 
+			 * 1) Filling the array on empty cells:
+			 * 1.1) Walls filling to the array
+			 * 1.2) Checking if there is a path to the bottom and side edges. If not, go to the 1.1 step.
+			 * 1.3) Players and boxes filling to the array
+			 *
+			 * 2) Array symmetrization:
+			 * Xs = Xmax - 1
+			 * Ys = Ymax - 1
+			 * (X1 = Xs - Xi; Y1 = Yi),
+			 * (X2 = Xi; Y2 = Ys - Yi),
+			 * (X3 = Xs - Xi; Y3 = Ys - Yi)
+			 */
+
+			continue;
+			// don't iterate
 			const FCell CellIt = *GridCells_[MapScale.X * Y + X];
 			USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t Iterated cell:", CellIt.Location.ToString());
 			if (ContainsMapComponents(CellIt, TO_FLAG(EActorType::All)))  // the cell is not free

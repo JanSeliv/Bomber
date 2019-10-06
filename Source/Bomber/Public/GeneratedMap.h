@@ -161,7 +161,7 @@ protected:
 	virtual void PostInitializeComponents() override;
 
 	/** Spawns and fills the Grid Array values by level actors */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void GenerateLevelActors();
 
 	/** Map components getter.
