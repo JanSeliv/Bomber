@@ -521,10 +521,11 @@ void AGeneratedMap::GenerateLevelActors()
 	PlayerCharactersNum = PlayersMapComponents.Num();
 
 	// Cells iterating by rows
-	const FIntVector MapScale(GetActorScale3D());  // Iterating by sizes (strings and columns)
-	for (int32 Y = 0; Y < MapScale.Y; ++Y)
+	TMap<FCell, EActorType> ArrayToGenerate;
+	const FIntVector MapHalfScale(GetActorScale3D() / 2 + 1);  // Iterating by sizes (strings and columns)
+	for (int32 Y = 0; Y < MapHalfScale.Y; ++Y)
 	{
-		for (int32 X = 0; X < MapScale.X; ++X)
+		for (int32 X = 0; X < MapHalfScale.X; ++X)
 		{
 			/* Steps:
 			 * 
@@ -540,12 +541,13 @@ void AGeneratedMap::GenerateLevelActors()
 			 * (X2 = Xi; Y2 = Ys - Yi),
 			 * (X3 = Xs - Xi; Y3 = Ys - Yi)
 			 */
-
+			const FSharedCell CellIt = GridCells_[GetActorScale3D().X * Y + X];
+			USingletonLibrary::AddDebugTextRenders(this, TArray<FSharedCell>{CellIt});
 			continue;
 			// don't iterate
-			const FCell CellIt = *GridCells_[MapScale.X * Y + X];
-			USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t Iterated cell:", CellIt.Location.ToString());
-			if (ContainsMapComponents(CellIt, TO_FLAG(EActorType::All)))  // the cell is not free
+
+			USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t Iterated cell:", CellIt->Location.ToString());
+			if (ContainsMapComponents(*CellIt, TO_FLAG(EActorType::All)))  // the cell is not free
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors \t The actor on the cell has already existed");
 				continue;
@@ -563,8 +565,8 @@ void AGeneratedMap::GenerateLevelActors()
 			}
 
 			// Player condition
-			const bool bIsCornerX = (X == 0 || X == MapScale.X - 1);
-			const bool bIsCornerY = (Y == 0 || Y == MapScale.Y - 1);
+			const bool bIsCornerX = (X == 0 || X == MapHalfScale.X - 1);
+			const bool bIsCornerY = (Y == 0 || Y == MapHalfScale.Y - 1);
 			if (bIsCornerX && bIsCornerY)  // is one of the corners
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "PLAYER will be spawned");
@@ -572,10 +574,10 @@ void AGeneratedMap::GenerateLevelActors()
 			}
 
 			// Box condition
-			if (ActorTypeToSpawn == EActorType::None					  // all previous conditions are false
-				&& FMath::RandRange(int32(0), int32(99)) < BoxesChance_   // Chance of boxes
-				&& (!bIsCornerX && X != 1 && X != MapScale.X - 2		  // X corner zone
-					   || !bIsCornerY && Y != 1 && Y != MapScale.Y - 2))  // Y corner zone
+			if (ActorTypeToSpawn == EActorType::None						  // all previous conditions are false
+				&& FMath::RandRange(int32(0), int32(99)) < BoxesChance_		  // Chance of boxes
+				&& (!bIsCornerX && X != 1 && X != MapHalfScale.X - 2		  // X corner zone
+					   || !bIsCornerY && Y != 1 && Y != MapHalfScale.Y - 2))  // Y corner zone
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "BOX will be spawned");
 				ActorTypeToSpawn = EActorType::Box;
@@ -585,7 +587,7 @@ void AGeneratedMap::GenerateLevelActors()
 
 			if (ActorTypeToSpawn != EActorType::None)  // There is type to spawn
 			{
-				AActor* SpawnedActor = SpawnActorByType(ActorTypeToSpawn, CellIt);
+				AActor* SpawnedActor = SpawnActorByType(ActorTypeToSpawn, *CellIt);
 #if WITH_EDITOR
 				if (USingletonLibrary::IsEditorNotPieWorld()  // [IsEditorNotPieWorld]
 					&& SpawnedActor != nullptr)				  // Successfully spawn
