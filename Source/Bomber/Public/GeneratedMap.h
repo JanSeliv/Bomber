@@ -138,11 +138,15 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	TArray<class UMapComponent*> MapComponents_;  //[M.IO]
 
-	/** The chance of boxes generation */
+	/** The chance of walls generation. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
-	int32 BoxesChance_ = 50;  //[AW]
+	int32 WallsChance_ = 35;  //[AW]
 
-	/** Number of characters on the Level Map */
+	/** The chance of boxes generation. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
+	int32 BoxesChance_ = 70;  //[AW]
+
+	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	int32 PlayerCharactersNum = 0;  //[G]
 
@@ -173,7 +177,6 @@ protected:
 	void GetMapComponents(
 		TSet<class UMapComponent*>& OutBitmaskedComponents,
 		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& ActorsTypesBitmask) const;
-
 	/* ---------------------------------------------------
 	 *					Editor development
 	 * --------------------------------------------------- */
