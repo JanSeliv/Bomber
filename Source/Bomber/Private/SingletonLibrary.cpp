@@ -16,6 +16,7 @@
 #include "LevelActors/WallActor.h"
 #include "MapComponent.h"
 #include "MyGameInstance.h"
+#include "MyGameModeBase.h"
 
 #if WITH_EDITOR		 // [Editor]
 #include "Editor.h"  // GEditor
@@ -207,6 +208,12 @@ void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
 UMyGameInstance* USingletonLibrary::GetMyGameInstance(const UObject* WorldContextObject)
 {
 	return Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(WorldContextObject));
+}
+
+// Contains a data of Bomber Level, nullptr otherwise
+AMyGameModeBase* USingletonLibrary::GetMyGameMode(const UObject* WorldContextObject)
+{
+	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
 }
 
 /* ---------------------------------------------------

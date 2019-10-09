@@ -89,6 +89,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class UMyGameInstance* GetMyGameInstance(const UObject* WorldContextObject);
 
+	/** Contains a data of Bomber Level, nullptr otherwise. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static class AMyGameModeBase* GetMyGameMode(const UObject* WorldContextObject);
+
 	/* ---------------------------------------------------
 	 *		FCell blueprint functions
 	 * --------------------------------------------------- */
