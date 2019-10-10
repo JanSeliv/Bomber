@@ -11,6 +11,7 @@
 #include "Cell.h"
 #include "MapComponent.h"
 #include "MyGameInstance.h"
+#include "MyGameModeBase.h"
 #include "SingletonLibrary.h"
 
 /* ---------------------------------------------------
@@ -382,6 +383,13 @@ void AGeneratedMap::Tick(float DeltaTime)
 
 	// AI moving
 	USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+
+	const float Timer = USingletonLibrary::GetMyGameMode(this)->Timer;
+	if (static_cast<int32>(Timer) % 10 == 0)
+	{
+		const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
+		SpawnActorByType(EActorType::Item, RandCell);
+	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -523,8 +531,8 @@ void AGeneratedMap::GenerateLevelActors()
 	 * Part 0: Actors random filling to the ArrayToGenerate.
 	 *
 	 * Part 1: ArrayToGenerate iteration:
-	 * 2.1) Finding all symmetrical cells for each iterated cell;
-	 * 2.2) Spawning these actors
+	 * 1.1) Finding all symmetrical cells for each iterated cell;
+	 * 1.2) Spawning these actors
 	 *
 	 * Part 2: Checking if there is a path to the bottom and side edges. If not, go to the 0 step.
 	 */
