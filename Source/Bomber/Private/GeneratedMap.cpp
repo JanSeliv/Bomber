@@ -384,11 +384,15 @@ void AGeneratedMap::Tick(float DeltaTime)
 	// AI moving
 	USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 
+	// Random item spawning
 	const float Timer = USingletonLibrary::GetMyGameMode(this)->Timer;
-	if (static_cast<int32>(Timer) % 10 == 0)
+	const int32 IntTimer = static_cast<int32>(Timer);
+	if (IntTimer <= 60							  // after the minute
+		&& FMath::IsNearlyEqual(Timer, IntTimer)  // is whole number
+		&& IntTimer % 10 == 0)					  // each 10 seconds
 	{
 		const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
-		SpawnActorByType(EActorType::Item, RandCell);
+		SpawnActorByType(EActorType::Item, RandCell);  // can be not spawned in non empty cell
 	}
 }
 
