@@ -57,7 +57,6 @@ void AGeneratedMap::GetSidesCells(
 	if (OutCells.Num())
 	{
 		Walls = OutCells;
-		OutCells.Empty();
 	}
 	else
 	{
@@ -550,7 +549,7 @@ void AGeneratedMap::GenerateLevelActors()
 	// Locals
 	const FIntVector MapScale(GetActorScale3D());
 	const FIntVector MapHalfScale(MapScale / 2);
-	FCells EndCellsX, EndCellsY, Walls;
+	FCells EndCellsX, EndCellsY, Walls, Bones;
 	TMap<FCell, EActorType> ActorsToSpawn;
 
 	// --- Part 0: Cells filling ---
@@ -559,24 +558,14 @@ void AGeneratedMap::GenerateLevelActors()
 	{
 		for (int32 X = 0; X <= MapHalfScale.X; ++X)  // Columns
 		{
+			// Filling the bottom and side cells
+
 			if (X == 0 && Y == 1 || X == 1 && Y == 0)  // is the safe zone
 			{
 				continue;  // skip
 			}
 
-			// Filling the bottom and side cells
 			FCell CellIt = *GridCells_[MapScale.X * Y + X];
-			if (X != Y)
-			{
-				if (X == MapHalfScale.X)
-				{
-					EndCellsX.Emplace(CellIt);
-				}
-				else if (Y == MapHalfScale.Y)
-				{
-					EndCellsY.Emplace(CellIt);
-				}
-			}
 
 			// --- Part 0: Actors random filling to the ArrayToGenerate._ ---
 
@@ -606,7 +595,22 @@ void AGeneratedMap::GenerateLevelActors()
 				ActorTypeToSpawn = EActorType::Box;
 			}
 
-			// Adds to the array
+			if (ActorTypeToSpawn != EActorType::Wall)
+			{
+				Bones.Emplace(CellIt);
+				if (X != Y)
+				{
+					if (X == MapHalfScale.X)
+					{
+						EndCellsX.Emplace(CellIt);
+					}
+					else if (Y == MapHalfScale.Y)
+					{
+						EndCellsY.Emplace(CellIt);
+					}
+				}
+			}
+
 			if (ActorTypeToSpawn == EActorType::None)  // There is no types to spawn
 			{
 				continue;
@@ -648,6 +652,12 @@ void AGeneratedMap::GenerateLevelActors()
 		}	  // X iterations
 	}		   // Y iterations
 
+	if (!EndCellsX.Num() || !EndCellsY.Num())
+	{
+		GenerateLevelActors();
+		return;
+	}
+
 	// --- Part 1 : Checking if there is a path to the bottom and side edges.If not, go to the 0 step._ ---
 
 #if WITH_EDITOR
@@ -659,56 +669,28 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// Locals
 	bool bIsConnectedX = false, bIsConnectedY = false, bAreConnectedItems = false, bWereFound = false;
-	FCells IteratedCells, FinishedCells, ItemsCells;
-	GetSidesCells(IteratedCells, *GridCells_[0], EPathType::Explosion, 100);
+	FCells FinishedCells = Walls, ItemsCells;
 	IntersectCellsByTypes(ItemsCells, TO_FLAG(EActorType::Item));
 
-	while (IteratedCells.Num() > 0)
+	for (const auto& CellIt : Bones)
 	{
-#if WITH_EDITOR
-		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, IteratedCells, FLinearColor::Black, bOutBool, OutArray);
-#endif  // WITH_EDITOR
-
-		FCells FoundCells = Walls;
-
-		for (const auto& CellIt : IteratedCells)
-		{
-			FinishedCells.Emplace(CellIt);
-
-			if (!bIsConnectedX)
-			{
-				bIsConnectedX = EndCellsX.Contains(CellIt);
-			}
-
-			if (!bIsConnectedY)
-			{
-				bIsConnectedY = EndCellsY.Contains(CellIt);
-			}
-
-			if (!bAreConnectedItems  //
-				&& ItemsCells.Contains(CellIt))
-			{
-				ItemsCells.Remove(CellIt);
-				bAreConnectedItems = ItemsCells.Num() == 0;
-			}
-
-			if (bIsConnectedX && bIsConnectedY && bAreConnectedItems)
-			{
-				USingletonLibrary::PrintToLog(this, "_____ GenerateLevelActors _____", "_____ END _____");
-				bWereFound = true;
-				break;
-			}
-
-			GetSidesCells(FoundCells, CellIt, EPathType::Explosion, 100);
-		}
-
-		IteratedCells = FoundCells.Difference(FinishedCells);
+		GetSidesCells(FinishedCells, CellIt, EPathType::Explosion, 100);
 	}
 
-	if (!bWereFound)
+	Bones = Bones.Difference(FinishedCells);
+
+	if (!FinishedCells.Intersect(EndCellsX).Num()	 //
+		|| !FinishedCells.Intersect(EndCellsY).Num()  //
+		|| Bones.Contains(*GridCells_[0])			  //
+		|| Bones.Intersect(ItemsCells).Num())
 	{
 		GenerateLevelActors();
+		return;
 	}
+
+#if WITH_EDITOR
+	USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, FinishedCells, FLinearColor::Black, bOutBool, OutArray);
+#endif  // WITH_EDITOR
 
 	// --- Part 2: Spawning ---
 
@@ -728,6 +710,7 @@ void AGeneratedMap::GenerateLevelActors()
 		}
 #endif  // WITH_EDITOR [IsEditorNotPieWorld]
 	}
+	USingletonLibrary::PrintToLog(this, "_____ GenerateLevelActors _____", "_____ END _____");
 }
 
 //  Map components getter.
