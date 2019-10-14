@@ -44,7 +44,7 @@ public:
 
 	/** Getting an array of cells by four sides of an input center cell and type of breaks.
 	 *
-	 * @param OutCells Will contains found cells.
+	 * @param OutCells Will contain found cells. In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
 	 * @param Cell The start of searching by the sides.
 	 * @param SideLength Length of each side.
 	 * @param Pathfinder Type of cells searching.

@@ -538,18 +538,17 @@ void AGeneratedMap::GenerateLevelActors()
 	/* Steps:
 	 * 
 	 * Part 0: Actors random filling to the ArrayToGenerate.
+	 * 0.1) Finding all symmetrical cells for each iterated cell;
 	 *
-	 * Part 1: ArrayToGenerate iteration:
-	 * 1.1) Finding all symmetrical cells for each iterated cell;
-	 * 1.2) Spawning these actors
-	 *
-	 * Part 2: Checking if there is a path to the bottom and side edges. If not, go to the 0 step.
+	 * Part 1: Checking if there is a path to the each bone. If not, go to the 0 step.
+	 * 
+	 * Part 2: Spawning these actors
 	 */
 
 	// Locals
 	const FIntVector MapScale(GetActorScale3D());
 	const FIntVector MapHalfScale(MapScale / 2);
-	FCells EndCellsX, EndCellsY, Walls, Bones;
+	FCells Bones;
 	TMap<FCell, EActorType> ActorsToSpawn;
 
 	// --- Part 0: Cells filling ---
@@ -558,13 +557,7 @@ void AGeneratedMap::GenerateLevelActors()
 	{
 		for (int32 X = 0; X <= MapHalfScale.X; ++X)  // Columns
 		{
-			// Filling the bottom and side cells
-
-			if (X == 0 && Y == 1 || X == 1 && Y == 0)  // is the safe zone
-			{
-				continue;  // skip
-			}
-
+			const bool IsSafeZone = X == 0 && Y == 1 || X == 1 && Y == 0;
 			FCell CellIt = *GridCells_[MapScale.X * Y + X];
 
 			// --- Part 0: Actors random filling to the ArrayToGenerate._ ---
@@ -581,34 +574,23 @@ void AGeneratedMap::GenerateLevelActors()
 
 			// Wall condition
 			if (ActorTypeToSpawn == EActorType::None  // all previous conditions are false
-				&& FMath::RandRange(int32(0), int32(99)) < WallsChance_)
+				&& !IsSafeZone && FMath::RandRange(int32(0), int32(99)) < WallsChance_)
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "WALL will be spawned");
 				ActorTypeToSpawn = EActorType::Wall;
 			}
 
 			// Box condition
-			if (ActorTypeToSpawn == EActorType::None					  // all previous conditions are false
-				&& FMath::RandRange(int32(0), int32(99)) < BoxesChance_)  // Chance of boxes
+			if (ActorTypeToSpawn == EActorType::None									 // all previous conditions are false
+				&& !IsSafeZone && FMath::RandRange(int32(0), int32(99)) < BoxesChance_)  // Chance of boxes
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "BOX will be spawned");
 				ActorTypeToSpawn = EActorType::Box;
 			}
 
-			if (ActorTypeToSpawn != EActorType::Wall)
+			if (ActorTypeToSpawn != EActorType::Wall)  //
 			{
 				Bones.Emplace(CellIt);
-				if (X != Y)
-				{
-					if (X == MapHalfScale.X)
-					{
-						EndCellsX.Emplace(CellIt);
-					}
-					else if (Y == MapHalfScale.Y)
-					{
-						EndCellsY.Emplace(CellIt);
-					}
-				}
 			}
 
 			if (ActorTypeToSpawn == EActorType::None)  // There is no types to spawn
@@ -616,11 +598,9 @@ void AGeneratedMap::GenerateLevelActors()
 				continue;
 			}
 
-			// --- Part 1: ArrayToGenerate iteration ---
+			// 0.1) Array symmetrization
 			const int32 Xs = MapScale.X - 1 - X, Ys = MapScale.Y - 1 - Y;  // Symmetrized cell position
-
-			// 1.1) Array symmetrization
-			for (int32 I = 0; I < 4; ++I)  // 4 sides of symmetry
+			for (int32 I = 0; I < 4; ++I)								   // 4 sides of symmetry
 			{
 				if (I > 0)  // the 0 index is always current CellIt, otherwise needs to find symmetry
 				{
@@ -646,58 +626,64 @@ void AGeneratedMap::GenerateLevelActors()
 				if (!NonEmptyCells.Contains(CellIt))  // the cell is not free
 				{
 					ActorsToSpawn.Emplace(CellIt, ActorTypeToSpawn);
-					if (ActorTypeToSpawn == EActorType::Wall) Walls.Emplace(CellIt);
 				}
+				else if (ActorTypeToSpawn == EActorType::Wall)
+				{
+					Bones.Add(CellIt);  // the wall was not spawned, then this cell is the bone
+				}
+
 			}  // Symmetry iterations
 		}	  // X iterations
 	}		   // Y iterations
 
-	if (!EndCellsX.Num() || !EndCellsY.Num())
-	{
-		GenerateLevelActors();
-		return;
-	}
-
 	// --- Part 1 : Checking if there is a path to the bottom and side edges.If not, go to the 0 step._ ---
 
-#if WITH_EDITOR
-	bool bOutBool = false;
-	TArray<UTextRenderComponent*> OutArray{};
-	USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, EndCellsX, FLinearColor::Blue, bOutBool, OutArray);
-	USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, EndCellsY, FLinearColor::Green, bOutBool, OutArray);
-#endif  // WITH_EDITOR
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::Wall));
+	Bones = Bones.Difference(NonEmptyCells);
 
-	// Locals
-	bool bIsConnectedX = false, bIsConnectedY = false, bAreConnectedItems = false, bWereFound = false;
-	FCells FinishedCells = Walls, ItemsCells;
-	IntersectCellsByTypes(ItemsCells, TO_FLAG(EActorType::Item));
-
-	for (const auto& CellIt : Bones)
+	// Finding all cells that not in Bones (NonEmptyCells = GridCells / Bones)
+	for (const auto& SharedCellIt : GridCells_)
 	{
-		GetSidesCells(FinishedCells, CellIt, EPathType::Explosion, 100);
+		if (!Bones.Contains(*SharedCellIt))
+		{
+			NonEmptyCells.Add(*SharedCellIt);
+		}
 	}
 
-	Bones = Bones.Difference(FinishedCells);
+	// Locals
+	FCells IteratedCells{*GridCells_[0]}, FinishedCells = NonEmptyCells;
 
-	if (!FinishedCells.Intersect(EndCellsX).Num()	 //
-		|| !FinishedCells.Intersect(EndCellsY).Num()  //
-		|| Bones.Contains(*GridCells_[0])			  //
-		|| Bones.Intersect(ItemsCells).Num())
+#if WITH_EDITOR
+	if (bShouldShowRenders)
+	{
+		bool bOutBool = false;
+		TArray<UTextRenderComponent*> OutArray{};
+		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, Bones, FLinearColor::Green, bOutBool, OutArray, 263, 148);
+		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, NonEmptyCells, FLinearColor::Red, bOutBool, OutArray, 260);
+	}
+#endif  // WITH_EDITOR
+
+	while (IteratedCells.Num() && Bones.Num())
+	{
+		for (const FCell& CellIt : IteratedCells)
+		{
+			GetSidesCells(FinishedCells, CellIt, EPathType::Explosion, 100);
+		}
+		IteratedCells = FinishedCells.Difference(NonEmptyCells);
+		Bones = Bones.Difference(FinishedCells);
+		NonEmptyCells = FinishedCells;
+	}
+
+	if (Bones.Num())
 	{
 		GenerateLevelActors();
 		return;
 	}
-
-#if WITH_EDITOR
-	USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, FinishedCells, FLinearColor::Black, bOutBool, OutArray);
-#endif  // WITH_EDITOR
 
 	// --- Part 2: Spawning ---
 
 	for (const auto& It : ActorsToSpawn)
 	{
-		// --- Part 1: ArrayToGenerate iteration ---
-
 		AActor* SpawnedActor = SpawnActorByType(It.Value, It.Key);
 
 #if WITH_EDITOR
