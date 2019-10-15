@@ -44,9 +44,10 @@ public:
 
 	/** Getting an array of cells by four sides of an input center cell and type of breaks.
 	 *
-	 * @param OutCells Will contains found cells.
+	 * @param OutCells Will contain found cells. 
 	 * @param Cell The start of searching by the sides.
 	 * @param SideLength Length of each side.
+	 * @param bBreakInputCells In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
 	 * @param Pathfinder Type of cells searching.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Pathfinder, SideLength"))
@@ -54,7 +55,8 @@ public:
 		TSet<struct FCell>& OutCells,
 		const struct FCell& Cell,
 		const EPathType& Pathfinder,
-		const int32& SideLength) const;
+		const int32& SideLength,
+		bool bBreakInputCells = false) const;
 
 	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
 	 * 
@@ -138,11 +140,15 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	TArray<class UMapComponent*> MapComponents_;  //[M.IO]
 
-	/** The chance of boxes generation */
+	/** The chance of walls generation. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
-	int32 BoxesChance_ = 50;  //[AW]
+	int32 WallsChance_ = 35;  //[AW]
 
-	/** Number of characters on the Level Map */
+	/** The chance of boxes generation. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
+	int32 BoxesChance_ = 70;  //[AW]
+
+	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	int32 PlayerCharactersNum = 0;  //[G]
 
@@ -173,7 +179,6 @@ protected:
 	void GetMapComponents(
 		TSet<class UMapComponent*>& OutBitmaskedComponents,
 		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& ActorsTypesBitmask) const;
-
 	/* ---------------------------------------------------
 	 *					Editor development
 	 * --------------------------------------------------- */
