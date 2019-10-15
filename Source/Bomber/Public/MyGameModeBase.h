@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2019 Yevhenii Selivanov.
 
 #pragma once
 
@@ -21,6 +21,10 @@ public:
 	/** The class of the camera actor. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
 	TSubclassOf<AActor> CameraActorClass;  //[B]
+
+	/** The class of the camera actor. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	float Timer = 120.0F;
 
 protected:
 	/** Called when the game starts or when spawned */
