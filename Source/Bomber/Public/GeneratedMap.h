@@ -44,9 +44,10 @@ public:
 
 	/** Getting an array of cells by four sides of an input center cell and type of breaks.
 	 *
-	 * @param OutCells Will contain found cells. In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
+	 * @param OutCells Will contain found cells. 
 	 * @param Cell The start of searching by the sides.
 	 * @param SideLength Length of each side.
+	 * @param bBreakInputCells In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
 	 * @param Pathfinder Type of cells searching.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Pathfinder, SideLength"))
@@ -54,7 +55,8 @@ public:
 		TSet<struct FCell>& OutCells,
 		const struct FCell& Cell,
 		const EPathType& Pathfinder,
-		const int32& SideLength) const;
+		const int32& SideLength,
+		bool bBreakInputCells = false) const;
 
 	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
 	 * 

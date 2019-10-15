@@ -50,17 +50,20 @@ void AGeneratedMap::GetSidesCells(
 	FCells& OutCells,
 	const FCell& Cell,
 	const EPathType& Pathfinder,
-	const int32& SideLength) const
+	const int32& SideLength,
+	bool bBreakInputCells) const
 {
 	// ----- Locals -----
 	FCells Walls;
-	if (OutCells.Num())
+	if (bBreakInputCells)
 	{
 		Walls = OutCells;
 	}
-	else
+
+	if (!OutCells.Num())
 	{
 		IntersectCellsByTypes(Walls, TO_FLAG(EActorType::Wall));
+		OutCells.Empty();
 	}
 
 	// the index of the specified cell
@@ -667,7 +670,7 @@ void AGeneratedMap::GenerateLevelActors()
 	{
 		for (const FCell& CellIt : IteratedCells)
 		{
-			GetSidesCells(FinishedCells, CellIt, EPathType::Explosion, 100);
+			GetSidesCells(FinishedCells, CellIt, EPathType::Explosion, 100, true);
 		}
 		IteratedCells = FinishedCells.Difference(NonEmptyCells);
 		Bones = Bones.Difference(FinishedCells);
