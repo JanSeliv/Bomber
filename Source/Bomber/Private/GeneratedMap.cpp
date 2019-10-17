@@ -53,17 +53,19 @@ void AGeneratedMap::GetSidesCells(
 	const int32& SideLength,
 	bool bBreakInputCells) const
 {
-	// ----- Locals -----
+	// ----- Walls definition -----
 	FCells Walls;
-	if (bBreakInputCells)
+	if (OutCells.Num() == 0)
 	{
-		Walls = OutCells;
+		IntersectCellsByTypes(Walls, TO_FLAG(EActorType::Wall));  // just finding the walls on the map
 	}
-
-	if (!OutCells.Num())
+	else if (bBreakInputCells)  // specified OutCells is not empty, these cells break lines as the Wall behavior
 	{
-		IntersectCellsByTypes(Walls, TO_FLAG(EActorType::Wall));
-		OutCells.Empty();
+		Walls = OutCells;  // these cells break lines as the Wall behavior, don't empty specified array
+	}
+	else  //OutCells > 0 && !bBreakInputCells
+	{
+		OutCells.Empty();  // should empty array in order to return only sides cells
 	}
 
 	// the index of the specified cell
