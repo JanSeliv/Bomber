@@ -47,9 +47,9 @@ The game menu is shown the result of the games match (win, lose, draw). If the m
 
 
 ## Procedural generation
-- Regeneration from each new game:
+- Symmetrical regeneration for each new game:
 
-![GIF6](https://user-images.githubusercontent.com/20540872/63046084-0a7ec300-bed2-11e9-9c34-a13a80d29776.gif)
+![GIF6](https://user-images.githubusercontent.com/20540872/67123411-8659fc00-f1f0-11e9-8b71-f0b9072c34f8.gif)
 
 - Scaling sides sizes in the editor or sizes selection in the start menu:
 
