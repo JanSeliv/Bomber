@@ -1,12 +1,7 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "SingletonLibrary.h"
-
-#include "Components/TextRenderComponent.h"
-#include "Engine.h"
-#include "Kismet/GameplayStatics.h"
-#include "Math/Color.h"
-
+//---
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "LevelActors/BombActor.h"
@@ -17,14 +12,19 @@
 #include "MapComponent.h"
 #include "MyGameInstance.h"
 #include "MyGameModeBase.h"
+//---
+#include "Components/TextRenderComponent.h"
+#include "Engine.h"
+#include "Kismet/GameplayStatics.h"
+#include "Math/Color.h"
 
 #if WITH_EDITOR		 // [Editor]
-#include "Editor.h"  // GEditor
+#include "Editor.h"	 // GEditor
 #endif				 //WITH_EDITOR [Editor]
 
 USingletonLibrary::USingletonLibrary()
 {
-	// Defaults classes ot level actors
+	// Defaults classes of level actors
 	typedef TPairInitializer<const EActorType&, const TSubclassOf<AActor>&> FMyPair;
 	ActorTypesByClasses_ = {
 		FMyPair(EActorType::Bomb, ABombActor::StaticClass()),
@@ -44,37 +44,38 @@ USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
 // Checks, that this actor placed in the editor world and the game is not started yet
 bool USingletonLibrary::IsEditorNotPieWorld()
 {
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (GIsEditor && GEditor)
 	{
 		return GEditor->GetEditorWorldContext().World() == GWorld;
 	}
-#endif  // [IsEditorNotPieWorld]
+#endif	// [IsEditorNotPieWorld]
 	return false;
 }
 
 void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message)
 {
-#if WITH_EDITOR  // [Editor]
+#if WITH_EDITOR	 // [Editor]
 	AGeneratedMap* const LevelMap = GetLevelMap();
-	if (!LevelMap || LevelMap->bShouldShowRenders)  // The Level Map is not accessible or has the debug mode
+	if (!LevelMap || LevelMap->bShouldShowRenders)	// The Level Map is not accessible or has the debug mode
 	{
 		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("nullptr")), *FunctionName, *Message);
 	}
-#endif  //WITH_EDIT [Editor]
+#endif	//WITH_EDIT [Editor]
 }
 
 // Remove all text renders of the Owner
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
-#if WITH_EDITOR  // [Editor]
+#if WITH_EDITOR	 // [Editor]
 
 	if (IS_VALID(Owner) == false)  // The owner is not valid
 	{
 		return;
 	}
 
-	const TArray<UActorComponent*> TextRendersArray = Owner->GetComponentsByClass(UTextRenderComponent::StaticClass());
+	TArray<UActorComponent*> TextRendersArray;
+	Owner->GetComponents(UTextRenderComponent::StaticClass(), TextRendersArray);
 	if (TextRendersArray.Num() > 0)
 	{
 		for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
@@ -89,7 +90,7 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 		if (IsEditorNotPieWorld()) PrintToLog(Owner, "[IsEditorNotPieWorld]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
 
-#endif  // WITH_EDITOR [Editor]
+#endif	// WITH_EDITOR [Editor]
 }
 
 // Debug visualization by text renders
@@ -104,7 +105,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FString& RenderString,
 	const FVector& CoordinatePosition) const
 {
-#if WITH_EDITOR  // [Editor]
+#if WITH_EDITOR	 // [Editor]
 
 	if (Cells.Num() == NULL			  // Null length
 		|| !IS_VALID(Owner)			  // Owner is not valid
@@ -124,11 +125,11 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 
 	if (IsEditorNotPieWorld()) PrintToLog(Owner, "[IsEditorNotPieWorld]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderString + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 
-#endif  // WITH_EDITOR [Editor]
+#endif	// WITH_EDITOR [Editor]
 }
 
 // Shortest static overloading of debugging visualization without outer params
-#if WITH_EDITOR  // [Editor] AddDebugTextRenders()
+#if WITH_EDITOR	 // [Editor] AddDebugTextRenders()
 void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TArray<FSharedCell>& SharedCells, const FLinearColor& TextColor, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition)
 {
 	bool bOutBool = false;
@@ -141,7 +142,7 @@ void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TArray<FSharedC
 	}
 	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray, TextHeight, TextSize, RenderString, CoordinatePosition);
 }
-#endif  // WITH_EDITOR [Editor]
+#endif	// WITH_EDITOR [Editor]
 
 /* ---------------------------------------------------
  *		Static library functions
@@ -164,14 +165,14 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 		return nullptr;
 	}
 
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
 
 	if (IsEditorNotPieWorld() == true			  // IsEditorNotPieWorld only
 		&& !GetSingleton()->LevelMap_.IsValid())  // Is transient
 	{
 		SetLevelMap(nullptr);  // Find the Level Map
 	}
-#endif  // WITH_EDITOR [IsEditorNotPieWorld]
+#endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
 	return GetSingleton()->LevelMap_.Get();
 }
@@ -179,7 +180,7 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 // The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
 void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
 {
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
 
 	if (IsEditorNotPieWorld()  // IsEditorNotPieWorld only
 		&& LevelMap == nullptr)
@@ -195,7 +196,7 @@ void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
 			}
 		}
 	}
-#endif  // WITH_EDITOR [IsEditorNotPieWorld]
+#endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
 	if (IS_VALID(LevelMap))
 	{

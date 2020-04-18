@@ -1,7 +1,7 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "MyPlayerController.h"
-
+//---
 #include "InGameWidget.h"
 #include "MyHUD.h"
 

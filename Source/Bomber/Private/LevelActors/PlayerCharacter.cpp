@@ -1,19 +1,19 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "LevelActors/PlayerCharacter.h"
-
-#include "Animation/AnimInstance.h"			   //UAnimInstance
-#include "Components/SkeletalMeshComponent.h"  // USkeletalMesh
-#include "Components/StaticMeshComponent.h"	// UStaticMeshComponent
-#include "Kismet/KismetMathLibrary.h"		   //test character rotation ----
-#include "UObject/ConstructorHelpers.h"		   // ConstructorHelpers
-
+//---
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "LevelActors/BombActor.h"
 #include "MapComponent.h"
 #include "MyAIController.h"
 #include "SingletonLibrary.h"
+//---
+#include "Animation/AnimInstance.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "UObject/ConstructorHelpers.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -43,7 +43,7 @@ APlayerCharacter::APlayerCharacter()
 		if (SkeletalMeshFinderArray[i].Succeeded())
 		{
 			SkeletalMeshes.Emplace(SkeletalMeshFinderArray[i].Object);
-			if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);  // preview
+			if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);	// preview
 		}
 	}
 
@@ -103,14 +103,14 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Set the animation
-	if (GetMesh()->GetAnimInstance() == nullptr  // Is not created yet
+	if (GetMesh()->GetAnimInstance() == nullptr	 // Is not created yet
 		&& MyAnimClass != nullptr)				 // The animation class is set
 	{
 		GetMesh()->SetAnimInstanceClass(MyAnimClass);
 	}
 
 	// Posses the controller
-	if (CharacterID_ == 0)  // Is the player (not AI)
+	if (CharacterID_ == 0)	// Is the player (not AI)
 	{
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		if (PlayerController)
@@ -119,7 +119,7 @@ void APlayerCharacter::BeginPlay()
 		}
 	}
 	else								// has AI controller
-		if (!IS_VALID(MyAIController))  // was not spawned early
+		if (!IS_VALID(MyAIController))	// was not spawned early
 	{
 		MyAIController = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		MyAIController->Possess(this);
@@ -172,13 +172,13 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 			if (MyAIController) MyAIController->Destroy();
 		}
 		else								// Is a bot with debug visualization
-			if (MyAIController == nullptr)  // AI controller is not created yet
+			if (MyAIController == nullptr)	// AI controller is not created yet
 		{
 			SpawnDefaultController();
 			if (GetController()) GetController()->bIsEditorOnlyActor = true;
 		}
 	}
-#endif  // WITH_EDITOR [IsEditorNotPieWorld]
+#endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Rotate this character
 	const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;

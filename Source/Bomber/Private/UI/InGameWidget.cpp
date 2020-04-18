@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "InGameWidget.h"
 

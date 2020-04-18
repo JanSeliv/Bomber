@@ -1,9 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "Blueprint/UserWidget.h"
-
+//---
 #include "InGameWidget.generated.h"
 
 /**

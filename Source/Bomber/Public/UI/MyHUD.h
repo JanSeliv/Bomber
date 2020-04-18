@@ -1,9 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "GameFramework/HUD.h"
-
+//---
 #include "MyHUD.generated.h"
 
 /**
@@ -24,7 +24,7 @@ public:
 	TSubclassOf<class UUserWidget> UmgLevelClass;  // [B]
 
 	/** The current widget object. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "�++")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Ñ++")
 	class UUserWidget* CreatedWidget;  //[G]
 
 	/* Sets default values for this HUD's properties. */

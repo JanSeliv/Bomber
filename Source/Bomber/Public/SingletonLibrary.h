@@ -1,11 +1,11 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "Bomber.h"
 #include "Cell.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-
+//---
 #include "SingletonLibrary.generated.h"
 
 /**
@@ -54,7 +54,7 @@ public:
 		const FString& RenderString = "",
 		const FVector& CoordinatePosition = FVector::ZeroVector) const;
 
-#if WITH_EDITOR  // AddDebugTextRenders
+#if WITH_EDITOR	 // AddDebugTextRenders
 	/** Shortest static overloading of debugging visualization without outer params */
 	static void AddDebugTextRenders(
 		class AActor* Owner,
@@ -64,7 +64,7 @@ public:
 		float TextSize = 124.0f,
 		const FString& RenderString = "",
 		const FVector& CoordinatePosition = FVector::ZeroVector);
-#endif  //WITH_EDITOR AddDebugTextRenders
+#endif	//WITH_EDITOR AddDebugTextRenders
 
 	/* ---------------------------------------------------
 	 *		Static library functions
@@ -176,9 +176,9 @@ protected:
 
 	/** The reference to the AGeneratedMap actor. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	TSoftObjectPtr<class AGeneratedMap> LevelMap_;  //[B]
+	TSoftObjectPtr<class AGeneratedMap> LevelMap_;	//[B]
 
 	/** Type and its class as associated pair. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
-	TMap<EActorType, TSubclassOf<AActor>> ActorTypesByClasses_;  //[B]
+	TMap<EActorType, TSubclassOf<AActor>> ActorTypesByClasses_;	 //[B]
 };

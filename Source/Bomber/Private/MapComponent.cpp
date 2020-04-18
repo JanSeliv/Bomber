@@ -1,7 +1,7 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "MapComponent.h"
-
+//---
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "SingletonLibrary.h"
@@ -33,7 +33,7 @@ void UMapComponent::OnMapComponentConstruction()
 	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddToGrid");
 	USingletonLibrary::GetLevelMap()->AddToGrid(GetCell(), this);
 
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
 		// Remove all text renders of the Owner
@@ -44,7 +44,7 @@ void UMapComponent::OnMapComponentConstruction()
 		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
-#endif  //WITH_EDITOR [IsEditorNotPieWorld]
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 //  Called when a component is registered (not loaded
@@ -71,13 +71,13 @@ void UMapComponent::OnRegister()
 		Owner->GetRootComponent()->SetMobility(EComponentMobility::Movable);
 	}
 
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
 		// Should not call OnConstruction on drag events
 		Owner->bRunConstructionScriptOnDrag = false;
 	}
-#endif  //WITH_EDITOR [IsEditorNotPieWorld]
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 // Called when a component is destroyed for removing the owner from the Level Map.
@@ -88,15 +88,15 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		&& IsValid(USingletonLibrary::GetLevelMap()))  // is valid and is not transient the level map
 	{
 		USingletonLibrary::PrintToLog(ComponentOwner, "OnComponentDestroyed", "-> \t DestroyActorsFromMap");
-		USingletonLibrary::GetLevelMap()->RemoveMapComponent(this);  // During a game: destroyed bombs, pickup-ed items
+		USingletonLibrary::GetLevelMap()->RemoveMapComponent(this);	 // During a game: destroyed bombs, pickup-ed items
 
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
 		// Editor delegates
 		if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 		{
 			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 		}
-#endif  //WITH_EDITOR [IsEditorNotPieWorld]
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);

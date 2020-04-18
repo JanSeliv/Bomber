@@ -1,7 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "MyHUD.h"
+//---
 #include "Bomber.h"
+//---
 #include "ConstructorHelpers.h"
 #include "UserWidget.h"
 
@@ -30,7 +32,7 @@ void AMyHUD::BeginPlay()
 	const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 	const TSubclassOf<UUserWidget> UmgCurrentClass = CurrentLevelName == "MenuLevel" ? UmgMenuClass : UmgLevelClass;
 	CreatedWidget = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), UmgCurrentClass);
-	if (IsValid(CreatedWidget))  // successfully created
+	if (IsValid(CreatedWidget))	 // successfully created
 	{
 		CreatedWidget->AddToViewport();
 	}

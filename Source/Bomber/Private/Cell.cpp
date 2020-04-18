@@ -1,12 +1,11 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "Cell.h"
-
-#include "GameFramework/Actor.h"
-
+//---
 #include "GeneratedMap.h"
 #include "MapComponent.h"
 #include "SingletonLibrary.h"
+//---
 
 // The zero cell
 const FCell FCell::ZeroCell = FCell();
@@ -27,7 +26,7 @@ FCell::FCell(FVector Vector)
 FCell FCell::RotateAngleAxis(const float& AxisZ) const
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (IsValid(LevelMap) == false  //
+	if (IsValid(LevelMap) == false	//
 		|| !ensureAlwaysMsgf(AxisZ != abs(0.f), TEXT("The axis is zero")))
 	{
 		return *this;

@@ -1,10 +1,11 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "LevelActors/WallActor.h"
-
+//---
 #include "Bomber.h"
-#include "Components/StaticMeshComponent.h"
 #include "MapComponent.h"
+//---
+#include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
@@ -36,7 +37,7 @@ void AWallActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponent))  // Is not valid for map construction
+		|| !IsValid(MapComponent))	// Is not valid for map construction
 	{
 		return;
 	}

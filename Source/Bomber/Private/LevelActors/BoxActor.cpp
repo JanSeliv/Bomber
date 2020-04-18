@@ -1,13 +1,14 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "LevelActors/BoxActor.h"
-
+//---
 #include "Bomber.h"
-#include "Components/StaticMeshComponent.h"
 #include "GeneratedMap.h"
 #include "MapComponent.h"
-#include "Math/UnrealMathUtility.h"
 #include "SingletonLibrary.h"
+//---
+#include "Components/StaticMeshComponent.h"
+#include "Math/UnrealMathUtility.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values.
@@ -38,7 +39,7 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IsValid(MapComponent) == false)  // this component is not valid for owner construction
+	if (IsValid(MapComponent) == false)	 // this component is not valid for owner construction
 	{
 		return;
 	}
@@ -61,7 +62,7 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (LevelMap == nullptr					// The Level Map is not accessible
-		|| IsValid(MapComponent) == false)  // The Map Component is not valid or transient
+		|| IsValid(MapComponent) == false)	// The Map Component is not valid or transient
 	{
 		return;
 	}

@@ -1,12 +1,12 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "LevelActors/ItemActor.h"
-
+//---
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UObject/ConstructorHelpers.h"
-
+//---
 #include "Bomber.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "MapComponent.h"
@@ -55,7 +55,7 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponent))  // Is not valid for map construction
+		|| !IsValid(MapComponent))	// Is not valid for map construction
 	{
 		return;
 	}
@@ -89,7 +89,7 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	const auto OverlappedCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (OverlappedCharacter == nullptr				// Other actor is not myCharacter
-		|| IS_VALID(OverlappedCharacter) == false)  // Character is not valid
+		|| IS_VALID(OverlappedCharacter) == false)	// Character is not valid
 
 	{
 		return;
@@ -101,7 +101,7 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 		{
 			const int32 SkateN = ++OverlappedCharacter->Powerups_.SkateN * 100.F + 500.F;
 			UCharacterMovementComponent* MovementComponent = OverlappedCharacter->GetCharacterMovement();
-			if (MovementComponent	 //  is accessible
+			if (MovementComponent	  //  is accessible
 				&& SkateN <= 1000.F)  // is lower than the max speed value (5x skate items)
 			{
 				MovementComponent->MaxWalkSpeed = SkateN;

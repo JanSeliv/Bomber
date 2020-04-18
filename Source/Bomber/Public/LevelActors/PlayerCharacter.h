@@ -1,9 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "GameFramework/Character.h"
-
+//---
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -44,7 +44,7 @@ public:
 	 * --------------------------------------------------- */
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
-	class UMapComponent* MapComponent;  //[C.AW]
+	class UMapComponent* MapComponent;	//[C.AW]
 
 	/** All skeletal meshes of the character */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -52,7 +52,7 @@ public:
 
 	/** The static mesh nameplate */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UStaticMeshComponent* NameplateMeshComponent;  //[C.DO]
+	class UStaticMeshComponent* NameplateMeshComponent;	 //[C.DO]
 
 	/** All materials that used by nameplate meshes */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -77,7 +77,7 @@ protected:
 
 	/** Count of items that affect the abilities of a player during gameplay */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	struct FPowerUp Powerups_;  //[AW]
+	struct FPowerUp Powerups_;	//[AW]
 	/** Items have access to increase it */
 	friend class AItemActor;
 	/** Owned AI controller has access to his pawn to see a blast radius */
@@ -92,7 +92,7 @@ protected:
 
 	/** The character's AI controller */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	class AMyAIController* MyAIController;  //[G]
+	class AMyAIController* MyAIController;	//[G]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

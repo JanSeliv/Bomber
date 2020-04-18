@@ -1,10 +1,10 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "Bomber.h"
 #include "GameFramework/Actor.h"
-
+//---
 #include "ItemActor.generated.h"
 
 /** 
@@ -18,15 +18,15 @@ class BOMBER_API AItemActor final : public AActor
 public:
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
-	class UMapComponent* MapComponent;  //[C.AW]
+	class UMapComponent* MapComponent;	//[C.AW]
 
 	/** The static mesh component of this actor */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UStaticMeshComponent* ItemMeshComponent;  //[C.DO]
+	class UStaticMeshComponent* ItemMeshComponent;	//[C.DO]
 
 	/** Type and its class as associated pairs  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TMap<EItemType, class UStaticMesh*> ItemTypesByMeshes;  //[M.DO]
+	TMap<EItemType, class UStaticMesh*> ItemTypesByMeshes;	//[M.DO]
 
 	/**
 	 * Skate: Increase the movement speed of the character.

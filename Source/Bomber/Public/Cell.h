@@ -1,4 +1,4 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
@@ -27,7 +27,7 @@ struct FCell
 	/** Always holds the free cell's FVector-coordinate.
 	 * If it is not empty or not found, holds the last succeeded due to copy operator. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FVector Location = FVector::DownVector;  //[AW]
+	FVector Location = FVector::DownVector;	 //[AW]
 
 	/** Default constructor (zero initialization). */
 	FCell() {}

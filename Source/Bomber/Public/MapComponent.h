@@ -1,11 +1,11 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "Bomber.h"
 #include "Cell.h"
 #include "Components/ActorComponent.h"
-
+//---
 #include "MapComponent.generated.h"
 
 /** Typedef to allow for some nicer looking sets of map components */
@@ -33,7 +33,7 @@ public:
 	/** Mark the editor updating visualization(text renders) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly))
 	bool bShouldShowRenders = false;
-#endif  //WITH_EDITORONLY_DATA bShouldShowRenders
+#endif	//WITH_EDITORONLY_DATA bShouldShowRenders
 
 	/* ---------------------------------------------------
 	 *	Map Component's public functions

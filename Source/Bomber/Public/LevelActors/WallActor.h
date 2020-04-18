@@ -1,9 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "GameFramework/Actor.h"
-
+//---
 #include "WallActor.generated.h"
 
 /**
@@ -20,11 +20,11 @@ public:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
-	class UMapComponent* MapComponent;  //[C.AW]
+	class UMapComponent* MapComponent;	//[C.AW]
 
 	/** The static mesh component of this actor */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UStaticMeshComponent* WallMeshComponent;  //[C.DO]
+	class UStaticMeshComponent* WallMeshComponent;	//[C.DO]
 
 protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */

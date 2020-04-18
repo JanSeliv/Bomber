@@ -1,14 +1,15 @@
-﻿// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "LevelActors/BombActor.h"
-
+//---
 #include "Bomber.h"
-#include "Components/BoxComponent.h"
-#include "Components/StaticMeshComponent.h"
 #include "GeneratedMap.h"
 #include "MapComponent.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "SingletonLibrary.h"
+//---
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 // Sets default values
@@ -67,7 +68,7 @@ void ABombActor::InitializeBombProperties(
 	const int32& FireN,
 	const int32& CharacterID)
 {
-	if (!IsValid(USingletonLibrary::GetLevelMap())  // // The Level Map is not valid
+	if (!IsValid(USingletonLibrary::GetLevelMap())	// // The Level Map is not valid
 		|| IsValid(MapComponent) == false			// The Map Component is not valid
 		|| FireN < 0)								// Negative length of the explosion
 	{
@@ -81,7 +82,7 @@ void ABombActor::InitializeBombProperties(
 	}
 
 	// Set material
-	if (IsValid(BombMeshComponent)  // Mesh of the bomb is not valid
+	if (IsValid(BombMeshComponent)	// Mesh of the bomb is not valid
 		&& CharacterID != -1)		// is not debug character
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
@@ -106,7 +107,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponent))  // Is not valid for map construction
+		|| !IsValid(MapComponent))	// Is not valid for map construction
 	{
 		return;
 	}
@@ -122,7 +123,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
-#endif  //WITH_EDITOR [IsEditorNotPieWorld]
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 // Called when the game starts or when spawned
@@ -145,7 +146,7 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 {
 	UWorld* const World = GetWorld();
 	if (World == nullptr								// World is null
-		|| !IsValid(USingletonLibrary::GetLevelMap()))  // The Level Map is not valid
+		|| !IsValid(USingletonLibrary::GetLevelMap()))	// The Level Map is not valid
 	{
 		return;
 	}
@@ -168,7 +169,7 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 // Sets the collision preset to block all dynamics.
 void ABombActor::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (OtherActor == this)  // Self triggering
+	if (OtherActor == this)	 // Self triggering
 	{
 		return;
 	}

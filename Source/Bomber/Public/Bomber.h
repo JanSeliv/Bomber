@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
@@ -17,7 +17,7 @@
 UENUM(BlueprintType)
 enum class EPathType : uint8
 {
-	Explosion,  ///< Break to the first EActorType::Wall without obstacles
+	Explosion,	///< Break to the first EActorType::Wall without obstacles
 	Free,		///< Break to the first EActorType::Wall + obstacles
 	Safe,		///< Break to the first EActorType::Wall + obstacles + explosions
 	Secure		///< Break to the first EActorType::Wall + obstacles + explosions + EActorType::Player
@@ -37,7 +37,7 @@ enum class EActorType : uint8
 	Item = 1 << 2,							 ///< A picked element giving power-up (FPowerUp struct)
 	Player = 1 << 3,						 ///< A character that is controlled by a person or bot
 	Wall = 1 << 4,							 ///< An absolute static and unchangeable block throughout the game
-	All = Bomb | Item | Player | Wall | Box  ///< All level actors
+	All = Bomb | Item | Player | Wall | Box	 ///< All level actors
 };
 
 /** Bitwise OR operator for setting a bitmask of actors types. */
@@ -65,8 +65,8 @@ FORCEINLINE bool operator&(const EActorType& LType, const int32& Bitmask)
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	None,   ///< The type was not selected
-	Skate,  ///< Increases speed
-	Bomb,   ///< increases the amount of bombs
+	None,	///< The type was not selected
+	Skate,	///< Increases speed
+	Bomb,	///< increases the amount of bombs
 	Fire	///< Increases the range of explosion
 };

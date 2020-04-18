@@ -1,9 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "GameFramework/PlayerController.h"
-
+//---
 #include "MyPlayerController.generated.h"
 
 /**

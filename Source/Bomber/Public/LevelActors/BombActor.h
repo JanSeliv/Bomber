@@ -1,10 +1,10 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "Cell.h"
 #include "GameFramework/Actor.h"
-
+//---
 #include "BombActor.generated.h"
 
 /** Bombs are left by the character to destroy the level actors, trigger other bombs */
@@ -16,11 +16,11 @@ class BOMBER_API ABombActor final : public AActor
 public:
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
-	class UMapComponent* MapComponent;  //[C.AW]
+	class UMapComponent* MapComponent;	//[C.AW]
 
 	/** The static mesh component of this actor */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UStaticMeshComponent* BombMeshComponent;  //[C.DO]
+	class UStaticMeshComponent* BombMeshComponent;	//[C.DO]
 
 	/** All materials that used by bomb meshes */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")

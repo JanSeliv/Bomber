@@ -1,9 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "GameFramework/Actor.h"
-
+//---
 #include "BoxActor.generated.h"
 
 /**
@@ -17,7 +17,7 @@ class BOMBER_API ABoxActor final : public AActor
 public:
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
-	class UMapComponent* MapComponent;  //[C.AW]
+	class UMapComponent* MapComponent;	//[C.AW]
 
 	/** The static mesh component of the this actor */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")

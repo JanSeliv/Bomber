@@ -1,8 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "Engine/GameInstance.h"
+//---
 #include "MyGameInstance.generated.h"
 
 #define DEFAULT_NICKNAME FText::FromString(TEXT("Player"))
@@ -22,5 +23,5 @@ public:
 
 	/** A player nickname*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FText Nickname = DEFAULT_NICKNAME;  //[B]
+	FText Nickname = DEFAULT_NICKNAME;	//[B]
 };

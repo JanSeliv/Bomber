@@ -1,11 +1,11 @@
-// Copyright 2019 Yevhenii Selivanov.
+// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "Bomber.h"
 #include "Cell.h"
 #include "GameFramework/Actor.h"
-
+//---
 #include "GeneratedMap.generated.h"
 
 /**
@@ -23,7 +23,7 @@ public:
 	 * --------------------------------------------------- *
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	UChildActorComponent* BackgroundBlueprintComponent;  //[C.DO]
+	UChildActorComponent* BackgroundBlueprintComponent;	 //[C.DO]
 
 	/** The blueprint class with the background, collision cage and floor. Can be changed in the editor */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -33,7 +33,7 @@ public:
 	/** Mark the editor updating visualization(text renders) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly))
 	bool bShouldShowRenders = false;
-#endif  //WITH_EDITORONLY_DATA [Editor] bShouldShowRenders
+#endif	//WITH_EDITORONLY_DATA [Editor] bShouldShowRenders
 
 	/* ---------------------------------------------------
 	 *		Public functions
@@ -134,7 +134,7 @@ protected:
 	 * --------------------------------------------------- *
 
 	/** Cells storage. */
-	TArray<FSharedCell> GridCells_;  //[M.IO]
+	TArray<FSharedCell> GridCells_;	 //[M.IO]
 
 	/** Storage of alive players and their current locations */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
@@ -150,7 +150,7 @@ protected:
 
 	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	int32 PlayerCharactersNum = 0;  //[G]
+	int32 PlayerCharactersNum = 0;	//[G]
 
 	/* ---------------------------------------------------
 	 *		Protected functions
@@ -183,8 +183,8 @@ protected:
 	 *					Editor development
 	 * --------------------------------------------------- */
 
-#if WITH_EDITOR  // [Editor] Destroyed
+#if WITH_EDITOR	 // [Editor] Destroyed
 	/** Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending */
 	virtual void Destroyed() override;
-#endif  // [Editor] Destroyed
+#endif	// [Editor] Destroyed
 };

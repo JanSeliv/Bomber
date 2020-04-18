@@ -1,13 +1,13 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #include "MyGameModeBase.h"
-
-#include "Engine/World.h"
-#include "Kismet/GameplayStatics.h"
-
+//---
 #include "MyCameraActor.h"
 #include "MyHUD.h"
 #include "MyPlayerController.h"
+//---
+#include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this actor's properties
 AMyGameModeBase::AMyGameModeBase()

@@ -1,10 +1,10 @@
-// Copyright 2019 Yevhenii Selivanov.
+﻿// Copyright 2020 Yevhenii Selivanov.
 
 #pragma once
 
 #include "AIController.h"
 #include "Cell.h"
-
+//---
 #include "MyAIController.generated.h"
 
 /**
@@ -30,7 +30,7 @@ public:
 protected:
 	/** Cell position of current path segment's end */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	struct FCell AiMoveTo;  //[G]
+	struct FCell AiMoveTo;	//[G]
 
 	/** Controlled character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))

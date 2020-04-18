@@ -1,13 +1,13 @@
-// Copyright 2019 Yevhenii Selivanov
+﻿// Copyright 2020 Yevhenii Selivanov
 
 #include "MyCameraActor.h"
-
+//---
+#include "GeneratedMap.h"
+#include "SingletonLibrary.h"
+//---
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
-
-#include "GeneratedMap.h"
-#include "SingletonLibrary.h"
 
 // Sets default values
 AMyCameraActor::AMyCameraActor()
@@ -16,9 +16,9 @@ AMyCameraActor::AMyCameraActor()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Set defaults to the CameraComponent
-	GetCameraComponent()->RelativeLocation.Z = 500.F;
-	GetCameraComponent()->RelativeRotation = FRotator(-90.0F, 0.0F, -90.0F);
-	GetCameraComponent()->SetConstraintAspectRatio(false);  // viewport without black borders
+	GetCameraComponent()->SetRelativeLocation(FVector(0.F, 0.F, 500.F));
+	GetCameraComponent()->SetRelativeRotation(FRotator(-90.0F, 0.0F, -90.0F));
+	GetCameraComponent()->SetConstraintAspectRatio(false);	// viewport without black borders
 }
 
 // Called every frame

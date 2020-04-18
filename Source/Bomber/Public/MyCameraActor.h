@@ -1,9 +1,9 @@
-// Copyright 2019 Yevhenii Selivanov
+﻿// Copyright 2020 Yevhenii Selivanov
 
 #pragma once
 
 #include "Camera/CameraActor.h"
-
+//---
 #include "MyCameraActor.generated.h"
 
 /**
