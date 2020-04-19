@@ -66,9 +66,10 @@ public:
 	APlayerCharacter();
 
 	/**  Finds and rotates the self at the current character's location to point at the specified location.
-	 * @param Location the character is looking at. */
+	 * @param Location the character is looking at.
+	 * @param bShouldInterpolate if true, smoothly rotate the character toward the direction. */
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Location"))
-	void RotateToLocation(const FVector& Location) const;
+	void RotateToLocation(const FVector& Location, bool bShouldInterpolate) const;
 
 protected:
 	/* ---------------------------------------------------

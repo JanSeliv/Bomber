@@ -256,7 +256,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	MoveToLocation(AiMoveTo.Location, -1.0f, false, false);
 
 	// Rotate the character
-	MyCharacter->RotateToLocation(AiMoveTo.Location);
+	MyCharacter->RotateToLocation(AiMoveTo.Location, false);
 
 #if WITH_EDITOR	 // [Editor]
 	// Visualize and show destination cell

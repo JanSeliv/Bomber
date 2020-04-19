@@ -222,9 +222,9 @@ FString USingletonLibrary::GetMenuLevelName()
 {
 	USingletonLibrary* SingletonLibrary = GetSingleton();
 	if (SingletonLibrary  //
-		&& !SingletonLibrary->MenuLevelAsset.IsNull())
+		&& !SingletonLibrary->MenuLevelAsset_.IsNull())
 	{
-		return SingletonLibrary->MenuLevelAsset.GetAssetName();
+		return SingletonLibrary->MenuLevelAsset_.GetAssetName();
 	}
 
 	ensure("USingletonLibrary::GetMenuLevelName: The Map is not choosen.");
@@ -236,9 +236,9 @@ FString USingletonLibrary::GetMainLevelName()
 {
 	USingletonLibrary* SingletonLibrary = GetSingleton();
 	if (SingletonLibrary  //
-		&& !SingletonLibrary->MainLevelAsset.IsNull())
+		&& !SingletonLibrary->MainLevelAsset_.IsNull())
 	{
-		return SingletonLibrary->MainLevelAsset.GetAssetName();
+		return SingletonLibrary->MainLevelAsset_.GetAssetName();
 	}
 
 	ensure("USingletonLibrary::GetMainLevelName: The Map is not choosen.");

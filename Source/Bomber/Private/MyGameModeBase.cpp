@@ -7,9 +7,7 @@
 #include "MyPlayerController.h"
 #include "SingletonLibrary.h"
 //---
-
 #include "Engine/World.h"
-#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this actor's properties
 AMyGameModeBase::AMyGameModeBase()

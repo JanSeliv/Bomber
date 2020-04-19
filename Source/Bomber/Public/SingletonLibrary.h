@@ -192,9 +192,9 @@ protected:
 
 	/** The class of the Menu Level. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
-	TAssetPtr<UWorld> MenuLevelAsset;
+	TAssetPtr<UWorld> MenuLevelAsset_;
 
 	/** The class of the Main Level. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
-	TAssetPtr<UWorld> MainLevelAsset;
+	TAssetPtr<UWorld> MainLevelAsset_;
 };

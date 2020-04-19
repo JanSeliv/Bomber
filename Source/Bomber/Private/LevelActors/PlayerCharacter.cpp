@@ -82,15 +82,31 @@ APlayerCharacter::APlayerCharacter()
 }
 
 // Finds and rotates the self at the current character's location to point at the specified location.
-void APlayerCharacter::RotateToLocation(const FVector& Location) const
+void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInterpolate) const
 {
+	UWorld* World = GetWorld();
 	USkeletalMeshComponent* MeshComponent = GetMesh();
-	if (MeshComponent)
+	if (!World	//
+		|| !MeshComponent)
 	{
-		FRotator NewRotation = FRotator::ZeroRotator;
-		NewRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location).Yaw - 90.F;
-		MeshComponent->SetWorldRotation(NewRotation);
+		return;
 	}
+
+	FRotator TargetRotation = FRotator::ZeroRotator;
+	TargetRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location).Yaw - 90.F;
+
+	FRotator NewRotation;
+	if (bShouldInterpolate)
+	{
+		NewRotation = UKismetMathLibrary::RInterpTo(
+			MeshComponent->GetComponentRotation(), TargetRotation, World->GetDeltaSeconds() * 10.F, 1.F);
+	}
+	else
+	{
+		NewRotation = TargetRotation;
+	}
+
+	MeshComponent->SetWorldRotation(NewRotation);
 }
 
 /* ---------------------------------------------------
@@ -199,13 +215,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 // Adds the movement input along the given world direction vector.
 void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue, bool bForce)
 {
-	if (ScaleValue != 0)
+	if (ScaleValue)
 	{
 		// Move the character
 		Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
 
 		// Rotate the character
-		RotateToLocation(GetActorLocation() + ScaleValue * WorldDirection);
+		RotateToLocation(GetActorLocation() + ScaleValue * WorldDirection, true);
 	}
 }
 
