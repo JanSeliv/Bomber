@@ -28,7 +28,7 @@ ABombActor::ABombActor()
 	// Initialize bomb mesh component
 	BombMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMeshComponent"));
 	BombMeshComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BombMesh"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Meshes/SM_Bomb"));
 	if (BombMeshFinder.Succeeded())
 	{
 		BombMeshComponent->SetStaticMesh(BombMeshFinder.Object);
@@ -44,10 +44,10 @@ ABombActor::ABombActor()
 
 	// Find bomb materials
 	static TArray<ConstructorHelpers::FObjectFinder<UMaterialInterface>> MaterialsFinderArray{
-		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Yellow"),
-		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Blue"),
-		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Silver"),
-		TEXT("/Game/Bomber/Assets/MI_Bombs/MI_Bomb_Pink")};
+		TEXT("/Game/Bomber/Materials/MI_Bombs/MI_Bomb_Yellow"),
+		TEXT("/Game/Bomber/Materials/MI_Bombs/MI_Bomb_Blue"),
+		TEXT("/Game/Bomber/Materials/MI_Bombs/MI_Bomb_Silver"),
+		TEXT("/Game/Bomber/Materials/MI_Bombs/MI_Bomb_Pink")};
 	for (int32 i = 0; i < MaterialsFinderArray.Num(); ++i)
 	{
 		if (MaterialsFinderArray[i].Succeeded())

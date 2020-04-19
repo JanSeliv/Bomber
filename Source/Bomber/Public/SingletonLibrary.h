@@ -93,6 +93,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class AMyGameModeBase* GetMyGameMode(const UObject* WorldContextObject);
 
+	/** Returns the name of the Menu Level. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FString GetMenuLevelName();
+
+	/** Returns the name of the Main Level */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FString GetMainLevelName();
+
 	/* ---------------------------------------------------
 	 *		FCell blueprint functions
 	 * --------------------------------------------------- */
@@ -181,4 +189,12 @@ protected:
 	/** Type and its class as associated pair. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
 	TMap<EActorType, TSubclassOf<AActor>> ActorTypesByClasses_;	 //[B]
+
+	/** The class of the Menu Level. */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
+	TAssetPtr<UWorld> MenuLevelAsset;
+
+	/** The class of the Main Level. */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
+	TAssetPtr<UWorld> MainLevelAsset;
 };

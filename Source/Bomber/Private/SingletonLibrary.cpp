@@ -217,6 +217,34 @@ AMyGameModeBase* USingletonLibrary::GetMyGameMode(const UObject* WorldContextObj
 	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
 }
 
+// Returns the name of the Menu Level.
+FString USingletonLibrary::GetMenuLevelName()
+{
+	USingletonLibrary* SingletonLibrary = GetSingleton();
+	if (SingletonLibrary  //
+		&& !SingletonLibrary->MenuLevelAsset.IsNull())
+	{
+		return SingletonLibrary->MenuLevelAsset.GetAssetName();
+	}
+
+	ensure("USingletonLibrary::GetMenuLevelName: The Map is not choosen.");
+	return "";
+}
+
+// Returns the name of the Main Level.
+FString USingletonLibrary::GetMainLevelName()
+{
+	USingletonLibrary* SingletonLibrary = GetSingleton();
+	if (SingletonLibrary  //
+		&& !SingletonLibrary->MainLevelAsset.IsNull())
+	{
+		return SingletonLibrary->MainLevelAsset.GetAssetName();
+	}
+
+	ensure("USingletonLibrary::GetMainLevelName: The Map is not choosen.");
+	return "";
+}
+
 /* ---------------------------------------------------
  *		FCell blueprint functions
  * --------------------------------------------------- */
@@ -234,7 +262,7 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 			Sum += CellIt.Location;
 		}
 
-		Average = Sum / float(CellsNum);
+		Average = Sum / static_cast<float>(CellsNum);
 	}
 
 	return FCell(Average);

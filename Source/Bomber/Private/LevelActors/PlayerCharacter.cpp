@@ -68,10 +68,10 @@ APlayerCharacter::APlayerCharacter()
 
 	// Find nameplate materials
 	static TArray<ConstructorHelpers::FObjectFinder<UMaterialInterface>> MaterialsFinderArray{
-		TEXT("/Game/Bomber/Assets/MI_NamePlates/MI_NamePlateYellow"),
-		TEXT("/Game/Bomber/Assets/MI_NamePlates/MI_NamePlateBlue"),
-		TEXT("/Game/Bomber/Assets/MI_NamePlates/MI_NamePlateWhite"),
-		TEXT("/Game/Bomber/Assets/MI_NamePlates/MI_NamePlatePink")};
+		TEXT("/Game/Bomber/Materials/MI_NamePlates/MI_NamePlateYellow"),
+		TEXT("/Game/Bomber/Materials/MI_NamePlates/MI_NamePlateBlue"),
+		TEXT("/Game/Bomber/Materials/MI_NamePlates/MI_NamePlateWhite"),
+		TEXT("/Game/Bomber/Materials/MI_NamePlates/MI_NamePlatePink")};
 	for (int32 i = 0; i < MaterialsFinderArray.Num(); ++i)
 	{
 		if (MaterialsFinderArray[i].Succeeded())

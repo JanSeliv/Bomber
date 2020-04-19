@@ -5,7 +5,9 @@
 #include "MyCameraActor.h"
 #include "MyHUD.h"
 #include "MyPlayerController.h"
+#include "SingletonLibrary.h"
 //---
+
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -25,8 +27,8 @@ void AMyGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
 	// Camera spawning
-	UWorld* const World = GetWorld();
-	if (UGameplayStatics::GetCurrentLevelName(World) == "BomberLevel")
+	UWorld* World = GetWorld();
+	if (World && World->GetName() == USingletonLibrary::GetMainLevelName())	 // is main level
 	{
 		World->SpawnActor(CameraActorClass);
 	}

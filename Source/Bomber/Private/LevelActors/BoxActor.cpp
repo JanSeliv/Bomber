@@ -27,7 +27,7 @@ ABoxActor::ABoxActor()
 	// Initialize box mesh component
 	BoxMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxMeshComponent"));
 	BoxMeshComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/BoxMesh"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Meshes/SM_Box"));
 	if (BombMeshFinder.Succeeded())
 	{
 		BoxMeshComponent->SetStaticMesh(BombMeshFinder.Object);

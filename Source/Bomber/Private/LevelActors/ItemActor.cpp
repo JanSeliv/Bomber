@@ -30,9 +30,9 @@ AItemActor::AItemActor()
 
 	// Find and fill item meshes array
 	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>> ItemMeshFinderArray{
-		TEXT("/Game/Bomber/Assets/Meshes/SkateItemMesh"),
-		TEXT("/Game/Bomber/Assets/Meshes/BombItemMesh"),
-		TEXT("/Game/Bomber/Assets/Meshes/FireItemMesh")};
+		TEXT("/Game/Bomber/Meshes/SM_Item_Skate"),
+		TEXT("/Game/Bomber/Meshes/SM_Item_Bomb"),
+		TEXT("/Game/Bomber/Meshes/SM_Item_Fire")};
 	for (int32 i = 0; i < ItemMeshFinderArray.Num(); ++i)
 	{
 		if (ItemMeshFinderArray[i].Succeeded())

@@ -24,7 +24,7 @@ AWallActor::AWallActor()
 	// Initialize wall mesh component
 	WallMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WallMeshComponent"));
 	WallMeshComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> WallMeshFinder(TEXT("/Game/Bomber/Assets/Meshes/WallMesh"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> WallMeshFinder(TEXT("/Game/Bomber/Meshes/SM_Wall"));
 	if (WallMeshFinder.Succeeded())
 	{
 		WallMeshComponent->SetStaticMesh(WallMeshFinder.Object);

@@ -36,12 +36,12 @@ AGeneratedMap::AGeneratedMap()
 	RootComponent->SetRelativeScale3D(FVector(7.F, 7.F, 7.F));
 
 	// Find blueprint class of the background
-	BackgroundBlueprintComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("BackgroundBlueprintComponent"));
+	BackgroundBlueprintComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("BP_BackgroundAssetComponent"));
 	BackgroundBlueprintComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<AActor> BackgroundClassFinder(TEXT("/Game/Bomber/Assets/BackgroundBlueprintAsset"));
-	if (BackgroundClassFinder.Succeeded())
+	static ConstructorHelpers::FClassFinder<AActor> BP_BackgroundAssetFinder(TEXT("/Game/Bomber/Blueprints/BP_BackgroundAsset"));
+	if (BP_BackgroundAssetFinder.Succeeded())
 	{
-		BackgroundBlueprintClass = BackgroundClassFinder.Class;	 // Default class of the PlatformComponent
+		BackgroundBlueprintClass = BP_BackgroundAssetFinder.Class;	// Default class of the PlatformComponent
 	}
 }
 
@@ -235,7 +235,7 @@ void AGeneratedMap::IntersectCellsByTypes(
 void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOnly)
 {
 	if (MapComponents_.Num() == 0  //
-		|| Cells.Num() == 0)
+		|| !Cells.Num() && !bIsNotValidOnly)
 	{
 		return;
 	}
@@ -395,14 +395,19 @@ void AGeneratedMap::Tick(float DeltaTime)
 	USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 
 	// Random item spawning
-	const float Timer = USingletonLibrary::GetMyGameMode(this)->Timer;
-	const int32 IntTimer = static_cast<int32>(Timer);
-	if (IntTimer <= 60							  // after the minute
-		&& FMath::IsNearlyEqual(Timer, IntTimer)  // is whole number
-		&& IntTimer % 10 == 0)					  // each 10 seconds
+	// @todo GameMode is null for client, redesign this logic!
+	AMyGameModeBase* MyGameModeBase = USingletonLibrary::GetMyGameMode(this);
+	if (ensureMsgf(MyGameModeBase, TEXT("AGeneratedMap::Tick: MyGameModeBase is null")))
 	{
-		const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
-		SpawnActorByType(EActorType::Item, RandCell);  // can be not spawned in non empty cell
+		const float Timer = MyGameModeBase->Timer;
+		const int32 IntTimer = static_cast<int32>(Timer);
+		if (IntTimer <= 60							  // after the minute
+			&& FMath::IsNearlyEqual(Timer, IntTimer)  // is whole number
+			&& IntTimer % 10 == 0)					  // each 10 seconds
+		{
+			const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
+			SpawnActorByType(EActorType::Item, RandCell);  // can be not spawned in non empty cell
+		}
 	}
 }
 
@@ -707,6 +712,22 @@ void AGeneratedMap::GenerateLevelActors()
 //  Map components getter.
 void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, const int32& ActorsTypesBitmask) const
 {
+	//if (!MapComponents_.Num())
+	//{
+	//	return;
+	//}
+
+	//if (TO_FLAG(EActorType::All) == ActorsTypesBitmask)
+	//{
+	//	OutBitmaskedComponents.Append(MapComponents_);
+	//	return;
+	//}
+
+	//OutBitmaskedComponents.Append(
+	//	MapComponents_.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr) {
+	//		return Ptr && Ptr->ActorType & ActorsTypesBitmask;
+	//	}));
+
 	if (MapComponents_.Num() > 0)
 	{
 		OutBitmaskedComponents.Append(
