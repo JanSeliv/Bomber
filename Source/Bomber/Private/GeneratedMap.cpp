@@ -378,6 +378,8 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 // Called every time on this actor to update characters locations on the Level Map.
 void AGeneratedMap::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+
 	if (GetCharactersNum() == 0)  // are no players left
 	{
 		SetActorTickEnabled(false);
@@ -546,12 +548,12 @@ void AGeneratedMap::GenerateLevelActors()
 	PlayerCharactersNum = PlayersMapComponents.Num();
 
 	/* Steps:
-	 * 
+	 *
 	 * Part 0: Actors random filling to the ArrayToGenerate.
 	 * 0.1) Finding all symmetrical cells for each iterated cell;
 	 *
 	 * Part 1: Checking if there is a path to the each bone. If not, go to the 0 step.
-	 * 
+	 *
 	 * Part 2: Spawning these actors
 	 */
 
