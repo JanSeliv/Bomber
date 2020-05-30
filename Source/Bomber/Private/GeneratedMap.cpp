@@ -41,7 +41,7 @@ AGeneratedMap::AGeneratedMap()
 	static ConstructorHelpers::FClassFinder<AActor> BP_BackgroundAssetFinder(TEXT("/Game/Bomber/Blueprints/BP_BackgroundAsset"));
 	if (BP_BackgroundAssetFinder.Succeeded())
 	{
-		BackgroundBlueprintClass = BP_BackgroundAssetFinder.Class;	// Default class of the PlatformComponent
+		BackgroundBlueprintClass = BP_BackgroundAssetFinder.Class; // Default class of the PlatformComponent
 	}
 }
 
@@ -57,20 +57,20 @@ void AGeneratedMap::GetSidesCells(
 	FCells Walls;
 	if (OutCells.Num() == 0)
 	{
-		IntersectCellsByTypes(Walls, TO_FLAG(EActorType::Wall));  // just finding the walls on the map
+		IntersectCellsByTypes(Walls, TO_FLAG(EActorType::Wall)); // just finding the walls on the map
 	}
-	else if (bBreakInputCells)	// specified OutCells is not empty, these cells break lines as the Wall behavior
+	else if (bBreakInputCells) // specified OutCells is not empty, these cells break lines as the Wall behavior
 	{
-		Walls = OutCells;  // these cells break lines as the Wall behavior, don't empty specified array
+		Walls = OutCells; // these cells break lines as the Wall behavior, don't empty specified array
 	}
-	else  //OutCells > 0 && !bBreakInputCells
+	else //OutCells > 0 && !bBreakInputCells
 	{
-		OutCells.Empty();  // should empty array in order to return only sides cells
+		OutCells.Empty(); // should empty array in order to return only sides cells
 	}
 
 	// the index of the specified cell
 	const int32 C0 = GridCells_.IndexOfByPredicate([Cell](const FSharedCell& SharedCell) { return *SharedCell == Cell; });
-	if (C0 == INDEX_NONE)  // if index was found and cell is contained in the array
+	if (C0 == INDEX_NONE) // if index was found and cell is contained in the array
 	{
 		return;
 	}
@@ -78,7 +78,7 @@ void AGeneratedMap::GetSidesCells(
 	// ----- A path without obstacles -----
 	FCells Obstacles;
 	const bool bWithoutObstacles = Pathfinder != EPathType::Explosion;
-	if (bWithoutObstacles)	// if is the request to find the path without Bombs/Boxes
+	if (bWithoutObstacles) // if is the request to find the path without Bombs/Boxes
 	{
 		IntersectCellsByTypes(Obstacles, TO_FLAG(EActorType::Bomb | EActorType::Box));
 	}
@@ -86,7 +86,7 @@ void AGeneratedMap::GetSidesCells(
 	// ----- Secure: a path without players -----
 	FCells PlayersCells;
 	const bool bWithoutPlayers = Pathfinder == EPathType::Secure;
-	if (bWithoutPlayers)  // if is the request to find the path without players cells.
+	if (bWithoutPlayers) // if is the request to find the path without players cells.
 	{
 		IntersectCellsByTypes(PlayersCells, TO_FLAG(EActorType::Player));
 	}
@@ -94,7 +94,7 @@ void AGeneratedMap::GetSidesCells(
 	// ----- A path without explosions -----
 	FCells DangerousCells;
 	const bool bWithoutExplosions = Pathfinder == EPathType::Safe || Pathfinder == EPathType::Secure;
-	if (bWithoutExplosions)	 // if is the request to find the path without explosions.
+	if (bWithoutExplosions) // if is the request to find the path without explosions.
 	{
 		FMapComponents BombsMapComponents;
 		GetMapComponents(BombsMapComponents, TO_FLAG(EActorType::Bomb));
@@ -103,7 +103,7 @@ void AGeneratedMap::GetSidesCells(
 			for (const auto& MapComponentIt : BombsMapComponents)
 			{
 				const auto BombOwner = MapComponentIt ? Cast<ABombActor>(MapComponentIt->GetOwner()) : nullptr;
-				if (IS_VALID(BombOwner))  // is valid and is not transient
+				if (IS_VALID(BombOwner)) // is valid and is not transient
 				{
 					DangerousCells = DangerousCells.Union(BombOwner->ExplosionCells_);
 				}
@@ -112,54 +112,52 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// ----- The specified cell adding -----
-	if (bWithoutExplosions == false			// can be danger
-		|| !DangerousCells.Contains(Cell))	// is not dangerous cell
+	if (bWithoutExplosions == false        // can be danger
+	    || !DangerousCells.Contains(Cell)) // is not dangerous cell
 	{
 		OutCells.Emplace(Cell);
 	}
 
 	// ----- Cells finding -----
 	const int32 MaxWight = GetActorScale3D().X;
-	for (int32 bIsY = 0; bIsY <= 1; ++bIsY)	 // 0(X-raw direction) and 1(Y-column direction)
+	for (int32 bIsY = 0; bIsY <= 1; ++bIsY) // 0(X-raw direction) and 1(Y-column direction)
 	{
 		const int32 PositionC0 = bIsY ? /*Y-column*/ C0 % MaxWight : C0 / MaxWight /*raw*/;
-		for (int32 SideMultiplier = -1; SideMultiplier <= 1; SideMultiplier += 2)  // -1(Left|Down) and 1(Right|Up)
+		for (int32 SideMultiplier = -1; SideMultiplier <= 1; SideMultiplier += 2) // -1(Left|Down) and 1(Right|Up)
 		{
 			for (int32 i = 1; i <= SideLength; ++i)
 			{
 				int32 Distance = i * SideMultiplier;
 				if (bIsY) Distance *= MaxWight;
 				const int32 FoundIndex = C0 + Distance;
-				if (PositionC0 != (bIsY ? FoundIndex % MaxWight : FoundIndex / MaxWight)  // PositionC0 != PositionX
-					|| !GridCells_.IsValidIndex(FoundIndex))							  // is not in range
+				if (PositionC0 != (bIsY ? FoundIndex % MaxWight : FoundIndex / MaxWight) // PositionC0 != PositionX
+				    || !GridCells_.IsValidIndex(FoundIndex))                             // is not in range
 				{
-					break;	// to the next side
+					break; // to the next side
 				}
 
 				const FCell FoundCell = *GridCells_[FoundIndex];
 
-				if (Walls.Contains(FoundCell)									  // cell contains a wall
-					|| bWithoutObstacles && Obstacles.Contains(FoundCell)		  // cell contains an obstacle (Bombs/Boxes)
-					|| bWithoutPlayers && PlayersCells.Contains(FoundCell)		  // cell contains a player
-					|| bWithoutExplosions && DangerousCells.Contains(FoundCell))  // cell contains an explosion
+				if (Walls.Contains(FoundCell)                                    // cell contains a wall
+				    || bWithoutObstacles && Obstacles.Contains(FoundCell)        // cell contains an obstacle (Bombs/Boxes)
+				    || bWithoutPlayers && PlayersCells.Contains(FoundCell)       // cell contains a player
+				    || bWithoutExplosions && DangerousCells.Contains(FoundCell)) // cell contains an explosion
 				{
-					break;	// to the next side
+					break; // to the next side
 				}
 
 				OutCells.Emplace(FoundCell);
-			}  // Cells iterating
-
-		}  // Each side iterating: -1(Left|Down) and 1(Right|Up)
-
-	}  // Each direction iterating: 0(X-raw) and 1(Y-column)
+			} // Cells iterating
+		}     // Each side iterating: -1(Left|Down) and 1(Right|Up)
+	}         // Each direction iterating: 0(X-raw) and 1(Y-column)
 }
 
 // Spawns level actor on the Level Map by the specified type
 AActor* AGeneratedMap::SpawnActorByType(const EActorType& Type, const FCell& Cell)
 {
 	UWorld* World = GetWorld();
-	if (!World || ContainsMapComponents(Cell, TO_FLAG(~EActorType::Player))	 // the free cell was not found
-		|| Type == EActorType::None)										 // nothing to spawn
+	if (!World || ContainsMapComponents(Cell, TO_FLAG(~EActorType::Player)) // the free cell was not found
+	    || Type == EActorType::None)                                        // nothing to spawn
 	{
 		return nullptr;
 	}
@@ -171,16 +169,16 @@ AActor* AGeneratedMap::SpawnActorByType(const EActorType& Type, const FCell& Cel
 void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 {
 	AActor* const ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
-	if (!IS_VALID(ComponentOwner))	// the component's owner is not valid or is transient
+	if (!IS_VALID(ComponentOwner)) // the component's owner is not valid or is transient
 	{
 		return;
 	}
 
-	if (!MapComponents_.Contains(AddedComponent))  // is not contains in the array
+	if (!MapComponents_.Contains(AddedComponent)) // is not contains in the array
 	{
 		MapComponents_.Emplace(AddedComponent);
 
-		if (AddedComponent->ActorType == EActorType::Player)  // Is a player
+		if (AddedComponent->ActorType == EActorType::Player) // Is a player
 		{
 			PlayerCharactersNum++;
 		}
@@ -188,11 +186,20 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 
 	ComponentOwner->GetRootComponent()->SetAbsolute(false, false, true);
 
-	// Locate actor on cell
+	// begin: find transform
 	FRotator ActorRotation{GetActorRotation()};
 	ActorRotation.Yaw += FMath::RandRange(int32(1), int32(4)) * 90.f;
-	const FVector ActorLocation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + 100.f};
+
+	FVector ActorLocation, ActorExtent;
+	ComponentOwner->GetActorBounds(false, ActorLocation, ActorExtent, false);
+	ActorLocation.X = Cell.Location.X;
+	ActorLocation.Y = Cell.Location.Y;
+	ActorLocation.Z = Cell.Location.Z + ActorExtent.Z;
+
 	const FVector Scale{1.f, 1.f, 1.f};
+	// end
+
+	// Locate actor on cell
 	ComponentOwner->SetActorTransform(FTransform(ActorRotation, ActorLocation, Scale));
 
 	// Attach to the Level Map actor
@@ -208,8 +215,8 @@ void AGeneratedMap::IntersectCellsByTypes(
 	bool bIntersectAllIfEmpty,
 	const UMapComponent* ExceptedComponent) const
 {
-	if (bIntersectAllIfEmpty == false  // should not intersect with all existed cells
-		&& OutCells.Num() == 0)		   // but the specified array is empty
+	if (bIntersectAllIfEmpty == false // should not intersect with all existed cells
+	    && OutCells.Num() == 0)       // but the specified array is empty
 	{
 		return;
 	}
@@ -218,7 +225,7 @@ void AGeneratedMap::IntersectCellsByTypes(
 	GetMapComponents(BitmaskedComponents, ActorsTypesBitmask);
 	if (BitmaskedComponents.Num() == 0)
 	{
-		OutCells.Empty();  // nothing found, returns empty OutCells array
+		OutCells.Empty(); // nothing found, returns empty OutCells array
 		return;
 	}
 
@@ -234,15 +241,15 @@ void AGeneratedMap::IntersectCellsByTypes(
 // Destroy all actors from the set of cells
 void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOnly)
 {
-	if (MapComponents_.Num() == 0  //
-		|| !Cells.Num() && !bIsNotValidOnly)
+	if (MapComponents_.Num() == 0 //
+	    || !Cells.Num() && !bIsNotValidOnly)
 	{
 		return;
 	}
 
 	for (int32 i = MapComponents_.Num() - 1; i >= 0; --i)
 	{
-		if (!MapComponents_.IsValidIndex(i))  // the element already was removed
+		if (!MapComponents_.IsValidIndex(i)) // the element already was removed
 		{
 			continue;
 		}
@@ -258,8 +265,8 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 			continue;
 		}
 
-		if (MapComponentIt && Cells.Contains(MapComponentIt->GetCell())	 // the cell is contained on the grid
-			|| bIsNotValidOnly)											 //  if true, not-valid component should be deleted anyway
+		if (MapComponentIt && Cells.Contains(MapComponentIt->GetCell()) // the cell is contained on the grid
+		    || bIsNotValidOnly)                                         //  if true, not-valid component should be deleted anyway
 		{
 			USingletonLibrary::PrintToLog(ComponentOwner, "DestroyActorsFromMap");
 
@@ -270,11 +277,11 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 			// Destroy the iterated owner
 			if (IsValidOwner)
 			{
-				ComponentOwner->SetFlags(RF_Transient);	 // destroy only once
+				ComponentOwner->SetFlags(RF_Transient); // destroy only once
 				ComponentOwner->Destroy();
 			}
 		}
-	}  // Map components iteration
+	} // Map components iteration
 }
 
 // Removes the specified map component from the MapComponents_ array without an owner destroying
@@ -283,7 +290,7 @@ void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 	// Remove from the array
 	MapComponents_.Remove(MapComponent);
 
-	if (MapComponent == nullptr)  // the Map Component is null
+	if (MapComponent == nullptr) // the Map Component is null
 	{
 		return;
 	}
@@ -292,7 +299,7 @@ void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 	MapComponent->Cell.Reset();
 
 	// Decrement the players number
-	if (MapComponent->ActorType == EActorType::Player)	// Is a player
+	if (MapComponent->ActorType == EActorType::Player) // Is a player
 	{
 		PlayerCharactersNum--;
 	}
@@ -308,25 +315,26 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 
 	// ----- Part 0: Locals -----
 	FSharedCell FoundCell;
-	const FCell OwnerCell(ComponentOwner->GetActorLocation());	// The owner location
+	const FCell OwnerCell(ComponentOwner->GetActorLocation()); // The owner location
 	// Check if the owner already standing on:
-	FCells InitialCells({OwnerCell,																		   // 0: exactly the current his cell
-		FCell(OwnerCell.RotateAngleAxis(-1.F).Location.GridSnap(FCell::CellSize)).RotateAngleAxis(1.F)});  // 1: within the radius of one cell
+	FCells InitialCells({OwnerCell,                                                                                        // 0: exactly the current his cell
+	                     FCell(OwnerCell.RotateAngleAxis(-1.F).Location.GridSnap(FCell::CellSize)).RotateAngleAxis(1.F)}); // 1: within the radius of one cell
 
-	TSet<FSharedCell> CellsToIterate(GridCells_.FilterByPredicate([InitialCells](FSharedCell Cell) {
+	TSet<FSharedCell> CellsToIterate(GridCells_.FilterByPredicate([InitialCells](FSharedCell Cell)
+	{
 		return InitialCells.Contains(*Cell);
 	}));
 
-	const int32 InitialCellsNum = CellsToIterate.Num();										 // The number of initial cells
-	FCells NonEmptyCells;																	 // all cells of each level actor
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EActorType::Player), true, MapComponent);	 //EActorType::Bomb | EActorType::Item | EActorType::Wall | EActorType::Box
+	const int32 InitialCellsNum = CellsToIterate.Num();                                     // The number of initial cells
+	FCells NonEmptyCells;                                                                   // all cells of each level actor
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EActorType::Player), true, MapComponent); //EActorType::Bomb | EActorType::Item | EActorType::Wall | EActorType::Box
 
 	// Pre gameplay locals to find a nearest cell
-	const bool bHasNotBegunPlay = !HasActorBegunPlay();	 // the game was not started
+	const bool bHasNotBegunPlay = !HasActorBegunPlay(); // the game was not started
 	float LastFoundEditorLen = MAX_FLT;
 	if (bHasNotBegunPlay)
 	{
-		CellsToIterate.Append(GridCells_);	// union of two sets(initials+all) for finding a nearest cell
+		CellsToIterate.Append(GridCells_); // union of two sets(initials+all) for finding a nearest cell
 	}
 
 	// ----- Part 1:  Cells iteration
@@ -337,32 +345,31 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 		Counter++;
 		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter) + ":" + CellIt->Location.ToString());
 
-		if (NonEmptyCells.Contains(*CellIt))  // the cell is not free from other level actors
+		if (NonEmptyCells.Contains(*CellIt)) // the cell is not free from other level actors
 		{
 			continue;
 		}
 
 		// if the cell was found among initial cells without searching a nearest
-		if (Counter < InitialCellsNum		 // is the initial cell
-			&& GridCells_.Contains(CellIt))	 // is contained on the grid
+		if (Counter < InitialCellsNum       // is the initial cell
+		    && GridCells_.Contains(CellIt)) // is contained on the grid
 		{
 			FoundCell = CellIt;
 			break;
 		}
 
 		//	Finding the nearest cell before starts the game
-		if (bHasNotBegunPlay				// the game was not started
-			&& Counter >= InitialCellsNum)	// if iterated cell is not initial
+		if (bHasNotBegunPlay               // the game was not started
+		    && Counter >= InitialCellsNum) // if iterated cell is not initial
 		{
 			const float EditorLenIt = USingletonLibrary::CalculateCellsLength(OwnerCell, *CellIt);
-			if (EditorLenIt < LastFoundEditorLen)  // Distance closer
+			if (EditorLenIt < LastFoundEditorLen) // Distance closer
 			{
 				LastFoundEditorLen = EditorLenIt;
 				FoundCell = CellIt;
 			}
 		}
-
-	}  //[Cells Iteration]
+	} //[Cells Iteration]
 
 	// Checks the cell is contained in the grid and free from other level actors.
 	if (FoundCell.IsValid())
@@ -380,7 +387,7 @@ void AGeneratedMap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetCharactersNum() == 0)  // are no players left
+	if (GetCharactersNum() == 0) // are no players left
 	{
 		SetActorTickEnabled(false);
 		return;
@@ -403,12 +410,12 @@ void AGeneratedMap::Tick(float DeltaTime)
 	{
 		const float Timer = MyGameModeBase->Timer;
 		const int32 IntTimer = static_cast<int32>(Timer);
-		if (IntTimer <= 60							  // after the minute
-			&& FMath::IsNearlyEqual(Timer, IntTimer)  // is whole number
-			&& IntTimer % 10 == 0)					  // each 10 seconds
+		if (IntTimer <= 60                           // after the minute
+		    && FMath::IsNearlyEqual(Timer, IntTimer) // is whole number
+		    && IntTimer % 10 == 0)                   // each 10 seconds
 		{
 			const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
-			SpawnActorByType(EActorType::Item, RandCell);  // can be not spawned in non empty cell
+			SpawnActorByType(EActorType::Item, RandCell); // can be not spawned in non empty cell
 		}
 	}
 }
@@ -418,7 +425,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_TRANSIENT(this) == true)	 // the level map is transient
+	if (IS_TRANSIENT(this) == true) // the level map is transient
 	{
 		return;
 	}
@@ -429,9 +436,9 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 #endif	// WITH_EDITOR [Editor]
 
 	// Create the background blueprint child actor
-	if (BackgroundBlueprintClass									 // There is some background class
-		&& BackgroundBlueprintComponent								 // Is accessible
-		&& !IsValid(BackgroundBlueprintComponent->GetChildActor()))	 // Is not created yet
+	if (BackgroundBlueprintClass                                    // There is some background class
+	    && BackgroundBlueprintComponent                             // Is accessible
+	    && !IsValid(BackgroundBlueprintComponent->GetChildActor())) // Is not created yet
 	{
 		BackgroundBlueprintComponent->SetChildActorClass(BackgroundBlueprintClass);
 		BackgroundBlueprintComponent->CreateChildActor();
@@ -441,15 +448,15 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
 	SetActorLocation(GetActorLocation().GridSnap(USingletonLibrary::GetCellSize()));
 	FIntVector MapScale(GetActorScale3D());
-	if (MapScale.X % 2 != 1)  // Length must be unpaired
+	if (MapScale.X % 2 != 1) // Length must be unpaired
 	{
 		MapScale.X += 1;
 	}
-	if (MapScale.Y % 2 != 1)  // Weight must be unpaired
+	if (MapScale.Y % 2 != 1) // Weight must be unpaired
 	{
 		MapScale.Y += 1;
 	}
-	MapScale.Z = 1;	 //Height must be 1
+	MapScale.Z = 1; //Height must be 1
 	SetActorScale3D(FVector(MapScale));
 
 	// Clear the old grid array
@@ -480,7 +487,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		}
 	}
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld] \
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	// Show cells coordinates of the Grid array
 	USingletonLibrary::ClearOwnerTextRenders(this);
 	if (bShouldShowRenders)
@@ -497,7 +504,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 void AGeneratedMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	if (IS_TRANSIENT(this) == true)	 // the level map is transient
+	if (IS_TRANSIENT(this) == true) // the level map is transient
 	{
 		return;
 	}
@@ -510,8 +517,8 @@ void AGeneratedMap::PostInitializeComponents()
 	if (MyGameInstance)
 	{
 		const FVector MapScale = MyGameInstance->LevelMapScale;
-		if (MapScale.IsZero() == false	// is not zero
-			&& MapScale != GetActorScale3D())
+		if (MapScale.IsZero() == false // is not zero
+		    && MapScale != GetActorScale3D())
 		{
 			SetActorScale3D(MapScale);
 		}
@@ -565,9 +572,9 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// --- Part 0: Cells filling ---
 
-	for (int32 Y = 0; Y <= MapHalfScale.Y; ++Y)	 // Strings
+	for (int32 Y = 0; Y <= MapHalfScale.Y; ++Y) // Strings
 	{
-		for (int32 X = 0; X <= MapHalfScale.X; ++X)	 // Columns
+		for (int32 X = 0; X <= MapHalfScale.X; ++X) // Columns
 		{
 			const bool IsSafeZone = X == 0 && Y == 1 || X == 1 && Y == 0;
 			FCell CellIt = *GridCells_[MapScale.X * Y + X];
@@ -578,54 +585,54 @@ void AGeneratedMap::GenerateLevelActors()
 			EActorType ActorTypeToSpawn = EActorType::None;
 
 			// Player condition
-			if (X == 0 && Y == 0)  // is first corner
+			if (X == 0 && Y == 0) // is first corner
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "PLAYER will be spawned");
 				ActorTypeToSpawn = EActorType::Player;
 			}
 
 			// Wall condition
-			if (ActorTypeToSpawn == EActorType::None  // all previous conditions are false
-				&& !IsSafeZone && FMath::RandRange(int32(0), int32(99)) < WallsChance_)
+			if (ActorTypeToSpawn == EActorType::None // all previous conditions are false
+			    && !IsSafeZone && FMath::RandRange(int32(0), int32(99)) < WallsChance_)
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "WALL will be spawned");
 				ActorTypeToSpawn = EActorType::Wall;
 			}
 
 			// Box condition
-			if (ActorTypeToSpawn == EActorType::None									 // all previous conditions are false
-				&& !IsSafeZone && FMath::RandRange(int32(0), int32(99)) < BoxesChance_)	 // Chance of boxes
+			if (ActorTypeToSpawn == EActorType::None                                    // all previous conditions are false
+			    && !IsSafeZone && FMath::RandRange(int32(0), int32(99)) < BoxesChance_) // Chance of boxes
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "BOX will be spawned");
 				ActorTypeToSpawn = EActorType::Box;
 			}
 
-			if (ActorTypeToSpawn != EActorType::Wall)  //
+			if (ActorTypeToSpawn != EActorType::Wall) //
 			{
 				Bones.Emplace(CellIt);
 			}
 
-			if (ActorTypeToSpawn == EActorType::None)  // There is no types to spawn
+			if (ActorTypeToSpawn == EActorType::None) // There is no types to spawn
 			{
 				continue;
 			}
 
 			// 0.1) Array symmetrization
-			const int32 Xs = MapScale.X - 1 - X, Ys = MapScale.Y - 1 - Y;  // Symmetrized cell position
-			for (int32 I = 0; I < 4; ++I)								   // 4 sides of symmetry
+			const int32 Xs = MapScale.X - 1 - X, Ys = MapScale.Y - 1 - Y; // Symmetrized cell position
+			for (int32 I = 0; I < 4; ++I)                                 // 4 sides of symmetry
 			{
-				if (I > 0)	// the 0 index is always current CellIt, otherwise needs to find symmetry
+				if (I > 0) // the 0 index is always current CellIt, otherwise needs to find symmetry
 				{
-					int32 Xi = X, Yi = Y;  // Keeping the current coordinates
+					int32 Xi = X, Yi = Y; // Keeping the current coordinates
 					switch (I)
 					{
-						case 1:	 // (X1 = Xs; Y1 = Y)
+						case 1: // (X1 = Xs; Y1 = Y)
 							Xi = Xs;
 							break;
-						case 2:	 // (X2 = X; Y2 = Ys)
+						case 2: // (X2 = X; Y2 = Ys)
 							Yi = Ys;
 							break;
-						case 3:	 // (X3 = Xs; Y3 = Ys)
+						case 3: // (X3 = Xs; Y3 = Ys)
 							Xi = Xs;
 							Yi = Ys;
 							break;
@@ -635,18 +642,17 @@ void AGeneratedMap::GenerateLevelActors()
 					CellIt = *GridCells_[MapScale.X * Yi + Xi];
 				}
 
-				if (!NonEmptyCells.Contains(CellIt))  // the cell is not free
+				if (!NonEmptyCells.Contains(CellIt)) // the cell is not free
 				{
 					ActorsToSpawn.Emplace(CellIt, ActorTypeToSpawn);
 				}
 				else if (ActorTypeToSpawn == EActorType::Wall)
 				{
-					Bones.Add(CellIt);	// the wall was not spawned, then this cell is the bone
+					Bones.Add(CellIt); // the wall was not spawned, then this cell is the bone
 				}
-
-			}  // Symmetry iterations
-		}	   // X iterations
-	}		   // Y iterations
+			} // Symmetry iterations
+		}     // X iterations
+	}         // Y iterations
 
 	// --- Part 1 : Checking if there is a path to the bottom and side edges.If not, go to the 0 step._ ---
 
@@ -699,8 +705,8 @@ void AGeneratedMap::GenerateLevelActors()
 		AActor* SpawnedActor = SpawnActorByType(It.Value, It.Key);
 
 #if WITH_EDITOR
-		if (USingletonLibrary::IsEditorNotPieWorld()  // [IsEditorNotPieWorld]
-			&& SpawnedActor != nullptr)				  // Successfully spawn
+		if (USingletonLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld]
+		    && SpawnedActor != nullptr)              // Successfully spawn
 		{
 			// If PIE world, mark this spawned actor as bIsEditorOnlyActor
 			SpawnedActor->bIsEditorOnlyActor = true;
@@ -714,26 +720,11 @@ void AGeneratedMap::GenerateLevelActors()
 //  Map components getter.
 void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, const int32& ActorsTypesBitmask) const
 {
-	//if (!MapComponents_.Num())
-	//{
-	//	return;
-	//}
-
-	//if (TO_FLAG(EActorType::All) == ActorsTypesBitmask)
-	//{
-	//	OutBitmaskedComponents.Append(MapComponents_);
-	//	return;
-	//}
-
-	//OutBitmaskedComponents.Append(
-	//	MapComponents_.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr) {
-	//		return Ptr && Ptr->ActorType & ActorsTypesBitmask;
-	//	}));
-
 	if (MapComponents_.Num() > 0)
 	{
 		OutBitmaskedComponents.Append(
-			MapComponents_.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr) {
+			MapComponents_.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr)
+			{
 				return Ptr && Ptr->ActorType & ActorsTypesBitmask;
 			}));
 	}
@@ -744,7 +735,6 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, con
  * --------------------------------------------------- */
 
 #if WITH_EDITOR	 // [Editor] Destroyed
-
 // Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending
 void AGeneratedMap::Destroyed()
 {
