@@ -27,6 +27,7 @@ AItemActor::AItemActor()
 	// Initialize item mesh component
 	ItemMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
 	ItemMeshComponent->SetupAttachment(RootComponent);
+	ItemMeshComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 
 	// Find and fill item meshes array
 	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>> ItemMeshFinderArray{
@@ -41,12 +42,6 @@ AItemActor::AItemActor()
 			if (i == 0) ItemMeshComponent->SetStaticMesh(ItemMeshFinderArray[i].Object);  // Preview
 		}
 	}
-
-	// Initialize the Item Collision Component to allow players moving through this item to pick up it
-	UBoxComponent* ItemCollisionComponent = CreateDefaultSubobject<UBoxComponent>("ItemCollisionComponent");
-	ItemCollisionComponent->SetupAttachment(RootComponent);
-	ItemCollisionComponent->SetBoxExtent(FVector(50.f));
-	ItemCollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
