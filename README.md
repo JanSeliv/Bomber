@@ -4,6 +4,7 @@ The last alive character is the winner. The gameplay includes strategically plac
 Player competes with bots that will do everything but not let them win.
 The first rule is just to be the best bomber and do not let bots to bomb player!
 
+>  **To download and play the game go to the [LINK](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi).**
 
 # Features
 **The level camera** that moves and zooms lens depending on the distance between players:
@@ -46,9 +47,9 @@ The game menu is shown the result of the games match (win, lose, draw). If the m
 
 
 ## Procedural generation
-- Regeneration from each new game:
+- Symmetrical regeneration for each new game:
 
-![GIF6](https://user-images.githubusercontent.com/20540872/63046084-0a7ec300-bed2-11e9-9c34-a13a80d29776.gif)
+![GIF6](https://user-images.githubusercontent.com/20540872/67123411-8659fc00-f1f0-11e9-8b71-f0b9072c34f8.gif)
 
 - Scaling sides sizes in the editor or sizes selection in the start menu:
 
