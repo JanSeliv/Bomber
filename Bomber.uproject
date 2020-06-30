@@ -14,12 +14,6 @@
 			]
 		}
 	],
-	"Plugins": [
-		{
-			"Name": "RiderLink",
-			"Enabled": true
-		}
-	],
 	"TargetPlatforms": [
 		"WindowsNoEditor"
 	]
