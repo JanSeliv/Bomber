@@ -189,13 +189,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 	// begin: find transform
 	FRotator ActorRotation{GetActorRotation()};
 	ActorRotation.Yaw += FMath::RandRange(int32(1), int32(4)) * 90.f;
-
-	FVector ActorLocation, ActorExtent;
-	ComponentOwner->GetActorBounds(false, ActorLocation, ActorExtent, false);
-	ActorLocation.X = Cell.Location.X;
-	ActorLocation.Y = Cell.Location.Y;
-	ActorLocation.Z = Cell.Location.Z + ActorExtent.Z;
-
+	const FVector ActorLocation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + 100.f};
 	const FVector Scale{1.f, 1.f, 1.f};
 	// end
 
