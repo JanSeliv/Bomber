@@ -33,26 +33,28 @@ APlayerCharacter::APlayerCharacter()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
 
 	// Find skeletal meshes
-	static TArray<ConstructorHelpers::FObjectFinder<USkeletalMesh>> SkeletalMeshFinderArray{
-		TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/Phoenix/Meshes/IggyScorch_Phoenix"),
-		TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/MechaTerror/Meshes/IggyScorch_MechaTerror"),
-		TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/JingleBombs/Meshes/IggyScorch_JingleBombs"),
-		TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/Fireball/Meshes/IggyScorch_Fireball")};
-	for (int32 i = 0; i < SkeletalMeshFinderArray.Num(); ++i)
-	{
-		if (SkeletalMeshFinderArray[i].Succeeded())
-		{
-			SkeletalMeshes.Emplace(SkeletalMeshFinderArray[i].Object);
-			if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);	// preview
-		}
-	}
+	// @TODO Get skeletal meshes from the Singleton Library
+	// static TArray<ConstructorHelpers::FObjectFinder<USkeletalMesh>> SkeletalMeshFinderArray{
+	// 	TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/Phoenix/Meshes/IggyScorch_Phoenix"),
+	// 	TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/MechaTerror/Meshes/IggyScorch_MechaTerror"),
+	// 	TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/JingleBombs/Meshes/IggyScorch_JingleBombs"),
+	// 	TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/Fireball/Meshes/IggyScorch_Fireball")};
+	// for (int32 i = 0; i < SkeletalMeshFinderArray.Num(); ++i)
+	// {
+	// 	if (SkeletalMeshFinderArray[i].Succeeded())
+	// 	{
+	// 		SkeletalMeshes.Emplace(SkeletalMeshFinderArray[i].Object);
+	// 		if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);	// preview
+	// 	}
+	// }
 
 	// Set the animation
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimationFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP"));
-	if (AnimationFinder.Succeeded())  // The animation was found
-	{
-		MyAnimClass = AnimationFinder.Class;
-	}
+	// @TODO Get the animation blueprint from the Singleton Library
+	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimationFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP"));
+	// if (AnimationFinder.Succeeded())  // The animation was found
+	// {
+	// 	MyAnimClass = AnimationFinder.Class;
+	// }
 
 	// Initialize the nameplate mesh component
 	NameplateMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
