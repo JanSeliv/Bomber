@@ -3,9 +3,32 @@
 #pragma once
 
 #include "Cell.h"
+#include "LevelActorDataAsset.h"
+//---
 #include "GameFramework/Actor.h"
 //---
 #include "BombActor.generated.h"
+
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnBombDestroyed, AActor*, DestroyedBomb);
+
+/**
+ *
+ */
+UCLASS(Blueprintable, BlueprintType)
+class UBombDataAsset final : public ULevelActorDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
+
+protected:
+	/** The lifetime of a bomb*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	float LifeSpanInternal = 2.f;
+};
 
 /** Bombs are left by the character to destroy the level actors, trigger other bombs */
 UCLASS()
@@ -39,31 +62,21 @@ public:
 
 	/**
 	 * Sets the defaults of the bomb
-	 * @param RefBombsN Reference to the character's bombs count to change an amount after bomb putting(--) and destroying(++)
+	 * @param EventToBind Delegate that will be executed on bomb destroying
 	 * @param FireN Setting explosion length of this bomb
 	 * @param CharacterID Setting a mesh material of bomb by the character ID
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void InitializeBombProperties(
-		UPARAM(ref) int32& RefBombsN,
-		const int32& FireN,
-		const int32& CharacterID);
+	void InitBomb(
+		const FOnBombDestroyed& EventToBind,
+		const int32& FireN = 1,
+		const int32& CharacterID = -1);
 
 protected:
-	/** The lifetime of a bomb*/
-	UPROPERTY(EditAnywhere, Category = "C++", meta = (BlueprintProtected))
-	float LifeSpan_ = 2.f;
-
-	/** The blast length on each side */
-	UPROPERTY(EditAnywhere, Category = "C++", meta = (BlueprintProtected))
-	int32 ExplosionLength_ = 1;
-
-	/** Amount of character bombs at the current time */
-	int32* PlayerBombsN_;
-
 	/** The bomb blast path */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected))
 	TSet<struct FCell> ExplosionCells_;
+
 	/** The level map has access to ABombActor::ExplosionCells_ */
 	friend class AGeneratedMap;
 
@@ -73,7 +86,7 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
-	/** 
+	/**
 	 * Event triggered when the actor has been explicitly destroyed.
 	 * Calls destroying request of all actors by cells in explosion cells array.
 	 */

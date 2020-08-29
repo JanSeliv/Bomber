@@ -2,9 +2,22 @@
 
 #pragma once
 
+#include "LevelActorDataAsset.h"
+//---
 #include "GameFramework/Actor.h"
 //---
 #include "BoxActor.generated.h"
+
+/**
+*
+*/
+UCLASS(Blueprintable, BlueprintType)
+class UBoxDataAsset final : public ULevelActorDataAsset
+{
+	GENERATED_BODY()
+
+public:
+};
 
 /**
  * Boxes on destruction with some chances spawns an item.
@@ -33,7 +46,7 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
-	/** 
+	/**
 	 * Event triggered when the actor has been explicitly destroyed.
 	 * With some chances spawns an item.
 	 */

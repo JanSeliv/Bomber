@@ -241,11 +241,19 @@ void APlayerCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto Bomb = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorType::Bomb, MapComponent->GetCell()));
-
-	// Updating explosion cells
-	if (Bomb != nullptr)
+	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorType::Bomb, MapComponent->GetCell()));
+	if (ensureMsgf(BombActor, TEXT("ASSERT: 'BombActor' is not valid")))
 	{
-		Bomb->InitializeBombProperties(Powerups_.BombN, Powerups_.FireN, CharacterID_);
+		// Updating explosion cells
+		Powerups_.BombN--;
+		FOnBombDestroyed OnBombDestroyed;
+		OnBombDestroyed.BindDynamic(this, &ThisClass::OnBombDestroyed);
+		BombActor->InitBomb(OnBombDestroyed, Powerups_.FireN, CharacterID_);
 	}
+}
+
+// Event triggered when the bomb has been explicitly destroyed.
+void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
+{
+	Powerups_.BombN++;
 }

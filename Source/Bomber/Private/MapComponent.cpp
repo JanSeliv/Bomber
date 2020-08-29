@@ -4,6 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "LevelActorDataAsset.h"
 #include "SingletonLibrary.h"
 
 // Sets default values for this component's properties
@@ -58,9 +59,9 @@ void UMapComponent::OnRegister()
 	}
 	USingletonLibrary::PrintToLog(Owner, "OnRegister", "");
 
-	// Finding the actor type
-	ActorType = USingletonLibrary::GetActorTypeByClass(Owner->GetClass());
-	check(ActorType != EActorType::None && "Is not valid the specified class");
+	// Finding the actor data asset
+	ActorDataAsset = USingletonLibrary::GetDataAssetByActorClass(Owner->GetClass());
+	ensureMsgf(ActorDataAsset, TEXT("ASSERT: 'the Actor Data Asset was not found"));
 
 	// Disable the tick
 	Owner->SetActorTickEnabled(false);

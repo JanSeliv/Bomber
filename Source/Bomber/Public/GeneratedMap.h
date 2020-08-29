@@ -44,7 +44,7 @@ public:
 
 	/** Getting an array of cells by four sides of an input center cell and type of breaks.
 	 *
-	 * @param OutCells Will contain found cells. 
+	 * @param OutCells Will contain found cells.
 	 * @param Cell The start of searching by the sides.
 	 * @param SideLength Length of each side.
 	 * @param bBreakInputCells In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
@@ -59,13 +59,13 @@ public:
 		bool bBreakInputCells = false) const;
 
 	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
-	 * 
+	 *
 	 * @param Type Which type of level actors
 	 * @param Cell Actors location
 	 * @return Spawned actor on the Level Map, nullptr otherwise.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Type,Cell"))
-	AActor* SpawnActorByType(const EActorType& Type, const FCell& Cell);
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Type,Cell"))
+	AActor* SpawnActorByType(const EActorType& Type, const FCell& Cell) const;
 
 	/** Adding and attaching the specified Map Component to the MapComponents_ array
 
@@ -76,7 +76,7 @@ public:
 	void AddToGrid(const struct FCell& Cell, class UMapComponent* AddedComponent);
 
 	/** The intersection of (OutCells ∩ ActorsTypesBitmask).
-	 * 
+	 *
 	 * @param OutCells Will contains cells with actors of specified types.
 	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
 	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
@@ -106,7 +106,7 @@ public:
 	}
 
 	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
-	 * 
+	 *
 	 * @param Cells The set of cells for destroying the found actors.
 	 * @param bIsNotValidOnly If should destroy editor-only actors that were spawned in the PIE world
 	 */
@@ -117,8 +117,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void RemoveMapComponent(class UMapComponent* MapComponent);
 
-	/** Finds the nearest cell pointer to the specified Map Component 
-	 * 
+	/** Finds the nearest cell pointer to the specified Map Component
+	 *
 	 * @param MapComponent The component whose owner is being searched
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")

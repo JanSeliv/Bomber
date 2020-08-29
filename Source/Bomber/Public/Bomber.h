@@ -24,6 +24,19 @@ enum class EPathType : uint8
 };
 
 /**
+* Levels in the game.
+*/
+UENUM(BlueprintType)
+enum class ELevelType : uint8
+{
+	LT_First 	UMETA(DisplayName = "Maya"),
+	LT_Second 	UMETA(DisplayName = "City"),
+	LT_Third  	UMETA(DisplayName = "Forest"),
+	LT_Max	  	UMETA(DisplayName = "Any")  ///< Can be used for such levels as menu, sandbox or any, keep as LAST enum
+};
+ENUM_RANGE_BY_COUNT(ELevelType, ELevelType::LT_Max);
+
+/**
  * Types of all actors on the Level Map
  * Where Walls, Boxes and Bombs are the physical barriers for players
  * It is possible to make a bitmask of actors types

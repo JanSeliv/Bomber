@@ -3,11 +3,24 @@
 #pragma once
 
 #include "Bomber.h"
+#include "LevelActorDataAsset.h"
+//---
 #include "GameFramework/Actor.h"
 //---
 #include "ItemActor.generated.h"
 
-/** 
+/**
+*
+*/
+UCLASS(Blueprintable, BlueprintType)
+class UItemDataAsset final : public ULevelActorDataAsset
+{
+	GENERATED_BODY()
+
+public:
+
+};
+/**
  * Affects the abilities of a player during gameplay
  */
 UCLASS()

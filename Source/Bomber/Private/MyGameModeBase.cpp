@@ -25,8 +25,9 @@ void AMyGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
 	// Camera spawning
+	//@TODO Cpawn camera on changing a game state
 	UWorld* World = GetWorld();
-	if (World && World->GetName() == USingletonLibrary::GetMainLevelName())	 // is main level
+	if (World /*&& World->GetName() == USingletonLibrary::GetMainLevelName()*/) // is main level
 	{
 		World->SpawnActor(CameraActorClass);
 	}

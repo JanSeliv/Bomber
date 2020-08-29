@@ -63,27 +63,21 @@ ABombActor::ABombActor()
 	BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
-void ABombActor::InitializeBombProperties(
-	int32& RefBombsN,
-	const int32& FireN,
-	const int32& CharacterID)
+void ABombActor::InitBomb(
+	const FOnBombDestroyed& EventToBind,
+	const int32& FireN /*= 1*/,
+	const int32& CharacterID /*=-1*/)
 {
 	if (!IsValid(USingletonLibrary::GetLevelMap())	// // The Level Map is not valid
-		|| IsValid(MapComponent) == false			// The Map Component is not valid
-		|| FireN < 0)								// Negative length of the explosion
+	    || IsValid(MapComponent) == false // The Map Component is not valid
+	    || FireN < 0)                     // Negative length of the explosion
 	{
 		return;
 	}
 
-	PlayerBombsN_ = &RefBombsN;
-	if (PlayerBombsN_ != nullptr)
-	{
-		(*PlayerBombsN_)--;
-	}
-
 	// Set material
 	if (IsValid(BombMeshComponent)	// Mesh of the bomb is not valid
-		&& CharacterID != -1)		// is not debug character
+        && CharacterID != -1)		// is not debug character
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
 		BombMeshComponent->SetMaterial(0, BombMaterials[BombMaterialNo]);
@@ -99,6 +93,11 @@ void ABombActor::InitializeBombProperties(
 	//		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
 	//	}
 	//#endif
+
+	if(EventToBind.IsBound())
+	{
+		OnDestroyed.Add(EventToBind);
+	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned.
@@ -119,7 +118,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 	{
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t InitializeBombProperties");
-		InitializeBombProperties(*PlayerBombsN_, ExplosionLength_, -1);
+		InitBomb(FOnBombDestroyed());
 
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
@@ -138,7 +137,11 @@ void ABombActor::BeginPlay()
 	BombCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ABombActor::OnBombEndOverlap);
 
 	// Destroy itself after N seconds
-	SetLifeSpan(LifeSpan_);
+	const UBombDataAsset* BombDataAsset = MapComponent ? Cast<UBombDataAsset>(MapComponent->GetActorDataAsset()) : nullptr;
+	if(BombDataAsset)
+	{
+		SetLifeSpan(BombDataAsset->GetLifeSpan());
+	}
 }
 
 // Calls destroying request of all actors by cells in explosion cells array.
@@ -151,11 +154,6 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 		return;
 	}
 
-	// Return to the character +1 of bombs
-	if (PlayerBombsN_ != nullptr)
-	{
-		(*PlayerBombsN_)++;
-	}
 	// Spawn emitters
 	for (const FCell& Cell : ExplosionCells_)
 	{
@@ -175,7 +173,7 @@ void ABombActor::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	}
 	//Sets the collision preset to block all dynamics
 	TArray<AActor*> OverlappingActors;
-	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetClassByActorType(EActorType::Player));
+	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetActorClassByType(EActorType::Player));
 	if (OverlappingActors.Num() == 0)  // There are no more characters on the bomb
 	{
 		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);

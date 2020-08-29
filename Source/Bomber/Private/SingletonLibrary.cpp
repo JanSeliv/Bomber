@@ -4,11 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "LevelActors/BombActor.h"
-#include "LevelActors/BoxActor.h"
-#include "LevelActors/ItemActor.h"
-#include "LevelActors/PlayerCharacter.h"
-#include "LevelActors/WallActor.h"
+#include "LevelActorDataAsset.h"
 #include "MapComponent.h"
 #include "MyGameInstance.h"
 #include "MyGameModeBase.h"
@@ -17,22 +13,10 @@
 #include "Engine.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/Color.h"
-
+//---
 #if WITH_EDITOR		 // [Editor]
 #include "Editor.h"	 // GEditor
 #endif				 //WITH_EDITOR [Editor]
-
-USingletonLibrary::USingletonLibrary()
-{
-	// Defaults classes of level actors
-	typedef TPairInitializer<const EActorType&, const TSubclassOf<AActor>&> FMyPair;
-	ActorTypesByClasses_ = {
-		FMyPair(EActorType::Bomb, ABombActor::StaticClass()),
-		FMyPair(EActorType::Box, ABoxActor::StaticClass()),
-		FMyPair(EActorType::Item, AItemActor::StaticClass()),
-		FMyPair(EActorType::Player, APlayerCharacter::StaticClass()),
-		FMyPair(EActorType::Wall, AWallActor::StaticClass())};
-}
 
 /* ---------------------------------------------------
  *		Editor development functions
@@ -153,7 +137,7 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 {
 	USingletonLibrary* Singleton = nullptr;
 	if (GEngine) Singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
-	check(Singleton != nullptr && "The Singleton is null");
+	checkf(Singleton, TEXT("The Singleton is null"));
 	return Singleton;
 }
 
@@ -166,15 +150,14 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-
 	if (IsEditorNotPieWorld() == true			  // IsEditorNotPieWorld only
-		&& !GetSingleton()->LevelMap_.IsValid())  // Is transient
+		&& !GetSingleton()->LevelMapInternal.IsValid())  // Is transient
 	{
 		SetLevelMap(nullptr);  // Find the Level Map
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
-	return GetSingleton()->LevelMap_.Get();
+	return GetSingleton()->LevelMapInternal.Get();
 }
 
 // The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
@@ -200,7 +183,7 @@ void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
 
 	if (IS_VALID(LevelMap))
 	{
-		GetSingleton()->LevelMap_ = LevelMap;
+		GetSingleton()->LevelMapInternal = LevelMap;
 		PrintToLog(LevelMap, "----- SetLevelMap", "UPDATED -----");
 	}
 }
@@ -215,34 +198,6 @@ UMyGameInstance* USingletonLibrary::GetMyGameInstance(const UObject* WorldContex
 AMyGameModeBase* USingletonLibrary::GetMyGameMode(const UObject* WorldContextObject)
 {
 	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
-}
-
-// Returns the name of the Menu Level.
-FString USingletonLibrary::GetMenuLevelName()
-{
-	USingletonLibrary* SingletonLibrary = GetSingleton();
-	if (SingletonLibrary  //
-		&& !SingletonLibrary->MenuLevelAsset_.IsNull())
-	{
-		return SingletonLibrary->MenuLevelAsset_.GetAssetName();
-	}
-
-	ensure("USingletonLibrary::GetMenuLevelName: The Map is not choosen.");
-	return "";
-}
-
-// Returns the name of the Main Level.
-FString USingletonLibrary::GetMainLevelName()
-{
-	USingletonLibrary* SingletonLibrary = GetSingleton();
-	if (SingletonLibrary  //
-		&& !SingletonLibrary->MainLevelAsset_.IsNull())
-	{
-		return SingletonLibrary->MainLevelAsset_.GetAssetName();
-	}
-
-	ensure("USingletonLibrary::GetMainLevelName: The Map is not choosen.");
-	return "";
 }
 
 /* ---------------------------------------------------
@@ -266,4 +221,37 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 	}
 
 	return FCell(Average);
+}
+
+//
+ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass)
+{
+	for (ULevelActorDataAsset*& DataAssetIt : GetSingleton()->ActorsDataAssetsInternal)
+	{
+		if (DataAssetIt && DataAssetIt->GetActorClass()->IsChildOf(ActorClass))
+		{
+			return DataAssetIt;
+		}
+	}
+	return nullptr;
+}
+
+//
+ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorType(EActorType ActorType)
+{
+	for (ULevelActorDataAsset*& DataAssetIt : GetSingleton()->ActorsDataAssetsInternal)
+	{
+		if (DataAssetIt && DataAssetIt->GetActorType() == ActorType)
+		{
+			return DataAssetIt;
+		}
+	}
+	return nullptr;
+}
+
+//
+TSubclassOf<AActor> USingletonLibrary::GetActorClassByType(EActorType ActorType)
+{
+	const ULevelActorDataAsset* DataAsset = USingletonLibrary::GetDataAssetByActorType(ActorType);
+	return DataAsset ? DataAsset->GetActorClass() : nullptr;
 }

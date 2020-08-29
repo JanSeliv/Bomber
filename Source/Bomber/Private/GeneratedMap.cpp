@@ -9,8 +9,8 @@
 #include "MyGameInstance.h"
 #include "MyGameModeBase.h"
 #include "SingletonLibrary.h"
+#include "LevelActorDataAsset.h"
 //---
-#include "Components/StaticMeshComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -153,23 +153,25 @@ void AGeneratedMap::GetSidesCells(
 }
 
 // Spawns level actor on the Level Map by the specified type
-AActor* AGeneratedMap::SpawnActorByType(const EActorType& Type, const FCell& Cell)
+AActor* AGeneratedMap::SpawnActorByType(const EActorType& Type, const FCell& Cell) const
 {
 	UWorld* World = GetWorld();
 	if (!World || ContainsMapComponents(Cell, TO_FLAG(~EActorType::Player)) // the free cell was not found
-	    || Type == EActorType::None)                                        // nothing to spawn
+	    || Type == EActorType::None)                                         // nothing to spawn
 	{
 		return nullptr;
 	}
 
-	return World->SpawnActor<AActor>(USingletonLibrary::GetClassByActorType(Type), FTransform(Cell.Location));
+	return World->SpawnActor<AActor>(USingletonLibrary::GetActorClassByType(Type), FTransform(Cell.Location));
 }
 
 // The function that places the actor on the Level Map, attaches it and writes this actor to the GridArray_
 void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 {
 	AActor* const ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
-	if (!IS_VALID(ComponentOwner)) // the component's owner is not valid or is transient
+	const ULevelActorDataAsset* DataAsset = AddedComponent->GetActorDataAsset();
+	if (!IS_VALID(ComponentOwner) // the component's owner is not valid or is transient
+	    || !DataAsset)            // actor's data asset is now valid
 	{
 		return;
 	}
@@ -177,8 +179,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 	if (!MapComponents_.Contains(AddedComponent)) // is not contains in the array
 	{
 		MapComponents_.Emplace(AddedComponent);
-
-		if (AddedComponent->ActorType == EActorType::Player) // Is a player
+		if (DataAsset->GetActorType() == EActorType::Player) // Is a player
 		{
 			PlayerCharactersNum++;
 		}
@@ -293,7 +294,9 @@ void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 	MapComponent->Cell.Reset();
 
 	// Decrement the players number
-	if (MapComponent->ActorType == EActorType::Player) // Is a player
+	const ULevelActorDataAsset* DataAsset = MapComponent->GetActorDataAsset();
+	if (DataAsset
+		&& DataAsset->GetActorType() == EActorType::Player) // Is a player
 	{
 		PlayerCharactersNum--;
 	}
@@ -399,19 +402,19 @@ void AGeneratedMap::Tick(float DeltaTime)
 
 	// Random item spawning
 	// @todo GameMode is null for client, redesign this logic!
-	AMyGameModeBase* MyGameModeBase = USingletonLibrary::GetMyGameMode(this);
-	if (ensureMsgf(MyGameModeBase, TEXT("AGeneratedMap::Tick: MyGameModeBase is null")))
-	{
-		const float Timer = MyGameModeBase->Timer;
-		const int32 IntTimer = static_cast<int32>(Timer);
-		if (IntTimer <= 60                           // after the minute
-		    && FMath::IsNearlyEqual(Timer, IntTimer) // is whole number
-		    && IntTimer % 10 == 0)                   // each 10 seconds
-		{
-			const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
-			SpawnActorByType(EActorType::Item, RandCell); // can be not spawned in non empty cell
-		}
-	}
+	// AMyGameModeBase* MyGameModeBase = USingletonLibrary::GetMyGameMode(this);
+	// if (ensureMsgf(MyGameModeBase, TEXT("AGeneratedMap::Tick: MyGameModeBase is null")))
+	// {
+	// 	const float Timer = MyGameModeBase->Timer;
+	// 	const int32 IntTimer = static_cast<int32>(Timer);
+	// 	if (IntTimer <= 60                           // after the minute
+	// 	    && FMath::IsNearlyEqual(Timer, IntTimer) // is whole number
+	// 	    && IntTimer % 10 == 0)                   // each 10 seconds
+	// 	{
+	// 		const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
+	// 		SpawnActorByType(EActorType::Item, RandCell); // can be not spawned in non empty cell
+	// 	}
+	// }
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -719,7 +722,9 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, con
 		OutBitmaskedComponents.Append(
 			MapComponents_.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr)
 			{
-				return Ptr && Ptr->ActorType & ActorsTypesBitmask;
+				const ULevelActorDataAsset* DataAsset = Ptr ? Ptr->GetActorDataAsset() : nullptr;
+				const EActorType ActorType = DataAsset ? DataAsset->GetActorType() : EActorType::None;
+				return ActorType & ActorsTypesBitmask;
 			}));
 	}
 }

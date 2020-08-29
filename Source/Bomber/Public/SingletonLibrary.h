@@ -4,15 +4,16 @@
 
 #include "Bomber.h"
 #include "Cell.h"
+//---
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
 #include "SingletonLibrary.generated.h"
 
 /**
- * 	The static functions library  
+ * 	The static functions library
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
+class USingletonLibrary final : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -22,7 +23,7 @@ public:
 	static FUpdateAI GOnAIUpdatedDelegate;
 
 	/** Sets default values for this actor's properties */
-	USingletonLibrary();
+	USingletonLibrary() = default;
 
 	/* ---------------------------------------------------
 	 *		Editor development functions
@@ -79,7 +80,7 @@ public:
 	static class AGeneratedMap* GetLevelMap();
 
 	/** The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
-	 * 
+	 *
 	 * @param LevelMap The level map to set in the Library
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -92,14 +93,6 @@ public:
 	/** Contains a data of Bomber Level, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class AMyGameModeBase* GetMyGameMode(const UObject* WorldContextObject);
-
-	/** Returns the name of the Menu Level. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FString GetMenuLevelName();
-
-	/** Returns the name of the Main Level */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FString GetMainLevelName();
 
 	/* ---------------------------------------------------
 	 *		FCell blueprint functions
@@ -120,7 +113,7 @@ public:
 	}
 
 	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
-	 * 
+	 *
 	 * @param Cell The cell, that will be rotated
 	 * @param AxisZ The Z param of the axis to rotate around
 	 * @return Rotated to the Level Map cell
@@ -161,40 +154,28 @@ public:
 		return (LBitmask & RBitmask) != 0;
 	}
 
-	/** Finding the actor type associated with the class */
+	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
-	static FORCEINLINE EActorType GetActorTypeByClass(const TSubclassOf<AActor>& ActorClass)
-	{
-		const EActorType* FoundActorType = GetSingleton()->ActorTypesByClasses_.FindKey(ActorClass);
-		return FoundActorType ? *FoundActorType : EActorType::None;
-	}
+    static class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
 
-	/** Finding the class associated with the actor type */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorType"))
-	static FORCEINLINE TSubclassOf<AActor> GetClassByActorType(const EActorType& ActorType)
-	{
-		const TSubclassOf<AActor>* ActorClass = GetSingleton()->ActorTypesByClasses_.Find(ActorType);
-		return ActorClass ? *ActorClass : nullptr;
-	}
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    static class ULevelActorDataAsset* GetDataAssetByActorType(EActorType ActorType);
 
-protected:
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    static TSubclassOf<AActor> GetActorClassByType(EActorType ActorType);
+
 	/* ---------------------------------------------------
 	*		Protected properties
 	* --------------------------------------------------- */
+	protected:
 
 	/** The reference to the AGeneratedMap actor. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	TSoftObjectPtr<class AGeneratedMap> LevelMap_;	//[B]
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (DisplayName = "LevelMap", BlueprintProtected))
+	TSoftObjectPtr<class AGeneratedMap> LevelMapInternal;	//[B]
 
-	/** Type and its class as associated pair. */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
-	TMap<EActorType, TSubclassOf<AActor>> ActorTypesByClasses_;	 //[B]
-
-	/** The class of the Menu Level. */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
-	TAssetPtr<UWorld> MenuLevelAsset_;
-
-	/** The class of the Main Level. */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected))
-	TAssetPtr<UWorld> MainLevelAsset_;
+	/** Actor type and its associated class. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "ActorsDataAssets", BlueprintProtected))
+	TArray<class ULevelActorDataAsset*> ActorsDataAssetsInternal; //[B]
 };

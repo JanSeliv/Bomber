@@ -32,15 +32,11 @@ void AMyHUD::BeginPlay()
 	Super::BeginPlay();
 
 	// Widget creating and adding it to viewport
-
-	const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
-	const TSubclassOf<UUserWidget> UmgCurrentClass =
-		CurrentLevelName == USingletonLibrary::GetMenuLevelName()  // is menu level
-			? UmgMenuClass
-			: UmgLevelClass;
-	CreatedWidget = CreateWidget<UUserWidget>(GetWorld(), UmgCurrentClass);
-	if (IsValid(CreatedWidget))	 // successfully created
-	{
-		CreatedWidget->AddToViewport();
-	}
+	// @TODO Creating widget only on changing a game state
+	 const FString CurrentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
+	 CreatedWidget = CreateWidget<UUserWidget>(GetWorld(), UmgLevelClass);
+	 if (CreatedWidget)	 // successfully created
+	 {
+	 	CreatedWidget->AddToViewport();
+	 }
 }

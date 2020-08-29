@@ -4,6 +4,7 @@
 
 #include "Bomber.h"
 #include "Cell.h"
+#include "LevelActorDataAsset.h"
 #include "Components/ActorComponent.h"
 //---
 #include "MapComponent.generated.h"
@@ -11,7 +12,7 @@
 /** Typedef to allow for some nicer looking sets of map components */
 typedef TSet<class UMapComponent*> FMapComponents;
 
-/** 
+/**
  * These components manage their level actors updates on the level map in case of any changes that allow to:
  * -  Free location and rotation of the level map in the editor time:
  * - Prepare in advance the level actors in the editor time:
@@ -25,9 +26,6 @@ class BOMBER_API UMapComponent final : public UActorComponent
 public:
 	/** Owner's cell location on the Level Map */
 	TWeakPtr<struct FCell> Cell;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++")
-	EActorType ActorType = EActorType::None;  //[i]
 
 #if WITH_EDITORONLY_DATA  // bShouldShowRenders
 	/** Mark the editor updating visualization(text renders) */
@@ -67,7 +65,19 @@ public:
 		GetOwner()->RerunConstructionScripts();
 	}
 
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAsset; }
+
+	/**  */
+	template <typename T>
+	FORCEINLINE T* GetActorDataAsset() const { return CastChecked<T>(ActorDataAsset); }
+
 protected:
+	/** */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
+	class ULevelActorDataAsset* ActorDataAsset; //[D]
+
 	/* ---------------------------------------------------
 	 *	Map Component's protected functions
 	 * --------------------------------------------------- */

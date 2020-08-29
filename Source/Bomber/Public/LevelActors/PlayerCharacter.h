@@ -2,12 +2,25 @@
 
 #pragma once
 
+#include "LevelActorDataAsset.h"
+//---
 #include "GameFramework/Character.h"
 //---
 #include "PlayerCharacter.generated.h"
 
 /**
- * Numbers of power-ups that affect the abilities of a player during gameplay. 
+*
+*/
+UCLASS(Blueprintable, BlueprintType)
+class UPlayerDataAsset final : public ULevelActorDataAsset
+{
+	GENERATED_BODY()
+
+public:
+};
+
+/**
+ * Numbers of power-ups that affect the abilities of a player during gameplay.
  */
 USTRUCT(BlueprintType)
 struct FPowerUp
@@ -108,9 +121,9 @@ protected:
 	/* Called to bind functionality to input */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	/** Virtual overriding of the UFUNCTION. 
+	/** Virtual overriding of the UFUNCTION.
 	 * Adds the movement input along the given world direction vector.
-	 * 
+	 *
 	 * @param WorldDirection Direction in world space to apply input
 	 * @param ScaleValue Scale to apply to input. This can be used for analog input, ie a value of 0.5 applies half the normal value, while -1.0 would reverse the direction.
 	 * @param bForce If true always add the input, ignoring the result of IsMoveInputIgnored().
@@ -126,4 +139,8 @@ protected:
 	/** Spawns bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SpawnBomb();
+
+	/** Event triggered when the bomb has been explicitly destroyed. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+    void OnBombDestroyed(AActor* DestroyedBomb);
 };

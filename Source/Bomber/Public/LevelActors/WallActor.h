@@ -2,9 +2,23 @@
 
 #pragma once
 
+#include "LevelActorDataAsset.h"
+//---
 #include "GameFramework/Actor.h"
 //---
 #include "WallActor.generated.h"
+
+/**
+*
+*/
+UCLASS(Blueprintable, BlueprintType)
+class UWallDataAsset final : public ULevelActorDataAsset
+{
+	GENERATED_BODY()
+
+public:
+};
+
 
 /**
  * Walls are not destroyed by a bomb explosion and stop the explosion.
@@ -33,7 +47,7 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
-	/** 
+	/**
 	 * Event triggered when the actor has been explicitly destroyed.
 	 * @warning Should not be destroyed in the game
 	 */
