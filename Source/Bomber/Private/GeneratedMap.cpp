@@ -49,7 +49,7 @@ AGeneratedMap::AGeneratedMap()
 void AGeneratedMap::GetSidesCells(
 	FCells& OutCells,
 	const FCell& Cell,
-	const EPathType& Pathfinder,
+	const EPathType Pathfinder,
 	const int32& SideLength,
 	bool bBreakInputCells) const
 {
@@ -69,7 +69,7 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// the index of the specified cell
-	const int32 C0 = GridCellsInternal.IndexOfByPredicate([Cell](const FCell& SharedCell) { return SharedCell == Cell; });
+	const int32 C0 = GridCellsInternal.IndexOfByPredicate([Cell](const FCell& InCell) { return InCell == Cell; });
 	if (C0 == INDEX_NONE) // if index was found and cell is contained in the array
 	{
 		return;
@@ -153,7 +153,7 @@ void AGeneratedMap::GetSidesCells(
 }
 
 // Spawns level actor on the Level Map by the specified type
-AActor* AGeneratedMap::SpawnActorByType(const EActorType& Type, const FCell& Cell) const
+AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell) const
 {
 	UWorld* World = GetWorld();
 	if (!World || ContainsMapComponents(Cell, TO_FLAG(~EActorType::Player)) // the free cell was not found
@@ -641,7 +641,7 @@ void AGeneratedMap::GenerateLevelActors()
 				}
 				else if (ActorTypeToSpawn == EActorType::Wall)
 				{
-					Bones.Add(CellIt); // the wall was not spawned, then this cell is the bone
+					Bones.Emplace(CellIt); // the wall was not spawned, then this cell is the bone
 				}
 			} // Symmetry iterations
 		}     // X iterations
@@ -653,11 +653,11 @@ void AGeneratedMap::GenerateLevelActors()
 	Bones = Bones.Difference(NonEmptyCells);
 
 	// Finding all cells that not in Bones (NonEmptyCells = GridCells / Bones)
-	for (const auto& SharedCellIt : GridCellsInternal)
+	for (const FCell& CellIt : GridCellsInternal)
 	{
-		if (!Bones.Contains(SharedCellIt))
+		if (!Bones.Contains(CellIt))
 		{
-			NonEmptyCells.Add(SharedCellIt);
+			NonEmptyCells.Emplace(CellIt);
 		}
 	}
 

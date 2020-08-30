@@ -61,6 +61,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
 
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	TArray<FLevelActorMeshRow> Meshes; //[D]
+
 protected:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Class"))
@@ -69,8 +73,4 @@ protected:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Type"))
 	EActorType ActorTypeInternal; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Meshes", ShowOnlyInnerProperties))
-	TArray<FLevelActorMeshRow> MeshesInternal; //[D]
 };

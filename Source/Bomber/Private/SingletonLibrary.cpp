@@ -114,17 +114,11 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 
 // Shortest static overloading of debugging visualization without outer params
 #if WITH_EDITOR	 // [Editor] AddDebugTextRenders()
-void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TArray<FCell>& SharedCells, const FLinearColor& TextColor, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition)
+void USingletonLibrary::AddDebugTextRenders(AActor* Owner, const TArray<FCell>& Cells, const FLinearColor& TextColor, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition)
 {
 	bool bOutBool = false;
-	TArray<UTextRenderComponent*> OutArray{};
-	FCells Cells;
-	Cells.Reserve(SharedCells.Num());
-	for (const auto& SharedCell : SharedCells)
-	{
-		Cells.Emplace(SharedCell);
-	}
-	GetSingleton()->AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray, TextHeight, TextSize, RenderString, CoordinatePosition);
+	TArray<UTextRenderComponent*> OutArray;
+	GetSingleton()->AddDebugTextRenders(Owner, FCells{Cells}, TextColor, bOutBool, OutArray, TextHeight, TextSize, RenderString, CoordinatePosition);
 }
 #endif	// WITH_EDITOR [Editor]
 

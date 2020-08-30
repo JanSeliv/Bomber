@@ -50,11 +50,11 @@ public:
 	 * @param bBreakInputCells In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
 	 * @param Pathfinder Type of cells searching.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Pathfinder, SideLength"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SideLength"))
 	void GetSidesCells(
 		TSet<struct FCell>& OutCells,
 		const struct FCell& Cell,
-		const EPathType& Pathfinder,
+		const EPathType Pathfinder,
 		const int32& SideLength,
 		bool bBreakInputCells = false) const;
 
@@ -64,8 +64,8 @@ public:
 	 * @param Cell Actors location
 	 * @return Spawned actor on the Level Map, nullptr otherwise.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Type,Cell"))
-	AActor* SpawnActorByType(const EActorType& Type, const FCell& Cell) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	AActor* SpawnActorByType(EActorType Type, const FCell& Cell) const;
 
 	/** Adding and attaching the specified Map Component to the MapComponents_ array
 

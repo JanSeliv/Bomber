@@ -166,10 +166,15 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	check(CharacterID_ != INDEX_NONE && "The character was not found on the Level Map");
 
 	// Set a character skeletal mesh
-	if (GetMesh())
+	const int32 SkeletalMeshesNum = SkeletalMeshes.Num();
+	if (GetMesh()
+		&& SkeletalMeshesNum)
 	{
-		const int32 SkeletalNo = CharacterID_ < SkeletalMeshes.Num() ? CharacterID_ : CharacterID_ % SkeletalMeshes.Num();
-		GetMesh()->SetSkeletalMesh(SkeletalMeshes[SkeletalNo]);
+		const int32 SkeletalNo = CharacterID_ < SkeletalMeshesNum ? CharacterID_ : CharacterID_ % SkeletalMeshesNum;
+		if(SkeletalMeshes.IsValidIndex(SkeletalNo))
+		{
+			GetMesh()->SetSkeletalMesh(SkeletalMeshes[SkeletalNo]);
+		}
 	}
 
 	// Set a nameplate material

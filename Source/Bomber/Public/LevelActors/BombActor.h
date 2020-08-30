@@ -74,7 +74,7 @@ public:
 
 protected:
 	/** The bomb blast path */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected))
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TSet<struct FCell> ExplosionCells_;
 
 	/** The level map has access to ABombActor::ExplosionCells_ */

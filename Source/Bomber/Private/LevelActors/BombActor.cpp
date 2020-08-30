@@ -77,7 +77,8 @@ void ABombActor::InitBomb(
 
 	// Set material
 	if (IsValid(BombMeshComponent)	// Mesh of the bomb is not valid
-        && CharacterID != -1)		// is not debug character
+        && CharacterID != -1		// Is not debug character
+        && BombMaterials.Num())		// As least one bomb material
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
 		BombMeshComponent->SetMaterial(0, BombMaterials[BombMaterialNo]);
@@ -86,13 +87,13 @@ void ABombActor::InitBomb(
 	// Update explosion information
 	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCells_, MapComponent->Cell, EPathType::Explosion, FireN);
 
-	//#if WITH_EDITOR  // [Editor]
-	//	if (MapComponent->bShouldShowRenders)
-	//	{
-	//		USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
-	//		USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_, FLinearColor::Red);
-	//	}
-	//#endif
+	#if WITH_EDITOR  // [Editor]
+		if (MapComponent->bShouldShowRenders)
+		{
+			USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
+			USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_.Array(), FLinearColor::Red);
+		}
+	#endif
 
 	if(EventToBind.IsBound())
 	{

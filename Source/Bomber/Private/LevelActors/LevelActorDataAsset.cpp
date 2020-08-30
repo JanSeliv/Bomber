@@ -7,6 +7,7 @@ ULevelActorDataAsset::ULevelActorDataAsset()
 {
 	for (ELevelType LevelTypeIt : TEnumRange<ELevelType>())
 	{
-		MeshesInternal.Add(FLevelActorMeshRow(LevelTypeIt));
+		Meshes.Emplace(FLevelActorMeshRow(LevelTypeIt));
 	}
 }
+

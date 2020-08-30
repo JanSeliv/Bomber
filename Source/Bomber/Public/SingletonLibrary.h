@@ -137,7 +137,7 @@ public:
 	 * @param C2 The other cell
 	 * @return The distance between to cells
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "C1,C2"))
 	static FORCEINLINE float CalculateCellsLength(const struct FCell& C1, const struct FCell& C2)
 	{
 		return fabsf((C1.Location - C2.Location).Size()) / GetCellSize();
