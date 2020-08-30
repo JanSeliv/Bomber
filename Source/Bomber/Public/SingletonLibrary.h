@@ -59,7 +59,7 @@ public:
 	/** Shortest static overloading of debugging visualization without outer params */
 	static void AddDebugTextRenders(
 		class AActor* Owner,
-		const TArray<FSharedCell>& Cells,
+		const TArray<FCell>& Cells,
 		const struct FLinearColor& TextColor = FLinearColor::Black,
 		float TextHeight = 261.0f,
 		float TextSize = 124.0f,
@@ -110,6 +110,13 @@ public:
 	static FORCEINLINE FCell GetZeroCell()
 	{
 		return FCell::ZeroCell;
+	}
+
+	/** Returns the zero cell (0,0,0) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+    static FORCEINLINE bool IsValidCell(const FCell& Cell)
+	{
+		return Cell;
 	}
 
 	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
@@ -172,10 +179,10 @@ public:
 	protected:
 
 	/** The reference to the AGeneratedMap actor. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (DisplayName = "LevelMap", BlueprintProtected))
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (DisplayName = "Level Map", BlueprintProtected))
 	TSoftObjectPtr<class AGeneratedMap> LevelMapInternal;	//[B]
 
 	/** Actor type and its associated class. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "ActorsDataAssets", BlueprintProtected))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Actors Data Assets", BlueprintProtected))
 	TArray<class ULevelActorDataAsset*> ActorsDataAssetsInternal; //[B]
 };

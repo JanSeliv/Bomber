@@ -134,11 +134,12 @@ protected:
 	 * --------------------------------------------------- *
 
 	/** Cells storage. */
-	TArray<FSharedCell> GridCells_;	 //[M.IO]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
+	TArray<FCell> GridCellsInternal;	 //[M.IO]
 
 	/** Storage of alive players and their current locations */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	TArray<class UMapComponent*> MapComponents_;  //[M.IO]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
+	TArray<class UMapComponent*> MapComponentsInternal;  //[M.IO]
 
 	/** The chance of walls generation. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))

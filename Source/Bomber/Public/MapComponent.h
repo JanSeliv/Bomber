@@ -24,14 +24,15 @@ class BOMBER_API UMapComponent final : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	/** Owner's cell location on the Level Map */
-	TWeakPtr<struct FCell> Cell;
-
 #if WITH_EDITORONLY_DATA  // bShouldShowRenders
 	/** Mark the editor updating visualization(text renders) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly))
 	bool bShouldShowRenders = false;
 #endif	//WITH_EDITORONLY_DATA bShouldShowRenders
+
+	/** Owner's cell location on the Level Map */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FCell Cell; //[G]
 
 	/* ---------------------------------------------------
 	 *	Map Component's public functions
@@ -43,11 +44,6 @@ public:
 	/** Updates a owner's state. Should be called in the owner's OnConstruction event. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnMapComponentConstruction();
-
-	/** Getter of the Cell.
-	 * @return the cell location of an owner. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE struct FCell GetCell() const { return Cell.IsValid() ? *Cell.Pin() : FCell::ZeroCell; }
 
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -67,16 +63,16 @@ public:
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAsset; }
+	FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAssetInternal; }
 
 	/**  */
 	template <typename T>
-	FORCEINLINE T* GetActorDataAsset() const { return CastChecked<T>(ActorDataAsset); }
+	FORCEINLINE T* GetActorDataAsset() const { return CastChecked<T>(ActorDataAssetInternal); }
 
 protected:
-	/** */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
-	class ULevelActorDataAsset* ActorDataAsset; //[D]
+	/** Contains exposed for designers properties for the spawned owner. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))
+	class ULevelActorDataAsset* ActorDataAssetInternal; //[D]
 
 	/* ---------------------------------------------------
 	 *	Map Component's protected functions

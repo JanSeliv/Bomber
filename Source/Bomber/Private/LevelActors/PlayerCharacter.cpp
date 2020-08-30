@@ -162,7 +162,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// Setting an ID to the player character as his position in the array
 	FCells PlayersCells;
 	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EActorType::Player));
-	CharacterID_ = PlayersCells.FindId(MapComponent->GetCell()).AsInteger();
+	CharacterID_ = PlayersCells.FindId(MapComponent->Cell).AsInteger();
 	check(CharacterID_ != INDEX_NONE && "The character was not found on the Level Map");
 
 	// Set a character skeletal mesh
@@ -241,7 +241,7 @@ void APlayerCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorType::Bomb, MapComponent->GetCell()));
+	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorType::Bomb, MapComponent->Cell));
 	if (ensureMsgf(BombActor, TEXT("ASSERT: 'BombActor' is not valid")))
 	{
 		// Updating explosion cells

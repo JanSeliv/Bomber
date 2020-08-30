@@ -4,6 +4,8 @@
 
 #include "Bomber.h"
 //---
+#include "ImmediatePhysicsCore.h"
+#include "ImmediatePhysicsDeclares.h"
 #include "Engine/DataAsset.h"
 //---
 #include "LevelActorDataAsset.generated.h"
@@ -61,14 +63,14 @@ public:
 
 protected:
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Class"))
 	TSubclassOf<class AActor> ActorClassInternal; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Type"))
 	EActorType ActorTypeInternal; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Meshes", ShowOnlyInnerProperties))
 	TArray<FLevelActorMeshRow> MeshesInternal; //[D]
 };

@@ -26,7 +26,7 @@ public:
 
 protected:
 	/** The lifetime of a bomb*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Life Span"))
 	float LifeSpanInternal = 2.f;
 };
 

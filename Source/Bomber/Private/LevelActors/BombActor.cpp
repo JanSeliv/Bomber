@@ -84,7 +84,7 @@ void ABombActor::InitBomb(
 	}
 
 	// Update explosion information
-	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCells_, MapComponent->GetCell(), EPathType::Explosion, FireN);
+	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCells_, MapComponent->Cell, EPathType::Explosion, FireN);
 
 	//#if WITH_EDITOR  // [Editor]
 	//	if (MapComponent->bShouldShowRenders)

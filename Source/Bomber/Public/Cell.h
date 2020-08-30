@@ -7,9 +7,6 @@
 /** Typedef to allow for some nicer looking sets of cells. */
 typedef TSet<struct FCell> FCells;
 
-/** Typedef to allow for some nicer looking shared pointer of cell.*/
-typedef TSharedPtr<struct FCell> FSharedCell;
-
 /**
  * The structure that contains a location of an one cell on a grid of the Level Map.
  */
@@ -18,7 +15,7 @@ struct FCell
 {
 	GENERATED_BODY()
 
-	/** The zero cell (0,0,0) */
+	/** The zero cell (0,0,-1) */
 	static const FCell ZeroCell;
 
 	/** The length of the one cell */
@@ -41,7 +38,7 @@ struct FCell
 	explicit FCell(struct FVector Vector);
 
 	/** Rotates around the center of the Level Map to the same yaw degree.
-	 * 
+	 *
 	 * @param AxisZ The Z param of the axis to rotate around
 	 * @return Rotated to the Level Map cell, the same cell otherwise
 	 */
@@ -58,8 +55,14 @@ struct FCell
 		return this->Location == Other.Location;
 	}
 
+	/** Comparing with uninitialized Zero Cell. */
+	FORCEINLINE operator bool() const
+	{
+		return this->Location != ZeroCell.Location;
+	}
+
 	/**
-	* Creates a hash value from a FCell. 
+	* Creates a hash value from a FCell.
 	*
 	* @param Vector the cell to create a hash value for
 	* @return The hash value from the components

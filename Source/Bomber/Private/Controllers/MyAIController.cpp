@@ -41,7 +41,7 @@ void AMyAIController::UpdateAI()
 	// ----- Part 0: Before iterations -----
 
 	// Set the START cell searching bot location
-	const FCell F0 = MyCharacter->MapComponent->GetCell();
+	const FCell F0 = MyCharacter->MapComponent->Cell;
 
 	// Searching 'SAFE NEIGHBORS'
 	FCells Free;

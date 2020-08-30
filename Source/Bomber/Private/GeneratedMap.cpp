@@ -69,7 +69,7 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// the index of the specified cell
-	const int32 C0 = GridCells_.IndexOfByPredicate([Cell](const FSharedCell& SharedCell) { return *SharedCell == Cell; });
+	const int32 C0 = GridCellsInternal.IndexOfByPredicate([Cell](const FCell& SharedCell) { return SharedCell == Cell; });
 	if (C0 == INDEX_NONE) // if index was found and cell is contained in the array
 	{
 		return;
@@ -131,12 +131,12 @@ void AGeneratedMap::GetSidesCells(
 				if (bIsY) Distance *= MaxWight;
 				const int32 FoundIndex = C0 + Distance;
 				if (PositionC0 != (bIsY ? FoundIndex % MaxWight : FoundIndex / MaxWight) // PositionC0 != PositionX
-				    || !GridCells_.IsValidIndex(FoundIndex))                             // is not in range
+				    || !GridCellsInternal.IsValidIndex(FoundIndex))                             // is not in range
 				{
 					break; // to the next side
 				}
 
-				const FCell FoundCell = *GridCells_[FoundIndex];
+				const FCell FoundCell = GridCellsInternal[FoundIndex];
 
 				if (Walls.Contains(FoundCell)                                    // cell contains a wall
 				    || bWithoutObstacles && Obstacles.Contains(FoundCell)        // cell contains an obstacle (Bombs/Boxes)
@@ -176,9 +176,9 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 		return;
 	}
 
-	if (!MapComponents_.Contains(AddedComponent)) // is not contains in the array
+	if (!MapComponentsInternal.Contains(AddedComponent)) // is not contains in the array
 	{
-		MapComponents_.Emplace(AddedComponent);
+		MapComponentsInternal.Emplace(AddedComponent);
 		if (DataAsset->GetActorType() == EActorType::Player) // Is a player
 		{
 			PlayerCharactersNum++;
@@ -227,8 +227,12 @@ void AGeneratedMap::IntersectCellsByTypes(
 	FCells BitmaskedCells;
 	for (const auto& MapCompIt : BitmaskedComponents)
 	{
-		if (MapCompIt && MapCompIt != ExceptedComponent) BitmaskedCells.Emplace(MapCompIt->GetCell());
+		if (MapCompIt && MapCompIt != ExceptedComponent)
+		{
+			BitmaskedCells.Emplace(MapCompIt->Cell);
+		}
 	}
+
 
 	OutCells = OutCells.Num() > 0 ? OutCells.Intersect(BitmaskedCells) : BitmaskedCells;
 }
@@ -236,20 +240,20 @@ void AGeneratedMap::IntersectCellsByTypes(
 // Destroy all actors from the set of cells
 void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOnly)
 {
-	if (MapComponents_.Num() == 0 //
+	if (MapComponentsInternal.Num() == 0 //
 	    || !Cells.Num() && !bIsNotValidOnly)
 	{
 		return;
 	}
 
-	for (int32 i = MapComponents_.Num() - 1; i >= 0; --i)
+	for (int32 i = MapComponentsInternal.Num() - 1; i >= 0; --i)
 	{
-		if (!MapComponents_.IsValidIndex(i)) // the element already was removed
+		if (!MapComponentsInternal.IsValidIndex(i)) // the element already was removed
 		{
 			continue;
 		}
 
-		UMapComponent* const MapComponentIt = MapComponents_[i];
+		UMapComponent* const MapComponentIt = MapComponentsInternal[i];
 
 		AActor* const ComponentOwner = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		const bool IsValidOwner = IsValid(ComponentOwner);
@@ -260,7 +264,7 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 			continue;
 		}
 
-		if (MapComponentIt && Cells.Contains(MapComponentIt->GetCell()) // the cell is contained on the grid
+		if (MapComponentIt && Cells.Contains(MapComponentIt->Cell) // the cell is contained on the grid
 		    || bIsNotValidOnly)                                         //  if true, not-valid component should be deleted anyway
 		{
 			USingletonLibrary::PrintToLog(ComponentOwner, "DestroyActorsFromMap");
@@ -283,15 +287,12 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 {
 	// Remove from the array
-	MapComponents_.Remove(MapComponent);
+	MapComponentsInternal.Remove(MapComponent);
 
 	if (MapComponent == nullptr) // the Map Component is null
 	{
 		return;
 	}
-
-	// Remove the weak reference
-	MapComponent->Cell.Reset();
 
 	// Decrement the players number
 	const ULevelActorDataAsset* DataAsset = MapComponent->GetActorDataAsset();
@@ -311,15 +312,15 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 	}
 
 	// ----- Part 0: Locals -----
-	FSharedCell FoundCell;
+	FCell FoundCell;
 	const FCell OwnerCell(ComponentOwner->GetActorLocation()); // The owner location
 	// Check if the owner already standing on:
 	FCells InitialCells({OwnerCell,                                                                                        // 0: exactly the current his cell
 	                     FCell(OwnerCell.RotateAngleAxis(-1.F).Location.GridSnap(FCell::CellSize)).RotateAngleAxis(1.F)}); // 1: within the radius of one cell
 
-	TSet<FSharedCell> CellsToIterate(GridCells_.FilterByPredicate([InitialCells](FSharedCell Cell)
+	TSet<FCell> CellsToIterate(GridCellsInternal.FilterByPredicate([InitialCells](FCell Cell)
 	{
-		return InitialCells.Contains(*Cell);
+		return InitialCells.Contains(Cell);
 	}));
 
 	const int32 InitialCellsNum = CellsToIterate.Num();                                     // The number of initial cells
@@ -331,7 +332,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 	float LastFoundEditorLen = MAX_FLT;
 	if (bHasNotBegunPlay)
 	{
-		CellsToIterate.Append(GridCells_); // union of two sets(initials+all) for finding a nearest cell
+		CellsToIterate.Append(GridCellsInternal); // union of two sets(initials+all) for finding a nearest cell
 	}
 
 	// ----- Part 1:  Cells iteration
@@ -340,16 +341,16 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 	for (const auto& CellIt : CellsToIterate)
 	{
 		Counter++;
-		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter) + ":" + CellIt->Location.ToString());
+		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter) + ":" + CellIt.Location.ToString());
 
-		if (NonEmptyCells.Contains(*CellIt)) // the cell is not free from other level actors
+		if (NonEmptyCells.Contains(CellIt)) // the cell is not free from other level actors
 		{
 			continue;
 		}
 
 		// if the cell was found among initial cells without searching a nearest
 		if (Counter < InitialCellsNum       // is the initial cell
-		    && GridCells_.Contains(CellIt)) // is contained on the grid
+		    && GridCellsInternal.Contains(CellIt)) // is contained on the grid
 		{
 			FoundCell = CellIt;
 			break;
@@ -359,7 +360,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 		if (bHasNotBegunPlay               // the game was not started
 		    && Counter >= InitialCellsNum) // if iterated cell is not initial
 		{
-			const float EditorLenIt = USingletonLibrary::CalculateCellsLength(OwnerCell, *CellIt);
+			const float EditorLenIt = USingletonLibrary::CalculateCellsLength(OwnerCell, CellIt);
 			if (EditorLenIt < LastFoundEditorLen) // Distance closer
 			{
 				LastFoundEditorLen = EditorLenIt;
@@ -369,7 +370,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 	} //[Cells Iteration]
 
 	// Checks the cell is contained in the grid and free from other level actors.
-	if (FoundCell.IsValid())
+	if (FoundCell) // can be invalid if nothing was found, check to avoid such rewriting
 	{
 		MapComponent->Cell = FoundCell;
 	}
@@ -456,13 +457,8 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	MapScale.Z = 1; //Height must be 1
 	SetActorScale3D(FVector(MapScale));
 
-	// Clear the old grid array
-	for (auto& SharedCell : GridCells_)
-	{
-		SharedCell.Reset();
-	}
-	GridCells_.Empty();
-	GridCells_.Reserve(MapScale.X * MapScale.Y);
+	GridCellsInternal.Empty();
+	GridCellsInternal.Reserve(MapScale.X * MapScale.Y);
 
 	// Loopy cell-filling of the grid array
 	for (int32 Y = 0; Y < MapScale.Y; ++Y)
@@ -480,7 +476,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetCellSize());
 			// Cell was found, add rotated cell to the array
 			const FCell FoundCell(FCell(FoundVector).RotateAngleAxis(1.0F));
-			GridCells_.AddUnique(MakeShared<FCell>(FoundCell));
+			GridCellsInternal.AddUnique(FoundCell);
 		}
 	}
 
@@ -489,7 +485,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::ClearOwnerTextRenders(this);
 	if (bShouldShowRenders)
 	{
-		USingletonLibrary::AddDebugTextRenders(this, GridCells_);
+		USingletonLibrary::AddDebugTextRenders(this, GridCellsInternal);
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -527,7 +523,7 @@ void AGeneratedMap::PostInitializeComponents()
 // Spawns and fills the Grid Array values by level actors
 void AGeneratedMap::GenerateLevelActors()
 {
-	check(GridCells_.Num() > 0 && "Is no cells for the actors generation");
+	check(GridCellsInternal.Num() > 0 && "Is no cells for the actors generation");
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
 	USingletonLibrary::ClearOwnerTextRenders(this);
 
@@ -539,10 +535,10 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// Calls before generation preview actors to updating of all dragged to the Level Map actors
 	// After destroying only editor actors and before their generation
-	for (const auto& MapComponentIt : MapComponents_)
+	for (const auto& MapComponentIt : MapComponentsInternal)
 	{
 		MapComponentIt->RerunOwnerConstruction();
-		NonEmptyCells.Emplace(MapComponentIt->GetCell());
+		NonEmptyCells.Emplace(MapComponentIt->Cell);
 	}
 	USingletonLibrary::PrintToLog(this, "_____ [Editor]BroadcastActorsUpdating _____", "_____ END _____");
 
@@ -574,7 +570,7 @@ void AGeneratedMap::GenerateLevelActors()
 		for (int32 X = 0; X <= MapHalfScale.X; ++X) // Columns
 		{
 			const bool IsSafeZone = X == 0 && Y == 1 || X == 1 && Y == 0;
-			FCell CellIt = *GridCells_[MapScale.X * Y + X];
+			FCell CellIt = GridCellsInternal[MapScale.X * Y + X];
 
 			// --- Part 0: Actors random filling to the ArrayToGenerate._ ---
 
@@ -636,7 +632,7 @@ void AGeneratedMap::GenerateLevelActors()
 						default: break;
 					}
 
-					CellIt = *GridCells_[MapScale.X * Yi + Xi];
+					CellIt = GridCellsInternal[MapScale.X * Yi + Xi];
 				}
 
 				if (!NonEmptyCells.Contains(CellIt)) // the cell is not free
@@ -657,16 +653,16 @@ void AGeneratedMap::GenerateLevelActors()
 	Bones = Bones.Difference(NonEmptyCells);
 
 	// Finding all cells that not in Bones (NonEmptyCells = GridCells / Bones)
-	for (const auto& SharedCellIt : GridCells_)
+	for (const auto& SharedCellIt : GridCellsInternal)
 	{
-		if (!Bones.Contains(*SharedCellIt))
+		if (!Bones.Contains(SharedCellIt))
 		{
-			NonEmptyCells.Add(*SharedCellIt);
+			NonEmptyCells.Add(SharedCellIt);
 		}
 	}
 
 	// Locals
-	FCells IteratedCells{*GridCells_[0]}, FinishedCells = NonEmptyCells;
+	FCells IteratedCells{GridCellsInternal[0]}, FinishedCells = NonEmptyCells;
 
 #if WITH_EDITOR
 	if (bShouldShowRenders)
@@ -717,10 +713,10 @@ void AGeneratedMap::GenerateLevelActors()
 //  Map components getter.
 void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, const int32& ActorsTypesBitmask) const
 {
-	if (MapComponents_.Num() > 0)
+	if (MapComponentsInternal.Num() > 0)
 	{
 		OutBitmaskedComponents.Append(
-			MapComponents_.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr)
+			MapComponentsInternal.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr)
 			{
 				const ULevelActorDataAsset* DataAsset = Ptr ? Ptr->GetActorDataAsset() : nullptr;
 				const EActorType ActorType = DataAsset ? DataAsset->GetActorType() : EActorType::None;

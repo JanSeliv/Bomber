@@ -32,7 +32,7 @@ void UMapComponent::OnMapComponentConstruction()
 
 	// Owner updating
 	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddToGrid");
-	USingletonLibrary::GetLevelMap()->AddToGrid(GetCell(), this);
+	USingletonLibrary::GetLevelMap()->AddToGrid(Cell, this);
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())
@@ -60,8 +60,8 @@ void UMapComponent::OnRegister()
 	USingletonLibrary::PrintToLog(Owner, "OnRegister", "");
 
 	// Finding the actor data asset
-	ActorDataAsset = USingletonLibrary::GetDataAssetByActorClass(Owner->GetClass());
-	ensureMsgf(ActorDataAsset, TEXT("ASSERT: 'the Actor Data Asset was not found"));
+	ActorDataAssetInternal = USingletonLibrary::GetDataAssetByActorClass(Owner->GetClass());
+	ensureMsgf(ActorDataAssetInternal, TEXT("ASSERT: 'the Actor Data Asset was not found"));
 
 	// Disable the tick
 	Owner->SetActorTickEnabled(false);
