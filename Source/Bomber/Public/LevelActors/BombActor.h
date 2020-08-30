@@ -56,12 +56,12 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	class UStaticMeshComponent* BombMeshComponent;	//[C.DO]
 
-	/** Prevents players from moving through the bomb after they moved away */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UBoxComponent* BombCollisionComponent;  //[C.DO]
-
 	/** Sets default values for this actor's properties */
 	ABombActor();
+
+	/** Returns explosion cells (by copy to avoid changes). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSet<FCell> GetExplosionCells() const { return ExplosionCellsInternal; }
 
 	/**
 	 * Sets the defaults of the bomb
@@ -77,11 +77,8 @@ public:
 
 protected:
 	/** The bomb blast path */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TSet<struct FCell> ExplosionCells_;
-
-	/** The level map has access to ABombActor::ExplosionCells_ */
-	friend class AGeneratedMap;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells", ShowOnlyInnerProperties))
+	TSet<FCell> ExplosionCellsInternal;
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -97,9 +94,9 @@ protected:
 	void OnBombDestroyed(AActor* DestroyedActor);
 
 	/**
-	 * Called when character end to overlaps the BombCollisionComponent component.
+	 * Triggers when character end to overlaps with this bomb.
 	 * Sets the collision preset to block all dynamics.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 };

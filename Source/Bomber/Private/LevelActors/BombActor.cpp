@@ -33,12 +33,6 @@ ABombActor::ABombActor()
 	// Initialize bomb mesh component
 	BombMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMeshComponent"));
 	BombMeshComponent->SetupAttachment(RootComponent);
-
-	// Initialize the Bomb Collision Component to prevent players from moving through the bomb after they moved away
-	BombCollisionComponent = CreateDefaultSubobject<UBoxComponent>("BombCollisionComponent");
-	BombCollisionComponent->SetupAttachment(RootComponent);
-	BombCollisionComponent->SetBoxExtent(FVector(100.f));
-	BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
 void ABombActor::InitBomb(
@@ -64,13 +58,13 @@ void ABombActor::InitBomb(
 	}
 
 	// Update explosion information
-	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCells_, MapComponent->Cell, EPathType::Explosion, FireN);
+	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCellsInternal, MapComponent->Cell, EPathType::Explosion, FireN);
 
 	#if WITH_EDITOR  // [Editor]
 		if (MapComponent->bShouldShowRenders)
 		{
 			USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
-			USingletonLibrary::AddDebugTextRenders(this, ExplosionCells_.Array(), FLinearColor::Red);
+			USingletonLibrary::AddDebugTextRenders(this, ExplosionCellsInternal.Array(), FLinearColor::Red);
 		}
 	#endif
 
@@ -121,7 +115,7 @@ void ABombActor::BeginPlay()
 	OnDestroyed.AddDynamic(this, &ABombActor::OnBombDestroyed);
 
 	// Binding to the event, that triggered when character end to overlaps the ItemCollisionComponent component
-	BombCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ABombActor::OnBombEndOverlap);
+	OnActorEndOverlap.AddDynamic(this, &ABombActor::OnBombEndOverlap);
 
 	// Destroy itself after N seconds
 	const UBombDataAsset* BombDataAsset = MapComponent ? Cast<UBombDataAsset>(MapComponent->GetActorDataAsset()) : nullptr;
@@ -138,7 +132,7 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 	if(MapComponent)
 	{
 		UParticleSystem* ExplosionParticle = MapComponent->GetActorDataAsset<UBombDataAsset>()->ExplosionParticle;
-		for (const FCell& Cell : ExplosionCells_)
+		for (const FCell& Cell : ExplosionCellsInternal)
 		{
 			const FTransform Position{GetActorRotation(), Cell.Location, GetActorScale3D()};
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, Position);
@@ -148,17 +142,20 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 	// Destroy all actors from array of cells
 	if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())	// The Level Map is not valid
 	{
-		LevelMap->DestroyActorsFromMap(ExplosionCells_);
+		LevelMap->DestroyActorsFromMap(ExplosionCellsInternal);
 	}
 }
 
-// Sets the collision preset to block all dynamics.
-void ABombActor::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+// Triggers when character end to overlaps with this bomb.
+void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	if (OtherActor == this)	 // Self triggering
+	UBoxComponent* BombCollisionComponent = MapComponent ? MapComponent->BoxCollision : nullptr;
+	if (!BombCollisionComponent	// Is not valid collision component
+		|| OtherActor == this)	// Self triggering
 	{
 		return;
 	}
+
 	//Sets the collision preset to block all dynamics
 	TArray<AActor*> OverlappingActors;
 	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetActorClassByType(AT::Player));

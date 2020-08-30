@@ -105,7 +105,7 @@ void AGeneratedMap::GetSidesCells(
 				const auto BombOwner = MapComponentIt ? Cast<ABombActor>(MapComponentIt->GetOwner()) : nullptr;
 				if (IS_VALID(BombOwner)) // is valid and is not transient
 				{
-					DangerousCells = DangerousCells.Union(BombOwner->ExplosionCells_);
+					DangerousCells = DangerousCells.Union(BombOwner->GetExplosionCells());
 				}
 			}
 		}
@@ -156,8 +156,9 @@ void AGeneratedMap::GetSidesCells(
 AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell) const
 {
 	UWorld* World = GetWorld();
-	if (!World || ContainsMapComponents(Cell, TO_FLAG(~AT::Player)) // the free cell was not found
-	    || Type == AT::None)                                         // nothing to spawn
+	if (!World
+	    || ContainsMapComponents(Cell, TO_FLAG(~AT::Player))	// the free cell was not found
+	    || Type == AT::None)									// nothing to spawn
 	{
 		return nullptr;
 	}

@@ -22,9 +22,10 @@ AMyAIController::AMyAIController()
 void AMyAIController::UpdateAI()
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(MyCharacter);
 	if (!LevelMap								 // The Level Map is not valid or is transient
 		|| !IS_VALID(MyCharacter)				 // The controller character is not valid or is transient
-		|| !IsValid(MyCharacter->MapComponent))	 // The Map Component is not valid
+		|| !IsValid(MapComponent))				 // The Map Component is not valid
 	{
 		return;
 	}
@@ -41,7 +42,7 @@ void AMyAIController::UpdateAI()
 	// ----- Part 0: Before iterations -----
 
 	// Set the START cell searching bot location
-	const FCell F0 = MyCharacter->MapComponent->Cell;
+	const FCell F0 = MapComponent->Cell;
 
 	// Searching 'SAFE NEIGHBORS'
 	FCells Free;
@@ -95,7 +96,7 @@ void AMyAIController::UpdateAI()
 		{
 			// Finding crossways
 			AllCrossways.Emplace(*F);  // is the crossway
-			LevelMap->IntersectCellsByTypes(Way = ThisCrossway, TO_FLAG(AT::Player), false, MyCharacter->MapComponent);
+			LevelMap->IntersectCellsByTypes(Way = ThisCrossway, TO_FLAG(AT::Player), false, MapComponent);
 			if (Way.Num() == 0)
 			{
 				SecureCrossways.Emplace(*F);
@@ -182,15 +183,15 @@ void AMyAIController::UpdateAI()
 		&& bIsItemInDirect == false)	// was not found direct items
 	{
 		FCells BoxesAndPlayers;
-		LevelMap->GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, MyCharacter->Powerups_.FireN);
-		LevelMap->IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(AT::Box | AT::Player), false, MyCharacter->MapComponent);
+		LevelMap->GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, MyCharacter->GetPowerups().FireN);
+		LevelMap->IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(AT::Box | AT::Player), false, MapComponent);
 		if (BoxesAndPlayers.Num() > 0)	// Are bombs or players in own bomb radius
 		{
 			MyCharacter->SpawnBomb();
 			Free.Empty();  // Delete all cells to make new choice
 
 #if WITH_EDITOR	 // [Editor]
-			if (MyCharacter->MapComponent->bShouldShowRenders)
+			if (MapComponent->bShouldShowRenders)
 			{
 				bool bOutBool = false;
 				TArray<UTextRenderComponent*> OutArray{};
@@ -210,7 +211,7 @@ void AMyAIController::UpdateAI()
 	MoveToCell(Filtered.Array()[FMath::RandRange(NULL, Filtered.Num() - 1)]);
 
 #if WITH_EDITOR	 // [Editor]
-	if (MyCharacter->MapComponent->bShouldShowRenders)
+	if (MapComponent->bShouldShowRenders)
 	{
 		for (int32 i = 0; i < 3; ++i)
 		{
@@ -266,8 +267,9 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
 	}  // [PIE]
 
-	if (MyCharacter->MapComponent  // is accessible map component
-		&& MyCharacter->MapComponent->bShouldShowRenders)
+	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(MyCharacter);
+	if (MapComponent  // is valid  map component
+		&& MapComponent->bShouldShowRenders)
 	{
 		bool bOutBool = false;
 		TArray<UTextRenderComponent*> OutArray{};

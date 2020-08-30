@@ -19,6 +19,10 @@ class UPlayerDataAsset final : public ULevelActorDataAsset
 public:
 	/** Default constructor. */
 	UPlayerDataAsset();
+
+	/** All materials that are used by nameplate meshes. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	TArray<class UMaterialInterface*> NameplateMaterials;  //[M.DO]
 };
 
 /**
@@ -55,30 +59,15 @@ class BOMBER_API APlayerCharacter final : public ACharacter
 
 public:
 	/* ---------------------------------------------------
-	 *		Public properties
-	 * --------------------------------------------------- */
-	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
-	class UMapComponent* MapComponent;	//[C.AW]
-
-	/** All skeletal meshes of the character */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TArray<class USkeletalMesh*> SkeletalMeshes;  //[M.DO]
-
-	/** The static mesh nameplate */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UStaticMeshComponent* NameplateMeshComponent;	 //[C.DO]
-
-	/** All materials that used by nameplate meshes */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TArray<class UMaterialInterface*> NameplateMaterials;  //[M.DO]
-
-	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
 
 	/** Sets default values for this character's properties */
 	APlayerCharacter();
+
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FPowerUp GetPowerups() const { return PowerupsInternal; }
 
 	/**  Finds and rotates the self at the current character's location to point at the specified location.
 	 * @param Location the character is looking at.
@@ -86,18 +75,26 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Location"))
 	void RotateToLocation(const FVector& Location, bool bShouldInterpolate) const;
 
+	/** Spawns bomb on character position */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+    void SpawnBomb();
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
-	/** Count of items that affect the abilities of a player during gameplay */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	struct FPowerUp Powerups_;	//[AW]
-	/** Items have access to increase it */
-	friend class AItemActor;
-	/** Owned AI controller has access to his pawn to see a blast radius */
-	friend class AMyAIController;
+	/** The MapComponent manages this actor on the Level Map */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
+	class UMapComponent* MapComponent;	//[C.AW]
+
+	/** The static mesh nameplate */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
+	class UStaticMeshComponent* NameplateMeshComponent;	 //[C.DO]
+
+	/** Count of items that affect on a player during gameplay */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups"))
+	FPowerUp PowerupsInternal;	//[AW]
 
 	/** The ID identification of each character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
@@ -138,9 +135,12 @@ protected:
 	/* Move the player character by the right vector. */
 	FORCEINLINE void OnMoveRightLeft(float ScaleValue) { AddMovementInput(GetActorRightVector(), ScaleValue); }
 
-	/** Spawns bomb on character position */
+	/**
+	 * Triggers when this player character starts something overlap.
+	 * With item overlapping Increases +1 to numbers of character's powerups (Skate/Bomb/Fire).
+	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SpawnBomb();
+    void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	/** Event triggered when the bomb has been explicitly destroyed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

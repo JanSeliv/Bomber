@@ -6,6 +6,8 @@
 #include "GeneratedMap.h"
 #include "LevelActorDataAsset.h"
 #include "SingletonLibrary.h"
+//---
+#include "Components/BoxComponent.h"
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()
@@ -14,6 +16,9 @@ UMapComponent::UMapComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
+
+	// Initialize the Box Collition compoennt
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>("BoxCollisionComponent");
 }
 
 // Updates a owner's state. Should be called in the owner's OnConstruction event.
@@ -59,10 +64,6 @@ void UMapComponent::OnRegister()
 	}
 	USingletonLibrary::PrintToLog(Owner, "OnRegister", "");
 
-	// Finding the actor data asset
-	ActorDataAssetInternal = USingletonLibrary::GetDataAssetByActorClass(Owner->GetClass());
-	ensureMsgf(ActorDataAssetInternal, TEXT("ASSERT: 'the Actor Data Asset was not found"));
-
 	// Disable the tick
 	Owner->SetActorTickEnabled(false);
 
@@ -70,6 +71,22 @@ void UMapComponent::OnRegister()
 	if (Owner->GetRootComponent() != nullptr)
 	{
 		Owner->GetRootComponent()->SetMobility(EComponentMobility::Movable);
+	}
+
+	// Finding the actor data asset
+	ActorDataAssetInternal = USingletonLibrary::GetDataAssetByActorClass(Owner->GetClass());
+	ensureMsgf(ActorDataAssetInternal, TEXT("ASSERT: 'the Actor Data Asset' was not found"));
+
+	// Initialize the Box Collision Component
+	if (ActorDataAssetInternal
+	    && ensureMsgf(BoxCollision, TEXT("ASSERT: 'BoxCollisionInternal' is not valid")))
+	{
+		BoxCollision->SetupAttachment(Owner->GetRootComponent());
+		BoxCollision->SetBoxExtent(ActorDataAssetInternal->GetCollisionExtent());
+		BoxCollision->SetCollisionResponseToAllChannels(ActorDataAssetInternal->GetCollisionResponse());
+#if WITH_EDITOR
+		BoxCollision->SetHiddenInGame(!bShouldShowRenders);
+#endif
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
@@ -89,12 +106,20 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		&& IsValid(USingletonLibrary::GetLevelMap()))  // is valid and is not transient the level map
 	{
 		USingletonLibrary::PrintToLog(ComponentOwner, "OnComponentDestroyed", "-> \t DestroyActorsFromMap");
-		USingletonLibrary::GetLevelMap()->RemoveMapComponent(this);	 // During a game: destroyed bombs, pickup-ed items
+
+		// During a game: destroyed bombs, pickup-ed items
+		USingletonLibrary::GetLevelMap()->RemoveMapComponent(this);
+
+		//disable collision for safety
+		ComponentOwner->SetActorEnableCollision(false);
+
+		// @TODO Delete spawned collision component
+		//
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-		// Editor delegates
-		if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
+		if (USingletonLibrary::IsEditorNotPieWorld())
 		{
+			// Editor delegates
 			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 		}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]

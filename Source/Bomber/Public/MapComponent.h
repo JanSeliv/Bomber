@@ -23,12 +23,20 @@ class BOMBER_API UMapComponent final : public UActorComponent
 {
 	GENERATED_BODY()
 
+	/* ---------------------------------------------------
+	*	Map Component's public properties
+	* --------------------------------------------------- */
 public:
+
 #if WITH_EDITORONLY_DATA  // bShouldShowRenders
 	/** Mark the editor updating visualization(text renders) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly))
 	bool bShouldShowRenders = false;
 #endif	//WITH_EDITORONLY_DATA bShouldShowRenders
+
+	/** The Collision Component, is attached to an owner. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	class UBoxComponent* BoxCollision; //[C.DO]
 
 	/** Owner's cell location on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))

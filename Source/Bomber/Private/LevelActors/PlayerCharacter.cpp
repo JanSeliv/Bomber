@@ -9,9 +9,11 @@
 #include "MyAIController.h"
 #include "SingletonLibrary.h"
 //---
+#include "ItemActor.h"
 #include "Animation/AnimInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -39,30 +41,6 @@ APlayerCharacter::APlayerCharacter()
 	// Initialize skeletal mesh
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
 
-	// Find skeletal meshes
-	// @TODO Get skeletal meshes from the Singleton Library
-	// static TArray<ConstructorHelpers::FObjectFinder<USkeletalMesh>> SkeletalMeshFinderArray{
-	// 	TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/Phoenix/Meshes/IggyScorch_Phoenix"),
-	// 	TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/MechaTerror/Meshes/IggyScorch_MechaTerror"),
-	// 	TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/JingleBombs/Meshes/IggyScorch_JingleBombs"),
-	// 	TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/Skins/Fireball/Meshes/IggyScorch_Fireball")};
-	// for (int32 i = 0; i < SkeletalMeshFinderArray.Num(); ++i)
-	// {
-	// 	if (SkeletalMeshFinderArray[i].Succeeded())
-	// 	{
-	// 		SkeletalMeshes.Emplace(SkeletalMeshFinderArray[i].Object);
-	// 		if (i == 0) GetMesh()->SetSkeletalMesh(SkeletalMeshFinderArray[i].Object);	// preview
-	// 	}
-	// }
-
-	// Set the animation
-	// @TODO Get the animation blueprint from the Singleton Library
-	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimationFinder(TEXT("/Game/ParagonIggyScorch/Characters/Heroes/IggyScorch/IggyScorch_AnimBP"));
-	// if (AnimationFinder.Succeeded())  // The animation was found
-	// {
-	// 	MyAnimClass = AnimationFinder.Class;
-	// }
-
 	// Initialize the nameplate mesh component
 	NameplateMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
 	NameplateMeshComponent->SetupAttachment(RootComponent);
@@ -73,20 +51,6 @@ APlayerCharacter::APlayerCharacter()
 	if (NameplateMeshFinder.Succeeded())
 	{
 		NameplateMeshComponent->SetStaticMesh(NameplateMeshFinder.Object);
-	}
-
-	// Find nameplate materials
-	static TArray<ConstructorHelpers::FObjectFinder<UMaterialInterface>> MaterialsFinderArray{
-		TEXT("/Game/Bomber/Materials/MI_Nameplates/MI_Nameplate_Yellow"),
-		TEXT("/Game/Bomber/Materials/MI_Nameplates/MI_Nameplate_Blue"),
-		TEXT("/Game/Bomber/Materials/MI_Nameplates/MI_Nameplate_White"),
-		TEXT("/Game/Bomber/Materials/MI_Nameplates/MI_Nameplate_Pink")};
-	for (int32 i = 0; i < MaterialsFinderArray.Num(); ++i)
-	{
-		if (MaterialsFinderArray[i].Succeeded())
-		{
-			NameplateMaterials.Emplace(MaterialsFinderArray[i].Object);
-		}
 	}
 }
 
@@ -116,6 +80,33 @@ void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInt
 	}
 
 	MeshComponent->SetWorldRotation(NewRotation);
+}
+
+// Spawns bomb on character position
+void APlayerCharacter::SpawnBomb()
+{
+	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	if (!LevelMap                                     // The Level Map is not accessible
+	    || !IsValid(MapComponent)            // The Map Component is not valid or transient
+	    || PowerupsInternal.FireN <= 0               // Null length of explosion
+	    || PowerupsInternal.BombN <= 0               // No more bombs
+	    || USingletonLibrary::IsEditorNotPieWorld()) // Should not spawn bomb in PIE
+	{
+		return;
+	}
+
+	// Spawn bomb
+	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(AT::Bomb, MapComponent->Cell));
+	if (BombActor) // can return nullptr if the cell is not free
+	{
+		// Updating explosion cells
+		PowerupsInternal.BombN--;
+
+		// Init Bomb
+		FOnBombDestroyed OnBombDestroyed;
+		OnBombDestroyed.BindDynamic(this, &ThisClass::OnBombDestroyed);
+		BombActor->InitBomb(OnBombDestroyed, PowerupsInternal.FireN, CharacterID_);
+	}
 }
 
 /* ---------------------------------------------------
@@ -149,6 +140,8 @@ void APlayerCharacter::BeginPlay()
 		MyAIController = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		MyAIController->Possess(this);
 	}
+
+	OnActorBeginOverlap.AddDynamic(this, &APlayerCharacter::OnPlayerBeginOverlap);
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -158,11 +151,11 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (IS_TRANSIENT(this)		   // This actor is transient
-		|| !IsValid(MapComponent)  // Is not valid for map construction
-		|| !LevelMap)			   // the level map is not valid or transient
-	{
+        || !IsValid(MapComponent)  // Is not valid for map construction
+        || !LevelMap)			   // the level map is not valid or transient
+        	{
 		return;
-	}
+        	}
 	// Construct the actor's map component
 	MapComponent->OnMapComponentConstruction();
 
@@ -173,26 +166,33 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	ensureMsgf(CharacterID_ != INDEX_NONE, TEXT("The character was not found on the Level Map"));
 
 	// Set a character skeletal mesh
-	const int32 SkeletalMeshesNum = SkeletalMeshes.Num();
-	if (SkeletalMeshesNum > 0
-		&& GetMesh())
+	if (ensureMsgf(GetMesh(), TEXT("ASSERT: 'GetMesh()' is not valid")))
 	{
-		const int32 SkeletalNo = CharacterID_ < SkeletalMeshesNum ? CharacterID_ : CharacterID_ % SkeletalMeshesNum;
-		if(SkeletalMeshes.IsValidIndex(SkeletalNo))
+		TArray<FLevelActorMeshRow> SkeletalMeshes;
+		MapComponent->GetActorDataAsset<UPlayerDataAsset>()->GetMeshesByLevelType(SkeletalMeshes, TO_FLAG(LT::Max));
+		const int32 SkeletalMeshesNum = SkeletalMeshes.Num();
+		if (SkeletalMeshesNum > 0)
 		{
-			GetMesh()->SetSkeletalMesh(SkeletalMeshes[SkeletalNo]);
+			const int32 SkeletalNo = CharacterID_ < SkeletalMeshesNum ? CharacterID_ : CharacterID_ % SkeletalMeshesNum;
+			if (SkeletalMeshes.IsValidIndex(SkeletalNo))
+			{
+				GetMesh()->SetSkeletalMesh(Cast<USkeletalMesh>(SkeletalMeshes[SkeletalNo].Mesh));
+			}
 		}
 	}
 
 	// Set a nameplate material
-	const int32 NameplateMeshesNum = NameplateMaterials.Num();
-	if (NameplateMeshesNum > 0
-		&& NameplateMeshComponent)
+	if (ensureMsgf(NameplateMeshComponent, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
 	{
-		const int32 MaterialNo = CharacterID_ < NameplateMeshesNum ? CharacterID_ : CharacterID_ % NameplateMeshesNum;
-		if(NameplateMaterials.IsValidIndex(MaterialNo))
+		const TArray<UMaterialInterface*>& NameplateMaterials = MapComponent->GetActorDataAsset<UPlayerDataAsset>()->NameplateMaterials;
+		const int32 NameplateMeshesNum = NameplateMaterials.Num();
+		if (NameplateMeshesNum > 0)
 		{
-			NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
+			const int32 MaterialNo = CharacterID_ < NameplateMeshesNum ? CharacterID_ : CharacterID_ % NameplateMeshesNum;
+			if (NameplateMaterials.IsValidIndex(MaterialNo))
+			{
+				NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
+			}
 		}
 	}
 
@@ -244,33 +244,48 @@ void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 	}
 }
 
-// Spawns bomb on character position
-void APlayerCharacter::SpawnBomb()
+// Triggers when this player character starts something overlap.
+void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (LevelMap == nullptr							  // The Level Map is not accessible
-		|| IsValid(MapComponent) == false			  // The Map Component is not valid or transient
-		|| Powerups_.FireN <= 0						  // Null length of explosion
-		|| Powerups_.BombN <= 0						  // No more bombs
-		|| USingletonLibrary::IsEditorNotPieWorld())  // Should not spawn bomb in PIE
+	AItemActor* OverlappedItem = Cast<AItemActor>(OtherActor);
+	const EItemType ItemType = OverlappedItem ? OverlappedItem->GetItemType() : EItemType::None;
+	if (ItemType == EItemType::None) // item is not valid
 	{
 		return;
 	}
 
-	// Spawn bomb
-	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(AT::Bomb, MapComponent->Cell));
-	if (ensureMsgf(BombActor, TEXT("ASSERT: 'BombActor' is not valid")))
+	switch (ItemType)
 	{
-		// Updating explosion cells
-		Powerups_.BombN--;
-		FOnBombDestroyed OnBombDestroyed;
-		OnBombDestroyed.BindDynamic(this, &ThisClass::OnBombDestroyed);
-		BombActor->InitBomb(OnBombDestroyed, Powerups_.FireN, CharacterID_);
+		case EItemType::Skate:
+		{
+			const int32 SkateN = ++PowerupsInternal.SkateN * 100.F + 500.F;
+			UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+			if (MovementComponent    //  is accessible
+			    && SkateN <= 1000.F) // is lower than the max speed value (5x skate items)
+			{
+				MovementComponent->MaxWalkSpeed = SkateN;
+			}
+			break;
+		}
+		case EItemType::Bomb:
+		{
+			PowerupsInternal.BombN++;
+			break;
+		}
+		case EItemType::Fire:
+		{
+			PowerupsInternal.FireN++;
+			break;
+		}
+		default: break;
 	}
+
+	// Uninitialize item
+	OverlappedItem->ResetItemType();
 }
 
 // Event triggered when the bomb has been explicitly destroyed.
 void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
 {
-	Powerups_.BombN++;
+	PowerupsInternal.BombN++;
 }
