@@ -10,16 +10,18 @@
 #include "ItemActor.generated.h"
 
 /**
-*
-*/
+ *
+ */
 UCLASS(Blueprintable, BlueprintType)
 class UItemDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
 public:
-
+	/** Default constructor. */
+	UItemDataAsset();
 };
+
 /**
  * Affects the abilities of a player during gameplay
  */

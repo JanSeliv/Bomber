@@ -29,11 +29,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
 	TSubclassOf<AActor> BackgroundBlueprintClass;  //[B]
 
-#if WITH_EDITORONLY_DATA  // bShouldShowRenders
+#if WITH_EDITORONLY_DATA  // [Editor] Renders
 	/** Mark the editor updating visualization(text renders) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, InlineEditConditionToggle))
 	bool bShouldShowRenders = false;
-#endif	//WITH_EDITORONLY_DATA [Editor] bShouldShowRenders
+
+	/** Specify for which level actors should show debug renders */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, EditCondition = "bShouldShowRenders", Bitmask, BitmaskEnum = "EActorType"))
+	int32 RenderActorsTypes = TO_FLAG(AT::All); //[N]
+#endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
 	/* ---------------------------------------------------
 	 *		Public functions
@@ -85,7 +89,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AdvancedDisplay = 2, AutoCreateRefTerm = "ActorsTypesBitmask"))
 	void IntersectCellsByTypes(
 		UPARAM(ref) TSet<struct FCell>& OutCells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& ActorsTypesBitmask,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask,
 		bool bIntersectAllIfEmpty = true,
 		const class UMapComponent* ExceptedComponent = nullptr) const;
 
@@ -98,7 +102,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE bool ContainsMapComponents(
 		const struct FCell& Cell,
-		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& ActorsTypesBitmask) const
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask) const
 	{
 		FCells NonEmptyCells;
 		IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask);
@@ -179,7 +183,7 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActorsTypesBitmask"))
 	void GetMapComponents(
 		TSet<class UMapComponent*>& OutBitmaskedComponents,
-		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& ActorsTypesBitmask) const;
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask) const;
 	/* ---------------------------------------------------
 	 *					Editor development
 	 * --------------------------------------------------- */

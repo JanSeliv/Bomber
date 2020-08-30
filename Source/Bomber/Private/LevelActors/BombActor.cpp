@@ -10,7 +10,12 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "UObject/ConstructorHelpers.h"
+
+// Default constructor
+UBombDataAsset::UBombDataAsset()
+{
+	ActorTypeInternal = AT::Bomb;
+}
 
 // Sets default values
 ABombActor::ABombActor()
@@ -28,33 +33,6 @@ ABombActor::ABombActor()
 	// Initialize bomb mesh component
 	BombMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMeshComponent"));
 	BombMeshComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Meshes/SM_Bomb"));
-	if (BombMeshFinder.Succeeded())
-	{
-		BombMeshComponent->SetStaticMesh(BombMeshFinder.Object);
-	}
-
-	// Initialize explosion particle component
-	ExplosionParticle = CreateDefaultSubobject<UParticleSystem>(TEXT("ExplosionParticle"));
-	static ConstructorHelpers::FObjectFinder<UParticleSystem> ParticleFinder(TEXT("/Game/VFX_Toolkit_V1/ParticleSystems/356Days/Par_CrescentBoom2_OLD"));
-	if (ParticleFinder.Succeeded())
-	{
-		ExplosionParticle = ParticleFinder.Object;
-	}
-
-	// Find bomb materials
-	static TArray<ConstructorHelpers::FObjectFinder<UMaterialInterface>> MaterialsFinderArray{
-		TEXT("/Game/Bomber/Materials/MI_Bombs/MI_Bomb_Yellow"),
-		TEXT("/Game/Bomber/Materials/MI_Bombs/MI_Bomb_Blue"),
-		TEXT("/Game/Bomber/Materials/MI_Bombs/MI_Bomb_Silver"),
-		TEXT("/Game/Bomber/Materials/MI_Bombs/MI_Bomb_Pink")};
-	for (int32 i = 0; i < MaterialsFinderArray.Num(); ++i)
-	{
-		if (MaterialsFinderArray[i].Succeeded())
-		{
-			BombMaterials.Emplace(MaterialsFinderArray[i].Object);
-		}
-	}
 
 	// Initialize the Bomb Collision Component to prevent players from moving through the bomb after they moved away
 	BombCollisionComponent = CreateDefaultSubobject<UBoxComponent>("BombCollisionComponent");
@@ -68,14 +46,15 @@ void ABombActor::InitBomb(
 	const int32& FireN /*= 1*/,
 	const int32& CharacterID /*=-1*/)
 {
-	if (!IsValid(USingletonLibrary::GetLevelMap())	// // The Level Map is not valid
-	    || IsValid(MapComponent) == false // The Map Component is not valid
-	    || FireN < 0)                     // Negative length of the explosion
+	if (!IsValid(USingletonLibrary::GetLevelMap()) // // The Level Map is not valid
+	    || !IsValid(MapComponent)                  // The Map Component is not valid
+	    || FireN < 0)                              // Negative length of the explosion
 	{
 		return;
 	}
 
 	// Set material
+	const TArray<UMaterialInterface*>& BombMaterials = MapComponent->GetActorDataAsset<UBombDataAsset>()->BombMaterials;
 	if (IsValid(BombMeshComponent)	// Mesh of the bomb is not valid
         && CharacterID != -1		// Is not debug character
         && BombMaterials.Num())		// As least one bomb material
@@ -110,6 +89,13 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 		|| !IsValid(MapComponent))	// Is not valid for map construction
 	{
 		return;
+	}
+
+	TArray<FLevelActorMeshRow> BombMeshes;
+	MapComponent->GetActorDataAsset<UBombDataAsset>()->GetMeshesByLevelType(BombMeshes, TO_FLAG(LT::Max));
+	if(BombMeshes.IsValidIndex(0))
+	{
+		BombMeshComponent->SetStaticMesh(Cast<UStaticMesh>(BombMeshes[0].Mesh));
 	}
 
 	// Construct the actor's map component
@@ -148,21 +134,22 @@ void ABombActor::BeginPlay()
 // Calls destroying request of all actors by cells in explosion cells array.
 void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 {
-	UWorld* const World = GetWorld();
-	if (World == nullptr								// World is null
-		|| !IsValid(USingletonLibrary::GetLevelMap()))	// The Level Map is not valid
-	{
-		return;
-	}
-
 	// Spawn emitters
-	for (const FCell& Cell : ExplosionCells_)
+	if(MapComponent)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(World, ExplosionParticle, FTransform(GetActorRotation(), Cell.Location, GetActorScale3D()));
+		UParticleSystem* ExplosionParticle = MapComponent->GetActorDataAsset<UBombDataAsset>()->ExplosionParticle;
+		for (const FCell& Cell : ExplosionCells_)
+		{
+			const FTransform Position{GetActorRotation(), Cell.Location, GetActorScale3D()};
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, Position);
+        }
 	}
 
 	// Destroy all actors from array of cells
-	USingletonLibrary::GetLevelMap()->DestroyActorsFromMap(ExplosionCells_);
+	if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())	// The Level Map is not valid
+	{
+		LevelMap->DestroyActorsFromMap(ExplosionCells_);
+	}
 }
 
 // Sets the collision preset to block all dynamics.
@@ -174,7 +161,7 @@ void ABombActor::OnBombEndOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	}
 	//Sets the collision preset to block all dynamics
 	TArray<AActor*> OverlappingActors;
-	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetActorClassByType(EActorType::Player));
+	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetActorClassByType(AT::Player));
 	if (OverlappingActors.Num() == 0)  // There are no more characters on the bomb
 	{
 		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);

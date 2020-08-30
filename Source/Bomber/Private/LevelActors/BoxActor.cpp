@@ -11,6 +11,12 @@
 #include "Math/UnrealMathUtility.h"
 #include "UObject/ConstructorHelpers.h"
 
+// Default constructor
+UBoxDataAsset::UBoxDataAsset()
+{
+	ActorTypeInternal = AT::Box;
+}
+
 // Sets default values.
 ABoxActor::ABoxActor()
 {
@@ -72,6 +78,6 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 	if (ItemChance)
 	{
 		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");
-		LevelMap->SpawnActorByType(EActorType::Item, FCell(GetActorLocation()));
+		LevelMap->SpawnActorByType(AT::Item, FCell(GetActorLocation()));
 	}
 }

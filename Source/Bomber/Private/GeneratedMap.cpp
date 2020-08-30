@@ -57,7 +57,7 @@ void AGeneratedMap::GetSidesCells(
 	FCells Walls;
 	if (OutCells.Num() == 0)
 	{
-		IntersectCellsByTypes(Walls, TO_FLAG(EActorType::Wall)); // just finding the walls on the map
+		IntersectCellsByTypes(Walls, TO_FLAG(AT::Wall)); // just finding the walls on the map
 	}
 	else if (bBreakInputCells) // specified OutCells is not empty, these cells break lines as the Wall behavior
 	{
@@ -80,7 +80,7 @@ void AGeneratedMap::GetSidesCells(
 	const bool bWithoutObstacles = Pathfinder != EPathType::Explosion;
 	if (bWithoutObstacles) // if is the request to find the path without Bombs/Boxes
 	{
-		IntersectCellsByTypes(Obstacles, TO_FLAG(EActorType::Bomb | EActorType::Box));
+		IntersectCellsByTypes(Obstacles, TO_FLAG(AT::Bomb | AT::Box));
 	}
 
 	// ----- Secure: a path without players -----
@@ -88,7 +88,7 @@ void AGeneratedMap::GetSidesCells(
 	const bool bWithoutPlayers = Pathfinder == EPathType::Secure;
 	if (bWithoutPlayers) // if is the request to find the path without players cells.
 	{
-		IntersectCellsByTypes(PlayersCells, TO_FLAG(EActorType::Player));
+		IntersectCellsByTypes(PlayersCells, TO_FLAG(AT::Player));
 	}
 
 	// ----- A path without explosions -----
@@ -97,7 +97,7 @@ void AGeneratedMap::GetSidesCells(
 	if (bWithoutExplosions) // if is the request to find the path without explosions.
 	{
 		FMapComponents BombsMapComponents;
-		GetMapComponents(BombsMapComponents, TO_FLAG(EActorType::Bomb));
+		GetMapComponents(BombsMapComponents, TO_FLAG(AT::Bomb));
 		if (BombsMapComponents.Num() > 0)
 		{
 			for (const auto& MapComponentIt : BombsMapComponents)
@@ -156,8 +156,8 @@ void AGeneratedMap::GetSidesCells(
 AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell) const
 {
 	UWorld* World = GetWorld();
-	if (!World || ContainsMapComponents(Cell, TO_FLAG(~EActorType::Player)) // the free cell was not found
-	    || Type == EActorType::None)                                         // nothing to spawn
+	if (!World || ContainsMapComponents(Cell, TO_FLAG(~AT::Player)) // the free cell was not found
+	    || Type == AT::None)                                         // nothing to spawn
 	{
 		return nullptr;
 	}
@@ -179,7 +179,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 	if (!MapComponentsInternal.Contains(AddedComponent)) // is not contains in the array
 	{
 		MapComponentsInternal.Emplace(AddedComponent);
-		if (DataAsset->GetActorType() == EActorType::Player) // Is a player
+		if (DataAsset->GetActorType() == AT::Player) // Is a player
 		{
 			PlayerCharactersNum++;
 		}
@@ -297,7 +297,7 @@ void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 	// Decrement the players number
 	const ULevelActorDataAsset* DataAsset = MapComponent->GetActorDataAsset();
 	if (DataAsset
-		&& DataAsset->GetActorType() == EActorType::Player) // Is a player
+		&& DataAsset->GetActorType() == AT::Player) // Is a player
 	{
 		PlayerCharactersNum--;
 	}
@@ -325,7 +325,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 
 	const int32 InitialCellsNum = CellsToIterate.Num();                                     // The number of initial cells
 	FCells NonEmptyCells;                                                                   // all cells of each level actor
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EActorType::Player), true, MapComponent); //EActorType::Bomb | EActorType::Item | EActorType::Wall | EActorType::Box
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~AT::Player), true, MapComponent); //AT::Bomb | AT::Item | AT::Wall | AT::Box
 
 	// Pre gameplay locals to find a nearest cell
 	const bool bHasNotBegunPlay = !HasActorBegunPlay(); // the game was not started
@@ -392,7 +392,7 @@ void AGeneratedMap::Tick(float DeltaTime)
 	}
 
 	FMapComponents PlayersMapComponents;
-	GetMapComponents(PlayersMapComponents, TO_FLAG(EActorType::Player));
+	GetMapComponents(PlayersMapComponents, TO_FLAG(AT::Player));
 	for (const auto& MapCompIt : PlayersMapComponents)
 	{
 		if (MapCompIt) SetNearestCell(MapCompIt);
@@ -413,7 +413,7 @@ void AGeneratedMap::Tick(float DeltaTime)
 	// 	    && IntTimer % 10 == 0)                   // each 10 seconds
 	// 	{
 	// 		const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
-	// 		SpawnActorByType(EActorType::Item, RandCell); // can be not spawned in non empty cell
+	// 		SpawnActorByType(AT::Item, RandCell); // can be not spawned in non empty cell
 	// 	}
 	// }
 }
@@ -480,15 +480,6 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		}
 	}
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	// Show cells coordinates of the Grid array
-	USingletonLibrary::ClearOwnerTextRenders(this);
-	if (bShouldShowRenders)
-	{
-		USingletonLibrary::AddDebugTextRenders(this, GridCellsInternal);
-	}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]
-
 	// Actors generation
 	GenerateLevelActors();
 }
@@ -525,11 +516,10 @@ void AGeneratedMap::GenerateLevelActors()
 {
 	check(GridCellsInternal.Num() > 0 && "Is no cells for the actors generation");
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
-	USingletonLibrary::ClearOwnerTextRenders(this);
 
 	// Destroy all editor-only non-PIE actors
 	FCells NonEmptyCells;
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::All));
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(AT::All));
 	DestroyActorsFromMap(NonEmptyCells, true);
 	NonEmptyCells.Empty();
 
@@ -544,7 +534,7 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// Set number of existed player characters
 	FMapComponents PlayersMapComponents;
-	GetMapComponents(PlayersMapComponents, TO_FLAG(EActorType::Player));
+	GetMapComponents(PlayersMapComponents, TO_FLAG(AT::Player));
 	PlayerCharactersNum = PlayersMapComponents.Num();
 
 	/* Steps:
@@ -575,37 +565,37 @@ void AGeneratedMap::GenerateLevelActors()
 			// --- Part 0: Actors random filling to the ArrayToGenerate._ ---
 
 			// In case all next conditions will be false
-			EActorType ActorTypeToSpawn = EActorType::None;
+			EActorType ActorTypeToSpawn = AT::None;
 
 			// Player condition
 			if (X == 0 && Y == 0) // is first corner
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "PLAYER will be spawned");
-				ActorTypeToSpawn = EActorType::Player;
+				ActorTypeToSpawn = AT::Player;
 			}
 
 			// Wall condition
-			if (ActorTypeToSpawn == EActorType::None // all previous conditions are false
+			if (ActorTypeToSpawn == AT::None // all previous conditions are false
 			    && !IsSafeZone && FMath::RandRange(int32(0), int32(99)) < WallsChance_)
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "WALL will be spawned");
-				ActorTypeToSpawn = EActorType::Wall;
+				ActorTypeToSpawn = AT::Wall;
 			}
 
 			// Box condition
-			if (ActorTypeToSpawn == EActorType::None                                    // all previous conditions are false
+			if (ActorTypeToSpawn == AT::None                                    // all previous conditions are false
 			    && !IsSafeZone && FMath::RandRange(int32(0), int32(99)) < BoxesChance_) // Chance of boxes
 			{
 				USingletonLibrary::PrintToLog(this, "GenerateLevelActors", "BOX will be spawned");
-				ActorTypeToSpawn = EActorType::Box;
+				ActorTypeToSpawn = AT::Box;
 			}
 
-			if (ActorTypeToSpawn != EActorType::Wall) //
+			if (ActorTypeToSpawn != AT::Wall) //
 			{
 				Bones.Emplace(CellIt);
 			}
 
-			if (ActorTypeToSpawn == EActorType::None) // There is no types to spawn
+			if (ActorTypeToSpawn == AT::None) // There is no types to spawn
 			{
 				continue;
 			}
@@ -639,7 +629,7 @@ void AGeneratedMap::GenerateLevelActors()
 				{
 					ActorsToSpawn.Emplace(CellIt, ActorTypeToSpawn);
 				}
-				else if (ActorTypeToSpawn == EActorType::Wall)
+				else if (ActorTypeToSpawn == AT::Wall)
 				{
 					Bones.Emplace(CellIt); // the wall was not spawned, then this cell is the bone
 				}
@@ -649,7 +639,7 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// --- Part 1 : Checking if there is a path to the bottom and side edges.If not, go to the 0 step._ ---
 
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::Wall));
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(AT::Wall));
 	Bones = Bones.Difference(NonEmptyCells);
 
 	// Finding all cells that not in Bones (NonEmptyCells = GridCells / Bones)
@@ -664,15 +654,15 @@ void AGeneratedMap::GenerateLevelActors()
 	// Locals
 	FCells IteratedCells{GridCellsInternal[0]}, FinishedCells = NonEmptyCells;
 
-#if WITH_EDITOR
-	if (bShouldShowRenders)
-	{
-		bool bOutBool = false;
-		TArray<UTextRenderComponent*> OutArray{};
-		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, Bones, FLinearColor::Green, bOutBool, OutArray, 263, 148);
-		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, NonEmptyCells, FLinearColor::Red, bOutBool, OutArray, 260);
-	}
-#endif	// WITH_EDITOR
+// #if WITH_EDITOR // show generated bones (green and red)
+// 	if (bShouldShowRenders)
+// 	{
+// 		bool bOutBool = false;
+// 		TArray<UTextRenderComponent*> OutArray{};
+// 		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, Bones, FLinearColor::Green, bOutBool, OutArray, 263, 148);
+// 		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, NonEmptyCells, FLinearColor::Red, bOutBool, OutArray, 260);
+// 	}
+// #endif	// WITH_EDITOR
 
 	while (IteratedCells.Num() && Bones.Num())
 	{
@@ -707,6 +697,21 @@ void AGeneratedMap::GenerateLevelActors()
 		}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 	}
+
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld())
+	{
+		USingletonLibrary::ClearOwnerTextRenders(this);
+		// Show cells coordinates of the Grid array
+		if (bShouldShowRenders)
+		{
+			FCells CellsToRender;
+			IntersectCellsByTypes(CellsToRender, RenderActorsTypes, true);
+			USingletonLibrary::AddDebugTextRenders(this, CellsToRender.Array());
+		}
+	}
+#endif	// WITH_EDITOR [IsEditorNotPieWorld]
+
 	USingletonLibrary::PrintToLog(this, "_____ GenerateLevelActors _____", "_____ END _____");
 }
 
@@ -719,8 +724,8 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, con
 			MapComponentsInternal.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr)
 			{
 				const ULevelActorDataAsset* DataAsset = Ptr ? Ptr->GetActorDataAsset() : nullptr;
-				const EActorType ActorType = DataAsset ? DataAsset->GetActorType() : EActorType::None;
-				return ActorType & ActorsTypesBitmask;
+				const EActorType ActorType = DataAsset ? DataAsset->GetActorType() : AT::None;
+				return EnumHasAnyFlags(ActorType, TO_ENUM(EActorType, ActorsTypesBitmask));
 			}));
 	}
 }
@@ -736,7 +741,7 @@ void AGeneratedMap::Destroyed()
 	if (!IS_TRANSIENT(this))
 	{
 		FCells NonEmptyCells;
-		IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EActorType::All));
+		IntersectCellsByTypes(NonEmptyCells, TO_FLAG(AT::All));
 		DestroyActorsFromMap(NonEmptyCells);
 	}
 	Super::Destroyed();

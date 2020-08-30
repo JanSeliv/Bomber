@@ -8,6 +8,12 @@
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
+// Default constructor
+UWallDataAsset::UWallDataAsset()
+{
+	ActorTypeInternal = AT::Wall;
+}
+
 // Sets default values
 AWallActor::AWallActor()
 {

@@ -11,6 +11,12 @@
 #include "LevelActors/PlayerCharacter.h"
 #include "MapComponent.h"
 
+// Default constructor
+UItemDataAsset::UItemDataAsset()
+{
+	ActorTypeInternal = AT::Item;
+}
+
 // Sets default values
 AItemActor::AItemActor()
 {

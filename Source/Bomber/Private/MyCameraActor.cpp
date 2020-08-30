@@ -35,7 +35,7 @@ void AMyCameraActor::Tick(float DeltaTime)
 
 	// Find all players locations
 	FCells PlayersCells;
-	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EActorType::Player));
+	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(AT::Player));
 
 	// Distance finding between players
 	float Distance = 0;

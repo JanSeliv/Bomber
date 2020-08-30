@@ -52,7 +52,6 @@ void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionN
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
 #if WITH_EDITOR	 // [Editor]
-
 	if (IS_VALID(Owner) == false)  // The owner is not valid
 	{
 		return;

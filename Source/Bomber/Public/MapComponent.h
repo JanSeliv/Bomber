@@ -65,9 +65,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAssetInternal; }
 
-	/**  */
+	/** Get checked Data Asset */
 	template <typename T>
-	FORCEINLINE T* GetActorDataAsset() const { return CastChecked<T>(ActorDataAssetInternal); }
+	FORCEINLINE const T* GetActorDataAsset() const { return CastChecked<T>(ActorDataAssetInternal); }
 
 protected:
 	/** Contains exposed for designers properties for the spawned owner. */

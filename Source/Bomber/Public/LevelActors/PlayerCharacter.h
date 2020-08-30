@@ -9,14 +9,16 @@
 #include "PlayerCharacter.generated.h"
 
 /**
-*
-*/
+ *
+ */
 UCLASS(Blueprintable, BlueprintType)
 class UPlayerDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	/** Default constructor. */
+	UPlayerDataAsset();
 };
 
 /**

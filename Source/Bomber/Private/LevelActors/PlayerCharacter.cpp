@@ -15,6 +15,13 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
+// Default constructor
+
+UPlayerDataAsset::UPlayerDataAsset()
+{
+	ActorTypeInternal = AT::Player;
+}
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -161,14 +168,14 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 
 	// Setting an ID to the player character as his position in the array
 	FCells PlayersCells;
-	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EActorType::Player));
+	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(AT::Player));
 	CharacterID_ = PlayersCells.FindId(MapComponent->Cell).AsInteger();
-	check(CharacterID_ != INDEX_NONE && "The character was not found on the Level Map");
+	ensureMsgf(CharacterID_ != INDEX_NONE, TEXT("The character was not found on the Level Map"));
 
 	// Set a character skeletal mesh
 	const int32 SkeletalMeshesNum = SkeletalMeshes.Num();
-	if (GetMesh()
-		&& SkeletalMeshesNum)
+	if (SkeletalMeshesNum > 0
+		&& GetMesh())
 	{
 		const int32 SkeletalNo = CharacterID_ < SkeletalMeshesNum ? CharacterID_ : CharacterID_ % SkeletalMeshesNum;
 		if(SkeletalMeshes.IsValidIndex(SkeletalNo))
@@ -178,10 +185,15 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	}
 
 	// Set a nameplate material
-	if (NameplateMeshComponent)
+	const int32 NameplateMeshesNum = NameplateMaterials.Num();
+	if (NameplateMeshesNum > 0
+		&& NameplateMeshComponent)
 	{
-		const int32 MaterialNo = CharacterID_ < NameplateMaterials.Num() ? CharacterID_ : CharacterID_ % NameplateMaterials.Num();
-		NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
+		const int32 MaterialNo = CharacterID_ < NameplateMeshesNum ? CharacterID_ : CharacterID_ % NameplateMeshesNum;
+		if(NameplateMaterials.IsValidIndex(MaterialNo))
+		{
+			NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
+		}
 	}
 
 	// Spawn or destroy controller of specific ai with enabled visualization
@@ -246,7 +258,7 @@ void APlayerCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(EActorType::Bomb, MapComponent->Cell));
+	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(AT::Bomb, MapComponent->Cell));
 	if (ensureMsgf(BombActor, TEXT("ASSERT: 'BombActor' is not valid")))
 	{
 		// Updating explosion cells

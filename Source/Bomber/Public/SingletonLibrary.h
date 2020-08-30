@@ -155,8 +155,8 @@ public:
 	 * Checks the actors types among each other between themselves */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "LBitmask,RBitmask", CompactNodeTitle = "&"))
 	static FORCEINLINE bool BitwiseActorTypes(
-		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& LBitmask,
-		UPARAM(meta = (Bitmask, BitmaskEnum = EActorType)) const int32& RBitmask)
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& LBitmask,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& RBitmask)
 	{
 		return (LBitmask & RBitmask) != 0;
 	}

@@ -20,14 +20,25 @@ class UBombDataAsset final : public ULevelActorDataAsset
 	GENERATED_BODY()
 
 public:
-	/** */
+	/** Default constructor. */
+	UBombDataAsset();
+
+	/** All bomb materials. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	TArray<class UMaterialInterface*> BombMaterials; //[D]
+
+	/** The emitter of the bomb explosion */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	class UParticleSystem* ExplosionParticle; //[D]
+
+	/** Get the bomb lifetime. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
 
 protected:
-	/** The lifetime of a bomb*/
+	/** The lifetime of a bomb. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Life Span"))
-	float LifeSpanInternal = 2.f;
+	float LifeSpanInternal = 2.f; //[D]
 };
 
 /** Bombs are left by the character to destroy the level actors, trigger other bombs */
@@ -45,17 +56,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	class UStaticMeshComponent* BombMeshComponent;	//[C.DO]
 
-	/** All materials that used by bomb meshes */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TArray<class UMaterialInterface*> BombMaterials;  //[M.DO]
-
 	/** Prevents players from moving through the bomb after they moved away */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	class UBoxComponent* BombCollisionComponent;  //[C.DO]
-
-	/** The emitter of the bomb explosion */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	class UParticleSystem* ExplosionParticle;  //[B]
 
 	/** Sets default values for this actor's properties */
 	ABombActor();

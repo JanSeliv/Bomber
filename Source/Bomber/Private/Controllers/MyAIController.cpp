@@ -62,7 +62,7 @@ void AMyAIController::UpdateAI()
 	{
 		FCells ItemsFromF0;
 		LevelMap->GetSidesCells(ItemsFromF0, F0, EPathType::Safe, 2);
-		LevelMap->IntersectCellsByTypes(ItemsFromF0, TO_FLAG(EActorType::Item), false);
+		LevelMap->IntersectCellsByTypes(ItemsFromF0, TO_FLAG(AT::Item), false);
 		if (ItemsFromF0.Num() > 0)
 		{
 			MoveToCell(ItemsFromF0.Array()[0]);
@@ -95,14 +95,14 @@ void AMyAIController::UpdateAI()
 		{
 			// Finding crossways
 			AllCrossways.Emplace(*F);  // is the crossway
-			LevelMap->IntersectCellsByTypes(Way = ThisCrossway, TO_FLAG(EActorType::Player), false, MyCharacter->MapComponent);
+			LevelMap->IntersectCellsByTypes(Way = ThisCrossway, TO_FLAG(AT::Player), false, MyCharacter->MapComponent);
 			if (Way.Num() == 0)
 			{
 				SecureCrossways.Emplace(*F);
 			}
 
 			// Finding items
-			LevelMap->IntersectCellsByTypes(ThisCrossway, TO_FLAG(EActorType::Item), false);
+			LevelMap->IntersectCellsByTypes(ThisCrossway, TO_FLAG(AT::Item), false);
 			if (ThisCrossway.Num() > 0)	 // Is there items in this crossway?
 			{
 				ThisCrossway = ThisCrossway.Intersect(Free);  // ThisCrossway = ThisCrossway ∪ Free
@@ -183,7 +183,7 @@ void AMyAIController::UpdateAI()
 	{
 		FCells BoxesAndPlayers;
 		LevelMap->GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, MyCharacter->Powerups_.FireN);
-		LevelMap->IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(EActorType::Box | EActorType::Player), false, MyCharacter->MapComponent);
+		LevelMap->IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(AT::Box | AT::Player), false, MyCharacter->MapComponent);
 		if (BoxesAndPlayers.Num() > 0)	// Are bombs or players in own bomb radius
 		{
 			MyCharacter->SpawnBomb();

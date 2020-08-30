@@ -9,14 +9,16 @@
 #include "BoxActor.generated.h"
 
 /**
-*
-*/
+ *
+ */
 UCLASS(Blueprintable, BlueprintType)
 class UBoxDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	/** Default constructor. */
+	UBoxDataAsset();
 };
 
 /**

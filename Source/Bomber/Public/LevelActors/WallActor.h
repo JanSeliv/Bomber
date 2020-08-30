@@ -9,14 +9,16 @@
 #include "WallActor.generated.h"
 
 /**
-*
-*/
+ *
+ */
 UCLASS(Blueprintable, BlueprintType)
 class UWallDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	/** Default constructor. */
+	UWallDataAsset();
 };
 
 

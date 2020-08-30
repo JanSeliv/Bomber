@@ -4,8 +4,6 @@
 
 #include "Bomber.h"
 //---
-#include "ImmediatePhysicsCore.h"
-#include "ImmediatePhysicsDeclares.h"
 #include "Engine/DataAsset.h"
 //---
 #include "LevelActorDataAsset.generated.h"
@@ -26,7 +24,7 @@ struct FLevelActorMeshRow
 
 	/** The level where should be used a mesh */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	ELevelType LevelType = ELevelType::LT_Max; //[D]
+	ELevelType LevelType = LT::Max  ; //[D]
 
 	/** The static mesh, skeletal mesh or texture */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C++", meta = (ExposeOnSpawn = "true"))
@@ -62,8 +60,10 @@ public:
     FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
-	TArray<FLevelActorMeshRow> Meshes; //[D]
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "LevelsTypesBitmask"))
+	void GetMeshesByLevelType(
+		TArray<FLevelActorMeshRow>& OutMeshes,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "ELevelType")) const int32& LevelsTypesBitmask) const;
 
 protected:
 	/** */
@@ -73,4 +73,8 @@ protected:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Type"))
 	EActorType ActorTypeInternal; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Meshes", ShowOnlyInnerProperties))
+	TArray<FLevelActorMeshRow> MeshesInternal; //[D]
 };
