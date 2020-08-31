@@ -17,37 +17,56 @@ UMapComponent::UMapComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
-	// Initialize the Box Collition compoennt
+	// Initialize the Box Collision component
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>("BoxCollisionComponent");
 }
 
 // Updates a owner's state. Should be called in the owner's OnConstruction event.
-void UMapComponent::OnMapComponentConstruction()
+void UMapComponent::OnComponentConstruct(UMeshComponent* MeshComponent, FLevelActorMeshRow ComparedMeshRowTypes)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (IS_VALID(GetOwner()) == false  // The owner is not valid
-		|| !IsValid(LevelMap))		   // The Level Map is not valid
+	AActor* Owner = GetOwner();
+	if (!IS_VALID(Owner)  	// The owner is not valid
+        || !LevelMap)		   	// The Level Map is not valid
 	{
 		return;
 	}
 
+	// Find mesh
+	if(ComparedMeshRowTypes.LevelType == ELT::None)
+	{
+		ComparedMeshRowTypes.LevelType = LevelMap->GetLevelType();
+	}
+	ActorDataAssetInternal->GetMeshRowByTypes(ComparedMeshRowTypes);
+
+	// Set mesh
+	if (auto SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponent))
+	{
+		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(ComparedMeshRowTypes.Mesh));
+	}
+	else if (auto StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent))
+	{
+		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(ComparedMeshRowTypes.Mesh));
+	}
+
+
 	// Find new Location at dragging and update-delegate
-	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t FCell()");
+	USingletonLibrary::PrintToLog(Owner, "OnMapComponentConstruction", "-> \t FCell()");
 	LevelMap->SetNearestCell(this);
 
 	// Owner updating
-	USingletonLibrary::PrintToLog(GetOwner(), "OnMapComponentConstruction", "-> \t AddToGrid");
+	USingletonLibrary::PrintToLog(Owner, "OnMapComponentConstruction", "-> \t AddToGrid");
 	USingletonLibrary::GetLevelMap()->AddToGrid(Cell, this);
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
 		// Remove all text renders of the Owner
-		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
-		USingletonLibrary::ClearOwnerTextRenders(GetOwner());
+		USingletonLibrary::PrintToLog(Owner, "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
+		USingletonLibrary::ClearOwnerTextRenders(Owner);
 
 		// Update AI renders after adding obj to map
-		USingletonLibrary::PrintToLog(GetOwner(), "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
+		USingletonLibrary::PrintToLog(Owner, "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]

@@ -18,10 +18,9 @@
 #include "UObject/ConstructorHelpers.h"
 
 // Default constructor
-
 UPlayerDataAsset::UPlayerDataAsset()
 {
-	ActorTypeInternal = AT::Player;
+	ActorTypeInternal = EAT::Player;
 }
 
 // Sets default values
@@ -96,14 +95,14 @@ void APlayerCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(AT::Bomb, MapComponent->Cell));
+	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(EAT::Bomb, MapComponent->Cell));
 	if (BombActor) // can return nullptr if the cell is not free
 	{
 		// Updating explosion cells
 		PowerupsInternal.BombN--;
 
 		// Init Bomb
-		FOnBombDestroyed OnBombDestroyed;
+		ABombActor::FOnBombDestroyed OnBombDestroyed;
 		OnBombDestroyed.BindDynamic(this, &ThisClass::OnBombDestroyed);
 		BombActor->InitBomb(OnBombDestroyed, PowerupsInternal.FireN, CharacterID_);
 	}
@@ -150,36 +149,24 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (IS_TRANSIENT(this)		   // This actor is transient
-        || !IsValid(MapComponent)  // Is not valid for map construction
-        || !LevelMap)			   // the level map is not valid or transient
-        	{
+	if (IS_TRANSIENT(this)        // This actor is transient
+	    || !IsValid(MapComponent) // Is not valid for map construction
+	    || !LevelMap)             // the level map is not valid or transient
+	{
 		return;
-        	}
-	// Construct the actor's map component
-	MapComponent->OnMapComponentConstruction();
+	}
 
 	// Setting an ID to the player character as his position in the array
-	FCells PlayersCells;
-	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(AT::Player));
-	CharacterID_ = PlayersCells.FindId(MapComponent->Cell).AsInteger();
-	ensureMsgf(CharacterID_ != INDEX_NONE, TEXT("The character was not found on the Level Map"));
+	// FCells PlayersCells;
+	// LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
+	// CharacterID_ = PlayersCells.FindId(MapComponent->Cell).AsInteger();
+	// ensureMsgf(CharacterID_ != INDEX_NONE, TEXT("The character was not found on the Level Map"));
 
-	// Set a character skeletal mesh
-	if (ensureMsgf(GetMesh(), TEXT("ASSERT: 'GetMesh()' is not valid")))
-	{
-		TArray<FLevelActorMeshRow> SkeletalMeshes;
-		MapComponent->GetActorDataAsset<UPlayerDataAsset>()->GetMeshesByLevelType(SkeletalMeshes, TO_FLAG(LT::Max));
-		const int32 SkeletalMeshesNum = SkeletalMeshes.Num();
-		if (SkeletalMeshesNum > 0)
-		{
-			const int32 SkeletalNo = CharacterID_ < SkeletalMeshesNum ? CharacterID_ : CharacterID_ % SkeletalMeshesNum;
-			if (SkeletalMeshes.IsValidIndex(SkeletalNo))
-			{
-				GetMesh()->SetSkeletalMesh(Cast<USkeletalMesh>(SkeletalMeshes[SkeletalNo].Mesh));
-			}
-		}
-	}
+	CharacterID_= LevelMap->GetCharactersNum();
+
+	// Construct the actor's map component
+	const ELevelType LevelType = TO_ENUM(ELevelType, (1 << CharacterID_) % TO_FLAG(ELevelType::Max));
+	MapComponent->OnComponentConstruct(GetMesh(), FLevelActorMeshRow(LevelType));
 
 	// Set a nameplate material
 	if (ensureMsgf(NameplateMeshComponent, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))

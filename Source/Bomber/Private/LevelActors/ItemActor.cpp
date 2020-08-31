@@ -13,7 +13,7 @@
 // Default constructor
 UItemDataAsset::UItemDataAsset()
 {
-	ActorTypeInternal = AT::Item;
+	ActorTypeInternal = EAT::Item;
 }
 
 // Sets default values
@@ -27,26 +27,11 @@ AItemActor::AItemActor()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
 	// Initialize MapComponent
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize item mesh component
-	ItemMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
-	ItemMeshComponent->SetupAttachment(RootComponent);
-	ItemMeshComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
-
-	// Find and fill item meshes array
-	static TArray<ConstructorHelpers::FObjectFinder<UStaticMesh>> ItemMeshFinderArray{
-		TEXT("/Game/Bomber/Meshes/SM_Item_Skate"),
-		TEXT("/Game/Bomber/Meshes/SM_Item_Bomb"),
-		TEXT("/Game/Bomber/Meshes/SM_Item_Fire")};
-	for (int32 i = 0; i < ItemMeshFinderArray.Num(); ++i)
-	{
-		if (ItemMeshFinderArray[i].Succeeded())
-		{
-			ItemTypesByMeshes.Emplace(static_cast<EItemType>(i + 1), ItemMeshFinderArray[i].Object);
-			if (i == 0) ItemMeshComponent->SetStaticMesh(ItemMeshFinderArray[i].Object);  // Preview
-		}
-	}
+	ItemMeshComponentInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
+	ItemMeshComponentInternal->SetupAttachment(RootComponent);
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -55,26 +40,22 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponent))	// Is not valid for map construction
+		|| !IsValid(MapComponentInternal))	// Is not valid for map construction
 	{
 		return;
 	}
 
-	// Construct the actor's map component
-	MapComponent->OnMapComponentConstruction();
-
-	// Rand the item type
+	// Rand the item type if not set yet
 	if (ItemTypeInternal == EItemType::None)
 	{
-		TArray<EItemType> ItemTypesArray;
-		ItemTypesByMeshes.GetKeys(ItemTypesArray);
-		const int32 RandItemTypeNo = FMath::RandRange(0, ItemTypesArray.Num() - 1);
-		ItemTypeInternal = ItemTypesArray[RandItemTypeNo];
+		if (const static UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, TEXT("EItemType"), true))
+		{
+			ItemTypeInternal = TO_ENUM(EItemType, Enum->GetValueByIndex(FMath::RandRange(1, TO_FLAG(Enum->GetMaxEnumValue() - 1))));
+		}
 	}
 
-	UStaticMesh* FoundMesh = *ItemTypesByMeshes.Find(ItemTypeInternal);
-	ensureAlwaysMsgf(FoundMesh != nullptr, TEXT("The item mesh of this type was not found"));
-	ItemMeshComponent->SetStaticMesh(FoundMesh);
+	// Construct the actor's map component
+	MapComponentInternal->OnComponentConstruct(ItemMeshComponentInternal, FLevelActorMeshRow(ItemTypeInternal));
 }
 
 // Called when the game starts or when spawned

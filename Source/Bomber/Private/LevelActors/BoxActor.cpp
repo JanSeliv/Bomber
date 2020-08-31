@@ -14,7 +14,7 @@
 // Default constructor
 UBoxDataAsset::UBoxDataAsset()
 {
-	ActorTypeInternal = AT::Box;
+	ActorTypeInternal = EAT::Box;
 }
 
 // Sets default values.
@@ -28,16 +28,11 @@ ABoxActor::ABoxActor()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
 	// Initialize MapComponent
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize box mesh component
-	BoxMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxMeshComponent"));
-	BoxMeshComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> BombMeshFinder(TEXT("/Game/Bomber/Meshes/SM_Box"));
-	if (BombMeshFinder.Succeeded())
-	{
-		BoxMeshComponent->SetStaticMesh(BombMeshFinder.Object);
-	}
+	BoxMeshComponentInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxMeshComponent"));
+	BoxMeshComponentInternal->SetupAttachment(RootComponent);
 }
 
 // Called when an instance of this class is placed (in editor) or spawned.
@@ -45,13 +40,13 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IsValid(MapComponent) == false)	 // this component is not valid for owner construction
+	if (IsValid(MapComponentInternal) == false)	 // this component is not valid for owner construction
 	{
 		return;
 	}
 
 	// Construct the actor's map component.
-	MapComponent->OnMapComponentConstruction();
+	MapComponentInternal->OnComponentConstruct(BoxMeshComponentInternal, FLevelActorMeshRow::Empty);
 }
 
 // Called when the game starts or when spawned
@@ -68,7 +63,7 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (LevelMap == nullptr					// The Level Map is not accessible
-		|| IsValid(MapComponent) == false)	// The Map Component is not valid or transient
+		|| IsValid(MapComponentInternal) == false)	// The Map Component is not valid or transient
 	{
 		return;
 	}
@@ -78,6 +73,6 @@ void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 	if (ItemChance)
 	{
 		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");
-		LevelMap->SpawnActorByType(AT::Item, FCell(GetActorLocation()));
+		LevelMap->SpawnActorByType(EAT::Item, FCell(GetActorLocation()));
 	}
 }

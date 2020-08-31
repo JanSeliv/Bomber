@@ -9,8 +9,6 @@
 //---
 #include "BombActor.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_OneParam(FOnBombDestroyed, AActor*, DestroyedBomb);
-
 /**
  *
  */
@@ -24,20 +22,20 @@ public:
 	UBombDataAsset();
 
 	/** All bomb materials. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++  | Custom")
 	TArray<class UMaterialInterface*> BombMaterials; //[D]
 
 	/** The emitter of the bomb explosion */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Custom")
 	class UParticleSystem* ExplosionParticle; //[D]
 
 	/** Get the bomb lifetime. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++  | Custom")
     FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
 
 protected:
 	/** The lifetime of a bomb. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Life Span"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Custom", meta = (DisplayName = "Life Span"))
 	float LifeSpanInternal = 2.f; //[D]
 };
 
@@ -48,13 +46,12 @@ class BOMBER_API ABombActor final : public AActor
 	GENERATED_BODY()
 
 public:
-	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
-	class UMapComponent* MapComponent;	//[C.AW]
+	/** Is used by player character to listen bomb destroying. */
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnBombDestroyed, AActor*, DestroyedBomb);
 
-	/** The static mesh component of this actor */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UStaticMeshComponent* BombMeshComponent;	//[C.DO]
+	/* ---------------------------------------------------
+	 *		Public functions
+	 * --------------------------------------------------- */
 
 	/** Sets default values for this actor's properties */
 	ABombActor();
@@ -76,9 +73,25 @@ public:
 		const int32& CharacterID = -1);
 
 protected:
+	/* ---------------------------------------------------
+	 *		Protected properties
+	 * --------------------------------------------------- */
+
+	/** The MapComponent manages this actor on the Level Map */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
+	class UMapComponent* MapComponentInternal;	//[C.AW]
+
+	/** The static mesh component of this actor */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Mesh Component"))
+	class UStaticMeshComponent* BombMeshComponentInternal;	//[C.DO]
+
 	/** The bomb blast path */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells", ShowOnlyInnerProperties))
 	TSet<FCell> ExplosionCellsInternal;
+
+	/* ---------------------------------------------------
+ 	 *		Protected functions
+	 * --------------------------------------------------- */
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;

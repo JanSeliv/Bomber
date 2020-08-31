@@ -23,10 +23,10 @@ class BOMBER_API UMapComponent final : public UActorComponent
 {
 	GENERATED_BODY()
 
-	/* ---------------------------------------------------
-	*	Map Component's public properties
-	* --------------------------------------------------- */
 public:
+	/* ---------------------------------------------------
+	 *		Public properties
+	 * --------------------------------------------------- */
 
 #if WITH_EDITORONLY_DATA  // bShouldShowRenders
 	/** Mark the editor updating visualization(text renders) */
@@ -43,22 +43,25 @@ public:
 	FCell Cell; //[G]
 
 	/* ---------------------------------------------------
-	 *	Map Component's public functions
+	 *		Public functions
 	 * --------------------------------------------------- */
 
 	/** Sets default values for this component's properties */
 	UMapComponent();
 
-	/** Updates a owner's state. Should be called in the owner's OnConstruction event. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void OnMapComponentConstruction();
+	/**
+	 *	Updates a owner's state. Should be called in the owner's OnConstruction event.
+	 *	@param MeshComponent Mesh component to set a mesh to an owner.
+	 *	@param ComparedMeshRowTypes Specify level and item types to find its mesh. Affects on a stylistic. Can be FLevelActorMeshRow::Empty
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta =(AutoCreateRefTerm = "ComparedMeshRowTypes"))
+	void OnComponentConstruct(UMeshComponent* MeshComponent, FLevelActorMeshRow ComparedMeshRowTypes);
 
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner)
 	{
-		check(Owner && "The specified owner is not accessible");
-		return Owner->FindComponentByClass<UMapComponent>();
+		return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr;
 	}
 
 	/**  Rerun owner's construction scripts. The temporary only editor owner will not be updated. */
@@ -83,7 +86,7 @@ protected:
 	class ULevelActorDataAsset* ActorDataAssetInternal; //[D]
 
 	/* ---------------------------------------------------
-	 *	Map Component's protected functions
+	 *		Protected functions
 	 * --------------------------------------------------- */
 
 	/** Called when a component is registered (not loaded) */

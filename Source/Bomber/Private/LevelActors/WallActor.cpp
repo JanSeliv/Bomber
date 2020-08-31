@@ -11,7 +11,7 @@
 // Default constructor
 UWallDataAsset::UWallDataAsset()
 {
-	ActorTypeInternal = AT::Wall;
+	ActorTypeInternal = EAT::Wall;
 }
 
 // Sets default values
@@ -25,16 +25,11 @@ AWallActor::AWallActor()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
 	// Initialize MapComponent
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize wall mesh component
-	WallMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WallMeshComponent"));
-	WallMeshComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> WallMeshFinder(TEXT("/Game/Bomber/Meshes/SM_Wall"));
-	if (WallMeshFinder.Succeeded())
-	{
-		WallMeshComponent->SetStaticMesh(WallMeshFinder.Object);
-	}
+	WallMeshComponentInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WallMeshComponent"));
+	WallMeshComponentInternal->SetupAttachment(RootComponent);
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -43,13 +38,13 @@ void AWallActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponent))	// Is not valid for map construction
+		|| !IsValid(MapComponentInternal))	// Is not valid for map construction
 	{
 		return;
 	}
 
 	// Update this actor on the Level Map
-	MapComponent->OnMapComponentConstruction();
+	MapComponentInternal->OnComponentConstruct(WallMeshComponentInternal, FLevelActorMeshRow::Empty);
 }
 
 // Called when the game starts or when spawned

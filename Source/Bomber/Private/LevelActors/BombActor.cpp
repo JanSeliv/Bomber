@@ -14,7 +14,7 @@
 // Default constructor
 UBombDataAsset::UBombDataAsset()
 {
-	ActorTypeInternal = AT::Bomb;
+	ActorTypeInternal = EAT::Bomb;
 }
 
 // Sets default values
@@ -28,11 +28,11 @@ ABombActor::ABombActor()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
 	// Initialize MapComponent
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize bomb mesh component
-	BombMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMeshComponent"));
-	BombMeshComponent->SetupAttachment(RootComponent);
+	BombMeshComponentInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMeshComponent"));
+	BombMeshComponentInternal->SetupAttachment(RootComponent);
 }
 
 void ABombActor::InitBomb(
@@ -41,27 +41,27 @@ void ABombActor::InitBomb(
 	const int32& CharacterID /*=-1*/)
 {
 	if (!IsValid(USingletonLibrary::GetLevelMap()) // // The Level Map is not valid
-	    || !IsValid(MapComponent)                  // The Map Component is not valid
+	    || !IsValid(MapComponentInternal)                  // The Map Component is not valid
 	    || FireN < 0)                              // Negative length of the explosion
 	{
 		return;
 	}
 
 	// Set material
-	const TArray<UMaterialInterface*>& BombMaterials = MapComponent->GetActorDataAsset<UBombDataAsset>()->BombMaterials;
-	if (IsValid(BombMeshComponent)	// Mesh of the bomb is not valid
+	const TArray<UMaterialInterface*>& BombMaterials = MapComponentInternal->GetActorDataAsset<UBombDataAsset>()->BombMaterials;
+	if (IsValid(BombMeshComponentInternal)	// Mesh of the bomb is not valid
         && CharacterID != -1		// Is not debug character
         && BombMaterials.Num())		// As least one bomb material
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
-		BombMeshComponent->SetMaterial(0, BombMaterials[BombMaterialNo]);
+		BombMeshComponentInternal->SetMaterial(0, BombMaterials[BombMaterialNo]);
 	}
 
 	// Update explosion information
-	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCellsInternal, MapComponent->Cell, EPathType::Explosion, FireN);
+	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCellsInternal, MapComponentInternal->Cell, EPathType::Explosion, FireN);
 
 	#if WITH_EDITOR  // [Editor]
-		if (MapComponent->bShouldShowRenders)
+		if (MapComponentInternal->bShouldShowRenders)
 		{
 			USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
 			USingletonLibrary::AddDebugTextRenders(this, ExplosionCellsInternal.Array(), FLinearColor::Red);
@@ -74,26 +74,23 @@ void ABombActor::InitBomb(
 	}
 }
 
+/* ---------------------------------------------------
+ *					Protected functions
+ * --------------------------------------------------- */
+
 // Called when an instance of this class is placed (in editor) or spawned.
 void ABombActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
 	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponent))	// Is not valid for map construction
+		|| !IsValid(MapComponentInternal))	// Is not valid for map construction
 	{
 		return;
 	}
 
-	TArray<FLevelActorMeshRow> BombMeshes;
-	MapComponent->GetActorDataAsset<UBombDataAsset>()->GetMeshesByLevelType(BombMeshes, TO_FLAG(LT::Max));
-	if(BombMeshes.IsValidIndex(0))
-	{
-		BombMeshComponent->SetStaticMesh(Cast<UStaticMesh>(BombMeshes[0].Mesh));
-	}
-
 	// Construct the actor's map component
-	MapComponent->OnMapComponentConstruction();
+	MapComponentInternal->OnComponentConstruct(BombMeshComponentInternal, FLevelActorMeshRow::Empty);
 
 #if WITH_EDITOR
 	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
@@ -118,7 +115,7 @@ void ABombActor::BeginPlay()
 	OnActorEndOverlap.AddDynamic(this, &ABombActor::OnBombEndOverlap);
 
 	// Destroy itself after N seconds
-	const UBombDataAsset* BombDataAsset = MapComponent ? Cast<UBombDataAsset>(MapComponent->GetActorDataAsset()) : nullptr;
+	const UBombDataAsset* BombDataAsset = MapComponentInternal ? Cast<UBombDataAsset>(MapComponentInternal->GetActorDataAsset()) : nullptr;
 	if(BombDataAsset)
 	{
 		SetLifeSpan(BombDataAsset->GetLifeSpan());
@@ -129,9 +126,9 @@ void ABombActor::BeginPlay()
 void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 {
 	// Spawn emitters
-	if(MapComponent)
+	if(MapComponentInternal)
 	{
-		UParticleSystem* ExplosionParticle = MapComponent->GetActorDataAsset<UBombDataAsset>()->ExplosionParticle;
+		UParticleSystem* ExplosionParticle = MapComponentInternal->GetActorDataAsset<UBombDataAsset>()->ExplosionParticle;
 		for (const FCell& Cell : ExplosionCellsInternal)
 		{
 			const FTransform Position{GetActorRotation(), Cell.Location, GetActorScale3D()};
@@ -149,7 +146,7 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 // Triggers when character end to overlaps with this bomb.
 void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UBoxComponent* BombCollisionComponent = MapComponent ? MapComponent->BoxCollision : nullptr;
+	UBoxComponent* BombCollisionComponent = MapComponentInternal ? MapComponentInternal->BoxCollision : nullptr;
 	if (!BombCollisionComponent	// Is not valid collision component
 		|| OtherActor == this)	// Self triggering
 	{
@@ -158,7 +155,7 @@ void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 
 	//Sets the collision preset to block all dynamics
 	TArray<AActor*> OverlappingActors;
-	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetActorClassByType(AT::Player));
+	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetActorClassByType(EAT::Player));
 	if (OverlappingActors.Num() == 0)  // There are no more characters on the bomb
 	{
 		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);

@@ -20,14 +20,7 @@ class BOMBER_API AGeneratedMap final : public AActor
 public:
 	/* ---------------------------------------------------
 	 *		Public properties
-	 * --------------------------------------------------- *
-	/** The blueprint background actor  */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	UChildActorComponent* BackgroundBlueprintComponent;	 //[C.DO]
-
-	/** The blueprint class with the background, collision cage and floor. Can be changed in the editor */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TSubclassOf<AActor> BackgroundBlueprintClass;  //[B]
+	 * --------------------------------------------------- */
 
 #if WITH_EDITORONLY_DATA  // [Editor] Renders
 	/** Mark the editor updating visualization(text renders) */
@@ -36,7 +29,7 @@ public:
 
 	/** Specify for which level actors should show debug renders */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, EditCondition = "bShouldShowRenders", Bitmask, BitmaskEnum = "EActorType"))
-	int32 RenderActorsTypes = TO_FLAG(AT::All); //[N]
+	int32 RenderActorsTypes = TO_FLAG(EAT::All); //[N]
 #endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
 	/* ---------------------------------------------------
@@ -45,6 +38,14 @@ public:
 
 	/** Sets default values for this actor's properties */
 	AGeneratedMap();
+
+	/** Returns number of characters in the array. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    FORCEINLINE int32 GetCharactersNum() const { return PlayerCharactersNum; }
+
+	/** Get the current level type. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    FORCEINLINE ELevelType GetLevelType() const { return LevelTypeInternal; }
 
 	/** Getting an array of cells by four sides of an input center cell and type of breaks.
 	 *
@@ -128,14 +129,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
 	void SetNearestCell(class UMapComponent* MapComponent) const;
 
-	/** Returns number of characters in the array. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetCharactersNum() const { return PlayerCharactersNum; }
-
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
-	 * --------------------------------------------------- *
+	 * --------------------------------------------------- */
+
+	/** The blueprint background actor  */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
+	UChildActorComponent* BackgroundBlueprintComponent;	 //[C.DO]
+
+	/** The blueprint class with the background, collision cage and floor. Can be changed in the editor */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
+	TSubclassOf<AActor> BackgroundBlueprintClass;  //[B]
 
 	/** Cells storage. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
@@ -156,6 +161,10 @@ protected:
 	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	int32 PlayerCharactersNum = 0;	//[G]
+
+	/** The current level type. Affects on the meshes of each level actor. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
+	ELevelType LevelTypeInternal = ELT::First; //[N]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

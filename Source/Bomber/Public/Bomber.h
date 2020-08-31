@@ -29,7 +29,7 @@ enum class EActorType : uint8
     All		= Bomb | Item | Player | Wall | Box	///< All actor types
 };
 ENUM_CLASS_FLAGS(EActorType);
-using AT = EActorType;
+using EAT = EActorType;
 
 /**
  * Levels in the game. In some cases bitmask are used to filter meshes.
@@ -44,7 +44,7 @@ enum class ELevelType : uint8
 	Max	  	= First | Second | Third		UMETA(DisplayName = "Any")	///< Can be used for such levels as menu, sandbox, etc.
 };
 ENUM_CLASS_FLAGS(ELevelType);
-using LT = ELevelType;
+using ELT = ELevelType;
 
 /**
  * Pathfinding types by danger extents.
@@ -69,3 +69,4 @@ enum class EItemType : uint8
     Bomb,	///< increases the amount of bombs
     Fire	///< Increases the range of explosion
 };
+

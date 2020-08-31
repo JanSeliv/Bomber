@@ -21,7 +21,7 @@ public:
 	UPlayerDataAsset();
 
 	/** All materials that are used by nameplate meshes. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Custom")
 	TArray<class UMaterialInterface*> NameplateMaterials;  //[M.DO]
 };
 
@@ -93,7 +93,7 @@ protected:
 	class UStaticMeshComponent* NameplateMeshComponent;	 //[C.DO]
 
 	/** Count of items that affect on a player during gameplay */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
 	FPowerUp PowerupsInternal;	//[AW]
 
 	/** The ID identification of each character */

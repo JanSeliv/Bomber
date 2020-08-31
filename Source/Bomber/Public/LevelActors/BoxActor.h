@@ -30,18 +30,26 @@ class BOMBER_API ABoxActor final : public AActor
 	GENERATED_BODY()
 
 public:
-	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
-	class UMapComponent* MapComponent;	//[C.AW]
-
-	/** The static mesh component of the this actor */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UStaticMeshComponent* BoxMeshComponent;  //[C.DO]
-
 	/** Sets default values for this actor's properties */
 	ABoxActor();
 
 protected:
+	/* ---------------------------------------------------
+	*		Protected properties
+	* --------------------------------------------------- */
+
+	/** The MapComponent manages this actor on the Level Map */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
+	class UMapComponent* MapComponentInternal;	//[C.AW]
+
+	/** The static mesh component of this actor */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Mesh Component"))
+	class UStaticMeshComponent* BoxMeshComponentInternal;  //[C.DO]
+
+	/* ---------------------------------------------------
+	*		Protected functions
+	* --------------------------------------------------- */
+
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
