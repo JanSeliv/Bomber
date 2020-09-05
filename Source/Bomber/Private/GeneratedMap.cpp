@@ -36,9 +36,9 @@ AGeneratedMap::AGeneratedMap()
 	RootComponent->SetRelativeScale3D(FVector(7.F, 7.F, 7.F));
 
 	// Find blueprint class of the background
-	BackgroundBlueprintComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("BP_BackgroundAssetComponent"));
-	BackgroundBlueprintComponent->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<AActor> BP_BackgroundAssetFinder(TEXT("/Game/Bomber/Blueprints/BP_BackgroundAsset"));
+	CollisionComponentInternal = CreateDefaultSubobject<UChildActorComponent>(TEXT("Collision Component"));
+	CollisionComponentInternal->SetupAttachment(RootComponent);
+	static ConstructorHelpers::FClassFinder<AActor> BP_BackgroundAssetFinder(TEXT("/Game/Bomber/Blueprints/BP_CollisionAsset"));
 	if (BP_BackgroundAssetFinder.Succeeded())
 	{
 		BackgroundBlueprintClass = BP_BackgroundAssetFinder.Class; // Default class of the PlatformComponent
@@ -436,11 +436,11 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 	// Create the background blueprint child actor
 	if (BackgroundBlueprintClass                                    // There is some background class
-	    && BackgroundBlueprintComponent                             // Is accessible
-	    && !IsValid(BackgroundBlueprintComponent->GetChildActor())) // Is not created yet
+	    && CollisionComponentInternal                             // Is accessible
+	    && !IsValid(CollisionComponentInternal->GetChildActor())) // Is not created yet
 	{
-		BackgroundBlueprintComponent->SetChildActorClass(BackgroundBlueprintClass);
-		BackgroundBlueprintComponent->CreateChildActor();
+		CollisionComponentInternal->SetChildActorClass(BackgroundBlueprintClass);
+		CollisionComponentInternal->CreateChildActor();
 	}
 
 	// Align the Transform

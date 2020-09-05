@@ -135,8 +135,8 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** The blueprint background actor  */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
-	UChildActorComponent* BackgroundBlueprintComponent;	 //[C.DO]
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
+	UChildActorComponent* CollisionComponentInternal;	 //[C.DO]
 
 	/** The blueprint class with the background, collision cage and floor. Can be changed in the editor */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
