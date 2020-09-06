@@ -100,7 +100,7 @@ void UMapComponent::OnRegister()
 	if (ActorDataAssetInternal
 	    && ensureMsgf(BoxCollision, TEXT("ASSERT: 'BoxCollisionInternal' is not valid")))
 	{
-		BoxCollision->SetupAttachment(Owner->GetRootComponent());
+		BoxCollision->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		BoxCollision->SetBoxExtent(ActorDataAssetInternal->GetCollisionExtent());
 		BoxCollision->SetCollisionResponseToAllChannels(ActorDataAssetInternal->GetCollisionResponse());
 #if WITH_EDITOR

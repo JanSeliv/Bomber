@@ -15,10 +15,18 @@ AMyCameraActor::AMyCameraActor()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// Set defaults to the CameraComponent
-	GetCameraComponent()->SetRelativeLocation(FVector(0.F, 0.F, 500.F));
-	GetCameraComponent()->SetRelativeRotation(FRotator(-90.0F, 0.0F, -90.0F));
-	GetCameraComponent()->SetConstraintAspectRatio(false);	// viewport without black borders
+	// Set defaults to the CameraComp
+	UCameraComponent* CameraComp = GetCameraComponent();
+	checkf(CameraComp, TEXT("ERROR: Camera Component was not initialized"));
+	CameraComp->SetRelativeLocation(FVector(0.F, 0.F, 500.F));
+	CameraComp->SetRelativeRotation(FRotator(-90.0F, 0.0F, -90.0F));
+	CameraComp->SetConstraintAspectRatio(false);	// viewport without black borders
+
+	// Disable Eye Adaptation
+	CameraComp->PostProcessSettings.bOverride_AutoExposureMinBrightness = true;
+	CameraComp->PostProcessSettings.AutoExposureMinBrightness = 1;
+	CameraComp->PostProcessSettings.bOverride_AutoExposureMaxBrightness = true;
+	CameraComp->PostProcessSettings.AutoExposureMaxBrightness = 1;
 }
 
 // Called every frame

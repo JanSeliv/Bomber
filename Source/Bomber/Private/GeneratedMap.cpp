@@ -314,6 +314,7 @@ void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 	}
 }
 
+// Finds the nearest cell pointer to the specified Map Component
 void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 {
 	AActor* const ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
@@ -384,6 +385,62 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 	if (FoundCell) // can be invalid if nothing was found, check to avoid such rewriting
 	{
 		MapComponent->Cell = FoundCell;
+	}
+}
+
+// Change level by type
+void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
+{
+	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
+	UWorld* World = GetWorld();
+	if (!World
+        || !LevelsDataAsset)
+	{
+		return;
+	}
+
+	// show the specified level, hide other levels
+	const TArray<FLevelStreamRow>& LevelStreamRows = LevelsDataAsset->GetLevelStreamRows();
+	for (const FLevelStreamRow& LevelStreamRowIt : LevelStreamRows)
+	{
+		const FName LevelName(LevelStreamRowIt.Level.GetAssetName());
+		ULevelStreaming* LevelStreaming = UGameplayStatics::GetStreamingLevel(World, LevelName);
+		if (!LevelStreaming)
+		{
+			continue;
+		}
+
+		const bool bShouldBeVisible = LevelStreamRowIt.LevelType == NewLevelType;
+
+		// changing levels in the preview world
+		#if WITH_EDITOR // [IsEditorNotPieWorld]
+		if (USingletonLibrary::IsEditorNotPieWorld())
+		{
+			if (ULevel* Level = LevelStreaming->GetLoadedLevel())
+			{
+				const TSubclassOf<ULevelStreaming>& LevelStreamingClass = bShouldBeVisible
+                                                                              ? ULevelStreamingAlwaysLoaded::StaticClass()
+                                                                              : ULevelStreamingDynamic::StaticClass();
+				//UEditorLevelUtils::SetStreamingClassForLevel(LevelStreaming, LevelStreamingClass);
+				UEditorLevelUtils::SetLevelVisibility(Level, bShouldBeVisible, false);
+				//World->SetCurrentLevel(World->PersistentLevel);
+			}
+			continue;
+		}
+#endif // [IsEditorNotPieWorld]
+
+		// Changing level in the game
+		//@TODO Add delay after load\unload streams
+		const FLatentActionInfo LatentInfo;
+		if (bShouldBeVisible)
+		{
+			UGameplayStatics::LoadStreamLevel(World, LevelStreaming->PackageNameToLoad, true, false, LatentInfo);
+			LevelTypeInternal = NewLevelType;
+		}
+		else
+		{
+			UGameplayStatics::UnloadStreamLevel(World, LevelStreaming->PackageNameToLoad, LatentInfo, false);
+		}
 	}
 }
 
@@ -741,65 +798,6 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, con
 				const EActorType ActorType = DataAsset ? DataAsset->GetActorType() : EAT::None;
 				return EnumHasAnyFlags(ActorType, TO_ENUM(EActorType, ActorsTypesBitmask));
 			}));
-	}
-}
-
-// Change level by type
-void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
-{
-	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
-	UWorld* World = GetWorld();
-	if (!World
-		|| !LevelsDataAsset)
-	{
-		return;
-	}
-
-	// show the specified level, hide other levels
-	for (const FLevelStreamRow& LevelStreamRowIt : LevelsDataAsset->GetLevelStreamRows())
-	{
-		if (!LevelStreamRowIt.Level)
-		{
-			continue;
-		}
-
-		const FName LevelName(LevelStreamRowIt.Level->GetMapName());
-		ULevelStreaming* LevelStreaming = UGameplayStatics::GetStreamingLevel(World, LevelName);
-		if (!LevelStreaming)
-		{
-			continue;
-		}
-
-		const bool bShouldBeVisible = LevelStreamRowIt.LevelType == NewLevelType;
-
-		// changing levels in the preview world
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-		if (USingletonLibrary::IsEditorNotPieWorld())
-		{
-			if (ULevel* Level = LevelStreaming->GetLoadedLevel())
-			{
-				const TSubclassOf<ULevelStreaming>& LevelStreamingClass = bShouldBeVisible
-					                                                          ? ULevelStreamingAlwaysLoaded::StaticClass()
-					                                                          : ULevelStreamingDynamic::StaticClass();
-				UEditorLevelUtils::SetStreamingClassForLevel(LevelStreaming, LevelStreamingClass);
-				UEditorLevelUtils::SetLevelVisibility(Level, bShouldBeVisible, false);
-				World->SetCurrentLevel(World->PersistentLevel);
-			}
-			continue;
-		}
-#endif // [IsEditorNotPieWorld]
-
-		// Changing level in the game
-		const FLatentActionInfo LatentInfo;
-		if (bShouldBeVisible)
-		{
-			UGameplayStatics::LoadStreamLevel(World, LevelStreaming->PackageNameToLoad, true, true, LatentInfo);
-			LevelTypeInternal = NewLevelType;
-		}
-		else
-		{
-			UGameplayStatics::UnloadStreamLevel(World, LevelStreaming->PackageNameToLoad, LatentInfo, true);
-		}
 	}
 }
 

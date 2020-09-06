@@ -184,6 +184,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
 	void SetNearestCell(class UMapComponent* MapComponent) const;
 
+	/**
+	* Change level by type. Specified level will be shown, other levels will be hidden.
+	* @param NewLevelType the new level to apply.
+	*/
+	UFUNCTION(BlueprintCallable, Category = "C++")
+    void SetLevelType(ELevelType NewLevelType);
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -238,13 +245,6 @@ protected:
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "C++", meta = (BlueprintProtected))
 	void GenerateLevelActors();
-
-	/**
-	 * Change level by type. Specified level will be shown, other levels will be hidden.
-	 * @param NewLevelType the new level to apply.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetLevelType(ELevelType NewLevelType);
 
 	/** Map components getter.
 	 *

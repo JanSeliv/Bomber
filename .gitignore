@@ -348,7 +348,6 @@ healthchecksdb
 **/Content/Developers/
 *.sln
 *.uproject
-*_BuiltData.uasset
 *Win64_DebugGame.*
 **/Binaries/UE4Editor-*-0*.dll
 **/Binaries/UE4Editor-*-1*.dll
