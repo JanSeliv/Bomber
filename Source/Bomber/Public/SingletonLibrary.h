@@ -29,7 +29,11 @@ public:
 	 *		Editor development functions
 	 * --------------------------------------------------- */
 
-	/** Checks, that this actor placed in the editor world and the game is not started yet */
+	/** Checks, is the current world placed in the editor. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
+    static bool IsEditor();
+
+	/** Checks is the current world placed in the editor and the game not started yet. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
 	static bool IsEditorNotPieWorld();
 

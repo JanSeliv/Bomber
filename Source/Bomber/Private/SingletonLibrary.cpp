@@ -25,13 +25,18 @@ USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
  *		Editor development functions
  * --------------------------------------------------- */
 
+bool USingletonLibrary::IsEditor()
+{
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	return GIsEditor && GWorld && GWorld->IsEditorWorld();
+#endif
+}
+
 // Checks, that this actor placed in the editor world and the game is not started yet
 bool USingletonLibrary::IsEditorNotPieWorld()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	return GIsEditor
-	       && GWorld && GWorld->IsEditorWorld()
-	       && GEditor && !GEditor->IsPlayingSessionInEditor();
+	return IsEditor() && GEditor && !GEditor->IsPlayingSessionInEditor();
 #endif	// [IsEditorNotPieWorld]
 	return false;
 }

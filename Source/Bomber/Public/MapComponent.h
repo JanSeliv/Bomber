@@ -54,7 +54,7 @@ public:
 	 *	@param MeshComponent Mesh component to set a mesh to an owner.
 	 *	@param ComparedMeshRowTypes Specify level and item types to find its mesh. Affects on a stylistic. Can be FLevelActorMeshRow::Empty
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta =(AutoCreateRefTerm = "ComparedMeshRowTypes"))
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnComponentConstruct(UMeshComponent* MeshComponent, FLevelActorMeshRow ComparedMeshRowTypes);
 
 	/** Returns the map component of the specified owner. */
@@ -68,7 +68,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
 	void RerunOwnerConstruction() const
 	{
-		if (IsEditorOnly() || !ensureMsgf(GetOwner(), TEXT("The specified owner is not accessible"))) return;
+		if (!ensureMsgf(GetOwner(), TEXT("RerunOwnerConstruction: The map owner is not valid"))) return;
 		GetOwner()->RerunConstructionScripts();
 	}
 

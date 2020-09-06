@@ -391,56 +391,112 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 // Change level by type
 void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 {
-	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
 	UWorld* World = GetWorld();
-	if (!World
-        || !LevelsDataAsset)
+	TArray<FLevelStreamRow> LevelStreamRows;
+	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
+	if(LevelsDataAsset)
+	{
+		LevelStreamRows = LevelsDataAsset->GetLevelStreamRows();
+	}
+	if (!LevelStreamRows.Num()
+		|| !World)
+	{
+		return;
+	}
+
+	// Get Level Streaming by Index in LevelStreamingRows, returns if found stream should be visible
+	auto GetLevelStreaming = [&LevelStreamRows, World, NewLevelType](const int32& Index, ULevelStreaming*& OutLevelStreaming) -> bool
+	{
+		if (!LevelStreamRows.IsValidIndex(Index))
+		{
+			return false;
+		}
+
+		const FLevelStreamRow& LevelStreamRowIt = LevelStreamRows[Index];
+		const FName LevelName(LevelStreamRowIt.Level.GetAssetName());
+		OutLevelStreaming = UGameplayStatics::GetStreamingLevel(World, LevelName);
+		return LevelStreamRowIt.LevelType == NewLevelType;
+	};
+
+	// ---- Changing streaming levels in the preview world ----
+
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld())
+	{
+		TArray<ULevel*> Levels;
+		TArray<bool> Visibilities;
+		for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
+		{
+			ULevelStreaming* LevelStreamingIt;
+			const bool bShouldBeVisibleIt = GetLevelStreaming(Index, LevelStreamingIt);
+			ULevel* LoadedLevel = LevelStreamingIt ? LevelStreamingIt->GetLoadedLevel() : nullptr;
+			if (!LoadedLevel)
+			{
+				continue;
+			}
+
+			// Fill arrays
+			Levels.Emplace(LoadedLevel);
+			Visibilities.Emplace(bShouldBeVisibleIt);
+
+			// Override streaming methods
+			const TSubclassOf<ULevelStreaming>& LevelStreamingClass = bShouldBeVisibleIt
+				                                                          ? ULevelStreamingAlwaysLoaded::StaticClass()
+				                                                          : ULevelStreamingDynamic::StaticClass();
+			UEditorLevelUtils::SetStreamingClassForLevel(LevelStreamingIt, LevelStreamingClass);
+			World->SetCurrentLevel(World->PersistentLevel);
+		}
+
+		// Overrides streams by Levels and Visibilities array
+		UEditorLevelUtils::SetLevelsVisibility(Levels, Visibilities, false);
+
+		// The editor stream was overrides, no need to continue
+		return;
+	}
+#endif // [IsEditorNotPieWorld]
+
+	// ---- Changing levels during the game ----
+
+	// No need to override streams during the game
+	if (NewLevelType == LevelTypeInternal)
 	{
 		return;
 	}
 
 	// show the specified level, hide other levels
-	const TArray<FLevelStreamRow>& LevelStreamRows = LevelsDataAsset->GetLevelStreamRows();
-	for (const FLevelStreamRow& LevelStreamRowIt : LevelStreamRows)
+	bool bLevelWasFound = false;
+	for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
 	{
-		const FName LevelName(LevelStreamRowIt.Level.GetAssetName());
-		ULevelStreaming* LevelStreaming = UGameplayStatics::GetStreamingLevel(World, LevelName);
-		if (!LevelStreaming)
+		ULevelStreaming* LevelStreamingIt;
+		const bool bShouldBeVisibleIt = GetLevelStreaming(Index, LevelStreamingIt);
+		if (!LevelStreamingIt)
 		{
 			continue;
 		}
 
-		const bool bShouldBeVisible = LevelStreamRowIt.LevelType == NewLevelType;
-
-		// changing levels in the preview world
-		#if WITH_EDITOR // [IsEditorNotPieWorld]
-		if (USingletonLibrary::IsEditorNotPieWorld())
+		FLatentActionInfo LatentInfo;
+		LatentInfo.UUID = Index;
+		if (bShouldBeVisibleIt)
 		{
-			if (ULevel* Level = LevelStreaming->GetLoadedLevel())
-			{
-				const TSubclassOf<ULevelStreaming>& LevelStreamingClass = bShouldBeVisible
-                                                                              ? ULevelStreamingAlwaysLoaded::StaticClass()
-                                                                              : ULevelStreamingDynamic::StaticClass();
-				//UEditorLevelUtils::SetStreamingClassForLevel(LevelStreaming, LevelStreamingClass);
-				UEditorLevelUtils::SetLevelVisibility(Level, bShouldBeVisible, false);
-				//World->SetCurrentLevel(World->PersistentLevel);
-			}
-			continue;
-		}
-#endif // [IsEditorNotPieWorld]
-
-		// Changing level in the game
-		//@TODO Add delay after load\unload streams
-		const FLatentActionInfo LatentInfo;
-		if (bShouldBeVisible)
-		{
-			UGameplayStatics::LoadStreamLevel(World, LevelStreaming->PackageNameToLoad, true, false, LatentInfo);
-			LevelTypeInternal = NewLevelType;
+			bLevelWasFound = true;
+			UGameplayStatics::LoadStreamLevel(World, LevelStreamingIt->PackageNameToLoad, true, false, LatentInfo);
 		}
 		else
 		{
-			UGameplayStatics::UnloadStreamLevel(World, LevelStreaming->PackageNameToLoad, LatentInfo, false);
+			UGameplayStatics::UnloadStreamLevel(World, LevelStreamingIt->PackageNameToLoad, LatentInfo, false);
 		}
+	}
+
+	// once level is loading, prepare him
+	if (!bLevelWasFound)
+	{
+		return;
+	}
+
+	LevelTypeInternal = NewLevelType;
+	for (UMapComponent* MapComponentIt : MapComponentsInternal)
+	{
+		MapComponentIt->RerunOwnerConstruction();
 	}
 }
 
@@ -461,9 +517,12 @@ void AGeneratedMap::Tick(float DeltaTime)
 
 	FMapComponents PlayersMapComponents;
 	GetMapComponents(PlayersMapComponents, TO_FLAG(EAT::Player));
-	for (const auto& MapCompIt : PlayersMapComponents)
+	for (UMapComponent* MapCompIt : PlayersMapComponents)
 	{
-		if (MapCompIt) SetNearestCell(MapCompIt);
+		if (MapCompIt)
+		{
+			SetNearestCell(MapCompIt);
+		}
 	}
 
 	// AI moving
@@ -551,7 +610,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	// Actors generation
 	GenerateLevelActors();
 
-	// Update level
+	// Update level stream
 	SetLevelType(LevelTypeInternal);
 }
 
