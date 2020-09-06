@@ -14,25 +14,24 @@
 #include "Kismet/GameplayStatics.h"
 #include "Math/Color.h"
 //---
-#if WITH_EDITOR		 // [Editor]
+#if WITH_EDITOR
 #include "Editor.h"	 // GEditor
-#endif				 //WITH_EDITOR [Editor]
+#endif
+
+// Binds to update movements of each AI controller.
+USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
 
 /* ---------------------------------------------------
  *		Editor development functions
  * --------------------------------------------------- */
 
-// Binds to update movements of each AI controller.
-USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
-
 // Checks, that this actor placed in the editor world and the game is not started yet
 bool USingletonLibrary::IsEditorNotPieWorld()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (GIsEditor && GEditor)
-	{
-		return GEditor->GetEditorWorldContext().World() == GWorld;
-	}
+	return GIsEditor
+	       && GWorld && GWorld->IsEditorWorld()
+	       && GEditor && !GEditor->IsPlayingSessionInEditor();
 #endif	// [IsEditorNotPieWorld]
 	return false;
 }
@@ -45,7 +44,7 @@ void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionN
 	{
 		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("nullptr")), *FunctionName, *Message);
 	}
-#endif	//WITH_EDIT [Editor]
+#endif	//WITH_EDITOR [Editor]
 }
 
 // Remove all text renders of the Owner
@@ -89,7 +88,6 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FVector& CoordinatePosition) const
 {
 #if WITH_EDITOR	 // [Editor]
-
 	if (Cells.Num() == NULL			  // Null length
 		|| !IS_VALID(Owner)			  // Owner is not valid
 		|| !IS_VALID(GetLevelMap()))  // The Level Map is not valid
@@ -137,11 +135,6 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 // The Level Map getter, nullptr otherwise
 AGeneratedMap* USingletonLibrary::GetLevelMap()
 {
-	if (GetSingleton() == nullptr)
-	{
-		return nullptr;
-	}
-
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (IsEditorNotPieWorld() == true			  // IsEditorNotPieWorld only
 		&& !GetSingleton()->LevelMapInternal.IsValid())  // Is transient

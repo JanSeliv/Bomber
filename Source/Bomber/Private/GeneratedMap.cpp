@@ -13,6 +13,12 @@
 //---
 #include "Math/UnrealMathUtility.h"
 #include "UObject/ConstructorHelpers.h"
+//---
+#if WITH_EDITOR
+#include "EditorLevelUtils.h"
+#include "Engine/LevelStreamingAlwaysLoaded.h"
+#include "Engine/LevelStreamingDynamic.h"
+#endif
 
 /* ---------------------------------------------------
  *		Level map public functions
@@ -153,7 +159,7 @@ void AGeneratedMap::GetSidesCells(
 }
 
 // Spawns level actor on the Level Map by the specified type
-AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell) const
+AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 {
 	UWorld* World = GetWorld();
 	if (!World
@@ -163,7 +169,11 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell) cons
 		return nullptr;
 	}
 
-	return World->SpawnActor<AActor>(USingletonLibrary::GetActorClassByType(Type), FTransform(Cell.Location));
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.bTemporaryEditorActor = USingletonLibrary::IsEditorNotPieWorld();
+	return World->SpawnActor<AActor>(USingletonLibrary::GetActorClassByType(Type), FTransform(Cell.Location), SpawnParams);
 }
 
 // The function that places the actor on the Level Map, attaches it and writes this actor to the GridArray_
@@ -483,6 +493,9 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 	// Actors generation
 	GenerateLevelActors();
+
+	// Update level
+	SetLevelType(LevelTypeInternal);
 }
 
 // This is called only in the gameplay before calling begin play to generate level actors
@@ -728,6 +741,65 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, con
 				const EActorType ActorType = DataAsset ? DataAsset->GetActorType() : EAT::None;
 				return EnumHasAnyFlags(ActorType, TO_ENUM(EActorType, ActorsTypesBitmask));
 			}));
+	}
+}
+
+// Change level by type
+void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
+{
+	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
+	UWorld* World = GetWorld();
+	if (!World
+		|| !LevelsDataAsset)
+	{
+		return;
+	}
+
+	// show the specified level, hide other levels
+	for (const FLevelStreamRow& LevelStreamRowIt : LevelsDataAsset->GetLevelStreamRows())
+	{
+		if (!LevelStreamRowIt.Level)
+		{
+			continue;
+		}
+
+		const FName LevelName(LevelStreamRowIt.Level->GetMapName());
+		ULevelStreaming* LevelStreaming = UGameplayStatics::GetStreamingLevel(World, LevelName);
+		if (!LevelStreaming)
+		{
+			continue;
+		}
+
+		const bool bShouldBeVisible = LevelStreamRowIt.LevelType == NewLevelType;
+
+		// changing levels in the preview world
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+		if (USingletonLibrary::IsEditorNotPieWorld())
+		{
+			if (ULevel* Level = LevelStreaming->GetLoadedLevel())
+			{
+				const TSubclassOf<ULevelStreaming>& LevelStreamingClass = bShouldBeVisible
+					                                                          ? ULevelStreamingAlwaysLoaded::StaticClass()
+					                                                          : ULevelStreamingDynamic::StaticClass();
+				UEditorLevelUtils::SetStreamingClassForLevel(LevelStreaming, LevelStreamingClass);
+				UEditorLevelUtils::SetLevelVisibility(Level, bShouldBeVisible, false);
+				World->SetCurrentLevel(World->PersistentLevel);
+			}
+			continue;
+		}
+#endif // [IsEditorNotPieWorld]
+
+		// Changing level in the game
+		const FLatentActionInfo LatentInfo;
+		if (bShouldBeVisible)
+		{
+			UGameplayStatics::LoadStreamLevel(World, LevelStreaming->PackageNameToLoad, true, true, LatentInfo);
+			LevelTypeInternal = NewLevelType;
+		}
+		else
+		{
+			UGameplayStatics::UnloadStreamLevel(World, LevelStreaming->PackageNameToLoad, LatentInfo, true);
+		}
 	}
 }
 

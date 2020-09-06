@@ -161,28 +161,36 @@ public:
 		return (LBitmask & RBitmask) != 0;
 	}
 
-	/** */
+	/** Returns the Levels Data Asset*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    static FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return GetSingleton()->LevelsDataAssetInternal; }
+
+	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
     static class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
 
-	/** */
+	/** Iterate ActorsDataAssets array and returns the found Data Asset of level actors by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     static class ULevelActorDataAsset* GetDataAssetByActorType(EActorType ActorType);
 
-	/**  */
+	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     static TSubclassOf<AActor> GetActorClassByType(EActorType ActorType);
 
+protected:
 	/* ---------------------------------------------------
 	*		Protected properties
 	* --------------------------------------------------- */
-	protected:
 
-	/** The reference to the AGeneratedMap actor. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (DisplayName = "Level Map", BlueprintProtected))
+	/** AGeneratedMap wrapper. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
 	TSoftObjectPtr<class AGeneratedMap> LevelMapInternal;	//[B]
 
+	/** The class of the Main Level. */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))
+	class UGeneratedMapDataAsset* LevelsDataAssetInternal;
+
 	/** Actor type and its associated class. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Actors Data Assets", BlueprintProtected))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actors Data Assets"))
 	TArray<class ULevelActorDataAsset*> ActorsDataAssetsInternal; //[B]
 };

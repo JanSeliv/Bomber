@@ -8,6 +8,61 @@
 //---
 #include "GeneratedMap.generated.h"
 
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FLevelStreamRow
+{
+	GENERATED_BODY()
+
+	/** The empty mesh row. */
+	static const FLevelStreamRow Empty;
+
+	/** Default constructor */
+	FLevelStreamRow() = default;
+
+	/** The level asset */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	TSoftObjectPtr<UWorld> Level; //[D]
+
+	/** The associated type of a level. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	ELevelType LevelType = ELT::None; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, InlineEditConditionToggle))
+	bool bIsStoryLevel = false; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, EditCondition = "bIsStoryLevel"))
+	FVector2D StoryLevelSize = FVector2D::ZeroVector; //[D]
+
+};
+
+/**
+ *
+ */
+UCLASS(Blueprintable, BlueprintType)
+class UGeneratedMapDataAsset final : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	/** Default constructor. */
+	UGeneratedMapDataAsset() = default;
+
+	/** Returns copies of levels. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Default")
+	FORCEINLINE TArray<FLevelStreamRow> GetLevelStreamRows() const { return LevelsInternal; }
+
+protected:
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Default", meta = (ShowOnlyInnerProperties, BlueprintProtected, DisplayName = "Levels"))
+	TArray<FLevelStreamRow> LevelsInternal; //[D]
+};
+
 /**
  * Procedurally generated grid of cells and actors on the scene.
  * @see USingletonLibrary::LevelMap_ reference to this Level Map.
@@ -69,8 +124,8 @@ public:
 	 * @param Cell Actors location
 	 * @return Spawned actor on the Level Map, nullptr otherwise.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	AActor* SpawnActorByType(EActorType Type, const FCell& Cell) const;
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	AActor* SpawnActorByType(EActorType Type, const FCell& Cell);
 
 	/** Adding and attaching the specified Map Component to the MapComponents_ array
 
@@ -183,6 +238,13 @@ protected:
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "C++", meta = (BlueprintProtected))
 	void GenerateLevelActors();
+
+	/**
+	 * Change level by type. Specified level will be shown, other levels will be hidden.
+	 * @param NewLevelType the new level to apply.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetLevelType(ELevelType NewLevelType);
 
 	/** Map components getter.
 	 *
