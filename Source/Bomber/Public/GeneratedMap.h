@@ -155,7 +155,7 @@ public:
 	 * @param ActorsTypesBitmask Bitmask of actors types to check.
 	 * @return true if at least one level actor is contained.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask"))
 	FORCEINLINE bool ContainsMapComponents(
 		const struct FCell& Cell,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask) const

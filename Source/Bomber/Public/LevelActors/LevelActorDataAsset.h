@@ -60,12 +60,23 @@ struct FLevelActorMeshRow
 	{
 		return LevelType == Other.LevelType && Mesh == Other.Mesh && ItemType == Other.ItemType;
 	}
+
+	/**
+	* Creates a hash value from a mesh row.
+	*
+	* @param MeshRow The mesh to create a hash value for
+	* @return The hash value from the components
+	*/
+	friend FORCEINLINE uint32 GetTypeHash(const FLevelActorMeshRow& MeshRow)
+	{
+		return GetTypeHash(MeshRow.Mesh);
+	}
 };
 
 /**
  *
  */
-UCLASS(Abstract)
+UCLASS(Blueprintable, BlueprintType)
 class ULevelActorDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

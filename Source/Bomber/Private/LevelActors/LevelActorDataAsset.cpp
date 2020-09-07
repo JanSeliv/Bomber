@@ -18,7 +18,8 @@ void ULevelActorDataAsset::GetMeshesByLevelType(TArray<FLevelActorMeshRow>& OutM
 {
 	for (const FLevelActorMeshRow& MeshRowIt : MeshesInternal)
 	{
-		if (EnumHasAnyFlags(MeshRowIt.LevelType, TO_ENUM(ELevelType, LevelsTypesBitmask)))
+		if (MeshRowIt.Mesh //is not empty
+			&& EnumHasAnyFlags(MeshRowIt.LevelType, TO_ENUM(ELevelType, LevelsTypesBitmask)))
 		{
 			OutMeshes.Emplace(MeshRowIt);
 		}

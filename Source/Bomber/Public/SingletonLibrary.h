@@ -173,9 +173,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
     static class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
 
-	/** Iterate ActorsDataAssets array and returns the found Data Asset of level actors by specified actor type. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    static class ULevelActorDataAsset* GetDataAssetByActorType(EActorType ActorType);
+	/** Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask"))
+	static void GetDataAssetsByActorTypes(
+		TArray<class ULevelActorDataAsset*>& OutDataAssets,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask);
 
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
