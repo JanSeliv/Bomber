@@ -464,7 +464,6 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 	}
 
 	// show the specified level, hide other levels
-	bool bLevelWasFound = false;
 	for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
 	{
 		ULevelStreaming* LevelStreamingIt;
@@ -478,7 +477,6 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 		LatentInfo.UUID = Index;
 		if (bShouldBeVisibleIt)
 		{
-			bLevelWasFound = true;
 			UGameplayStatics::LoadStreamLevel(World, LevelStreamingIt->PackageNameToLoad, true, false, LatentInfo);
 		}
 		else
@@ -488,11 +486,6 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 	}
 
 	// once level is loading, prepare him
-	if (!bLevelWasFound)
-	{
-		return;
-	}
-
 	LevelTypeInternal = NewLevelType;
 	for (UMapComponent* MapComponentIt : MapComponentsInternal)
 	{
