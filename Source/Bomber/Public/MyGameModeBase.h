@@ -18,19 +18,14 @@ public:
 	/** Sets default values for this actor's properties */
 	AMyGameModeBase();
 
-	/** The class of the camera actor. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TSubclassOf<AActor> CameraActorClass;  //[B]
-
-	/** */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	AActor* SpawnedCameraActor; //[G]
-
-	/** The class of the camera actor. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	float Timer = 120.0F;
-
 protected:
-	/** Called when the game starts or when spawned */
+	/** Called when the game starts or when spawned */ /** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
+
+	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the PlayerController. */
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	/** Called when all players were connected. */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (BlueprintProtected))
+	void OnSessionStarted() const;
 };

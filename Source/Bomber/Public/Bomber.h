@@ -70,3 +70,13 @@ enum class EItemType : uint8
     Fire	///< Increases the range of explosion
 };
 
+/**
+ * The replicated states of the game.
+ */
+UENUM(BlueprintType)
+enum class ECurrentGameState : uint8
+{
+	Menu,
+	GameStarting,
+	InGame
+};

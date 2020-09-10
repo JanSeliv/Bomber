@@ -200,7 +200,8 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
 	UChildActorComponent* CollisionComponentInternal;	 //[C.DO]
 
-	/** The blueprint class with the background, collision cage and floor. Can be changed in the editor */
+	/** The blueprint class with the background, collision cage and floor. Can be changed in the editor.
+	* @TODO Replace to the data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	TSubclassOf<AActor> BackgroundBlueprintClass;  //[B]
 
@@ -212,15 +213,18 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	TArray<class UMapComponent*> MapComponentsInternal;  //[M.IO]
 
-	/** The chance of walls generation. */
+	/** The chance of walls generation.
+	 * @TODO Replace to the data asset. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
 	int32 WallsChance_ = 35;  //[AW]
 
-	/** The chance of boxes generation. */
+	/** The chance of boxes generation.
+	* @TODO Replace to the data asset. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
 	int32 BoxesChance_ = 70;  //[AW]
 
-	/** Number of characters on the Level Map. */
+	/** Number of characters on the Level Map.
+	* @TODO Replace to the data asset. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	int32 PlayerCharactersNum = 0;	//[G]
 
@@ -228,6 +232,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
 	ELevelType LevelTypeInternal = ELT::First; //[N]
 
+	/** The class of the camera actor.
+	* @TODO Replace to the data asset. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
+	TSubclassOf<class AMyCameraActor> CameraActorClass; //[B]
+
+	/** */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Actor"))
+	class AMyCameraActor* CameraActorInternal; //[G]
+
+	/** */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
+	bool bIsGameRunningInternal; //[G]
 	/* ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */
@@ -255,6 +271,11 @@ protected:
 	void GetMapComponents(
 		TSet<class UMapComponent*>& OutBitmaskedComponents,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask) const;
+
+	/** */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStarted(ECurrentGameState CurrentGameState);
+
 	/* ---------------------------------------------------
 	 *					Editor development
 	 * --------------------------------------------------- */

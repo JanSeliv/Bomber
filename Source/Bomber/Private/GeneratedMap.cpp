@@ -2,14 +2,15 @@
 
 #include "GeneratedMap.h"
 //---
-#include "BombActor.h"
+#include "LevelActors/BombActor.h"
 #include "Bomber.h"
 #include "Cell.h"
 #include "MapComponent.h"
 #include "MyGameInstance.h"
-#include "MyGameModeBase.h"
 #include "SingletonLibrary.h"
-#include "LevelActorDataAsset.h"
+#include "LevelActors/LevelActorDataAsset.h"
+#include "MyCameraActor.h"
+#include "GameFramework/MyGameStateBase.h"
 //---
 #include "Math/UnrealMathUtility.h"
 #include "UObject/ConstructorHelpers.h"
@@ -32,6 +33,9 @@ AGeneratedMap::AGeneratedMap()
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	PrimaryActorTick.TickInterval = 0.25F;
 
+	// setup replication
+	bReplicates = true;
+
 #if WITH_EDITOR	 //[Editor]
 	// Should not call OnConstruction on drag events
 	bRunConstructionScriptOnDrag = false;
@@ -49,6 +53,9 @@ AGeneratedMap::AGeneratedMap()
 	{
 		BackgroundBlueprintClass = BP_BackgroundAssetFinder.Class; // Default class of the PlatformComponent
 	}
+
+	// Default camera class
+	CameraActorClass = AMyCameraActor::StaticClass();
 }
 
 // Getting an array of cells by four sides of an input center cell and type of breaks
@@ -243,7 +250,6 @@ void AGeneratedMap::IntersectCellsByTypes(
 			BitmaskedCells.Emplace(MapCompIt->Cell);
 		}
 	}
-
 
 	OutCells = OutCells.Num() > 0 ? OutCells.Intersect(BitmaskedCells) : BitmaskedCells;
 }
@@ -611,7 +617,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 void AGeneratedMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	if (IS_TRANSIENT(this) == true) // the level map is transient
+	if (IS_TRANSIENT(this)) // the level map is transient
 	{
 		return;
 	}
@@ -631,6 +637,12 @@ void AGeneratedMap::PostInitializeComponents()
 		}
 
 		RerunConstructionScripts();
+	}
+
+	// Listen states to spawn camera
+	if(AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	{
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStarted);
 	}
 }
 
@@ -850,6 +862,49 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, con
 				const EActorType ActorType = DataAsset ? DataAsset->GetActorType() : EAT::None;
 				return EnumHasAnyFlags(ActorType, TO_ENUM(EActorType, ActorsTypesBitmask));
 			}));
+	}
+}
+
+//
+void AGeneratedMap::OnGameStarted(ECurrentGameState CurrentGameState)
+{
+	UWorld* World = GetWorld();
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (!World
+	    || !PC)
+	{
+		return;
+	}
+
+	switch (CurrentGameState)
+	{
+		case ECurrentGameState::Menu:
+		{
+			bIsGameRunningInternal = false;
+			break;
+		}
+
+		case ECurrentGameState::GameStarting:
+		{
+			if (bIsGameRunningInternal)
+			{
+				// reset level
+				GenerateLevelActors();
+			}
+
+			bIsGameRunningInternal = true;
+
+			// Spawn the camera actor
+			if (!CameraActorInternal) // not spawned yet
+			{
+				CameraActorInternal = World->SpawnActor<AMyCameraActor>(CameraActorClass);
+			}
+
+			PC->SetViewTargetWithBlend(CameraActorInternal, CameraActorInternal->GetBlendTime());
+			break;
+		}
+
+		default: break;
 	}
 }
 

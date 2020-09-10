@@ -8,6 +8,7 @@
 #include "MapComponent.h"
 #include "MyGameInstance.h"
 #include "MyGameModeBase.h"
+#include "GameFramework/MyGameStateBase.h"
 //---
 #include "Components/TextRenderComponent.h"
 #include "Engine.h"
@@ -189,6 +190,12 @@ UMyGameInstance* USingletonLibrary::GetMyGameInstance(const UObject* WorldContex
 AMyGameModeBase* USingletonLibrary::GetMyGameMode(const UObject* WorldContextObject)
 {
 	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+}
+
+//
+AMyGameStateBase* USingletonLibrary::GetMyGameState(const UObject* WorldContextObject)
+{
+	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(WorldContextObject));
 }
 
 /* ---------------------------------------------------

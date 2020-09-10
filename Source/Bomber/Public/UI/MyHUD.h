@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/HUD.h"
+#include "Bomber.h"
 //---
 #include "MyHUD.generated.h"
 
@@ -15,22 +16,35 @@ class BOMBER_API AMyHUD final : public AHUD
 	GENERATED_BODY()
 
 public:
-	/** The UMG class of the Menu. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TSubclassOf<class UUserWidget> UmgMenuClass;  // [B]
+	/* ---------------------------------------------------
+	*		Public properties
+	* --------------------------------------------------- */
 
-	/** The UMG class of the Level. */
+	/** The UMG class of the Level.
+	 * @todo Replace to the UI Data Asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TSubclassOf<class UUserWidget> UmgLevelClass;  // [B]
+	TSubclassOf<class UUserWidget> InGameWidgetClass;  // [B]
 
 	/** The current widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Ñ++")
-	class UUserWidget* CreatedWidget;  //[G]
+	class UUserWidget* InGameWidget;  //[G]
+
+	/* ---------------------------------------------------
+	*		Public functions
+	* --------------------------------------------------- */
 
 	/* Sets default values for this HUD's properties. */
 	AMyHUD();
 
 protected:
+	/* ---------------------------------------------------
+	*		Protected functions
+	* --------------------------------------------------- */
+
 	/** Called when the game starts. Created widget. */
 	virtual void BeginPlay() override;
+
+	/** */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+    void OnGameStarted(ECurrentGameState CurrentGameState);
 };

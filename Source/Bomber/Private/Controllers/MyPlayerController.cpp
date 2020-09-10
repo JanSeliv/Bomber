@@ -25,9 +25,10 @@ void AMyPlayerController::SetupInputComponent()
 
 	// Call UInGameWidget::ShowInGameState function when the escape was pressed
 	FInputActionBinding EscapeWasPressedLambda("EscapeEvent", IE_Pressed);
+	FInputActionBinding EscapeWasPressedLambda("EscapeEvent", IE_Pressed);
 	EscapeWasPressedLambda.ActionDelegate.GetDelegateForManualSet().BindLambda([this]() {
 		const auto MyCustomHUD = Cast<AMyHUD>(GetHUD());
-		const auto InGameWidget = MyCustomHUD ? Cast<UInGameWidget>(MyCustomHUD->CreatedWidget) : nullptr;
+		const auto InGameWidget = MyCustomHUD ? Cast<UInGameWidget>(MyCustomHUD->InGameWidget) : nullptr;
 		if (InGameWidget)
 		{
 			InGameWidget->ShowInGameState();
