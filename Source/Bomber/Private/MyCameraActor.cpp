@@ -4,6 +4,7 @@
 //---
 #include "GeneratedMap.h"
 #include "SingletonLibrary.h"
+#include "GameFramework/MyGameStateBase.h"
 //---
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -14,6 +15,7 @@ AMyCameraActor::AMyCameraActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Set defaults to the CameraComp
 	UCameraComponent* CameraComp = GetCameraComponent();
@@ -79,7 +81,7 @@ void AMyCameraActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const AGeneratedMap* const LevelMap = USingletonLibrary::GetLevelMap();
+	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (IsValid(LevelMap) == false)
 	{
 		return;
@@ -94,10 +96,23 @@ void AMyCameraActor::BeginPlay()
 	SetActorLocation(NewLocation);
 	SetActorRotation(LevelMap->GetActorRotation());
 
-	// Set view
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	if (PlayerController)
+	// Listen states to manage the tick
+	if(AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
 	{
-		PlayerController->SetViewTarget(this);
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+}
+
+//
+void AMyCameraActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	SetActorTickEnabled(CurrentGameState == ECurrentGameState::InGame);
+
+	if (CurrentGameState == ECurrentGameState::GameStarting)
+	{
+		if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
+		{
+			PlayerController->SetViewTargetWithBlend(this, BlendTimeInternal);
+		}
 	}
 }

@@ -2,10 +2,6 @@
 
 #include "MyHUD.h"
 //---
-#include "Bomber.h"
-#include "MyGameStateBase.h"
-#include "SingletonLibrary.h"
-//---
 #include "ConstructorHelpers.h"
 #include "UserWidget.h"
 
@@ -30,35 +26,7 @@ void AMyHUD::BeginPlay()
 	InGameWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), InGameWidgetClass);
 	if (InGameWidget) // successfully created
 	{
-		InGameWidget->SetVisibility(ESlateVisibility::Hidden);
 		InGameWidget->AddToViewport();
 	}
-
-	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
-	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStarted);
-	}
 }
 
-void AMyHUD::OnGameStarted(ECurrentGameState CurrentGameState)
-{
-	if(!InGameWidget)
-	{
-		return;
-	}
-
-	switch (CurrentGameState)
-	{
-		case ECurrentGameState::Menu:
-		{
-			InGameWidget->SetVisibility(ESlateVisibility::Hidden);
-			break;
-		}
-		case ECurrentGameState::GameStarting:
-		{
-			InGameWidget->SetVisibility(ESlateVisibility::Visible);
-			break;
-		}
-	}
-}

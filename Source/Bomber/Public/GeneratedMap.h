@@ -274,7 +274,7 @@ protected:
 
 	/** */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStarted(ECurrentGameState CurrentGameState);
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/* ---------------------------------------------------
 	 *					Editor development

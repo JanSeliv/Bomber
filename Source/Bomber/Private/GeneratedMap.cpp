@@ -639,10 +639,16 @@ void AGeneratedMap::PostInitializeComponents()
 		RerunConstructionScripts();
 	}
 
-	// Listen states to spawn camera
+	// Spawn the camera
+	if(UWorld* World = GetWorld())
+	{
+		CameraActorInternal = World->SpawnActor<AMyCameraActor>(CameraActorClass);
+	}
+
+	// Listen states
 	if(AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
 	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStarted);
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 }
 
@@ -866,7 +872,7 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, con
 }
 
 //
-void AGeneratedMap::OnGameStarted(ECurrentGameState CurrentGameState)
+void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
@@ -893,14 +899,6 @@ void AGeneratedMap::OnGameStarted(ECurrentGameState CurrentGameState)
 			}
 
 			bIsGameRunningInternal = true;
-
-			// Spawn the camera actor
-			if (!CameraActorInternal) // not spawned yet
-			{
-				CameraActorInternal = World->SpawnActor<AMyCameraActor>(CameraActorClass);
-			}
-
-			PC->SetViewTargetWithBlend(CameraActorInternal, CameraActorInternal->GetBlendTime());
 			break;
 		}
 

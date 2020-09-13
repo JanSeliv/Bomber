@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Camera/CameraActor.h"
+#include "Bomber.h"
 //---
 #include "MyCameraActor.generated.h"
 
@@ -27,14 +28,18 @@ public:
 	FORCEINLINE float GetBlendTime() const { return BlendTimeInternal; }
 
 protected:
+	/** Time taken to blend.
+	* @TODO Replace to the Camera Data Asset. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Blend Time"))
+	float BlendTimeInternal = 1.F; //[N]
+
 	/** Called every frame. */
 	virtual void Tick(float DeltaTime) override;
 
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
 
-	/** Time taken to blend.
-	 * @TODO Replace to the Camera Data Asset. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Blend Time"))
-	float BlendTimeInternal = 1.F; //[N]
+	/** */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+    void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

@@ -43,8 +43,4 @@ protected:
 
 	/** Called when the game starts. Created widget. */
 	virtual void BeginPlay() override;
-
-	/** */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-    void OnGameStarted(ECurrentGameState CurrentGameState);
 };

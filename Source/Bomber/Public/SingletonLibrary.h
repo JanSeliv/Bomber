@@ -90,17 +90,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetLevelMap(const class AGeneratedMap* LevelMap);
 
-	/** Contains a data of standalone and PIE games, nullptr otherwise */
+	/** Return rhe Bomber Game Instance, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class UMyGameInstance* GetMyGameInstance(const UObject* WorldContextObject);
 
-	/** Contains a data of Bomber Level, nullptr otherwise. */
+	/** Returns the Bomber Game Mode, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class AMyGameModeBase* GetMyGameMode(const UObject* WorldContextObject);
 
-	/** Contains a data of Bomber Level, nullptr otherwise. */
+	/** Returns the Bomber Game state, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
     static class AMyGameStateBase* GetMyGameState(const UObject* WorldContextObject);
+
+	/** Returns the Bomber Player Controller, nullptr otherwise. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+    static class AMyPlayerController* GetMyPlayerController(const UObject* WorldContextObject);
+
 
 	/* ---------------------------------------------------
 	 *		FCell blueprint functions

@@ -9,6 +9,7 @@
 #include "MyGameInstance.h"
 #include "MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Controllers/MyPlayerController.h"
 //---
 #include "Components/TextRenderComponent.h"
 #include "Engine.h"
@@ -196,6 +197,11 @@ AMyGameModeBase* USingletonLibrary::GetMyGameMode(const UObject* WorldContextObj
 AMyGameStateBase* USingletonLibrary::GetMyGameState(const UObject* WorldContextObject)
 {
 	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(WorldContextObject));
+}
+
+AMyPlayerController* USingletonLibrary::GetMyPlayerController(const UObject* WorldContextObject)
+{
+	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(WorldContextObject, 0));
 }
 
 /* ---------------------------------------------------
