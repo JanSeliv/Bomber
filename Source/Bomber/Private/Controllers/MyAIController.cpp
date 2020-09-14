@@ -6,6 +6,7 @@
 #include "GeneratedMap.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "MapComponent.h"
+#include "MyGameStateBase.h"
 #include "SingletonLibrary.h"
 
 // Sets default values for this character's properties
@@ -16,6 +17,100 @@ AMyAIController::AMyAIController()
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	bAttachToPawn = true;
+}
+
+// Makes AI go toward specified destination cell
+void AMyAIController::MoveToCell(const FCell& DestinationCell)
+{
+	if (IS_VALID(MyCharacter) == false)	 // The controlled character is not valid or is transient
+	{
+		return;
+	}
+
+	AiMoveTo = DestinationCell;
+	MoveToLocation(AiMoveTo.Location, -1.0f, false, false);
+
+	// Rotate the character
+	MyCharacter->RotateToLocation(AiMoveTo.Location, false);
+
+#if WITH_EDITOR	 // [Editor]
+	// Visualize and show destination cell
+	if (HasActorBegunPlay())  // [PIE]
+	{
+		USingletonLibrary::PrintToLog(this, "MoveAI", "-> \t ClearOwnerTextRenders");
+		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
+	}  // [PIE]
+
+	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(MyCharacter);
+	if (MapComponent  // is valid  map component
+		&& MapComponent->bShouldShowRenders)
+	{
+		bool bOutBool = false;
+		TArray<UTextRenderComponent*> OutArray{};
+		USingletonLibrary::GetSingleton()->AddDebugTextRenders(MyCharacter, FCells{AiMoveTo}, FLinearColor::Gray, bOutBool, OutArray, 255, 300, "x");
+	}
+#endif
+}
+
+/* ---------------------------------------------------
+ *					Protected functions
+ * --------------------------------------------------- */
+
+// Called when an instance of this class is placed (in editor) or spawned
+void AMyAIController::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	if (IS_TRANSIENT(this))
+	{
+		return;
+	}
+
+	Possess(MyCharacter);
+}
+
+//  Called when the game starts or when spawned
+void AMyAIController::BeginPlay()
+{
+	// Call to super
+	Super::BeginPlay();
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	// Listen states
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	{
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+
+	// Setup timer handle to update AI brain (initialized being paused)
+	if(const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
+	{
+		FTimerManager& TimerManager = World->GetTimerManager();
+		TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, LevelsDataAsset->GetTickInterval(), true);
+		TimerManager.PauseTimer(AIUpdateHandleInternal);
+	}
+}
+
+// Allows the PlayerController to set up custom input bindings
+void AMyAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	if (IS_VALID(InPawn) == false)
+	{
+		return;
+	}
+
+	MyCharacter = Cast<APlayerCharacter>(InPawn);
+
+	if (USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this) == false)
+	{
+		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+	}
 }
 
 // The main AI logic
@@ -245,75 +340,28 @@ void AMyAIController::UpdateAI()
 #endif	// [Editor]
 }
 
-// Makes AI go toward specified destination cell
-void AMyAIController::MoveToCell(const FCell& DestinationCell)
+void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
-	if (IS_VALID(MyCharacter) == false)	 // The controlled character is not valid or is transient
+	UWorld* World = GetWorld();
+	if (!World)
 	{
 		return;
 	}
 
-	AiMoveTo = DestinationCell;
-	MoveToLocation(AiMoveTo.Location, -1.0f, false, false);
-
-	// Rotate the character
-	MyCharacter->RotateToLocation(AiMoveTo.Location, false);
-
-#if WITH_EDITOR	 // [Editor]
-	// Visualize and show destination cell
-	if (HasActorBegunPlay())  // [PIE]
+	FTimerManager& TimerManager = World->GetTimerManager();
+	switch (CurrentGameState)
 	{
-		USingletonLibrary::PrintToLog(this, "MoveAI", "-> \t ClearOwnerTextRenders");
-		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
-	}  // [PIE]
-
-	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(MyCharacter);
-	if (MapComponent  // is valid  map component
-		&& MapComponent->bShouldShowRenders)
-	{
-		bool bOutBool = false;
-		TArray<UTextRenderComponent*> OutArray{};
-		USingletonLibrary::GetSingleton()->AddDebugTextRenders(MyCharacter, FCells{AiMoveTo}, FLinearColor::Gray, bOutBool, OutArray, 255, 300, "x");
-	}
-#endif
-}
-
-/* ---------------------------------------------------
- *					Protected functions
- * --------------------------------------------------- */
-
-// Called when an instance of this class is placed (in editor) or spawned
-void AMyAIController::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-	if (IS_TRANSIENT(this))
-	{
-		return;
-	}
-
-	Possess(MyCharacter);
-}
-
-//  Called when the game starts or when spawned
-void AMyAIController::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-// Allows the PlayerController to set up custom input bindings
-void AMyAIController::OnPossess(APawn* InPawn)
-{
-	Super::OnPossess(InPawn);
-
-	if (IS_VALID(InPawn) == false)
-	{
-		return;
-	}
-
-	MyCharacter = Cast<APlayerCharacter>(InPawn);
-
-	if (USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this) == false)
-	{
-		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		case ECurrentGameState::Menu:
+		case ECurrentGameState::GameStarting:
+		{
+			TimerManager.PauseTimer(AIUpdateHandleInternal);
+			break;
+		}
+		case ECurrentGameState::InGame:
+		{
+			TimerManager.UnPauseTimer(AIUpdateHandleInternal);
+			break;
+		}
+		default: break;
 	}
 }

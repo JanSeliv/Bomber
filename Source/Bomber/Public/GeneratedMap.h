@@ -38,7 +38,6 @@ struct FLevelStreamRow
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, EditCondition = "bIsStoryLevel"))
 	FVector2D StoryLevelSize = FVector2D::ZeroVector; //[D]
-
 };
 
 /**
@@ -54,13 +53,21 @@ public:
 	UGeneratedMapDataAsset() = default;
 
 	/** Returns copies of levels. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Default")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE TArray<FLevelStreamRow> GetLevelStreamRows() const { return LevelsInternal; }
+
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    FORCEINLINE float GetTickInterval() const { return TickInternal; }
 
 protected:
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Default", meta = (ShowOnlyInnerProperties, BlueprintProtected, DisplayName = "Levels"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels", ShowOnlyInnerProperties))
 	TArray<FLevelStreamRow> LevelsInternal; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))
+	float TickInternal = 0.2F; //[D]
 };
 
 /**
@@ -244,12 +251,10 @@ protected:
 	/** */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
 	bool bIsGameRunningInternal; //[G]
+
 	/* ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */
-
-	/** Called every time on this actor to update characters locations */
-	virtual void Tick(float DeltaTime) override;
 
 	/** Called when an instance of this class is placed (in editor) or spawned
 	 * @todo Generate only platform without boxes*/

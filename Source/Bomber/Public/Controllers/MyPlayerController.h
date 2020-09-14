@@ -26,4 +26,17 @@ public:
 protected:
 	/** Allows the PlayerController to set up custom input bindings. */
 	virtual void SetupInputComponent() override;
+
+	/** Called when the game starts or when spawned. */
+	virtual void BeginPlay() override;
+
+	/**
+	* Locks or unlocks movement input, consecutive calls stack up and require the same amount of calls to undo, or can all be undone using ResetIgnoreMoveInput.
+	* @param bNewMoveInput	If true, move input is ignored. If false, input is not ignored.
+	*/
+    virtual void SetIgnoreMoveInput(bool bNewMoveInput) override;
+
+	/** */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+    void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

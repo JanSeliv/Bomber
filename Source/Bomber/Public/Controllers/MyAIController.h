@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AIController.h"
+#include "Bomber.h"
 #include "Cell.h"
 //---
 #include "MyAIController.generated.h"
@@ -19,15 +20,15 @@ public:
 	/** Sets default values for this character's properties */
 	AMyAIController();
 
-	/** The main AI logic */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void UpdateAI();
-
 	/** Makes AI go toward specified destination cell */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void MoveToCell(const struct FCell& DestinationCell);
 
 protected:
+	/**  */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
+	FTimerHandle AIUpdateHandleInternal;
+
 	/** Cell position of current path segment's end */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	struct FCell AiMoveTo;	//[G]
@@ -44,4 +45,12 @@ protected:
 
 	/** Allows the PlayerController to set up custom input bindings. */
 	virtual void OnPossess(APawn* InPawn) override;
+
+	/** The main AI logic */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+    void UpdateAI();
+
+	/** */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+    void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

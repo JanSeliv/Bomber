@@ -8,8 +8,9 @@
 #include "MapComponent.h"
 #include "MyAIController.h"
 #include "SingletonLibrary.h"
-//---
 #include "ItemActor.h"
+#include "GameFramework/MyGameStateBase.h"
+//---
 #include "Animation/AnimInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -115,7 +116,14 @@ void APlayerCharacter::SpawnBomb()
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
+	// Call to super
 	Super::BeginPlay();
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
 
 	// Set the animation
 	if (GetMesh()->GetAnimInstance() == nullptr	 // Is not created yet
@@ -127,7 +135,7 @@ void APlayerCharacter::BeginPlay()
 	// Posses the controller
 	if (CharacterID_ == 0)	// Is the player (not AI)
 	{
-		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
 		if (PlayerController)
 		{
 			PlayerController->Possess(this);
@@ -136,11 +144,32 @@ void APlayerCharacter::BeginPlay()
 	else								// has AI controller
 		if (!IS_VALID(MyAIController))	// was not spawned early
 	{
-		MyAIController = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+		MyAIController = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		MyAIController->Possess(this);
 	}
 
 	OnActorBeginOverlap.AddDynamic(this, &APlayerCharacter::OnPlayerBeginOverlap);
+
+	// Listen states
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	{
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+
+	// Setup timer handle to update a player location on the level map (initialized being paused)
+	if(const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
+	{
+		FTimerManager& TimerManager = World->GetTimerManager();
+		TWeakObjectPtr<ThisClass> WeakThis(this);
+		TimerManager.SetTimer(UpdatePositionHandleInternal, [WeakThis]
+		{
+			if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
+			{
+				LevelMap->SetNearestCell(WeakThis.IsValid() ? WeakThis.Get()->MapComponent : nullptr);
+			}
+		}, LevelsDataAsset->GetTickInterval(), true);
+		TimerManager.PauseTimer(UpdatePositionHandleInternal);
+	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -275,4 +304,30 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
 {
 	PowerupsInternal.BombN++;
+}
+
+void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager = World->GetTimerManager();
+	switch (CurrentGameState)
+	{
+		case ECurrentGameState::Menu:
+        case ECurrentGameState::GameStarting:
+		{
+			TimerManager.PauseTimer(UpdatePositionHandleInternal);
+			break;
+		}
+		case ECurrentGameState::InGame:
+		{
+			TimerManager.UnPauseTimer(UpdatePositionHandleInternal);
+			break;
+		}
+		default: break;
+	}
 }

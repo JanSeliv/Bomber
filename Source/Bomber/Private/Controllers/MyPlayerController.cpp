@@ -35,19 +35,56 @@ bool AMyPlayerController::ServerSetGameState_Validate(ECurrentGameState NewGameS
 void AMyPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-
-	// Focus to the game
-	SetInputMode(FInputModeGameOnly());
-
-	// Call UInGameWidget::ShowInGameState function when the escape was pressed
-	FInputActionBinding EscapeWasPressedLambda("EscapeEvent", IE_Pressed);
-	EscapeWasPressedLambda.ActionDelegate.GetDelegateForManualSet().BindLambda([this]() {
-		const auto MyCustomHUD = Cast<AMyHUD>(GetHUD());
-		const auto InGameWidget = MyCustomHUD ? Cast<UInGameWidget>(MyCustomHUD->InGameWidget) : nullptr;
-		if (InGameWidget)
-		{
-			InGameWidget->ShowInGameState();
-		}
-	});
-	InputComponent->AddActionBinding(EscapeWasPressedLambda);
 }
+
+void AMyPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Listen states
+	if(AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	{
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+
+	SetIgnoreMoveInput(true);
+}
+
+// Locks or unlocks movement input
+void AMyPlayerController::SetIgnoreMoveInput(bool bNewMoveInput)
+{
+	IgnoreMoveInput = bNewMoveInput;
+	bShowMouseCursor = bNewMoveInput;
+	bEnableClickEvents = bNewMoveInput;
+	bEnableMouseOverEvents = bNewMoveInput;
+
+	if(bNewMoveInput)
+	{
+		SetInputMode(FInputModeGameAndUI());
+	}
+	else
+	{
+		SetInputMode(FInputModeGameOnly());
+	}
+}
+
+//
+void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	switch (CurrentGameState)
+	{
+		case ECurrentGameState::Menu:
+        case ECurrentGameState::GameStarting:
+		{
+			SetIgnoreMoveInput(true);
+			break;
+		}
+		case ECurrentGameState::InGame:
+		{
+			SetIgnoreMoveInput(false);
+			break;
+		}
+		default: break;
+	}
+}
+

@@ -29,9 +29,8 @@
 AGeneratedMap::AGeneratedMap()
 {
 	// Set this actor to call Tick() every time to update characters locations
-	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.bStartWithTickEnabled = true;
-	PrimaryActorTick.TickInterval = 0.25F;
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// setup replication
 	bReplicates = true;
@@ -324,7 +323,7 @@ void AGeneratedMap::RemoveMapComponent(UMapComponent* MapComponent)
 void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 {
 	AActor* const ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
-	if (!ensureMsgf(IS_VALID(ComponentOwner), TEXT("FCell:: The specified actor is not valid")))
+	if (!IS_VALID(ComponentOwner))
 	{
 		return;
 	}
@@ -399,8 +398,7 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 {
 	UWorld* World = GetWorld();
 	TArray<FLevelStreamRow> LevelStreamRows;
-	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
-	if(LevelsDataAsset)
+	if(const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
 	{
 		LevelStreamRows = LevelsDataAsset->GetLevelStreamRows();
 	}
@@ -502,47 +500,6 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 /* ---------------------------------------------------
  *		Level map protected functions
  * --------------------------------------------------- */
-
-// Called every time on this actor to update characters locations on the Level Map.
-void AGeneratedMap::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (GetCharactersNum() == 0) // are no players left
-	{
-		SetActorTickEnabled(false);
-		return;
-	}
-
-	FMapComponents PlayersMapComponents;
-	GetMapComponents(PlayersMapComponents, TO_FLAG(EAT::Player));
-	for (UMapComponent* MapCompIt : PlayersMapComponents)
-	{
-		if (MapCompIt)
-		{
-			SetNearestCell(MapCompIt);
-		}
-	}
-
-	// AI moving
-	USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
-
-	// Random item spawning
-	// @todo GameMode is null for client, redesign this logic!
-	// AMyGameModeBase* MyGameModeBase = USingletonLibrary::GetMyGameMode(this);
-	// if (ensureMsgf(MyGameModeBase, TEXT("AGeneratedMap::Tick: MyGameModeBase is null")))
-	// {
-	// 	const float Timer = MyGameModeBase->Timer;
-	// 	const int32 IntTimer = static_cast<int32>(Timer);
-	// 	if (IntTimer <= 60                           // after the minute
-	// 	    && FMath::IsNearlyEqual(Timer, IntTimer) // is whole number
-	// 	    && IntTimer % 10 == 0)                   // each 10 seconds
-	// 	{
-	// 		const FCell RandCell = *GridCells_[FMath::RandRange(int32(0), GridCells_.Num() - 1)];
-	// 		SpawnActorByType(AT::Item, RandCell); // can be not spawned in non empty cell
-	// 	}
-	// }
-}
 
 // Called when an instance of this class is placed (in editor) or spawned
 void AGeneratedMap::OnConstruction(const FTransform& Transform)

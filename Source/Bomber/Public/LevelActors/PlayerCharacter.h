@@ -107,6 +107,10 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	class AMyAIController* MyAIController;	//[G]
 
+	/**  */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
+	FTimerHandle UpdatePositionHandleInternal;
+
 	/* ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */
@@ -145,4 +149,8 @@ protected:
 	/** Event triggered when the bomb has been explicitly destroyed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
     void OnBombDestroyed(AActor* DestroyedBomb);
+
+	/** */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+    void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };
