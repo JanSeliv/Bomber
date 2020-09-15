@@ -38,7 +38,7 @@ bool USingletonLibrary::IsEditor()
 bool USingletonLibrary::IsEditorNotPieWorld()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	return IsEditor() && GEditor && !GEditor->IsPlayingSessionInEditor();
+	return IsEditor() && GEditor && !GEditor->IsPlaySessionInProgress();
 #endif	// [IsEditorNotPieWorld]
 	return false;
 }

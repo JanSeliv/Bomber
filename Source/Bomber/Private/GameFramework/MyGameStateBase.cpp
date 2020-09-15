@@ -73,7 +73,8 @@ void AMyGameStateBase::OnGameStarting()
 	FTimerHandle InGameCountdownTimer;
 	World->GetTimerManager().SetTimer(InGameCountdownTimer, [WeakThis]
     {
-        if (AMyGameStateBase* MyGameStateBase = WeakThis.Get())
+		AMyGameStateBase* MyGameStateBase = WeakThis.Get();
+        if (MyGameStateBase->CurrentGameStateInternal == ECurrentGameState::GameStarting) // state was not changed
         {
             MyGameStateBase->ServerSetGameState(ECurrentGameState::InGame);
         }

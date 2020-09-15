@@ -59,8 +59,10 @@ void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInt
 {
 	UWorld* World = GetWorld();
 	USkeletalMeshComponent* MeshComponent = GetMesh();
-	if (!World	//
-		|| !MeshComponent)
+	AController* Controller = GetController();
+	if (!World
+		|| !MeshComponent
+		|| Controller->IsMoveInputIgnored())
 	{
 		return;
 	}

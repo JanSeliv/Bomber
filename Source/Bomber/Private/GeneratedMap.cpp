@@ -274,14 +274,16 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells, bool bIsNotValidOn
 		AActor* const ComponentOwner = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		const bool IsValidOwner = IsValid(ComponentOwner);
 
+		// ignore destroying dragged actors
 		// if bIsNotValidOnly param: should destroy only not valid or editor non-PIE owners, otherwise continue
-		if (bIsNotValidOnly && IsValidOwner && !ComponentOwner->IsEditorOnly())
+		if (MapComponentIt && MapComponentIt->GetIsDragged()
+			|| bIsNotValidOnly && IsValidOwner && !ComponentOwner->IsEditorOnly())
 		{
 			continue;
 		}
 
 		if (MapComponentIt && Cells.Contains(MapComponentIt->Cell) // the cell is contained on the grid
-		    || bIsNotValidOnly)                                         //  if true, not-valid component should be deleted anyway
+		    || bIsNotValidOnly)                                    //  if true, not-valid component should be deleted anyway
 		{
 			USingletonLibrary::PrintToLog(ComponentOwner, "DestroyActorsFromMap");
 
@@ -618,7 +620,13 @@ void AGeneratedMap::GenerateLevelActors()
 	// Destroy all editor-only non-PIE actors
 	FCells NonEmptyCells;
 	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
-	DestroyActorsFromMap(NonEmptyCells, true);
+
+	bool bIsNotValidOnly = false;
+#if WITH_EDITOR
+	bIsNotValidOnly = USingletonLibrary::IsEditorNotPieWorld();
+#endif
+	DestroyActorsFromMap(NonEmptyCells, bIsNotValidOnly);
+
 	NonEmptyCells.Empty();
 
 	// Calls before generation preview actors to updating of all dragged to the Level Map actors
@@ -843,6 +851,8 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::Menu:
 		{
+			// on returning to menu case
+			GenerateLevelActors();
 			bIsGameRunningInternal = false;
 			break;
 		}
@@ -851,7 +861,7 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		{
 			if (bIsGameRunningInternal)
 			{
-				// reset level
+				// on reset pressed case
 				GenerateLevelActors();
 			}
 
