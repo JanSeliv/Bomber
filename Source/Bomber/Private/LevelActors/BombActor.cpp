@@ -48,7 +48,7 @@ void ABombActor::InitBomb(
 	}
 
 	// Set material
-	const TArray<UMaterialInterface*>& BombMaterials = MapComponentInternal->GetActorDataAsset<UBombDataAsset>()->BombMaterials;
+	const TArray<UMaterialInterface*>& BombMaterials = MapComponentInternal->GetDataAssetChecked<UBombDataAsset>()->BombMaterials;
 	if (IsValid(BombMeshComponentInternal)	// Mesh of the bomb is not valid
         && CharacterID != -1		// Is not debug character
         && BombMaterials.Num())		// As least one bomb material
@@ -128,7 +128,7 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 	// Spawn emitters
 	if(MapComponentInternal)
 	{
-		UParticleSystem* ExplosionParticle = MapComponentInternal->GetActorDataAsset<UBombDataAsset>()->ExplosionParticle;
+		UParticleSystem* ExplosionParticle = MapComponentInternal->GetDataAssetChecked<UBombDataAsset>()->ExplosionParticle;
 		for (const FCell& Cell : ExplosionCellsInternal)
 		{
 			const FTransform Position{GetActorRotation(), Cell.Location, GetActorScale3D()};

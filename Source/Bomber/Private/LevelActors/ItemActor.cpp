@@ -2,13 +2,15 @@
 
 #include "LevelActors/ItemActor.h"
 //---
+#include "Bomber.h"
+#include "GeneratedMap.h"
+#include "LevelActors/PlayerCharacter.h"
+#include "MapComponent.h"
+#include "SingletonLibrary.h"
+//---
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
-//---
-#include "Bomber.h"
-#include "LevelActors/PlayerCharacter.h"
-#include "MapComponent.h"
 
 // Default constructor
 UItemDataAsset::UItemDataAsset()
@@ -70,12 +72,15 @@ void AItemActor::BeginPlay()
 void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	const auto OverlappedCharacter = Cast<APlayerCharacter>(OtherActor);
-	if (!IS_VALID(this)						// Other actor is not myCharacter
-		|| !IsValid(OverlappedCharacter))	// Character is not valid
+	if (!IS_VALID(this)				// is not pending killed
+		|| !OverlappedCharacter)		// character is not valid)
 	{
 		return;
 	}
 
 	// Destroy itself on overlapping
-	this->Destroy();
+	if(AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
+	{
+		LevelMap->DestroyLevelActor(MapComponentInternal);
+	}
 }

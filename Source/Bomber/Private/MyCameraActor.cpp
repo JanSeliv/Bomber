@@ -106,13 +106,26 @@ void AMyCameraActor::BeginPlay()
 //
 void AMyCameraActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
-	SetActorTickEnabled(CurrentGameState == ECurrentGameState::InGame);
+	bool bShouldTick = false;
 
-	if (CurrentGameState == ECurrentGameState::GameStarting)
+	switch (CurrentGameState)
 	{
-		if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
+		case ECurrentGameState::GameStarting:
 		{
-			PlayerController->SetViewTargetWithBlend(this, BlendTimeInternal);
+			if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
+			{
+				PlayerController->SetViewTargetWithBlend(this, BlendTimeInternal);
+			}
+			bShouldTick = true;
+			break;
 		}
+		case ECurrentGameState::InGame:
+		{
+			bShouldTick = true;
+			break;
+		}
+		default : break;
 	}
+
+	SetActorTickEnabled(bShouldTick);
 }

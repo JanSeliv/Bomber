@@ -78,11 +78,7 @@ public:
 
 	/** Get checked Data Asset */
 	template <typename T>
-	FORCEINLINE const T* GetActorDataAsset() const { return CastChecked<T>(ActorDataAssetInternal); }
-
-	/** Returns true if owner actor was dragged to the scene. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool GetIsDragged() const { return bIsDraggedInternal; }
+	FORCEINLINE const T* GetDataAssetChecked() const { return CastChecked<T>(ActorDataAssetInternal); }
 
 protected:
 	/* ---------------------------------------------------
@@ -92,10 +88,6 @@ protected:
 	/** Contains exposed for designers properties for the spawned owner. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))
 	class ULevelActorDataAsset* ActorDataAssetInternal; //[D]
-
-	/** True for dragged actor, false for generated or spawned actor. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Dragged"))
-	bool bIsDraggedInternal; //[G]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

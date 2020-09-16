@@ -62,15 +62,16 @@ void ABoxActor::BeginPlay()
 void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (LevelMap == nullptr					// The Level Map is not accessible
-		|| IsValid(MapComponentInternal) == false)	// The Map Component is not valid or transient
+	if (LevelMap                           // The Level Map is not valid or transient (in regenerating process)
+	    || !IsValid(MapComponentInternal)) // The Map Component is not valid or is destroyed already
 	{
 		return;
 	}
 
 	// Spawn item with the chance
-	const bool ItemChance = FMath::RandRange(int32(0), int32(100)) < 30;
-	if (ItemChance)
+	const int32 SpawnItemChance = MapComponentInternal->GetDataAssetChecked<UBoxDataAsset>()->GetSpawnItemChance();
+	const int32 Max = 100;
+	if(FMath::RandHelper(Max) < SpawnItemChance)
 	{
 		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");
 		LevelMap->SpawnActorByType(EAT::Item, FCell(GetActorLocation()));

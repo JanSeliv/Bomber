@@ -175,14 +175,13 @@ public:
 	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
 	 *
 	 * @param Cells The set of cells for destroying the found actors.
-	 * @param bIsNotValidOnly If should destroy editor-only actors that were spawned in the PIE world
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void DestroyActorsFromMap(const TSet<struct FCell>& Cells, bool bIsNotValidOnly = false);
+	void DestroyActorsFromMap(const TSet<struct FCell>& Cells);
 
 	/** Removes the specified map component from the MapComponents_ array without an owner destroying. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void RemoveMapComponent(class UMapComponent* MapComponent);
+	void DestroyLevelActor(class UMapComponent* MapComponent);
 
 	/** Finds the nearest cell pointer to the specified Map Component
 	 *
@@ -219,6 +218,10 @@ protected:
 	/** Storage of alive players and their current locations */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	TArray<class UMapComponent*> MapComponentsInternal;  //[M.IO]
+
+	/** Contains map components that were dragged to the scene, store it to avoid destroying and restore its owners after each regenerating. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Components"))
+	TArray<class UMapComponent*> DraggedComponentsInternal;  //[M.IO]
 
 	/** The chance of walls generation.
 	 * @TODO Replace to the data asset. */

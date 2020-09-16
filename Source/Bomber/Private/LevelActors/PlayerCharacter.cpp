@@ -59,10 +59,10 @@ void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInt
 {
 	UWorld* World = GetWorld();
 	USkeletalMeshComponent* MeshComponent = GetMesh();
-	AController* Controller = GetController();
+	AController* OwnedController = GetController();
 	if (!World
 		|| !MeshComponent
-		|| Controller->IsMoveInputIgnored())
+		|| OwnedController->IsMoveInputIgnored())
 	{
 		return;
 	}
@@ -202,7 +202,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// Set a nameplate material
 	if (ensureMsgf(NameplateMeshComponent, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
 	{
-		const TArray<UMaterialInterface*>& NameplateMaterials = MapComponent->GetActorDataAsset<UPlayerDataAsset>()->NameplateMaterials;
+		const TArray<UMaterialInterface*>& NameplateMaterials = MapComponent->GetDataAssetChecked<UPlayerDataAsset>()->NameplateMaterials;
 		const int32 NameplateMeshesNum = NameplateMaterials.Num();
 		if (NameplateMeshesNum > 0)
 		{

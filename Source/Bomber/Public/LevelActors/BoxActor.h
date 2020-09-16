@@ -19,6 +19,15 @@ class UBoxDataAsset final : public ULevelActorDataAsset
 public:
 	/** Default constructor. */
 	UBoxDataAsset();
+
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Custom")
+    FORCEINLINE int32 GetSpawnItemChance() const { return SpawnItemChanceInternal; }
+
+protected:
+	/** The chance to spawn item after box destroying. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Custom", meta = (BlueprintProtected, DisplayName = " Spawn Item Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
+	int32 SpawnItemChanceInternal = 30.F;  //[D]
 };
 
 /**
@@ -45,6 +54,8 @@ protected:
 	/** The static mesh component of this actor */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Mesh Component"))
 	class UStaticMeshComponent* BoxMeshComponentInternal;  //[C.DO]
+
+
 
 	/* ---------------------------------------------------
 	*		Protected functions
