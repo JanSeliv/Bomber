@@ -12,6 +12,7 @@
 #include "MyCameraActor.h"
 #include "GameFramework/MyGameStateBase.h"
 //---
+#include "Engine/LevelStreaming.h"
 #include "Math/UnrealMathUtility.h"
 #include "UObject/ConstructorHelpers.h"
 //---
@@ -178,7 +179,9 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = this;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+#if WITH_EDITOR
 	SpawnParams.bTemporaryEditorActor = USingletonLibrary::IsEditorNotPieWorld();
+#endif
 	return World->SpawnActor<AActor>(USingletonLibrary::GetActorClassByType(Type), FTransform(Cell.Location), SpawnParams);
 }
 
@@ -419,7 +422,7 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 	}
 
 	// Get Level Streaming by Index in LevelStreamingRows, returns if found stream should be visible
-	auto GetLevelStreaming = [&LevelStreamRows, World, NewLevelType](const int32& Index, ULevelStreaming*& OutLevelStreaming) -> bool
+	auto GetLevelStreaming = [&LevelStreamRows, World, NewLevelType](const int32& Index, FName& OutLevelName) -> bool
 	{
 		if (!LevelStreamRows.IsValidIndex(Index))
 		{
@@ -427,8 +430,7 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 		}
 
 		const FLevelStreamRow& LevelStreamRowIt = LevelStreamRows[Index];
-		const FName LevelName(LevelStreamRowIt.Level.GetAssetName());
-		OutLevelStreaming = UGameplayStatics::GetStreamingLevel(World, LevelName);
+		OutLevelName = *LevelStreamRowIt.Level.GetAssetName();
 		return LevelStreamRowIt.LevelType == NewLevelType;
 	};
 
@@ -441,8 +443,14 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 		TArray<bool> Visibilities;
 		for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
 		{
-			ULevelStreaming* LevelStreamingIt;
-			const bool bShouldBeVisibleIt = GetLevelStreaming(Index, LevelStreamingIt);
+			FName LevelName;
+			const bool bShouldBeVisibleIt = GetLevelStreaming(Index, LevelName);
+			if (LevelName.IsNone())
+			{
+				continue;
+			}
+
+			ULevelStreaming* LevelStreamingIt = UGameplayStatics::GetStreamingLevel(World, LevelName);
 			ULevel* LoadedLevel = LevelStreamingIt ? LevelStreamingIt->GetLoadedLevel() : nullptr;
 			if (!LoadedLevel)
 			{
@@ -455,8 +463,8 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 
 			// Override streaming methods
 			const TSubclassOf<ULevelStreaming>& LevelStreamingClass = bShouldBeVisibleIt
-				                                                          ? ULevelStreamingAlwaysLoaded::StaticClass()
-				                                                          : ULevelStreamingDynamic::StaticClass();
+                                                                          ? ULevelStreamingAlwaysLoaded::StaticClass()
+                                                                          : ULevelStreamingDynamic::StaticClass();
 			UEditorLevelUtils::SetStreamingClassForLevel(LevelStreamingIt, LevelStreamingClass);
 			World->SetCurrentLevel(World->PersistentLevel);
 		}
@@ -480,9 +488,9 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 	// show the specified level, hide other levels
 	for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
 	{
-		ULevelStreaming* LevelStreamingIt;
-		const bool bShouldBeVisibleIt = GetLevelStreaming(Index, LevelStreamingIt);
-		if (!LevelStreamingIt)
+		FName LevelName;
+		const bool bShouldBeVisibleIt = GetLevelStreaming(Index, LevelName);
+		if (LevelName.IsNone())
 		{
 			continue;
 		}
@@ -491,11 +499,11 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 		LatentInfo.UUID = Index;
 		if (bShouldBeVisibleIt)
 		{
-			UGameplayStatics::LoadStreamLevel(World, LevelStreamingIt->PackageNameToLoad, true, false, LatentInfo);
+			UGameplayStatics::LoadStreamLevel(World, LevelName, true, false, LatentInfo);
 		}
 		else
 		{
-			UGameplayStatics::UnloadStreamLevel(World, LevelStreamingIt->PackageNameToLoad, LatentInfo, false);
+			UGameplayStatics::UnloadStreamLevel(World, LevelName, LatentInfo, false);
 		}
 	}
 

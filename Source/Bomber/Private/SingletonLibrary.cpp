@@ -32,6 +32,7 @@ bool USingletonLibrary::IsEditor()
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	return GIsEditor && GWorld && GWorld->IsEditorWorld();
 #endif
+	return false;
 }
 
 // Checks, that this actor placed in the editor world and the game is not started yet
