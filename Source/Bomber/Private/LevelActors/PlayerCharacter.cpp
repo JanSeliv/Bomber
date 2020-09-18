@@ -62,6 +62,7 @@ void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInt
 	AController* OwnedController = GetController();
 	if (!World
 		|| !MeshComponent
+		|| !OwnedController
 		|| OwnedController->IsMoveInputIgnored())
 	{
 		return;
@@ -87,12 +88,15 @@ void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInt
 // Spawns bomb on character position
 void APlayerCharacter::SpawnBomb()
 {
+	AController* OwnedController = GetController();
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap                                     // The Level Map is not accessible
-	    || !IsValid(MapComponent)            // The Map Component is not valid or transient
-	    || PowerupsInternal.FireN <= 0               // Null length of explosion
-	    || PowerupsInternal.BombN <= 0               // No more bombs
-	    || USingletonLibrary::IsEditorNotPieWorld()) // Should not spawn bomb in PIE
+	if (!LevelMap                                   // The Level Map is not accessible
+	    || !IsValid(MapComponent)                   // The Map Component is not valid or transient
+	    || PowerupsInternal.FireN <= 0              // Null length of explosion
+	    || PowerupsInternal.BombN <= 0              // No more bombs
+	    || USingletonLibrary::IsEditorNotPieWorld() // Should not spawn bomb in PIE
+	    || !OwnedController							// controller is not valid
+	    || OwnedController->IsMoveInputIgnored())	// controller is blocked
 	{
 		return;
 	}

@@ -42,11 +42,11 @@ public:
 
 	/** Return the summary time required to start the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE float GetStartingCountdown() const { return StartingCountdownInternal; }
+	FORCEINLINE int32 GetStartingCountdown() const { return StartingCountdownInternal; }
 
-	/** Returns the AMyGameStateBase::InGameCountdown property. Used by BPW_InGameWidget. */
+	/** Returns the left second to the end of the game. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE float GetInGameCountdown() const { return InGameCountdownInternal; };
+	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdownInternal; };
 
 protected:
 	/* ---------------------------------------------------
@@ -59,11 +59,11 @@ protected:
 
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Starting Countdown"))
-	float StartingCountdownInternal = 3.F;
+	int32 StartingCountdownInternal = 3;
 
 	/** Seconds to the end of the round, each second decrements by 1. Replicated. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, meta = (BlueprintProtected,  DisplayName = "In-Game Countdown"))
-	float InGameCountdownInternal = 120.F; //[B]
+	int32 InGameCountdownInternal = 120; //[B]
 
 	/* ---------------------------------------------------
 	*		Protected functions
