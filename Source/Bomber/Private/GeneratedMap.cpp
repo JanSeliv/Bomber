@@ -58,6 +58,17 @@ AGeneratedMap::AGeneratedMap()
 	CameraActorClass = AMyCameraActor::StaticClass();
 }
 
+// Returns number of characters in the array
+int32 AGeneratedMap::GetPlayersNum()
+{
+	int8 PlayersNum = 0;
+	if(const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
+	{
+		PlayersNum = LevelMap->PlayersNumInternal;
+	}
+	return PlayersNum;
+}
+
 // Getting an array of cells by four sides of an input center cell and type of breaks
 void AGeneratedMap::GetSidesCells(
 	FCells& OutCells,
@@ -201,7 +212,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 		MapComponentsInternal.Emplace(AddedComponent);
 		if (DataAsset->GetActorType() == EAT::Player) // Is a player
 		{
-			PlayerCharactersNum++;
+			PlayersNumInternal++;
 		}
 	}
 
@@ -274,6 +285,12 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 		return;
 	}
 
+	// Decrement the players number before their destroying
+	FCells PlayerCells = Cells;
+	IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player));
+	PlayersNumInternal -= PlayerCells.Num();
+
+	// Iterate and destroy
 	for (int32 i = MapComponentsInternal.Num() - 1; i >= 0; --i)
 	{
 		if (!MapComponentsInternal.IsValidIndex(i)) // the element already was removed
@@ -300,14 +317,6 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 {
 	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
 	const bool bIsValidOwner = IsValid(ComponentOwner);
-
-	// Decrement the players number
-	const ULevelActorDataAsset* DataAsset = MapComponent ? MapComponent->GetActorDataAsset() : nullptr;
-	if (DataAsset
-	    && DataAsset->GetActorType() == EAT::Player) // Is a player
-	{
-		PlayerCharactersNum--;
-	}
 
 	// Remove from the array (MapComponent can be invalid)
 	MapComponentsInternal.Remove(MapComponent);
@@ -638,12 +647,10 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// Destroy all editor-only non-PIE actors
 	//EObjectFlags CurrentFlag = GetFlags();
-	//SetFlags(RF_Transient); // mark transient to avoid some OnDestroy-executions (f.e spawning items on box destroying)
 	FCells NonEmptyCells;
 	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
 	DestroyActorsFromMap(NonEmptyCells);
 	NonEmptyCells.Empty();
-	//SetFlags(CurrentFlag); // restore flags
 
 	// Calls before generation preview actors to updating of all dragged to the Level Map actors
 	for (UMapComponent* MapComponentIt : DraggedComponentsInternal)
@@ -664,7 +671,7 @@ void AGeneratedMap::GenerateLevelActors()
 	// Set number of existed player characters
 	FMapComponents PlayersMapComponents;
 	GetMapComponents(PlayersMapComponents, TO_FLAG(EAT::Player));
-	PlayerCharactersNum = PlayersMapComponents.Num();
+	PlayersNumInternal = PlayersMapComponents.Num();
 
 	/* Steps:
 	 *
@@ -860,7 +867,7 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, con
 }
 
 //
-void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void AGeneratedMap::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);

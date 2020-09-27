@@ -51,6 +51,6 @@ protected:
     void UpdateAI();
 
 	/** */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
     void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

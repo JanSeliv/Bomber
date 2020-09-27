@@ -55,8 +55,6 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Mesh Component"))
 	class UStaticMeshComponent* BoxMeshComponentInternal;  //[C.DO]
 
-
-
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */

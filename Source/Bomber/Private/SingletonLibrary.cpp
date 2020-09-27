@@ -9,6 +9,7 @@
 #include "MyGameInstance.h"
 #include "MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
 #include "Controllers/MyPlayerController.h"
 //---
 #include "Components/TextRenderComponent.h"
@@ -194,15 +195,22 @@ AMyGameModeBase* USingletonLibrary::GetMyGameMode(const UObject* WorldContextObj
 	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
 }
 
-//
+// Returns the Bomber Game state, nullptr otherwise.
 AMyGameStateBase* USingletonLibrary::GetMyGameState(const UObject* WorldContextObject)
 {
 	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(WorldContextObject));
 }
 
+// Returns the Bomber Player Controller, nullptr otherwise
 AMyPlayerController* USingletonLibrary::GetMyPlayerController(const UObject* WorldContextObject)
 {
 	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(WorldContextObject, 0));
+}
+
+// Returns the Bomber Player State for specified player, nullptr otherwise
+AMyPlayerState* USingletonLibrary::GetMyPlayerState(const AController* Controller)
+{
+	return Controller ? Cast<AMyPlayerState>(Controller->PlayerState) : nullptr;
 }
 
 /* ---------------------------------------------------

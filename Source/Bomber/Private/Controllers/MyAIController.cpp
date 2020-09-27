@@ -90,7 +90,7 @@ void AMyAIController::BeginPlay()
 	if(const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
 	{
 		FTimerManager& TimerManager = World->GetTimerManager();
-		TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, LevelsDataAsset->GetTickInterval(), true);
+		TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, LevelsDataAsset->GetTickInterval(), true, KINDA_SMALL_NUMBER);
 		TimerManager.PauseTimer(AIUpdateHandleInternal);
 	}
 }
@@ -340,7 +340,7 @@ void AMyAIController::UpdateAI()
 #endif	// [Editor]
 }
 
-void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -353,6 +353,7 @@ void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::Menu:
 		case ECurrentGameState::GameStarting:
+		case ECurrentGameState::EndGame:
 		{
 			TimerManager.PauseTimer(AIUpdateHandleInternal);
 			break;

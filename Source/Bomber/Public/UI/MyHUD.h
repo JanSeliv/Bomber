@@ -27,7 +27,7 @@ public:
 
 	/** The current widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Ñ++")
-	class UUserWidget* InGameWidget;  //[G]
+	class UInGameWidget* InGameWidget;  //[G]
 
 	/* ---------------------------------------------------
 	*		Public functions

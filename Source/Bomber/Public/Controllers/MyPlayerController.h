@@ -19,9 +19,17 @@ public:
 	/** Sets default values for this controller's properties. */
 	AMyPlayerController();
 
+	/**  */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	bool CanHideMouse() const;
+
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "C++", meta = (DisplayName = "Set Game State"))
     void ServerSetGameState(ECurrentGameState NewGameState);
+
+	/**  */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetMouseCursor(bool bShouldShow);
 
 protected:
 	/** Allows the PlayerController to set up custom input bindings. */
@@ -32,11 +40,11 @@ protected:
 
 	/**
 	* Locks or unlocks movement input, consecutive calls stack up and require the same amount of calls to undo, or can all be undone using ResetIgnoreMoveInput.
-	* @param bNewMoveInput	If true, move input is ignored. If false, input is not ignored.
+	* @param bShouldIgnore	If true, move input is ignored. If false, input is not ignored.
 	*/
-    virtual void SetIgnoreMoveInput(bool bNewMoveInput) override;
+    virtual void SetIgnoreMoveInput(bool bShouldIgnore) override;
 
 	/** */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
     void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

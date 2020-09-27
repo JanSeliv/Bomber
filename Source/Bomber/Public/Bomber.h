@@ -76,7 +76,22 @@ enum class EItemType : uint8
 UENUM(BlueprintType)
 enum class ECurrentGameState : uint8
 {
+	None,
 	Menu,
 	GameStarting,
+	EndGame,
 	InGame
+};
+
+
+/**
+ *
+ */
+UENUM(BlueprintType)
+enum class EEndGameState : uint8
+{
+	None,
+	Win,
+	Lose,
+	Draw
 };

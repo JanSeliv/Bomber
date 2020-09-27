@@ -6,6 +6,7 @@
 #include "GeneratedMap.h"
 #include "MapComponent.h"
 #include "SingletonLibrary.h"
+#include "MyGameStateBase.h"
 //---
 #include "Components/StaticMeshComponent.h"
 #include "Math/UnrealMathUtility.h"

@@ -106,6 +106,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
     static class AMyPlayerController* GetMyPlayerController(const UObject* WorldContextObject);
 
+	/** Returns the Bomber Player State for specified player, nullptr otherwise. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+    static class AMyPlayerState* GetMyPlayerState(const class AController* Controller);
 
 	/* ---------------------------------------------------
 	 *		FCell blueprint functions

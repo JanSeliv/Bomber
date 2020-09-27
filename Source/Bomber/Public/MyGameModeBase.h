@@ -19,7 +19,7 @@ public:
 	AMyGameModeBase();
 
 protected:
-	/** Called when the game starts or when spawned */ /** Called when the game starts or when spawned */
+	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
 	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the PlayerController. */

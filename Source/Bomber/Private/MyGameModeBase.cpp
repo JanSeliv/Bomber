@@ -5,8 +5,7 @@
 #include "MyHUD.h"
 #include "MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "SingletonLibrary.h"
-#include "Bomber.h"
+#include "GameFramework/MyPlayerState.h"
 
 // Sets default values for this actor's properties
 AMyGameModeBase::AMyGameModeBase()
@@ -16,6 +15,7 @@ AMyGameModeBase::AMyGameModeBase()
 	HUDClass = AMyHUD::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = nullptr;
+	PlayerStateClass = AMyPlayerState::StaticClass();
 }
 
 // Called when the game starts or when spawned
@@ -44,8 +44,5 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 // Called when all players were connected.
 void AMyGameModeBase::OnSessionStarted() const
 {
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
-	{
-		MyGameState->ServerSetGameState(ECurrentGameState::Menu);
-	}
+
 }

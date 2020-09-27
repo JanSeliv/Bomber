@@ -23,16 +23,7 @@ public:
 	/** Sets default values for this actor's properties. */
 	AMyCameraActor();
 
-	/** Returns the time taken to blend. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE float GetBlendTime() const { return BlendTimeInternal; }
-
 protected:
-	/** Time taken to blend.
-	* @TODO Replace to the Camera Data Asset. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Blend Time"))
-	float BlendTimeInternal = 1.F; //[N]
-
 	/** Called every frame. */
 	virtual void Tick(float DeltaTime) override;
 
@@ -40,6 +31,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	/** */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
     void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

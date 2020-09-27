@@ -23,6 +23,9 @@ AMyCameraActor::AMyCameraActor()
 	CameraComp->SetRelativeLocation(FVector(0.F, 0.F, 500.F));
 	CameraComp->SetRelativeRotation(FRotator(-90.0F, 0.0F, -90.0F));
 	CameraComp->SetConstraintAspectRatio(false);	// viewport without black borders
+#if WITH_EDITOR
+	CameraComp->bCameraMeshHiddenInGame = false;
+#endif
 
 	// Disable Eye Adaptation
 	CameraComp->PostProcessSettings.bOverride_AutoExposureMinBrightness = true;
@@ -37,7 +40,8 @@ void AMyCameraActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	const AGeneratedMap* const LevelMap = USingletonLibrary::GetLevelMap();
-	if (IsValid(LevelMap) == false || LevelMap->GetCharactersNum() == 0)
+	if (IsValid(LevelMap) == false
+		|| !AGeneratedMap::GetPlayersNum())
 	{
 		SetActorTickEnabled(false);
 		return;
@@ -104,7 +108,7 @@ void AMyCameraActor::BeginPlay()
 }
 
 //
-void AMyCameraActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void AMyCameraActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	bool bShouldTick = false;
 
@@ -112,9 +116,12 @@ void AMyCameraActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::GameStarting:
 		{
-			if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0))
+			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+			const AMyGameStateBase* GameStateBase = USingletonLibrary::GetMyGameState(this);
+			if (PlayerController
+				&& GameStateBase)
 			{
-				PlayerController->SetViewTargetWithBlend(this, BlendTimeInternal);
+				PlayerController->SetViewTargetWithBlend(this, GameStateBase->GetStartingCountdown());
 			}
 			bShouldTick = true;
 			break;

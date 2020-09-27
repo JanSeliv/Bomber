@@ -2,6 +2,9 @@
 
 #include "GameFramework/MyGameStateBase.h"
 //---
+#include "SingletonLibrary.h"
+#include "MyPlayerController.h"
+//---
 #include "UnrealNetwork.h"
 
 // Default constructor
@@ -10,6 +13,16 @@ AMyGameStateBase::AMyGameStateBase()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+}
+
+//  Returns the AMyGameStateBase::CurrentGameState property
+ECurrentGameState AMyGameStateBase::GetCurrentGameState(const UObject* WorldContextObject)
+ {
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(WorldContextObject))
+	{
+		return MyGameState->CurrentGameStateInternal;
+	}
+	return ECurrentGameState::None;
 }
 
 // Returns the AMyGameState::CurrentGameState property.
@@ -25,16 +38,23 @@ bool AMyGameStateBase::ServerSetGameState_Validate(ECurrentGameState NewGameStat
 }
 
 /* ---------------------------------------------------
-*		Protected functions
-* --------------------------------------------------- */
+ *		Protected
+ * --------------------------------------------------- */
 
 // Returns properties that are replicated for the lifetime of the actor channel.
 void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, InGameCountdownInternal);
 	DOREPLIFETIME(ThisClass, CurrentGameStateInternal);
+}
+
+// Called when the game starts or when spawned
+void AMyGameStateBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ServerSetGameState(ECurrentGameState::Menu);
 }
 
 // Called on the AMyGameState::CurrentGameState property updating.
@@ -42,14 +62,18 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 {
 	switch (CurrentGameStateInternal)
 	{
-		case ECurrentGameState::Menu:
-			break;
+		case ECurrentGameState::Menu: break;
 		case ECurrentGameState::GameStarting:
-			OnGameStarting();
+		{
+			ServerOnGameStarting();
 			break;
+		}
+		case ECurrentGameState::EndGame: break;
 		case ECurrentGameState::InGame:
+		{
 			ServerStartInGameCountdown();
 			break;
+		}
 		default: break;
 	}
 
@@ -57,28 +81,31 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 	OnGameStateChanged.Broadcast(CurrentGameStateInternal);
 }
 
-//
-void AMyGameStateBase::OnGameStarting()
+void AMyGameStateBase::ServerOnGameStarting_Implementation()
 {
 	UWorld* World = GetWorld();
 	if (!World
-        || StartingCountdownInternal <= 0
         || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::GameStarting, TEXT("ASSERT: 'CurrentGameStateInternal == ECurrentGameState::InGame' condition is FALSE")))
 	{
 		return;
 	}
 
-	// Decrement in-game countdown timer
+	// Clear timer
+	FTimerManager& TimerManager = World->GetTimerManager();
+	TimerManager.ClearTimer(StartingTimerInternal);
+	StartingTimerInternal.Invalidate();
+
+	// Decrement starting countdown timer
 	TWeakObjectPtr<ThisClass> WeakThis(this);
-	FTimerHandle InGameCountdownTimer;
-	World->GetTimerManager().SetTimer(InGameCountdownTimer, [WeakThis]
-    {
+	World->GetTimerManager().SetTimer(StartingTimerInternal, [WeakThis]
+	{
 		AMyGameStateBase* MyGameStateBase = WeakThis.Get();
-        if (MyGameStateBase->CurrentGameStateInternal == ECurrentGameState::GameStarting) // state was not changed
-        {
-            MyGameStateBase->ServerSetGameState(ECurrentGameState::InGame);
-        }
-    }, StartingCountdownInternal, false);
+		if (MyGameStateBase
+		    && MyGameStateBase->CurrentGameStateInternal == ECurrentGameState::GameStarting) // state was not changed
+		{
+			MyGameStateBase->ServerSetGameState(ECurrentGameState::InGame);
+		}
+	}, StartingCountdownInternal, false);
 }
 
 // Decrement the countdown timer of the current game.
@@ -92,16 +119,22 @@ void AMyGameStateBase::ServerStartInGameCountdown_Implementation()
 		return;
 	}
 
+	// Clear timer
+	FTimerManager& TimerManager = World->GetTimerManager();
+	TimerManager.ClearTimer(InGameTimerInternal);
+	InGameTimerInternal.Invalidate();
+
 	// Decrement in-game countdown timer
 	TWeakObjectPtr<ThisClass> WeakThis(this);
-	FTimerHandle InGameCountdownTimer;
-	World->GetTimerManager().SetTimer(InGameCountdownTimer, [WeakThis]
-	{
-		if (AMyGameStateBase* MyGameStateBase = WeakThis.Get())
-		{
-			MyGameStateBase->InGameCountdownInternal--;
-		}
-	}, 1.F, true);
+	TimerManager.SetTimer(InGameTimerInternal, [WeakThis]
+    {
+        AMyGameStateBase* MyGameStateBase = WeakThis.Get();
+        if (MyGameStateBase
+            && MyGameStateBase->CurrentGameStateInternal == ECurrentGameState::InGame) // state was not changed
+        {
+        	MyGameStateBase->ServerSetGameState(ECurrentGameState::EndGame);
+        }
+    }, InGameCountdownInternal, false);
 }
 
 bool AMyGameStateBase::ServerStartInGameCountdown_Validate()

@@ -2,8 +2,9 @@
 
 #include "MyHUD.h"
 //---
+#include "InGameWidget.h"
+//---
 #include "ConstructorHelpers.h"
-#include "UserWidget.h"
 
 // Sets default values for this HUD's properties
 AMyHUD::AMyHUD()
@@ -23,7 +24,7 @@ void AMyHUD::BeginPlay()
 	Super::BeginPlay();
 
 	// Widget creating and adding it to viewport
-	InGameWidget = CreateWidget<UUserWidget>(GetOwningPlayerController(), InGameWidgetClass);
+	InGameWidget = CreateWidget<UInGameWidget>(GetOwningPlayerController(), InGameWidgetClass);
 	if (InGameWidget) // successfully created
 	{
 		InGameWidget->AddToViewport();

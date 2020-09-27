@@ -103,7 +103,7 @@ public:
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE int32 GetCharactersNum() const { return PlayerCharactersNum; }
+    static int32 GetPlayersNum();
 
 	/** Get the current level type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -233,10 +233,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
 	int32 BoxesChance_ = 70;  //[AW]
 
-	/** Number of characters on the Level Map.
-	* @TODO Replace to the data asset. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	int32 PlayerCharactersNum = 0;	//[G]
+	/** Number of characters on the Level Map. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
+	int32 PlayersNumInternal = 0;	//[G]
 
 	/** The current level type. Affects on the meshes of each level actor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
@@ -281,7 +280,7 @@ protected:
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask) const;
 
 	/** */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/* ---------------------------------------------------

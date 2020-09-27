@@ -6,6 +6,7 @@
 #include "GeneratedMap.h"
 #include "MapComponent.h"
 #include "SingletonLibrary.h"
+#include "MyGameStateBase.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -125,22 +126,24 @@ void ABombActor::BeginPlay()
 // Calls destroying request of all actors by cells in explosion cells array.
 void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 {
-	// Spawn emitters
-	if(MapComponentInternal)
+	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	if (!LevelMap                                                             // The Level Map is not valid or transient (in regenerating process)
+	    || !IsValid(MapComponentInternal)                                     // The Map Component is not valid or is destroyed already
+	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame) // game was not started or already finished
 	{
-		UParticleSystem* ExplosionParticle = MapComponentInternal->GetDataAssetChecked<UBombDataAsset>()->ExplosionParticle;
-		for (const FCell& Cell : ExplosionCellsInternal)
-		{
-			const FTransform Position{GetActorRotation(), Cell.Location, GetActorScale3D()};
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, Position);
-        }
+		return;
+	}
+
+	// Spawn emitters
+	UParticleSystem* ExplosionParticle = MapComponentInternal->GetDataAssetChecked<UBombDataAsset>()->ExplosionParticle;
+	for (const FCell& Cell : ExplosionCellsInternal)
+	{
+		const FTransform Position{GetActorRotation(), Cell.Location, GetActorScale3D()};
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, Position);
 	}
 
 	// Destroy all actors from array of cells
-	if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())	// The Level Map is not valid
-	{
-		LevelMap->DestroyActorsFromMap(ExplosionCellsInternal);
-	}
+	LevelMap->DestroyActorsFromMap(ExplosionCellsInternal);
 }
 
 // Triggers when character end to overlaps with this bomb.

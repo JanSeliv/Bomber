@@ -10,6 +10,7 @@
 #include "SingletonLibrary.h"
 #include "ItemActor.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "MyPlayerState.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -36,7 +37,7 @@ APlayerCharacter::APlayerCharacter()
 	AutoPossessAI = EAutoPossessAI::Disabled;
 
 	// Initialize MapComponent
-	MapComponent = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize skeletal mesh
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
@@ -91,7 +92,7 @@ void APlayerCharacter::SpawnBomb()
 	AController* OwnedController = GetController();
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (!LevelMap                                   // The Level Map is not accessible
-	    || !IsValid(MapComponent)                   // The Map Component is not valid or transient
+	    || !IsValid(MapComponentInternal)                   // The Map Component is not valid or transient
 	    || PowerupsInternal.FireN <= 0              // Null length of explosion
 	    || PowerupsInternal.BombN <= 0              // No more bombs
 	    || USingletonLibrary::IsEditorNotPieWorld() // Should not spawn bomb in PIE
@@ -102,7 +103,7 @@ void APlayerCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(EAT::Bomb, MapComponent->Cell));
+	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(EAT::Bomb, MapComponentInternal->Cell));
 	if (BombActor) // can return nullptr if the cell is not free
 	{
 		// Updating explosion cells
@@ -132,6 +133,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	// Set the animation
+	// @TODO Get Anim class from data asset
 	if (GetMesh()->GetAnimInstance() == nullptr	 // Is not created yet
 		&& MyAnimClass != nullptr)				 // The animation class is set
 	{
@@ -147,14 +149,14 @@ void APlayerCharacter::BeginPlay()
 			PlayerController->Possess(this);
 		}
 	}
-	else								// has AI controller
-		if (!IS_VALID(MyAIController))	// was not spawned early
+	else if (!IS_VALID(MyAIController))	// has AI controller and was not spawned early
 	{
 		MyAIController = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		MyAIController->Possess(this);
 	}
 
-	OnActorBeginOverlap.AddDynamic(this, &APlayerCharacter::OnPlayerBeginOverlap);
+	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
+	OnDestroyed.AddDynamic(this, &ThisClass::OnPlayerDestroyed);
 
 	// Listen states
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
@@ -169,11 +171,12 @@ void APlayerCharacter::BeginPlay()
 		TWeakObjectPtr<ThisClass> WeakThis(this);
 		TimerManager.SetTimer(UpdatePositionHandleInternal, [WeakThis]
 		{
-			if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
+			AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+			if (const APlayerCharacter* PlayerCharacter = WeakThis.Get())
 			{
-				LevelMap->SetNearestCell(WeakThis.IsValid() ? WeakThis.Get()->MapComponent : nullptr);
+				LevelMap->SetNearestCell(PlayerCharacter->MapComponentInternal);
 			}
-		}, LevelsDataAsset->GetTickInterval(), true);
+		}, LevelsDataAsset->GetTickInterval(), true, KINDA_SMALL_NUMBER);
 		TimerManager.PauseTimer(UpdatePositionHandleInternal);
 	}
 }
@@ -185,7 +188,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (IS_TRANSIENT(this)        // This actor is transient
-	    || !IsValid(MapComponent) // Is not valid for map construction
+	    || !IsValid(MapComponentInternal) // Is not valid for map construction
 	    || !LevelMap)             // the level map is not valid or transient
 	{
 		return;
@@ -197,16 +200,16 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// CharacterID_ = PlayersCells.FindId(MapComponent->Cell).AsInteger();
 	// ensureMsgf(CharacterID_ != INDEX_NONE, TEXT("The character was not found on the Level Map"));
 
-	CharacterID_= LevelMap->GetCharactersNum();
+	CharacterID_= LevelMap->GetPlayersNum();
 
 	// Construct the actor's map component
 	const ELevelType LevelType = TO_ENUM(ELevelType, (1 << CharacterID_) % TO_FLAG(ELevelType::Max));
-	MapComponent->OnComponentConstruct(GetMesh(), FLevelActorMeshRow(LevelType));
+	MapComponentInternal->OnComponentConstruct(GetMesh(), FLevelActorMeshRow(LevelType));
 
 	// Set a nameplate material
 	if (ensureMsgf(NameplateMeshComponent, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
 	{
-		const TArray<UMaterialInterface*>& NameplateMaterials = MapComponent->GetDataAssetChecked<UPlayerDataAsset>()->NameplateMaterials;
+		const TArray<UMaterialInterface*>& NameplateMaterials = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->NameplateMaterials;
 		const int32 NameplateMeshesNum = NameplateMaterials.Num();
 		if (NameplateMeshesNum > 0)
 		{
@@ -224,7 +227,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		&& CharacterID_ > 0)					  // Is a bot
 	{
 		MyAIController = Cast<AMyAIController>(GetController());
-		if (MapComponent->bShouldShowRenders == false)
+		if (MapComponentInternal->bShouldShowRenders == false)
 		{
 			if (MyAIController) MyAIController->Destroy();
 		}
@@ -264,6 +267,20 @@ void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 		// Rotate the character
 		RotateToLocation(GetActorLocation() + ScaleValue * WorldDirection, true);
 	}
+}
+
+// Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending
+void APlayerCharacter::Destroyed()
+{
+	AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this);
+	if (IsValid(MapComponentInternal) // is not destroyed already
+		&& MyGameState
+		&& AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+	{
+		MyGameState->OnAnyPlayerDestroyed.Broadcast(this);
+	}
+
+	Super::Destroyed();
 }
 
 // Triggers when this player character starts something overlap.
@@ -306,13 +323,27 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 	OverlappedItem->ResetItemType();
 }
 
+void APlayerCharacter::OnPlayerDestroyed(AActor* DestroyedPawn)
+{
+	if (!IsValid(MapComponentInternal))                                      // The Map Component is not valid or is destroyed already
+	{
+		return;
+	}
+
+	// Listen states
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	{
+		//->OnPlayerDestroyed.Broadcast(this);
+	}
+}
+
 // Event triggered when the bomb has been explicitly destroyed.
 void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
 {
 	PowerupsInternal.BombN++;
 }
 
-void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
 	if (!World)

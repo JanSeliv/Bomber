@@ -2,12 +2,31 @@
 
 #include "InGameWidget.h"
 //---
+#include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "SingletonLibrary.h"
 
 // Shows the in game menu.
-void UInGameWidget::ShowInGameState_Implementation(const UWidget* DisplayedWidget)
+void UInGameWidget::ShowEndGameState_Implementation()
 {
+	// Show mouse cursor
+	if(AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController(this))
+	{
+		MyPlayerController->SetMouseCursor(true);
+	}
+
+	// Blueprint implementation
+	// ...
+}
+
+void UInGameWidget::HideEndGameState_Implementation()
+{
+	// Hide mouse cursor
+	if(AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController(this))
+	{
+		MyPlayerController->SetMouseCursor(false);
+	}
+
 	// Blueprint implementation
 	// ...
 }
@@ -34,8 +53,22 @@ void UInGameWidget::SynchronizeProperties()
 	Super::SynchronizeProperties();
 }
 
+// Launch 'Three-two-one-GO' timer.
+void UInGameWidget::LaunchStartingCountdown_Implementation()
+{
+	// Blueprint implementation
+	// ...
+}
+
+// Launch the main timer that count the seconds to the game ending.
+void UInGameWidget::LaunchInGameCountdown_Implementation()
+{
+	// Blueprint implementation
+	// ...
+}
+
 //
-void UInGameWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void UInGameWidget::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
@@ -47,15 +80,21 @@ void UInGameWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		case ECurrentGameState::GameStarting:
 		{
 			SetVisibility(ESlateVisibility::Visible);
+			HideEndGameState();
 			LaunchStartingCountdown();
+			break;
+		}
+		case ECurrentGameState::EndGame:
+		{
+			ShowEndGameState();
+			break;
+		}
+		case ECurrentGameState::InGame:
+		{
+			LaunchInGameCountdown();
+			HideEndGameState();
 			break;
 		}
 		default: break;
 	}
-}
-
-void UInGameWidget::LaunchStartingCountdown_Implementation()
-{
-	// Blueprint implementation
-	// ...
 }

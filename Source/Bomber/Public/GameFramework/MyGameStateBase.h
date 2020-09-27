@@ -11,7 +11,7 @@
  *
  */
 UCLASS()
-class BOMBER_API AMyGameStateBase : public AGameStateBase
+class BOMBER_API AMyGameStateBase final : public AGameStateBase
 {
 	GENERATED_BODY()
 
@@ -25,6 +25,11 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAnyPlayerDestroyed, const class APawn*, DestroyedPawn);
+	/** Called when one of players was destroyed. */
+	UPROPERTY(BlueprintAssignable, Category = "C++")
+	FOnAnyPlayerDestroyed OnAnyPlayerDestroyed;
+
 	/* ---------------------------------------------------
 	*		Public functions
 	* --------------------------------------------------- */
@@ -37,8 +42,8 @@ public:
 	void ServerSetGameState(ECurrentGameState NewGameState);
 
 	/** Returns the AMyGameStateBase::CurrentGameState property. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE ECurrentGameState GetGameState() const { return CurrentGameStateInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static ECurrentGameState GetCurrentGameState(const class UObject* WorldContextObject);
 
 	/** Return the summary time required to start the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -46,7 +51,7 @@ public:
 
 	/** Returns the left second to the end of the game. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdownInternal; };
+	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdownInternal; }
 
 protected:
 	/* ---------------------------------------------------
@@ -55,15 +60,24 @@ protected:
 
 	/** Store the game state for the current game. */
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = "OnRep_CurrentGameState", meta = (BlueprintProtected, DisplayName = "Current Game State"))
-	ECurrentGameState CurrentGameStateInternal;
+	ECurrentGameState CurrentGameStateInternal = ECurrentGameState::None;
 
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Starting Countdown"))
 	int32 StartingCountdownInternal = 3;
 
-	/** Seconds to the end of the round, each second decrements by 1. Replicated. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, meta = (BlueprintProtected,  DisplayName = "In-Game Countdown"))
+	/** Decrement AMyGameStateBase::StartingCountdownInternal by 1 for each second.*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Starting Timer"))
+	FTimerHandle StartingTimerInternal;
+
+	/** Seconds to the end of the round,
+	 * @todo Move to Data asset */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected,  DisplayName = "In-Game Countdown"))
 	int32 InGameCountdownInternal = 120; //[B]
+
+	/** Decrement AMyGameStateBase::InGameCountdownInternal by 1 for each second. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected,  DisplayName = "In-Game Timer"))
+	FTimerHandle InGameTimerInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -72,13 +86,16 @@ protected:
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	/** Called when the game starts or when spawned. */
+	virtual void BeginPlay() override;
+
 	/** Called on the AMyGameStateBase::CurrentGameState property updating. */
 	UFUNCTION()
 	void OnRep_CurrentGameState();
 
 	/** */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStarting();
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void ServerOnGameStarting();
 
 	/** Decrement the countdown timer of the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "C++", meta = (DisplayName = "Start In-Game Countdown"))

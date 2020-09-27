@@ -85,8 +85,8 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** The MapComponent manages this actor on the Level Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
-	class UMapComponent* MapComponent;	//[C.AW]
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
+	class UMapComponent* MapComponentInternal;	//[C.AW]
 
 	/** The static mesh nameplate */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
@@ -100,7 +100,8 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
 	int32 CharacterID_ = INDEX_NONE;  //[G]
 
-	/* The AnimBlueprint class to use, can set it only in the gameplay */
+	/* The AnimBlueprint class to use, can set it only in the gameplay
+	 * @TODO Move to the Data Asset	 */
 	class TSubclassOf<UAnimInstance> MyAnimClass;
 
 	/** The character's AI controller */
@@ -133,6 +134,9 @@ protected:
 	 */
 	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.0f, bool bForce = false) override;
 
+	/** Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending */
+	virtual void Destroyed() override;
+
 	/* Move the player character by the forward vector. */
 	FORCEINLINE void OnMoveUpDown(float ScaleValue) { AddMovementInput(GetActorForwardVector(), ScaleValue); }
 
@@ -146,11 +150,15 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
     void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
+	/** Event triggered when the actor has been explicitly destroyed.*/
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+    void OnPlayerDestroyed(AActor* DestroyedPawn);
+
 	/** Event triggered when the bomb has been explicitly destroyed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
     void OnBombDestroyed(AActor* DestroyedBomb);
 
 	/** */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
     void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

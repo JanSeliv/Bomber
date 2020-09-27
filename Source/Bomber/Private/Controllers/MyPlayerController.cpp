@@ -4,7 +4,6 @@
 //---
 #include "InGameWidget.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "MyHUD.h"
 #include "SingletonLibrary.h"
 
 // Sets default values for this controller's properties
@@ -15,6 +14,17 @@ AMyPlayerController::AMyPlayerController()
 
 	// Use level 2D-camera without switches
 	bAutoManageActiveCameraTarget = false;
+}
+
+//
+bool AMyPlayerController::CanHideMouse() const
+{
+	switch(AMyGameStateBase::GetCurrentGameState(this))
+	{
+		case ECurrentGameState::GameStarting: return true;
+		case ECurrentGameState::InGame: return true;
+		default: return false;
+	}
 }
 
 void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
@@ -29,6 +39,28 @@ void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState Ne
 bool AMyPlayerController::ServerSetGameState_Validate(ECurrentGameState NewGameState)
 {
 	return true;
+}
+
+void AMyPlayerController::SetMouseCursor(bool bShouldShow)
+{
+	if (!bShouldShow
+	    && !CanHideMouse())
+	{
+		return;
+	}
+
+	bShowMouseCursor = bShouldShow;
+	bEnableClickEvents = bShouldShow;
+	bEnableMouseOverEvents = bShouldShow;
+
+	if(bShouldShow)
+	{
+		SetInputMode(FInputModeGameAndUI());
+	}
+	else
+	{
+		SetInputMode(FInputModeGameOnly());
+	}
 }
 
 //  Allows the PlayerController to set up custom input bindings
@@ -47,34 +79,32 @@ void AMyPlayerController::BeginPlay()
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	SetIgnoreMoveInput(true);
+	OnGameStateChanged(ECurrentGameState::Menu);
 }
 
 // Locks or unlocks movement input
-void AMyPlayerController::SetIgnoreMoveInput(bool bNewMoveInput)
+void AMyPlayerController::SetIgnoreMoveInput(bool bShouldIgnore)
 {
-	IgnoreMoveInput = bNewMoveInput;
-	bShowMouseCursor = bNewMoveInput;
-	bEnableClickEvents = bNewMoveInput;
-	bEnableMouseOverEvents = bNewMoveInput;
+	// Do not call super to avoid stacking, override it
 
-	if(bNewMoveInput)
+	if (!bShouldIgnore
+	    && !CanHideMouse())
 	{
-		SetInputMode(FInputModeGameAndUI());
+		return;
 	}
-	else
-	{
-		SetInputMode(FInputModeGameOnly());
-	}
+
+	SetMouseCursor(bShouldIgnore);
+	IgnoreMoveInput = bShouldIgnore;
 }
 
 //
-void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
 		case ECurrentGameState::Menu:
         case ECurrentGameState::GameStarting:
+		case ECurrentGameState::EndGame:
 		{
 			SetIgnoreMoveInput(true);
 			break;
@@ -87,4 +117,3 @@ void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		default: break;
 	}
 }
-
