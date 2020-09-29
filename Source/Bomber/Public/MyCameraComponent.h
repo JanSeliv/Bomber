@@ -16,10 +16,14 @@ class BOMBER_API UMyCameraComponent final : public UCameraComponent
 	GENERATED_BODY()
 
 public:
+	/** The minimal camera height. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	float MinHeight = 500.f; //[N]
+
 	/** Sets default values for this actor's properties. */
 	UMyCameraComponent();
 
-	/** Set the maximum possible height. */
+	/** Set the maximum possible height. Called on construct and game start*/
 	UFUNCTION(BlueprintCallable, Category = "C++")
     void UpdateMaxHeight();
 
@@ -32,7 +36,7 @@ public:
 	bool UpdateLocation(float DeltaTime = 0.f);
 
 protected:
-	/** */
+	/** The maximal camera height. Is set dynamically by UMyCameraComponent::UpdateMaxHeights(). */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Max Height"))
 	float MaxHeightInternal;//[G]
 

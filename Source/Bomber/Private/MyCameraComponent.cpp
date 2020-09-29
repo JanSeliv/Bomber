@@ -82,7 +82,7 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 
 	// Set the new location
 	FVector NewLocation = USingletonLibrary::GetCellArrayAverage(PlayersCells).Location;
-	NewLocation.Z += Distance;
+	NewLocation.Z = FMath::Max(MinHeight, NewLocation.Z + Distance);
 	if(DeltaTime)
 	{
 		NewLocation = FMath::Lerp(GetComponentLocation(), NewLocation, DeltaTime);
