@@ -90,6 +90,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetLevelMap(const class AGeneratedMap* LevelMap);
 
+	/** Returns number of alive players. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    static int32 GetAlivePlayersNum();
+
 	/** Return rhe Bomber Game Instance, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static class UMyGameInstance* GetMyGameInstance(const UObject* WorldContextObject);

@@ -183,6 +183,17 @@ void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
 	}
 }
 
+// Returns number of alive players
+int32 USingletonLibrary::GetAlivePlayersNum()
+{
+	int32 PlayersNum = 0;
+	if (const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
+	{
+		PlayersNum = LevelMap->GetAlivePlayersNum();
+	}
+	return PlayersNum;
+}
+
 // Contains a data of standalone and PIE games, nullptr otherwise
 UMyGameInstance* USingletonLibrary::GetMyGameInstance(const UObject* WorldContextObject)
 {

@@ -200,7 +200,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// CharacterID_ = PlayersCells.FindId(MapComponent->Cell).AsInteger();
 	// ensureMsgf(CharacterID_ != INDEX_NONE, TEXT("The character was not found on the Level Map"));
 
-	CharacterID_= LevelMap->GetPlayersNum();
+	CharacterID_= LevelMap->GetAlivePlayersNum();
 
 	// Construct the actor's map component
 	const ELevelType LevelType = TO_ENUM(ELevelType, (1 << CharacterID_) % TO_FLAG(ELevelType::Max));

@@ -9,7 +9,7 @@
 #include "MyGameInstance.h"
 #include "SingletonLibrary.h"
 #include "LevelActors/LevelActorDataAsset.h"
-#include "MyCameraActor.h"
+#include "MyCameraComponent.h"
 #include "GameFramework/MyGameStateBase.h"
 //---
 #include "Engine/LevelStreaming.h"
@@ -55,18 +55,8 @@ AGeneratedMap::AGeneratedMap()
 	}
 
 	// Default camera class
-	CameraActorClass = AMyCameraActor::StaticClass();
-}
-
-// Returns number of characters in the array
-int32 AGeneratedMap::GetPlayersNum()
-{
-	int8 PlayersNum = 0;
-	if(const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
-	{
-		PlayersNum = LevelMap->PlayersNumInternal;
-	}
-	return PlayersNum;
+	CameraComponentInternal = CreateDefaultSubobject<UMyCameraComponent>(TEXT("CameraComponent"));
+	CameraComponentInternal->SetupAttachment(RootComponent);
 }
 
 // Getting an array of cells by four sides of an input center cell and type of breaks
@@ -595,6 +585,13 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 	// Update level stream
 	SetLevelType(LevelTypeInternal);
+
+	// Update camera position
+	if(CameraComponentInternal)
+	{
+		CameraComponentInternal->UpdateMaxHeight();
+		CameraComponentInternal->UpdateLocation();
+	}
 }
 
 // This is called only in the gameplay before calling begin play to generate level actors
@@ -621,12 +618,6 @@ void AGeneratedMap::PostInitializeComponents()
 		}
 
 		RerunConstructionScripts();
-	}
-
-	// Spawn the camera
-	if(UWorld* World = GetWorld())
-	{
-		CameraActorInternal = World->SpawnActor<AMyCameraActor>(CameraActorClass);
 	}
 
 	// Listen states

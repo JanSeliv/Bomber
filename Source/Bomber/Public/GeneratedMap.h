@@ -103,11 +103,15 @@ public:
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    static int32 GetPlayersNum();
+    FORCEINLINE int32 GetAlivePlayersNum() const { return PlayersNumInternal; };
 
 	/** Get the current level type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE ELevelType GetLevelType() const { return LevelTypeInternal; }
+
+	/** Returns the camera component of the level. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UMyCameraComponent* GetCameraComponent() const { return CameraComponentInternal; }
 
 	/** Getting an array of cells by four sides of an input center cell and type of breaks.
 	 *
@@ -241,14 +245,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
 	ELevelType LevelTypeInternal = ELT::First; //[N]
 
-	/** The class of the camera actor.
-	* @TODO Replace to the data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	TSubclassOf<class AMyCameraActor> CameraActorClass; //[B]
-
 	/** */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Actor"))
-	class AMyCameraActor* CameraActorInternal; //[G]
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Component"))
+	class UMyCameraComponent* CameraComponentInternal;  //[C.DO]
 
 	/** */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))

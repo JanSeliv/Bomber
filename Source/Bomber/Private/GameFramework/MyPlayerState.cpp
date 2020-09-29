@@ -76,7 +76,7 @@ void AMyPlayerState::ServerUpdateEndState_Implementation(const APawn* Pawn)
 
 	// locals
 	bool bUpdateGameState = false;
-	const int32 PlayerNum = AGeneratedMap::GetPlayersNum();
+	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
 	const APawn* PawnOwner = GetPawn();
 
 	if (PawnOwner == Pawn) // is owner destroyed
