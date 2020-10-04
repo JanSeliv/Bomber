@@ -194,13 +194,13 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
-	// Setting an ID to the player character as his position in the array
-	// FCells PlayersCells;
-	// LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
-	// CharacterID_ = PlayersCells.FindId(MapComponent->Cell).AsInteger();
-	// ensureMsgf(CharacterID_ != INDEX_NONE, TEXT("The character was not found on the Level Map"));
-
-	CharacterID_= LevelMap->GetAlivePlayersNum();
+	// Set ID
+	if(CharacterID_ == INDEX_NONE)
+	{
+		FCells PlayerCells;
+		LevelMap->IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
+		CharacterID_= PlayerCells.Num();
+	}
 
 	// Construct the actor's map component
 	const ELevelType LevelType = TO_ENUM(ELevelType, (1 << CharacterID_) % TO_FLAG(ELevelType::Max));
