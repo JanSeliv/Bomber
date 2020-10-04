@@ -27,6 +27,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE EEndGameState GetEndGameState() const { return EndGameStateInternal; }
 
+	/**  */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ChoosePlayer(class UStreamableRenderAsset* MeshAsset);
+
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE UStreamableRenderAsset* GetChosenMesh() const { return ChosenMeshInternal; }
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected
@@ -35,6 +43,10 @@ protected:
 	/** Contains result of the game for controlled player after ending the game. */
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
 	EEndGameState EndGameStateInternal = EEndGameState::None; //[N]
+
+	/** */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Chosen Mesh"))
+	class UStreamableRenderAsset* ChosenMeshInternal; //[G]
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;

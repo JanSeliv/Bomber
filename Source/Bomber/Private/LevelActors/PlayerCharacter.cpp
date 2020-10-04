@@ -187,25 +187,36 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (IS_TRANSIENT(this)        // This actor is transient
+	if (IS_TRANSIENT(this)                // This actor is transient
 	    || !IsValid(MapComponentInternal) // Is not valid for map construction
-	    || !LevelMap)             // the level map is not valid or transient
+	    || !LevelMap)                     // the level map is not valid or transient
 	{
 		return;
 	}
 
 	// Set ID
-	if(CharacterID_ == INDEX_NONE)
+	if (CharacterID_ == INDEX_NONE)
 	{
 		FCells PlayerCells;
 		LevelMap->IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
-		CharacterID_= PlayerCells.Num();
+		CharacterID_ = PlayerCells.Num();
 	}
 
 	// Construct the actor's map component
 	const int32 MeshesNum = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->GetMeshesNum();
 	const ELevelType LevelType = TO_ENUM(ELevelType, 1 << (CharacterID_ % MeshesNum));
 	MapComponentInternal->OnComponentConstruct(GetMesh(), FLevelActorMeshRow(LevelType));
+
+	// Update mesh if chosen
+	if (CharacterID_ == 0) // is player
+	{
+		const AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+		UStreamableRenderAsset* MeshAsset = MyPlayerState ? MyPlayerState->GetChosenMesh() : nullptr;
+		if (MeshAsset)
+		{
+			MapComponentInternal->SetMesh(MeshAsset);
+		}
+	}
 
 	// Set a nameplate material
 	if (ensureMsgf(NameplateMeshComponent, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
@@ -220,20 +231,21 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 				NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
 			}
 		}
+
+		UpdateNickname();
 	}
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld()  // [IsEditorNotPieWorld] only
-		&& CharacterID_ > 0)					  // Is a bot
+	if (USingletonLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
+	    && CharacterID_ > 0)                     // Is a bot
 	{
 		MyAIController = Cast<AMyAIController>(GetController());
 		if (MapComponentInternal->bShouldShowRenders == false)
 		{
 			if (MyAIController) MyAIController->Destroy();
 		}
-		else								// Is a bot with debug visualization
-			if (MyAIController == nullptr)	// AI controller is not created yet
+		else if (MyAIController == nullptr) // Is a bot with debug visualization and AI controller is not created yet
 		{
 			SpawnDefaultController();
 			if (GetController()) GetController()->bIsEditorOnlyActor = true;
@@ -369,3 +381,11 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 		default: break;
 	}
 }
+
+//
+void APlayerCharacter::UpdateNickname_Implementation() const
+{
+	// BP implementation
+	// ...
+}
+

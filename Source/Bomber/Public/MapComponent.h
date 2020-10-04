@@ -57,6 +57,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnComponentConstruct(UMeshComponent* MeshComponent, FLevelActorMeshRow ComparedMeshRowTypes);
 
+	/** Set specified mesh to the Owner. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetMesh(class UStreamableRenderAsset* MeshAsset);
+
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner)
@@ -89,6 +93,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))
 	class ULevelActorDataAsset* ActorDataAssetInternal; //[D]
 
+	/** */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
+	class UMeshComponent* MeshComponentInternal; //[G]
 	/* ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */

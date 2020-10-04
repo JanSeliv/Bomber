@@ -32,21 +32,16 @@ void UMapComponent::OnComponentConstruct(UMeshComponent* MeshComponent, FLevelAc
 		return;
 	}
 
-	// Find mesh
-	if(ComparedMeshRowTypes.LevelType == ELT::None)
-	{
-		ComparedMeshRowTypes.LevelType = LevelMap->GetLevelType();
-	}
-	ActorDataAssetInternal->GetMeshRowByTypes(ComparedMeshRowTypes);
-
 	// Set mesh
-	if (auto SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponent))
+	if(MeshComponent)
 	{
-		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(ComparedMeshRowTypes.Mesh));
-	}
-	else if (auto StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent))
-	{
-		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(ComparedMeshRowTypes.Mesh));
+		MeshComponentInternal = MeshComponent;
+		if(ComparedMeshRowTypes.LevelType == ELT::None)
+		{
+			ComparedMeshRowTypes.LevelType = LevelMap->GetLevelType();
+		}
+		ActorDataAssetInternal->GetMeshRowByTypes(ComparedMeshRowTypes);
+		SetMesh(ComparedMeshRowTypes.Mesh);
 	}
 
 	// Find new Location at dragging and update-delegate
@@ -69,6 +64,25 @@ void UMapComponent::OnComponentConstruct(UMeshComponent* MeshComponent, FLevelAc
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
+}
+
+// Set specified mesh to the Owner
+void UMapComponent::SetMesh(UStreamableRenderAsset* MeshAsset)
+{
+	if (!MeshComponentInternal
+	    || !MeshAsset)
+	{
+		return;
+	}
+
+	if (auto SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
+	{
+		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(MeshAsset));
+	}
+	else if (auto StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponentInternal))
+	{
+		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(MeshAsset));
+	}
 }
 
 //  Called when a component is registered (not loaded

@@ -5,12 +5,28 @@
 #include "GeneratedMap.h"
 #include "MyGameStateBase.h"
 #include "SingletonLibrary.h"
+#include "LevelActors/PlayerCharacter.h"
+#include "MapComponent.h"
 //---
 #include "UnrealNetwork.h"
 
 /* ---------------------------------------------------
  *		Protected
  * --------------------------------------------------- */
+
+//
+void AMyPlayerState::ChoosePlayer(UStreamableRenderAsset* MeshAsset)
+{
+	UMapComponent* MapComponent = UMapComponent::GetMapComponent(GetPawn());
+	if(!MapComponent
+		|| !MeshAsset)
+	{
+		return;
+	}
+
+	ChosenMeshInternal = MeshAsset;
+	MapComponent->SetMesh(MeshAsset);
+}
 
 // Returns properties that are replicated for the lifetime of the actor channel.
 void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
