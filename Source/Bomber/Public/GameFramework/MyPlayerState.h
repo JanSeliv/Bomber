@@ -29,11 +29,11 @@ public:
 
 	/**  */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ChoosePlayer(class UStreamableRenderAsset* MeshAsset);
+	void ChoosePlayer(class USkeletalMesh* MeshAsset);
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE UStreamableRenderAsset* GetChosenMesh() const { return ChosenMeshInternal; }
+	FORCEINLINE class USkeletalMesh* GetChosenMesh() const { return ChosenMeshInternal; }
 
 protected:
 	/* ---------------------------------------------------
@@ -46,7 +46,7 @@ protected:
 
 	/** */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Chosen Mesh"))
-	class UStreamableRenderAsset* ChosenMeshInternal; //[G]
+	class USkeletalMesh* ChosenMeshInternal; //[G]
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;

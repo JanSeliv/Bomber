@@ -15,7 +15,7 @@
  * --------------------------------------------------- */
 
 //
-void AMyPlayerState::ChoosePlayer(UStreamableRenderAsset* MeshAsset)
+void AMyPlayerState::ChoosePlayer(USkeletalMesh* MeshAsset)
 {
 	UMapComponent* MapComponent = UMapComponent::GetMapComponent(GetPawn());
 	if(!MapComponent
