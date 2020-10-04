@@ -203,7 +203,8 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	}
 
 	// Construct the actor's map component
-	const ELevelType LevelType = TO_ENUM(ELevelType, (1 << CharacterID_) % TO_FLAG(ELevelType::Max));
+	const int32 MeshesNum = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->GetMeshesNum();
+	const ELevelType LevelType = TO_ENUM(ELevelType, 1 << (CharacterID_ % MeshesNum));
 	MapComponentInternal->OnComponentConstruct(GetMesh(), FLevelActorMeshRow(LevelType));
 
 	// Set a nameplate material

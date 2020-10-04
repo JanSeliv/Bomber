@@ -107,6 +107,10 @@ public:
     void GetMeshRowByTypes(FLevelActorMeshRow& OutComparedMeshRow) const;
 
 	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetMeshesNum() const { return MeshesInternal.Num(); }
+
+	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Collision")
     FORCEINLINE FVector GetCollisionExtent() const { return CollisionExtentInternal; }
 
