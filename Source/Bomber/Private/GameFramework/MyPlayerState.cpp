@@ -17,15 +17,17 @@
 //
 void AMyPlayerState::ChoosePlayer(USkeletalMesh* MeshAsset)
 {
-	UMapComponent* MapComponent = UMapComponent::GetMapComponent(GetPawn());
-	if(!MapComponent
-		|| !MeshAsset)
+	if(!MeshAsset)
 	{
 		return;
 	}
 
 	ChosenMeshInternal = MeshAsset;
-	MapComponent->SetMesh(MeshAsset);
+
+	if(UMapComponent* MapComponent = UMapComponent::GetMapComponent(GetPawn()))
+	{
+		MapComponent->SetMesh(MeshAsset);
+	}
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel.
