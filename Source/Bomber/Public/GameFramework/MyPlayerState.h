@@ -60,6 +60,6 @@ protected:
 
 	/** Updated result of the game for controlled player after ending the game. Called when one of players is destroying. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
-    void ServerUpdateEndState(const class APawn* Pawn);
+    void ServerUpdateEndState();
 
 };

@@ -25,7 +25,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAnyPlayerDestroyed, const class APawn*, DestroyedPawn);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
 	/** Called when one of players was destroyed. */
 	UPROPERTY(BlueprintAssignable, Category = "C++")
 	FOnAnyPlayerDestroyed OnAnyPlayerDestroyed;

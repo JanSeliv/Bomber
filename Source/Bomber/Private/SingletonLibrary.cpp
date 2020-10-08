@@ -60,7 +60,7 @@ void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionN
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
 #if WITH_EDITOR	 // [Editor]
-	if (IS_VALID(Owner) == false)  // The owner is not valid
+	if (!IS_VALID(Owner))  // The owner is not valid
 	{
 		return;
 	}
@@ -78,9 +78,8 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 			}
 		}
 
-		if (IsEditorNotPieWorld()) PrintToLog(Owner, "[IsEditorNotPieWorld]ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
+		PrintToLog(Owner, "ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
-
 #endif	// WITH_EDITOR [Editor]
 }
 
@@ -97,9 +96,8 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FVector& CoordinatePosition) const
 {
 #if WITH_EDITOR	 // [Editor]
-	if (Cells.Num() == NULL			  // Null length
-		|| !IS_VALID(Owner)			  // Owner is not valid
-		|| !IS_VALID(GetLevelMap()))  // The Level Map is not valid
+	if (!Cells.Num()			  // Null length
+		|| !IS_VALID(Owner))			  // Owner is not valid
 	{
 		return;
 	}
@@ -113,8 +111,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		//TextRenderIt->MarkAsEditorOnlySubobject();
 	}
 
-	if (IsEditorNotPieWorld()) PrintToLog(Owner, "[IsEditorNotPieWorld]AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderString + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
-
+	PrintToLog(Owner, "AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderString + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 #endif	// WITH_EDITOR [Editor]
 }
 

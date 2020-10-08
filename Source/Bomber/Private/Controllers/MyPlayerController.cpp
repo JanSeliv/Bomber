@@ -3,6 +3,7 @@
 #include "MyPlayerController.h"
 //---
 #include "InGameWidget.h"
+#include "MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "SingletonLibrary.h"
 
@@ -14,6 +15,9 @@ AMyPlayerController::AMyPlayerController()
 
 	// Use level 2D-camera without switches
 	bAutoManageActiveCameraTarget = false;
+
+	// Set cheat class
+	CheatClass = UMyCheatManager::StaticClass();
 }
 
 //

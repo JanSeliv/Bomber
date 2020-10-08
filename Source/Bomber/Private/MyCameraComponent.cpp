@@ -40,7 +40,8 @@ void UMyCameraComponent::UpdateMaxHeight()
 {
 	if(const AGeneratedMap* LevelMap = Cast<AGeneratedMap>(GetOwner()))
 	{
-		MaxHeightInternal = FCell::CellSize * LevelMap->GetActorScale3D().GetMax();
+		const float Multiplier = 1.5f;
+		MaxHeightInternal = FCell::CellSize * LevelMap->GetActorScale3D().GetMax() * Multiplier;
 	}
 }
 

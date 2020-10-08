@@ -112,7 +112,7 @@ void APlayerCharacter::SpawnBomb()
 		// Init Bomb
 		ABombActor::FOnBombDestroyed OnBombDestroyed;
 		OnBombDestroyed.BindDynamic(this, &ThisClass::OnBombDestroyed);
-		BombActor->InitBomb(OnBombDestroyed, PowerupsInternal.FireN, CharacterID_);
+		BombActor->InitBomb(OnBombDestroyed, PowerupsInternal.FireN, CharacterIDInternal);
 	}
 }
 
@@ -141,7 +141,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	// Posses the controller
-	if (CharacterID_ == 0)	// Is the player (not AI)
+	if (!CharacterIDInternal)	// Is the player (not AI)
 	{
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
 		if (PlayerController)
@@ -156,7 +156,6 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
-	OnDestroyed.AddDynamic(this, &ThisClass::OnPlayerDestroyed);
 
 	// Listen states
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
@@ -195,20 +194,20 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	}
 
 	// Set ID
-	if (CharacterID_ == INDEX_NONE)
+	if (CharacterIDInternal == INDEX_NONE)
 	{
 		FCells PlayerCells;
 		LevelMap->IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
-		CharacterID_ = PlayerCells.Num();
+		CharacterIDInternal = PlayerCells.Num();
 	}
 
 	// Construct the actor's map component
 	const int32 MeshesNum = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->GetMeshesNum();
-	const ELevelType LevelType = TO_ENUM(ELevelType, 1 << (CharacterID_ % MeshesNum));
+	const ELevelType LevelType = TO_ENUM(ELevelType, 1 << (CharacterIDInternal % MeshesNum));
 	MapComponentInternal->OnComponentConstruct(GetMesh(), FLevelActorMeshRow(LevelType));
 
 	// Update mesh if chosen
-	if (CharacterID_ == 0) // is player
+	if (!CharacterIDInternal) // is player
 	{
 		const AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 		UStreamableRenderAsset* MeshAsset = MyPlayerState ? MyPlayerState->GetChosenMesh() : nullptr;
@@ -225,7 +224,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		const int32 NameplateMeshesNum = NameplateMaterials.Num();
 		if (NameplateMeshesNum > 0)
 		{
-			const int32 MaterialNo = CharacterID_ < NameplateMeshesNum ? CharacterID_ : CharacterID_ % NameplateMeshesNum;
+			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
 			if (NameplateMaterials.IsValidIndex(MaterialNo))
 			{
 				NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
@@ -238,7 +237,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
 	if (USingletonLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
-	    && CharacterID_ > 0)                     // Is a bot
+	    && CharacterIDInternal > 0)                     // Is a bot
 	{
 		MyAIController = Cast<AMyAIController>(GetController());
 		if (MapComponentInternal->bShouldShowRenders == false)
@@ -282,20 +281,6 @@ void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 	}
 }
 
-// Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending
-void APlayerCharacter::Destroyed()
-{
-	AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this);
-	if (IsValid(MapComponentInternal) // is not destroyed already
-		&& MyGameState
-		&& AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
-	{
-		MyGameState->OnAnyPlayerDestroyed.Broadcast(this);
-	}
-
-	Super::Destroyed();
-}
-
 // Triggers when this player character starts something overlap.
 void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
@@ -334,20 +319,6 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 
 	// Uninitialize item
 	OverlappedItem->ResetItemType();
-}
-
-void APlayerCharacter::OnPlayerDestroyed(AActor* DestroyedPawn)
-{
-	if (!IsValid(MapComponentInternal))                                      // The Map Component is not valid or is destroyed already
-	{
-		return;
-	}
-
-	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
-	{
-		//->OnPlayerDestroyed.Broadcast(this);
-	}
 }
 
 // Event triggered when the bomb has been explicitly destroyed.

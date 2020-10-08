@@ -340,7 +340,8 @@ void AMyAIController::UpdateAI()
 #endif	// [Editor]
 }
 
-void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+//
+void AMyAIController::SetAI(bool bShouldEnable) const
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -349,18 +350,31 @@ void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState Curren
 	}
 
 	FTimerManager& TimerManager = World->GetTimerManager();
+	if(bShouldEnable)
+	{
+		TimerManager.UnPauseTimer(AIUpdateHandleInternal);
+	}
+	else
+	{
+		TimerManager.PauseTimer(AIUpdateHandleInternal);
+	}
+}
+
+//
+void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+{
 	switch (CurrentGameState)
 	{
 		case ECurrentGameState::Menu:
 		case ECurrentGameState::GameStarting:
 		case ECurrentGameState::EndGame:
 		{
-			TimerManager.PauseTimer(AIUpdateHandleInternal);
+			SetAI(false);
 			break;
 		}
 		case ECurrentGameState::InGame:
 		{
-			TimerManager.UnPauseTimer(AIUpdateHandleInternal);
+			SetAI(true);
 			break;
 		}
 		default: break;

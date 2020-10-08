@@ -28,6 +28,11 @@ ECurrentGameState AMyGameStateBase::GetCurrentGameState(const UObject* WorldCont
 // Returns the AMyGameState::CurrentGameState property.
 void AMyGameStateBase::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
 {
+	if (NewGameState == CurrentGameStateInternal)
+	{
+		return;
+	}
+
 	CurrentGameStateInternal = NewGameState;
 	OnRep_CurrentGameState();
 }

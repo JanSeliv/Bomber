@@ -54,8 +54,8 @@ public:
 	 *	@param MeshComponent Mesh component to set a mesh to an owner.
 	 *	@param ComparedMeshRowTypes Specify level and item types to find its mesh. Affects on a stylistic. Can be FLevelActorMeshRow::Empty
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void OnComponentConstruct(UMeshComponent* MeshComponent, FLevelActorMeshRow ComparedMeshRowTypes);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "ComparedMeshRowTypes"))
+	void OnComponentConstruct(UMeshComponent* MeshComponent, const FLevelActorMeshRow& ComparedMeshRowTypes);
 
 	/** Set specified mesh to the Owner. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -84,6 +84,10 @@ public:
 	template <typename T>
 	FORCEINLINE const T* GetDataAssetChecked() const { return CastChecked<T>(ActorDataAssetInternal); }
 
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE EActorType GetActorType() const { return ActorDataAssetInternal ? ActorDataAssetInternal->GetActorType() : EAT::None; }
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -94,8 +98,9 @@ protected:
 	class ULevelActorDataAsset* ActorDataAssetInternal; //[D]
 
 	/** */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
-	class UMeshComponent* MeshComponentInternal; //[G]
+	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
+	class UMeshComponent* MeshComponentInternal;//[C.DO]
+
 	/* ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */

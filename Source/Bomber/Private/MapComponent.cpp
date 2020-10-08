@@ -22,7 +22,7 @@ UMapComponent::UMapComponent()
 }
 
 // Updates a owner's state. Should be called in the owner's OnConstruction event.
-void UMapComponent::OnComponentConstruct(UMeshComponent* MeshComponent, FLevelActorMeshRow ComparedMeshRowTypes)
+void UMapComponent::OnComponentConstruct(UMeshComponent* MeshComponent, const FLevelActorMeshRow& ComparedMeshRowTypes)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	AActor* Owner = GetOwner();
@@ -36,12 +36,13 @@ void UMapComponent::OnComponentConstruct(UMeshComponent* MeshComponent, FLevelAc
 	if(MeshComponent)
 	{
 		MeshComponentInternal = MeshComponent;
-		if(ComparedMeshRowTypes.LevelType == ELT::None)
+		FLevelActorMeshRow ComparedMeshRow = ComparedMeshRowTypes;
+		if(ComparedMeshRow.LevelType == ELT::None)
 		{
-			ComparedMeshRowTypes.LevelType = LevelMap->GetLevelType();
+			ComparedMeshRow.LevelType = LevelMap->GetLevelType();
 		}
-		ActorDataAssetInternal->GetMeshRowByTypes(ComparedMeshRowTypes);
-		SetMesh(ComparedMeshRowTypes.Mesh);
+		ActorDataAssetInternal->GetMeshRowByTypes(ComparedMeshRow);
+		SetMesh(ComparedMeshRow.Mesh);
 	}
 
 	// Find new Location at dragging and update-delegate
@@ -139,9 +140,6 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	{
 		USingletonLibrary::PrintToLog(ComponentOwner, "OnComponentDestroyed", "-> \t DestroyActorsFromMap");
 
-		// During a game: destroyed bombs, pickup-ed items
-		USingletonLibrary::GetLevelMap()->DestroyLevelActor(this);
-
 		//disable collision for safety
 		ComponentOwner->SetActorEnableCollision(false);
 
@@ -151,6 +149,9 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 		if (USingletonLibrary::IsEditorNotPieWorld())
 		{
+			// The owner was removed from the editor level
+			USingletonLibrary::GetLevelMap()->DestroyLevelActor(this);
+
 			// Editor delegates
 			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 		}

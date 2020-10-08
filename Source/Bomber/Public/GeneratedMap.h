@@ -206,6 +206,8 @@ protected:
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
+	friend class UMyCheatManager;
+
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
 	UChildActorComponent* CollisionComponentInternal;	 //[C.DO]

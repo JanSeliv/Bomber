@@ -25,6 +25,9 @@ public:
 	void MoveToCell(const struct FCell& DestinationCell);
 
 protected:
+
+	friend class UMyCheatManager;
+
 	/**  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
 	FTimerHandle AIUpdateHandleInternal;
@@ -49,6 +52,10 @@ protected:
 	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
     void UpdateAI();
+
+	/**  */
+	UFUNCTION(BlueprintCallable, meta = (BlueprintProtected))
+	void SetAI(bool bShouldEnable) const;
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))

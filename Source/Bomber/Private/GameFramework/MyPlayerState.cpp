@@ -63,15 +63,15 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 		}
 		case ECurrentGameState::EndGame:
 		{
-			ServerUpdateEndState(GetPawn());
+			ServerUpdateEndState();
 			break;
 		}
 		default: break;
 	}
 }
 
-//
-void AMyPlayerState::ServerUpdateEndState_Implementation(const APawn* Pawn)
+// Updated result of the game for controlled player after ending the game. Called when one of players is destroying
+void AMyPlayerState::ServerUpdateEndState_Implementation()
 {
 	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState(this);
 	if (CurrentGameState == ECurrentGameState::None     // is not valid game state, nullptr or not fully initialized
@@ -80,6 +80,7 @@ void AMyPlayerState::ServerUpdateEndState_Implementation(const APawn* Pawn)
 		return;
 	}
 
+	// handle timer is 0
 	if (CurrentGameState == ECurrentGameState::EndGame) // game was finished
 	{
 		EndGameStateInternal = EEndGameState::Draw;
@@ -90,32 +91,33 @@ void AMyPlayerState::ServerUpdateEndState_Implementation(const APawn* Pawn)
 	{
 		return;
 	}
+
 	// Game is running
 
 	// locals
 	bool bUpdateGameState = false;
 	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
 	const APawn* PawnOwner = GetPawn();
-
-	if (PawnOwner == Pawn) // is owner destroyed
+	if (!IS_VALID(PawnOwner)) // is dead owner
 	{
-		if (!PlayerNum) // last players were blasted together
+		if (PlayerNum <= 0) // last players were blasted together
 		{
 			EndGameStateInternal = EEndGameState::Draw;
 			bUpdateGameState = true; // no players to play, game ended
 		}
-		else if (!IS_VALID(Pawn)) // is dead
+		else
 		{
 			EndGameStateInternal = EEndGameState::Lose;
+			bUpdateGameState = PlayerNum == 1;
 		}
 	}
-	else if (PlayerNum == 1) // another player was destroyed and is alive only 1 player
+	else if (PlayerNum == 1) // is alive owner and is the last player
 	{
-		if (IS_VALID(PawnOwner)) // the owner is left
+		if (PawnOwner->GetController<APlayerController>()) // is player
 		{
 			EndGameStateInternal = EEndGameState::Win;
-			bUpdateGameState = true; // we have winner, game ended
 		}
+		bUpdateGameState = true; // we have winner, game ended
 	}
 
 	// Need to notify that the game was ended

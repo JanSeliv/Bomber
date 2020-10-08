@@ -27,6 +27,7 @@ public:
 
 /**
  * Numbers of power-ups that affect the abilities of a player during gameplay.
+ * @todo rewrite as attributes of ability system
  */
 USTRUCT(BlueprintType)
 struct FPowerUp
@@ -69,6 +70,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE FPowerUp GetPowerups() const { return PowerupsInternal; }
 
+	/** Returns the personal ID. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetCharacterID() const { return CharacterIDInternal; }
+
 	/**  Finds and rotates the self at the current character's location to point at the specified location.
 	 * @param Location the character is looking at.
 	 * @param bShouldInterpolate if true, smoothly rotate the character toward the direction. */
@@ -84,6 +89,8 @@ protected:
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
+	friend class UMyCheatManager;
+
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	class UMapComponent* MapComponentInternal;	//[C.AW]
@@ -92,13 +99,13 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
 	class UStaticMeshComponent* NameplateMeshComponent;	 //[C.DO]
 
-	/** Count of items that affect on a player during gameplay */
+	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
 	FPowerUp PowerupsInternal;	//[AW]
 
 	/** The ID identification of each character */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	int32 CharacterID_ = INDEX_NONE;  //[G]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
+	int32 CharacterIDInternal = INDEX_NONE;  //[G]
 
 	/* The AnimBlueprint class to use, can set it only in the gameplay
 	 * @TODO Move to the Data Asset	 */
@@ -134,9 +141,6 @@ protected:
 	 */
 	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.0f, bool bForce = false) override;
 
-	/** Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending */
-	virtual void Destroyed() override;
-
 	/* Move the player character by the forward vector. */
 	FORCEINLINE void OnMoveUpDown(float ScaleValue) { AddMovementInput(GetActorForwardVector(), ScaleValue); }
 
@@ -149,10 +153,6 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
     void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
-
-	/** Event triggered when the actor has been explicitly destroyed.*/
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-    void OnPlayerDestroyed(AActor* DestroyedPawn);
 
 	/** Event triggered when the bomb has been explicitly destroyed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

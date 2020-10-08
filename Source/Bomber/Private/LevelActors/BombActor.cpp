@@ -42,7 +42,7 @@ void ABombActor::InitBomb(
 	const int32& CharacterID /*=-1*/)
 {
 	if (!IsValid(USingletonLibrary::GetLevelMap()) // // The Level Map is not valid
-	    || !IsValid(MapComponentInternal)                  // The Map Component is not valid
+	    || !IsValid(MapComponentInternal)          // The Map Component is not valid
 	    || FireN < 0)                              // Negative length of the explosion
 	{
 		return;
@@ -50,29 +50,29 @@ void ABombActor::InitBomb(
 
 	// Set material
 	const TArray<UMaterialInterface*>& BombMaterials = MapComponentInternal->GetDataAssetChecked<UBombDataAsset>()->BombMaterials;
-	if (IsValid(BombMeshComponentInternal)	// Mesh of the bomb is not valid
-        && CharacterID != -1		// Is not debug character
-        && BombMaterials.Num())		// As least one bomb material
+	if (IsValid(BombMeshComponentInternal) // Mesh of the bomb is not valid
+	    && CharacterID != -1               // Is not debug character
+	    && BombMaterials.Num())            // As least one bomb material
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
 		BombMeshComponentInternal->SetMaterial(0, BombMaterials[BombMaterialNo]);
 	}
 
 	// Update explosion information
+	ExplosionCellsInternal.Empty();
 	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCellsInternal, MapComponentInternal->Cell, EPathType::Explosion, FireN);
 
-	#if WITH_EDITOR  // [Editor]
-		if (MapComponentInternal->bShouldShowRenders)
-		{
-			USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
-			USingletonLibrary::AddDebugTextRenders(this, ExplosionCellsInternal.Array(), FLinearColor::Red);
-		}
-	#endif
-
-	if(EventToBind.IsBound())
+#if WITH_EDITOR  // [Editor]
+	if (MapComponentInternal->bShouldShowRenders)
 	{
-		OnDestroyed.Add(EventToBind);
+		USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
+		USingletonLibrary::ClearOwnerTextRenders(this);
+		USingletonLibrary::AddDebugTextRenders(this, ExplosionCellsInternal.Array(), FLinearColor::Red);
 	}
+#endif
+
+	// Notify player that bomb was detonated
+	OnDestroyed.Add(EventToBind);
 }
 
 /* ---------------------------------------------------
@@ -84,8 +84,8 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponentInternal))	// Is not valid for map construction
+	if (IS_TRANSIENT(this)                 // This actor is transient
+	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
 	{
 		return;
 	}
@@ -110,25 +110,53 @@ void ABombActor::BeginPlay()
 	Super::BeginPlay();
 
 	// Binding to the event, that triggered when the actor has been explicitly destroyed
-	OnDestroyed.AddDynamic(this, &ABombActor::OnBombDestroyed);
+	OnDestroyed.AddDynamic(this, &ThisClass::DetonateBomb);
+
 
 	// Binding to the event, that triggered when character end to overlaps the ItemCollisionComponent component
 	OnActorEndOverlap.AddDynamic(this, &ABombActor::OnBombEndOverlap);
 
 	// Destroy itself after N seconds
-	const UBombDataAsset* BombDataAsset = MapComponentInternal ? Cast<UBombDataAsset>(MapComponentInternal->GetActorDataAsset()) : nullptr;
-	if(BombDataAsset)
+	if (AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
 	{
-		SetLifeSpan(BombDataAsset->GetLifeSpan());
+		SetLifeSpan();
+	}
+	else if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	{
+		// This dragged bomb should start listening in-game state to set lifespan
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 }
 
-// Calls destroying request of all actors by cells in explosion cells array.
-void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
+// Set the lifespan of this actor. When it expires the object will be destroyed
+void ABombActor::SetLifeSpan(float InLifespan/* = 0.f*/)
+{
+	if (InLifespan == INDEX_NONE) // is default value, should override it
+	{
+		const UBombDataAsset* BombDataAsset = MapComponentInternal ? MapComponentInternal->GetDataAssetChecked<UBombDataAsset>() : nullptr;
+		if (BombDataAsset)
+		{
+			InLifespan = BombDataAsset->GetLifeSpan();
+		}
+	}
+
+	Super::SetLifeSpan(InLifespan);
+}
+
+// Called when the lifespan of an actor expires (if he has one)
+void ABombActor::LifeSpanExpired()
+{
+	// Override to prevent destroying, do not call super
+	DetonateBomb();
+}
+
+// Destroy bomb and burst explosion cells
+void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap                                                             // The Level Map is not valid or transient (in regenerating process)
-	    || !IsValid(MapComponentInternal)                                     // The Map Component is not valid or is destroyed already
+	if (!LevelMap                                                                    // The Level Map is not valid or transient (in regenerating process)
+		|| !ExplosionCellsInternal.Num()                                             // no cells to destroy
+	    || !IsValid(MapComponentInternal)                                            // The Map Component is not valid or is destroyed already
 	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame) // game was not started or already finished
 	{
 		return;
@@ -142,8 +170,12 @@ void ABombActor::OnBombDestroyed(AActor* DestroyedActor)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, Position);
 	}
 
+	// Copy explosion cells and empty it to avoid self destroying one more time by another bomb
+	const FCells CellsToDestroy{ExplosionCellsInternal};
+	ExplosionCellsInternal.Empty();
+
 	// Destroy all actors from array of cells
-	LevelMap->DestroyActorsFromMap(ExplosionCellsInternal);
+	LevelMap->DestroyActorsFromMap(CellsToDestroy);
 }
 
 // Triggers when character end to overlaps with this bomb.
@@ -162,5 +194,16 @@ void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	if (OverlappingActors.Num() == 0)  // There are no more characters on the bomb
 	{
 		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
+	}
+}
+
+// Listen by dragged bombs to handle game resetting
+void ABombActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+{
+	if (CurrentGameState == ECurrentGameState::InGame)
+	{
+		// Reinit bomb and restart lifespan
+		InitBomb(FOnBombDestroyed());
+		SetLifeSpan();
 	}
 }

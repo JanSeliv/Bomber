@@ -83,7 +83,6 @@ enum class ECurrentGameState : uint8
 	InGame
 };
 
-
 /**
  *
  */

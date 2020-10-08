@@ -41,7 +41,8 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IsValid(MapComponentInternal) == false)	 // this component is not valid for owner construction
+	if (IS_TRANSIENT(this)                 // This actor is transient
+        || !IsValid(MapComponentInternal)) // Is not valid for map construction
 	{
 		return;
 	}
@@ -56,25 +57,62 @@ void ABoxActor::BeginPlay()
 	Super::BeginPlay();
 
 	// Binding to the event, that triggered when the actor has been explicitly destroyed
-	OnDestroyed.AddDynamic(this, &ABoxActor::OnBoxDestroyed);
+	OnDestroyed.AddDynamic(this, &ABoxActor::TrySpawnItem);
+
+	// Listen states
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	{
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+
+	ResetItemChance();
 }
 
-// Event triggered when the actor has been explicitly destroyed. With some chances spawns an item.
-void ABoxActor::OnBoxDestroyed(AActor* DestroyedActor)
+// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
+void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
+{
+	Super::SetActorHiddenInGame(bNewHidden);
+
+	if (bNewHidden)
+	{
+		TrySpawnItem();
+	}
+}
+
+
+// Spawn item with a chance
+void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (LevelMap                           // The Level Map is not valid or transient (in regenerating process)
-	    || !IsValid(MapComponentInternal)) // The Map Component is not valid or is destroyed already
+	if (!LevelMap                         // The Level Map is not valid or transient (in regenerating process)
+        || !IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
+        || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame)
 	{
 		return;
 	}
 
 	// Spawn item with the chance
-	const int32 SpawnItemChance = MapComponentInternal->GetDataAssetChecked<UBoxDataAsset>()->GetSpawnItemChance();
 	const int32 Max = 100;
-	if(FMath::RandHelper(Max) < SpawnItemChance)
+	if (FMath::RandHelper(Max) < SpawnItemChanceInternal)
 	{
 		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");
 		LevelMap->SpawnActorByType(EAT::Item, FCell(GetActorLocation()));
+	}
+}
+
+// The item chance can be overrided in game, so it should be reset for each new game
+void ABoxActor::ResetItemChance()
+{
+	// Update current chance from Data Asset
+	SpawnItemChanceInternal = MapComponentInternal->GetDataAssetChecked<UBoxDataAsset>()->GetSpawnItemChance();
+}
+
+// Listen to reset item chance for each new game
+void ABoxActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+{
+	if(CurrentGameState == ECurrentGameState::GameStarting)
+	{
+		// Update current chance from Data Asset
+		ResetItemChance();
 	}
 }

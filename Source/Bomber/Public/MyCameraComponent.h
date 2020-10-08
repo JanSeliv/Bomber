@@ -18,7 +18,7 @@ class BOMBER_API UMyCameraComponent final : public UCameraComponent
 public:
 	/** The minimal camera height. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	float MinHeight = 500.f; //[N]
+	float MinHeight = 1500.f; //[N]
 
 	/** Sets default values for this actor's properties. */
 	UMyCameraComponent();

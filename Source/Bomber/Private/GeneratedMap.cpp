@@ -190,9 +190,7 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 {
 	AActor* const ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
-	const ULevelActorDataAsset* DataAsset = AddedComponent->GetActorDataAsset();
-	if (!IS_VALID(ComponentOwner) // the component's owner is not valid or is transient
-	    || !DataAsset)            // actor's data asset is now valid
+	if (!IS_VALID(ComponentOwner)) // the component's owner is not valid or is transient
 	{
 		return;
 	}
@@ -200,7 +198,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 	if (!MapComponentsInternal.Contains(AddedComponent)) // is not contains in the array
 	{
 		MapComponentsInternal.Emplace(AddedComponent);
-		if (DataAsset->GetActorType() == EAT::Player) // Is a player
+		if (AddedComponent->GetActorType() == EAT::Player) // Is a player
 		{
 			PlayersNumInternal++;
 		}
@@ -258,7 +256,8 @@ void AGeneratedMap::IntersectCellsByTypes(
 	FCells BitmaskedCells;
 	for (const auto& MapCompIt : BitmaskedComponents)
 	{
-		if (MapCompIt && MapCompIt != ExceptedComponent)
+		if (MapCompIt
+			&& MapCompIt != ExceptedComponent)
 		{
 			BitmaskedCells.Emplace(MapCompIt->Cell);
 		}
@@ -270,17 +269,15 @@ void AGeneratedMap::IntersectCellsByTypes(
 // Destroy all actors from the set of cells
 void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 {
-	if (!MapComponentsInternal.Num())
+	if (!MapComponentsInternal.Num()
+		|| !Cells.Num())
 	{
 		return;
 	}
 
-	// Decrement the players number before their destroying
-	FCells PlayerCells = Cells;
-	IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player));
-	PlayersNumInternal -= PlayerCells.Num();
 
 	// Iterate and destroy
+	bool OnAnyPlayerDestroyed = false;
 	for (int32 i = MapComponentsInternal.Num() - 1; i >= 0; --i)
 	{
 		if (!MapComponentsInternal.IsValidIndex(i)) // the element already was removed
@@ -297,8 +294,28 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 			// First removing, because after the box destroying the item can be spawned and starts searching for an empty cell
 			// MapComponentIt can be invalid here
 			DestroyLevelActor(MapComponentIt);
+
+			// Decrement the players number
+			if (MapComponentIt && MapComponentIt->GetActorType() == EAT::Player) // Is a player
+			{
+				--PlayersNumInternal;
+				OnAnyPlayerDestroyed = true;
+			}
+
+			USingletonLibrary::PrintToLog(OwnerIt, "DestroyActorsFromMap");
 		}
-		USingletonLibrary::PrintToLog(OwnerIt, "DestroyActorsFromMap");
+	}
+	MapComponentsInternal.Shrink();
+
+	// Update endgame state
+	if (OnAnyPlayerDestroyed)
+	{
+		AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this);
+		if (MyGameState
+            && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+		{
+			MyGameState->OnAnyPlayerDestroyed.Broadcast();
+		}
 	}
 }
 
@@ -312,7 +329,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 	MapComponentsInternal.Remove(MapComponent);
 
 	// hide if dragged else destroy
-	if (bIsValidOwner && !IsPendingKillPending()                // forcing destroy dragged actors only when the owner or  Generated Map becomes invalid
+	if (bIsValidOwner && !IsPendingKillPending()             // forcing destroy dragged actors only when the owner or Generated Map becomes invalid
 	    && DraggedComponentsInternal.Contains(MapComponent)) // is dragged
 	{
 		ComponentOwner->SetActorHiddenInGame(true);
@@ -334,7 +351,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 // Finds the nearest cell pointer to the specified Map Component
 void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 {
-	AActor* const ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
+	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
 	if (!IS_VALID(ComponentOwner))
 	{
 		return;
@@ -781,15 +798,15 @@ void AGeneratedMap::GenerateLevelActors()
 	// Locals
 	FCells IteratedCells{GridCellsInternal[0]}, FinishedCells = NonEmptyCells;
 
-// #if WITH_EDITOR // show generated bones (green and red)
-// 	if (bShouldShowRenders)
-// 	{
-// 		bool bOutBool = false;
-// 		TArray<UTextRenderComponent*> OutArray{};
-// 		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, Bones, FLinearColor::Green, bOutBool, OutArray, 263, 148);
-// 		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, NonEmptyCells, FLinearColor::Red, bOutBool, OutArray, 260);
-// 	}
-// #endif	// WITH_EDITOR
+#if WITH_EDITOR // show generated bones (green and red)
+	if (bShouldShowRenders)
+	{
+		bool bOutBool = false;
+		TArray<UTextRenderComponent*> OutArray{};
+		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, Bones, FLinearColor::Green, bOutBool, OutArray, 263, 148);
+		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, NonEmptyCells, FLinearColor::Red, bOutBool, OutArray, 260);
+	}
+#endif	// WITH_EDITOR
 
 	while (IteratedCells.Num() && Bones.Num())
 	{
@@ -845,16 +862,16 @@ void AGeneratedMap::GenerateLevelActors()
 //  Map components getter.
 void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, const int32& ActorsTypesBitmask) const
 {
-	if (MapComponentsInternal.Num() > 0)
+	if (!MapComponentsInternal.Num())
 	{
-		OutBitmaskedComponents.Append(
-			MapComponentsInternal.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr)
-			{
-				const ULevelActorDataAsset* DataAsset = Ptr ? Ptr->GetActorDataAsset() : nullptr;
-				const EActorType ActorType = DataAsset ? DataAsset->GetActorType() : EAT::None;
-				return EnumHasAnyFlags(ActorType, TO_ENUM(EActorType, ActorsTypesBitmask));
-			}));
+		return;
 	}
+
+	OutBitmaskedComponents.Append(
+		MapComponentsInternal.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr)
+		{
+			return Ptr && EnumHasAnyFlags(Ptr->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask));
+		}));
 }
 
 //

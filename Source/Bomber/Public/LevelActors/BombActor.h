@@ -99,12 +99,17 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
-	/**
-	 * Event triggered when the actor has been explicitly destroyed.
-	 * Calls destroying request of all actors by cells in explosion cells array.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnBombDestroyed(AActor* DestroyedActor);
+	/** Set the lifespan of this actor. When it expires the object will be destroyed.
+	 * @param InLifespan overriden with a default value, time will be got from the data asset. */
+	virtual void SetLifeSpan(float InLifespan = INDEX_NONE) override;
+
+	/** Called when the lifespan of an actor expires (if he has one). */
+	virtual void LifeSpanExpired() override;
+
+	/** Destroy bomb and burst explosion cells.
+	  * Calls destroying request of all actors by cells in explosion cells array.*/
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void DetonateBomb(AActor* DestroyedActor = nullptr);
 
 	/**
 	 * Triggers when character end to overlaps with this bomb.
@@ -112,4 +117,8 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
+	/** Listen by dragged bombs to handle game resetting. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+    void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };
