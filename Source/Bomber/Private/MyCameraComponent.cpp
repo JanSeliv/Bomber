@@ -23,7 +23,7 @@ UMyCameraComponent::UMyCameraComponent()
 	SetUsingAbsoluteScale(true);
 
 	// Camera defaults
-	SetConstraintAspectRatio(false);	// viewport without black borders
+	SetConstraintAspectRatio(false); // viewport without black borders
 #if WITH_EDITOR
 	bCameraMeshHiddenInGame = false;
 #endif
@@ -38,7 +38,7 @@ UMyCameraComponent::UMyCameraComponent()
 // Set the maximum possible height
 void UMyCameraComponent::UpdateMaxHeight()
 {
-	if(const AGeneratedMap* LevelMap = Cast<AGeneratedMap>(GetOwner()))
+	if (const AGeneratedMap* LevelMap = Cast<AGeneratedMap>(GetOwner()))
 	{
 		const float Multiplier = 1.5f;
 		MaxHeightInternal = FCell::CellSize * LevelMap->GetActorScale3D().GetMax() * Multiplier;
@@ -48,43 +48,47 @@ void UMyCameraComponent::UpdateMaxHeight()
 // Set the location between players
 bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 {
+	UE_LOG(LogInit, Log, TEXT("--- Tick, rand bool %s"), *FString(FMath::RandBool()? TEXT("TRUE"):TEXT("FALSE")));
+	FVector NewLocation = FVector::ZeroVector;
+
+	// If true, the camera will be forced moving to the start position
 	const AGeneratedMap* LevelMap = Cast<AGeneratedMap>(GetOwner());
 	if (!LevelMap
-        || !LevelMap->GetAlivePlayersNum())
+        || !LevelMap->GetAlivePlayersNum()
+        || bForceStartInternal)
 	{
-		return false;
-	}
+		NewLocation = FMath::Lerp(GetComponentLocation(), StartLocation, DeltaTime);
+		SetWorldLocation(NewLocation);
 
-	// Find all players locations
-	FCells PlayersCells;
-	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
+		// return false to disable tick on finishing
+		return !NewLocation.Equals(StartLocation, 10.f);
+	}
 
 	// Distance finding between players
 	float Distance = 0;
-	if (PlayersCells.Num() > 1)
+	FCells PlayersCells;
+	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
+	for (const FCell& C1 : PlayersCells)
 	{
-		for (const FCell& C1 : PlayersCells)
+		for (const FCell& C2 : PlayersCells)
 		{
-			for (const FCell& C2 : PlayersCells)
+			const float LengthIt = USingletonLibrary::CalculateCellsLength(C1, C2);
+			if (LengthIt > Distance)
 			{
-				const float LengthIt = USingletonLibrary::CalculateCellsLength(C1, C2);
-				if (LengthIt > Distance)
-				{
-					Distance = LengthIt;
-				}
+				Distance = LengthIt;
 			}
 		}
-		Distance *= FCell::CellSize;
-		if (Distance > MaxHeightInternal)
-		{
-			Distance = MaxHeightInternal;
-		}
+	}
+	Distance *= FCell::CellSize;
+	if (Distance > MaxHeightInternal)
+	{
+		Distance = MaxHeightInternal;
 	}
 
 	// Set the new location
-	FVector NewLocation = USingletonLibrary::GetCellArrayAverage(PlayersCells).Location;
+	NewLocation = USingletonLibrary::GetCellArrayAverage(PlayersCells).Location;
 	NewLocation.Z = FMath::Max(MinHeight, NewLocation.Z + Distance);
-	if(DeltaTime)
+	if (DeltaTime)
 	{
 		NewLocation = FMath::Lerp(GetComponentLocation(), NewLocation, DeltaTime);
 	}
@@ -98,7 +102,7 @@ void UMyCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if(!UpdateLocation(DeltaTime))
+	if (!UpdateLocation(DeltaTime))
 	{
 		SetComponentTickEnabled(false);
 	}
@@ -109,8 +113,10 @@ void UMyCameraComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	StartLocation = GetComponentLocation();
+
 	// Listen states to manage the tick
-	if(AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -128,19 +134,26 @@ void UMyCameraComponent::OnGameStateChanged_Implementation(ECurrentGameState Cur
 			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 			const AMyGameStateBase* GameStateBase = USingletonLibrary::GetMyGameState(this);
 			if (PlayerController
-				&& GameStateBase)
+			    && GameStateBase)
 			{
 				PlayerController->SetViewTargetWithBlend(GetOwner(), GameStateBase->GetStartingCountdown());
 			}
 			bShouldTick = true;
 			break;
 		}
-		case ECurrentGameState::InGame:
+		case ECurrentGameState::EndGame:
 		{
+			bForceStartInternal = true;
 			bShouldTick = true;
 			break;
 		}
-		default : break;
+		case ECurrentGameState::InGame:
+		{
+			bForceStartInternal = false;
+			bShouldTick = true;
+			break;
+		}
+		default: break;
 	}
 
 	SetComponentTickEnabled(bShouldTick);
