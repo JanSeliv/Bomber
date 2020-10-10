@@ -510,31 +510,27 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 
 	// ---- Changing levels during the game ----
 
-	// No need to override streams during the game
-	if (NewLevelType == LevelTypeInternal)
-	{
-		return;
-	}
-
 	// show the specified level, hide other levels
 	for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
 	{
-		FName LevelName;
-		const bool bShouldBeVisibleIt = GetLevelStreaming(Index, LevelName);
-		if (LevelName.IsNone())
+		FName PackageName;
+		const bool bShouldBeVisibleIt = GetLevelStreaming(Index, PackageName);
+		if (PackageName.IsNone())
 		{
 			continue;
 		}
 
 		FLatentActionInfo LatentInfo;
 		LatentInfo.UUID = Index;
-		if (bShouldBeVisibleIt)
+		ULevelStreaming* StreamingLevel = UGameplayStatics::GetStreamingLevel(World, PackageName);
+		if (!StreamingLevel
+			|| !StreamingLevel->IsLevelLoaded())
 		{
-			UGameplayStatics::LoadStreamLevel(World, LevelName, true, false, LatentInfo);
+			UGameplayStatics::LoadStreamLevel(World, PackageName, bShouldBeVisibleIt, false, LatentInfo);
 		}
 		else
 		{
-			UGameplayStatics::UnloadStreamLevel(World, LevelName, LatentInfo, false);
+			StreamingLevel->SetShouldBeVisible(bShouldBeVisibleIt);
 		}
 	}
 
