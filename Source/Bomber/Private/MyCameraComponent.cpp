@@ -48,7 +48,6 @@ void UMyCameraComponent::UpdateMaxHeight()
 // Set the location between players
 bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 {
-	UE_LOG(LogInit, Log, TEXT("--- Tick, rand bool %s"), *FString(FMath::RandBool()? TEXT("TRUE"):TEXT("FALSE")));
 	FVector NewLocation = FVector::ZeroVector;
 
 	// If true, the camera will be forced moving to the start position
@@ -57,11 +56,11 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
         || !LevelMap->GetAlivePlayersNum()
         || bForceStartInternal)
 	{
-		NewLocation = FMath::Lerp(GetComponentLocation(), StartLocation, DeltaTime);
+		NewLocation = FMath::Lerp(GetComponentLocation(), StartLocationInternal, DeltaTime);
 		SetWorldLocation(NewLocation);
 
 		// return false to disable tick on finishing
-		return !NewLocation.Equals(StartLocation, 10.f);
+		return !NewLocation.Equals(StartLocationInternal, 10.f);
 	}
 
 	// Distance finding between players
@@ -113,7 +112,7 @@ void UMyCameraComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StartLocation = GetComponentLocation();
+	StartLocationInternal = GetComponentLocation();
 
 	// Listen states to manage the tick
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))

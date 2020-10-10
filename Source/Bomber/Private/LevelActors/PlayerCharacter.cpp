@@ -17,7 +17,6 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "UObject/ConstructorHelpers.h"
 
 // Default constructor
 UPlayerDataAsset::UPlayerDataAsset()
@@ -48,11 +47,6 @@ APlayerCharacter::APlayerCharacter()
 	NameplateMeshComponent->SetRelativeLocation(FVector(-60.f, 0.f, 150.f));
 	NameplateMeshComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	NameplateMeshComponent->SetRelativeScale3D(FVector(1.75f, 1.f, 1.f));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> NameplateMeshFinder(TEXT("/Engine/BasicShapes/Plane"));
-	if (NameplateMeshFinder.Succeeded())
-	{
-		NameplateMeshComponent->SetStaticMesh(NameplateMeshFinder.Object);
-	}
 }
 
 // Finds and rotates the self at the current character's location to point at the specified location.

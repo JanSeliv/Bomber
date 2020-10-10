@@ -14,7 +14,7 @@ ULevelActorDataAsset::ULevelActorDataAsset()
 	}
 }
 
-void ULevelActorDataAsset::GetMeshesByLevelType(TArray<FLevelActorMeshRow>& OutMeshes, const int32& LevelsTypesBitmask) const
+void ULevelActorDataAsset::GetMeshesByLevelType(TArray<FLevelActorMeshRow>& OutMeshes, int32 LevelsTypesBitmask) const
 {
 	for (const FLevelActorMeshRow& MeshRowIt : MeshesInternal)
 	{

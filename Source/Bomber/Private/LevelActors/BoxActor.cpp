@@ -10,7 +10,6 @@
 //---
 #include "Components/StaticMeshComponent.h"
 #include "Math/UnrealMathUtility.h"
-#include "UObject/ConstructorHelpers.h"
 
 // Default constructor
 UBoxDataAsset::UBoxDataAsset()

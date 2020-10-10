@@ -8,7 +8,6 @@
 //---
 #include "GeneratedMap.generated.h"
 
-
 /**
  *
  */
@@ -24,19 +23,19 @@ struct FLevelStreamRow
 	FLevelStreamRow() = default;
 
 	/** The level asset */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	TSoftObjectPtr<UWorld> Level; //[D]
 
 	/** The associated type of a level. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	ELevelType LevelType = ELT::None; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (InlineEditConditionToggle))
 	bool bIsStoryLevel = false; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, EditCondition = "bIsStoryLevel"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (EditCondition = "bIsStoryLevel"))
 	FVector2D StoryLevelSize = FVector2D::ZeroVector; //[D]
 };
 
@@ -56,18 +55,42 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE TArray<FLevelStreamRow> GetLevelStreamRows() const { return LevelsInternal; }
 
-	/** */
+	/** Get UGeneratedMapDataAsset::TickInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE float GetTickInterval() const { return TickInternal; }
+
+	/** Get UGeneratedMapDataAsset::WallsChanceInternal. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetWallsChance() const { return WallsChanceInternal; }
+
+	/** Get UGeneratedMapDataAsset::BoxesChanceInternal. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetBoxesChance() const { return BoxesChanceInternal; }
+
+	/** Get UGeneratedMapDataAsset::CollisionsAssetInternal. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    FORCEINLINE TSubclassOf<AActor> GetCollisionsAsset() const { return CollisionsAssetInternal; }
 
 protected:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels", ShowOnlyInnerProperties))
 	TArray<FLevelStreamRow> LevelsInternal; //[D]
 
-	/** */
+	/** How ofter update actors on map. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))
 	float TickInternal = 0.2F; //[D]
+
+	/** The chance of walls generation. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Walls Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
+	int32 WallsChanceInternal = 35;  //[AW]
+
+	/** The chance of boxes generation. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Boxes Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
+	int32 BoxesChanceInternal = 70;  //[AW]
+
+	/** Asset that contains scalable collision. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collisions Asset", ShowOnlyInnerProperties))
+	TSubclassOf<AActor> CollisionsAssetInternal; //[D]
 };
 
 /**
@@ -121,12 +144,12 @@ public:
 	 * @param bBreakInputCells In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
 	 * @param Pathfinder Type of cells searching.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SideLength"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetSidesCells(
 		TSet<struct FCell>& OutCells,
 		const struct FCell& Cell,
-		const EPathType Pathfinder,
-		const int32& SideLength,
+		EPathType Pathfinder,
+		int32 SideLength,
 		bool bBreakInputCells = false) const;
 
 	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
@@ -153,10 +176,10 @@ public:
 	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
 	 * @param ExceptedComponent Is not included for intersecting.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AdvancedDisplay = 2, AutoCreateRefTerm = "ActorsTypesBitmask"))
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AdvancedDisplay = 2))
 	void IntersectCellsByTypes(
 		UPARAM(ref) TSet<struct FCell>& OutCells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask,
 		bool bIntersectAllIfEmpty = true,
 		const class UMapComponent* ExceptedComponent = nullptr) const;
 
@@ -166,10 +189,10 @@ public:
 	 * @param ActorsTypesBitmask Bitmask of actors types to check.
 	 * @return true if at least one level actor is contained.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE bool ContainsMapComponents(
 		const struct FCell& Cell,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask) const
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const
 	{
 		FCells NonEmptyCells;
 		IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask);
@@ -212,14 +235,9 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
 	UChildActorComponent* CollisionComponentInternal;	 //[C.DO]
 
-	/** The blueprint class with the background, collision cage and floor. Can be changed in the editor.
-	* @TODO Replace to the data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	TSubclassOf<AActor> BackgroundBlueprintClass;  //[B]
-
 	/** Cells storage. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
-	TArray<FCell> GridCellsInternal;	 //[M.IO]
+	TArray<FCell> GridCellsInternal; //[M.IO]
 
 	/** Storage of alive players and their current locations */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
@@ -228,16 +246,6 @@ protected:
 	/** Contains map components that were dragged to the scene, store it to avoid destroying and restore its owners after each regenerating. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Components"))
 	TArray<class UMapComponent*> DraggedComponentsInternal;  //[M.IO]
-
-	/** The chance of walls generation.
-	 * @TODO Replace to the data asset. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
-	int32 WallsChance_ = 35;  //[AW]
-
-	/** The chance of boxes generation.
-	* @TODO Replace to the data asset. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ClampMin = "0", ClampMax = "100"))
-	int32 BoxesChance_ = 70;  //[AW]
 
 	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
@@ -259,8 +267,7 @@ protected:
 	 *		Protected functions
 	 * --------------------------------------------------- */
 
-	/** Called when an instance of this class is placed (in editor) or spawned
-	 * @todo Generate only platform without boxes*/
+	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	/** This is called only in the gameplay before calling begin play to generate level actors */
@@ -275,10 +282,10 @@ protected:
 	 * @param OutBitmaskedComponents Will contains map components of owners having the specified types.
 	 * @param ActorsTypesBitmask EActorType bitmask of actors types.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActorsTypesBitmask"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetMapComponents(
 		TSet<class UMapComponent*>& OutBitmaskedComponents,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask) const;
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))

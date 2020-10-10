@@ -173,10 +173,10 @@ public:
 
 	/** Bitwise and(&) operation with bitmasks of actors types.
 	 * Checks the actors types among each other between themselves */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "LBitmask,RBitmask", CompactNodeTitle = "&"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (CompactNodeTitle = "&"))
 	static FORCEINLINE bool BitwiseActorTypes(
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& LBitmask,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& RBitmask)
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 LBitmask,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 RBitmask)
 	{
 		return (LBitmask & RBitmask) != 0;
 	}
@@ -185,15 +185,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     static FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return GetSingleton()->LevelsDataAssetInternal; }
 
+	/** Returns the UI Data Asset*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    static FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return GetSingleton()->UIDataAssetInternal; }
+
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
-    static class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
+    static class ULevelActorDataAsset* GetDataAssetByActorClass(TSubclassOf<AActor> ActorClass);
 
 	/** Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorsTypesBitmask"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static void GetDataAssetsByActorTypes(
 		TArray<class ULevelActorDataAsset*>& OutDataAssets,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) const int32& ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -208,9 +212,13 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
 	TSoftObjectPtr<class AGeneratedMap> LevelMapInternal;	//[B]
 
-	/** The class of the Main Level. */
+	/** Contains properties to setup the generated level. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))
 	class UGeneratedMapDataAsset* LevelsDataAssetInternal;
+
+	/** Contains properties to setup UI. */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "UI Data Asset"))
+	class UUIDataAsset* UIDataAssetInternal;
 
 	/** Actor type and its associated class. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actors Data Assets"))

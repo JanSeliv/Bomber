@@ -22,20 +22,20 @@ public:
 	UBombDataAsset();
 
 	/** All bomb materials. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++  | Custom")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
 	TArray<class UMaterialInterface*> BombMaterials; //[D]
 
 	/** The emitter of the bomb explosion */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Custom")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
 	class UParticleSystem* ExplosionParticle; //[D]
 
 	/** Get the bomb lifetime. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++  | Custom")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (ShowOnlyInnerProperties))
     FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
 
 protected:
 	/** The lifetime of a bomb. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Custom", meta = (DisplayName = "Life Span"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Life Span", ShowOnlyInnerProperties))
 	float LifeSpanInternal = 2.f; //[D]
 };
 
@@ -69,8 +69,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void InitBomb(
 		const FOnBombDestroyed& EventToBind,
-		const int32& FireN = 1,
-		const int32& CharacterID = -1);
+		int32 FireN = 1,
+		int32 CharacterID = -1);
 
 protected:
 	/* ---------------------------------------------------

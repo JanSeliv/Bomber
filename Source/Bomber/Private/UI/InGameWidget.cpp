@@ -38,7 +38,7 @@ void UInGameWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	// Hide that widget by default
-	SetVisibility(ESlateVisibility::Hidden);
+	SetVisibility(ESlateVisibility::Collapsed);
 
 	// Listen states to spawn widgets
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
@@ -74,7 +74,7 @@ void UInGameWidget::OnGameStateChanged_Implementation(ECurrentGameState CurrentG
 	{
 		case ECurrentGameState::Menu:
 		{
-			SetVisibility(ESlateVisibility::Hidden);
+			SetVisibility(ESlateVisibility::Collapsed);
 			break;
 		}
 		case ECurrentGameState::GameStarting:

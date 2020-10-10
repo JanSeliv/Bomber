@@ -3,20 +3,7 @@
 #include "MyHUD.h"
 //---
 #include "InGameWidget.h"
-//---
-#include "ConstructorHelpers.h"
-
-// Sets default values for this HUD's properties
-AMyHUD::AMyHUD()
-{
-	// Find In Game User Widget
-	static ConstructorHelpers::FClassFinder<UUserWidget> UmgLevelClassFinder(TEXT("/Game/Bomber/UI/InGame/WBP_InGame"));
-	if (UmgLevelClassFinder.Succeeded())
-	{
-		InGameWidgetClass = UmgLevelClassFinder.Class;
-	}
-}
-
+#include "SingletonLibrary.h"
 
 // Called when the game starts. Created widget.
 void AMyHUD::BeginPlay()
@@ -24,10 +11,13 @@ void AMyHUD::BeginPlay()
 	Super::BeginPlay();
 
 	// Widget creating and adding it to viewport
-	InGameWidget = CreateWidget<UInGameWidget>(GetOwningPlayerController(), InGameWidgetClass);
-	if (InGameWidget) // successfully created
+	if (const UUIDataAsset* UIDataAsset = USingletonLibrary::GetUIDataAsset())
 	{
-		InGameWidget->AddToViewport();
+		InGameWidget = CreateWidget<UInGameWidget>(GetOwningPlayerController(), UIDataAsset->GetInGameClass());
+		if (InGameWidget) // successfully created
+		{
+			InGameWidget->AddToViewport();
+		}
 	}
 }
 

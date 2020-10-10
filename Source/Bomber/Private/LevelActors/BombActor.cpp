@@ -38,8 +38,8 @@ ABombActor::ABombActor()
 
 void ABombActor::InitBomb(
 	const FOnBombDestroyed& EventToBind,
-	const int32& FireN /*= 1*/,
-	const int32& CharacterID /*=-1*/)
+	int32 FireN /*= 1*/,
+	int32 CharacterID /*=-1*/)
 {
 	if (!IsValid(USingletonLibrary::GetLevelMap()) // // The Level Map is not valid
 	    || !IsValid(MapComponentInternal)          // The Map Component is not valid

@@ -3,9 +3,36 @@
 #pragma once
 
 #include "GameFramework/HUD.h"
-#include "Bomber.h"
 //---
 #include "MyHUD.generated.h"
+
+/**
+ *
+ */
+UCLASS(Blueprintable, BlueprintType)
+class UUIDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	/* ---------------------------------------------------
+	 *		Public
+	 * --------------------------------------------------- */
+
+	/** Default constructor. */
+	UUIDataAsset() = default;
+
+	/** Get UUIDataAsset::InGameWidgetInternal.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    FORCEINLINE TSubclassOf<class UUserWidget> GetInGameClass() const { return InGameClassInternal; }
+
+protected:
+	/** The class of a In-Game Widget blueprint. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget", ShowOnlyInnerProperties))
+	TSubclassOf<class UUserWidget> InGameClassInternal; //[D]
+
+};
+
 
 /**
  * The custom HUD class. Also manages other widgets.
@@ -20,11 +47,6 @@ public:
 	*		Public properties
 	* --------------------------------------------------- */
 
-	/** The UMG class of the Level.
-	 * @todo Replace to the UI Data Asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TSubclassOf<class UUserWidget> InGameWidgetClass;  // [B]
-
 	/** The current widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Ñ++")
 	class UInGameWidget* InGameWidget;  //[G]
@@ -34,7 +56,7 @@ public:
 	* --------------------------------------------------- */
 
 	/* Sets default values for this HUD's properties. */
-	AMyHUD();
+	AMyHUD() = default;
 
 protected:
 	/* ---------------------------------------------------

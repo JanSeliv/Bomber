@@ -245,7 +245,7 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 }
 
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
-ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass)
+ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(TSubclassOf<AActor> ActorClass)
 {
 	for (ULevelActorDataAsset*& DataAssetIt : GetSingleton()->ActorsDataAssetsInternal)
 	{
@@ -258,7 +258,7 @@ ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclas
 }
 
 // Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types.
-void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>& OutDataAssets, const int32& ActorsTypesBitmask)
+void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
 {
 	for (ULevelActorDataAsset* DataAssetIt : GetSingleton()->ActorsDataAssetsInternal)
 	{

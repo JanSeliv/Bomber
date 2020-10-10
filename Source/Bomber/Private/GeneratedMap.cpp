@@ -13,7 +13,6 @@
 //---
 #include "Engine/LevelStreaming.h"
 #include "Math/UnrealMathUtility.h"
-#include "UObject/ConstructorHelpers.h"
 //---
 #if WITH_EDITOR
 #include "EditorLevelUtils.h"
@@ -47,11 +46,6 @@ AGeneratedMap::AGeneratedMap()
 	// Find blueprint class of the background
 	CollisionComponentInternal = CreateDefaultSubobject<UChildActorComponent>(TEXT("Collision Component"));
 	CollisionComponentInternal->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FClassFinder<AActor> BP_BackgroundAssetFinder(TEXT("/Game/Bomber/Blueprints/BP_CollisionAsset"));
-	if (BP_BackgroundAssetFinder.Succeeded())
-	{
-		BackgroundBlueprintClass = BP_BackgroundAssetFinder.Class; // Default class of the PlatformComponent
-	}
 
 	// Default camera class
 	CameraComponentInternal = CreateDefaultSubobject<UMyCameraComponent>(TEXT("CameraComponent"));
@@ -62,8 +56,8 @@ AGeneratedMap::AGeneratedMap()
 void AGeneratedMap::GetSidesCells(
 	FCells& OutCells,
 	const FCell& Cell,
-	const EPathType Pathfinder,
-	const int32& SideLength,
+	EPathType Pathfinder,
+	int32 SideLength,
 	bool bBreakInputCells) const
 {
 	// ----- Walls definition -----
@@ -234,7 +228,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 // The intersection of (OutCells ∩ ActorsTypesBitmask).
 void AGeneratedMap::IntersectCellsByTypes(
 	FCells& OutCells,
-	const int32& ActorsTypesBitmask,
+	int32 ActorsTypesBitmask,
 	bool bIntersectAllIfEmpty,
 	const UMapComponent* ExceptedComponent) const
 {
@@ -562,11 +556,12 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 #endif	// WITH_EDITOR [Editor]
 
 	// Create the background blueprint child actor
-	if (BackgroundBlueprintClass                                    // There is some background class
-	    && CollisionComponentInternal                             // Is accessible
-	    && !IsValid(CollisionComponentInternal->GetChildActor())) // Is not created yet
+	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
+	if (LevelsDataAsset
+		&& CollisionComponentInternal                    // Is accessible
+	    && !CollisionComponentInternal->GetChildActor()) // Is not created yet
 	{
-		CollisionComponentInternal->SetChildActorClass(BackgroundBlueprintClass);
+		CollisionComponentInternal->SetChildActorClass(LevelsDataAsset->GetCollisionsAsset());
 		CollisionComponentInternal->CreateChildActor();
 	}
 
@@ -709,8 +704,10 @@ void AGeneratedMap::GenerateLevelActors()
 	* Part 2: Spawning these actors
 	*/
 
+	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
+	float WallsChance = LevelsDataAsset ? LevelsDataAsset->GetWallsChance() : 0.f; // Copy to decrease chance after each failed generation
+	int32 BoxesChance = LevelsDataAsset ? LevelsDataAsset->GetBoxesChance() : 0;
 	TMap<FCell, EActorType> ActorsToSpawn;
-	float WallsChance = WallsChance_; // Copy to decrease chance after each failed generation
 	int32 Counter = 0;
 	bool bFoundPath = false;
 	while (WallsChance > KINDA_SMALL_NUMBER // exit if there is no chance to generate level
@@ -758,7 +755,7 @@ void AGeneratedMap::GenerateLevelActors()
 
 				// Box condition
 				if (ActorTypeToSpawn == EAT::None                            // all previous conditions are false
-				    && !IsSafeZone && FMath::RandHelper(100) < BoxesChance_) // Chance of boxes
+				    && !IsSafeZone && FMath::RandHelper(100) < BoxesChance) // Chance of boxes
 				{
 					ActorTypeToSpawn = EAT::Box;
 				}
@@ -884,7 +881,7 @@ void AGeneratedMap::GenerateLevelActors()
 }
 
 //  Map components getter.
-void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, const int32& ActorsTypesBitmask) const
+void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, int32 ActorsTypesBitmask) const
 {
 	if (!MapComponentsInternal.Num())
 	{

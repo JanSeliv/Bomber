@@ -29,19 +29,19 @@ struct FLevelActorMeshRow
 	explicit FLevelActorMeshRow(EItemType InItemType) : bIsItem(InItemType != EItemType::None), ItemType(InItemType) {}
 
 	/** The level where should be used a mesh */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Default")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	ELevelType LevelType = ELT::None; //[D]
 
 	/** The static mesh, skeletal mesh or texture */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C++ | Default", meta = (ExposeOnSpawn = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C++", meta = (ExposeOnSpawn = "true"))
 	class UStreamableRenderAsset* Mesh = nullptr; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Default", meta = (InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (InlineEditConditionToggle))
 	bool bIsItem = false; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Default", meta = (EditCondition = "bIsItem"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (EditCondition = "bIsItem"))
 	EItemType ItemType = EItemType::None; //[D]
 
 	/**
@@ -86,24 +86,24 @@ public:
 	ULevelActorDataAsset();
 
 	/** */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Default")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE TSubclassOf<class AActor> GetActorClass() const { return ActorClassInternal; }
 
 	/** */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Default")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
 
 	/** */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Default", meta = (AutoCreateRefTerm = "LevelsTypesBitmask"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetMeshesByLevelType(
 		TArray<FLevelActorMeshRow>& OutMeshes,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "ELevelType")) const int32& LevelsTypesBitmask) const;
+		UPARAM(meta = (Bitmask, BitmaskEnum = "ELevelType")) int32 LevelsTypesBitmask) const;
 
 	/**
 	 * Returns the first found mesh row that is equal by its level and item types to specified mesh row types.
 	 * @param OutComparedMeshRow Mesh row to compare its level and item types, it true than fill mesh and return it back.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Default", meta = (AutoCreateRefTerm = "OutComparedMeshRow"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "OutComparedMeshRow"))
     void GetMeshRowByTypes(FLevelActorMeshRow& OutComparedMeshRow) const;
 
 	/** */
@@ -111,31 +111,31 @@ public:
 	FORCEINLINE int32 GetMeshesNum() const { return MeshesInternal.Num(); }
 
 	/** */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Collision")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE FVector GetCollisionExtent() const { return CollisionExtentInternal; }
 
 	/** */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Collision")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
 
 protected:
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Default", meta = (BlueprintProtected, DisplayName = "Actor Class"))
-	TSubclassOf<class AActor> ActorClassInternal = nullptr; //[D]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))
+	TSubclassOf<class AActor> ActorClassInternal; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Default", meta = (BlueprintProtected, DisplayName = "Actor Type"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))
 	EActorType ActorTypeInternal = EAT::None; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Default", meta = (BlueprintProtected, DisplayName = "Meshes", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Meshes", ShowOnlyInnerProperties))
 	TArray<FLevelActorMeshRow> MeshesInternal; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Collision", meta = (BlueprintProtected, DisplayName = "Collision Extent"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Extent", ShowOnlyInnerProperties))
 	FVector CollisionExtentInternal = FVector(100.f); //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Collision", meta = (BlueprintProtected, DisplayName = "Collision Response"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties))
 	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap; //[D]
 };

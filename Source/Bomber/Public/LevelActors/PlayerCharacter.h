@@ -21,7 +21,7 @@ public:
 	UPlayerDataAsset();
 
 	/** All materials that are used by nameplate meshes. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Custom")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
 	TArray<class UMaterialInterface*> NameplateMaterials;  //[M.DO]
 };
 

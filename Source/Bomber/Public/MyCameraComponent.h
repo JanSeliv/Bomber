@@ -44,9 +44,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))
 	bool bForceStartInternal; //[N]
 
-	/** The absolute center position between players. The camera starts game from that position and returns to it on endgame. */
+	/** The absolute center position between players. The camera starts game from that position and returns to it on endgame. Is not visible in editor, is set on Begin Play*/
 	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Start Location"))
-	FVector StartLocation; //[N]
+	FVector StartLocationInternal; //[N]
 
 	/** Called every frame. */
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;

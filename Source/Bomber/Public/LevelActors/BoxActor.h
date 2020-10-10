@@ -21,12 +21,12 @@ public:
 	UBoxDataAsset();
 
 	/** */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++ | Custom")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE int32 GetSpawnItemChance() const { return SpawnItemChanceInternal; }
 
 protected:
 	/** The chance to spawn item after box destroying. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++ | Custom", meta = (BlueprintProtected, DisplayName = " Spawn Item Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
 	int32 SpawnItemChanceInternal = 30.F;  //[D]
 };
 

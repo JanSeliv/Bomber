@@ -10,7 +10,6 @@
 //---
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "UObject/ConstructorHelpers.h"
 
 // Default constructor
 UItemDataAsset::UItemDataAsset()

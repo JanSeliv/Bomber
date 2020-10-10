@@ -6,7 +6,6 @@
 #include "MapComponent.h"
 //---
 #include "Components/StaticMeshComponent.h"
-#include "UObject/ConstructorHelpers.h"
 
 // Default constructor
 UWallDataAsset::UWallDataAsset()
