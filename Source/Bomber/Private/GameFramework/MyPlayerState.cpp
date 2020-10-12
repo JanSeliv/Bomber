@@ -1,18 +1,25 @@
 // Copyright 2020 Yevhenii Selivanov
 
-#include "MyPlayerState.h"
+#include "GameFramework/MyPlayerState.h"
 //---
 #include "GeneratedMap.h"
-#include "MyGameStateBase.h"
-#include "SingletonLibrary.h"
+#include "Components/MapComponent.h"
+#include "Globals/SingletonLibrary.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "MapComponent.h"
 //---
-#include "UnrealNetwork.h"
+#include "Net/UnrealNetwork.h"
 
 /* ---------------------------------------------------
  *		Protected
  * --------------------------------------------------- */
+
+AMyPlayerState::AMyPlayerState()
+{
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+}
 
 //
 void AMyPlayerState::ChoosePlayer(USkeletalMesh* MeshAsset)

@@ -1,10 +1,10 @@
 ﻿// Copyright 2020 Yevhenii Selivanov.
 
-#include "InGameWidget.h"
+#include "UI/InGameWidget.h"
 //---
+#include "Globals/SingletonLibrary.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "SingletonLibrary.h"
 
 // Shows the in game menu.
 void UInGameWidget::ShowEndGameState_Implementation()

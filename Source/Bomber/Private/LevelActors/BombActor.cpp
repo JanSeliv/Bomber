@@ -4,12 +4,11 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "MapComponent.h"
-#include "SingletonLibrary.h"
-#include "MyGameStateBase.h"
+#include "Components/MapComponent.h"
+#include "Globals/SingletonLibrary.h"
+#include "GameFramework/MyGameStateBase.h"
 //---
 #include "Components/BoxComponent.h"
-#include "Components/StaticMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
 // Default constructor
@@ -30,16 +29,12 @@ ABombActor::ABombActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
-
-	// Initialize bomb mesh component
-	BombMeshComponentInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMeshComponent"));
-	BombMeshComponentInternal->SetupAttachment(RootComponent);
 }
 
 void ABombActor::InitBomb(
 	const FOnBombDestroyed& EventToBind,
-	int32 FireN /*= 1*/,
-	int32 CharacterID /*=-1*/)
+	int32 FireN/* = 1*/,
+	int32 CharacterID/* = -1*/)
 {
 	if (!IsValid(USingletonLibrary::GetLevelMap()) // // The Level Map is not valid
 	    || !IsValid(MapComponentInternal)          // The Map Component is not valid
@@ -50,12 +45,11 @@ void ABombActor::InitBomb(
 
 	// Set material
 	const TArray<UMaterialInterface*>& BombMaterials = MapComponentInternal->GetDataAssetChecked<UBombDataAsset>()->BombMaterials;
-	if (IsValid(BombMeshComponentInternal) // Mesh of the bomb is not valid
-	    && CharacterID != -1               // Is not debug character
-	    && BombMaterials.Num())            // As least one bomb material
+	if (CharacterID != -1       // Is not debug character
+	    && BombMaterials.Num()) // As least one bomb material
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
-		BombMeshComponentInternal->SetMaterial(0, BombMaterials[BombMaterialNo]);
+		MapComponentInternal->SetMaterial(BombMaterials[BombMaterialNo]);
 	}
 
 	// Update explosion information
@@ -67,7 +61,9 @@ void ABombActor::InitBomb(
 	{
 		USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(this);
-		USingletonLibrary::AddDebugTextRenders(this, ExplosionCellsInternal.Array(), FLinearColor::Red);
+		bool bOutBool = false;
+		TArray<UTextRenderComponent*> OutArray;
+		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, ExplosionCellsInternal, FLinearColor::Red, bOutBool, OutArray);
 	}
 #endif
 
@@ -91,7 +87,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	}
 
 	// Construct the actor's map component
-	MapComponentInternal->OnComponentConstruct(BombMeshComponentInternal, FLevelActorMeshRow::Empty);
+	MapComponentInternal->OnConstruction();
 
 #if WITH_EDITOR
 	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
@@ -129,7 +125,7 @@ void ABombActor::BeginPlay()
 }
 
 // Set the lifespan of this actor. When it expires the object will be destroyed
-void ABombActor::SetLifeSpan(float InLifespan/* = 0.f*/)
+void ABombActor::SetLifeSpan(float InLifespan/* = INDEX_NONE*/)
 {
 	if (InLifespan == INDEX_NONE) // is default value, should override it
 	{

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "LevelActorDataAsset.h"
+#include "Globals/LevelActorDataAsset.h"
 //---
 #include "GameFramework/Actor.h"
 //---
@@ -21,12 +21,12 @@ public:
 	UBoxDataAsset();
 
 	/** */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure)
     FORCEINLINE int32 GetSpawnItemChance() const { return SpawnItemChanceInternal; }
 
 protected:
 	/** The chance to spawn item after box destroying. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Spawn Item Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
 	int32 SpawnItemChanceInternal = 30.F;  //[D]
 };
 
@@ -47,23 +47,19 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
+	friend  class UMyCheatManager;
+
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	class UMapComponent* MapComponentInternal;	//[C.AW]
 
-	/** The static mesh component of this actor */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Mesh Component"))
-	class UStaticMeshComponent* BoxMeshComponentInternal;  //[C.DO]
+	/** Contains current spawn chance to spawn item. Can be overriden by the Cheat Manager. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
+	int32 SpawnItemChanceInternal; //[N]
 
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
-
-	friend  class UMyCheatManager;
-
-	/** Contains current spawn chance to spawn item. Can be overriden by the Cheat Manager. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
-	int32 SpawnItemChanceInternal; //[N]
 
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;

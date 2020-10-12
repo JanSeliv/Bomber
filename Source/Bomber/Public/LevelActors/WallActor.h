@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "LevelActorDataAsset.h"
+#include "Globals/LevelActorDataAsset.h"
 //---
 #include "GameFramework/Actor.h"
 //---
@@ -42,10 +42,6 @@ protected:
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	class UMapComponent* MapComponentInternal;	//[C.AW]
-
-	/** The static mesh component of this actor */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Wall Mesh Component"))
-	class UStaticMeshComponent* WallMeshComponentInternal;  //[C.DO]
 
 	/* ---------------------------------------------------
 	*		Protected functions

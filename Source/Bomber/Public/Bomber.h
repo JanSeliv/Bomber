@@ -37,11 +37,12 @@ using EAT = EActorType;
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ELevelType : uint8
 {
-	None	= 0 							UMETA(DisplayName = "None"),
-	First 	= 1 << 0 						UMETA(DisplayName = "Maya"),
-	Second 	= 1 << 1						UMETA(DisplayName = "City"),
-	Third  	= 1 << 2						UMETA(DisplayName = "Forest"),
-	Max	  	= First | Second | Third		UMETA(DisplayName = "Any")	///< Can be used for such levels as menu, sandbox, etc.
+	None	= 0 								UMETA(DisplayName = "None"),
+	First 	= 1 << 0 							UMETA(DisplayName = "Maya"),
+	Second 	= 1 << 1							UMETA(DisplayName = "City"),
+	Third  	= 1 << 2							UMETA(DisplayName = "Forest"),
+	Fourth  = 1 << 3							UMETA(DisplayName = "Water"),
+	Max	  	= First | Second | Third | Fourth	UMETA(DisplayName = "Any")	///< Can be used for such levels as menu, sandbox, etc.
 };
 ENUM_CLASS_FLAGS(ELevelType);
 using ELT = ELevelType;

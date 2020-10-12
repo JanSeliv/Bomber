@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Cell.h"
-#include "LevelActorDataAsset.h"
+#include "Globals/LevelActorDataAsset.h"
 //---
 #include "GameFramework/Actor.h"
 //---
@@ -22,20 +22,20 @@ public:
 	UBombDataAsset();
 
 	/** All bomb materials. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
 	TArray<class UMaterialInterface*> BombMaterials; //[D]
 
 	/** The emitter of the bomb explosion */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
 	class UParticleSystem* ExplosionParticle; //[D]
 
 	/** Get the bomb lifetime. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (ShowOnlyInnerProperties))
     FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
 
 protected:
 	/** The lifetime of a bomb. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Life Span", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Life Span", ShowOnlyInnerProperties))
 	float LifeSpanInternal = 2.f; //[D]
 };
 
@@ -80,10 +80,6 @@ protected:
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	class UMapComponent* MapComponentInternal;	//[C.AW]
-
-	/** The static mesh component of this actor */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Mesh Component"))
-	class UStaticMeshComponent* BombMeshComponentInternal;	//[C.DO]
 
 	/** The bomb blast path */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells", ShowOnlyInnerProperties))

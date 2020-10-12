@@ -15,22 +15,14 @@ class UUIDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	/* ---------------------------------------------------
-	 *		Public
-	 * --------------------------------------------------- */
-
-	/** Default constructor. */
-	UUIDataAsset() = default;
-
 	/** Get UUIDataAsset::InGameWidgetInternal.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE TSubclassOf<class UUserWidget> GetInGameClass() const { return InGameClassInternal; }
 
 protected:
 	/** The class of a In-Game Widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget", ShowOnlyInnerProperties))
 	TSubclassOf<class UUserWidget> InGameClassInternal; //[D]
-
 };
 
 

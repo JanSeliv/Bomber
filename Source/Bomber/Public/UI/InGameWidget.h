@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "Blueprint/UserWidget.h"
 #include "Bomber.h"
+#include "Blueprint/UserWidget.h"
 //---
 #include "InGameWidget.generated.h"
 
@@ -11,7 +11,7 @@
  * In game user widget.
  */
 UCLASS(Abstract)
-class BOMBER_API UInGameWidget : public UUserWidget
+class BOMBER_API UInGameWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 public:

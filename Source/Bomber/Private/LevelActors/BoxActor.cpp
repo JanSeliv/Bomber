@@ -4,11 +4,10 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "MapComponent.h"
-#include "SingletonLibrary.h"
-#include "MyGameStateBase.h"
+#include "Components/MapComponent.h"
+#include "Globals/SingletonLibrary.h"
+#include "GameFramework/MyGameStateBase.h"
 //---
-#include "Components/StaticMeshComponent.h"
 #include "Math/UnrealMathUtility.h"
 
 // Default constructor
@@ -29,10 +28,6 @@ ABoxActor::ABoxActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
-
-	// Initialize box mesh component
-	BoxMeshComponentInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoxMeshComponent"));
-	BoxMeshComponentInternal->SetupAttachment(RootComponent);
 }
 
 // Called when an instance of this class is placed (in editor) or spawned.
@@ -47,7 +42,7 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 	}
 
 	// Construct the actor's map component.
-	MapComponentInternal->OnComponentConstruct(BoxMeshComponentInternal, FLevelActorMeshRow::Empty);
+	MapComponentInternal->OnConstruction();
 }
 
 // Called when the game starts or when spawned

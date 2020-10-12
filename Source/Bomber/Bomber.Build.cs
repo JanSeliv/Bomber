@@ -11,7 +11,6 @@ public class Bomber : ModuleRules
         PublicDependencyModuleNames.AddRange(new string[] {
             "Core", "CoreUObject", "Engine", "InputCore", // Default
             "HeadMountedDisplay", "UMG", "Slate", "SlateCore", // UMG
-            "Http", "Json", "JsonUtilities", // HTTP and JSON
             "AIModule" // AI
             });
 
@@ -22,7 +21,7 @@ public class Bomber : ModuleRules
             PrivateDependencyModuleNames.AddRange(
                 new string[]
                 {
-                    "UnrealEd" // FEditorDelegates::EndPIE 
+                    "UnrealEd" // FEditorDelegates::EndPIE
                 });
         }
 

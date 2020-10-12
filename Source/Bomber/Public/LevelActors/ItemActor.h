@@ -3,11 +3,25 @@
 #pragma once
 
 #include "Bomber.h"
-#include "LevelActorDataAsset.h"
+#include "Globals/LevelActorDataAsset.h"
 //---
 #include "GameFramework/Actor.h"
 //---
 #include "ItemActor.generated.h"
+
+/**
+ *
+ */
+UCLASS(Blueprintable, BlueprintType)
+class UItemRow final : public ULevelActorRow
+{
+	GENERATED_BODY()
+
+public:
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
+	EItemType ItemType = EItemType::None; //[D]
+};
 
 /**
  *
@@ -55,10 +69,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	class UMapComponent* MapComponentInternal;	//[C.AW]
 
-	/** The static mesh component of this actor */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Item Mesh Component"))
-	class UStaticMeshComponent* ItemMeshComponentInternal;  //[C.DO]
-
 	/**
 	* Skate: Increase the movement speed of the character.
 	* Bomb: Increase the number of bombs that can be set at one time.
@@ -66,6 +76,10 @@ protected:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DIsplayName = "Item Type"))
 	EItemType ItemTypeInternal = EItemType::None;  // [AW]
+
+	/* ---------------------------------------------------
+	*		Protected functions
+	* --------------------------------------------------- */
 
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;

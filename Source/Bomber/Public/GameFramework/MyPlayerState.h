@@ -21,7 +21,7 @@ public:
 	* --------------------------------------------------- */
 
 	/** Default constructor. */
-	AMyPlayerState() = default;
+	AMyPlayerState();
 
 	/** Returns result of the game for controlled player after ending the game. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

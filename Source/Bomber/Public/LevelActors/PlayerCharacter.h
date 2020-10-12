@@ -2,11 +2,28 @@
 
 #pragma once
 
-#include "LevelActorDataAsset.h"
+#include "Globals/LevelActorDataAsset.h"
 //---
 #include "GameFramework/Character.h"
 //---
 #include "PlayerCharacter.generated.h"
+
+/**
+ *
+ */
+UCLASS(Blueprintable, BlueprintType)
+class UPlayerRow final : public ULevelActorRow
+{
+	GENERATED_BODY()
+
+public:
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
+	class UBlendSpace1D* IdleWalkRunBlendSpace; //[D]
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
+	class UAnimSequence* DanceAnimation; //[D]
+};
 
 /**
  *
@@ -21,8 +38,12 @@ public:
 	UPlayerDataAsset();
 
 	/** All materials that are used by nameplate meshes. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
 	TArray<class UMaterialInterface*> NameplateMaterials;  //[M.DO]
+
+	/* The AnimBlueprint class to use, can set it only in the gameplay. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
+	class TSubclassOf<UAnimInstance> AnimBlueprintClass;
 };
 
 /**
@@ -96,8 +117,8 @@ protected:
 	class UMapComponent* MapComponentInternal;	//[C.AW]
 
 	/** The static mesh nameplate */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
-	class UStaticMeshComponent* NameplateMeshComponent;	 //[C.DO]
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Mesh Component"))
+	class UStaticMeshComponent* NameplateMeshInternal;	 //[C.DO]
 
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
@@ -107,15 +128,11 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
 	int32 CharacterIDInternal = INDEX_NONE;  //[G]
 
-	/* The AnimBlueprint class to use, can set it only in the gameplay
-	 * @TODO Move to the Data Asset	 */
-	class TSubclassOf<UAnimInstance> MyAnimClass;
-
 	/** The character's AI controller */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	class AMyAIController* MyAIController;	//[G]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
+	class AMyAIController* MyAIControllerInternal;	//[G]
 
-	/**  */
+	/** Store to pause and unpause updating the current location of the player and bots on the level map.  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
 	FTimerHandle UpdatePositionHandleInternal;
 
@@ -139,7 +156,7 @@ protected:
 	 * @param ScaleValue Scale to apply to input. This can be used for analog input, ie a value of 0.5 applies half the normal value, while -1.0 would reverse the direction.
 	 * @param bForce If true always add the input, ignoring the result of IsMoveInputIgnored().
 	 */
-	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.0f, bool bForce = false) override;
+	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.f, bool bForce = false) override;
 
 	/* Move the player character by the forward vector. */
 	FORCEINLINE void OnMoveUpDown(float ScaleValue) { AddMovementInput(GetActorForwardVector(), ScaleValue); }

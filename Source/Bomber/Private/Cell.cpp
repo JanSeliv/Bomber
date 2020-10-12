@@ -3,8 +3,8 @@
 #include "Cell.h"
 //---
 #include "GeneratedMap.h"
-#include "MapComponent.h"
-#include "SingletonLibrary.h"
+#include "Components/MapComponent.h"
+#include "Globals/SingletonLibrary.h"
 //---
 
 // The zero cell

@@ -17,6 +17,10 @@ class BOMBER_API AMyAIController final : public AAIController
 	GENERATED_BODY()
 
 public:
+	/* ---------------------------------------------------
+	*		Public functions
+	* --------------------------------------------------- */
+
 	/** Sets default values for this character's properties */
 	AMyAIController();
 
@@ -25,6 +29,9 @@ public:
 	void MoveToCell(const struct FCell& DestinationCell);
 
 protected:
+	/* ---------------------------------------------------
+	*		Protected properties
+	* --------------------------------------------------- */
 
 	friend class UMyCheatManager;
 
@@ -33,12 +40,16 @@ protected:
 	FTimerHandle AIUpdateHandleInternal;
 
 	/** Cell position of current path segment's end */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	struct FCell AiMoveTo;	//[G]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "AI Move To"))
+	FCell AIMoveToInternal;	//[G]
 
 	/** Controlled character */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected))
-	class APlayerCharacter* MyCharacter;  //[G]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))
+	class APlayerCharacter* OwnerInternal;  //[G]
+
+	/* ---------------------------------------------------
+	*		Protected functions
+	* --------------------------------------------------- */
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;

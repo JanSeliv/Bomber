@@ -2,14 +2,14 @@
 
 #include "GeneratedMap.h"
 //---
-#include "LevelActors/BombActor.h"
 #include "Bomber.h"
 #include "Cell.h"
-#include "MapComponent.h"
-#include "MyGameInstance.h"
-#include "SingletonLibrary.h"
-#include "MyCameraComponent.h"
+#include "Components/MapComponent.h"
+#include "Components/MyCameraComponent.h"
+#include "Globals/MyGameInstance.h"
+#include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "LevelActors/BombActor.h"
 //---
 #include "Engine/LevelStreaming.h"
 #include "Math/UnrealMathUtility.h"
@@ -448,8 +448,14 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
-		TArray<ULevel*> Levels;
-		TArray<bool> Visibilities;
+		if (NewLevelType == ELevelType::None)
+		{
+			// the level is not selected, choose persistent
+			UEditorLevelUtils::MakeLevelCurrent(World->PersistentLevel, false);
+			return;
+		}
+
+		// Iterate all levels, load all, show selected, hide others
 		for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
 		{
 			FName PackageName(NAME_None);
@@ -459,43 +465,27 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 				continue;
 			}
 
-			bool bSetStreamingClass = true;
 			const TSubclassOf<ULevelStreaming>& StreamingClass = bShouldBeVisibleIt ? ULevelStreamingAlwaysLoaded::StaticClass() : ULevelStreamingDynamic::StaticClass();
-
 			ULevelStreaming* LevelStreamingIt = UGameplayStatics::GetStreamingLevel(World, PackageName);
 			if (!LevelStreamingIt) // level is not added to the persistent
 			{
 				LevelStreamingIt = UEditorLevelUtils::AddLevelToWorld(World, *PackageName.ToString(), StreamingClass);
-				bSetStreamingClass = false; // streaming method already was set by adding the new level, skip it
 			}
 
+			// Set visibility
 			ULevel* LoadedLevel = LevelStreamingIt ? LevelStreamingIt->GetLoadedLevel() : nullptr;
-			if (!LoadedLevel                                      // was not loaded
-			    || LoadedLevel->bIsVisible == bShouldBeVisibleIt) // already is set visibility and streaming class (on reconstruction)
+			if (LoadedLevel)
 			{
-				continue;
-			}
-
-			// Fill arrays to set visibility
-			Levels.Emplace(LoadedLevel);
-			Visibilities.Emplace(bShouldBeVisibleIt);
-
-			// Override streaming methods
-			if (bSetStreamingClass) // is true only for already added levels earlier (not for that frame)
-			{
-				UEditorLevelUtils::SetStreamingClassForLevel(LevelStreamingIt, StreamingClass);
+				if (bShouldBeVisibleIt) // Make the selected level as current (it will make him visible)
+				{
+					UEditorLevelUtils::MakeLevelCurrent(LoadedLevel, true);
+				}
+				else // hide not selected level
+				{
+					UEditorLevelUtils::SetLevelVisibility(LoadedLevel, false, false);
+				}
 			}
 		}
-
-		// Overrides streams by Levels and Visibilities array
-		if (Levels.Num()
-			&& ensureMsgf(Levels.Num() == Visibilities.Num(), TEXT("Levels and Visibilities arrays are not equal")))
-		{
-			UEditorLevelUtils::SetLevelsVisibility(Levels, Visibilities, false);
-		}
-
-		// Set current level as persistent level
-		World->SetCurrentLevel(World->PersistentLevel);
 
 		// The editor stream was overrided, no need to continue
 		return;
@@ -526,6 +516,12 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 		{
 			StreamingLevel->SetShouldBeVisible(bShouldBeVisibleIt);
 		}
+	}
+
+	// skip if the same level type
+	if (LevelTypeInternal == NewLevelType)
+	{
+		return;
 	}
 
 	// once level is loading, prepare him

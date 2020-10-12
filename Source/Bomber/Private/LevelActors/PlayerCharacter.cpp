@@ -4,13 +4,13 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "LevelActors/BombActor.h"
-#include "MapComponent.h"
-#include "MyAIController.h"
-#include "SingletonLibrary.h"
-#include "ItemActor.h"
+#include "Components/MapComponent.h"
+#include "Globals/SingletonLibrary.h"
+#include "Controllers/MyAIController.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "MyPlayerState.h"
+#include "GameFramework/MyPlayerState.h"
+#include "LevelActors/BombActor.h"
+#include "LevelActors/ItemActor.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -42,11 +42,11 @@ APlayerCharacter::APlayerCharacter()
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
 
 	// Initialize the nameplate mesh component
-	NameplateMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
-	NameplateMeshComponent->SetupAttachment(RootComponent);
-	NameplateMeshComponent->SetRelativeLocation(FVector(-60.f, 0.f, 150.f));
-	NameplateMeshComponent->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
-	NameplateMeshComponent->SetRelativeScale3D(FVector(1.75f, 1.f, 1.f));
+	NameplateMeshInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
+	NameplateMeshInternal->SetupAttachment(RootComponent);
+	NameplateMeshInternal->SetRelativeLocation(FVector(-60.f, 0.f, 150.f));
+	NameplateMeshInternal->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	NameplateMeshInternal->SetRelativeScale3D(FVector(1.75f, 1.f, 1.f));
 }
 
 // Finds and rotates the self at the current character's location to point at the specified location.
@@ -121,17 +121,16 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	UWorld* World = GetWorld();
-	if (!World)
+	if (!World
+		|| !MapComponentInternal)
 	{
 		return;
 	}
 
 	// Set the animation
-	// @TODO Get Anim class from data asset
-	if (GetMesh()->GetAnimInstance() == nullptr	 // Is not created yet
-		&& MyAnimClass != nullptr)				 // The animation class is set
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		GetMesh()->SetAnimInstanceClass(MyAnimClass);
+		MeshComp->SetAnimInstanceClass(MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->AnimBlueprintClass);
 	}
 
 	// Posses the controller
@@ -143,10 +142,10 @@ void APlayerCharacter::BeginPlay()
 			PlayerController->Possess(this);
 		}
 	}
-	else if (!IS_VALID(MyAIController))	// has AI controller and was not spawned early
+	else if (!IS_VALID(MyAIControllerInternal))	// has AI controller and was not spawned early
 	{
-		MyAIController = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
-		MyAIController->Possess(this);
+		MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+		MyAIControllerInternal->Possess(this);
 	}
 
 	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
@@ -187,18 +186,31 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
+	// Construct the actor's map component
+	MapComponentInternal->OnConstruction();
+
 	// Set ID
 	if (CharacterIDInternal == INDEX_NONE)
 	{
 		FCells PlayerCells;
 		LevelMap->IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
-		CharacterIDInternal = PlayerCells.Num();
+		CharacterIDInternal = PlayerCells.Num() - 1;
 	}
 
-	// Construct the actor's map component
-	const int32 MeshesNum = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->GetMeshesNum();
-	const ELevelType LevelType = TO_ENUM(ELevelType, 1 << (CharacterIDInternal % MeshesNum));
-	MapComponentInternal->OnComponentConstruct(GetMesh(), FLevelActorMeshRow(LevelType));
+	// Override mesh
+	TArray<ULevelActorRow*> OutRows;
+	const ULevelActorDataAsset* PlayerDataAsset = MapComponentInternal->GetActorDataAsset();
+	const int32 MeshesNum = PlayerDataAsset ? PlayerDataAsset->GetRowsNum() : 0;
+	if(MeshesNum)
+	{
+		const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
+		PlayerDataAsset->GetRowsByLevelType(OutRows, LevelType);
+		const ULevelActorRow* Row = OutRows.IsValidIndex(0) ? OutRows[0] : nullptr;
+		if (Row)
+		{
+			MapComponentInternal->SetMesh(Row->Mesh, GetMesh());
+		}
+	}
 
 	// Update mesh if chosen
 	if (!CharacterIDInternal) // is player
@@ -212,7 +224,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	}
 
 	// Set a nameplate material
-	if (ensureMsgf(NameplateMeshComponent, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
+	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
 	{
 		const TArray<UMaterialInterface*>& NameplateMaterials = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->NameplateMaterials;
 		const int32 NameplateMeshesNum = NameplateMaterials.Num();
@@ -221,7 +233,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
 			if (NameplateMaterials.IsValidIndex(MaterialNo))
 			{
-				NameplateMeshComponent->SetMaterial(0, NameplateMaterials[MaterialNo]);
+				NameplateMeshInternal->SetMaterial(0, NameplateMaterials[MaterialNo]);
 			}
 		}
 
@@ -233,12 +245,12 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	if (USingletonLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
 	    && CharacterIDInternal > 0)                     // Is a bot
 	{
-		MyAIController = Cast<AMyAIController>(GetController());
+		MyAIControllerInternal = Cast<AMyAIController>(GetController());
 		if (MapComponentInternal->bShouldShowRenders == false)
 		{
-			if (MyAIController) MyAIController->Destroy();
+			if (MyAIControllerInternal) MyAIControllerInternal->Destroy();
 		}
-		else if (MyAIController == nullptr) // Is a bot with debug visualization and AI controller is not created yet
+		else if (MyAIControllerInternal == nullptr) // Is a bot with debug visualization and AI controller is not created yet
 		{
 			SpawnDefaultController();
 			if (GetController()) GetController()->bIsEditorOnlyActor = true;
@@ -263,7 +275,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 }
 
 // Adds the movement input along the given world direction vector.
-void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue, bool bForce)
+void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue/* = 1.f*/, bool bForce/* = false*/)
 {
 	if (ScaleValue)
 	{

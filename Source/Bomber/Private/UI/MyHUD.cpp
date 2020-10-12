@@ -1,9 +1,9 @@
 ﻿// Copyright 2020 Yevhenii Selivanov.
 
-#include "MyHUD.h"
+#include "UI/MyHUD.h"
 //---
-#include "InGameWidget.h"
-#include "SingletonLibrary.h"
+#include "Globals/SingletonLibrary.h"
+#include "UI/InGameWidget.h"
 
 // Called when the game starts. Created widget.
 void AMyHUD::BeginPlay()

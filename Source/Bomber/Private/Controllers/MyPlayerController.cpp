@@ -1,11 +1,11 @@
 ﻿// Copyright 2020 Yevhenii Selivanov.
 
-#include "MyPlayerController.h"
+#include "Controllers/MyPlayerController.h"
 //---
-#include "InGameWidget.h"
-#include "MyCheatManager.h"
+#include "GameFramework/MyCheatManager.h"
+#include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "SingletonLibrary.h"
+#include "UI/InGameWidget.h"
 
 // Sets default values for this controller's properties
 AMyPlayerController::AMyPlayerController()

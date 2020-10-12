@@ -4,12 +4,11 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "Components/MapComponent.h"
+#include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "MapComponent.h"
-#include "SingletonLibrary.h"
 //---
 #include "Components/BoxComponent.h"
-#include "Components/StaticMeshComponent.h"
 
 // Default constructor
 UItemDataAsset::UItemDataAsset()
@@ -29,10 +28,6 @@ AItemActor::AItemActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
-
-	// Initialize item mesh component
-	ItemMeshComponentInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMeshComponent"));
-	ItemMeshComponentInternal->SetupAttachment(RootComponent);
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -40,11 +35,14 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponentInternal))	// Is not valid for map construction
+	if (IS_TRANSIENT(this)                 // This actor is transient
+	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
 	{
 		return;
 	}
+
+	// Construct the map component
+	MapComponentInternal->OnConstruction();
 
 	// Rand the item type if not set yet
 	if (ItemTypeInternal == EItemType::None)
@@ -55,8 +53,19 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 		}
 	}
 
-	// Construct the actor's map component
-	MapComponentInternal->OnComponentConstruct(ItemMeshComponentInternal, FLevelActorMeshRow(ItemTypeInternal));
+	// Override mesh
+	TArray<ULevelActorRow*> OutRows;
+	MapComponentInternal->GetDataAssetChecked<UItemDataAsset>()->GetRowsByLevelType(OutRows, TO_FLAG(USingletonLibrary::GetLevelType()));
+	const auto FoundRow = OutRows.FindByPredicate([ItemType = ItemTypeInternal](const ULevelActorRow* RowIt)
+	{
+		const auto ItemRow = Cast<UItemRow>(RowIt);
+		return ItemRow && ItemRow->ItemType == ItemType;
+	});
+	ULevelActorRow* LevelActorRow = FoundRow ? *FoundRow : nullptr;
+	if (LevelActorRow)
+	{
+		MapComponentInternal->SetMesh(LevelActorRow->Mesh);
+	}
 }
 
 // Called when the game starts or when spawned

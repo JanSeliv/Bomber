@@ -1,13 +1,13 @@
 ﻿// Copyright 2020 Yevhenii Selivanov.
 
-#include "MyAIController.h"
+#include "Controllers/MyAIController.h"
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "Components/MapComponent.h"
+#include "Globals/SingletonLibrary.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "MapComponent.h"
-#include "MyGameStateBase.h"
-#include "SingletonLibrary.h"
 
 // Sets default values for this character's properties
 AMyAIController::AMyAIController()
@@ -22,32 +22,32 @@ AMyAIController::AMyAIController()
 // Makes AI go toward specified destination cell
 void AMyAIController::MoveToCell(const FCell& DestinationCell)
 {
-	if (IS_VALID(MyCharacter) == false)	 // The controlled character is not valid or is transient
+	if (!IS_VALID(OwnerInternal))	 // The controlled character is not valid or is transient
 	{
 		return;
 	}
 
-	AiMoveTo = DestinationCell;
-	MoveToLocation(AiMoveTo.Location, -1.0f, false, false);
+	AIMoveToInternal = DestinationCell;
+	MoveToLocation(AIMoveToInternal.Location, -1.0f, false, false);
 
 	// Rotate the character
-	MyCharacter->RotateToLocation(AiMoveTo.Location, false);
+	OwnerInternal->RotateToLocation(AIMoveToInternal.Location, false);
 
 #if WITH_EDITOR	 // [Editor]
 	// Visualize and show destination cell
 	if (HasActorBegunPlay())  // [PIE]
 	{
 		USingletonLibrary::PrintToLog(this, "MoveAI", "-> \t ClearOwnerTextRenders");
-		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
+		USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
 	}  // [PIE]
 
-	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(MyCharacter);
+	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
 	if (MapComponent  // is valid  map component
 		&& MapComponent->bShouldShowRenders)
 	{
 		bool bOutBool = false;
 		TArray<UTextRenderComponent*> OutArray{};
-		USingletonLibrary::GetSingleton()->AddDebugTextRenders(MyCharacter, FCells{AiMoveTo}, FLinearColor::Gray, bOutBool, OutArray, 255, 300, "x");
+		USingletonLibrary::GetSingleton()->AddDebugTextRenders(OwnerInternal, FCells{AIMoveToInternal}, FLinearColor::Gray, bOutBool, OutArray, 255, 300, "x");
 	}
 #endif
 }
@@ -65,7 +65,7 @@ void AMyAIController::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
-	Possess(MyCharacter);
+	Possess(OwnerInternal);
 }
 
 //  Called when the game starts or when spawned
@@ -105,7 +105,7 @@ void AMyAIController::OnPossess(APawn* InPawn)
 		return;
 	}
 
-	MyCharacter = Cast<APlayerCharacter>(InPawn);
+	OwnerInternal = Cast<APlayerCharacter>(InPawn);
 
 	if (USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this) == false)
 	{
@@ -117,9 +117,9 @@ void AMyAIController::OnPossess(APawn* InPawn)
 void AMyAIController::UpdateAI()
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(MyCharacter);
+	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
 	if (!LevelMap								 // The Level Map is not valid or is transient
-		|| !IS_VALID(MyCharacter)				 // The controller character is not valid or is transient
+		|| !IS_VALID(OwnerInternal)				 // The controller character is not valid or is transient
 		|| !IsValid(MapComponent))				 // The Map Component is not valid
 	{
 		return;
@@ -129,8 +129,8 @@ void AMyAIController::UpdateAI()
 	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
 	{
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]UpdateAI", "-> \t ClearOwnerTextRenders");
-		USingletonLibrary::ClearOwnerTextRenders(MyCharacter);
-		AiMoveTo = FCell::ZeroCell;
+		USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
+		AIMoveToInternal = FCell::ZeroCell;
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -278,11 +278,11 @@ void AMyAIController::UpdateAI()
 		&& bIsItemInDirect == false)	// was not found direct items
 	{
 		FCells BoxesAndPlayers;
-		LevelMap->GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, MyCharacter->GetPowerups().FireN);
+		LevelMap->GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
 		LevelMap->IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(EAT::Box | EAT::Player), false, MapComponent);
 		if (BoxesAndPlayers.Num() > 0)	// Are bombs or players in own bomb radius
 		{
-			MyCharacter->SpawnBomb();
+			OwnerInternal->SpawnBomb();
 			Free.Empty();  // Delete all cells to make new choice
 
 #if WITH_EDITOR	 // [Editor]
@@ -290,7 +290,7 @@ void AMyAIController::UpdateAI()
 			{
 				bool bOutBool = false;
 				TArray<UTextRenderComponent*> OutArray{};
-				USingletonLibrary::GetSingleton()->AddDebugTextRenders(MyCharacter, FCells{F0}, FLinearColor::Red, bOutBool, OutArray, 261.F, 95.F, "Attack");
+				USingletonLibrary::GetSingleton()->AddDebugTextRenders(OwnerInternal, FCells{F0}, FLinearColor::Red, bOutBool, OutArray, 261.F, 95.F, "Attack");
 			}
 #endif	// [Editor]
 		}
@@ -298,7 +298,7 @@ void AMyAIController::UpdateAI()
 
 	// ----- Part 3: Making choice-----
 
-	if (Free.Contains(AiMoveTo))
+	if (Free.Contains(AIMoveToInternal))
 	{
 		return;
 	}
@@ -334,7 +334,7 @@ void AMyAIController::UpdateAI()
 			}  // 3 visualization types
 			bool bOutBool = false;
 			TArray<UTextRenderComponent*> OutArray{};
-			USingletonLibrary::GetSingleton()->AddDebugTextRenders(MyCharacter, VisualizingStep, Color, bOutBool, OutArray, 263, 124, String, Position);
+			USingletonLibrary::GetSingleton()->AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, bOutBool, OutArray, 263, 124, String, Position);
 		}  // [Loopy visualization]
 	}
 #endif	// [Editor]

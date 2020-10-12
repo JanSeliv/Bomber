@@ -23,19 +23,19 @@ struct FLevelStreamRow
 	FLevelStreamRow() = default;
 
 	/** The level asset */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
 	TSoftObjectPtr<UWorld> Level; //[D]
 
 	/** The associated type of a level. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
 	ELevelType LevelType = ELT::None; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (InlineEditConditionToggle))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level", meta = (InlineEditConditionToggle))
 	bool bIsStoryLevel = false; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (EditCondition = "bIsStoryLevel"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level", meta = (EditCondition = "bIsStoryLevel"))
 	FVector2D StoryLevelSize = FVector2D::ZeroVector; //[D]
 };
 
@@ -73,23 +73,23 @@ public:
 
 protected:
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels", ShowOnlyInnerProperties))
 	TArray<FLevelStreamRow> LevelsInternal; //[D]
 
 	/** How ofter update actors on map. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))
 	float TickInternal = 0.2F; //[D]
 
 	/** The chance of walls generation. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Walls Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Walls Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
 	int32 WallsChanceInternal = 35;  //[AW]
 
 	/** The chance of boxes generation. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Boxes Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Boxes Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
 	int32 BoxesChanceInternal = 70;  //[AW]
 
 	/** Asset that contains scalable collision. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collisions Asset", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collisions Asset", ShowOnlyInnerProperties))
 	TSubclassOf<AActor> CollisionsAssetInternal; //[D]
 };
 

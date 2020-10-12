@@ -2,10 +2,10 @@
 
 #include "GameFramework/MyGameStateBase.h"
 //---
-#include "SingletonLibrary.h"
-#include "MyPlayerController.h"
+#include "Globals/SingletonLibrary.h"
+#include "Controllers/MyPlayerController.h"
 //---
-#include "UnrealNetwork.h"
+#include "Net/UnrealNetwork.h"
 
 // Default constructor
 AMyGameStateBase::AMyGameStateBase()
