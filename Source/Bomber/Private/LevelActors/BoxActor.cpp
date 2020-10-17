@@ -98,7 +98,10 @@ void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 void ABoxActor::ResetItemChance()
 {
 	// Update current chance from Data Asset
-	SpawnItemChanceInternal = MapComponentInternal->GetDataAssetChecked<UBoxDataAsset>()->GetSpawnItemChance();
+	if (MapComponentInternal)
+	{
+		SpawnItemChanceInternal = MapComponentInternal->GetDataAssetChecked<UBoxDataAsset>()->GetSpawnItemChance();
+	}
 }
 
 // Listen to reset item chance for each new game

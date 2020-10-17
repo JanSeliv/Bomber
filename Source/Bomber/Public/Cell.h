@@ -10,7 +10,7 @@ typedef TSet<struct FCell> FCells;
 /**
  * The structure that contains a location of an one cell on a grid of the Level Map.
  */
-USTRUCT(BlueprintType, meta = (HasNativeMake = "Bomber.SingletonLibrary.MakeCell"))
+USTRUCT(BlueprintType)
 struct FCell
 {
 	GENERATED_BODY()

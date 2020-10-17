@@ -41,12 +41,15 @@ void UMapComponent::OnConstruction()
 	USingletonLibrary::GetLevelMap()->AddToGrid(Cell, this);
 
 	// Set default mesh asset
-	TArray<ULevelActorRow*> OutRows;
-	ActorDataAssetInternal->GetRowsByLevelType(OutRows, TO_FLAG(USingletonLibrary::GetLevelType()));
-	ULevelActorRow* FoundRow = OutRows.IsValidIndex(0) ? OutRows[0] : nullptr;
-	if (FoundRow)
+	if (ActorDataAssetInternal)
 	{
-		SetMesh(FoundRow->Mesh);
+		TArray<ULevelActorRow*> OutRows;
+		ActorDataAssetInternal->GetRowsByLevelType(OutRows, TO_FLAG(USingletonLibrary::GetLevelType()));
+		ULevelActorRow* FoundRow = OutRows.IsValidIndex(0) ? OutRows[0] : nullptr;
+		if (FoundRow)
+		{
+			SetMesh(FoundRow->Mesh);
+		}
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
