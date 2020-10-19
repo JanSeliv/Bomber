@@ -201,3 +201,27 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
+
+#if WITH_EDITOR
+// Returns whether this component or its owner is an editor-only object or not
+bool UMapComponent::IsEditorOnly() const
+{
+	AActor* Owner = GetOwner();
+	return Super::IsEditorOnly() || Owner && Owner->IsEditorOnly();
+}
+
+// Destroy editoronly actor for the editor -game before registering the component
+bool UMapComponent::Modify(bool bAlwaysMarkDirty/* = true*/)
+{
+	AActor* Owner = GetOwner();
+	if (Owner
+	    && !USingletonLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
+	    && IsEditorOnly())                // was generated in the editor
+	{
+		Owner->Destroy();
+		return false;
+	}
+
+	return Super::Modify(bAlwaysMarkDirty);
+}
+#endif //WITH_EDITOR

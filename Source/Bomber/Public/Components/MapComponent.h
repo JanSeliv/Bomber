@@ -105,4 +105,16 @@ protected:
 
 	/** Called when a component is destroyed for removing the owner from the Level Map. */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
+
+#if WITH_EDITOR
+	/** Returns true whether this component or its owner is an editor-only object or not. */
+	virtual bool IsEditorOnly() const override;
+
+	/**
+	* Destroy EditorOnly owner for the editor -game.
+	* Before we register our component, save it to our transaction buffer so if "undone" it will return to an unregistered state.
+	* This should prevent unwanted components hanging around when undoing a copy/paste or duplication action.
+	*/
+	virtual bool Modify(bool bAlwaysMarkDirty = true) override;
+#endif
 };
