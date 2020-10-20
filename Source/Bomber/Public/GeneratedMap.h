@@ -71,8 +71,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
     FORCEINLINE TSubclassOf<AActor> GetCollisionsAsset() const { return CollisionsAssetInternal; }
 
+	/** Get UGeneratedMapDataAsset::LockLocationOnZeroInternal.  */
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE bool IsLockedOnZero() const { return LockOnZeroInternal; }
+
 protected:
-	/** */
+	/** Contains all used levels. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels", ShowOnlyInnerProperties))
 	TArray<FLevelStreamRow> LevelsInternal; //[D]
 
@@ -91,6 +95,10 @@ protected:
 	/** Asset that contains scalable collision. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collisions Asset", ShowOnlyInnerProperties))
 	TSubclassOf<AActor> CollisionsAssetInternal; //[D]
+
+	/** If true, the level position will be locked on the (0,0,0) location. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Lock Location On Zero", ShowOnlyInnerProperties))
+	bool LockOnZeroInternal = true; //[D]
 };
 
 /**

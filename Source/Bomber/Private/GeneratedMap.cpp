@@ -41,7 +41,7 @@ AGeneratedMap::AGeneratedMap()
 
 	// Initialize the Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	RootComponent->SetRelativeScale3D(FVector(7.F, 7.F, 7.F));
+	RootComponent->SetRelativeScale3D(FVector(9.F, 9.F, 1.F));
 
 	// Find blueprint class of the background
 	CollisionComponentInternal = CreateDefaultSubobject<UChildActorComponent>(TEXT("Collision Component"));
@@ -232,8 +232,8 @@ void AGeneratedMap::IntersectCellsByTypes(
 	bool bIntersectAllIfEmpty,
 	const UMapComponent* ExceptedComponent) const
 {
-	if (bIntersectAllIfEmpty == false // should not intersect with all existed cells
-	    && OutCells.Num() == 0)       // but the specified array is empty
+	if (!GridCellsInternal.Num() // nothing to intersect
+	    || !bIntersectAllIfEmpty && !OutCells.Num()) // should not intersect with all existed cells but the specified array is empty
 	{
 		return;
 	}
@@ -541,7 +541,9 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_TRANSIENT(this) == true) // the level map is transient
+	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
+	if (!LevelsDataAsset
+		|| IS_TRANSIENT(this)) // the level map is transient
 	{
 		return;
 	}
@@ -552,9 +554,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 #endif	// WITH_EDITOR [Editor]
 
 	// Create the background blueprint child actor
-	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
-	if (LevelsDataAsset
-		&& CollisionComponentInternal                    // Is accessible
+	if (CollisionComponentInternal                    // Is accessible
 	    && !CollisionComponentInternal->GetChildActor()) // Is not created yet
 	{
 		CollisionComponentInternal->SetChildActorClass(LevelsDataAsset->GetCollisionsAsset());
@@ -562,8 +562,11 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 
 	// Align the Transform
+	const FVector NewLocation = LevelsDataAsset->IsLockedOnZero()
+		                            ? FVector::ZeroVector
+		                            : GetActorLocation().GridSnap(USingletonLibrary::GetCellSize());
+	SetActorLocation(NewLocation);
 	SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
-	SetActorLocation(GetActorLocation().GridSnap(USingletonLibrary::GetCellSize()));
 	FIntVector MapScale(GetActorScale3D());
 	if (MapScale.X % 2 != 1) // Length must be unpaired
 	{
@@ -656,9 +659,7 @@ void AGeneratedMap::GenerateLevelActors()
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
 
 	// Destroy all editor-only non-PIE actors
-	FCells NonEmptyCells;
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
-	DestroyActorsFromMap(NonEmptyCells);
+	DestroyActorsFromMap(FCells(GridCellsInternal));
 	PlayersNumInternal = 0;
 
 	// Calls before generation preview actors to updating of all dragged to the Level Map actors
