@@ -4,6 +4,7 @@
 
 #include "Bomber.h"
 #include "Cell.h"
+#include "Globals//LevelActorDataAsset.h"
 #include "GameFramework/Actor.h"
 //---
 #include "GeneratedMap.generated.h"
@@ -43,7 +44,7 @@ struct FLevelStreamRow
  *
  */
 UCLASS(Blueprintable, BlueprintType)
-class UGeneratedMapDataAsset final : public UDataAsset
+class UGeneratedMapDataAsset final : public UBomberDataAsset
 {
 	GENERATED_BODY()
 
@@ -274,6 +275,9 @@ protected:
 	/* ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */
+
+	/** Called before construction when a map is loaded. */
+	virtual void PostLoad() override;
 
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;

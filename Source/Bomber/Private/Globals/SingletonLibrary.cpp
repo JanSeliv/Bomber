@@ -25,8 +25,13 @@
 USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
 
 /* ---------------------------------------------------
- *		Editor development functions
+ *		Editor development
  * --------------------------------------------------- */
+
+#if WITH_EDITOR
+// Will notify on any data asset changes
+USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChanged;
+#endif //WITH_EDITOR
 
 bool USingletonLibrary::IsEditor()
 {

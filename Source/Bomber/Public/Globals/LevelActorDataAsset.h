@@ -27,10 +27,25 @@ public:
 };
 
 /**
+ * The base data asset for the Bomber's data.
+ */
+UCLASS(Blueprintable, BlueprintType)
+class UBomberDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+#if WITH_EDITOR
+	/** Called to notify on any data asset changes. */
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif //WITH_EDITOR
+};
+
+/**
  * The base data asset for any level actor that contains the main data about them.
  */
 UCLASS(Blueprintable, BlueprintType)
-class ULevelActorDataAsset : public UDataAsset
+class ULevelActorDataAsset : public UBomberDataAsset
 {
 	GENERATED_BODY()
 
@@ -47,19 +62,19 @@ public:
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE TSubclassOf<class AActor> GetActorClass() const { return ActorClassInternal; }
+	FORCEINLINE TSubclassOf<class AActor> GetActorClass() const { return ActorClassInternal; }
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
+	FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE FVector GetCollisionExtent() const { return CollisionExtentInternal; }
+	FORCEINLINE FVector GetCollisionExtent() const { return CollisionExtentInternal; }
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
+	FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
 
 protected:
 	/** */

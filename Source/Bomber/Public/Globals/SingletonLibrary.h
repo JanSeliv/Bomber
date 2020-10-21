@@ -26,8 +26,14 @@ public:
 	USingletonLibrary() = default;
 
 	/* ---------------------------------------------------
-	 *		Editor development functions
+	 *		Editor development
 	 * --------------------------------------------------- */
+
+#if WITH_EDITOR
+	DECLARE_MULTICAST_DELEGATE(FOnAnyDataAssetChanged);
+	/** Will notify on any data asset changes. */
+	static FOnAnyDataAssetChanged GOnAnyDataAssetChanged;
+#endif //WITH_EDITOR
 
 	/** Checks, is the current world placed in the editor. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))

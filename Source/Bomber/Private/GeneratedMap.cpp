@@ -536,6 +536,21 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
  *		Level map protected functions
  * --------------------------------------------------- */
 
+// Called before construction when a map is loaded
+void AGeneratedMap::PostLoad()
+{
+	Super::PostLoad();
+
+#if WITH_EDITOR // [GEditor]
+	if (GEditor
+		&& !IS_TRANSIENT(this)
+        && !USingletonLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
+	{
+		USingletonLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
+	}
+#endif //WITH_EDITOR [GEditor]
+}
+
 // Called when an instance of this class is placed (in editor) or spawned
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
@@ -554,7 +569,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 #endif	// WITH_EDITOR [Editor]
 
 	// Create the background blueprint child actor
-	if (CollisionComponentInternal                    // Is accessible
+	if (CollisionComponentInternal                       // Is accessible
 	    && !CollisionComponentInternal->GetChildActor()) // Is not created yet
 	{
 		CollisionComponentInternal->SetChildActorClass(LevelsDataAsset->GetCollisionsAsset());
@@ -659,7 +674,9 @@ void AGeneratedMap::GenerateLevelActors()
 	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
 
 	// Destroy all editor-only non-PIE actors
-	DestroyActorsFromMap(FCells(GridCellsInternal));
+	FCells NonEmptyCells;
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
+	DestroyActorsFromMap(NonEmptyCells);
 	PlayersNumInternal = 0;
 
 	// Calls before generation preview actors to updating of all dragged to the Level Map actors
@@ -942,6 +959,9 @@ void AGeneratedMap::Destroyed()
 		FCells NonEmptyCells;
 		IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
 		DestroyActorsFromMap(NonEmptyCells);
+
+		// Remove bound delegate
+		USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
 	}
 	Super::Destroyed();
 }
