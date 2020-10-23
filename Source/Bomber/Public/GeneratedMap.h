@@ -276,9 +276,6 @@ protected:
 	 *		Protected functions
 	 * --------------------------------------------------- */
 
-	/** Called before construction when a map is loaded. */
-	virtual void PostLoad() override;
-
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 

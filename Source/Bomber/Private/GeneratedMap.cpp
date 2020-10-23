@@ -536,21 +536,6 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
  *		Level map protected functions
  * --------------------------------------------------- */
 
-// Called before construction when a map is loaded
-void AGeneratedMap::PostLoad()
-{
-	Super::PostLoad();
-
-#if WITH_EDITOR // [GEditor]
-	if (GEditor
-		&& !IS_TRANSIENT(this)
-        && !USingletonLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
-	{
-		USingletonLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
-	}
-#endif //WITH_EDITOR [GEditor]
-}
-
 // Called when an instance of this class is placed (in editor) or spawned
 void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
@@ -564,9 +549,14 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 	USingletonLibrary::PrintToLog(this, "----- OnConstruction -----");
 
-#if WITH_EDITOR	 // [Editor]
-	USingletonLibrary::SetLevelMap(this);
-#endif	// WITH_EDITOR [Editor]
+#if WITH_EDITOR // [GEditor]
+	if (GEditor
+        && !USingletonLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
+	{
+		USingletonLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
+		USingletonLibrary::SetLevelMap(this);
+	}
+#endif //WITH_EDITOR [GEditor]
 
 	// Create the background blueprint child actor
 	if (CollisionComponentInternal                       // Is accessible
