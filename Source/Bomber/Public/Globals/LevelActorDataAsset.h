@@ -34,7 +34,7 @@ class UBomberDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
-public:
+protected:
 #if WITH_EDITOR
 	/** Called to notify on any data asset changes. */
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -77,6 +77,10 @@ public:
 	FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
 
 protected:
+	/** DevelopmentOnly: internal class of rows, is overriden by child data assets, used on adding new row. */
+	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Row Class", DevelopmentOnly))
+	UClass* RowClassInternal = ULevelActorRow::StaticClass();
+
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (BlueprintProtected, DisplayName = "Rows", ShowOnlyInnerProperties))
 	TArray<class ULevelActorRow*> RowsInternal; //[D]
@@ -95,5 +99,10 @@ protected:
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties))
-	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap; //[D]
+	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap;  //[D]
+
+#if WITH_EDITOR
+	/** Handle adding new rows. */
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif	//WITH_EDITOR
 };

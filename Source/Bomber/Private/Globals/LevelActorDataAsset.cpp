@@ -15,7 +15,39 @@ void UBomberDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 		USingletonLibrary::GOnAnyDataAssetChanged.Broadcast();
 	}
 }
-#endif //WITH_EDITOR [IsEditorNotPieWorld]
+
+// Handle adding new rows of level actor data assets
+void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	// Continue only if [IsEditorNotPieWorld]
+	if (!USingletonLibrary::IsEditorNotPieWorld())
+	{
+		return;
+	}
+
+	// Continue only if the PersistentData structure was changed
+	FProperty* Property = PropertyChangedEvent.Property;
+	if (!Property															 //
+		|| !Property->IsA<FArrayProperty>()									 //
+		|| PropertyChangedEvent.ChangeType != EPropertyChangeType::ArrayAdd	 //
+		|| Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, RowsInternal))
+	{
+		return;
+	}
+
+	const int32 AddedAtIndex = PropertyChangedEvent.GetArrayIndex(PropertyChangedEvent.Property->GetFName().ToString());
+	if (RowsInternal.IsValidIndex(AddedAtIndex))
+	{
+		ULevelActorRow*& Row = RowsInternal[AddedAtIndex];
+		if (!Row)
+		{
+			Row = NewObject<ULevelActorRow>(this, RowClassInternal);
+		}
+	}
+}
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
 void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, int32 LevelsTypesBitmask) const
 {

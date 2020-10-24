@@ -22,6 +22,7 @@
 UPlayerDataAsset::UPlayerDataAsset()
 {
 	ActorTypeInternal = EAT::Player;
+	RowClassInternal = UPlayerRow::StaticClass();
 }
 
 // Sets default values

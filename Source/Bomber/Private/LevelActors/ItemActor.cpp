@@ -14,6 +14,7 @@
 UItemDataAsset::UItemDataAsset()
 {
 	ActorTypeInternal = EAT::Item;
+	RowClassInternal = UItemRow::StaticClass();
 }
 
 // Sets default values
