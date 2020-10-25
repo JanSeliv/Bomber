@@ -1,9 +1,9 @@
 // Copyright 2020 Yevhenii Selivanov
 
-#include "Carousel.h"
+#include "UI/Carousel.h"
 //---
 #include "Bomber.h"
-#include "SingletonLibrary.h"
+#include "Globals/SingletonLibrary.h"
 
 // Sets default values
 ACarousel::ACarousel()
