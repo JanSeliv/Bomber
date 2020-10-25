@@ -550,11 +550,11 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	USingletonLibrary::PrintToLog(this, "----- OnConstruction -----");
 
 #if WITH_EDITOR // [GEditor]
+	USingletonLibrary::SetLevelMap(this);
 	if (GEditor
         && !USingletonLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
 		USingletonLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
-		USingletonLibrary::SetLevelMap(this);
 	}
 #endif //WITH_EDITOR [GEditor]
 
