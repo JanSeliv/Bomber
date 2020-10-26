@@ -24,8 +24,8 @@ UMyCameraComponent::UMyCameraComponent()
 
 	// Camera defaults
 	SetConstraintAspectRatio(false); // viewport without black borders
-#if WITH_EDITOR
-	bCameraMeshHiddenInGame = false;
+#if WITH_EDITOR // [Editor]
+		bCameraMeshHiddenInGame = !USingletonLibrary::IsEditor();
 #endif
 
 	// Disable Eye Adaptation
