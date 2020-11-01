@@ -282,6 +282,9 @@ protected:
 	/** This is called only in the gameplay before calling begin play to generate level actors */
 	virtual void PostInitializeComponents() override;
 
+	/** Called when is explicitly being destroyed to destroy level actors, not called during level streaming or gameplay ending. */
+	virtual void Destroyed() override;
+
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "C++", meta = (BlueprintProtected))
 	void GenerateLevelActors();
@@ -304,11 +307,8 @@ protected:
 	 *					Editor development
 	 * --------------------------------------------------- */
 
-#if WITH_EDITOR	 // [GEditor]PostLoad(); [Editor]Destroyed();
-	/** [GEditor] Do any object-specific cleanup required immediately after loading an object. This is not called for newly-created objects. */
+#if WITH_EDITOR	 // [GEditor]PostLoad();
+	/** Do any object-specific cleanup required immediately after loading an object. This is not called for newly-created objects. */
 	virtual void PostLoad() override;
-
-	/** [Editor] Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending. */
-	virtual void Destroyed() override;
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]PostLoad(); [Editor]Destroyed();
+#endif	// WITH_EDITOR [GEditor]PostLoad();
 };

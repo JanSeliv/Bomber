@@ -655,6 +655,29 @@ void AGeneratedMap::PostInitializeComponents()
 	}
 }
 
+// Called when is explicitly being destroyed to destroy level actors, not called during level streaming or gameplay ending
+void AGeneratedMap::Destroyed()
+{
+	if (!IS_TRANSIENT(this))
+	{
+		// Destroy level actors
+		FCells NonEmptyCells;
+		IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
+		DestroyActorsFromMap(NonEmptyCells);
+
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+		if (USingletonLibrary::IsEditorNotPieWorld())
+		{
+			// Remove editor bound delegates
+			USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
+			FEditorDelegates::OnMapOpened.RemoveAll(this);
+		}
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
+	}
+
+	Super::Destroyed();
+}
+
 // Spawns and fills the Grid Array values by level actors
 void AGeneratedMap::GenerateLevelActors()
 {
@@ -941,8 +964,8 @@ void AGeneratedMap::OnGameStateChanged_Implementation(ECurrentGameState CurrentG
  *					Editor development
  * --------------------------------------------------- */
 
-#if WITH_EDITOR	 // [GEditor]PostLoad(); [Editor]Destroyed();
-// [GEditor] Do any object-specific cleanup required immediately after loading an object. This is not called for newly-created objects
+#if WITH_EDITOR	 // [GEditor]PostLoad();
+// Do any object-specific cleanup required immediately after loading an object. This is not called for newly-created objects
 void AGeneratedMap::PostLoad()
 {
 	Super::PostLoad();
@@ -968,22 +991,4 @@ void AGeneratedMap::PostLoad()
 		FEditorDelegates::OnMapOpened.AddWeakLambda(this, UpdateLevelType);
 	}
 }
-
-// [Editor] Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending
-void AGeneratedMap::Destroyed()
-{
-	if (USingletonLibrary::IsEditor()
-		&& !IS_TRANSIENT(this))
-	{
-		// Destroy level actors
-		FCells NonEmptyCells;
-		IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
-		DestroyActorsFromMap(NonEmptyCells);
-
-		// Remove bound delegate
-		USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
-	}
-
-	Super::Destroyed();
-}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]PostLoad(); [Editor]Destroyed();
+#endif	// WITH_EDITOR [GEditor]PostLoad();

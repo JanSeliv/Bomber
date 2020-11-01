@@ -5,7 +5,6 @@
 #include "GameFramework/Actor.h"
 #include "Carousel.generated.h"
 
-
 /**
  * Data about spawned meshes for that floor.
  */
@@ -16,7 +15,7 @@ struct FFloor
 
 	/** Names and relative locations of spawned floors. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	TMap<FString /*Name*/, FTransform /*Relative*/> Meshes; //[M.AW]
+	TMap<FString, FTransform> Meshes; //[M.AW]
 };
 
 /**
