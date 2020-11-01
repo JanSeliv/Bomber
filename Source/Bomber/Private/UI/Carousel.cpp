@@ -16,7 +16,6 @@ ACarousel::ACarousel()
 void ACarousel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -38,5 +37,19 @@ void ACarousel::OnConstruction(const FTransform& Transform)
 void ACarousel::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
+
+#if WITH_EDITOR	 // [Editor]Destroyed();
+//  Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending.
+void ACarousel::Destroyed()
+{
+	if (USingletonLibrary::IsEditor()
+	    && !IS_TRANSIENT(this))
+	{
+		// Remove bound delegate
+		USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
+	}
+
+	Super::Destroyed();
+}
+#endif	// WITH_EDITOR [Editor]Destroyed();
