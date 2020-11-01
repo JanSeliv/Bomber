@@ -304,8 +304,11 @@ protected:
 	 *					Editor development
 	 * --------------------------------------------------- */
 
-#if WITH_EDITOR	 // [Editor] Destroyed
-	/** Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending */
+#if WITH_EDITOR	 // [GEditor]PostLoad(); [Editor]Destroyed();
+	/** [GEditor] Do any object-specific cleanup required immediately after loading an object. This is not called for newly-created objects. */
+	virtual void PostLoad() override;
+
+	/** [Editor] Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending. */
 	virtual void Destroyed() override;
-#endif	// [Editor] Destroyed
+#endif	// WITH_EDITOR [IsEditorNotPieWorld]PostLoad(); [Editor]Destroyed();
 };
