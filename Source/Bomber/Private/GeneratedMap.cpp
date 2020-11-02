@@ -551,9 +551,10 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 #if WITH_EDITOR // [GEditor]
 	USingletonLibrary::SetLevelMap(this);
-	if (GEditor
+	if (GEditor // Can be bound before editor is loaded
         && !USingletonLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
+		// Should be bind in construction in a case of object reconstructing after blueprint compile
 		USingletonLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
 	}
 #endif //WITH_EDITOR [GEditor]
@@ -652,6 +653,29 @@ void AGeneratedMap::PostInitializeComponents()
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
+}
+
+// Called when is explicitly being destroyed to destroy level actors, not called during level streaming or gameplay ending
+void AGeneratedMap::Destroyed()
+{
+	if (!IS_TRANSIENT(this))
+	{
+		// Destroy level actors
+		FCells NonEmptyCells;
+		IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
+		DestroyActorsFromMap(NonEmptyCells);
+
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+		if (USingletonLibrary::IsEditorNotPieWorld())
+		{
+			// Remove editor bound delegates
+			USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
+			FEditorDelegates::OnMapOpened.RemoveAll(this);
+		}
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
+	}
+
+	Super::Destroyed();
 }
 
 // Spawns and fills the Grid Array values by level actors
@@ -940,19 +964,31 @@ void AGeneratedMap::OnGameStateChanged_Implementation(ECurrentGameState CurrentG
  *					Editor development
  * --------------------------------------------------- */
 
-#if WITH_EDITOR	 // [Editor] Destroyed
-// Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending
-void AGeneratedMap::Destroyed()
+#if WITH_EDITOR	 // [GEditor]PostLoad();
+// Do any object-specific cleanup required immediately after loading an object. This is not called for newly-created objects
+void AGeneratedMap::PostLoad()
 {
-	if (!IS_TRANSIENT(this))
-	{
-		FCells NonEmptyCells;
-		IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
-		DestroyActorsFromMap(NonEmptyCells);
+	Super::PostLoad();
 
-		// Remove bound delegate
-		USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
+	if (!GEditor) // is bound before editor is loaded to update streams
+	{
+		return;
 	}
-	Super::Destroyed();
+
+	// Update streaming level on editor opening
+	TWeakObjectPtr<AGeneratedMap> WeakLevelMap(this);
+	auto UpdateLevelType = [WeakLevelMap](const FString& Filename, bool bAsTemplate)
+	{
+		if (AGeneratedMap* LevelMap = WeakLevelMap.Get())
+		{
+			FEditorDelegates::OnMapOpened.RemoveAll(LevelMap);
+			LevelMap->SetLevelType(LevelMap->LevelTypeInternal);
+		}
+	};
+
+	if (!FEditorDelegates::OnMapOpened.IsBoundToObject(this))
+	{
+		FEditorDelegates::OnMapOpened.AddWeakLambda(this, UpdateLevelType);
+	}
 }
-#endif	// [Editor] Destroyed
+#endif	// WITH_EDITOR [GEditor]PostLoad();
