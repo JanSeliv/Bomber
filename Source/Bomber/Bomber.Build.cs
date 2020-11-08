@@ -1,4 +1,4 @@
-// Copyright 2019 Yevhenii Selivanov.
+// Copyright 2020 Yevhenii Selivanov.
 
 using UnrealBuildTool;
 
@@ -24,9 +24,6 @@ public class Bomber : ModuleRules
                     "UnrealEd" // FEditorDelegates::EndPIE
                 });
         }
-
-        // Uncomment if you are using Slate UI
-        // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 
         // Uncomment if you are using online features
         // PrivateDependencyModuleNames.Add("OnlineSubsystem");
