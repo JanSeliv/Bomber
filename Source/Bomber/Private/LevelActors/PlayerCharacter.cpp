@@ -5,10 +5,10 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
 #include "Controllers/MyAIController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
 //---
@@ -57,9 +57,9 @@ void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInt
 	USkeletalMeshComponent* MeshComponent = GetMesh();
 	AController* OwnedController = GetController();
 	if (!World
-		|| !MeshComponent
-		|| !OwnedController
-		|| OwnedController->IsMoveInputIgnored())
+	    || !MeshComponent
+	    || !OwnedController
+	    || OwnedController->IsMoveInputIgnored())
 	{
 		return;
 	}
@@ -87,12 +87,12 @@ void APlayerCharacter::SpawnBomb()
 	AController* OwnedController = GetController();
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (!LevelMap                                   // The Level Map is not accessible
-	    || !IsValid(MapComponentInternal)                   // The Map Component is not valid or transient
+	    || !IsValid(MapComponentInternal)           // The Map Component is not valid or transient
 	    || PowerupsInternal.FireN <= 0              // Null length of explosion
 	    || PowerupsInternal.BombN <= 0              // No more bombs
 	    || USingletonLibrary::IsEditorNotPieWorld() // Should not spawn bomb in PIE
-	    || !OwnedController							// controller is not valid
-	    || OwnedController->IsMoveInputIgnored())	// controller is blocked
+	    || !OwnedController                         // controller is not valid
+	    || OwnedController->IsMoveInputIgnored())   // controller is blocked
 	{
 		return;
 	}
@@ -123,7 +123,7 @@ void APlayerCharacter::BeginPlay()
 
 	UWorld* World = GetWorld();
 	if (!World
-		|| !MapComponentInternal)
+	    || !MapComponentInternal)
 	{
 		return;
 	}
@@ -135,7 +135,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	// Posses the controller
-	if (!CharacterIDInternal)	// Is the player (not AI)
+	if (!CharacterIDInternal) // Is the player (not AI)
 	{
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
 		if (PlayerController)
@@ -143,7 +143,7 @@ void APlayerCharacter::BeginPlay()
 			PlayerController->Possess(this);
 		}
 	}
-	else if (!IS_VALID(MyAIControllerInternal))	// has AI controller and was not spawned early
+	else if (!IS_VALID(MyAIControllerInternal)) // has AI controller and was not spawned early
 	{
 		MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		MyAIControllerInternal->Possess(this);
@@ -158,7 +158,7 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	// Setup timer handle to update a player location on the level map (initialized being paused)
-	if(const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
+	if (const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
 	{
 		FTimerManager& TimerManager = World->GetTimerManager();
 		TWeakObjectPtr<ThisClass> WeakThis(this);
@@ -202,7 +202,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	TArray<ULevelActorRow*> OutRows;
 	const ULevelActorDataAsset* PlayerDataAsset = MapComponentInternal->GetActorDataAsset();
 	const int32 MeshesNum = PlayerDataAsset ? PlayerDataAsset->GetRowsNum() : 0;
-	if(MeshesNum)
+	if (MeshesNum)
 	{
 		const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
 		PlayerDataAsset->GetRowsByLevelType(OutRows, LevelType);
@@ -244,7 +244,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
 	if (USingletonLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
-	    && CharacterIDInternal > 0)                     // Is a bot
+	    && CharacterIDInternal > 0)              // Is a bot
 	{
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
 		if (MapComponentInternal->bShouldShowRenders == false)
@@ -346,7 +346,7 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 	switch (CurrentGameState)
 	{
 		case ECurrentGameState::Menu:
-        case ECurrentGameState::GameStarting:
+		case ECurrentGameState::GameStarting:
 		{
 			TimerManager.PauseTimer(UpdatePositionHandleInternal);
 			break;
@@ -366,4 +366,3 @@ void APlayerCharacter::UpdateNickname_Implementation() const
 	// BP implementation
 	// ...
 }
-

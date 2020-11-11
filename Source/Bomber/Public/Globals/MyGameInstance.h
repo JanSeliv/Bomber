@@ -19,9 +19,9 @@ class BOMBER_API UMyGameInstance final : public UGameInstance
 public:
 	/** A size of the level map */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FVector LevelMapScale = FVector::ZeroVector;  //[B]
+	FVector LevelMapScale = FVector::ZeroVector; //[B]
 
 	/** A player nickname*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FText Nickname = DEFAULT_NICKNAME;	//[B]
+	FText Nickname = DEFAULT_NICKNAME; //[B]
 };

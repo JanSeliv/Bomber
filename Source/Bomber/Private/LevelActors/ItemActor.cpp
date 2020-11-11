@@ -81,14 +81,14 @@ void AItemActor::BeginPlay()
 void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	const auto OverlappedCharacter = Cast<APlayerCharacter>(OtherActor);
-	if (!IS_VALID(this)				// is not pending killed
-		|| !OverlappedCharacter)		// character is not valid)
+	if (!IS_VALID(this)          // is not pending killed
+	    || !OverlappedCharacter) // character is not valid)
 	{
 		return;
 	}
 
 	// Destroy itself on overlapping
-	if(AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
+	if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
 	{
 		LevelMap->DestroyLevelActor(MapComponentInternal);
 	}

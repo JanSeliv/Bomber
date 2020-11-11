@@ -58,7 +58,7 @@ public:
 
 	/** Calls to uninitialize item type. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-    FORCEINLINE EItemType ResetItemType() { return ItemTypeInternal = EItemType::None; }
+	FORCEINLINE EItemType ResetItemType() { return ItemTypeInternal = EItemType::None; }
 
 protected:
 	/* ---------------------------------------------------
@@ -67,7 +67,7 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	class UMapComponent* MapComponentInternal;	//[C.AW]
+	class UMapComponent* MapComponentInternal; //[C.AW]
 
 	/**
 	* Skate: Increase the movement speed of the character.
@@ -75,7 +75,7 @@ protected:
 	* Fire: Increase the bomb blast radius.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DIsplayName = "Item Type"))
-	EItemType ItemTypeInternal = EItemType::None;  // [AW]
+	EItemType ItemTypeInternal = EItemType::None; // [AW]
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -89,5 +89,5 @@ protected:
 
 	/** Triggers when this item starts overlap a player character to destroy itself. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-    void OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+	void OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 };

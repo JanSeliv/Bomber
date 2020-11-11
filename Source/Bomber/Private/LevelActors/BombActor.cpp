@@ -5,8 +5,8 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/SingletonLibrary.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -90,7 +90,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	MapComponentInternal->OnConstruction();
 
 #if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t InitializeBombProperties");
 		InitBomb(FOnBombDestroyed());
@@ -107,7 +107,6 @@ void ABombActor::BeginPlay()
 
 	// Binding to the event, that triggered when the actor has been explicitly destroyed
 	OnDestroyed.AddDynamic(this, &ThisClass::DetonateBomb);
-
 
 	// Binding to the event, that triggered when character end to overlaps the ItemCollisionComponent component
 	OnActorEndOverlap.AddDynamic(this, &ABombActor::OnBombEndOverlap);
@@ -151,7 +150,7 @@ void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (!LevelMap                                                                    // The Level Map is not valid or transient (in regenerating process)
-		|| !ExplosionCellsInternal.Num()                                             // no cells to destroy
+	    || !ExplosionCellsInternal.Num()                                             // no cells to destroy
 	    || !IsValid(MapComponentInternal)                                            // The Map Component is not valid or is destroyed already
 	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame) // game was not started or already finished
 	{
@@ -178,8 +177,8 @@ void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	UBoxComponent* BombCollisionComponent = MapComponentInternal ? MapComponentInternal->BoxCollision : nullptr;
-	if (!BombCollisionComponent	// Is not valid collision component
-		|| OtherActor == this)	// Self triggering
+	if (!BombCollisionComponent // Is not valid collision component
+	    || OtherActor == this)  // Self triggering
 	{
 		return;
 	}
@@ -187,7 +186,7 @@ void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	//Sets the collision preset to block all dynamics
 	TArray<AActor*> OverlappingActors;
 	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetActorClassByType(EAT::Player));
-	if (OverlappingActors.Num() == 0)  // There are no more characters on the bomb
+	if (OverlappingActors.Num() == 0) // There are no more characters on the bomb
 	{
 		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
 	}

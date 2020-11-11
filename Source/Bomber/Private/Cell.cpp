@@ -26,8 +26,8 @@ FCell::FCell(FVector Vector)
 FCell FCell::RotateAngleAxis(const float& AxisZ) const
 {
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (IsValid(LevelMap) == false	//
-		|| !ensureAlwaysMsgf(AxisZ != abs(0.f), TEXT("The axis is zero")))
+	if (IsValid(LevelMap) == false //
+	    || !ensureAlwaysMsgf(AxisZ != abs(0.f), TEXT("The axis is zero")))
 	{
 		return *this;
 	}

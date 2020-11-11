@@ -44,5 +44,4 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 // Called when all players were connected.
 void AMyGameModeBase::OnSessionStarted() const
 {
-
 }

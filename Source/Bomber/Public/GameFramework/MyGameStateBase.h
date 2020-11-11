@@ -21,11 +21,13 @@ public:
 	* --------------------------------------------------- */
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, ECurrentGameState, CurrentGameState);
+
 	/** Called when the current game state was changed. */
 	UPROPERTY(BlueprintAssignable, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
+
 	/** Called when one of players was destroyed. */
 	UPROPERTY(BlueprintAssignable, Category = "C++")
 	FOnAnyPlayerDestroyed OnAnyPlayerDestroyed;
@@ -72,11 +74,11 @@ protected:
 
 	/** Seconds to the end of the round,
 	 * @todo Move to Data asset */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected,  DisplayName = "In-Game Countdown"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Countdown"))
 	int32 InGameCountdownInternal = 120; //[B]
 
 	/** Decrement AMyGameStateBase::InGameCountdownInternal by 1 for each second. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected,  DisplayName = "In-Game Timer"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Timer"))
 	FTimerHandle InGameTimerInternal;
 
 	/* ---------------------------------------------------

@@ -37,13 +37,13 @@ protected:
 
 	/** Launch 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void LaunchStartingCountdown();
+	void LaunchStartingCountdown();
 
 	/** Launch the main timer that count the seconds to the game ending. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void LaunchInGameCountdown();
+	void LaunchInGameCountdown();
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

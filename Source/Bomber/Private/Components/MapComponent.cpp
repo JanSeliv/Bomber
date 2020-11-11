@@ -26,8 +26,8 @@ void UMapComponent::OnConstruction()
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	AActor* Owner = GetOwner();
-	if (!IS_VALID(Owner)  	// The owner is not valid
-        || !LevelMap)		   	// The Level Map is not valid
+	if (!IS_VALID(Owner) // The owner is not valid
+	    || !LevelMap)    // The Level Map is not valid
 	{
 		return;
 	}
@@ -70,7 +70,7 @@ void UMapComponent::OnConstruction()
 void UMapComponent::SetMesh(UStreamableRenderAsset* MeshAsset, class UMeshComponent* InMeshComponent/* = nullptr*/)
 {
 	if (!MeshAsset
-		|| !MeshComponentInternal && !InMeshComponent)
+	    || !MeshComponentInternal && !InMeshComponent)
 	{
 		return;
 	}
@@ -94,7 +94,7 @@ void UMapComponent::SetMesh(UStreamableRenderAsset* MeshAsset, class UMeshCompon
 void UMapComponent::SetMaterial(UMaterialInterface* Material)
 {
 	if (MeshComponentInternal
-		&& Material)
+	    && Material)
 	{
 		MeshComponentInternal->SetMaterial(0, Material);
 	}
@@ -118,7 +118,7 @@ void UMapComponent::OnRegister()
 {
 	Super::OnRegister();
 	AActor* Owner = GetOwner();
-	if (!IS_VALID(Owner))  // owner is not valid
+	if (!IS_VALID(Owner)) // owner is not valid
 	{
 		return;
 	}
@@ -176,8 +176,8 @@ void UMapComponent::OnRegister()
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	AActor* const ComponentOwner = GetOwner();
-	if (IS_TRANSIENT(ComponentOwner) == false		   // Is not transient owner
-		&& IsValid(USingletonLibrary::GetLevelMap()))  // is valid and is not transient the level map
+	if (IS_TRANSIENT(ComponentOwner) == false         // Is not transient owner
+	    && IsValid(USingletonLibrary::GetLevelMap())) // is valid and is not transient the level map
 	{
 		USingletonLibrary::PrintToLog(ComponentOwner, "OnComponentDestroyed", "-> \t DestroyActorsFromMap");
 

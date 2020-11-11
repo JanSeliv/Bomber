@@ -49,15 +49,18 @@ class BOMBER_API UShapeButton final : public UButton
 
 public:
 	/** Default constructor. */
-	explicit UShapeButton(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) {}
+	explicit UShapeButton(const FObjectInitializer& ObjectInitializer)
+		: Super(ObjectInitializer)
+	{
+	}
 
 	/**  */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-    void SetAdvancedHitTexture(class UTexture2D* InTexture);
+	void SetAdvancedHitTexture(class UTexture2D* InTexture);
 
 	/** */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-    void SetAdvancedHitAlpha(int32 InAlpha);
+	void SetAdvancedHitAlpha(int32 InAlpha);
 
 protected:
 	/**  */

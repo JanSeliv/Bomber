@@ -29,10 +29,10 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 
 	// Continue only if the PersistentData structure was changed
 	FProperty* Property = PropertyChangedEvent.Property;
-	if (!Property															 //
-		|| !Property->IsA<FArrayProperty>()									 //
-		|| PropertyChangedEvent.ChangeType != EPropertyChangeType::ArrayAdd	 //
-		|| Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, RowsInternal))
+	if (!Property                                                           //
+	    || !Property->IsA<FArrayProperty>()                                 //
+	    || PropertyChangedEvent.ChangeType != EPropertyChangeType::ArrayAdd //
+	    || Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, RowsInternal))
 	{
 		return;
 	}
@@ -54,8 +54,8 @@ void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, 
 	for (ULevelActorRow* const& RowIt : RowsInternal)
 	{
 		if (RowIt
-			&& RowIt->Mesh //is not empty
-			&& EnumHasAnyFlags(RowIt->LevelType, TO_ENUM(ELevelType, LevelsTypesBitmask)))
+		    && RowIt->Mesh //is not empty
+		    && EnumHasAnyFlags(RowIt->LevelType, TO_ENUM(ELevelType, LevelsTypesBitmask)))
 		{
 			OutRows.Emplace(RowIt);
 		}

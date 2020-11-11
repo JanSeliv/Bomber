@@ -4,8 +4,8 @@
 
 #include "Bomber.h"
 #include "Cell.h"
-#include "Globals//LevelActorDataAsset.h"
 #include "GameFramework/Actor.h"
+#include "Globals//LevelActorDataAsset.h"
 //---
 #include "GeneratedMap.generated.h"
 
@@ -58,7 +58,7 @@ public:
 
 	/** Get UGeneratedMapDataAsset::TickInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE float GetTickInterval() const { return TickInternal; }
+	FORCEINLINE float GetTickInterval() const { return TickInternal; }
 
 	/** Get UGeneratedMapDataAsset::WallsChanceInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -70,7 +70,7 @@ public:
 
 	/** Get UGeneratedMapDataAsset::CollisionsAssetInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE TSubclassOf<AActor> GetCollisionsAsset() const { return CollisionsAssetInternal; }
+	FORCEINLINE TSubclassOf<AActor> GetCollisionsAsset() const { return CollisionsAssetInternal; }
 
 	/** Get UGeneratedMapDataAsset::LockLocationOnZeroInternal.  */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -87,11 +87,11 @@ protected:
 
 	/** The chance of walls generation. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Walls Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
-	int32 WallsChanceInternal = 35;  //[AW]
+	int32 WallsChanceInternal = 35; //[AW]
 
 	/** The chance of boxes generation. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Boxes Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
-	int32 BoxesChanceInternal = 70;  //[AW]
+	int32 BoxesChanceInternal = 70; //[AW]
 
 	/** Asset that contains scalable collision. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collisions Asset", ShowOnlyInnerProperties))
@@ -135,11 +135,11 @@ public:
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE int32 GetAlivePlayersNum() const { return PlayersNumInternal; };
+	FORCEINLINE int32 GetAlivePlayersNum() const { return PlayersNumInternal; };
 
 	/** Get the current level type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE ELevelType GetLevelType() const { return LevelTypeInternal; }
+	FORCEINLINE ELevelType GetLevelType() const { return LevelTypeInternal; }
 
 	/** Returns the camera component of the level. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -231,7 +231,7 @@ public:
 	* @param NewLevelType the new level to apply.
 	*/
 	UFUNCTION(BlueprintCallable, Category = "C++")
-    void SetLevelType(ELevelType NewLevelType);
+	void SetLevelType(ELevelType NewLevelType);
 
 protected:
 	/* ---------------------------------------------------
@@ -242,7 +242,7 @@ protected:
 
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
-	UChildActorComponent* CollisionComponentInternal;	 //[C.DO]
+	UChildActorComponent* CollisionComponentInternal; //[C.DO]
 
 	/** Cells storage. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
@@ -250,15 +250,15 @@ protected:
 
 	/** Storage of alive players and their current locations */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
-	TArray<class UMapComponent*> MapComponentsInternal;  //[M.IO]
+	TArray<class UMapComponent*> MapComponentsInternal; //[M.IO]
 
 	/** Contains map components that were dragged to the scene, store it to avoid destroying and restore its owners after each regenerating. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Components"))
-	TArray<class UMapComponent*> DraggedComponentsInternal;  //[M.IO]
+	TArray<class UMapComponent*> DraggedComponentsInternal; //[M.IO]
 
 	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
-	int32 PlayersNumInternal = 0;	//[G]
+	int32 PlayersNumInternal = 0; //[G]
 
 	/** The current level type. Affects on the meshes of each level actor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
@@ -266,7 +266,7 @@ protected:
 
 	/** */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Component"))
-	class UMyCameraComponent* CameraComponentInternal;  //[C.DO]
+	class UMyCameraComponent* CameraComponentInternal; //[C.DO]
 
 	/** */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))

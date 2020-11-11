@@ -24,14 +24,14 @@ AMyPlayerState::AMyPlayerState()
 //
 void AMyPlayerState::ChoosePlayer(USkeletalMesh* MeshAsset)
 {
-	if(!MeshAsset)
+	if (!MeshAsset)
 	{
 		return;
 	}
 
 	ChosenMeshInternal = MeshAsset;
 
-	if(UMapComponent* MapComponent = UMapComponent::GetMapComponent(GetPawn()))
+	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(GetPawn()))
 	{
 		MapComponent->SetMesh(MeshAsset);
 	}

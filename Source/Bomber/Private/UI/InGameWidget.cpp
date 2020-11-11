@@ -2,15 +2,15 @@
 
 #include "UI/InGameWidget.h"
 //---
-#include "Globals/SingletonLibrary.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/SingletonLibrary.h"
 
 // Shows the in game menu.
 void UInGameWidget::ShowEndGameState_Implementation()
 {
 	// Show mouse cursor
-	if(AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController(this))
+	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController(this))
 	{
 		MyPlayerController->SetMouseCursor(true);
 	}
@@ -22,7 +22,7 @@ void UInGameWidget::ShowEndGameState_Implementation()
 void UInGameWidget::HideEndGameState_Implementation()
 {
 	// Hide mouse cursor
-	if(AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController(this))
+	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController(this))
 	{
 		MyPlayerController->SetMouseCursor(false);
 	}

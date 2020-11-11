@@ -30,8 +30,8 @@ void AWallActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_TRANSIENT(this)			// This actor is transient
-		|| !IsValid(MapComponentInternal))	// Is not valid for map construction
+	if (IS_TRANSIENT(this)                 // This actor is transient
+	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
 	{
 		return;
 	}

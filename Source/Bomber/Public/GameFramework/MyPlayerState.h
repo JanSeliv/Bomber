@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/PlayerState.h"
+//---
 #include "Bomber.h"
 //---
 #include "MyPlayerState.generated.h"
@@ -56,10 +57,9 @@ protected:
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Updated result of the game for controlled player after ending the game. Called when one of players is destroying. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
-    void ServerUpdateEndState();
-
+	void ServerUpdateEndState();
 };

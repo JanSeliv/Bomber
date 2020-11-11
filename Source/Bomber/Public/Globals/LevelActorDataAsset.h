@@ -99,7 +99,7 @@ protected:
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties))
-	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap;  //[D]
+	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap; //[D]
 
 #if WITH_EDITOR
 	/** Handle adding new rows. */
