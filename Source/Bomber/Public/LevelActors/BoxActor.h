@@ -22,12 +22,12 @@ public:
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-    FORCEINLINE int32 GetSpawnItemChance() const { return SpawnItemChanceInternal; }
+	FORCEINLINE int32 GetSpawnItemChance() const { return SpawnItemChanceInternal; }
 
 protected:
 	/** The chance to spawn item after box destroying. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Spawn Item Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
-	int32 SpawnItemChanceInternal = 30.F;  //[D]
+	int32 SpawnItemChanceInternal = 30.F; //[D]
 };
 
 /**
@@ -47,11 +47,11 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	friend  class UMyCheatManager;
+	friend class UMyCheatManager;
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	class UMapComponent* MapComponentInternal;	//[C.AW]
+	class UMapComponent* MapComponentInternal; //[C.AW]
 
 	/** Contains current spawn chance to spawn item. Can be overriden by the Cheat Manager. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
@@ -80,5 +80,5 @@ protected:
 
 	/** Listen to reset item chance for each new game. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

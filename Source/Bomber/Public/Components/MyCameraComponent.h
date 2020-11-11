@@ -25,7 +25,7 @@ public:
 
 	/** Set the maximum possible height. Called on construct and game start*/
 	UFUNCTION(BlueprintCallable, Category = "C++")
-    void UpdateMaxHeight();
+	void UpdateMaxHeight();
 
 	/**
 	 * Set the location between players.
@@ -38,7 +38,7 @@ public:
 protected:
 	/** The maximal camera height. Is set dynamically by UMyCameraComponent::UpdateMaxHeights(). */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Max Height"))
-	float MaxHeightInternal;//[G]
+	float MaxHeightInternal; //[G]
 
 	/** If UMyCameraComponent::StartLocation is true, then should forced moving to the start position. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))
@@ -49,12 +49,12 @@ protected:
 	FVector StartLocationInternal; //[N]
 
 	/** Called every frame. */
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

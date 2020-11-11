@@ -24,10 +24,12 @@ struct FCell
 	/** Always holds the free cell's FVector-coordinate.
 	 * If it is not empty or not found, holds the last succeeded due to copy operator. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FVector Location = FVector::DownVector;	 //[AW]
+	FVector Location = FVector::DownVector; //[AW]
 
 	/** Default constructor (zero initialization). */
-	FCell() {}
+	FCell()
+	{
+	}
 
 	/**
 	* Initial constructor for cells filling into the array.

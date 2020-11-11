@@ -37,7 +37,7 @@ public:
 
 	/** Checks, is the current world placed in the editor. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
-    static bool IsEditor();
+	static bool IsEditor();
 
 	/** Checks is the current world placed in the editor and the game not started yet. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
@@ -85,11 +85,11 @@ public:
 
 	/** Returns number of alive players. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    static int32 GetAlivePlayersNum();
+	static int32 GetAlivePlayersNum();
 
 	/** Returns the type of the current level. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    static ELevelType GetLevelType();
+	static ELevelType GetLevelType();
 
 	/** Return rhe Bomber Game Instance, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
@@ -101,15 +101,15 @@ public:
 
 	/** Returns the Bomber Game state, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-    static class AMyGameStateBase* GetMyGameState(const UObject* WorldContextObject);
+	static class AMyGameStateBase* GetMyGameState(const UObject* WorldContextObject);
 
 	/** Returns the Bomber Player Controller, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-    static class AMyPlayerController* GetMyPlayerController(const UObject* WorldContextObject);
+	static class AMyPlayerController* GetMyPlayerController(const UObject* WorldContextObject);
 
 	/** Returns the Bomber Player State for specified player, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-    static class AMyPlayerState* GetMyPlayerState(const class AController* Controller);
+	static class AMyPlayerState* GetMyPlayerState(const class AController* Controller);
 
 	/* ---------------------------------------------------
 	 *		FCell blueprint functions
@@ -131,7 +131,7 @@ public:
 
 	/** Returns the zero cell (0,0,0) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-    static FORCEINLINE bool IsValidCell(const FCell& Cell)
+	static FORCEINLINE bool IsValidCell(const FCell& Cell)
 	{
 		return Cell;
 	}
@@ -180,15 +180,15 @@ public:
 
 	/** Returns the Levels Data Asset*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    static FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return GetSingleton()->LevelsDataAssetInternal; }
+	static FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return GetSingleton()->LevelsDataAssetInternal; }
 
 	/** Returns the UI Data Asset*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    static FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return GetSingleton()->UIDataAssetInternal; }
+	static FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return GetSingleton()->UIDataAssetInternal; }
 
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
-    static class ULevelActorDataAsset* GetDataAssetByActorClass(TSubclassOf<AActor> ActorClass);
+	static class ULevelActorDataAsset* GetDataAssetByActorClass(TSubclassOf<AActor> ActorClass);
 
 	/** Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -198,7 +198,7 @@ public:
 
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    static TSubclassOf<AActor> GetActorClassByType(EActorType ActorType);
+	static TSubclassOf<AActor> GetActorClassByType(EActorType ActorType);
 
 protected:
 	/* ---------------------------------------------------
@@ -207,7 +207,7 @@ protected:
 
 	/** AGeneratedMap wrapper. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
-	TSoftObjectPtr<class AGeneratedMap> LevelMapInternal;	//[B]
+	TSoftObjectPtr<class AGeneratedMap> LevelMapInternal; //[B]
 
 	/** Contains properties to setup the generated level. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))

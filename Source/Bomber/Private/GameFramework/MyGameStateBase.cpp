@@ -2,8 +2,8 @@
 
 #include "GameFramework/MyGameStateBase.h"
 //---
-#include "Globals/SingletonLibrary.h"
 #include "Controllers/MyPlayerController.h"
+#include "Globals/SingletonLibrary.h"
 //---
 #include "Net/UnrealNetwork.h"
 
@@ -17,7 +17,7 @@ AMyGameStateBase::AMyGameStateBase()
 
 //  Returns the AMyGameStateBase::CurrentGameState property
 ECurrentGameState AMyGameStateBase::GetCurrentGameState(const UObject* WorldContextObject)
- {
+{
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(WorldContextObject))
 	{
 		return MyGameState->CurrentGameStateInternal;
@@ -90,7 +90,7 @@ void AMyGameStateBase::ServerOnGameStarting_Implementation()
 {
 	UWorld* World = GetWorld();
 	if (!World
-        || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::GameStarting, TEXT("ASSERT: 'CurrentGameStateInternal == ECurrentGameState::InGame' condition is FALSE")))
+	    || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::GameStarting, TEXT("ASSERT: 'CurrentGameStateInternal == ECurrentGameState::InGame' condition is FALSE")))
 	{
 		return;
 	}
@@ -132,14 +132,14 @@ void AMyGameStateBase::ServerStartInGameCountdown_Implementation()
 	// Decrement in-game countdown timer
 	TWeakObjectPtr<ThisClass> WeakThis(this);
 	TimerManager.SetTimer(InGameTimerInternal, [WeakThis]
-    {
-        AMyGameStateBase* MyGameStateBase = WeakThis.Get();
-        if (MyGameStateBase
-            && MyGameStateBase->CurrentGameStateInternal == ECurrentGameState::InGame) // state was not changed
-        {
-        	MyGameStateBase->ServerSetGameState(ECurrentGameState::EndGame);
-        }
-    }, InGameCountdownInternal, false);
+	{
+		AMyGameStateBase* MyGameStateBase = WeakThis.Get();
+		if (MyGameStateBase
+		    && MyGameStateBase->CurrentGameStateInternal == ECurrentGameState::InGame) // state was not changed
+		{
+			MyGameStateBase->ServerSetGameState(ECurrentGameState::EndGame);
+		}
+	}, InGameCountdownInternal, false);
 }
 
 bool AMyGameStateBase::ServerStartInGameCountdown_Validate()

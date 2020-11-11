@@ -135,7 +135,7 @@ bool SShapeButton::NeedExecuteAction(const FGeometry& MyGeometry, const FPointer
 	{
 		FColor* const& ColorData = static_cast<FColor*>(ImageData);
 		if (!ColorData
-			|| ColorData[BufferPosition].A <= AdvancedHitAlpha)
+		    || ColorData[BufferPosition].A <= AdvancedHitAlpha)
 		{
 			bToReturn = false;
 		}

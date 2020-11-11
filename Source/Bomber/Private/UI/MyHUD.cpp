@@ -20,4 +20,3 @@ void AMyHUD::BeginPlay()
 		}
 	}
 }
-

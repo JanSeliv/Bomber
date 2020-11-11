@@ -31,7 +31,7 @@ public:
 
 	/** Get the bomb lifetime. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (ShowOnlyInnerProperties))
-    FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
+	FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
 
 protected:
 	/** The lifetime of a bomb. */
@@ -79,7 +79,7 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	class UMapComponent* MapComponentInternal;	//[C.AW]
+	class UMapComponent* MapComponentInternal; //[C.AW]
 
 	/** The bomb blast path */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells", ShowOnlyInnerProperties))
@@ -116,5 +116,5 @@ protected:
 
 	/** Listen by dragged bombs to handle game resetting. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

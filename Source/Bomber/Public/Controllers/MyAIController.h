@@ -41,11 +41,11 @@ protected:
 
 	/** Cell position of current path segment's end */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "AI Move To"))
-	FCell AIMoveToInternal;	//[G]
+	FCell AIMoveToInternal; //[G]
 
 	/** Controlled character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))
-	class APlayerCharacter* OwnerInternal;  //[G]
+	class APlayerCharacter* OwnerInternal; //[G]
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -62,7 +62,7 @@ protected:
 
 	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-    void UpdateAI();
+	void UpdateAI();
 
 	/**  */
 	UFUNCTION(BlueprintCallable, meta = (BlueprintProtected))
@@ -70,5 +70,5 @@ protected:
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

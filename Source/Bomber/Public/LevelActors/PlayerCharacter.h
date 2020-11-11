@@ -39,7 +39,7 @@ public:
 
 	/** All materials that are used by nameplate meshes. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TArray<class UMaterialInterface*> NameplateMaterials;  //[M.DO]
+	TArray<class UMaterialInterface*> NameplateMaterials; //[M.DO]
 
 	/* The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
@@ -56,7 +56,9 @@ struct FPowerUp
 	GENERATED_BODY()
 
 	/** Empty constructor */
-	FPowerUp(){};
+	FPowerUp()
+	{
+	};
 
 	/** The number of items, that increases the movement speed of the character */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
@@ -103,7 +105,7 @@ public:
 
 	/** Spawns bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-    void SpawnBomb();
+	void SpawnBomb();
 
 protected:
 	/* ---------------------------------------------------
@@ -114,23 +116,23 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	class UMapComponent* MapComponentInternal;	//[C.AW]
+	class UMapComponent* MapComponentInternal; //[C.AW]
 
 	/** The static mesh nameplate */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Mesh Component"))
-	class UStaticMeshComponent* NameplateMeshInternal;	 //[C.DO]
+	class UStaticMeshComponent* NameplateMeshInternal; //[C.DO]
 
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
-	FPowerUp PowerupsInternal;	//[AW]
+	FPowerUp PowerupsInternal; //[AW]
 
 	/** The ID identification of each character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
-	int32 CharacterIDInternal = INDEX_NONE;  //[G]
+	int32 CharacterIDInternal = INDEX_NONE; //[G]
 
 	/** The character's AI controller */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
-	class AMyAIController* MyAIControllerInternal;	//[G]
+	class AMyAIController* MyAIControllerInternal; //[G]
 
 	/** Store to pause and unpause updating the current location of the player and bots on the level map.  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
@@ -169,15 +171,15 @@ protected:
 	 * With item overlapping Increases +1 to numbers of character's powerups (Skate/Bomb/Fire).
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-    void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+	void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	/** Event triggered when the bomb has been explicitly destroyed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-    void OnBombDestroyed(AActor* DestroyedBomb);
+	void OnBombDestroyed(AActor* DestroyedBomb);
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-    void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/**  */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++")

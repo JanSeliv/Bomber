@@ -5,8 +5,8 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/SingletonLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
 
@@ -36,7 +36,7 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	if (IS_TRANSIENT(this)                 // This actor is transient
-        || !IsValid(MapComponentInternal)) // Is not valid for map construction
+	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
 	{
 		return;
 	}
@@ -79,8 +79,8 @@ void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 {
 	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (!LevelMap                         // The Level Map is not valid or transient (in regenerating process)
-        || !IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
-        || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame)
+	    || !IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
+	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame)
 	{
 		return;
 	}
@@ -107,7 +107,7 @@ void ABoxActor::ResetItemChance()
 // Listen to reset item chance for each new game
 void ABoxActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
-	if(CurrentGameState == ECurrentGameState::GameStarting)
+	if (CurrentGameState == ECurrentGameState::GameStarting)
 	{
 		// Update current chance from Data Asset
 		ResetItemChance();

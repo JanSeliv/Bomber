@@ -5,12 +5,12 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Globals/MyGameInstance.h"
-#include "GameFramework/MyGameModeBase.h"
 #include "Controllers/MyPlayerController.h"
+#include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/LevelActorDataAsset.h"
+#include "Globals/MyGameInstance.h"
 //---
 #include "Engine.h"
 #include "Components/TextRenderComponent.h"
@@ -54,7 +54,7 @@ void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionN
 {
 #if WITH_EDITOR	 // [Editor]
 	AGeneratedMap* const LevelMap = GetLevelMap();
-	if (!LevelMap || LevelMap->bShouldShowRenders)	// The Level Map is not accessible or has the debug mode
+	if (!LevelMap || LevelMap->bShouldShowRenders) // The Level Map is not accessible or has the debug mode
 	{
 		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("nullptr")), *FunctionName, *Message);
 	}
@@ -65,7 +65,7 @@ void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionN
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
 #if WITH_EDITOR	 // [Editor]
-	if (!IS_VALID(Owner))  // The owner is not valid
+	if (!IS_VALID(Owner)) // The owner is not valid
 	{
 		return;
 	}
@@ -77,7 +77,7 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 		for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
 		{
 			FString StringIt = Cast<UTextRenderComponent>(TextRendersArray[i])->Text.ToString();
-			if (StringIt != "Player" && StringIt != "AI")  // is not nickname
+			if (StringIt != "Player" && StringIt != "AI") // is not nickname
 			{
 				TextRendersArray[i]->DestroyComponent();
 			}
@@ -101,8 +101,8 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FVector& CoordinatePosition/* = FVector::ZeroVector*/) const
 {
 #if WITH_EDITOR	 // [Editor]
-	if (!Cells.Num()			  // Null length
-		|| !IS_VALID(Owner))			  // Owner is not valid
+	if (!Cells.Num()         // Null length
+	    || !IS_VALID(Owner)) // Owner is not valid
 	{
 		return;
 	}
@@ -137,10 +137,10 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 AGeneratedMap* USingletonLibrary::GetLevelMap()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (IsEditorNotPieWorld() == true			  // IsEditorNotPieWorld only
-		&& !GetSingleton()->LevelMapInternal.IsValid())  // Is transient
+	if (IsEditorNotPieWorld() == true                   // IsEditorNotPieWorld only
+	    && !GetSingleton()->LevelMapInternal.IsValid()) // Is transient
 	{
-		SetLevelMap(nullptr);  // Find the Level Map
+		SetLevelMap(nullptr); // Find the Level Map
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -152,8 +152,8 @@ void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 
-	if (IsEditorNotPieWorld()  // IsEditorNotPieWorld only
-		&& LevelMap == nullptr)
+	if (IsEditorNotPieWorld() // IsEditorNotPieWorld only
+	    && LevelMap == nullptr)
 	{
 		UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
 		if (EditorWorld)
@@ -179,7 +179,7 @@ void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
 int32 USingletonLibrary::GetAlivePlayersNum()
 {
 	int32 PlayersNum = 0;
-	if (const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
+	if (const AGeneratedMap* LevelMap = GetLevelMap())
 	{
 		PlayersNum = LevelMap->GetAlivePlayersNum();
 	}
@@ -190,7 +190,7 @@ int32 USingletonLibrary::GetAlivePlayersNum()
 ELevelType USingletonLibrary::GetLevelType()
 {
 	ELevelType LevelType = ELT::None;
-	if (const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
+	if (const AGeneratedMap* LevelMap = GetLevelMap())
 	{
 		LevelType = LevelMap->GetLevelType();
 	}
@@ -269,7 +269,7 @@ void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>&
 	for (ULevelActorDataAsset* DataAssetIt : GetSingleton()->ActorsDataAssetsInternal)
 	{
 		if (DataAssetIt
-			&& EnumHasAnyFlags(DataAssetIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
+		    && EnumHasAnyFlags(DataAssetIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
 		{
 			OutDataAssets.Emplace(DataAssetIt);
 		}
@@ -280,7 +280,7 @@ void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>&
 TSubclassOf<AActor> USingletonLibrary::GetActorClassByType(EActorType ActorType)
 {
 	TArray<ULevelActorDataAsset*> FoundDataAssets;
-	USingletonLibrary::GetDataAssetsByActorTypes(FoundDataAssets, TO_FLAG(ActorType));
+	GetDataAssetsByActorTypes(FoundDataAssets, TO_FLAG(ActorType));
 	const ULevelActorDataAsset* DataAsset = FoundDataAssets.IsValidIndex(0) ? FoundDataAssets[0] : nullptr;
 	return DataAsset ? DataAsset->GetActorClass() : nullptr;
 }

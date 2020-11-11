@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine\World.h"
+#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 
 //@todo Is includes the transient world as IsEditorWorld() ? //!(Obj)->GetWorld()->IsGameWorld()
@@ -20,14 +20,21 @@
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EActorType : uint8
 {
-	None	= 0,								///< None of the types for comparisons
-    Bomb	= 1 << 0,	 						///< A destroyable exploding Obstacle
-    Box		= 1 << 1,		 					///< A destroyable Obstacle
-    Item	= 1 << 2,							///< A picked element giving power-up (FPowerUp struct)
-    Player	= 1 << 3,							///< A character that is controlled by a person or bot
-    Wall	= 1 << 4,							///< An absolute static and unchangeable block throughout the game
-    All		= Bomb | Item | Player | Wall | Box	///< All actor types
+	None = 0,
+	///< None of the types for comparisons
+	Bomb = 1 << 0,
+	///< A destroyable exploding Obstacle
+	Box = 1 << 1,
+	///< A destroyable Obstacle
+	Item = 1 << 2,
+	///< A picked element giving power-up (FPowerUp struct)
+	Player = 1 << 3,
+	///< A character that is controlled by a person or bot
+	Wall = 1 << 4,
+	///< An absolute static and unchangeable block throughout the game
+	All = Bomb | Item | Player | Wall | Box ///< All actor types
 };
+
 ENUM_CLASS_FLAGS(EActorType);
 using EAT = EActorType;
 
@@ -37,13 +44,14 @@ using EAT = EActorType;
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ELevelType : uint8
 {
-	None	= 0 								UMETA(DisplayName = "None"),
-	First 	= 1 << 0 							UMETA(DisplayName = "Maya"),
-	Second 	= 1 << 1							UMETA(DisplayName = "City"),
-	Third  	= 1 << 2							UMETA(DisplayName = "Forest"),
-	Fourth  = 1 << 3							UMETA(DisplayName = "Water"),
-	Max	  	= First | Second | Third | Fourth	UMETA(DisplayName = "Any")	///< Can be used for such levels as menu, sandbox, etc.
+	None = 0 UMETA(DisplayName = "None"),
+	First = 1 << 0 UMETA(DisplayName = "Maya"),
+	Second = 1 << 1 UMETA(DisplayName = "City"),
+	Third = 1 << 2 UMETA(DisplayName = "Forest"),
+	Fourth = 1 << 3 UMETA(DisplayName = "Water"),
+	Max = First | Second | Third | Fourth UMETA(DisplayName = "Any") ///< Can be used for such levels as menu, sandbox, etc.
 };
+
 ENUM_CLASS_FLAGS(ELevelType);
 using ELT = ELevelType;
 
@@ -53,10 +61,13 @@ using ELT = ELevelType;
 UENUM(BlueprintType)
 enum class EPathType : uint8
 {
-	Explosion,	///< Break to the first AT::Wall without obstacles
-    Free,		///< Break to the first AT::Wall + obstacles
-    Safe,		///< Break to the first AT::Wall + obstacles + explosions
-    Secure		///< Break to the first AT::Wall + obstacles + explosions + AT::Player
+	Explosion,
+	///< Break to the first AT::Wall without obstacles
+	Free,
+	///< Break to the first AT::Wall + obstacles
+	Safe,
+	///< Break to the first AT::Wall + obstacles + explosions
+	Secure ///< Break to the first AT::Wall + obstacles + explosions + AT::Player
 };
 
 /**
@@ -65,10 +76,13 @@ enum class EPathType : uint8
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	None,	///< The type was not selected
-    Skate,	///< Increases speed
-    Bomb,	///< increases the amount of bombs
-    Fire	///< Increases the range of explosion
+	None,
+	///< The type was not selected
+	Skate,
+	///< Increases speed
+	Bomb,
+	///< increases the amount of bombs
+	Fire ///< Increases the range of explosion
 };
 
 /**

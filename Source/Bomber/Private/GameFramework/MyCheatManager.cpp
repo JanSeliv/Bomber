@@ -4,8 +4,8 @@
 //---
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
 #include "Controllers/MyAIController.h"
+#include "Globals/SingletonLibrary.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
 
@@ -132,11 +132,11 @@ void UMyCheatManager::SetItemChance(int32 Chance) const
 // Override the level of each powerup for a controlled player
 void UMyCheatManager::SetPowerups(int32 NewLevel) const
 {
-	if(const auto PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerPawn(this, 0)))
+	if (const auto PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerPawn(this, 0)))
 	{
 		NewLevel = FMath::Clamp(NewLevel, 1, 9);
 		PlayerCharacter->PowerupsInternal.BombN = NewLevel;
-		PlayerCharacter->PowerupsInternal.FireN= NewLevel;
+		PlayerCharacter->PowerupsInternal.FireN = NewLevel;
 		PlayerCharacter->PowerupsInternal.SkateN = NewLevel;
 	}
 }

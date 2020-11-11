@@ -17,7 +17,7 @@ class UUIDataAsset : public UDataAsset
 public:
 	/** Get UUIDataAsset::InGameWidgetInternal.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE TSubclassOf<class UUserWidget> GetInGameClass() const { return InGameClassInternal; }
+	FORCEINLINE TSubclassOf<class UUserWidget> GetInGameClass() const { return InGameClassInternal; }
 
 protected:
 	/** The class of a In-Game Widget blueprint. */
@@ -41,7 +41,7 @@ public:
 
 	/** The current widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Ñ++")
-	class UInGameWidget* InGameWidget;  //[G]
+	class UInGameWidget* InGameWidget; //[G]
 
 	/* ---------------------------------------------------
 	*		Public functions

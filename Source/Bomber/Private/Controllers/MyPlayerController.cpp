@@ -3,8 +3,8 @@
 #include "Controllers/MyPlayerController.h"
 //---
 #include "GameFramework/MyCheatManager.h"
-#include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
 
 // Sets default values for this controller's properties
@@ -23,7 +23,7 @@ AMyPlayerController::AMyPlayerController()
 //
 bool AMyPlayerController::CanHideMouse() const
 {
-	switch(AMyGameStateBase::GetCurrentGameState(this))
+	switch (AMyGameStateBase::GetCurrentGameState(this))
 	{
 		case ECurrentGameState::GameStarting: return true;
 		case ECurrentGameState::InGame: return true;
@@ -34,7 +34,7 @@ bool AMyPlayerController::CanHideMouse() const
 void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
 {
 	// Listen states to manage the tick
-	if(AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
 	{
 		MyGameState->ServerSetGameState(NewGameState);
 	}
@@ -57,7 +57,7 @@ void AMyPlayerController::SetMouseCursor(bool bShouldShow)
 	bEnableClickEvents = bShouldShow;
 	bEnableMouseOverEvents = bShouldShow;
 
-	if(bShouldShow)
+	if (bShouldShow)
 	{
 		SetInputMode(FInputModeGameAndUI());
 	}
@@ -78,7 +78,7 @@ void AMyPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	// Listen states
-	if(AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -107,7 +107,7 @@ void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState Cu
 	switch (CurrentGameState)
 	{
 		case ECurrentGameState::Menu:
-        case ECurrentGameState::GameStarting:
+		case ECurrentGameState::GameStarting:
 		case ECurrentGameState::EndGame:
 		{
 			SetIgnoreMoveInput(true);

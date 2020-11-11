@@ -3,8 +3,8 @@
 #include "Components/MyCameraComponent.h"
 //---
 #include "GeneratedMap.h"
-#include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/SingletonLibrary.h"
 //---
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -25,7 +25,7 @@ UMyCameraComponent::UMyCameraComponent()
 	// Camera defaults
 	SetConstraintAspectRatio(false); // viewport without black borders
 #if WITH_EDITOR // [Editor]
-		bCameraMeshHiddenInGame = !USingletonLibrary::IsEditor();
+	bCameraMeshHiddenInGame = !USingletonLibrary::IsEditor();
 #endif
 
 	// Disable Eye Adaptation
@@ -53,8 +53,8 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 	// If true, the camera will be forced moving to the start position
 	const AGeneratedMap* LevelMap = Cast<AGeneratedMap>(GetOwner());
 	if (!LevelMap
-        || !LevelMap->GetAlivePlayersNum()
-        || bForceStartInternal)
+	    || !LevelMap->GetAlivePlayersNum()
+	    || bForceStartInternal)
 	{
 		NewLocation = FMath::Lerp(GetComponentLocation(), StartLocationInternal, DeltaTime);
 		SetWorldLocation(NewLocation);
