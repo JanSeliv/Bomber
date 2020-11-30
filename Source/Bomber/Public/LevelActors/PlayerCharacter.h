@@ -11,6 +11,24 @@
 /**
  *
  */
+USTRUCT(BlueprintType)
+struct FAttachedMesh
+{
+	GENERATED_BODY()
+
+	/** The attached static mesh or skeletal mesh.  */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn = "true"))
+	class UStreamableRenderAsset* AttachedMesh = nullptr; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
+	FName Bone; //[D]
+};
+
+
+/**
+ * The player archetype of level actor rows. Determines the individual of the character model
+ */
 UCLASS(Blueprintable, BlueprintType)
 class UPlayerRow final : public ULevelActorRow
 {
@@ -18,15 +36,20 @@ class UPlayerRow final : public ULevelActorRow
 
 public:
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
+	TArray<FAttachedMesh> AttachedMeshes; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	class UBlendSpace1D* IdleWalkRunBlendSpace; //[D]
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	class UAnimSequence* DanceAnimation; //[D]
 };
 
 /**
- *
+ * The data asset of the Bomber characters
  */
 UCLASS(Blueprintable, BlueprintType)
 class UPlayerDataAsset final : public ULevelActorDataAsset

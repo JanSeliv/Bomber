@@ -4,30 +4,29 @@ using UnrealBuildTool;
 
 public class Bomber : ModuleRules
 {
-    public Bomber(ReadOnlyTargetRules Target) : base(Target)
-    {
-        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+	public Bomber(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] {
-            "Core", "CoreUObject", "Engine", "InputCore", // Default
-            "HeadMountedDisplay", "UMG", "Slate", "SlateCore", // UMG
-            "AIModule" // AI
-            });
+		PublicDependencyModuleNames.AddRange(new[]
+		{
+			"Core", "CoreUObject", "Engine", "InputCore", // Default
+			"HeadMountedDisplay", "UMG", "Slate", "SlateCore", // UMG
+			"AIModule" // AI
+		});
 
-        PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] { });
 
-        if (Target.Type == TargetType.Editor)
-        {
-            PrivateDependencyModuleNames.AddRange(
-                new string[]
-                {
-                    "UnrealEd" // FEditorDelegates::EndPIE
-                });
-        }
+		if (Target.Type == TargetType.Editor)
+			PrivateDependencyModuleNames.AddRange(
+				new[]
+				{
+					"UnrealEd" // FEditorDelegates::EndPIE
+				});
 
-        // Uncomment if you are using online features
-        // PrivateDependencyModuleNames.Add("OnlineSubsystem");
+		// Uncomment if you are using online features
+		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
 
-        // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-    }
+		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+	}
 }

@@ -1,7 +1,6 @@
 // Copyright 2020 Yevhenii Selivanov.
 
 using UnrealBuildTool;
-using System.Collections.Generic;
 
 public class BomberTarget : TargetRules
 {
@@ -9,6 +8,6 @@ public class BomberTarget : TargetRules
     {
         Type = TargetType.Game;
         DefaultBuildSettings = BuildSettingsVersion.V2;
-        ExtraModuleNames.AddRange(new string[] { "Bomber" });
+        ExtraModuleNames.AddRange(new[] {"Bomber"});
     }
 }
