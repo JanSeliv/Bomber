@@ -18,11 +18,11 @@ class ULevelActorRow : public UObject
 
 public:
 	/** The level where should be used a mesh */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	ELevelType LevelType = ELT::None; //[D]
 
 	/** The static mesh, skeletal mesh or texture */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Row", meta = (ExposeOnSpawn = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties, ExposeOnSpawn = "true"))
 	class UStreamableRenderAsset* Mesh = nullptr; //[D]
 };
 
