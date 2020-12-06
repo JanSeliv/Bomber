@@ -276,11 +276,17 @@ void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>&
 	}
 }
 
-// Iterate ActorsDataAssets array and returns the found actor class by specified actor type
-TSubclassOf<AActor> USingletonLibrary::GetActorClassByType(EActorType ActorType)
+// Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type
+ULevelActorDataAsset* USingletonLibrary::GetDataAssetsByActorType(EActorType ActorType)
 {
 	TArray<ULevelActorDataAsset*> FoundDataAssets;
 	GetDataAssetsByActorTypes(FoundDataAssets, TO_FLAG(ActorType));
-	const ULevelActorDataAsset* DataAsset = FoundDataAssets.IsValidIndex(0) ? FoundDataAssets[0] : nullptr;
-	return DataAsset ? DataAsset->GetActorClass() : nullptr;
+	return FoundDataAssets.IsValidIndex(0) ? FoundDataAssets[0] : nullptr;
+}
+
+// Iterate ActorsDataAssets array and returns the found actor class by specified actor type
+TSubclassOf<AActor> USingletonLibrary::GetActorClassByType(EActorType ActorType)
+{
+	ULevelActorDataAsset* FoundDataAsset = GetDataAssetsByActorType(ActorType);
+	return FoundDataAsset ? FoundDataAsset->GetActorClass() : nullptr;
 }

@@ -196,6 +196,10 @@ public:
 		TArray<class ULevelActorDataAsset*>& OutDataAssets,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
+	/** Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    static class ULevelActorDataAsset* GetDataAssetsByActorType(EActorType ActorType);
+
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static TSubclassOf<AActor> GetActorClassByType(EActorType ActorType);

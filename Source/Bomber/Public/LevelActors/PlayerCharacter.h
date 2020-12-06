@@ -22,7 +22,7 @@ struct FAttachedMesh
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	FName Bone; //[D]
+	FName Socket = NAME_None; //[D]
 };
 
 
@@ -37,7 +37,7 @@ class UPlayerRow final : public ULevelActorRow
 public:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TArray<FAttachedMesh> AttachedMeshes; //[D]
+	TArray<FAttachedMesh> PlayerProps; //[D]
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
@@ -46,6 +46,10 @@ public:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	class UAnimSequence* DanceAnimation; //[D]
+
+	/** Attach all FAttachedMeshes to specified parent mesh. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void AttachPlayerProps(class USkeletalMeshComponent* ParentMesh);
 };
 
 /**
@@ -77,11 +81,6 @@ USTRUCT(BlueprintType)
 struct FPowerUp
 {
 	GENERATED_BODY()
-
-	/** Empty constructor */
-	FPowerUp()
-	{
-	};
 
 	/** The number of items, that increases the movement speed of the character */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
