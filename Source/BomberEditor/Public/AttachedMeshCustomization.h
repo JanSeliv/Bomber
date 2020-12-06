@@ -10,6 +10,10 @@
 class FAttachedMeshCustomization final : public IPropertyTypeCustomization
 {
 public:
+	/* ---------------------------------------------------
+	*		Public functions
+	* --------------------------------------------------- */
+
 	/** Makes a new instance of this detail layout class for a specific detail view requesting it. */
 	static TSharedRef<class IPropertyTypeCustomization> MakeInstance();
 
@@ -33,18 +37,35 @@ public:
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
 private:
-	/** FAttachedMesh struct property. */
-	TSharedPtr<IPropertyHandle> SharedPropertyHandle = nullptr;
+	/* ---------------------------------------------------
+	*		Private properties
+	* --------------------------------------------------- */
+
+	/** FAttachedMesh::FName property. */
+	TSharedPtr<IPropertyHandle> SocketPropertyHandleInternal = nullptr;
 
 	/** UPlayerRow outer object. */
-	TWeakObjectPtr<UObject> WeakPlayerRowOuter = nullptr;
+	TWeakObjectPtr<UObject> PlayerRowOuterInternal = nullptr;
 
-	/** A Skeletal mesh component that contains the parent character mesh. */
-	TWeakObjectPtr<USkeletalMeshComponent> WeakParentMeshComponent = nullptr;
+	/** A Skeletal mesh component that contains the parent character mesh. Is transient component. User as a parameter to push the SSocketChooserPopup. */
+	TWeakObjectPtr<USkeletalMeshComponent> ParentMeshCompInternal = nullptr;
 
-	FText GetSocketName() const;
-	bool CanChangeSocket() const;
+	/* ---------------------------------------------------
+	*		Private functions
+	* --------------------------------------------------- */
+
+	/** Customize a Socket property, will add the chosen text row, the Select and Clear buttons. */
+	void AddSocketWidgetRow(IDetailChildrenBuilder& ChildBuilder);
+
+	/** Push the SSocketChooserPopup menu to allow user choose socket. */
 	void OnBrowseSocket();
+
+	/** Set chosen socket to None. */
 	void OnClearSocket();
-	void OnSocketSelection(FName SocketName);
+
+	/** Executed every tick. */
+	FText GetSocketFromProperty() const;
+
+	/** Executed on socket selection. */
+	void SetSocketToProperty(FName BoneName);
 };

@@ -18,6 +18,46 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
+// Attach all FAttachedMeshes to specified parent mesh
+void UPlayerRow::AttachPlayerProps(USkeletalMeshComponent* ParentMesh)
+{
+	if (!ParentMesh)
+	{
+		return;
+	}
+
+	for (const FAttachedMesh& MeshIt : PlayerProps)
+	{
+		UMeshComponent* MeshComponent = nullptr;
+		if (const auto SkeletalMesh = Cast<USkeletalMesh>(MeshIt.AttachedMesh))
+		{
+			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(ParentMesh);
+			SkeletalComponent->SetSkeletalMesh(SkeletalMesh);
+			MeshComponent = SkeletalComponent;
+		}
+		else if (const auto StaticMesh = Cast<UStaticMesh>(MeshIt.AttachedMesh))
+		{
+			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(ParentMesh);
+			StaticMeshComponent->SetStaticMesh(StaticMesh);
+			MeshComponent = StaticMeshComponent;
+		}
+
+		if (MeshComponent)
+		{
+			const FTransform Transform(ParentMesh->GetRelativeRotation(), FVector::ZeroVector, ParentMesh->GetRelativeScale3D());
+			MeshComponent->SetupAttachment(ParentMesh->GetAttachmentRoot());
+			MeshComponent->SetRelativeTransform(Transform);
+			MeshComponent->RegisterComponent();
+			const FAttachmentTransformRules AttachRules(
+				EAttachmentRule::SnapToTarget,
+				EAttachmentRule::KeepWorld,
+				EAttachmentRule::SnapToTarget,
+				true);
+			MeshComponent->AttachToComponent(ParentMesh, AttachRules, MeshIt.Socket);
+		}
+	}
+}
+
 // Default constructor
 UPlayerDataAsset::UPlayerDataAsset()
 {
