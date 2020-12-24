@@ -339,16 +339,23 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
-**/Plugins/
 **/Intermediate/
 **/Saved/
 **/Build/
 **/docs/
 **/Binaries/
+**/DerivedDataCache/
 **/Content/Developers/
 *.sln
 *.uproject
+*_BuiltData.uasset
 *Win64_DebugGame.*
+*.dll
+*.pdb
+*.modules
+*.target
+*.udd
+*.bak
 **/Binaries/UE4Editor-*-0*.dll
 **/Binaries/UE4Editor-*-1*.dll
 **/Binaries/UE4Editor-*-2*.dll
