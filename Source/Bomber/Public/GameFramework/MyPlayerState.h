@@ -30,11 +30,11 @@ public:
 
 	/**  */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ChoosePlayer(class USkeletalMesh* MeshAsset);
+	void SetChosenPlayerRaw(class UPlayerRow* ChosenPlayerRow);
 
-	/** */
+	/** By which level type a skeletal mesh is chosen. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class USkeletalMesh* GetChosenMesh() const { return ChosenMeshInternal; }
+	FORCEINLINE class UPlayerRow* GetChosenPlayerRaw() const { return ChosenPlayerRowInternal; }
 
 protected:
 	/* ---------------------------------------------------
@@ -45,9 +45,9 @@ protected:
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
 	EEndGameState EndGameStateInternal = EEndGameState::None; //[N]
 
-	/** */
+	/** a level type of chosen skeletal mesh. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Chosen Mesh"))
-	class USkeletalMesh* ChosenMeshInternal; //[G]
+	UPlayerRow* ChosenPlayerRowInternal; //[G]
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;

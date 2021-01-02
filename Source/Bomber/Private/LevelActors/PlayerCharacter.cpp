@@ -239,28 +239,21 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	}
 
 	// Override mesh
-	TArray<ULevelActorRow*> OutRows;
 	const ULevelActorDataAsset* PlayerDataAsset = MapComponentInternal->GetActorDataAsset();
 	const int32 MeshesNum = PlayerDataAsset ? PlayerDataAsset->GetRowsNum() : 0;
 	if (MeshesNum)
 	{
 		const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
-		PlayerDataAsset->GetRowsByLevelType(OutRows, LevelType);
-		const ULevelActorRow* Row = OutRows.IsValidIndex(0) ? OutRows[0] : nullptr;
-		if (Row)
-		{
-			MapComponentInternal->SetMesh(Row->Mesh, GetMesh());
-		}
+		const ULevelActorRow* Row = PlayerDataAsset->GetRowByLevelType(TO_ENUM(ELevelType, LevelType));
+		MapComponentInternal->SetMeshByRow(Row, GetMesh());
 	}
 
 	// Update mesh if chosen
 	if (!CharacterIDInternal) // is player
 	{
-		const AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-		UStreamableRenderAsset* MeshAsset = MyPlayerState ? MyPlayerState->GetChosenMesh() : nullptr;
-		if (MeshAsset)
+		if (const AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
 		{
-			MapComponentInternal->SetMesh(MeshAsset);
+			MapComponentInternal->SetMeshByRow(MyPlayerState->GetChosenPlayerRaw());
 		}
 	}
 

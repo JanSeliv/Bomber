@@ -43,13 +43,8 @@ void UMapComponent::OnConstruction()
 	// Set default mesh asset
 	if (ActorDataAssetInternal)
 	{
-		TArray<ULevelActorRow*> OutRows;
-		ActorDataAssetInternal->GetRowsByLevelType(OutRows, TO_FLAG(USingletonLibrary::GetLevelType()));
-		ULevelActorRow* FoundRow = OutRows.IsValidIndex(0) ? OutRows[0] : nullptr;
-		if (FoundRow)
-		{
-			SetMesh(FoundRow->Mesh);
-		}
+		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
+		SetMeshByRow(FoundRow);
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
@@ -67,9 +62,9 @@ void UMapComponent::OnConstruction()
 }
 
 // Set specified mesh to the Owner
-void UMapComponent::SetMesh(UStreamableRenderAsset* MeshAsset, class UMeshComponent* InMeshComponent/* = nullptr*/)
+void UMapComponent::SetMeshByRow(const ULevelActorRow* Row, UMeshComponent* InMeshComponent/* = nullptr*/)
 {
-	if (!MeshAsset
+	if (!Row
 	    || !MeshComponentInternal && !InMeshComponent)
 	{
 		return;
@@ -82,11 +77,11 @@ void UMapComponent::SetMesh(UStreamableRenderAsset* MeshAsset, class UMeshCompon
 
 	if (auto SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
 	{
-		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(MeshAsset));
+		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(Row->Mesh));
 	}
 	else if (auto StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponentInternal))
 	{
-		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(MeshAsset));
+		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(Row->Mesh));
 	}
 }
 

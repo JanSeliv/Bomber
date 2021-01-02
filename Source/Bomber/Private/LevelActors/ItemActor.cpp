@@ -57,15 +57,14 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	// Override mesh
 	TArray<ULevelActorRow*> OutRows;
 	MapComponentInternal->GetDataAssetChecked<UItemDataAsset>()->GetRowsByLevelType(OutRows, TO_FLAG(USingletonLibrary::GetLevelType()));
-	const auto FoundRow = OutRows.FindByPredicate([ItemType = ItemTypeInternal](const ULevelActorRow* RowIt)
+	const ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType = ItemTypeInternal](const ULevelActorRow* RowIt)
 	{
 		const auto ItemRow = Cast<UItemRow>(RowIt);
 		return ItemRow && ItemRow->ItemType == ItemType;
 	});
-	ULevelActorRow* LevelActorRow = FoundRow ? *FoundRow : nullptr;
-	if (LevelActorRow)
+	if (FoundRowPtr)
 	{
-		MapComponentInternal->SetMesh(LevelActorRow->Mesh);
+		MapComponentInternal->SetMeshByRow(*FoundRowPtr);
 	}
 }
 
