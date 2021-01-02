@@ -54,7 +54,7 @@ public:
 
 	/** Set specified mesh to the Owner. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMesh(class UStreamableRenderAsset* MeshAsset, class UMeshComponent* InMeshComponent = nullptr);
+    void SetMeshByRow(const class ULevelActorRow* Row, class UMeshComponent* InMeshComponent = nullptr);
 
 	/** Set material to the mesh. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -73,7 +73,7 @@ public:
 
 	/** Get the owner's data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    EActorType GetActorType() const;
+	EActorType GetActorType() const;
 
 	/** Get the owner's data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -94,7 +94,7 @@ protected:
 
 	/** */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
-	class UMeshComponent* MeshComponentInternal;//[C.DO]
+	class UMeshComponent* MeshComponentInternal; //[C.DO]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

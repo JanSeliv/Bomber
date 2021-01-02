@@ -22,18 +22,13 @@ AMyPlayerState::AMyPlayerState()
 }
 
 //
-void AMyPlayerState::ChoosePlayer(USkeletalMesh* MeshAsset)
+void AMyPlayerState::SetChosenPlayerRaw(UPlayerRow* ChosenPlayerRow)
 {
-	if (!MeshAsset)
-	{
-		return;
-	}
-
-	ChosenMeshInternal = MeshAsset;
+	ChosenPlayerRowInternal = ChosenPlayerRow;
 
 	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(GetPawn()))
 	{
-		MapComponent->SetMesh(MeshAsset);
+		MapComponent->SetMeshByRow(ChosenPlayerRow);
 	}
 }
 
