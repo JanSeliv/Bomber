@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Yevhenii Selivanov.
+﻿// Copyright 2021 Yevhenii Selivanov.
 
 #include "GeneratedMap.h"
 //---
@@ -257,6 +257,14 @@ void AGeneratedMap::IntersectCellsByTypes(
 	}
 
 	OutCells = OutCells.Num() > 0 ? OutCells.Intersect(BitmaskedCells) : BitmaskedCells;
+}
+
+// Checking the containing of the specified cell among owners locations of the Map Components array
+bool AGeneratedMap::ContainsMapComponents(const FCell& Cell, int32 ActorsTypesBitmask) const
+{
+	FCells NonEmptyCells;
+	IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask);
+	return NonEmptyCells.Contains(Cell);
 }
 
 // Destroy all actors from the set of cells

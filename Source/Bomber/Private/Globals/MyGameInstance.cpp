@@ -1,3 +1,3 @@
-﻿// Copyright 2020 Yevhenii Selivanov.
+﻿// Copyright 2021 Yevhenii Selivanov.
 
 #include "Globals/MyGameInstance.h"

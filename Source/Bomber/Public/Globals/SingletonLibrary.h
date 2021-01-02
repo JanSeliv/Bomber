@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Yevhenii Selivanov.
+﻿// Copyright 2021 Yevhenii Selivanov.
 
 #pragma once
 
@@ -117,24 +117,15 @@ public:
 
 	/** Returns the length of the one cell (a floor bound) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE float GetCellSize()
-	{
-		return FCell::CellSize;
-	}
+	static FORCEINLINE float GetCellSize() { return FCell::CellSize; }
 
 	/** Returns the zero cell (0,0,0) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE FCell GetZeroCell()
-	{
-		return FCell::ZeroCell;
-	}
+	static FORCEINLINE FCell GetZeroCell() { return FCell::ZeroCell; }
 
 	/** Returns the zero cell (0,0,0) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static FORCEINLINE bool IsValidCell(const FCell& Cell)
-	{
-		return Cell;
-	}
+	static FORCEINLINE bool IsValidCell(const FCell& Cell) { return Cell; }
 
 	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
 	 *
@@ -198,7 +189,7 @@ public:
 
 	/** Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    static class ULevelActorDataAsset* GetDataAssetsByActorType(EActorType ActorType);
+	static class ULevelActorDataAsset* GetDataAssetsByActorType(EActorType ActorType);
 
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

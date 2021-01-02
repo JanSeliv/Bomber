@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Yevhenii Selivanov.
+﻿// Copyright 2021 Yevhenii Selivanov.
 
 #pragma once
 
@@ -52,16 +52,10 @@ struct FCell
 	 * @param Other The other cell being compared.
 	 * @return true if the points are equal, false otherwise
 	 */
-	FORCEINLINE bool operator==(const FCell& Other) const
-	{
-		return this->Location == Other.Location;
-	}
+	FORCEINLINE bool operator==(const FCell& Other) const { return this->Location == Other.Location; }
 
 	/** Comparing with uninitialized Zero Cell. */
-	FORCEINLINE operator bool() const
-	{
-		return this->Location != ZeroCell.Location;
-	}
+	FORCEINLINE operator bool() const { return this->Location != ZeroCell.Location; }
 
 	/**
 	* Creates a hash value from a FCell.
@@ -69,8 +63,5 @@ struct FCell
 	* @param Vector the cell to create a hash value for
 	* @return The hash value from the components
 	*/
-	friend FORCEINLINE uint32 GetTypeHash(const FCell& Vector)
-	{
-		return GetTypeHash(Vector.Location);
-	}
+	friend FORCEINLINE uint32 GetTypeHash(const FCell& Vector) { return GetTypeHash(Vector.Location); }
 };
