@@ -1,4 +1,4 @@
-// Copyright 2020 Yevhenii Selivanov.
+// Copyright 2021 Yevhenii Selivanov.
 
 #pragma once
 
@@ -199,14 +199,9 @@ public:
 	 * @return true if at least one level actor is contained.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool ContainsMapComponents(
+	bool ContainsMapComponents(
 		const struct FCell& Cell,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const
-	{
-		FCells NonEmptyCells;
-		IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask);
-		return NonEmptyCells.Contains(Cell);
-	}
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
 
 	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
 	 *

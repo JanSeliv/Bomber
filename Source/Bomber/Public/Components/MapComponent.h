@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Yevhenii Selivanov.
+﻿// Copyright 2021 Yevhenii Selivanov.
 
 #pragma once
 
@@ -54,7 +54,7 @@ public:
 
 	/** Set specified mesh to the Owner. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-    void SetMeshByRow(const class ULevelActorRow* Row, class UMeshComponent* InMeshComponent = nullptr);
+	void SetMeshByRow(const class ULevelActorRow* Row, class UMeshComponent* InMeshComponent = nullptr);
 
 	/** Set material to the mesh. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -62,10 +62,7 @@ public:
 
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner)
-	{
-		return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr;
-	}
+	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner) { return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr; }
 
 	/**  Rerun owner's construction scripts. The temporary only editor owner will not be updated. */
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
