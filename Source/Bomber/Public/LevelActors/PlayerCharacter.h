@@ -46,10 +46,6 @@ public:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	class UAnimSequence* DanceAnimation; //[D]
-
-	/** Attach all FAttachedMeshes to specified parent mesh. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void AttachPlayerProps(class USkeletalMeshComponent* ParentMesh);
 };
 
 /**
@@ -109,7 +105,7 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Sets default values for this character's properties */
-	APlayerCharacter();
+	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
