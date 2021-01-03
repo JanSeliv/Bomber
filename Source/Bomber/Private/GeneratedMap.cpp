@@ -201,7 +201,10 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 
 	// begin: find transform
 	FRotator ActorRotation{GetActorRotation()};
-	ActorRotation.Yaw += FMath::RandRange(static_cast<int32>(1), static_cast<int32>(4)) * 90.f;
+	if (!(TO_FLAG(AddedComponent->GetActorType()) & TO_FLAG(EAT::Item | EAT::Player))) // Random rotate if is not item and not player
+	{
+		ActorRotation.Yaw += FMath::RandRange(static_cast<int32>(1), static_cast<int32>(4)) * 90.f;
+	}
 	const FVector ActorLocation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + 100.f};
 	const FVector Scale{1.f, 1.f, 1.f};
 	// end

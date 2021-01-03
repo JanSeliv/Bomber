@@ -2,10 +2,11 @@
 
 #include "Components/MapComponent.h"
 //---
-#include "Bomber.h"
 #include "GeneratedMap.h"
-#include "Globals/SingletonLibrary.h"
+#include "Components/MySkeletalMeshComponent.h"
 #include "Globals/LevelActorDataAsset.h"
+#include "Globals/SingletonLibrary.h"
+#include "LevelActors/PlayerCharacter.h"
 //---
 #include "Components/BoxComponent.h"
 
@@ -75,9 +76,10 @@ void UMapComponent::SetMeshByRow(const ULevelActorRow* Row, UMeshComponent* InMe
 		MeshComponentInternal = InMeshComponent;
 	}
 
-	if (auto SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
+	if (auto SkeletalMeshComponent = Cast<UMySkeletalMeshComponent>(MeshComponentInternal))
 	{
 		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(Row->Mesh));
+		SkeletalMeshComponent->AttachProps(Cast<UPlayerRow>(Row));
 	}
 	else if (auto StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponentInternal))
 	{
