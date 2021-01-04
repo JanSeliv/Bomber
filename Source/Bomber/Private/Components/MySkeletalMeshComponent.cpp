@@ -26,12 +26,15 @@ void UMySkeletalMeshComponent::AttachProps(const UPlayerRow* PlayerRow)
 		{
 			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this);
 			SkeletalComponent->SetSkeletalMesh(SkeletalMeshProp);
+			SkeletalComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 			MeshComponent = SkeletalComponent;
 		}
 		else if (const auto StaticMeshProp = Cast<UStaticMesh>(MeshIt.AttachedMesh))
 		{
 			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
 			StaticMeshComponent->SetStaticMesh(StaticMeshProp);
+			StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			MeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 			MeshComponent = StaticMeshComponent;
 		}
 
@@ -40,13 +43,13 @@ void UMySkeletalMeshComponent::AttachProps(const UPlayerRow* PlayerRow)
 			const FTransform Transform(GetRelativeRotation(), FVector::ZeroVector, GetRelativeScale3D());
 			MeshComponent->SetupAttachment(GetAttachmentRoot());
 			MeshComponent->SetRelativeTransform(Transform);
-			MeshComponent->RegisterComponent();
 			const FAttachmentTransformRules AttachRules(
 				EAttachmentRule::SnapToTarget,
 				EAttachmentRule::KeepWorld,
 				EAttachmentRule::SnapToTarget,
 				true);
 			MeshComponent->AttachToComponent(this, AttachRules, MeshIt.Socket);
+			MeshComponent->RegisterComponent();
 		}
 	}
 }
