@@ -179,10 +179,10 @@ protected:
 	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.f, bool bForce = false) override;
 
 	/* Move the player character by the forward vector. */
-	FORCEINLINE void OnMoveUpDown(float ScaleValue) { AddMovementInput(GetActorForwardVector(), ScaleValue); }
+	FORCEINLINE void OnMoveUpDown(float ScaleValue) { AddMovementInput(GetActorRightVector(), ScaleValue); }
 
 	/* Move the player character by the right vector. */
-	FORCEINLINE void OnMoveRightLeft(float ScaleValue) { AddMovementInput(GetActorRightVector(), ScaleValue); }
+	FORCEINLINE void OnMoveRightLeft(float ScaleValue) { AddMovementInput(GetActorForwardVector(), ScaleValue); }
 
 	/**
 	 * Triggers when this player character starts something overlap.

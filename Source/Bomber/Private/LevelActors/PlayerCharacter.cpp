@@ -48,7 +48,6 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	NameplateMeshInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
 	NameplateMeshInternal->SetupAttachment(RootComponent);
 	NameplateMeshInternal->SetRelativeLocation(FVector(-60.f, 0.f, 150.f));
-	NameplateMeshInternal->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 	NameplateMeshInternal->SetRelativeScale3D(FVector(1.75f, 1.f, 1.f));
 }
 
@@ -253,11 +252,6 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		}
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
-
-	// Rotate this character
-	const float YawRotation = USingletonLibrary::GetLevelMap()->GetActorRotation().Yaw - 90.f;
-	SetActorRotation(FRotator(0.f, YawRotation, 0.f));
-	USingletonLibrary::PrintToLog(this, "OnConstruction \t New rotation:", GetActorRotation().ToString());
 }
 
 // Called to bind functionality to input
