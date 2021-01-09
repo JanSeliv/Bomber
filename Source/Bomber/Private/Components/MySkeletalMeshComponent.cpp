@@ -13,11 +13,26 @@ UMySkeletalMeshComponent::UMySkeletalMeshComponent()
 // Attach all FAttachedMeshes to specified parent mesh
 void UMySkeletalMeshComponent::AttachProps(const UPlayerRow* PlayerRow)
 {
-	if (!PlayerRow)
+	if (!PlayerRow
+	    || PlayerRow->LevelType == MeshesLevelTypeInternal)
 	{
 		return;
 	}
 
+	MeshesLevelTypeInternal = PlayerRow->LevelType;
+
+	// Destroy previous meshes
+	for (int32 i = AttachedMeshesInternal.Num() - 1; i >= 0; --i)
+	{
+		UMeshComponent* const& MeshComponentIt = AttachedMeshesInternal.IsValidIndex(i) ? AttachedMeshesInternal[i] : nullptr;
+		if (MeshComponentIt)
+		{
+			AttachedMeshesInternal.RemoveAt(i);
+			MeshComponentIt->DestroyComponent();
+		}
+	}
+
+	// Spawn new components and attach meshes
 	const TArray<FAttachedMesh>& PlayerProps = PlayerRow->PlayerProps;
 	for (const FAttachedMesh& MeshIt : PlayerProps)
 	{
@@ -40,6 +55,7 @@ void UMySkeletalMeshComponent::AttachProps(const UPlayerRow* PlayerRow)
 
 		if (MeshComponent)
 		{
+			AttachedMeshesInternal.Add(MeshComponent);
 			const FTransform Transform(GetRelativeRotation(), FVector::ZeroVector, GetRelativeScale3D());
 			MeshComponent->SetupAttachment(GetAttachmentRoot());
 			MeshComponent->SetRelativeTransform(Transform);

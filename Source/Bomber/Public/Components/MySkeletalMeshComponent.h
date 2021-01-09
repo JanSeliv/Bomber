@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Bomber.h"
 #include "Components/SkeletalMeshComponent.h"
 //---
 #include "MySkeletalMeshComponent.generated.h"
@@ -20,5 +21,14 @@ public:
 
 	/** Attach all FAttachedMesh UPlayerRow::PlayerProps to specified parent mesh. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-    void AttachProps(const class UPlayerRow* PlayerRow);
+	void AttachProps(const class UPlayerRow* PlayerRow);
+
+protected:
+	/** Current level type of attached meshes. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "MeshesLevelType"))
+	ELevelType MeshesLevelTypeInternal = ELevelType::None; //[G]
+
+	/** Current attached mesh components. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "AttachedMeshes"))
+	TArray<class UMeshComponent*> AttachedMeshesInternal; //[G]
 };
