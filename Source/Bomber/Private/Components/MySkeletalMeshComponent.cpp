@@ -8,6 +8,7 @@
 UMySkeletalMeshComponent::UMySkeletalMeshComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
 }
 
 // Attach all FAttachedMeshes to specified parent mesh
@@ -67,5 +68,16 @@ void UMySkeletalMeshComponent::AttachProps(const UPlayerRow* PlayerRow)
 			MeshComponent->AttachToComponent(this, AttachRules, MeshIt.Socket);
 			MeshComponent->RegisterComponent();
 		}
+	}
+}
+
+// Enables or disables gravity for the owner body and all attached meshes from the player row
+void UMySkeletalMeshComponent::SetEnableGravity(bool bGravityEnabled)
+{
+	Super::SetEnableGravity(bGravityEnabled);
+
+	for (UMeshComponent* const& MeshComponentIt : AttachedMeshesInternal)
+	{
+		MeshComponentIt->SetEnableGravity(bGravityEnabled);
 	}
 }

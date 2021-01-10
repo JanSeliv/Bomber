@@ -49,6 +49,12 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	NameplateMeshInternal->SetupAttachment(RootComponent);
 	NameplateMeshInternal->SetRelativeLocation(FVector(-60.f, 0.f, 150.f));
 	NameplateMeshInternal->SetRelativeScale3D(FVector(1.75f, 1.f, 1.f));
+
+	// Disable gravity
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->GravityScale = 0.f;
+	}
 }
 
 // Finds and rotates the self at the current character's location to point at the specified location.
