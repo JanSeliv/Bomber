@@ -9,7 +9,7 @@
 #include "PlayerCharacter.generated.h"
 
 /**
- *
+ * Determines each mesh to attach.
  */
 USTRUCT(BlueprintType)
 struct FAttachedMesh
@@ -25,7 +25,6 @@ struct FAttachedMesh
 	FName Socket = NAME_None; //[D]
 };
 
-
 /**
  * The player archetype of level actor rows. Determines the individual of the character model
  */
@@ -35,17 +34,21 @@ class UPlayerRow final : public ULevelActorRow
 	GENERATED_BODY()
 
 public:
-	/** */
+	/** All meshes that will be attached to the player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	TArray<FAttachedMesh> PlayerProps; //[D]
 
-	/** */
+	/** The own movement animation for the each character. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	class UBlendSpace1D* IdleWalkRunBlendSpace; //[D]
 
-	/** */
+	/** Dance animation that is used mostly in the menu instead of idle. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	class UAnimSequence* DanceAnimation; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
+	TArray<class UTexture2D*> DiffuseMaps; //[D]
 };
 
 /**
