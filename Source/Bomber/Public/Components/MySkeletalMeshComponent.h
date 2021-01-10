@@ -23,6 +23,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AttachProps(const class UPlayerRow* PlayerRow);
 
+	/** Enables or disables gravity for the owner body and all attached meshes from the player row. */
+	virtual void SetEnableGravity(bool bGravityEnabled) override;
+
 protected:
 	/** Current level type of attached meshes. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "MeshesLevelType"))
