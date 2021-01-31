@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerState.h"
 //---
 #include "Bomber.h"
+#include "Components/MySkeletalMeshComponent.h"
 //---
 #include "MyPlayerState.generated.h"
 
@@ -28,13 +29,15 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE EEndGameState GetEndGameState() const { return EndGameStateInternal; }
 
-	/**  */
+	/** Set and apply how a player has to look like.
+	 * @param CustomPlayerMeshData
+	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetChosenPlayerRaw(class UPlayerRow* ChosenPlayerRow);
+	void SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
 	/** By which level type a skeletal mesh is chosen. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UPlayerRow* GetChosenPlayerRaw() const { return ChosenPlayerRowInternal; }
+	FORCEINLINE FCustomPlayerMeshData GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
 
 protected:
 	/* ---------------------------------------------------
@@ -46,8 +49,8 @@ protected:
 	EEndGameState EndGameStateInternal = EEndGameState::None; //[N]
 
 	/** a level type of chosen skeletal mesh. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Chosen Mesh"))
-	UPlayerRow* ChosenPlayerRowInternal; //[G]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Mesh Data"))
+	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;

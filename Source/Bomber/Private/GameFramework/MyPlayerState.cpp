@@ -3,9 +3,8 @@
 #include "GameFramework/MyPlayerState.h"
 //---
 #include "GeneratedMap.h"
-#include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 //---
 #include "Net/UnrealNetwork.h"
@@ -21,14 +20,14 @@ AMyPlayerState::AMyPlayerState()
 	PrimaryActorTick.bStartWithTickEnabled = false;
 }
 
-//
-void AMyPlayerState::SetChosenPlayerRaw(UPlayerRow* ChosenPlayerRow)
+// Set and apply how a player has to look like
+void AMyPlayerState::SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
-	ChosenPlayerRowInternal = ChosenPlayerRow;
+	PlayerMeshDataInternal = CustomPlayerMeshData;
 
-	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(GetPawn()))
+	if (const auto PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
 	{
-		MapComponent->SetMeshByRow(ChosenPlayerRow);
+		PlayerCharacter->InitMySkeletalMesh(CustomPlayerMeshData);
 	}
 }
 

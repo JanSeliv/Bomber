@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "Globals/LevelActorDataAsset.h"
-//---
 #include "GameFramework/Character.h"
+//---
+#include "Components/MySkeletalMeshComponent.h"
+#include "Globals/LevelActorDataAsset.h"
 //---
 #include "PlayerCharacter.generated.h"
 
@@ -17,12 +18,16 @@ struct FAttachedMesh
 	GENERATED_BODY()
 
 	/** The attached static mesh or skeletal mesh.  */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn))
 	class UStreamableRenderAsset* AttachedMesh = nullptr; //[D]
 
-	/** */
+	/** In the which socket should attach this prop. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
 	FName Socket = NAME_None; //[D]
+
+	/** Prop animation is loop played all the time, starts playing on attaching to the owner. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
+	class UAnimSequence* MeshAnimation; //[D]
 };
 
 /**
@@ -46,9 +51,46 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	class UAnimSequence* DanceAnimation; //[D]
 
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TArray<class UTexture2D*> DiffuseMaps; //[D]
+	/** Returns the num of skin textures in the array of diffuse maps specified a player material instance. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetMaterialInstancesDynamicNum() const { return MaterialInstancesDynamicInternal.Num(); }
+
+	/** Returns the dynamic material instance of a player with specified skin.
+	 * @param SkinIndex The skin position to get.
+	 * @see UPlayerRow::MaterialInstancesDynamicInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class UMaterialInstanceDynamic* GetMaterialInstanceDynamic(int32 SkinIndex) const;
+
+protected:
+	/** The material instance of a player.
+	 * @warning Is not BlueprintReadOnly and has not getter to prevent being used directly, we have dynamic materials instead.
+	 * @see UPlayerRow::MaterialInstancesDynamicInternal. */
+	UPROPERTY(EditDefaultsOnly, Category = "Row", meta = (BlueprintProtected, DisplayName = "Material Instance", ShowOnlyInnerProperties))
+	class UMaterialInstance* MaterialInstanceInternal; //[D]
+
+	/**
+	 * Contains all created dynamic materials for each skin in the Material Instance.
+	 * Saves memory avoiding creation of dynamic materials for each mesh component, just use the same dynamic material for different meshes with the same skin.
+	 * Is filled on object creating and changing.
+	 * @warning Is not EditDefaultsOnly because have to be created dynamically, in the same time is incompatible with VisibleInstanceOnly.
+	 * @see UPlayerRow::MaterialInstanceInternal. */
+	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Material Instances Dynamic"))
+	TArray<class UMaterialInstanceDynamic*> MaterialInstancesDynamicInternal; //[G]
+
+#if WITH_EDITOR
+	/** Handle adding and changing material instance to prepare dynamic materials. */
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif	//WITH_EDITOR
+
+	/** Called after loading an object. Is overridden to prepare dynamic materials. */
+	virtual void PostLoad() override;
+
+	/**
+	 * Create dynamic material instance for each ski if is not done before.
+	 * UPlayerRow::MaterialInstancesDynamicInternal
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void TryCreateDynamicMaterials();
 };
 
 /**
@@ -63,13 +105,46 @@ public:
 	/** Default constructor. */
 	UPlayerDataAsset();
 
+	/** The num of nameplate materials.  */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetNameplateMaterialsNum() const { return NameplateMaterialsInternal.Num(); }
+
+	/** Returns a nameplate material by index, is used by nameplate meshes.
+	 * @see UPlayerDataAsset::NameplateMaterials */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class UMaterialInterface* GetNameplateMaterial(int32 Index) const;
+
+	/** Returns the Anim Blueprint class to use.
+	 * @see UPlayerDataAsset::AnimInstanceClassInternal. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClassInternal; }
+
+	/** Returns the name of a material parameter with a diffuse array.
+	 * @see UPlayerDataAsset::SkinSlotNameInternal. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FName GetSkinArrayParameter() const { return SkinArrayParameterInternal; }
+
+	/** Returns the name of a material parameter with a diffuse index.
+	* @see UPlayerDataAsset::SkinSlotNameInternal. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FName GetSkinIndexParameter() const { return SkinIndexParameterInternal; }
+
+protected:
 	/** All materials that are used by nameplate meshes. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TArray<class UMaterialInterface*> NameplateMaterials; //[M.DO]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Materials", ShowOnlyInnerProperties))
+	TArray<class UMaterialInterface*> NameplateMaterialsInternal; //[D]
 
 	/* The AnimBlueprint class to use, can set it only in the gameplay. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	class TSubclassOf<UAnimInstance> AnimBlueprintClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
+	TSubclassOf<UAnimInstance> AnimInstanceClassInternal; //[D]
+
+	/** The name of a material parameter with a diffuse array. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))
+	FName SkinArrayParameterInternal = "DiffuseArray"; //[D]
+
+	/** The name of a material parameter with a diffuse index. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skin Index Parameter", ShowOnlyInnerProperties))
+	FName SkinIndexParameterInternal = "DiffuseIndex"; //[D]
 };
 
 /**
@@ -118,7 +193,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetCharacterID() const { return CharacterIDInternal; }
 
-	/**  Finds and rotates the self at the current character's location to point at the specified location.
+	/** Finds and rotates the self at the current character's location to point at the specified location.
 	 * @param Location the character is looking at.
 	 * @param bShouldInterpolate if true, smoothly rotate the character toward the direction. */
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Location"))
@@ -127,6 +202,13 @@ public:
 	/** Spawns bomb on character position */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SpawnBomb();
+
+	/**
+	 *
+	 * @param CustomPlayerMeshData
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
 protected:
 	/* ---------------------------------------------------

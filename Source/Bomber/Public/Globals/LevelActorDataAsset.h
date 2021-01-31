@@ -24,6 +24,12 @@ public:
 	/** The static mesh, skeletal mesh or texture */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties, ExposeOnSpawn = "true"))
 	class UStreamableRenderAsset* Mesh = nullptr; //[D]
+
+protected:
+#if WITH_EDITOR
+	/** Called to handle row changes. */
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif //WITH_EDITOR
 };
 
 /**

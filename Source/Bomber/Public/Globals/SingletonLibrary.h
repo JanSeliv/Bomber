@@ -189,7 +189,7 @@ public:
 
 	/** Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class ULevelActorDataAsset* GetDataAssetsByActorType(EActorType ActorType);
+	static class ULevelActorDataAsset* GetDataAssetByActorType(EActorType ActorType);
 
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
