@@ -5,6 +5,12 @@
 #include "Globals/SingletonLibrary.h"
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
+// Called to handle row changes
+void ULevelActorRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
 // Called to notify on any data asset changes
 void UBomberDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -29,9 +35,9 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 
 	// Continue only if was added new row
 	FProperty* Property = PropertyChangedEvent.Property;
-	if (!Property                                                           //
-	    || !Property->IsA<FArrayProperty>()                                 //
-	    || PropertyChangedEvent.ChangeType != EPropertyChangeType::ArrayAdd //
+	if (!Property
+	    || !Property->IsA<FArrayProperty>()
+	    || PropertyChangedEvent.ChangeType != EPropertyChangeType::ArrayAdd
 	    || Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, RowsInternal))
 	{
 		return;

@@ -16,14 +16,120 @@
 #include "Components/MySkeletalMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/Texture2DArray.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Materials/MaterialInstance.h"
+#include "Materials/MaterialInstanceDynamic.h"
+
+// Returns the dynamic material instance of a player with specified skin.
+UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const
+{
+	if (MaterialInstancesDynamicInternal.IsValidIndex(SkinIndex))
+	{
+		return MaterialInstancesDynamicInternal[SkinIndex];
+	}
+
+	return nullptr;
+}
+
+
+#if WITH_EDITOR
+// Handle adding and changing material instance to prepare dynamic materials
+void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	// Continue only if [IsEditorNotPieWorld]
+	if (!USingletonLibrary::IsEditorNotPieWorld())
+	{
+		return;
+	}
+
+	// If material instance was changed
+	FProperty* Property = PropertyChangedEvent.Property;
+	if (Property
+	    && Property->IsA<FObjectProperty>()
+	    && PropertyChangedEvent.ChangeType == EPropertyChangeType::ValueSet
+	    && Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, MaterialInstanceInternal))
+	{
+		// Force recreation of dynamic material instances
+		MaterialInstancesDynamicInternal.Empty();
+		TryCreateDynamicMaterials();
+	}
+}
+#endif	//WITH_EDITOR
+
+//
+void UPlayerRow::PostLoad()
+{
+	Super::PostLoad();
+
+	TryCreateDynamicMaterials();
+}
+
+//
+void UPlayerRow::TryCreateDynamicMaterials()
+{
+	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(GetOuter());
+	if (!PlayerDataAsset
+	    || !MaterialInstanceInternal)
+	{
+		return;
+	}
+
+	static const FName SkinArrayParameterName = PlayerDataAsset->GetSkinArrayParameter();
+	static const FName SkinIndexParameterName = PlayerDataAsset->GetSkinIndexParameter();
+	static const bool bSkinParamNamesAreValid = !(SkinArrayParameterName.IsNone() && SkinIndexParameterName.IsNone());
+	if (!ensureMsgf(bSkinParamNamesAreValid, TEXT("ASSERT: TryCreateDynamicMaterials: 'bSkinParamNamesAreValid' is false")))
+	{
+		return;
+	}
+
+	// Find the number of skins in the texture 2D array of player material instance.
+	UTexture* FoundTexture = nullptr;
+	MaterialInstanceInternal->GetTextureParameterValue(SkinArrayParameterName, FoundTexture);
+	const auto Texture2DArray = Cast<UTexture2DArray>(FoundTexture);
+	const int32 SkinTexturesNum = Texture2DArray ? Texture2DArray->GetNumSlices() : 0;
+	const int32 MaterialInstancesDynamicNum = MaterialInstancesDynamicInternal.Num();
+	if (SkinTexturesNum == MaterialInstancesDynamicNum)
+	{
+		// The same amount, so all dynamic materials are already created
+		return;
+	}
+
+	// Create dynamic materials
+	const int32 InstancesToCreateNum = SkinTexturesNum - MaterialInstancesDynamicNum;
+	for (int32 i = 0; i < InstancesToCreateNum; ++i)
+	{
+		UMaterialInstanceDynamic* MaterialInstanceDynamic = UMaterialInstanceDynamic::Create(MaterialInstanceInternal, PlayerDataAsset);
+		if (!ensureMsgf(MaterialInstanceDynamic, TEXT("ASSERT: Could not create 'MaterialInstanceDynamic'")))
+		{
+			continue;
+		}
+
+		MaterialInstanceDynamic->SetFlags(RF_Public | RF_Transactional);
+		const int32 SkinPosition = MaterialInstancesDynamicInternal.Add(MaterialInstanceDynamic);
+		MaterialInstanceDynamic->SetScalarParameterValue(SkinIndexParameterName, SkinPosition);
+	}
+}
 
 // Default constructor
 UPlayerDataAsset::UPlayerDataAsset()
 {
 	ActorTypeInternal = EAT::Player;
 	RowClassInternal = UPlayerRow::StaticClass();
+}
+
+// Get nameplate material by index, is used by nameplate meshes
+UMaterialInterface* UPlayerDataAsset::GetNameplateMaterial(int32 Index) const
+{
+	if (NameplateMaterialsInternal.IsValidIndex(Index))
+	{
+		return NameplateMaterialsInternal[Index];
+	}
+
+	return nullptr;
 }
 
 // Sets default values
@@ -118,6 +224,18 @@ void APlayerCharacter::SpawnBomb()
 	}
 }
 
+//
+void APlayerCharacter::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
+{
+	const auto MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
+	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: 'MySkeletalMeshComp' is not valid")))
+	{
+		return;
+	}
+
+	MySkeletalMeshComp->InitMySkeletalMesh(CustomPlayerMeshData);
+}
+
 /* ---------------------------------------------------
  *					Protected functions
  * --------------------------------------------------- */
@@ -138,7 +256,8 @@ void APlayerCharacter::BeginPlay()
 	// Set the animation
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		MeshComp->SetAnimInstanceClass(MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->AnimBlueprintClass);
+		const TSubclassOf<UAnimInstance> AnimInstanceClass = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->GetAnimInstanceClass();
+		MeshComp->SetAnimInstanceClass(AnimInstanceClass);
 	}
 
 	// Posses the controller
@@ -186,6 +305,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	UMySkeletalMeshComponent* MySkeletalMeshComponent = Cast<UMySkeletalMeshComponent>(GetMesh());
 	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	if (IS_TRANSIENT(this)                // This actor is transient
 	    || !IsValid(MapComponentInternal) // Is not valid for map construction
@@ -205,36 +325,40 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		CharacterIDInternal = PlayerCells.Num() - 1;
 	}
 
-	// Override mesh
-	const ULevelActorDataAsset* PlayerDataAsset = MapComponentInternal->GetActorDataAsset();
-	const int32 MeshesNum = PlayerDataAsset ? PlayerDataAsset->GetRowsNum() : 0;
-	if (MeshesNum)
+	// Update mesh
+	FCustomPlayerMeshData CustomPlayerMeshData;
+	const AMyPlayerState* MyPlayerState = !CharacterIDInternal ? USingletonLibrary::GetMyPlayerState(UGameplayStatics::GetPlayerController(GetWorld(), 0)) : nullptr;
+	if (MyPlayerState)
 	{
-		const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
-		const ULevelActorRow* Row = PlayerDataAsset->GetRowByLevelType(TO_ENUM(ELevelType, LevelType));
-		MapComponentInternal->SetMeshByRow(Row, GetMesh());
+		CustomPlayerMeshData = MyPlayerState->GetCustomPlayerMeshData();
 	}
-
-	// Update mesh if chosen
-	if (!CharacterIDInternal) // is player
+	else // is bot
 	{
-		if (const AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(UGameplayStatics::GetPlayerController(GetWorld(), 0)))
+		const ULevelActorDataAsset* PlayerDataAsset = MapComponentInternal->GetActorDataAsset();
+		const int32 MeshesNum = PlayerDataAsset ? PlayerDataAsset->GetRowsNum() : 0;
+		if (MeshesNum)
 		{
-			MapComponentInternal->SetMeshByRow(MyPlayerState->GetChosenPlayerRaw());
+			const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
+			if (UPlayerRow* Row = Cast<UPlayerRow>(PlayerDataAsset->GetRowByLevelType(TO_ENUM(ELevelType, LevelType))))
+			{
+				CustomPlayerMeshData.PlayerRow = Row;
+				CustomPlayerMeshData.SkinIndex = FMath::RandHelper(Row->GetMaterialInstancesDynamicNum());
+			}
 		}
 	}
+	InitMySkeletalMesh(CustomPlayerMeshData);
 
 	// Set a nameplate material
 	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
 	{
-		const TArray<UMaterialInterface*>& NameplateMaterials = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->NameplateMaterials;
-		const int32 NameplateMeshesNum = NameplateMaterials.Num();
+		const auto PlayerDataAsset = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>();
+		const int32 NameplateMeshesNum = PlayerDataAsset->GetNameplateMaterialsNum();
 		if (NameplateMeshesNum > 0)
 		{
 			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
-			if (NameplateMaterials.IsValidIndex(MaterialNo))
+			if (UMaterialInterface* Material = PlayerDataAsset->GetNameplateMaterial(MaterialNo))
 			{
-				NameplateMeshInternal->SetMaterial(0, NameplateMaterials[MaterialNo]);
+				NameplateMeshInternal->SetMaterial(0, Material);
 			}
 		}
 

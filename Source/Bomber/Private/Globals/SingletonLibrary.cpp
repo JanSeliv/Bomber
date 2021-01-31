@@ -266,7 +266,8 @@ ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(TSubclassOf<AA
 // Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types.
 void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
 {
-	for (ULevelActorDataAsset* DataAssetIt : GetSingleton()->ActorsDataAssetsInternal)
+	const TArray<ULevelActorDataAsset*>& ActorsDataAssets = GetSingleton()->ActorsDataAssetsInternal;
+	for (ULevelActorDataAsset* const& DataAssetIt : ActorsDataAssets)
 	{
 		if (DataAssetIt
 		    && EnumHasAnyFlags(DataAssetIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
@@ -277,7 +278,7 @@ void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>&
 }
 
 // Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type
-ULevelActorDataAsset* USingletonLibrary::GetDataAssetsByActorType(EActorType ActorType)
+ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorType(EActorType ActorType)
 {
 	TArray<ULevelActorDataAsset*> FoundDataAssets;
 	GetDataAssetsByActorTypes(FoundDataAssets, TO_FLAG(ActorType));
@@ -287,6 +288,6 @@ ULevelActorDataAsset* USingletonLibrary::GetDataAssetsByActorType(EActorType Act
 // Iterate ActorsDataAssets array and returns the found actor class by specified actor type
 TSubclassOf<AActor> USingletonLibrary::GetActorClassByType(EActorType ActorType)
 {
-	ULevelActorDataAsset* FoundDataAsset = GetDataAssetsByActorType(ActorType);
+	ULevelActorDataAsset* FoundDataAsset = GetDataAssetByActorType(ActorType);
 	return FoundDataAsset ? FoundDataAsset->GetActorClass() : nullptr;
 }
