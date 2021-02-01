@@ -1,7 +1,8 @@
 {
-	"BuildId": "13144385",
+	"BuildId": "14830424",
 	"Modules": 
 	{
-		"Bomber": "UE4Editor-Bomber.dll"
+		"Bomber": "UE4Editor-Bomber.dll",
+		"BomberEditor": "UE4Editor-BomberEditor.dll"
 	}
 }
