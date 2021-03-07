@@ -2,7 +2,7 @@
 
 #include "MorphDataCustomization.h"
 //---
-#include "AnimNotify_PlayMorph.h"
+#include "AnimNotifyState_PlayMorph.h"
 //---
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
@@ -48,8 +48,8 @@ void FMorphDataCustomization::AddCustomPropertyRow(const FText& PropertyDisplayT
 // Set new values for the list of selectable members
 void FMorphDataCustomization::RefreshCustomProperty()
 {
-	const auto AnimNotify = Cast<UAnimNotify>(MyPropertyOuterInternal.Get());
-	const auto AnimSequence = AnimNotify ? Cast<UAnimSequence>(AnimNotify->GetOuter()) : nullptr;
+	const auto AnimNotifyState = Cast<UAnimNotifyState>(MyPropertyOuterInternal.Get());
+	const auto AnimSequence = AnimNotifyState ? Cast<UAnimSequence>(AnimNotifyState->GetOuter()) : nullptr;
 	const USkeletalMesh* PreviewMesh = AnimSequence ? AnimSequence->GetPreviewMesh() : nullptr;
 	if (!PreviewMesh)
 	{
