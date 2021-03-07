@@ -3,28 +3,43 @@
 #include "BomberEditorModule.h"
 //---
 #include "AttachedMeshCustomization.h"
+#include "MorphDataCustomization.h"
+#include "SettingsFunctionCustomization.h"
 //---
 #include "Modules/ModuleManager.h"
 
 IMPLEMENT_GAME_MODULE(FBomberEditorModule, BomberEditor);
 
-#define LOCTEXT_NAMESPACE "BomberEditor"
-
-static const FName AttachedMeshPropertyType = "AttachedMesh";
+static const FName PropertyEditorModule = "PropertyEditor";
+static const FName AttachedMeshProperty = "AttachedMesh";
+static const FName SettingsFunctionProperty = "SettingsFunction";
+static const FName MorphDataProperty = "MorphData";
 
 void FBomberEditorModule::StartupModule()
 {
-	if (!FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
 	{
 		return;
 	}
 
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
 
 	// FAttachedMesh property realizes the functionally of the SSocketChooser
 	PropertyModule.RegisterCustomPropertyTypeLayout(
-		AttachedMeshPropertyType,
+		AttachedMeshProperty,
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FAttachedMeshCustomization::MakeInstance)
+		);
+
+	// Allows to choose ufunction
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		SettingsFunctionProperty,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSettingsFunctionCustomization::MakeInstance)
+		);
+
+	// Allows to choose a morph
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		MorphDataProperty,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FMorphDataCustomization::MakeInstance)
 		);
 
 	PropertyModule.NotifyCustomizationModuleChanged();
@@ -32,14 +47,14 @@ void FBomberEditorModule::StartupModule()
 
 void FBomberEditorModule::ShutdownModule()
 {
-	if (!FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
 	{
 		return;
 	}
 
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
 
-	PropertyModule.UnregisterCustomPropertyTypeLayout(AttachedMeshPropertyType);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(AttachedMeshProperty);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(SettingsFunctionProperty);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(MorphDataProperty);
 }
-
-#undef LOCTEXT_NAMESPACE

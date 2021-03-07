@@ -177,6 +177,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return GetSingleton()->UIDataAssetInternal; }
 
+	/** Returns the settings data.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() { return GetSingleton()->SettingsDataAssetInternal; }
+
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
 	static class ULevelActorDataAsset* GetDataAssetByActorClass(TSubclassOf<AActor> ActorClass);
@@ -207,6 +211,10 @@ protected:
 	/** Contains properties to setup the generated level. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))
 	class UGeneratedMapDataAsset* LevelsDataAssetInternal;
+
+	/** Settings data. */
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Data Asset"))
+	class USettingsDataAsset* SettingsDataAssetInternal;
 
 	/** Contains properties to setup UI. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "UI Data Asset"))

@@ -12,6 +12,12 @@
 #include "SceneOutliner/Private/SSocketChooser.h"
 #include "Toolkits/ToolkitManager.h"
 
+//
+FAttachedMeshCustomization::FAttachedMeshCustomization()
+{
+	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FAttachedMesh, Socket);
+}
+
 // Makes a new instance of this detail layout class for a specific detail view requesting it
 TSharedRef<IPropertyTypeCustomization> FAttachedMeshCustomization::MakeInstance()
 {
@@ -21,70 +27,30 @@ TSharedRef<IPropertyTypeCustomization> FAttachedMeshCustomization::MakeInstance(
 // Called when the header of the property (the row in the details panel where the property is shown)
 void FAttachedMeshCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	// Use default the header details panel
-	HeaderRow
-		.NameContent()
-		[
-			PropertyHandle->CreatePropertyNameWidget()
-		]
-		.ValueContent()
-		[
-			PropertyHandle->CreatePropertyValueWidget()
-		];
+	Super::CustomizeHeader(PropertyHandle, HeaderRow, CustomizationUtils);
 }
 
 // Called when the children of the property should be customized or extra rows added.
 void FAttachedMeshCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	TArray<UObject*> OuterObjects;
-	PropertyHandle->GetOuterObjects(OuterObjects);
-	PlayerRowOuterInternal = OuterObjects.IsValidIndex(0) ? OuterObjects[0] : nullptr;
-
-	uint32 NumChildren;
-	PropertyHandle->GetNumChildren(NumChildren);
-	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
-	{
-		const TSharedRef<IPropertyHandle> ChildHandleIt = PropertyHandle->GetChildHandle(ChildIndex).ToSharedRef();
-		const FProperty* ChildProperty = ChildHandleIt->GetProperty();
-		if (!ChildProperty)
-		{
-			continue;
-		}
-
-		// Customize the FAttachedMesh::Socket
-		static const FName SocketPropertyName = GET_MEMBER_NAME_CHECKED(FAttachedMesh, Socket);
-		if (SocketPropertyName == ChildProperty->GetFName())
-		{
-			if (const FNameProperty* NameProperty = CastField<FNameProperty>(ChildProperty))
-			{
-				SocketPropertyHandleInternal = ChildHandleIt;
-				AddSocketWidgetRow(ChildBuilder);
-			}
-		}
-		else
-		{
-			// Add each another property to the Details Panel without customization
-			ChildBuilder.AddProperty(ChildHandleIt);
-		}
-	}
+	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
 }
 
-// Customize a Socket property, will add the chosen text row, the Select and Clear buttons
-void FAttachedMeshCustomization::AddSocketWidgetRow(IDetailChildrenBuilder& ChildBuilder)
+// Is called for each property on building its row
+void FAttachedMeshCustomization::OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName)
 {
-	IPropertyHandle* SocketHandle = SocketPropertyHandleInternal.Get();
-	if (!SocketHandle)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--- GetSocketName - FAIL - Can not obtain SocketProperty data"));
-		return;
-	}
+	Super::OnCustomizeChildren(ChildPropertyHandle, ChildBuilder, PropertyName);
+}
 
-	ChildBuilder.AddCustomRow(SocketHandle->GetPropertyDisplayName())
+// Is called on adding the custom property
+void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder)
+{
+	ChildBuilder.AddCustomRow(PropertyDisplayText)
 	            .NameContent()
 		[
 			SNew(STextBlock)
-			.Text(SocketHandle->GetPropertyDisplayName())
-			.Font(IDetailLayoutBuilder::GetDetailFont())
+        .Text(PropertyDisplayText)
+        .Font(IDetailLayoutBuilder::GetDetailFont())
 		]
 		.ValueContent()
 		[
@@ -93,9 +59,9 @@ void FAttachedMeshCustomization::AddSocketWidgetRow(IDetailChildrenBuilder& Chil
 			.FillWidth(1.0f)
 			[
 				SNew(SEditableTextBox)
-				.Text(this, &FAttachedMeshCustomization::GetSocketFromProperty)
-				.IsReadOnly(true)
-				.Font(IDetailLayoutBuilder::GetDetailFont())
+            .Text(this, &FAttachedMeshCustomization::GetCustomPropertyDisplayText)
+            .IsReadOnly(true)
+            .Font(IDetailLayoutBuilder::GetDetailFont())
 			]
 			+ SHorizontalBox::Slot()
 			  .AutoWidth()
@@ -116,7 +82,7 @@ void FAttachedMeshCustomization::AddSocketWidgetRow(IDetailChildrenBuilder& Chil
 			  .Padding(2.0f, 1.0f)
 			[
 				PropertyCustomizationHelpers::MakeClearButton(
-					FSimpleDelegate::CreateSP(this, &FAttachedMeshCustomization::OnClearSocket),
+					FSimpleDelegate::CreateSP(this, &FAttachedMeshCustomization::InvalidateCustomProperty),
 					FText::FromString("Clear the Parent Socket - cannot change socket on inherited components"),
 					TAttribute<bool>(true)
 					)
@@ -127,7 +93,7 @@ void FAttachedMeshCustomization::AddSocketWidgetRow(IDetailChildrenBuilder& Chil
 // Push menu to allow user choose socket
 void FAttachedMeshCustomization::OnBrowseSocket()
 {
-	const UObject* PlayerRowOuter = PlayerRowOuterInternal.Get();
+	const UObject* PlayerRowOuter = MyPropertyOuterInternal.Get();
 	if (!PlayerRowOuter)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("--- OnBrowseSocket - FAIL - Can not obtain UPlayerRow data"));
@@ -173,39 +139,12 @@ void FAttachedMeshCustomization::OnBrowseSocket()
 
 	// Pop up a combo box to pick a socket or bone from mesh
 	FSlateApplication::Get().PushMenu(
-		ToolkitEditor->/*ref*/GetToolkitHost()->/*ref*/GetParentWidget(),
+		ToolkitEditor->GetToolkitHost()->/*ref*/GetParentWidget(),
 		FWidgetPath(),
 		SNew(SSocketChooserPopup)
         .SceneComponent(ParentMeshComponent)
-        .OnSocketChosen(this, &FAttachedMeshCustomization::SetSocketToProperty),
+        .OnSocketChosen(this, &FAttachedMeshCustomization::SetCustomPropertyValue),
 		FSlateApplication::Get().GetCursorPos(),
 		FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
 		);
-}
-
-// Set chosen socket to None
-void FAttachedMeshCustomization::OnClearSocket()
-{
-	SetSocketToProperty(NAME_None);
-}
-
-// Executed every tick
-FText FAttachedMeshCustomization::GetSocketFromProperty() const
-{
-	FText Value(FText::GetEmpty());
-	SocketPropertyHandleInternal->GetValueAsDisplayText(Value);
-	return Value;
-}
-
-// Executed on socket selection
-void FAttachedMeshCustomization::SetSocketToProperty(FName BoneName)
-{
-	IPropertyHandle* SocketPropertyHandle = SocketPropertyHandleInternal.Get();
-	if (!SocketPropertyHandle)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--- SetSocketToProperty - FAIL - Can not obtain SocketPropertyHandle data"));
-		return;
-	}
-
-	SocketPropertyHandle->SetValueFromFormattedString(BoneName.ToString());
 }

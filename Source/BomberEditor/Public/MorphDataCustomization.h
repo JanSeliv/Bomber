@@ -6,9 +6,9 @@
 #include "MyPropertyTypeCustomization.h"
 
 /**
- * Reuse the socket chooser widget to allow choose the FAttachedMesh::Bone within UPlayerRow::Mesh.
+ * Allow to choose the morph for FMorphData::Morph within UAnimNotify instead of manually typing a name.
  */
-class FAttachedMeshCustomization final : public FMyPropertyTypeCustomization
+class FMorphDataCustomization final : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------
@@ -16,7 +16,7 @@ public:
 	* --------------------------------------------------- */
 
 	/** Default constructor. */
-	FAttachedMeshCustomization();
+	FMorphDataCustomization();
 
 	/** Makes a new instance of this detail layout class for a specific detail view requesting it. */
 	static TSharedRef<class IPropertyTypeCustomization> MakeInstance();
@@ -31,7 +31,7 @@ public:
 	virtual void CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
 	/**
- 	 * Called when the children of the property should be customized or extra rows added.
+	 * Called when the children of the property should be customized or extra rows added.
 	 * @param PropertyHandle Handle to the property being customized
 	 * @param ChildBuilder A builder for adding children
 	 * @param CustomizationUtils Utilities for customization
@@ -40,13 +40,6 @@ public:
 
 protected:
 	/* ---------------------------------------------------
-	*		Protected properties
-	* --------------------------------------------------- */
-
-	/** A Skeletal mesh component that contains the parent character mesh. Is transient component. Used as a parameter to push the SSocketChooserPopup. */
-	TWeakObjectPtr<USkeletalMeshComponent> ParentMeshCompInternal = nullptr;
-
-	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
 
@@ -54,10 +47,10 @@ protected:
 	virtual void OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName) override;
 
 	/** Is called on adding the custom property.
-	 * Customize a Socket property, will add the chosen text row, the Select and Clear buttons.
-	 * @see FMyPropertyTypeCustomization::CustomPropertyNameInternal */
+	* @see FMyPropertyTypeCustomization::CustomPropertyNameInternal */
 	virtual void AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder) override;
 
-	/** Push the SSocketChooserPopup menu to allow user choose socket. */
-	void OnBrowseSocket();
+	/** Set new values for the list of selectable members.
+	* @see FMyPropertyTypeCustomization::SearchableComboBoxValuesInternal */
+	virtual void RefreshCustomProperty() override;
 };

@@ -10,12 +10,12 @@ public class BomberEditor : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
+			"Bomber", // Bomber Editor sources
 			"Core", "CoreUObject", "Engine", "InputCore", // Default
 			"UnrealEd", // FEditorDelegates::EndPIE
-			"Slate", "SlateCore", "PropertyEditor", "EditorStyle" // Property types customizations
+			"Slate", "SlateCore", "PropertyEditor", "EditorStyle", // Property types customizations
+			"EditorWidgets" // SSearchableComboBox etc
 		});
-
-		PublicDependencyModuleNames.AddRange(new[] {"Bomber"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
