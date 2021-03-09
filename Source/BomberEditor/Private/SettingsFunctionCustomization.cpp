@@ -11,7 +11,7 @@
 // Default constructor
 FSettingsFunctionCustomization::FSettingsFunctionCustomization()
 {
-	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FSettingsFunction, Name);
+	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionName);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -23,17 +23,34 @@ TSharedRef<IPropertyTypeCustomization> FSettingsFunctionCustomization::MakeInsta
 // Called when the header of the property (the row in the details panel where the property is shown)
 void FSettingsFunctionCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	// Do not use the header panel at all
+	Super::CustomizeHeader(PropertyHandle, HeaderRow, CustomizationUtils);
 }
 
 // Called when the children of the property should be customized or extra rows added.
 void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
+	// Determine current property has to have template as getter or setter
+	FName TemplateFunctionName = NAME_None;
+	const FProperty* CurrentProperty = PropertyHandle/*ref*/->GetProperty();
+	const FName CurrentPropertyName = CurrentProperty ? CurrentProperty->GetFName() : NAME_None;
+	if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, Setter))
+	{
+		static const FName SettingsSetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, TemplateSettingsSetter);
+		TemplateFunctionName = SettingsSetterName;
+	}
+	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, Getter))
+	{
+		static const FName SettingsGetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, TemplateSettingsGetter);
+		TemplateFunctionName = SettingsGetterName;
+	}
+
 	// Set TemplateFunctionInternal
-	static const FName SettingsSetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, TemplateSettingsSetter);
-	const UGameUserSettings* GameUserSettings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
-	const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
-	TemplateSetterInternal = ScopeClass ? ScopeClass->FindFunctionByName(SettingsSetterName, EIncludeSuperFlag::ExcludeSuper) : nullptr;
+	if (ensureMsgf(!TemplateFunctionName.IsNone(), TEXT("ASSERT: 'TemplateFunctionName' is none")))
+	{
+		const UGameUserSettings* GameUserSettings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+		const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
+		TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName, EIncludeSuperFlag::ExcludeSuper) : nullptr;
+	}
 
 	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
 }
@@ -41,7 +58,7 @@ void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandl
 // Is called for each property on building its row
 void FSettingsFunctionCustomization::OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName)
 {
-	static const FName ClassName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, Class);
+	static const FName ClassName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionClass);
 	if (PropertyName == ClassName)
 	{
 		FunctionClassHandleInternal = ChildPropertyHandle;
@@ -60,7 +77,7 @@ void FSettingsFunctionCustomization::AddCustomPropertyRow(const FText& PropertyD
 // Set new values for the list of selectable members
 void FSettingsFunctionCustomization::RefreshCustomProperty()
 {
-	const UFunction* TemplateFunction = TemplateSetterInternal.Get();
+	const UFunction* TemplateFunction = TemplateFunctionInternal.Get();
 	if (!TemplateFunction)
 	{
 		InvalidateCustomProperty();
@@ -82,9 +99,7 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 	}
 	CachedFunctionClassInternal = ChosenFunctionClassName;
 
-	// Set default value
 	SetCustomPropertyEnabled(true);
-	SetCustomPropertyValue(NAME_None);
 
 	SearchableComboBoxValuesInternal.Empty();
 
@@ -100,11 +115,11 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 	{
 		const UFunction* FunctionIt = *It;
 		if (FunctionIt
-			&& FunctionIt != TemplateFunction
-			&& FunctionIt->IsSignatureCompatibleWith(TemplateFunction))
+		    && FunctionIt != TemplateFunction
+		    && FunctionIt->IsSignatureCompatibleWith(TemplateFunction))
 		{
 			FName FunctionName = FunctionIt->GetFName();
-			if (AllChildFunctions.Contains(FunctionName))	 // is child not super function
+			if (AllChildFunctions.Contains(FunctionName)) // is child not super function
 			{
 				FoundList.Emplace(MoveTemp(FunctionName));
 			}
@@ -150,5 +165,5 @@ const UClass* FSettingsFunctionCustomization::GetChosenFunctionClass() const
 	const FProperty* ChildProperty = ChildHandleIt ? ChildHandleIt->GetProperty() : nullptr;
 	const auto ObjectProperty = ChildProperty ? CastField<FObjectProperty>(ChildProperty) : nullptr;
 	const uint8* Data = ObjectProperty ? ChildHandleIt->GetValueBaseAddress((uint8*)MyPropertyOuterInternal.Get()) : nullptr;
-	return Cast<UClass>(ObjectProperty->GetObjectPropertyValue(Data));
+	return Data ? Cast<UClass>(ObjectProperty->GetObjectPropertyValue(Data)) : nullptr;
 }

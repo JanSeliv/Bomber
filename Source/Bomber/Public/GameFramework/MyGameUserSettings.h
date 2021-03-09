@@ -20,12 +20,12 @@ struct FSettingsFunction
 	GENERATED_BODY()
 
 	/**  */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
-	TSubclassOf<UObject> Class; //[D]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Class"))
+	TSubclassOf<UObject> FunctionClass; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FName Name; //[D]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Function"))
+	FName FunctionName; //[D]
 };
 
 /**
@@ -42,7 +42,11 @@ struct FSettingsRow : public FTableRowBase
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction FunctionPicker; //[D]
+	FSettingsFunction Setter; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsFunction Getter; //[D]
 };
 
 /**
@@ -116,6 +120,10 @@ public:
 	/**  */
 	UFUNCTION()
 	void TemplateSettingsSetter(const int32 ChosenID) { }
+
+	/**  */
+	UFUNCTION()
+	int32 TemplateSettingsGetter() const { return 0; }
 #endif
 
 protected:
@@ -124,11 +132,4 @@ protected:
 	 * @warning DevelopmentOnly */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))
 	void OnDataTableChanged();
-
-	/**  */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SomeFunction(int32 IntParam)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--- IS CALLED ---"));
-	}
 };

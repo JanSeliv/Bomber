@@ -85,7 +85,7 @@ void UMyGameUserSettings::OnDataTableChanged()
 
 	//@todo fill map by [functiontag, functionptr]
 	const FSettingsRow& SettingsTableRow = SettingsTableRows[0];
-	const FName FunctionName = SettingsTableRow.FunctionPicker.Name;
+	const FName FunctionName = SettingsTableRow.Setter.FunctionName;
 	if (!FunctionName.IsNone() && FunctionName.IsValid())
 	{
 		// OnOptionSelect.BindUFunction(this, FunctionName);

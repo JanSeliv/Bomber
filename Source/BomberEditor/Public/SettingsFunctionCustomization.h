@@ -49,7 +49,7 @@ protected:
 
 	/** Contains the function to be compared with all other functions of a class to show in the list only compatible functions.
 	 * @see FSettingsFunctionCustomization::RefreshCustomProperty() */
-	TWeakObjectPtr<UFunction> TemplateSetterInternal = nullptr;
+	TWeakObjectPtr<UFunction> TemplateFunctionInternal = nullptr;
 
 	/** A name of last chosen class property. When is not changed, refreshing of a custom property will be skipped.
 	 * @see FSettingsFunctionCustomization::RefreshCustomProperty() */
