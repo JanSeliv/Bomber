@@ -4,6 +4,7 @@
 
 #include "GameFramework/GameUserSettings.h"
 #include "GameplayTagContainer.h"
+#include "Engine/DataTable.h"
 //---
 #include "Bomber.h"
 #include "Globals/LevelActorDataAsset.h"
@@ -58,10 +59,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void GenerateSettingsArray(TArray<FSettingsRow>& OutRows) const;
 
-#if WITH_EDITOR
 	/** Delegate to react on changing settings data table. */
 	DECLARE_DYNAMIC_DELEGATE(FOnDataTableChanged);
-#endif	  // WITH_EDITOR
 
 	/** Get a multicast delegate that is called any time the data table changes.
 	 * @warning DevelopmentOnly */

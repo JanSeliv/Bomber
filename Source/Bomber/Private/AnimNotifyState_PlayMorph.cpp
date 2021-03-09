@@ -1,8 +1,10 @@
 // Copyright 2021 Yevhenii Selivanov.
-#pragma optimize("", off)
+
 #include "AnimNotifyState_PlayMorph.h"
 //
+#include "Components/MySkeletalMeshComponent.h"
 #include "Curves/CurveFloat.h"
+#include "Globals/SingletonLibrary.h"
 
 // Overridden from UAnimNotifyState to provide custom notify name
 FString UAnimNotifyState_PlayMorph::GetNotifyName_Implementation() const
@@ -27,9 +29,9 @@ void UAnimNotifyState_PlayMorph::NotifyBegin(USkeletalMeshComponent* MeshComp, U
 
 	InitCurveFloatOnce();
 
-	UpdateCurveLength(TotalDuration);
+	ApplyCurveLengthOnce(TotalDuration);
 
-	TimelineInternal.PlayFromStart();
+	StartTimeline();
 }
 
 // Is called on an every animation tick
@@ -49,7 +51,7 @@ void UAnimNotifyState_PlayMorph::NotifyEnd(USkeletalMeshComponent* MeshComp, UAn
 	Super::NotifyEnd(MeshComp, Animation);
 }
 
-//
+// Create a new curve, is created once
 void UAnimNotifyState_PlayMorph::InitCurveFloatOnce()
 {
 	// return if is already exist
@@ -61,13 +63,16 @@ void UAnimNotifyState_PlayMorph::InitCurveFloatOnce()
 	CurveFloat = NewObject<UCurveFloat>(this, NAME_None, RF_Public | RF_Transactional);
 
 	FOnTimelineFloat OnTimelineFloat;
-	OnTimelineFloat.BindDynamic(this, &ThisClass::HandlePlayMorph);
-
+	OnTimelineFloat.BindDynamic(this, &ThisClass::OnTimelineTick);
 	TimelineInternal.AddInterpFloat(CurveFloat, OnTimelineFloat);
+
+	FOnTimelineEvent OnTimelineFinished;
+	OnTimelineFinished.BindDynamic(this, &ThisClass::OnTimelineFinished);
+	TimelineInternal.SetTimelineFinishedFunc(OnTimelineFinished);
 }
 
-//
-void UAnimNotifyState_PlayMorph::UpdateCurveLength(float TotalDuration)
+// Set curve values
+void UAnimNotifyState_PlayMorph::ApplyCurveLengthOnce(float TotalDuration)
 {
 	if (!ensureMsgf(CurveFloat, TEXT("ASSERT: 'CurveFloat' is not valid")))
 	{
@@ -76,35 +81,98 @@ void UAnimNotifyState_PlayMorph::UpdateCurveLength(float TotalDuration)
 
 	FRichCurve& Curve = CurveFloat->FloatCurve;
 	TArray<FRichCurveKey>& Keys = Curve.Keys;
-	if (Keys.Num())
+	const int32 KeysNum = Keys.Num();
+	if (KeysNum) // Is updated before
 	{
-		// Update [1]
-		Keys.RemoveAt(Keys.Num() - 1);
+#if WITH_EDITOR //[IsEditorNotPieWorld]
+		if (USingletonLibrary::IsEditorNotPieWorld())
+		{
+			// Remove [1] in editor
+			Keys.RemoveAt(KeysNum - 1);
+		}
+		else // Is in game
+#endif // WITH_EDITOR
+		{
+			// Do not change anything during the game
+			return;
+		}
 	}
-	else
+	else // Is init for first time
 	{
 		// Set [0]
 		Curve.AddKey(0.f, 0.f);
 	}
+
+	// Set [1]
 	Curve.AddKey(TotalDuration, 1.f);
 }
 
-//
-void UAnimNotifyState_PlayMorph::HandlePlayMorph(float PlaybackPosition)
+// Is executed on every frame during playing the timeline
+void UAnimNotifyState_PlayMorph::OnTimelineTick(float PlaybackPosition)
+{
+	// If need to play from A to B to A
+	if (MorphDataInternal.PlaybackType == EPlaybackType::Max)
+	{
+		// 2x faster
+		PlaybackPosition *= 2;
+
+		static constexpr float MidCurveValue = 1.f;
+		static constexpr float EndCurveValue = 2.f;
+		if (PlaybackPosition >= MidCurveValue)
+		{
+			// Reverse playing
+			PlaybackPosition = EndCurveValue - PlaybackPosition;
+		}
+	}
+
+	static const FVector2D StartEndCurveValue = FVector2D(0.f, 1.f);
+	const FVector2D StartEndMorphValue = FVector2D(MorphDataInternal.StartValue, MorphDataInternal.EndValue);
+	const float NewMorphValue = FMath::GetMappedRangeValueClamped(StartEndCurveValue, StartEndMorphValue, PlaybackPosition);
+	SetMorphValue(NewMorphValue);
+}
+
+void UAnimNotifyState_PlayMorph::OnTimelineFinished()
+{
+	// Is called on finished playing
+}
+
+// Will play the timeline with current playback type
+void UAnimNotifyState_PlayMorph::StartTimeline()
+{
+	if (MorphDataInternal.Morph.IsNone())
+	{
+		return;
+	}
+
+	switch (MorphDataInternal.PlaybackType)
+	{
+		case EPlaybackType::None: // Set a specified start value without playing
+			SetMorphValue(MorphDataInternal.StartValue);
+			break;
+
+		case EPlaybackType::FromStart: // Play from start to end
+		case EPlaybackType::Max:       // Play from start to end and back to start
+			TimelineInternal.PlayFromStart();
+			break;
+
+		case EPlaybackType::FromEnd: // Play from end to start
+			TimelineInternal.ReverseFromEnd();
+			break;
+
+		default:
+			ensure(!"EPlaybackType default case");
+			break;
+	}
+}
+
+// Set a specified value for chosen morph
+void UAnimNotifyState_PlayMorph::SetMorphValue(float Value)
 {
 	if (!ensureMsgf(MeshCompInternal, TEXT("ASSERT: 'SkeletalMeshComponent' is not valid")))
 	{
 		return;
 	}
 
-	const bool bIsReversing = TimelineInternal.IsReversing();
-	static const FVector2D ForwardCurveValue = FVector2D(0.f, 1.f);
-	static const FVector2D ReverseCurveValue = FVector2D(1.f, 0.f);
-	const FVector2D StartEndCurveValue = bIsReversing ? ReverseCurveValue : ForwardCurveValue;
-	const FVector2D StartEndMorphValue = FVector2D(MorphDataInternal.StartValue, MorphDataInternal.EndValue);
-	const float NewMorphValue = FMath::GetMappedRangeValueClamped(StartEndCurveValue, StartEndMorphValue, PlaybackPosition);
-	MeshCompInternal->SetMorphTarget(MorphDataInternal.Morph, NewMorphValue);
-	UE_LOG(LogInit, Log, TEXT("--- StartEndMorphValue: %s, PlaybackPosition: %f -> NewMorphValue: %f"), *StartEndMorphValue.ToString(), PlaybackPosition, NewMorphValue);
-
+	const float ClampedValue = FMath::Clamp(Value, MorphDataInternal.StartValue, MorphDataInternal.EndValue);
+	MeshCompInternal->SetMorphTarget(MorphDataInternal.Morph, ClampedValue);
 }
-#pragma optimize("", on)

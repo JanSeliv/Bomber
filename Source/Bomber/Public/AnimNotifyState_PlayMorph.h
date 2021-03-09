@@ -25,32 +25,32 @@ enum class EPlaybackType : uint8
 };
 
 /**
- * Data about morph target (shape key)
+ * Data about morph target (shape key) to be played.
  */
 USTRUCT(BlueprintType)
 struct FMorphData
 {
 	GENERATED_BODY()
 
-	/** */
+	/** The name of morph. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
 	FName Morph;
 
-	/** */
+	/** In which way the morph should be played. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
 	EPlaybackType PlaybackType = EPlaybackType::Max;
 
-	/** */
+	/** The initial value of a morph to be set. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Start (A)", ClampMin = "0", ClampMax = "1"))
 	float StartValue = 0.f;
 
-	/** */
+	/** The finish value of a morph to be set. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "End (B)", ClampMin = "0", ClampMax = "1"))
 	float EndValue = 1.f;
 };
 
 /**
- *
+ * Play the chosen morph for picked frames.
  */
 UCLASS(Blueprintable, meta = (DisplayName = "Play Morph"))
 class BOMBER_API UAnimNotifyState_PlayMorph final : public UAnimNotifyState
@@ -67,24 +67,24 @@ public:
 
 	/**
 	 * Is called on an animation notify.
-	 * @param MeshComp
-	 * @param Animation
+	 * @param MeshComp Current used mesh component.
+	 * @param Animation Current played animation.
 	 * @param TotalDuration How long the notify is played. Is determined by amount of frames dragged on an animation track.
 	 */
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
 
 	/**
 	 * Is called on an every animation tick.
-	 * @param MeshComp
-	 * @param Animation
-	 * @param FrameDeltaTime
+   	 * @param MeshComp Current used mesh component.
+	 * @param Animation Current played animation.
+	 * @param FrameDeltaTime Tick time.
 	 */
 	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime) override;
 
 	/**
 	 * Is called before destroying.
-	 * @param MeshComp
-	 * @param Animation
+	 * @param MeshComp Current used mesh component.
+	 * @param Animation Current played animation.
 	 */
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
 
@@ -102,35 +102,57 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Morph Data", ShowOnlyInnerProperties))
 	FMorphData MorphDataInternal;
 
-	/** */
+	/** Timeline to be played. */
 	FTimeline TimelineInternal; //[G]
 
-	/**  */
-	UPROPERTY(Transient,  BlueprintReadWrite, Category = "C++")
+	/**
+	 * Is created once. Can not be set in the editor due to dynamic duration
+	 * that depends on length on dragged notify.
+	 * Time: [0, TotalDuration].
+	 * Values: [0, 1].
+	 * @see UAnimNotifyState_PlayMorph::InitCurveFloatOnce()
+	 */
+	UPROPERTY(Transient, BlueprintReadWrite, Category = "C++")
 	class UCurveFloat* CurveFloat;
 
-	/** */
-	UPROPERTY(Transient,  BlueprintReadWrite, Category = "C++")
+	/** The current skeletal mesh. */
+	UPROPERTY(Transient, BlueprintReadWrite, Category = "C++")
 	class USkeletalMeshComponent* MeshCompInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
 
-	/**  */
+	/** Create a new curve, is created once. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void InitCurveFloatOnce();
 
 	/**
-	 *
-	 * @param TotalDuration
+	 * Set curve values.
+	 * Is set once during the game, but is overriden in the editor during changes on track.
+	 * @param TotalDuration The length of notify.
 	 */
-	void UpdateCurveLength(float TotalDuration);
+	void ApplyCurveLengthOnce(float TotalDuration);
 
 	/**
-	 *
-	 * @param PlaybackPosition
+	 * Is executed on every frame during playing the timeline.
+	 * @param PlaybackPosition Current timeline position.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void HandlePlayMorph(float PlaybackPosition);
+	void OnTimelineTick(float PlaybackPosition);
+
+	/** Is called on finished playing. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnTimelineFinished();
+
+	/**  Will play the timeline with current playback type. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void StartTimeline();
+
+	/**
+	 * Set a specified value for chosen morph.
+	 * @param Value New morph value between [MorphDataInternal.StartValue, MorphDataInternal.EndValue].
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetMorphValue(float Value);
 };

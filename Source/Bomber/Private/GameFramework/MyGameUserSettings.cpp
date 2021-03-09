@@ -28,12 +28,13 @@ void USettingsDataAsset::GenerateSettingsArray(TArray<FSettingsRow>& OutRows) co
 	}
 }
 
-#if WITH_EDITOR
 // Get a multicast delegate that is called any time the data table changes
 void USettingsDataAsset::BindOnDataTableChanged(
 	const FOnDataTableChanged& EventToBind) const
 {
-	if (!SettingsDataTableInternal
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (!USingletonLibrary::IsEditorNotPieWorld()
+	    || !SettingsDataTableInternal
 	    || !EventToBind.IsBound())
 	{
 		return;
@@ -44,16 +45,18 @@ void USettingsDataAsset::BindOnDataTableChanged(
 	{
 		EventToBind.Execute();
 	});
-}
 #endif // WITH_EDITOR
+}
 
 //
 void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {
 	Super::LoadSettings(bForceReload);
 
-#if WITH_EDITOR
-	if (const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset())
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
+	if (USingletonLibrary::IsEditorNotPieWorld()
+	    && SettingsDataAsset)
 	{
 		USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
 		OnDataTableChanged.BindDynamic(this, &ThisClass::OnDataTableChanged);
@@ -62,12 +65,13 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 #endif	  // WITH_EDITOR
 }
 
-#if WITH_EDITOR
 // Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks
 void UMyGameUserSettings::OnDataTableChanged()
 {
+#if WITH_EDITOR // [IsEditorNotPieWorld]
 	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
-	if (!ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
+	if (!USingletonLibrary::IsEditorNotPieWorld()
+	    || !ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
 	{
 		return;
 	}
@@ -87,5 +91,5 @@ void UMyGameUserSettings::OnDataTableChanged()
 		// OnOptionSelect.BindUFunction(this, FunctionName);
 		// OnOptionSelect.Execute(-1);
 	}
-}
 #endif	  // WITH_EDITOR
+}
