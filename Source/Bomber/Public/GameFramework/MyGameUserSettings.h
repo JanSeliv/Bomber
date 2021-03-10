@@ -61,7 +61,7 @@ public:
 	/**
 	 * @see USettingsDataAsset::SettingsDataTableInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void GenerateSettingsArray(TArray<FSettingsRow>& OutRows) const;
+	void GenerateSettingsArray(TMap<FName, FSettingsRow>& OutRows) const;
 
 	/** Delegate to react on changing settings data table. */
 	DECLARE_DYNAMIC_DELEGATE(FOnDataTableChanged);
@@ -86,11 +86,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE FText GetTitle() const { return TitleInternal; }
 
-protected:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table", ShowOnlyInnerProperties))
 	class UDataTable* SettingsDataTableInternal; //[D]
 
+protected:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Width By Screen", ShowOnlyInnerProperties))
 	float WidthByScreenInternal; //[D]
@@ -113,6 +113,8 @@ class UMyGameUserSettings final : public UGameUserSettings
 	GENERATED_BODY()
 
 public:
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetter, int32, Param);
+
 	/** Loads the user settings from persistent storage */
 	virtual void LoadSettings(bool bForceReload) override;
 

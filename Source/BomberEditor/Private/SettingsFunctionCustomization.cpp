@@ -110,6 +110,8 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 
 	TArray<FName> FoundList;
 	TArray<FName> AllChildFunctions;
+	bool bValidCustomProperty = false;
+	const FName CustomPropertyContent(GetCustomPropertyDisplayText().ToString());
 	ChosenFunctionClass->GenerateFunctionList(AllChildFunctions);
 	for (TFieldIterator<UFunction> It(ChosenFunctionClass); It; ++It)
 	{
@@ -118,12 +120,23 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 		    && FunctionIt != TemplateFunction
 		    && FunctionIt->IsSignatureCompatibleWith(TemplateFunction))
 		{
-			FName FunctionName = FunctionIt->GetFName();
-			if (AllChildFunctions.Contains(FunctionName)) // is child not super function
+			FName FunctionNameIt = FunctionIt->GetFName();
+			if (AllChildFunctions.Contains(FunctionNameIt)) // is child not super function
 			{
-				FoundList.Emplace(MoveTemp(FunctionName));
+				FoundList.Emplace(MoveTemp(FunctionNameIt));
+
+				if (FunctionNameIt == CustomPropertyContent)
+				{
+					bValidCustomProperty = true;
+				}
 			}
 		}
+	}
+
+	// Reset function if does not contain in specified class
+	if (!bValidCustomProperty)
+	{
+		SetCustomPropertyValue(NAME_None);
 	}
 
 	for (const FName& ItemData : FoundList)

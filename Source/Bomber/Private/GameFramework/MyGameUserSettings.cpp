@@ -2,28 +2,31 @@
 
 #include "GameFramework/MyGameUserSettings.h"
 //---
-
+#include "Globals/SingletonLibrary.h"
 //---
 #include "Engine/DataTable.h"
-#include "Globals/SingletonLibrary.h"
+#if WITH_EDITOR //[include]
+#include "DataTableEditorUtils.h"
+#endif // WITH_EDITOR
 
 //
-void USettingsDataAsset::GenerateSettingsArray(TArray<FSettingsRow>& OutRows) const
+void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsRow>& OutRows) const
 {
 	if (!ensureMsgf(SettingsDataTableInternal, TEXT("ASSERT: 'SettingsDataTableInternal' is not valid")))
 	{
 		return;
 	}
 
-	const TMap<FName, uint8*> RowMap = SettingsDataTableInternal->GetRowMap();
+	const TMap<FName, uint8*>& RowMap = SettingsDataTableInternal->GetRowMap();
 	OutRows.Empty();
 	OutRows.Reserve(RowMap.Num());
 	for (const auto& RowIt : RowMap)
 	{
 		if (const auto FoundRowPtr = reinterpret_cast<FSettingsRow*>(RowIt.Value))
 		{
-			FSettingsRow SettingsTableRow(*FoundRowPtr);
-			OutRows.Emplace(MoveTemp(SettingsTableRow));
+			const FSettingsRow& SettingsTableRow = *FoundRowPtr;
+			const FName RowName = RowIt.Key;
+			OutRows.Emplace(RowName, SettingsTableRow);
 		}
 	}
 }
@@ -76,20 +79,46 @@ void UMyGameUserSettings::OnDataTableChanged()
 		return;
 	}
 
-	TArray<FSettingsRow> SettingsTableRows;
-	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
-	if (!ensureMsgf(SettingsTableRows.IsValidIndex(0), TEXT("ASSERT: 'SettingsTableRows' is empty")))
+	UDataTable* SettingsDataTable = SettingsDataAsset->SettingsDataTableInternal;
+	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
 	{
 		return;
 	}
 
-	//@todo fill map by [functiontag, functionptr]
-	const FSettingsRow& SettingsTableRow = SettingsTableRows[0];
-	const FName FunctionName = SettingsTableRow.Setter.FunctionName;
-	if (!FunctionName.IsNone() && FunctionName.IsValid())
+	TMap<FName, FSettingsRow> SettingsTableRows;
+	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
+	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
 	{
-		// OnOptionSelect.BindUFunction(this, FunctionName);
-		// OnOptionSelect.Execute(-1);
+		return;
+	}
+
+	for (const auto& SettingsTableRowIt : SettingsTableRows)
+	{
+		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
+		const FSettingsFunction& Setter = RowValue.Setter;
+		if (!Setter.FunctionName.IsNone()
+		    && Setter.FunctionClass)
+		{
+			UFunction* FoundSetter = Setter.FunctionClass->FindFunctionByName(Setter.FunctionName, EIncludeSuperFlag::ExcludeSuper);
+			if (FoundSetter)
+			{
+				FOnSetter OnSetter;
+				OnSetter.BindUFunction(this, Setter.FunctionName);
+				OnSetter.Execute(1996);
+			}
+		}
+
+		// Set row name by specified tag
+		const FName RowKey = SettingsTableRowIt.Key;
+		const FName RowValueTag = RowValue.Tag.GetTagName();
+		static const FString EmptyRowName = FString("NewRow");
+		if (!RowValueTag.IsNone()                            // Tag is not empty
+		    && (RowKey != RowValueTag                        // New tag name
+		        || RowKey.ToString().Contains(EmptyRowName)) // New row
+		    && !SettingsTableRows.Contains(RowValueTag))     // Unique tag
+		{
+			FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
+		}
 	}
 #endif	  // WITH_EDITOR
 }
