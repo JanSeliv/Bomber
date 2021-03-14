@@ -47,6 +47,7 @@ void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandl
 	{
 		static const FName SettingsObjectContextName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, GetObjectContext);
 		TemplateFunctionName = SettingsObjectContextName;
+		bIsStaticFunction = true;
 	}
 
 	// Set TemplateFunctionInternal
@@ -123,17 +124,20 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 		const UFunction* FunctionIt = *It;
 		if (FunctionIt
 		    && FunctionIt != TemplateFunction
-		    && FunctionIt->IsSignatureCompatibleWith(TemplateFunction))
+		    && (!bIsStaticFunction || FunctionIt->FunctionFlags & FUNC_Static) // only static functions if specified
+		    && IsSignatureCompatible(FunctionIt))
 		{
+			static const FString DelegateSignatureSubStr = "DelegateSignature";
 			FName FunctionNameIt = FunctionIt->GetFName();
-			if (AllChildFunctions.Contains(FunctionNameIt)) // is child not super function
+			if (!FunctionNameIt.ToString().Contains(DelegateSignatureSubStr) // is not delegate
+			    && AllChildFunctions.Contains(FunctionNameIt))               // is child not super function
 			{
-				FoundList.Emplace(MoveTemp(FunctionNameIt));
-
 				if (FunctionNameIt == CustomPropertyContent)
 				{
 					bValidCustomProperty = true;
 				}
+
+				FoundList.Emplace(MoveTemp(FunctionNameIt));
 			}
 		}
 	}
@@ -184,4 +188,87 @@ const UClass* FSettingsFunctionCustomization::GetChosenFunctionClass() const
 	const auto ObjectProperty = ChildProperty ? CastField<FObjectProperty>(ChildProperty) : nullptr;
 	const uint8* Data = ObjectProperty ? ChildHandleIt->GetValueBaseAddress((uint8*)MyPropertyOuterInternal.Get()) : nullptr;
 	return Data ? Cast<UClass>(ObjectProperty->GetObjectPropertyValue(Data)) : nullptr;
+}
+
+// Check if all signatures of specified function are compatible with current template function
+bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Function) const
+{
+	const UFunction* TemplateFunction = TemplateFunctionInternal.Get();
+	if (!TemplateFunction)
+	{
+		return false;
+	}
+
+	auto ArePropertiesTheSame = [](const FProperty* A, const FProperty* B)
+	{
+		if (A == B)
+		{
+			return true;
+		}
+
+		if (!A || !B) //one of properties is null
+		{
+			return false;
+		}
+
+		if (A->GetSize() != B->GetSize())
+		{
+			return false;
+		}
+
+		if (A->GetOffset_ForGC() != B->GetOffset_ForGC())
+		{
+			return false;
+		}
+
+		if (!A->SameType(B)) // A->GetClass() == B->GetClass()
+		{
+			// That part is implemented: if is return param with the same flags
+			// Will return true for any derived UObject
+			if (A->PropertyFlags & B->PropertyFlags & CPF_ReturnParm
+			    && A->IsA(B->GetClass()))
+			{
+				return true;
+			}
+			return false;
+		}
+
+		return true;
+	};
+
+	const uint64 IgnoreFlags = CPF_OutParm | UFunction::GetDefaultIgnoredSignatureCompatibilityFlags();
+
+	// Run thru the parameter property chains to compare each property
+	TFieldIterator<FProperty> IteratorA(TemplateFunction);
+	TFieldIterator<FProperty> IteratorB(Function);
+
+	while (IteratorA && (IteratorA->PropertyFlags & CPF_Parm))
+	{
+		if (IteratorB && (IteratorB->PropertyFlags & CPF_Parm))
+		{
+			// Compare the two properties to make sure their types are identical
+			// Note: currently this requires both to be strictly identical and wouldn't allow functions that differ only by how derived a class is,
+			// which might be desirable when binding delegates, assuming there is directionality in the SignatureIsCompatibleWith call
+			FProperty* PropA = *IteratorA;
+			FProperty* PropB = *IteratorB;
+
+			// Check the flags as well
+			const uint64 PropertyMash = PropA->PropertyFlags ^ PropB->PropertyFlags;
+			if (!ArePropertiesTheSame(PropA, PropB) || ((PropertyMash & ~IgnoreFlags) != 0))
+			{
+				// Type mismatch between an argument of A and B
+				return false;
+			}
+		}
+		else
+		{
+			// B ran out of arguments before A did
+			return false;
+		}
+		++IteratorA;
+		++IteratorB;
+	}
+
+	// They matched all the way thru A's properties, but it could still be a mismatch if B has remaining parameters
+	return true;
 }

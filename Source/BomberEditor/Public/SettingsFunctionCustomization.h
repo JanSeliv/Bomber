@@ -55,6 +55,9 @@ protected:
 	 * @see FSettingsFunctionCustomization::RefreshCustomProperty() */
 	FName CachedFunctionClassInternal = NAME_None;
 
+	/** If true, will be added FUNC_Static flag to show only static function in the list. */
+	bool bIsStaticFunction = false;
+
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
@@ -83,4 +86,13 @@ protected:
 	 * @see FSettingsFunctionCustomization::FunctionClassHandleInternal
 	 * @see FSettingsFunction::Class */
 	const UClass* GetChosenFunctionClass() const;
+
+	/**
+	 * Check if all signatures of specified function are compatible with current template function.
+	 * Contains the logic UFunction::IsSignatureCompatibleWith but implements some part to return true for any derived UObject
+	 * @param Function The function to check.
+	 * @return true if compatible.
+	 * @see FSettingsFunctionCustomization::TemplateFunctionInternal
+	 */
+	bool IsSignatureCompatible(const UFunction* Function) const;
 };
