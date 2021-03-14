@@ -42,6 +42,10 @@ struct FSettingsRow : public FTableRowBase
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsFunction ObjectContext; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
 	FSettingsFunction Setter; //[D]
 
 	/** */
@@ -115,18 +119,24 @@ class UMyGameUserSettings final : public UGameUserSettings
 public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetter, int32, Param);
 
+	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetter);
+
+	DECLARE_DYNAMIC_DELEGATE_RetVal(UObject*, FOnObjectContext);
+
 	/** Loads the user settings from persistent storage */
 	virtual void LoadSettings(bool bForceReload) override;
 
-#if WITH_EDITOR
 	/**  */
-	UFUNCTION()
-	void TemplateSettingsSetter(const int32 ChosenID) { }
+	UFUNCTION(BlueprintCallable, BlueprintPure = "true", Category = "C++")
+	static UObject* GetObjectContext();
 
 	/**  */
-	UFUNCTION()
-	int32 TemplateSettingsGetter() const { return 0; }
-#endif
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetOption(int32 InValue);
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintPure = "true", Category = "C++")
+	int32 GetOption();
 
 protected:
 	/**

@@ -35,13 +35,18 @@ void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandl
 	const FName CurrentPropertyName = CurrentProperty ? CurrentProperty->GetFName() : NAME_None;
 	if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, Setter))
 	{
-		static const FName SettingsSetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, TemplateSettingsSetter);
+		static const FName SettingsSetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, SetOption);
 		TemplateFunctionName = SettingsSetterName;
 	}
 	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, Getter))
 	{
-		static const FName SettingsGetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, TemplateSettingsGetter);
+		static const FName SettingsGetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, GetOption);
 		TemplateFunctionName = SettingsGetterName;
+	}
+	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, ObjectContext))
+	{
+		static const FName SettingsObjectContextName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, GetObjectContext);
+		TemplateFunctionName = SettingsObjectContextName;
 	}
 
 	// Set TemplateFunctionInternal

@@ -5,6 +5,7 @@
 #include "Globals/SingletonLibrary.h"
 //---
 #include "Engine/DataTable.h"
+
 #if WITH_EDITOR //[include]
 #include "DataTableEditorUtils.h"
 #endif // WITH_EDITOR
@@ -32,8 +33,7 @@ void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsRow>& OutRow
 }
 
 // Get a multicast delegate that is called any time the data table changes
-void USettingsDataAsset::BindOnDataTableChanged(
-	const FOnDataTableChanged& EventToBind) const
+void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& EventToBind) const
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (!USingletonLibrary::IsEditorNotPieWorld()
@@ -44,10 +44,7 @@ void USettingsDataAsset::BindOnDataTableChanged(
 	}
 
 	UDataTable::FOnDataTableChanged& OnDataTableChangedDelegate = SettingsDataTableInternal->OnDataTableChanged();
-	OnDataTableChangedDelegate.AddLambda([EventToBind]()
-	{
-		EventToBind.Execute();
-	});
+	OnDataTableChangedDelegate.AddLambda([EventToBind]() { EventToBind.ExecuteIfBound(); });
 #endif // WITH_EDITOR
 }
 
@@ -57,21 +54,175 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 	Super::LoadSettings(bForceReload);
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
+	// Notify settings for any change in the settings data table
 	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
 	if (USingletonLibrary::IsEditorNotPieWorld()
 	    && SettingsDataAsset)
 	{
-		USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
-		OnDataTableChanged.BindDynamic(this, &ThisClass::OnDataTableChanged);
-		SettingsDataAsset->BindOnDataTableChanged(OnDataTableChanged);
+		// Bind only once
+		static USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
+		if (!OnDataTableChanged.IsBound())
+		{
+			OnDataTableChanged.BindDynamic(this, &ThisClass::OnDataTableChanged);
+			SettingsDataAsset->BindOnDataTableChanged(OnDataTableChanged);
+		}
 	}
-#endif	  // WITH_EDITOR
+#endif // WITH_EDITOR
+}
+
+UObject* UMyGameUserSettings::GetObjectContext()
+{
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
+	{
+		// Only during the game the ProcessEvent(...) can execute a found function
+		return nullptr;
+	}
+#endif // WITH_EDITOR
+
+	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
+	if (!ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
+	{
+		return nullptr;
+	}
+
+	TMap<FName, FSettingsRow> SettingsTableRows;
+	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
+	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
+	{
+		return nullptr;
+	}
+
+	for (const auto& SettingsTableRowIt : SettingsTableRows)
+	{
+		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
+		const FSettingsFunction& ObjectContext = RowValue.ObjectContext;
+		if (!ObjectContext.FunctionName.IsNone()
+		    && ObjectContext.FunctionClass)
+		{
+			if (UObject* ClassDefaultObject = ObjectContext.FunctionClass->ClassDefaultObject)
+			{
+				FOnObjectContext OnObjectContext;
+				OnObjectContext.BindUFunction(ClassDefaultObject, ObjectContext.FunctionName);
+				if (OnObjectContext.IsBoundToObject(ClassDefaultObject))
+				{
+					UObject* OutVal = OnObjectContext.Execute();
+					return OutVal;
+				}
+				return nullptr;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+//
+void UMyGameUserSettings::SetOption(int32 InValue)
+{
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
+	{
+		// Only during the game the ProcessEvent(...) can execute a found function
+		return;
+	}
+#endif // WITH_EDITOR
+
+	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
+	if (!ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
+	{
+		return;
+	}
+
+	TMap<FName, FSettingsRow> SettingsTableRows;
+	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
+	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
+	{
+		return;
+	}
+
+	for (const auto& SettingsTableRowIt : SettingsTableRows)
+	{
+		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
+		const FSettingsFunction& Setter = RowValue.Setter;
+		if (!Setter.FunctionName.IsNone()
+		    && Setter.FunctionClass)
+		{
+			UObject* ObjectContext = GetObjectContext();
+			UE_LOG(LogTemp, Warning, TEXT("--- GetOption: ObjectContext: %s"), *GetNameSafe(ObjectContext));
+			if (ObjectContext)
+			{
+				FOnSetter OnSetter;
+				OnSetter.BindUFunction(ObjectContext, Setter.FunctionName);
+				if (OnSetter.IsBoundToObject(ObjectContext))
+				{
+					OnSetter.Execute(InValue);
+				}
+				return;
+			}
+		}
+	}
+}
+
+int32 UMyGameUserSettings::GetOption()
+{
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
+	{
+		// Only during the game the ProcessEvent(...) can execute a found function
+		return INDEX_NONE;
+	}
+#endif // WITH_EDITOR
+
+	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
+	if (!ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
+	{
+		return INDEX_NONE;
+	}
+
+	TMap<FName, FSettingsRow> SettingsTableRows;
+	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
+	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
+	{
+		return INDEX_NONE;
+	}
+
+	for (const auto& SettingsTableRowIt : SettingsTableRows)
+	{
+		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
+		const FSettingsFunction& Getter = RowValue.Getter;
+		if (!Getter.FunctionName.IsNone()
+		    && Getter.FunctionClass)
+		{
+			UObject* ObjectContext = GetObjectContext();
+			UE_LOG(LogTemp, Warning, TEXT("--- GetOption: ObjectContext: %s"), *GetNameSafe(ObjectContext));
+			if (ObjectContext)
+			{
+				FOnGetter OnGetter;
+				OnGetter.BindUFunction(ObjectContext, Getter.FunctionName);
+				if (OnGetter.IsBoundToObject(ObjectContext))
+				{
+					const int32 OutVal = OnGetter.Execute();
+					UE_LOG(LogInit, Log, TEXT("--- GetOption: OutVal: %i"), OutVal);
+					return OutVal;
+				}
+				return INDEX_NONE;
+			}
+		}
+	}
+
+	return INDEX_NONE;
 }
 
 // Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks
 void UMyGameUserSettings::OnDataTableChanged()
 {
-#if WITH_EDITOR // [IsEditorNotPieWorld]
+#if WITH_EDITOR  // [IsEditorNotPieWorld]
+	if (!USingletonLibrary::IsEditorNotPieWorld())
+	{
+		return;
+	}
+
 	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
 	if (!USingletonLibrary::IsEditorNotPieWorld()
 	    || !ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
@@ -92,23 +243,10 @@ void UMyGameUserSettings::OnDataTableChanged()
 		return;
 	}
 
+	// Set row name by specified tag
 	for (const auto& SettingsTableRowIt : SettingsTableRows)
 	{
 		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
-		const FSettingsFunction& Setter = RowValue.Setter;
-		if (!Setter.FunctionName.IsNone()
-		    && Setter.FunctionClass)
-		{
-			UFunction* FoundSetter = Setter.FunctionClass->FindFunctionByName(Setter.FunctionName, EIncludeSuperFlag::ExcludeSuper);
-			if (FoundSetter)
-			{
-				FOnSetter OnSetter;
-				OnSetter.BindUFunction(this, Setter.FunctionName);
-				OnSetter.Execute(1996);
-			}
-		}
-
-		// Set row name by specified tag
 		const FName RowKey = SettingsTableRowIt.Key;
 		const FName RowValueTag = RowValue.Tag.GetTagName();
 		static const FString EmptyRowName = FString("NewRow");
