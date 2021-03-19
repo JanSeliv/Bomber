@@ -35,17 +35,17 @@ void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandl
 	const FName CurrentPropertyName = CurrentProperty ? CurrentProperty->GetFName() : NAME_None;
 	if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, Setter))
 	{
-		static const FName SettingsSetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, SetOption);
+		static const FName SettingsSetterName = "OnSetter__DelegateSignature";
 		TemplateFunctionName = SettingsSetterName;
 	}
 	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, Getter))
 	{
-		static const FName SettingsGetterName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, GetOption);
+		static const FName SettingsGetterName = "OnGetter__DelegateSignature";
 		TemplateFunctionName = SettingsGetterName;
 	}
 	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, ObjectContext))
 	{
-		static const FName SettingsObjectContextName = GET_FUNCTION_NAME_CHECKED(UMyGameUserSettings, GetObjectContext);
+		static const FName SettingsObjectContextName = "OnObjectContext__DelegateSignature";
 		TemplateFunctionName = SettingsObjectContextName;
 		bIsStaticFunction = true;
 	}
@@ -127,10 +127,8 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 		    && (!bIsStaticFunction || FunctionIt->FunctionFlags & FUNC_Static) // only static functions if specified
 		    && IsSignatureCompatible(FunctionIt))
 		{
-			static const FString DelegateSignatureSubStr = "DelegateSignature";
 			FName FunctionNameIt = FunctionIt->GetFName();
-			if (!FunctionNameIt.ToString().Contains(DelegateSignatureSubStr) // is not delegate
-			    && AllChildFunctions.Contains(FunctionNameIt))               // is child not super function
+			if (AllChildFunctions.Contains(FunctionNameIt)) // is child not super function
 			{
 				if (FunctionNameIt == CustomPropertyContent)
 				{

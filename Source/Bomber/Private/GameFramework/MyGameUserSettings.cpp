@@ -67,6 +67,124 @@ UMyGameUserSettings& UMyGameUserSettings::Get()
 	return *MyGameUserSettings;
 }
 
+UObject* UMyGameUserSettings::GetObjectContext(FName TagName) const
+{
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
+	{
+		// Only during the game the ProcessEvent(...) can execute a found function
+		return nullptr;
+	}
+#endif // WITH_EDITOR
+
+	const FSettingsRow* FoundRow = SettingsTableRowsInternal.Find(TagName);
+	if (!FoundRow)
+	{
+		return nullptr;
+	}
+
+	const FSettingsFunction& ObjectContext = FoundRow->ObjectContext;
+	if (ObjectContext.FunctionName.IsNone()
+	    || !ObjectContext.FunctionClass)
+	{
+		return nullptr;
+	}
+
+	UObject* ClassDefaultObject = ObjectContext.FunctionClass->ClassDefaultObject;
+	if (!ClassDefaultObject)
+	{
+		return nullptr;
+	}
+
+	FOnObjectContext OnObjectContext;
+	OnObjectContext.BindUFunction(ClassDefaultObject, ObjectContext.FunctionName);
+	if (OnObjectContext.IsBoundToObject(ClassDefaultObject))
+	{
+		UObject* OutVal = OnObjectContext.Execute();
+		return OutVal;
+	}
+
+	return nullptr;
+}
+
+//
+void UMyGameUserSettings::SetOption(FName TagName, int32 InValue)
+{
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
+	{
+		// Only during the game the ProcessEvent(...) can execute a found function
+		return;
+	}
+#endif // WITH_EDITOR
+
+	const FSettingsRow* FoundRow = SettingsTableRowsInternal.Find(TagName);
+	if (!FoundRow)
+	{
+		return;
+	}
+
+	const FSettingsFunction& Setter = FoundRow->Setter;
+	if (Setter.FunctionName.IsNone()
+	    || !Setter.FunctionClass)
+	{
+		return;
+	}
+
+	UObject* ObjectContext = GetObjectContext(TagName);
+	if (!ObjectContext)
+	{
+		return;
+	}
+
+	FOnSetter OnSetter;
+	OnSetter.BindUFunction(ObjectContext, Setter.FunctionName);
+	if (OnSetter.IsBoundToObject(ObjectContext))
+	{
+		OnSetter.Execute(InValue);
+	}
+}
+
+int32 UMyGameUserSettings::GetOption(FName TagName) const
+{
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
+	{
+		// Only during the game the ProcessEvent(...) can execute a found function
+		return INDEX_NONE;
+	}
+#endif // WITH_EDITOR
+
+	const FSettingsRow* FoundRow = SettingsTableRowsInternal.Find(TagName);
+	if (!FoundRow)
+	{
+		return INDEX_NONE;
+	}
+
+	const FSettingsFunction& Getter = FoundRow->Getter;
+	if (Getter.FunctionName.IsNone()
+	    || !Getter.FunctionClass)
+	{
+		return INDEX_NONE;
+	}
+
+	UObject* ObjectContext = GetObjectContext(TagName);
+	if (!ObjectContext)
+	{
+		return INDEX_NONE;
+	}
+
+	FOnGetter OnGetter;
+	OnGetter.BindUFunction(ObjectContext, Getter.FunctionName);
+	if (OnGetter.IsBoundToObject(ObjectContext))
+	{
+		const int32 OutVal = OnGetter.Execute();
+		return OutVal;
+	}
+
+	return INDEX_NONE;
+}
+
 //
 void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {
@@ -89,109 +207,15 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 #endif // WITH_EDITOR
 }
 
-UObject* UMyGameUserSettings::GetObjectContext()
-{
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
-	{
-		// Only during the game the ProcessEvent(...) can execute a found function
-		return nullptr;
-	}
-#endif // WITH_EDITOR
-
-	for (const auto& SettingsTableRowIt : Get().SettingsTableRowsInternal)
-	{
-		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
-		const FSettingsFunction& ObjectContext = RowValue.ObjectContext;
-		if (!ObjectContext.FunctionName.IsNone()
-		    && ObjectContext.FunctionClass)
-		{
-			if (UObject* ClassDefaultObject = ObjectContext.FunctionClass->ClassDefaultObject)
-			{
-				FOnObjectContext OnObjectContext;
-				OnObjectContext.BindUFunction(ClassDefaultObject, ObjectContext.FunctionName);
-				if (OnObjectContext.IsBoundToObject(ClassDefaultObject))
-				{
-					UObject* OutVal = OnObjectContext.Execute();
-					return OutVal;
-				}
-				return nullptr;
-			}
-		}
-	}
-
-	return nullptr;
-}
-
 //
-void UMyGameUserSettings::SetOption(int32 InValue)
+FSettingsRow UMyGameUserSettings::FindSettingsTableRow(FName TagName) const
 {
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
+	FSettingsRow SettingsRow = FSettingsRow::EmptyRow;
+	if (const FSettingsRow* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
-		// Only during the game the ProcessEvent(...) can execute a found function
-		return;
+		SettingsRow = *SettingsRowPtr;
 	}
-#endif // WITH_EDITOR
-
-	for (const auto& SettingsTableRowIt : SettingsTableRowsInternal)
-	{
-		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
-		const FSettingsFunction& Setter = RowValue.Setter;
-		if (!Setter.FunctionName.IsNone()
-		    && Setter.FunctionClass)
-		{
-			UObject* ObjectContext = GetObjectContext();
-			UE_LOG(LogTemp, Warning, TEXT("--- GetOption: ObjectContext: %s"), *GetNameSafe(ObjectContext));
-			if (ObjectContext)
-			{
-				FOnSetter OnSetter;
-				OnSetter.BindUFunction(ObjectContext, Setter.FunctionName);
-				if (OnSetter.IsBoundToObject(ObjectContext))
-				{
-					OnSetter.Execute(InValue);
-				}
-				return;
-			}
-		}
-	}
-}
-
-int32 UMyGameUserSettings::GetOption()
-{
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
-	{
-		// Only during the game the ProcessEvent(...) can execute a found function
-		return INDEX_NONE;
-	}
-#endif // WITH_EDITOR
-
-	for (const auto& SettingsTableRowIt : SettingsTableRowsInternal)
-	{
-		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
-		const FSettingsFunction& Getter = RowValue.Getter;
-		if (!Getter.FunctionName.IsNone()
-		    && Getter.FunctionClass)
-		{
-			UObject* ObjectContext = GetObjectContext();
-			UE_LOG(LogTemp, Warning, TEXT("--- GetOption: ObjectContext: %s"), *GetNameSafe(ObjectContext));
-			if (ObjectContext)
-			{
-				FOnGetter OnGetter;
-				OnGetter.BindUFunction(ObjectContext, Getter.FunctionName);
-				if (OnGetter.IsBoundToObject(ObjectContext))
-				{
-					const int32 OutVal = OnGetter.Execute();
-					UE_LOG(LogInit, Log, TEXT("--- GetOption: OutVal: %i"), OutVal);
-					return OutVal;
-				}
-				return INDEX_NONE;
-			}
-		}
-	}
-
-	return INDEX_NONE;
+	return MoveTemp(SettingsRow);
 }
 
 // Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks
@@ -215,10 +239,8 @@ void UMyGameUserSettings::OnDataTableChanged()
 		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
 		const FName RowKey = SettingsTableRowIt.Key;
 		const FName RowValueTag = RowValue.Tag.GetTagName();
-		static const FString EmptyRowName = FString("NewRow");
-		if (!RowValueTag.IsNone()                             // Tag is not empty
-		    && (RowKey != RowValueTag                         // New tag name
-		        || RowKey.ToString().Contains(EmptyRowName))) // New row
+		if (!RowValueTag.IsNone()     // Tag is not empty
+		    && RowKey != RowValueTag) // New tag name
 		{
 			FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
 		}

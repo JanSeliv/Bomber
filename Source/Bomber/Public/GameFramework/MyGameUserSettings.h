@@ -32,7 +32,7 @@ struct FSettingsFunction
 	FORCEINLINE bool operator==(const FSettingsFunction& Other) const
 	{
 		return this->FunctionClass == Other.FunctionClass
-               && this->FunctionName == Other.FunctionName;
+		       && this->FunctionName == Other.FunctionName;
 	}
 };
 
@@ -148,35 +148,50 @@ class UMyGameUserSettings final : public UGameUserSettings
 	GENERATED_BODY()
 
 public:
+	/* ---------------------------------------------------
+	*		Public functions
+	* --------------------------------------------------- */
+
 	/** Returns the game user settings.
 	 * Is init once and can not be destroyed. */
 	static UMyGameUserSettings& Get();
 
+	/**  */
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetter, int32, Param);
 
+	/**  */
 	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetter);
 
+	/**  */
 	DECLARE_DYNAMIC_DELEGATE_RetVal(UObject*, FOnObjectContext);
 
-	/** Loads the user settings from persistent storage */
-	virtual void LoadSettings(bool bForceReload) override;
-
 	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintPure = "true", Category = "C++")
-	static UObject* GetObjectContext();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UObject* GetObjectContext(FName TagName) const;
 
 	/**  */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetOption(int32 InValue);
+	void SetOption(FName TagName, int32 InValue);
 
 	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintPure = "true", Category = "C++")
-	int32 GetOption();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	int32 GetOption(FName TagName) const;
 
 protected:
+	/* ---------------------------------------------------
+	*		Protected properties
+	* --------------------------------------------------- */
+
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows", ShowOnlyInnerProperties))
 	TMap<FName, FSettingsRow> SettingsTableRowsInternal; //[D]
+
+	/* ---------------------------------------------------
+	*		Protected functions
+	* --------------------------------------------------- */
+
+	/** Loads the user settings from persistent storage */
+	virtual void LoadSettings(bool bForceReload) override;
 
 	/** Returns the amount of settings rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
