@@ -26,6 +26,14 @@ struct FSettingsFunction
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Function"))
 	FName FunctionName; //[D]
+
+	/** Compares for equality.
+	* @param Other The other object being compared. */
+	FORCEINLINE bool operator==(const FSettingsFunction& Other) const
+	{
+		return this->FunctionClass == Other.FunctionClass
+               && this->FunctionName == Other.FunctionName;
+	}
 };
 
 /**
@@ -35,6 +43,9 @@ USTRUCT(BlueprintType)
 struct FSettingsRow : public FTableRowBase
 {
 	GENERATED_BODY()
+
+	/** Empty settings row. */
+	static const FSettingsRow EmptyRow;
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
@@ -51,6 +62,23 @@ struct FSettingsRow : public FTableRowBase
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
 	FSettingsFunction Getter; //[D]
+
+	/** Returns true if row is valid. */
+	FORCEINLINE bool IsValid() const { return !(*this == EmptyRow); }
+
+	/** Compares for equality.
+     * @param Other The other object being compared. */
+	FORCEINLINE bool operator==(const FSettingsRow& Other) const
+	{
+		return this->Tag == Other.Tag
+		       && this->ObjectContext == Other.ObjectContext
+		       && this->Setter == Other.Setter
+		       && this->Getter == Other.Getter;
+	}
+
+	/** Creates a hash value.
+	* @param Other the other object to create a hash value for. */
+	friend FORCEINLINE uint32 GetTypeHash(const FSettingsRow& Other) { return GetTypeHash(Other.Tag); }
 };
 
 /**
@@ -120,6 +148,10 @@ class UMyGameUserSettings final : public UGameUserSettings
 	GENERATED_BODY()
 
 public:
+	/** Returns the game user settings.
+	 * Is init once and can not be destroyed. */
+	static UMyGameUserSettings& Get();
+
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetter, int32, Param);
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetter);
@@ -142,6 +174,20 @@ public:
 	int32 GetOption();
 
 protected:
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows", ShowOnlyInnerProperties))
+	TMap<FName, FSettingsRow> SettingsTableRowsInternal; //[D]
+
+	/** Returns the amount of settings rows. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetSettingsTableRowsNum() const { return SettingsTableRowsInternal.Num(); }
+
+	/** Returns the found num by specified tag.
+	 * @param TagName The key by which the row will be find.
+	 * @see UMyGameUserSettings::SettingsTableRowsInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FSettingsRow FindSettingsTableRow(FName TagName) const;
+
 	/**
 	 * Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks.
 	 * @warning DevelopmentOnly */

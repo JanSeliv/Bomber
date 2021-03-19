@@ -5,6 +5,7 @@
 #include "Bomber.h"
 #include "Cell.h"
 //---
+#include "GameFramework/MyGameUserSettings.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
 #include "SingletonLibrary.generated.h"
@@ -113,7 +114,7 @@ public:
 	static class AMyPlayerState* GetMyPlayerState(const class AController* Controller);
 
 	/* ---------------------------------------------------
-	 *		FCell blueprint functions
+	 *		Structs functions
 	 * --------------------------------------------------- */
 
 	/** Returns the length of the one cell (a floor bound) */
@@ -155,6 +156,14 @@ public:
 	/** Find the average of an set of cells */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FCell GetCellArrayAverage(const TSet<struct FCell>& Cells);
+
+	/** Returns empty settings row. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE FSettingsRow GetEmptySettingsRow() { return FSettingsRow::EmptyRow; }
+
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingsRow"))
+	static FORCEINLINE bool IsValidSettingsRow(const FSettingsRow& SettingsRow) { return SettingsRow.IsValid(); }
 
 	/* ---------------------------------------------------
 	*		EActorType bitmask functions

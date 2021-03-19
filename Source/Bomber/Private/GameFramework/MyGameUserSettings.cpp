@@ -10,6 +10,9 @@
 #include "DataTableEditorUtils.h"
 #endif // WITH_EDITOR
 
+// Empty settings row
+const FSettingsRow FSettingsRow::EmptyRow = FSettingsRow();
+
 // Returns the settings data asset
 const USettingsDataAsset& USettingsDataAsset::Get()
 {
@@ -56,23 +59,31 @@ void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& Event
 #endif // WITH_EDITOR
 }
 
+// Returns the game user settings
+UMyGameUserSettings& UMyGameUserSettings::Get()
+{
+	UMyGameUserSettings* MyGameUserSettings = GEngine ? Cast<UMyGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;;
+	checkf(MyGameUserSettings, TEXT("The My Game User Settings is not valid"));
+	return *MyGameUserSettings;
+}
+
 //
 void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {
 	Super::LoadSettings(bForceReload);
 
+	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRowsInternal);
+
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	// Notify settings for any change in the settings data table
-	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
-	if (USingletonLibrary::IsEditorNotPieWorld()
-	    && SettingsDataAsset)
+	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
 		// Bind only once
 		static USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
 		if (!OnDataTableChanged.IsBound())
 		{
 			OnDataTableChanged.BindDynamic(this, &ThisClass::OnDataTableChanged);
-			SettingsDataAsset->BindOnDataTableChanged(OnDataTableChanged);
+			USettingsDataAsset::Get().BindOnDataTableChanged(OnDataTableChanged);
 		}
 	}
 #endif // WITH_EDITOR
@@ -88,14 +99,7 @@ UObject* UMyGameUserSettings::GetObjectContext()
 	}
 #endif // WITH_EDITOR
 
-	TMap<FName, FSettingsRow> SettingsTableRows;
-	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRows);
-	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
-	{
-		return nullptr;
-	}
-
-	for (const auto& SettingsTableRowIt : SettingsTableRows)
+	for (const auto& SettingsTableRowIt : Get().SettingsTableRowsInternal)
 	{
 		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
 		const FSettingsFunction& ObjectContext = RowValue.ObjectContext;
@@ -130,14 +134,7 @@ void UMyGameUserSettings::SetOption(int32 InValue)
 	}
 #endif // WITH_EDITOR
 
-	TMap<FName, FSettingsRow> SettingsTableRows;
-	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRows);
-	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
-	{
-		return;
-	}
-
-	for (const auto& SettingsTableRowIt : SettingsTableRows)
+	for (const auto& SettingsTableRowIt : SettingsTableRowsInternal)
 	{
 		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
 		const FSettingsFunction& Setter = RowValue.Setter;
@@ -170,14 +167,7 @@ int32 UMyGameUserSettings::GetOption()
 	}
 #endif // WITH_EDITOR
 
-	TMap<FName, FSettingsRow> SettingsTableRows;
-	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRows);
-	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
-	{
-		return INDEX_NONE;
-	}
-
-	for (const auto& SettingsTableRowIt : SettingsTableRows)
+	for (const auto& SettingsTableRowIt : SettingsTableRowsInternal)
 	{
 		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
 		const FSettingsFunction& Getter = RowValue.Getter;
@@ -213,37 +203,22 @@ void UMyGameUserSettings::OnDataTableChanged()
 		return;
 	}
 
-	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
-	if (!USingletonLibrary::IsEditorNotPieWorld()
-	    || !ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
-	{
-		return;
-	}
-
-	UDataTable* SettingsDataTable = SettingsDataAsset->SettingsDataTableInternal;
+	UDataTable* SettingsDataTable = USettingsDataAsset::Get().SettingsDataTableInternal;
 	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
 	{
 		return;
 	}
 
-	TMap<FName, FSettingsRow> SettingsTableRows;
-	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
-	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
-	{
-		return;
-	}
-
 	// Set row name by specified tag
-	for (const auto& SettingsTableRowIt : SettingsTableRows)
+	for (const auto& SettingsTableRowIt : SettingsTableRowsInternal)
 	{
 		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
 		const FName RowKey = SettingsTableRowIt.Key;
 		const FName RowValueTag = RowValue.Tag.GetTagName();
 		static const FString EmptyRowName = FString("NewRow");
-		if (!RowValueTag.IsNone()                            // Tag is not empty
-		    && (RowKey != RowValueTag                        // New tag name
-		        || RowKey.ToString().Contains(EmptyRowName)) // New row
-		    && !SettingsTableRows.Contains(RowValueTag))     // Unique tag
+		if (!RowValueTag.IsNone()                             // Tag is not empty
+		    && (RowKey != RowValueTag                         // New tag name
+		        || RowKey.ToString().Contains(EmptyRowName))) // New row
 		{
 			FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
 		}
