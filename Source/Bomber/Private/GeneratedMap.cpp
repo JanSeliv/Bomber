@@ -24,6 +24,14 @@
  *		Level map public functions
  * --------------------------------------------------- */
 
+// Returns the generated map data asset
+const UGeneratedMapDataAsset& UGeneratedMapDataAsset::Get()
+{
+	const UGeneratedMapDataAsset* GeneratedMapDataAsset = USingletonLibrary::GetLevelsDataAsset();
+	checkf(GeneratedMapDataAsset, TEXT("The Generated Map Data Asset is not valid"))
+	return *GeneratedMapDataAsset;
+}
+
 // Sets default values
 AGeneratedMap::AGeneratedMap()
 {
@@ -50,6 +58,14 @@ AGeneratedMap::AGeneratedMap()
 	// Default camera class
 	CameraComponentInternal = CreateDefaultSubobject<UMyCameraComponent>(TEXT("CameraComponent"));
 	CameraComponentInternal->SetupAttachment(RootComponent);
+}
+
+// Returns the generated map
+AGeneratedMap& AGeneratedMap::Get()
+{
+	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	checkf(LevelMap, TEXT("The Level Map is not valid"));
+	return *LevelMap;
 }
 
 // Getting an array of cells by four sides of an input center cell and type of breaks
@@ -135,7 +151,7 @@ void AGeneratedMap::GetSidesCells(
 			for (int32 i = 1; i <= SideLength; ++i)
 			{
 				int32 Distance = i * SideMultiplier;
-				if (bIsY) Distance *= MaxWight;
+				if (bIsY) { Distance *= MaxWight; }
 				const int32 FoundIndex = C0 + Distance;
 				if (PositionC0 != (bIsY ? FoundIndex % MaxWight : FoundIndex / MaxWight) // PositionC0 != PositionX
 				    || !GridCellsInternal.IsValidIndex(FoundIndex))                      // is not in range
@@ -203,7 +219,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 	FRotator ActorRotation{GetActorRotation()};
 	if (!(TO_FLAG(AddedComponent->GetActorType()) & TO_FLAG(EAT::Item | EAT::Player))) // Random rotate if is not item and not player
 	{
-		ActorRotation.Yaw += FMath::RandRange(static_cast<int32>(1), static_cast<int32>(4)) * 90.f;
+		ActorRotation.Yaw += FMath::RandRange(1, 4) * 90.f;
 	}
 	const FVector ActorLocation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + 100.f};
 	const FVector Scale{1.f, 1.f, 1.f};
@@ -429,11 +445,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 {
 	UWorld* World = GetWorld();
-	TArray<FLevelStreamRow> LevelStreamRows;
-	if (const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
-	{
-		LevelStreamRows = LevelsDataAsset->GetLevelStreamRows();
-	}
+	const TArray<FLevelStreamRow>& LevelStreamRows = UGeneratedMapDataAsset::Get().GetLevelStreamRows();
 	if (!LevelStreamRows.Num()
 	    || !World)
 	{
@@ -551,13 +563,10 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
-	if (!LevelsDataAsset
-	    || IS_TRANSIENT(this)) // the level map is transient
+	if (IS_TRANSIENT(this)) // the level map is transient
 	{
 		return;
 	}
-	USingletonLibrary::PrintToLog(this, "----- OnConstruction -----");
 
 #if WITH_EDITOR // [GEditor]
 	USingletonLibrary::SetLevelMap(this);
@@ -569,16 +578,19 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 #endif //WITH_EDITOR [GEditor]
 
+	USingletonLibrary::PrintToLog(this, "----- OnConstruction -----");
+	const UGeneratedMapDataAsset& LevelsDataAsset = UGeneratedMapDataAsset::Get();
+
 	// Create the background blueprint child actor
 	if (CollisionComponentInternal                       // Is accessible
 	    && !CollisionComponentInternal->GetChildActor()) // Is not created yet
 	{
-		CollisionComponentInternal->SetChildActorClass(LevelsDataAsset->GetCollisionsAsset());
+		CollisionComponentInternal->SetChildActorClass(LevelsDataAsset.GetCollisionsAsset());
 		CollisionComponentInternal->CreateChildActor();
 	}
 
 	// Align the Transform
-	const FVector NewLocation = LevelsDataAsset->IsLockedOnZero()
+	const FVector NewLocation = LevelsDataAsset.IsLockedOnZero()
 		                            ? FVector::ZeroVector
 		                            : GetActorLocation().GridSnap(USingletonLibrary::GetCellSize());
 	SetActorLocation(NewLocation);
@@ -742,9 +754,9 @@ void AGeneratedMap::GenerateLevelActors()
 	* Part 2: Spawning these actors
 	*/
 
-	const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset();
-	float WallsChance = LevelsDataAsset ? LevelsDataAsset->GetWallsChance() : 0.f; // Copy to decrease chance after each failed generation
-	int32 BoxesChance = LevelsDataAsset ? LevelsDataAsset->GetBoxesChance() : 0;
+	const UGeneratedMapDataAsset& LevelsDataAsset = UGeneratedMapDataAsset::Get();
+	float WallsChance = LevelsDataAsset.GetWallsChance(); // Copy to decrease chance after each failed generation
+	int32 BoxesChance = LevelsDataAsset.GetBoxesChance();
 	TMap<FCell, EActorType> ActorsToSpawn;
 	int32 Counter = 0;
 	bool bFoundPath = false;
@@ -822,7 +834,8 @@ void AGeneratedMap::GenerateLevelActors()
 								Xi = Xs;
 								Yi = Ys;
 								break;
-							default: break;
+							default:
+								break;
 						}
 
 						CellIt = GridCellsInternal[MapScale.X * Yi + Xi];
@@ -878,9 +891,9 @@ void AGeneratedMap::GenerateLevelActors()
 			{
 				bool bOutBool = false;
 				TArray<UTextRenderComponent*> OutArray{};
-				const USingletonLibrary* Singleton = USingletonLibrary::GetSingleton();
-				Singleton->AddDebugTextRenders(this, DraggedItems, FLinearColor::Gray, bOutBool, OutArray, 254, 255, "*");
-				Singleton->AddDebugTextRenders(this, WallsToSpawn.Union(DraggedWalls), FLinearColor::Red, bOutBool, OutArray, 265);
+				const USingletonLibrary& Singleton = USingletonLibrary::Get();
+				Singleton.AddDebugTextRenders(this, DraggedItems, FLinearColor::Gray, bOutBool, OutArray, 254, 255, "*");
+				Singleton.AddDebugTextRenders(this, WallsToSpawn.Union(DraggedWalls), FLinearColor::Red, bOutBool, OutArray, 265);
 				UE_LOG(LogInit, Log, TEXT("--- Count: %i, wall %f"), Counter, WallsChance);
 			}
 		}
@@ -910,7 +923,10 @@ void AGeneratedMap::GenerateLevelActors()
 		{
 			// If PIE world, mark this spawned actor as bIsEditorOnlyActor
 			SpawnedActor->bIsEditorOnlyActor = true;
-			UMapComponent::GetMapComponent(SpawnedActor)->bIsEditorOnly = true;
+			if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(SpawnedActor))
+			{
+				MapComponent->bIsEditorOnly = true;
+			}
 		}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 	}
@@ -966,7 +982,8 @@ void AGeneratedMap::OnGameStateChanged_Implementation(ECurrentGameState CurrentG
 			break;
 		}
 
-		default: break;
+		default:
+			break;
 	}
 }
 

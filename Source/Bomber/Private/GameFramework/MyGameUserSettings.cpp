@@ -10,6 +10,14 @@
 #include "DataTableEditorUtils.h"
 #endif // WITH_EDITOR
 
+// Returns the settings data asset
+const USettingsDataAsset& USettingsDataAsset::Get()
+{
+	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
+	checkf(SettingsDataAsset, TEXT("The Settings Data Asset is not valid"));
+	return *SettingsDataAsset;
+}
+
 //
 void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsRow>& OutRows) const
 {
@@ -80,14 +88,8 @@ UObject* UMyGameUserSettings::GetObjectContext()
 	}
 #endif // WITH_EDITOR
 
-	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
-	if (!ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
-	{
-		return nullptr;
-	}
-
 	TMap<FName, FSettingsRow> SettingsTableRows;
-	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
+	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRows);
 	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
 	{
 		return nullptr;
@@ -128,14 +130,8 @@ void UMyGameUserSettings::SetOption(int32 InValue)
 	}
 #endif // WITH_EDITOR
 
-	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
-	if (!ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
-	{
-		return;
-	}
-
 	TMap<FName, FSettingsRow> SettingsTableRows;
-	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
+	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRows);
 	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
 	{
 		return;
@@ -174,14 +170,8 @@ int32 UMyGameUserSettings::GetOption()
 	}
 #endif // WITH_EDITOR
 
-	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
-	if (!ensureMsgf(SettingsDataAsset, TEXT("ASSERT: 'SettingsDataAsset' is not valid")))
-	{
-		return INDEX_NONE;
-	}
-
 	TMap<FName, FSettingsRow> SettingsTableRows;
-	SettingsDataAsset->GenerateSettingsArray(SettingsTableRows);
+	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRows);
 	if (!ensureMsgf(SettingsTableRows.Num(), TEXT("ASSERT: 'SettingsTableRows' is empty")))
 	{
 		return INDEX_NONE;

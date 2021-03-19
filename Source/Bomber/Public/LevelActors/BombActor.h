@@ -10,7 +10,7 @@
 #include "BombActor.generated.h"
 
 /**
- *
+ * Describes common data for all bombs.
  */
 UCLASS(Blueprintable, BlueprintType)
 class UBombDataAsset final : public ULevelActorDataAsset
@@ -20,6 +20,9 @@ class UBombDataAsset final : public ULevelActorDataAsset
 public:
 	/** Default constructor. */
 	UBombDataAsset();
+
+	/** Returns the bomb data asset. */
+	static const UBombDataAsset& Get();
 
 	/** All bomb materials. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))

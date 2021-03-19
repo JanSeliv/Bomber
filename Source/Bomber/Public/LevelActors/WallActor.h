@@ -9,7 +9,7 @@
 #include "WallActor.generated.h"
 
 /**
- *
+ * Describes common data for all walls.
  */
 UCLASS(Blueprintable, BlueprintType)
 class UWallDataAsset final : public ULevelActorDataAsset
@@ -19,6 +19,9 @@ class UWallDataAsset final : public ULevelActorDataAsset
 public:
 	/** Default constructor. */
 	UWallDataAsset();
+
+	/** Returns the wall data asset. */
+	static const UWallDataAsset& Get();
 };
 
 

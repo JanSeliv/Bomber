@@ -105,6 +105,9 @@ public:
 	/** Default constructor. */
 	UPlayerDataAsset();
 
+	/** Returns the player data asset. */
+	static const UPlayerDataAsset& Get();
+
 	/** The num of nameplate materials.  */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetNameplateMaterialsNum() const { return NameplateMaterialsInternal.Num(); }

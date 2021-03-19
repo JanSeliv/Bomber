@@ -52,40 +52,47 @@ bool USingletonLibrary::IsEditorNotPieWorld()
 
 void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message)
 {
-#if WITH_EDITOR	 // [Editor]
-	AGeneratedMap* const LevelMap = GetLevelMap();
-	if (!LevelMap || LevelMap->bShouldShowRenders) // The Level Map is not accessible or has the debug mode
+#if WITH_EDITOR	 // [IsEditor]
+	if (IsEditor()
+	    && AGeneratedMap::Get().bShouldShowRenders) // The Level Map is not accessible or has the debug mode
 	{
 		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("nullptr")), *FunctionName, *Message);
 	}
-#endif	//WITH_EDITOR [Editor]
+#endif // [IsEditor]
 }
 
 // Remove all text renders of the Owner
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
-#if WITH_EDITOR	 // [Editor]
-	if (!IS_VALID(Owner)) // The owner is not valid
+#if WITH_EDITOR	 // [IsEditor]
+	if (!IsEditor()
+	    || !IS_VALID(Owner)) // The owner is not valid
 	{
 		return;
 	}
 
 	TArray<UActorComponent*> TextRendersArray;
 	Owner->GetComponents(UTextRenderComponent::StaticClass(), TextRendersArray);
-	if (TextRendersArray.Num() > 0)
+	for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
 	{
-		for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
+		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(i) ? Cast<UTextRenderComponent>(TextRendersArray[i]) : nullptr;
+		if (!TextRenderIt)
 		{
-			FString StringIt = Cast<UTextRenderComponent>(TextRendersArray[i])->Text.ToString();
-			if (StringIt != "Player" && StringIt != "AI") // is not nickname
-			{
-				TextRendersArray[i]->DestroyComponent();
-			}
+			continue;
+		}
+
+		const FName NameIt = *TextRenderIt->Text.ToString();
+		static const FName DefaultPlayerName = "Player";
+		static const FName DefaultAIName = "AI";
+		if (NameIt != DefaultPlayerName
+		    && NameIt != DefaultAIName)
+		{
+			TextRenderIt->DestroyComponent();
 		}
 
 		PrintToLog(Owner, "ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
-#endif	// WITH_EDITOR [Editor]
+#endif	// WITH_EDITOR [IsEditor]
 }
 
 // Debug visualization by text renders
@@ -100,8 +107,9 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	const FString& RenderString/* = ""*/,
 	const FVector& CoordinatePosition/* = FVector::ZeroVector*/) const
 {
-#if WITH_EDITOR	 // [Editor]
-	if (!Cells.Num()         // Null length
+#if WITH_EDITOR	 // [IsEditor]
+	if (!IsEditor()
+	    || !Cells.Num()      // Null length
 	    || !IS_VALID(Owner)) // Owner is not valid
 	{
 		return;
@@ -113,11 +121,10 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 	{
 		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
 		TextRenderIt->RegisterComponent();
-		//TextRenderIt->MarkAsEditorOnlySubobject();
 	}
 
 	PrintToLog(Owner, "AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderString + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
-#endif	// WITH_EDITOR [Editor]
+#endif	// WITH_EDITOR [IsEditor]
 }
 
 /* ---------------------------------------------------
@@ -127,8 +134,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 //  Returns the singleton, nullptr otherwise
 USingletonLibrary* USingletonLibrary::GetSingleton()
 {
-	USingletonLibrary* Singleton = nullptr;
-	if (GEngine) Singleton = Cast<USingletonLibrary>(GEngine->GameSingleton);
+	USingletonLibrary* Singleton = GEngine ? Cast<USingletonLibrary>(GEngine->GameSingleton) : nullptr;
 	checkf(Singleton, TEXT("The Singleton is null"));
 	return Singleton;
 }
@@ -137,30 +143,29 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 AGeneratedMap* USingletonLibrary::GetLevelMap()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (IsEditorNotPieWorld() == true                   // IsEditorNotPieWorld only
-	    && !GetSingleton()->LevelMapInternal.IsValid()) // Is transient
+	if (IsEditorNotPieWorld()       // IsEditorNotPieWorld only
+	    && !Get().LevelMapInternal) // Is transient
 	{
 		SetLevelMap(nullptr); // Find the Level Map
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
-	return GetSingleton()->LevelMapInternal.Get();
+	return Get().LevelMapInternal;
 }
 
 // The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
-void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
+void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-
 	if (IsEditorNotPieWorld() // IsEditorNotPieWorld only
-	    && LevelMap == nullptr)
+        && LevelMap == nullptr)
 	{
-		UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
+		const UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 		if (EditorWorld)
 		{
 			TArray<AActor*> LevelMapsArray;
 			UGameplayStatics::GetAllActorsOfClass(EditorWorld, AGeneratedMap::StaticClass(), LevelMapsArray);
-			if (LevelMapsArray.Num() > 0)
+			if (LevelMapsArray.IsValidIndex(0))
 			{
 				LevelMap = Cast<AGeneratedMap>(LevelMapsArray[0]);
 			}
@@ -178,23 +183,13 @@ void USingletonLibrary::SetLevelMap(const AGeneratedMap* LevelMap)
 // Returns number of alive players
 int32 USingletonLibrary::GetAlivePlayersNum()
 {
-	int32 PlayersNum = 0;
-	if (const AGeneratedMap* LevelMap = GetLevelMap())
-	{
-		PlayersNum = LevelMap->GetAlivePlayersNum();
-	}
-	return PlayersNum;
+	return AGeneratedMap::Get().GetAlivePlayersNum();
 }
 
 // Returns the type of the current level
 ELevelType USingletonLibrary::GetLevelType()
 {
-	ELevelType LevelType = ELT::None;
-	if (const AGeneratedMap* LevelMap = GetLevelMap())
-	{
-		LevelType = LevelMap->GetLevelType();
-	}
-	return LevelType;
+	return AGeneratedMap::Get().GetLevelType();
 }
 
 // Contains a data of standalone and PIE games, nullptr otherwise
@@ -250,10 +245,15 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 	return FCell(Average);
 }
 
+/* ---------------------------------------------------
+*		Data assets
+* --------------------------------------------------- */
+
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
 ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(TSubclassOf<AActor> ActorClass)
 {
-	for (ULevelActorDataAsset*& DataAssetIt : GetSingleton()->ActorsDataAssetsInternal)
+	TArray<ULevelActorDataAsset*>& ActorsDataAsset = GetSingleton()->ActorsDataAssetsInternal;
+	for (ULevelActorDataAsset*& DataAssetIt : ActorsDataAsset)
 	{
 		if (DataAssetIt && DataAssetIt->GetActorClass()->IsChildOf(ActorClass))
 		{
@@ -266,7 +266,7 @@ ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(TSubclassOf<AA
 // Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types.
 void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
 {
-	const TArray<ULevelActorDataAsset*>& ActorsDataAssets = GetSingleton()->ActorsDataAssetsInternal;
+	const TArray<ULevelActorDataAsset*>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
 	for (ULevelActorDataAsset* const& DataAssetIt : ActorsDataAssets)
 	{
 		if (DataAssetIt

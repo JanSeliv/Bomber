@@ -7,14 +7,17 @@
 #include "MyHUD.generated.h"
 
 /**
- *
+ * Contains in-game UI data.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UUIDataAsset : public UDataAsset
+class UUIDataAsset final : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
+	/** Returns the UI data asset. */
+	static FORCEINLINE const UUIDataAsset& Get();
+
 	/** Get UUIDataAsset::InGameWidgetInternal.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UUserWidget> GetInGameClass() const { return InGameClassInternal; }

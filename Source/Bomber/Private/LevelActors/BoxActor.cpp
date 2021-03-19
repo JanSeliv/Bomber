@@ -16,6 +16,15 @@ UBoxDataAsset::UBoxDataAsset()
 	ActorTypeInternal = EAT::Box;
 }
 
+// Returns the box data asset
+const UBoxDataAsset& UBoxDataAsset::Get()
+{
+	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Box);
+	const auto BoxDataAsset = Cast<UBoxDataAsset>(FoundDataAsset);
+	checkf(BoxDataAsset, TEXT("The Box Data Asset is not valid"));
+	return *BoxDataAsset;
+}
+
 // Sets default values.
 ABoxActor::ABoxActor()
 {
@@ -43,6 +52,8 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 
 	// Construct the actor's map component.
 	MapComponentInternal->OnConstruction();
+
+	UpdateItemChance();
 }
 
 // Called when the game starts or when spawned
@@ -58,8 +69,6 @@ void ABoxActor::BeginPlay()
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
-
-	ResetItemChance();
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -77,9 +86,7 @@ void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
 // Spawn item with a chance
 void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 {
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap                         // The Level Map is not valid or transient (in regenerating process)
-	    || !IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
+	if (!IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
 	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame)
 	{
 		return;
@@ -90,17 +97,17 @@ void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 	if (FMath::RandHelper(Max) < SpawnItemChanceInternal)
 	{
 		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");
-		LevelMap->SpawnActorByType(EAT::Item, FCell(GetActorLocation()));
+		AGeneratedMap::Get().SpawnActorByType(EAT::Item, FCell(GetActorLocation()));
 	}
 }
 
 // The item chance can be overrided in game, so it should be reset for each new game
-void ABoxActor::ResetItemChance()
+void ABoxActor::UpdateItemChance()
 {
 	// Update current chance from Data Asset
 	if (MapComponentInternal)
 	{
-		SpawnItemChanceInternal = MapComponentInternal->GetDataAssetChecked<UBoxDataAsset>()->GetSpawnItemChance();
+		SpawnItemChanceInternal = UBoxDataAsset::Get().GetSpawnItemChance();
 	}
 }
 
@@ -110,6 +117,6 @@ void ABoxActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameS
 	if (CurrentGameState == ECurrentGameState::GameStarting)
 	{
 		// Update current chance from Data Asset
-		ResetItemChance();
+		UpdateItemChance();
 	}
 }

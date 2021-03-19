@@ -17,6 +17,15 @@ UItemDataAsset::UItemDataAsset()
 	RowClassInternal = UItemRow::StaticClass();
 }
 
+// Returns the item data asset
+const UItemDataAsset& UItemDataAsset::Get()
+{
+	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Item);
+	const auto ItemDataAsset = Cast<UItemDataAsset>(FoundDataAsset);
+	checkf(ItemDataAsset, TEXT("The Item Data Asset is not valid"));
+	return *ItemDataAsset;
+}
+
 // Sets default values
 AItemActor::AItemActor()
 {
@@ -56,7 +65,7 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 
 	// Override mesh
 	TArray<ULevelActorRow*> OutRows;
-	MapComponentInternal->GetDataAssetChecked<UItemDataAsset>()->GetRowsByLevelType(OutRows, TO_FLAG(USingletonLibrary::GetLevelType()));
+	UItemDataAsset::Get().GetRowsByLevelType(OutRows, TO_FLAG(USingletonLibrary::GetLevelType()));
 	const ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType = ItemTypeInternal](const ULevelActorRow* RowIt)
 	{
 		const auto ItemRow = Cast<UItemRow>(RowIt);
@@ -87,8 +96,5 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	}
 
 	// Destroy itself on overlapping
-	if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap())
-	{
-		LevelMap->DestroyLevelActor(MapComponentInternal);
-	}
+	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal);
 }

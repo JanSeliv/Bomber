@@ -62,6 +62,9 @@ class BOMBER_API USettingsDataAsset final : public UBomberDataAsset
 	GENERATED_BODY()
 
 public:
+	/** Returns the settings data asset. */
+	static const USettingsDataAsset& Get();
+
 	/**
 	 * @see USettingsDataAsset::SettingsDataTableInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++")

@@ -22,7 +22,7 @@ AMyAIController::AMyAIController()
 // Makes AI go toward specified destination cell
 void AMyAIController::MoveToCell(const FCell& DestinationCell)
 {
-	if (!IS_VALID(OwnerInternal))	 // The controlled character is not valid or is transient
+	if (!IS_VALID(OwnerInternal)) // The controlled character is not valid or is transient
 	{
 		return;
 	}
@@ -33,21 +33,24 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	// Rotate the character
 	OwnerInternal->RotateToLocation(AIMoveToInternal.Location, false);
 
-#if WITH_EDITOR	 // [Editor]
-	// Visualize and show destination cell
-	if (HasActorBegunPlay())  // [PIE]
+#if WITH_EDITOR	 // [IsEditor]
+	if (USingletonLibrary::IsEditor())
 	{
-		USingletonLibrary::PrintToLog(this, "MoveAI", "-> \t ClearOwnerTextRenders");
-		USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
-	}  // [PIE]
+		// Visualize and show destination cell
+		if (!USingletonLibrary::IsEditorNotPieWorld()) // [PIE]
+		{
+			USingletonLibrary::PrintToLog(this, "MoveAI", "-> \t ClearOwnerTextRenders");
+			USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
+		} // [IsEditorNotPieWorld]
 
-	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
-	if (MapComponent  // is valid  map component
-		&& MapComponent->bShouldShowRenders)
-	{
-		bool bOutBool = false;
-		TArray<UTextRenderComponent*> OutArray{};
-		USingletonLibrary::GetSingleton()->AddDebugTextRenders(OwnerInternal, FCells{AIMoveToInternal}, FLinearColor::Gray, bOutBool, OutArray, 255, 300, "x");
+		const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
+		if (MapComponent // is valid  map component
+		    && MapComponent->bShouldShowRenders)
+		{
+			bool bOutBool = false;
+			TArray<UTextRenderComponent*> OutArray{};
+			USingletonLibrary::Get().AddDebugTextRenders(OwnerInternal, FCells{AIMoveToInternal}, FLinearColor::Gray, bOutBool, OutArray, 255, 300, "x");
+		}
 	}
 #endif
 }
@@ -87,12 +90,9 @@ void AMyAIController::BeginPlay()
 	}
 
 	// Setup timer handle to update AI brain (initialized being paused)
-	if(const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
-	{
-		FTimerManager& TimerManager = World->GetTimerManager();
-		TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, LevelsDataAsset->GetTickInterval(), true, KINDA_SMALL_NUMBER);
-		TimerManager.PauseTimer(AIUpdateHandleInternal);
-	}
+	FTimerManager& TimerManager = World->GetTimerManager();
+	TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, UGeneratedMapDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
+	TimerManager.PauseTimer(AIUpdateHandleInternal);
 }
 
 // Allows the PlayerController to set up custom input bindings
@@ -116,17 +116,17 @@ void AMyAIController::OnPossess(APawn* InPawn)
 // The main AI logic
 void AMyAIController::UpdateAI()
 {
-	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
-	if (!LevelMap								 // The Level Map is not valid or is transient
-		|| !IS_VALID(OwnerInternal)				 // The controller character is not valid or is transient
-		|| !IsValid(MapComponent))				 // The Map Component is not valid
+	if (!IS_VALID(OwnerInternal)   // The controller character is not valid or is transient
+	    || !IsValid(MapComponent)) // The Map Component is not valid
 	{
 		return;
 	}
 
+	const AGeneratedMap& LevelMap = AGeneratedMap::Get();
+
 #if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld())  // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]UpdateAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
@@ -142,13 +142,13 @@ void AMyAIController::UpdateAI()
 	// Searching 'SAFE NEIGHBORS'
 	FCells Free;
 	int32 bIsDangerous;
-	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous)  // two searches (safe and free)
+	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous) // two searches (safe and free)
 	{
-		LevelMap->GetSidesCells(Free, F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MAX_int32);
+		LevelMap.GetSidesCells(Free, F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MAX_int32);
 		if (!bIsDangerous && Free.Num() > 0)
 		{
 			// Remove this cell from array
-			bIsDangerous = !Free.Remove(F0);  // if it can't be removed - the bot is standing in the explosion
+			bIsDangerous = !Free.Remove(F0); // if it can't be removed - the bot is standing in the explosion
 			break;
 		}
 	}
@@ -157,8 +157,8 @@ void AMyAIController::UpdateAI()
 	if (bIsDangerous == false)
 	{
 		FCells ItemsFromF0;
-		LevelMap->GetSidesCells(ItemsFromF0, F0, EPathType::Safe, 2);
-		LevelMap->IntersectCellsByTypes(ItemsFromF0, TO_FLAG(EAT::Item), false);
+		LevelMap.GetSidesCells(ItemsFromF0, F0, EPathType::Safe, 2);
+		LevelMap.IntersectCellsByTypes(ItemsFromF0, TO_FLAG(EAT::Item), false);
 		if (ItemsFromF0.Num() > 0)
 		{
 			MoveToCell(ItemsFromF0.Array()[0]);
@@ -167,59 +167,59 @@ void AMyAIController::UpdateAI()
 	}
 	// ----- Part 1: Cells iteration -----
 
-	FCells AllCrossways;	 //  cells of all crossways
-	FCells SecureCrossways;	 // crossways without players
+	FCells AllCrossways;    //  cells of all crossways
+	FCells SecureCrossways; // crossways without players
 	FCells FoundItems;
 	bool bIsItemInDirect = false;
 
 	for (auto F = Free.CreateIterator(); F; ++F)
 	{
-		if (bIsDangerous  // is not dangerous situation
-			&& USingletonLibrary::CalculateCellsLength(F0, *F) > 3.0F)
+		if (bIsDangerous // is not dangerous situation
+		    && USingletonLibrary::CalculateCellsLength(F0, *F) > 3.0F)
 		{
-			F.RemoveCurrent();	// removing distant cells
+			F.RemoveCurrent(); // removing distant cells
 			continue;
 		}
 
 		FCells ThisCrossway;
-		LevelMap->GetSidesCells(ThisCrossway, *F, EPathType::Safe, 2);
-		FCells Way = Free;					 // Way = Safe / (Free + F0)
-		Way.Emplace(F0);					 // Way = Free + F0
-		Way = ThisCrossway.Difference(Way);	 // Way = Safe / Way
+		LevelMap.GetSidesCells(ThisCrossway, *F, EPathType::Safe, 2);
+		FCells Way = Free;                  // Way = Safe / (Free + F0)
+		Way.Emplace(F0);                    // Way = Free + F0
+		Way = ThisCrossway.Difference(Way); // Way = Safe / Way
 
-		if (Way.Num() > 0)	// Are there any cells?
+		if (Way.Num() > 0) // Are there any cells?
 		{
 			// Finding crossways
-			AllCrossways.Emplace(*F);  // is the crossway
-			LevelMap->IntersectCellsByTypes(Way = ThisCrossway, TO_FLAG(EAT::Player), false, MapComponent);
+			AllCrossways.Emplace(*F); // is the crossway
+			LevelMap.IntersectCellsByTypes(Way = ThisCrossway, TO_FLAG(EAT::Player), false, MapComponent);
 			if (Way.Num() == 0)
 			{
 				SecureCrossways.Emplace(*F);
 			}
 
 			// Finding items
-			LevelMap->IntersectCellsByTypes(ThisCrossway, TO_FLAG(EAT::Item), false);
-			if (ThisCrossway.Num() > 0)	 // Is there items in this crossway?
+			LevelMap.IntersectCellsByTypes(ThisCrossway, TO_FLAG(EAT::Item), false);
+			if (ThisCrossway.Num() > 0) // Is there items in this crossway?
 			{
-				ThisCrossway = ThisCrossway.Intersect(Free);  // ThisCrossway = ThisCrossway ∪ Free
-				if (ThisCrossway.Num() > 0)					  // Is there direct items in this crossway?
+				ThisCrossway = ThisCrossway.Intersect(Free); // ThisCrossway = ThisCrossway ∪ Free
+				if (ThisCrossway.Num() > 0)                  // Is there direct items in this crossway?
 				{
-					if (bIsItemInDirect == false)  // is the first found direct item
+					if (bIsItemInDirect == false) // is the first found direct item
 					{
 						bIsItemInDirect = true;
-						FoundItems.Empty();	 // clear all previously found corner items
+						FoundItems.Empty(); // clear all previously found corner items
 					}
-					FoundItems = FoundItems.Union(ThisCrossway);  // Add found direct items
-				}												  // item around the corner
-				else if (bIsItemInDirect == false)				  // Need corner item?
+					FoundItems = FoundItems.Union(ThisCrossway); // Add found direct items
+				}                                                // item around the corner
+				else if (bIsItemInDirect == false)               // Need corner item?
 				{
-					FoundItems.Emplace(*F);	 // Add found corner item
+					FoundItems.Emplace(*F); // Add found corner item
 				}
-			}  // [has items]
-		}	   // [is crossway]
+			} // [has items]
+		}     // [is crossway]
 		else if (bIsDangerous && ThisCrossway.Contains(*F) == false)
 		{
-			F.RemoveCurrent();	// In the dangerous situation delete a non-crossway cell
+			F.RemoveCurrent(); // In the dangerous situation delete a non-crossway cell
 		}
 	}
 
@@ -232,24 +232,24 @@ void AMyAIController::UpdateAI()
 
 	// ----- Part 2: Cells filtration -----
 
-	FCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free;	 // selected cells
+	FCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free; // selected cells
 	bool bIsFilteringFailed = false;
 	for (int32 i = 0; i < 4; ++i)
 	{
 		FCells FilteringStep;
-		switch (i)	// 4 filtering steps
+		switch (i) // 4 filtering steps
 		{
-			case 0:	 // All crossways: Filtered ∪ AllCrossways
+			case 0: // All crossways: Filtered ∪ AllCrossways
 				FilteringStep = Filtered.Intersect(AllCrossways);
 				break;
-			case 1:	 // Without players
-				LevelMap->GetSidesCells(FilteringStep, F0, EPathType::Secure, MAX_int32);
+			case 1: // Without players
+				LevelMap.GetSidesCells(FilteringStep, F0, EPathType::Secure, MAX_int32);
 				FilteringStep = Filtered.Intersect(FilteringStep);
 				break;
-			case 2:	 // Without crossways with another players
+			case 2: // Without crossways with another players
 				FilteringStep = Filtered.Intersect(SecureCrossways);
 				break;
-			case 3:	 // Only nearest cells ( length <= 3 cells)
+			case 3: // Only nearest cells ( length <= 3 cells)
 				for (const FCell& It : Filtered)
 				{
 					if (USingletonLibrary::CalculateCellsLength(F0, It) <= 3.0F)
@@ -258,8 +258,9 @@ void AMyAIController::UpdateAI()
 					}
 				}
 				break;
-			default: break;
-		}  //[4 filtering steps]
+			default:
+				break;
+		} //[4 filtering steps]
 
 		if (FilteringStep.Num() > 0)
 		{
@@ -269,28 +270,28 @@ void AMyAIController::UpdateAI()
 		{
 			bIsFilteringFailed = true;
 		}
-	}  // [Loopy filtering]
+	} // [Loopy filtering]
 
 	// ----- Part 2: Deciding whether to put the bomb -----
 
-	if (bIsDangerous == false			// is not dangerous situation
-		&& bIsFilteringFailed == false	// filtering was not failed
-		&& bIsItemInDirect == false)	// was not found direct items
+	if (bIsDangerous == false          // is not dangerous situation
+	    && bIsFilteringFailed == false // filtering was not failed
+	    && bIsItemInDirect == false)   // was not found direct items
 	{
 		FCells BoxesAndPlayers;
-		LevelMap->GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
-		LevelMap->IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(EAT::Box | EAT::Player), false, MapComponent);
-		if (BoxesAndPlayers.Num() > 0)	// Are bombs or players in own bomb radius
+		LevelMap.GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
+		LevelMap.IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(EAT::Box | EAT::Player), false, MapComponent);
+		if (BoxesAndPlayers.Num() > 0) // Are bombs or players in own bomb radius
 		{
 			OwnerInternal->SpawnBomb();
-			Free.Empty();  // Delete all cells to make new choice
+			Free.Empty(); // Delete all cells to make new choice
 
 #if WITH_EDITOR	 // [Editor]
 			if (MapComponent->bShouldShowRenders)
 			{
 				bool bOutBool = false;
 				TArray<UTextRenderComponent*> OutArray{};
-				USingletonLibrary::GetSingleton()->AddDebugTextRenders(OwnerInternal, FCells{F0}, FLinearColor::Red, bOutBool, OutArray, 261.F, 95.F, "Attack");
+				USingletonLibrary::Get().AddDebugTextRenders(OwnerInternal, FCells{F0}, FLinearColor::Red, bOutBool, OutArray, 261.F, 95.F, "Attack");
 			}
 #endif	// [Editor]
 		}
@@ -314,7 +315,7 @@ void AMyAIController::UpdateAI()
 			FLinearColor Color;
 			FString String = "+";
 			FVector Position = FVector::ZeroVector;
-			switch (i)	// 3 types of visualization
+			switch (i) // 3 types of visualization
 			{
 				case 0:
 					VisualizingStep = AllCrossways.Difference(SecureCrossways);
@@ -330,12 +331,13 @@ void AMyAIController::UpdateAI()
 					String = "F";
 					Position = FVector(-50.0F, -50.0F, 0.0F);
 					break;
-				default: break;
-			}  // 3 visualization types
+				default:
+					break;
+			} // 3 visualization types
 			bool bOutBool = false;
 			TArray<UTextRenderComponent*> OutArray{};
-			USingletonLibrary::GetSingleton()->AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, bOutBool, OutArray, 263, 124, String, Position);
-		}  // [Loopy visualization]
+			USingletonLibrary::Get().AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, bOutBool, OutArray, 263, 124, String, Position);
+		} // [Loopy visualization]
 	}
 #endif	// [Editor]
 }
@@ -350,7 +352,7 @@ void AMyAIController::SetAI(bool bShouldEnable) const
 	}
 
 	FTimerManager& TimerManager = World->GetTimerManager();
-	if(bShouldEnable)
+	if (bShouldEnable)
 	{
 		TimerManager.UnPauseTimer(AIUpdateHandleInternal);
 	}
@@ -377,6 +379,7 @@ void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState Curren
 			SetAI(true);
 			break;
 		}
-		default: break;
+		default:
+			break;
 	}
 }

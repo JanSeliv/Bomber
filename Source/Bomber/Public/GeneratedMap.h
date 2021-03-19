@@ -10,7 +10,7 @@
 #include "GeneratedMap.generated.h"
 
 /**
- *
+ * Unique data about one separated level.
  */
 USTRUCT(BlueprintType)
 struct FLevelStreamRow
@@ -41,7 +41,7 @@ struct FLevelStreamRow
 };
 
 /**
- *
+ * Contains all data that describe all levels.
  */
 UCLASS(Blueprintable, BlueprintType)
 class UGeneratedMapDataAsset final : public UBomberDataAsset
@@ -49,8 +49,8 @@ class UGeneratedMapDataAsset final : public UBomberDataAsset
 	GENERATED_BODY()
 
 public:
-	/** Default constructor. */
-	UGeneratedMapDataAsset() = default;
+	/** Returns the generated map data asset. */
+	static const UGeneratedMapDataAsset& Get();
 
 	/** Returns copies of levels. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -132,6 +132,10 @@ public:
 
 	/** Sets default values for this actor's properties */
 	AGeneratedMap();
+
+	/** Returns the generated map.
+	 * Is created only once, can not be destroyed and always exist in persistent level. */
+	static AGeneratedMap& Get();
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

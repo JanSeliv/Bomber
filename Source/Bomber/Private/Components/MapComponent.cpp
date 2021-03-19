@@ -25,21 +25,21 @@ UMapComponent::UMapComponent()
 // Updates a owner's state. Should be called in the owner's OnConstruction event.
 void UMapComponent::OnConstruction()
 {
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
 	AActor* Owner = GetOwner();
-	if (!IS_VALID(Owner) // The owner is not valid
-	    || !LevelMap)    // The Level Map is not valid
+	if (!IS_VALID(Owner)) // The owner is not valid
 	{
 		return;
 	}
 
+	AGeneratedMap& LevelMap = AGeneratedMap::Get();
+
 	// Find new Location at dragging and update-delegate
 	USingletonLibrary::PrintToLog(Owner, "OnMapComponentConstruction", "-> \t FCell()");
-	LevelMap->SetNearestCell(this);
+	LevelMap.SetNearestCell(this);
 
 	// Owner updating
 	USingletonLibrary::PrintToLog(Owner, "OnMapComponentConstruction", "-> \t AddToGrid");
-	USingletonLibrary::GetLevelMap()->AddToGrid(Cell, this);
+	LevelMap.AddToGrid(Cell, this);
 
 	// Set default mesh asset
 	if (ActorDataAssetInternal)
@@ -66,6 +66,7 @@ void UMapComponent::OnConstruction()
 void UMapComponent::SetMeshByRow(const ULevelActorRow* Row, UMeshComponent* InMeshComponent/* = nullptr*/)
 {
 	if (!Row
+	    || !Row->Mesh
 	    || !MeshComponentInternal && !InMeshComponent)
 	{
 		return;
@@ -99,8 +100,11 @@ void UMapComponent::SetMaterial(UMaterialInterface* Material)
 // Rerun owner's construction scripts. The temporary only editor owner will not be updated
 void UMapComponent::RerunOwnerConstruction() const
 {
-	if (!ensureMsgf(GetOwner(), TEXT("RerunOwnerConstruction: The map owner is not valid"))) return;
-	GetOwner()->RerunConstructionScripts();
+	AActor* Owner = GetOwner();
+	if (ensureMsgf(Owner, TEXT("RerunOwnerConstruction: The map owner is not valid")))
+	{
+		Owner->RerunConstructionScripts();
+	}
 }
 
 // Get the owner's data asset
@@ -114,7 +118,8 @@ void UMapComponent::OnRegister()
 {
 	Super::OnRegister();
 	AActor* Owner = GetOwner();
-	if (!IS_VALID(Owner)) // owner is not valid
+	if (!IS_VALID(Owner)           // Owner is not valid
+	    || ActorDataAssetInternal) // is already registered
 	{
 		return;
 	}
@@ -172,8 +177,7 @@ void UMapComponent::OnRegister()
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	AActor* const ComponentOwner = GetOwner();
-	if (IS_TRANSIENT(ComponentOwner) == false         // Is not transient owner
-	    && IsValid(USingletonLibrary::GetLevelMap())) // is valid and is not transient the level map
+	if (!IS_TRANSIENT(ComponentOwner)) // Is not transient owner
 	{
 		USingletonLibrary::PrintToLog(ComponentOwner, "OnComponentDestroyed", "-> \t DestroyActorsFromMap");
 
@@ -187,7 +191,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		if (USingletonLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
-			USingletonLibrary::GetLevelMap()->DestroyLevelActor(this);
+			AGeneratedMap::Get().DestroyLevelActor(this);
 
 			// Editor delegates
 			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();

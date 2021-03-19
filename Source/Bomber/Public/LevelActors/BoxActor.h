@@ -9,7 +9,7 @@
 #include "BoxActor.generated.h"
 
 /**
- *
+ * Describes common data for all boxes.
  */
 UCLASS(Blueprintable, BlueprintType)
 class UBoxDataAsset final : public ULevelActorDataAsset
@@ -19,6 +19,9 @@ class UBoxDataAsset final : public ULevelActorDataAsset
 public:
 	/** Default constructor. */
 	UBoxDataAsset();
+
+	/** Returns the box data asset. */
+	static const UBoxDataAsset& Get();
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -54,8 +57,8 @@ protected:
 	class UMapComponent* MapComponentInternal; //[C.AW]
 
 	/** Contains current spawn chance to spawn item. Can be overriden by the Cheat Manager. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
-	int32 SpawnItemChanceInternal; //[N]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
+	int32 SpawnItemChanceInternal = INDEX_NONE; //[G]
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -76,7 +79,7 @@ protected:
 
 	/** The item chance can be overrided in game, so it should be reset for each new game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ResetItemChance();
+	void UpdateItemChance();
 
 	/** Listen to reset item chance for each new game. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))

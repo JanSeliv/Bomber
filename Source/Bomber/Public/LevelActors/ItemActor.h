@@ -10,7 +10,7 @@
 #include "ItemActor.generated.h"
 
 /**
- *
+ * Row that describes each unique item.
  */
 UCLASS(Blueprintable, BlueprintType)
 class UItemRow final : public ULevelActorRow
@@ -18,13 +18,13 @@ class UItemRow final : public ULevelActorRow
 	GENERATED_BODY()
 
 public:
-	/** */
+	/** Of each type this item is. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
 	EItemType ItemType = EItemType::None; //[D]
 };
 
 /**
- *
+ * Describes common data for all items.
  */
 UCLASS(Blueprintable, BlueprintType)
 class UItemDataAsset final : public ULevelActorDataAsset
@@ -34,6 +34,9 @@ class UItemDataAsset final : public ULevelActorDataAsset
 public:
 	/** Default constructor. */
 	UItemDataAsset();
+
+	/** Returns the item data asset. */
+    static const UItemDataAsset& Get();
 };
 
 /**

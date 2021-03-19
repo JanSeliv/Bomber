@@ -5,18 +5,23 @@
 #include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
 
+// Returns the UI data asset
+const UUIDataAsset& UUIDataAsset::Get()
+{
+	const UUIDataAsset* UIDataAsset = USingletonLibrary::GetUIDataAsset();
+	checkf(UIDataAsset, TEXT("The UI Data Asset is not valid"));
+	return *UIDataAsset;
+}
+
 // Called when the game starts. Created widget.
 void AMyHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// Widget creating and adding it to viewport
-	if (const UUIDataAsset* UIDataAsset = USingletonLibrary::GetUIDataAsset())
+	InGameWidget = CreateWidget<UInGameWidget>(GetOwningPlayerController(), UUIDataAsset::Get().GetInGameClass());
+	if (InGameWidget) // successfully created
 	{
-		InGameWidget = CreateWidget<UInGameWidget>(GetOwningPlayerController(), UIDataAsset->GetInGameClass());
-		if (InGameWidget) // successfully created
-		{
-			InGameWidget->AddToViewport();
-		}
+		InGameWidget->AddToViewport();
 	}
 }

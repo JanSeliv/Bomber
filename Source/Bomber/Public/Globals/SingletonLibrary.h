@@ -71,6 +71,7 @@ public:
 	/** Returns the singleton, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static USingletonLibrary* GetSingleton();
+	static FORCEINLINE const USingletonLibrary& Get() { return *GetSingleton(); };
 
 	/** The Level Map getter, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -81,7 +82,7 @@ public:
 	 * @param LevelMap The level map to set in the Library
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	static void SetLevelMap(const class AGeneratedMap* LevelMap);
+	static void SetLevelMap(class AGeneratedMap* LevelMap);
 
 	/** Returns number of alive players. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -169,17 +170,21 @@ public:
 		return (LBitmask & RBitmask) != 0;
 	}
 
+	/* ---------------------------------------------------
+	*		Data assets
+	* --------------------------------------------------- */
+
 	/** Returns the Levels Data Asset*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return GetSingleton()->LevelsDataAssetInternal; }
+	static FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return Get().LevelsDataAssetInternal; }
 
 	/** Returns the UI Data Asset*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return GetSingleton()->UIDataAssetInternal; }
+	static FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return Get().UIDataAssetInternal; }
 
 	/** Returns the settings data.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() { return GetSingleton()->SettingsDataAssetInternal; }
+	static FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() { return Get().SettingsDataAssetInternal; }
 
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
@@ -205,20 +210,20 @@ protected:
 	* --------------------------------------------------- */
 
 	/** AGeneratedMap wrapper. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
-	TSoftObjectPtr<class AGeneratedMap> LevelMapInternal; //[B]
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
+	class AGeneratedMap* LevelMapInternal; //[G]
 
 	/** Contains properties to setup the generated level. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))
-	class UGeneratedMapDataAsset* LevelsDataAssetInternal;
+	class UGeneratedMapDataAsset* LevelsDataAssetInternal; //[B]
 
 	/** Settings data. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Data Asset"))
-	class USettingsDataAsset* SettingsDataAssetInternal;
+	class USettingsDataAsset* SettingsDataAssetInternal; //[B]
 
 	/** Contains properties to setup UI. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "UI Data Asset"))
-	class UUIDataAsset* UIDataAssetInternal;
+	class UUIDataAsset* UIDataAssetInternal; //[B]
 
 	/** Actor type and its associated class. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actors Data Assets"))

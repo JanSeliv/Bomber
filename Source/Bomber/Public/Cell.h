@@ -26,10 +26,8 @@ struct FCell
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FVector Location = FVector::DownVector; //[AW]
 
-	/** Default constructor (zero initialization). */
-	FCell()
-	{
-	}
+	/** Default constructor. */
+	FCell() = default;
 
 	/**
 	* Initial constructor for cells filling into the array.

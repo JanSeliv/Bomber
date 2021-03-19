@@ -121,6 +121,15 @@ UPlayerDataAsset::UPlayerDataAsset()
 	RowClassInternal = UPlayerRow::StaticClass();
 }
 
+// Returns the player data asset
+const UPlayerDataAsset& UPlayerDataAsset::Get()
+{
+	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Player);
+	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(FoundDataAsset);
+	checkf(PlayerDataAsset, TEXT("The Player Data Asset is not valid"));
+	return *PlayerDataAsset;
+}
+
 // Get nameplate material by index, is used by nameplate meshes
 UMaterialInterface* UPlayerDataAsset::GetNameplateMaterial(int32 Index) const
 {
@@ -148,7 +157,10 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize skeletal mesh
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
+	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
+	{
+		SkeletalMeshComponent->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
+	}
 
 	// Initialize the nameplate mesh component
 	NameplateMeshInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
@@ -197,10 +209,8 @@ void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInt
 // Spawns bomb on character position
 void APlayerCharacter::SpawnBomb()
 {
-	AController* OwnedController = GetController();
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap                                   // The Level Map is not accessible
-	    || !IsValid(MapComponentInternal)           // The Map Component is not valid or transient
+	const AController* OwnedController = GetController();
+	if (!MapComponentInternal                       // The Map Component is not valid or transient
 	    || PowerupsInternal.FireN <= 0              // Null length of explosion
 	    || PowerupsInternal.BombN <= 0              // No more bombs
 	    || USingletonLibrary::IsEditorNotPieWorld() // Should not spawn bomb in PIE
@@ -211,7 +221,7 @@ void APlayerCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto BombActor = Cast<ABombActor>(LevelMap->SpawnActorByType(EAT::Bomb, MapComponentInternal->Cell));
+	auto BombActor = Cast<ABombActor>(AGeneratedMap::Get().SpawnActorByType(EAT::Bomb, MapComponentInternal->Cell));
 	if (BombActor) // can return nullptr if the cell is not free
 	{
 		// Updating explosion cells
@@ -256,7 +266,7 @@ void APlayerCharacter::BeginPlay()
 	// Set the animation
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		const TSubclassOf<UAnimInstance> AnimInstanceClass = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>()->GetAnimInstanceClass();
+		const TSubclassOf<UAnimInstance> AnimInstanceClass = UPlayerDataAsset::Get().GetAnimInstanceClass();
 		MeshComp->SetAnimInstanceClass(AnimInstanceClass);
 	}
 
@@ -284,20 +294,16 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	// Setup timer handle to update a player location on the level map (initialized being paused)
-	if (const UGeneratedMapDataAsset* LevelsDataAsset = USingletonLibrary::GetLevelsDataAsset())
+	FTimerManager& TimerManager = World->GetTimerManager();
+	TWeakObjectPtr<ThisClass> WeakThis(this);
+	TimerManager.SetTimer(UpdatePositionHandleInternal, [WeakThis]
 	{
-		FTimerManager& TimerManager = World->GetTimerManager();
-		TWeakObjectPtr<ThisClass> WeakThis(this);
-		TimerManager.SetTimer(UpdatePositionHandleInternal, [WeakThis]
+		if (const APlayerCharacter* PlayerCharacter = WeakThis.Get())
 		{
-			AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-			if (const APlayerCharacter* PlayerCharacter = WeakThis.Get())
-			{
-				LevelMap->SetNearestCell(PlayerCharacter->MapComponentInternal);
-			}
-		}, LevelsDataAsset->GetTickInterval(), true, KINDA_SMALL_NUMBER);
-		TimerManager.PauseTimer(UpdatePositionHandleInternal);
-	}
+			AGeneratedMap::Get().SetNearestCell(PlayerCharacter->MapComponentInternal);
+		}
+	}, UGeneratedMapDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
+	TimerManager.PauseTimer(UpdatePositionHandleInternal);
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -306,10 +312,8 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	UMySkeletalMeshComponent* MySkeletalMeshComponent = Cast<UMySkeletalMeshComponent>(GetMesh());
-	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (IS_TRANSIENT(this)                // This actor is transient
-	    || !IsValid(MapComponentInternal) // Is not valid for map construction
-	    || !LevelMap)                     // the level map is not valid or transient
+	if (IS_TRANSIENT(this)        // This actor is transient
+	    || !MapComponentInternal) // Is not valid for map construction
 	{
 		return;
 	}
@@ -321,7 +325,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	if (CharacterIDInternal == INDEX_NONE)
 	{
 		FCells PlayerCells;
-		LevelMap->IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
+		AGeneratedMap::Get().IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
 		CharacterIDInternal = PlayerCells.Num() - 1;
 	}
 
@@ -351,12 +355,12 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// Set a nameplate material
 	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
 	{
-		const auto PlayerDataAsset = MapComponentInternal->GetDataAssetChecked<UPlayerDataAsset>();
-		const int32 NameplateMeshesNum = PlayerDataAsset->GetNameplateMaterialsNum();
+		const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
 		if (NameplateMeshesNum > 0)
 		{
 			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
-			if (UMaterialInterface* Material = PlayerDataAsset->GetNameplateMaterial(MaterialNo))
+			if (UMaterialInterface* Material = PlayerDataAsset.GetNameplateMaterial(MaterialNo))
 			{
 				NameplateMeshInternal->SetMaterial(0, Material);
 			}
@@ -373,12 +377,14 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
 		if (MapComponentInternal->bShouldShowRenders == false)
 		{
-			if (MyAIControllerInternal) MyAIControllerInternal->Destroy();
+			if (MyAIControllerInternal)
+				MyAIControllerInternal->Destroy();
 		}
 		else if (MyAIControllerInternal == nullptr) // Is a bot with debug visualization and AI controller is not created yet
 		{
 			SpawnDefaultController();
-			if (GetController()) GetController()->bIsEditorOnlyActor = true;
+			if (GetController())
+				GetController()->bIsEditorOnlyActor = true;
 		}
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
@@ -440,7 +446,8 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 			PowerupsInternal.FireN++;
 			break;
 		}
-		default: break;
+		default:
+			break;
 	}
 
 	// Uninitialize item
@@ -475,7 +482,8 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 			TimerManager.UnPauseTimer(UpdatePositionHandleInternal);
 			break;
 		}
-		default: break;
+		default:
+			break;
 	}
 }
 

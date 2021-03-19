@@ -17,6 +17,15 @@ UBombDataAsset::UBombDataAsset()
 	ActorTypeInternal = EAT::Bomb;
 }
 
+// Returns the bomb data asset
+const UBombDataAsset& UBombDataAsset::Get()
+{
+	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Bomb);
+	const auto BombDataAsset = Cast<UBombDataAsset>(FoundDataAsset);
+	checkf(BombDataAsset, TEXT("The Bomb Data Asset is not valid"));
+	return *BombDataAsset;
+}
+
 // Sets default values
 ABombActor::ABombActor()
 {
@@ -36,15 +45,14 @@ void ABombActor::InitBomb(
 	int32 FireN/* = 1*/,
 	int32 CharacterID/* = -1*/)
 {
-	if (!IsValid(USingletonLibrary::GetLevelMap()) // // The Level Map is not valid
-	    || !IsValid(MapComponentInternal)          // The Map Component is not valid
-	    || FireN < 0)                              // Negative length of the explosion
+	if (!MapComponentInternal
+	    || FireN < 0) // Negative length of the explosion
 	{
 		return;
 	}
 
 	// Set material
-	const TArray<UMaterialInterface*>& BombMaterials = MapComponentInternal->GetDataAssetChecked<UBombDataAsset>()->BombMaterials;
+	const TArray<UMaterialInterface*>& BombMaterials = UBombDataAsset::Get().BombMaterials;
 	if (CharacterID != -1       // Is not debug character
 	    && BombMaterials.Num()) // As least one bomb material
 	{
@@ -54,16 +62,17 @@ void ABombActor::InitBomb(
 
 	// Update explosion information
 	ExplosionCellsInternal.Empty();
-	USingletonLibrary::GetLevelMap()->GetSidesCells(ExplosionCellsInternal, MapComponentInternal->Cell, EPathType::Explosion, FireN);
+	AGeneratedMap::Get().GetSidesCells(ExplosionCellsInternal, MapComponentInternal->Cell, EPathType::Explosion, FireN);
 
-#if WITH_EDITOR  // [Editor]
-	if (MapComponentInternal->bShouldShowRenders)
+#if WITH_EDITOR  // [IsEditor]
+	if (USingletonLibrary::IsEditor()
+	    && MapComponentInternal->bShouldShowRenders)
 	{
 		USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(this);
 		bool bOutBool = false;
 		TArray<UTextRenderComponent*> OutArray;
-		USingletonLibrary::GetSingleton()->AddDebugTextRenders(this, ExplosionCellsInternal, FLinearColor::Red, bOutBool, OutArray);
+		USingletonLibrary::Get().AddDebugTextRenders(this, ExplosionCellsInternal, FLinearColor::Red, bOutBool, OutArray);
 	}
 #endif
 
@@ -128,11 +137,7 @@ void ABombActor::SetLifeSpan(float InLifespan/* = INDEX_NONE*/)
 {
 	if (InLifespan == INDEX_NONE) // is default value, should override it
 	{
-		const UBombDataAsset* BombDataAsset = MapComponentInternal ? MapComponentInternal->GetDataAssetChecked<UBombDataAsset>() : nullptr;
-		if (BombDataAsset)
-		{
-			InLifespan = BombDataAsset->GetLifeSpan();
-		}
+		InLifespan = UBombDataAsset::Get().GetLifeSpan();
 	}
 
 	Super::SetLifeSpan(InLifespan);
@@ -148,9 +153,7 @@ void ABombActor::LifeSpanExpired()
 // Destroy bomb and burst explosion cells
 void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 {
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap                                                                    // The Level Map is not valid or transient (in regenerating process)
-	    || !ExplosionCellsInternal.Num()                                             // no cells to destroy
+	if (!ExplosionCellsInternal.Num()                                                // no cells to destroy
 	    || !IsValid(MapComponentInternal)                                            // The Map Component is not valid or is destroyed already
 	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame) // game was not started or already finished
 	{
@@ -158,7 +161,7 @@ void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 	}
 
 	// Spawn emitters
-	UParticleSystem* ExplosionParticle = MapComponentInternal->GetDataAssetChecked<UBombDataAsset>()->ExplosionParticle;
+	UParticleSystem* ExplosionParticle = UBombDataAsset::Get().ExplosionParticle;
 	for (const FCell& Cell : ExplosionCellsInternal)
 	{
 		const FTransform Position{GetActorRotation(), Cell.Location, GetActorScale3D()};
@@ -170,7 +173,7 @@ void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 	ExplosionCellsInternal.Empty();
 
 	// Destroy all actors from array of cells
-	LevelMap->DestroyActorsFromMap(CellsToDestroy);
+	AGeneratedMap::Get().DestroyActorsFromMap(CellsToDestroy);
 }
 
 // Triggers when character end to overlaps with this bomb.
