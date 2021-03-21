@@ -218,9 +218,12 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** AGeneratedMap wrapper. */
+	/** Is actor on persistent level.
+	 * Is uproperty to be accessible in blueprints.
+	 * Is transient to not serialize it since will be set by AGeneratedMap::OnConstruction().
+	 * Is stored in singleton, so has weak reference field to be garbage collected on loading another maps where that actor does not exist. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
-	class AGeneratedMap* LevelMapInternal; //[G]
+	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal; //[G]
 
 	/** Contains properties to setup the generated level. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))

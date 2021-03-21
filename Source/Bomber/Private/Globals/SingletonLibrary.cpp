@@ -143,14 +143,14 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 AGeneratedMap* USingletonLibrary::GetLevelMap()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (IsEditorNotPieWorld()       // IsEditorNotPieWorld only
-	    && !Get().LevelMapInternal) // Is transient
+	if (IsEditorNotPieWorld()
+	    && !Get().LevelMapInternal.IsValid())
 	{
 		SetLevelMap(nullptr); // Find the Level Map
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
-	return Get().LevelMapInternal;
+	return Get().LevelMapInternal.Get();
 }
 
 // The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
