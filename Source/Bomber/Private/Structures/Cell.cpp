@@ -1,10 +1,9 @@
 ﻿// Copyright 2021 Yevhenii Selivanov.
 
-#include "Cell.h"
+#include "Structures/Cell.h"
 //---
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
 //---
 
 // The zero cell

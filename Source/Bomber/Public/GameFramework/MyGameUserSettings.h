@@ -106,6 +106,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = "false", Category = "C++", meta = (DevelopmentOnly))
 	void BindOnDataTableChanged(const FOnDataTableChanged& EventToBind) const;
 
+	/** */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+    FORCEINLINE class UDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal; }
+
 	/**
 	 * @see USettingsDataAsset::WidthByScreen */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -121,11 +125,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE FText GetTitle() const { return TitleInternal; }
 
+protected:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table", ShowOnlyInnerProperties))
 	class UDataTable* SettingsDataTableInternal; //[D]
 
-protected:
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Width By Screen", ShowOnlyInnerProperties))
 	float WidthByScreenInternal; //[D]

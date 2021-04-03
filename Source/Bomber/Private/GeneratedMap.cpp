@@ -3,7 +3,7 @@
 #include "GeneratedMap.h"
 //---
 #include "Bomber.h"
-#include "Cell.h"
+#include "Structures/Cell.h"
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
 #include "GameFramework/MyGameStateBase.h"

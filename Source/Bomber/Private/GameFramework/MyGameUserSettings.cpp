@@ -227,7 +227,7 @@ void UMyGameUserSettings::OnDataTableChanged()
 		return;
 	}
 
-	UDataTable* SettingsDataTable = USettingsDataAsset::Get().SettingsDataTableInternal;
+	UDataTable* SettingsDataTable = USettingsDataAsset::Get().GetSettingsDataTable();
 	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
 	{
 		return;

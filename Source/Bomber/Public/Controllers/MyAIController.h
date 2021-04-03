@@ -4,7 +4,7 @@
 
 #include "AIController.h"
 #include "Bomber.h"
-#include "Cell.h"
+#include "Structures/Cell.h"
 //---
 #include "MyAIController.generated.h"
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Cell.h"
+#include "Structures/Cell.h"
 #include "Globals/LevelActorDataAsset.h"
 //---
 #include "GameFramework/Actor.h"

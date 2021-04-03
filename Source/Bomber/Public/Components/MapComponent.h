@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Bomber.h"
-#include "Cell.h"
+#include "Structures/Cell.h"
 #include "Components/ActorComponent.h"
 //---
 #include "MapComponent.generated.h"
