@@ -115,7 +115,7 @@ void UMyCameraComponent::BeginPlay()
 	StartLocationInternal = GetComponentLocation();
 
 	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -131,7 +131,7 @@ void UMyCameraComponent::OnGameStateChanged_Implementation(ECurrentGameState Cur
 		case ECurrentGameState::GameStarting:
 		{
 			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-			const AMyGameStateBase* GameStateBase = USingletonLibrary::GetMyGameState(this);
+			const AMyGameStateBase* GameStateBase = USingletonLibrary::GetMyGameState();
 			if (PlayerController
 			    && GameStateBase)
 			{

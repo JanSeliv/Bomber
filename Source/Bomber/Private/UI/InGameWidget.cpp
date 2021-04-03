@@ -10,7 +10,7 @@
 void UInGameWidget::ShowEndGameState_Implementation()
 {
 	// Show mouse cursor
-	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController(this))
+	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController())
 	{
 		MyPlayerController->SetMouseCursor(true);
 	}
@@ -22,7 +22,7 @@ void UInGameWidget::ShowEndGameState_Implementation()
 void UInGameWidget::HideEndGameState_Implementation()
 {
 	// Hide mouse cursor
-	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController(this))
+	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController())
 	{
 		MyPlayerController->SetMouseCursor(false);
 	}
@@ -41,7 +41,7 @@ void UInGameWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}

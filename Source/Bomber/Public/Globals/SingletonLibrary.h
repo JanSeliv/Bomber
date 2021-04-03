@@ -4,8 +4,8 @@
 
 #include "Bomber.h"
 #include "Structures/Cell.h"
+#include "Structures/SettingsRow.h"
 //---
-#include "GameFramework/MyGameUserSettings.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
 #include "SingletonLibrary.generated.h"
@@ -25,6 +25,9 @@ public:
 
 	/** Sets default values for this actor's properties */
 	USingletonLibrary() = default;
+
+	/** Returns a world of stored level map. */
+	virtual class UWorld* GetWorld() const override;
 
 	/* ---------------------------------------------------
 	 *		Editor development
@@ -94,24 +97,28 @@ public:
 	static ELevelType GetLevelType();
 
 	/** Return rhe Bomber Game Instance, nullptr otherwise */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class UMyGameInstance* GetMyGameInstance(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UMyGameInstance* GetMyGameInstance();
 
 	/** Returns the Bomber Game Mode, nullptr otherwise. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class AMyGameModeBase* GetMyGameMode(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AMyGameModeBase* GetMyGameMode();
 
 	/** Returns the Bomber Game state, nullptr otherwise. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class AMyGameStateBase* GetMyGameState(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AMyGameStateBase* GetMyGameState();
 
 	/** Returns the Bomber Player Controller, nullptr otherwise. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class AMyPlayerController* GetMyPlayerController(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AMyPlayerController* GetMyPlayerController();
 
 	/** Returns the Bomber Player State for specified player, nullptr otherwise. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AMyPlayerState* GetMyPlayerState(const class AController* Controller);
+
+	/** Returns the Bomber settings. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UMyGameUserSettings* GetMyGameUserSettings();
 
 	/* ---------------------------------------------------
 	 *		Structs functions

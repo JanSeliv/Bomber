@@ -329,7 +329,7 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 	// Update endgame state
 	if (OnAnyPlayerDestroyed)
 	{
-		AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this);
+		AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
 		if (MyGameState
 		    && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
 		{
@@ -657,7 +657,7 @@ void AGeneratedMap::PostInitializeComponents()
 	USingletonLibrary::SetLevelMap(this);
 
 	// Cells regeneration if the level map's size was changed
-	UMyGameInstance* const MyGameInstance = USingletonLibrary::GetMyGameInstance(this);
+	UMyGameInstance* const MyGameInstance = USingletonLibrary::GetMyGameInstance();
 	if (MyGameInstance)
 	{
 		const FVector MapScale = MyGameInstance->LevelMapScale;
@@ -671,7 +671,7 @@ void AGeneratedMap::PostInitializeComponents()
 	}
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}

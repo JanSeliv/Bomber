@@ -8,6 +8,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyGameUserSettings.h"
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/LevelActorDataAsset.h"
 #include "Globals/MyGameInstance.h"
@@ -15,7 +16,6 @@
 #include "Engine.h"
 #include "Components/TextRenderComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Math/Color.h"
 //---
 #if WITH_EDITOR
 #include "Editor.h"	 // GEditor
@@ -32,6 +32,12 @@ USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
 // Will notify on any data asset changes
 USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChanged;
 #endif //WITH_EDITOR
+
+// Returns a world of stored level map
+UWorld* USingletonLibrary::GetWorld() const
+{
+	return AGeneratedMap::Get().GetWorld();
+}
 
 bool USingletonLibrary::IsEditor()
 {
@@ -193,27 +199,27 @@ ELevelType USingletonLibrary::GetLevelType()
 }
 
 // Contains a data of standalone and PIE games, nullptr otherwise
-UMyGameInstance* USingletonLibrary::GetMyGameInstance(const UObject* WorldContextObject)
+UMyGameInstance* USingletonLibrary::GetMyGameInstance()
 {
-	return Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(WorldContextObject));
+	return Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(Get().GetWorld()));
 }
 
 // Contains a data of Bomber Level, nullptr otherwise
-AMyGameModeBase* USingletonLibrary::GetMyGameMode(const UObject* WorldContextObject)
+AMyGameModeBase* USingletonLibrary::GetMyGameMode()
 {
-	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(Get().GetWorld()));
 }
 
 // Returns the Bomber Game state, nullptr otherwise.
-AMyGameStateBase* USingletonLibrary::GetMyGameState(const UObject* WorldContextObject)
+AMyGameStateBase* USingletonLibrary::GetMyGameState()
 {
-	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(WorldContextObject));
+	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(Get().GetWorld()));
 }
 
 // Returns the Bomber Player Controller, nullptr otherwise
-AMyPlayerController* USingletonLibrary::GetMyPlayerController(const UObject* WorldContextObject)
+AMyPlayerController* USingletonLibrary::GetMyPlayerController()
 {
-	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(WorldContextObject, 0));
+	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(Get().GetWorld(), 0));
 }
 
 // Returns the Bomber Player State for specified player, nullptr otherwise
@@ -222,8 +228,14 @@ AMyPlayerState* USingletonLibrary::GetMyPlayerState(const AController* Controlle
 	return Controller ? Cast<AMyPlayerState>(Controller->PlayerState) : nullptr;
 }
 
+// Returns the Bomber settings
+UMyGameUserSettings* USingletonLibrary::GetMyGameUserSettings()
+{
+	return GEngine ? Cast<UMyGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;
+}
+
 /* ---------------------------------------------------
- *		FCell blueprint functions
+ *		Structs functions
  * --------------------------------------------------- */
 
 // Find the average of an array of vectors

@@ -45,7 +45,7 @@ void AMyPlayerState::BeginPlay()
 	Super::BeginPlay();
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 		MyGameState->OnAnyPlayerDestroyed.AddDynamic(this, &ThisClass::ServerUpdateEndState);
@@ -124,6 +124,6 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	// Need to notify that the game was ended
 	if (bUpdateGameState)
 	{
-		USingletonLibrary::GetMyGameState(this)->ServerSetGameState(ECurrentGameState::EndGame);
+		USingletonLibrary::GetMyGameState()->ServerSetGameState(ECurrentGameState::EndGame);
 	}
 }

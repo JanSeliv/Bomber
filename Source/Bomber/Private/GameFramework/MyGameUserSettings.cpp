@@ -62,7 +62,7 @@ void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& Event
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()
 {
-	UMyGameUserSettings* MyGameUserSettings = GEngine ? Cast<UMyGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;;
+	UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings();
 	checkf(MyGameUserSettings, TEXT("The My Game User Settings is not valid"));
 	return *MyGameUserSettings;
 }

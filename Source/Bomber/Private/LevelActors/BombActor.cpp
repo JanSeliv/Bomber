@@ -125,7 +125,7 @@ void ABombActor::BeginPlay()
 	{
 		SetLifeSpan();
 	}
-	else if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	else if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		// This dragged bomb should start listening in-game state to set lifespan
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
