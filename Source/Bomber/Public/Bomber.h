@@ -99,7 +99,7 @@ enum class ECurrentGameState : uint8
 };
 
 /**
- *
+ * The round result.
  */
 UENUM(BlueprintType)
 enum class EEndGameState : uint8
@@ -108,4 +108,20 @@ enum class EEndGameState : uint8
 	Win,
 	Lose,
 	Draw
+};
+
+/**
+ * The type of in-game option.
+ */
+UENUM(BlueprintType)
+enum class ESettingsType : uint8
+{
+	None,
+    Button,
+    ButtonsRow,
+	Checkbox,
+	Combobox,
+	Slider,
+	TextSimple,
+	TextInput
 };

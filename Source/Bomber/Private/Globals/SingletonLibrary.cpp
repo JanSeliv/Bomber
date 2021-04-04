@@ -60,6 +60,7 @@ void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionN
 {
 #if WITH_EDITOR	 // [IsEditor]
 	if (IsEditor()
+	    && IS_VALID(GetLevelMap())
 	    && AGeneratedMap::Get().bShouldShowRenders) // The Level Map is not accessible or has the debug mode
 	{
 		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("nullptr")), *FunctionName, *Message);

@@ -10,9 +10,6 @@
 #include "DataTableEditorUtils.h"
 #endif // WITH_EDITOR
 
-// Empty settings row
-const FSettingsRow FSettingsRow::EmptyRow = FSettingsRow();
-
 // Returns the settings data asset
 const USettingsDataAsset& USettingsDataAsset::Get()
 {
@@ -77,7 +74,7 @@ UObject* UMyGameUserSettings::GetObjectContext(FName TagName) const
 	}
 #endif // WITH_EDITOR
 
-	const FSettingsRow* FoundRow = SettingsTableRowsInternal.Find(TagName);
+	const FSettingsDataBase* FoundRow = FindSettingsTableRow(TagName).GetChosenSettingsData();
 	if (!FoundRow)
 	{
 		return nullptr;
@@ -118,7 +115,7 @@ void UMyGameUserSettings::SetOption(FName TagName, int32 InValue)
 	}
 #endif // WITH_EDITOR
 
-	const FSettingsRow* FoundRow = SettingsTableRowsInternal.Find(TagName);
+	const FSettingsDataBase* FoundRow = FindSettingsTableRow(TagName).GetChosenSettingsData();
 	if (!FoundRow)
 	{
 		return;
@@ -155,7 +152,7 @@ int32 UMyGameUserSettings::GetOption(FName TagName) const
 	}
 #endif // WITH_EDITOR
 
-	const FSettingsRow* FoundRow = SettingsTableRowsInternal.Find(TagName);
+	const FSettingsDataBase* FoundRow = FindSettingsTableRow(TagName).GetChosenSettingsData();
 	if (!FoundRow)
 	{
 		return INDEX_NONE;
@@ -236,13 +233,16 @@ void UMyGameUserSettings::OnDataTableChanged()
 	// Set row name by specified tag
 	for (const auto& SettingsTableRowIt : SettingsTableRowsInternal)
 	{
-		const FSettingsRow& RowValue = SettingsTableRowIt.Value;
-		const FName RowKey = SettingsTableRowIt.Key;
-		const FName RowValueTag = RowValue.Tag.GetTagName();
-		if (!RowValueTag.IsNone()     // Tag is not empty
-		    && RowKey != RowValueTag) // New tag name
+		const FSettingsRow& SettingsRow = SettingsTableRowIt.Value;
+		if (const FSettingsDataBase* ChosenSettingsData = SettingsRow.GetChosenSettingsData())
 		{
-			FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
+			const FName RowKey = SettingsTableRowIt.Key;
+			const FName RowValueTag = ChosenSettingsData->Tag.GetTagName();
+			if (!RowValueTag.IsNone()     // Tag is not empty
+			    && RowKey != RowValueTag) // New tag name
+			{
+				FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
+			}
 		}
 	}
 #endif	  // WITH_EDITOR

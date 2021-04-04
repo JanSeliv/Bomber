@@ -33,17 +33,17 @@ void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandl
 	FName TemplateFunctionName = NAME_None;
 	const FProperty* CurrentProperty = PropertyHandle/*ref*/->GetProperty();
 	const FName CurrentPropertyName = CurrentProperty ? CurrentProperty->GetFName() : NAME_None;
-	if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, Setter))
+	if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Setter))
 	{
 		static const FName SettingsSetterName = "OnSetter__DelegateSignature";
 		TemplateFunctionName = SettingsSetterName;
 	}
-	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, Getter))
+	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Getter))
 	{
 		static const FName SettingsGetterName = "OnGetter__DelegateSignature";
 		TemplateFunctionName = SettingsGetterName;
 	}
-	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsRow, ObjectContext))
+	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsDataBase, ObjectContext))
 	{
 		static const FName SettingsObjectContextName = "OnObjectContext__DelegateSignature";
 		TemplateFunctionName = SettingsObjectContextName;

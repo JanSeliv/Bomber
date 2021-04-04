@@ -3,83 +3,11 @@
 #pragma once
 
 #include "GameFramework/GameUserSettings.h"
-#include "GameplayTagContainer.h"
-#include "Engine/DataTable.h"
 //---
-#include "Bomber.h"
+#include "Structures/SettingsRow.h"
 #include "Globals/LevelActorDataAsset.h"
 //---
 #include "MyGameUserSettings.generated.h"
-
-/**
- *
- */
-USTRUCT(BlueprintType)
-struct FSettingsFunction
-{
-	GENERATED_BODY()
-
-	/**  */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Class"))
-	TSubclassOf<UObject> FunctionClass; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Function"))
-	FName FunctionName; //[D]
-
-	/** Compares for equality.
-	* @param Other The other object being compared. */
-	FORCEINLINE bool operator==(const FSettingsFunction& Other) const
-	{
-		return this->FunctionClass == Other.FunctionClass
-		       && this->FunctionName == Other.FunctionName;
-	}
-};
-
-/**
- *
- */
-USTRUCT(BlueprintType)
-struct FSettingsRow : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	/** Empty settings row. */
-	static const FSettingsRow EmptyRow;
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FGameplayTag Tag; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction ObjectContext; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction Setter; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction Getter; //[D]
-
-	/** Returns true if row is valid. */
-	FORCEINLINE bool IsValid() const { return !(*this == EmptyRow); }
-
-	/** Compares for equality.
-     * @param Other The other object being compared. */
-	FORCEINLINE bool operator==(const FSettingsRow& Other) const
-	{
-		return this->Tag == Other.Tag
-		       && this->ObjectContext == Other.ObjectContext
-		       && this->Setter == Other.Setter
-		       && this->Getter == Other.Getter;
-	}
-
-	/** Creates a hash value.
-	* @param Other the other object to create a hash value for. */
-	friend FORCEINLINE uint32 GetTypeHash(const FSettingsRow& Other) { return GetTypeHash(Other.Tag); }
-};
 
 /**
  *
@@ -108,7 +36,7 @@ public:
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-    FORCEINLINE class UDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal; }
+	FORCEINLINE class UDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal; }
 
 	/**
 	 * @see USettingsDataAsset::WidthByScreen */
