@@ -109,19 +109,3 @@ enum class EEndGameState : uint8
 	Lose,
 	Draw
 };
-
-/**
- * The type of in-game option.
- */
-UENUM(BlueprintType)
-enum class ESettingsType : uint8
-{
-	None,
-    Button,
-    ButtonsRow,
-	Checkbox,
-	Combobox,
-	Slider,
-	TextSimple,
-	TextInput
-};

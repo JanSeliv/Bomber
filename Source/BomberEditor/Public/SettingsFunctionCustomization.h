@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "IPropertyTypeCustomization.h"
 #include "MyPropertyTypeCustomization.h"
 
 /**
@@ -15,11 +14,14 @@ public:
 	*		Public functions
 	* --------------------------------------------------- */
 
+	/** The name of class to be customized. */
+	static const FName PropertyClassName;
+
 	/** Default constructor. */
 	FSettingsFunctionCustomization();
 
 	/** Makes a new instance of this detail layout class for a specific detail view requesting it. */
-	static TSharedRef<class IPropertyTypeCustomization> MakeInstance();
+	static TSharedRef<IPropertyTypeCustomization> MakeInstance();
 
 	/**
  	 * Called when the header of the property (the row in the details panel where the property is shown)
@@ -56,7 +58,7 @@ protected:
 	FName CachedFunctionClassInternal = NAME_None;
 
 	/** If true, will be added FUNC_Static flag to show only static function in the list. */
-	bool bIsStaticFunction = false;
+	bool bIsStaticFunctionInternal = false;
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -78,9 +80,6 @@ protected:
 
 	/** Returns true if changing custom property currently is not forbidden. */
 	virtual bool IsAllowedEnableCustomProperty() const override;
-
-	/** Is called on changing value of any child property. */
-	virtual void OnAnyChildPropertyChanged() override;
 
 	/** Returns the currently chosen class of functions to display.
 	 * @see FSettingsFunctionCustomization::FunctionClassHandleInternal

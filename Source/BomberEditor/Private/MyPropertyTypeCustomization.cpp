@@ -8,11 +8,7 @@
 #include "PropertyCustomizationHelpers.h"
 #include "SSearchableComboBox.h"
 
-// Makes a new instance of this detail layout class for a specific detail view requesting it
-TSharedRef<IPropertyTypeCustomization> FMyPropertyTypeCustomization::MakeInstance()
-{
-	return MakeShareable(new FMyPropertyTypeCustomization());
-}
+typedef Super ThisClass;
 
 // Called when the header of the property (the row in the details panel where the property is shown)
 void FMyPropertyTypeCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
@@ -32,16 +28,13 @@ void FMyPropertyTypeCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> P
 // Called when the children of the property should be customized or extra rows added.
 void FMyPropertyTypeCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	// Make sure there is property to customize
-	ensureMsgf(!CustomPropertyNameInternal.IsNone(), TEXT("ASSERT: 'CustomizedPropertyName' is none"));
-
 	// Find outer
 	TArray<UObject*> OuterObjects;
 	PropertyHandle/*ref*/->GetOuterObjects(OuterObjects);
 	MyPropertyOuterInternal = OuterObjects.IsValidIndex(0) ? OuterObjects[0] : nullptr;
 
 	// Bind to delegate
-	PropertyHandle/*ref*/->SetOnChildPropertyValueChanged(FSimpleDelegate::CreateSP(this, &FMyPropertyTypeCustomization::OnAnyChildPropertyChanged));
+	PropertyHandle/*ref*/->SetOnChildPropertyValueChanged(FSimpleDelegate::CreateSP(this, &ThisClass::RefreshCustomProperty));
 
 	// Customize
 	uint32 NumChildren;
@@ -191,11 +184,6 @@ void FMyPropertyTypeCustomization::InvalidateCustomProperty()
 	SetCustomPropertyEnabled(false);
 
 	SetCustomPropertyValue(NAME_None);
-}
-
-void FMyPropertyTypeCustomization::OnAnyChildPropertyChanged()
-{
-	// Is called on changing value of any child property
 }
 
 // Called when the children of the property should be customized or extra rows added

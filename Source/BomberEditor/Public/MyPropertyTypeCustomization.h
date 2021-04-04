@@ -17,9 +17,6 @@ public:
 	*		Public functions
 	* --------------------------------------------------- */
 
-	/** Makes a new instance of this detail layout class for a specific detail view requesting it. */
-	static TSharedRef<class IPropertyTypeCustomization> MakeInstance();
-
 	/**
 	 * Called when the header of the property (the row in the details panel where the property is shown)
 	 * If nothing is added to the row, the header is not displayed
@@ -104,9 +101,6 @@ protected:
 
 	/** Returns true if changing custom property currently is not forbidden. */
 	virtual bool IsAllowedEnableCustomProperty() const { return true; }
-
-	/** Is called on changing value of any child property. */
-	virtual void OnAnyChildPropertyChanged();
 
 	/**
 	 * Callback for when the function selection has changed from the dropdown. Will call setter of custom property.

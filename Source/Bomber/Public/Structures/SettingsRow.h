@@ -42,7 +42,6 @@ struct FSettingsDataBase
 {
 	GENERATED_BODY()
 
-public:
 	/** */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
 	FGameplayTag Tag; //[AW]
@@ -75,8 +74,6 @@ USTRUCT(BlueprintType)
 struct FSettingsButton : public FSettingsDataBase
 {
 	GENERATED_BODY()
-
-public:
 };
 
 /**
@@ -86,8 +83,6 @@ USTRUCT(BlueprintType)
 struct FSettingsButtonsRow : public FSettingsDataBase
 {
 	GENERATED_BODY()
-
-public:
 };
 
 /**
@@ -97,8 +92,6 @@ USTRUCT(BlueprintType)
 struct FSettingsCheckbox : public FSettingsDataBase
 {
 	GENERATED_BODY()
-
-public:
 };
 
 /**
@@ -108,8 +101,6 @@ USTRUCT(BlueprintType)
 struct FSettingsCombobox : public FSettingsDataBase
 {
 	GENERATED_BODY()
-
-public:
 };
 
 /**
@@ -119,8 +110,6 @@ USTRUCT(BlueprintType)
 struct FSettingsSlider : public FSettingsDataBase
 {
 	GENERATED_BODY()
-
-public:
 };
 
 /**
@@ -130,8 +119,6 @@ USTRUCT(BlueprintType)
 struct FSettingsTextSimple : public FSettingsDataBase
 {
 	GENERATED_BODY()
-
-public:
 };
 
 /**
@@ -141,64 +128,79 @@ USTRUCT(BlueprintType)
 struct FSettingsTextInput : public FSettingsTextSimple
 {
 	GENERATED_BODY()
-
-public:
 };
 
 /**
-*
-*/
+ * is customizable struct, its members were created under FSettingsPicker ...
+ * (instead of FSettingsRow which implements table row struct and can't be customized),
+ * to have possibility to be property-customized by FSettingsPickerCustomization,
+ * which allows to show only selected in-game option.
+ */
+USTRUCT(BlueprintType)
+struct FSettingsPicker
+{
+	GENERATED_BODY()
+
+	/** Nothing picked. */
+	static const FSettingsPicker Empty;
+
+	/** Contains a in-game settings type to be used. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FName SettingsType = NAME_None; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsButton Button; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsButtonsRow ButtonsRow; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsCheckbox Checkbox; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsCombobox Combobox; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsSlider Slider; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsTextSimple TextSimple; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsTextInput TextInput; //[AW]
+
+	/** Returns the pointer to one of the chosen in-game type.
+	 * @see FSettingsPicker::SettingsType */
+	const FSettingsDataBase* GetChosenSettingsData() const;
+
+	/** Returns true if row is valid. */
+	FORCEINLINE bool IsValid() const { return !(*this == Empty); }
+
+	/** Compares for equality.
+	 * @param Other The other object being compared. */
+	bool operator==(const FSettingsPicker& Other) const;
+
+	/** Creates a hash value.
+	* @param Other the other object to create a hash value for. */
+	friend uint32 GetTypeHash(const FSettingsPicker& Other);
+};
+
+/**
+ *
+ */
 USTRUCT(BlueprintType)
 struct FSettingsRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	/** Empty settings row. */
-	static const FSettingsRow EmptyRow;
-
-	/** Contains a in-game settings type to be used. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ESettingsType SettingsType = ESettingsType::None; //[AW]
-
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSettingsButton Button; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSettingsButtonsRow ButtonsRow; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSettingsCheckbox Checkbox; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSettingsCombobox Combobox; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSettingsSlider Slider; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSettingsTextSimple TextSimple; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSettingsTextInput TextInput; //[AW]
-
-	/** */
-	const FSettingsDataBase* GetChosenSettingsData() const;
-
-	/** Returns true if row is valid. */
-	FORCEINLINE bool IsValid() const { return !(*this == EmptyRow); }
-
-	/** Compares for equality.
-	 * @param Other The other object being compared. */
-	bool operator==(const FSettingsRow& Other) const;
-
-	/** Creates a hash value.
-	* @param Other the other object to create a hash value for. */
-	friend uint32 GetTypeHash(const FSettingsRow& Other);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	FSettingsPicker SettingsPicker = FSettingsPicker::Empty; //[D]
 };

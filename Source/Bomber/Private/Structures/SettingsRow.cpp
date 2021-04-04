@@ -3,7 +3,7 @@
 #include "Structures/SettingsRow.h"
 
 // Empty settings row
-const FSettingsRow FSettingsRow::EmptyRow = FSettingsRow();
+const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
 
 //
 bool FSettingsFunction::operator==(const FSettingsFunction& Other) const
@@ -36,39 +36,25 @@ uint32 GetTypeHash(const FSettingsDataBase& Other)
 }
 
 //
-const FSettingsDataBase* FSettingsRow::GetChosenSettingsData() const
+const FSettingsDataBase* FSettingsPicker::GetChosenSettingsData() const
 {
-	switch (SettingsType)
+	if (SettingsType.IsNone())
 	{
-		case ESettingsType::None:
-			return nullptr;
-		case ESettingsType::Button:
-			return &Button;
-		case ESettingsType::ButtonsRow:
-			return &ButtonsRow;
-		case ESettingsType::Checkbox:
-			return &Checkbox;
-		case ESettingsType::Combobox:
-			return &Combobox;
-		case ESettingsType::Slider:
-			return &Slider;
-		case ESettingsType::TextSimple:
-			return &TextSimple;
-		case ESettingsType::TextInput:
-			return &TextInput;
-		default:
-			return nullptr;
+		return nullptr;
 	}
+
+	const FStructProperty* FoundProperty = CastField<FStructProperty>(StaticStruct()->FindPropertyByName(SettingsType));
+	return FoundProperty ? FoundProperty->ContainerPtrToValuePtr<FSettingsDataBase>(this, 0) : nullptr;
 }
 
 //
-bool FSettingsRow::operator==(const FSettingsRow& Other) const
+bool FSettingsPicker::operator==(const FSettingsPicker& Other) const
 {
 	return GetTypeHash(*this) == GetTypeHash(Other);
 }
 
 //
-uint32 GetTypeHash(const FSettingsRow& Other)
+uint32 GetTypeHash(const FSettingsPicker& Other)
 {
 	if (const FSettingsDataBase* OtherRowPtr = Other.GetChosenSettingsData())
 	{

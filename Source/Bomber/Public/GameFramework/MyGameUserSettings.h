@@ -24,7 +24,7 @@ public:
 	/**
 	 * @see USettingsDataAsset::SettingsDataTableInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void GenerateSettingsArray(TMap<FName, FSettingsRow>& OutRows) const;
+	void GenerateSettingsArray(TMap<FName, FSettingsPicker>& OutRows) const;
 
 	/** Delegate to react on changing settings data table. */
 	DECLARE_DYNAMIC_DELEGATE(FOnDataTableChanged);
@@ -115,8 +115,8 @@ protected:
 	* --------------------------------------------------- */
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows", ShowOnlyInnerProperties))
-	TMap<FName, FSettingsRow> SettingsTableRowsInternal; //[D]
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows", ShowOnlyInnerProperties))
+	TMap<FName, FSettingsPicker> SettingsTableRowsInternal; //[D]
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -133,7 +133,7 @@ protected:
 	 * @param TagName The key by which the row will be find.
 	 * @see UMyGameUserSettings::SettingsTableRowsInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FSettingsRow FindSettingsTableRow(FName TagName) const;
+	FSettingsPicker FindSettingsTableRow(FName TagName) const;
 
 	/**
 	 * Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks.

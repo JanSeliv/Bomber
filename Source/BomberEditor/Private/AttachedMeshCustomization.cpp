@@ -5,14 +5,18 @@
 #include "LevelActors/PlayerCharacter.h"
 //---
 #include "DetailLayoutBuilder.h"
-#include "DetailWidgetRow.h"
 #include "IDetailChildrenBuilder.h"
 #include "LevelEditor.h"
 #include "PropertyCustomizationHelpers.h"
 #include "SceneOutliner/Private/SSocketChooser.h"
 #include "Toolkits/ToolkitManager.h"
 
-//
+typedef FAttachedMeshCustomization ThisClass;
+
+// The name of class to be customized
+const FName FAttachedMeshCustomization::PropertyClassName = FAttachedMesh::StaticStruct()->GetFName();
+
+// Default constructor
 FAttachedMeshCustomization::FAttachedMeshCustomization()
 {
 	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FAttachedMesh, Socket);
@@ -21,7 +25,7 @@ FAttachedMeshCustomization::FAttachedMeshCustomization()
 // Makes a new instance of this detail layout class for a specific detail view requesting it
 TSharedRef<IPropertyTypeCustomization> FAttachedMeshCustomization::MakeInstance()
 {
-	return MakeShareable(new FAttachedMeshCustomization());
+	return MakeShareable(new ThisClass());
 }
 
 // Called when the header of the property (the row in the details panel where the property is shown)
@@ -59,7 +63,7 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 			.FillWidth(1.0f)
 			[
 				SNew(SEditableTextBox)
-            .Text(this, &FAttachedMeshCustomization::GetCustomPropertyDisplayText)
+            .Text(this, &ThisClass::GetCustomPropertyDisplayText)
             .IsReadOnly(true)
             .Font(IDetailLayoutBuilder::GetDetailFont())
 			]
@@ -70,7 +74,7 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 			  .Padding(2.0f, 1.0f)
 			[
 				PropertyCustomizationHelpers::MakeBrowseButton(
-					FSimpleDelegate::CreateSP(this, &FAttachedMeshCustomization::OnBrowseSocket),
+					FSimpleDelegate::CreateSP(this, &ThisClass::OnBrowseSocket),
 					FText::FromString("Select a different Parent Socket - cannot change socket on inherited components"),
 					TAttribute<bool>(true)
 					)
@@ -82,7 +86,7 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 			  .Padding(2.0f, 1.0f)
 			[
 				PropertyCustomizationHelpers::MakeClearButton(
-					FSimpleDelegate::CreateSP(this, &FAttachedMeshCustomization::InvalidateCustomProperty),
+					FSimpleDelegate::CreateSP(this, &ThisClass::InvalidateCustomProperty),
 					FText::FromString("Clear the Parent Socket - cannot change socket on inherited components"),
 					TAttribute<bool>(true)
 					)
@@ -143,7 +147,7 @@ void FAttachedMeshCustomization::OnBrowseSocket()
 		FWidgetPath(),
 		SNew(SSocketChooserPopup)
         .SceneComponent(ParentMeshComponent)
-        .OnSocketChosen(this, &FAttachedMeshCustomization::SetCustomPropertyValue),
+        .OnSocketChosen(this, &Super::SetCustomPropertyValue),
 		FSlateApplication::Get().GetCursorPos(),
 		FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)
 		);

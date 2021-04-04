@@ -4,6 +4,7 @@
 //---
 #include "AttachedMeshCustomization.h"
 #include "MorphDataCustomization.h"
+#include "SettingsPickerCustomization.h"
 #include "SettingsFunctionCustomization.h"
 //---
 #include "Modules/ModuleManager.h"
@@ -11,9 +12,6 @@
 IMPLEMENT_GAME_MODULE(FBomberEditorModule, BomberEditor);
 
 static const FName PropertyEditorModule = "PropertyEditor";
-static const FName AttachedMeshProperty = "AttachedMesh";
-static const FName SettingsFunctionProperty = "SettingsFunction";
-static const FName MorphDataProperty = "MorphData";
 
 void FBomberEditorModule::StartupModule()
 {
@@ -26,19 +24,25 @@ void FBomberEditorModule::StartupModule()
 
 	// FAttachedMesh property realizes the functionally of the SSocketChooser
 	PropertyModule.RegisterCustomPropertyTypeLayout(
-		AttachedMeshProperty,
+		FAttachedMeshCustomization::PropertyClassName,
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FAttachedMeshCustomization::MakeInstance)
+		);
+
+	// Is customized to show only selected in-game option
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		FSettingsPickerCustomization::PropertyClassName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSettingsPickerCustomization::MakeInstance)
 		);
 
 	// Allows to choose ufunction
 	PropertyModule.RegisterCustomPropertyTypeLayout(
-		SettingsFunctionProperty,
+		FSettingsFunctionCustomization::PropertyClassName,
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSettingsFunctionCustomization::MakeInstance)
 		);
 
 	// Allows to choose a morph
 	PropertyModule.RegisterCustomPropertyTypeLayout(
-		MorphDataProperty,
+		FMorphDataCustomization::PropertyClassName,
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FMorphDataCustomization::MakeInstance)
 		);
 
@@ -54,7 +58,8 @@ void FBomberEditorModule::ShutdownModule()
 
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
 
-	PropertyModule.UnregisterCustomPropertyTypeLayout(AttachedMeshProperty);
-	PropertyModule.UnregisterCustomPropertyTypeLayout(SettingsFunctionProperty);
-	PropertyModule.UnregisterCustomPropertyTypeLayout(MorphDataProperty);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(FAttachedMeshCustomization::PropertyClassName);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(FSettingsPickerCustomization::PropertyClassName);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(FSettingsFunctionCustomization::PropertyClassName);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(FMorphDataCustomization::PropertyClassName);
 }

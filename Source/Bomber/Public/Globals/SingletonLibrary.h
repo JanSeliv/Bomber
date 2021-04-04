@@ -166,11 +166,11 @@ public:
 
 	/** Returns empty settings row. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE FSettingsRow GetEmptySettingsRow() { return FSettingsRow::EmptyRow; }
+	static FORCEINLINE FSettingsPicker GetEmptySettingsRow() { return FSettingsPicker::Empty; }
 
 	/** */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingsRow"))
-	static FORCEINLINE bool IsValidSettingsRow(const FSettingsRow& SettingsRow) { return SettingsRow.IsValid(); }
+	static FORCEINLINE bool IsValidSettingsRow(const FSettingsPicker& SettingsRow) { return SettingsRow.IsValid(); }
 
 	/* ---------------------------------------------------
 	*		EActorType bitmask functions

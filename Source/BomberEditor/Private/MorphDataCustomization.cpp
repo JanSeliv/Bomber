@@ -3,12 +3,13 @@
 #include "MorphDataCustomization.h"
 //---
 #include "AnimNotifyState_PlayMorph.h"
-//---
-#include "DetailLayoutBuilder.h"
-#include "DetailWidgetRow.h"
-#include "IDetailChildrenBuilder.h"
 
-//
+typedef FMorphDataCustomization ThisClass;
+
+// The name of class to be customized
+const FName FMorphDataCustomization::PropertyClassName = FMorphData::StaticStruct()->GetFName();
+
+// Default constructor
 FMorphDataCustomization::FMorphDataCustomization()
 {
 	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FMorphData, Morph);
@@ -17,7 +18,7 @@ FMorphDataCustomization::FMorphDataCustomization()
 // Makes a new instance of this detail layout class for a specific detail view requesting it
 TSharedRef<IPropertyTypeCustomization> FMorphDataCustomization::MakeInstance()
 {
-	return MakeShareable(new FMorphDataCustomization());
+	return MakeShareable(new ThisClass());
 }
 
 // Called when the header of the property (the row in the details panel where the property is shown)
@@ -51,19 +52,22 @@ void FMorphDataCustomization::RefreshCustomProperty()
 	const auto AnimNotifyState = Cast<UAnimNotifyState>(MyPropertyOuterInternal.Get());
 	const auto AnimSequence = AnimNotifyState ? Cast<UAnimSequence>(AnimNotifyState->GetOuter()) : nullptr;
 	const USkeletalMesh* PreviewMesh = AnimSequence ? AnimSequence->GetPreviewMesh() : nullptr;
-	if (!PreviewMesh)
+	const FName MeshName = PreviewMesh ? PreviewMesh->GetFName() : NAME_None;
+	if (MeshName.IsNone()
+	    || MeshName == CachedMeshNameInternal)
 	{
 		return;
 	}
+	CachedMeshNameInternal = MeshName;
 
 	SearchableComboBoxValuesInternal.Empty();
+	SearchableComboBoxValuesInternal.Reserve(PreviewMesh->MorphTargetIndexMap.Num() + 1);
 
 	// Add an empty row, so the user can clear the selection if they want
 	static const FString NoneName{FName(NAME_None).ToString()};
 	const TSharedPtr<FString> NoneNamePtr = MakeShareable(new FString(NoneName));
 	SearchableComboBoxValuesInternal.Add(NoneNamePtr);
 
-	TArray<FName> FoundList;
 	for (const auto& MorphTargetIt : PreviewMesh->MorphTargetIndexMap)
 	{
 		// Add this to the searchable text box as an FString so users can type and find it

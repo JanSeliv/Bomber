@@ -2,11 +2,12 @@
 
 #include "SettingsFunctionCustomization.h"
 //---
-#include "GameFramework/MyGameUserSettings.h"
-//---
-#include "DetailLayoutBuilder.h"
-#include "DetailWidgetRow.h"
-#include "IDetailChildrenBuilder.h"
+#include "Structures/SettingsRow.h"
+
+typedef FSettingsFunctionCustomization ThisClass;
+
+// The name of class to be customized
+const FName FSettingsFunctionCustomization::PropertyClassName = FSettingsFunction::StaticStruct()->GetFName();
 
 // Default constructor
 FSettingsFunctionCustomization::FSettingsFunctionCustomization()
@@ -17,7 +18,7 @@ FSettingsFunctionCustomization::FSettingsFunctionCustomization()
 // Makes a new instance of this detail layout class for a specific detail view requesting it
 TSharedRef<IPropertyTypeCustomization> FSettingsFunctionCustomization::MakeInstance()
 {
-	return MakeShareable(new FSettingsFunctionCustomization());
+	return MakeShareable(new ThisClass());
 }
 
 // Called when the header of the property (the row in the details panel where the property is shown)
@@ -29,33 +30,39 @@ void FSettingsFunctionCustomization::CustomizeHeader(TSharedRef<IPropertyHandle>
 // Called when the children of the property should be customized or extra rows added.
 void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	// Determine current property has to have template as getter or setter
+	// Determine current property is wrapped by getter, setter or object context
 	FName TemplateFunctionName = NAME_None;
 	const FProperty* CurrentProperty = PropertyHandle/*ref*/->GetProperty();
 	const FName CurrentPropertyName = CurrentProperty ? CurrentProperty->GetFName() : NAME_None;
-	if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Setter))
+
+	static const FName SetterName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Setter);
+	static const FName GetterName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Getter);
+	static const FName ContextName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, ObjectContext);
+
+	if (CurrentPropertyName == SetterName)
 	{
 		static const FName SettingsSetterName = "OnSetter__DelegateSignature";
 		TemplateFunctionName = SettingsSetterName;
 	}
-	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Getter))
+	else if (CurrentPropertyName == GetterName)
 	{
 		static const FName SettingsGetterName = "OnGetter__DelegateSignature";
 		TemplateFunctionName = SettingsGetterName;
 	}
-	else if (CurrentPropertyName == GET_MEMBER_NAME_CHECKED(FSettingsDataBase, ObjectContext))
+	else if (CurrentPropertyName == ContextName)
 	{
 		static const FName SettingsObjectContextName = "OnObjectContext__DelegateSignature";
 		TemplateFunctionName = SettingsObjectContextName;
-		bIsStaticFunction = true;
+		bIsStaticFunctionInternal = true;
 	}
 
-	// Set TemplateFunctionInternal
-	if (ensureMsgf(!TemplateFunctionName.IsNone(), TEXT("ASSERT: 'TemplateFunctionName' is none")))
+	// Set TemplateFunctionInternal to filter by its signature
+	if (!TemplateFunctionName.IsNone())
 	{
-		const UGameUserSettings* GameUserSettings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+		const UObject* GameUserSettings = GEngine ? (UObject*)GEngine->GetGameUserSettings() : nullptr;
 		const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
 		TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName, EIncludeSuperFlag::ExcludeSuper) : nullptr;
+		ensureMsgf(TemplateFunctionInternal.IsValid(), TEXT("ASSERT: 'TemplateFunctionInternal' is not found"));
 	}
 
 	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
@@ -124,7 +131,7 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 		const UFunction* FunctionIt = *It;
 		if (FunctionIt
 		    && FunctionIt != TemplateFunction
-		    && (!bIsStaticFunction || FunctionIt->FunctionFlags & FUNC_Static) // only static functions if specified
+		    && (!bIsStaticFunctionInternal || FunctionIt->FunctionFlags & FUNC_Static) // only static functions if specified
 		    && IsSignatureCompatible(FunctionIt))
 		{
 			FName FunctionNameIt = FunctionIt->GetFName();
@@ -170,21 +177,13 @@ bool FSettingsFunctionCustomization::IsAllowedEnableCustomProperty() const
 	return !CachedFunctionClassInternal.IsNone();
 }
 
-// Is called on changing value of any child property
-void FSettingsFunctionCustomization::OnAnyChildPropertyChanged()
-{
-	Super::OnAnyChildPropertyChanged();
-
-	RefreshCustomProperty();
-}
-
 // Returns the currently chosen class of functions to display
 const UClass* FSettingsFunctionCustomization::GetChosenFunctionClass() const
 {
 	const IPropertyHandle* ChildHandleIt = FunctionClassHandleInternal.Get();
 	const FProperty* ChildProperty = ChildHandleIt ? ChildHandleIt->GetProperty() : nullptr;
 	const auto ObjectProperty = ChildProperty ? CastField<FObjectProperty>(ChildProperty) : nullptr;
-	const uint8* Data = ObjectProperty ? ChildHandleIt->GetValueBaseAddress((uint8*)MyPropertyOuterInternal.Get()) : nullptr;
+	const uint8* Data = ObjectProperty ? ChildHandleIt->GetValueBaseAddress(nullptr) : nullptr;
 	return Data ? Cast<UClass>(ObjectProperty->GetObjectPropertyValue(Data)) : nullptr;
 }
 

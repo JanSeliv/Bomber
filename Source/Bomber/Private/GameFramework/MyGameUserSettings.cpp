@@ -19,7 +19,7 @@ const USettingsDataAsset& USettingsDataAsset::Get()
 }
 
 //
-void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsRow>& OutRows) const
+void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsPicker>& OutRows) const
 {
 	if (!ensureMsgf(SettingsDataTableInternal, TEXT("ASSERT: 'SettingsDataTableInternal' is not valid")))
 	{
@@ -33,7 +33,7 @@ void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsRow>& OutRow
 	{
 		if (const auto FoundRowPtr = reinterpret_cast<FSettingsRow*>(RowIt.Value))
 		{
-			const FSettingsRow& SettingsTableRow = *FoundRowPtr;
+			const FSettingsPicker& SettingsTableRow = FoundRowPtr->SettingsPicker;
 			const FName RowName = RowIt.Key;
 			OutRows.Emplace(RowName, SettingsTableRow);
 		}
@@ -205,10 +205,10 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 }
 
 //
-FSettingsRow UMyGameUserSettings::FindSettingsTableRow(FName TagName) const
+FSettingsPicker UMyGameUserSettings::FindSettingsTableRow(FName TagName) const
 {
-	FSettingsRow SettingsRow = FSettingsRow::EmptyRow;
-	if (const FSettingsRow* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
+	FSettingsPicker SettingsRow = FSettingsPicker::Empty;
+	if (const FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
 		SettingsRow = *SettingsRowPtr;
 	}
@@ -233,7 +233,7 @@ void UMyGameUserSettings::OnDataTableChanged()
 	// Set row name by specified tag
 	for (const auto& SettingsTableRowIt : SettingsTableRowsInternal)
 	{
-		const FSettingsRow& SettingsRow = SettingsTableRowIt.Value;
+		const FSettingsPicker& SettingsRow = SettingsTableRowIt.Value;
 		if (const FSettingsDataBase* ChosenSettingsData = SettingsRow.GetChosenSettingsData())
 		{
 			const FName RowKey = SettingsTableRowIt.Key;

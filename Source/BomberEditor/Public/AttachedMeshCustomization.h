@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "IPropertyTypeCustomization.h"
 #include "MyPropertyTypeCustomization.h"
 
 /**
@@ -15,11 +14,14 @@ public:
 	*		Public functions
 	* --------------------------------------------------- */
 
+	/** The name of class to be customized. */
+	static const FName PropertyClassName;
+
 	/** Default constructor. */
 	FAttachedMeshCustomization();
 
 	/** Makes a new instance of this detail layout class for a specific detail view requesting it. */
-	static TSharedRef<class IPropertyTypeCustomization> MakeInstance();
+	static TSharedRef<IPropertyTypeCustomization> MakeInstance();
 
 	/**
 	 * Called when the header of the property (the row in the details panel where the property is shown)
