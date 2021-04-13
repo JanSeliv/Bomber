@@ -42,19 +42,11 @@ public:
 
 protected:
 	/* ---------------------------------------------------
-	*		Protected properties
-	* --------------------------------------------------- */
-
-	/** A name of the last selected settings type. When is not changed, refreshing of a custom property will be skipped.
-	* @see FMorphDataCustomization::RefreshCustomProperty() */
-	FName CachedSettingsTypeInternal = NAME_None;
-
-	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
 
 	/** Is called for each property on building its row. */
-	virtual void OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName) override;
+	virtual void OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData) override;
 
 	/** Is called on adding the custom property.
 	* @see FMyPropertyTypeCustomization::CustomPropertyNameInternal */

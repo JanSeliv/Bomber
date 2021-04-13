@@ -12,7 +12,7 @@ const FName FMorphDataCustomization::PropertyClassName = FMorphData::StaticStruc
 // Default constructor
 FMorphDataCustomization::FMorphDataCustomization()
 {
-	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FMorphData, Morph);
+	CustomProperty.PropertyName = GET_MEMBER_NAME_CHECKED(FMorphData, Morph);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -34,9 +34,9 @@ void FMorphDataCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 }
 
 // Is called for each property on building its row
-void FMorphDataCustomization::OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName)
+void FMorphDataCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
 {
-	Super::OnCustomizeChildren(ChildPropertyHandle, ChildBuilder, PropertyName);
+	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
 }
 
 // Is called on adding the custom property

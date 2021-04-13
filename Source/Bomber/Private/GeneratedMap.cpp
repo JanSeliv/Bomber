@@ -478,6 +478,9 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 		}
 
 		// Iterate all levels, load all, show selected, hide others
+		UPackage* PersistentLevelPackage = World->PersistentLevel->GetPackage();
+		const bool bIsPersistentLevelDirty = PersistentLevelPackage && PersistentLevelPackage->IsDirty();
+		bool bClearPersistentLevelDirty = false;
 		for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
 		{
 			FName PackageName(NAME_None);
@@ -498,18 +501,24 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 			ULevel* LoadedLevel = LevelStreamingIt ? LevelStreamingIt->GetLoadedLevel() : nullptr;
 			if (LoadedLevel)
 			{
-				if (bShouldBeVisibleIt) // Make the selected level as current (it will make him visible)
+				UEditorLevelUtils::SetLevelVisibility(LoadedLevel, bShouldBeVisibleIt, false, ELevelVisibilityDirtyMode::DontModify);
+				if (bShouldBeVisibleIt)
 				{
+					// Make the selected level as current (it will make persistent as dirty)
 					UEditorLevelUtils::MakeLevelCurrent(LoadedLevel, true);
-				}
-				else // hide not selected level
-				{
-					UEditorLevelUtils::SetLevelVisibility(LoadedLevel, false, false);
+					bClearPersistentLevelDirty = !bIsPersistentLevelDirty;
 				}
 			}
 		}
 
-		// The editor stream was overrided, no need to continue
+		// Reset dirty flag for persistent marked by UEditorLevelUtils if level was not modified before
+		if (bClearPersistentLevelDirty
+		    && PersistentLevelPackage)
+		{
+			PersistentLevelPackage->ClearDirtyFlag();
+		}
+
+		// The editor stream was overridden, no need to continue
 		return;
 	}
 #endif // [IsEditorNotPieWorld]

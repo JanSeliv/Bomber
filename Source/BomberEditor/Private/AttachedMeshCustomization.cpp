@@ -19,7 +19,7 @@ const FName FAttachedMeshCustomization::PropertyClassName = FAttachedMesh::Stati
 // Default constructor
 FAttachedMeshCustomization::FAttachedMeshCustomization()
 {
-	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FAttachedMesh, Socket);
+	CustomProperty.PropertyName = GET_MEMBER_NAME_CHECKED(FAttachedMesh, Socket);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -41,9 +41,9 @@ void FAttachedMeshCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> P
 }
 
 // Is called for each property on building its row
-void FAttachedMeshCustomization::OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName)
+void FAttachedMeshCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
 {
-	Super::OnCustomizeChildren(ChildPropertyHandle, ChildBuilder, PropertyName);
+	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
 }
 
 // Is called on adding the custom property
@@ -63,7 +63,7 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 			.FillWidth(1.0f)
 			[
 				SNew(SEditableTextBox)
-            .Text(this, &ThisClass::GetCustomPropertyDisplayText)
+            .Text(this, &ThisClass::GetCustomPropertyValue)
             .IsReadOnly(true)
             .Font(IDetailLayoutBuilder::GetDetailFont())
 			]

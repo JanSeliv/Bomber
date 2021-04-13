@@ -6,6 +6,22 @@
 
 typedef class FMyPropertyTypeCustomization Super;
 
+
+/**
+ * Contains data that describes property.
+ */
+struct FPropertyData
+{
+	/** The name of a property. */
+	FName PropertyName = NAME_None;
+
+	/**  */
+	FName PropertyValue = NAME_None;
+
+	/** The handle of a property.*/
+	TSharedPtr<IPropertyHandle> PropertyHandle = nullptr;
+};
+
 /**
  * Overrides some property to make better experience avoiding any errors in properties by manual typing etc.
  * The FName Property is customised as button to select the value in a list.
@@ -34,9 +50,8 @@ public:
 	*/
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
-	/**  Get chosen displayed value contained in the property to be customized.
-	 * @see FMyPropertyTypeCustomization::MyPropertyHandleInternal. */
-	FText GetCustomPropertyDisplayText() const;
+	/** Get cached value contained in the property to be customized. */
+	FORCEINLINE FText GetCustomPropertyValue() const { return FText::FromString(CustomProperty.PropertyValue.ToString()); }
 
 	/** Set the FName value into the property.
 	 * @see FMyPropertyTypeCustomization::MyPropertyHandleInternal. */
@@ -53,11 +68,8 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/**  The name of a property to be customized. Is set in children's constructors.  */
-	FName CustomPropertyNameInternal = NAME_None;
-
-	/** The handle of a property to be customized.*/
-	TSharedPtr<IPropertyHandle> CustomPropertyHandleInternal = nullptr;
+	/** Property data to be customized. It's property name has to be set in children's constructors.  */
+	FPropertyData CustomProperty;
 
 	/** The outer uobject of a property to be customized. */
 	TWeakObjectPtr<class UObject> MyPropertyOuterInternal = nullptr;
@@ -72,17 +84,19 @@ protected:
 	 * @see FMyPropertyTypeCustomization::SearchableComboBoxValuesInternal */
 	TWeakPtr<class SSearchableComboBox> SearchableComboBoxInternal = nullptr;
 
+	/**  */
+	TArray<FPropertyData> DefaultPropertiesData;
+
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
 
 	/**
 	 * Is called for each property on building its row.
-	 * @param ChildPropertyHandle Child handle to the property being customized
 	 * @param ChildBuilder A builder for adding children.
-	 * @param PropertyName The same variable name as it was called in code.
+	 * @param PropertyData Data of a property to be customized.
 	 */
-	virtual void OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName);
+	virtual void OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData);
 
 	/**
 	 * Is called on adding the custom property.

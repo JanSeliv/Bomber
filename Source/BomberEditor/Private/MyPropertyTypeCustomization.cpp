@@ -36,42 +36,52 @@ void FMyPropertyTypeCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 	// Bind to delegate
 	PropertyHandle/*ref*/->SetOnChildPropertyValueChanged(FSimpleDelegate::CreateSP(this, &ThisClass::RefreshCustomProperty));
 
-	// Customize
 	uint32 NumChildren;
 	PropertyHandle/*ref*/->GetNumChildren(NumChildren);
 	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 	{
-		const TSharedRef<IPropertyHandle> ChildPropertyHandleIt = PropertyHandle/*ref*/->GetChildHandle(ChildIndex).ToSharedRef();
-		if (const FProperty* ChildProperty = ChildPropertyHandleIt->GetProperty())
+		FPropertyData PropertyData;
+		PropertyData.PropertyHandle = PropertyHandle/*ref*/->GetChildHandle(ChildIndex);
+		if (!PropertyData.PropertyHandle)
 		{
-			OnCustomizeChildren(ChildPropertyHandleIt, ChildBuilder, ChildProperty->GetFName());
+			continue;
 		}
-	}
-}
 
-// Get chosen displayed value contained in the property to be customized
-FText FMyPropertyTypeCustomization::GetCustomPropertyDisplayText() const
-{
-	FText Value(FText::GetEmpty());
-	if (const IPropertyHandle* PropertyHandle = CustomPropertyHandleInternal.Get())
-	{
-		PropertyHandle->GetValueAsDisplayText(/*Out*/Value);
-	}
+		const FProperty* ChildProperty = PropertyData.PropertyHandle->GetProperty();
+		if (!ChildProperty)
+		{
+			continue;
+		}
 
-	return Value;
+		PropertyData.PropertyName = ChildProperty->GetFName();
+
+		// Get FName value by property handle
+		if (const FNameProperty* NameProperty = CastField<FNameProperty>(ChildProperty))
+		{
+			if (const uint8* Data = PropertyHandle->GetValueBaseAddress((uint8*)MyPropertyOuterInternal.Get()))
+			{
+				PropertyData.PropertyValue = NameProperty->GetPropertyValue_InContainer(Data);
+				UE_LOG(LogInit, Log, TEXT("--- BoneName: %s"), *PropertyData.PropertyValue.ToString());
+			}
+		}
+
+		OnCustomizeChildren(ChildBuilder, PropertyData);
+	}
 }
 
 // Set the FName value into the property
 void FMyPropertyTypeCustomization::SetCustomPropertyValue(FName Value)
 {
+	CustomProperty.PropertyValue = Value;
 	const FString StringToSet = Value.ToString();
-	if (CustomPropertyHandleInternal)
+
+	if (CustomProperty.PropertyHandle)
 	{
 		// Set value into property
-		CustomPropertyHandleInternal->SetValueFromFormattedString(StringToSet);
+		CustomProperty.PropertyHandle->SetValueFromFormattedString(StringToSet);
 	}
 
-	if (const TSharedPtr<STextBlock> RowTextWidget = RowTextWidgetInternal.Pin())
+	if (const TSharedPtr<STextBlock>& RowTextWidget = RowTextWidgetInternal.Pin())
 	{
 		// Update value on displayed widget
 		RowTextWidget->SetText(FText::FromString(StringToSet));
@@ -82,7 +92,7 @@ void FMyPropertyTypeCustomization::SetCustomPropertyValue(FName Value)
 bool FMyPropertyTypeCustomization::IsCustomPropertyEnabled() const
 {
 	bool bIsEnabled = false;
-	if (const TSharedPtr<SSearchableComboBox> SearchableComboBox = SearchableComboBoxInternal.Pin())
+	if (const TSharedPtr<SSearchableComboBox>& SearchableComboBox = SearchableComboBoxInternal.Pin())
 	{
 		bIsEnabled = SearchableComboBox->IsEnabled();
 	}
@@ -100,25 +110,34 @@ void FMyPropertyTypeCustomization::SetCustomPropertyEnabled(bool bEnabled)
 		return;
 	}
 
-	if (const TSharedPtr<SSearchableComboBox> SearchableComboBox = SearchableComboBoxInternal.Pin())
+	if (const TSharedPtr<SSearchableComboBox>& SearchableComboBox = SearchableComboBoxInternal.Pin())
 	{
 		SearchableComboBox->SetEnabled(bEnabled);
 	}
 }
 
 // Is called for each property on building its row
-void FMyPropertyTypeCustomization::OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName)
+void FMyPropertyTypeCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
 {
-	if (PropertyName != CustomPropertyNameInternal)
+	if (!ensureMsgf(PropertyData.PropertyHandle, TEXT("ASSERT: 'PropertyData.PropertyHandle' is not valid")))
 	{
-		// Add each another property to the Details Panel without customization
-		ChildBuilder.AddProperty(ChildPropertyHandle);
 		return;
 	}
 
+	if (PropertyData.PropertyName != CustomProperty.PropertyName)
+	{
+		// Add each another property to the Details Panel without customization
+		ChildBuilder.AddProperty(PropertyData.PropertyHandle.ToSharedRef()).ShouldAutoExpand(true);
+		DefaultPropertiesData.Emplace(PropertyData);
+		return;
+	}
+
+	// --- Is custom property ---
+
+	CustomProperty = PropertyData;
+
 	// Add as searchable combo box by default
-	CustomPropertyHandleInternal = ChildPropertyHandle;
-	AddCustomPropertyRow(ChildPropertyHandle/*ref*/->GetPropertyDisplayName(), ChildBuilder);
+	AddCustomPropertyRow(PropertyData.PropertyHandle->GetPropertyDisplayName(), ChildBuilder);
 }
 
 // Will add the default searchable combo box
@@ -129,7 +148,7 @@ void FMyPropertyTypeCustomization::AddCustomPropertyRow(const FText& PropertyDis
 	// Will add the searchable combo box by default
 	const TSharedRef<STextBlock> TextRowWidgetRef =
 		SNew(STextBlock)
-		.Text(GetCustomPropertyDisplayText());
+		.Text(GetCustomPropertyValue());
 	RowTextWidgetInternal = TextRowWidgetRef;
 
 	const TSharedRef<SSearchableComboBox> SearchableComboBoxRef =
@@ -172,7 +191,7 @@ void FMyPropertyTypeCustomization::AddCustomPropertyRow(const FText& PropertyDis
 //Set new values for the list of selectable members
 void FMyPropertyTypeCustomization::RefreshCustomProperty()
 {
-	if (const TSharedPtr<SSearchableComboBox> SearchableComboBox = SearchableComboBoxInternal.Pin())
+	if (const TSharedPtr<SSearchableComboBox>& SearchableComboBox = SearchableComboBoxInternal.Pin())
 	{
 		SearchableComboBox->RefreshOptions();
 	}

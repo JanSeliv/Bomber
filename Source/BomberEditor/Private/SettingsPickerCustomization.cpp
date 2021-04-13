@@ -12,7 +12,7 @@ const FName FSettingsPickerCustomization::PropertyClassName = FSettingsPicker::S
 // Default constructor
 FSettingsPickerCustomization::FSettingsPickerCustomization()
 {
-	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
+	CustomProperty.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -30,42 +30,6 @@ void FSettingsPickerCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> P
 // Called when the children of the property should be customized or extra rows added.
 void FSettingsPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
-}
-
-// Is called for each property on building its row
-void FSettingsPickerCustomization::OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName)
-{
-	static const FName PropertySelector = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
-
-	const FName SelectedProperty = *GetCustomPropertyDisplayText().ToString();
-	if (PropertyName == SelectedProperty
-	    || PropertyName == PropertySelector)
-	{
-		// Add only chosen property
-		Super::OnCustomizeChildren(ChildPropertyHandle, ChildBuilder, PropertyName);
-	}
-}
-
-// Is called on adding the custom property
-void FSettingsPickerCustomization::AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder)
-{
-	// Super will add the searchable combo box
-	Super::AddCustomPropertyRow(PropertyDisplayText, ChildBuilder);
-}
-
-// Set new values for the list of selectable members
-void FSettingsPickerCustomization::RefreshCustomProperty()
-{
-	const FName SettingsType = *GetCustomPropertyDisplayText().ToString();
-	if (SettingsType == CachedSettingsTypeInternal)
-	{
-		return;
-	}
-	CachedSettingsTypeInternal = SettingsType;
-
-	SearchableComboBoxValuesInternal.Empty();
-
 	// Add an empty row, so the user can clear the selection if they want
 	static const FString NoneName{FName(NAME_None).ToString()};
 	const TSharedPtr<FString> NoneNamePtr = MakeShareable(new FString(NoneName));
@@ -85,6 +49,24 @@ void FSettingsPickerCustomization::RefreshCustomProperty()
 		}
 	}
 
-	// Will refresh searchable combo box
-	Super::RefreshCustomProperty();
+	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
+}
+
+// Is called for each property on building its row
+void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
+{
+	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
+}
+
+// Is called on adding the custom property
+void FSettingsPickerCustomization::AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder)
+{
+	// Super will add the searchable combo box
+	Super::AddCustomPropertyRow(PropertyDisplayText, ChildBuilder);
+}
+
+// Set new values for the list of selectable members
+void FSettingsPickerCustomization::RefreshCustomProperty()
+{
+	// Super is not called to avoid refreshing searchable combo box, it always has the same values
 }

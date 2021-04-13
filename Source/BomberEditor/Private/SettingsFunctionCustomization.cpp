@@ -12,7 +12,7 @@ const FName FSettingsFunctionCustomization::PropertyClassName = FSettingsFunctio
 // Default constructor
 FSettingsFunctionCustomization::FSettingsFunctionCustomization()
 {
-	CustomPropertyNameInternal = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionName);
+	CustomProperty.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionName);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -69,15 +69,15 @@ void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandl
 }
 
 // Is called for each property on building its row
-void FSettingsFunctionCustomization::OnCustomizeChildren(TSharedRef<IPropertyHandle> ChildPropertyHandle, IDetailChildrenBuilder& ChildBuilder, FName PropertyName)
+void FSettingsFunctionCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
 {
-	static const FName ClassName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionClass);
-	if (PropertyName == ClassName)
+	static const FName FunctionClassPropertyName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionClass);
+	if (PropertyData.PropertyName == FunctionClassPropertyName)
 	{
-		FunctionClassHandleInternal = ChildPropertyHandle;
+		FunctionClassHandleInternal = PropertyData.PropertyHandle;
 	}
 
-	Super::OnCustomizeChildren(ChildPropertyHandle, ChildBuilder, PropertyName);
+	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
 }
 
 // Is called on adding the custom property
@@ -104,7 +104,7 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 		return;
 	}
 
-	// Compare with cached value, if equal, then skip refreshing
+	// Compare with cached class, if equal, then skip refreshing
 	const FName ChosenFunctionClassName = ChosenFunctionClass->GetFName();
 	if (ChosenFunctionClassName == CachedFunctionClassInternal)
 	{
@@ -124,7 +124,6 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 	TArray<FName> FoundList;
 	TArray<FName> AllChildFunctions;
 	bool bValidCustomProperty = false;
-	const FName CustomPropertyContent(GetCustomPropertyDisplayText().ToString());
 	ChosenFunctionClass->GenerateFunctionList(AllChildFunctions);
 	for (TFieldIterator<UFunction> It(ChosenFunctionClass); It; ++It)
 	{
@@ -137,7 +136,7 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 			FName FunctionNameIt = FunctionIt->GetFName();
 			if (AllChildFunctions.Contains(FunctionNameIt)) // is child not super function
 			{
-				if (FunctionNameIt == CustomPropertyContent)
+				if (FunctionNameIt == CustomProperty.PropertyValue)
 				{
 					bValidCustomProperty = true;
 				}
