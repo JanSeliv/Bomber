@@ -12,7 +12,7 @@ const FName FSettingsPickerCustomization::PropertyClassName = FSettingsPicker::S
 // Default constructor
 FSettingsPickerCustomization::FSettingsPickerCustomization()
 {
-	CustomProperty.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
+	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -55,10 +55,10 @@ void FSettingsPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 // Is called for each property on building its row
 void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
-	if (PropertyData.PropertyName != CustomProperty.PropertyName)
+	if (PropertyData.PropertyName != CustomPropertyInternal.PropertyName)
 	{
 		// Add lambda for visibility attribute to show\hide property when is not chosen
-		PropertyData.Visibility = MakeAttributeLambda([InDefaultProperty = PropertyData, InCustomProperty = CustomProperty]() -> EVisibility
+		PropertyData.Visibility = MakeAttributeLambda([InDefaultProperty = PropertyData, InCustomProperty = CustomPropertyInternal]() -> EVisibility
 		{
 			const FName OtherPropertyName = InDefaultProperty.PropertyName;
 			const FName CustomPropertyValueName = InCustomProperty.GetPropertyValueFromHandle();

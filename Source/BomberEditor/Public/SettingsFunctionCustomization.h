@@ -50,7 +50,7 @@ protected:
 	TWeakObjectPtr<UFunction> TemplateFunctionInternal = nullptr;
 
 	/** Contains property data about FSettingsFunction::FunctionClass */
-	FPropertyData FunctionClassProperty;
+	FPropertyData FunctionClassPropertyInternal;
 
 	/** If true, will be added FUNC_Static flag to show only static function in the list. */
 	bool bIsStaticFunctionInternal = false;

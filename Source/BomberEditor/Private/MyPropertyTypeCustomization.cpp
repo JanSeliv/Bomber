@@ -10,6 +10,9 @@
 
 typedef Super ThisClass;
 
+// Empty property data
+const FPropertyData FPropertyData::Empty = FPropertyData();
+
 // Get property from handle
 FProperty* FPropertyData::GetProperty() const
 {
@@ -76,7 +79,7 @@ void FMyPropertyTypeCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 	PropertyHandle/*ref*/->GetNumChildren(NumChildren);
 	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 	{
-		FPropertyData PropertyData;
+		FPropertyData PropertyData = FPropertyData::Empty;
 		PropertyData.PropertyHandle = PropertyHandle/*ref*/->GetChildHandle(ChildIndex);
 		PropertyData.PropertyName = PropertyData.GetPropertyNameFromHandle();
 		PropertyData.PropertyValue = PropertyData.GetPropertyValueFromHandle();
@@ -90,8 +93,8 @@ void FMyPropertyTypeCustomization::SetCustomPropertyValue(FName Value)
 	const FString StringToSet = Value.ToString();
 
 	// Set value into property
-	CustomProperty.PropertyValue = Value;
-	CustomProperty.SetPropertyValueToHandle(Value);
+	CustomPropertyInternal.PropertyValue = Value;
+	CustomPropertyInternal.SetPropertyValueToHandle(Value);
 
 	if (const TSharedPtr<STextBlock>& RowTextWidget = RowTextWidgetInternal.Pin())
 	{
@@ -115,7 +118,7 @@ void FMyPropertyTypeCustomization::SetCustomPropertyEnabled(bool bEnabled)
 		SearchableComboBox->SetEnabled(bEnabled);
 	}
 
-	CustomProperty.bIsEnabled = bEnabled;
+	CustomPropertyInternal.bIsEnabled = bEnabled;
 }
 
 // Is called for each property on building its row
@@ -126,20 +129,20 @@ void FMyPropertyTypeCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 		return;
 	}
 
-	if (PropertyData.PropertyName != CustomProperty.PropertyName)
+	if (PropertyData.PropertyName != CustomPropertyInternal.PropertyName)
 	{
 		// Add each another property to the Details Panel without customization
 		IDetailPropertyRow& AddedRow = ChildBuilder.AddProperty(PropertyData.PropertyHandle.ToSharedRef())
 		                                           .ShouldAutoExpand(true)
 		                                           .IsEnabled(PropertyData.bIsEnabled)
 		                                           .Visibility(PropertyData.Visibility);
-		DefaultPropertiesData.Emplace(PropertyData);
+		DefaultPropertiesInternal.Emplace(PropertyData);
 		return;
 	}
 
 	// --- Is custom property ---
 
-	CustomProperty = PropertyData;
+	CustomPropertyInternal = PropertyData;
 
 	// Add as searchable combo box by default
 	AddCustomPropertyRow(PropertyData.PropertyHandle->GetPropertyDisplayName(), ChildBuilder);
@@ -166,7 +169,7 @@ void FMyPropertyTypeCustomization::AddCustomPropertyRow(const FText& PropertyDis
                 .OnSelectionChanged(this, &FMyPropertyTypeCustomization::OnCustomPropertyChosen)
                 .ContentPadding(2.f)
                 .MaxListHeight(200.f)
-				.IsEnabled(CustomProperty.bIsEnabled)
+				.IsEnabled(CustomPropertyInternal.bIsEnabled)
 				.Content()
 		[
 			TextRowWidgetRef
@@ -174,7 +177,7 @@ void FMyPropertyTypeCustomization::AddCustomPropertyRow(const FText& PropertyDis
 	SearchableComboBoxInternal = SearchableComboBoxRef;
 
 	ChildBuilder.AddCustomRow(PropertyDisplayText)
-	            .Visibility(CustomProperty.Visibility)
+	            .Visibility(CustomPropertyInternal.Visibility)
 	            .NameContent()
 		[
 			SNew(STextBlock)

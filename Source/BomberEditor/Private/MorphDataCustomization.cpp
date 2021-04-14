@@ -12,7 +12,7 @@ const FName FMorphDataCustomization::PropertyClassName = FMorphData::StaticStruc
 // Default constructor
 FMorphDataCustomization::FMorphDataCustomization()
 {
-	CustomProperty.PropertyName = GET_MEMBER_NAME_CHECKED(FMorphData, Morph);
+	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FMorphData, Morph);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it

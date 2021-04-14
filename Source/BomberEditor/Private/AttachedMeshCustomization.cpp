@@ -19,7 +19,7 @@ const FName FAttachedMeshCustomization::PropertyClassName = FAttachedMesh::Stati
 // Default constructor
 FAttachedMeshCustomization::FAttachedMeshCustomization()
 {
-	CustomProperty.PropertyName = GET_MEMBER_NAME_CHECKED(FAttachedMesh, Socket);
+	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FAttachedMesh, Socket);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it

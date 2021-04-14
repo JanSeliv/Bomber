@@ -12,7 +12,7 @@ const FName FSettingsFunctionCustomization::PropertyClassName = FSettingsFunctio
 // Default constructor
 FSettingsFunctionCustomization::FSettingsFunctionCustomization()
 {
-	CustomProperty.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionName);
+	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionName);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -41,7 +41,7 @@ void FSettingsFunctionCustomization::OnCustomizeChildren(IDetailChildrenBuilder&
 	static const FName FunctionClassPropertyName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionClass);
 	if (PropertyData.PropertyName == FunctionClassPropertyName)
 	{
-		FunctionClassProperty = PropertyData;
+		FunctionClassPropertyInternal = PropertyData;
 	}
 
 	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
@@ -72,13 +72,13 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 	}
 
 	// Compare with cached class, if equal and combo box values exist, then skip refreshing
-	const FName ChosenFunctionClassName = FunctionClassProperty.GetPropertyValueFromHandle();
-	if (ChosenFunctionClassName == FunctionClassProperty.PropertyValue
+	const FName ChosenFunctionClassName = FunctionClassPropertyInternal.GetPropertyValueFromHandle();
+	if (ChosenFunctionClassName == FunctionClassPropertyInternal.PropertyValue
 	    && SearchableComboBoxValuesInternal.Num())
 	{
 		return;
 	}
-	FunctionClassProperty.PropertyValue = ChosenFunctionClassName;
+	FunctionClassPropertyInternal.PropertyValue = ChosenFunctionClassName;
 
 	SetCustomPropertyEnabled(true);
 
@@ -104,7 +104,7 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 			FName FunctionNameIt = FunctionIt->GetFName();
 			if (AllChildFunctions.Contains(FunctionNameIt)) // is child not super function
 			{
-				if (FunctionNameIt == CustomProperty.PropertyValue)
+				if (FunctionNameIt == CustomPropertyInternal.PropertyValue)
 				{
 					bValidCustomProperty = true;
 				}
@@ -135,19 +135,19 @@ void FSettingsFunctionCustomization::InvalidateCustomProperty()
 {
 	Super::InvalidateCustomProperty();
 
-	FunctionClassProperty.PropertyValue = NAME_None;
+	FunctionClassPropertyInternal.PropertyValue = NAME_None;
 }
 
 // Returns true if changing custom property currently is not forbidden
 bool FSettingsFunctionCustomization::IsAllowedEnableCustomProperty() const
 {
-	return !FunctionClassProperty.PropertyValue.IsNone();
+	return !FunctionClassPropertyInternal.PropertyValue.IsNone();
 }
 
 // Returns the currently chosen class of functions to display
 const UClass* FSettingsFunctionCustomization::GetChosenFunctionClass() const
 {
-	const IPropertyHandle* ChildHandleIt = FunctionClassProperty.PropertyHandle.Get();
+	const IPropertyHandle* ChildHandleIt = FunctionClassPropertyInternal.PropertyHandle.Get();
 	const FProperty* ChildProperty = ChildHandleIt ? ChildHandleIt->GetProperty() : nullptr;
 	const auto ObjectProperty = ChildProperty ? CastField<FObjectProperty>(ChildProperty) : nullptr;
 	const uint8* Data = ObjectProperty ? ChildHandleIt->GetValueBaseAddress(nullptr) : nullptr;

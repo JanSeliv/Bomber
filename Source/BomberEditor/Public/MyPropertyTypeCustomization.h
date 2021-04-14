@@ -6,12 +6,14 @@
 
 typedef class FMyPropertyTypeCustomization Super;
 
-
 /**
  * Contains data that describes property.
  */
 struct FPropertyData
 {
+	/** Empty property data. */
+	static const FPropertyData Empty;
+
 	/** The name of a property. */
 	FName PropertyName = NAME_None;
 
@@ -45,10 +47,13 @@ struct FPropertyData
 	/**
 	 * Set new template value to property handle.
 	 * @tparam T Template param, is used to as to set simple types as well as set whole FProperty*
-	 * @param NewValue
+	 * @param NewValue Value to set.
 	 */
 	template <typename T>
 	void SetPropertyValueToHandle(const T& NewValue);
+
+	/** Returns true is property is not empty. */
+	FORCEINLINE bool IsValid() const { return PropertyName.IsNone() && PropertyHandle != nullptr; }
 };
 
 /**
@@ -80,7 +85,7 @@ public:
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
 	/** Get cached value contained in the property to be customized. */
-	FORCEINLINE FText GetCustomPropertyValue() const { return FText::FromString(CustomProperty.PropertyValue.ToString()); }
+	FORCEINLINE FText GetCustomPropertyValue() const { return FText::FromString(CustomPropertyInternal.PropertyValue.ToString()); }
 
 	/** Set the FName value into the property.
 	 * @see FMyPropertyTypeCustomization::MyPropertyHandleInternal. */
@@ -95,7 +100,7 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Property data to be customized. It's property name has to be set in children's constructors.  */
-	FPropertyData CustomProperty;
+	FPropertyData CustomPropertyInternal;
 
 	/** The outer uobject of a property to be customized. */
 	TWeakObjectPtr<class UObject> MyPropertyOuterInternal = nullptr;
@@ -111,7 +116,7 @@ protected:
 	TWeakPtr<class SSearchableComboBox> SearchableComboBoxInternal = nullptr;
 
 	/** Contains data about all not custom child properties. */
-	TArray<FPropertyData> DefaultPropertiesData;
+	TArray<FPropertyData> DefaultPropertiesInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions
