@@ -41,7 +41,7 @@ void FAttachedMeshCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> P
 }
 
 // Is called for each property on building its row
-void FAttachedMeshCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
+void FAttachedMeshCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
 	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
 }

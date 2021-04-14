@@ -53,8 +53,18 @@ void FSettingsPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 }
 
 // Is called for each property on building its row
-void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
+void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
+	if (PropertyData.PropertyName != CustomProperty.PropertyName)
+	{
+		// Add lambda for visibility attribute to show\hide property when is not chosen
+		PropertyData.Visibility = MakeAttributeLambda([InDefaultProperty = PropertyData, InCustomProperty = CustomProperty]() -> EVisibility
+		{
+			const FName OtherPropertyName = InDefaultProperty.PropertyName;
+			const FName CustomPropertyValueName = InCustomProperty.GetPropertyValueFromHandle();
+			return OtherPropertyName == CustomPropertyValueName ? EVisibility::Visible : EVisibility::Collapsed;
+		});
+	}
 	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
 }
 

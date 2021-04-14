@@ -53,7 +53,7 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Is called for each property on building its row. */
-	virtual void OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData) override;
+	virtual void OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData) override;
 
 	/** Is called on adding the custom property.
 	 * Customize a Socket property, will add the chosen text row, the Select and Clear buttons.

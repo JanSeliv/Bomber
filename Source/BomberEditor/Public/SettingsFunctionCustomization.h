@@ -45,17 +45,12 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** The handle of a property that contains a class of functions to display.
-	 * @see FSettingsFunction::Class */
-	TSharedPtr<IPropertyHandle> FunctionClassHandleInternal = nullptr;
-
 	/** Contains the function to be compared with all other functions of a class to show in the list only compatible functions.
 	 * @see FSettingsFunctionCustomization::RefreshCustomProperty() */
 	TWeakObjectPtr<UFunction> TemplateFunctionInternal = nullptr;
 
-	/** A name of last chosen class property. When is not changed, refreshing of a custom property will be skipped.
-	 * @see FSettingsFunctionCustomization::RefreshCustomProperty() */
-	FName CachedFunctionClassInternal = NAME_None;
+	/** Contains property data about FSettingsFunction::FunctionClass */
+	FPropertyData FunctionClassProperty;
 
 	/** If true, will be added FUNC_Static flag to show only static function in the list. */
 	bool bIsStaticFunctionInternal = false;
@@ -65,7 +60,7 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Is called for each property on building its row. */
-	virtual void OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData) override;
+	virtual void OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData) override;
 
 	/** Is called on adding the custom property.
 	* @see FMyPropertyTypeCustomization::CustomPropertyNameInternal */
@@ -94,4 +89,8 @@ protected:
 	 * @see FSettingsFunctionCustomization::TemplateFunctionInternal
 	 */
 	bool IsSignatureCompatible(const UFunction* Function) const;
+
+	/** Set Template Function once.
+	 *  @see FSettingsFunctionCustomization::TemplateFunctionInternal */
+	void InitTemplateFunction(const TSharedRef<IPropertyHandle>& ParentPropertyHandle);
 };

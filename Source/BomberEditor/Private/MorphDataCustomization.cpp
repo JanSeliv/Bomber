@@ -34,7 +34,7 @@ void FMorphDataCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Prop
 }
 
 // Is called for each property on building its row
-void FMorphDataCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
+void FMorphDataCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
 	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
 }

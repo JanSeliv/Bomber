@@ -15,11 +15,40 @@ struct FPropertyData
 	/** The name of a property. */
 	FName PropertyName = NAME_None;
 
-	/**  */
+	/** The last cached value of a property. */
 	FName PropertyValue = NAME_None;
 
-	/** The handle of a property.*/
+	/** The handle of a property. */
 	TSharedPtr<IPropertyHandle> PropertyHandle = nullptr;
+
+	/** Determines if property is active (not greyed out). */
+	TAttribute<bool> bIsEnabled = true;
+
+	/** Determines if property is visible. */
+	TAttribute<EVisibility> Visibility = EVisibility::Visible;
+
+	/** Get property from handle.*/
+	FProperty* GetProperty() const;
+
+	/** Get property name by handle.
+	 * It returns current name of the property.
+	 * Is cheaper to use cached one.
+	 * @see FPropertyData::PropertyName. */
+	FName GetPropertyNameFromHandle() const;
+
+	/** Get property value by handle.
+	* It returns current value contained in property.
+	* Is cheaper to use cached one.
+	* @see FPropertyData::PropertyValue. */
+	FName GetPropertyValueFromHandle() const;
+
+	/**
+	 * Set new template value to property handle.
+	 * @tparam T Template param, is used to as to set simple types as well as set whole FProperty*
+	 * @param NewValue
+	 */
+	template <typename T>
+	void SetPropertyValueToHandle(const T& NewValue);
 };
 
 /**
@@ -57,9 +86,6 @@ public:
 	 * @see FMyPropertyTypeCustomization::MyPropertyHandleInternal. */
 	void SetCustomPropertyValue(FName Value);
 
-	/** Returns true if custom property is active (not greyed out).  */
-	bool IsCustomPropertyEnabled() const;
-
 	/** Set true to activate property, false to grey out it (read-only). */
 	void SetCustomPropertyEnabled(bool bEnabled);
 
@@ -84,7 +110,7 @@ protected:
 	 * @see FMyPropertyTypeCustomization::SearchableComboBoxValuesInternal */
 	TWeakPtr<class SSearchableComboBox> SearchableComboBoxInternal = nullptr;
 
-	/**  */
+	/** Contains data about all not custom child properties. */
 	TArray<FPropertyData> DefaultPropertiesData;
 
 	/* ---------------------------------------------------
@@ -96,7 +122,7 @@ protected:
 	 * @param ChildBuilder A builder for adding children.
 	 * @param PropertyData Data of a property to be customized.
 	 */
-	virtual void OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData);
+	virtual void OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData);
 
 	/**
 	 * Is called on adding the custom property.

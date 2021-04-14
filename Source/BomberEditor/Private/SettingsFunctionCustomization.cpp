@@ -30,51 +30,18 @@ void FSettingsFunctionCustomization::CustomizeHeader(TSharedRef<IPropertyHandle>
 // Called when the children of the property should be customized or extra rows added.
 void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	// Determine current property is wrapped by getter, setter or object context
-	FName TemplateFunctionName = NAME_None;
-	const FProperty* CurrentProperty = PropertyHandle/*ref*/->GetProperty();
-	const FName CurrentPropertyName = CurrentProperty ? CurrentProperty->GetFName() : NAME_None;
-
-	static const FName SetterName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Setter);
-	static const FName GetterName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Getter);
-	static const FName ContextName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, ObjectContext);
-
-	if (CurrentPropertyName == SetterName)
-	{
-		static const FName SettingsSetterName = "OnSetter__DelegateSignature";
-		TemplateFunctionName = SettingsSetterName;
-	}
-	else if (CurrentPropertyName == GetterName)
-	{
-		static const FName SettingsGetterName = "OnGetter__DelegateSignature";
-		TemplateFunctionName = SettingsGetterName;
-	}
-	else if (CurrentPropertyName == ContextName)
-	{
-		static const FName SettingsObjectContextName = "OnObjectContext__DelegateSignature";
-		TemplateFunctionName = SettingsObjectContextName;
-		bIsStaticFunctionInternal = true;
-	}
-
-	// Set TemplateFunctionInternal to filter by its signature
-	if (!TemplateFunctionName.IsNone())
-	{
-		const UObject* GameUserSettings = GEngine ? (UObject*)GEngine->GetGameUserSettings() : nullptr;
-		const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
-		TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName, EIncludeSuperFlag::ExcludeSuper) : nullptr;
-		ensureMsgf(TemplateFunctionInternal.IsValid(), TEXT("ASSERT: 'TemplateFunctionInternal' is not found"));
-	}
+	InitTemplateFunction(PropertyHandle);
 
 	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
 }
 
 // Is called for each property on building its row
-void FSettingsFunctionCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, const FPropertyData& PropertyData)
+void FSettingsFunctionCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
 	static const FName FunctionClassPropertyName = GET_MEMBER_NAME_CHECKED(FSettingsFunction, FunctionClass);
 	if (PropertyData.PropertyName == FunctionClassPropertyName)
 	{
-		FunctionClassHandleInternal = PropertyData.PropertyHandle;
+		FunctionClassProperty = PropertyData;
 	}
 
 	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
@@ -104,13 +71,14 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 		return;
 	}
 
-	// Compare with cached class, if equal, then skip refreshing
-	const FName ChosenFunctionClassName = ChosenFunctionClass->GetFName();
-	if (ChosenFunctionClassName == CachedFunctionClassInternal)
+	// Compare with cached class, if equal and combo box values exist, then skip refreshing
+	const FName ChosenFunctionClassName = FunctionClassProperty.GetPropertyValueFromHandle();
+	if (ChosenFunctionClassName == FunctionClassProperty.PropertyValue
+	    && SearchableComboBoxValuesInternal.Num())
 	{
 		return;
 	}
-	CachedFunctionClassInternal = ChosenFunctionClassName;
+	FunctionClassProperty.PropertyValue = ChosenFunctionClassName;
 
 	SetCustomPropertyEnabled(true);
 
@@ -167,19 +135,19 @@ void FSettingsFunctionCustomization::InvalidateCustomProperty()
 {
 	Super::InvalidateCustomProperty();
 
-	CachedFunctionClassInternal = NAME_None;
+	FunctionClassProperty.PropertyValue = NAME_None;
 }
 
 // Returns true if changing custom property currently is not forbidden
 bool FSettingsFunctionCustomization::IsAllowedEnableCustomProperty() const
 {
-	return !CachedFunctionClassInternal.IsNone();
+	return !FunctionClassProperty.PropertyValue.IsNone();
 }
 
 // Returns the currently chosen class of functions to display
 const UClass* FSettingsFunctionCustomization::GetChosenFunctionClass() const
 {
-	const IPropertyHandle* ChildHandleIt = FunctionClassHandleInternal.Get();
+	const IPropertyHandle* ChildHandleIt = FunctionClassProperty.PropertyHandle.Get();
 	const FProperty* ChildProperty = ChildHandleIt ? ChildHandleIt->GetProperty() : nullptr;
 	const auto ObjectProperty = ChildProperty ? CastField<FObjectProperty>(ChildProperty) : nullptr;
 	const uint8* Data = ObjectProperty ? ChildHandleIt->GetValueBaseAddress(nullptr) : nullptr;
@@ -267,4 +235,49 @@ bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Func
 
 	// They matched all the way thru A's properties, but it could still be a mismatch if B has remaining parameters
 	return true;
+}
+
+// Set Template Function once
+void FSettingsFunctionCustomization::InitTemplateFunction(const TSharedRef<IPropertyHandle>& ParentPropertyHandle)
+{
+	if (TemplateFunctionInternal != nullptr)
+	{
+		// Set once
+		return;
+	}
+
+	// Determine current property is wrapped by getter, setter or object context
+	FName TemplateFunctionName = NAME_None;
+	const FProperty* ParentProperty = ParentPropertyHandle/*ref*/->GetProperty();
+	const FName ParentPropertyName = ParentProperty ? ParentProperty->GetFName() : NAME_None;
+
+	static const FName SetterName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Setter);
+	static const FName GetterName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Getter);
+	static const FName ContextName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, ObjectContext);
+
+	if (ParentPropertyName == SetterName)
+	{
+		static const FName SettingsSetterName = "OnSetter__DelegateSignature";
+		TemplateFunctionName = SettingsSetterName;
+	}
+	else if (ParentPropertyName == GetterName)
+	{
+		static const FName SettingsGetterName = "OnGetter__DelegateSignature";
+		TemplateFunctionName = SettingsGetterName;
+	}
+	else if (ParentPropertyName == ContextName)
+	{
+		static const FName SettingsObjectContextName = "OnObjectContext__DelegateSignature";
+		TemplateFunctionName = SettingsObjectContextName;
+		bIsStaticFunctionInternal = true;
+	}
+
+	// Set TemplateFunctionInternal to filter by its signature
+	if (!TemplateFunctionName.IsNone())
+	{
+		const UObject* GameUserSettings = GEngine ? (UObject*)GEngine->GetGameUserSettings() : nullptr;
+		const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
+		TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName, EIncludeSuperFlag::ExcludeSuper) : nullptr;
+		ensureMsgf(TemplateFunctionInternal.IsValid(), TEXT("ASSERT: 'TemplateFunctionInternal' is not found"));
+	}
 }
