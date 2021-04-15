@@ -2,6 +2,12 @@
 
 #include "Structures/SettingsRow.h"
 
+// Empty settings function
+const FSettingsFunction FSettingsFunction::Empty = FSettingsFunction();
+
+// Empty settings data
+const FSettingsDataBase FSettingsDataBase::Empty = FSettingsDataBase();
+
 // Empty settings row
 const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
 

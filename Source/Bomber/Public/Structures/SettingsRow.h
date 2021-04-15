@@ -10,20 +10,26 @@
 #include "SettingsRow.generated.h"
 
 /**
- *
+ * Function wrapper
  */
 USTRUCT(BlueprintType)
 struct FSettingsFunction
 {
 	GENERATED_BODY()
 
+	/** Empty settings function. */
+	static const FSettingsFunction Empty;
+
 	/**  */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Class"))
-	TSubclassOf<UObject> FunctionClass; //[AW]
+	TSubclassOf<UObject> FunctionClass = nullptr; //[AW]
 
 	/** */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Function"))
-	FName FunctionName; //[AW]
+	FName FunctionName = NAME_None; //[AW]
+
+	/** Returns true if is valid. */
+	FORCEINLINE bool IsValid() const { return !(*this == Empty); }
 
 	/** Compares for equality.
 	* @param Other The other object being compared. */
@@ -35,12 +41,15 @@ struct FSettingsFunction
 };
 
 /**
- *
+ * The base archetype of some setting.
  */
 USTRUCT(BlueprintType)
 struct FSettingsDataBase
 {
 	GENERATED_BODY()
+
+	/** Empty settings data. */
+	static const FSettingsDataBase Empty;
 
 	/** */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
@@ -48,15 +57,18 @@ struct FSettingsDataBase
 
 	/** */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction ObjectContext; //[AW]
+	FSettingsFunction ObjectContext = FSettingsFunction::Empty; //[AW]
 
 	/** */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction Setter; //[AW]
+	FSettingsFunction Setter = FSettingsFunction::Empty; //[AW]
 
 	/** */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction Getter; //[AW]
+	FSettingsFunction Getter = FSettingsFunction::Empty; //[AW]
+
+	/** Returns true if is valid. */
+	FORCEINLINE bool IsValid() const { return !(*this == Empty); }
 
 	/** Compares for equality.
 	* @param Other The other object being compared. */
@@ -193,7 +205,7 @@ struct FSettingsPicker
 };
 
 /**
- *
+ * Row of the settings data table.
  */
 USTRUCT(BlueprintType)
 struct FSettingsRow : public FTableRowBase

@@ -42,6 +42,13 @@ public:
 
 protected:
 	/* ---------------------------------------------------
+	*		Protected properties
+	* --------------------------------------------------- */
+
+	/** Last chosen option. */
+	FName CachedSettingsTypeInternal = NAME_None;
+
+	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
 
@@ -52,7 +59,9 @@ protected:
 	* @see FMyPropertyTypeCustomization::CustomPropertyNameInternal */
 	virtual void AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder) override;
 
-	/** Set new values for the list of selectable members.
-	* @see FMyPropertyTypeCustomization::SearchableComboBoxValuesInternal */
+	/** Is called when any child property is changed. */
 	virtual void RefreshCustomProperty() override;
+
+	/** Is called when is chosen new member from custom property. */
+	void OnNewSettingsTypeChosen();
 };

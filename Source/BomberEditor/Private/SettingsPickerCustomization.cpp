@@ -44,8 +44,8 @@ void FSettingsPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 		    && StructPropertyIt->IsChildOf(SettingsDataBaseStruct))
 		{
 			// Add this to the searchable text box as an FString so users can type and find it
-			const FString MorphTarget = SettingsPickerIt->GetName();
-			SearchableComboBoxValuesInternal.Add(MakeShareable(new FString(MorphTarget)));
+			const FString SettingsDataBasePropertyName = SettingsPickerIt->GetName();
+			SearchableComboBoxValuesInternal.Add(MakeShareable(new FString(SettingsDataBasePropertyName)));
 		}
 	}
 
@@ -79,4 +79,65 @@ void FSettingsPickerCustomization::AddCustomPropertyRow(const FText& PropertyDis
 void FSettingsPickerCustomization::RefreshCustomProperty()
 {
 	// Super is not called to avoid refreshing searchable combo box, it always has the same values
+
+	if (CachedSettingsTypeInternal.IsNone())
+	{
+		// Is called first time on init
+		CachedSettingsTypeInternal = CustomPropertyInternal.PropertyValue;
+		return;
+	}
+
+	// Compare with chosen option
+	if (CachedSettingsTypeInternal != CustomPropertyInternal.PropertyValue)
+	{
+		OnNewSettingsTypeChosen();
+	}
+}
+
+// Is called when is chosen new member from custom property
+void FSettingsPickerCustomization::OnNewSettingsTypeChosen()
+{
+	FPropertyData PrevPropertyData = FPropertyData::Empty;
+	FPropertyData NewPropertyData = FPropertyData::Empty;
+	for (const FPropertyData& DefaultPropertyIt : DefaultPropertiesInternal)
+	{
+		if (DefaultPropertyIt.PropertyName == CustomPropertyInternal.PropertyValue)
+		{
+			NewPropertyData = DefaultPropertyIt;
+		}
+		else if (DefaultPropertyIt.PropertyName == CachedSettingsTypeInternal)
+		{
+			PrevPropertyData = DefaultPropertyIt;
+		}
+	}
+
+	CachedSettingsTypeInternal = CustomPropertyInternal.PropertyValue;
+
+	void* PrevValueData = nullptr;
+	const FProperty* PrevProperty = nullptr;
+	if (const IPropertyHandle* PrevPropertyHandle = PrevPropertyData.PropertyHandle.Get())
+	{
+		PrevPropertyHandle->GetValueData(PrevValueData);
+		PrevProperty = PrevPropertyData.GetProperty();
+	}
+
+	void* NewValueData = nullptr;
+	const FProperty* NewProperty = nullptr;
+	if (const IPropertyHandle* NewPropertyHandle = NewPropertyData.PropertyHandle.Get())
+	{
+		NewPropertyHandle->GetValueData(NewValueData);
+		NewProperty = NewPropertyData.GetProperty();
+	}
+
+	if (PrevValueData && PrevProperty)
+	{
+		if (NewValueData
+		    && NewProperty)
+		{
+			NewProperty->ClearValue(NewValueData);
+			NewProperty->CopyCompleteValue(NewValueData, PrevValueData);
+		}
+
+		PrevProperty->ClearValue(PrevValueData);
+	}
 }
