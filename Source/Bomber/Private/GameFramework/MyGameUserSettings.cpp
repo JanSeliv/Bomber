@@ -29,7 +29,7 @@ void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsPicker>& Out
 	const TMap<FName, uint8*>& RowMap = SettingsDataTableInternal->GetRowMap();
 	OutRows.Empty();
 	OutRows.Reserve(RowMap.Num());
-	for (const auto& RowIt : RowMap)
+	for (const TTuple<FName, uint8*>& RowIt : RowMap)
 	{
 		if (const auto FoundRowPtr = reinterpret_cast<FSettingsRow*>(RowIt.Value))
 		{
@@ -60,7 +60,7 @@ void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& Event
 UMyGameUserSettings& UMyGameUserSettings::Get()
 {
 	UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings();
-	checkf(MyGameUserSettings, TEXT("The My Game User Settings is not valid"));
+	checkf(MyGameUserSettings, TEXT("My Game User Settings is not valid"));
 	return *MyGameUserSettings;
 }
 
@@ -74,30 +74,30 @@ UObject* UMyGameUserSettings::GetObjectContext(FName TagName) const
 	}
 #endif // WITH_EDITOR
 
-	const FSettingsDataBase* FoundRow = FindSettingsTableRow(TagName).GetChosenSettingsData();
-	if (!FoundRow)
+	const FSettingsPicker& FoundRow = FindSettingsTableRow(TagName);
+	if (!FoundRow.IsValid())
 	{
 		return nullptr;
 	}
 
-	const FSettingsFunction& ObjectContext = FoundRow->ObjectContext;
-	if (ObjectContext.FunctionName.IsNone()
-	    || !ObjectContext.FunctionClass)
+	const FSettingsFunction& StaticContext = FoundRow.StaticContext;
+	if (StaticContext.FunctionName.IsNone()
+	    || !StaticContext.FunctionClass)
 	{
 		return nullptr;
 	}
 
-	UObject* ClassDefaultObject = ObjectContext.FunctionClass->ClassDefaultObject;
+	UObject* ClassDefaultObject = StaticContext.FunctionClass->ClassDefaultObject;
 	if (!ClassDefaultObject)
 	{
 		return nullptr;
 	}
 
-	FOnObjectContext OnObjectContext;
-	OnObjectContext.BindUFunction(ClassDefaultObject, ObjectContext.FunctionName);
-	if (OnObjectContext.IsBoundToObject(ClassDefaultObject))
+	FOnStaticContext OnStaticContext;
+	OnStaticContext.BindUFunction(ClassDefaultObject, StaticContext.FunctionName);
+	if (OnStaticContext.IsBoundToObject(ClassDefaultObject))
 	{
-		UObject* OutVal = OnObjectContext.Execute();
+		UObject* OutVal = OnStaticContext.Execute();
 		return OutVal;
 	}
 
@@ -115,30 +115,30 @@ void UMyGameUserSettings::SetOption(FName TagName, int32 InValue)
 	}
 #endif // WITH_EDITOR
 
-	const FSettingsDataBase* FoundRow = FindSettingsTableRow(TagName).GetChosenSettingsData();
-	if (!FoundRow)
+	const FSettingsPicker& FoundRow = FindSettingsTableRow(TagName);
+	if (!FoundRow.IsValid())
 	{
 		return;
 	}
 
-	const FSettingsFunction& Setter = FoundRow->Setter;
+	const FSettingsFunction& Setter = FoundRow.Setter;
 	if (Setter.FunctionName.IsNone()
 	    || !Setter.FunctionClass)
 	{
 		return;
 	}
 
-	UObject* ObjectContext = GetObjectContext(TagName);
-	if (!ObjectContext)
+	UObject* StaticContext = GetObjectContext(TagName);
+	if (!StaticContext)
 	{
 		return;
 	}
 
-	FOnSetter OnSetter;
-	OnSetter.BindUFunction(ObjectContext, Setter.FunctionName);
-	if (OnSetter.IsBoundToObject(ObjectContext))
+	FOnSetterInt OnSetterInt;
+	OnSetterInt.BindUFunction(StaticContext, Setter.FunctionName);
+	if (OnSetterInt.IsBoundToObject(StaticContext))
 	{
-		OnSetter.Execute(InValue);
+		OnSetterInt.Execute(InValue);
 	}
 }
 
@@ -152,30 +152,30 @@ int32 UMyGameUserSettings::GetOption(FName TagName) const
 	}
 #endif // WITH_EDITOR
 
-	const FSettingsDataBase* FoundRow = FindSettingsTableRow(TagName).GetChosenSettingsData();
-	if (!FoundRow)
+	const FSettingsPicker& FoundRow = FindSettingsTableRow(TagName);
+	if (!FoundRow.IsValid())
 	{
 		return INDEX_NONE;
 	}
 
-	const FSettingsFunction& Getter = FoundRow->Getter;
+	const FSettingsFunction& Getter = FoundRow.Getter;
 	if (Getter.FunctionName.IsNone()
 	    || !Getter.FunctionClass)
 	{
 		return INDEX_NONE;
 	}
 
-	UObject* ObjectContext = GetObjectContext(TagName);
-	if (!ObjectContext)
+	UObject* StaticContext = GetObjectContext(TagName);
+	if (!StaticContext)
 	{
 		return INDEX_NONE;
 	}
 
-	FOnGetter OnGetter;
-	OnGetter.BindUFunction(ObjectContext, Getter.FunctionName);
-	if (OnGetter.IsBoundToObject(ObjectContext))
+	FOnGetterInt OnGetterInt;
+	OnGetterInt.BindUFunction(StaticContext, Getter.FunctionName);
+	if (OnGetterInt.IsBoundToObject(StaticContext))
 	{
-		const int32 OutVal = OnGetter.Execute();
+		const int32 OutVal = OnGetterInt.Execute();
 		return OutVal;
 	}
 
@@ -231,18 +231,16 @@ void UMyGameUserSettings::OnDataTableChanged()
 	}
 
 	// Set row name by specified tag
-	for (const auto& SettingsTableRowIt : SettingsTableRowsInternal)
+	for (const TTuple<FName, FSettingsPicker>& SettingsTableRowIt : SettingsTableRowsInternal)
 	{
 		const FSettingsPicker& SettingsRow = SettingsTableRowIt.Value;
-		if (const FSettingsDataBase* ChosenSettingsData = SettingsRow.GetChosenSettingsData())
+
+		const FName RowKey = SettingsTableRowIt.Key;
+		const FName RowValueTag = SettingsTableRowIt.Value.Tag.GetTagName();
+		if (!RowValueTag.IsNone()     // Tag is not empty
+		    && RowKey != RowValueTag) // New tag name
 		{
-			const FName RowKey = SettingsTableRowIt.Key;
-			const FName RowValueTag = ChosenSettingsData->Tag.GetTagName();
-			if (!RowValueTag.IsNone()     // Tag is not empty
-			    && RowKey != RowValueTag) // New tag name
-			{
-				FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
-			}
+			FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
 		}
 	}
 #endif	  // WITH_EDITOR

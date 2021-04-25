@@ -10,45 +10,6 @@
 
 typedef Super ThisClass;
 
-// Empty property data
-const FPropertyData FPropertyData::Empty = FPropertyData();
-
-// Get property from handle
-FProperty* FPropertyData::GetProperty() const
-{
-	return PropertyHandle ? PropertyHandle->GetProperty() : nullptr;
-}
-
-// Get property name by handle
-FName FPropertyData::GetPropertyNameFromHandle() const
-{
-	const FProperty* CurrentProperty = GetProperty();
-	return CurrentProperty ? CurrentProperty->GetFName() : NAME_None;
-}
-
-// Get FName value by property handle
-FName FPropertyData::GetPropertyValueFromHandle() const
-{
-	FName ValueName = NAME_None;
-	if (PropertyHandle.IsValid())
-	{
-		FString ValueString;
-		PropertyHandle->GetValueAsDisplayString(/*Out*/ValueString);
-		ValueName = *ValueString;
-	}
-	return ValueName;
-}
-
-// Set FName value by property handle
-template <typename T>
-void FPropertyData::SetPropertyValueToHandle(const T& NewValue)
-{
-	if (PropertyHandle.IsValid())
-	{
-		PropertyHandle->SetValue(NewValue);
-	}
-}
-
 // Called when the header of the property (the row in the details panel where the property is shown)
 void FMyPropertyTypeCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
@@ -72,17 +33,18 @@ void FMyPropertyTypeCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 	PropertyHandle/*ref*/->GetOuterObjects(OuterObjects);
 	MyPropertyOuterInternal = OuterObjects.IsValidIndex(0) ? OuterObjects[0] : nullptr;
 
-	// Bind to delegate
-	PropertyHandle/*ref*/->SetOnChildPropertyValueChanged(FSimpleDelegate::CreateSP(this, &ThisClass::RefreshCustomProperty));
+	// Set parent property
+	ParentPropertyInternal = FPropertyData(PropertyHandle);
+	const TDelegate<void()>& RefreshCustomPropertyFunction = FSimpleDelegate::CreateSP(this, &ThisClass::RefreshCustomProperty);
+	PropertyHandle/*ref*/->SetOnPropertyValueChanged(RefreshCustomPropertyFunction);
+	PropertyHandle/*ref*/->SetOnChildPropertyValueChanged(RefreshCustomPropertyFunction);
 
+	// Set children properties
 	uint32 NumChildren;
 	PropertyHandle/*ref*/->GetNumChildren(NumChildren);
 	for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 	{
-		FPropertyData PropertyData = FPropertyData::Empty;
-		PropertyData.PropertyHandle = PropertyHandle/*ref*/->GetChildHandle(ChildIndex);
-		PropertyData.PropertyName = PropertyData.GetPropertyNameFromHandle();
-		PropertyData.PropertyValue = PropertyData.GetPropertyValueFromHandle();
+		FPropertyData PropertyData(PropertyHandle/*ref*/->GetChildHandle(ChildIndex).ToSharedRef());
 		OnCustomizeChildren(ChildBuilder, PropertyData);
 	}
 }
@@ -124,7 +86,7 @@ void FMyPropertyTypeCustomization::SetCustomPropertyEnabled(bool bEnabled)
 // Is called for each property on building its row
 void FMyPropertyTypeCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
-	if (!ensureMsgf(PropertyData.PropertyHandle, TEXT("ASSERT: 'PropertyData.PropertyHandle' is not valid")))
+	if (!ensureMsgf(PropertyData.IsValid(), TEXT("ASSERT: 'PropertyData.PropertyHandle' is not valid")))
 	{
 		return;
 	}
@@ -151,6 +113,8 @@ void FMyPropertyTypeCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 // Will add the default searchable combo box
 void FMyPropertyTypeCustomization::AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder)
 {
+	InitSearchableComboBox();
+
 	RefreshCustomProperty();
 
 	// Will add the searchable combo box by default
@@ -220,5 +184,36 @@ void FMyPropertyTypeCustomization::OnCustomPropertyChosen(TSharedPtr<FString> Se
 	if (const FString* SelectedString = SelectedStringPtr.Get())
 	{
 		SetCustomPropertyValue(**SelectedString);
+	}
+}
+
+// Add an empty row once, so the users can clear the selection if they want
+void FMyPropertyTypeCustomization::InitSearchableComboBox()
+{
+	if (!NoneStringInternal.IsValid())
+	{
+		TSharedPtr<FString> NoneStringPtr(MakeShareable(new FString(FPropertyData::NoneString)));
+		NoneStringInternal = NoneStringPtr;
+		SearchableComboBoxValuesInternal.EmplaceAt(0, MoveTemp(NoneStringPtr));
+	}
+}
+
+// Reset and remove all shared strings in array except 'None' string
+void FMyPropertyTypeCustomization::ResetSearchableComboBox()
+{
+	const int32 ValuesNum = SearchableComboBoxValuesInternal.Num();
+	for (int32 Index = ValuesNum - 1; Index >= 0; --Index)
+	{
+		if (!SearchableComboBoxValuesInternal.IsValidIndex(Index))
+		{
+			continue;
+		}
+
+		TSharedPtr<FString>& StringPtrIt = SearchableComboBoxValuesInternal[Index];
+		if (StringPtrIt != NoneStringInternal)
+		{
+			StringPtrIt.Reset();
+			SearchableComboBoxValuesInternal.RemoveAt(Index);
+		}
 	}
 }

@@ -7,7 +7,7 @@
 typedef FMorphDataCustomization ThisClass;
 
 // The name of class to be customized
-const FName FMorphDataCustomization::PropertyClassName = FMorphData::StaticStruct()->GetFName();
+const FName ThisClass::PropertyClassName = FMorphData::StaticStruct()->GetFName();
 
 // Default constructor
 FMorphDataCustomization::FMorphDataCustomization()
@@ -60,19 +60,14 @@ void FMorphDataCustomization::RefreshCustomProperty()
 	}
 	CachedMeshNameInternal = MeshName;
 
-	SearchableComboBoxValuesInternal.Empty();
+	ResetSearchableComboBox();
 	SearchableComboBoxValuesInternal.Reserve(PreviewMesh->MorphTargetIndexMap.Num() + 1);
 
-	// Add an empty row, so the user can clear the selection if they want
-	static const FString NoneName{FName(NAME_None).ToString()};
-	const TSharedPtr<FString> NoneNamePtr = MakeShareable(new FString(NoneName));
-	SearchableComboBoxValuesInternal.Add(NoneNamePtr);
-
-	for (const auto& MorphTargetIt : PreviewMesh->MorphTargetIndexMap)
+	for (const TTuple<FName, int32>& MorphTargetIt : PreviewMesh->MorphTargetIndexMap)
 	{
 		// Add this to the searchable text box as an FString so users can type and find it
 		const FString MorphTarget = MorphTargetIt.Key.ToString();
-		SearchableComboBoxValuesInternal.Add(MakeShareable(new FString(MorphTarget)));
+		SearchableComboBoxValuesInternal.Emplace(MakeShareable(new FString(MorphTarget)));
 	}
 
 	// Will refresh searchable combo box

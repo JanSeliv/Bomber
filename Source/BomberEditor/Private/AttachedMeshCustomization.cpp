@@ -14,7 +14,7 @@
 typedef FAttachedMeshCustomization ThisClass;
 
 // The name of class to be customized
-const FName FAttachedMeshCustomization::PropertyClassName = FAttachedMesh::StaticStruct()->GetFName();
+const FName ThisClass::PropertyClassName = FAttachedMesh::StaticStruct()->GetFName();
 
 // Default constructor
 FAttachedMeshCustomization::FAttachedMeshCustomization()
@@ -75,7 +75,7 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 			[
 				PropertyCustomizationHelpers::MakeBrowseButton(
 					FSimpleDelegate::CreateSP(this, &ThisClass::OnBrowseSocket),
-					FText::FromString("Select a different Parent Socket - cannot change socket on inherited components"),
+					FText::FromString(TEXT("Select a different Parent Socket - cannot change socket on inherited components")),
 					TAttribute<bool>(true)
 					)
 			]
@@ -87,7 +87,7 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 			[
 				PropertyCustomizationHelpers::MakeClearButton(
 					FSimpleDelegate::CreateSP(this, &ThisClass::InvalidateCustomProperty),
-					FText::FromString("Clear the Parent Socket - cannot change socket on inherited components"),
+					FText::FromString(TEXT("Clear the Parent Socket - cannot change socket on inherited components")),
 					TAttribute<bool>(true)
 					)
 			]
@@ -108,7 +108,8 @@ void FAttachedMeshCustomization::OnBrowseSocket()
 	USkeletalMesh* SkeletalMeshAsset = nullptr;
 	static const FName ParentMeshPropertyName = GET_MEMBER_NAME_CHECKED(UPlayerRow, Mesh);
 	const UClass* PlayerRowClass = PlayerRowOuter->GetClass();
-	if (const auto ParentMeshProperty = CastField<FObjectProperty>(PlayerRowClass->FindPropertyByName(ParentMeshPropertyName)))
+	const FProperty* FoundProperty = PlayerRowClass ? PlayerRowClass->FindPropertyByName(ParentMeshPropertyName) : nullptr;
+	if (const auto ParentMeshProperty = CastField<FObjectProperty>(FoundProperty))
 	{
 		SkeletalMeshAsset = Cast<USkeletalMesh>(ParentMeshProperty->GetPropertyValue_InContainer(PlayerRowOuter));
 	}

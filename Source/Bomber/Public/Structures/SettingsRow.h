@@ -43,40 +43,11 @@ struct FSettingsFunction
 /**
  * The base archetype of some setting.
  */
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (
+	SettingsFunctionContextTemplate="OnStaticContext__DelegateSignature"))
 struct FSettingsDataBase
 {
 	GENERATED_BODY()
-
-	/** Empty settings data. */
-	static const FSettingsDataBase Empty;
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FGameplayTag Tag; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction ObjectContext = FSettingsFunction::Empty; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction Setter = FSettingsFunction::Empty; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FSettingsFunction Getter = FSettingsFunction::Empty; //[AW]
-
-	/** Returns true if is valid. */
-	FORCEINLINE bool IsValid() const { return !(*this == Empty); }
-
-	/** Compares for equality.
-	* @param Other The other object being compared. */
-	bool operator==(const FSettingsDataBase& Other) const;
-
-	/** Creates a hash value.
-	* @param Other the other object to create a hash value for. */
-	friend uint32 GetTypeHash(const FSettingsDataBase& Other);
 };
 
 /**
@@ -100,37 +71,61 @@ struct FSettingsButtonsRow : public FSettingsDataBase
 /**
  *
  */
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (
+	SettingsFunctionSetterTemplate="OnSetterBool__DelegateSignature",
+	SettingsFunctionGetterTemplate="OnGetterBool__DelegateSignature"))
 struct FSettingsCheckbox : public FSettingsDataBase
 {
 	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	bool bIsSet = false; //[AW]
 };
 
 /**
  *
- */
-USTRUCT(BlueprintType)
+*/
+USTRUCT(BlueprintType, meta = (
+	SettingsFunctionSetterTemplate="OnSetterInt__DelegateSignature",
+	SettingsFunctionGetterTemplate="OnGetterInt__DelegateSignature"))
 struct FSettingsCombobox : public FSettingsDataBase
 {
 	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	int32 ChosenMemberIndex = INDEX_NONE; //[AW]
 };
 
 /**
  *
  */
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (
+	SettingsFunctionSetterTemplate="OnSetterFloat__DelegateSignature",
+	SettingsFunctionGetterTemplate="OnGetterFloat__DelegateSignature"))
 struct FSettingsSlider : public FSettingsDataBase
 {
 	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	float ChosenValue = static_cast<float>(INDEX_NONE); //[AW]
 };
 
 /**
  *
  */
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (
+	SettingsFunctionSetterTemplate="OnSetterText__DelegateSignature",
+	SettingsFunctionGetterTemplate="OnGetterText__DelegateSignature"))
 struct FSettingsTextSimple : public FSettingsDataBase
 {
 	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FText CurrentText = FCoreTexts::Get().None; //[AW]
 };
 
 /**
@@ -157,15 +152,31 @@ struct FSettingsPicker
 	static const FSettingsPicker Empty;
 
 	/** Contains a in-game settings type to be used. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FName SettingsType = NAME_None; //[AW]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FGameplayTag Tag = FGameplayTag::EmptyTag; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionContextTemplate))
+	FSettingsFunction StaticContext = FSettingsFunction::Empty; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionSetterTemplate))
+	FSettingsFunction Setter = FSettingsFunction::Empty; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionGetterTemplate))
+	FSettingsFunction Getter = FSettingsFunction::Empty; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FSettingsButton Button; //[AW]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FSettingsButtonsRow ButtonsRow; //[AW]
 
 	/** */

@@ -2,17 +2,27 @@
 
 #include "SettingsPickerCustomization.h"
 //---
+#include "SettingsFunctionCustomization.h"
 #include "Structures/SettingsRow.h"
 
 typedef FSettingsPickerCustomization ThisClass;
 
 // The name of class to be customized
-const FName FSettingsPickerCustomization::PropertyClassName = FSettingsPicker::StaticStruct()->GetFName();
+const FName ThisClass::PropertyClassName = FSettingsPicker::StaticStruct()->GetFName();
+
+//Pointer to the FSettingsDataBase struct
+const UScriptStruct* const& ThisClass::SettingsDataBaseStruct = FSettingsDataBase::StaticStruct();
 
 // Default constructor
 FSettingsPickerCustomization::FSettingsPickerCustomization()
 {
 	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
+
+	SettingsFunctionProperties.Reserve(FSettingsFunctionCustomization::TemplateMetaKeys.Num());
+	for (FName MetaNameIt : FSettingsFunctionCustomization::TemplateMetaKeys)
+	{
+		SettingsFunctionProperties.Emplace(MoveTemp(MetaNameIt), FPropertyData::Empty);
+	}
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -30,41 +40,57 @@ void FSettingsPickerCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> P
 // Called when the children of the property should be customized or extra rows added.
 void FSettingsPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	// Add an empty row, so the user can clear the selection if they want
-	static const FString NoneName{FName(NAME_None).ToString()};
-	const TSharedPtr<FString> NoneNamePtr = MakeShareable(new FString(NoneName));
-	SearchableComboBoxValuesInternal.Add(NoneNamePtr);
-
-	static const UScriptStruct* const SettingsDataBaseStruct = FSettingsDataBase::StaticStruct();
-	static const UScriptStruct* const SettingsPickerStruct = FSettingsPicker::StaticStruct();
-	for (TFieldIterator<FStructProperty> SettingsPickerIt(SettingsPickerStruct); SettingsPickerIt; ++SettingsPickerIt)
-	{
-		const UScriptStruct* StructPropertyIt = SettingsPickerIt->Struct;
-		if (StructPropertyIt
-		    && StructPropertyIt->IsChildOf(SettingsDataBaseStruct))
-		{
-			// Add this to the searchable text box as an FString so users can type and find it
-			const FString SettingsDataBasePropertyName = SettingsPickerIt->GetName();
-			SearchableComboBoxValuesInternal.Add(MakeShareable(new FString(SettingsDataBasePropertyName)));
-		}
-	}
-
 	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
+
+	// Display added values in the picker list
+	Super::RefreshCustomProperty();
+	ClearPrevChosenProperty();
 }
 
 // Is called for each property on building its row
 void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
-	if (PropertyData.PropertyName != CustomPropertyInternal.PropertyName)
+	const auto StructProperty = CastField<FStructProperty>(PropertyData.GetProperty());
+	if (StructProperty)
 	{
-		// Add lambda for visibility attribute to show\hide property when is not chosen
-		PropertyData.Visibility = MakeAttributeLambda([InDefaultProperty = PropertyData, InCustomProperty = CustomPropertyInternal]() -> EVisibility
+		bool bIsSettingsFunctionProperty = false;
+		for (TTuple<FName, FPropertyData>& SettingsFunctionPropertyIt : SettingsFunctionProperties)
 		{
-			const FName OtherPropertyName = InDefaultProperty.PropertyName;
-			const FName CustomPropertyValueName = InCustomProperty.GetPropertyValueFromHandle();
-			return OtherPropertyName == CustomPropertyValueName ? EVisibility::Visible : EVisibility::Collapsed;
-		});
+			const FName MetaName = SettingsFunctionPropertyIt.Key;
+			bIsSettingsFunctionProperty = StructProperty->FindMetaData(MetaName) != nullptr;
+			if (bIsSettingsFunctionProperty)
+			{
+				SettingsFunctionPropertyIt.Value = PropertyData;
+				break;
+			}
+		}
+
+		if (!bIsSettingsFunctionProperty)
+		{
+			bool bIsSettingsDataProperty = false;
+			const UScriptStruct* SettingsDataChildStruct = StructProperty ? StructProperty->Struct : nullptr;
+			if (SettingsDataChildStruct
+			    && SettingsDataChildStruct->IsChildOf(SettingsDataBaseStruct))
+			{
+				// Add this to the searchable text box as an FString so users can type and find it
+				const FString SettingsDataBasePropertyName = PropertyData.PropertyName.ToString();
+				SearchableComboBoxValuesInternal.Emplace(MakeShareable(new FString(SettingsDataBasePropertyName)));
+				bIsSettingsDataProperty = true;
+			}
+
+			if (bIsSettingsDataProperty)
+			{
+				// Add lambda for visibility attribute to show\hide property when is not chosen
+				PropertyData.Visibility = MakeAttributeLambda([InDefaultProperty = PropertyData, InCustomProperty = CustomPropertyInternal]() -> EVisibility
+				{
+					const FName OtherPropertyName = InDefaultProperty.PropertyName;
+					const FName CustomPropertyValueName = InCustomProperty.GetPropertyValueFromHandle();
+					return OtherPropertyName == CustomPropertyValueName ? EVisibility::Visible : EVisibility::Collapsed;
+				});
+			}
+		}
 	}
+
 	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
 }
 
@@ -80,64 +106,99 @@ void FSettingsPickerCustomization::RefreshCustomProperty()
 {
 	// Super is not called to avoid refreshing searchable combo box, it always has the same values
 
-	if (CachedSettingsTypeInternal.IsNone())
-	{
-		// Is called first time on init
-		CachedSettingsTypeInternal = CustomPropertyInternal.PropertyValue;
-		return;
-	}
-
 	// Compare with chosen option
-	if (CachedSettingsTypeInternal != CustomPropertyInternal.PropertyValue)
+	if (ChosenSettingsDataInternal.PropertyName != CustomPropertyInternal.PropertyValue)
 	{
-		OnNewSettingsTypeChosen();
+		ClearPrevChosenProperty();
 	}
 }
 
-// Is called when is chosen new member from custom property
-void FSettingsPickerCustomization::OnNewSettingsTypeChosen()
+// Will reset the whole property content of last chosen settings type
+void FSettingsPickerCustomization::ClearPrevChosenProperty()
 {
-	FPropertyData PrevPropertyData = FPropertyData::Empty;
 	FPropertyData NewPropertyData = FPropertyData::Empty;
+	FPropertyData PrevPropertyData = FPropertyData::Empty;
 	for (const FPropertyData& DefaultPropertyIt : DefaultPropertiesInternal)
 	{
-		if (DefaultPropertyIt.PropertyName == CustomPropertyInternal.PropertyValue)
+		if (!NewPropertyData.IsValid()
+		    && CustomPropertyInternal.IsValid()
+		    && CustomPropertyInternal.PropertyValue == DefaultPropertyIt.PropertyName)
 		{
 			NewPropertyData = DefaultPropertyIt;
+			continue;
 		}
-		else if (DefaultPropertyIt.PropertyName == CachedSettingsTypeInternal)
+
+		if (!PrevPropertyData.IsValid()
+		    && ChosenSettingsDataInternal.IsValid()
+		    && ChosenSettingsDataInternal.PropertyName == DefaultPropertyIt.PropertyName)
 		{
 			PrevPropertyData = DefaultPropertyIt;
 		}
 	}
 
-	CachedSettingsTypeInternal = CustomPropertyInternal.PropertyValue;
-
-	void* PrevValueData = nullptr;
-	const FProperty* PrevProperty = nullptr;
-	if (const IPropertyHandle* PrevPropertyHandle = PrevPropertyData.PropertyHandle.Get())
+	if (!PrevPropertyData.IsValid()
+	    && !NewPropertyData.IsValid())
 	{
-		PrevPropertyHandle->GetValueData(PrevValueData);
-		PrevProperty = PrevPropertyData.GetProperty();
+		return;
 	}
 
-	void* NewValueData = nullptr;
-	const FProperty* NewProperty = nullptr;
-	if (const IPropertyHandle* NewPropertyHandle = NewPropertyData.PropertyHandle.Get())
+	ChosenSettingsDataInternal = NewPropertyData;
+
+	// Clear prev value
+	void* PrevValueData = PrevPropertyData.GetPropertyValuePtrFromHandle();
+	const FProperty* PrevProperty = PrevPropertyData.GetProperty();
+	if (PrevValueData
+	    && PrevProperty)
 	{
-		NewPropertyHandle->GetValueData(NewValueData);
-		NewProperty = NewPropertyData.GetProperty();
+		PrevProperty->ClearValue(PrevValueData);
 	}
 
-	if (PrevValueData && PrevProperty)
+	CopyMetas();
+}
+
+// Copy meta from chosen option USTRUCT to each UPROPERTY of Settings Functions
+void FSettingsPickerCustomization::CopyMetas()
+{
+	const auto StructProperty = CastField<FStructProperty>(ChosenSettingsDataInternal.GetProperty());
+	const UScriptStruct* SettingsDataChildStruct = StructProperty ? StructProperty->Struct : nullptr;
+
+	for (TTuple<FName, FPropertyData>& PropertyIt : SettingsFunctionProperties)
 	{
-		if (NewValueData
-		    && NewProperty)
+		const FName TemplateMetaKey = PropertyIt.Key;
+		FPropertyData& PropertyDataRef = PropertyIt.Value;
+		if (!PropertyIt.Value.IsValid())
 		{
-			NewProperty->ClearValue(NewValueData);
-			NewProperty->CopyCompleteValue(NewValueData, PrevValueData);
+			continue;
 		}
 
-		PrevProperty->ClearValue(PrevValueData);
+		auto SetMetaData = [&PropertyIt](const FString& NewMetaValue)
+		{
+			PropertyIt.Value.GetProperty()->SetMetaData(PropertyIt.Key, *NewMetaValue);
+			PropertyIt.Value.PropertyHandle->NotifyPostChange();
+		};
+
+		if (!SettingsDataChildStruct)
+		{
+			PropertyDataRef.SetMetaDataValue(TemplateMetaKey, NAME_None, true);
+			continue;
+		}
+
+		// Check meta key in parent struct if not found for child struct
+		for (const UStruct* StructIt = SettingsDataChildStruct; StructIt; StructIt = StructIt->GetSuperStruct())
+		{
+			// Copy meta from chosen option USTRUCT to each UPROPERTY of SettingsFunctionProperties
+			if (const FString* FoundMetaData = StructIt->FindMetaData(TemplateMetaKey))
+			{
+				PropertyDataRef.SetMetaDataValue(TemplateMetaKey, **FoundMetaData, true);
+				break;
+			}
+
+			if (StructIt == SettingsDataBaseStruct)
+			{
+				// The meta key was not found
+				PropertyDataRef.SetMetaDataValue(TemplateMetaKey, NAME_None, true);
+				break;
+			}
+		}
 	}
 }

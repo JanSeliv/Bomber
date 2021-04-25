@@ -17,6 +17,9 @@ public:
 	/** The name of class to be customized. */
 	static const FName PropertyClassName;
 
+	/** Pointer to the FSettingsDataBase struct. */
+	static const UScriptStruct* const& SettingsDataBaseStruct;
+
 	/** Default constructor. */
 	FSettingsPickerCustomization();
 
@@ -45,8 +48,13 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** Last chosen option. */
-	FName CachedSettingsTypeInternal = NAME_None;
+	/** One of chosen FSettingsDataBase property. */
+	FPropertyData ChosenSettingsDataInternal = FPropertyData::Empty;
+
+	/** Contains property to by meta.
+	 * MetaName: SettingsFunctionContextTemplate, SettingsFunctionSetterTemplate, SettingsFunctionGetterTemplate.
+	 * SettingsFunctionProperty: FSettingsPicker::StaticContext, FSettingsPicker::Setter, FSettingsPicker::Getter, */
+	TMap<FName/*TemplateMetaKey*/, FPropertyData/*SettingsFunctionProperty*/> SettingsFunctionProperties;
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -62,6 +70,11 @@ protected:
 	/** Is called when any child property is changed. */
 	virtual void RefreshCustomProperty() override;
 
-	/** Is called when is chosen new member from custom property. */
-	void OnNewSettingsTypeChosen();
+	/** Will reset the whole property content of last chosen settings type. */
+	void ClearPrevChosenProperty();
+
+	/** Copy meta from chosen option USTRUCT to each UPROPERTY of Settings Functions.
+     * @see FMyPropertyTypeCustomization::CustomPropertyInternal
+     * @see FSettingsPickerCustomization::SettingsFunctionProperties */
+	void CopyMetas();
 };

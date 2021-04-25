@@ -7,7 +7,15 @@
 typedef FSettingsFunctionCustomization ThisClass;
 
 // The name of class to be customized
-const FName FSettingsFunctionCustomization::PropertyClassName = FSettingsFunction::StaticStruct()->GetFName();
+const FName ThisClass::PropertyClassName = FSettingsFunction::StaticStruct()->GetFName();
+
+// Static const array, that contains names of metas used by this property
+const ThisClass::FNamesArray ThisClass::TemplateMetaKeys =
+{
+	TEXT("SettingsFunctionContextTemplate"),
+	TEXT("SettingsFunctionSetterTemplate"),
+	TEXT("SettingsFunctionGetterTemplate")
+};
 
 // Default constructor
 FSettingsFunctionCustomization::FSettingsFunctionCustomization()
@@ -30,9 +38,11 @@ void FSettingsFunctionCustomization::CustomizeHeader(TSharedRef<IPropertyHandle>
 // Called when the children of the property should be customized or extra rows added.
 void FSettingsFunctionCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	InitTemplateFunction(PropertyHandle);
-
 	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
+
+	InitTemplateMetaKey();
+
+	RefreshCustomProperty();
 }
 
 // Is called for each property on building its row
@@ -57,13 +67,25 @@ void FSettingsFunctionCustomization::AddCustomPropertyRow(const FText& PropertyD
 // Set new values for the list of selectable members
 void FSettingsFunctionCustomization::RefreshCustomProperty()
 {
-	const UFunction* TemplateFunction = TemplateFunctionInternal.Get();
-	if (!TemplateFunction)
+	// Invalidate if class is not chosen
+	const FName ChosenFunctionClassName = FunctionClassPropertyInternal.GetPropertyValueFromHandle();
+	if (ChosenFunctionClassName.IsNone())
 	{
 		InvalidateCustomProperty();
 		return;
 	}
 
+	// Skip if nothing changed
+	const bool bChosenNewClass = FunctionClassPropertyInternal.PropertyValue != ChosenFunctionClassName;
+	FunctionClassPropertyInternal.PropertyValue = ChosenFunctionClassName;
+	const bool bIsNewSettingsType = UpdateTemplateFunction();
+	if (!bIsNewSettingsType && !bChosenNewClass    // Settings Type and Class depend on each other
+	    && SearchableComboBoxValuesInternal.Num()) // List is not empty
+	{
+		return;
+	}
+
+	// Invalidate if invalid class
 	const UClass* ChosenFunctionClass = GetChosenFunctionClass();
 	if (!ChosenFunctionClass)
 	{
@@ -71,23 +93,9 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 		return;
 	}
 
-	// Compare with cached class, if equal and combo box values exist, then skip refreshing
-	const FName ChosenFunctionClassName = FunctionClassPropertyInternal.GetPropertyValueFromHandle();
-	if (ChosenFunctionClassName == FunctionClassPropertyInternal.PropertyValue
-	    && SearchableComboBoxValuesInternal.Num())
-	{
-		return;
-	}
-	FunctionClassPropertyInternal.PropertyValue = ChosenFunctionClassName;
-
 	SetCustomPropertyEnabled(true);
 
-	SearchableComboBoxValuesInternal.Empty();
-
-	// Add an empty row, so the user can clear the selection if they want
-	static const FString NoneName{FName(NAME_None).ToString()};
-	const TSharedPtr<FString> NoneNamePtr = MakeShareable(new FString(NoneName));
-	SearchableComboBoxValuesInternal.Add(NoneNamePtr);
+	ResetSearchableComboBox();
 
 	TArray<FName> FoundList;
 	TArray<FName> AllChildFunctions;
@@ -97,7 +105,7 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 	{
 		const UFunction* FunctionIt = *It;
 		if (FunctionIt
-		    && FunctionIt != TemplateFunction
+		    && FunctionIt != TemplateFunctionInternal
 		    && (!bIsStaticFunctionInternal || FunctionIt->FunctionFlags & FUNC_Static) // only static functions if specified
 		    && IsSignatureCompatible(FunctionIt))
 		{
@@ -123,7 +131,7 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 	for (const FName& ItemData : FoundList)
 	{
 		// Add this to the searchable text box as an FString so users can type and find it
-		SearchableComboBoxValuesInternal.Add(MakeShareable(new FString(ItemData.ToString())));
+		SearchableComboBoxValuesInternal.Emplace(MakeShareable(new FString(ItemData.ToString())));
 	}
 
 	// Will refresh searchable combo box
@@ -157,10 +165,16 @@ const UClass* FSettingsFunctionCustomization::GetChosenFunctionClass() const
 // Check if all signatures of specified function are compatible with current template function
 bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Function) const
 {
+	if (!Function)
+	{
+		return false;
+	}
+
 	const UFunction* TemplateFunction = TemplateFunctionInternal.Get();
 	if (!TemplateFunction)
 	{
-		return false;
+		// Template was not specified, so is compatible
+		return true;
 	}
 
 	auto ArePropertiesTheSame = [](const FProperty* A, const FProperty* B)
@@ -238,46 +252,54 @@ bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Func
 }
 
 // Set Template Function once
-void FSettingsFunctionCustomization::InitTemplateFunction(const TSharedRef<IPropertyHandle>& ParentPropertyHandle)
+bool FSettingsFunctionCustomization::UpdateTemplateFunction()
 {
-	if (TemplateFunctionInternal != nullptr)
+	// Skip if meta was not changed
+	const FName TemplateFunctionName = ParentPropertyInternal.GetMetaDataValue(TemplateMetaKeyInternal);
+	if (TemplateFunctionName == TemplateMetaValueInternal)
 	{
-		// Set once
-		return;
+		return false;
+	}
+	TemplateMetaValueInternal = TemplateFunctionName;
+
+	// Clear if meta is empty (none settings type is chosen)
+	if (TemplateFunctionName.IsNone())
+	{
+		TemplateFunctionInternal.Reset();
+		TemplateMetaValueInternal = NAME_None;
+		return true;
 	}
 
-	// Determine current property is wrapped by getter, setter or object context
-	FName TemplateFunctionName = NAME_None;
-	const FProperty* ParentProperty = ParentPropertyHandle/*ref*/->GetProperty();
-	const FName ParentPropertyName = ParentProperty ? ParentProperty->GetFName() : NAME_None;
-
-	static const FName SetterName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Setter);
-	static const FName GetterName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, Getter);
-	static const FName ContextName = GET_MEMBER_NAME_CHECKED(FSettingsDataBase, ObjectContext);
-
-	if (ParentPropertyName == SetterName)
+	static const FName ContextPropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, StaticContext);
+	if (ParentPropertyInternal.PropertyName == ContextPropertyName)
 	{
-		static const FName SettingsSetterName = "OnSetter__DelegateSignature";
-		TemplateFunctionName = SettingsSetterName;
-	}
-	else if (ParentPropertyName == GetterName)
-	{
-		static const FName SettingsGetterName = "OnGetter__DelegateSignature";
-		TemplateFunctionName = SettingsGetterName;
-	}
-	else if (ParentPropertyName == ContextName)
-	{
-		static const FName SettingsObjectContextName = "OnObjectContext__DelegateSignature";
-		TemplateFunctionName = SettingsObjectContextName;
 		bIsStaticFunctionInternal = true;
 	}
 
-	// Set TemplateFunctionInternal to filter by its signature
-	if (!TemplateFunctionName.IsNone())
+	// Set TemplateFunctionInternal to filter by its signature. All templates are stored in settings class
+	const UObject* GameUserSettings = GEngine ? (UObject*)GEngine->GetGameUserSettings() : nullptr;
+	const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
+	TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName, EIncludeSuperFlag::ExcludeSuper) : nullptr;
+	ensureMsgf(TemplateFunctionInternal.IsValid(), TEXT("ASSERT: Specified '%s' function was not found in game settings"), *TemplateFunctionName.ToString());
+	return true;
+}
+
+// Will set once the meta key of this property
+void FSettingsFunctionCustomization::InitTemplateMetaKey()
+{
+	if (!TemplateMetaKeyInternal.IsNone() // set only once since the key never changes
+	    || !ParentPropertyInternal.IsValid())
 	{
-		const UObject* GameUserSettings = GEngine ? (UObject*)GEngine->GetGameUserSettings() : nullptr;
-		const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
-		TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName, EIncludeSuperFlag::ExcludeSuper) : nullptr;
-		ensureMsgf(TemplateFunctionInternal.IsValid(), TEXT("ASSERT: 'TemplateFunctionInternal' is not found"));
+		return;
+	}
+
+	// Will set once the meta key of this property.
+	for (FName MetaKeyIt : TemplateMetaKeys)
+	{
+		if (ParentPropertyInternal.IsMetaKeyExists(MetaKeyIt))
+		{
+			TemplateMetaKeyInternal = MoveTemp(MetaKeyIt);
+			break;
+		}
 	}
 }

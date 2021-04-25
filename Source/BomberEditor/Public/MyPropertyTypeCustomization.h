@@ -3,58 +3,10 @@
 #pragma once
 
 #include "IPropertyTypeCustomization.h"
+//---
+#include "PropertyData.h"
 
 typedef class FMyPropertyTypeCustomization Super;
-
-/**
- * Contains data that describes property.
- */
-struct FPropertyData
-{
-	/** Empty property data. */
-	static const FPropertyData Empty;
-
-	/** The name of a property. */
-	FName PropertyName = NAME_None;
-
-	/** The last cached value of a property. */
-	FName PropertyValue = NAME_None;
-
-	/** The handle of a property. */
-	TSharedPtr<IPropertyHandle> PropertyHandle = nullptr;
-
-	/** Determines if property is active (not greyed out). */
-	TAttribute<bool> bIsEnabled = true;
-
-	/** Determines if property is visible. */
-	TAttribute<EVisibility> Visibility = EVisibility::Visible;
-
-	/** Get property from handle.*/
-	FProperty* GetProperty() const;
-
-	/** Get property name by handle.
-	 * It returns current name of the property.
-	 * Is cheaper to use cached one.
-	 * @see FPropertyData::PropertyName. */
-	FName GetPropertyNameFromHandle() const;
-
-	/** Get property value by handle.
-	* It returns current value contained in property.
-	* Is cheaper to use cached one.
-	* @see FPropertyData::PropertyValue. */
-	FName GetPropertyValueFromHandle() const;
-
-	/**
-	 * Set new template value to property handle.
-	 * @tparam T Template param, is used to as to set simple types as well as set whole FProperty*
-	 * @param NewValue Value to set.
-	 */
-	template <typename T>
-	void SetPropertyValueToHandle(const T& NewValue);
-
-	/** Returns true is property is not empty. */
-	FORCEINLINE bool IsValid() const { return PropertyName.IsNone() && PropertyHandle != nullptr; }
-};
 
 /**
  * Overrides some property to make better experience avoiding any errors in properties by manual typing etc.
@@ -99,8 +51,14 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
+	/** Contains data of hierarchically upper property which is chosen in editor module to customize its child property. */
+	FPropertyData ParentPropertyInternal = FPropertyData::Empty;
+
 	/** Property data to be customized. It's property name has to be set in children's constructors.  */
-	FPropertyData CustomPropertyInternal;
+	FPropertyData CustomPropertyInternal = FPropertyData::Empty;
+
+	/** Contains data about all not custom child properties. */
+	TArray<FPropertyData> DefaultPropertiesInternal;
 
 	/** The outer uobject of a property to be customized. */
 	TWeakObjectPtr<class UObject> MyPropertyOuterInternal = nullptr;
@@ -115,8 +73,8 @@ protected:
 	 * @see FMyPropertyTypeCustomization::SearchableComboBoxValuesInternal */
 	TWeakPtr<class SSearchableComboBox> SearchableComboBoxInternal = nullptr;
 
-	/** Contains data about all not custom child properties. */
-	TArray<FPropertyData> DefaultPropertiesInternal;
+	/** Shared none string. Is selectable value in the searchable box. */
+	TWeakPtr<FString> NoneStringInternal = nullptr;
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -154,4 +112,10 @@ protected:
 	 * @see FMyPropertyTypeCustomization::SetCustomPropertyValue(FName).
 	 */
 	void OnCustomPropertyChosen(TSharedPtr<FString> SelectedStringPtr, ESelectInfo::Type SelectInfo);
+
+	/** Add an empty row once, so the users can clear the selection if they want. */
+	void InitSearchableComboBox();
+
+	/** Reset and remove all shared strings in array except 'None' string. */
+	void ResetSearchableComboBox();
 };

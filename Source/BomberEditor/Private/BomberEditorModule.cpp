@@ -11,7 +11,7 @@
 
 IMPLEMENT_GAME_MODULE(FBomberEditorModule, BomberEditor);
 
-static const FName PropertyEditorModule = "PropertyEditor";
+static const FName PropertyEditorModule = TEXT("PropertyEditor");
 
 void FBomberEditorModule::StartupModule()
 {

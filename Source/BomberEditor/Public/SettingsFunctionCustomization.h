@@ -17,6 +17,10 @@ public:
 	/** The name of class to be customized. */
 	static const FName PropertyClassName;
 
+	/** Fixed-size TemplateMetaKeys which contains names of metas used by this property. */
+	typedef TArray<FName, TFixedAllocator<3>> FNamesArray;
+	const static FNamesArray TemplateMetaKeys;
+
 	/** Default constructor. */
 	FSettingsFunctionCustomization();
 
@@ -49,8 +53,19 @@ protected:
 	 * @see FSettingsFunctionCustomization::RefreshCustomProperty() */
 	TWeakObjectPtr<UFunction> TemplateFunctionInternal = nullptr;
 
+	/** One of the TemplateMetaKeys.
+	* UPROPERTY(meta = (Key="Value")) FSettingsFunction SomeProperty
+	* It stores the name of Key.
+	* Is set once on init and never changes.
+	* @see FSettingsFunctionCustomization::InitTemplateMetaKey(). */
+	FName TemplateMetaKeyInternal = NAME_None;
+
+	/** Dynamic value, is set for meta when new setting type is chose.
+	* @see FSettingsPickerCustomization::CopyMetas() */
+	FName TemplateMetaValueInternal = NAME_None;
+
 	/** Contains property data about FSettingsFunction::FunctionClass */
-	FPropertyData FunctionClassPropertyInternal;
+	FPropertyData FunctionClassPropertyInternal = FPropertyData::Empty;
 
 	/** If true, will be added FUNC_Static flag to show only static function in the list. */
 	bool bIsStaticFunctionInternal = false;
@@ -91,6 +106,11 @@ protected:
 	bool IsSignatureCompatible(const UFunction* Function) const;
 
 	/** Set Template Function once.
-	 *  @see FSettingsFunctionCustomization::TemplateFunctionInternal */
-	void InitTemplateFunction(const TSharedRef<IPropertyHandle>& ParentPropertyHandle);
+	 *  @see FSettingsFunctionCustomization::TemplateFunctionInternal.
+	 *  @return true if new template function was set. */
+	bool UpdateTemplateFunction();
+
+	/** Will set once the meta key of this property.
+	 *  @see FSettingsFunctionCustomization::TemplateMetaKeyInternal. */
+	void InitTemplateMetaKey();
 };
