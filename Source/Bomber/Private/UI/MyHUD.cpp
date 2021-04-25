@@ -2,6 +2,7 @@
 
 #include "UI/MyHUD.h"
 //---
+#include "GameFramework/MyGameUserSettings.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
 
@@ -24,4 +25,6 @@ void AMyHUD::BeginPlay()
 	{
 		InGameWidget->AddToViewport();
 	}
+
+	UMyGameUserSettings::Get().InitSettings();
 }

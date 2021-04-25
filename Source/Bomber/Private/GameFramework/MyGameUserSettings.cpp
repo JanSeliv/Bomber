@@ -183,6 +183,125 @@ int32 UMyGameUserSettings::GetOption(FName TagName) const
 }
 
 //
+void UMyGameUserSettings::InitSettings_Implementation()
+{
+	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
+	{
+		const FSettingsDataBase* ChosenData = RowIt.Value.GetChosenSettingsData();
+		if (!ChosenData)
+		{
+			continue;
+		}
+
+		if (ChosenData == &RowIt.Value.Button)
+		{
+			if (const auto Data = static_cast<const FSettingsButton*>(ChosenData))
+			{
+				AddSettingsButton(*Data);
+				continue;
+			}
+		}
+
+		if (ChosenData == &RowIt.Value.ButtonsRow)
+		{
+			if (const auto Data = static_cast<const FSettingsButtonsRow*>(ChosenData))
+			{
+				AddSettingsButtonsRow(*Data);
+				continue;
+			}
+		}
+
+		if (ChosenData == &RowIt.Value.Checkbox)
+		{
+			if (const auto Data = static_cast<const FSettingsCheckbox*>(ChosenData))
+			{
+				AddSettingsCheckbox(*Data);
+				continue;
+			}
+		}
+
+		if (ChosenData == &RowIt.Value.Combobox)
+		{
+			if (const auto Data = static_cast<const FSettingsCombobox*>(ChosenData))
+			{
+				AddSettingsCombobox(*Data);
+				continue;
+			}
+		}
+
+		if (ChosenData == &RowIt.Value.Slider)
+		{
+			if (const auto Data = static_cast<const FSettingsSlider*>(ChosenData))
+			{
+				AddSettingsSlider(*Data);
+				continue;
+			}
+		}
+
+		if (ChosenData == &RowIt.Value.TextSimple)
+		{
+			if (const auto Data = static_cast<const FSettingsTextSimple*>(ChosenData))
+			{
+				AddSettingsTextSimple(*Data);
+				continue;
+			}
+		}
+
+		if (ChosenData == &RowIt.Value.TextInput)
+		{
+			if (const auto Data = static_cast<const FSettingsTextInput*>(ChosenData))
+			{
+				AddSettingsTextInput(*Data);
+				continue;
+			}
+		}
+	}
+}
+
+//
+void UMyGameUserSettings::AddSettingsButton_Implementation(const FSettingsButton& Data)
+{
+	//BP implementation
+}
+
+//
+void UMyGameUserSettings::AddSettingsButtonsRow_Implementation(const FSettingsButtonsRow& Data)
+{
+	//BP implementation
+}
+
+//
+void UMyGameUserSettings::AddSettingsCheckbox_Implementation(const FSettingsCheckbox& Data)
+{
+	//BP implementation
+}
+
+//
+void UMyGameUserSettings::AddSettingsCombobox_Implementation(const FSettingsCombobox& Data)
+{
+	//BP implementation
+}
+
+//
+void UMyGameUserSettings::AddSettingsSlider_Implementation(const FSettingsSlider& Data)
+{
+	//BP implementation
+}
+
+//
+void UMyGameUserSettings::AddSettingsTextSimple_Implementation(const FSettingsTextSimple& Data)
+{
+	//BP implementation
+}
+
+//
+void UMyGameUserSettings::AddSettingsTextInput_Implementation(const FSettingsTextInput& Data)
+{
+	//BP implementation
+}
+
+
+//
 void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {
 	Super::LoadSettings(bForceReload);
@@ -231,6 +350,7 @@ void UMyGameUserSettings::OnDataTableChanged()
 	}
 
 	// Set row name by specified tag
+	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRowsInternal);
 	for (const TTuple<FName, FSettingsPicker>& SettingsTableRowIt : SettingsTableRowsInternal)
 	{
 		const FSettingsPicker& SettingsRow = SettingsTableRowIt.Value;

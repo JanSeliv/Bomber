@@ -279,7 +279,7 @@ bool FSettingsFunctionCustomization::UpdateTemplateFunction()
 	// Set TemplateFunctionInternal to filter by its signature. All templates are stored in settings class
 	const UObject* GameUserSettings = GEngine ? (UObject*)GEngine->GetGameUserSettings() : nullptr;
 	const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
-	TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName, EIncludeSuperFlag::ExcludeSuper) : nullptr;
+	TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName) : nullptr;
 	ensureMsgf(TemplateFunctionInternal.IsValid(), TEXT("ASSERT: Specified '%s' function was not found in game settings"), *TemplateFunctionName.ToString());
 	return true;
 }

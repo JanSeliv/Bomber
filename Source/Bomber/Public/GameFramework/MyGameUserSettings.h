@@ -91,13 +91,19 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_RetVal(UObject*, FOnStaticContext);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterInt, int32, Param);
+
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterFloat, float, Param);
+
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterBool, bool, Param);
+
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterText, FText, Param);
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetterInt);
+
 	DECLARE_DYNAMIC_DELEGATE_RetVal(float, FOnGetterFloat);
+
 	DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnGetterBool);
+
 	DECLARE_DYNAMIC_DELEGATE_RetVal(FText, FOnGetterText);
 
 	/**  */
@@ -111,6 +117,38 @@ public:
 	/**  */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	int32 GetOption(FName TagName) const;
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void InitSettings();
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void AddSettingsButton(const FSettingsButton& Data);
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void AddSettingsButtonsRow(const FSettingsButtonsRow& Data);
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void AddSettingsCheckbox(const FSettingsCheckbox& Data);
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void AddSettingsCombobox(const FSettingsCombobox& Data);
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void AddSettingsSlider(const FSettingsSlider& Data);
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void AddSettingsTextSimple(const FSettingsTextSimple& Data);
+
+	/**  */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void AddSettingsTextInput(const FSettingsTextInput& Data);
 
 protected:
 	/* ---------------------------------------------------
