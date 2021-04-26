@@ -235,6 +235,12 @@ UMyGameUserSettings* USingletonLibrary::GetMyGameUserSettings()
 	return GEngine ? Cast<UMyGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;
 }
 
+// Returns the Camera Component used on level
+UMyCameraComponent* USingletonLibrary::GetLevelCamera()
+{
+	return AGeneratedMap::Get().GetCameraComponent();
+}
+
 /* ---------------------------------------------------
  *		Structs functions
  * --------------------------------------------------- */

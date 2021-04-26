@@ -6,8 +6,6 @@
 #include "Structures/Cell.h"
 #include "Structures/SettingsRow.h"
 //---
-#include "Kismet/BlueprintFunctionLibrary.h"
-//---
 #include "SingletonLibrary.generated.h"
 
 /**
@@ -119,6 +117,10 @@ public:
 	/** Returns the Bomber settings. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UMyGameUserSettings* GetMyGameUserSettings();
+
+	/** Returns the Camera Component used on level. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UMyCameraComponent* GetLevelCamera();
 
 	/* ---------------------------------------------------
 	 *		Structs functions

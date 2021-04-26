@@ -51,22 +51,27 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 	FVector NewLocation = FVector::ZeroVector;
 
 	// If true, the camera will be forced moving to the start position
-	const AGeneratedMap* LevelMap = Cast<AGeneratedMap>(GetOwner());
-	if (!LevelMap
-	    || !LevelMap->GetAlivePlayersNum()
+	if (bIsCameraLockedOnCenterInternal
+	    || !USingletonLibrary::Get().GetAlivePlayersNum()
 	    || bForceStartInternal)
 	{
-		NewLocation = FMath::Lerp(GetComponentLocation(), StartLocationInternal, DeltaTime);
-		SetWorldLocation(NewLocation);
+		static constexpr float Tolerance = 10.f;
+		const FVector CameraWorldLocation = GetComponentLocation();
+		const bool bShouldLerp = !CameraWorldLocation.Equals(StartLocationInternal, Tolerance);
+		if (bShouldLerp)
+		{
+			NewLocation = FMath::Lerp(CameraWorldLocation, StartLocationInternal, DeltaTime);
+			SetWorldLocation(NewLocation);
+		}
 
 		// return false to disable tick on finishing
-		return !NewLocation.Equals(StartLocationInternal, 10.f);
+		return bShouldLerp;
 	}
 
 	// Distance finding between players
 	float Distance = 0;
 	FCells PlayersCells;
-	LevelMap->IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
+	AGeneratedMap::Get().IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
 	for (const FCell& C1 : PlayersCells)
 	{
 		for (const FCell& C2 : PlayersCells)
@@ -86,7 +91,7 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 
 	// Set the new location
 	NewLocation = USingletonLibrary::GetCellArrayAverage(PlayersCells).Location;
-	NewLocation.Z = FMath::Max(MinHeight, NewLocation.Z + Distance);
+	NewLocation.Z = FMath::Max(MinHeightInternal, NewLocation.Z + Distance);
 	if (DeltaTime)
 	{
 		NewLocation = FMath::Lerp(GetComponentLocation(), NewLocation, DeltaTime);
@@ -94,6 +99,22 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 	SetWorldLocation(NewLocation);
 
 	return true;
+}
+
+// Calls to set following camera by player locations
+void UMyCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
+{
+	bIsCameraLockedOnCenterInternal = bInCameraLockedOnCenter;
+
+	SaveConfig();
+
+	// Enable camera if should be unlocked
+	if (!bInCameraLockedOnCenter
+	    && !IsComponentTickEnabled()
+	    && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+	{
+		SetComponentTickEnabled(true);
+	}
 }
 
 // Called every frame
@@ -152,7 +173,8 @@ void UMyCameraComponent::OnGameStateChanged_Implementation(ECurrentGameState Cur
 			bShouldTick = true;
 			break;
 		}
-		default: break;
+		default:
+			break;
 	}
 
 	SetComponentTickEnabled(bShouldTick);
