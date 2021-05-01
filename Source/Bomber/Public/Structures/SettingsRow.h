@@ -41,6 +41,42 @@ struct FSettingsFunction
 };
 
 /**
+* The primary data of any setting.
+*/
+USTRUCT(BlueprintType)
+struct FSettingsPrimary
+{
+	GENERATED_BODY()
+
+	/** Empty primary data. */
+	static const FSettingsPrimary Empty;
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FGameplayTag Tag = FGameplayTag::EmptyTag; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionContextTemplate))
+	FSettingsFunction StaticContext = FSettingsFunction::Empty; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionSetterTemplate))
+	FSettingsFunction Setter = FSettingsFunction::Empty; //[AW]
+
+	/** */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionGetterTemplate))
+	FSettingsFunction Getter = FSettingsFunction::Empty; //[AW]
+
+	/** Compares for equality.
+	* @param Other The other object being compared. */
+	bool operator==(const FSettingsPrimary& Other) const;
+
+	/** Creates a hash value.
+	* @param Other the other object to create a hash value for. */
+	friend uint32 GetTypeHash(const FSettingsPrimary& Other);
+};
+
+/**
  * The base archetype of some setting.
  */
 USTRUCT(BlueprintType, meta = (
@@ -157,19 +193,7 @@ struct FSettingsPicker
 
 	/** */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FGameplayTag Tag = FGameplayTag::EmptyTag; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionContextTemplate))
-	FSettingsFunction StaticContext = FSettingsFunction::Empty; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionSetterTemplate))
-	FSettingsFunction Setter = FSettingsFunction::Empty; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionGetterTemplate))
-	FSettingsFunction Getter = FSettingsFunction::Empty; //[AW]
+	FSettingsPrimary PrimaryData = FSettingsPrimary::Empty;
 
 	/** */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
@@ -180,23 +204,23 @@ struct FSettingsPicker
 	FSettingsButtonsRow ButtonsRow; //[AW]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FSettingsCheckbox Checkbox; //[AW]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FSettingsCombobox Combobox; //[AW]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FSettingsSlider Slider; //[AW]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FSettingsTextSimple TextSimple; //[AW]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FSettingsTextInput TextInput; //[AW]
 
 	/** Returns the pointer to one of the chosen in-game type.
@@ -224,6 +248,6 @@ struct FSettingsRow : public FTableRowBase
 	GENERATED_BODY()
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	FSettingsPicker SettingsPicker = FSettingsPicker::Empty; //[D]
 };

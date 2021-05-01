@@ -8,8 +8,17 @@ const FSettingsFunction FSettingsFunction::Empty = FSettingsFunction();
 // Empty settings row
 const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
 
+// Empty primary data
+const FSettingsPrimary FSettingsPrimary::Empty = FSettingsPrimary();
+
 //
 bool FSettingsFunction::operator==(const FSettingsFunction& Other) const
+{
+	return GetTypeHash(*this) == GetTypeHash(Other);
+}
+
+//
+bool FSettingsPrimary::operator==(const FSettingsPrimary& Other) const
 {
 	return GetTypeHash(*this) == GetTypeHash(Other);
 }
@@ -20,6 +29,16 @@ uint32 GetTypeHash(const FSettingsFunction& Other)
 	const uint32 FunctionClassHash = GetTypeHash(Other.FunctionClass);
 	const uint32 FunctionNameHash = GetTypeHash(Other.FunctionName);
 	return HashCombine(FunctionClassHash, FunctionNameHash);
+}
+
+//
+uint32 GetTypeHash(const FSettingsPrimary& Other)
+{
+	const uint32 TagHash = GetTypeHash(Other.Tag);
+	const uint32 ObjectContextHash = GetTypeHash(Other.StaticContext);
+	const uint32 SetterHash = GetTypeHash(Other.Setter);
+	const uint32 GetterHash = GetTypeHash(Other.Getter);
+	return HashCombine(HashCombine(HashCombine(TagHash, ObjectContextHash), SetterHash), GetterHash);
 }
 
 //
@@ -44,9 +63,5 @@ bool FSettingsPicker::operator==(const FSettingsPicker& Other) const
 //
 uint32 GetTypeHash(const FSettingsPicker& Other)
 {
-	const uint32 TagHash = GetTypeHash(Other.Tag);
-	const uint32 ObjectContextHash = GetTypeHash(Other.StaticContext);
-	const uint32 SetterHash = GetTypeHash(Other.Setter);
-	const uint32 GetterHash = GetTypeHash(Other.Getter);
-	return HashCombine(HashCombine(HashCombine(TagHash, ObjectContextHash), SetterHash), GetterHash);
+	return GetTypeHash(Other.PrimaryData);
 }

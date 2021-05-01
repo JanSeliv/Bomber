@@ -80,7 +80,7 @@ UObject* UMyGameUserSettings::GetObjectContext(FName TagName) const
 		return nullptr;
 	}
 
-	const FSettingsFunction& StaticContext = FoundRow.StaticContext;
+	const FSettingsFunction& StaticContext = FoundRow.PrimaryData.StaticContext;
 	if (StaticContext.FunctionName.IsNone()
 	    || !StaticContext.FunctionClass)
 	{
@@ -121,7 +121,7 @@ void UMyGameUserSettings::SetOption(FName TagName, int32 InValue)
 		return;
 	}
 
-	const FSettingsFunction& Setter = FoundRow.Setter;
+	const FSettingsFunction& Setter = FoundRow.PrimaryData.Setter;
 	if (Setter.FunctionName.IsNone()
 	    || !Setter.FunctionClass)
 	{
@@ -158,7 +158,7 @@ int32 UMyGameUserSettings::GetOption(FName TagName) const
 		return INDEX_NONE;
 	}
 
-	const FSettingsFunction& Getter = FoundRow.Getter;
+	const FSettingsFunction& Getter = FoundRow.PrimaryData.Getter;
 	if (Getter.FunctionName.IsNone()
 	    || !Getter.FunctionClass)
 	{
@@ -356,7 +356,7 @@ void UMyGameUserSettings::OnDataTableChanged()
 		const FSettingsPicker& SettingsRow = SettingsTableRowIt.Value;
 
 		const FName RowKey = SettingsTableRowIt.Key;
-		const FName RowValueTag = SettingsTableRowIt.Value.Tag.GetTagName();
+		const FName RowValueTag = SettingsTableRowIt.Value.PrimaryData.Tag.GetTagName();
 		if (!RowValueTag.IsNone()     // Tag is not empty
 		    && RowKey != RowValueTag) // New tag name
 		{

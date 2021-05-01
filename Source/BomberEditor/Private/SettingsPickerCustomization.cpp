@@ -50,44 +50,55 @@ void FSettingsPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 // Is called for each property on building its row
 void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
+	/* ╔FSettingsPicker
+	 * ╠════╦FSettingsPrimary (1)
+	 * ║	╚════FSettingsFunction (2)
+	 * ╚═════FSettingsDataBase (3)
+	 */
 	const auto StructProperty = CastField<FStructProperty>(PropertyData.GetProperty());
-	if (StructProperty)
+	const UScriptStruct* StructClass = StructProperty ? StructProperty->Struct : nullptr;
+	if (StructClass)
 	{
-		bool bIsSettingsFunctionProperty = false;
-		for (TTuple<FName, FPropertyData>& SettingsFunctionPropertyIt : SettingsFunctionProperties)
+		static const UScriptStruct* const& SettingsPrimaryStruct = FSettingsPrimary::StaticStruct();
+		if (StructClass->IsChildOf(SettingsPrimaryStruct)) //(1)
 		{
-			const FName MetaName = SettingsFunctionPropertyIt.Key;
-			bIsSettingsFunctionProperty = StructProperty->FindMetaData(MetaName) != nullptr;
-			if (bIsSettingsFunctionProperty)
+			const TSharedRef<IPropertyHandle>& SettingsPrimaryHandle = PropertyData.PropertyHandle.ToSharedRef();
+			uint32 NumChildren;
+			SettingsPrimaryHandle->GetNumChildren(NumChildren);
+			for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 			{
-				SettingsFunctionPropertyIt.Value = PropertyData;
-				break;
+				static const UScriptStruct* const& SettingsFunctionStruct = FSettingsFunction::StaticStruct();
+				FPropertyData SettingsPrimaryData(SettingsPrimaryHandle->GetChildHandle(ChildIndex).ToSharedRef());
+				const FStructProperty* ChildProperty = CastField<FStructProperty>(SettingsPrimaryData.GetProperty());
+				const UScriptStruct* ChildClass = ChildProperty ? ChildProperty->Struct : nullptr;
+				if (ChildClass
+				    && ChildClass->IsChildOf(SettingsFunctionStruct)) //(2)
+				{
+					for (TTuple<FName, FPropertyData>& SettingsFunctionPropertyIt : SettingsFunctionProperties)
+					{
+						const FName MetaName = SettingsFunctionPropertyIt.Key;
+						if (ChildProperty->FindMetaData(MetaName) != nullptr)
+						{
+							SettingsFunctionPropertyIt.Value = MoveTemp(SettingsPrimaryData);
+							break;
+						}
+					}
+				}
 			}
 		}
-
-		if (!bIsSettingsFunctionProperty)
+		else if (StructClass->IsChildOf(SettingsDataBaseStruct)) //(3)
 		{
-			bool bIsSettingsDataProperty = false;
-			const UScriptStruct* SettingsDataChildStruct = StructProperty ? StructProperty->Struct : nullptr;
-			if (SettingsDataChildStruct
-			    && SettingsDataChildStruct->IsChildOf(SettingsDataBaseStruct))
-			{
-				// Add this to the searchable text box as an FString so users can type and find it
-				const FString SettingsDataBasePropertyName = PropertyData.PropertyName.ToString();
-				SearchableComboBoxValuesInternal.Emplace(MakeShareable(new FString(SettingsDataBasePropertyName)));
-				bIsSettingsDataProperty = true;
-			}
+			// Add this to the searchable text box as an FString so users can type and find it
+			const FString SettingsDataBasePropertyName = PropertyData.PropertyName.ToString();
+			SearchableComboBoxValuesInternal.Emplace(MakeShareable(new FString(SettingsDataBasePropertyName)));
 
-			if (bIsSettingsDataProperty)
+			// Add lambda for visibility attribute to show\hide property when is not chosen
+			PropertyData.Visibility = MakeAttributeLambda([InDefaultProperty = PropertyData, InCustomProperty = CustomPropertyInternal]() -> EVisibility
 			{
-				// Add lambda for visibility attribute to show\hide property when is not chosen
-				PropertyData.Visibility = MakeAttributeLambda([InDefaultProperty = PropertyData, InCustomProperty = CustomPropertyInternal]() -> EVisibility
-				{
-					const FName OtherPropertyName = InDefaultProperty.PropertyName;
-					const FName CustomPropertyValueName = InCustomProperty.GetPropertyValueFromHandle();
-					return OtherPropertyName == CustomPropertyValueName ? EVisibility::Visible : EVisibility::Collapsed;
-				});
-			}
+				const FName OtherPropertyName = InDefaultProperty.PropertyName;
+				const FName CustomPropertyValueName = InCustomProperty.GetPropertyValueFromHandle();
+				return OtherPropertyName == CustomPropertyValueName ? EVisibility::Visible : EVisibility::Collapsed;
+			});
 		}
 	}
 

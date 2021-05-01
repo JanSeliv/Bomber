@@ -98,10 +98,8 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 	ResetSearchableComboBox();
 
 	TArray<FName> FoundList;
-	TArray<FName> AllChildFunctions;
 	bool bValidCustomProperty = false;
-	ChosenFunctionClass->GenerateFunctionList(AllChildFunctions);
-	for (TFieldIterator<UFunction> It(ChosenFunctionClass); It; ++It)
+	for (TFieldIterator<UFunction> It(ChosenFunctionClass, EFieldIteratorFlags::ExcludeSuper); It; ++It)
 	{
 		const UFunction* FunctionIt = *It;
 		if (FunctionIt
@@ -110,15 +108,12 @@ void FSettingsFunctionCustomization::RefreshCustomProperty()
 		    && IsSignatureCompatible(FunctionIt))
 		{
 			FName FunctionNameIt = FunctionIt->GetFName();
-			if (AllChildFunctions.Contains(FunctionNameIt)) // is child not super function
+			if (FunctionNameIt == CustomPropertyInternal.PropertyValue)
 			{
-				if (FunctionNameIt == CustomPropertyInternal.PropertyValue)
-				{
-					bValidCustomProperty = true;
-				}
-
-				FoundList.Emplace(MoveTemp(FunctionNameIt));
+				bValidCustomProperty = true;
 			}
+
+			FoundList.Emplace(MoveTemp(FunctionNameIt));
 		}
 	}
 
@@ -270,7 +265,7 @@ bool FSettingsFunctionCustomization::UpdateTemplateFunction()
 		return true;
 	}
 
-	static const FName ContextPropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, StaticContext);
+	static const FName ContextPropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPrimary, StaticContext);
 	if (ParentPropertyInternal.PropertyName == ContextPropertyName)
 	{
 		bIsStaticFunctionInternal = true;
