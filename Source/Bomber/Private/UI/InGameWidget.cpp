@@ -19,6 +19,7 @@ void UInGameWidget::ShowEndGameState_Implementation()
 	// ...
 }
 
+// Hide the in game menu.
 void UInGameWidget::HideEndGameState_Implementation()
 {
 	// Hide mouse cursor
@@ -67,7 +68,7 @@ void UInGameWidget::LaunchInGameCountdown_Implementation()
 	// ...
 }
 
-//
+// Called when the current game state was changed
 void UInGameWidget::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
@@ -95,6 +96,7 @@ void UInGameWidget::OnGameStateChanged_Implementation(ECurrentGameState CurrentG
 			HideEndGameState();
 			break;
 		}
-		default: break;
+		default:
+			break;
 	}
 }

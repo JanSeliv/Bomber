@@ -17,11 +17,12 @@ class BOMBER_API UInGameWidget final : public UUserWidget
 public:
 	/** The in game menu is shown the result of the games match (win, lose, draw).
 	 *	If the match has not yet finished, it could be minimized or opened out by ESC button in order to
-	 *	continue watching the game or restart the play, or to return to the main menu
+	 *	continue watching the game or restart the play, or to return to the main menu.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void ShowEndGameState();
 
+	/** Hide the in game menu. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void HideEndGameState();
 
@@ -43,7 +44,7 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void LaunchInGameCountdown();
 
-	/** */
+	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

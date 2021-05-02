@@ -2,9 +2,9 @@
 
 #include "UI/MyHUD.h"
 //---
-#include "GameFramework/MyGameUserSettings.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
+#include "UI/SettingsWidget.h"
 
 // Returns the UI data asset
 const UUIDataAsset& UUIDataAsset::Get()
@@ -19,12 +19,17 @@ void AMyHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Widget creating and adding it to viewport
-	InGameWidget = CreateWidget<UInGameWidget>(GetOwningPlayerController(), UUIDataAsset::Get().GetInGameClass());
-	if (InGameWidget) // successfully created
+	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
+
+	InGameWidgetInternal = CreateWidget<UInGameWidget>(PlayerOwner, UIDataAsset.GetInGameWidgetClass());
+	if (InGameWidgetInternal)
 	{
-		InGameWidget->AddToViewport();
+		InGameWidgetInternal->AddToViewport();
 	}
 
-	UMyGameUserSettings::Get().InitSettings();
+	SettingsWidgetInternal = CreateWidget<USettingsWidget>(PlayerOwner, UIDataAsset.GetSettingsWidgetClass());
+	if (SettingsWidgetInternal)
+	{
+		SettingsWidgetInternal->AddToViewport();
+	}
 }

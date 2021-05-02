@@ -9,9 +9,29 @@
 //---
 #include "SettingsRow.generated.h"
 
+#define TEXT_NONE FCoreTexts::Get().None
+
+/* ╔FSettingsRow
+ * ╚════╦FSettingsPicker
+ *		╠═══╦FSettingsPrimary
+ *		║	╚════FSettingsFunction
+ *		╚════FSettingsDataBase */
+
 /**
- * Function wrapper
+ *
  */
+UENUM(BlueprintType)
+enum class EMyVerticalAlignment : uint8
+{
+	Header,
+	Content,
+	Footer
+};
+
+//ENUM_RANGE_BY_FIRST_AND_LAST($ENUM$, $ENUM$::First, $ENUM$::Last);
+/**
+  * Function wrapper
+  */
 USTRUCT(BlueprintType)
 struct FSettingsFunction
 {
@@ -21,12 +41,12 @@ struct FSettingsFunction
 	static const FSettingsFunction Empty;
 
 	/**  */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Class"))
-	TSubclassOf<UObject> FunctionClass = nullptr; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Class"))
+	TSubclassOf<UObject> FunctionClass = nullptr; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Function"))
-	FName FunctionName = NAME_None; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Function"))
+	FName FunctionName = NAME_None; //[D]
 
 	/** Returns true if is valid. */
 	FORCEINLINE bool IsValid() const { return !(*this == Empty); }
@@ -48,24 +68,45 @@ struct FSettingsPrimary
 {
 	GENERATED_BODY()
 
-	/** Empty primary data. */
-	static const FSettingsPrimary Empty;
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FGameplayTag Tag = FGameplayTag::EmptyTag; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FGameplayTag Tag = FGameplayTag::EmptyTag; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionContextTemplate))
+	FSettingsFunction StaticContext = FSettingsFunction::Empty; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionContextTemplate))
-	FSettingsFunction StaticContext = FSettingsFunction::Empty; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionSetterTemplate))
+	FSettingsFunction Setter = FSettingsFunction::Empty; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionSetterTemplate))
-	FSettingsFunction Setter = FSettingsFunction::Empty; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionGetterTemplate))
+	FSettingsFunction Getter = FSettingsFunction::Empty; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (SettingsFunctionGetterTemplate))
-	FSettingsFunction Getter = FSettingsFunction::Empty; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FText Caption = TEXT_NONE; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FText Tooltip = TEXT_NONE; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	float PaddingLeft = 0.f; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	float PaddingTop = 0.f; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	float PaddingRight = 0.f; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	float PaddingBottom = 0.f; //[D]
 
 	/** Compares for equality.
 	* @param Other The other object being compared. */
@@ -89,19 +130,23 @@ struct FSettingsDataBase
 /**
  *
  */
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta = (
+	SettingsFunctionSetterTemplate="OnButtonPressed__DelegateSignature"))
 struct FSettingsButton : public FSettingsDataBase
 {
 	GENERATED_BODY()
-};
 
-/**
- *
- */
-USTRUCT(BlueprintType)
-struct FSettingsButtonsRow : public FSettingsDataBase
-{
-	GENERATED_BODY()
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	EMyVerticalAlignment VerticalAlignment = EMyVerticalAlignment::Content; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	float LineHeight = 0.f; //[D]
 };
 
 /**
@@ -115,13 +160,13 @@ struct FSettingsCheckbox : public FSettingsDataBase
 	GENERATED_BODY()
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	bool bIsSet = false; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	bool bIsSet = false; //[D]
 };
 
 /**
  *
-*/
+ */
 USTRUCT(BlueprintType, meta = (
 	SettingsFunctionSetterTemplate="OnSetterInt__DelegateSignature",
 	SettingsFunctionGetterTemplate="OnGetterInt__DelegateSignature"))
@@ -130,8 +175,24 @@ struct FSettingsCombobox : public FSettingsDataBase
 	GENERATED_BODY()
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	int32 ChosenMemberIndex = INDEX_NONE; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionSetterTemplate="OnSetMembers__DelegateSignature"))
+	FSettingsFunction SetMembers = FSettingsFunction::Empty; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionGetterTemplate="OnGetMembers__DelegateSignature"))
+	FSettingsFunction GetMembers = FSettingsFunction::Empty; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	int32 ChosenMemberIndex = INDEX_NONE; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	TArray<FText> Members; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	TEnumAsByte<ETextJustify::Type> TextJustify = ETextJustify::Center; //[D]
 };
 
 /**
@@ -144,9 +205,9 @@ struct FSettingsSlider : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	float ChosenValue = static_cast<float>(INDEX_NONE); //[AW]
+	/** Slider value (0..1). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float ChosenValue = 0.5f; //[D]
 };
 
 /**
@@ -160,8 +221,12 @@ struct FSettingsTextSimple : public FSettingsDataBase
 	GENERATED_BODY()
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FText CurrentText = FCoreTexts::Get().None; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	EMyVerticalAlignment VerticalAlignment = EMyVerticalAlignment::Content; //[D]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill; //[D]
 };
 
 /**
@@ -188,40 +253,36 @@ struct FSettingsPicker
 	static const FSettingsPicker Empty;
 
 	/** Contains a in-game settings type to be used. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FName SettingsType = NAME_None; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FName SettingsType = NAME_None; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FSettingsPrimary PrimaryData = FSettingsPrimary::Empty;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FSettingsPrimary PrimaryData;
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FSettingsButton Button; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FSettingsButton Button; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FSettingsButtonsRow ButtonsRow; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FSettingsCheckbox Checkbox; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FSettingsCheckbox Checkbox; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FSettingsCombobox Combobox; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FSettingsCombobox Combobox; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FSettingsSlider Slider; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FSettingsSlider Slider; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FSettingsTextSimple TextSimple; //[D]
 
 	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FSettingsTextSimple TextSimple; //[AW]
-
-	/** */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FSettingsTextInput TextInput; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FSettingsTextInput TextInput; //[D]
 
 	/** Returns the pointer to one of the chosen in-game type.
 	 * @see FSettingsPicker::SettingsType */

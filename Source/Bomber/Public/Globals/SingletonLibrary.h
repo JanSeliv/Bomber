@@ -122,6 +122,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UMyCameraComponent* GetLevelCamera();
 
+	/** Returns the HUD actor. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AMyHUD* GetMyHUD();
+
 	/* ---------------------------------------------------
 	 *		Structs functions
 	 * --------------------------------------------------- */
@@ -206,7 +210,7 @@ public:
 
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
-	static class ULevelActorDataAsset* GetDataAssetByActorClass(TSubclassOf<AActor> ActorClass);
+	static class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
 
 	/** Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

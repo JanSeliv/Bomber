@@ -18,14 +18,24 @@ public:
 	/** Returns the UI data asset. */
 	static FORCEINLINE const UUIDataAsset& Get();
 
-	/** Get UUIDataAsset::InGameWidgetInternal.*/
+	/** Returns a class of the in-game widget.
+	 * @see UUIDataAsset::InGameWidgetClassInternal.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UUserWidget> GetInGameClass() const { return InGameClassInternal; }
+	FORCEINLINE TSubclassOf<class UInGameWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
+
+	/** Returns a class of the settings widget.
+	* @see UUIDataAsset::SettingsWidgetClassInternal.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class USettingsWidget> GetSettingsWidgetClass() const { return SettingsWidgetClassInternal; }
 
 protected:
 	/** The class of a In-Game Widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> InGameClassInternal; //[D]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
+	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal; //[D]
+
+	/** The class of a Settings Widget blueprint. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))
+	TSubclassOf<class USettingsWidget> SettingsWidgetClassInternal; //[D]
 };
 
 
@@ -39,21 +49,30 @@ class BOMBER_API AMyHUD final : public AHUD
 
 public:
 	/* ---------------------------------------------------
-	*		Public properties
-	* --------------------------------------------------- */
-
-	/** The current widget object. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "Ñ++")
-	class UInGameWidget* InGameWidget; //[G]
-
-	/* ---------------------------------------------------
 	*		Public functions
 	* --------------------------------------------------- */
 
-	/* Sets default values for this HUD's properties. */
-	AMyHUD() = default;
+	/** Returns the current in-game widget object. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UInGameWidget* GetInGameWidget() const { return InGameWidgetInternal; }
+
+	/** Returns the current settings widget object. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class USettingsWidget* GetSettingsWidget() const { return SettingsWidgetInternal; }
 
 protected:
+	/* ---------------------------------------------------
+	*		Protected properties
+	* --------------------------------------------------- */
+
+	/** The current in-game widget object. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
+	class UInGameWidget* InGameWidgetInternal; //[G]
+
+	/** The current settings widget object. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))
+	class USettingsWidget* SettingsWidgetInternal; //[G]
+
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */

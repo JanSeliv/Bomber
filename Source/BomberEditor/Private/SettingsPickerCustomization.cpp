@@ -62,6 +62,13 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 		static const UScriptStruct* const& SettingsPrimaryStruct = FSettingsPrimary::StaticStruct();
 		if (StructClass->IsChildOf(SettingsPrimaryStruct)) //(1)
 		{
+			// Add lambda for visibility attribute to show\hide function properties when nothing is chosen
+			PropertyData.Visibility = MakeAttributeLambda([InCustomProperty = CustomPropertyInternal]() -> EVisibility
+			{
+				const FName CustomPropertyValueName = InCustomProperty.GetPropertyValueFromHandle();
+				return !CustomPropertyValueName.IsNone() ? EVisibility::Visible : EVisibility::Collapsed;
+			});
+
 			const TSharedRef<IPropertyHandle>& SettingsPrimaryHandle = PropertyData.PropertyHandle.ToSharedRef();
 			uint32 NumChildren;
 			SettingsPrimaryHandle->GetNumChildren(NumChildren);
@@ -74,10 +81,11 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 				if (ChildClass
 				    && ChildClass->IsChildOf(SettingsFunctionStruct)) //(2)
 				{
+					// Find and set function properties into array
 					for (TTuple<FName, FPropertyData>& SettingsFunctionPropertyIt : SettingsFunctionProperties)
 					{
-						const FName MetaName = SettingsFunctionPropertyIt.Key;
-						if (ChildProperty->FindMetaData(MetaName) != nullptr)
+						const FName MetaKey = SettingsFunctionPropertyIt.Key;
+						if (SettingsPrimaryData.IsMetaKeyExists(MetaKey))
 						{
 							SettingsFunctionPropertyIt.Value = MoveTemp(SettingsPrimaryData);
 							break;

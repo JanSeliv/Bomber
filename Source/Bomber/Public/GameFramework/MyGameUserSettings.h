@@ -10,7 +10,7 @@
 #include "MyGameUserSettings.generated.h"
 
 /**
- *
+ * Describes common data of settings.
  */
 UCLASS()
 class BOMBER_API USettingsDataAsset final : public UBomberDataAsset
@@ -21,7 +21,7 @@ public:
 	/** Returns the settings data asset. */
 	static const USettingsDataAsset& Get();
 
-	/**
+	/** Returns the table rows.
 	 * @see USettingsDataAsset::SettingsDataTableInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void GenerateSettingsArray(TMap<FName, FSettingsPicker>& OutRows) const;
@@ -34,45 +34,45 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = "false", Category = "C++", meta = (DevelopmentOnly))
 	void BindOnDataTableChanged(const FOnDataTableChanged& EventToBind) const;
 
-	/** */
+	/** Returns the data table. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal; }
 
-	/**
+	/** Returns the width of the widget.
 	 * @see USettingsDataAsset::WidthByScreen */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE float GetWidthByScreen() const { return WidthByScreenInternal; }
 
-	/**
+	/** Returns the height of the widget.
 	 * @see USettingsDataAsset::HeightByScreen */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE float GetHeightByScreen() const { return HeightByScreenInternal; }
 
-	/**
+	/** Returns the title name of the widget.
 	 * @see USettingsDataAsset::Title */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE FText GetTitle() const { return TitleInternal; }
 
 protected:
-	/** */
+	/** The data table with all settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table", ShowOnlyInnerProperties))
 	class UDataTable* SettingsDataTableInternal; //[D]
 
-	/** */
+	/** The width of the widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Width By Screen", ShowOnlyInnerProperties))
 	float WidthByScreenInternal; //[D]
 
-	/** */
+	/** The height of the widget */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Height By Screen", ShowOnlyInnerProperties))
 	float HeightByScreenInternal; //[D]
 
-	/** */
+	/** The title name of the widget */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Title", ShowOnlyInnerProperties))
 	FText TitleInternal; //[D]
 };
 
 /**
- *
+ * The Bomber settings.
  */
 UCLASS(Blueprintable, BlueprintType)
 class UMyGameUserSettings final : public UGameUserSettings
@@ -90,6 +90,8 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(UObject*, FOnStaticContext);
 
+	DECLARE_DYNAMIC_DELEGATE(FOnButtonPressed);
+
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterInt, int32, Param);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterFloat, float, Param);
@@ -97,6 +99,8 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterBool, bool, Param);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterText, FText, Param);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetMembers, const TArray<FText>&, NewMembers);
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetterInt);
 
@@ -106,59 +110,13 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(FText, FOnGetterText);
 
-	/**  */
+	DECLARE_DYNAMIC_DELEGATE_RetVal(TArray<FText>, FOnGetMembers);
+
+	/** Returns the settings widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	UObject* GetObjectContext(FName TagName) const;
-
-	/**  */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetOption(FName TagName, int32 InValue);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	int32 GetOption(FName TagName) const;
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void InitSettings();
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void AddSettingsButton(const FSettingsButton& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void AddSettingsButtonsRow(const FSettingsButtonsRow& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void AddSettingsCheckbox(const FSettingsCheckbox& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void AddSettingsCombobox(const FSettingsCombobox& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void AddSettingsSlider(const FSettingsSlider& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void AddSettingsTextSimple(const FSettingsTextSimple& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void AddSettingsTextInput(const FSettingsTextInput& Data);
+	class USettingsWidget* GetSettingsWidget() const;
 
 protected:
-	/* ---------------------------------------------------
-	*		Protected properties
-	* --------------------------------------------------- */
-
-	/** */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows", ShowOnlyInnerProperties))
-	TMap<FName, FSettingsPicker> SettingsTableRowsInternal; //[D]
-
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
@@ -166,18 +124,7 @@ protected:
 	/** Loads the user settings from persistent storage */
 	virtual void LoadSettings(bool bForceReload) override;
 
-	/** Returns the amount of settings rows. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetSettingsTableRowsNum() const { return SettingsTableRowsInternal.Num(); }
-
-	/** Returns the found num by specified tag.
-	 * @param TagName The key by which the row will be find.
-	 * @see UMyGameUserSettings::SettingsTableRowsInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FSettingsPicker FindSettingsTableRow(FName TagName) const;
-
-	/**
-	 * Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks.
+	/** Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks.
 	 * @warning DevelopmentOnly */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))
 	void OnDataTableChanged();

@@ -212,8 +212,8 @@ bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Func
 	const uint64 IgnoreFlags = CPF_OutParm | UFunction::GetDefaultIgnoredSignatureCompatibilityFlags();
 
 	// Run thru the parameter property chains to compare each property
-	TFieldIterator<FProperty> IteratorA(TemplateFunction);
-	TFieldIterator<FProperty> IteratorB(Function);
+	TFieldIterator<FProperty> IteratorA(Function);
+	TFieldIterator<FProperty> IteratorB(TemplateFunction);
 
 	while (IteratorA && (IteratorA->PropertyFlags & CPF_Parm))
 	{

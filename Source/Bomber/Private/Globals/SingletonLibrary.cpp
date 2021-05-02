@@ -12,6 +12,7 @@
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/LevelActorDataAsset.h"
 #include "Globals/MyGameInstance.h"
+#include "UI/MyHUD.h"
 //---
 #include "Engine.h"
 #include "Components/TextRenderComponent.h"
@@ -165,7 +166,7 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (IsEditorNotPieWorld() // IsEditorNotPieWorld only
-        && LevelMap == nullptr)
+	    && LevelMap == nullptr)
 	{
 		const UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 		if (EditorWorld)
@@ -241,6 +242,13 @@ UMyCameraComponent* USingletonLibrary::GetLevelCamera()
 	return AGeneratedMap::Get().GetCameraComponent();
 }
 
+// Returns the HUD actor
+AMyHUD* USingletonLibrary::GetMyHUD()
+{
+	const AMyPlayerController* MyPlayerController = GetMyPlayerController();
+	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
+}
+
 /* ---------------------------------------------------
  *		Structs functions
  * --------------------------------------------------- */
@@ -250,15 +258,15 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 {
 	FVector Sum(0.f);
 	FVector Average(0.f);
-	const int32 CellsNum = Cells.Num();
-	if (CellsNum > 0)
+	const float CellsNum = static_cast<float>(Cells.Num());
+	if (CellsNum > 0.f)
 	{
-		for (const auto& CellIt : Cells)
+		for (const FCell& CellIt : Cells)
 		{
 			Sum += CellIt.Location;
 		}
 
-		Average = Sum / static_cast<float>(CellsNum);
+		Average = Sum / CellsNum;
 	}
 
 	return FCell(Average);
@@ -269,7 +277,7 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 * --------------------------------------------------- */
 
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
-ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(TSubclassOf<AActor> ActorClass)
+ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass)
 {
 	TArray<ULevelActorDataAsset*>& ActorsDataAsset = GetSingleton()->ActorsDataAssetsInternal;
 	for (ULevelActorDataAsset*& DataAssetIt : ActorsDataAsset)
