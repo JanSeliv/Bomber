@@ -116,7 +116,7 @@ protected:
 	/** Bind on text getter and setter.
 	* @see FSettingsPrimary::OnStaticContext */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TryBindTextFunctions(FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
+	void TryBindTextFunctions(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
 
 	/* ---------------------------------------------------
 	 *		Add by setting types
@@ -127,32 +127,32 @@ protected:
 	void AddSetting(UPARAM(ref)FSettingsPicker& Setting);
 
 	/** Add button on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddButton"))
-	void AddButtonBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsButton& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddButton", AutoCreateRefTerm = "Primary,Data"))
+	void AddButtonBP(const FSettingsPrimary& Primary, const FSettingsButton& Data);
 	void AddButton(FSettingsPrimary& Primary, FSettingsButton& Data);
 
 	/** Add checkbox on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCheckbox"))
-	void AddCheckboxBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsCheckbox& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCheckbox", AutoCreateRefTerm = "Primary,Data"))
+	void AddCheckboxBP(const FSettingsPrimary& Primary, const FSettingsCheckbox& Data);
 	void AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data);
 
 	/** Add combobox on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCombobox"))
-	void AddComboboxBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsCombobox& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCombobox", AutoCreateRefTerm = "Primary,Data"))
+	void AddComboboxBP(const FSettingsPrimary& Primary, const FSettingsCombobox& Data);
 	void AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data);
 
 	/** Add slider on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddSlider"))
-	void AddSliderBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsSlider& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddSlider", AutoCreateRefTerm = "Primary,Data"))
+	void AddSliderBP(const FSettingsPrimary& Primary, const FSettingsSlider& Data);
 	void AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data);
 
 	/** Add simple text on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextSimple"))
-	void AddTextSimpleBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextSimple", AutoCreateRefTerm = "Primary,Data"))
+	void AddTextSimpleBP(const FSettingsPrimary& Primary, const FSettingsTextSimple& Data);
 	void AddTextSimple(FSettingsPrimary& Primary, FSettingsTextSimple& Data);
 
 	/** Add text input on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextInput"))
-	void AddTextInputBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextInput& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextInput", AutoCreateRefTerm = "Primary,Data"))
+	void AddTextInputBP(const FSettingsPrimary& Primary, const FSettingsTextInput& Data);
 	void AddTextInput(FSettingsPrimary& Primary, FSettingsTextInput& Data);
 };

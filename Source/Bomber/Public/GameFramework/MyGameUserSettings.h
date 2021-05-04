@@ -88,10 +88,6 @@ public:
 	 * Is init once and can not be destroyed. */
 	static UMyGameUserSettings& Get();
 
-	/** Returns the settings widget. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class USettingsWidget* GetSettingsWidget() const;
-
 protected:
 	/* ---------------------------------------------------
 	*		Protected functions

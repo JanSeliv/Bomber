@@ -391,13 +391,13 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetSettingsWidget"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "None"
+					"FunctionClass": "WidgetBlueprintGeneratedClass'/Game/Bomber/UI/UI1-3_Settings/UI1-3_Settings.UI1-3_Settings_C'",
+					"FunctionName": "HideSettings"
 				},
 				"Getter":
 				{

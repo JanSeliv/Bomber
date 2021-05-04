@@ -3,7 +3,6 @@
 #include "UI/SettingsWidget.h"
 //---
 #include "GameFramework/MyGameUserSettings.h"
-#include "Globals/SingletonLibrary.h"
 
 // Returns the found row by specified tag
 FSettingsPicker USettingsWidget::FindSettingRow(FName TagName) const
@@ -405,10 +404,10 @@ void USettingsWidget::AddButton(FSettingsPrimary& Primary, FSettingsButton& Data
 {
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
 	{
-		const FName GetterFunctionName = Primary.Getter.FunctionName;
-		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
+		const FName SetterFunctionName = Primary.Setter.FunctionName;
+		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
-			Data.OnButtonPressed.BindUFunction(StaticContextObject, GetterFunctionName);
+			Data.OnButtonPressed.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
 	}
 

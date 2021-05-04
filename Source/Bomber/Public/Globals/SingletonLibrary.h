@@ -118,6 +118,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UMyGameUserSettings* GetMyGameUserSettings();
 
+	/** Returns the settings widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class USettingsWidget* GetSettingsWidget();
+
 	/** Returns the Camera Component used on level. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UMyCameraComponent* GetLevelCamera();

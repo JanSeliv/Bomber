@@ -236,6 +236,13 @@ UMyGameUserSettings* USingletonLibrary::GetMyGameUserSettings()
 	return GEngine ? Cast<UMyGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;
 }
 
+// Returns the settings widget
+USettingsWidget* USingletonLibrary::GetSettingsWidget()
+{
+	const AMyHUD* MyHUD = GetMyHUD();
+	return MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
+}
+
 // Returns the Camera Component used on level
 UMyCameraComponent* USingletonLibrary::GetLevelCamera()
 {

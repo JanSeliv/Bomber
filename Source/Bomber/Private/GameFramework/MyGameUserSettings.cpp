@@ -65,13 +65,6 @@ UMyGameUserSettings& UMyGameUserSettings::Get()
 	return *MyGameUserSettings;
 }
 
-// Returns the settings widget
-USettingsWidget* UMyGameUserSettings::GetSettingsWidget() const
-{
-	AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
-	return MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
-}
-
 // Loads the user settings from persistent storage
 void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {
