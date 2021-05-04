@@ -364,7 +364,7 @@ struct FSettingsPicker
 
 	/** Returns the pointer to one of the chosen in-game type.
 	 * @see FSettingsPicker::SettingsType */
-	FSettingsDataBase* GetChosenSettingsData() const;
+	const FSettingsDataBase* GetChosenSettingsData() const;
 
 	/** Returns true if row is valid. */
 	FORCEINLINE bool IsValid() const { return !(*this == Empty); }

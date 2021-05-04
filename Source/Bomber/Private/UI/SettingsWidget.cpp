@@ -19,7 +19,7 @@ FSettingsPicker USettingsWidget::FindSettingRow(FName TagName) const
 // Set value to the option by tag
 void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 {
-	const FSettingsPicker FoundRow = FindSettingRow(TagName);;
+	const FSettingsPicker FoundRow = FindSettingRow(TagName);
 	if (!FoundRow.IsValid())
 	{
 		return;
@@ -177,51 +177,108 @@ void USettingsWidget::SetTextInput_Implementation(FName TagName, const FText& In
 		FoundRow.PrimaryData.Caption = InValue;
 		SettingsTableRowsInternal.Emplace(TagName, MoveTemp(FoundRow));
 
-		FoundRow.TextSimple.OnSetterText.ExecuteIfBound(InValue);
+		FoundRow.TextInput.OnSetterText.ExecuteIfBound(InValue);
 	}
 
 	// BP implementation
 }
 
-// Return the value of the option
-int32 USettingsWidget::GetOption(FName TagName) const
+// Returns is a checkbox toggled
+bool USettingsWidget::GetCheckboxValue(FName TagName) const
 {
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld()) // return if not in the game
-	{
-		// Only during the game the ProcessEvent(...) can execute a found function
-		return INDEX_NONE;
-	}
-#endif // WITH_EDITOR
-
 	const FSettingsPicker FoundRow = FindSettingRow(TagName);
-	if (!FoundRow.IsValid())
+	bool Value = false;
+	if (FoundRow.IsValid())
 	{
-		return INDEX_NONE;
-	}
+		const FSettingsCheckbox& Data = FoundRow.Checkbox;
+		Value = Data.bIsSet;
 
-	const FSettingsFunction& Getter = FoundRow.PrimaryData.Getter;
-	if (Getter.FunctionName.IsNone()
-	    || !Getter.FunctionClass)
+		const USettingTemplate::FOnGetterBool& Getter = Data.OnGetterBool;
+		if (Getter.IsBound())
+		{
+			Value = Getter.Execute();
+		}
+	}
+	return Value;
+}
+
+// Returns chosen member index of a combobox
+int32 USettingsWidget::GetComboboxIndex(FName TagName) const
+{
+	const FSettingsPicker FoundRow = FindSettingRow(TagName);
+	int32 Value = false;
+	if (FoundRow.IsValid())
 	{
-		return INDEX_NONE;
-	}
+		const FSettingsCombobox& Data = FoundRow.Combobox;
+		Value = Data.ChosenMemberIndex;
 
-	UObject* StaticContext = FoundRow.PrimaryData.StaticContextObject.Get();
-	if (!StaticContext)
+		const USettingTemplate::FOnGetterInt& Getter = Data.OnGetterInt;
+		if (Getter.IsBound())
+		{
+			Value = Getter.Execute();
+		}
+	}
+	return Value;
+}
+
+// Get all members of a combobox
+TArray<FText> USettingsWidget::GetComboboxMembers(FName TagName) const
+{
+	const FSettingsPicker FoundRow = FindSettingRow(TagName);
+	TArray<FText> Value;
+	if (FoundRow.IsValid())
 	{
-		return INDEX_NONE;
-	}
+		const FSettingsCombobox& Data = FoundRow.Combobox;
+		Value = Data.Members;
 
-	USettingTemplate::FOnGetterInt OnGetterInt;
-	OnGetterInt.BindUFunction(StaticContext, Getter.FunctionName);
-	if (OnGetterInt.IsBoundToObject(StaticContext))
+		const USettingTemplate::FOnGetMembers& Getter = Data.OnGetMembers;
+		if (Getter.IsBound())
+		{
+			Value = Getter.Execute();
+		}
+	}
+	return Value;
+}
+
+// Get current value of a slider [0...1]
+float USettingsWidget::GetSliderValue(FName TagName) const
+{
+	const FSettingsPicker FoundRow = FindSettingRow(TagName);
+	float Value = 0.f;
+	if (FoundRow.IsValid())
 	{
-		const int32 OutVal = OnGetterInt.Execute();
-		return OutVal;
-	}
+		const FSettingsSlider& Data = FoundRow.Slider;
+		Value = Data.ChosenValue;
 
-	return INDEX_NONE;
+		const USettingTemplate::FOnGetterFloat& Getter = Data.OnGetterFloat;
+		if (Getter.IsBound())
+		{
+			Value = Getter.Execute();
+		}
+	}
+	return Value;
+}
+
+// Get current text of a simple text widget
+FText USettingsWidget::GetTextValue(FName TagName) const
+{
+	const FSettingsPicker FoundRow = FindSettingRow(TagName);
+	FText Value = TEXT_NONE;
+	if (FoundRow.IsValid())
+	{
+		Value = FoundRow.PrimaryData.Caption;
+
+		const auto Data = static_cast<const FSettingsTextSimple*>(FoundRow.GetChosenSettingsData());
+		if (Data)
+		{
+			const USettingTemplate::FOnGetterText& Getter = Data->OnGetterText;
+			if (Getter.IsBound())
+			{
+				Value = Getter.Execute();
+			}
+		}
+	}
+	return Value;
 }
 
 // Called after the underlying slate widget is constructed
@@ -271,15 +328,22 @@ void USettingsWidget::TryBindStaticContext(FSettingsPrimary& Primary)
 	if (UObject* ContextObject = OnStaticContext.Execute())
 	{
 		Primary.StaticContextObject = ContextObject;
-		if (const UClass* ContextClass = ContextObject->GetClass())
+		if (UClass* ContextClass = ContextObject->GetClass())
 		{
-			ContextClass->GenerateFunctionList(Primary.StaticContextFunctionList);
+			for (TFieldIterator<UFunction> It(ContextClass, EFieldIteratorFlags::IncludeSuper); It; ++It)
+			{
+				if (const UFunction* FunctionIt = *It)
+				{
+					FName FunctionNameIt = FunctionIt->GetFName();
+					Primary.StaticContextFunctionList.Emplace(MoveTemp(FunctionNameIt));
+				}
+			}
 		}
 	}
 }
 
 // Bind on text getter and setter
-void USettingsWidget::TryBindTextFunctions(const FSettingsPrimary& Primary, FSettingsTextSimple& Data)
+void USettingsWidget::TryBindTextFunctions(FSettingsPrimary& Primary, FSettingsTextSimple& Data)
 {
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
 	{
@@ -287,6 +351,7 @@ void USettingsWidget::TryBindTextFunctions(const FSettingsPrimary& Primary, FSet
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterText.BindUFunction(StaticContextObject, GetterFunctionName);
+			Primary.Caption = GetTextValue(Primary.Tag.GetTagName());
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
@@ -300,7 +365,7 @@ void USettingsWidget::TryBindTextFunctions(const FSettingsPrimary& Primary, FSet
 // Add setting on UI.
 void USettingsWidget::AddSetting(FSettingsPicker& Setting)
 {
-	FSettingsDataBase* ChosenData = Setting.GetChosenSettingsData();
+	const FSettingsDataBase* ChosenData = Setting.GetChosenSettingsData();
 	if (!ChosenData)
 	{
 		return;
@@ -311,50 +376,32 @@ void USettingsWidget::AddSetting(FSettingsPicker& Setting)
 
 	if (ChosenData == &Setting.Button)
 	{
-		if (FSettingsButton* Data = static_cast<FSettingsButton*>(ChosenData))
-		{
-			AddButton(PrimaryData, *Data);
-		}
+		AddButton(PrimaryData, Setting.Button);
 	}
 	else if (ChosenData == &Setting.Checkbox)
 	{
-		if (FSettingsCheckbox* Data = static_cast<FSettingsCheckbox*>(ChosenData))
-		{
-			AddCheckbox(PrimaryData, *Data);
-		}
+		AddCheckbox(PrimaryData, Setting.Checkbox);
 	}
 	else if (ChosenData == &Setting.Combobox)
 	{
-		if (FSettingsCombobox* Data = static_cast<FSettingsCombobox*>(ChosenData))
-		{
-			AddCombobox(PrimaryData, *Data);
-		}
+		AddCombobox(PrimaryData, Setting.Combobox);
 	}
 	else if (ChosenData == &Setting.Slider)
 	{
-		if (FSettingsSlider* Data = static_cast<FSettingsSlider*>(ChosenData))
-		{
-			AddSlider(PrimaryData, *Data);
-		}
+		AddSlider(PrimaryData, Setting.Slider);
 	}
 	else if (ChosenData == &Setting.TextSimple)
 	{
-		if (FSettingsTextSimple* Data = static_cast<FSettingsTextSimple*>(ChosenData))
-		{
-			AddTextSimple(PrimaryData, *Data);
-		}
+		AddTextSimple(PrimaryData, Setting.TextSimple);
 	}
 	else if (ChosenData == &Setting.TextInput)
 	{
-		if (FSettingsTextInput* Data = static_cast<FSettingsTextInput*>(ChosenData))
-		{
-			AddTextInput(PrimaryData, *Data);
-		}
+		AddTextInput(PrimaryData, Setting.TextInput);
 	}
 }
 
 // Add button on UI
-void USettingsWidget::AddButton_Implementation(FSettingsPrimary& Primary, FSettingsButton& Data)
+void USettingsWidget::AddButton(FSettingsPrimary& Primary, FSettingsButton& Data)
 {
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
 	{
@@ -365,11 +412,11 @@ void USettingsWidget::AddButton_Implementation(FSettingsPrimary& Primary, FSetti
 		}
 	}
 
-	//BP implementation
+	AddButtonBP(Primary, Data);
 }
 
 // Add checkbox on UI
-void USettingsWidget::AddCheckbox_Implementation(FSettingsPrimary& Primary, FSettingsCheckbox& Data)
+void USettingsWidget::AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data)
 {
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
 	{
@@ -377,6 +424,7 @@ void USettingsWidget::AddCheckbox_Implementation(FSettingsPrimary& Primary, FSet
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterBool.BindUFunction(StaticContextObject, GetterFunctionName);
+			Data.bIsSet = GetCheckboxValue(Primary.Tag.GetTagName());
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
@@ -386,18 +434,20 @@ void USettingsWidget::AddCheckbox_Implementation(FSettingsPrimary& Primary, FSet
 		}
 	}
 
-	//BP implementation
+	AddCheckboxBP(Primary, Data);
 }
 
 // Add combobox on UI
-void USettingsWidget::AddCombobox_Implementation(FSettingsPrimary& Primary, FSettingsCombobox& Data)
+void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data)
 {
+	const FName TagName = Primary.Tag.GetTagName();
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
 	{
 		const FName GetterFunctionName = Primary.Getter.FunctionName;
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterInt.BindUFunction(StaticContextObject, GetterFunctionName);
+			Data.ChosenMemberIndex = GetComboboxIndex(TagName);
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
@@ -410,6 +460,7 @@ void USettingsWidget::AddCombobox_Implementation(FSettingsPrimary& Primary, FSet
 		if (Primary.StaticContextFunctionList.Contains(GetMembersFunctionName))
 		{
 			Data.OnGetMembers.BindUFunction(StaticContextObject, GetMembersFunctionName);
+			Data.Members = GetComboboxMembers(TagName);
 		}
 
 		const FName SetMembersFunctionName = Data.SetMembers.FunctionName;
@@ -419,11 +470,11 @@ void USettingsWidget::AddCombobox_Implementation(FSettingsPrimary& Primary, FSet
 		}
 	}
 
-	//BP implementation
+	AddComboboxBP(Primary, Data);
 }
 
 // Add slider on UI
-void USettingsWidget::AddSlider_Implementation(FSettingsPrimary& Primary, FSettingsSlider& Data)
+void USettingsWidget::AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data)
 {
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
 	{
@@ -431,6 +482,7 @@ void USettingsWidget::AddSlider_Implementation(FSettingsPrimary& Primary, FSetti
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterFloat.BindUFunction(StaticContextObject, GetterFunctionName);
+			Data.ChosenValue = GetSliderValue(Primary.Tag.GetTagName());
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
@@ -440,21 +492,21 @@ void USettingsWidget::AddSlider_Implementation(FSettingsPrimary& Primary, FSetti
 		}
 	}
 
-	//BP implementation
+	AddSliderBP(Primary, Data);
 }
 
 // Add simple text on UI
-void USettingsWidget::AddTextSimple_Implementation(FSettingsPrimary& Primary, FSettingsTextSimple& Data)
+void USettingsWidget::AddTextSimple(FSettingsPrimary& Primary, FSettingsTextSimple& Data)
 {
 	TryBindTextFunctions(Primary, Data);
 
-	//BP implementation
+	AddTextSimpleBP(Primary, Data);
 }
 
 // Add text input on UI
-void USettingsWidget::AddTextInput_Implementation(FSettingsPrimary& Primary, FSettingsTextInput& Data)
+void USettingsWidget::AddTextInput(FSettingsPrimary& Primary, FSettingsTextInput& Data)
 {
 	TryBindTextFunctions(Primary, Data);
 
-	//BP implementation
+	AddTextInputBP(Primary, Data);
 }

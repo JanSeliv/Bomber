@@ -67,12 +67,25 @@ public:
 	 *		Getters by setting types
 	 * --------------------------------------------------- */
 
-	/**
-	 * Return the value of the option.
-	 * @param TagName The tag of the option.
-	 */
+	/** Returns is a checkbox toggled. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	int32 GetOption(FName TagName) const;
+	bool GetCheckboxValue(FName TagName) const;
+
+	/** Returns chosen member index of a combobox. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	int32 GetComboboxIndex(FName TagName) const;
+
+	/** Get all members of a combobox. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	TArray<FText> GetComboboxMembers(FName TagName) const;
+
+	/** Get current value of a slider [0...1]. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	float GetSliderValue(FName TagName) const;
+
+	/** Get current text of a simple or input text widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FText GetTextValue(FName TagName) const;
 
 protected:
 	/* ---------------------------------------------------
@@ -103,7 +116,7 @@ protected:
 	/** Bind on text getter and setter.
 	* @see FSettingsPrimary::OnStaticContext */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TryBindTextFunctions(const FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
+	void TryBindTextFunctions(FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
 
 	/* ---------------------------------------------------
 	 *		Add by setting types
@@ -114,26 +127,32 @@ protected:
 	void AddSetting(UPARAM(ref)FSettingsPicker& Setting);
 
 	/** Add button on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void AddButton(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsButton& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddButton"))
+	void AddButtonBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsButton& Data);
+	void AddButton(FSettingsPrimary& Primary, FSettingsButton& Data);
 
 	/** Add checkbox on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void AddCheckbox(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsCheckbox& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCheckbox"))
+	void AddCheckboxBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsCheckbox& Data);
+	void AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data);
 
 	/** Add combobox on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void AddCombobox(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsCombobox& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCombobox"))
+	void AddComboboxBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsCombobox& Data);
+	void AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data);
 
 	/** Add slider on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void AddSlider(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsSlider& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddSlider"))
+	void AddSliderBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsSlider& Data);
+	void AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data);
 
 	/** Add simple text on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void AddTextSimple(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextSimple"))
+	void AddTextSimpleBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
+	void AddTextSimple(FSettingsPrimary& Primary, FSettingsTextSimple& Data);
 
 	/** Add text input on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void AddTextInput(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextInput& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextInput"))
+	void AddTextInputBP(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextInput& Data);
+	void AddTextInput(FSettingsPrimary& Primary, FSettingsTextInput& Data);
 };
