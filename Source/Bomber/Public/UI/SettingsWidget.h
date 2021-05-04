@@ -3,6 +3,8 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
+//---
+#include "GameFramework/MyGameUserSettings.h"
 #include "Structures/SettingsRow.h"
 //---
 #include "SettingsWidget.generated.h"
@@ -23,30 +25,47 @@ public:
 	* @param TagName The key by which the row will be find.
 	* @see UMyGameUserSettings::SettingsTableRowsInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FSettingsPicker FindSettingsTableRow(FName TagName) const;
-
-	/**
-	 * Returns the object of chosen option.
-	 * @param TagName The tag of the option.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	UObject* GetObjectContext(FName TagName) const;
+	FSettingsPicker FindSettingRow(FName TagName) const;
 
 	/* ---------------------------------------------------
-	*		Option setters
-	* --------------------------------------------------- */
+	 *		Setters by setting types
+	 * --------------------------------------------------- */
 
-	/**
-	 * Set value to the option.
-	 * @param TagName The tag of the option.
-	 * @param InValue The value to set.
-	 */
+	/** Set value to the option by tag. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetOption(FName TagName, int32 InValue);
+	void SetSettingValue(FName TagName, const FString& Value);
+
+	/** Press button. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void SetButtonPressed(FName TagName);
+
+	/** Toggle checkbox. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void SetCheckbox(FName TagName, bool InValue);
+
+	/** Set chosen member index for a combobox. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void SetComboboxIndex(FName TagName, int32 InValue);
+
+	/** Set new members for a combobox. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void SetComboboxMembers(FName TagName, const TArray<FText>& InValue);
+
+	/** Set current value for a slider [0...1]. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void SetSlider(FName TagName, float InValue);
+
+	/** Set new text. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void SetTextSimple(FName TagName, const FText& InValue);
+
+	/** Set new text for an input box. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void SetTextInput(FName TagName, const FText& InValue);
 
 	/* ---------------------------------------------------
-	*		Option getters
-	* --------------------------------------------------- */
+	 *		Getters by setting types
+	 * --------------------------------------------------- */
 
 	/**
 	 * Return the value of the option.
@@ -56,6 +75,18 @@ public:
 	int32 GetOption(FName TagName) const;
 
 protected:
+	/* ---------------------------------------------------
+	 *		Protected properties
+	 * --------------------------------------------------- */
+
+	/** Contains all settings. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows"))
+	TMap<FName/*Tag*/, FSettingsPicker> SettingsTableRowsInternal; //[D]
+
+	/* ---------------------------------------------------
+	*		Protected functions
+	* --------------------------------------------------- */
+
 	/** Called after the underlying slate widget is constructed.
 	* May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
@@ -64,39 +95,45 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ConstructSettings();
 
-	/* ---------------------------------------------------
-	*		Option getters
-	* --------------------------------------------------- */
+	/** Bind and set static object delegate.
+	* @see FSettingsPrimary::OnStaticContext */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void TryBindStaticContext(UPARAM(ref)FSettingsPrimary& Primary);
 
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Primary,Data"))
-	void AddButton(const FSettingsPrimary& Primary, const FSettingsButton& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Primary,Data"))
-	void AddCheckbox(const FSettingsPrimary& Primary, const FSettingsCheckbox& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Primary,Data"))
-	void AddCombobox(const FSettingsPrimary& Primary, const FSettingsCombobox& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Primary,Data"))
-	void AddSlider(const FSettingsPrimary& Primary, const FSettingsSlider& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Primary,Data"))
-	void AddTextSimple(const FSettingsPrimary& Primary, const FSettingsTextSimple& Data);
-
-	/**  */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Primary,Data"))
-	void AddTextInput(const FSettingsPrimary& Primary, const FSettingsTextInput& Data);
+	/** Bind on text getter and setter.
+	* @see FSettingsPrimary::OnStaticContext */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void TryBindTextFunctions(const FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
 
 	/* ---------------------------------------------------
-	*		Protected properties
-	* --------------------------------------------------- */
+	 *		Add by setting types
+	 * --------------------------------------------------- */
 
-	/** Contains all settings. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows", ShowOnlyInnerProperties))
-	TMap<FName, FSettingsPicker> SettingsTableRowsInternal; //[D]
+	/** Add setting on UI. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void AddSetting(UPARAM(ref)FSettingsPicker& Setting);
+
+	/** Add button on UI. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void AddButton(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsButton& Data);
+
+	/** Add checkbox on UI. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void AddCheckbox(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsCheckbox& Data);
+
+	/** Add combobox on UI. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void AddCombobox(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsCombobox& Data);
+
+	/** Add slider on UI. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void AddSlider(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsSlider& Data);
+
+	/** Add simple text on UI. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void AddTextSimple(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
+
+	/** Add text input on UI. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void AddTextInput(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextInput& Data);
 };

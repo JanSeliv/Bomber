@@ -8,6 +8,8 @@
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "UI/MyHUD.h"
+#include "UI/SettingsWidget.h"
 
 // Called when CheatManager is created to allow any needed initialization
 void UMyCheatManager::InitCheatManager()
@@ -149,5 +151,44 @@ void UMyCheatManager::DisplayDebug() const
 		PC->ConsoleCommand("DisplayAll MyGameStateBase CurrentGameStateInternal");
 		PC->ConsoleCommand("DisplayAll MyPlayerState EndGameStateInternal");
 		PC->ConsoleCommand("DisplayAll GeneratedMap PlayersNumInternal");
+	}
+}
+
+// Set new setting value
+void UMyCheatManager::SetSettingValue(const FString& TagByValue) const
+{
+	if (TagByValue.IsEmpty())
+	{
+		return;
+	}
+
+	static const FString Delimiter = TEXT("?");
+	TArray<FString> SeparatedStrings;
+	TagByValue.ParseIntoArray(SeparatedStrings, *Delimiter);
+
+	static constexpr int32 TagIndex = 0;
+	FName TagName = NAME_None;
+	if (SeparatedStrings.IsValidIndex(TagIndex))
+	{
+		TagName = *SeparatedStrings[TagIndex];
+	}
+
+	if (TagName.IsNone())
+	{
+		return;
+	}
+
+	static constexpr int32 ValueIndex = 1;
+	FString TagValue = TEXT("");
+	if (SeparatedStrings.IsValidIndex(ValueIndex))
+	{
+		TagValue = SeparatedStrings[ValueIndex];
+	}
+
+	const AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
+	USettingsWidget* SettingsWidget = MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
+	if (SettingsWidget)
+	{
+		SettingsWidget->SetSettingValue(TagName, TagValue);
 	}
 }

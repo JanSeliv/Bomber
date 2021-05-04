@@ -97,4 +97,17 @@ protected:
 	/** Display debug information. */
 	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.DisplayDebug"))
 	void DisplayDebug() const;
+
+
+	/** Set new setting value.
+	 * Button:			Settings.Test.Button
+	 * Checkbox:		Settings.Test.Checkbox?true
+	 * Combobox index:	Settings.Test.Combobox?2
+	 * Combobox vals:	Settings.Test.Combobox?Low,Medium,High
+	 * Slider:			Settings.Test.Slider?0.5f
+	 * Text:			Settings.Test.TextSimple?Settings
+	 * @param TagByVal	Tag?Value
+	 */
+	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.SetSettingValue"))
+	void SetSettingValue(const FString& TagByVal) const;
 };

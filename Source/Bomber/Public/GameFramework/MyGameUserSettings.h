@@ -88,30 +88,6 @@ public:
 	 * Is init once and can not be destroyed. */
 	static UMyGameUserSettings& Get();
 
-	DECLARE_DYNAMIC_DELEGATE_RetVal(UObject*, FOnStaticContext);
-
-	DECLARE_DYNAMIC_DELEGATE(FOnButtonPressed);
-
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterInt, int32, Param);
-
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterFloat, float, Param);
-
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterBool, bool, Param);
-
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterText, FText, Param);
-
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetMembers, const TArray<FText>&, NewMembers);
-
-	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetterInt);
-
-	DECLARE_DYNAMIC_DELEGATE_RetVal(float, FOnGetterFloat);
-
-	DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnGetterBool);
-
-	DECLARE_DYNAMIC_DELEGATE_RetVal(FText, FOnGetterText);
-
-	DECLARE_DYNAMIC_DELEGATE_RetVal(TArray<FText>, FOnGetMembers);
-
 	/** Returns the settings widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class USettingsWidget* GetSettingsWidget() const;

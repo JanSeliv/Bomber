@@ -35,7 +35,7 @@ protected:
 /**
  * The base data asset for the Bomber's data.
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, Abstract)
 class UBomberDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

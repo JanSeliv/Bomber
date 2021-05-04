@@ -212,8 +212,8 @@ bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Func
 	const uint64 IgnoreFlags = CPF_OutParm | UFunction::GetDefaultIgnoredSignatureCompatibilityFlags();
 
 	// Run thru the parameter property chains to compare each property
-	TFieldIterator<FProperty> IteratorA(Function);
-	TFieldIterator<FProperty> IteratorB(TemplateFunction);
+	TFieldIterator<FProperty> IteratorA(TemplateFunction);
+	TFieldIterator<FProperty> IteratorB(Function);
 
 	while (IteratorA && (IteratorA->PropertyFlags & CPF_Parm))
 	{
@@ -271,9 +271,8 @@ bool FSettingsFunctionCustomization::UpdateTemplateFunction()
 		bIsStaticFunctionInternal = true;
 	}
 
-	// Set TemplateFunctionInternal to filter by its signature. All templates are stored in settings class
-	const UObject* GameUserSettings = GEngine ? (UObject*)GEngine->GetGameUserSettings() : nullptr;
-	const UClass* ScopeClass = GameUserSettings ? GameUserSettings->GetClass() : nullptr;
+	// Set TemplateFunctionInternal to filter by its signature. All templates are stored in USettingTemplate class
+	static const UClass* const& ScopeClass = USettingTemplate::StaticClass();
 	TemplateFunctionInternal = ScopeClass ? ScopeClass->FindFunctionByName(TemplateFunctionName) : nullptr;
 	ensureMsgf(TemplateFunctionInternal.IsValid(), TEXT("ASSERT: Specified '%s' function was not found in game settings"), *TemplateFunctionName.ToString());
 	return true;

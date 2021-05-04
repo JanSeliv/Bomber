@@ -46,15 +46,16 @@ uint32 GetTypeHash(const FSettingsPrimary& Other)
 }
 
 //
-const FSettingsDataBase* FSettingsPicker::GetChosenSettingsData() const
+FSettingsDataBase* FSettingsPicker::GetChosenSettingsData() const
 {
-	const FSettingsDataBase* FoundSetting = nullptr;
+	FSettingsDataBase* FoundSetting = nullptr;
 	if (!SettingsType.IsNone())
 	{
 		static const UScriptStruct* const& SettingsPickerStruct = StaticStruct();
-		const FProperty* FoundProperty = SettingsPickerStruct ? SettingsPickerStruct->FindPropertyByName(SettingsType) : nullptr;
-		const FStructProperty* FoundStructProperty = CastField<FStructProperty>(FoundProperty);
-		FoundSetting = FoundStructProperty ? FoundStructProperty->ContainerPtrToValuePtr<FSettingsDataBase>(this, 0) : nullptr;
+		FProperty* FoundProperty = SettingsPickerStruct ? SettingsPickerStruct->FindPropertyByName(SettingsType) : nullptr;
+		FStructProperty* FoundStructProperty = CastField<FStructProperty>(FoundProperty);
+		const FSettingsDataBase* SettingsDataBase = FoundStructProperty ? FoundStructProperty->ContainerPtrToValuePtr<FSettingsDataBase>(this, 0) : nullptr;
+		FoundSetting = const_cast<FSettingsDataBase*>(SettingsDataBase);
 	}
 	return FoundSetting;
 }

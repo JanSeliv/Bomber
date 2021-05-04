@@ -28,7 +28,43 @@ enum class EMyVerticalAlignment : uint8
 	Footer
 };
 
-//ENUM_RANGE_BY_FIRST_AND_LAST($ENUM$, $ENUM$::First, $ENUM$::Last);
+/**
+* Delegates wrapper that are used as templates for FSettingsFunction properties.
+* Has to have reflection to allow find its members by FSettingsFunctionCustomization:
+* USettingTemplate::StaticClass()->FindFunctionByName("OnStaticContext__DelegateSignature");
+* DECLARE_DYNAMIC_DELEGATE can't be declared under USTRUCT
+*/
+UCLASS(Abstract, Const, Transient)
+class BOMBER_API USettingTemplate final : public UObject
+{
+	GENERATED_BODY()
+
+public:
+	DECLARE_DYNAMIC_DELEGATE_RetVal(UObject*, FOnStaticContext);
+
+	DECLARE_DYNAMIC_DELEGATE(FOnButtonPressed);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterInt, int32, Param);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterFloat, float, Param);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterBool, bool, Param);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterText, FText, Param);
+
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetMembers, const TArray<FText>&, NewMembers);
+
+	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetterInt);
+
+	DECLARE_DYNAMIC_DELEGATE_RetVal(float, FOnGetterFloat);
+
+	DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnGetterBool);
+
+	DECLARE_DYNAMIC_DELEGATE_RetVal(FText, FOnGetterText);
+
+	DECLARE_DYNAMIC_DELEGATE_RetVal(TArray<FText>, FOnGetMembers);
+};
+
 /**
   * Function wrapper
   */
@@ -41,11 +77,11 @@ struct FSettingsFunction
 	static const FSettingsFunction Empty;
 
 	/**  */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Class"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Class"))
 	TSubclassOf<UObject> FunctionClass = nullptr; //[D]
 
 	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Function"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Function"))
 	FName FunctionName = NAME_None; //[D]
 
 	/** Returns true if is valid. */
@@ -108,6 +144,15 @@ struct FSettingsPrimary
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	float PaddingBottom = 0.f; //[D]
 
+	/** */
+	TWeakObjectPtr<UObject> StaticContextObject;
+
+	/** */
+	TArray<FName> StaticContextFunctionList;
+
+	/** Returns true if is valid. */
+	FORCEINLINE bool IsValid() const { return Tag.IsValid(); }
+
 	/** Compares for equality.
 	* @param Other The other object being compared. */
 	bool operator==(const FSettingsPrimary& Other) const;
@@ -147,6 +192,9 @@ struct FSettingsButton : public FSettingsDataBase
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	float LineHeight = 0.f; //[D]
+
+	/** */
+	USettingTemplate::FOnButtonPressed OnButtonPressed;
 };
 
 /**
@@ -162,6 +210,12 @@ struct FSettingsCheckbox : public FSettingsDataBase
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	bool bIsSet = false; //[D]
+
+	/** */
+	USettingTemplate::FOnGetterBool OnGetterBool;
+
+	/** */
+	USettingTemplate::FOnSetterBool OnSetterBool;
 };
 
 /**
@@ -193,6 +247,18 @@ struct FSettingsCombobox : public FSettingsDataBase
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	TEnumAsByte<ETextJustify::Type> TextJustify = ETextJustify::Center; //[D]
+
+	/** */
+	USettingTemplate::FOnGetterInt OnGetterInt;
+
+	/** */
+	USettingTemplate::FOnSetterInt OnSetterInt;
+
+	/** */
+	USettingTemplate::FOnGetMembers OnGetMembers;
+
+	/** */
+	USettingTemplate::FOnSetMembers OnSetMembers;
 };
 
 /**
@@ -208,6 +274,12 @@ struct FSettingsSlider : public FSettingsDataBase
 	/** Slider value (0..1). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float ChosenValue = 0.5f; //[D]
+
+	/** */
+	USettingTemplate::FOnGetterFloat OnGetterFloat;
+
+	/** */
+	USettingTemplate::FOnSetterFloat OnSetterFloat;
 };
 
 /**
@@ -227,6 +299,12 @@ struct FSettingsTextSimple : public FSettingsDataBase
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill; //[D]
+
+	/** */
+	USettingTemplate::FOnGetterText OnGetterText;
+
+	/** */
+	USettingTemplate::FOnSetterText OnSetterText;
 };
 
 /**
@@ -286,7 +364,7 @@ struct FSettingsPicker
 
 	/** Returns the pointer to one of the chosen in-game type.
 	 * @see FSettingsPicker::SettingsType */
-	const FSettingsDataBase* GetChosenSettingsData() const;
+	FSettingsDataBase* GetChosenSettingsData() const;
 
 	/** Returns true if row is valid. */
 	FORCEINLINE bool IsValid() const { return !(*this == Empty); }
