@@ -190,5 +190,6 @@ void UMyCheatManager::SetSettingValue(const FString& TagByValue) const
 	if (SettingsWidget)
 	{
 		SettingsWidget->SetSettingValue(TagName, TagValue);
+		SettingsWidget->SaveSettings();
 	}
 }

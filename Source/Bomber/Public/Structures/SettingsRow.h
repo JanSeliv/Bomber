@@ -380,6 +380,10 @@ struct FSettingsPicker
 
 /**
  * Row of the settings data table.
+ * In a row can be specified all UI values, chosen any getter/setter in the list.
+ * Main features:
+ * By this row, new setting will be automatically added on UI.
+ * Executing UI getters/setters will call automatically bounded chosen functions.
  */
 USTRUCT(BlueprintType)
 struct FSettingsRow : public FTableRowBase

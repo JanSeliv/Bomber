@@ -106,8 +106,6 @@ void UMyCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
 {
 	bIsCameraLockedOnCenterInternal = bInCameraLockedOnCenter;
 
-	SaveConfig();
-
 	// Enable camera if should be unlocked
 	if (!bInCameraLockedOnCenter
 	    && !IsComponentTickEnabled()

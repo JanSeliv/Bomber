@@ -4,13 +4,13 @@
 
 #include "Blueprint/UserWidget.h"
 //---
-#include "GameFramework/MyGameUserSettings.h"
 #include "Structures/SettingsRow.h"
 //---
 #include "SettingsWidget.generated.h"
 
 /**
  * The UI widget of settings.
+ * It generates and manages settings specified in rows of the Settings Data Table.
  */
 UCLASS(Abstract)
 class BOMBER_API USettingsWidget final : public UUserWidget
@@ -26,6 +26,10 @@ public:
 	* @see UMyGameUserSettings::SettingsTableRowsInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FSettingsPicker FindSettingRow(FName TagName) const;
+
+	/** Save all settings into their configs. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SaveSettings();
 
 	/* ---------------------------------------------------
 	 *		Setters by setting types
@@ -94,7 +98,7 @@ protected:
 
 	/** Contains all settings. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows"))
-	TMap<FName/*Tag*/, FSettingsPicker> SettingsTableRowsInternal; //[D]
+	TMap<FName/*Tag*/, FSettingsPicker/*Row*/> SettingsTableRowsInternal; //[D]
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -107,6 +111,11 @@ protected:
 	/**  */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ConstructSettings();
+
+	/** Called when the visibility has changed.
+	 * @param InVisibility New visibility. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void OnVisibilityChange(ESlateVisibility InVisibility);
 
 	/** Bind and set static object delegate.
 	* @see FSettingsPrimary::OnStaticContext */

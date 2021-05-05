@@ -15,6 +15,18 @@ FSettingsPicker USettingsWidget::FindSettingRow(FName TagName) const
 	return FoundRow;
 }
 
+// Save all settings into their configs
+void USettingsWidget::SaveSettings()
+{
+	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
+	{
+		if (UObject* ContextObject = RowIt.Value.PrimaryData.StaticContextObject.Get())
+		{
+			ContextObject->SaveConfig();
+		}
+	}
+}
+
 // Set value to the option by tag
 void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 {
@@ -288,6 +300,8 @@ void USettingsWidget::NativeConstruct()
 	// Hide that widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
+	OnVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnVisibilityChange);
+
 	ConstructSettings();
 }
 
@@ -298,6 +312,16 @@ void USettingsWidget::ConstructSettings()
 	for (TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
 		AddSetting(RowIt.Value);
+	}
+}
+
+// Called when the visibility has changed
+void USettingsWidget::OnVisibilityChange_Implementation(ESlateVisibility InVisibility)
+{
+	if (InVisibility == ESlateVisibility::Collapsed
+	    || InVisibility == ESlateVisibility::Hidden)
+	{
+		SaveSettings();
 	}
 }
 
