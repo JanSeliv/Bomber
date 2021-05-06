@@ -37,7 +37,10 @@ FName FPropertyData::GetPropertyValueFromHandle() const
 	{
 		FString ValueString;
 		PropertyHandle->GetValueAsDisplayString(/*Out*/ValueString);
-		ValueName = *ValueString;
+		if (ValueString.Len() < NAME_SIZE)
+		{
+			ValueName = *ValueString;
+		}
 	}
 	return ValueName;
 }

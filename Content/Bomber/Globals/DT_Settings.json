@@ -255,7 +255,7 @@
 				"PaddingLeft": 0,
 				"PaddingTop": 0,
 				"PaddingRight": 0,
-				"PaddingBottom": 0
+				"PaddingBottom": 15
 			},
 			"Button":
 			{
@@ -334,7 +334,7 @@
 				"PaddingLeft": 0,
 				"PaddingTop": 0,
 				"PaddingRight": 0,
-				"PaddingBottom": 0
+				"PaddingBottom": 15
 			},
 			"Button":
 			{
@@ -409,7 +409,7 @@
 				"PaddingLeft": 0,
 				"PaddingTop": 0,
 				"PaddingRight": 0,
-				"PaddingBottom": 0
+				"PaddingBottom": 15
 			},
 			"Button":
 			{
@@ -509,6 +509,81 @@
 					"FunctionName": "GetTextResolutions"
 				},
 				"ChosenMemberIndex": 0,
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+				"ChosenValue": 0.5
+			},
+			"TextSimple":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"TextInput":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			}
+		}
+	},
+	{
+		"Name": "Settings.Checkbox.FullscreenMode",
+		"SettingsPicker":
+		{
+			"SettingsType": "Checkbox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Checkbox.FullscreenMode"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionName": "GetGameUserSettings"
+				},
+				"Setter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "SetFullscreenEnabled"
+				},
+				"Getter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "IsFullscreenEnabled"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"5926D6EE494D9E1629AD67BC89F13393\", \"Fullscreen\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"7CA7B97243DD97A33BC42B90D25EE828\", \"Check to enable  the fullscreen mode\")",
+				"PaddingLeft": 0,
+				"PaddingTop": 0,
+				"PaddingRight": 0,
+				"PaddingBottom": 15
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+				"bIsSet": false
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},

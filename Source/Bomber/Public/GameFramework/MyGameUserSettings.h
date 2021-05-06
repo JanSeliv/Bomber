@@ -108,13 +108,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void UpdateSupportedResolutions();
 
-	/** Set new resolution by index. */
+	/** Set and apply a new resolution by index. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetResolutionByIndex(int32 Index);
 
 	/** Returns the index of chosen resolution*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetResolutionIndex() const { return CurrentResolutionIndexInternal; }
+
+	/** Returns true if the game is in fullscreen mode. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsFullscreenEnabled() const { return GetFullscreenMode() != EWindowMode::Windowed; }
+
+	/** Set and apply fullscreen mode. If false, the windowed mode will be applied. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetFullscreenEnabled(bool bIsFullscreen);
 
 protected:
 	/* ---------------------------------------------------

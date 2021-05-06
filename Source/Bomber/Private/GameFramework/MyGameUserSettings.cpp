@@ -138,6 +138,14 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 	CurrentResolutionIndexInternal = Index;
 }
 
+// Set and apply fullscreen mode. If false, the windowed mode will be applied
+void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
+{
+	const EWindowMode::Type NewFullscreenMode = bIsFullscreen ? EWindowMode::Fullscreen : EWindowMode::Windowed;
+	SetFullscreenMode(NewFullscreenMode);
+	ApplyResolutionSettings(true);
+}
+
 // Loads the user settings from persistent storage
 void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {
