@@ -1,6 +1,6 @@
 [
 	{
-		"Name": "Settings.Test.TextSimple",
+		"Name": "Settings.TextSimple",
 		"SettingsPicker":
 		{
 			"SettingsType": "TextSimple",
@@ -8,7 +8,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Test.TextSimple"
+					"TagName": "Settings.TextSimple"
 				},
 				"StaticContext":
 				{
@@ -75,7 +75,7 @@
 		}
 	},
 	{
-		"Name": "Settings.Test.Slider",
+		"Name": "Settings.Slider",
 		"SettingsPicker":
 		{
 			"SettingsType": "Slider",
@@ -83,7 +83,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Test.Slider"
+					"TagName": "Settings.Slider"
 				},
 				"StaticContext":
 				{
@@ -100,7 +100,7 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A66DE2E649B1E65ADBD8FE8105588DB0\", \"Audio volume\")",
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A66DE2E649B1E65ADBD8FE8105588DB0\", \"Audio Volume\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"848C332C48030AC4947D7EBDFA94420C\", \"Set the audio volume\")",
 				"PaddingLeft": 0,
 				"PaddingTop": 0,
@@ -150,7 +150,7 @@
 		}
 	},
 	{
-		"Name": "Settings.Test.Checkbox",
+		"Name": "Settings.Checkbox",
 		"SettingsPicker":
 		{
 			"SettingsType": "Checkbox",
@@ -158,7 +158,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Test.Checkbox"
+					"TagName": "Settings.Checkbox"
 				},
 				"StaticContext":
 				{
@@ -225,7 +225,7 @@
 		}
 	},
 	{
-		"Name": "Settings.Test.Combobox",
+		"Name": "Settings.Combobox",
 		"SettingsPicker":
 		{
 			"SettingsType": "Combobox",
@@ -233,7 +233,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Test.Combobox"
+					"TagName": "Settings.Combobox"
 				},
 				"StaticContext":
 				{
@@ -250,12 +250,12 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"157063DC4ECDE08518DCE0B1B9DB17C8\", \"Screen Resolutions\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2B904AAE46925A17E999DA8F23EFD034\", \"Choose screen resolution\")",
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"68BFE801439719772FD76486D3E798A4\", \"Quality Level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
 				"PaddingLeft": 0,
 				"PaddingTop": 0,
 				"PaddingRight": 0,
-				"PaddingBottom": 15
+				"PaddingBottom": 0
 			},
 			"Button":
 			{
@@ -271,12 +271,12 @@
 			{
 				"SetMembers":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
 				"GetMembers":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
 				"ChosenMemberIndex": 2,
@@ -304,7 +304,7 @@
 		}
 	},
 	{
-		"Name": "Settings.Test.TextInput",
+		"Name": "Settings.TextInput",
 		"SettingsPicker":
 		{
 			"SettingsType": "TextInput",
@@ -312,7 +312,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Test.TextInput"
+					"TagName": "Settings.TextInput"
 				},
 				"StaticContext":
 				{
@@ -379,7 +379,7 @@
 		}
 	},
 	{
-		"Name": "Settings.Test.Button",
+		"Name": "Settings.Button",
 		"SettingsPicker":
 		{
 			"SettingsType": "Button",
@@ -387,7 +387,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Test.Button"
+					"TagName": "Settings.Button"
 				},
 				"StaticContext":
 				{
@@ -434,6 +434,81 @@
 					"FunctionName": "None"
 				},
 				"ChosenMemberIndex": -1,
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+				"ChosenValue": 0.5
+			},
+			"TextSimple":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"TextInput":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			}
+		}
+	},
+	{
+		"Name": "Settings.Combobox.Resolution",
+		"SettingsPicker":
+		{
+			"SettingsType": "Combobox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Combobox.Resolution"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionName": "GetGameUserSettings"
+				},
+				"Setter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "SetResolutionByIndex"
+				},
+				"Getter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "GetResolutionIndex"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"157063DC4ECDE08518DCE0B1B9DB17C8\", \"Screen Resolutions\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2B904AAE46925A17E999DA8F23EFD034\", \"Choose screen resolution\")",
+				"PaddingLeft": 0,
+				"PaddingTop": 0,
+				"PaddingRight": 0,
+				"PaddingBottom": 15
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+				"bIsSet": false
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "GetTextResolutions"
+				},
+				"ChosenMemberIndex": 0,
 				"Members": [],
 				"TextJustify": "Center"
 			},

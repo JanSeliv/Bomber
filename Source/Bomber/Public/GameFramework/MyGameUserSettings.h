@@ -88,10 +88,62 @@ public:
 	 * Is init once and can not be destroyed. */
 	static UMyGameUserSettings& Get();
 
+	/** Returns the min allowed resolution width. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetMinResolutionSizeX() const { return MinResolutionSizeXInternal; }
+
+	/** Returns the min allowed resolution height. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetMinResolutionSizeY() const { return MinResolutionSizeYInternal; }
+
+	/** Get all supported resolutions of the primary monitor in the text format. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TArray<FText> GetTextResolutions() const { return TextResolutionsInternal; }
+
+	/** Get all supported resolutions of the primary monitor in the int point format.. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TArray<FIntPoint> GetIntResolutions() const { return IntResolutionsInternal; }
+
+	/** Call to update supported resolutions in arrays. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdateSupportedResolutions();
+
+	/** Set new resolution by index. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetResolutionByIndex(int32 Index);
+
+	/** Returns the index of chosen resolution*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetResolutionIndex() const { return CurrentResolutionIndexInternal; }
+
 protected:
 	/* ---------------------------------------------------
-	*		Protected functions
-	* --------------------------------------------------- */
+	 *		Protected properties
+	 * --------------------------------------------------- */
+
+	/** The min allowed resolution width. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size X"))
+	int32 MinResolutionSizeXInternal; //[C]
+
+	/** The min allowed resolution height. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size Y"))
+	int32 MinResolutionSizeYInternal; //[C]
+
+	/** Contains all resolutions. Is displayed on UI. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Text Resolutions"))
+	TArray<FText> TextResolutionsInternal; //[M.IO]
+
+	/** Contains all resolutions in the int point format. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Int Resolutions"))
+	TArray<FIntPoint> IntResolutionsInternal; //[M.IO]
+
+	/** The index of chosen resolution. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Resolution Index"))
+	int32 CurrentResolutionIndexInternal; //[G]
+
+	/* ---------------------------------------------------
+	 *		Protected functions
+	 * --------------------------------------------------- */
 
 	/** Loads the user settings from persistent storage */
 	virtual void LoadSettings(bool bForceReload) override;

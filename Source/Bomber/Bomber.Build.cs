@@ -13,7 +13,8 @@ public class Bomber : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", // Default
 			"HeadMountedDisplay", "UMG", "Slate", "SlateCore", // UMG
 			"AIModule", // AI
-			"GameplayTags" // Tags
+			"GameplayTags", // Tags
+			"RHI" // Resolutions
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

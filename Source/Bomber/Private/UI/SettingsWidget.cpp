@@ -466,19 +466,6 @@ void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& 
 	const FName TagName = Primary.Tag.GetTagName();
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
 	{
-		const FName GetterFunctionName = Primary.Getter.FunctionName;
-		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
-		{
-			Data.OnGetterInt.BindUFunction(StaticContextObject, GetterFunctionName);
-			Data.ChosenMemberIndex = GetComboboxIndex(TagName);
-		}
-
-		const FName SetterFunctionName = Primary.Setter.FunctionName;
-		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
-		{
-			Data.OnSetterInt.BindUFunction(StaticContextObject, SetterFunctionName);
-		}
-
 		const FName GetMembersFunctionName = Data.GetMembers.FunctionName;
 		if (Primary.StaticContextFunctionList.Contains(GetMembersFunctionName))
 		{
@@ -490,6 +477,19 @@ void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& 
 		if (Primary.StaticContextFunctionList.Contains(SetMembersFunctionName))
 		{
 			Data.OnSetMembers.BindUFunction(StaticContextObject, SetMembersFunctionName);
+		}
+
+		const FName GetterFunctionName = Primary.Getter.FunctionName;
+		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
+		{
+			Data.OnGetterInt.BindUFunction(StaticContextObject, GetterFunctionName);
+			Data.ChosenMemberIndex = GetComboboxIndex(TagName);
+		}
+
+		const FName SetterFunctionName = Primary.Setter.FunctionName;
+		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
+		{
+			Data.OnSetterInt.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
 	}
 
