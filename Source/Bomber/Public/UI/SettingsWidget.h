@@ -5,15 +5,83 @@
 #include "Blueprint/UserWidget.h"
 //---
 #include "Structures/SettingsRow.h"
+#include "Globals/LevelActorDataAsset.h"
 //---
 #include "SettingsWidget.generated.h"
+
+/**
+ * Describes common data of settings.
+ */
+UCLASS()
+class BOMBER_API USettingsDataAsset final : public UBomberDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	/** Returns the settings data asset. */
+	static const USettingsDataAsset& Get();
+
+	/** Returns the table rows.
+	 * @see USettingsDataAsset::SettingsDataTableInternal */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void GenerateSettingsArray(TMap<FName, FSettingsPicker>& OutRows) const;
+
+	/** Delegate to react on changing settings data table. */
+	DECLARE_DYNAMIC_DELEGATE(FOnDataTableChanged);
+
+	/** Get a multicast delegate that is called any time the data table changes.
+	 * @warning DevelopmentOnly */
+	UFUNCTION(BlueprintCallable, BlueprintPure = "false", Category = "C++", meta = (DevelopmentOnly))
+	void BindOnDataTableChanged(const FOnDataTableChanged& EventToBind) const;
+
+	/** Returns the data table. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal; }
+
+	/** Returns the width and height of the settings widget in percentages of an entire screen. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FVector2D GetSettingsPercentSize() const { return SettingsPercentSizeInternal; }
+
+	/** Returns the height of the scrollbox widget in percentages of the entire settings widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE float GetScrollboxPercentHeight() const { return ScrollboxPercentHeightInternal; }
+
+	/** Returns the padding of the settings widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FMargin GetSettingsPadding() const { return SettingsPaddingInternal; }
+
+	/** Returns the padding of the scrollbox widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FMargin GetScrollboxPadding() const { return ScrollboxPaddingInternal; }
+
+protected:
+	/** The data table with all settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table", ShowOnlyInnerProperties))
+	class UDataTable* SettingsDataTableInternal; //[D]
+
+	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Percent Size", ShowOnlyInnerProperties))
+	FVector2D SettingsPercentSizeInternal = FVector2D::UnitVector; //[D]
+
+	/** The padding of the settings widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Padding", ShowOnlyInnerProperties))
+	FMargin SettingsPaddingInternal = 50.f; //[D]
+
+	/** The height of the scrollbox widget in percentages of the entire settings widget, where 1 means fill all space under settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Scrollbox Percent Height", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "1"))
+	float ScrollboxPercentHeightInternal = 0.7f; //[D]
+
+	/** The padding of the scrollbox widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Scrollbox Padding", ShowOnlyInnerProperties))
+	FMargin ScrollboxPaddingInternal = 0.f; //[D]
+};
 
 /**
  * The UI widget of settings.
  * It generates and manages settings specified in rows of the Settings Data Table.
  */
-UCLASS(Abstract)
-class BOMBER_API USettingsWidget final : public UUserWidget
+UCLASS()
+class USettingsWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 public:
@@ -108,8 +176,8 @@ protected:
 	* May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
 
-	/**  */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	/** Construct all settings from the settings data table. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void ConstructSettings();
 
 	/** Called when the visibility has changed.
@@ -126,6 +194,10 @@ protected:
 	* @see FSettingsPrimary::OnStaticContext */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryBindTextFunctions(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
+
+	/** Save and close the settings widget. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void CloseSettings();
 
 	/* ---------------------------------------------------
 	 *		Add by setting types

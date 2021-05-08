@@ -134,7 +134,7 @@ void UMyCheatManager::SetItemChance(int32 Chance) const
 // Override the level of each powerup for a controlled player
 void UMyCheatManager::SetPowerups(int32 NewLevel) const
 {
-	if (const auto PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerPawn(this, 0)))
+	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetPlayerCharacter())
 	{
 		NewLevel = FMath::Clamp(NewLevel, 1, 9);
 		PlayerCharacter->PowerupsInternal.BombN = NewLevel;

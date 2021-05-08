@@ -5,6 +5,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/SingletonLibrary.h"
+#include "UI/MyHUD.h"
 
 // Shows the in game menu.
 void UInGameWidget::ShowEndGameState_Implementation()
@@ -32,6 +33,13 @@ void UInGameWidget::HideEndGameState_Implementation()
 	// ...
 }
 
+// Flip-floppy show and hide the end game state window
+void UInGameWidget::ToggleEndGameState_Implementation()
+{
+	// Blueprint implementation
+	// ...
+}
+
 // Called after the underlying slate widget is constructed. May be called multiple times due to adding and removing from the hierarchy.
 void UInGameWidget::NativeConstruct()
 {
@@ -44,7 +52,13 @@ void UInGameWidget::NativeConstruct()
 	// Listen states to spawn widgets
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+
+	// Listen escape input to toggle the game state widget
+	if (AMyHUD* MyHUD = USingletonLibrary::GetMyHUD())
+	{
+		MyHUD->OnGoUIBack.AddUniqueDynamic(this, &ThisClass::ToggleEndGameState);
 	}
 }
 

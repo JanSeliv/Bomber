@@ -10,8 +10,8 @@
 /**
  * In game user widget.
  */
-UCLASS(Abstract)
-class BOMBER_API UInGameWidget final : public UUserWidget
+UCLASS()
+class UInGameWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 public:
@@ -25,6 +25,10 @@ public:
 	/** Hide the in game menu. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
 	void HideEndGameState();
+
+	/** Flip-floppy show and hide the end game state window. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void ToggleEndGameState();
 
 protected:
 	/**

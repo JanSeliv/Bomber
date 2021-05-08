@@ -12,6 +12,7 @@
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/LevelActorDataAsset.h"
 #include "Globals/MyGameInstance.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "UI/MyHUD.h"
 //---
 #include "Engine.h"
@@ -254,6 +255,12 @@ AMyHUD* USingletonLibrary::GetMyHUD()
 {
 	const AMyPlayerController* MyPlayerController = GetMyPlayerController();
 	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
+}
+
+// Returns controlled player character.
+APlayerCharacter* USingletonLibrary::GetPlayerCharacter()
+{
+	return Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(Get().GetWorld(), 0));
 }
 
 /* ---------------------------------------------------

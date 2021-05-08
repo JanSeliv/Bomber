@@ -11,6 +11,7 @@
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
+#include "UI/MyHUD.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/MySkeletalMeshComponent.h"
@@ -234,7 +235,7 @@ void APlayerCharacter::SpawnBomb()
 	}
 }
 
-//
+// Set and apply new skeletal mesh by specified data
 void APlayerCharacter::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
 	const auto MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
@@ -304,6 +305,8 @@ void APlayerCharacter::BeginPlay()
 		}
 	}, UGeneratedMapDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
 	TimerManager.PauseTimer(UpdatePositionHandleInternal);
+
+	UpdateNickname();
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -375,16 +378,20 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	    && CharacterIDInternal > 0)              // Is a bot
 	{
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
-		if (MapComponentInternal->bShouldShowRenders == false)
+		if (!MapComponentInternal->bShouldShowRenders)
 		{
 			if (MyAIControllerInternal)
+			{
 				MyAIControllerInternal->Destroy();
+			}
 		}
-		else if (MyAIControllerInternal == nullptr) // Is a bot with debug visualization and AI controller is not created yet
+		else if (!MyAIControllerInternal) // Is a bot with debug visualization and AI controller is not created yet
 		{
 			SpawnDefaultController();
-			if (GetController())
-				GetController()->bIsEditorOnlyActor = true;
+			if (AController* PlayerController = GetController())
+			{
+				PlayerController->bIsEditorOnlyActor = true;
+			}
 		}
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
@@ -395,9 +402,25 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveUpDown", this, &APlayerCharacter::OnMoveUpDown);
-	PlayerInputComponent->BindAxis("MoveRightLeft", this, &APlayerCharacter::OnMoveRightLeft);
-	PlayerInputComponent->BindAction("SpaceEvent", IE_Pressed, this, &APlayerCharacter::SpawnBomb);
+	if (!ensureMsgf(PlayerInputComponent, TEXT("ASSERT: 'PlayerInputComponent' is not valid")))
+	{
+		return;
+	}
+
+	// Do not consume added input
+	auto SetInput = [](FInputBinding& InputRef) { InputRef.bConsumeInput = false; };
+
+	static const FName MoveUpDownName = GET_FUNCTION_NAME_CHECKED(ThisClass, MoveUpDown);
+	SetInput(PlayerInputComponent->BindAxis(MoveUpDownName, this, &ThisClass::MoveUpDown));
+
+	static const FName MoveRightLeftName = GET_FUNCTION_NAME_CHECKED(ThisClass, MoveRightLeft);
+	SetInput(PlayerInputComponent->BindAxis(MoveRightLeftName, this, &ThisClass::MoveRightLeft));
+
+	static const FName SpawnBombName = GET_FUNCTION_NAME_CHECKED(ThisClass, SpawnBomb);
+	SetInput(PlayerInputComponent->BindAction(SpawnBombName, IE_Pressed, this, &ThisClass::SpawnBomb));
+
+	static const FName GoUIBackName = GET_FUNCTION_NAME_CHECKED(AMyHUD, GoUIBack);
+	SetInput(PlayerInputComponent->BindAction(GoUIBackName, IE_Pressed, USingletonLibrary::GetMyHUD(), &AMyHUD::GoUIBack));
 }
 
 // Adds the movement input along the given world direction vector.
@@ -411,6 +434,17 @@ void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 		// Rotate the character
 		RotateToLocation(GetActorLocation() + ScaleValue * WorldDirection, true);
 	}
+}
+
+// Move the player character by the forward vector
+void APlayerCharacter::MoveUpDown(float ScaleValue)
+{
+	AddMovementInput(GetActorRightVector(), ScaleValue);
+}
+
+void APlayerCharacter::MoveRightLeft(float ScaleValue)
+{
+	AddMovementInput(GetActorForwardVector(), ScaleValue);
 }
 
 // Triggers when this player character starts something overlap.
@@ -460,6 +494,7 @@ void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
 	PowerupsInternal.BombN++;
 }
 
+// Called when the current game state was changed
 void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
@@ -487,7 +522,7 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 	}
 }
 
-//
+// Update player name on a 3D widget component
 void APlayerCharacter::UpdateNickname_Implementation() const
 {
 	// BP implementation

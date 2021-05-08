@@ -130,6 +130,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AMyHUD* GetMyHUD();
 
+	/** Returns controlled player character. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class APlayerCharacter* GetPlayerCharacter();
+
 	/* ---------------------------------------------------
 	 *		Structs functions
 	 * --------------------------------------------------- */

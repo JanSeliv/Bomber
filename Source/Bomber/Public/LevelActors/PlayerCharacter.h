@@ -137,7 +137,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Materials", ShowOnlyInnerProperties))
 	TArray<class UMaterialInterface*> NameplateMaterialsInternal; //[D]
 
-	/* The AnimBlueprint class to use, can set it only in the gameplay. */
+	/** The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
 	TSubclassOf<UAnimInstance> AnimInstanceClassInternal; //[D]
 
@@ -176,19 +176,19 @@ struct FPowerUp
  * Players and AI, whose goal is to remain the last survivor for the win.
  */
 UCLASS()
-class BOMBER_API APlayerCharacter final : public ACharacter
+class APlayerCharacter final : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	/* ---------------------------------------------------
+	/** ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
 
 	/** Sets default values for this character's properties */
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
-	/** */
+	/** Returns current powerup levels */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE FPowerUp GetPowerups() const { return PowerupsInternal; }
 
@@ -206,15 +206,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SpawnBomb();
 
-	/**
-	 *
-	 * @param CustomPlayerMeshData
-	 */
+	/** Set and apply new skeletal mesh by specified data.
+	 * @param CustomPlayerMeshData Contains data about the skin to set. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
 protected:
-	/* ---------------------------------------------------
+	/** ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
@@ -244,7 +242,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
 	FTimerHandle UpdatePositionHandleInternal;
 
-	/* ---------------------------------------------------
+	/** ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */
 
@@ -254,11 +252,14 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/* Called to bind functionality to input */
+	/** ---------------------------------------------------
+	 *		Input
+	 * --------------------------------------------------- */
+
+	/** Called to bind functionality to input */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	/** Virtual overriding of the UFUNCTION.
-	 * Adds the movement input along the given world direction vector.
+	/** Adds the movement input along the given world direction vector.
 	 *
 	 * @param WorldDirection Direction in world space to apply input
 	 * @param ScaleValue Scale to apply to input. This can be used for analog input, ie a value of 0.5 applies half the normal value, while -1.0 would reverse the direction.
@@ -266,11 +267,15 @@ protected:
 	 */
 	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.f, bool bForce = false) override;
 
-	/* Move the player character by the forward vector. */
-	FORCEINLINE void OnMoveUpDown(float ScaleValue) { AddMovementInput(GetActorRightVector(), ScaleValue); }
+	/** Move the player character by the forward vector. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void MoveUpDown(float ScaleValue);
 
-	/* Move the player character by the right vector. */
-	FORCEINLINE void OnMoveRightLeft(float ScaleValue) { AddMovementInput(GetActorForwardVector(), ScaleValue); }
+	/** Move the player character by the right vector. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void MoveRightLeft(float ScaleValue);
+
+	/** --------------------------------------------------- */
 
 	/**
 	 * Triggers when this player character starts something overlap.
@@ -283,11 +288,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBombDestroyed(AActor* DestroyedBomb);
 
-	/** */
+	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-	/**  */
+	/** Update player name on a 3D widget component. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++")
 	void UpdateNickname() const;
 };

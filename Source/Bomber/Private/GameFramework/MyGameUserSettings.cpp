@@ -5,56 +5,11 @@
 #include "Globals/SingletonLibrary.h"
 //---
 #include "Engine/DataTable.h"
+#include "UI/SettingsWidget.h"
 
 #if WITH_EDITOR //[include]
 #include "DataTableEditorUtils.h"
 #endif // WITH_EDITOR
-
-// Returns the settings data asset
-const USettingsDataAsset& USettingsDataAsset::Get()
-{
-	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
-	checkf(SettingsDataAsset, TEXT("The Settings Data Asset is not valid"));
-	return *SettingsDataAsset;
-}
-
-// Returns the table rows.
-void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsPicker>& OutRows) const
-{
-	if (!ensureMsgf(SettingsDataTableInternal, TEXT("ASSERT: 'SettingsDataTableInternal' is not valid")))
-	{
-		return;
-	}
-
-	const TMap<FName, uint8*>& RowMap = SettingsDataTableInternal->GetRowMap();
-	OutRows.Empty();
-	OutRows.Reserve(RowMap.Num());
-	for (const TTuple<FName, uint8*>& RowIt : RowMap)
-	{
-		if (const auto FoundRowPtr = reinterpret_cast<FSettingsRow*>(RowIt.Value))
-		{
-			const FSettingsPicker& SettingsTableRow = FoundRowPtr->SettingsPicker;
-			const FName RowName = RowIt.Key;
-			OutRows.Emplace(RowName, SettingsTableRow);
-		}
-	}
-}
-
-// Get a multicast delegate that is called any time the data table changes
-void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& EventToBind) const
-{
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld()
-	    || !SettingsDataTableInternal
-	    || !EventToBind.IsBound())
-	{
-		return;
-	}
-
-	UDataTable::FOnDataTableChanged& OnDataTableChangedDelegate = SettingsDataTableInternal->OnDataTableChanged();
-	OnDataTableChangedDelegate.AddLambda([EventToBind]() { EventToBind.ExecuteIfBound(); });
-#endif // WITH_EDITOR
-}
 
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()
