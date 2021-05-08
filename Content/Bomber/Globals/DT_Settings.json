@@ -27,10 +27,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"22477F044C20668A342AD9BFCC293291\", \"GRAPHICS\")",
 				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 0,
-				"PaddingBottom": 0
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 0
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -102,10 +106,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"AAE2048449B33D048130B7968DC491F6\", \"Back\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"67498FE9459053E03CCBCFA687170C85\", \"Return back to the main menu\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 0,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -177,10 +185,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"788D42434311C2017FD979A633D31E4B\", \"GAMEPLAY\")",
 				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 0,
-				"PaddingBottom": 0
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 0
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -252,10 +264,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"BB51A3194AE57C2B65A8EF915EAE4407\", \"Camera Lock\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"C523CF824AE2E0878B869792652B6AF6\", \"Check if you want to lock camera on center\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -327,10 +343,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"1D396D434CB1BF352536C39A81C8F475\", \"Player Name\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"783B361E459F1C17B9852CB11D1D5BDB\", \"Enter your nickname\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -402,10 +422,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A66DE2E649B1E65ADBD8FE8105588DB0\", \"Audio Volume\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"848C332C48030AC4947D7EBDFA94420C\", \"Set the audio volume\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -477,10 +501,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"8ECA0FAA480D8A7DE54E16804EA3D3A5\", \"VIDEO\")",
 				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 0,
-				"PaddingBottom": 0
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 0
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -552,10 +580,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"89FCF48E4D0FD7AFE17C1EB1E7DC0452\", \"V-Sync\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"48BD64BE4AC741D10AABC5BEDC3E6ECD\", \"Check to enable vertical synchronization\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -627,10 +659,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"5926D6EE494D9E1629AD67BC89F13393\", \"Fullscreen\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"7CA7B97243DD97A33BC42B90D25EE828\", \"Check to enable  the fullscreen mode\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -702,10 +738,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"157063DC4ECDE08518DCE0B1B9DB17C8\", \"Screen Resolutions\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2B904AAE46925A17E999DA8F23EFD034\", \"Choose screen resolution\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -777,10 +817,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"D73EC5834637ACCE06D6CAB1B06DEAD9\", \"Framerate Lock\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DF7552C9458903FADB2D9D8888E39F94\", \"Choose a limit on the allowed FPS\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -857,12 +901,16 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"3FEA8A9A4B5887BF5D92CBB5394F2186\", \"ADVANCED\")",
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"3FEA8A9A4B5887BF5D92CBB5394F2186\", \"GRAPHICS\")",
 				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 0,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": true
 			},
 			"Button":
 			{
@@ -934,10 +982,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"68BFE801439719772FD76486D3E798A4\", \"Quality Level\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -1015,10 +1067,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"699CF95A414DA8AA1713E9BF9F6BA783\", \"View DIstance\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -1096,10 +1152,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DDF59A1A4BB68C53D342728755A2A58A\", \"Anti Aliasing\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -1177,10 +1237,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"6F3AD8DB4877DFED740EB1A0125861D8\", \"Post Processing\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -1258,10 +1322,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"BCC93E33454A91A7FB03E99E98797742\", \"Shadows\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -1339,10 +1407,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"62FA1061465C1CABE5CD8F9179769BF6\", \"Textures\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -1420,10 +1492,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"1AADA6C649D8855063941FB69944F2DE\", \"Effects\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -1501,10 +1577,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"84D4B56F43A50156C0222BBC06F0E75F\", \"Foliage\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{
@@ -1582,10 +1662,14 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"58AA052E4251940966BA49835B41FA29\", \"Shading\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
-				"PaddingLeft": 0,
-				"PaddingTop": 0,
-				"PaddingRight": 30,
-				"PaddingBottom": 15
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
 			},
 			"Button":
 			{

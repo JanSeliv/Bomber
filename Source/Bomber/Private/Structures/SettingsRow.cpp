@@ -37,10 +37,10 @@ uint32 GetTypeHash(const FSettingsPrimary& Other)
 	const uint32 GetterHash = GetTypeHash(Other.Getter);
 	const uint32 CaptionHash = GetTypeHash(Other.Caption.ToString());
 	const uint32 TooltipHash = GetTypeHash(Other.Tooltip.ToString());
-	const uint32 PaddingLeftHash = GetTypeHash(Other.PaddingLeft);
-	const uint32 PaddingTopHash = GetTypeHash(Other.PaddingTop);
-	const uint32 PaddingRightHash = GetTypeHash(Other.PaddingRight);
-	const uint32 PaddingBottomHash = GetTypeHash(Other.PaddingBottom);
+	const uint32 PaddingLeftHash = GetTypeHash(Other.Padding.Left);
+	const uint32 PaddingTopHash = GetTypeHash(Other.Padding.Top);
+	const uint32 PaddingRightHash = GetTypeHash(Other.Padding.Right);
+	const uint32 PaddingBottomHash = GetTypeHash(Other.Padding.Bottom);
 	return HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(
 		TagHash, ObjectContextHash), SetterHash), GetterHash), CaptionHash), TooltipHash), PaddingLeftHash), PaddingTopHash), PaddingRightHash), PaddingBottomHash);
 }

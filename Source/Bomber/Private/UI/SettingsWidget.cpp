@@ -345,6 +345,13 @@ void USettingsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRowsInternal);
+
+	// Set overall columns num by amount of rows that are marked to be started on next column
+	TArray<FSettingsPicker> Rows;
+	SettingsTableRowsInternal.GenerateValueArray(Rows);
+	OverallColumnsNumInternal += Rows.FilterByPredicate([](const FSettingsPicker& Row) { return Row.PrimaryData.bStartOnNextColumn; }).Num();
+
 	OnVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnVisibilityChange);
 
 	// Hide that widget by default
@@ -363,7 +370,6 @@ void USettingsWidget::ConstructSettings_Implementation()
 	// BP implementation to create subsetting widgets
 	//...
 
-	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRowsInternal);
 	for (TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
 		AddSetting(RowIt.Value);
@@ -468,6 +474,11 @@ void USettingsWidget::AddSetting(FSettingsPicker& Setting)
 	FSettingsPrimary& PrimaryData = Setting.PrimaryData;
 	TryBindStaticContext(PrimaryData);
 
+	if (Setting.PrimaryData.bStartOnNextColumn)
+	{
+		StartNextColumn();
+	}
+
 	if (ChosenData == &Setting.Button)
 	{
 		AddButton(PrimaryData, Setting.Button);
@@ -507,6 +518,9 @@ void USettingsWidget::AddButton(FSettingsPrimary& Primary, FSettingsButton& Data
 	}
 
 	AddButtonBP(Primary, Data);
+
+	// BP implementation
+	// ...
 }
 
 // Add checkbox on UI
@@ -529,6 +543,9 @@ void USettingsWidget::AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& 
 	}
 
 	AddCheckboxBP(Primary, Data);
+
+	// BP implementation
+	// ...
 }
 
 // Add combobox on UI
@@ -565,6 +582,9 @@ void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& 
 	}
 
 	AddComboboxBP(Primary, Data);
+
+	// BP implementation
+	// ...
 }
 
 // Add slider on UI
@@ -587,6 +607,9 @@ void USettingsWidget::AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data
 	}
 
 	AddSliderBP(Primary, Data);
+
+	// BP implementation
+	// ...
 }
 
 // Add simple text on UI
@@ -595,6 +618,9 @@ void USettingsWidget::AddTextSimple(FSettingsPrimary& Primary, FSettingsTextSimp
 	TryBindTextFunctions(Primary, Data);
 
 	AddTextSimpleBP(Primary, Data);
+
+	// BP implementation
+	// ...
 }
 
 // Add text input on UI
@@ -603,4 +629,14 @@ void USettingsWidget::AddTextInput(FSettingsPrimary& Primary, FSettingsTextInput
 	TryBindTextFunctions(Primary, Data);
 
 	AddTextInputBP(Primary, Data);
+
+	// BP implementation
+	// ...
+}
+
+// Starts adding settings on the next column
+void USettingsWidget::StartNextColumn_Implementation()
+{
+	// BP implementation
+	// ...
 }

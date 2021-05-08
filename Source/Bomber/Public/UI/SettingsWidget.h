@@ -54,6 +54,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE FMargin GetScrollboxPadding() const { return ScrollboxPaddingInternal; }
 
+	/** Return the padding space, used on adding next column. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE float GetSpaceBetweenColumns() const { return SpaceBetweenColumnsInternal; }
+
 protected:
 	/** The data table with all settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table", ShowOnlyInnerProperties))
@@ -74,6 +78,10 @@ protected:
 	/** The padding of the scrollbox widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Scrollbox Padding", ShowOnlyInnerProperties))
 	FMargin ScrollboxPaddingInternal = 0.f; //[D]
+
+	/** The padding space, used on adding next column. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Space Between Columns", ShowOnlyInnerProperties))
+	float SpaceBetweenColumnsInternal = 10.f; //[D]
 };
 
 /**
@@ -166,7 +174,15 @@ protected:
 
 	/** Contains all settings. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows"))
-	TMap<FName/*Tag*/, FSettingsPicker/*Row*/> SettingsTableRowsInternal; //[D]
+	TMap<FName/*Tag*/, FSettingsPicker/*Row*/> SettingsTableRowsInternal; //[G]
+
+	/** The index of the current column. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Column Index"))
+	int32 CurrentColumnIndexInternal; //[G]
+
+	/** Is set automatically on started by amount of rows that are marked to be started on next column. Settings have at least one column. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overall Columns Num"))
+	int32 OverallColumnsNumInternal = 1; //[G]
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -236,4 +252,8 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextInput", AutoCreateRefTerm = "Primary,Data"))
 	void AddTextInputBP(const FSettingsPrimary& Primary, const FSettingsTextInput& Data);
 	void AddTextInput(FSettingsPrimary& Primary, FSettingsTextInput& Data);
+
+	/** Starts adding settings on the next column. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void StartNextColumn();
 };

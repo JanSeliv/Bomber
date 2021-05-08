@@ -130,19 +130,11 @@ struct FSettingsPrimary
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	float PaddingLeft = 0.f; //[D]
+	FMargin Padding = 0.f;
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	float PaddingTop = 0.f; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	float PaddingRight = 0.f; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	float PaddingBottom = 0.f; //[D]
+	bool bStartOnNextColumn; //[D]
 
 	/** */
 	TWeakObjectPtr<UObject> StaticContextObject;
