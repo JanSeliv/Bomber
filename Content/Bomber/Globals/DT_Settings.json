@@ -876,6 +876,85 @@
 		}
 	},
 	{
+		"Name": "Settings.Checkbox.FPSCounter",
+		"SettingsPicker":
+		{
+			"SettingsType": "Checkbox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Checkbox.FPSCounter"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetMyHUD"
+				},
+				"Setter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyHUD'",
+					"FunctionName": "SetFPSCounterEnabled"
+				},
+				"Getter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyHUD'",
+					"FunctionName": "IsFPSCounterEnabled"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"1315620C476BCC916E6B50B474B3DC38\", \"FPS Counter\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"04341B454CFB45870906DE8307F3C665\", \"Check to show the current FPS\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+				"bIsSet": false
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"ChosenMemberIndex": -1,
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+				"ChosenValue": 0.5
+			},
+			"TextSimple":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"TextInput":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			}
+		}
+	},
+	{
 		"Name": "Settings.TextSimple.GraphicsTab",
 		"SettingsPicker":
 		{

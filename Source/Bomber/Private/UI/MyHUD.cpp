@@ -23,6 +23,17 @@ void AMyHUD::GoUIBack()
 	}
 }
 
+// Set true to show the FPS counter widget on the HUD
+void AMyHUD::SetFPSCounterEnabled(bool bEnable)
+{
+	if (FPSCounterWidgetInternal)
+	{
+		const ESlateVisibility NewVisibility = bEnable ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed;
+		FPSCounterWidgetInternal->SetVisibility(NewVisibility);
+		bIsFPSCounterEnabledInternal = bEnable;
+	}
+}
+
 // Init all widgets on gameplay starting before begin play
 void AMyHUD::PostInitializeComponents()
 {
@@ -67,6 +78,14 @@ void AMyHUD::InitWidgets()
 		SettingsWidgetInternal = CreateWidget<USettingsWidget>(PlayerOwner, SettingsWidgetClass);
 		checkf(SettingsWidgetInternal, TEXT("ERROR: SettingsWidgetInternal failed to create"));
 		SettingsWidgetInternal->AddToViewport();
+	}
+
+	const TSubclassOf<UUserWidget>& FPSCounterWidgetClass = UIDataAsset.GetFPSCounterWidgetClass();
+	if (ensureMsgf(FPSCounterWidgetClass, TEXT("ASSERT: 'FPSCounterWidgetClass' is not set in the UI data table")))
+	{
+		FPSCounterWidgetInternal = CreateWidget<UUserWidget>(PlayerOwner, FPSCounterWidgetClass);
+		checkf(FPSCounterWidgetInternal, TEXT("ERROR: FPSCounterWidgetInternal failed to create"));
+		FPSCounterWidgetInternal->AddToViewport();
 	}
 
 	const TSubclassOf<UUserWidget>& NicknameWidgetClass = UIDataAsset.GetNicknameWidgetClass();
