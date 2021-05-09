@@ -190,7 +190,7 @@
 					"Left": 0,
 					"Top": 0,
 					"Right": 0,
-					"Bottom": 0
+					"Bottom": 15
 				},
 				"bStartOnNextColumn": false
 			},
@@ -506,7 +506,7 @@
 					"Left": 0,
 					"Top": 0,
 					"Right": 0,
-					"Bottom": 0
+					"Bottom": 15
 				},
 				"bStartOnNextColumn": false
 			},
@@ -802,18 +802,18 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
 					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "None"
+					"FunctionName": "SetFPSLockByIndex"
 				},
 				"Getter":
 				{
 					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "None"
+					"FunctionName": "GetFPSLockIndex"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"D73EC5834637ACCE06D6CAB1B06DEAD9\", \"Framerate Lock\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DF7552C9458903FADB2D9D8888E39F94\", \"Choose a limit on the allowed FPS\")",
@@ -848,14 +848,15 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
+				"ChosenMemberIndex": 0,
 				"Members": [
-					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"4C68A38B4BCDA403924FE6B6F5668D4F\", \"24 FPS\")",
-					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"78D3A4AA4DD14FFC362BAA96ADA3D8C4\", \"30 FPS\")",
-					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"62A1A7094634BB42C552EA8C145807AA\", \"60 FPS\")",
-					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"F5F355A6460A30FA27D1E6BE01FF25F6\", \"120 FPS\")",
+					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"33666EB14000EF87C208479B3BF10FA6\", \"Uncapped\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"60B56F8742106CD4CC21CD881FFBF8F7\", \"144 FPS\")",
-					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"33666EB14000EF87C208479B3BF10FA6\", \"Uncapped\")"
+					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"F5F355A6460A30FA27D1E6BE01FF25F6\", \"120 FPS\")",
+					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"62A1A7094634BB42C552EA8C145807AA\", \"60 FPS\")",
+					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"746E4CD542AF5E0BD8D5688A9A781295\", \"44 FPS\")",
+					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"78D3A4AA4DD14FFC362BAA96ADA3D8C4\", \"30 FPS\")",
+					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"4C68A38B4BCDA403924FE6B6F5668D4F\", \"24 FPS\")"
 				],
 				"TextJustify": "Center"
 			},

@@ -9,6 +9,11 @@ const FSettingsFunction FSettingsFunction::Empty = FSettingsFunction();
 const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
 
 //
+FSettingsFunction::FSettingsFunction(TSubclassOf<UObject> InFunctionClass, FName InFunctionName)
+	: FunctionClass(InFunctionClass)
+	, FunctionName(InFunctionName) {}
+
+//
 bool FSettingsFunction::operator==(const FSettingsFunction& Other) const
 {
 	return GetTypeHash(*this) == GetTypeHash(Other);

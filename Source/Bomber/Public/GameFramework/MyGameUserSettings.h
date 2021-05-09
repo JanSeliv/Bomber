@@ -59,6 +59,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetFullscreenEnabled(bool bIsFullscreen);
 
+	/** Returns the index of chosen fps lock in array. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetFPSLockIndex() const { return FPSLockIndexInternal; }
+
+	/** Set the FPS cap by specified member index. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetFPSLockByIndex(int32 Index);
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -83,6 +91,10 @@ protected:
 	/** The index of chosen resolution. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Resolution Index"))
 	int32 CurrentResolutionIndexInternal; //[G]
+
+	/** The index of chosen fps lock in array. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Lock Index"))
+	int32 FPSLockIndexInternal; //[G]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

@@ -101,6 +101,42 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 	ApplyResolutionSettings(true);
 }
 
+// Set the FPS cap by specified member index
+void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
+{
+	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	if (!SettingsWidget
+	    || !GEngine)
+	{
+		return;
+	}
+
+	static const FSettingsFunction ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
+	const FName Tag = SettingsWidget->GetTagNameByFunction(ThisFunction);
+	const TArray<FText> ComboboxMembers = SettingsWidget->GetComboboxMembers(Tag);
+	if (!ComboboxMembers.IsValidIndex(Index))
+	{
+		return;
+	}
+
+	FPSLockIndexInternal = Index;
+
+	FString StrMaxFPS = ComboboxMembers[Index].ToString();
+	if (!StrMaxFPS.IsNumeric())
+	{
+		static const FString StrUncappedFPS = TEXT("0");
+		static const FString SpaceDelimiter = TEXT(" ");
+		TArray<FString> StringArray;
+		StrMaxFPS.ParseIntoArray(StringArray, *SpaceDelimiter);
+		const FString* FoundNumericStr = StringArray.FindByPredicate([](const FString& StrIt) { return StrIt.IsNumeric(); });
+		StrMaxFPS = FoundNumericStr ? *FoundNumericStr : StrUncappedFPS;
+	}
+
+	const int32 MaxFPS = FCString::Atoi(*StrMaxFPS);
+	SetFrameRateLimit(MaxFPS);
+	SetFrameRateLimitCVar(MaxFPS);
+}
+
 // Loads the user settings from persistent storage
 void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {

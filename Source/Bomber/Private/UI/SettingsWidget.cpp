@@ -75,6 +75,15 @@ void USettingsWidget::SaveSettings()
 	}
 }
 
+// Returns the name of found tag by specified function
+FName USettingsWidget::GetTagNameByFunction(const FSettingsFunction& Function) const
+{
+	TArray<FSettingsPicker> Rows;
+	SettingsTableRowsInternal.GenerateValueArray(Rows);
+	const FSettingsPicker* FoundRow = Rows.FindByPredicate([&Function](const FSettingsPicker& Row) { return Row.PrimaryData.Getter == Function || Row.PrimaryData.Setter == Function; });
+	return FoundRow ? FoundRow->PrimaryData.Tag.GetTagName() : FGameplayTag::EmptyTag.GetTagName();
+}
+
 // Set value to the option by tag
 void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 {
@@ -439,6 +448,7 @@ void USettingsWidget::TryBindTextFunctions(FSettingsPrimary& Primary, FSettingsT
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterText.BindUFunction(StaticContextObject, SetterFunctionName);
+			Data.OnSetterText.ExecuteIfBound(Primary.Caption);
 		}
 	}
 }
@@ -539,6 +549,7 @@ void USettingsWidget::AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& 
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterBool.BindUFunction(StaticContextObject, SetterFunctionName);
+			Data.OnSetterBool.ExecuteIfBound(Data.bIsSet);
 		}
 	}
 
@@ -565,6 +576,7 @@ void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& 
 		if (Primary.StaticContextFunctionList.Contains(SetMembersFunctionName))
 		{
 			Data.OnSetMembers.BindUFunction(StaticContextObject, SetMembersFunctionName);
+			Data.OnSetMembers.ExecuteIfBound(Data.Members);
 		}
 
 		const FName GetterFunctionName = Primary.Getter.FunctionName;
@@ -578,6 +590,7 @@ void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& 
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterInt.BindUFunction(StaticContextObject, SetterFunctionName);
+			Data.OnSetterInt.ExecuteIfBound(Data.ChosenMemberIndex);
 		}
 	}
 
@@ -603,6 +616,7 @@ void USettingsWidget::AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterFloat.BindUFunction(StaticContextObject, SetterFunctionName);
+			Data.OnSetterFloat.ExecuteIfBound(Data.ChosenValue);
 		}
 	}
 

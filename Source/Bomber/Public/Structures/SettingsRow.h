@@ -76,6 +76,12 @@ struct FSettingsFunction
 	/** Empty settings function. */
 	static const FSettingsFunction Empty;
 
+	/** */
+	FSettingsFunction() = default;
+
+	/** */
+	FSettingsFunction(TSubclassOf<UObject> InFunctionClass, FName InFunctionName);
+
 	/**  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Class"))
 	TSubclassOf<UObject> FunctionClass = nullptr; //[D]
