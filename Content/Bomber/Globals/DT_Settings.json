@@ -341,7 +341,7 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"1D396D434CB1BF352536C39A81C8F475\", \"Player Name\")",
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"72219A3F4944330938ED3685430DF7A3\", \"Player Name\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"783B361E459F1C17B9852CB11D1D5BDB\", \"Enter your nickname\")",
 				"Padding":
 				{
@@ -1035,7 +1035,7 @@
 		}
 	},
 	{
-		"Name": "Settings.Combobox.Quality",
+		"Name": "Settings.Combobox.OverallQuality",
 		"SettingsPicker":
 		{
 			"SettingsType": "Combobox",
@@ -1043,7 +1043,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Combobox.Quality"
+					"TagName": "Settings.Combobox.OverallQuality"
 				},
 				"StaticContext":
 				{
@@ -1060,7 +1060,7 @@
 					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetOverallScalabilityLevel"
 				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"68BFE801439719772FD76486D3E798A4\", \"Quality Level\")",
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"68BFE801439719772FD76486D3E798A4\", \"Overall Quality\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
 				"Padding":
 				{
@@ -1095,6 +1095,7 @@
 				},
 				"ChosenMemberIndex": 2,
 				"Members": [
+					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"97E4AFD848589AB32794FB84CAC10865\", \"Custom\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DD228AEA4BFD52296E3C76A85FA22A2D\", \"High\")",

@@ -75,6 +75,47 @@ void USettingsWidget::SaveSettings()
 	}
 }
 
+// Update settings on UI
+void USettingsWidget::UpdateSettings()
+{
+	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
+	{
+		const FSettingsPicker& Setting = RowIt.Value;
+		const FSettingsDataBase* ChosenData = Setting.GetChosenSettingsData();
+		if (!ChosenData)
+		{
+			continue;
+		}
+
+		const FName TagName = Setting.PrimaryData.Tag.GetTagName();
+		if (ChosenData == &Setting.Checkbox)
+		{
+			const bool NewValue = GetCheckboxValue(TagName);
+			SetCheckbox(TagName, NewValue);
+		}
+		else if (ChosenData == &Setting.Combobox)
+		{
+			const int32 NewValue = GetComboboxIndex(TagName);
+			SetComboboxIndex(TagName, NewValue);
+		}
+		else if (ChosenData == &Setting.Slider)
+		{
+			const float NewValue = GetSliderValue(TagName);
+			SetSlider(TagName, NewValue);
+		}
+		else if (ChosenData == &Setting.TextSimple)
+		{
+			const FText NewValue = GetTextValue(TagName);
+			SetTextSimple(TagName, NewValue);
+		}
+		else if (ChosenData == &Setting.TextInput)
+		{
+			const FText NewValue = GetTextValue(TagName);
+			SetTextInput(TagName, NewValue);
+		}
+	}
+}
+
 // Returns the name of found tag by specified function
 FName USettingsWidget::GetTagNameByFunction(const FSettingsFunction& Function) const
 {
@@ -150,10 +191,9 @@ void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 // Press button
 void USettingsWidget::SetButtonPressed_Implementation(FName TagName)
 {
-	const FSettingsPicker FoundRow = FindSettingRow(TagName);
-	if (FoundRow.IsValid())
+	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
-		FoundRow.Button.OnButtonPressed.ExecuteIfBound();
+		SettingsRowPtr->Button.OnButtonPressed.ExecuteIfBound();
 	}
 
 	// BP implementation
@@ -162,13 +202,15 @@ void USettingsWidget::SetButtonPressed_Implementation(FName TagName)
 // Toggle checkbox
 void USettingsWidget::SetCheckbox_Implementation(FName TagName, bool InValue)
 {
-	FSettingsPicker FoundRow = FindSettingRow(TagName);
-	if (FoundRow.IsValid())
+	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
-		FoundRow.Checkbox.bIsSet = InValue;
-		SettingsTableRowsInternal.Emplace(TagName, MoveTemp(FoundRow));
-
-		FoundRow.Checkbox.OnSetterBool.ExecuteIfBound(InValue);
+		bool& bIsSetRef = SettingsRowPtr->Checkbox.bIsSet;
+		if (bIsSetRef != InValue)
+		{
+			bIsSetRef = InValue;
+			SettingsRowPtr->Checkbox.OnSetterBool.ExecuteIfBound(InValue);
+			UpdateSettings();
+		}
 	}
 
 	// BP implementation
@@ -177,13 +219,15 @@ void USettingsWidget::SetCheckbox_Implementation(FName TagName, bool InValue)
 // Set chosen member index for a combobox
 void USettingsWidget::SetComboboxIndex_Implementation(FName TagName, int32 InValue)
 {
-	FSettingsPicker FoundRow = FindSettingRow(TagName);
-	if (FoundRow.IsValid())
+	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
-		FoundRow.Combobox.ChosenMemberIndex = InValue;
-		SettingsTableRowsInternal.Emplace(TagName, MoveTemp(FoundRow));
-
-		FoundRow.Combobox.OnSetterInt.ExecuteIfBound(InValue);
+		int32& ChosenMemberIndexRef = SettingsRowPtr->Combobox.ChosenMemberIndex;
+		if (ChosenMemberIndexRef != InValue)
+		{
+			ChosenMemberIndexRef = InValue;
+			SettingsRowPtr->Combobox.OnSetterInt.ExecuteIfBound(InValue);
+			UpdateSettings();
+		}
 	}
 
 	// BP implementation
@@ -192,13 +236,10 @@ void USettingsWidget::SetComboboxIndex_Implementation(FName TagName, int32 InVal
 // Set new members for a combobox
 void USettingsWidget::SetComboboxMembers_Implementation(FName TagName, const TArray<FText>& InValue)
 {
-	FSettingsPicker FoundRow = FindSettingRow(TagName);
-	if (FoundRow.IsValid())
+	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
-		FoundRow.Combobox.Members = InValue;
-		SettingsTableRowsInternal.Emplace(TagName, MoveTemp(FoundRow));
-
-		FoundRow.Combobox.OnSetMembers.ExecuteIfBound(InValue);
+		SettingsRowPtr->Combobox.Members = InValue;
+		SettingsRowPtr->Combobox.OnSetMembers.ExecuteIfBound(InValue);
 	}
 
 	// BP implementation
@@ -207,15 +248,18 @@ void USettingsWidget::SetComboboxMembers_Implementation(FName TagName, const TAr
 // Set current value for a slider
 void USettingsWidget::SetSlider_Implementation(FName TagName, float InValue)
 {
-	FSettingsPicker FoundRow = FindSettingRow(TagName);
-	if (FoundRow.IsValid())
+	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
 		static constexpr float MinValue = 0.f;
 		static constexpr float MaxValue = 1.f;
-		FoundRow.Slider.ChosenValue = FMath::Clamp(InValue, MinValue, MaxValue);
-		SettingsTableRowsInternal.Emplace(TagName, MoveTemp(FoundRow));
-
-		FoundRow.Slider.OnSetterFloat.ExecuteIfBound(InValue);
+		const float NewValue = FMath::Clamp(InValue, MinValue, MaxValue);
+		float& ChosenValueRef = SettingsRowPtr->Slider.ChosenValue;
+		if (ChosenValueRef != NewValue)
+		{
+			ChosenValueRef = NewValue;
+			SettingsRowPtr->Slider.OnSetterFloat.ExecuteIfBound(InValue);
+			UpdateSettings();
+		}
 	}
 
 	// BP implementation
@@ -224,13 +268,15 @@ void USettingsWidget::SetSlider_Implementation(FName TagName, float InValue)
 // Set new text
 void USettingsWidget::SetTextSimple_Implementation(FName TagName, const FText& InValue)
 {
-	FSettingsPicker FoundRow = FindSettingRow(TagName);
-	if (FoundRow.IsValid())
+	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
-		FoundRow.PrimaryData.Caption = InValue;
-		SettingsTableRowsInternal.Emplace(TagName, MoveTemp(FoundRow));
-
-		FoundRow.TextSimple.OnSetterText.ExecuteIfBound(InValue);
+		FText& Caption = SettingsRowPtr->PrimaryData.Caption;
+		if (!Caption.EqualTo(InValue))
+		{
+			Caption = InValue;
+			SettingsRowPtr->TextSimple.OnSetterText.ExecuteIfBound(InValue);
+			UpdateSettings();
+		}
 	}
 
 	// BP implementation
@@ -239,13 +285,15 @@ void USettingsWidget::SetTextSimple_Implementation(FName TagName, const FText& I
 // Set new text for an input box
 void USettingsWidget::SetTextInput_Implementation(FName TagName, const FText& InValue)
 {
-	FSettingsPicker FoundRow = FindSettingRow(TagName);
-	if (FoundRow.IsValid())
+	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
-		FoundRow.PrimaryData.Caption = InValue;
-		SettingsTableRowsInternal.Emplace(TagName, MoveTemp(FoundRow));
-
-		FoundRow.TextInput.OnSetterText.ExecuteIfBound(InValue);
+		FText& Caption = SettingsRowPtr->PrimaryData.Caption;
+		if (!Caption.EqualTo(InValue))
+		{
+			Caption = InValue;
+			SettingsRowPtr->TextInput.OnSetterText.ExecuteIfBound(InValue);
+			UpdateSettings();
+		}
 	}
 
 	// BP implementation
@@ -462,14 +510,14 @@ void USettingsWidget::CloseSettings()
 		return;
 	}
 
-	SaveSettings();
-
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	if (UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings())
 	{
 		MyGameUserSettings->ApplySettings(true);
 	}
+
+	SaveSettings();
 }
 
 // Add setting on UI.

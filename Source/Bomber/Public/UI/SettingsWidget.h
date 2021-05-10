@@ -107,6 +107,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SaveSettings();
 
+	/** Update settings on UI. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdateSettings();
+
 	/** Returns the name of found tag by specified function. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FName GetTagNameByFunction(const FSettingsFunction& Function) const;

@@ -16,7 +16,8 @@ FSettingsFunction::FSettingsFunction(TSubclassOf<UObject> InFunctionClass, FName
 //
 bool FSettingsFunction::operator==(const FSettingsFunction& Other) const
 {
-	return GetTypeHash(*this) == GetTypeHash(Other);
+	return Other.FunctionClass->IsChildOf(this->FunctionClass)
+	       && Other.FunctionName == this->FunctionName;
 }
 
 //

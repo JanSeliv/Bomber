@@ -23,6 +23,14 @@ public:
 	 * Is init once and can not be destroyed. */
 	static UMyGameUserSettings& Get();
 
+	/** Changes all scalability settings at once based on a single overall quality level, is declared in parent as UFUNCTION.
+	 * @param Value New quality level.
+	 * @see UMyGameUserSettings::OverallQualityInternal */
+	virtual void SetOverallScalabilityLevel(int32 Value) override;
+
+	/* Returns the overall scalability level, is declared in parent as UFUNCTION. */
+	virtual int32 GetOverallScalabilityLevel() const override;
+
 	/** Returns the min allowed resolution width. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetMinResolutionSizeX() const { return MinResolutionSizeXInternal; }
@@ -71,6 +79,11 @@ protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
+
+	/** The overall quality level.
+	 * 0:custom, 1:low, 2:medium, 3:high, 4:very high, 5:ultra. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overall Quality"))
+	int32 OverallQualityInternal; //[C]
 
 	/** The min allowed resolution width. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size X"))

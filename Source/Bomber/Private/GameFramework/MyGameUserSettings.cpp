@@ -19,6 +19,41 @@ UMyGameUserSettings& UMyGameUserSettings::Get()
 	return *MyGameUserSettings;
 }
 
+// Changes all scalability settings at once based on a single overall quality level
+void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
+{
+	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	if (!ensureMsgf(SettingsWidget, TEXT("ASSERT: 'SettingsWidget' is not valid"))
+	    || Value == OverallQualityInternal)
+	{
+		return;
+	}
+
+	OverallQualityInternal = Value;
+
+	if (!OverallQualityInternal)
+	{
+		// Custom scalability is set
+		return;
+	}
+
+	static constexpr int32 QualityOffset = 1;
+	Super::SetOverallScalabilityLevel(Value - QualityOffset);
+}
+
+// Returns the overall scalability level
+int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
+{
+	if (!OverallQualityInternal)
+	{
+		return OverallQualityInternal;
+	}
+
+	static constexpr int32 QualityOffset = 1;
+	const int32 OverallScalabilityLevel = Super::GetOverallScalabilityLevel();
+	return OverallScalabilityLevel + QualityOffset;
+}
+
 // Get all supported resolutions of the primary monitor
 void UMyGameUserSettings::UpdateSupportedResolutions()
 {
@@ -105,15 +140,19 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 {
 	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
-	if (!SettingsWidget
-	    || !GEngine)
+	if (!ensureMsgf(SettingsWidget, TEXT("ASSERT: 'SettingsWidget' is not valid")))
 	{
 		return;
 	}
 
 	static const FSettingsFunction ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
-	const FName Tag = SettingsWidget->GetTagNameByFunction(ThisFunction);
-	const TArray<FText> ComboboxMembers = SettingsWidget->GetComboboxMembers(Tag);
+	const FName TagName = SettingsWidget->GetTagNameByFunction(ThisFunction);
+	if (TagName.IsNone())
+	{
+		return;
+	}
+
+	const TArray<FText> ComboboxMembers = SettingsWidget->GetComboboxMembers(TagName);
 	if (!ComboboxMembers.IsValidIndex(Index))
 	{
 		return;
