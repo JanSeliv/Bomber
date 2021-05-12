@@ -231,6 +231,12 @@ AMyPlayerState* USingletonLibrary::GetMyPlayerState(const AController* Controlle
 	return Controller ? Cast<AMyPlayerState>(Controller->PlayerState) : nullptr;
 }
 
+// Returns the player state of current controller
+AMyPlayerState* USingletonLibrary::GetCurrentPlayerState()
+{
+	return GetMyPlayerState(GetMyPlayerController());
+}
+
 // Returns the Bomber settings
 UMyGameUserSettings* USingletonLibrary::GetMyGameUserSettings()
 {

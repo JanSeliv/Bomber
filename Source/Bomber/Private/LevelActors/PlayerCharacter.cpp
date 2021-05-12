@@ -247,6 +247,13 @@ void APlayerCharacter::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPla
 	MySkeletalMeshComp->InitMySkeletalMesh(CustomPlayerMeshData);
 }
 
+// Update player name on a 3D widget component
+void APlayerCharacter::UpdateNickname_Implementation() const
+{
+	// BP implementation
+	// ...
+}
+
 /* ---------------------------------------------------
  *					Protected functions
  * --------------------------------------------------- */
@@ -334,7 +341,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 
 	// Update mesh
 	FCustomPlayerMeshData CustomPlayerMeshData;
-	const AMyPlayerState* MyPlayerState = !CharacterIDInternal ? USingletonLibrary::GetMyPlayerState(UGameplayStatics::GetPlayerController(GetWorld(), 0)) : nullptr;
+	const AMyPlayerState* MyPlayerState = !CharacterIDInternal ? USingletonLibrary::GetCurrentPlayerState() : nullptr;
 	if (MyPlayerState)
 	{
 		CustomPlayerMeshData = MyPlayerState->GetCustomPlayerMeshData();
@@ -520,11 +527,4 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 		default:
 			break;
 	}
-}
-
-// Update player name on a 3D widget component
-void APlayerCharacter::UpdateNickname_Implementation() const
-{
-	// BP implementation
-	// ...
 }

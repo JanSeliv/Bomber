@@ -211,6 +211,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
+	/** Update player name on a 3D widget component. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++")
+	void UpdateNickname() const;
+
 protected:
 	/** ---------------------------------------------------
 	 *		Protected properties
@@ -291,8 +295,4 @@ protected:
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Update player name on a 3D widget component. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++")
-	void UpdateNickname() const;
 };

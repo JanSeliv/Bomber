@@ -31,6 +31,39 @@ void AMyPlayerState::SetCustomPlayerMeshData(const FCustomPlayerMeshData& Custom
 	}
 }
 
+// Set the custom player name by user input
+void AMyPlayerState::SetPlayerNameCustom(FName NewName)
+{
+	if (CustomPlayerNameInternal == NewName
+	    || NewName.IsNone())
+	{
+		return;
+	}
+
+	bUseCustomPlayerNames = true;
+	CustomPlayerNameInternal = NewName;
+
+	SetPlayerName(NewName.ToString());
+
+	if (const auto PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
+	{
+		PlayerCharacter->UpdateNickname();
+	}
+}
+
+// Set the player name
+void AMyPlayerState::SetPlayerName(const FString& S)
+{
+	if (CustomPlayerNameInternal.IsNone())
+	{
+		// Is default name, set it as a custom
+		SetPlayerNameCustom(*S);
+		return;
+	}
+
+	Super::SetPlayerName(S);
+}
+
 // Returns properties that are replicated for the lifetime of the actor channel.
 void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -67,7 +100,8 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 			ServerUpdateEndState();
 			break;
 		}
-		default: break;
+		default:
+			break;
 	}
 }
 

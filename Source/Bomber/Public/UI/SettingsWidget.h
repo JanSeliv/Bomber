@@ -125,31 +125,31 @@ public:
 
 	/** Press button. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void SetButtonPressed(FName TagName);
+	bool SetButtonPressed(FName TagName);
 
 	/** Toggle checkbox. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void SetCheckbox(FName TagName, bool InValue);
+	bool SetCheckbox(FName TagName, bool InValue);
 
 	/** Set chosen member index for a combobox. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void SetComboboxIndex(FName TagName, int32 InValue);
+	bool SetComboboxIndex(FName TagName, int32 InValue);
 
 	/** Set new members for a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void SetComboboxMembers(FName TagName, const TArray<FText>& InValue);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "InValue"))
+	bool SetComboboxMembers(FName TagName, const TArray<FText>& InValue);
 
 	/** Set current value for a slider [0...1]. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void SetSlider(FName TagName, float InValue);
+	bool SetSlider(FName TagName, float InValue);
 
 	/** Set new text. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void SetTextSimple(FName TagName, const FText& InValue);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "InValue"))
+	bool SetTextLine(FName TagName, const FText& InValue);
 
 	/** Set new text for an input box. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void SetTextInput(FName TagName, const FText& InValue);
+	bool SetUserInput(FName TagName, FName InValue);
 
 	/* ---------------------------------------------------
 	 *		Getters by setting types
@@ -173,7 +173,11 @@ public:
 
 	/** Get current text of a simple or input text widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FText GetTextValue(FName TagName) const;
+	FText GetTextLineValue(FName TagName) const;
+
+	/** Get current input name of the text input. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FName GetUserInputValue(FName TagName) const;
 
 protected:
 	/* ---------------------------------------------------
@@ -214,11 +218,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryBindStaticContext(UPARAM(ref)FSettingsPrimary& Primary);
 
-	/** Bind on text getter and setter.
-	* @see FSettingsPrimary::OnStaticContext */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TryBindTextFunctions(UPARAM(ref)FSettingsPrimary& Primary, UPARAM(ref)FSettingsTextSimple& Data);
-
 	/** Save and close the settings widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void CloseSettings();
@@ -252,14 +251,14 @@ protected:
 	void AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data);
 
 	/** Add simple text on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextSimple", AutoCreateRefTerm = "Primary,Data"))
-	void AddTextSimpleBP(const FSettingsPrimary& Primary, const FSettingsTextSimple& Data);
-	void AddTextSimple(FSettingsPrimary& Primary, FSettingsTextSimple& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextLine", AutoCreateRefTerm = "Primary,Data"))
+	void AddTextLineBP(const FSettingsPrimary& Primary, const FSettingsTextLine& Data);
+	void AddTextLine(FSettingsPrimary& Primary, FSettingsTextLine& Data);
 
 	/** Add text input on UI. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextInput", AutoCreateRefTerm = "Primary,Data"))
-	void AddTextInputBP(const FSettingsPrimary& Primary, const FSettingsTextInput& Data);
-	void AddTextInput(FSettingsPrimary& Primary, FSettingsTextInput& Data);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddUserInput", AutoCreateRefTerm = "Primary,Data"))
+	void AddUserInputBP(const FSettingsPrimary& Primary, const FSettingsUserInput& Data);
+	void AddUserInput(FSettingsPrimary& Primary, FSettingsUserInput& Data);
 
 	/** Starts adding settings on the next column. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))

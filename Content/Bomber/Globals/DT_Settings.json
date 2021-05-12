@@ -1,14 +1,14 @@
 [
 	{
-		"Name": "Settings.TextSimple.Title",
+		"Name": "Settings.TextLine.Title",
 		"SettingsPicker":
 		{
-			"SettingsType": "TextSimple",
+			"SettingsType": "TextLine",
 			"PrimaryData":
 			{
 				"Tag":
 				{
-					"TagName": "Settings.TextSimple.Title"
+					"TagName": "Settings.TextLine.Title"
 				},
 				"StaticContext":
 				{
@@ -25,7 +25,7 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"22477F044C20668A342AD9BFCC293291\", \"GRAPHICS\")",
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"22477F044C20668A342AD9BFCC293291\", \"SETTINGS\")",
 				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
 				"Padding":
 				{
@@ -66,15 +66,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Header",
 				"HorizontalAlignment": "HAlign_Center"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -145,28 +144,27 @@
 			{
 				"ChosenValue": 0.5
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
 	{
-		"Name": "Settings.TextSimple.GameplayTab",
+		"Name": "Settings.TextLine.GameplayTab",
 		"SettingsPicker":
 		{
-			"SettingsType": "TextSimple",
+			"SettingsType": "TextLine",
 			"PrimaryData":
 			{
 				"Tag":
 				{
-					"TagName": "Settings.TextSimple.GameplayTab"
+					"TagName": "Settings.TextLine.GameplayTab"
 				},
 				"StaticContext":
 				{
@@ -224,15 +222,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Center"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -303,43 +300,42 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
 	{
-		"Name": "Settings.TextInput.PlayerName",
+		"Name": "Settings.UserInput.PlayerName",
 		"SettingsPicker":
 		{
-			"SettingsType": "TextInput",
+			"SettingsType": "UserInput",
 			"PrimaryData":
 			{
 				"Tag":
 				{
-					"TagName": "Settings.TextInput.PlayerName"
+					"TagName": "Settings.UserInput.PlayerName"
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetCurrentPlayerState"
 				},
 				"Setter":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
+					"FunctionName": "SetPlayerNameCustom"
 				},
 				"Getter":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
+					"FunctionName": "GetPlayerNameCustom"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"72219A3F4944330938ED3685430DF7A3\", \"Player Name\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"783B361E459F1C17B9852CB11D1D5BDB\", \"Enter your nickname\")",
@@ -382,15 +378,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "Player"
 			}
 		}
 	},
@@ -461,28 +456,27 @@
 			{
 				"ChosenValue": 1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
 	{
-		"Name": "Settings.TextSimple.VideoTab",
+		"Name": "Settings.TextLine.VideoTab",
 		"SettingsPicker":
 		{
-			"SettingsType": "TextSimple",
+			"SettingsType": "TextLine",
 			"PrimaryData":
 			{
 				"Tag":
 				{
-					"TagName": "Settings.TextSimple.VideoTab"
+					"TagName": "Settings.TextLine.VideoTab"
 				},
 				"StaticContext":
 				{
@@ -540,15 +534,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Center"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -619,15 +612,14 @@
 			{
 				"ChosenValue": 0.5
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -698,15 +690,14 @@
 			{
 				"ChosenValue": 0.5
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -777,15 +768,14 @@
 			{
 				"ChosenValue": 0.5
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -864,15 +854,14 @@
 			{
 				"ChosenValue": 0.5
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -943,28 +932,27 @@
 			{
 				"ChosenValue": 0.5
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
 	{
-		"Name": "Settings.TextSimple.GraphicsTab",
+		"Name": "Settings.TextLine.GraphicsTab",
 		"SettingsPicker":
 		{
-			"SettingsType": "TextSimple",
+			"SettingsType": "TextLine",
 			"PrimaryData":
 			{
 				"Tag":
 				{
-					"TagName": "Settings.TextSimple.GraphicsTab"
+					"TagName": "Settings.TextLine.GraphicsTab"
 				},
 				"StaticContext":
 				{
@@ -1022,15 +1010,14 @@
 			{
 				"ChosenValue": 0.5
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Center"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1108,15 +1095,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1193,15 +1179,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1278,15 +1263,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1363,15 +1347,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1448,15 +1431,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1533,15 +1515,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1618,15 +1599,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1703,15 +1683,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	},
@@ -1788,15 +1767,14 @@
 			{
 				"ChosenValue": -1
 			},
-			"TextSimple":
+			"TextLine":
 			{
 				"VerticalAlignment": "Content",
 				"HorizontalAlignment": "HAlign_Fill"
 			},
-			"TextInput":
+			"UserInput":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"UserInput": "None"
 			}
 		}
 	}

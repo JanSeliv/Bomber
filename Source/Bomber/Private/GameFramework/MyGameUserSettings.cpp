@@ -186,6 +186,12 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 		UpdateSupportedResolutions();
 	}
 
+	if (GetLastGPUBenchmarkResult() == INDEX_NONE)
+	{
+		RunHardwareBenchmark();
+		ApplyHardwareBenchmarkResults();
+	}
+
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	// Notify settings for any change in the settings data table
 	if (USingletonLibrary::IsEditorNotPieWorld())

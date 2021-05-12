@@ -54,6 +54,8 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetMembers, const TArray<FText>&, NewMembers);
 
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterName, FName, Param);
+
 	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetterInt);
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(float, FOnGetterFloat);
@@ -63,6 +65,8 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_RetVal(FText, FOnGetterText);
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(TArray<FText>, FOnGetMembers);
+
+	DECLARE_DYNAMIC_DELEGATE_RetVal(FName, FOnGetterName);
 };
 
 /**
@@ -286,7 +290,7 @@ struct FSettingsSlider : public FSettingsDataBase
 USTRUCT(BlueprintType, meta = (
 	SettingsFunctionSetterTemplate="OnSetterText__DelegateSignature",
 	SettingsFunctionGetterTemplate="OnGetterText__DelegateSignature"))
-struct FSettingsTextSimple : public FSettingsDataBase
+struct FSettingsTextLine : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
@@ -308,10 +312,22 @@ struct FSettingsTextSimple : public FSettingsDataBase
 /**
  *
  */
-USTRUCT(BlueprintType)
-struct FSettingsTextInput : public FSettingsTextSimple
+USTRUCT(BlueprintType, meta = (
+	SettingsFunctionSetterTemplate="OnSetterName__DelegateSignature",
+	SettingsFunctionGetterTemplate="OnGetterName__DelegateSignature"))
+struct FSettingsUserInput : public FSettingsDataBase
 {
 	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
+	FName UserInput = NAME_None; //[D]
+
+	/** */
+	USettingTemplate::FOnGetterName OnGetterName;
+
+	/** */
+	USettingTemplate::FOnSetterName OnSetterName;
 };
 
 /**
@@ -354,11 +370,11 @@ struct FSettingsPicker
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsTextSimple TextSimple; //[D]
+	FSettingsTextLine TextLine; //[D]
 
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsTextInput TextInput; //[D]
+	FSettingsUserInput UserInput; //[D]
 
 	/** Returns the pointer to one of the chosen in-game type.
 	 * @see FSettingsPicker::SettingsType */

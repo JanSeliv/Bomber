@@ -114,6 +114,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AMyPlayerState* GetMyPlayerState(const class AController* Controller);
 
+	/** Returns the player state of current controller. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AMyPlayerState* GetCurrentPlayerState();
+
 	/** Returns the Bomber settings. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UMyGameUserSettings* GetMyGameUserSettings();
