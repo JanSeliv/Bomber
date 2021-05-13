@@ -11,12 +11,6 @@
 
 #define TEXT_NONE FCoreTexts::Get().None
 
-/* ╔FSettingsRow
- * ╚════╦FSettingsPicker
- *		╠═══╦FSettingsPrimary
- *		║	╚════FSettingsFunction
- *		╚════FSettingsDataBase */
-
 /**
  *
  */
@@ -27,6 +21,243 @@ enum class EMyVerticalAlignment : uint8
 	Content,
 	Footer
 };
+
+/**
+ *
+ */
+UENUM(BlueprintType)
+enum class ESettingsButtonState : uint8
+{
+	Normal,
+	Hovered,
+	Pressed,
+	Disabled
+};
+
+/**
+ *
+ */
+UENUM(BlueprintType)
+enum class ESettingsCheckboxState : uint8
+{
+	UncheckedNormal,
+	UncheckedHovered,
+	UncheckedPressed,
+	CheckedNormal,
+	CheckedHovered,
+	CheckedPressed,
+	UndeterminedNormal,
+	UndeterminedHovered,
+	UndeterminedPressed
+};
+
+/**
+ *
+ */
+UENUM(BlueprintType)
+enum class ESettingsSliderState : uint8
+{
+	NormalBar,
+	DisabledBar,
+	NormalThumb,
+	DisabledThumb
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FSettingsThemeData
+{
+	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	class UTexture* Texture; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FVector2D Size = FVector2D(64.f, 64.f); //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	TEnumAsByte<enum ESlateBrushDrawType::Type> DrawAs = ESlateBrushDrawType::Box; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FMargin Margin; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FMargin Padding; //[B]
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FButtonThemeData : public FSettingsThemeData
+{
+	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FMargin PressedPadding; //[B]
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FCheckboxThemeData : public FSettingsThemeData
+{
+	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	class UTexture* CheckedTexture; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	class UTexture* UndeterminedTexture; //[B]
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FComboboxThemeData : public FSettingsThemeData
+{
+	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FMargin PressedPadding; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSettingsThemeData Arrow; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSettingsThemeData Border; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor ItemBackgroundColor; //[B]
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FSliderThemeData : public FSettingsThemeData
+{
+	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor BarNormalTint;
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor BarDisabledTint;
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSettingsThemeData Thumb;
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor ThumbNormalTint;
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor ThumbDisabledTint;
+};
+
+/**
+ *
+ */
+USTRUCT(BlueprintType)
+struct FMiscThemeData
+{
+	GENERATED_BODY()
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor ThemeColorNormal; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor ThemeColorHover; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor ThemeColorExtra; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateFontInfo TextAndCaptionFont; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor TextAndCaptionColor; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateFontInfo TextHeaderFont; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor TextHeaderColor; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateFontInfo TextFooterFont; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor TextFooterColor; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateFontInfo TextElementFont; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor TextElementColor; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateFontInfo BottomLineFont; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor BottomLineColor; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSettingsThemeData TooltipBackground; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor TooltipBackgroundTint; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSettingsThemeData WindowBackground; //[B]
+
+	/** */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
+	FSlateColor WindowBackgroundTint; //[B]
+};
+
+/* ╔FSettingsRow
+ * ╚════╦FSettingsPicker
+ *		╠═══╦FSettingsPrimary
+ *		║	╚════FSettingsFunction
+ *		╚════FSettingsDataBase */
 
 /**
 * Delegates wrapper that are used as templates for FSettingsFunction properties.

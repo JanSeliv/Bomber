@@ -58,6 +58,30 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE float GetSpaceBetweenColumns() const { return SpaceBetweenColumnsInternal; }
 
+	/** Return the button theme data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FButtonThemeData GetButtonThemeData() const { return ButtonThemeDataInternal; }
+
+	/** Returns the checkbox theme data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FCheckboxThemeData GetCheckboxThemeData() const { return CheckboxThemeDataInternal; }
+
+	/** Returns the combobox theme data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FComboboxThemeData GetComboboxThemeData() const { return ComboboxThemeDataInternal; }
+
+	/** Returns the slider theme data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FSliderThemeData GetSliderThemeData() const { return SliderThemeDataInternal; }
+
+	/** Returns the user input theme data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FSettingsThemeData GetUserInputThemeData() const { return UserInputThemeDataInternal; }
+
+	/** Returns the misc theme data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE FMiscThemeData GetMiscThemeData() const { return MiscThemeDataInternal; }
+
 protected:
 	/** The data table with all settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table", ShowOnlyInnerProperties))
@@ -82,6 +106,30 @@ protected:
 	/** The padding space, used on adding next column. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Space Between Columns", ShowOnlyInnerProperties))
 	float SpaceBetweenColumnsInternal = 10.f; //[D]
+
+	/** The button theme data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Button Theme Data", ShowOnlyInnerProperties))
+	FButtonThemeData ButtonThemeDataInternal; //[D]
+
+	/** The checkbox theme data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Checkbox Theme Data", ShowOnlyInnerProperties))
+	FCheckboxThemeData CheckboxThemeDataInternal; //[D]
+
+	/** The combobox theme data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Combobox Theme Data", ShowOnlyInnerProperties))
+	FComboboxThemeData ComboboxThemeDataInternal; //[D]
+
+	/** The slider theme data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Slider Theme Data", ShowOnlyInnerProperties))
+	FSliderThemeData SliderThemeDataInternal; //[D]
+
+	/** The user input theme data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "User Input Theme Data", ShowOnlyInnerProperties))
+	FSettingsThemeData UserInputThemeDataInternal; //[D]
+
+	/** The misc theme data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Misc Theme Data", ShowOnlyInnerProperties))
+	FMiscThemeData MiscThemeDataInternal; //[D]
 };
 
 /**
