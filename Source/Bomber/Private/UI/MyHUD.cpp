@@ -14,6 +14,14 @@ const UUIDataAsset& UUIDataAsset::Get()
 	return *UIDataAsset;
 }
 
+// Default constructor
+AMyHUD::AMyHUD()
+{
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+}
+
 // Go back input for UI widgets
 void AMyHUD::GoUIBack()
 {

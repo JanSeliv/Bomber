@@ -79,6 +79,9 @@ public:
 	*		Public functions
 	* --------------------------------------------------- */
 
+	/** Default constructor. */
+	AMyHUD();
+
 	/** Returns the current in-game widget object. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UInGameWidget* GetInGameWidget() const { return InGameWidgetInternal; }
