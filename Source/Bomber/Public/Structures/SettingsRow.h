@@ -251,6 +251,18 @@ struct FMiscThemeData
 	/** */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme")
 	FSlateColor WindowBackgroundTint; //[B]
+
+	/** The menu border data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme | Menu Border")
+	FSettingsThemeData MenuBorderData; //[B]
+
+	/** Color of the border. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme | Menu Border")
+	FSlateColor MenuBorderTint; //[B]
+
+	/** Visibility of the border. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Theme | Menu Border")
+	ESlateVisibility MenuBorderVisibility; //[B]
 };
 
 /* ╔FSettingsRow
