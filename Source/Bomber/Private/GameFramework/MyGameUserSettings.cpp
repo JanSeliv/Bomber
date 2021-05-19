@@ -64,14 +64,29 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		return;
 	}
 
-	TextResolutionsInternal.Empty();
-	IntResolutionsInternal.Empty();
+	FIntPoint MaxDisplayResolution = FIntPoint::ZeroValue;
+	FDisplayMetrics DisplayMetrics;
+	FDisplayMetrics::RebuildDisplayMetrics(DisplayMetrics);
+	for (const FMonitorInfo& MonitorIt : DisplayMetrics.MonitorInfo)
+	{
+		if (MonitorIt.bIsPrimary)
+		{
+			MaxDisplayResolution = FIntPoint(MonitorIt.NativeWidth, MonitorIt.NativeHeight);
+			break;
+		}
+	}
 
-	const FIntPoint PrimaryDisplayNativeResolution = GetDesktopResolution();
-	const int32 MaxDisplayWidth = PrimaryDisplayNativeResolution.X;
-	const int32 MaxDisplayHeight = PrimaryDisplayNativeResolution.Y;
+	if (MaxDisplayResolution == FIntPoint::ZeroValue)
+	{
+		return;
+	}
+
+	const int32 MaxDisplayWidth = MaxDisplayResolution.X;
+	const int32 MaxDisplayHeight = MaxDisplayResolution.Y;
 	const float AspectRatio = FMath::DivideAndRoundDown<float>(MaxDisplayWidth, MaxDisplayHeight);
 
+	TextResolutionsInternal.Empty();
+	IntResolutionsInternal.Empty();
 	const int32 ResolutionsArrayNum = ResolutionsArray.Num();
 	for (int32 Index = ResolutionsArrayNum - 1; Index >= 0; --Index)
 	{
@@ -123,7 +138,8 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 
 	const FIntPoint& NewResolution = IntResolutionsInternal[Index];
 	SetScreenResolution(NewResolution);
-	ApplyResolutionSettings(true);
+	ApplyResolutionSettings(false);
+	ConfirmVideoMode();
 
 	CurrentResolutionIndexInternal = Index;
 }
