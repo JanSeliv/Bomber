@@ -11,7 +11,6 @@
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
-#include "UI/MyHUD.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/MySkeletalMeshComponent.h"
@@ -321,7 +320,6 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	UMySkeletalMeshComponent* MySkeletalMeshComponent = Cast<UMySkeletalMeshComponent>(GetMesh());
 	if (IS_TRANSIENT(this)        // This actor is transient
 	    || !MapComponentInternal) // Is not valid for map construction
 	{
@@ -425,9 +423,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	static const FName SpawnBombName = GET_FUNCTION_NAME_CHECKED(ThisClass, SpawnBomb);
 	SetInput(PlayerInputComponent->BindAction(SpawnBombName, IE_Pressed, this, &ThisClass::SpawnBomb));
-
-	static const FName GoUIBackName = GET_FUNCTION_NAME_CHECKED(AMyHUD, GoUIBack);
-	SetInput(PlayerInputComponent->BindAction(GoUIBackName, IE_Pressed, USingletonLibrary::GetMyHUD(), &AMyHUD::GoUIBack));
 }
 
 // Adds the movement input along the given world direction vector.

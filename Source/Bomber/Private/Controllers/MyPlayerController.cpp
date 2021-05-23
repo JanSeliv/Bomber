@@ -6,6 +6,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
+#include "UI/MyHUD.h"
 
 // Sets default values for this controller's properties
 AMyPlayerController::AMyPlayerController()
@@ -20,17 +21,7 @@ AMyPlayerController::AMyPlayerController()
 	CheatClass = UMyCheatManager::StaticClass();
 }
 
-//
-bool AMyPlayerController::CanHideMouse() const
-{
-	switch (AMyGameStateBase::GetCurrentGameState(this))
-	{
-		case ECurrentGameState::GameStarting: return true;
-		case ECurrentGameState::InGame: return true;
-		default: return false;
-	}
-}
-
+// Set the new game state for the current game
 void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
 {
 	// Listen states to manage the tick
@@ -40,12 +31,21 @@ void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState Ne
 	}
 }
 
-bool AMyPlayerController::ServerSetGameState_Validate(ECurrentGameState NewGameState)
+// Returns true if the mouse cursor can be hidden
+bool AMyPlayerController::CanHideMouse() const
 {
-	return true;
+	switch (AMyGameStateBase::GetCurrentGameState(this))
+	{
+		case ECurrentGameState::GameStarting:
+		case ECurrentGameState::InGame:
+			return true;
+		default:
+			return false;
+	}
 }
 
-void AMyPlayerController::SetMouseCursor(bool bShouldShow)
+// Called to to set mouse cursor visibility
+void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 {
 	if (!bShouldShow
 	    && !CanHideMouse())
@@ -67,12 +67,33 @@ void AMyPlayerController::SetMouseCursor(bool bShouldShow)
 	}
 }
 
+// Go back input for UI widgets
+void AMyPlayerController::GoUIBack()
+{
+	if (AMyHUD* HUD = USingletonLibrary::GetMyHUD())
+	{
+		HUD->GoUIBack();
+	}
+}
+
 //  Allows the PlayerController to set up custom input bindings
 void AMyPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+
+	if (!ensureMsgf(InputComponent, TEXT("ASSERT: 'InputComponent' is not valid")))
+	{
+		return;
+	}
+
+	// Do not consume added input
+	auto SetInput = [](FInputBinding& InputRef) { InputRef.bConsumeInput = false; };
+
+	static const FName GoUIBackName = GET_FUNCTION_NAME_CHECKED(AMyHUD, GoUIBack);
+	SetInput(InputComponent->BindAction(GoUIBackName, IE_Pressed, this, &ThisClass::GoUIBack));
 }
 
+// Called when the game starts or when spawned
 void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -97,17 +118,22 @@ void AMyPlayerController::SetIgnoreMoveInput(bool bShouldIgnore)
 		return;
 	}
 
-	SetMouseCursor(bShouldIgnore);
+	SetMouseVisibility(bShouldIgnore);
 	IgnoreMoveInput = bShouldIgnore;
 }
 
-//
+// Listen to toggle movement input and mouse cursor
 void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
-		case ECurrentGameState::Menu:
 		case ECurrentGameState::GameStarting:
+		{
+			SetIgnoreMoveInput(true);
+			SetMouseVisibility(false);
+			break;
+		}
+		case ECurrentGameState::Menu:
 		case ECurrentGameState::EndGame:
 		{
 			SetIgnoreMoveInput(true);
@@ -118,6 +144,7 @@ void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState Cu
 			SetIgnoreMoveInput(false);
 			break;
 		}
-		default: break;
+		default:
+			break;
 	}
 }

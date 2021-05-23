@@ -13,7 +13,7 @@ void UInGameWidget::ShowEndGameState_Implementation()
 	// Show mouse cursor
 	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController())
 	{
-		MyPlayerController->SetMouseCursor(true);
+		MyPlayerController->SetMouseVisibility(true);
 	}
 
 	// Blueprint implementation
@@ -26,7 +26,7 @@ void UInGameWidget::HideEndGameState_Implementation()
 	// Hide mouse cursor
 	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController())
 	{
-		MyPlayerController->SetMouseCursor(false);
+		MyPlayerController->SetMouseVisibility(false);
 	}
 
 	// Blueprint implementation
