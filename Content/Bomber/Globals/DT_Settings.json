@@ -1048,7 +1048,7 @@
 					"FunctionName": "GetOverallScalabilityLevel"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"68BFE801439719772FD76486D3E798A4\", \"Overall Quality\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"79127FB34294581527852AA62140D5D0\", \"Choose the overall quality level\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1133,7 +1133,7 @@
 					"FunctionName": "GetViewDistanceQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"699CF95A414DA8AA1713E9BF9F6BA783\", \"View DIstance\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A34CB5004C8997BB6F506FAF80960811\", \"Choose the view distance quality level\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1217,7 +1217,7 @@
 					"FunctionName": "GetAntiAliasingQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DDF59A1A4BB68C53D342728755A2A58A\", \"Anti Aliasing\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2B03576A4D346F393E36D9A529870F8A\", \"Choose the anti-aliasing quality level\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1301,7 +1301,7 @@
 					"FunctionName": "GetPostProcessingQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"6F3AD8DB4877DFED740EB1A0125861D8\", \"Post Processing\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"4736FB8E43D773F82FEC60B747C63992\", \"Choose the post processing quality level\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1385,7 +1385,7 @@
 					"FunctionName": "GetShadowQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"BCC93E33454A91A7FB03E99E98797742\", \"Shadows\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"BF9FEC98499F9B31F2654C82EB9D4ED2\", \"Choose the shadows quality level\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1469,7 +1469,7 @@
 					"FunctionName": "GetTextureQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"62FA1061465C1CABE5CD8F9179769BF6\", \"Textures\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"E8FBABC740BBA8BF5CCFA9A722533149\", \"Choose the textures quality level\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1553,7 +1553,7 @@
 					"FunctionName": "GetVisualEffectQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"1AADA6C649D8855063941FB69944F2DE\", \"Effects\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"F05BC92B420F315ED0239593944AF46C\", \"Choose the effects quality level\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1637,7 +1637,7 @@
 					"FunctionName": "GetFoliageQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"84D4B56F43A50156C0222BBC06F0E75F\", \"Foliage\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"68B39A3E4E624487A224E7A106C35CA3\", \"Choose the foliage quality level\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1721,7 +1721,7 @@
 					"FunctionName": "GetShadingQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"58AA052E4251940966BA49835B41FA29\", \"Shading\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the quality level\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA1440394DC66790A9875084575F9A85\", \"Choose the shading quality level\")",
 				"Padding":
 				{
 					"Left": 0,
