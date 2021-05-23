@@ -7,9 +7,11 @@
 #include "Engine/DataTable.h"
 #include "UI/SettingsWidget.h"
 
-#if WITH_EDITOR //[include]
+#if WITH_EDITOR //[OnDataTableChanged]
 #include "DataTableEditorUtils.h"
-#endif // WITH_EDITOR
+#include "EditorFramework/AssetImportData.h"
+#include "Misc/FileHelper.h"
+#endif // WITH_EDITOR [OnDataTableChanged]
 
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()
@@ -252,6 +254,17 @@ void UMyGameUserSettings::OnDataTableChanged()
 		    && !SettingsArray.Contains(RowValueTag)) // Unique tag
 		{
 			FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
+		}
+	}
+
+	// Export to json
+	if (const UAssetImportData* AssetImportData = SettingsDataTable->AssetImportData)
+	{
+		const FString CurrentFilename = AssetImportData->GetFirstFilename();
+		if (!CurrentFilename.IsEmpty())
+		{
+			const FString TableAsJSON = SettingsDataTable->GetTableAsJSON(EDataTableExportFlags::UseJsonObjectsForStructs);
+			FFileHelper::SaveStringToFile(TableAsJSON, *CurrentFilename);
 		}
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
