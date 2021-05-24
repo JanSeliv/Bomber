@@ -435,8 +435,6 @@ void USettingsWidget::NativeConstruct()
 	SettingsTableRowsInternal.GenerateValueArray(Rows);
 	OverallColumnsNumInternal += Rows.FilterByPredicate([](const FSettingsPicker& Row) { return Row.PrimaryData.bStartOnNextColumn; }).Num();
 
-	OnVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnVisibilityChange);
-
 	// Hide that widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
@@ -457,13 +455,6 @@ void USettingsWidget::ConstructSettings_Implementation()
 	{
 		AddSetting(RowIt.Value);
 	}
-}
-
-// Called when the visibility has changed
-void USettingsWidget::OnVisibilityChange_Implementation(ESlateVisibility InVisibility)
-{
-	// BP Implementation
-	//...
 }
 
 // Bind and set static object delegate

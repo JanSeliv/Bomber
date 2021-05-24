@@ -44,7 +44,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -58,13 +57,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -73,7 +70,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -122,7 +118,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -136,13 +131,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": 0.5
 			},
 			"TextLine":
 			{
@@ -151,7 +144,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -200,7 +192,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -214,13 +205,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -229,7 +218,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -278,7 +266,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -292,13 +279,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -307,7 +292,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -356,7 +340,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -370,13 +353,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -385,7 +366,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "Player"
 			}
 		}
 	},
@@ -434,7 +414,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -448,13 +427,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": 1
 			},
 			"TextLine":
 			{
@@ -463,7 +440,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -512,7 +488,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -526,13 +501,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -541,7 +514,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -590,7 +562,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -604,13 +575,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": 0.5
 			},
 			"TextLine":
 			{
@@ -619,7 +588,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -668,7 +636,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -682,13 +649,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": 0.5
 			},
 			"TextLine":
 			{
@@ -697,7 +662,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -746,13 +710,12 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
 				"SetMembers":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
 				"GetMembers":
@@ -760,13 +723,11 @@
 					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
 					"FunctionName": "GetTextResolutions"
 				},
-				"ChosenMemberIndex": 0,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": 0.5
 			},
 			"TextLine":
 			{
@@ -775,7 +736,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -824,7 +784,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -838,7 +797,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 0,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"33666EB14000EF87C208479B3BF10FA6\", \"Uncapped\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"60B56F8742106CD4CC21CD881FFBF8F7\", \"144 FPS\")",
@@ -852,7 +810,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": 0.5
 			},
 			"TextLine":
 			{
@@ -861,7 +818,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -910,7 +866,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -924,13 +879,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": 0.5
 			},
 			"TextLine":
 			{
@@ -939,7 +892,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -988,7 +940,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1002,13 +953,11 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": -1,
 				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":
 			{
-				"ChosenValue": 0.5
 			},
 			"TextLine":
 			{
@@ -1017,7 +966,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1066,7 +1014,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1080,7 +1027,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"97E4AFD848589AB32794FB84CAC10865\", \"Custom\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
@@ -1093,7 +1039,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1102,7 +1047,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1151,7 +1095,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1165,7 +1108,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
@@ -1177,7 +1119,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1186,7 +1127,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1235,7 +1175,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1249,7 +1188,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
@@ -1261,7 +1199,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1270,7 +1207,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1319,7 +1255,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1333,7 +1268,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
@@ -1345,7 +1279,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1354,7 +1287,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1403,7 +1335,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1417,7 +1348,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
@@ -1429,7 +1359,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1438,7 +1367,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1487,7 +1415,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1501,7 +1428,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
@@ -1513,7 +1439,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1522,7 +1447,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1571,7 +1495,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1585,7 +1508,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
@@ -1597,7 +1519,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1606,7 +1527,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1655,7 +1575,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1669,7 +1588,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
@@ -1681,7 +1599,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1690,7 +1607,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	},
@@ -1739,7 +1655,6 @@
 			},
 			"Checkbox":
 			{
-				"bIsSet": false
 			},
 			"Combobox":
 			{
@@ -1753,7 +1668,6 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"ChosenMemberIndex": 2,
 				"Members": [
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2345CCFC40D9017EAB6DBA884B6876CF\", \"Low\")",
 					"NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"DE09CE844A3690873612C7AB39D9A8A9\", \"Medium\")",
@@ -1765,7 +1679,6 @@
 			},
 			"Slider":
 			{
-				"ChosenValue": -1
 			},
 			"TextLine":
 			{
@@ -1774,7 +1687,6 @@
 			},
 			"UserInput":
 			{
-				"UserInput": "None"
 			}
 		}
 	}

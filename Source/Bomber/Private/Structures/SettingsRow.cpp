@@ -8,19 +8,19 @@ const FSettingsFunction FSettingsFunction::Empty = FSettingsFunction();
 // Empty settings row
 const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
 
-//
+// Custom constructor to set all members values
 FSettingsFunction::FSettingsFunction(TSubclassOf<UObject> InFunctionClass, FName InFunctionName)
 	: FunctionClass(InFunctionClass)
 	, FunctionName(InFunctionName) {}
 
-//
+// Compares for equality
 bool FSettingsFunction::operator==(const FSettingsFunction& Other) const
 {
 	return Other.FunctionClass->IsChildOf(this->FunctionClass)
 	       && Other.FunctionName == this->FunctionName;
 }
 
-//
+// Creates a hash value
 uint32 GetTypeHash(const FSettingsFunction& Other)
 {
 	const uint32 FunctionClassHash = GetTypeHash(Other.FunctionClass);
@@ -28,13 +28,13 @@ uint32 GetTypeHash(const FSettingsFunction& Other)
 	return HashCombine(FunctionClassHash, FunctionNameHash);
 }
 
-//
+// Compares for equality
 bool FSettingsPrimary::operator==(const FSettingsPrimary& Other) const
 {
 	return GetTypeHash(*this) == GetTypeHash(Other);
 }
 
-//
+// Creates a hash value
 uint32 GetTypeHash(const FSettingsPrimary& Other)
 {
 	const uint32 TagHash = GetTypeHash(Other.Tag);
@@ -51,7 +51,7 @@ uint32 GetTypeHash(const FSettingsPrimary& Other)
 		TagHash, ObjectContextHash), SetterHash), GetterHash), CaptionHash), TooltipHash), PaddingLeftHash), PaddingTopHash), PaddingRightHash), PaddingBottomHash);
 }
 
-//
+// Returns the pointer to one of the chosen in-game type
 const FSettingsDataBase* FSettingsPicker::GetChosenSettingsData() const
 {
 	const FSettingsDataBase* FoundSetting = nullptr;
@@ -65,14 +65,14 @@ const FSettingsDataBase* FSettingsPicker::GetChosenSettingsData() const
 	return FoundSetting;
 }
 
-//
+// Compares for equality
 bool FSettingsPicker::operator==(const FSettingsPicker& Other) const
 {
 	return GetChosenSettingsData() == Other.GetChosenSettingsData()
 	       && GetTypeHash(*this) == GetTypeHash(Other);
 }
 
-//
+// Creates a hash value
 uint32 GetTypeHash(const FSettingsPicker& Other)
 {
 	return GetTypeHash(Other.PrimaryData);
