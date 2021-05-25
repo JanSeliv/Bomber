@@ -11,7 +11,7 @@
  * The player controller class
  */
 UCLASS()
-class BOMBER_API AMyPlayerController final : public APlayerController
+class AMyPlayerController final : public APlayerController
 {
 	GENERATED_BODY()
 

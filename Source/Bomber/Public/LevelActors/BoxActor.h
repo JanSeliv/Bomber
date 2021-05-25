@@ -37,7 +37,7 @@ protected:
  * Boxes on destruction with some chances spawns an item.
  */
 UCLASS()
-class BOMBER_API ABoxActor final : public AActor
+class ABoxActor final : public AActor
 {
 	GENERATED_BODY()
 

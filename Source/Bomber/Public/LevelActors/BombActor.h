@@ -44,7 +44,7 @@ protected:
 
 /** Bombs are left by the character to destroy the level actors, trigger other bombs */
 UCLASS()
-class BOMBER_API ABombActor final : public AActor
+class ABombActor final : public AActor
 {
 	GENERATED_BODY()
 

@@ -19,7 +19,7 @@ struct FCell
 	static const FCell ZeroCell;
 
 	/** The length of the one cell */
-	static const float CellSize;
+	static constexpr float CellSize = 200.f;
 
 	/** Always holds the free cell's FVector-coordinate.
 	 * If it is not empty or not found, holds the last succeeded due to copy operator. */

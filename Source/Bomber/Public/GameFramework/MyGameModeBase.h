@@ -10,7 +10,7 @@
  * The custom game mode class
  */
 UCLASS()
-class BOMBER_API AMyGameModeBase final : public AGameModeBase
+class AMyGameModeBase final : public AGameModeBase
 {
 	GENERATED_BODY()
 

@@ -26,6 +26,19 @@ const UItemDataAsset& UItemDataAsset::Get()
 	return *ItemDataAsset;
 }
 
+// Return row by specified item type
+UItemRow* UItemDataAsset::GetRowByItemType(EItemType ItemType, ELevelType LevelType) const
+{
+	TArray<ULevelActorRow*> OutRows;
+	UItemDataAsset::Get().GetRowsByLevelType(OutRows, TO_FLAG(LevelType));
+	ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType](const ULevelActorRow* RowIt)
+	{
+		const auto ItemRow = Cast<UItemRow>(RowIt);
+		return ItemRow && ItemRow->ItemType == ItemType;
+	});
+	return FoundRowPtr ? Cast<UItemRow>(*FoundRowPtr) : nullptr;
+}
+
 // Sets default values
 AItemActor::AItemActor()
 {
@@ -57,23 +70,16 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	// Rand the item type if not set yet
 	if (ItemTypeInternal == EItemType::None)
 	{
-		if (const static UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, TEXT("EItemType"), true))
+		if (static const UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, TEXT("EItemType"), true))
 		{
 			ItemTypeInternal = TO_ENUM(EItemType, Enum->GetValueByIndex(FMath::RandRange(1, TO_FLAG(Enum->GetMaxEnumValue() - 1))));
 		}
 	}
 
 	// Override mesh
-	TArray<ULevelActorRow*> OutRows;
-	UItemDataAsset::Get().GetRowsByLevelType(OutRows, TO_FLAG(USingletonLibrary::GetLevelType()));
-	const ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType = ItemTypeInternal](const ULevelActorRow* RowIt)
+	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, USingletonLibrary::GetLevelType()))
 	{
-		const auto ItemRow = Cast<UItemRow>(RowIt);
-		return ItemRow && ItemRow->ItemType == ItemType;
-	});
-	if (FoundRowPtr)
-	{
-		MapComponentInternal->SetMeshByRow(*FoundRowPtr);
+		MapComponentInternal->SetMeshByRow(FoundItemRow);
 	}
 }
 

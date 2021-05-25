@@ -18,8 +18,10 @@ UMyCameraComponent::UMyCameraComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	// Set transform defaults
-	SetRelativeLocation(FVector(0.F, 0.F, 1000.F));
-	SetRelativeRotation(FRotator(-90.0F, 0.0F, -90.0F));
+	static const FVector DefaultRelativeLocation(0.F, 0.F, 1000.F);
+	SetRelativeLocation_Direct(DefaultRelativeLocation);
+	static const FRotator DefaultRelativeRotation(-90.0F, 0.0F, -90.0F);
+	SetRelativeRotation_Direct(DefaultRelativeRotation);
 	SetUsingAbsoluteScale(true);
 
 	// Camera defaults
@@ -40,7 +42,7 @@ void UMyCameraComponent::UpdateMaxHeight()
 {
 	if (const AGeneratedMap* LevelMap = Cast<AGeneratedMap>(GetOwner()))
 	{
-		const float Multiplier = 1.5f;
+		static constexpr float Multiplier = 1.5f;
 		MaxHeightInternal = FCell::CellSize * LevelMap->GetActorScale3D().GetMax() * Multiplier;
 	}
 }

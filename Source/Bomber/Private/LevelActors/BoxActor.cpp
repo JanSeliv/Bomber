@@ -93,7 +93,7 @@ void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 	}
 
 	// Spawn item with the chance
-	const int32 Max = 100;
+	static constexpr int32 Max = 100;
 	if (FMath::RandHelper(Max) < SpawnItemChanceInternal)
 	{
 		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");

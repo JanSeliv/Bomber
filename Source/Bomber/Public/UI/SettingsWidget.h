@@ -13,7 +13,7 @@
  * Describes common data of settings.
  */
 UCLASS()
-class BOMBER_API USettingsDataAsset final : public UBomberDataAsset
+class USettingsDataAsset final : public UBomberDataAsset
 {
 	GENERATED_BODY()
 

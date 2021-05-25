@@ -159,14 +159,19 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	// Initialize skeletal mesh
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
 	{
-		SkeletalMeshComponent->SetRelativeLocationAndRotation(FVector(0, 0, -90.f), FRotator(0, -90.f, 0));
+		static const FVector MeshRelativeLocation(0, 0, -90.f);
+		SkeletalMeshComponent->SetRelativeLocation_Direct(MeshRelativeLocation);
+		static const FRotator MeshRelativeRotation(0, -90.f, 0);
+		SkeletalMeshComponent->SetRelativeRotation_Direct(MeshRelativeRotation);
 	}
 
 	// Initialize the nameplate mesh component
 	NameplateMeshInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
 	NameplateMeshInternal->SetupAttachment(RootComponent);
-	NameplateMeshInternal->SetRelativeLocation(FVector(-60.f, 0.f, 150.f));
-	NameplateMeshInternal->SetRelativeScale3D(FVector(1.75f, 1.f, 1.f));
+	static const FVector NameplateRelativeLocation(-60.f, 0.f, 150.f);
+	NameplateMeshInternal->SetRelativeLocation_Direct(NameplateRelativeLocation);
+	static const FVector NameplateRelativeScale(1.75f, 1.f, 1.f);
+	NameplateMeshInternal->SetRelativeScale3D_Direct(NameplateRelativeScale);
 
 	// Disable gravity
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
@@ -459,27 +464,39 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 		return;
 	}
 
+	const UItemDataAsset& ItemDataAsset = UItemDataAsset::Get();
+
+	const int32 MaxAllowedItemsNum = ItemDataAsset.GetMaxAllowedItemsNum();
+	auto IncrementIfAllowed = [MaxAllowedItemsNum](int32& NumRef)
+	{
+		if (NumRef < MaxAllowedItemsNum)
+		{
+			++NumRef;
+		}
+	};
+
 	switch (ItemType)
 	{
 		case EItemType::Skate:
 		{
-			const int32 SkateN = ++PowerupsInternal.SkateN * 100.F + 500.F;
-			UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-			if (MovementComponent    //  is accessible
-			    && SkateN <= 1000.F) // is lower than the max speed value (5x skate items)
+			IncrementIfAllowed(PowerupsInternal.SkateN);
+			if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 			{
+				static constexpr float SpeedMultiplier = 100.F;
+				const float SkateAdditiveStrength = ItemDataAsset.GetSkateAdditiveStrength();
+				const int32 SkateN = PowerupsInternal.SkateN * SpeedMultiplier + SkateAdditiveStrength;
 				MovementComponent->MaxWalkSpeed = SkateN;
 			}
 			break;
 		}
 		case EItemType::Bomb:
 		{
-			PowerupsInternal.BombN++;
+			IncrementIfAllowed(PowerupsInternal.BombN);
 			break;
 		}
 		case EItemType::Fire:
 		{
-			PowerupsInternal.FireN++;
+			IncrementIfAllowed(PowerupsInternal.FireN);
 			break;
 		}
 		default:

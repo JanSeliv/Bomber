@@ -53,7 +53,7 @@ struct FMorphData
  * Play the chosen morph for picked frames.
  */
 UCLASS(Blueprintable, meta = (DisplayName = "Play Morph"))
-class BOMBER_API UAnimNotifyState_PlayMorph final : public UAnimNotifyState
+class UAnimNotifyState_PlayMorph final : public UAnimNotifyState
 {
 	GENERATED_BODY()
 

@@ -36,7 +36,7 @@ struct FCustomPlayerMeshData
  * but in different UI actors and widgets to visualize the player's mannequin.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BOMBER_API UMySkeletalMeshComponent final : public USkeletalMeshComponent
+class UMySkeletalMeshComponent final : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
 

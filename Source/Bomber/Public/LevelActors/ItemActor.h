@@ -36,14 +36,37 @@ public:
 	UItemDataAsset();
 
 	/** Returns the item data asset. */
-    static const UItemDataAsset& Get();
+	static const UItemDataAsset& Get();
+
+	/** Returns speed value that is added to the player speed on taking a skate item.
+	  * @see UItemDataAsset::SkateStrengthInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE float GetSkateAdditiveStrength() const { return SkateAdditiveStrengthInternal; }
+
+	/** Return row by specified item type. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UItemRow* GetRowByItemType(EItemType ItemType, ELevelType LevelType) const;
+
+	/** Returns max possible items to be picked up by player.
+	  * @see UItemDataAsset::MaxAllowedItemNumInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetMaxAllowedItemsNum() const { return MaxAllowedItemsNumInternal; }
+
+protected:
+	/** The speed additive value when player takes the skate item. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skate Additive Strength", ShowOnlyInnerProperties))
+	float SkateAdditiveStrengthInternal = 500.f; //[D]
+
+	/** Max possible items to be picked up by player. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Max Allowed Items Num", ShowOnlyInnerProperties))
+	int32 MaxAllowedItemsNumInternal = 5; //[D]
 };
 
 /**
  * Affects the abilities of a player during gameplay
  */
 UCLASS()
-class BOMBER_API AItemActor final : public AActor
+class AItemActor final : public AActor
 {
 	GENERATED_BODY()
 

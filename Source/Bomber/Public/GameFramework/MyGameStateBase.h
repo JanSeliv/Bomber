@@ -11,7 +11,7 @@
  *
  */
 UCLASS()
-class BOMBER_API AMyGameStateBase final : public AGameStateBase
+class AMyGameStateBase final : public AGameStateBase
 {
 	GENERATED_BODY()
 
@@ -40,7 +40,7 @@ public:
 	AMyGameStateBase();
 
 	/** Set the new game state for the current game. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "C++", meta = (DisplayName = "Set Game State"))
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
 	void ServerSetGameState(ECurrentGameState NewGameState);
 
 	/** Returns the AMyGameStateBase::CurrentGameState property. */
@@ -100,6 +100,6 @@ protected:
 	void ServerOnGameStarting();
 
 	/** Decrement the countdown timer of the current game. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, WithValidation, Category = "C++", meta = (DisplayName = "Start In-Game Countdown"))
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Start In-Game Countdown"))
 	void ServerStartInGameCountdown();
 };

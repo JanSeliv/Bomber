@@ -37,11 +37,6 @@ void AMyGameStateBase::ServerSetGameState_Implementation(ECurrentGameState NewGa
 	OnRep_CurrentGameState();
 }
 
-bool AMyGameStateBase::ServerSetGameState_Validate(ECurrentGameState NewGameState)
-{
-	return true;
-}
-
 /* ---------------------------------------------------
  *		Protected
  * --------------------------------------------------- */
@@ -67,19 +62,22 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 {
 	switch (CurrentGameStateInternal)
 	{
-		case ECurrentGameState::Menu: break;
+		case ECurrentGameState::Menu:
+			break;
 		case ECurrentGameState::GameStarting:
 		{
 			ServerOnGameStarting();
 			break;
 		}
-		case ECurrentGameState::EndGame: break;
+		case ECurrentGameState::EndGame:
+			break;
 		case ECurrentGameState::InGame:
 		{
 			ServerStartInGameCountdown();
 			break;
 		}
-		default: break;
+		default:
+			break;
 	}
 
 	// Notify listeners
@@ -140,9 +138,4 @@ void AMyGameStateBase::ServerStartInGameCountdown_Implementation()
 			MyGameStateBase->ServerSetGameState(ECurrentGameState::EndGame);
 		}
 	}, InGameCountdownInternal, false);
-}
-
-bool AMyGameStateBase::ServerStartInGameCountdown_Validate()
-{
-	return true;
 }

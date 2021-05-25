@@ -12,7 +12,7 @@
  * Characters controlled by bots
  */
 UCLASS()
-class BOMBER_API AMyAIController final : public AAIController
+class AMyAIController final : public AAIController
 {
 	GENERATED_BODY()
 

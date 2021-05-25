@@ -107,7 +107,7 @@ protected:
  * @see USingletonLibrary::LevelMap_ reference to this Level Map.
  */
 UCLASS()
-class BOMBER_API AGeneratedMap final : public AActor
+class AGeneratedMap final : public AActor
 {
 	GENERATED_BODY()
 

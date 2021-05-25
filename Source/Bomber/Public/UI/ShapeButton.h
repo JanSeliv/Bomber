@@ -43,7 +43,7 @@ protected:
  * To define a shape, use a texture with an alpha channel
  */
 UCLASS()
-class BOMBER_API UShapeButton final : public UButton
+class UShapeButton final : public UButton
 {
 	GENERATED_BODY()
 

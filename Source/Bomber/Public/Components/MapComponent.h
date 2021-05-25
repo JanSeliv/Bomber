@@ -18,7 +18,7 @@ typedef TSet<class UMapComponent*> FMapComponents;
  * Same calls and initializations for each of the level map actors
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BOMBER_API UMapComponent final : public UActorComponent
+class UMapComponent final : public UActorComponent
 {
 	GENERATED_BODY()
 

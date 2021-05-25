@@ -9,9 +9,6 @@
 // The zero cell
 const FCell FCell::ZeroCell = FCell();
 
-// The length of the one cell
-const float FCell::CellSize = 200.0F;
-
 // Initial constructor for cells filling into the array. Round another FVector into this cell.
 FCell::FCell(FVector Vector)
 {

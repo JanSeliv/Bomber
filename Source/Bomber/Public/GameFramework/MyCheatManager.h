@@ -11,7 +11,7 @@
  *
  */
 UCLASS()
-class BOMBER_API UMyCheatManager : public UCheatManager
+class UMyCheatManager : public UCheatManager
 {
 	GENERATED_BODY()
 

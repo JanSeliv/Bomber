@@ -29,7 +29,7 @@ public:
  * Walls are not destroyed by a bomb explosion and stop the explosion.
  */
 UCLASS()
-class BOMBER_API AWallActor final : public AActor
+class AWallActor final : public AActor
 {
 	GENERATED_BODY()
 

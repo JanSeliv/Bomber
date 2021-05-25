@@ -49,7 +49,8 @@ AGeneratedMap::AGeneratedMap()
 
 	// Initialize the Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	RootComponent->SetRelativeScale3D(FVector(9.F, 9.F, 1.F));
+	static const FVector DefaultRelativeScale(9.F, 9.F, 1.F);
+	RootComponent->SetRelativeScale3D_Direct(DefaultRelativeScale);
 
 	// Find blueprint class of the background
 	CollisionComponentInternal = CreateDefaultSubobject<UChildActorComponent>(TEXT("Collision Component"));
