@@ -136,7 +136,11 @@ public:
 
 	/** Returns controlled player character. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class APlayerCharacter* GetPlayerCharacter();
+	static class APlayerCharacter* GetControllablePlayer();
+
+	/** Returns true if specified actor is a controllable player. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static bool IsControllablePlayer(const class AActor* Player);
 
 	/* ---------------------------------------------------
 	 *		Structs functions

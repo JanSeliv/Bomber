@@ -147,9 +147,10 @@ public:
 
 	/** Returns the found row by specified tag.
 	* @param TagName The key by which the row will be find.
+	* @param bSubStringSearch true to return row by substring (for 'VSync' will find a row with 'Settings.Checkbox.VSync' tag).
 	* @see UMyGameUserSettings::SettingsTableRowsInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FSettingsPicker FindSettingRow(FName TagName) const;
+	FSettingsPicker FindSettingRow(FName TagName, bool bSubStringSearch = false) const;
 
 	/** Save all settings into their configs. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -167,9 +168,16 @@ public:
 	 *		Setters by setting types
 	 * --------------------------------------------------- */
 
-	/** Set value to the option by tag. */
+	/**
+   	  * Set value to the option by tag.
+   	  * Common function to set setting of an any type by the string.
+   	  * Used by cheat manager to override any setting.
+	  *	@param TagName The key by which the row will be find.
+	  * @param Value The value in a string format.
+	  * @param bSubStringSearch True to set row by substring (for 'VSync' will find a row with 'Settings.Checkbox.VSync' tag).
+	  */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetSettingValue(FName TagName, const FString& Value);
+	void SetSettingValue(FName TagName, const FString& Value, bool bSubStringSearch = false);
 
 	/** Press button. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")

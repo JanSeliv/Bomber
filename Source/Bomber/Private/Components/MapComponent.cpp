@@ -19,7 +19,7 @@ UMapComponent::UMapComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	// Initialize the Box Collision component
-	BoxCollision = CreateDefaultSubobject<UBoxComponent>("BoxCollisionComponent");
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
 }
 
 // Updates a owner's state. Should be called in the owner's OnConstruction event.
@@ -111,6 +111,12 @@ void UMapComponent::RerunOwnerConstruction() const
 EActorType UMapComponent::GetActorType() const
 {
 	return ActorDataAssetInternal ? ActorDataAssetInternal->GetActorType() : EAT::None;
+}
+
+// Set true to make an owner to be undestroyable on this level
+void UMapComponent::SetUndestroyable(bool bIsUndestroyable)
+{
+	bIsUndestroyableInternal = bIsUndestroyable;
 }
 
 //  Called when a component is registered (not loaded

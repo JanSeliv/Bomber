@@ -263,10 +263,16 @@ AMyHUD* USingletonLibrary::GetMyHUD()
 	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
 }
 
-// Returns controlled player character.
-APlayerCharacter* USingletonLibrary::GetPlayerCharacter()
+// Returns controlled player character
+APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 {
 	return Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(Get().GetWorld(), 0));
+}
+
+// Returns true if specified actor is a controllable player
+bool USingletonLibrary::IsControllablePlayer(const AActor* Player)
+{
+	return Player && Player == GetControllablePlayer();
 }
 
 /* ---------------------------------------------------

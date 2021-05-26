@@ -53,16 +53,38 @@ void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& Event
 }
 
 // Returns the found row by specified tag
-FSettingsPicker USettingsWidget::FindSettingRow(FName TagName) const
+FSettingsPicker USettingsWidget::FindSettingRow(FName TagName, bool bSubStringSearch/* = false*/) const
 {
 	FSettingsPicker FoundRow = FSettingsPicker::Empty;
-	if (!TagName.IsNone())
+	if (TagName.IsNone())
 	{
-		if (const FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
-		{
-			FoundRow = *SettingsRowPtr;
-		}
+		return FoundRow;
 	}
+
+	const FSettingsPicker* SettingsRowPtr = nullptr;
+
+	if (bSubStringSearch)
+	{
+		// Find row by specified substring
+		const FString TagSubString(TagName.ToString());
+		TArray<FSettingsPicker> Rows;
+		SettingsTableRowsInternal.GenerateValueArray(Rows);
+		SettingsRowPtr = Rows.FindByPredicate([TagSubString](const FSettingsPicker& RowIt)
+		{
+			const FString TagStringIt(RowIt.PrimaryData.Tag.ToString());
+			return TagStringIt.Contains(TagSubString);
+		});
+	}
+	else
+	{
+		SettingsRowPtr = SettingsTableRowsInternal.Find(TagName);
+	}
+
+	if (SettingsRowPtr)
+	{
+		FoundRow = *SettingsRowPtr;
+	}
+
 	return FoundRow;
 }
 
@@ -129,9 +151,9 @@ FName USettingsWidget::GetTagNameByFunction(const FSettingsFunction& Function) c
 }
 
 // Set value to the option by tag
-void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
+void USettingsWidget::SetSettingValue(FName TagName, const FString& Value, bool bSubStringSearch/* = false*/)
 {
-	const FSettingsPicker FoundRow = FindSettingRow(TagName);
+	const FSettingsPicker FoundRow = FindSettingRow(TagName, bSubStringSearch);
 	if (!FoundRow.IsValid())
 	{
 		return;
@@ -141,6 +163,11 @@ void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 	if (!ChosenData)
 	{
 		return;
+	}
+
+	if (bSubStringSearch)
+	{
+		TagName = FoundRow.PrimaryData.Tag.GetTagName();
 	}
 
 	if (ChosenData == &FoundRow.Button)

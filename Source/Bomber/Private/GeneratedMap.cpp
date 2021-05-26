@@ -124,7 +124,7 @@ void AGeneratedMap::GetSidesCells(
 		GetMapComponents(BombsMapComponents, TO_FLAG(EAT::Bomb));
 		if (BombsMapComponents.Num() > 0)
 		{
-			for (const auto& MapComponentIt : BombsMapComponents)
+			for (const UMapComponent* const& MapComponentIt : BombsMapComponents)
 			{
 				const auto BombOwner = MapComponentIt ? Cast<ABombActor>(MapComponentIt->GetOwner()) : nullptr;
 				if (IS_VALID(BombOwner)) // is valid and is not transient
@@ -267,7 +267,7 @@ void AGeneratedMap::IntersectCellsByTypes(
 	}
 
 	FCells BitmaskedCells;
-	for (const auto& MapCompIt : BitmaskedComponents)
+	for (const UMapComponent* const& MapCompIt : BitmaskedComponents)
 	{
 		if (MapCompIt
 		    && MapCompIt != ExceptedComponent)
@@ -310,6 +310,13 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 		if (!OwnerIt                                                   // if is null, destroy that object from the array
 		    || MapComponentIt && Cells.Contains(MapComponentIt->Cell)) // the cell is contained on the grid
 		{
+			// Do not destroy actor during the game session if required
+			if (MapComponentIt && MapComponentIt->IsUndestroyable()
+			    && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+			{
+				continue;
+			}
+
 			// Remove from the array
 			// First removing, because after the box destroying the item can be spawned and starts searching for an empty cell
 			// MapComponentIt can be invalid here
@@ -404,7 +411,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 	// ----- Part 1:  Cells iteration
 
 	int32 Counter = -1;
-	for (const auto& CellIt : CellsToIterate)
+	for (const FCell& CellIt : CellsToIterate)
 	{
 		Counter++;
 		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter) + ":" + CellIt.Location.ToString());

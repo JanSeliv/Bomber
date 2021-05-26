@@ -76,6 +76,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAssetInternal; }
 
+	/** Returns true if an owner is set by cheat manager or skills to be undestroyable in game. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsUndestroyable() const { return bIsUndestroyableInternal; }
+
+	/** Set true to make an owner to be undestroyable on this level. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetUndestroyable(bool bIsUndestroyable);
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -88,6 +96,10 @@ protected:
 	/** */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
 	class UMeshComponent* MeshComponentInternal; //[C.DO]
+
+	/** If true the owner is undestroyable, is used by skills and cheat manager. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
+	bool bIsUndestroyableInternal; //[G]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

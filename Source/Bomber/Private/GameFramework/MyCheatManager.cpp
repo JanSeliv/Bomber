@@ -7,6 +7,7 @@
 #include "Controllers/MyAIController.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BoxActor.h"
+#include "LevelActors/ItemActor.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
@@ -37,14 +38,8 @@ int32 UMyCheatManager::GetBitmask(const FString& String) const
 // Enable or disable all bots
 void UMyCheatManager::SetAI(bool bShouldEnable) const
 {
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap)
-	{
-		return;
-	}
-
-	TSet<UMapComponent*> PlayerComponents;
-	LevelMap->GetMapComponents(PlayerComponents, TO_FLAG(EActorType::Player));
+	FMapComponents PlayerComponents;
+	AGeneratedMap::Get().GetMapComponents(PlayerComponents, TO_FLAG(EActorType::Player));
 	for (const UActorComponent* MapComponentIt : PlayerComponents)
 	{
 		const APawn* Pawn = MapComponentIt ? Cast<APawn>(MapComponentIt->GetOwner()) : nullptr;
@@ -59,29 +54,15 @@ void UMyCheatManager::SetAI(bool bShouldEnable) const
 // Destroy all specified level actors on the map
 void UMyCheatManager::DestroyAllByType(EActorType ActorType) const
 {
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap)
-	{
-		return;
-	}
-
 	FCells Cells;
-	LevelMap->IntersectCellsByTypes(Cells, TO_FLAG(ActorType), true);
-	LevelMap->DestroyActorsFromMap(Cells);
+	AGeneratedMap& LevelMap = AGeneratedMap::Get();
+	LevelMap.IntersectCellsByTypes(Cells, TO_FLAG(ActorType), true);
+	LevelMap.DestroyActorsFromMap(Cells);
 }
 
 // Destroy characters in specified slots
 void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 {
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap)
-	{
-		return;
-	}
-
-	// Display debug information
-	DisplayDebug();
-
 	// Set bitmask
 	const int32 Bitmask = GetBitmask(Slot);
 	if (!Bitmask)
@@ -89,10 +70,12 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 		return;
 	}
 
+	AGeneratedMap& LevelMap = AGeneratedMap::Get();
+
 	// Get all players
 	FCells CellsToDestroy;
-	TSet<UMapComponent*> MapComponents;
-	LevelMap->GetMapComponents(MapComponents, TO_FLAG(EActorType::Player));
+	FMapComponents MapComponents;
+	LevelMap.GetMapComponents(MapComponents, TO_FLAG(EActorType::Player));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
 		const APlayerCharacter* PlayerCharacter = MapComponentIt ? Cast<APlayerCharacter>(MapComponentIt->GetOwner()) : nullptr;
@@ -104,22 +87,16 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 	}
 
 	// Destroy all specified
-	LevelMap->DestroyActorsFromMap(CellsToDestroy);
+	LevelMap.DestroyActorsFromMap(CellsToDestroy);
 }
 
-//
+// Override the chance to spawn item after box destroying
 void UMyCheatManager::SetItemChance(int32 Chance) const
 {
-	const AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
-	if (!LevelMap)
-	{
-		return;
-	}
-
 	// Get all boxes
 	FCells CellsToDestroy;
-	TSet<UMapComponent*> MapComponents;
-	LevelMap->GetMapComponents(MapComponents, TO_FLAG(EActorType::Box));
+	FMapComponents MapComponents;
+	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EActorType::Box));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
 		ABoxActor* BoxActor = MapComponentIt ? Cast<ABoxActor>(MapComponentIt->GetOwner()) : nullptr;
@@ -134,28 +111,36 @@ void UMyCheatManager::SetItemChance(int32 Chance) const
 // Override the level of each powerup for a controlled player
 void UMyCheatManager::SetPowerups(int32 NewLevel) const
 {
-	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetPlayerCharacter())
+	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetControllablePlayer())
 	{
-		NewLevel = FMath::Clamp(NewLevel, 1, 9);
+		static constexpr int32 MinItemsNum = 1;
+		const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
+		NewLevel = FMath::Clamp(NewLevel, MinItemsNum, MaxItemsNum);
 		PlayerCharacter->PowerupsInternal.BombN = NewLevel;
 		PlayerCharacter->PowerupsInternal.FireN = NewLevel;
 		PlayerCharacter->PowerupsInternal.SkateN = NewLevel;
+		PlayerCharacter->ApplyPowerups();
 	}
 }
 
-// Display debug information
-void UMyCheatManager::DisplayDebug() const
+// Enable or disable the God mode to make a controllable player undestroyable
+void UMyCheatManager::SetGodMode(bool bShouldEnable) const
 {
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
+	FMapComponents MapComponents;
+	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EActorType::Player));
+	for (UMapComponent* MapComponentIt : MapComponents)
 	{
-		PC->ConsoleCommand("DisplayAll MyGameStateBase CurrentGameStateInternal");
-		PC->ConsoleCommand("DisplayAll MyPlayerState EndGameStateInternal");
-		PC->ConsoleCommand("DisplayAll GeneratedMap PlayersNumInternal");
+		if (MapComponentIt
+		    && USingletonLibrary::IsControllablePlayer(MapComponentIt->GetOwner()))
+		{
+			MapComponentIt->SetUndestroyable(bShouldEnable);
+			return;
+		}
 	}
 }
 
 // Set new setting value
-void UMyCheatManager::SetSettingValue(const FString& TagByValue) const
+void UMyCheatManager::SetSetting(const FString& TagByValue) const
 {
 	if (TagByValue.IsEmpty())
 	{
@@ -178,6 +163,7 @@ void UMyCheatManager::SetSettingValue(const FString& TagByValue) const
 		return;
 	}
 
+	// Extract value
 	static constexpr int32 ValueIndex = 1;
 	FString TagValue = TEXT("");
 	if (SeparatedStrings.IsValidIndex(ValueIndex))
@@ -189,7 +175,7 @@ void UMyCheatManager::SetSettingValue(const FString& TagByValue) const
 	USettingsWidget* SettingsWidget = MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
 	if (SettingsWidget)
 	{
-		SettingsWidget->SetSettingValue(TagName, TagValue);
+		SettingsWidget->SetSettingValue(TagName, TagValue, true);
 		SettingsWidget->SaveSettings();
 	}
 }

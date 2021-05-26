@@ -480,13 +480,6 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 		case EItemType::Skate:
 		{
 			IncrementIfAllowed(PowerupsInternal.SkateN);
-			if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
-			{
-				static constexpr float SpeedMultiplier = 100.F;
-				const float SkateAdditiveStrength = ItemDataAsset.GetSkateAdditiveStrength();
-				const int32 SkateN = PowerupsInternal.SkateN * SpeedMultiplier + SkateAdditiveStrength;
-				MovementComponent->MaxWalkSpeed = SkateN;
-			}
 			break;
 		}
 		case EItemType::Bomb:
@@ -503,6 +496,8 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 			break;
 	}
 
+	ApplyPowerups();
+
 	// Uninitialize item
 	OverlappedItem->ResetItemType();
 }
@@ -510,7 +505,10 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 // Event triggered when the bomb has been explicitly destroyed.
 void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
 {
-	PowerupsInternal.BombN++;
+	if (PowerupsInternal.BombN < UItemDataAsset::Get().GetMaxAllowedItemsNum())
+	{
+		++PowerupsInternal.BombN;
+	}
 }
 
 // Called when the current game state was changed
@@ -539,4 +537,19 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 		default:
 			break;
 	}
+}
+
+// Apply effect of picked up powerups
+void APlayerCharacter::ApplyPowerups()
+{
+	// Apply speed
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		static constexpr float SpeedMultiplier = 100.F;
+		const float SkateAdditiveStrength = UItemDataAsset::Get().GetSkateAdditiveStrength();
+		const int32 SkateN = PowerupsInternal.SkateN * SpeedMultiplier + SkateAdditiveStrength;
+		MovementComponent->MaxWalkSpeed = SkateN;
+	}
+
+	// Apply others
 }
