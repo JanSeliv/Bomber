@@ -885,7 +885,7 @@ void AGeneratedMap::GenerateLevelActors()
 		{
 			for (const FCell& CellIt : IteratedCells)
 			{
-				GetSidesCells(PathBreakers, CellIt, EPathType::Explosion, 100, true);
+				GetSidesCells(PathBreakers, CellIt, EPathType::Explosion, MAX_int32, true);
 			}
 
 			IteratedCells = PathBreakers.Difference(LDraggedCells);

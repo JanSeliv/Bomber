@@ -131,7 +131,8 @@ void UMapComponent::OnRegister()
 	}
 	USingletonLibrary::PrintToLog(Owner, "OnRegister", "");
 
-	// Disable the tick
+	// Set the tick disabled by default and decrease the interval
+	Owner->SetActorTickInterval(UGeneratedMapDataAsset::Get().GetTickInterval());
 	Owner->SetActorTickEnabled(false);
 
 	// Set the movable mobility for in-game attaching

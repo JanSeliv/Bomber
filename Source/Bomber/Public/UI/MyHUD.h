@@ -16,7 +16,7 @@ class UUIDataAsset final : public UDataAsset
 
 public:
 	/** Returns the UI data asset. */
-	static FORCEINLINE const UUIDataAsset& Get();
+	static const UUIDataAsset& Get();
 
 	/** Returns a class of the in-game widget.
 	 * @see UUIDataAsset::InGameWidgetClassInternal.*/

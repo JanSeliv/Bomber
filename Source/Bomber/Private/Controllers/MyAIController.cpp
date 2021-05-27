@@ -9,6 +9,14 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 
+// Returns the AI data asset
+const UAIDataAsset& UAIDataAsset::Get()
+{
+	const UAIDataAsset* AIDataAsset = USingletonLibrary::GetAIDataAsset();
+	checkf(AIDataAsset, TEXT("The AI Data Asset is not valid"));
+	return *AIDataAsset;
+}
+
 // Sets default values for this character's properties
 AMyAIController::AMyAIController()
 {
@@ -28,7 +36,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	}
 
 	AIMoveToInternal = DestinationCell;
-	MoveToLocation(AIMoveToInternal.Location, -1.0f, false, false);
+	MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
 
 	// Rotate the character
 	OwnerInternal->RotateToLocation(AIMoveToInternal.Location, false);
@@ -124,6 +132,7 @@ void AMyAIController::UpdateAI()
 	}
 
 	const AGeneratedMap& LevelMap = AGeneratedMap::Get();
+	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
 
 #if WITH_EDITOR
 	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
@@ -157,7 +166,7 @@ void AMyAIController::UpdateAI()
 	if (bIsDangerous == false)
 	{
 		FCells ItemsFromF0;
-		LevelMap.GetSidesCells(ItemsFromF0, F0, EPathType::Safe, 2);
+		LevelMap.GetSidesCells(ItemsFromF0, F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius());
 		LevelMap.IntersectCellsByTypes(ItemsFromF0, TO_FLAG(EAT::Item), false);
 		if (ItemsFromF0.Num() > 0)
 		{
@@ -175,14 +184,14 @@ void AMyAIController::UpdateAI()
 	for (auto F = Free.CreateIterator(); F; ++F)
 	{
 		if (bIsDangerous // is not dangerous situation
-		    && USingletonLibrary::CalculateCellsLength(F0, *F) > 3.0F)
+		    && USingletonLibrary::CalculateCellsLength(F0, *F) > AIDataAsset.GetNearDangerousRadius())
 		{
 			F.RemoveCurrent(); // removing distant cells
 			continue;
 		}
 
 		FCells ThisCrossway;
-		LevelMap.GetSidesCells(ThisCrossway, *F, EPathType::Safe, 2);
+		LevelMap.GetSidesCells(ThisCrossway, *F, EPathType::Safe, AIDataAsset.GetCrosswaySearchRadius());
 		FCells Way = Free;                  // Way = Safe / (Free + F0)
 		Way.Emplace(F0);                    // Way = Free + F0
 		Way = ThisCrossway.Difference(Way); // Way = Safe / Way
@@ -234,10 +243,11 @@ void AMyAIController::UpdateAI()
 
 	FCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free; // selected cells
 	bool bIsFilteringFailed = false;
-	for (int32 i = 0; i < 4; ++i)
+	static constexpr int32 FilteringStepsNum = 4;
+	for (int32 i = 0; i < FilteringStepsNum; ++i)
 	{
 		FCells FilteringStep;
-		switch (i) // 4 filtering steps
+		switch (i)
 		{
 			case 0: // All crossways: Filtered ∪ AllCrossways
 				FilteringStep = Filtered.Intersect(AllCrossways);
@@ -249,10 +259,10 @@ void AMyAIController::UpdateAI()
 			case 2: // Without crossways with another players
 				FilteringStep = Filtered.Intersect(SecureCrossways);
 				break;
-			case 3: // Only nearest cells ( length <= 3 cells)
+			case 3: // Only nearest cells (length <= near radius)
 				for (const FCell& It : Filtered)
 				{
-					if (USingletonLibrary::CalculateCellsLength(F0, It) <= 3.0F)
+					if (USingletonLibrary::CalculateCellsLength(F0, It) <= AIDataAsset.GetNearFilterRadius())
 					{
 						FilteringStep.Emplace(It);
 					}
@@ -260,7 +270,7 @@ void AMyAIController::UpdateAI()
 				break;
 			default:
 				break;
-		} //[4 filtering steps]
+		}
 
 		if (FilteringStep.Num() > 0)
 		{
@@ -309,31 +319,39 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR	 // [Editor]
 	if (MapComponent->bShouldShowRenders)
 	{
-		for (int32 i = 0; i < 3; ++i)
+		static constexpr int32 VisualizationTypesNum = 3;
+		for (int32 Index = 0; Index < VisualizationTypesNum; ++Index)
 		{
 			FCells VisualizingStep;
 			FLinearColor Color;
 			FString String = "+";
 			FVector Position = FVector::ZeroVector;
-			switch (i) // 3 types of visualization
+			switch (Index)
 			{
 				case 0:
+				{
 					VisualizingStep = AllCrossways.Difference(SecureCrossways);
 					Color = FLinearColor::Red;
 					break;
+				}
 				case 1:
+				{
 					VisualizingStep = SecureCrossways;
 					Color = FLinearColor::Green;
 					break;
+				}
 				case 2:
+				{
 					VisualizingStep = Filtered;
 					Color = FLinearColor::Yellow;
-					String = "F";
-					Position = FVector(-50.0F, -50.0F, 0.0F);
+					String = TEXT("F");
+					static const FVector DefaultPosition(-50.0F, -50.0F, 0.0F);
+					Position = DefaultPosition;
 					break;
+				}
 				default:
 					break;
-			} // 3 visualization types
+			}
 			bool bOutBool = false;
 			TArray<UTextRenderComponent*> OutArray{};
 			USingletonLibrary::Get().AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, bOutBool, OutArray, 263, 124, String, Position);
@@ -342,7 +360,7 @@ void AMyAIController::UpdateAI()
 #endif	// [Editor]
 }
 
-//
+// Enable or disable AI for this bot
 void AMyAIController::SetAI(bool bShouldEnable) const
 {
 	UWorld* World = GetWorld();
@@ -362,7 +380,7 @@ void AMyAIController::SetAI(bool bShouldEnable) const
 	}
 }
 
-//
+// Listen game states to enable or disable AI
 void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
