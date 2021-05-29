@@ -242,10 +242,6 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
 	class AMyAIController* MyAIControllerInternal; //[G]
 
-	/** Store to pause and unpause updating the current location of the player and bots on the level map.  */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
-	FTimerHandle UpdatePositionHandleInternal;
-
 	/** ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */
@@ -255,6 +251,9 @@ protected:
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Called every frame, is disabled on start, tick interval is decreased. */
+	virtual void Tick(float DeltaTime) override;
 
 	/** ---------------------------------------------------
 	 *		Input
@@ -292,7 +291,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBombDestroyed(AActor* DestroyedBomb);
 
-	/** Called when the current game state was changed. */
+	/** Listen to manage the tick. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 

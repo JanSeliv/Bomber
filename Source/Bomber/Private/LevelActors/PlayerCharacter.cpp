@@ -145,8 +145,7 @@ UMaterialInterface* UPlayerDataAsset::GetNameplateMaterial(int32 Index) const
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UMySkeletalMeshComponent>(MeshComponentName)) // Init UMySkeletalMeshComponent instead of USkeletalMeshComponent
 {
-	// Set this character to don't call Tick()
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Set the default AI controller class
@@ -305,18 +304,6 @@ void APlayerCharacter::BeginPlay()
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	// Setup timer handle to update a player location on the level map (initialized being paused)
-	FTimerManager& TimerManager = World->GetTimerManager();
-	TWeakObjectPtr<ThisClass> WeakThis(this);
-	TimerManager.SetTimer(UpdatePositionHandleInternal, [WeakThis]
-	{
-		if (const APlayerCharacter* PlayerCharacter = WeakThis.Get())
-		{
-			AGeneratedMap::Get().SetNearestCell(PlayerCharacter->MapComponentInternal);
-		}
-	}, UGeneratedMapDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
-	TimerManager.PauseTimer(UpdatePositionHandleInternal);
-
 	UpdateNickname();
 }
 
@@ -405,6 +392,15 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		}
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
+}
+
+// Called every frame, is disabled on start, tick interval is decreased
+void APlayerCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Update a player location on the level map
+	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
 }
 
 // Called to bind functionality to input
@@ -511,7 +507,7 @@ void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
 	}
 }
 
-// Called when the current game state was changed
+// Listen to manage the tick
 void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
@@ -526,12 +522,12 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 		case ECurrentGameState::Menu:
 		case ECurrentGameState::GameStarting:
 		{
-			TimerManager.PauseTimer(UpdatePositionHandleInternal);
+			SetActorTickEnabled(false);
 			break;
 		}
 		case ECurrentGameState::InGame:
 		{
-			TimerManager.UnPauseTimer(UpdatePositionHandleInternal);
+			SetActorTickEnabled(true);
 			break;
 		}
 		default:
