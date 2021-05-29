@@ -537,7 +537,7 @@ void USettingsWidget::CloseSettings()
 
 	if (UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings())
 	{
-		MyGameUserSettings->ApplySettings(true);
+		MyGameUserSettings->ApplySettings(false);
 	}
 
 	SaveSettings();

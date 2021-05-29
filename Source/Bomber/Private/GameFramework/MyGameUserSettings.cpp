@@ -151,7 +151,8 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 {
 	const EWindowMode::Type NewFullscreenMode = bIsFullscreen ? EWindowMode::Fullscreen : EWindowMode::Windowed;
 	SetFullscreenMode(NewFullscreenMode);
-	ApplyResolutionSettings(true);
+	ApplyResolutionSettings(false);
+	ConfirmVideoMode();
 }
 
 // Set the FPS cap by specified member index
