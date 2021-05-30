@@ -66,23 +66,23 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class ULevelActorRow* GetRowByLevelType(ELevelType LevelType) const;
 
-	/** */
+	/** Returns overall number of contained rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetRowsNum() const { return RowsInternal.Num(); }
 
-	/** */
+	/** Returns the class of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class AActor> GetActorClass() const { return ActorClassInternal; }
 
-	/** */
+	/** Returns the actor type of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
 
-	/** */
+	/** Returns a extent size of the collision box of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE FVector GetCollisionExtent() const { return CollisionExtentInternal; }
 
-	/** */
+	/** Returns a response type of the collision box of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
 
@@ -91,23 +91,23 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Row Class", DevelopmentOnly))
 	UClass* RowClassInternal = ULevelActorRow::StaticClass();
 
-	/** */
+	/** All rows contained by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (BlueprintProtected, DisplayName = "Rows", ShowOnlyInnerProperties))
 	TArray<class ULevelActorRow*> RowsInternal; //[D]
 
-	/** */
+	/** Class of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))
 	TSubclassOf<class AActor> ActorClassInternal; //[D]
 
-	/** */
+	/** Actor type of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))
 	EActorType ActorTypeInternal = EAT::None; //[D]
 
-	/** */
+	/** Extent size of the collision box of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collision Extent", ShowOnlyInnerProperties))
 	FVector CollisionExtentInternal = FVector(100.f); //[D]
 
-	/** */
+	/** Response type of the collision box of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties))
 	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap; //[D]
 

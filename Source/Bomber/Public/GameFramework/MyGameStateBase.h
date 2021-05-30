@@ -95,7 +95,7 @@ protected:
 	UFUNCTION()
 	void OnRep_CurrentGameState();
 
-	/** */
+	/** Called when game enters to the Game Starting state and timer starts countdown. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void ServerOnGameStarting();
 

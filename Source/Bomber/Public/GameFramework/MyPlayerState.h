@@ -78,7 +78,7 @@ protected:
 	/** Called when the game starts. Created widget. */
 	virtual void BeginPlay() override;
 
-	/** */
+	/** Listen game states to notify server about ending game for controlled player. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 

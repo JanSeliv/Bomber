@@ -84,11 +84,12 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 	OnGameStateChanged.Broadcast(CurrentGameStateInternal);
 }
 
+// Called when game enters to the Game Starting state and timer starts countdown
 void AMyGameStateBase::ServerOnGameStarting_Implementation()
 {
 	const UWorld* World = GetWorld();
 	if (!World
-	    || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::GameStarting, TEXT("ASSERT: 'CurrentGameStateInternal == ECurrentGameState::InGame' condition is FALSE")))
+	    || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::GameStarting, TEXT("ASSERT: Is not the Game Starting event on the server side")))
 	{
 		return;
 	}

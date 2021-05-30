@@ -30,14 +30,6 @@ struct FLevelStreamRow
 	/** The associated type of a level. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
 	ELevelType LevelType = ELT::None; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level", meta = (InlineEditConditionToggle))
-	bool bIsStoryLevel = false; //[D]
-
-	/** */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level", meta = (EditCondition = "bIsStoryLevel"))
-	FVector2D StoryLevelSize = FVector2D::ZeroVector; //[D]
 };
 
 /**
@@ -298,7 +290,7 @@ protected:
 		TSet<class UMapComponent*>& OutBitmaskedComponents,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
 
-	/** */
+	/** Listen game states to generate level actors. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 

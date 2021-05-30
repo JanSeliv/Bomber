@@ -93,7 +93,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))
 	class ULevelActorDataAsset* ActorDataAssetInternal; //[D]
 
-	/** */
+	/** Mesh of an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
 	class UMeshComponent* MeshComponentInternal; //[C.DO]
 

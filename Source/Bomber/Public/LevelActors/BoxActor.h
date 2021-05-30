@@ -23,7 +23,7 @@ public:
 	/** Returns the box data asset. */
 	static const UBoxDataAsset& Get();
 
-	/** */
+	/** Returns the chance to spawn item after box destroying. */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FORCEINLINE int32 GetSpawnItemChance() const { return SpawnItemChanceInternal; }
 

@@ -985,7 +985,7 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, int
 		}));
 }
 
-//
+// Listen game states to generate level actors
 void AGeneratedMap::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
