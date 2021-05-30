@@ -107,7 +107,7 @@ protected:
 
 	/** The index of chosen fps lock in array. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Lock Index"))
-	int32 FPSLockIndexInternal; //[G]
+	int32 FPSLockIndexInternal; //[C]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

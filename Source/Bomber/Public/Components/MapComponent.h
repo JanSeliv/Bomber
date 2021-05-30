@@ -38,7 +38,7 @@ public:
 	class UBoxComponent* BoxCollision; //[C.DO]
 
 	/** Owner's cell location on the Level Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (ShowOnlyInnerProperties))
 	FCell Cell; //[G]
 
 	/* ---------------------------------------------------

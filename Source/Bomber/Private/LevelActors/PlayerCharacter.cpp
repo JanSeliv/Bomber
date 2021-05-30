@@ -60,7 +60,7 @@ void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 }
 #endif	//WITH_EDITOR
 
-//
+// Called after loading an object. Is overridden to prepare dynamic materials
 void UPlayerRow::PostLoad()
 {
 	Super::PostLoad();
@@ -68,7 +68,7 @@ void UPlayerRow::PostLoad()
 	TryCreateDynamicMaterials();
 }
 
-//
+// Create dynamic material instance for each ski if is not done before.
 void UPlayerRow::TryCreateDynamicMaterials()
 {
 	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(GetOuter());

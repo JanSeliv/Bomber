@@ -86,7 +86,7 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 
 void AMyGameStateBase::ServerOnGameStarting_Implementation()
 {
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if (!World
 	    || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::GameStarting, TEXT("ASSERT: 'CurrentGameStateInternal == ECurrentGameState::InGame' condition is FALSE")))
 	{
@@ -96,11 +96,10 @@ void AMyGameStateBase::ServerOnGameStarting_Implementation()
 	// Clear timer
 	FTimerManager& TimerManager = World->GetTimerManager();
 	TimerManager.ClearTimer(StartingTimerInternal);
-	StartingTimerInternal.Invalidate();
 
 	// Decrement starting countdown timer
 	TWeakObjectPtr<ThisClass> WeakThis(this);
-	World->GetTimerManager().SetTimer(StartingTimerInternal, [WeakThis]
+	TimerManager.SetTimer(StartingTimerInternal, [WeakThis]
 	{
 		AMyGameStateBase* MyGameStateBase = WeakThis.Get();
 		if (MyGameStateBase
@@ -114,7 +113,7 @@ void AMyGameStateBase::ServerOnGameStarting_Implementation()
 // Decrement the countdown timer of the current game.
 void AMyGameStateBase::ServerStartInGameCountdown_Implementation()
 {
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if (!World
 	    || InGameCountdownInternal <= 0
 	    || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::InGame, TEXT("ASSERT: 'CurrentGameStateInternal == ECurrentGameState::InGame' condition is FALSE")))
@@ -125,7 +124,6 @@ void AMyGameStateBase::ServerStartInGameCountdown_Implementation()
 	// Clear timer
 	FTimerManager& TimerManager = World->GetTimerManager();
 	TimerManager.ClearTimer(InGameTimerInternal);
-	InGameTimerInternal.Invalidate();
 
 	// Decrement in-game countdown timer
 	TWeakObjectPtr<ThisClass> WeakThis(this);

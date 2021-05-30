@@ -235,7 +235,7 @@ protected:
 	FPowerUp PowerupsInternal; //[AW]
 
 	/** The ID identification of each character */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
 	int32 CharacterIDInternal = INDEX_NONE; //[G]
 
 	/** The character's AI controller */

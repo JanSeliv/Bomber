@@ -78,7 +78,7 @@ public:
 
 protected:
 	/** Contains all used levels. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels", TitleProperty = "LevelType", ShowOnlyInnerProperties))
 	TArray<FLevelStreamRow> LevelsInternal; //[D]
 
 	/** How ofter update actors on map. */
@@ -256,19 +256,19 @@ protected:
 	TArray<class UMapComponent*> DraggedComponentsInternal; //[M.IO]
 
 	/** Number of characters on the Level Map. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
 	int32 PlayersNumInternal = 0; //[G]
 
 	/** The current level type. Affects on the meshes of each level actor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
 	ELevelType LevelTypeInternal = ELT::First; //[N]
 
-	/** */
+	/** Attached camera component. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Component"))
 	class UMyCameraComponent* CameraComponentInternal; //[C.DO]
 
-	/** */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
+	/** Is true when current state is Game Starting. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
 	bool bIsGameRunningInternal; //[G]
 
 	/* ---------------------------------------------------

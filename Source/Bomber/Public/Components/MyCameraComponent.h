@@ -10,7 +10,7 @@
 /**
  * The main camera viewpoint of the game.
  */
-UCLASS(Config = "GameUserSettings")
+UCLASS(Config = "GameUserSettings", ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class UMyCameraComponent final : public UCameraComponent
 {
 	GENERATED_BODY()

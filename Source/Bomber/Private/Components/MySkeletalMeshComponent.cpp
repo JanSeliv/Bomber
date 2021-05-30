@@ -30,13 +30,28 @@ void UMySkeletalMeshComponent::SetEnableGravity(bool bGravityEnabled)
 {
 	Super::SetEnableGravity(bGravityEnabled);
 
-	for (UMeshComponent* const& MeshComponentIt : AttachedMeshesInternal)
+	for (UMeshComponent* MeshComponentIt : AttachedMeshesInternal)
 	{
 		MeshComponentIt->SetEnableGravity(bGravityEnabled);
 	}
 }
 
-//
+// Overridable internal function to respond to changes in the visibility of the component.
+void UMySkeletalMeshComponent::OnVisibilityChanged()
+{
+	Super::OnVisibilityChanged();
+
+	if (IsVisible())
+	{
+		Play(true);
+	}
+	else
+	{
+		Stop();
+	}
+}
+
+// Init this component by specified player data
 void UMySkeletalMeshComponent::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
 	if (!CustomPlayerMeshData.PlayerRow)

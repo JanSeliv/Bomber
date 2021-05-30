@@ -64,16 +64,19 @@ public:
 	/** Enables or disables gravity for the owner body and all attached meshes from the player row. */
 	virtual void SetEnableGravity(bool bGravityEnabled) override;
 
+	/** Overridable internal function to respond to changes in the visibility of the component. */
+	virtual void OnVisibilityChanged() override;
+
 	/** Returns how this mesh looks like for now.
 	 * @see UMySkeletalMeshComponent::PlayerMeshDataInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE FCustomPlayerMeshData GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
 
 	/**
-	 *
-	 * @param CustomPlayerMeshData
+	 * Init this component by specified player data.
+	 * @param CustomPlayerMeshData Data to init.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
 	/**
@@ -97,11 +100,13 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** Determines how this mesh looks like for now. */
+	/** Determines how this mesh looks like for now.
+	 * Is not transient, can be set in editor-time. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
 
-	/** Current level type of attached meshes. */
+	/** Current level type of attached meshes.
+	 * Is not transient, can be set in editor-time. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes Type"))
 	ELevelType AttachedMeshesTypeInternal = ELevelType::None; //[G]
 
@@ -119,6 +124,4 @@ protected:
 
 	/** Called when a component is registered (not loaded). */
 	virtual void OnRegister() override;
-
-
 };

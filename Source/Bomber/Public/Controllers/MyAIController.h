@@ -85,16 +85,16 @@ protected:
 
 	friend class UMyCheatManager;
 
-	/**  */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
-	FTimerHandle AIUpdateHandleInternal;
+	/** Timer to update AI. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
+	FTimerHandle AIUpdateHandleInternal; //[G]
 
 	/** Cell position of current path segment's end */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "AI Move To"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "AI Move To"))
 	FCell AIMoveToInternal; //[G]
 
 	/** Controlled character */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))
 	class APlayerCharacter* OwnerInternal; //[G]
 
 	/* ---------------------------------------------------

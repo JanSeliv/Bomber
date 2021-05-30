@@ -57,11 +57,11 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** Contains result of the game for controlled player after ending the game. */
-	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
-	EEndGameState EndGameStateInternal = EEndGameState::None; //[N]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
+	EEndGameState EndGameStateInternal = EEndGameState::None; //[G]
 
 	/** A level type of chosen skeletal mesh. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Mesh Data"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
 
 	/** Config: custom name set by player. */
