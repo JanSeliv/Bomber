@@ -74,6 +74,80 @@
 		}
 	},
 	{
+		"Name": "Settings.Button.Controls",
+		"SettingsPicker":
+		{
+			"SettingsType": "Button",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Button.Controls"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Setter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Getter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA93E62C479C2490FA1B3580D36C0DEA\", \"Show Controls\")",
+				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 20
+				},
+				"bStartOnNextColumn": false
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Footer",
+				"HorizontalAlignment": "HAlign_Center",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+			}
+		}
+	},
+	{
 		"Name": "Settings.Button.CloseSettings",
 		"SettingsPicker":
 		{
