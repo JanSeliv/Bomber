@@ -4,19 +4,18 @@
 //---
 #include "UMG.h"
 
-//
+// Set texture to collide with specified texture
 void SShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
 {
-	AdvancedHitTexture = InTexture;
+	TextureWeakPtr = InTexture;
 }
 
-//
+// Set new alpha
 void SShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
 {
 	AdvancedHitAlpha = InAlpha;
 }
 
-//
 FReply SShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	if (!NeedExecuteAction(MyGeometry, MouseEvent))
@@ -26,7 +25,6 @@ FReply SShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPoint
 	return SButton::OnMouseButtonDown(MyGeometry, MouseEvent);
 }
 
-//
 FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
 {
 	if (!NeedExecuteAction(InMyGeometry, InMouseEvent))
@@ -36,7 +34,6 @@ FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, con
 	return SButton::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
 }
 
-//
 FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	if (!NeedExecuteAction(MyGeometry, MouseEvent))
@@ -46,7 +43,6 @@ FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointer
 	return SButton::OnMouseButtonUp(MyGeometry, MouseEvent);
 }
 
-//
 FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	const bool WhatToReturn = NeedExecuteAction(MyGeometry, MouseEvent);
@@ -65,23 +61,19 @@ FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEven
 	return SButton::OnMouseMove(MyGeometry, MouseEvent);
 }
 
-//
 void SShapeButton::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (AdvancedHitTexture)
+	if (TextureWeakPtr.IsValid())
 	{
-		return;
+		return SButton::OnMouseEnter(MyGeometry, MouseEvent);
 	}
-	return SButton::OnMouseEnter(MyGeometry, MouseEvent);
 }
 
-//
 void SShapeButton::OnMouseLeave(const FPointerEvent& MouseEvent)
 {
 	return SButton::OnMouseLeave(MouseEvent);
 }
 
-//
 FCursorReply SShapeButton::OnCursorQuery(const FGeometry& MyGeometry, const FPointerEvent& CursorEvent) const
 {
 	if (!bIsHovered)
@@ -92,16 +84,16 @@ FCursorReply SShapeButton::OnCursorQuery(const FGeometry& MyGeometry, const FPoi
 	return TheCursor.IsSet() ? FCursorReply::Cursor(TheCursor.GetValue()) : FCursorReply::Unhandled();
 }
 
-//
 TSharedPtr<IToolTip> SShapeButton::GetToolTip()
 {
 	return bIsHovered ? SWidget::GetToolTip() : nullptr;
 }
 
-//
+// Called on mouse moves and clicks
 bool SShapeButton::NeedExecuteAction(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const
 {
-	FTexturePlatformData* const& PlatformData = AdvancedHitTexture ? AdvancedHitTexture->PlatformData : nullptr;
+	const UTexture2D* AdvancedHitTexture = TextureWeakPtr.Get();
+	FTexturePlatformData* PlatformData = AdvancedHitTexture ? AdvancedHitTexture->PlatformData : nullptr;
 	if (!PlatformData)
 	{
 		return true;
@@ -125,27 +117,27 @@ bool SShapeButton::NeedExecuteAction(const FGeometry& MyGeometry, const FPointer
 	}
 
 	bool bToReturn = true;
-	FTexture2DMipMap& Mip = PlatformData->Mips[0];
-	void* const& ImageData = Mip.BulkData.Lock(LOCK_READ_ONLY);
+	FByteBulkData& BulkDataRef = PlatformData->Mips[0].BulkData;
+	const void* ImageData = BulkDataRef.Lock(LOCK_READ_ONLY);
 	if (!ImageData)
 	{
 		bToReturn = false;
 	}
 	else
 	{
-		FColor* const& ColorData = static_cast<FColor*>(ImageData);
-		if (!ColorData
-		    || ColorData[BufferPosition].A <= AdvancedHitAlpha)
+		const auto ColorPtr = static_cast<const FColor*>(ImageData);
+		if (!ColorPtr
+		    || ColorPtr[BufferPosition].A <= AdvancedHitAlpha)
 		{
 			bToReturn = false;
 		}
 	}
-	Mip.BulkData.Unlock();
+	BulkDataRef.Unlock();
 
 	return bToReturn;
 }
 
-//
+// Set texture to collide with specified texture
 void UShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
 {
 	AdvancedHitTexture = InTexture;
@@ -160,7 +152,7 @@ void UShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
 	}
 }
 
-//
+// Set new alpha
 void UShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
 {
 	AdvancedHitAlpha = InAlpha;
@@ -175,7 +167,7 @@ void UShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
 	}
 }
 
-//
+// Applies all properties to the native widget if possible
 void UShapeButton::SynchronizeProperties()
 {
 	Super::SynchronizeProperties();
@@ -184,7 +176,7 @@ void UShapeButton::SynchronizeProperties()
 	SetAdvancedHitAlpha(AdvancedHitAlpha);
 }
 
-//
+// Is called when the underlying SWidget needs to be constructed
 TSharedRef<SWidget> UShapeButton::RebuildWidget()
 {
 	TSharedPtr<SShapeButton> NewButton = SNew(SShapeButton)
