@@ -61,7 +61,7 @@ public:
 
 	/** Returns true if the game is in fullscreen mode. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsFullscreenEnabled() const { return GetFullscreenMode() != EWindowMode::Windowed; }
+	FORCEINLINE bool IsFullscreenEnabled() const { return GetFullscreenMode() == EWindowMode::Fullscreen; }
 
 	/** Set and apply fullscreen mode. If false, the windowed mode will be applied. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

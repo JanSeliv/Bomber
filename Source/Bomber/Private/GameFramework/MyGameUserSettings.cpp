@@ -24,9 +24,7 @@ UMyGameUserSettings& UMyGameUserSettings::Get()
 // Changes all scalability settings at once based on a single overall quality level
 void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
 {
-	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
-	if (!ensureMsgf(SettingsWidget, TEXT("ASSERT: 'SettingsWidget' is not valid"))
-	    || Value == OverallQualityInternal)
+	if (Value == OverallQualityInternal)
 	{
 		return;
 	}
@@ -158,8 +156,8 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 // Set the FPS cap by specified member index
 void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 {
-	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
-	if (!ensureMsgf(SettingsWidget, TEXT("ASSERT: 'SettingsWidget' is not valid")))
+	const USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	if (!SettingsWidget)
 	{
 		return;
 	}

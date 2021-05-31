@@ -18,6 +18,14 @@ bomber and do not let bots to bomb player!
 
 ## Changelog
 
+> `31.05.2021:`
+>   - Completely updated the Maya level.
+>   - Added the Water level of the Pirate character.
+>   - Added settings.
+> > ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
+> > ![](https://user-images.githubusercontent.com/20540872/120249541-8e5a9880-c27b-11eb-82cd-660878d33e6f.jpg)
+> > ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
+>   ---
 > `31.01.2021:`
 >   - Added the Maya (Sphynx cat) character with two skins.
 >   - Added the Pirate character with one skin.
