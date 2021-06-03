@@ -41,6 +41,13 @@ void UMapComponent::OnConstruction()
 	USingletonLibrary::PrintToLog(Owner, "OnMapComponentConstruction", "-> \t AddToGrid");
 	LevelMap.AddToGrid(Cell, this);
 
+	// Update default mesh asset
+	if (ActorDataAssetInternal)
+	{
+		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
+		SetMeshByRow(FoundRow);
+	}
+
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
@@ -162,10 +169,6 @@ void UMapComponent::OnRegister()
 		}
 		MeshComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		MeshComponentInternal->RegisterComponent();
-
-		// Set default mesh asset
-		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
-		SetMeshByRow(FoundRow);
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]

@@ -61,26 +61,21 @@ FSettingsPicker USettingsWidget::FindSettingRow(FName TagName, bool bSubStringSe
 		return FoundRow;
 	}
 
-	const FSettingsPicker* SettingsRowPtr = nullptr;
-
 	if (bSubStringSearch)
 	{
 		// Find row by specified substring
 		const FString TagSubString(TagName.ToString());
-		TArray<FSettingsPicker> Rows;
-		SettingsTableRowsInternal.GenerateValueArray(Rows);
-		SettingsRowPtr = Rows.FindByPredicate([TagSubString](const FSettingsPicker& RowIt)
+		for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 		{
-			const FString TagStringIt(RowIt.PrimaryData.Tag.ToString());
-			return TagStringIt.Contains(TagSubString);
-		});
+			const FString TagStringIt(RowIt.Key.ToString());
+			if (TagStringIt.Contains(TagSubString))
+			{
+				FoundRow = RowIt.Value;
+				break;
+			}
+		}
 	}
-	else
-	{
-		SettingsRowPtr = SettingsTableRowsInternal.Find(TagName);
-	}
-
-	if (SettingsRowPtr)
+	else if (const FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
 		FoundRow = *SettingsRowPtr;
 	}

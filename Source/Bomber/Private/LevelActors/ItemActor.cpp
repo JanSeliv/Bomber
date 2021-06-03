@@ -64,6 +64,13 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
+	// Construct the map component
+	MapComponentInternal->OnConstruction();
+	if (!IS_VALID(this))
+	{
+		return;
+	}
+
 	// Rand the item type if not set yet
 	if (ItemTypeInternal == EItemType::None)
 	{
@@ -78,9 +85,6 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	{
 		MapComponentInternal->SetMeshByRow(FoundItemRow);
 	}
-
-	// Construct the map component
-	MapComponentInternal->OnConstruction();
 }
 
 // Called when the game starts or when spawned
