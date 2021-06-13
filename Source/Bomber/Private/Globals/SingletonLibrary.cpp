@@ -305,10 +305,11 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
 ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass)
 {
-	TArray<ULevelActorDataAsset*>& ActorsDataAsset = GetSingleton()->ActorsDataAssetsInternal;
-	for (ULevelActorDataAsset*& DataAssetIt : ActorsDataAsset)
+	const TArray<TObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
+	for (const TObjectPtr<ULevelActorDataAsset>& DataAssetIt : ActorsDataAssets)
 	{
-		if (DataAssetIt && DataAssetIt->GetActorClass()->IsChildOf(ActorClass))
+		if (DataAssetIt
+			&& DataAssetIt->GetActorClass()->IsChildOf(ActorClass))
 		{
 			return DataAssetIt;
 		}
@@ -319,8 +320,8 @@ ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclas
 // Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types.
 void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
 {
-	const TArray<ULevelActorDataAsset*>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (ULevelActorDataAsset* const& DataAssetIt : ActorsDataAssets)
+	const TArray<TObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
+	for (const TObjectPtr<ULevelActorDataAsset>& DataAssetIt : ActorsDataAssets)
 	{
 		if (DataAssetIt
 		    && EnumHasAnyFlags(DataAssetIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))

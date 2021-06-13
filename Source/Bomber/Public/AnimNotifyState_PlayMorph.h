@@ -113,11 +113,11 @@ protected:
 	 * @see UAnimNotifyState_PlayMorph::InitCurveFloatOnce()
 	 */
 	UPROPERTY(Transient, BlueprintReadWrite, Category = "C++")
-	class UCurveFloat* CurveFloat;
+	TObjectPtr<class UCurveFloat> CurveFloat = nullptr;
 
 	/** The current skeletal mesh. */
 	UPROPERTY(Transient, BlueprintReadWrite, Category = "C++")
-	class USkeletalMeshComponent* MeshCompInternal;
+	TObjectPtr<class USkeletalMeshComponent> MeshCompInternal = nullptr;
 
 	/* ---------------------------------------------------
 	*		Protected functions

@@ -19,7 +19,7 @@ struct FAttachedMesh
 
 	/** The attached static mesh or skeletal mesh.  */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn))
-	class UStreamableRenderAsset* AttachedMesh = nullptr; //[D]
+	TObjectPtr<class UStreamableRenderAsset> AttachedMesh = nullptr; //[D]
 
 	/** In the which socket should attach this prop. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
@@ -27,7 +27,7 @@ struct FAttachedMesh
 
 	/** Prop animation is loop played all the time, starts playing on attaching to the owner. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	class UAnimSequence* MeshAnimation; //[D]
+	TObjectPtr<class UAnimSequence> MeshAnimation = nullptr; //[D]
 };
 
 /**
@@ -45,11 +45,11 @@ public:
 
 	/** The own movement animation for the each character. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	class UBlendSpace1D* IdleWalkRunBlendSpace; //[D]
+	TObjectPtr<class UBlendSpace1D> IdleWalkRunBlendSpace = nullptr; //[D]
 
 	/** Dance animation that is used mostly in the menu instead of idle. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	class UAnimSequence* DanceAnimation; //[D]
+	TObjectPtr<class UAnimSequence> DanceAnimation = nullptr; //[D]
 
 	/** Returns the num of skin textures in the array of diffuse maps specified a player material instance. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -66,7 +66,7 @@ protected:
 	 * @warning Is not BlueprintReadOnly and has not getter to prevent being used directly, we have dynamic materials instead.
 	 * @see UPlayerRow::MaterialInstancesDynamicInternal. */
 	UPROPERTY(EditDefaultsOnly, Category = "Row", meta = (BlueprintProtected, DisplayName = "Material Instance", ShowOnlyInnerProperties))
-	class UMaterialInstance* MaterialInstanceInternal; //[D]
+	TObjectPtr<class UMaterialInstance> MaterialInstanceInternal = nullptr; //[D]
 
 	/**
 	 * Contains all created dynamic materials for each skin in the Material Instance.
@@ -75,7 +75,7 @@ protected:
 	 * @warning Is not EditDefaultsOnly because have to be created dynamically, in the same time is incompatible with VisibleInstanceOnly.
 	 * @see UPlayerRow::MaterialInstanceInternal. */
 	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Material Instances Dynamic"))
-	TArray<class UMaterialInstanceDynamic*> MaterialInstancesDynamicInternal; //[G]
+	TArray<TObjectPtr<class UMaterialInstanceDynamic>> MaterialInstancesDynamicInternal; //[G]
 
 #if WITH_EDITOR
 	/** Handle adding and changing material instance to prepare dynamic materials. */
@@ -135,7 +135,7 @@ public:
 protected:
 	/** All materials that are used by nameplate meshes. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Materials", ShowOnlyInnerProperties))
-	TArray<class UMaterialInterface*> NameplateMaterialsInternal; //[D]
+	TArray<TObjectPtr<class UMaterialInterface>> NameplateMaterialsInternal; //[D]
 
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
@@ -224,11 +224,11 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	class UMapComponent* MapComponentInternal; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
 
 	/** The static mesh nameplate */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Mesh Component"))
-	class UStaticMeshComponent* NameplateMeshInternal; //[C.DO]
+	TObjectPtr<class UStaticMeshComponent> NameplateMeshInternal = nullptr; //[C.DO]
 
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
@@ -239,8 +239,8 @@ protected:
 	int32 CharacterIDInternal = INDEX_NONE; //[G]
 
 	/** The character's AI controller */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
-	class AMyAIController* MyAIControllerInternal; //[G]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
+	TObjectPtr<class AMyAIController> MyAIControllerInternal = nullptr; //[G]
 
 	/** ---------------------------------------------------
 	 *		Protected functions

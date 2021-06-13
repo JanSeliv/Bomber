@@ -23,7 +23,7 @@ public:
 
 	/** The static mesh, skeletal mesh or texture */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties, ExposeOnSpawn = "true"))
-	class UStreamableRenderAsset* Mesh = nullptr; //[D]
+	TObjectPtr<class UStreamableRenderAsset> Mesh = nullptr; //[D]
 
 protected:
 #if WITH_EDITOR
@@ -89,11 +89,11 @@ public:
 protected:
 	/** DevelopmentOnly: internal class of rows, is overriden by child data assets, used on adding new row. */
 	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Row Class", DevelopmentOnly))
-	UClass* RowClassInternal = ULevelActorRow::StaticClass();
+	TObjectPtr<UClass> RowClassInternal = ULevelActorRow::StaticClass();
 
 	/** All rows contained by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (BlueprintProtected, DisplayName = "Rows", ShowOnlyInnerProperties))
-	TArray<class ULevelActorRow*> RowsInternal; //[D]
+	TArray<TObjectPtr<class ULevelActorRow>> RowsInternal; //[D]
 
 	/** Class of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))

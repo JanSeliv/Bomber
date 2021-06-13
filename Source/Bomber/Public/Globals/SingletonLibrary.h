@@ -260,21 +260,21 @@ protected:
 
 	/** Contains properties to setup the generated level. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))
-	class UGeneratedMapDataAsset* LevelsDataAssetInternal; //[B]
+	TObjectPtr<class UGeneratedMapDataAsset> LevelsDataAssetInternal = nullptr; //[B]
 
 	/** Settings data. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Data Asset"))
-	class USettingsDataAsset* SettingsDataAssetInternal; //[B]
+	TObjectPtr<class USettingsDataAsset> SettingsDataAssetInternal = nullptr; //[B]
 
 	/** Contains properties to setup UI. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "UI Data Asset"))
-	class UUIDataAsset* UIDataAssetInternal; //[B]
+	TObjectPtr<class UUIDataAsset> UIDataAssetInternal = nullptr; //[B]
 
 	/** AI data. */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Data Asset"))
-	class UAIDataAsset* AIDataAssetInternal; //[B]
+	TObjectPtr<class UAIDataAsset> AIDataAssetInternal = nullptr; //[B]
 
 	/** Actor type and its associated class. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actors Data Assets"))
-	TArray<class ULevelActorDataAsset*> ActorsDataAssetsInternal; //[B]
+	TArray<TObjectPtr<class ULevelActorDataAsset>> ActorsDataAssetsInternal; //[B]
 };

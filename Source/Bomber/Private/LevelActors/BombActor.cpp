@@ -52,7 +52,7 @@ void ABombActor::InitBomb(
 	}
 
 	// Set material
-	const TArray<UMaterialInterface*>& BombMaterials = UBombDataAsset::Get().BombMaterials;
+	const TArray<TObjectPtr<UMaterialInterface>>& BombMaterials = UBombDataAsset::Get().BombMaterials;
 	if (CharacterID != -1       // Is not debug character
 	    && BombMaterials.Num()) // As least one bomb material
 	{

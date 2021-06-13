@@ -99,6 +99,6 @@ void FPropertyData::SetMetaDataValue(FName Key, FName NewValue, bool bNotifyPost
 
 	if (bNotifyPostChange)
 	{
-		PropertyHandle->NotifyPostChange();
+		PropertyHandle->NotifyPostChange(EPropertyChangeType::ValueSet);
 	}
 }

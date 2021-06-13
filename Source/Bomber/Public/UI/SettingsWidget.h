@@ -85,7 +85,7 @@ public:
 protected:
 	/** The data table with all settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table"))
-	class UDataTable* SettingsDataTableInternal; //[D]
+	TObjectPtr<class UDataTable> SettingsDataTableInternal = nullptr; //[D]
 
 	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Percent Size"))

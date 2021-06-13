@@ -61,7 +61,7 @@ public:
 protected:
 	/** Texture that determines collision shape. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected))
-	class UTexture2D* AdvancedHitTexture = nullptr;
+	TObjectPtr<class UTexture2D> AdvancedHitTexture = nullptr;
 
 	/** Alpha level that determines collision shape. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, ClampMin = "0.0", ClampMax = "255.0", UIMin = "0.0", UIMax = "255.0"))

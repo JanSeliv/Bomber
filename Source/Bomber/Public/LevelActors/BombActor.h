@@ -26,11 +26,11 @@ public:
 
 	/** All bomb materials. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TArray<class UMaterialInterface*> BombMaterials; //[D]
+	TArray<TObjectPtr<class UMaterialInterface>> BombMaterials; //[D]
 
 	/** The emitter of the bomb explosion */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	class UParticleSystem* ExplosionParticle; //[D]
+	TObjectPtr<class UParticleSystem> ExplosionParticle = nullptr; //[D]
 
 	/** Get the bomb lifetime. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (ShowOnlyInnerProperties))
@@ -82,7 +82,7 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	class UMapComponent* MapComponentInternal; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal; //[C.AW]
 
 	/** The bomb blast path */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells", ShowOnlyInnerProperties))

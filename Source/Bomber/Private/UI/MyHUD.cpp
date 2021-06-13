@@ -65,6 +65,7 @@ void AMyHUD::BeginPlay()
 // Create and set widget objects once
 void AMyHUD::InitWidgets()
 {
+	APlayerController* PlayerController = PlayerOwner.Get();
 	if (!ensureMsgf(PlayerOwner, TEXT("ASSERT: 'PlayerOwner' is not valid")))
 	{
 		return;
@@ -75,7 +76,7 @@ void AMyHUD::InitWidgets()
 	const TSubclassOf<UInGameWidget>& InGameWidgetClass = UIDataAsset.GetInGameWidgetClass();
 	if (ensureMsgf(InGameWidgetClass, TEXT("ASSERT: 'InGameWidgetClass' is not set in the UI data table")))
 	{
-		InGameWidgetInternal = CreateWidget<UInGameWidget>(PlayerOwner, InGameWidgetClass);
+		InGameWidgetInternal = CreateWidget<UInGameWidget>(PlayerController, InGameWidgetClass);
 		checkf(InGameWidgetInternal, TEXT("ERROR: InGameWidgetInternal failed to create"));
 		InGameWidgetInternal->AddToViewport();
 	}
@@ -83,7 +84,7 @@ void AMyHUD::InitWidgets()
 	const TSubclassOf<USettingsWidget>& SettingsWidgetClass = UIDataAsset.GetSettingsWidgetClass();
 	if (ensureMsgf(SettingsWidgetClass, TEXT("ASSERT: 'SettingsWidgetClass' is not set in the UI data table")))
 	{
-		SettingsWidgetInternal = CreateWidget<USettingsWidget>(PlayerOwner, SettingsWidgetClass);
+		SettingsWidgetInternal = CreateWidget<USettingsWidget>(PlayerController, SettingsWidgetClass);
 		checkf(SettingsWidgetInternal, TEXT("ERROR: SettingsWidgetInternal failed to create"));
 		SettingsWidgetInternal->AddToViewport();
 	}
@@ -91,7 +92,7 @@ void AMyHUD::InitWidgets()
 	const TSubclassOf<UUserWidget>& FPSCounterWidgetClass = UIDataAsset.GetFPSCounterWidgetClass();
 	if (ensureMsgf(FPSCounterWidgetClass, TEXT("ASSERT: 'FPSCounterWidgetClass' is not set in the UI data table")))
 	{
-		FPSCounterWidgetInternal = CreateWidget<UUserWidget>(PlayerOwner, FPSCounterWidgetClass);
+		FPSCounterWidgetInternal = CreateWidget<UUserWidget>(PlayerController, FPSCounterWidgetClass);
 		checkf(FPSCounterWidgetInternal, TEXT("ERROR: FPSCounterWidgetInternal failed to create"));
 		FPSCounterWidgetInternal->AddToViewport();
 	}
@@ -103,7 +104,7 @@ void AMyHUD::InitWidgets()
 		NicknameWidgetsInternal.Reserve(MaxPlayersNum);
 		for (int32 Index = 0; Index < MaxPlayersNum; ++Index)
 		{
-			UUserWidget* NicknameWidget = CreateWidget(PlayerOwner, NicknameWidgetClass);
+			UUserWidget* NicknameWidget = CreateWidget(PlayerController, NicknameWidgetClass);
 			checkf(NicknameWidget, TEXT("ERROR: NicknameWidget failed to create"));
 			NicknameWidgetsInternal.Emplace(NicknameWidget);
 		}

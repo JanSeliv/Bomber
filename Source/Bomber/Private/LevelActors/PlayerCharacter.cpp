@@ -90,7 +90,7 @@ void UPlayerRow::TryCreateDynamicMaterials()
 	UTexture* FoundTexture = nullptr;
 	MaterialInstanceInternal->GetTextureParameterValue(SkinArrayParameterName, FoundTexture);
 	const auto Texture2DArray = Cast<UTexture2DArray>(FoundTexture);
-	const int32 SkinTexturesNum = Texture2DArray ? Texture2DArray->GetNumSlices() : 0;
+	const int32 SkinTexturesNum = Texture2DArray ? Texture2DArray->GetArraySize() : 0;
 	const int32 MaterialInstancesDynamicNum = MaterialInstancesDynamicInternal.Num();
 	if (SkinTexturesNum == MaterialInstancesDynamicNum)
 	{
@@ -109,7 +109,7 @@ void UPlayerRow::TryCreateDynamicMaterials()
 		}
 
 		MaterialInstanceDynamic->SetFlags(RF_Public | RF_Transactional);
-		const int32 SkinPosition = MaterialInstancesDynamicInternal.Add(MaterialInstanceDynamic);
+		const int32 SkinPosition = MaterialInstancesDynamicInternal.Emplace(MaterialInstanceDynamic);
 		MaterialInstanceDynamic->SetScalarParameterValue(SkinIndexParameterName, SkinPosition);
 	}
 }

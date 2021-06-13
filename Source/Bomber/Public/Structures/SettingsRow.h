@@ -75,7 +75,7 @@ struct FSettingsThemeData
 
 	/** The texture image of the setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	class UTexture* Texture; //[B]
+	TObjectPtr<class UTexture> Texture = nullptr; //[B]
 
 	/** The size of the resource in Slate Units. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -118,11 +118,11 @@ struct FCheckboxThemeData : public FSettingsThemeData
 
 	/** The texture image of the toggled checkbox. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	class UTexture* CheckedTexture; //[B]
+	TObjectPtr<class UTexture> CheckedTexture = nullptr; //[B]
 
 	/** The texture image of the undetermined checkbox. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	class UTexture* UndeterminedTexture; //[B]
+	TObjectPtr<class UTexture> UndeterminedTexture = nullptr; //[B]
 };
 
 /**

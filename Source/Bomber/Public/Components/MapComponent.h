@@ -35,7 +35,7 @@ public:
 
 	/** The Collision Component, is attached to an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	class UBoxComponent* BoxCollision; //[C.DO]
+	TObjectPtr<class UBoxComponent> BoxCollision = nullptr; //[C.DO]
 
 	/** Owner's cell location on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (ShowOnlyInnerProperties))
@@ -91,11 +91,11 @@ protected:
 
 	/** Contains exposed for designers properties for the spawned owner. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))
-	class ULevelActorDataAsset* ActorDataAssetInternal; //[D]
+	TObjectPtr<class ULevelActorDataAsset> ActorDataAssetInternal = nullptr; //[D]
 
 	/** Mesh of an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
-	class UMeshComponent* MeshComponentInternal; //[C.DO]
+	TObjectPtr<class UMeshComponent> MeshComponentInternal = nullptr; //[C.DO]
 
 	/** If true the owner is undestroyable, is used by skills and cheat manager. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
