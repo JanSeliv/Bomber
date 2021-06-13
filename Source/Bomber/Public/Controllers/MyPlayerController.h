@@ -50,4 +50,8 @@ protected:
 	/** Listen to toggle movement input and mouse cursor. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Called default console commands on begin play. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ExecuteDefaultConsoleCommands();
 };
