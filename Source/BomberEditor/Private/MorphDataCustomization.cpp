@@ -61,9 +61,10 @@ void FMorphDataCustomization::RefreshCustomProperty()
 	CachedMeshNameInternal = MeshName;
 
 	ResetSearchableComboBox();
-	SearchableComboBoxValuesInternal.Reserve(PreviewMesh->MorphTargetIndexMap.Num() + 1);
+	const TMap<FName, int32>& MorphTargetIndexMap = PreviewMesh->GetMorphTargetIndexMap();
+	SearchableComboBoxValuesInternal.Reserve(MorphTargetIndexMap.Num() + 1);
 
-	for (const TTuple<FName, int32>& MorphTargetIt : PreviewMesh->MorphTargetIndexMap)
+	for (const TTuple<FName, int32>& MorphTargetIt : MorphTargetIndexMap)
 	{
 		// Add this to the searchable text box as an FString so users can type and find it
 		const FString MorphTarget = MorphTargetIt.Key.ToString();

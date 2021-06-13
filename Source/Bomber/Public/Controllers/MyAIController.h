@@ -95,7 +95,7 @@ protected:
 
 	/** Controlled character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))
-	class APlayerCharacter* OwnerInternal; //[G]
+	TObjectPtr<class APlayerCharacter> OwnerInternal = nullptr; //[G]
 
 	/* ---------------------------------------------------
 	*		Protected functions

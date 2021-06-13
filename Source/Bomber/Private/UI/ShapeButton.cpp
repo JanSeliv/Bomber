@@ -80,8 +80,8 @@ FCursorReply SShapeButton::OnCursorQuery(const FGeometry& MyGeometry, const FPoi
 	{
 		return FCursorReply::Unhandled();
 	}
-	TOptional<EMouseCursor::Type> TheCursor = Cursor.Get();
-	return TheCursor.IsSet() ? FCursorReply::Cursor(TheCursor.GetValue()) : FCursorReply::Unhandled();
+	const TOptional<EMouseCursor::Type> ThisCursor(GetCursor());
+	return ThisCursor.IsSet() ? FCursorReply::Cursor(ThisCursor.GetValue()) : FCursorReply::Unhandled();
 }
 
 TSharedPtr<IToolTip> SShapeButton::GetToolTip()

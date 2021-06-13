@@ -233,7 +233,7 @@ protected:
 
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
-	UChildActorComponent* CollisionComponentInternal; //[C.DO]
+	TObjectPtr<class UChildActorComponent> CollisionComponentInternal = nullptr; //[C.DO]
 
 	/** Cells storage. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
@@ -241,11 +241,11 @@ protected:
 
 	/** Storage of alive players and their current locations */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
-	TArray<class UMapComponent*> MapComponentsInternal; //[M.IO]
+	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal; //[M.IO]
 
 	/** Contains map components that were dragged to the scene, store it to avoid destroying and restore its owners after each regenerating. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Components"))
-	TArray<class UMapComponent*> DraggedComponentsInternal; //[M.IO]
+	TArray<TObjectPtr<class UMapComponent>> DraggedComponentsInternal; //[M.IO]
 
 	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
@@ -257,7 +257,7 @@ protected:
 
 	/** Attached camera component. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Component"))
-	class UMyCameraComponent* CameraComponentInternal; //[C.DO]
+	TObjectPtr<class UMyCameraComponent> CameraComponentInternal = nullptr; //[C.DO]
 
 	/** Is true when current state is Game Starting. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
