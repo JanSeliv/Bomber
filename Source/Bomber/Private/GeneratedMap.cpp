@@ -324,7 +324,7 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 			continue;
 		}
 
-		const TObjectPtr<UMapComponent>& MapComponentIt = MapComponentsInternal[i];
+		UMapComponent* MapComponentIt = MapComponentsInternal[i];
 		AActor* OwnerIt = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		if (!OwnerIt                                                   // if is null, destroy that object from the array
 		    || MapComponentIt && Cells.Contains(MapComponentIt->Cell)) // the cell is contained on the grid
