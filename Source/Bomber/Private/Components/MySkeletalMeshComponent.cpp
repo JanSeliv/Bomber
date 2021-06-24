@@ -30,9 +30,12 @@ void UMySkeletalMeshComponent::SetEnableGravity(bool bGravityEnabled)
 {
 	Super::SetEnableGravity(bGravityEnabled);
 
-	for (UMeshComponent* MeshComponentIt : AttachedMeshesInternal)
+	for (const TObjectPtr<UMeshComponent>& MeshComponentIt : AttachedMeshesInternal)
 	{
-		MeshComponentIt->SetEnableGravity(bGravityEnabled);
+		if (MeshComponentIt)
+		{
+			MeshComponentIt->SetEnableGravity(bGravityEnabled);
+		}
 	}
 }
 
@@ -83,7 +86,7 @@ void UMySkeletalMeshComponent::AttachProps()
 	// Destroy previous meshes
 	for (int32 i = AttachedMeshesInternal.Num() - 1; i >= 0; --i)
 	{
-		UMeshComponent* const& MeshComponentIt = AttachedMeshesInternal.IsValidIndex(i) ? AttachedMeshesInternal[i] : nullptr;
+		const TObjectPtr<UMeshComponent>& MeshComponentIt = AttachedMeshesInternal.IsValidIndex(i) ? AttachedMeshesInternal[i] : nullptr;
 		if (MeshComponentIt)
 		{
 			AttachedMeshesInternal.RemoveAt(i);
@@ -118,7 +121,7 @@ void UMySkeletalMeshComponent::AttachProps()
 
 		if (MeshComponent)
 		{
-			AttachedMeshesInternal.Add(MeshComponent);
+			AttachedMeshesInternal.Emplace(MeshComponent);
 			const FTransform Transform(GetRelativeRotation(), FVector::ZeroVector, GetRelativeScale3D());
 			MeshComponent->SetupAttachment(GetAttachmentRoot());
 			MeshComponent->SetRelativeTransform(Transform);
@@ -166,7 +169,7 @@ void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
 
 	// Set skin for own skeletal mesh and all attached props
 	SetMaterialForAllSlots(this);
-	for (UMeshComponent* const& AttachedMeshIt : AttachedMeshesInternal)
+	for (const TObjectPtr<UMeshComponent>& AttachedMeshIt : AttachedMeshesInternal)
 	{
 		SetMaterialForAllSlots(AttachedMeshIt);
 	}

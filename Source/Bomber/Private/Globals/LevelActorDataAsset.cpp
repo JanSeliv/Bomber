@@ -27,6 +27,11 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
+	if (!ensureMsgf(RowClassInternal, TEXT("ASSERT: 'RowClassInternal' is not valid")))
+	{
+		return;
+	}
+
 	// Continue only if [IsEditorNotPieWorld]
 	if (!USingletonLibrary::IsEditorNotPieWorld())
 	{
@@ -47,7 +52,7 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	const int32 AddedAtIndex = PropertyChangedEvent.GetArrayIndex(PropertyChangedEvent.Property->GetFName().ToString());
 	if (RowsInternal.IsValidIndex(AddedAtIndex))
 	{
-		ULevelActorRow*& Row = RowsInternal[AddedAtIndex];
+		TObjectPtr<ULevelActorRow>& Row = RowsInternal[AddedAtIndex];
 		if (!Row)
 		{
 			Row = NewObject<ULevelActorRow>(this, RowClassInternal, NAME_None, RF_Public | RF_Transactional);
@@ -59,7 +64,7 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 // Return rows by specified level types in the bitmask
 void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, int32 LevelsTypesBitmask) const
 {
-	for (ULevelActorRow* const& RowIt : RowsInternal)
+	for (const TObjectPtr<ULevelActorRow>& RowIt : RowsInternal)
 	{
 		if (RowIt
 		    && RowIt->Mesh //is not empty

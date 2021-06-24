@@ -117,19 +117,19 @@ protected:
 
 	/** The current in-game widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
-	class UInGameWidget* InGameWidgetInternal; //[G]
+	TObjectPtr<class UInGameWidget> InGameWidgetInternal = nullptr; //[G]
 
 	/** The current settings widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))
-	class USettingsWidget* SettingsWidgetInternal; //[G]
+	TObjectPtr<class USettingsWidget> SettingsWidgetInternal = nullptr; //[G]
 
 	/** The current FPS counter widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Counter Widget"))
-	class UUserWidget* FPSCounterWidgetInternal; //[G]
+	TObjectPtr<class UUserWidget> FPSCounterWidgetInternal = nullptr; //[G]
 
 	/** All nickname widget objects for each player. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nickname Widgets"))
-	TArray<class UUserWidget*> NicknameWidgetsInternal; //[G]
+	TArray<TObjectPtr<class UUserWidget>> NicknameWidgetsInternal; //[G]
 
 	/** If true, shows FPS counter widget on the HUD. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is FPS Counter Enabled"))

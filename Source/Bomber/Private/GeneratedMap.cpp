@@ -324,8 +324,8 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 			continue;
 		}
 
-		UMapComponent* const MapComponentIt = MapComponentsInternal[i];
-		AActor* const OwnerIt = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
+		UMapComponent* MapComponentIt = MapComponentsInternal[i];
+		AActor* OwnerIt = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		if (!OwnerIt                                                   // if is null, destroy that object from the array
 		    || MapComponentIt && Cells.Contains(MapComponentIt->Cell)) // the cell is contained on the grid
 		{
@@ -584,7 +584,7 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 
 	// once level is loading, prepare him
 	LevelTypeInternal = NewLevelType;
-	for (UMapComponent* MapComponentIt : MapComponentsInternal)
+	for (const TObjectPtr<UMapComponent>& MapComponentIt : MapComponentsInternal)
 	{
 		MapComponentIt->RerunOwnerConstruction();
 	}
@@ -753,7 +753,7 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// Calls before generation preview actors to updating of all dragged to the Level Map actors
 	FCells DraggedCells, DraggedWalls, DraggedItems;
-	for (UMapComponent* MapComponentIt : DraggedComponentsInternal)
+	for (const TObjectPtr<UMapComponent>& MapComponentIt : DraggedComponentsInternal)
 	{
 		AActor* OwnerIt = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		if (!OwnerIt)
@@ -978,11 +978,14 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, int
 		return;
 	}
 
-	OutBitmaskedComponents.Append(
-		MapComponentsInternal.FilterByPredicate([ActorsTypesBitmask](const UMapComponent* Ptr)
+	for (const TObjectPtr<UMapComponent>& MapComponentIt : MapComponentsInternal)
+	{
+		if (MapComponentIt
+		    && EnumHasAnyFlags(MapComponentIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
 		{
-			return Ptr && EnumHasAnyFlags(Ptr->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask));
-		}));
+			OutBitmaskedComponents.Emplace(MapComponentIt);
+		}
+	}
 }
 
 // Listen game states to generate level actors

@@ -105,6 +105,8 @@ void AMyPlayerController::BeginPlay()
 	}
 
 	OnGameStateChanged(ECurrentGameState::Menu);
+
+	ExecuteDefaultConsoleCommands();
 }
 
 // Locks or unlocks movement input
@@ -120,6 +122,13 @@ void AMyPlayerController::SetIgnoreMoveInput(bool bShouldIgnore)
 
 	SetMouseVisibility(bShouldIgnore);
 	IgnoreMoveInput = bShouldIgnore;
+}
+
+// Called default console commands on begin play
+void AMyPlayerController::ExecuteDefaultConsoleCommands()
+{
+	static const FString NaniteDisableCommand(TEXT("r.Nanite 0"));
+	ConsoleCommand(NaniteDisableCommand);
 }
 
 // Listen to toggle movement input and mouse cursor

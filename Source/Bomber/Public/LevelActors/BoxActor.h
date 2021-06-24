@@ -54,7 +54,7 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	class UMapComponent* MapComponentInternal; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
 
 	/** Contains current spawn chance to spawn item. Can be overriden by the Cheat Manager. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))

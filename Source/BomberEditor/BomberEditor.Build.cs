@@ -12,7 +12,7 @@ public class BomberEditor : ModuleRules
 		{
 			"Bomber", // Bomber Editor sources
 			"Core", "CoreUObject", "Engine", "InputCore", // Default
-			"UnrealEd", // FEditorDelegates::EndPIE
+			"EditorFramework", // FEditorDelegates::FToolkitManager
 			"Slate", "SlateCore", "PropertyEditor", "EditorStyle", // Property types customizations
 			"EditorWidgets" // SSearchableComboBox etc
 		});

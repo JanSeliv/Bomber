@@ -18,7 +18,7 @@ struct FCustomPlayerMeshData
 
 	/** The row that is used to visualize the bomber character. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	class UPlayerRow* PlayerRow; //[G]
+	TObjectPtr<class UPlayerRow> PlayerRow = nullptr; //[G]
 
 	/** The index of the texture to set. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
@@ -112,11 +112,7 @@ protected:
 
 	/** Current attached mesh components. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))
-	TArray<class UMeshComponent*> AttachedMeshesInternal; //[M.IO]
-
-	/** Materials that can change player skin (diffuse texture) during the game, are initialized once. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dynamic Materials"))
-	TArray<class UMaterialInstanceDynamic*> DynamicMaterialsInternal; //[M.DO]
+	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal; //[M.IO]
 
 	/* ---------------------------------------------------
 	*		Protected functions

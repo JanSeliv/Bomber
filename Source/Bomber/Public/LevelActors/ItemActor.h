@@ -93,7 +93,7 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	class UMapComponent* MapComponentInternal; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
 
 	/**
 	* Skate: Increase the movement speed of the character.
