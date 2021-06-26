@@ -226,15 +226,16 @@ AMyPlayerController* USingletonLibrary::GetMyPlayerController()
 }
 
 // Returns the Bomber Player State for specified player, nullptr otherwise
-AMyPlayerState* USingletonLibrary::GetMyPlayerState(const AController* Controller)
+AMyPlayerState* USingletonLibrary::GetMyPlayerState(const APawn* Pawn)
 {
-	return Controller ? Cast<AMyPlayerState>(Controller->PlayerState) : nullptr;
+	return Pawn ? Pawn->GetPlayerState<AMyPlayerState>() : nullptr;
 }
 
 // Returns the player state of current controller
 AMyPlayerState* USingletonLibrary::GetCurrentPlayerState()
 {
-	return GetMyPlayerState(GetMyPlayerController());
+	const AMyPlayerController* MyPlayerController = GetMyPlayerController();
+	return MyPlayerController ? MyPlayerController->GetPlayerState<AMyPlayerState>() : nullptr;
 }
 
 // Returns the Bomber settings
@@ -267,12 +268,6 @@ AMyHUD* USingletonLibrary::GetMyHUD()
 APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 {
 	return Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(Get().GetWorld(), 0));
-}
-
-// Returns true if specified actor is a controllable player
-bool USingletonLibrary::IsControllablePlayer(const AActor* Player)
-{
-	return Player && Player == GetControllablePlayer();
 }
 
 /* ---------------------------------------------------
