@@ -112,7 +112,7 @@ public:
 
 	/** Returns the Bomber Player State for specified player, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class AMyPlayerState* GetMyPlayerState(const class AController* Controller);
+	static class AMyPlayerState* GetMyPlayerState(const class APawn* Pawn);
 
 	/** Returns the player state of current controller. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -137,10 +137,6 @@ public:
 	/** Returns controlled player character. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class APlayerCharacter* GetControllablePlayer();
-
-	/** Returns true if specified actor is a controllable player. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static bool IsControllablePlayer(const class AActor* Player);
 
 	/* ---------------------------------------------------
 	 *		Structs functions

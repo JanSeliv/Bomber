@@ -126,16 +126,10 @@ void UMyCheatManager::SetPowerups(int32 NewLevel) const
 // Enable or disable the God mode to make a controllable player undestroyable
 void UMyCheatManager::SetGodMode(bool bShouldEnable) const
 {
-	FMapComponents MapComponents;
-	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EActorType::Player));
-	for (UMapComponent* MapComponentIt : MapComponents)
+	const APlayerCharacter* ControllablePlayer = USingletonLibrary::GetControllablePlayer();
+	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(ControllablePlayer))
 	{
-		if (MapComponentIt
-		    && USingletonLibrary::IsControllablePlayer(MapComponentIt->GetOwner()))
-		{
-			MapComponentIt->SetUndestroyable(bShouldEnable);
-			return;
-		}
+		MapComponent->SetUndestroyable(bShouldEnable);
 	}
 }
 
