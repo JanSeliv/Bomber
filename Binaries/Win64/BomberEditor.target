@@ -11,8 +11,8 @@
 		"MajorVersion": 5,
 		"MinorVersion": 0,
 		"PatchVersion": 0,
-		"Changelist": 16433597,
-		"CompatibleChangelist": 0,
+		"Changelist": 16682836,
+		"CompatibleChangelist": 16433597,
 		"IsLicenseeVersion": 0,
 		"IsPromotedBuild": 0,
 		"BranchName": "++UE5+Release-5.0-EarlyAccess",
@@ -36,19 +36,43 @@
 			"Type": "SymbolFile"
 		},
 		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Binaries/Win64/UnrealEditor-Bridge.dll",
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RD.dll",
 			"Type": "DynamicLibrary"
 		},
 		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Binaries/Win64/UnrealEditor-MegascansPlugin.dll",
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RD.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderLink.dll",
 			"Type": "DynamicLibrary"
 		},
 		{
-			"Path": "$(EngineDir)/Plugins/Editor/EditorScriptingUtilities/Binaries/Win64/UnrealEditor-EditorScriptingUtilities.dll",
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderLink.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderLoggingExtension.dll",
 			"Type": "DynamicLibrary"
 		},
 		{
-			"Path": "$(EngineDir)/Plugins/Editor/EditorScriptingUtilities/Binaries/Win64/UnrealEditor-EditorScriptingUtilities.pdb",
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderLoggingExtension.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderBlueprintExtension.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderBlueprintExtension.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderGameControlExtension.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderGameControlExtension.pdb",
 			"Type": "SymbolFile"
 		},
 		{
@@ -4332,22 +4356,6 @@
 			"Type": "SymbolFile"
 		},
 		{
-			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-CEF3Utils.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-CEF3Utils.pdb",
-			"Type": "SymbolFile"
-		},
-		{
-			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-WebBrowser.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-WebBrowser.pdb",
-			"Type": "SymbolFile"
-		},
-		{
 			"Path": "$(EngineDir)/Binaries/Win64/UnrealEditor-TreeMap.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -4432,11 +4440,7 @@
 			"Type": "RequiredResource"
 		},
 		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Binaries/Win64/UnrealEditor.modules",
-			"Type": "RequiredResource"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Editor/EditorScriptingUtilities/Binaries/Win64/UnrealEditor.modules",
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -4874,11 +4878,7 @@
 			"Type": "UFS"
 		},
 		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Bridge.uplugin",
-			"Type": "UFS"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Editor/EditorScriptingUtilities/EditorScriptingUtilities.uplugin",
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/RiderLink.uplugin",
 			"Type": "UFS"
 		},
 		{
@@ -8199,10 +8199,6 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/ARM/Win32/astcenc.exe",
-			"Type": "NonUFS"
-		},
-		{
-			"Path": "$(EngineDir)/Binaries/Win64/EpicWebHelper.exe",
 			"Type": "NonUFS"
 		}
 	],
