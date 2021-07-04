@@ -23,7 +23,8 @@ public class Bomber : ModuleRules
 			PrivateDependencyModuleNames.AddRange(
 				new[]
 				{
-					"UnrealEd" // FEditorDelegates::EndPIE
+					"UnrealEd", // FEditorDelegates::EndPIE
+					"Blutility" // UEditorUtilityLibrary::GetSelectionSet()
 				});
 
 		// Uncomment if you are using online features

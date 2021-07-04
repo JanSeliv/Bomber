@@ -124,7 +124,7 @@ void UMapComponent::OnRegister()
 {
 	Super::OnRegister();
 	AActor* Owner = GetOwner();
-	if (!IS_VALID(Owner)           // Owner is not valid
+	if (!Owner
 	    || ActorDataAssetInternal) // is already registered
 	{
 		return;
@@ -169,6 +169,10 @@ void UMapComponent::OnRegister()
 		}
 		MeshComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		MeshComponentInternal->RegisterComponent();
+
+		// Set default mesh asset
+		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
+		SetMeshByRow(FoundRow);
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]

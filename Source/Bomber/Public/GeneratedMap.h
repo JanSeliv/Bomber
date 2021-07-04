@@ -239,13 +239,13 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
 	TArray<FCell> GridCellsInternal; //[M.IO]
 
-	/** Storage of alive players and their current locations */
+	/** Map components of all level actors. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal; //[M.IO]
 
 	/** Contains map components that were dragged to the scene, store it to avoid destroying and restore its owners after each regenerating. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Components"))
-	TArray<TObjectPtr<class UMapComponent>> DraggedComponentsInternal; //[M.IO]
+	TSet<TObjectPtr<class UMapComponent>> DraggedComponentsInternal; //[M.IO]
 
 	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))

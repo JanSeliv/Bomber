@@ -39,7 +39,7 @@ public:
 
 	/** Owner's cell location on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FCell Cell; //[G]
+	FCell Cell = FCell::ZeroCell; //[G]
 
 	/* ---------------------------------------------------
 	 *		Public functions
