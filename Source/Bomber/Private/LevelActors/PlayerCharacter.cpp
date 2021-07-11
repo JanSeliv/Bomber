@@ -319,7 +319,11 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	}
 
 	// Construct the actor's map component
-	MapComponentInternal->OnConstruction();
+	const bool bIsConstructed = MapComponentInternal->OnConstruction();
+	if (!bIsConstructed)
+	{
+		return;
+	}
 
 	// Set ID
 	if (CharacterIDInternal == INDEX_NONE)

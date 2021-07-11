@@ -45,26 +45,21 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
 	static bool IsEditorNotPieWorld();
 
-	/** Blueprint debug function, that prints messages to the log */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, AutoCreateRefTerm = "FunctionName,Message", WorldContext = "UObj", CallableWithoutWorldContext))
-	static void PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message = "");
-
 	/** Remove all text renders of the Owner */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
 	static void ClearOwnerTextRenders(class AActor* Owner);
 
 	/** Debug visualization by text renders. Has blueprint implementation. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderText,CoordinatePosition", DefaultToSelf = "Owner"))
-	void AddDebugTextRenders(
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderString,CoordinatePosition", DefaultToSelf = "Owner"))
+	void AddDebugTextRenders(class AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<class UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const;
+	static void AddDebugTextRenders(
 		class AActor* Owner,
 		const TSet<FCell>& Cells,
-		const struct FLinearColor& TextColor, // used in the child native event
-		bool& bOutHasCoordinateRenders,       // used in the child native event
-		TArray<class UTextRenderComponent*>& OutTextRenderComponents,
+		const FLinearColor& TextColor,
 		float TextHeight = 261.f,
 		float TextSize = 124.f,
-		const FString& RenderString = "",
-		const FVector& CoordinatePosition = FVector::ZeroVector) const;
+		const FString& RenderString = TEXT(""),
+		const FVector& CoordinatePosition = FVector::ZeroVector);
 
 	/* ---------------------------------------------------
 	 *		Static library functions

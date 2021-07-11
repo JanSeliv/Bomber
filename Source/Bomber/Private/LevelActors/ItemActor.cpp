@@ -65,8 +65,8 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	}
 
 	// Construct the map component
-	MapComponentInternal->OnConstruction();
-	if (!IS_VALID(this))
+	const bool bIsConstructed = MapComponentInternal->OnConstruction();
+	if (!bIsConstructed)
 	{
 		return;
 	}

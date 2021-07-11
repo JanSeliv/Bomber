@@ -47,7 +47,6 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 		// Visualize and show destination cell
 		if (!USingletonLibrary::IsEditorNotPieWorld()) // [PIE]
 		{
-			USingletonLibrary::PrintToLog(this, "MoveAI", "-> \t ClearOwnerTextRenders");
 			USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
 		} // [IsEditorNotPieWorld]
 
@@ -55,9 +54,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 		if (MapComponent // is valid  map component
 		    && MapComponent->bShouldShowRenders)
 		{
-			bool bOutBool = false;
-			TArray<UTextRenderComponent*> OutArray{};
-			USingletonLibrary::Get().AddDebugTextRenders(OwnerInternal, FCells{AIMoveToInternal}, FLinearColor::Gray, bOutBool, OutArray, 255, 300, "x");
+			USingletonLibrary::AddDebugTextRenders(OwnerInternal, {AIMoveToInternal}, FLinearColor::Gray, 255.f, 300.f, TEXT("x"));
 		}
 	}
 #endif
@@ -137,7 +134,6 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR
 	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]UpdateAI", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
 		AIMoveToInternal = FCell::ZeroCell;
 	}
@@ -299,9 +295,7 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR	 // [Editor]
 			if (MapComponent->bShouldShowRenders)
 			{
-				bool bOutBool = false;
-				TArray<UTextRenderComponent*> OutArray{};
-				USingletonLibrary::Get().AddDebugTextRenders(OwnerInternal, FCells{F0}, FLinearColor::Red, bOutBool, OutArray, 261.F, 95.F, "Attack");
+				USingletonLibrary::AddDebugTextRenders(OwnerInternal, {F0}, FLinearColor::Red, 261.F, 95.F, TEXT("Attack"));
 			}
 #endif	// [Editor]
 		}
@@ -354,7 +348,7 @@ void AMyAIController::UpdateAI()
 			}
 			bool bOutBool = false;
 			TArray<UTextRenderComponent*> OutArray{};
-			USingletonLibrary::Get().AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, bOutBool, OutArray, 263, 124, String, Position);
+			USingletonLibrary::AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, 263.f, 124.f, String, Position);
 		} // [Loopy visualization]
 	}
 #endif	// [Editor]

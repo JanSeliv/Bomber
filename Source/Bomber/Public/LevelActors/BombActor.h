@@ -52,6 +52,8 @@ public:
 	/** Is used by player character to listen bomb destroying. */
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnBombDestroyed, AActor*, DestroyedBomb);
 
+	static const FOnBombDestroyed EmptyOnDestroyed;
+
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
@@ -66,13 +68,13 @@ public:
 	/**
 	 * Sets the defaults of the bomb
 	 * @param EventToBind Delegate that will be executed on bomb destroying
-	 * @param FireN Setting explosion length of this bomb
+	 * @param InFireRadius Setting explosion length of this bomb
 	 * @param CharacterID Setting a mesh material of bomb by the character ID
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void InitBomb(
 		const FOnBombDestroyed& EventToBind,
-		int32 FireN = 1,
+		int32 InFireRadius = 1,
 		int32 CharacterID = -1);
 
 protected:
@@ -87,6 +89,10 @@ protected:
 	/** The bomb blast path */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells", ShowOnlyInnerProperties))
 	TSet<FCell> ExplosionCellsInternal;
+
+	/** The radius of the blast to each side. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
+	int32 FireRadiusInternal = 1; //[N]
 
 	/* ---------------------------------------------------
  	 *		Protected functions

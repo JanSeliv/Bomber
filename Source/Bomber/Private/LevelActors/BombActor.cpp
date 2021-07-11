@@ -11,6 +11,8 @@
 #include "Components/BoxComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
+const ABombActor::FOnBombDestroyed ABombActor::EmptyOnDestroyed = FOnBombDestroyed();
+
 // Default constructor
 UBombDataAsset::UBombDataAsset()
 {
@@ -40,21 +42,22 @@ ABombActor::ABombActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
+// Sets the defaults of the bomb
 void ABombActor::InitBomb(
 	const FOnBombDestroyed& EventToBind,
-	int32 FireN/* = 1*/,
+	int32 InFireRadius/* = 1*/,
 	int32 CharacterID/* = -1*/)
 {
 	if (!MapComponentInternal
-	    || FireN < 0) // Negative length of the explosion
+	    || InFireRadius < 0) // Negative length of the explosion
 	{
 		return;
 	}
 
 	// Set material
 	const TArray<TObjectPtr<UMaterialInterface>>& BombMaterials = UBombDataAsset::Get().BombMaterials;
-	if (CharacterID != -1       // Is not debug character
-	    && BombMaterials.Num()) // As least one bomb material
+	if (CharacterID != INDEX_NONE // Is not debug character
+	    && BombMaterials.Num())   // As least one bomb material
 	{
 		const int32 BombMaterialNo = FMath::Abs(CharacterID) % BombMaterials.Num();
 		MapComponentInternal->SetMaterial(BombMaterials[BombMaterialNo]);
@@ -62,22 +65,14 @@ void ABombActor::InitBomb(
 
 	// Update explosion information
 	ExplosionCellsInternal.Empty();
-	AGeneratedMap::Get().GetSidesCells(ExplosionCellsInternal, MapComponentInternal->Cell, EPathType::Explosion, FireN);
-
-#if WITH_EDITOR  // [IsEditor]
-	if (USingletonLibrary::IsEditor()
-	    && MapComponentInternal->bShouldShowRenders)
-	{
-		USingletonLibrary::PrintToLog(this, "[Editor]InitializeBombProperties", "-> \t AddDebugTextRenders");
-		USingletonLibrary::ClearOwnerTextRenders(this);
-		bool bOutBool = false;
-		TArray<UTextRenderComponent*> OutArray;
-		USingletonLibrary::Get().AddDebugTextRenders(this, ExplosionCellsInternal, FLinearColor::Red, bOutBool, OutArray);
-	}
-#endif
+	FireRadiusInternal = InFireRadius;
+	AGeneratedMap::Get().GetSidesCells(ExplosionCellsInternal, MapComponentInternal->Cell, EPathType::Explosion, InFireRadius);
 
 	// Notify player that bomb was detonated
-	OnDestroyed.Add(EventToBind);
+	if (EventToBind.IsBound())
+	{
+		OnDestroyed.Add(EventToBind);
+	}
 }
 
 /* ---------------------------------------------------
@@ -96,15 +91,29 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	}
 
 	// Construct the actor's map component
-	MapComponentInternal->OnConstruction();
+	const bool bIsConstructed = MapComponentInternal->OnConstruction();
+	if (!bIsConstructed)
+	{
+		return;
+	}
 
-#if WITH_EDITOR
+#if WITH_EDITOR //[IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		USingletonLibrary::PrintToLog(this, "[IsEditorNotPieWorld]OnConstruction", "-> \t InitializeBombProperties");
-		InitBomb(FOnBombDestroyed());
+		InitBomb(EmptyOnDestroyed, FireRadiusInternal);
 
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+
+		if (MapComponentInternal->bShouldShowRenders)
+		{
+			USingletonLibrary::ClearOwnerTextRenders(this);
+
+			// Show all cells as yellow and red cells where will be optimized explosions
+			FCells EmitterCells;
+			AGeneratedMap::Get().GetDangerousCells(EmitterCells, this);
+			USingletonLibrary::Get().AddDebugTextRenders(this, EmitterCells, FLinearColor::Red, 266.f);
+			USingletonLibrary::Get().AddDebugTextRenders(this, ExplosionCellsInternal, FLinearColor::Yellow);
+		}
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
@@ -135,9 +144,10 @@ void ABombActor::BeginPlay()
 // Set the lifespan of this actor. When it expires the object will be destroyed
 void ABombActor::SetLifeSpan(float InLifespan/* = INDEX_NONE*/)
 {
-	if (InLifespan == INDEX_NONE) // is default value, should override it
+	if (MapComponentInternal
+	    && InLifespan == INDEX_NONE) // is default value, should override it
 	{
-		InLifespan = UBombDataAsset::Get().GetLifeSpan();
+		InLifespan = AGeneratedMap::Get().GetCellLifeSpan(MapComponentInternal->Cell, this);
 	}
 
 	Super::SetLifeSpan(InLifespan);
@@ -160,20 +170,27 @@ void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 		return;
 	}
 
+	AGeneratedMap& LevelMap = AGeneratedMap::Get();
+
+	// Get only unique cells to spawn emitters once
+	FCells UniqueBlastCells;
+	LevelMap.GetDangerousCells(UniqueBlastCells, this);
+
 	// Spawn emitters
+	UWorld* World = GetWorld();
 	UParticleSystem* ExplosionParticle = UBombDataAsset::Get().ExplosionParticle;
-	for (const FCell& Cell : ExplosionCellsInternal)
+	FTransform Position(GetActorTransform());
+	for (const FCell& Cell : UniqueBlastCells)
 	{
-		const FTransform Position{GetActorRotation(), Cell.Location, GetActorScale3D()};
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionParticle, Position);
+		Position.SetLocation(Cell.Location);
+		UGameplayStatics::SpawnEmitterAtLocation(World, ExplosionParticle, Position);
 	}
 
-	// Copy explosion cells and empty it to avoid self destroying one more time by another bomb
-	const FCells CellsToDestroy{ExplosionCellsInternal};
-	ExplosionCellsInternal.Empty();
+	// Move explosion cells to avoid self destroying one more time by another bomb
+	const FCells CellsToDestroy = MoveTemp(ExplosionCellsInternal);
 
 	// Destroy all actors from array of cells
-	AGeneratedMap::Get().DestroyActorsFromMap(CellsToDestroy);
+	LevelMap.DestroyActorsFromMap(UniqueBlastCells);
 }
 
 // Triggers when character end to overlaps with this bomb.
@@ -201,7 +218,7 @@ void ABombActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGame
 	if (CurrentGameState == ECurrentGameState::InGame)
 	{
 		// Reinit bomb and restart lifespan
-		InitBomb(FOnBombDestroyed());
-		SetLifeSpan();
+		InitBomb(EmptyOnDestroyed, FireRadiusInternal);
+		SetLifeSpan(UBombDataAsset::Get().GetLifeSpan());
 	}
 }

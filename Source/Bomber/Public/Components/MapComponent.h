@@ -48,9 +48,10 @@ public:
 	/** Sets default values for this component's properties */
 	UMapComponent();
 
-	/** Updates a owner's state. Should be called in the owner's OnConstruction event. */
+	/** Updates an owner's state. Should be called in the owner's OnConstruction event.
+	 * @return false if owner was not constructed. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void OnConstruction();
+	bool OnConstruction();
 
 	/** Set specified mesh to the Owner. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

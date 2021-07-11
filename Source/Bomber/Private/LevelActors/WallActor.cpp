@@ -47,7 +47,11 @@ void AWallActor::OnConstruction(const FTransform& Transform)
 	}
 
 	// Update this actor on the Level Map
-	MapComponentInternal->OnConstruction();
+	const bool bIsConstructed = MapComponentInternal->OnConstruction();
+	if (!bIsConstructed)
+	{
+		return;
+	}
 }
 
 // Called when the game starts or when spawned
