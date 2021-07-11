@@ -280,8 +280,6 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 
 	// Attach to the Level Map actor
 	ComponentOwner->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-
-	USingletonLibrary::PrintToLog(ComponentOwner, "AddToGrid \t ADDED:", Cell.Location.ToString());
 }
 
 // The intersection of (OutCells ∩ ActorsTypesBitmask).
@@ -367,8 +365,6 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 				--PlayersNumInternal;
 				OnAnyPlayerDestroyed = true;
 			}
-
-			USingletonLibrary::PrintToLog(OwnerIt, "DestroyActorsFromMap");
 		}
 	}
 	MapComponentsInternal.Shrink();
@@ -389,14 +385,14 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 {
 	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
-	const bool bIsValidOwner = IsValid(ComponentOwner);
+	const bool bIsValidOwner = IS_VALID(ComponentOwner);
 
 	// Remove from the array (MapComponent can be invalid)
 	MapComponentsInternal.Remove(MapComponent);
 
 	// hide if dragged else destroy
-	if (bIsValidOwner && !IsPendingKillPending()             // forcing destroy dragged actors only when the owner or Generated Map becomes invalid
-	    && DraggedComponentsInternal.Contains(MapComponent)) // is dragged
+	if (bIsValidOwner                         // forcing destroy dragged actors only when the owner or Generated Map becomes invalid
+	    && IsDraggedLevelActor(MapComponent)) // is dragged
 	{
 		ComponentOwner->SetActorHiddenInGame(true);
 		ComponentOwner->SetActorEnableCollision(false);
@@ -453,7 +449,6 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 	for (const FCell& CellIt : CellsToIterate)
 	{
 		Counter++;
-		USingletonLibrary::PrintToLog(ComponentOwner, "FCell(MapComponent)", FString::FromInt(Counter) + ":" + CellIt.Location.ToString());
 
 		if (NonEmptyCells.Contains(CellIt)) // the cell is not free from other level actors
 		{
@@ -610,6 +605,80 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 	}
 }
 
+// Returns cells that currently are chosen to be exploded
+void AGeneratedMap::GetDangerousCells(TSet<FCell>& OutCells, const ABombActor* BombInstigator/* = nullptr*/) const
+{
+	FMapComponents BombsMapComponents;
+	GetMapComponents(BombsMapComponents, TO_FLAG(EAT::Bomb));
+
+	FCells DangerousCells;
+	for (const UMapComponent* MapComponentIt : BombsMapComponents)
+	{
+		const auto BombOwner = MapComponentIt ? Cast<ABombActor>(MapComponentIt->GetOwner()) : nullptr;
+		if (!IS_VALID(BombOwner)
+		    || BombOwner == BombInstigator)
+		{
+			continue;
+		}
+
+		static constexpr float ErrorTolerance = 0.01f;
+		const float BombRemainsTime = BombOwner->GetLifeSpan();
+		if (!FMath::IsNearlyZero(BombRemainsTime, ErrorTolerance))
+		{
+			// Skip, is not ready to explode
+			continue;
+		}
+
+		const FCells ExplosionCells = BombOwner->GetExplosionCells();
+		DangerousCells = DangerousCells.Union(ExplosionCells);
+	}
+
+	if (BombInstigator)
+	{
+		// Return only unique cells to explode for specified instigator
+		const FCells InstigatorCells = BombInstigator->GetExplosionCells();
+		OutCells = InstigatorCells.Difference(DangerousCells);
+		return;
+	}
+
+	// Return dangerous cells of all bombs
+	OutCells = DangerousCells;
+}
+
+// Returns the life span for specified cell.
+float AGeneratedMap::GetCellLifeSpan(const FCell& Cell, const class ABombActor* BombInstigator/* = nullptr*/) const
+{
+	float MinLifeSpan = UBombDataAsset::Get().GetLifeSpan();
+	if (Cell == FCell::ZeroCell
+	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame)
+	{
+		return MinLifeSpan;
+	}
+
+	FMapComponents BombsMapComponents;
+	GetMapComponents(BombsMapComponents, TO_FLAG(EAT::Bomb));
+
+	for (const UMapComponent* MapComponentIt : BombsMapComponents)
+	{
+		const auto BombOwner = MapComponentIt ? Cast<ABombActor>(MapComponentIt->GetOwner()) : nullptr;
+		if (!IS_VALID(BombOwner)
+		    || BombOwner == BombInstigator)
+		{
+			continue;
+		}
+
+		const FCells ExplosionCells = BombOwner->GetExplosionCells();
+		const float OwnerLifeSpan = BombOwner->GetLifeSpan();
+		if (ExplosionCells.Contains(Cell)
+		    && OwnerLifeSpan < MinLifeSpan)
+		{
+			MinLifeSpan = OwnerLifeSpan;
+		}
+	}
+
+	return MinLifeSpan;
+}
+
 /* ---------------------------------------------------
  *		Level map protected functions
  * --------------------------------------------------- */
@@ -634,7 +703,6 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 #endif //WITH_EDITOR [GEditor]
 
-	USingletonLibrary::PrintToLog(this, "----- OnConstruction -----");
 	const UGeneratedMapDataAsset& LevelsDataAsset = UGeneratedMapDataAsset::Get();
 
 	// Create the background blueprint child actor
@@ -763,7 +831,6 @@ void AGeneratedMap::GenerateLevelActors()
 	{
 		return;
 	}
-	USingletonLibrary::PrintToLog(this, "----- GenerateLevelActors ------", "---- START -----");
 
 	// Destroy all editor-only non-PIE actors
 	FCells NonEmptyCells;
@@ -798,7 +865,6 @@ void AGeneratedMap::GenerateLevelActors()
 			DraggedItems.Emplace(MapComponentIt->Cell);
 		}
 	}
-	USingletonLibrary::PrintToLog(this, "_____ [Editor]BroadcastActorsUpdating _____", "_____ END _____");
 
 	/* Steps:
 	*
@@ -938,23 +1004,6 @@ void AGeneratedMap::GenerateLevelActors()
 			bFoundPath = !LCellsToFind.Num();
 		}
 
-#if WITH_EDITOR // show cells
-		if (bFoundPath                                                  // success, loop-exit condition
-		    || WallsChance - WallsChance * 0.01f <= KINDA_SMALL_NUMBER) // generation failed at all, loop-exit condition
-		{
-			USingletonLibrary::ClearOwnerTextRenders(this);
-			if (bShouldShowRenders)
-			{
-				bool bOutBool = false;
-				TArray<UTextRenderComponent*> OutArray{};
-				const USingletonLibrary& Singleton = USingletonLibrary::Get();
-				Singleton.AddDebugTextRenders(this, DraggedItems, FLinearColor::Gray, bOutBool, OutArray, 254, 255, "*");
-				Singleton.AddDebugTextRenders(this, WallsToSpawn.Union(DraggedWalls), FLinearColor::Red, bOutBool, OutArray, 265);
-				UE_LOG(LogInit, Log, TEXT("--- Count: %i, wall %f"), Counter, WallsChance);
-			}
-		}
-#endif	// WITH_EDITOR
-
 		// Go to the step 0 if don't found
 		if (!bFoundPath)
 		{
@@ -986,8 +1035,6 @@ void AGeneratedMap::GenerateLevelActors()
 		}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 	}
-
-	USingletonLibrary::PrintToLog(this, "_____ GenerateLevelActors _____", "_____ END _____");
 }
 
 //  Map components getter.

@@ -58,18 +58,6 @@ bool USingletonLibrary::IsEditorNotPieWorld()
 	return false;
 }
 
-void USingletonLibrary::PrintToLog(const UObject* UObj, const FString& FunctionName, const FString& Message)
-{
-#if WITH_EDITOR	 // [IsEditor]
-	if (IsEditor()
-	    && IS_VALID(GetLevelMap())
-	    && AGeneratedMap::Get().bShouldShowRenders) // The Level Map is not accessible or has the debug mode
-	{
-		UE_LOG(LogTemp, Warning, TEXT("\t %s \t %s \t %s"), (UObj ? *UObj->GetName() : TEXT("nullptr")), *FunctionName, *Message);
-	}
-#endif // [IsEditor]
-}
-
 // Remove all text renders of the Owner
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
@@ -98,23 +86,12 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 		{
 			TextRenderIt->DestroyComponent();
 		}
-
-		PrintToLog(Owner, "ClearOwnerTextRenders \t Components removed:", FString::FromInt(TextRendersArray.Num()));
 	}
 #endif	// WITH_EDITOR [IsEditor]
 }
 
 // Debug visualization by text renders
-void USingletonLibrary::AddDebugTextRenders_Implementation(
-	AActor* Owner,
-	const FCells& Cells,
-	const FLinearColor& TextColor,
-	bool& bOutHasCoordinateRenders,
-	TArray<UTextRenderComponent*>& OutTextRenderComponents,
-	float TextHeight/* = 261.f*/,
-	float TextSize/* = 124.f*/,
-	const FString& RenderString/* = ""*/,
-	const FVector& CoordinatePosition/* = FVector::ZeroVector*/) const
+void USingletonLibrary::AddDebugTextRenders_Implementation(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const
 {
 #if WITH_EDITOR	 // [IsEditor]
 	if (!IsEditor()
@@ -131,9 +108,21 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(
 		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
 		TextRenderIt->RegisterComponent();
 	}
-
-	PrintToLog(Owner, "AddDebugTextRenders \t added renders:", *(FString::FromInt(OutTextRenderComponents.Num()) + RenderString + FString(bOutHasCoordinateRenders ? "\t Double" : "")));
 #endif	// WITH_EDITOR [IsEditor]
+}
+
+void USingletonLibrary::AddDebugTextRenders(
+	AActor* Owner,
+	const FCells& Cells,
+	const FLinearColor& TextColor,
+	float TextHeight/* = 261.f*/,
+	float TextSize/* = 124.f*/,
+	const FString& RenderString/* = TEXT("")*/,
+	const FVector& CoordinatePosition/* = FVector::ZeroVector*/)
+{
+	bool bOutBool = false;
+	TArray<UTextRenderComponent*> OutArray;
+	Get().AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray, TextHeight, TextSize, RenderString, CoordinatePosition);
 }
 
 /* ---------------------------------------------------
@@ -185,7 +174,6 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 	if (IS_VALID(LevelMap))
 	{
 		GetSingleton()->LevelMapInternal = LevelMap;
-		PrintToLog(LevelMap, "----- SetLevelMap", "UPDATED -----");
 	}
 }
 

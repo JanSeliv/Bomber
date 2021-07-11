@@ -109,13 +109,9 @@ public:
 	 * --------------------------------------------------- */
 
 #if WITH_EDITORONLY_DATA  // [Editor] Renders
-	/** Mark the editor updating visualization(text renders) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, InlineEditConditionToggle))
-	bool bShouldShowRenders = false;
-
-	/** Specify for which level actors should show debug renders */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, EditCondition = "bShouldShowRenders", Bitmask, BitmaskEnum = "EActorType"))
-	int32 RenderActorsTypes = TO_FLAG(EAT::All); //[N]
+	/** Specify for which level actors should show debug renders. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "EActorType"))
+	int32 RenderActorsTypes; //[N]
 #endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
 	/* ---------------------------------------------------
@@ -151,8 +147,8 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetSidesCells(
-		TSet<struct FCell>& OutCells,
-		const struct FCell& Cell,
+		TSet<FCell>& OutCells,
+		const FCell& Cell,
 		EPathType Pathfinder,
 		int32 SideLength,
 		bool bBreakInputCells = false) const;
@@ -172,7 +168,7 @@ public:
 	 * @param AddedComponent The Map Component of the generated or dragged level actor
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void AddToGrid(const struct FCell& Cell, class UMapComponent* AddedComponent);
+	void AddToGrid(const FCell& Cell, class UMapComponent* AddedComponent);
 
 	/** The intersection of (OutCells ∩ ActorsTypesBitmask).
 	 *
@@ -183,7 +179,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AdvancedDisplay = 2))
 	void IntersectCellsByTypes(
-		UPARAM(ref) TSet<struct FCell>& OutCells,
+		UPARAM(ref) TSet<FCell>& OutCells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask,
 		bool bIntersectAllIfEmpty = true,
 		const class UMapComponent* ExceptedComponent = nullptr) const;
@@ -196,7 +192,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	bool ContainsMapComponents(
-		const struct FCell& Cell,
+		const FCell& Cell,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
 
 	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
@@ -204,7 +200,7 @@ public:
 	 * @param Cells The set of cells for destroying the found actors.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void DestroyActorsFromMap(const TSet<struct FCell>& Cells);
+	void DestroyActorsFromMap(const TSet<FCell>& Cells);
 
 	/** Removes the specified map component from the MapComponents_ array without an owner destroying. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -223,6 +219,26 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetLevelType(ELevelType NewLevelType);
+
+	/** Returns cells that currently are chosen to be exploded.
+	 *
+	 * @param OutCells Cells to return.
+	 * @param BombInstigator If set, then return only unique cells to explode for specified instigator.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	void GetDangerousCells(TSet<FCell>& OutCells, const class ABombActor* BombInstigator = nullptr) const;
+
+	/** Returns the life span for specified cell.
+	*
+	* @param Cell Cell to check.
+	* @param BombInstigator If set, then exclude specified instigator.
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	float GetCellLifeSpan(const FCell& Cell, const class ABombActor* BombInstigator = nullptr) const;
+
+	/** Returns true if specified map component has non-generated owner that is manually dragged to the scene. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsDraggedLevelActor(const class UMapComponent* MapComponent) const { return MapComponent && DraggedComponentsInternal.Contains(MapComponent); }
 
 protected:
 	/* ---------------------------------------------------

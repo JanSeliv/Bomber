@@ -51,7 +51,11 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 	}
 
 	// Construct the actor's map component.
-	MapComponentInternal->OnConstruction();
+	const bool bIsConstructed = MapComponentInternal->OnConstruction();
+	if (!bIsConstructed)
+	{
+		return;
+	}
 
 	UpdateItemChance();
 }
@@ -96,7 +100,6 @@ void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 	static constexpr int32 Max = 100;
 	if (FMath::RandHelper(Max) < SpawnItemChanceInternal)
 	{
-		USingletonLibrary::PrintToLog(this, "OnBoxDestroyed", "Item will be spawned");
 		AGeneratedMap::Get().SpawnActorByType(EAT::Item, FCell(GetActorLocation()));
 	}
 }

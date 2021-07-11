@@ -23,23 +23,25 @@ UMapComponent::UMapComponent()
 }
 
 // Updates a owner's state. Should be called in the owner's OnConstruction event.
-void UMapComponent::OnConstruction()
+bool UMapComponent::OnConstruction()
 {
 	AActor* Owner = GetOwner();
-	if (!IS_VALID(Owner)) // The owner is not valid
+	if (IS_TRANSIENT(Owner))
 	{
-		return;
+		return false;
 	}
 
 	AGeneratedMap& LevelMap = AGeneratedMap::Get();
 
 	// Find new Location at dragging and update-delegate
-	USingletonLibrary::PrintToLog(Owner, "OnMapComponentConstruction", "-> \t FCell()");
 	LevelMap.SetNearestCell(this);
 
 	// Owner updating
-	USingletonLibrary::PrintToLog(Owner, "OnMapComponentConstruction", "-> \t AddToGrid");
 	LevelMap.AddToGrid(Cell, this);
+	if (!IS_VALID(Owner)) // Dragged owner can be moved to the persistent
+	{
+		return false;
+	}
 
 	// Update default mesh asset
 	if (ActorDataAssetInternal)
@@ -52,14 +54,20 @@ void UMapComponent::OnConstruction()
 	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
 		// Remove all text renders of the Owner
-		USingletonLibrary::PrintToLog(Owner, "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t ClearOwnerTextRenders");
 		USingletonLibrary::ClearOwnerTextRenders(Owner);
 
 		// Update AI renders after adding obj to map
-		USingletonLibrary::PrintToLog(Owner, "[IsEditorNotPieWorld]OnMapComponentConstruction", "-> \t BroadcastAiUpdating");
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+
+		// Show current cell if type specified
+		if (TO_FLAG(GetActorType()) & LevelMap.RenderActorsTypes)
+		{
+			USingletonLibrary::AddDebugTextRenders(Owner, {Cell}, FColor::White);
+		}
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
+
+	return true;
 }
 
 // Set specified mesh to the Owner
@@ -129,7 +137,6 @@ void UMapComponent::OnRegister()
 	{
 		return;
 	}
-	USingletonLibrary::PrintToLog(Owner, "OnRegister", "");
 
 	// Set the tick disabled by default and decrease the interval
 	Owner->SetActorTickInterval(UGeneratedMapDataAsset::Get().GetTickInterval());
@@ -190,9 +197,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	AActor* const ComponentOwner = GetOwner();
 	if (!IS_TRANSIENT(ComponentOwner)) // Is not transient owner
 	{
-		USingletonLibrary::PrintToLog(ComponentOwner, "OnComponentDestroyed", "-> \t DestroyActorsFromMap");
-
-		//disable collision for safety
+		// Disable collision for safety
 		ComponentOwner->SetActorEnableCollision(false);
 
 		// Delete spawned collision component

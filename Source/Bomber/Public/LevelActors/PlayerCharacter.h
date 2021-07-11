@@ -143,11 +143,11 @@ protected:
 
 	/** The name of a material parameter with a diffuse array. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))
-	FName SkinArrayParameterInternal = "DiffuseArray"; //[D]
+	FName SkinArrayParameterInternal = TEXT("DiffuseArray"); //[D]
 
 	/** The name of a material parameter with a diffuse index. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skin Index Parameter", ShowOnlyInnerProperties))
-	FName SkinIndexParameterInternal = "DiffuseIndex"; //[D]
+	FName SkinIndexParameterInternal = TEXT("DiffuseIndex"); //[D]
 };
 
 /**
