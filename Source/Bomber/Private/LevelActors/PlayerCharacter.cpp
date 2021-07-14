@@ -11,10 +11,10 @@
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
+#include "Components/MySkeletalMeshComponent.h"
 //---
 #include "Animation/AnimInstance.h"
-#include "Components/MySkeletalMeshComponent.h"
-#include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/Texture2DArray.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -162,6 +162,8 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 		SkeletalMeshComponent->SetRelativeLocation_Direct(MeshRelativeLocation);
 		static const FRotator MeshRelativeRotation(0, -90.f, 0);
 		SkeletalMeshComponent->SetRelativeRotation_Direct(MeshRelativeRotation);
+
+		SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	// Initialize the nameplate mesh component
@@ -268,8 +270,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	UWorld* World = GetWorld();
-	if (!World
-	    || !MapComponentInternal)
+	if (!World)
 	{
 		return;
 	}
@@ -305,6 +306,31 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	UpdateNickname();
+
+	// Set the object collision type
+	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent())
+	{
+		ECollisionChannel CollisionObjectType = CapsuleComp->GetCollisionObjectType();
+		switch (CharacterIDInternal)
+		{
+			case 0:
+				CollisionObjectType = ECC_Player0;
+				break;
+			case 1:
+				CollisionObjectType = ECC_Player1;
+				break;
+			case 2:
+				CollisionObjectType = ECC_Player2;
+				break;
+			case 3:
+				CollisionObjectType = ECC_Player3;
+				break;
+			default:
+				break;
+		}
+
+		CapsuleComp->SetCollisionObjectType(CollisionObjectType);
+	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
