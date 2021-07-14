@@ -126,4 +126,21 @@ protected:
 	/** Listen by dragged bombs to handle game resetting. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Changes the response for specified player.
+	 *
+	 * @param CharacterID Player to set response.
+	 * @param NewResponse New response to set.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetCollisionResponseToPlayer(int32 CharacterID, ECollisionResponse NewResponse);
+
+	/** Changes the response for all players.
+	 * @param NewResponse New response to set. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetCollisionResponseToAllPlayers(ECollisionResponse NewResponse);
+
+	/** Returns all players overlapping with this bomb. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	void GetOverlappingPlayers(TArray<class AActor*>& OutPlayers) const;
 };

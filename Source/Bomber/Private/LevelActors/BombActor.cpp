@@ -7,6 +7,7 @@
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/SingletonLibrary.h"
+#include "LevelActors/PlayerCharacter.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -72,6 +73,20 @@ void ABombActor::InitBomb(
 	if (EventToBind.IsBound())
 	{
 		OnDestroyed.Add(EventToBind);
+	}
+
+	// Set default collision to block all players
+	SetCollisionResponseToAllPlayers(ECR_Block);
+
+	// Do not block overlapping players
+	TArray<AActor*> OverlappingPlayers;
+	GetOverlappingPlayers(OverlappingPlayers);
+	for (const AActor* OverlappingPlayerIt : OverlappingPlayers)
+	{
+		if (const auto PlayerCharacter = Cast<APlayerCharacter>(OverlappingPlayerIt))
+		{
+			SetCollisionResponseToPlayer(PlayerCharacter->GetCharacterID(), ECR_Overlap);
+		}
 	}
 }
 
@@ -196,20 +211,23 @@ void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 // Triggers when character end to overlaps with this bomb.
 void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	UBoxComponent* BombCollisionComponent = MapComponentInternal ? MapComponentInternal->BoxCollision : nullptr;
-	if (!BombCollisionComponent // Is not valid collision component
-	    || OtherActor == this)  // Self triggering
+	const auto PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (!PlayerCharacter)
 	{
 		return;
 	}
 
-	//Sets the collision preset to block all dynamics
-	TArray<AActor*> OverlappingActors;
-	BombCollisionComponent->GetOverlappingActors(OverlappingActors, USingletonLibrary::GetActorClassByType(EAT::Player));
-	if (OverlappingActors.Num() == 0) // There are no more characters on the bomb
+	TArray<AActor*> OverlappingPlayers;
+	GetOverlappingPlayers(OverlappingPlayers);
+	if (!OverlappingPlayers.Num())
 	{
-		BombCollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
+		// There are no more characters on the bomb
+		SetCollisionResponseToAllPlayers(ECR_Block);
+		return;
 	}
+
+	// Start block only the player that left this bomb
+	SetCollisionResponseToPlayer(PlayerCharacter->GetCharacterID(), ECR_Block);
 }
 
 // Listen by dragged bombs to handle game resetting
@@ -220,5 +238,57 @@ void ABombActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGame
 		// Reinit bomb and restart lifespan
 		InitBomb(EmptyOnDestroyed, FireRadiusInternal);
 		SetLifeSpan(UBombDataAsset::Get().GetLifeSpan());
+	}
+}
+
+// Changes the response for specified player
+void ABombActor::SetCollisionResponseToPlayer(int32 CharacterID, ECollisionResponse NewResponse)
+{
+	UBoxComponent* BombCollisionComponent = MapComponentInternal ? MapComponentInternal->BoxCollision : nullptr;
+	if (!BombCollisionComponent
+	    || CharacterID < 0)
+	{
+		return;
+	}
+
+	ECollisionChannel CollisionChannel = ECC_WorldDynamic;
+	switch (CharacterID)
+	{
+		case 0:
+			CollisionChannel = ECC_Player0;
+			break;
+		case 1:
+			CollisionChannel = ECC_Player1;
+			break;
+		case 2:
+			CollisionChannel = ECC_Player2;
+			break;
+		case 3:
+			CollisionChannel = ECC_Player3;
+			break;
+		default:
+			break;
+	}
+
+	BombCollisionComponent->SetCollisionResponseToChannel(CollisionChannel, NewResponse);
+}
+
+// Changes the response for all players
+void ABombActor::SetCollisionResponseToAllPlayers(ECollisionResponse NewResponse)
+{
+	static constexpr int32 MaxPlayerID = 3;
+	for (int32 CharacterID = 0; CharacterID <= MaxPlayerID; ++CharacterID)
+	{
+		SetCollisionResponseToPlayer(CharacterID, NewResponse);
+	}
+}
+
+// Returns all players overlapping with this bomb
+void ABombActor::GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const
+{
+	UBoxComponent* BombCollisionComponent = MapComponentInternal ? MapComponentInternal->BoxCollision : nullptr;
+	if (BombCollisionComponent)
+	{
+		BombCollisionComponent->GetOverlappingActors(OutPlayers, USingletonLibrary::GetActorClassByType(EAT::Player));
 	}
 }

@@ -9,6 +9,11 @@
 //---
 #include "PlayerCharacter.generated.h"
 
+#define ECC_Player0 ECollisionChannel::ECC_GameTraceChannel1
+#define ECC_Player1 ECollisionChannel::ECC_GameTraceChannel2
+#define ECC_Player2 ECollisionChannel::ECC_GameTraceChannel3
+#define ECC_Player3 ECollisionChannel::ECC_GameTraceChannel4
+
 /**
  * Determines each mesh to attach.
  */
