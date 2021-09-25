@@ -143,7 +143,7 @@ public:
 
 	/** Returns the zero cell (0,0,0) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE FCell GetZeroCell() { return FCell::ZeroCell; }
+	static const FORCEINLINE FCell& GetZeroCell() { return FCell::ZeroCell; }
 
 	/** Returns the zero cell (0,0,0) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
@@ -156,7 +156,7 @@ public:
 	 * @return Rotated to the Level Map cell
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "VectorToRotate,AxisZ"))
-	static FORCEINLINE struct FCell RotateCellAngleAxis(const FCell& Cell, const float& AxisZ)
+	static const FORCEINLINE FCell& RotateCellAngleAxis(const FCell& Cell, float AxisZ)
 	{
 		return Cell.RotateAngleAxis(AxisZ);
 	}
@@ -168,18 +168,18 @@ public:
 	 * @return The distance between to cells
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "C1,C2"))
-	static FORCEINLINE float CalculateCellsLength(const struct FCell& C1, const struct FCell& C2)
+	static FORCEINLINE float CalculateCellsLength(const FCell& C1, const FCell& C2)
 	{
 		return fabsf((C1.Location - C2.Location).Size()) / GetCellSize();
 	}
 
 	/** Find the average of an set of cells */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FCell GetCellArrayAverage(const TSet<struct FCell>& Cells);
+	static FCell GetCellArrayAverage(const TSet<FCell>& Cells);
 
 	/** Returns empty settings row. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE FSettingsPicker GetEmptySettingsRow() { return FSettingsPicker::Empty; }
+	static const FORCEINLINE FSettingsPicker& GetEmptySettingsRow() { return FSettingsPicker::Empty; }
 
 	/** Returns true if row is valid. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingsRow"))

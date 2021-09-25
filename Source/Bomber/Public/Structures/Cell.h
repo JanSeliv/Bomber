@@ -35,14 +35,14 @@ struct FCell
 	*
 	* @param Vector The other vector.
 	*/
-	explicit FCell(struct FVector Vector);
+	explicit FCell(const FVector& Vector);
 
 	/** Rotates around the center of the Level Map to the same yaw degree.
 	 *
 	 * @param AxisZ The Z param of the axis to rotate around
 	 * @return Rotated to the Level Map cell, the same cell otherwise
 	 */
-	FCell RotateAngleAxis(const float& AxisZ) const;
+	FCell RotateAngleAxis(float AxisZ) const;
 
 	/**
 	 * Compares cells for equality.

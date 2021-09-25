@@ -162,6 +162,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	AActor* SpawnActorByType(EActorType Type, const FCell& Cell);
 
+	/** Spawns a level actor on the Level Map by the specified type. */
+	template<typename T>
+	static T* SpawnActorByType(EActorType Type, const FCell& Cell) { return Cast<T>(Get().SpawnActorByType(Type, Cell)); }
+
 	/** Adding and attaching the specified Map Component to the MapComponents_ array
 
 	 * @param Cell The location where the owner will be standing on
@@ -240,6 +244,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsDraggedLevelActor(const class UMapComponent* MapComponent) const { return MapComponent && DraggedComponentsInternal.Contains(MapComponent); }
 
+	/** Returns the cached transform. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FTransform& GetCachedTransform() const { return CachedTransformInternal; }
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -278,6 +286,10 @@ protected:
 	/** Is true when current state is Game Starting. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
 	bool bIsGameRunningInternal; //[G]
+
+	/** Contains the cached transform since the level actor does not move and is always static. */
+	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cached Transform"))
+	FTransform CachedTransformInternal; //[G]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

@@ -693,6 +693,8 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
+	CachedTransformInternal = GetActorTransform();
+
 #if WITH_EDITOR // [GEditor]
 	USingletonLibrary::SetLevelMap(this);
 	if (GEditor // Can be bound before editor is loaded

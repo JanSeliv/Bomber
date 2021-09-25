@@ -265,8 +265,8 @@ APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 // Find the average of an array of vectors
 FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 {
-	FVector Sum(0.f);
-	FVector Average(0.f);
+	FVector Sum = FVector::ZeroVector;
+	FVector Average = FVector::ZeroVector;
 	const float CellsNum = static_cast<float>(Cells.Num());
 	if (CellsNum > 0.f)
 	{
