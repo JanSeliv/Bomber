@@ -10,23 +10,20 @@
 const FCell FCell::ZeroCell = FCell();
 
 // Initial constructor for cells filling into the array. Round another FVector into this cell.
-FCell::FCell(FVector Vector)
+FCell::FCell(const FVector& Vector)
 {
-	Location.X = FMath::RoundToFloat((Vector.X));
+	Location.X = FMath::RoundToFloat(Vector.X);
 	Location.Y = FMath::RoundToFloat(Vector.Y);
-	Location.Z = FMath::RoundToFloat(AGeneratedMap::Get().GetActorLocation().Z);
+	Location.Z = FMath::RoundToFloat(AGeneratedMap::Get().GetCachedTransform().GetLocation().Z);
 }
 
 // Rotates around the center of the Level Map to the same yaw degree
-FCell FCell::RotateAngleAxis(const float& AxisZ) const
+FCell FCell::RotateAngleAxis(float AxisZ) const
 {
-	if (!ensureAlwaysMsgf(AxisZ != abs(0.f), TEXT("The axis is zero")))
-	{
-		return *this;
-	}
-
-	const AGeneratedMap& LevelMap = AGeneratedMap::Get();
-	const FVector Dimensions = this->Location - LevelMap.GetActorLocation();
-	const FVector RotatedVector = Dimensions.RotateAngleAxis(LevelMap.GetActorRotation().Yaw, FVector(0, 0, AxisZ));
-	return FCell(this->Location + RotatedVector - Dimensions);
+	const FTransform& LevelTransform = AGeneratedMap::Get().GetCachedTransform();
+	const FVector Dimensions = Location - LevelTransform.GetLocation();
+	const float AngleDeg = LevelTransform.GetRotation().Rotator().Yaw;
+	const FVector Axis(0, 0, AxisZ);
+	const FVector RotatedVector = Dimensions.RotateAngleAxis(AngleDeg, Axis);
+	return FCell(Location + RotatedVector - Dimensions);
 }

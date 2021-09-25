@@ -227,8 +227,7 @@ void APlayerCharacter::SpawnBomb()
 	}
 
 	// Spawn bomb
-	auto BombActor = Cast<ABombActor>(AGeneratedMap::Get().SpawnActorByType(EAT::Bomb, MapComponentInternal->Cell));
-	if (BombActor) // can return nullptr if the cell is not free
+	if (ABombActor* BombActor = AGeneratedMap::SpawnActorByType<ABombActor>(EAT::Bomb, MapComponentInternal->Cell)) // can return nullptr if the cell is not free
 	{
 		// Updating explosion cells
 		PowerupsInternal.BombN--;
@@ -546,10 +545,9 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 		return;
 	}
 
-	FTimerManager& TimerManager = World->GetTimerManager();
 	switch (CurrentGameState)
 	{
-		case ECurrentGameState::Menu:
+		case ECurrentGameState::Menu: // fallthrough
 		case ECurrentGameState::GameStarting:
 		{
 			SetActorTickEnabled(false);
