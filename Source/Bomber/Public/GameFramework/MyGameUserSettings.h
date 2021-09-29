@@ -41,11 +41,11 @@ public:
 
 	/** Get all supported resolutions of the primary monitor in the text format. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TArray<FText> GetTextResolutions() const { return TextResolutionsInternal; }
+	void GetTextResolutions(TArray<FText>& OutTextResolutions) const { OutTextResolutions = TextResolutionsInternal; }
 
 	/** Get all supported resolutions of the primary monitor in the int point format.. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TArray<FIntPoint> GetIntResolutions() const { return IntResolutionsInternal; }
+	void GetIntResolutions(TArray<FIntPoint>& OutIntResolutions) const { OutIntResolutions = IntResolutionsInternal; }
 
 	/** Call to update supported resolutions in arrays. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
