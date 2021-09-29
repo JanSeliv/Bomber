@@ -40,7 +40,7 @@ public:
 
 	/** Returns the width and height of the settings widget in percentages of an entire screen. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FVector2D GetSettingsPercentSize() const { return SettingsPercentSizeInternal; }
+	const FORCEINLINE FVector2D& GetSettingsPercentSize() const { return SettingsPercentSizeInternal; }
 
 	/** Returns the height of the scrollbox widget in percentages of the entire settings widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -48,11 +48,11 @@ public:
 
 	/** Returns the padding of the settings widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FMargin GetSettingsPadding() const { return SettingsPaddingInternal; }
+	const FORCEINLINE FMargin& GetSettingsPadding() const { return SettingsPaddingInternal; }
 
 	/** Returns the padding of the scrollbox widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FMargin GetScrollboxPadding() const { return ScrollboxPaddingInternal; }
+	const FORCEINLINE FMargin& GetScrollboxPadding() const { return ScrollboxPaddingInternal; }
 
 	/** Return the padding space, used on adding next column. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -60,27 +60,27 @@ public:
 
 	/** Return the button theme data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FButtonThemeData GetButtonThemeData() const { return ButtonThemeDataInternal; }
+	const FORCEINLINE FButtonThemeData& GetButtonThemeData() const { return ButtonThemeDataInternal; }
 
 	/** Returns the checkbox theme data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FCheckboxThemeData GetCheckboxThemeData() const { return CheckboxThemeDataInternal; }
+	const FORCEINLINE FCheckboxThemeData& GetCheckboxThemeData() const { return CheckboxThemeDataInternal; }
 
 	/** Returns the combobox theme data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FComboboxThemeData GetComboboxThemeData() const { return ComboboxThemeDataInternal; }
+	const FORCEINLINE FComboboxThemeData& GetComboboxThemeData() const { return ComboboxThemeDataInternal; }
 
 	/** Returns the slider theme data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FSliderThemeData GetSliderThemeData() const { return SliderThemeDataInternal; }
+	const FORCEINLINE FSliderThemeData& GetSliderThemeData() const { return SliderThemeDataInternal; }
 
 	/** Returns the user input theme data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FSettingsThemeData GetUserInputThemeData() const { return UserInputThemeDataInternal; }
+	const FORCEINLINE FSettingsThemeData& GetUserInputThemeData() const { return UserInputThemeDataInternal; }
 
 	/** Returns the misc theme data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FMiscThemeData GetMiscThemeData() const { return MiscThemeDataInternal; }
+	const FORCEINLINE FMiscThemeData& GetMiscThemeData() const { return MiscThemeDataInternal; }
 
 protected:
 	/** The data table with all settings. */
@@ -150,7 +150,7 @@ public:
 	* @param bSubStringSearch true to return row by substring (for 'VSync' will find a row with 'Settings.Checkbox.VSync' tag).
 	* @see UMyGameUserSettings::SettingsTableRowsInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FSettingsPicker FindSettingRow(FName TagName, bool bSubStringSearch = false) const;
+	const FSettingsPicker& FindSettingRow(FName TagName, bool bSubStringSearch = false) const;
 
 	/** Save all settings into their configs. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -221,7 +221,7 @@ public:
 
 	/** Get all members of a combobox. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	TArray<FText> GetComboboxMembers(FName TagName) const;
+	void GetComboboxMembers(FName TagName, TArray<FText>& OutMembers) const;
 
 	/** Get current value of a slider [0...1]. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -229,7 +229,7 @@ public:
 
 	/** Get current text of a simple or input text widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FText GetTextLineValue(FName TagName) const;
+	const FText& GetTextLineValue(FName TagName) const;
 
 	/** Get current input name of the text input. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -284,22 +284,22 @@ protected:
 	/** Add button on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddButton", AutoCreateRefTerm = "Primary,Data"))
 	void AddButtonBP(const FSettingsPrimary& Primary, const FSettingsButton& Data);
-	void AddButton(FSettingsPrimary& Primary, FSettingsButton& Data);
+	void AddButton(const FSettingsPrimary& Primary, FSettingsButton& Data);
 
 	/** Add checkbox on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCheckbox", AutoCreateRefTerm = "Primary,Data"))
 	void AddCheckboxBP(const FSettingsPrimary& Primary, const FSettingsCheckbox& Data);
-	void AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data);
+	void AddCheckbox(const FSettingsPrimary& Primary, FSettingsCheckbox& Data);
 
 	/** Add combobox on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCombobox", AutoCreateRefTerm = "Primary,Data"))
 	void AddComboboxBP(const FSettingsPrimary& Primary, const FSettingsCombobox& Data);
-	void AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data);
+	void AddCombobox(const FSettingsPrimary& Primary, FSettingsCombobox& Data);
 
 	/** Add slider on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddSlider", AutoCreateRefTerm = "Primary,Data"))
 	void AddSliderBP(const FSettingsPrimary& Primary, const FSettingsSlider& Data);
-	void AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data);
+	void AddSlider(const FSettingsPrimary& Primary, FSettingsSlider& Data);
 
 	/** Add simple text on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextLine", AutoCreateRefTerm = "Primary,Data"))
@@ -309,7 +309,7 @@ protected:
 	/** Add text input on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddUserInput", AutoCreateRefTerm = "Primary,Data"))
 	void AddUserInputBP(const FSettingsPrimary& Primary, const FSettingsUserInput& Data);
-	void AddUserInput(FSettingsPrimary& Primary, FSettingsUserInput& Data);
+	void AddUserInput(const FSettingsPrimary& Primary, FSettingsUserInput& Data);
 
 	/** Starts adding settings on the next column. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
