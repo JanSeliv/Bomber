@@ -25,7 +25,7 @@ struct FLevelStreamRow
 
 	/** The level asset */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
-	TSoftObjectPtr<UWorld> Level; //[D]
+	TSoftObjectPtr<class UWorld> Level; //[D]
 
 	/** The associated type of a level. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
@@ -62,7 +62,7 @@ public:
 
 	/** Get UGeneratedMapDataAsset::CollisionsAssetInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<AActor> GetCollisionsAsset() const { return CollisionsAssetInternal; }
+	FORCEINLINE UClass* GetCollisionsAsset() const { return CollisionsAssetInternal; }
 
 	/** Get UGeneratedMapDataAsset::LockLocationOnZeroInternal.  */
 	UFUNCTION(BlueprintCallable, BlueprintPure)

@@ -325,6 +325,6 @@ ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorType(EActorType Acto
 // Iterate ActorsDataAssets array and returns the found actor class by specified actor type
 TSubclassOf<AActor> USingletonLibrary::GetActorClassByType(EActorType ActorType)
 {
-	ULevelActorDataAsset* FoundDataAsset = GetDataAssetByActorType(ActorType);
+	const ULevelActorDataAsset* FoundDataAsset = GetDataAssetByActorType(ActorType);
 	return FoundDataAsset ? FoundDataAsset->GetActorClass() : nullptr;
 }

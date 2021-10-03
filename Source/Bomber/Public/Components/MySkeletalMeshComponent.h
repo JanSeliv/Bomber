@@ -70,7 +70,7 @@ public:
 	/** Returns how this mesh looks like for now.
 	 * @see UMySkeletalMeshComponent::PlayerMeshDataInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FCustomPlayerMeshData GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
+	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
 
 	/**
 	 * Init this component by specified player data.

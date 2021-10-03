@@ -94,7 +94,7 @@ void FMyPropertyTypeCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 	if (PropertyData.PropertyName != CustomPropertyInternal.PropertyName)
 	{
 		// Add each another property to the Details Panel without customization
-		IDetailPropertyRow& AddedRow = ChildBuilder.AddProperty(PropertyData.PropertyHandle.ToSharedRef())
+		ChildBuilder.AddProperty(PropertyData.PropertyHandle.ToSharedRef())
 		                                           .ShouldAutoExpand(true)
 		                                           .IsEnabled(PropertyData.bIsEnabled)
 		                                           .Visibility(PropertyData.Visibility);

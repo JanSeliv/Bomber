@@ -36,7 +36,7 @@ public:
 
 	/** By which level type a skeletal mesh is chosen. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FCustomPlayerMeshData GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
+	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
 
 	/** Set the custom player name by user input. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

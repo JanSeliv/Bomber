@@ -117,10 +117,10 @@ void UAnimNotifyState_PlayMorph::OnTimelineTick(float PlaybackPosition)
 		PlaybackPosition *= 2;
 
 		static constexpr float MidCurveValue = 1.f;
-		static constexpr float EndCurveValue = 2.f;
 		if (PlaybackPosition >= MidCurveValue)
 		{
 			// Reverse playing
+			static constexpr float EndCurveValue = 2.f;
 			PlaybackPosition = EndCurveValue - PlaybackPosition;
 		}
 	}

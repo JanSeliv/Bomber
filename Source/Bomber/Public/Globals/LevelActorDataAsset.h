@@ -72,7 +72,7 @@ public:
 
 	/** Returns the class of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class AActor> GetActorClass() const { return ActorClassInternal; }
+	FORCEINLINE UClass* GetActorClass() const { return ActorClassInternal; }
 
 	/** Returns the actor type of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -80,7 +80,7 @@ public:
 
 	/** Returns a extent size of the collision box of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FVector GetCollisionExtent() const { return CollisionExtentInternal; }
+	const FORCEINLINE FVector& GetCollisionExtent() const { return CollisionExtentInternal; }
 
 	/** Returns a response type of the collision box of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

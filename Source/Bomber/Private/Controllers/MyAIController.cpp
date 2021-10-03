@@ -346,8 +346,6 @@ void AMyAIController::UpdateAI()
 				default:
 					break;
 			}
-			bool bOutBool = false;
-			TArray<UTextRenderComponent*> OutArray{};
 			USingletonLibrary::AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, 263.f, 124.f, String, Position);
 		} // [Loopy visualization]
 	}
