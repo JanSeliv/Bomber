@@ -257,8 +257,6 @@ void UMyGameUserSettings::OnDataTableChanged()
 	USettingsDataAsset::Get().GenerateSettingsArray(SettingsArray);
 	for (const TTuple<FName, FSettingsPicker>& SettingsTableRowIt : SettingsArray)
 	{
-		const FSettingsPicker& SettingsRow = SettingsTableRowIt.Value;
-
 		const FName RowKey = SettingsTableRowIt.Key;
 		const FName RowValueTag = SettingsTableRowIt.Value.PrimaryData.Tag.GetTagName();
 		if (!RowValueTag.IsNone()                    // Tag is not empty

@@ -15,7 +15,4 @@ class UMyGameInstance final : public UGameInstance
 	GENERATED_BODY()
 
 public:
-	/** A size of the level map */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FVector LevelMapScale = FVector::ZeroVector; //[B]
 };

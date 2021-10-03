@@ -190,12 +190,6 @@ void FSettingsPickerCustomization::CopyMetas()
 			continue;
 		}
 
-		auto SetMetaData = [&PropertyIt](const FString& NewMetaValue)
-		{
-			PropertyIt.Value.GetProperty()->SetMetaData(PropertyIt.Key, *NewMetaValue);
-			PropertyIt.Value.PropertyHandle->NotifyPostChange(EPropertyChangeType::ValueSet);
-		};
-
 		if (!SettingsDataChildStruct)
 		{
 			PropertyDataRef.SetMetaDataValue(TemplateMetaKey, NAME_None, true);

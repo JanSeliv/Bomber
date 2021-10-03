@@ -495,7 +495,7 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 	}
 
 	// Get Level Streaming by Index in LevelStreamingRows, returns if found stream should be visible
-	auto GetLevelStreaming = [&LevelStreamRows, World, NewLevelType](const int32& Index, FName& OutLevelName) -> bool
+	auto GetLevelStreaming = [&LevelStreamRows, NewLevelType](const int32& Index, FName& OutLevelName) -> bool
 	{
 		if (!LevelStreamRows.IsValidIndex(Index))
 		{
@@ -782,19 +782,7 @@ void AGeneratedMap::PostInitializeComponents()
 	// Update the gameplay LevelMap reference in the singleton library
 	USingletonLibrary::SetLevelMap(this);
 
-	// Cells regeneration if the level map's size was changed
-	UMyGameInstance* const MyGameInstance = USingletonLibrary::GetMyGameInstance();
-	if (MyGameInstance)
-	{
-		const FVector MapScale = MyGameInstance->LevelMapScale;
-		if (MapScale.IsZero() == false // is not zero
-		    && MapScale != GetActorScale3D())
-		{
-			SetActorScale3D(MapScale);
-		}
-
-		RerunConstructionScripts();
-	}
+	RerunConstructionScripts();
 
 	// Listen states
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
@@ -901,13 +889,10 @@ void AGeneratedMap::GenerateLevelActors()
 
 		for (int32 Y = 0; Y <= MapHalfScale.Y; ++Y) // Strings
 		{
-			const bool bIsBoneY = Y == MapHalfScale.Y;
 			for (int32 X = 0; X <= MapHalfScale.X; ++X) // Columns
 			{
-				const bool bIsBoneX = X == MapHalfScale.X;
 				const bool IsSafeZone = X == 0 && Y == 1 || X == 1 && Y == 0;
 				FCell CellIt = GridCellsInternal[MapScale.X * Y + X];
-				const bool bIsNotDraggedWall = !DraggedWalls.Contains(CellIt);
 
 				// --- Part 0: Actors random filling to the ArrayToGenerate._ ---
 

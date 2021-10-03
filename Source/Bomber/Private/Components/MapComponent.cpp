@@ -85,11 +85,11 @@ void UMapComponent::SetMeshByRow(const ULevelActorRow* Row, UMeshComponent* InMe
 		MeshComponentInternal = InMeshComponent;
 	}
 
-	if (auto SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
+	if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
 	{
 		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(Row->Mesh));
 	}
-	else if (auto StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponentInternal))
+	else if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponentInternal))
 	{
 		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(Row->Mesh));
 	}

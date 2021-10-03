@@ -211,7 +211,7 @@ bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Func
 
 	const uint64 IgnoreFlags = CPF_OutParm | UFunction::GetDefaultIgnoredSignatureCompatibilityFlags();
 
-	// Run thru the parameter property chains to compare each property
+	// Run through the parameter property chains to compare each property
 	TFieldIterator<FProperty> IteratorA(TemplateFunction);
 	TFieldIterator<FProperty> IteratorB(Function);
 
@@ -222,8 +222,8 @@ bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Func
 			// Compare the two properties to make sure their types are identical
 			// Note: currently this requires both to be strictly identical and wouldn't allow functions that differ only by how derived a class is,
 			// which might be desirable when binding delegates, assuming there is directionality in the SignatureIsCompatibleWith call
-			FProperty* PropA = *IteratorA;
-			FProperty* PropB = *IteratorB;
+			const FProperty* PropA = *IteratorA;
+			const FProperty* PropB = *IteratorB;
 
 			// Check the flags as well
 			const uint64 PropertyMash = PropA->PropertyFlags ^ PropB->PropertyFlags;
@@ -242,7 +242,7 @@ bool FSettingsFunctionCustomization::IsSignatureCompatible(const UFunction* Func
 		++IteratorB;
 	}
 
-	// They matched all the way thru A's properties, but it could still be a mismatch if B has remaining parameters
+	// They matched all the way through A's properties, but it could still be a mismatch if B has remaining parameters
 	return true;
 }
 
