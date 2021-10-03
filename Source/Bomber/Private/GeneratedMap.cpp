@@ -487,7 +487,8 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 {
 	UWorld* World = GetWorld();
-	const TArray<FLevelStreamRow>& LevelStreamRows = UGeneratedMapDataAsset::Get().GetLevelStreamRows();
+	TArray<FLevelStreamRow> LevelStreamRows;
+	UGeneratedMapDataAsset::Get().GetLevelStreamRows(LevelStreamRows);
 	if (!LevelStreamRows.Num()
 	    || !World)
 	{
