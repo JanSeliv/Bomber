@@ -30,6 +30,11 @@ struct FLevelStreamRow
 	/** The associated type of a level. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
 	ELevelType LevelType = ELT::None; //[D]
+
+	/** The name of a level on UI. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
+	FText LevelName; //[D]
+
 };
 
 /**
@@ -44,9 +49,9 @@ public:
 	/** Returns the generated map data asset. */
 	static const UGeneratedMapDataAsset& Get();
 
-	/** Returns copies of levels. */
+	/** Returns level rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TArray<FLevelStreamRow> GetLevelStreamRows() const { return LevelsInternal; }
+	void GetLevelStreamRows(TArray<FLevelStreamRow>& OutRows) const { OutRows = LevelsInternal; }
 
 	/** Get UGeneratedMapDataAsset::TickInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
