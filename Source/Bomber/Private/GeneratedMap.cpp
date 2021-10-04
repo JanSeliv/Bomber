@@ -694,8 +694,6 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
-	CachedTransformInternal = GetActorTransform();
-
 #if WITH_EDITOR // [GEditor]
 	USingletonLibrary::SetLevelMap(this);
 	if (GEditor // Can be bound before editor is loaded
@@ -706,56 +704,17 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	}
 #endif //WITH_EDITOR [GEditor]
 
-	const UGeneratedMapDataAsset& LevelsDataAsset = UGeneratedMapDataAsset::Get();
-
 	// Create the background blueprint child actor
 	if (CollisionComponentInternal                       // Is accessible
 	    && !CollisionComponentInternal->GetChildActor()) // Is not created yet
 	{
-		CollisionComponentInternal->SetChildActorClass(LevelsDataAsset.GetCollisionsAsset());
+		const TSubclassOf<AActor>& CollisionsAssetClass = UGeneratedMapDataAsset::Get().GetCollisionsAssetClass();
+		CollisionComponentInternal->SetChildActorClass(CollisionsAssetClass);
 		CollisionComponentInternal->CreateChildActor();
 	}
 
-	// Align the Transform
-	const FVector NewLocation = LevelsDataAsset.IsLockedOnZero()
-		                            ? FVector::ZeroVector
-		                            : GetActorLocation().GridSnap(USingletonLibrary::GetCellSize());
-	SetActorLocation(NewLocation);
-	SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
-	FIntVector MapScale(GetActorScale3D());
-	if (MapScale.X % 2 != 1) // Length must be unpaired
-	{
-		MapScale.X += 1;
-	}
-	if (MapScale.Y % 2 != 1) // Weight must be unpaired
-	{
-		MapScale.Y += 1;
-	}
-	MapScale.Z = 1; //Height must be 1
-	SetActorScale3D(FVector(MapScale));
-
-	GridCellsInternal.Empty();
-	GridCellsInternal.Reserve(MapScale.X * MapScale.Y);
-
-	// Loopy cell-filling of the grid array
-	for (int32 Y = 0; Y < MapScale.Y; ++Y)
-	{
-		for (int32 X = 0; X < MapScale.X; ++X)
-		{
-			FVector FoundVector(X, Y, 0.f);
-			// Calculate a length of iteration cell
-			FoundVector *= USingletonLibrary::GetCellSize();
-			// Locate the cell relative to the Level Map
-			FoundVector += GetActorLocation();
-			// Subtract the deviation from the center
-			FoundVector -= GetActorScale3D() / 2 * USingletonLibrary::GetCellSize();
-			// Snap to the cell
-			FoundVector = FoundVector.GridSnap(USingletonLibrary::GetCellSize());
-			// Cell was found, add rotated cell to the array
-			const FCell FoundCell(FCell(FoundVector).RotateAngleAxis(1.0F));
-			GridCellsInternal.AddUnique(FoundCell);
-		}
-	}
+	// Align transform and build cells
+	TransformLevelMap(Transform);
 
 	// Actors generation
 	GenerateLevelActors();
@@ -1078,6 +1037,60 @@ void AGeneratedMap::OnGameStateChanged_Implementation(ECurrentGameState CurrentG
 
 		default:
 			break;
+	}
+}
+
+// Align transform and build cells
+void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
+{
+	CachedTransformInternal = FTransform::Identity;
+	const float CellSize = USingletonLibrary::GetCellSize();
+
+	// Align the Transform
+	const FVector NewLocation = UGeneratedMapDataAsset::Get().IsLockedOnZero()
+		                            ? FVector::ZeroVector
+		                            : Transform.GetLocation().GridSnap(CellSize);
+	CachedTransformInternal.SetLocation(NewLocation);
+
+	const FRotator NewRotation(0.f, Transform.GetRotation().Rotator().Yaw, 0.f);
+	CachedTransformInternal.SetRotation(NewRotation.Quaternion());
+
+	FIntVector MapScale(Transform.GetScale3D());
+	MapScale.Z = 1; //Height must be 1
+	if (MapScale.X % 2 != 1) // Length must be unpaired
+	{
+		MapScale.X += 1;
+	}
+	if (MapScale.Y % 2 != 1) // Weight must be unpaired
+	{
+		MapScale.Y += 1;
+	}
+	const FVector NewScale3D(MapScale);
+	CachedTransformInternal.SetScale3D(NewScale3D);
+
+	SetActorTransform(CachedTransformInternal);
+
+	GridCellsInternal.Empty();
+	GridCellsInternal.Reserve(MapScale.X * MapScale.Y);
+
+	// Loopy cell-filling of the grid array
+	for (int32 Y = 0; Y < MapScale.Y; ++Y)
+	{
+		for (int32 X = 0; X < MapScale.X; ++X)
+		{
+			FVector FoundVector(X, Y, 0.f);
+			// Calculate a length of iteration cell
+			FoundVector *= CellSize;
+			// Locate the cell relative to the Level Map
+			FoundVector += NewLocation;
+			// Subtract the deviation from the center
+			FoundVector -= (NewScale3D / 2) * CellSize;
+			// Snap to the cell
+			FoundVector = FoundVector.GridSnap(CellSize);
+			// Cell was found, add rotated cell to the array
+			const FCell FoundCell(FCell(FoundVector).RotateAngleAxis(1.f));
+			GridCellsInternal.AddUnique(FoundCell);
+		}
 	}
 }
 
