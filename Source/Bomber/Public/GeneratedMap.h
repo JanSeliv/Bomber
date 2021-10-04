@@ -67,7 +67,7 @@ public:
 
 	/** Get UGeneratedMapDataAsset::CollisionsAssetInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE UClass* GetCollisionsAsset() const { return CollisionsAssetInternal; }
+	FORCEINLINE TSubclassOf<AActor> GetCollisionsAssetClass() const { return CollisionsAssetInternal; }
 
 	/** Get UGeneratedMapDataAsset::LockLocationOnZeroInternal.  */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -326,6 +326,11 @@ protected:
 	/** Listen game states to generate level actors. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Align transform and build cells.
+	* @param Transform New transform of the level map. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void TransformLevelMap(const FTransform& Transform);
 
 	/* ---------------------------------------------------
 	 *					Editor development
