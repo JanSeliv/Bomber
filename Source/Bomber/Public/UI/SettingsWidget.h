@@ -229,7 +229,7 @@ public:
 
 	/** Get current text of a simple or input text widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FText& GetTextLineValue(FName TagName) const;
+	void GetTextLineValue(FName TagName, FText& OutText) const;
 
 	/** Get current input name of the text input. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

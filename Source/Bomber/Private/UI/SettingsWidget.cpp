@@ -125,7 +125,8 @@ void USettingsWidget::UpdateSettings()
 		}
 		else if (ChosenData == &Setting.TextLine)
 		{
-			const FText& NewValue = GetTextLineValue(TagName);
+			FText NewValue = TEXT_NONE;
+			GetTextLineValue(TagName, /*Out*/NewValue);
 			SetTextLine(TagName, NewValue);
 		}
 		else if (ChosenData == &Setting.UserInput)
@@ -406,21 +407,19 @@ float USettingsWidget::GetSliderValue(FName TagName) const
 }
 
 // Get current text of a simple text widget
-const FText& USettingsWidget::GetTextLineValue(FName TagName) const
+void USettingsWidget::GetTextLineValue(FName TagName, FText& OutText) const
 {
 	const FSettingsPicker& FoundRow = FindSettingRow(TagName);
-	const FText* Value = &TEXT_NONE;
 	if (FoundRow.IsValid())
 	{
-		Value = &FoundRow.PrimaryData.Caption;
+		OutText = FoundRow.PrimaryData.Caption;
 
 		const USettingTemplate::FOnGetterText& Getter = FoundRow.TextLine.OnGetterText;
 		if (Getter.IsBound())
 		{
-			Value = &Getter.Execute();
+			Getter.Execute(OutText);
 		}
 	}
-	return *Value;
 }
 
 // Get current input name of the text input
@@ -686,7 +685,7 @@ void USettingsWidget::AddTextLine(FSettingsPrimary& Primary, FSettingsTextLine& 
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterText.BindUFunction(StaticContextObject, GetterFunctionName);
-			Primary.Caption = GetTextLineValue(Primary.Tag.GetTagName());
+			Data.OnGetterText.ExecuteIfBound(Primary.Caption);
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
