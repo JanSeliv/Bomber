@@ -155,8 +155,8 @@ public:
 	 * @param AxisZ The Z param of the axis to rotate around
 	 * @return Rotated to the Level Map cell
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "VectorToRotate,AxisZ"))
-	static const FORCEINLINE FCell& RotateCellAngleAxis(const FCell& Cell, float AxisZ)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static FORCEINLINE FCell RotateCellAngleAxis(const FCell& Cell, float AxisZ)
 	{
 		return Cell.RotateAngleAxis(AxisZ);
 	}

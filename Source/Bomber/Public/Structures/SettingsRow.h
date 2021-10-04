@@ -287,7 +287,7 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnGetterBool);
 
-	DECLARE_DYNAMIC_DELEGATE_RetVal(const FText&, FOnGetterText);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetterText, FText&, OutParam);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetMembers, TArray<FText>&, OutParam);
 
