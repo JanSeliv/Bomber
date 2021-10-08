@@ -79,6 +79,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
+	/** Gets all attached mesh components by specified filter class.
+	 * @param OutMeshComponents Contains returned components.
+	 * @param FilterClass By this class components will be filtered.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "FilterClass"))
+	void GetAttachedPropsByClass(TArray<class UMeshComponent*>& OutMeshComponents, const TSubclassOf<class UMeshComponent>& FilterClass) const;
+
 	/**
 	 * Attach all player props.
 	 * @see FAttachedMesh UPlayerRow::PlayerProps

@@ -72,6 +72,19 @@ void UMySkeletalMeshComponent::InitMySkeletalMesh(const FCustomPlayerMeshData& C
 	SetSkin(CustomPlayerMeshData.SkinIndex);
 }
 
+// Gets all attached mesh components by specified filter class
+void UMySkeletalMeshComponent::GetAttachedPropsByClass(TArray<UMeshComponent*>& OutMeshComponents, const TSubclassOf<class UMeshComponent>& FilterClass) const
+{
+	for (const TObjectPtr<UMeshComponent>& AttachedMeshIt : AttachedMeshesInternal)
+	{
+		if (AttachedMeshIt
+			&& AttachedMeshIt->IsA(FilterClass))
+		{
+			OutMeshComponents.Emplace(AttachedMeshIt);
+		}
+	}
+}
+
 // Attach all FAttachedMeshes to specified parent mesh
 void UMySkeletalMeshComponent::AttachProps()
 {
