@@ -7,6 +7,9 @@
 //---
 #include "Materials/MaterialInstanceDynamic.h"
 
+// The empty data
+const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData();
+
 // Sets default values for this component's properties
 UMySkeletalMeshComponent::UMySkeletalMeshComponent()
 {

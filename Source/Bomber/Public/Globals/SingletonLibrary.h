@@ -117,7 +117,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UMyGameUserSettings* GetMyGameUserSettings();
 
-	/** Returns the settings widget. */
+	/** Returns the Settings widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class USettingsWidget* GetSettingsWidget();
 
@@ -128,6 +128,14 @@ public:
 	/** Returns the HUD actor. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AMyHUD* GetMyHUD();
+
+	/** Returns the Main Menu widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UMainMenuWidget* GetMainMenuWidget();
+
+	/** Returns the In-Game Menu widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UInGameWidget* GetInGameWidget();
 
 	/** Returns controlled player character. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -208,7 +216,7 @@ public:
 	static FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return Get().LevelsDataAssetInternal; }
 
 	/** Returns the UI Data Asset*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get UI Data Asset"))
 	static FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return Get().UIDataAssetInternal; }
 
 	/** Returns the settings data.*/
@@ -216,8 +224,12 @@ public:
 	static FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() { return Get().SettingsDataAssetInternal; }
 
 	/** Returns the AI data.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get AI Data Asset"))
 	static FORCEINLINE class UAIDataAsset* GetAIDataAsset() { return Get().AIDataAssetInternal; }
+
+	/** Returns the Player Input data.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE class UPlayerInputDataAsset* GetPlayerInputDataAsset() { return Get().PlayerInputDataAssetInternal; }
 
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
@@ -250,20 +262,24 @@ protected:
 	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal; //[G]
 
 	/** Contains properties to setup the generated level. */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))
 	TObjectPtr<class UGeneratedMapDataAsset> LevelsDataAssetInternal = nullptr; //[B]
 
 	/** Settings data. */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Data Asset"))
 	TObjectPtr<class USettingsDataAsset> SettingsDataAssetInternal = nullptr; //[B]
 
 	/** Contains properties to setup UI. */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "UI Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "UI Data Asset"))
 	TObjectPtr<class UUIDataAsset> UIDataAssetInternal = nullptr; //[B]
 
 	/** AI data. */
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Data Asset"))
 	TObjectPtr<class UAIDataAsset> AIDataAssetInternal = nullptr; //[B]
+
+	/** Player Input data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Input Data Asset"))
+	TObjectPtr<class UPlayerInputDataAsset> PlayerInputDataAssetInternal = nullptr; //[B]
 
 	/** Actor type and its associated class. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actors Data Assets"))

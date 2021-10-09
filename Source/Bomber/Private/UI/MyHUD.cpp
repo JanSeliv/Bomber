@@ -4,6 +4,7 @@
 //---
 #include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
+#include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"
 
 // Returns the UI data asset
@@ -23,11 +24,11 @@ AMyHUD::AMyHUD()
 }
 
 // Go back input for UI widgets
-void AMyHUD::GoUIBack()
+void AMyHUD::BroadcastOnClose()
 {
-	if (OnGoUIBack.IsBound())
+	if (OnClose.IsBound())
 	{
-		OnGoUIBack.Broadcast();
+		OnClose.Broadcast();
 	}
 }
 
@@ -72,6 +73,14 @@ void AMyHUD::InitWidgets()
 	}
 
 	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
+
+	const TSubclassOf<UMainMenuWidget>& MainMenuWidgetClass = UIDataAsset.GetMainMenuWidgetClass();
+	if (ensureMsgf(MainMenuWidgetClass, TEXT("ASSERT: 'InGameWidgetClass' is not set in the UI data table")))
+	{
+		MainMenuWidgetInternal = CreateWidget<UMainMenuWidget>(PlayerController, MainMenuWidgetClass);
+		checkf(MainMenuWidgetInternal, TEXT("ERROR: MainMenuWidgetInternal failed to create"));
+		// Main Menu widget is drawn by 3D user widget component, no need add it to viewport
+	}
 
 	const TSubclassOf<UInGameWidget>& InGameWidgetClass = UIDataAsset.GetInGameWidgetClass();
 	if (ensureMsgf(InGameWidgetClass, TEXT("ASSERT: 'InGameWidgetClass' is not set in the UI data table")))

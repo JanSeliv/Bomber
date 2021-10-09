@@ -54,6 +54,8 @@ enum class ELevelType : uint8
 
 ENUM_CLASS_FLAGS(ELevelType);
 using ELT = ELevelType;
+#define ELT_FIRST_FLAG TO_FLAG(ELT::First)
+#define ELT_LAST_FLAG TO_FLAG(ELT::Fourth)
 
 /**
  * Pathfinding types by danger extents.

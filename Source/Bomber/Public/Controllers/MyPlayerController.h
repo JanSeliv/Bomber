@@ -3,9 +3,51 @@
 #pragma once
 
 #include "GameFramework/PlayerController.h"
+#include "InputActionValue.h"
+//---
 #include "Bomber.h"
+#include "Globals//LevelActorDataAsset.h"
 //---
 #include "MyPlayerController.generated.h"
+
+/**
+* Contains all data that describe player input.
+*/
+UCLASS(Blueprintable, BlueprintType)
+class UPlayerInputDataAsset final : public UBomberDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	/** Returns the player input data asset. */
+	static const UPlayerInputDataAsset& Get();
+
+	/** Returns the Enhanced Input Mapping Context of gameplay actions for specified local player.
+	* @param LocalPlayerIndex The index of a local player. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UInputMappingContext* GetGameplayInputContext(int32 LocalPlayerIndex);
+
+	/** Returns the Enhanced Input Mapping Context of actions on the User Interface. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UInputMappingContext* GetMainMenuInputContext() { return Get().MainMenuInputContextInternal; }
+
+	/** Returns the Enhanced Input Mapping Context of actions on the User Interface. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UInputMappingContext* GetInGameMenuInputContext() { return Get().InGameMenuInputContextInternal; }
+
+protected:
+	/** Enhanced Input Mapping Contexts of gameplay actions for local players. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Gameplay Input Contexts"))
+	TArray<TObjectPtr<class UInputMappingContext>> GameplayInputContextsInternal; //[B]
+
+	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Input Context"))
+	TObjectPtr<class UInputMappingContext> MainMenuInputContextInternal; //[B]
+
+	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context"))
+	TObjectPtr<class UInputMappingContext> InGameMenuInputContextInternal; //[B]
+};
 
 /**
  * The player controller class
@@ -32,14 +74,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMouseVisibility(bool bShouldShow);
 
-	/** Go back input for UI widgets. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void GoUIBack();
+	/** Returns the Enhanced Input Local Player Subsystem. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputSubsystem() const;
+
+	/** Finds input actions in specified contexts.
+	 * @param OutInputActions Returns all input actions for specified contexts.
+	 * @param InputContexts Contexts of input actions.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	void GetInputActions(TArray<class UInputAction*>& OutInputActions, const TArray<class UInputMappingContext*>& InputContexts) const;
 
 protected:
-	/** Allows the PlayerController to set up custom input bindings. */
-	virtual void SetupInputComponent() override;
-
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
 
@@ -47,11 +92,57 @@ protected:
 	* @param bShouldIgnore	If true, move input is ignored. If false, input is not ignored.*/
 	virtual void SetIgnoreMoveInput(bool bShouldIgnore) override;
 
+	/** Overridable native function for when this controller unpossesses its pawn. */
+	virtual void OnUnPossess() override;
+
+	/** Set up custom input bindings. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BindInputActions();
+
+	/** Prevents built-in slate input on UMG. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DisplayName = "Set UI Input Ignored"))
+	void SetUIInputIgnored();
+
 	/** Listen to toggle movement input and mouse cursor. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
+	/** Listens to handle input on opening and closing the InGame Menu widget. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnToggledInGameMenu(bool bIsVisible);
+
 	/** Called default console commands on begin play. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ExecuteDefaultConsoleCommands();
+
+	/** Enables or disables input contexts of gameplay input actions.
+	 * @param bEnable set true to add gameplay input context, otherwise it will be removed from local player. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetGameplayInputContextEnabled(bool bEnable);
+
+	/** Enables or disables specified input context.
+	 * @param bEnable set true to add specified input context, otherwise it will be removed from local player.
+	 * @param InputContext Context to set. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetInputContextEnabled(bool bEnable, const UInputMappingContext* InputContext);
+
+	/** Move the player character by the forward vector. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void MoveUpDown(const FInputActionValue& ActionValue);
+
+	/** Move the player character by the right vector. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void MoveRightLeft(const FInputActionValue& ActionValue);
+
+	/** Executes spawning the bomb on controllable player. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SpawnBomb();
+
+	/** Sets the GameStarting game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetGameStartingState();
+
+	/** Sets the Menu game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetMenuState();
 };

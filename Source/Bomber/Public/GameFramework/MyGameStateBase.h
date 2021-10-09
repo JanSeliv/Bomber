@@ -23,13 +23,13 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, ECurrentGameState, CurrentGameState);
 
 	/** Called when the current game state was changed. */
-	UPROPERTY(BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
 
 	/** Called when one of players was destroyed. */
-	UPROPERTY(BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnAnyPlayerDestroyed OnAnyPlayerDestroyed;
 
 	/* ---------------------------------------------------

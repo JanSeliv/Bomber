@@ -193,9 +193,17 @@ public:
 	/** Sets default values for this character's properties */
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
+	/** Adds the movement input along the given world direction vector.
+	*
+	* @param WorldDirection Direction in world space to apply input
+	* @param ScaleValue Scale to apply to input. This can be used for analog input, ie a value of 0.5 applies half the normal value, while -1.0 would reverse the direction.
+	* @param bForce If true always add the input, ignoring the result of IsMoveInputIgnored().
+	*/
+	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.f, bool bForce = false) override;
+
 	/** Returns current powerup levels */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE FPowerUp GetPowerups() const { return PowerupsInternal; }
+	const FORCEINLINE FPowerUp& GetPowerups() const { return PowerupsInternal; }
 
 	/** Returns the personal ID. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -259,31 +267,6 @@ protected:
 
 	/** Called every frame, is disabled on start, tick interval is decreased. */
 	virtual void Tick(float DeltaTime) override;
-
-	/** ---------------------------------------------------
-	 *		Input
-	 * --------------------------------------------------- */
-
-	/** Called to bind functionality to input */
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	/** Adds the movement input along the given world direction vector.
-	 *
-	 * @param WorldDirection Direction in world space to apply input
-	 * @param ScaleValue Scale to apply to input. This can be used for analog input, ie a value of 0.5 applies half the normal value, while -1.0 would reverse the direction.
-	 * @param bForce If true always add the input, ignoring the result of IsMoveInputIgnored().
-	 */
-	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.f, bool bForce = false) override;
-
-	/** Move the player character by the forward vector. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void MoveUpDown(float ScaleValue);
-
-	/** Move the player character by the right vector. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void MoveRightLeft(float ScaleValue);
-
-	/** --------------------------------------------------- */
 
 	/**
 	 * Triggers when this player character starts something overlap.
