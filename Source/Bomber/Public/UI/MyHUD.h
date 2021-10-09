@@ -23,6 +23,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UInGameWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
 
+	/** Returns a class of the main menu widget.
+	 * @see UUIDataAsset::MainMenuWidgetClassInternal.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class UMainMenuWidget> GetMainMenuWidgetClass() const { return MainMenuWidgetClassInternal; }
+
 	/** Returns a class of the settings widget.
 	 * @see UUIDataAsset::SettingsWidgetClassInternal.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -42,6 +47,10 @@ protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
 	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal; //[D]
+
+	/** The class of a In-Game Widget blueprint. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Widget Class", ShowOnlyInnerProperties))
+	TSubclassOf<class UMainMenuWidget> MainMenuWidgetClassInternal; //[D]
 
 	/** The class of a Settings Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))
@@ -69,11 +78,11 @@ public:
 	*		Public properties
 	* --------------------------------------------------- */
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGoUIBack);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClose);
 
-	/** Is called to notify widgets to go back. */
-	UPROPERTY(BlueprintAssignable, Category = "C++")
-	FOnGoUIBack OnGoUIBack;
+	/** Is called to notify listen widgets to be closed. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnClose OnClose;
 
 	/* ---------------------------------------------------
 	*		Public functions
@@ -85,6 +94,10 @@ public:
 	/** Returns the current in-game widget object. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UInGameWidget* GetInGameWidget() const { return InGameWidgetInternal; }
+
+	/** Returns the current Main Menu widget object. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidgetInternal; }
 
 	/** Returns the current settings widget object. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -98,9 +111,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UUserWidget* GetNicknameWidget(int32 Index) const { return NicknameWidgetsInternal.IsValidIndex(Index) ? NicknameWidgetsInternal[Index] : nullptr; }
 
-	/** Go back input for UI widgets. */
+	/** Notify listen UI widgets to close widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void GoUIBack();
+	void BroadcastOnClose();
 
 	/** Set true to show the FPS counter widget on the HUD. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -118,6 +131,10 @@ protected:
 	/** The current in-game widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
 	TObjectPtr<class UInGameWidget> InGameWidgetInternal = nullptr; //[G]
+
+	/** The current Main Menu widget object. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
+	TObjectPtr<class UMainMenuWidget> MainMenuWidgetInternal = nullptr; //[G]
 
 	/** The current settings widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))

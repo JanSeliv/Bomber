@@ -456,11 +456,7 @@ void USettingsWidget::NativeConstruct()
 	// Hide that widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
-	// Listen escape input to go back to the main menu
-	if (AMyHUD* MyHUD = USingletonLibrary::GetMyHUD())
-	{
-		MyHUD->OnGoUIBack.AddUniqueDynamic(this, &ThisClass::CloseSettings);
-	}
+	OnVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnVisibilityChange);
 }
 
 // Construct all settings from the settings data table
@@ -472,6 +468,25 @@ void USettingsWidget::ConstructSettings_Implementation()
 	for (TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
 		AddSetting(RowIt.Value);
+	}
+}
+
+// Is called when visibility is changed for this widget
+void USettingsWidget::OnVisibilityChange(ESlateVisibility InVisibility)
+{
+	AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
+	if (!MyHUD)
+	{
+		return;
+	}
+
+	if (InVisibility == ESlateVisibility::Visible)
+	{
+		MyHUD->OnClose.AddUniqueDynamic(this, &ThisClass::CloseSettings);
+	}
+	else if (MyHUD->OnClose.IsAlreadyBound(this, &ThisClass::CloseSettings))
+	{
+		MyHUD->OnClose.RemoveDynamic(this, &ThisClass::CloseSettings);
 	}
 }
 
@@ -513,6 +528,12 @@ void USettingsWidget::TryBindStaticContext(FSettingsPrimary& Primary)
 			}
 		}
 	}
+}
+
+// Display settings on UI
+void USettingsWidget::OpenSettings()
+{
+	SetVisibility(ESlateVisibility::Visible);
 }
 
 // Save and close the settings widget

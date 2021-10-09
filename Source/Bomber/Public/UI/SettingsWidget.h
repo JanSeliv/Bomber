@@ -141,6 +141,14 @@ class USettingsWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	/** Display settings on UI. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OpenSettings();
+
+	/** Save and close the settings widget. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void CloseSettings();
+
 	/** Returns the amount of settings rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetSettingsTableRowsNum() const { return SettingsTableRowsInternal.Num(); }
@@ -264,14 +272,14 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void ConstructSettings();
 
+	/** Is called when visibility is changed for this widget. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnVisibilityChange(ESlateVisibility InVisibility);
+
 	/** Bind and set static object delegate.
 	* @see FSettingsPrimary::OnStaticContext */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryBindStaticContext(UPARAM(ref)FSettingsPrimary& Primary);
-
-	/** Save and close the settings widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void CloseSettings();
 
 	/* ---------------------------------------------------
 	 *		Add by setting types

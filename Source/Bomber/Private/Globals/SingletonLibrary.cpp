@@ -252,6 +252,20 @@ AMyHUD* USingletonLibrary::GetMyHUD()
 	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
 }
 
+// Returns the Main Menu widget
+UMainMenuWidget* USingletonLibrary::GetMainMenuWidget()
+{
+	const AMyHUD* MyHUD = GetMyHUD();
+	return MyHUD ? MyHUD->GetMainMenuWidget() : nullptr;
+}
+
+// Returns the In-Game Menu widget
+UInGameWidget* USingletonLibrary::GetInGameWidget()
+{
+	const AMyHUD* MyHUD = GetMyHUD();
+	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
+}
+
 // Returns controlled player character
 APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 {

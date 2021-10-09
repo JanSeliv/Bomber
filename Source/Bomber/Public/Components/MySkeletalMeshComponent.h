@@ -16,6 +16,9 @@ struct FCustomPlayerMeshData
 {
 	GENERATED_BODY()
 
+	/** Empty data. */
+	static const FCustomPlayerMeshData Empty;
+
 	/** The row that is used to visualize the bomber character. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
 	TObjectPtr<class UPlayerRow> PlayerRow = nullptr; //[G]
@@ -24,10 +27,8 @@ struct FCustomPlayerMeshData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	int32 SkinIndex; //[N]
 
-	/** Contains up to 8 states (attached or not) about props by bits (their indexes in the array).
-	  * Ex: = 4, is mean 00000100 that the only prop mesh with index #2 is attached. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	uint8 AttachedPropsBitmask = 255;
+	/** Returns true is data is valid. */
+	FORCEINLINE bool IsValid() const { return PlayerRow != nullptr; }
 };
 
 /**
@@ -115,7 +116,7 @@ protected:
 	/** Current level type of attached meshes.
 	 * Is not transient, can be set in editor-time. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes Type"))
-	ELevelType AttachedMeshesTypeInternal = ELevelType::None; //[G]
+	ELevelType AttachedMeshesTypeInternal = ELT::None; //[G]
 
 	/** Current attached mesh components. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))

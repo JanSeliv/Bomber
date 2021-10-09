@@ -513,7 +513,7 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld())
 	{
-		if (NewLevelType == ELevelType::None)
+		if (NewLevelType == ELT::None)
 		{
 			// the level is not selected, choose persistent
 			UEditorLevelUtils::MakeLevelCurrent(World->PersistentLevel, false);
@@ -1056,7 +1056,7 @@ void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 	CachedTransformInternal.SetRotation(NewRotation.Quaternion());
 
 	FIntVector MapScale(Transform.GetScale3D());
-	MapScale.Z = 1; //Height must be 1
+	MapScale.Z = 1;          //Height must be 1
 	if (MapScale.X % 2 != 1) // Length must be unpaired
 	{
 		MapScale.X += 1;

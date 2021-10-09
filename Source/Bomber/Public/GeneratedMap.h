@@ -169,7 +169,7 @@ public:
 
 	/** Spawns a level actor on the Level Map by the specified type. */
 	template<typename T>
-	static T* SpawnActorByType(EActorType Type, const FCell& Cell) { return Cast<T>(Get().SpawnActorByType(Type, Cell)); }
+	static FORCEINLINE T* SpawnActorByType(EActorType Type, const FCell& Cell) { return Cast<T>(Get().SpawnActorByType(Type, Cell)); }
 
 	/** Adding and attaching the specified Map Component to the MapComponents_ array
 

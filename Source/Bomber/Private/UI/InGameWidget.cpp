@@ -8,12 +8,23 @@
 #include "UI/MyHUD.h"
 
 // Shows the in game menu.
-void UInGameWidget::ShowEndGameState_Implementation()
+void UInGameWidget::ShowInGameMenu_Implementation()
 {
+	if (IsVisibleInGameMenu())
+	{
+		// Is already shown
+		return;
+	}
+
 	// Show mouse cursor
 	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController())
 	{
 		MyPlayerController->SetMouseVisibility(true);
+	}
+
+	if (OnToggledInGameMenu.IsBound())
+	{
+		OnToggledInGameMenu.Broadcast(true);
 	}
 
 	// Blueprint implementation
@@ -21,12 +32,23 @@ void UInGameWidget::ShowEndGameState_Implementation()
 }
 
 // Hide the in game menu.
-void UInGameWidget::HideEndGameState_Implementation()
+void UInGameWidget::HideInGameMenu_Implementation()
 {
+	if (!IsVisibleInGameMenu())
+	{
+		// Is already hidden
+		return;
+	}
+
 	// Hide mouse cursor
 	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController())
 	{
 		MyPlayerController->SetMouseVisibility(false);
+	}
+
+	if (OnToggledInGameMenu.IsBound())
+	{
+		OnToggledInGameMenu.Broadcast(false);
 	}
 
 	// Blueprint implementation
@@ -34,10 +56,23 @@ void UInGameWidget::HideEndGameState_Implementation()
 }
 
 // Flip-floppy show and hide the end game state window
-void UInGameWidget::ToggleEndGameState_Implementation()
+void UInGameWidget::ToggleInGameMenu()
 {
-	// Blueprint implementation
-	// ...
+	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState(GetWorld());
+	if (CurrentGameState != ECurrentGameState::InGame
+	    && CurrentGameState != ECurrentGameState::EndGame)
+	{
+		return;
+	}
+
+	if (IsVisibleInGameMenu())
+	{
+		HideInGameMenu();
+	}
+	else
+	{
+		ShowInGameMenu();
+	}
 }
 
 // Called after the underlying slate widget is constructed. May be called multiple times due to adding and removing from the hierarchy.
@@ -49,16 +84,19 @@ void UInGameWidget::NativeConstruct()
 	// Hide that widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
+	// Listen changing the visibility of this widget
+	OnVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnWidgetVisibilityChanged);
+
 	// Listen states to spawn widgets
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	// Listen escape input to toggle the game state widget
+	// Listen to toggle the game state widget when is requested
 	if (AMyHUD* MyHUD = USingletonLibrary::GetMyHUD())
 	{
-		MyHUD->OnGoUIBack.AddUniqueDynamic(this, &ThisClass::ToggleEndGameState);
+		MyHUD->OnClose.AddUniqueDynamic(this, &ThisClass::ToggleInGameMenu);
 	}
 }
 
@@ -82,6 +120,15 @@ void UInGameWidget::LaunchInGameCountdown_Implementation()
 	// ...
 }
 
+// Called when the visibility of this widgets was changed
+void UInGameWidget::OnWidgetVisibilityChanged(ESlateVisibility InVisibility)
+{
+	if (InVisibility != ESlateVisibility::Visible)
+	{
+		HideInGameMenu();
+	}
+}
+
 // Called when the current game state was changed
 void UInGameWidget::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
@@ -95,19 +142,19 @@ void UInGameWidget::OnGameStateChanged_Implementation(ECurrentGameState CurrentG
 		case ECurrentGameState::GameStarting:
 		{
 			SetVisibility(ESlateVisibility::Visible);
-			HideEndGameState();
+			HideInGameMenu();
 			LaunchStartingCountdown();
 			break;
 		}
 		case ECurrentGameState::EndGame:
 		{
-			ShowEndGameState();
+			ShowInGameMenu();
 			break;
 		}
 		case ECurrentGameState::InGame:
 		{
 			LaunchInGameCountdown();
-			HideEndGameState();
+			HideInGameMenu();
 			break;
 		}
 		default:

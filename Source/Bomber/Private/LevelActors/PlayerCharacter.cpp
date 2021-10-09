@@ -33,7 +33,6 @@ UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex
 	return nullptr;
 }
 
-
 #if WITH_EDITOR
 // Handle adding and changing material instance to prepare dynamic materials
 void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -432,29 +431,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
 }
 
-// Called to bind functionality to input
-void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (!ensureMsgf(PlayerInputComponent, TEXT("ASSERT: 'PlayerInputComponent' is not valid")))
-	{
-		return;
-	}
-
-	// Do not consume added input
-	auto SetInput = [](FInputBinding& InputRef) { InputRef.bConsumeInput = false; };
-
-	static const FName MoveUpDownName = GET_FUNCTION_NAME_CHECKED(ThisClass, MoveUpDown);
-	SetInput(PlayerInputComponent->BindAxis(MoveUpDownName, this, &ThisClass::MoveUpDown));
-
-	static const FName MoveRightLeftName = GET_FUNCTION_NAME_CHECKED(ThisClass, MoveRightLeft);
-	SetInput(PlayerInputComponent->BindAxis(MoveRightLeftName, this, &ThisClass::MoveRightLeft));
-
-	static const FName SpawnBombName = GET_FUNCTION_NAME_CHECKED(ThisClass, SpawnBomb);
-	SetInput(PlayerInputComponent->BindAction(SpawnBombName, IE_Pressed, this, &ThisClass::SpawnBomb));
-}
-
 // Adds the movement input along the given world direction vector.
 void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue/* = 1.f*/, bool bForce/* = false*/)
 {
@@ -466,17 +442,6 @@ void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 		// Rotate the character
 		RotateToLocation(GetActorLocation() + ScaleValue * WorldDirection, true);
 	}
-}
-
-// Move the player character by the forward vector
-void APlayerCharacter::MoveUpDown(float ScaleValue)
-{
-	AddMovementInput(GetActorRightVector(), ScaleValue);
-}
-
-void APlayerCharacter::MoveRightLeft(float ScaleValue)
-{
-	AddMovementInput(GetActorForwardVector(), ScaleValue);
 }
 
 // Triggers when this player character starts something overlap.

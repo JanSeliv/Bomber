@@ -168,8 +168,9 @@ void UAnimNotifyState_PlayMorph::StartTimeline()
 // Set a specified value for chosen morph
 void UAnimNotifyState_PlayMorph::SetMorphValue(float Value)
 {
-	if (!ensureMsgf(MeshCompInternal, TEXT("ASSERT: 'SkeletalMeshComponent' is not valid")))
+	if (!MeshCompInternal)
 	{
+		// Can become invalid on aborting animation
 		return;
 	}
 

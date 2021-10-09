@@ -53,8 +53,6 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void AMyGameStateBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	ServerSetGameState(ECurrentGameState::Menu);
 }
 
 // Called on the AMyGameState::CurrentGameState property updating.
