@@ -266,10 +266,6 @@ bool FFunctionPickerCustomization::UpdateTemplateFunction()
 		return true;
 	}
 
-	// Set if function is static
-	static const FName FunctionContextTemplate = TEXT("FunctionContextTemplate");
-	bIsStaticFunctionInternal = TemplateMetaKeyInternal == FunctionContextTemplate;
-
 	// Parse into class name and function name
 	TArray<FString> ParsedStrArray;
 	static const FString Delimiter(TEXT("::"));
@@ -306,12 +302,16 @@ void FFunctionPickerCustomization::InitTemplateMetaKey()
 	}
 
 	// Will set once the meta key of this property.
-	for (FName MetaKeyIt : TemplateMetaKeys)
+	for (const FName MetaKeyIt : TemplateMetaKeys)
 	{
 		if (ParentPropertyInternal.IsMetaKeyExists(MetaKeyIt))
 		{
-			TemplateMetaKeyInternal = MoveTemp(MetaKeyIt);
+			TemplateMetaKeyInternal = MetaKeyIt;
 			break;
 		}
 	}
+
+	// Set if function is static
+	static const FName FunctionContextTemplate = TEXT("FunctionContextTemplate");
+	bIsStaticFunctionInternal = TemplateMetaKeyInternal == FunctionContextTemplate;
 }

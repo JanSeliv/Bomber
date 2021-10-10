@@ -493,39 +493,38 @@ void USettingsWidget::OnVisibilityChange(ESlateVisibility InVisibility)
 // Bind and set static object delegate
 void USettingsWidget::TryBindStaticContext(FSettingsPrimary& Primary)
 {
-	const FFunctionPicker& StaticContext = Primary.StaticContext;
-	if (StaticContext.FunctionName.IsNone()
-	    || !StaticContext.FunctionClass)
+	UObject* FoundContextObj = nullptr;
+	if (UFunction* FunctionPtr = Primary.StaticContext.GetFunction())
+	{
+		FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
+	}
+
+	if (!FoundContextObj)
 	{
 		return;
 	}
 
-	UObject* ClassDefaultObject = StaticContext.FunctionClass->ClassDefaultObject;
-	if (!ClassDefaultObject)
+	Primary.StaticContextObject = FoundContextObj;
+
+	const UClass* ContextClass = FoundContextObj->GetClass();
+	if (!ensureMsgf(ContextClass, TEXT("ASSERT: 'ContextClass' is not valid")))
 	{
 		return;
 	}
 
-	USettingTemplate::FOnStaticContext OnStaticContext;
-	OnStaticContext.BindUFunction(ClassDefaultObject, StaticContext.FunctionName);
-	if (!OnStaticContext.IsBound())
+	// Cache all functions that are contained in returned object
+	for (TFieldIterator<UFunction> It(ContextClass, EFieldIteratorFlags::IncludeSuper); It; ++It)
 	{
-		return;
-	}
-
-	if (UObject* ContextObject = OnStaticContext.Execute())
-	{
-		Primary.StaticContextObject = ContextObject;
-		if (const UClass* ContextClass = ContextObject->GetClass())
+		const UFunction* FunctionIt = *It;
+		if (!FunctionIt)
 		{
-			for (TFieldIterator<UFunction> It(ContextClass, EFieldIteratorFlags::IncludeSuper); It; ++It)
-			{
-				if (const UFunction* FunctionIt = *It)
-				{
-					FName FunctionNameIt = FunctionIt->GetFName();
-					Primary.StaticContextFunctionList.Emplace(MoveTemp(FunctionNameIt));
-				}
-			}
+			continue;
+		}
+
+		const FName FunctionNameIt = FunctionIt->GetFName();
+		if (!FunctionNameIt.IsNone())
+		{
+			Primary.StaticContextFunctionList.Emplace(FunctionNameIt);
 		}
 	}
 }

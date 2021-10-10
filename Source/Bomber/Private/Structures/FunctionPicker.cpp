@@ -8,6 +8,25 @@ FFunctionPicker::FFunctionPicker(UClass* InFunctionClass, FName InFunctionName)
 	: FunctionClass(InFunctionClass)
 	, FunctionName(InFunctionName) {}
 
+// Returns the function pointer based on set data to this structure
+UFunction* FFunctionPicker::GetFunction() const
+{
+	if (CachedFunctionInternal.IsValid())
+	{
+		return CachedFunctionInternal.Get();
+	}
+
+	if (FunctionClass
+	    && !FunctionName.IsNone())
+	{
+		UFunction* FoundFunction = FunctionClass->FindFunctionByName(FunctionName, EIncludeSuperFlag::ExcludeSuper);
+		CachedFunctionInternal = FoundFunction;
+		return FoundFunction;
+	}
+
+	return nullptr;
+}
+
 // Compares for equality
 bool FFunctionPicker::operator==(const FFunctionPicker& Other) const
 {

@@ -48,6 +48,9 @@ struct FFunctionPicker
 	/** Returns true if is valid. */
 	FORCEINLINE bool IsValid() const { return !(*this == Empty); }
 
+	/** Returns the function pointer based on set data to this structure. */
+	UFunction* GetFunction() const;
+
 	/** Compares for equality.
 	  * @param Other The other object being compared. */
 	bool operator==(const FFunctionPicker& Other) const;
@@ -55,4 +58,8 @@ struct FFunctionPicker
 	/** Creates a hash value.
 	  * @param Other the other object to create a hash value for. */
 	friend uint32 GetTypeHash(const FFunctionPicker& Other);
+
+protected:
+	/** Contains cached function ptr for performance reasons. */
+	mutable TWeakObjectPtr<UFunction> CachedFunctionInternal = nullptr;
 };

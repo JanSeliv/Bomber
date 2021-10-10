@@ -6,15 +6,15 @@
 #include "EnhancedInputComponent.h"
 #include "InputMappingContext.h"
 #include "Framework/Application/NavigationConfig.h"
+#include "Engine/LocalPlayer.h"
 //---
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/MyInputAction.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/InGameWidget.h"
 #include "UI/MainMenuWidget.h"
-#include "UI/MyHUD.h"
-#include "UI/SettingsWidget.h"
 
 // Returns the player input data asset
 const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
@@ -25,9 +25,9 @@ const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
 }
 
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
-UInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex)
+UInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
-	const TArray<TObjectPtr<UInputMappingContext>>& InputContexts = Get().GameplayInputContextsInternal;
+	const TArray<TObjectPtr<UInputMappingContext>>& InputContexts = GameplayInputContextsInternal;
 	return InputContexts.IsValidIndex(LocalPlayerIndex) ? InputContexts[LocalPlayerIndex] : nullptr;
 }
 
@@ -88,7 +88,7 @@ UEnhancedInputLocalPlayerSubsystem* AMyPlayerController::GetEnhancedInputSubsyst
 }
 
 // Finds input actions in specified contexts
-void AMyPlayerController::GetInputActions(TArray<UInputAction*>& OutInputActions, const TArray<UInputMappingContext*>& InputContexts) const
+void AMyPlayerController::GetInputActions(TArray<UMyInputAction*>& OutInputActions, const TArray<UInputMappingContext*>& InputContexts) const
 {
 	for (const UInputMappingContext* GameplayInputContextIt : InputContexts)
 	{
@@ -100,10 +100,10 @@ void AMyPlayerController::GetInputActions(TArray<UInputAction*>& OutInputActions
 		const TArray<FEnhancedActionKeyMapping>& Mappings = GameplayInputContextIt->GetMappings();
 		for (const FEnhancedActionKeyMapping& MappingIt : Mappings)
 		{
-			UInputAction* InputAction = const_cast<UInputAction*>(MappingIt.Action);
-			if (InputAction)
+			const UMyInputAction* MyInputAction = Cast<UMyInputAction>(MappingIt.Action);
+			if (MyInputAction)
 			{
-				OutInputActions.AddUnique(InputAction);
+				OutInputActions.AddUnique(const_cast<UMyInputAction*>(MyInputAction));
 			}
 		}
 	}
@@ -192,106 +192,27 @@ void AMyPlayerController::BindInputActions()
 	const TArray<UInputMappingContext*> InputContexts{InputContextP0, InputContextP1, MainMenu, InGameMenu};
 
 	// --- Bind input actions
-	TArray<UInputAction*> InputActions;
+	TArray<UMyInputAction*> InputActions;
 	GetInputActions(/*Out*/InputActions, InputContexts);
-	for (const UInputAction* ActionIt : InputActions)
+	for (const UMyInputAction* ActionIt : InputActions)
 	{
-		const FName ActionName = ActionIt ? ActionIt->GetFName() : NAME_None;
-		if (ActionName.IsNone())
+		const FName FunctionName = ActionIt ? ActionIt->GetFunctionToBind().FunctionName : NAME_None;
+		if (FunctionName.IsNone())
 		{
 			continue;
 		}
 
-		// @TODO: #1 PlayerInput: Set function to bind in input action.
-		/* @TODO: #2 PlayerInput: Rebind the movements to call character function's directly , when character won't be destroyed during the game:
-		EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetControllablePlayer(), &APlayerCharacter::SpawnBomb);*/
-
-		static const FName IA_Gameplay_RunBack(TEXT("IA_Gameplay_RunBack"));
-		static const FName IA_Gameplay_RunForward(TEXT("IA_Gameplay_RunForward"));
-		if (ActionName == IA_Gameplay_RunBack
-		    || ActionName == IA_Gameplay_RunForward)
+		UObject* FoundContextObj = nullptr;
+		if (UFunction* FunctionPtr = ActionIt->GetStaticContext().GetFunction())
 		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, this, &ThisClass::MoveUpDown);
-			continue;
+			FunctionPtr->ProcessEvent(FunctionPtr, &FoundContextObj);
 		}
 
-		static const FName IA_Gameplay_RunLeft(TEXT("IA_Gameplay_RunLeft"));
-		static const FName IA_Gameplay_RunRight(TEXT("IA_Gameplay_RunRight"));
-		if (ActionName == IA_Gameplay_RunLeft
-		    || ActionName == IA_Gameplay_RunRight)
+		// Bind action
+		if (FoundContextObj)
 		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, this, &ThisClass::MoveRightLeft);
-			continue;
-		}
-
-		static const FName IA_Gameplay_SpawnBomb(TEXT("IA_Gameplay_SpawnBomb"));
-		if (ActionName == IA_Gameplay_SpawnBomb)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, this, &ThisClass::SpawnBomb);
-			continue;
-		}
-
-		static const FName IA_UI_Back(TEXT("IA_UI_Close"));
-		if (ActionName == IA_UI_Back)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetMyHUD(), &AMyHUD::BroadcastOnClose);
-			continue;
-		}
-
-		static const FName IA_UI_Play(TEXT("IA_UI_Play"));
-		if (ActionName == IA_UI_Play)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, this, &ThisClass::SetGameStartingState);
-			continue;
-		}
-
-		static const FName IA_UI_Menu(TEXT("IA_UI_Menu"));
-		if (ActionName == IA_UI_Menu)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, this, &ThisClass::SetMenuState);
-			continue;
-		}
-
-		static const FName IA_UI_Settings(TEXT("IA_UI_Settings"));
-		if (ActionName == IA_UI_Settings)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetSettingsWidget(), &USettingsWidget::OpenSettings);
-			continue;
-		}
-
-		static const FName IA_UI_ChooseNext(TEXT("IA_UI_ChooseRight"));
-		if (ActionName == IA_UI_ChooseNext)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetMainMenuWidget(), &UMainMenuWidget::ChooseRight);
-			continue;
-		}
-
-		static const FName IA_UI_ChoosePrevious(TEXT("IA_UI_ChooseLeft"));
-		if (ActionName == IA_UI_ChoosePrevious)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetMainMenuWidget(), &UMainMenuWidget::ChooseLeft);
-			continue;
-		}
-
-		static const FName IA_UI_ChooseForward(TEXT("IA_UI_ChooseForward"));
-		if (ActionName == IA_UI_ChooseForward)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetMainMenuWidget(), &UMainMenuWidget::ChooseForward);
-			continue;
-		}
-
-		static const FName IA_UI_ChooseBack(TEXT("IA_UI_ChooseBack"));
-		if (ActionName == IA_UI_ChooseBack)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetMainMenuWidget(), &UMainMenuWidget::ChooseBack);
-			continue;
-		}
-
-		static const FName IA_UI_ToggleSkin(TEXT("IA_UI_NextSkin"));
-		if (ActionName == IA_UI_ToggleSkin)
-		{
-			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetMainMenuWidget(), &UMainMenuWidget::NextSkin);
-			continue;
+			const ETriggerEvent TriggerEvent = ActionIt->GetTriggerEvent();
+			EnhancedInputComponent->BindAction(ActionIt, TriggerEvent, FoundContextObj, FunctionName);
 		}
 	}
 }
