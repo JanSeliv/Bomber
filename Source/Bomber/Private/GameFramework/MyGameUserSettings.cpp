@@ -162,7 +162,7 @@ void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 		return;
 	}
 
-	static const FSettingsFunction ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
+	static const FFunctionPicker ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
 	const FName TagName = SettingsWidget->GetTagNameByFunction(ThisFunction);
 	if (TagName.IsNone())
 	{

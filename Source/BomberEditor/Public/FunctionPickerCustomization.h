@@ -7,7 +7,7 @@
 /**
  * Allow to choose the function for UGameUserSettings instead of manually typing a name.
  */
-class FSettingsFunctionCustomization final : public FMyPropertyTypeCustomization
+class FFunctionPickerCustomization final : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------
@@ -22,7 +22,7 @@ public:
 	const static FNamesArray TemplateMetaKeys;
 
 	/** Default constructor. */
-	FSettingsFunctionCustomization();
+	FFunctionPickerCustomization();
 
 	/** Makes a new instance of this detail layout class for a specific detail view requesting it. */
 	static TSharedRef<IPropertyTypeCustomization> MakeInstance();
@@ -50,21 +50,21 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Contains the function to be compared with all other functions of a class to show in the list only compatible functions.
-	 * @see FSettingsFunctionCustomization::RefreshCustomProperty() */
+	 * @see FFunctionPickerCustomization::RefreshCustomProperty() */
 	TWeakObjectPtr<UFunction> TemplateFunctionInternal = nullptr;
 
 	/** One of the TemplateMetaKeys.
-	* UPROPERTY(meta = (Key="Value")) FSettingsFunction SomeProperty
+	* UPROPERTY(meta = (Key="Value")) FFunctionPicker SomeProperty
 	* It stores the name of Key.
 	* Is set once on init and never changes.
-	* @see FSettingsFunctionCustomization::InitTemplateMetaKey(). */
+	* @see FFunctionPickerCustomization::InitTemplateMetaKey(). */
 	FName TemplateMetaKeyInternal = NAME_None;
 
 	/** Dynamic value, is set for meta when new setting type is chose.
 	* @see FSettingsPickerCustomization::CopyMetas() */
 	FName TemplateMetaValueInternal = NAME_None;
 
-	/** Contains property data about FSettingsFunction::FunctionClass */
+	/** Contains property data about FFunctionPicker::FunctionClass */
 	FPropertyData FunctionClassPropertyInternal = FPropertyData::Empty;
 
 	/** If true, will be added FUNC_Static flag to show only static function in the list. */
@@ -92,8 +92,8 @@ protected:
 	virtual bool IsAllowedEnableCustomProperty() const override;
 
 	/** Returns the currently chosen class of functions to display.
-	 * @see FSettingsFunctionCustomization::FunctionClassHandleInternal
-	 * @see FSettingsFunction::Class */
+	 * @see FFunctionPickerCustomization::FunctionClassHandleInternal
+	 * @see FFunctionPicker::Class */
 	const UClass* GetChosenFunctionClass() const;
 
 	/**
@@ -101,16 +101,16 @@ protected:
 	 * Contains the logic UFunction::IsSignatureCompatibleWith but implements some part to return true for any derived UObject
 	 * @param Function The function to check.
 	 * @return true if compatible.
-	 * @see FSettingsFunctionCustomization::TemplateFunctionInternal
+	 * @see FFunctionPickerCustomization::TemplateFunctionInternal
 	 */
 	bool IsSignatureCompatible(const UFunction* Function) const;
 
 	/** Set Template Function once.
-	 *  @see FSettingsFunctionCustomization::TemplateFunctionInternal.
+	 *  @see FFunctionPickerCustomization::TemplateFunctionInternal.
 	 *  @return true if new template function was set. */
 	bool UpdateTemplateFunction();
 
 	/** Will set once the meta key of this property.
-	 *  @see FSettingsFunctionCustomization::TemplateMetaKeyInternal. */
+	 *  @see FFunctionPickerCustomization::TemplateMetaKeyInternal. */
 	void InitTemplateMetaKey();
 };

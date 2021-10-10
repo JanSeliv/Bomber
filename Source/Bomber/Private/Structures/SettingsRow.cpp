@@ -2,31 +2,8 @@
 
 #include "Structures/SettingsRow.h"
 
-// Empty settings function
-const FSettingsFunction FSettingsFunction::Empty = FSettingsFunction();
-
 // Empty settings row
 const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
-
-// Custom constructor to set all members values
-FSettingsFunction::FSettingsFunction(TSubclassOf<UObject> InFunctionClass, FName InFunctionName)
-	: FunctionClass(InFunctionClass)
-	, FunctionName(InFunctionName) {}
-
-// Compares for equality
-bool FSettingsFunction::operator==(const FSettingsFunction& Other) const
-{
-	return Other.FunctionClass->IsChildOf(this->FunctionClass)
-	       && Other.FunctionName == this->FunctionName;
-}
-
-// Creates a hash value
-uint32 GetTypeHash(const FSettingsFunction& Other)
-{
-	const uint32 FunctionClassHash = GetTypeHash(Other.FunctionClass);
-	const uint32 FunctionNameHash = GetTypeHash(Other.FunctionName);
-	return HashCombine(FunctionClassHash, FunctionNameHash);
-}
 
 // Compares for equality
 bool FSettingsPrimary::operator==(const FSettingsPrimary& Other) const
