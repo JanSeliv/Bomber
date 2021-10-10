@@ -206,36 +206,26 @@ void AMyPlayerController::BindInputActions()
 		/* @TODO: #2 PlayerInput: Rebind the movements to call character function's directly , when character won't be destroyed during the game:
 		EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, USingletonLibrary::GetControllablePlayer(), &APlayerCharacter::SpawnBomb);*/
 
-		static const FName IA_Gameplay_RunBack_P1(TEXT("IA_Gameplay_RunBack_P1"));
-		static const FName IA_Gameplay_RunBack_P2(TEXT("IA_Gameplay_RunBack_P2"));
-		static const FName IA_Gameplay_RunForward_P1(TEXT("IA_Gameplay_RunForward_P1"));
-		static const FName IA_Gameplay_RunForward_P2(TEXT("IA_Gameplay_RunForward_P2"));
-		if (ActionName == IA_Gameplay_RunBack_P1
-		    || ActionName == IA_Gameplay_RunBack_P2
-		    || ActionName == IA_Gameplay_RunForward_P1
-		    || ActionName == IA_Gameplay_RunForward_P2)
+		static const FName IA_Gameplay_RunBack(TEXT("IA_Gameplay_RunBack"));
+		static const FName IA_Gameplay_RunForward(TEXT("IA_Gameplay_RunForward"));
+		if (ActionName == IA_Gameplay_RunBack
+		    || ActionName == IA_Gameplay_RunForward)
 		{
 			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, this, &ThisClass::MoveUpDown);
 			continue;
 		}
 
-		static const FName IA_Gameplay_RunLeft_P1(TEXT("IA_Gameplay_RunLeft_P1"));
-		static const FName IA_Gameplay_RunLeft_P2(TEXT("IA_Gameplay_RunLeft_P2"));
-		static const FName IA_Gameplay_RunRight_P1(TEXT("IA_Gameplay_RunRight_P1"));
-		static const FName IA_Gameplay_RunRight_P2(TEXT("IA_Gameplay_RunRight_P2"));
-		if (ActionName == IA_Gameplay_RunLeft_P1
-		    || ActionName == IA_Gameplay_RunLeft_P2
-		    || ActionName == IA_Gameplay_RunRight_P1
-		    || ActionName == IA_Gameplay_RunRight_P2)
+		static const FName IA_Gameplay_RunLeft(TEXT("IA_Gameplay_RunLeft"));
+		static const FName IA_Gameplay_RunRight(TEXT("IA_Gameplay_RunRight"));
+		if (ActionName == IA_Gameplay_RunLeft
+		    || ActionName == IA_Gameplay_RunRight)
 		{
 			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, this, &ThisClass::MoveRightLeft);
 			continue;
 		}
 
-		static const FName IA_Gameplay_SpawnBomb_P1(TEXT("IA_Gameplay_SpawnBomb_P1"));
-		static const FName IA_Gameplay_SpawnBomb_P2(TEXT("IA_Gameplay_SpawnBomb_P2"));
-		if (ActionName == IA_Gameplay_SpawnBomb_P1
-		    || ActionName == IA_Gameplay_SpawnBomb_P2)
+		static const FName IA_Gameplay_SpawnBomb(TEXT("IA_Gameplay_SpawnBomb"));
+		if (ActionName == IA_Gameplay_SpawnBomb)
 		{
 			EnhancedInputComponent->BindAction(ActionIt, ETriggerEvent::Triggered, this, &ThisClass::SpawnBomb);
 			continue;
