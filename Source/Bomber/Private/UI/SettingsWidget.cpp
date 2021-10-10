@@ -138,7 +138,7 @@ void USettingsWidget::UpdateSettings()
 }
 
 // Returns the name of found tag by specified function
-FName USettingsWidget::GetTagNameByFunction(const FSettingsFunction& Function) const
+FName USettingsWidget::GetTagNameByFunction(const FFunctionPicker& Function) const
 {
 	TArray<FSettingsPicker> Rows;
 	SettingsTableRowsInternal.GenerateValueArray(Rows);
@@ -493,7 +493,7 @@ void USettingsWidget::OnVisibilityChange(ESlateVisibility InVisibility)
 // Bind and set static object delegate
 void USettingsWidget::TryBindStaticContext(FSettingsPrimary& Primary)
 {
-	const FSettingsFunction& StaticContext = Primary.StaticContext;
+	const FFunctionPicker& StaticContext = Primary.StaticContext;
 	if (StaticContext.FunctionName.IsNone()
 	    || !StaticContext.FunctionClass)
 	{

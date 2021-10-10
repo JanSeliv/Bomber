@@ -170,7 +170,7 @@ public:
 
 	/** Returns the name of found tag by specified function. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FName GetTagNameByFunction(const FSettingsFunction& Function) const;
+	FName GetTagNameByFunction(const FFunctionPicker& Function) const;
 
 	/* ---------------------------------------------------
 	 *		Setters by setting types

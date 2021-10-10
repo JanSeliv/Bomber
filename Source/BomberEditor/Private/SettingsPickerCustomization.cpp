@@ -2,7 +2,7 @@
 
 #include "SettingsPickerCustomization.h"
 //---
-#include "SettingsFunctionCustomization.h"
+#include "FunctionPickerCustomization.h"
 #include "Structures/SettingsRow.h"
 
 typedef FSettingsPickerCustomization ThisClass;
@@ -18,8 +18,8 @@ FSettingsPickerCustomization::FSettingsPickerCustomization()
 {
 	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
 
-	SettingsFunctionProperties.Reserve(FSettingsFunctionCustomization::TemplateMetaKeys.Num());
-	for (FName MetaNameIt : FSettingsFunctionCustomization::TemplateMetaKeys)
+	SettingsFunctionProperties.Reserve(FFunctionPickerCustomization::TemplateMetaKeys.Num());
+	for (FName MetaNameIt : FFunctionPickerCustomization::TemplateMetaKeys)
 	{
 		SettingsFunctionProperties.Emplace(MoveTemp(MetaNameIt), FPropertyData::Empty);
 	}
@@ -52,7 +52,7 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 {
 	/* ╔FSettingsPicker
 	 * ╠════╦FSettingsPrimary (1)
-	 * ║	╚════FSettingsFunction (2)
+	 * ║	╚════FFunctionPicker (2)
 	 * ╚═════FSettingsDataBase (3)
 	 */
 	const auto StructProperty = CastField<FStructProperty>(PropertyData.GetProperty());
@@ -74,7 +74,7 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 			SettingsPrimaryHandle->GetNumChildren(NumChildren);
 			for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 			{
-				static const UScriptStruct* const& SettingsFunctionStruct = FSettingsFunction::StaticStruct();
+				static const UScriptStruct* const& SettingsFunctionStruct = FFunctionPicker::StaticStruct();
 				FPropertyData SettingsPrimaryData(SettingsPrimaryHandle->GetChildHandle(ChildIndex).ToSharedRef());
 				const FStructProperty* ChildProperty = CastField<FStructProperty>(SettingsPrimaryData.GetProperty());
 				const UScriptStruct* ChildClass = ChildProperty ? ChildProperty->Struct : nullptr;

@@ -5,7 +5,7 @@
 #include "AttachedMeshCustomization.h"
 #include "MorphDataCustomization.h"
 #include "SettingsPickerCustomization.h"
-#include "SettingsFunctionCustomization.h"
+#include "FunctionPickerCustomization.h"
 //---
 #include "Modules/ModuleManager.h"
 
@@ -36,8 +36,8 @@ void FBomberEditorModule::StartupModule()
 
 	// Allows to choose ufunction
 	PropertyModule.RegisterCustomPropertyTypeLayout(
-		FSettingsFunctionCustomization::PropertyClassName,
-		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSettingsFunctionCustomization::MakeInstance)
+		FFunctionPickerCustomization::PropertyClassName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FFunctionPickerCustomization::MakeInstance)
 		);
 
 	// Allows to choose a morph
@@ -60,6 +60,6 @@ void FBomberEditorModule::ShutdownModule()
 
 	PropertyModule.UnregisterCustomPropertyTypeLayout(FAttachedMeshCustomization::PropertyClassName);
 	PropertyModule.UnregisterCustomPropertyTypeLayout(FSettingsPickerCustomization::PropertyClassName);
-	PropertyModule.UnregisterCustomPropertyTypeLayout(FSettingsFunctionCustomization::PropertyClassName);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(FFunctionPickerCustomization::PropertyClassName);
 	PropertyModule.UnregisterCustomPropertyTypeLayout(FMorphDataCustomization::PropertyClassName);
 }

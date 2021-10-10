@@ -6,6 +6,7 @@
 #include "Engine/DataTable.h"
 //---
 #include "Bomber.h"
+#include "FunctionPicker.h"
 //---
 #include "SettingsRow.generated.h"
 
@@ -248,19 +249,18 @@ struct FMiscThemeData
  *
  * ╔FSettingsRow
  * ╚════╦FSettingsPicker
- *		╠═══╦FSettingsPrimary
- *		║	╚════FSettingsFunction
+ *		╠════FSettingsPrimary
  *		╚════FSettingsDataBase
  */
 
 /**
-  * Delegates wrapper that are used as templates for FSettingsFunction properties.
-  * Has to have reflection to allow find its members by FSettingsFunctionCustomization:
+  * Delegates wrapper that are used as templates for FFunctionPicker properties.
+  * Has to have reflection to allow find its members by FFunctionPickerCustomization:
   * USettingTemplate::StaticClass()->FindFunctionByName("OnStaticContext__DelegateSignature");
   * DECLARE_DYNAMIC_DELEGATE can't be declared under USTRUCT
   */
 UCLASS(Abstract, Const, Transient)
-class BOMBER_API USettingTemplate final : public UObject
+class USettingTemplate final : public UObject
 {
 	GENERATED_BODY()
 
@@ -295,43 +295,6 @@ public:
 };
 
 /**
-  * Function wrapper.
-  */
-USTRUCT(BlueprintType)
-struct FSettingsFunction
-{
-	GENERATED_BODY()
-
-	/** Empty settings function. */
-	static const FSettingsFunction Empty;
-
-	/** Default constructor. */
-	FSettingsFunction() = default;
-
-	/** Custom constructor to set all members values. */
-	FSettingsFunction(TSubclassOf<UObject> InFunctionClass, FName InFunctionName);
-
-	/** The class where function can be found. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Class"))
-	TSubclassOf<UObject> FunctionClass = nullptr; //[D]
-
-	/** The function name to choose for specified class.*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Function"))
-	FName FunctionName = NAME_None; //[D]
-
-	/** Returns true if is valid. */
-	FORCEINLINE bool IsValid() const { return !(*this == Empty); }
-
-	/** Compares for equality.
-	  * @param Other The other object being compared. */
-	bool operator==(const FSettingsFunction& Other) const;
-
-	/** Creates a hash value.
-	  * @param Other the other object to create a hash value for. */
-	friend uint32 GetTypeHash(const FSettingsFunction& Other);
-};
-
-/**
   * The primary data of any setting.
   * Does not contain a default states for its value, because it should be set in the DefaultGameUserSettings.ini
   */
@@ -345,19 +308,19 @@ struct FSettingsPrimary
 	FGameplayTag Tag = FGameplayTag::EmptyTag; //[D]
 
 	/** The static function to obtain object to call Setters and Getters.
-	  * The SettingsFunctionContextTemplate meta will contain a name of one USettingTemplate delegate. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionContextTemplate))
-	FSettingsFunction StaticContext = FSettingsFunction::Empty; //[D]
+	  * The FunctionContextTemplate meta will contain a name of one USettingTemplate delegate. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionContextTemplate))
+	FFunctionPicker StaticContext = FFunctionPicker::Empty; //[D]
 
 	/** The Setter function to be called to set the setting value for the Static Context object.
-	  * The SettingsFunctionSetterTemplate meta will contain a name of one USettingTemplate delegate. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionSetterTemplate))
-	FSettingsFunction Setter = FSettingsFunction::Empty; //[D]
+	  * The FunctionSetterTemplate meta will contain a name of one USettingTemplate delegate. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionSetterTemplate))
+	FFunctionPicker Setter = FFunctionPicker::Empty; //[D]
 
 	/** The Getter function to be called to get the setting value from the Static Context object.
-	  * The SettingsFunctionGetterTemplate meta will contain a name of one USettingTemplate delegate. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionGetterTemplate))
-	FSettingsFunction Getter = FSettingsFunction::Empty; //[D]
+	  * The FunctionGetterTemplate meta will contain a name of one USettingTemplate delegate. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionGetterTemplate))
+	FFunctionPicker Getter = FFunctionPicker::Empty; //[D]
 
 	/** The setting name. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
@@ -397,7 +360,7 @@ struct FSettingsPrimary
   * The base archetype of some setting.
   */
 USTRUCT(BlueprintType, meta = (
-	SettingsFunctionContextTemplate="OnStaticContext__DelegateSignature"))
+	FunctionContextTemplate="SettingTemplate::OnStaticContext__DelegateSignature"))
 struct FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -407,7 +370,7 @@ struct FSettingsDataBase
   * The setting button data.
   */
 USTRUCT(BlueprintType, meta = (
-	SettingsFunctionSetterTemplate="OnButtonPressed__DelegateSignature"))
+	FunctionSetterTemplate="SettingTemplate::OnButtonPressed__DelegateSignature"))
 struct FSettingsButton : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -432,8 +395,8 @@ struct FSettingsButton : public FSettingsDataBase
   * The setting checkbox data.
   */
 USTRUCT(BlueprintType, meta = (
-	SettingsFunctionSetterTemplate="OnSetterBool__DelegateSignature",
-	SettingsFunctionGetterTemplate="OnGetterBool__DelegateSignature"))
+	FunctionSetterTemplate="SettingTemplate::OnSetterBool__DelegateSignature",
+	FunctionGetterTemplate="SettingTemplate::OnGetterBool__DelegateSignature"))
 struct FSettingsCheckbox : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -452,19 +415,19 @@ struct FSettingsCheckbox : public FSettingsDataBase
   * The setting combobox data.
   */
 USTRUCT(BlueprintType, meta = (
-	SettingsFunctionSetterTemplate="OnSetterInt__DelegateSignature",
-	SettingsFunctionGetterTemplate="OnGetterInt__DelegateSignature"))
+	FunctionSetterTemplate="SettingTemplate::OnSetterInt__DelegateSignature",
+	FunctionGetterTemplate="SettingTemplate::OnGetterInt__DelegateSignature"))
 struct FSettingsCombobox : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
 	/** The Setter function to be called to set all combobox members. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionSetterTemplate="OnSetMembers__DelegateSignature"))
-	FSettingsFunction SetMembers = FSettingsFunction::Empty; //[D]
+	UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate="SettingTemplate::OnSetMembers__DelegateSignature"))
+	FFunctionPicker SetMembers = FFunctionPicker::Empty; //[D]
 
 	/** The Setter function to be called to get all combobox members. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (SettingsFunctionGetterTemplate="OnGetMembers__DelegateSignature"))
-	FSettingsFunction GetMembers = FSettingsFunction::Empty; //[D]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionGetterTemplate="SettingTemplate::OnGetMembers__DelegateSignature"))
+	FFunctionPicker GetMembers = FFunctionPicker::Empty; //[D]
 
 	/** Contains all combobox members. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
@@ -494,8 +457,8 @@ struct FSettingsCombobox : public FSettingsDataBase
   * The setting slider data.
   */
 USTRUCT(BlueprintType, meta = (
-	SettingsFunctionSetterTemplate="OnSetterFloat__DelegateSignature",
-	SettingsFunctionGetterTemplate="OnGetterFloat__DelegateSignature"))
+	FunctionSetterTemplate="SettingTemplate::OnSetterFloat__DelegateSignature",
+	FunctionGetterTemplate="SettingTemplate::OnGetterFloat__DelegateSignature"))
 struct FSettingsSlider : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -514,8 +477,8 @@ struct FSettingsSlider : public FSettingsDataBase
   * The setting text line data.
   */
 USTRUCT(BlueprintType, meta = (
-	SettingsFunctionSetterTemplate="OnSetterText__DelegateSignature",
-	SettingsFunctionGetterTemplate="OnGetterText__DelegateSignature"))
+	FunctionSetterTemplate="SettingTemplate::OnSetterText__DelegateSignature",
+	FunctionGetterTemplate="SettingTemplate::OnGetterText__DelegateSignature"))
 struct FSettingsTextLine : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -539,8 +502,8 @@ struct FSettingsTextLine : public FSettingsDataBase
   * The setting user input data.
   */
 USTRUCT(BlueprintType, meta = (
-	SettingsFunctionSetterTemplate="OnSetterName__DelegateSignature",
-	SettingsFunctionGetterTemplate="OnGetterName__DelegateSignature"))
+	FunctionSetterTemplate="SettingTemplate::OnSetterName__DelegateSignature",
+	FunctionGetterTemplate="SettingTemplate::OnGetterName__DelegateSignature"))
 struct FSettingsUserInput : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -575,7 +538,7 @@ struct FSettingsPicker
 
 	/** The common setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsPrimary PrimaryData;
+	FSettingsPrimary PrimaryData; //[D]
 
 	/** The button setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
