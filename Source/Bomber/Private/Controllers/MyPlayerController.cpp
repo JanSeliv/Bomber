@@ -4,7 +4,7 @@
 //---
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
-#include "InputMappingContext.h"
+#include "Globals/MyInputMappingContext.h"
 #include "Framework/Application/NavigationConfig.h"
 #include "Engine/LocalPlayer.h"
 //---
@@ -25,9 +25,9 @@ const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
 }
 
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
-UInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
+UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
-	const TArray<TObjectPtr<UInputMappingContext>>& InputContexts = GameplayInputContextsInternal;
+	const TArray<TObjectPtr<UMyInputMappingContext>>& InputContexts = GameplayInputContextsInternal;
 	return InputContexts.IsValidIndex(LocalPlayerIndex) ? InputContexts[LocalPlayerIndex] : nullptr;
 }
 
@@ -88,9 +88,9 @@ UEnhancedInputLocalPlayerSubsystem* AMyPlayerController::GetEnhancedInputSubsyst
 }
 
 // Finds input actions in specified contexts
-void AMyPlayerController::GetInputActions(TArray<UMyInputAction*>& OutInputActions, const TArray<UInputMappingContext*>& InputContexts) const
+void AMyPlayerController::GetInputActions(TArray<UMyInputAction*>& OutInputActions, const TArray<UMyInputMappingContext*>& InputContexts) const
 {
-	for (const UInputMappingContext* GameplayInputContextIt : InputContexts)
+	for (const UMyInputMappingContext* GameplayInputContextIt : InputContexts)
 	{
 		if (!ensureMsgf(GameplayInputContextIt, TEXT("ASSERT: 'GameplayInputContextIt' is not valid")))
 		{
@@ -185,11 +185,11 @@ void AMyPlayerController::BindInputActions()
 		return;
 	}
 
-	UInputMappingContext* InputContextP0 = UPlayerInputDataAsset::Get().GetGameplayInputContext(0);
-	UInputMappingContext* InputContextP1 = UPlayerInputDataAsset::Get().GetGameplayInputContext(1);
-	UInputMappingContext* MainMenu = UPlayerInputDataAsset::Get().GetMainMenuInputContext();
-	UInputMappingContext* InGameMenu = UPlayerInputDataAsset::Get().GetInGameMenuInputContext();
-	const TArray<UInputMappingContext*> InputContexts{InputContextP0, InputContextP1, MainMenu, InGameMenu};
+	UMyInputMappingContext* InputContextP0 = UPlayerInputDataAsset::Get().GetGameplayInputContext(0);
+	UMyInputMappingContext* InputContextP1 = UPlayerInputDataAsset::Get().GetGameplayInputContext(1);
+	UMyInputMappingContext* MainMenu = UPlayerInputDataAsset::Get().GetMainMenuInputContext();
+	UMyInputMappingContext* InGameMenu = UPlayerInputDataAsset::Get().GetInGameMenuInputContext();
+	const TArray<UMyInputMappingContext*> InputContexts{InputContextP0, InputContextP1, MainMenu, InGameMenu};
 
 	// --- Bind input actions
 	TArray<UMyInputAction*> InputActions;
@@ -301,13 +301,13 @@ void AMyPlayerController::SetGameplayInputContextEnabled(bool bEnable)
 	static constexpr int32 LocalPlayers = 2;
 	for (int32 PlayerIndex = 0; PlayerIndex < LocalPlayers; ++PlayerIndex)
 	{
-		const UInputMappingContext* InputContextIt = UPlayerInputDataAsset::Get().GetGameplayInputContext(PlayerIndex);
+		const UMyInputMappingContext* InputContextIt = UPlayerInputDataAsset::Get().GetGameplayInputContext(PlayerIndex);
 		SetInputContextEnabled(bEnable, InputContextIt);
 	}
 }
 
 // Enables or disables specified input context
-void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UInputMappingContext* InputContext)
+void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InputContext)
 {
 	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem();
 	if (!ensureMsgf(InputSubsystem, TEXT("ASSERT: 'InputSubsystem' is not valid"))
