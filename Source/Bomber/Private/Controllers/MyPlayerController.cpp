@@ -24,6 +24,15 @@ const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
 	return *PlayerInputDataAsset;
 }
 
+// Returns all input contexts contained in this data asset
+void UPlayerInputDataAsset::GetAllInputContexts(TArray<UMyInputMappingContext*>& OutInputContexts) const
+{
+	OutInputContexts.Emplace(GetGameplayInputContext(0));
+	OutInputContexts.Emplace(GetGameplayInputContext(1));
+	OutInputContexts.Emplace(GetMainMenuInputContext());
+	OutInputContexts.Emplace(GetInGameMenuInputContext());
+}
+
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
 UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
@@ -85,28 +94,6 @@ void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 UEnhancedInputLocalPlayerSubsystem* AMyPlayerController::GetEnhancedInputSubsystem() const
 {
 	return ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-}
-
-// Finds input actions in specified contexts
-void AMyPlayerController::GetInputActions(TArray<UMyInputAction*>& OutInputActions, const TArray<UMyInputMappingContext*>& InputContexts) const
-{
-	for (const UMyInputMappingContext* GameplayInputContextIt : InputContexts)
-	{
-		if (!ensureMsgf(GameplayInputContextIt, TEXT("ASSERT: 'GameplayInputContextIt' is not valid")))
-		{
-			continue;
-		}
-
-		const TArray<FEnhancedActionKeyMapping>& Mappings = GameplayInputContextIt->GetMappings();
-		for (const FEnhancedActionKeyMapping& MappingIt : Mappings)
-		{
-			const UMyInputAction* MyInputAction = Cast<UMyInputAction>(MappingIt.Action);
-			if (MyInputAction)
-			{
-				OutInputActions.AddUnique(const_cast<UMyInputAction*>(MyInputAction));
-			}
-		}
-	}
 }
 
 // Called when the game starts or when spawned
@@ -185,15 +172,16 @@ void AMyPlayerController::BindInputActions()
 		return;
 	}
 
-	UMyInputMappingContext* InputContextP0 = UPlayerInputDataAsset::Get().GetGameplayInputContext(0);
-	UMyInputMappingContext* InputContextP1 = UPlayerInputDataAsset::Get().GetGameplayInputContext(1);
-	UMyInputMappingContext* MainMenu = UPlayerInputDataAsset::Get().GetMainMenuInputContext();
-	UMyInputMappingContext* InGameMenu = UPlayerInputDataAsset::Get().GetInGameMenuInputContext();
-	const TArray<UMyInputMappingContext*> InputContexts{InputContextP0, InputContextP1, MainMenu, InGameMenu};
+	TArray<UMyInputMappingContext*> InputContexts;
+	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
+
+	TArray<UMyInputAction*> InputActions;
+	for (const UMyInputMappingContext* InputContextIt : InputContexts)
+	{
+		InputContextIt->GetInputActions(InputActions);
+	}
 
 	// --- Bind input actions
-	TArray<UMyInputAction*> InputActions;
-	GetInputActions(/*Out*/InputActions, InputContexts);
 	for (const UMyInputAction* ActionIt : InputActions)
 	{
 		const FName FunctionName = ActionIt ? ActionIt->GetFunctionToBind().FunctionName : NAME_None;
@@ -238,43 +226,40 @@ void AMyPlayerController::SetUIInputIgnored()
 // Listen to toggle movement input and mouse cursor
 void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
-	// @TODO: Set contexts by game states
 	switch (CurrentGameState)
 	{
 		case ECurrentGameState::GameStarting:
 		{
 			SetMouseVisibility(false);
-			SetGameplayInputContextEnabled(false);
-			SetInputContextEnabled(false, UPlayerInputDataAsset::Get().GetMainMenuInputContext());
-			SetInputContextEnabled(false, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
 			break;
 		}
 		case ECurrentGameState::Menu:
 		{
 			SetMouseVisibility(true);
-			SetGameplayInputContextEnabled(false);
-			SetInputContextEnabled(true, UPlayerInputDataAsset::Get().GetMainMenuInputContext());
-			SetInputContextEnabled(false, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
 			break;
 		}
 		case ECurrentGameState::EndGame:
 		{
 			SetMouseVisibility(true);
-			SetGameplayInputContextEnabled(false);
-			SetInputContextEnabled(false, UPlayerInputDataAsset::Get().GetMainMenuInputContext());
-			SetInputContextEnabled(true, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
 			break;
 		}
 		case ECurrentGameState::InGame:
 		{
 			SetMouseVisibility(false);
-			SetGameplayInputContextEnabled(true);
-			SetInputContextEnabled(false, UPlayerInputDataAsset::Get().GetMainMenuInputContext());
-			SetInputContextEnabled(false, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
 			break;
 		}
 		default:
 			break;
+	}
+
+	// Enable or disable input contexts by specified game states
+	TArray<UMyInputMappingContext*> InputContexts;
+	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
+	for (const UMyInputMappingContext* InputContextIt : InputContexts)
+	{
+		const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
+		const bool bEnableContext = GameStatesBitmask & TO_FLAG(CurrentGameState);
+		SetInputContextEnabled(bEnableContext, InputContextIt);
 	}
 }
 

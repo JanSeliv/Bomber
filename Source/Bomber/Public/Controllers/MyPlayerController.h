@@ -22,6 +22,10 @@ public:
 	/** Returns the player input data asset. */
 	static const UPlayerInputDataAsset& Get();
 
+	/** Returns all input contexts contained in this data asset. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	void GetAllInputContexts(TArray<class UMyInputMappingContext*>& OutInputContexts) const;
+
 	/** Returns the Enhanced Input Mapping Context of gameplay actions for specified local player.
 	* @param LocalPlayerIndex The index of a local player. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -79,12 +83,6 @@ public:
 	/** Returns the Enhanced Input Local Player Subsystem. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputSubsystem() const;
-
-	/** Finds input actions in specified contexts.
-	 * @param OutInputActions Returns all input actions for specified contexts.
-	 * @param InputContexts Contexts of input actions.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	void GetInputActions(TArray<class UMyInputAction*>& OutInputActions, const TArray<class UMyInputMappingContext*>& InputContexts) const;
 
 protected:
 	/** Called when the game starts or when spawned. */
