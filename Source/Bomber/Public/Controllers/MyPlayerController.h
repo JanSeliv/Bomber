@@ -25,30 +25,30 @@ public:
 	/** Returns the Enhanced Input Mapping Context of gameplay actions for specified local player.
 	* @param LocalPlayerIndex The index of a local player. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class UInputMappingContext* GetGameplayInputContext(int32 LocalPlayerIndex) const;
+	class UMyInputMappingContext* GetGameplayInputContext(int32 LocalPlayerIndex) const;
 
 	/** Returns the Enhanced Input Mapping Context of actions on the User Interface.
 	* @see UPlayerInputDataAsset::MainMenuInputContextInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class UInputMappingContext* GetMainMenuInputContext() const { return MainMenuInputContextInternal; }
+	class UMyInputMappingContext* GetMainMenuInputContext() const { return MainMenuInputContextInternal; }
 
 	/** Returns the Enhanced Input Mapping Context of actions on the User Interface.
 	  * @see UPlayerInputDataAsset:: */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class UInputMappingContext* GetInGameMenuInputContext() const { return InGameMenuInputContextInternal; }
+	class UMyInputMappingContext* GetInGameMenuInputContext() const { return InGameMenuInputContextInternal; }
 
 protected:
 	/** Enhanced Input Mapping Contexts of gameplay actions for local players. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Gameplay Input Contexts", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class UInputMappingContext>> GameplayInputContextsInternal; //[D]
+	TArray<TObjectPtr<class UMyInputMappingContext>> GameplayInputContextsInternal; //[D]
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<class UInputMappingContext> MainMenuInputContextInternal; //[D]
+	TObjectPtr<class UMyInputMappingContext> MainMenuInputContextInternal; //[D]
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<class UInputMappingContext> InGameMenuInputContextInternal; //[D]
+	TObjectPtr<class UMyInputMappingContext> InGameMenuInputContextInternal; //[D]
 };
 
 /**
@@ -84,7 +84,7 @@ public:
 	 * @param OutInputActions Returns all input actions for specified contexts.
 	 * @param InputContexts Contexts of input actions.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	void GetInputActions(TArray<class UMyInputAction*>& OutInputActions, const TArray<class UInputMappingContext*>& InputContexts) const;
+	void GetInputActions(TArray<class UMyInputAction*>& OutInputActions, const TArray<class UMyInputMappingContext*>& InputContexts) const;
 
 protected:
 	/** Called when the game starts or when spawned. */
@@ -126,7 +126,7 @@ protected:
 	 * @param bEnable set true to add specified input context, otherwise it will be removed from local player.
 	 * @param InputContext Context to set. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetInputContextEnabled(bool bEnable, const UInputMappingContext* InputContext);
+	void SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InputContext);
 
 	/** Move the player character by the forward vector. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
