@@ -90,15 +90,19 @@ enum class EItemType : uint8
 /**
  * The replicated states of the game.
  */
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ECurrentGameState : uint8
 {
-	None,
-	Menu,
-	GameStarting,
-	EndGame,
-	InGame
+	None = 0,
+	Menu = 1 << 0,
+	GameStarting = 1 << 1,
+	EndGame = 1 << 2,
+	InGame = 1 << 3,
+	Max = Menu | GameStarting | EndGame | InGame
 };
+
+ENUM_CLASS_FLAGS(ECurrentGameState);
+using ECGS = ECurrentGameState;
 
 /**
  * The round result.
