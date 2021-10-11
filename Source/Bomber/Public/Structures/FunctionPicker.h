@@ -39,7 +39,7 @@ struct FFunctionPicker
 
 	/** The class where function can be found. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Class"))
-	UClass* FunctionClass = nullptr; //[D]
+	TObjectPtr<UClass> FunctionClass = nullptr; //[D]
 
 	/** The function name to choose for specified class.*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Function"))

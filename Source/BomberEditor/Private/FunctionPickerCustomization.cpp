@@ -254,7 +254,7 @@ bool FFunctionPickerCustomization::UpdateTemplateFunction()
 	const FName TemplateMetaValue = ParentPropertyInternal.GetMetaDataValue(TemplateMetaKeyInternal);
 	if (TemplateMetaValue == TemplateMetaValueInternal)
 	{
-		return false;
+		return true;
 	}
 	TemplateMetaValueInternal = TemplateMetaValue;
 
