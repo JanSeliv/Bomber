@@ -14,6 +14,7 @@
 #include "Globals/MyGameInstance.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/MyHUD.h"
+#include "UI/InputControlsWidget.h"
 //---
 #include "Engine.h"
 #include "Components/TextRenderComponent.h"
@@ -266,6 +267,13 @@ UInGameWidget* USingletonLibrary::GetInGameWidget()
 	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
 }
 
+// Returns the widget that allows player to rebind input mappings
+UInputControlsWidget* USingletonLibrary::GetInputControlsWidget()
+{
+	const AMyHUD* MyHUD = GetMyHUD();
+	return MyHUD ? MyHUD->GetInputControlsWidget() : nullptr;
+}
+
 // Returns controlled player character
 APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 {
@@ -306,7 +314,7 @@ ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclas
 	for (const TObjectPtr<ULevelActorDataAsset>& DataAssetIt : ActorsDataAssets)
 	{
 		if (DataAssetIt
-			&& DataAssetIt->GetActorClass()->IsChildOf(ActorClass))
+		    && DataAssetIt->GetActorClass()->IsChildOf(ActorClass))
 		{
 			return DataAssetIt;
 		}
