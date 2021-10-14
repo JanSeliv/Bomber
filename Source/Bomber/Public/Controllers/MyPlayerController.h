@@ -120,6 +120,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SetGameplayInputContextEnabled(bool bEnable);
 
+	/** Returns true if specified input context is enabled.
+	 * @param InputContext Context to verify. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	bool IsInputContextEnabled(const UMyInputMappingContext* InputContext) const;
+
 	/** Enables or disables specified input context.
 	 * @param bEnable set true to add specified input context, otherwise it will be removed from local player.
 	 * @param InputContext Context to set. */
