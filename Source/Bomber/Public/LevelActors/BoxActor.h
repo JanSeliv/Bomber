@@ -74,7 +74,7 @@ protected:
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 
 	/** Spawn item with a chance. */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
 	void TrySpawnItem(AActor* DestroyedActor = nullptr);
 
 	/** The item chance can be overrided in game, so it should be reset for each new game. */
