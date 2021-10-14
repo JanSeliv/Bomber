@@ -538,7 +538,8 @@ void USettingsWidget::OpenSettings()
 // Save and close the settings widget
 void USettingsWidget::CloseSettings()
 {
-	if (!IsVisible())
+	if (!IsVisible()
+	    || !IsHovered())
 	{
 		// Widget is already closed
 		return;

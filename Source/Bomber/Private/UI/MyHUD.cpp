@@ -4,6 +4,7 @@
 //---
 #include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
+#include "UI/InputControlsWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"
 
@@ -117,5 +118,13 @@ void AMyHUD::InitWidgets()
 			checkf(NicknameWidget, TEXT("ERROR: NicknameWidget failed to create"));
 			NicknameWidgetsInternal.Emplace(NicknameWidget);
 		}
+	}
+
+	const TSubclassOf<UInputControlsWidget>& InputControlsWidgetClass = UIDataAsset.GetInputControlsWidgetClass();
+	if (ensureMsgf(InputControlsWidgetClass, TEXT("ASSERT: 'InputControlsWidgetClass' is not set in the UI data table")))
+	{
+		InputControlsWidgetInternal = CreateWidget<UInputControlsWidget>(PlayerController, InputControlsWidgetClass);
+		checkf(InputControlsWidgetInternal, TEXT("ERROR: InputControlsWidgetInternal failed to create"));
+		InputControlsWidgetInternal->AddToViewport();
 	}
 }

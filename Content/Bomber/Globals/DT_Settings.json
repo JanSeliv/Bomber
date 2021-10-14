@@ -86,13 +86,13 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetInputControlsWidget"
 				},
 				"Setter":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.InputControlsWidget'",
+					"FunctionName": "OpenWidget"
 				},
 				"Getter":
 				{
