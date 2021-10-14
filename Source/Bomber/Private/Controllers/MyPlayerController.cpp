@@ -291,6 +291,19 @@ void AMyPlayerController::SetGameplayInputContextEnabled(bool bEnable)
 	}
 }
 
+// Returns true if specified input context is enabled
+bool AMyPlayerController::IsInputContextEnabled(const UMyInputMappingContext* InputContext) const
+{
+	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem();
+	if (!ensureMsgf(InputSubsystem, TEXT("ASSERT: 'InputSubsystem' is not valid"))
+	    || !ensureMsgf(InputContext, TEXT("ASSERT: 'InputContext' is not valid")))
+	{
+		return false;
+	}
+
+	return InputSubsystem->HasMappingContext(InputContext);
+}
+
 // Enables or disables specified input context
 void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InputContext)
 {
