@@ -113,7 +113,7 @@ protected:
 
 	/** Destroy bomb and burst explosion cells.
 	  * Calls destroying request of all actors by cells in explosion cells array.*/
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DefaultToSelf = DestroyedActor))
 	void DetonateBomb(AActor* DestroyedActor = nullptr);
 
 	/**

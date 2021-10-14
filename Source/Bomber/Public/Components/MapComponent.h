@@ -62,7 +62,7 @@ public:
 	void SetMaterial(class UMaterialInterface* Material);
 
 	/** Returns the map component of the specified owner. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Owner"))
 	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner) { return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr; }
 
 	/**  Rerun owner's construction scripts. The temporary only editor owner will not be updated. */

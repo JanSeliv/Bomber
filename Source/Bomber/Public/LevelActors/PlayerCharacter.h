@@ -276,7 +276,7 @@ protected:
 	void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	/** Event triggered when the bomb has been explicitly destroyed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedBomb"))
 	void OnBombDestroyed(AActor* DestroyedBomb);
 
 	/** Listen to manage the tick. */
