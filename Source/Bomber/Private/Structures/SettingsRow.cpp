@@ -35,8 +35,8 @@ const FSettingsDataBase* FSettingsPicker::GetChosenSettingsData() const
 	if (!SettingsType.IsNone())
 	{
 		static const UScriptStruct* const& SettingsPickerStruct = StaticStruct();
-		FProperty* FoundProperty = SettingsPickerStruct ? SettingsPickerStruct->FindPropertyByName(SettingsType) : nullptr;
-		FStructProperty* FoundStructProperty = CastField<FStructProperty>(FoundProperty);
+		const FProperty* FoundProperty = SettingsPickerStruct ? SettingsPickerStruct->FindPropertyByName(SettingsType) : nullptr;
+		const FStructProperty* FoundStructProperty = CastField<FStructProperty>(FoundProperty);
 		FoundSetting = FoundStructProperty ? FoundStructProperty->ContainerPtrToValuePtr<FSettingsDataBase>(this, 0) : nullptr;
 	}
 	return FoundSetting;

@@ -10,7 +10,7 @@
  * Allows player to rebind input mappings.
  */
 UCLASS()
-class BOMBER_API UInputControlsWidget final : public UUserWidget
+class UInputControlsWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 

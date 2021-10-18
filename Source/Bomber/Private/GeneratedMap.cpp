@@ -7,7 +7,6 @@
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/MyGameInstance.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 //---

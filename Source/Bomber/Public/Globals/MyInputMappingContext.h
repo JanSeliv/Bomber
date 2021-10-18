@@ -10,8 +10,8 @@
 /**
  * Contains specific for this project data and is intended to with UMyInputAction
  */
-UCLASS()
-class BOMBER_API UMyInputMappingContext final : public UInputMappingContext
+UCLASS(Blueprintable, Const, AutoExpandCategories=("C++"))
+class UMyInputMappingContext final : public UInputMappingContext
 {
 	GENERATED_BODY()
 
@@ -24,6 +24,12 @@ public:
 	/** Returns all input actions set in mappings. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetInputActions(TArray<class UMyInputAction*>& OutInputActions) const;
+
+	/** Returns mappings by specified input action.
+	 * @param OutMappings Contains found mappings
+	 * @param InputAction Action by that*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	void GetMappingsByInputAction(TArray<FEnhancedActionKeyMapping>& OutMappings, const class UMyInputAction* InputAction) const;
 
 protected:
 	/** Set the game states for which this input context should be active. */

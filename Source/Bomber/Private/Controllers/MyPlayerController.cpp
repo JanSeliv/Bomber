@@ -4,6 +4,7 @@
 //---
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "EnhancedPlayerInput.h"
 #include "Globals/MyInputMappingContext.h"
 #include "Framework/Application/NavigationConfig.h"
 #include "Engine/LocalPlayer.h"
@@ -27,17 +28,46 @@ const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
 // Returns all input contexts contained in this data asset
 void UPlayerInputDataAsset::GetAllInputContexts(TArray<UMyInputMappingContext*>& OutInputContexts) const
 {
-	OutInputContexts.Emplace(GetGameplayInputContext(0));
-	OutInputContexts.Emplace(GetGameplayInputContext(1));
-	OutInputContexts.Emplace(GetMainMenuInputContext());
-	OutInputContexts.Emplace(GetInGameMenuInputContext());
+	static constexpr int32 FirstPlayer = 0;
+	if (UMyInputMappingContext* GameplayInputContextP1 = GetGameplayInputContext(FirstPlayer))
+	{
+		OutInputContexts.Emplace(GameplayInputContextP1);
+	}
+
+	static constexpr int32 SecondPlayer = 1;
+	if (UMyInputMappingContext* GameplayInputContextP2 = GetGameplayInputContext(SecondPlayer))
+	{
+		OutInputContexts.Emplace(GameplayInputContextP2);
+	}
+
+	if (UMyInputMappingContext* MainMenuInputContext = GetMainMenuInputContext())
+	{
+		OutInputContexts.Emplace(MainMenuInputContext);
+	}
+
+	if (UMyInputMappingContext* InGameMenuInputContext = GetInGameMenuInputContext())
+	{
+		OutInputContexts.Emplace(InGameMenuInputContext);
+	}
 }
 
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
 UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
-	const TArray<TObjectPtr<UMyInputMappingContext>>& InputContexts = GameplayInputContextsInternal;
-	return InputContexts.IsValidIndex(LocalPlayerIndex) ? InputContexts[LocalPlayerIndex] : nullptr;
+	if (GameplayInputContextsInternal.IsEmpty())
+	{
+		for (const UClass* ContextClassIt : GameplayInputContextClassesInternal)
+		{
+			if (ContextClassIt)
+			{
+				// Initialize new gameplay contexts
+				UMyInputMappingContext* NewGameplayInputContext = NewObject<UMyInputMappingContext>(GetTransientPackage(), ContextClassIt, NAME_None, RF_Public | RF_Transactional);
+				GameplayInputContextsInternal.Emplace(NewGameplayInputContext);
+			}
+		}
+	}
+
+	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
 }
 
 // Sets default values for this controller's properties
@@ -94,6 +124,18 @@ void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 UEnhancedInputLocalPlayerSubsystem* AMyPlayerController::GetEnhancedInputSubsystem() const
 {
 	return ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+}
+
+// Returns the Enhanced Input Component
+UEnhancedInputComponent* AMyPlayerController::GetEnhancedInputComponent() const
+{
+	return Cast<UEnhancedInputComponent>(InputComponent);
+}
+
+// Returns the Enhanced Player Input
+UEnhancedPlayerInput* AMyPlayerController::GetEnhancedPlayerInput() const
+{
+	return Cast<UEnhancedPlayerInput>(PlayerInput);
 }
 
 // Called when the game starts or when spawned
@@ -166,7 +208,7 @@ void AMyPlayerController::BindInputActions()
 {
 	Super::SetupInputComponent();
 
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+	UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent();
 	if (!ensureMsgf(EnhancedInputComponent, TEXT("ASSERT: 'EnhancedInputComponent' is not valid")))
 	{
 		return;

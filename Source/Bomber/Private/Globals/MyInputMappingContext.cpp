@@ -16,3 +16,15 @@ void UMyInputMappingContext::GetInputActions(TArray<UMyInputAction*>& OutInputAc
 		}
 	}
 }
+
+// Returns mappings by specified input action
+void UMyInputMappingContext::GetMappingsByInputAction(TArray<FEnhancedActionKeyMapping>& OutMappings, const UMyInputAction* InputAction) const
+{
+	for (const FEnhancedActionKeyMapping& MappingIt : Mappings)
+	{
+		if (MappingIt.Action == InputAction)
+		{
+			OutMappings.Emplace(MappingIt);
+		}
+	}
+}
