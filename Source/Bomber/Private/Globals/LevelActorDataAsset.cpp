@@ -39,17 +39,18 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	}
 
 	// Continue only if was added new row
-	FProperty* Property = PropertyChangedEvent.Property;
+	static const FString PropertyName = GET_MEMBER_NAME_STRING_CHECKED(ThisClass, RowsInternal);
+	const FProperty* Property = PropertyChangedEvent.Property;
 	if (!Property
 	    || !Property->IsA<FArrayProperty>()
 	    || PropertyChangedEvent.ChangeType != EPropertyChangeType::ArrayAdd
-	    || Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, RowsInternal))
+	    || Property->GetName() != PropertyName)
 	{
 		return;
 	}
 
 	// Initialize new row
-	const int32 AddedAtIndex = PropertyChangedEvent.GetArrayIndex(PropertyChangedEvent.Property->GetFName().ToString());
+	const int32 AddedAtIndex = PropertyChangedEvent.GetArrayIndex(PropertyName);
 	if (RowsInternal.IsValidIndex(AddedAtIndex))
 	{
 		TObjectPtr<ULevelActorRow>& Row = RowsInternal[AddedAtIndex];

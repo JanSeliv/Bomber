@@ -46,25 +46,17 @@ void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	}
 
 	// If material instance was changed
-	FProperty* Property = PropertyChangedEvent.Property;
+	static const FName PropertyName = GET_MEMBER_NAME_CHECKED(ThisClass, MaterialInstanceInternal);
+	const FProperty* Property = PropertyChangedEvent.Property;
 	if (Property
 	    && Property->IsA<FObjectProperty>()
 	    && PropertyChangedEvent.ChangeType == EPropertyChangeType::ValueSet
-	    && Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, MaterialInstanceInternal))
+	    && Property->GetFName() == PropertyName)
 	{
 		// Force recreation of dynamic material instances
 		MaterialInstancesDynamicInternal.Empty();
 		TryCreateDynamicMaterials();
 	}
-}
-#endif	//WITH_EDITOR
-
-// Called after loading an object. Is overridden to prepare dynamic materials
-void UPlayerRow::PostLoad()
-{
-	Super::PostLoad();
-
-	TryCreateDynamicMaterials();
 }
 
 // Create dynamic material instance for each ski if is not done before.
@@ -112,6 +104,7 @@ void UPlayerRow::TryCreateDynamicMaterials()
 		MaterialInstanceDynamic->SetScalarParameterValue(SkinIndexParameterName, SkinPosition);
 	}
 }
+#endif	//WITH_EDITOR
 
 // Default constructor
 UPlayerDataAsset::UPlayerDataAsset()

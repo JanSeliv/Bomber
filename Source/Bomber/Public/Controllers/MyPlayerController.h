@@ -42,9 +42,10 @@ public:
 	class UMyInputMappingContext* GetInGameMenuInputContext() const { return InGameMenuInputContextInternal; }
 
 protected:
-	/** Enhanced Input Mapping Contexts of gameplay actions for local players. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Gameplay Input Contexts", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class UMyInputMappingContext>> GameplayInputContextsInternal; //[D]
+	/** Enhanced Input Mapping Contexts of gameplay actions for local players
+	 *  Are selectable classes instead of objects directly to avoid changing data asset by MapKey\UnmapKey. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Gameplay Input Context Classes", ShowOnlyInnerProperties))
+	TArray<TSubclassOf<UMyInputMappingContext>> GameplayInputContextClassesInternal; //[D]
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Input Context", ShowOnlyInnerProperties))
@@ -53,6 +54,12 @@ protected:
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))
 	TObjectPtr<class UMyInputMappingContext> InGameMenuInputContextInternal; //[D]
+
+private:
+	/** Are created dynamically by specified input classes.
+	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
+	UPROPERTY(Transient)
+	mutable TArray<TObjectPtr<class UMyInputMappingContext>> GameplayInputContextsInternal; //[G]
 };
 
 /**
@@ -83,6 +90,14 @@ public:
 	/** Returns the Enhanced Input Local Player Subsystem. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputSubsystem() const;
+
+	/** Returns the Enhanced Input Component. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class UEnhancedInputComponent* GetEnhancedInputComponent() const;
+
+	/** Returns the Enhanced Player Input. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class UEnhancedPlayerInput* GetEnhancedPlayerInput() const;
 
 protected:
 	/** Called when the game starts or when spawned. */

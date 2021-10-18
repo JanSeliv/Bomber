@@ -85,10 +85,6 @@ protected:
 #if WITH_EDITOR
 	/** Handle adding and changing material instance to prepare dynamic materials. */
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif	//WITH_EDITOR
-
-	/** Called after loading an object. Is overridden to prepare dynamic materials. */
-	virtual void PostLoad() override;
 
 	/**
 	 * Create dynamic material instance for each ski if is not done before.
@@ -96,6 +92,7 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryCreateDynamicMaterials();
+#endif	//WITH_EDITOR
 };
 
 /**

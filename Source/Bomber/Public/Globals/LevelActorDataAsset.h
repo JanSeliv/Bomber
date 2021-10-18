@@ -11,7 +11,7 @@
 /**
  * The base archetype of level actor rows. Is implemented in player, item rows, etc.
  */
-UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew)
+UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, Const, AutoExpandCategories=("C++"))
 class ULevelActorRow : public UObject
 {
 	GENERATED_BODY()
@@ -35,7 +35,7 @@ protected:
 /**
  * The base data asset for the Bomber's data.
  */
-UCLASS(Blueprintable, BlueprintType, Abstract)
+UCLASS(Blueprintable, BlueprintType, Abstract, Const, AutoExpandCategories=("C++"))
 class UBomberDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
