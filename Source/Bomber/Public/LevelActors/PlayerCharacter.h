@@ -221,10 +221,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
-	/** Update player name on a 3D widget component. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++")
-	void UpdateNickname() const;
-
 protected:
 	/** ---------------------------------------------------
 	 *		Protected properties
@@ -283,4 +279,12 @@ protected:
 	/** Apply effect of picked up powerups. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyPowerups();
+
+	/** Updates new player name on a 3D widget component. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	void OnPlayerNameChanged(FName NewName);
+
+	/** Updates collision object type by current character ID. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void UpdateCollisionObjectType();
 };

@@ -22,6 +22,12 @@ public:
 	*		Public
 	* --------------------------------------------------- */
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerNameChanged, FName, NewName);
+
+	/** Called when player name is changed. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnPlayerNameChanged OnPlayerNameChanged; //[DMD]
+
 	/** Default constructor. */
 	AMyPlayerState();
 
@@ -38,17 +44,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
 
-	/** Set the custom player name by user input. */
+	/** Is created to expose APlayerState::SetPlayerName(NewName) to blueprints. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetPlayerNameCustom(FName NewName);
 
-	/** Set the player name. */
+	/** Is overriden to set the custom player name to config. */
 	virtual void SetPlayerName(const FString& S) override;
 
-	/** Custom access to player name, called only when bUseCustomPlayerNames is set */
+	/** Returns custom player name. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (OverrideNativeName = "GetPlayerNameCustom"))
-	FORCEINLINE FName GetPlayerNameCustomBP() const { return CustomPlayerNameInternal; }
+	FORCEINLINE FName GetPlayerFNameCustom() const { return CustomPlayerNameInternal; }
 
+	/** Is overriden to return own player name that is saved to config. */
 	virtual FString GetPlayerNameCustom() const override { return CustomPlayerNameInternal.ToString(); }
 
 protected:
@@ -64,7 +71,8 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
 
-	/** Config: custom name set by player. */
+	/** Config: custom name set by player.
+	 * Can contain different languages, uppercase, lowercase etc. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
 	FName CustomPlayerNameInternal; //[С]
 
