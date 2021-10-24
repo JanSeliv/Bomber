@@ -12,6 +12,7 @@
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
 #include "Components/MySkeletalMeshComponent.h"
+#include "Controllers/MyPlayerController.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -243,13 +244,6 @@ void APlayerCharacter::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPla
 	MySkeletalMeshComp->InitMySkeletalMesh(CustomPlayerMeshData);
 }
 
-// Update player name on a 3D widget component
-void APlayerCharacter::UpdateNickname_Implementation() const
-{
-	// BP implementation
-	// ...
-}
-
 /* ---------------------------------------------------
  *					Protected functions
  * --------------------------------------------------- */
@@ -276,8 +270,7 @@ void APlayerCharacter::BeginPlay()
 	// Posses the controller
 	if (!CharacterIDInternal) // Is the player (not AI)
 	{
-		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
-		if (PlayerController)
+		if (APlayerController* PlayerController = USingletonLibrary::GetMyPlayerController())
 		{
 			PlayerController->Possess(this);
 		}
@@ -290,38 +283,18 @@ void APlayerCharacter::BeginPlay()
 
 	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-	// Listen states
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	UpdateNickname();
-
-	// Set the object collision type
-	if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent())
+	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(this))
 	{
-		ECollisionChannel CollisionObjectType = CapsuleComp->GetCollisionObjectType();
-		switch (CharacterIDInternal)
-		{
-			case 0:
-				CollisionObjectType = ECC_Player0;
-				break;
-			case 1:
-				CollisionObjectType = ECC_Player1;
-				break;
-			case 2:
-				CollisionObjectType = ECC_Player2;
-				break;
-			case 3:
-				CollisionObjectType = ECC_Player3;
-				break;
-			default:
-				break;
-		}
-
-		CapsuleComp->SetCollisionObjectType(CollisionObjectType);
+		MyPlayerState->OnPlayerNameChanged.AddDynamic(this, &ThisClass::OnPlayerNameChanged);
+		OnPlayerNameChanged(MyPlayerState->GetPlayerFNameCustom());
 	}
+
+	UpdateCollisionObjectType();
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -370,6 +343,9 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 				CustomPlayerMeshData.SkinIndex = FMath::RandHelper(Row->GetMaterialInstancesDynamicNum());
 			}
 		}
+
+		static const FName DefaultAIName(TEXT("AI"));
+		OnPlayerNameChanged(DefaultAIName);
 	}
 	InitMySkeletalMesh(CustomPlayerMeshData);
 
@@ -386,8 +362,6 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 				NameplateMeshInternal->SetMaterial(0, Material);
 			}
 		}
-
-		UpdateNickname();
 	}
 
 	// Spawn or destroy controller of specific ai with enabled visualization
@@ -534,4 +508,43 @@ void APlayerCharacter::ApplyPowerups()
 	}
 
 	// Apply others
+}
+
+// Update player name on a 3D widget component
+void APlayerCharacter::OnPlayerNameChanged_Implementation(FName NewName)
+{
+	// BP implementation
+	// ...
+}
+
+void APlayerCharacter::UpdateCollisionObjectType()
+{
+	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+	if (!ensureMsgf(CapsuleComp, TEXT("ASSERT: 'CapsuleComponent' is not valid")))
+	{
+		return;
+	}
+
+	// Set the object collision type
+	ECollisionChannel CollisionObjectType = CapsuleComp->GetCollisionObjectType();
+	switch (CharacterIDInternal)
+	{
+		case 0:
+			CollisionObjectType = ECC_Player0;
+			break;
+		case 1:
+			CollisionObjectType = ECC_Player1;
+			break;
+		case 2:
+			CollisionObjectType = ECC_Player2;
+			break;
+		case 3:
+			CollisionObjectType = ECC_Player3;
+			break;
+		default:
+			ensureMsgf(false, TEXT("ASSERT: Can't update collision object type for Character ID %i"), CharacterIDInternal);
+			break;
+	}
+
+	CapsuleComp->SetCollisionObjectType(CollisionObjectType);
 }

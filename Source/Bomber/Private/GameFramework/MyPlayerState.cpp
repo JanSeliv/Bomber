@@ -45,9 +45,9 @@ void AMyPlayerState::SetPlayerNameCustom(FName NewName)
 
 	SetPlayerName(NewName.ToString());
 
-	if (const auto PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
+	if (OnPlayerNameChanged.IsBound())
 	{
-		PlayerCharacter->UpdateNickname();
+		OnPlayerNameChanged.Broadcast(NewName);
 	}
 }
 
