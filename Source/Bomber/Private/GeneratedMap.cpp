@@ -916,7 +916,8 @@ void AGeneratedMap::GenerateLevelActors()
 						{
 							WallsToSpawn.Emplace(CellIt);
 						}
-						else if (ActorTypeToSpawn == EAT::Player)
+						else if (ActorTypeToSpawn == EAT::Player
+						         || ActorTypeToSpawn == EAT::Box)
 						{
 							LCellsToFind.Emplace(CellIt);
 						}
