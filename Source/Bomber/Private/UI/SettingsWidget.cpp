@@ -246,6 +246,11 @@ bool USettingsWidget::SetCheckbox_Implementation(FName TagName, bool InValue)
 // Set chosen member index for a combobox
 bool USettingsWidget::SetComboboxIndex_Implementation(FName TagName, int32 InValue)
 {
+	if (InValue == INDEX_NONE)
+	{
+		return false;
+	}
+
 	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
 		int32& ChosenMemberIndexRef = SettingsRowPtr->Combobox.ChosenMemberIndex;
