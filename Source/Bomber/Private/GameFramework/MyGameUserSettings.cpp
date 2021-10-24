@@ -176,34 +176,39 @@ void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 		return;
 	}
 
-	auto SetFPSLockFromString = [&](const FString& StrMaxFPS)
+	auto SetFPSLock = [&](int32 MaxFPS)
 	{
-		const int32 MaxFPS = FCString::Atoi(*StrMaxFPS);
-		if (MaxFPS > 0)
-		{
-			SetFrameRateLimit(MaxFPS);
-			SetFrameRateLimitCVar(MaxFPS);
+		// 0 disables frame rate limiting
+		SetFrameRateLimit(MaxFPS);
+		SetFrameRateLimitCVar(MaxFPS);
 
-			FPSLockIndexInternal = Index;
-		}
+		FPSLockIndexInternal = Index;
 	};
 
+	// If numeric like '144', then set and return
 	const FString& StrMaxFPS = ComboboxMembers[Index].ToString();
 	if (StrMaxFPS.IsNumeric())
 	{
-		SetFPSLockFromString(StrMaxFPS);
+		const int32 MaxFPS = FCString::Atoi(*StrMaxFPS);
+		SetFPSLock(MaxFPS);
 		return;
 	}
 
-	// Find numeric in the string, f.e for '144 FPS' will be extracted '144'
+	// If numeric contains in the string like '144 FPS', then extract '144', set and return
 	static const FString SpaceDelimiter = TEXT(" ");
 	TArray<FString> StringArray;
 	StrMaxFPS.ParseIntoArray(StringArray, *SpaceDelimiter);
 	const FString* FoundNumericStr = StringArray.FindByPredicate([](const FString& StrIt) { return StrIt.IsNumeric(); });
 	if (FoundNumericStr)
 	{
-		SetFPSLockFromString(*FoundNumericStr);
+		const int32 MaxFPS = FCString::Atoi(**FoundNumericStr);
+		SetFPSLock(MaxFPS);
+		return;
 	}
+
+	// It is not a numeric member, uncap FPS
+	static constexpr int32 UncappedFPS = 0;
+	SetFPSLock(UncappedFPS);
 }
 
 // Loads the user settings from persistent storage
