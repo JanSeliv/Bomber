@@ -55,7 +55,7 @@ void AMyHUD::PostInitializeComponents()
 		PlayerOwner->MyHUD = this;
 	}
 
-	InitWidgets();
+	TryInitWidgets();
 }
 
 // Called when the game starts. Created widget.
@@ -64,9 +64,30 @@ void AMyHUD::BeginPlay()
 	Super::BeginPlay();
 }
 
+// Will try to start the process of initializing all widgets used in game
+void AMyHUD::TryInitWidgets()
+{
+#if WITH_EDITOR // [Editor]
+	if (USingletonLibrary::IsEditor())
+	{
+		const UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
+		FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
+		OnViewportResizedWhenInit(Viewport, 0);
+		return;
+	}
+#endif // WITH_EDITOR
+
+	FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
+}
+
 // Create and set widget objects once
 void AMyHUD::InitWidgets()
 {
+	if (AreWidgetInitialized())
+	{
+		return;
+	}
+
 	APlayerController* PlayerController = PlayerOwner.Get();
 	if (!ensureMsgf(PlayerOwner, TEXT("ASSERT: 'PlayerOwner' is not valid")))
 	{
@@ -127,4 +148,26 @@ void AMyHUD::InitWidgets()
 		checkf(InputControlsWidgetInternal, TEXT("ERROR: InputControlsWidgetInternal failed to create"));
 		InputControlsWidgetInternal->AddToViewport();
 	}
+
+	bAreWidgetInitializedInternal = true;
+
+	if (OnWidgetsInitialized.IsBound())
+	{
+		OnWidgetsInitialized.Broadcast();
+	}
+}
+
+void AMyHUD::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
+{
+	if (!Viewport)
+	{
+		return;
+	}
+
+	if (FViewport::ViewportResizedEvent.IsBoundToObject(this))
+	{
+		FViewport::ViewportResizedEvent.RemoveAll(this);
+	}
+
+	InitWidgets();
 }

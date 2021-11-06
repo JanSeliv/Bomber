@@ -462,6 +462,8 @@ void USettingsWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	OnVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnVisibilityChange);
+
+	ConstructSettings();
 }
 
 // Construct all settings from the settings data table

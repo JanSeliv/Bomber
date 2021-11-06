@@ -16,6 +16,7 @@
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/InGameWidget.h"
 #include "UI/MainMenuWidget.h"
+#include "UI/MyHUD.h"
 
 // Returns the player input data asset
 const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
@@ -157,24 +158,17 @@ void AMyPlayerController::BeginPlay()
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	// Update the Menu State
-	if (UMainMenuWidget* MainMenuWidget = USingletonLibrary::GetMainMenuWidget())
+	// Handle UI inputs
+	if (AMyHUD* HUD = GetHUD<AMyHUD>())
 	{
-		if (MainMenuWidget->IsReadyMainMenu())
+		if (HUD->AreWidgetInitialized())
 		{
-			SetMenuState();
+			OnWidgetsInitialized();
 		}
 		else
 		{
-			// Listens to set menu state when menu is ready
-			MainMenuWidget->OnMainMenuReady.AddDynamic(this, &ThisClass::SetMenuState);
+			HUD->OnWidgetsInitialized.AddDynamic(this, &ThisClass::OnWidgetsInitialized);
 		}
-	}
-
-	// Listens to handle input on opening and closing the InGame Menu widget
-	if (UInGameWidget* InGameWidget = USingletonLibrary::GetInGameWidget())
-	{
-		InGameWidget->OnToggledInGameMenu.AddDynamic(this, &ThisClass::OnToggledInGameMenu);
 	}
 
 	ExecuteDefaultConsoleCommands();
@@ -408,4 +402,30 @@ void AMyPlayerController::SetGameStartingState()
 void AMyPlayerController::SetMenuState()
 {
 	ServerSetGameState(ECurrentGameState::Menu);
+}
+
+// Is called when all game widgets are initialized
+void AMyPlayerController::OnWidgetsInitialized()
+{
+	UMainMenuWidget* MainMenuWidget = USingletonLibrary::GetMainMenuWidget();
+	if (ensureMsgf(MainMenuWidget, TEXT("ASSERT: 'MainMenuWidget' is not valid")))
+	{
+		// Update the Menu State
+		if (MainMenuWidget->IsReadyMainMenu())
+		{
+			SetMenuState();
+		}
+		else
+		{
+			// Listens to set menu state when menu is ready
+			MainMenuWidget->OnMainMenuReady.AddUniqueDynamic(this, &ThisClass::SetMenuState);
+		}
+	}
+
+	// Listens to handle input on opening and closing the InGame Menu widget
+	UInGameWidget* InGameWidget = USingletonLibrary::GetInGameWidget();
+	if (ensureMsgf(InGameWidget, TEXT("ASSERT: 'InGameWidget' is not valid")))
+	{
+		InGameWidget->OnToggledInGameMenu.AddUniqueDynamic(this, &ThisClass::OnToggledInGameMenu);
+	}
 }

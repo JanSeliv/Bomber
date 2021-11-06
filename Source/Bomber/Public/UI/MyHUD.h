@@ -87,6 +87,12 @@ public:
 	*		Public properties
 	* --------------------------------------------------- */
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWidgetsInitialized);
+
+	/** Is called to notify that all widgets were initialized and ready. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnWidgetsInitialized OnWidgetsInitialized;
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClose);
 
 	/** Is called to notify listen widgets to be closed. */
@@ -99,6 +105,10 @@ public:
 
 	/** Default constructor. */
 	AMyHUD();
+
+	/** Returns true if widgets ere initialized. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool AreWidgetInitialized() const { return bAreWidgetInitializedInternal; }
 
 	/** Returns the current in-game widget object. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -141,6 +151,10 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
+	/** Is true if widgets are initialized. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Are Widget Initialized"))
+	bool bAreWidgetInitializedInternal; //[G]
+
 	/** The current in-game widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
 	TObjectPtr<class UInGameWidget> InGameWidgetInternal = nullptr; //[G]
@@ -179,7 +193,14 @@ protected:
 	/** Called when the game starts. Created widget. */
 	virtual void BeginPlay() override;
 
+	/** Will try to start the process of initializing all widgets used in game. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void TryInitWidgets();
+
 	/** Create and set widget objects once. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void InitWidgets();
+
+	/** Is called right after the game was started and windows size is set. */
+	void OnViewportResizedWhenInit(class FViewport* Viewport, uint32 Index);
 };
