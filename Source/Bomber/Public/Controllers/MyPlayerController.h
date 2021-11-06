@@ -126,10 +126,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggledInGameMenu(bool bIsVisible);
 
-	/** Called default console commands on begin play. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ExecuteDefaultConsoleCommands();
-
 	/** Enables or disables input contexts of gameplay input actions.
 	 * @param bEnable set true to add gameplay input context, otherwise it will be removed from local player. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

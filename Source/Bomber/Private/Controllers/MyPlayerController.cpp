@@ -170,8 +170,6 @@ void AMyPlayerController::BeginPlay()
 			HUD->OnWidgetsInitialized.AddDynamic(this, &ThisClass::OnWidgetsInitialized);
 		}
 	}
-
-	ExecuteDefaultConsoleCommands();
 }
 
 // Locks or unlocks movement input
@@ -307,13 +305,6 @@ void AMyPlayerController::OnToggledInGameMenu(bool bIsVisible)
 		SetGameplayInputContextEnabled(!bIsVisible);
 		SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
 	}
-}
-
-// Called default console commands on begin play
-void AMyPlayerController::ExecuteDefaultConsoleCommands()
-{
-	static const FString NaniteDisableCommand(TEXT("r.Nanite 0"));
-	ConsoleCommand(NaniteDisableCommand);
 }
 
 // Enables or disables input contexts of gameplay input actions
