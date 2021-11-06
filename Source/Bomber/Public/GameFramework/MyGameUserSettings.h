@@ -31,6 +31,9 @@ public:
 	/* Returns the overall scalability level, is declared in parent as UFUNCTION. */
 	virtual int32 GetOverallScalabilityLevel() const override;
 
+	/** Mark current video mode settings (fullscreenmode/resolution) as being confirmed by the user. */
+	virtual void ConfirmVideoMode() override;
+
 	/** Returns the min allowed resolution width. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetMinResolutionSizeX() const { return MinResolutionSizeXInternal; }
