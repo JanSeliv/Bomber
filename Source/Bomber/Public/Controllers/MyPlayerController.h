@@ -165,4 +165,8 @@ protected:
 	/** Sets the Menu game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SetMenuState();
+
+	/** Is called when all game widgets are initialized. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnWidgetsInitialized();
 };
