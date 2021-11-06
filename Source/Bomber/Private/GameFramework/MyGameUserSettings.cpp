@@ -54,6 +54,17 @@ int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
 	return OverallScalabilityLevel + QualityOffset;
 }
 
+// Mark current video mode settings (fullscreenmode/resolution) as being confirmed by the user
+void UMyGameUserSettings::ConfirmVideoMode()
+{
+	Super::ConfirmVideoMode();
+
+	if (USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget())
+	{
+		SettingsWidget->UpdateSettings();
+	}
+}
+
 // Get all supported resolutions of the primary monitor
 void UMyGameUserSettings::UpdateSupportedResolutions()
 {
