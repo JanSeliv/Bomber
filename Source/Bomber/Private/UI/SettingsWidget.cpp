@@ -463,7 +463,18 @@ void USettingsWidget::NativeConstruct()
 
 	OnVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnVisibilityChange);
 
-	ConstructSettings();
+	// Listen until all other widgets will be initialized
+	if (AMyHUD* MyHUD = USingletonLibrary::GetMyHUD())
+	{
+		if (MyHUD->AreWidgetInitialized())
+		{
+			OnWidgetsInitialized();
+		}
+		else
+		{
+			MyHUD->OnWidgetsInitialized.AddDynamic(this, &ThisClass::OnWidgetsInitialized);
+		}
+	}
 }
 
 // Construct all settings from the settings data table
@@ -476,6 +487,19 @@ void USettingsWidget::ConstructSettings_Implementation()
 	{
 		AddSetting(RowIt.Value);
 	}
+}
+
+// Is called when all game widgets are initialized to construct settings
+void USettingsWidget::OnWidgetsInitialized()
+{
+	AMyHUD* HUD = USingletonLibrary::GetMyHUD();
+	if (HUD
+	    && HUD->OnWidgetsInitialized.IsAlreadyBound(this, &ThisClass::OnWidgetsInitialized))
+	{
+		HUD->OnWidgetsInitialized.RemoveDynamic(this, &ThisClass::OnWidgetsInitialized);
+	}
+
+	ConstructSettings();
 }
 
 // Is called when visibility is changed for this widget
@@ -556,10 +580,22 @@ void USettingsWidget::CloseSettings()
 
 	if (UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings())
 	{
+		// Will apply and save settings
 		MyGameUserSettings->ApplySettings(false);
 	}
+}
 
-	SaveSettings();
+// Flip-flop opens and closes the Settings menu
+void USettingsWidget::ToggleSettings()
+{
+	if (IsVisible())
+	{
+		CloseSettings();
+	}
+	else
+	{
+		OpenSettings();
+	}
 }
 
 // Add setting on UI.
