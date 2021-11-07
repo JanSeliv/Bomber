@@ -601,7 +601,10 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 	LevelTypeInternal = NewLevelType;
 	for (const TObjectPtr<UMapComponent>& MapComponentIt : MapComponentsInternal)
 	{
-		MapComponentIt->RerunOwnerConstruction();
+		if (MapComponentIt)
+		{
+			MapComponentIt->RerunOwnerConstruction();
+		}
 	}
 }
 
@@ -714,9 +717,6 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 
 	// Align transform and build cells
 	TransformLevelMap(Transform);
-
-	// Actors generation
-	GenerateLevelActors();
 
 	// Update level stream
 	SetLevelType(LevelTypeInternal);

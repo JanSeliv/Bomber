@@ -21,6 +21,33 @@ UMyGameUserSettings& UMyGameUserSettings::Get()
 	return *MyGameUserSettings;
 }
 
+// Validates and resets bad user settings to default. Deletes stale user settings file if necessary
+void UMyGameUserSettings::ValidateSettings()
+{
+	Super::ValidateSettings();
+
+	// Validate resolution
+	const FIntPoint CurrentScreenResolution(GetScreenResolution());
+	if (!IntResolutionsInternal.Contains(CurrentScreenResolution))
+	{
+		// Current resolution is not valid
+		const FIntPoint LastConfirmedScreenResolution(GetLastConfirmedScreenResolution());
+		if (IntResolutionsInternal.Contains(LastConfirmedScreenResolution))
+		{
+			// Last resolution is valid, revert to previous
+			ResolutionSizeX = LastConfirmedScreenResolution.X;
+			ResolutionSizeY = LastConfirmedScreenResolution.Y;
+		}
+		else if (IntResolutionsInternal.IsValidIndex(0))
+		{
+			// Reset current resolution to default
+			const FIntPoint DefaultResolution(IntResolutionsInternal[0]);
+			ResolutionSizeX = DefaultResolution.X;
+			ResolutionSizeY = DefaultResolution.Y;
+		}
+	}
+}
+
 // Changes all scalability settings at once based on a single overall quality level
 void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
 {
@@ -57,12 +84,12 @@ int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
 // Mark current video mode settings (fullscreenmode/resolution) as being confirmed by the user
 void UMyGameUserSettings::ConfirmVideoMode()
 {
-	Super::ConfirmVideoMode();
-
-	if (USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget())
+	if (LastConfirmedFullscreenMode != FullscreenMode)
 	{
-		SettingsWidget->UpdateSettings();
+		UpdateFullscreenEnabled();
 	}
+
+	Super::ConfirmVideoMode();
 }
 
 // Get all supported resolutions of the primary monitor
@@ -150,9 +177,10 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 	const FIntPoint& NewResolution = IntResolutionsInternal[Index];
 	SetScreenResolution(NewResolution);
 	ApplyResolutionSettings(false);
-	ConfirmVideoMode();
 
 	CurrentResolutionIndexInternal = Index;
+	LastUserConfirmedResolutionSizeX = NewResolution.X;
+	LastUserConfirmedResolutionSizeY = NewResolution.Y;
 }
 
 // Set and apply fullscreen mode. If false, the windowed mode will be applied
@@ -161,7 +189,28 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 	const EWindowMode::Type NewFullscreenMode = bIsFullscreen ? EWindowMode::Fullscreen : EWindowMode::Windowed;
 	SetFullscreenMode(NewFullscreenMode);
 	ApplyResolutionSettings(false);
-	ConfirmVideoMode();
+
+	LastConfirmedFullscreenMode = NewFullscreenMode;
+}
+
+// Update fullscreen mode on UI for cases when it's changed outside (e.g. by Alt+Enter)
+void UMyGameUserSettings::UpdateFullscreenEnabled()
+{
+	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	if (!SettingsWidget)
+	{
+		return;
+	}
+
+	static const FFunctionPicker SetFullscreenFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFullscreenEnabled));
+	const FName FullscreenTag = SettingsWidget->GetTagNameByFunction(SetFullscreenFunction);
+	if (FullscreenTag.IsNone())
+	{
+		return;
+	}
+
+	const bool bIsFullscreenEnabled = IsFullscreenEnabled();
+	SettingsWidget->SetCheckbox(FullscreenTag, bIsFullscreenEnabled);
 }
 
 // Set the FPS cap by specified member index

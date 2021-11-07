@@ -144,8 +144,6 @@ void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BindInputActions();
-
 	// Set input focus on the game
 	FSlateApplication::Get().SetAllUserFocusToGameViewport(EFocusCause::WindowActivate);
 
@@ -419,4 +417,6 @@ void AMyPlayerController::OnWidgetsInitialized()
 	{
 		InGameWidget->OnToggledInGameMenu.AddUniqueDynamic(this, &ThisClass::OnToggledInGameMenu);
 	}
+
+	BindInputActions();
 }

@@ -109,7 +109,7 @@ void UMapComponent::SetMaterial(UMaterialInterface* Material)
 void UMapComponent::RerunOwnerConstruction() const
 {
 	AActor* Owner = GetOwner();
-	if (ensureMsgf(Owner, TEXT("RerunOwnerConstruction: The map owner is not valid")))
+	if (ensureMsgf(IS_VALID(Owner), TEXT("RerunOwnerConstruction: The map owner is not valid")))
 	{
 		Owner->RerunConstructionScripts();
 	}
