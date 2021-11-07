@@ -225,7 +225,7 @@ void AMyPlayerController::BindInputActions()
 		UObject* FoundContextObj = nullptr;
 		if (UFunction* FunctionPtr = ActionIt->GetStaticContext().GetFunction())
 		{
-			FunctionPtr->ProcessEvent(FunctionPtr, &FoundContextObj);
+			FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
 		}
 
 		// Bind action
@@ -396,6 +396,13 @@ void AMyPlayerController::SetMenuState()
 // Is called when all game widgets are initialized
 void AMyPlayerController::OnWidgetsInitialized()
 {
+	AMyHUD* HUD = GetHUD<AMyHUD>();
+	if (HUD
+	    && HUD->OnWidgetsInitialized.IsAlreadyBound(this, &ThisClass::OnWidgetsInitialized))
+	{
+		HUD->OnWidgetsInitialized.RemoveDynamic(this, &ThisClass::OnWidgetsInitialized);
+	}
+
 	UMainMenuWidget* MainMenuWidget = USingletonLibrary::GetMainMenuWidget();
 	if (ensureMsgf(MainMenuWidget, TEXT("ASSERT: 'MainMenuWidget' is not valid")))
 	{

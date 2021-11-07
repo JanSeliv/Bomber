@@ -149,6 +149,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void CloseSettings();
 
+	/** Flip-flop opens and closes the Settings menu. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ToggleSettings();
+
 	/** Returns the amount of settings rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetSettingsTableRowsNum() const { return SettingsTableRowsInternal.Num(); }
@@ -271,6 +275,10 @@ protected:
 	/** Construct all settings from the settings data table. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void ConstructSettings();
+
+	/** Is called when all game widgets are initialized to construct settings. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnWidgetsInitialized();
 
 	/** Is called when visibility is changed for this widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
