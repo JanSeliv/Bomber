@@ -520,7 +520,8 @@ void APlayerCharacter::OnPlayerNameChanged_Implementation(FName NewName)
 void APlayerCharacter::UpdateCollisionObjectType()
 {
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
-	if (!ensureMsgf(CapsuleComp, TEXT("ASSERT: 'CapsuleComponent' is not valid")))
+	if (!ensureMsgf(CapsuleComp, TEXT("ASSERT: 'CapsuleComponent' is not valid"))
+	    || CharacterIDInternal == INDEX_NONE)
 	{
 		return;
 	}
@@ -542,7 +543,6 @@ void APlayerCharacter::UpdateCollisionObjectType()
 			CollisionObjectType = ECC_Player3;
 			break;
 		default:
-			ensureMsgf(false, TEXT("ASSERT: Can't update collision object type for Character ID %i"), CharacterIDInternal);
 			break;
 	}
 

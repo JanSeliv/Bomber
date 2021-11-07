@@ -74,6 +74,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AGeneratedMap* GetLevelMap();
 
+	/** Returns true if game was started. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static bool HasWorldBegunPlay();
+
 	/** The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
 	 *
 	 * @param LevelMap The level map to set in the Library

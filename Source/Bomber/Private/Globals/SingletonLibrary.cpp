@@ -39,7 +39,8 @@ USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChan
 // Returns a world of stored level map
 UWorld* USingletonLibrary::GetWorld() const
 {
-	return AGeneratedMap::Get().GetWorld();
+	const AGeneratedMap* LevelMap = GetLevelMap();
+	return LevelMap ? LevelMap->GetWorld() : nullptr;
 }
 
 bool USingletonLibrary::IsEditor()
@@ -150,6 +151,20 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
 	return Get().LevelMapInternal.Get();
+}
+
+// Returns true if game was started
+bool USingletonLibrary::HasWorldBegunPlay()
+{
+#if WITH_EDITOR	// [IsEditor]
+	if (IsEditor())
+	{
+		return GEditor && GEditor->IsPlaySessionInProgress();
+	}
+#endif	// [IsEditor]
+
+	const UWorld* World = Get().GetWorld();
+	return World && World->HasBegunPlay();
 }
 
 // The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one

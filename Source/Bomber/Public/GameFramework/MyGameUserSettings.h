@@ -23,6 +23,9 @@ public:
 	 * Is init once and can not be destroyed. */
 	static UMyGameUserSettings& Get();
 
+	/** Validates and resets bad user settings to default. Deletes stale user settings file if necessary. */
+	virtual void ValidateSettings() override;
+
 	/** Changes all scalability settings at once based on a single overall quality level, is declared in parent as UFUNCTION.
 	 * @param Value New quality level.
 	 * @see UMyGameUserSettings::OverallQualityInternal */
@@ -69,6 +72,10 @@ public:
 	/** Set and apply fullscreen mode. If false, the windowed mode will be applied. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetFullscreenEnabled(bool bIsFullscreen);
+
+	/** Update fullscreen mode on UI for cases when it's changed outside (e.g. by Alt+Enter). */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdateFullscreenEnabled();
 
 	/** Returns the index of chosen fps lock in array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
