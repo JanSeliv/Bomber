@@ -583,6 +583,8 @@ void USettingsWidget::CloseSettings()
 		// Will apply and save settings
 		MyGameUserSettings->ApplySettings(false);
 	}
+
+	SaveSettings();
 }
 
 // Flip-flop opens and closes the Settings menu
