@@ -27,23 +27,14 @@ void UMyGameUserSettings::ValidateSettings()
 	Super::ValidateSettings();
 
 	// Validate resolution
-	const FIntPoint CurrentScreenResolution(GetScreenResolution());
-	if (!IntResolutionsInternal.Contains(CurrentScreenResolution))
+	if (IntResolutionsInternal.IsValidIndex(CurrentResolutionIndexInternal))
 	{
-		// Current resolution is not valid
-		const FIntPoint LastConfirmedScreenResolution(GetLastConfirmedScreenResolution());
-		if (IntResolutionsInternal.Contains(LastConfirmedScreenResolution))
+		const FIntPoint ChosenScreenResolution(IntResolutionsInternal[CurrentResolutionIndexInternal]);
+		const FIntPoint CurrentScreenResolution(GetScreenResolution());
+		if (ChosenScreenResolution != CurrentScreenResolution)
 		{
-			// Last resolution is valid, revert to previous
-			ResolutionSizeX = LastConfirmedScreenResolution.X;
-			ResolutionSizeY = LastConfirmedScreenResolution.Y;
-		}
-		else if (IntResolutionsInternal.IsValidIndex(0))
-		{
-			// Reset current resolution to default
-			const FIntPoint DefaultResolution(IntResolutionsInternal[0]);
-			ResolutionSizeX = DefaultResolution.X;
-			ResolutionSizeY = DefaultResolution.Y;
+			ResolutionSizeX = ChosenScreenResolution.X;
+			ResolutionSizeY = ChosenScreenResolution.Y;
 		}
 	}
 }
@@ -176,11 +167,12 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 
 	const FIntPoint& NewResolution = IntResolutionsInternal[Index];
 	SetScreenResolution(NewResolution);
-	ApplyResolutionSettings(false);
 
 	CurrentResolutionIndexInternal = Index;
 	LastUserConfirmedResolutionSizeX = NewResolution.X;
 	LastUserConfirmedResolutionSizeY = NewResolution.Y;
+
+	ApplyResolutionSettings(false);
 }
 
 // Set and apply fullscreen mode. If false, the windowed mode will be applied
@@ -188,9 +180,10 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 {
 	const EWindowMode::Type NewFullscreenMode = bIsFullscreen ? EWindowMode::Fullscreen : EWindowMode::Windowed;
 	SetFullscreenMode(NewFullscreenMode);
-	ApplyResolutionSettings(false);
 
 	LastConfirmedFullscreenMode = NewFullscreenMode;
+
+	ApplyResolutionSettings(false);
 }
 
 // Update fullscreen mode on UI for cases when it's changed outside (e.g. by Alt+Enter)
