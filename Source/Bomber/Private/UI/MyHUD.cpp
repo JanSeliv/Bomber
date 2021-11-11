@@ -71,9 +71,14 @@ void AMyHUD::TryInitWidgets()
 	if (USingletonLibrary::IsEditor())
 	{
 		const UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
-		FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
-		OnViewportResizedWhenInit(Viewport, 0);
-		return;
+		FViewport* EditorViewport = GameViewport ? GameViewport->Viewport : nullptr;
+		if (EditorViewport
+		    && EditorViewport->GetSizeXY() != FIntPoint::ZeroValue)
+		{
+			OnViewportResizedWhenInit(EditorViewport, 0);
+			return;
+		}
+		// Fallback on bounding to viewport resized event
 	}
 #endif // WITH_EDITOR
 
