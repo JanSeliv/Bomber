@@ -33,8 +33,7 @@ void UMyGameUserSettings::ValidateSettings()
 		const FIntPoint CurrentScreenResolution(GetScreenResolution());
 		if (ChosenScreenResolution != CurrentScreenResolution)
 		{
-			ResolutionSizeX = ChosenScreenResolution.X;
-			ResolutionSizeY = ChosenScreenResolution.Y;
+			SetResolutionByIndex(CurrentResolutionIndexInternal);
 		}
 	}
 }
