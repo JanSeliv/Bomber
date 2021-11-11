@@ -70,13 +70,16 @@ void AMyHUD::TryInitWidgets()
 #if WITH_EDITOR // [Editor]
 	if (USingletonLibrary::IsEditor())
 	{
-		const UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
+		UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
 		FViewport* EditorViewport = GameViewport ? GameViewport->Viewport : nullptr;
-		if (EditorViewport
-		    && EditorViewport->GetSizeXY() != FIntPoint::ZeroValue)
+		if (EditorViewport)
 		{
-			OnViewportResizedWhenInit(EditorViewport, 0);
-			return;
+			GameViewport->MouseEnter(EditorViewport, 0, 0);
+			if (EditorViewport->GetSizeXY() != FIntPoint::ZeroValue)
+			{
+				OnViewportResizedWhenInit(EditorViewport, 0);
+				return;
+			}
 		}
 		// Fallback on bounding to viewport resized event
 	}
