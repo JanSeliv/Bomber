@@ -70,6 +70,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -144,6 +145,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -218,6 +220,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -292,6 +295,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -366,6 +370,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -440,6 +445,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 8
 			}
 		}
 	},
@@ -514,6 +520,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -588,6 +595,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -662,6 +670,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -736,6 +745,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -810,6 +820,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -892,6 +903,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -966,6 +978,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1040,6 +1053,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1121,6 +1135,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1201,6 +1216,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1281,6 +1297,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1361,6 +1378,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1441,6 +1459,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1521,6 +1540,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1601,6 +1621,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1681,6 +1702,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	},
@@ -1761,6 +1783,7 @@
 			},
 			"UserInput":
 			{
+				"MaxCharactersNumber": 0
 			}
 		}
 	}

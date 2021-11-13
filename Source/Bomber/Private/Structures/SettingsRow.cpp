@@ -24,8 +24,9 @@ uint32 GetTypeHash(const FSettingsPrimary& Other)
 	const uint32 PaddingTopHash = GetTypeHash(Other.Padding.Top);
 	const uint32 PaddingRightHash = GetTypeHash(Other.Padding.Right);
 	const uint32 PaddingBottomHash = GetTypeHash(Other.Padding.Bottom);
-	return HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(
-		TagHash, ObjectContextHash), SetterHash), GetterHash), CaptionHash), TooltipHash), PaddingLeftHash), PaddingTopHash), PaddingRightHash), PaddingBottomHash);
+	const uint32 StartOnNextColumnHash = GetTypeHash(Other.bStartOnNextColumn);
+	return HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(HashCombine(
+		TagHash, ObjectContextHash), SetterHash), GetterHash), CaptionHash), TooltipHash), PaddingLeftHash), PaddingTopHash), PaddingRightHash), PaddingBottomHash), StartOnNextColumnHash);
 }
 
 // Returns the pointer to one of the chosen in-game type

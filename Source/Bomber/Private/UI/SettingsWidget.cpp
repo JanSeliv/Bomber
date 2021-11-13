@@ -321,20 +321,32 @@ bool USettingsWidget::SetTextLine_Implementation(FName TagName, const FText& InV
 // Set new text for an input box
 bool USettingsWidget::SetUserInput_Implementation(FName TagName, FName InValue)
 {
-	if (FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
+	FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName);
+	if (!SettingsRowPtr)
 	{
-		FName& InputNameRef = SettingsRowPtr->UserInput.UserInput;
-		if (!InputNameRef.IsEqual(InValue)
-		    && !InValue.IsNone())
-		{
-			InputNameRef = InValue;
-			SettingsRowPtr->UserInput.OnSetterName.ExecuteIfBound(InValue);
-			UpdateSettings();
-			// BP implementation
-			return true;
-		}
+		return false;
 	}
-	return false;
+
+	FSettingsUserInput& UserInputRef = SettingsRowPtr->UserInput;
+	if (UserInputRef.UserInput.IsEqual(InValue)
+	    || InValue.IsNone())
+	{
+		// Is not needed to update
+		return false;
+	}
+
+	if (UserInputRef.MaxCharactersNumber > 0)
+	{
+		// Limit the length of the string
+		InValue = *InValue.ToString().Left(UserInputRef.MaxCharactersNumber);
+	}
+
+	UserInputRef.UserInput = InValue;
+	SettingsRowPtr->UserInput.OnSetterName.ExecuteIfBound(InValue);
+	UpdateSettings();
+
+	// BP implementation
+	return true;
 }
 
 // Returns is a checkbox toggled

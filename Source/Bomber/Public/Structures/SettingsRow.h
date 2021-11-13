@@ -508,6 +508,11 @@ struct FSettingsUserInput : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
+	/** The maximal length of the player input that is allowed to type.
+	 * Set 0 to do not limit number of characters. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	int32 MaxCharactersNumber = 0;
+
 	/** The cached text shown left of the input box. */
 	FName UserInput = NAME_None;
 
