@@ -338,6 +338,10 @@ struct FSettingsPrimary
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	bool bStartOnNextColumn; //[D]
 
+	/** Contains tags of settings which are needed to update after change of this setting. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FGameplayTagContainer SettingsToUpdate = FGameplayTagContainer::EmptyContainer; //[D]
+
 	/** The cached object obtained from the Static Context function. */
 	TWeakObjectPtr<UObject> StaticContextObject;
 

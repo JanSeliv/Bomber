@@ -96,18 +96,29 @@ void USettingsWidget::SaveSettings()
 }
 
 // Update settings on UI
-void USettingsWidget::UpdateSettings()
+void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpdate)
 {
+	if (SettingsToUpdate.IsEmpty())
+	{
+		return;
+	}
+
 	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
 		const FSettingsPicker& Setting = RowIt.Value;
+		const FGameplayTag& SettingTag = Setting.PrimaryData.Tag;
+		if (!SettingTag.MatchesAny(SettingsToUpdate))
+		{
+			continue;
+		}
+
 		const FSettingsDataBase* ChosenData = Setting.GetChosenSettingsData();
 		if (!ChosenData)
 		{
 			continue;
 		}
 
-		const FName TagName = Setting.PrimaryData.Tag.GetTagName();
+		const FName TagName = SettingTag.GetTagName();
 		if (ChosenData == &Setting.Checkbox)
 		{
 			const bool NewValue = GetCheckboxValue(TagName);
@@ -219,8 +230,12 @@ bool USettingsWidget::SetButtonPressed_Implementation(FName TagName)
 {
 	if (const FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(TagName))
 	{
+		SettingsRowPtr->Button.OnButtonPressed.ExecuteIfBound();
+
+		UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
+
 		// BP implementation
-		return SettingsRowPtr->Button.OnButtonPressed.ExecuteIfBound();;
+		return true;
 	}
 	return false;
 }
@@ -235,7 +250,7 @@ bool USettingsWidget::SetCheckbox_Implementation(FName TagName, bool InValue)
 		{
 			bIsSetRef = InValue;
 			SettingsRowPtr->Checkbox.OnSetterBool.ExecuteIfBound(InValue);
-			UpdateSettings();
+			UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 			// BP implementation
 			return true;
 		}
@@ -258,7 +273,7 @@ bool USettingsWidget::SetComboboxIndex_Implementation(FName TagName, int32 InVal
 		{
 			ChosenMemberIndexRef = InValue;
 			SettingsRowPtr->Combobox.OnSetterInt.ExecuteIfBound(InValue);
-			UpdateSettings();
+			UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 			// BP implementation
 			return true;
 		}
@@ -292,7 +307,7 @@ bool USettingsWidget::SetSlider_Implementation(FName TagName, float InValue)
 		{
 			ChosenValueRef = NewValue;
 			SettingsRowPtr->Slider.OnSetterFloat.ExecuteIfBound(InValue);
-			UpdateSettings();
+			UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 			// BP implementation
 			return true;
 		}
@@ -310,7 +325,7 @@ bool USettingsWidget::SetTextLine_Implementation(FName TagName, const FText& InV
 		{
 			CaptionRef = InValue;
 			SettingsRowPtr->TextLine.OnSetterText.ExecuteIfBound(InValue);
-			UpdateSettings();
+			UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 			// BP implementation
 			return true;
 		}
@@ -342,8 +357,8 @@ bool USettingsWidget::SetUserInput_Implementation(FName TagName, FName InValue)
 	}
 
 	UserInputRef.UserInput = InValue;
-	SettingsRowPtr->UserInput.OnSetterName.ExecuteIfBound(InValue);
-	UpdateSettings();
+	UserInputRef.OnSetterName.ExecuteIfBound(InValue);
+	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 
 	// BP implementation
 	return true;

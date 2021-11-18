@@ -168,9 +168,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SaveSettings();
 
-	/** Update settings on UI. */
+	/** Update settings on UI.
+	 * @param SettingsToUpdate Contains tags of settings that are needed to update. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void UpdateSettings();
+	void UpdateSettings(const FGameplayTagContainer& SettingsToUpdate);
 
 	/** Returns the name of found tag by specified function. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
