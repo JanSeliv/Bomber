@@ -34,7 +34,12 @@
 					"Right": 0,
 					"Bottom": 0
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -109,7 +114,12 @@
 					"Right": 0,
 					"Bottom": 20
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -184,7 +194,12 @@
 					"Right": 0,
 					"Bottom": 0
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -259,7 +274,12 @@
 					"Right": 0,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -334,7 +354,12 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -409,7 +434,12 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -484,7 +514,12 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -559,7 +594,12 @@
 					"Right": 0,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -634,7 +674,12 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -709,7 +754,12 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -784,7 +834,12 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -859,7 +914,12 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -942,7 +1002,12 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -1017,7 +1082,12 @@
 					"Right": 0,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": true
+				"bStartOnNextColumn": true,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
 			},
 			"Button":
 			{
@@ -1092,7 +1162,44 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.Effects"
+						},
+						{
+							"TagName": "Settings.Combobox.AntiAliasing"
+						},
+						{
+							"TagName": "Settings.Combobox.Foliage"
+						},
+						{
+							"TagName": "Settings.Combobox.PostProcessing"
+						},
+						{
+							"TagName": "Settings.Combobox.Shading"
+						},
+						{
+							"TagName": "Settings.Combobox.Shadows"
+						},
+						{
+							"TagName": "Settings.Combobox.ViewDistance"
+						},
+						{
+							"TagName": "Settings.Combobox.Textures"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
@@ -1174,7 +1281,23 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.OverallQuality"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
@@ -1255,7 +1378,23 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.OverallQuality"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
@@ -1336,7 +1475,23 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.OverallQuality"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
@@ -1417,7 +1572,23 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.OverallQuality"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
@@ -1498,7 +1669,23 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.OverallQuality"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
@@ -1579,7 +1766,23 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.OverallQuality"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
@@ -1660,7 +1863,23 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.OverallQuality"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
@@ -1741,7 +1960,23 @@
 					"Right": 30,
 					"Bottom": 15
 				},
-				"bStartOnNextColumn": false
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.OverallQuality"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
+				}
 			},
 			"Button":
 			{
