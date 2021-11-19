@@ -694,15 +694,15 @@ void USettingsWidget::AddCheckbox(const FSettingsPrimary& Primary, FSettingsChec
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterBool.BindUFunction(StaticContextObject, GetterFunctionName);
-			Data.bIsSet = GetCheckboxValue(Primary.Tag.GetTagName());
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterBool.BindUFunction(StaticContextObject, SetterFunctionName);
-			Data.OnSetterBool.ExecuteIfBound(Data.bIsSet);
 		}
+
+		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddCheckboxBP(Primary, Data);
@@ -732,15 +732,15 @@ void USettingsWidget::AddCombobox(const FSettingsPrimary& Primary, FSettingsComb
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterInt.BindUFunction(StaticContextObject, GetterFunctionName);
-			Data.ChosenMemberIndex = GetComboboxIndex(TagName);
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterInt.BindUFunction(StaticContextObject, SetterFunctionName);
-			Data.OnSetterInt.ExecuteIfBound(Data.ChosenMemberIndex);
 		}
+
+		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddComboboxBP(Primary, Data);
@@ -755,15 +755,15 @@ void USettingsWidget::AddSlider(const FSettingsPrimary& Primary, FSettingsSlider
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterFloat.BindUFunction(StaticContextObject, GetterFunctionName);
-			Data.ChosenValue = GetSliderValue(Primary.Tag.GetTagName());
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterFloat.BindUFunction(StaticContextObject, SetterFunctionName);
-			Data.OnSetterFloat.ExecuteIfBound(Data.ChosenValue);
 		}
+
+		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddSliderBP(Primary, Data);
@@ -778,15 +778,15 @@ void USettingsWidget::AddTextLine(FSettingsPrimary& Primary, FSettingsTextLine& 
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterText.BindUFunction(StaticContextObject, GetterFunctionName);
-			Data.OnGetterText.ExecuteIfBound(Primary.Caption);
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterText.BindUFunction(StaticContextObject, SetterFunctionName);
-			Data.OnSetterText.ExecuteIfBound(Primary.Caption);
 		}
+
+		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddTextLineBP(Primary, Data);
@@ -801,15 +801,15 @@ void USettingsWidget::AddUserInput(const FSettingsPrimary& Primary, FSettingsUse
 		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
 		{
 			Data.OnGetterName.BindUFunction(StaticContextObject, GetterFunctionName);
-			Data.UserInput = GetUserInputValue(Primary.Tag.GetTagName());
 		}
 
 		const FName SetterFunctionName = Primary.Setter.FunctionName;
 		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
 		{
 			Data.OnSetterName.BindUFunction(StaticContextObject, SetterFunctionName);
-			Data.OnSetterName.ExecuteIfBound(Data.UserInput);
 		}
+
+		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddUserInputBP(Primary, Data);

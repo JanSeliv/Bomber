@@ -48,15 +48,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetPlayerNameCustom(FName NewName);
 
-	/** Is overriden to set the custom player name to config. */
-	virtual void SetPlayerName(const FString& S) override;
-
 	/** Returns custom player name. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (OverrideNativeName = "GetPlayerNameCustom"))
-	FORCEINLINE FName GetPlayerFNameCustom() const { return CustomPlayerNameInternal; }
+	FName GetPlayerFNameCustom() const;
 
 	/** Is overriden to return own player name that is saved to config. */
-	virtual FString GetPlayerNameCustom() const override { return CustomPlayerNameInternal.ToString(); }
+	virtual FString GetPlayerNameCustom() const override { return GetPlayerFNameCustom().ToString(); }
 
 protected:
 	/* ---------------------------------------------------
