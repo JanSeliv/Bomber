@@ -61,11 +61,6 @@ void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
 // Returns the overall scalability level
 int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
 {
-	if (!OverallQualityInternal)
-	{
-		return OverallQualityInternal;
-	}
-
 	static constexpr int32 QualityOffset = 1;
 	const int32 OverallScalabilityLevel = Super::GetOverallScalabilityLevel();
 	return OverallScalabilityLevel + QualityOffset;

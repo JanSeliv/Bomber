@@ -51,17 +51,16 @@ void AMyPlayerState::SetPlayerNameCustom(FName NewName)
 	}
 }
 
-// Set the player name
-void AMyPlayerState::SetPlayerName(const FString& S)
+FName AMyPlayerState::GetPlayerFNameCustom() const
 {
 	if (CustomPlayerNameInternal.IsNone())
 	{
-		// Is default name, set it as a custom
-		SetPlayerNameCustom(*S);
-		return;
+		// Return default name
+		const FName PlatformUserName(UKismetSystemLibrary::GetPlatformUserName());
+		return PlatformUserName;
 	}
 
-	Super::SetPlayerName(S);
+	return CustomPlayerNameInternal;
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel.
