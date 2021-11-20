@@ -144,8 +144,11 @@ void AMyPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Set input focus on the game
+	// Set input focus on the game window
 	FSlateApplication::Get().SetAllUserFocusToGameViewport(EFocusCause::WindowActivate);
+
+	// Set mouse focus
+	SetInputMode(FInputModeGameAndUI());
 
 	// Prevents built-in slate input on UMG
 	SetUIInputIgnored();
