@@ -34,7 +34,6 @@ struct FLevelStreamRow
 	/** The name of a level on UI. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
 	FText LevelName; //[D]
-
 };
 
 /**
@@ -119,6 +118,12 @@ public:
 	int32 RenderActorsTypes; //[N]
 #endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetNewLevelType, ELevelType, NewLevelType);
+
+	/** Called when new level type is set. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnSetNewLevelType OnSetNewLevelType; //[DMD]
+
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- *
@@ -168,7 +173,7 @@ public:
 	AActor* SpawnActorByType(EActorType Type, const FCell& Cell);
 
 	/** Spawns a level actor on the Level Map by the specified type. */
-	template<typename T>
+	template <typename T>
 	static FORCEINLINE T* SpawnActorByType(EActorType Type, const FCell& Cell) { return Cast<T>(Get().SpawnActorByType(Type, Cell)); }
 
 	/** Adding and attaching the specified Map Component to the MapComponents_ array

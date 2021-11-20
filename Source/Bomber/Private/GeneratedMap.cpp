@@ -591,14 +591,20 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 		}
 	}
 
-	// skip if the same level type
+	// Skip if the same level type
 	if (LevelTypeInternal == NewLevelType)
 	{
 		return;
 	}
 
-	// once level is loading, prepare him
 	LevelTypeInternal = NewLevelType;
+
+	if (OnSetNewLevelType.IsBound())
+	{
+		OnSetNewLevelType.Broadcast(NewLevelType);
+	}
+
+	// Once level is loading, prepare him
 	for (const TObjectPtr<UMapComponent>& MapComponentIt : MapComponentsInternal)
 	{
 		if (MapComponentIt)
