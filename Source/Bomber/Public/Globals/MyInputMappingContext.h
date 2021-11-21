@@ -16,8 +16,13 @@ class UMyInputMappingContext final : public UInputMappingContext
 	GENERATED_BODY()
 
 public:
+	/** Returns the priority of the context. If higher, then block the same consumed inputs other contexts with lower priorities.
+	 * @see UMyInputMappingContext::ContextPriorityInternal. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetContextPriority() const { return ContextPriorityInternal; }
+
 	/** Returns the game states for which this input context is active.
-	 * @see ::ActiveForStatesInternal */
+	 * @see UMyInputMappingContext::ActiveForStatesInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetChosenGameStatesBitmask() const { return ActiveForStatesInternal; }
 
@@ -32,7 +37,11 @@ public:
 	void GetMappingsByInputAction(TArray<FEnhancedActionKeyMapping>& OutMappings, const class UMyInputAction* InputAction) const;
 
 protected:
+	/** If higher, then block the same consumed inputs other contexts with lower priorities. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Context Priority"))
+	int32 ContextPriorityInternal; //[D]
+
 	/** Set the game states for which this input context should be active. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, Bitmask, BitmaskEnum = "ECurrentGameState", DisplayName = "Active For States", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Active For States", Bitmask, BitmaskEnum = "ECurrentGameState"))
 	int32 ActiveForStatesInternal; //[D]
 };
