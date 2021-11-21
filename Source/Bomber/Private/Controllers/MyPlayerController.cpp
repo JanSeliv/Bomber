@@ -344,8 +344,7 @@ void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMap
 
 	if (bEnable)
 	{
-		static constexpr int32 Priority = 0;
-		InputSubsystem->AddMappingContext(InputContext, Priority);
+		InputSubsystem->AddMappingContext(InputContext, InputContext->GetContextPriority());
 	}
 	else
 	{
