@@ -346,6 +346,7 @@ healthchecksdb
 **/Binaries/
 **/DerivedDataCache/
 **/Content/Developers/
+**/Plugins/Developer/RiderLink/
 *.sln
 *.uproject
 *_BuiltData.uasset
