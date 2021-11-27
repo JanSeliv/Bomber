@@ -95,13 +95,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overall Quality"))
 	int32 OverallQualityInternal; //[C]
 
-	/** The min allowed resolution width. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size X"))
-	int32 MinResolutionSizeXInternal; //[C]
+	/** The min allowed resolution width.
+	 * Is set on starting from game (not settings) config.
+	 * By default is 1280. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size X"))
+	int32 MinResolutionSizeXInternal = 1280; //[G]
 
-	/** The min allowed resolution height. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size Y"))
-	int32 MinResolutionSizeYInternal; //[C]
+	/** The min allowed resolution height.
+	 * Is set on starting from game (not settings) config.
+	 * By default is 720. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size Y"))
+	int32 MinResolutionSizeYInternal = 720; //[G]
 
 	/** Contains all resolutions. Is displayed on UI. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Text Resolutions"))
