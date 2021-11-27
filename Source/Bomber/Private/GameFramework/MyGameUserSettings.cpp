@@ -263,6 +263,16 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {
 	Super::LoadSettings(bForceReload);
 
+	const bool bUpdateMinResolutions = !MinResolutionSizeXInternal || !MinResolutionSizeYInternal;
+	if (bUpdateMinResolutions
+	    && GConfig
+	    && !GGameIni.IsEmpty())
+	{
+		static const FString Section(TEXT("/Script/EngineSettings.GeneralProjectSettings"));
+		GConfig->GetInt(*Section, TEXT("MinWindowWidth"), MinResolutionSizeXInternal, GGameIni);
+		GConfig->GetInt(*Section, TEXT("MinWindowHeight"), MinResolutionSizeYInternal, GGameIni);
+	}
+
 	if (!IntResolutionsInternal.Num())
 	{
 		UpdateSupportedResolutions();
