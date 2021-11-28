@@ -62,7 +62,8 @@ UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 Loc
 			if (ContextClassIt)
 			{
 				// Initialize new gameplay contexts
-				UMyInputMappingContext* NewGameplayInputContext = NewObject<UMyInputMappingContext>(GetTransientPackage(), ContextClassIt, NAME_None, RF_Public | RF_Transactional);
+				UWorld* World = USingletonLibrary::Get().GetWorld();
+				UMyInputMappingContext* NewGameplayInputContext = NewObject<UMyInputMappingContext>(World, ContextClassIt, NAME_None, RF_Public | RF_Transactional);
 				GameplayInputContextsInternal.Emplace(NewGameplayInputContext);
 			}
 		}
