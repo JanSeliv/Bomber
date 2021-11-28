@@ -149,6 +149,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class APlayerCharacter* GetControllablePlayer();
 
+	/** Returns the Sounds Manager. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class USoundsManager* GetSoundsManager();
+
 	/* ---------------------------------------------------
 	 *		Structs functions
 	 * --------------------------------------------------- */
@@ -239,6 +243,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FORCEINLINE class UPlayerInputDataAsset* GetPlayerInputDataAsset() { return Get().PlayerInputDataAssetInternal; }
 
+	/** Returns the Sounds data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE class USoundsDataAsset* GetSoundsDataAsset() { return Get().SoundsDataAssetInternal; }
+
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
 	static class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
@@ -288,6 +296,10 @@ protected:
 	/** Player Input data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Input Data Asset"))
 	TObjectPtr<class UPlayerInputDataAsset> PlayerInputDataAssetInternal = nullptr; //[B]
+
+	/** Sounds data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Sounds Data Asset"))
+	TObjectPtr<class USoundsDataAsset> SoundsDataAssetInternal = nullptr; //[B]
 
 	/** Actor type and its associated class. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actors Data Assets"))

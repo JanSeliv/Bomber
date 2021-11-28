@@ -4,6 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "SoundsManager.h"
 #include "Components/MapComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameModeBase.h"
@@ -293,6 +294,12 @@ UInputControlsWidget* USingletonLibrary::GetInputControlsWidget()
 APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 {
 	return Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(Get().GetWorld(), 0));
+}
+
+// Returns the Sound Manager
+USoundsManager* USingletonLibrary::GetSoundsManager()
+{
+	return USoundsDataAsset::Get().GetSoundsManager();
 }
 
 /* ---------------------------------------------------
