@@ -468,7 +468,7 @@ struct FSettingsSlider : public FSettingsDataBase
 	GENERATED_BODY()
 
 	/** Cached slider value (0..1). */
-	float ChosenValue = 0.f;
+	float ChosenValue = static_cast<float>(INDEX_NONE);
 
 	/** The cached bound delegate, is executed to get the current slider value. */
 	USettingTemplate::FOnGetterFloat OnGetterFloat;

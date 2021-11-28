@@ -480,7 +480,7 @@
 		}
 	},
 	{
-		"Name": "Settings.Slider.AudioVolume",
+		"Name": "Settings.Slider.MusicVolume",
 		"SettingsPicker":
 		{
 			"SettingsType": "Slider",
@@ -488,25 +488,25 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Slider.AudioVolume"
+					"TagName": "Settings.Slider.MusicVolume"
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetSoundsManager"
 				},
 				"Setter":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionName": "SetMusicVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionName": "GetMusicVolume"
 				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A66DE2E649B1E65ADBD8FE8105588DB0\", \"Audio Volume\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"848C332C48030AC4947D7EBDFA94420C\", \"Set the audio volume\")",
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A66DE2E649B1E65ADBD8FE8105588DB0\", \"Music Volume\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"848C332C48030AC4947D7EBDFA94420C\", \"Set the sound volume for the background music\")",
 				"Padding":
 				{
 					"Left": 0,
