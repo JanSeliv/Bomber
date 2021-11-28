@@ -711,7 +711,6 @@ void USettingsWidget::AddCheckbox(const FSettingsPrimary& Primary, FSettingsChec
 // Add combobox on UI
 void USettingsWidget::AddCombobox(const FSettingsPrimary& Primary, FSettingsCombobox& Data)
 {
-	const FName TagName = Primary.Tag.GetTagName();
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
 	{
 		const FName GetMembersFunctionName = Data.GetMembers.FunctionName;
