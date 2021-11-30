@@ -55,17 +55,38 @@ void UPlayerInputDataAsset::GetAllInputContexts(TArray<UMyInputMappingContext*>&
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
 UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
-	if (GameplayInputContextsInternal.IsEmpty())
+	// Create new objects if is null
+	const int32 ClassesNum = GameplayInputContextClassesInternal.Num();
+	for (int32 Index = 0; Index < ClassesNum; ++Index)
 	{
-		for (const UClass* ContextClassIt : GameplayInputContextClassesInternal)
+		const bool bIsValidIndex = GameplayInputContextsInternal.IsValidIndex(Index);
+		const TObjectPtr<UMyInputMappingContext>& GameplayInputContextsIt = bIsValidIndex ? GameplayInputContextsInternal[Index] : nullptr;
+		if (GameplayInputContextsIt)
 		{
-			if (ContextClassIt)
-			{
-				// Initialize new gameplay contexts
-				UWorld* World = USingletonLibrary::Get().GetWorld();
-				UMyInputMappingContext* NewGameplayInputContext = NewObject<UMyInputMappingContext>(World, ContextClassIt, NAME_None, RF_Public | RF_Transactional);
-				GameplayInputContextsInternal.Emplace(NewGameplayInputContext);
-			}
+			// Is already created
+			continue;
+		}
+
+		// Initialize new gameplay contexts
+		UWorld* World = USingletonLibrary::Get().GetWorld();
+		const TSubclassOf<UMyInputMappingContext>& ContextClassIt = GameplayInputContextClassesInternal[Index];
+		if (!World
+		    || !ContextClassIt)
+		{
+			// Is empty class
+			continue;
+		}
+
+		const FName ContextClassName(*FString::Printf(TEXT("%s_%i"), *ContextClassIt->GetName(), Index));
+		UMyInputMappingContext* NewGameplayInputContext = NewObject<UMyInputMappingContext>(World, ContextClassIt, ContextClassName, RF_Public | RF_Transactional);
+
+		if (bIsValidIndex)
+		{
+			GameplayInputContextsInternal[Index] = NewGameplayInputContext;
+		}
+		else
+		{
+			GameplayInputContextsInternal.EmplaceAt(Index, NewGameplayInputContext);
 		}
 	}
 
