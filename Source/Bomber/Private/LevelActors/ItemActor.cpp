@@ -7,6 +7,7 @@
 #include "Components/MapComponent.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "SoundsManager.h"
 //---
 #include "Components/BoxComponent.h"
 
@@ -103,6 +104,12 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	    || !OverlappedCharacter) // character is not valid)
 	{
 		return;
+	}
+
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayItemPickUpSFX();
 	}
 
 	// Destroy itself on overlapping

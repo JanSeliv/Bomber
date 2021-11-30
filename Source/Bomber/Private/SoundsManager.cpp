@@ -93,6 +93,19 @@ void USoundsManager::PlayExplosionSFX()
 	}
 }
 
+// Play the sound of the picked power-up
+void USoundsManager::PlayItemPickUpSFX()
+{
+	if (AMyGameStateBase::GetCurrentGameState(this) != ECGS::InGame)
+	{
+		return;
+	}
+
+	if (USoundBase* ItemPickUpSFX = USoundsDataAsset::Get().GetItemPickUpSFX())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ItemPickUpSFX);
+	}
+}
 
 // Called after the C++ constructor and after the properties have been initialized, including those loaded from config
 void USoundsManager::PostInitProperties()

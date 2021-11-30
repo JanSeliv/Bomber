@@ -160,6 +160,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void PlayExplosionSFX();
 
+	/** Play the sound of the picked power-up. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayItemPickUpSFX();
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
