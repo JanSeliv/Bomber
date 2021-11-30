@@ -22,6 +22,12 @@ public:
 	*		Public
 	* --------------------------------------------------- */
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndGameStateChanged, EEndGameState, EndGameState);
+
+	/** Called when the player state was changed. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnEndGameStateChanged OnEndGameStateChanged; //[DMD]
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerNameChanged, FName, NewName);
 
 	/** Called when player name is changed. */

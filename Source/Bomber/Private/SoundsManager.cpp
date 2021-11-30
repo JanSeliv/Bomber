@@ -2,6 +2,8 @@
 
 #include "SoundsManager.h"
 //---
+#include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
 #include "Globals/SingletonLibrary.h"
 
 const USoundsDataAsset& USoundsDataAsset::Get()
@@ -23,6 +25,17 @@ USoundsManager* USoundsDataAsset::GetSoundsManager() const
 	return SoundManager;
 }
 
+// Returns the End-Game sound by specified End-Game state
+USoundBase* USoundsDataAsset::GetEndGameSFX(EEndGameState EndGameState) const
+{
+	if (const TObjectPtr<USoundBase>* FoundSFX = EndGameSFXInternal.Find(EndGameState))
+	{
+		return *FoundSFX;
+	}
+
+	return nullptr;
+}
+
 // Returns a world of stored level map
 UWorld* USoundsManager::GetWorld() const
 {
@@ -39,12 +52,31 @@ void USoundsManager::SetSoundVolumeByClass(USoundClass* InSoundClass, float InVo
 	UGameplayStatics::SetSoundMixClassOverride(World, MainSoundMix, InSoundClass, InVolume, Pitch, FadeInTime);
 }
 
+// Set the general sound volume for all sound classes in game
+void USoundsManager::SetMasterVolume(float InVolume)
+{
+	MasterVolumeInternal = InVolume;
+
+	USoundClass* MasterSoundClass = USoundsDataAsset::Get().GetMasterSoundClass();
+	SetSoundVolumeByClass(MasterSoundClass, InVolume);
+}
+
 // Set new sound volume for music sound class
 void USoundsManager::SetMusicVolume(float InVolume)
 {
-	USoundClass* MusicSoundClass = USoundsDataAsset::Get().GetMusicSoundClass();
 	MusicVolumeInternal = InVolume;
+
+	USoundClass* MusicSoundClass = USoundsDataAsset::Get().GetMusicSoundClass();
 	SetSoundVolumeByClass(MusicSoundClass, InVolume);
+}
+
+// Set new sound volume for SFX sound class
+void USoundsManager::SetSFXVolume(float InVolume)
+{
+	SFXVolumeInternal = InVolume;
+
+	USoundClass* SFXSoundClass = USoundsDataAsset::Get().GetSFXSoundClass();
+	SetSoundVolumeByClass(SFXSoundClass, InVolume);
 }
 
 // Called after the C++ constructor and after the properties have been initialized, including those loaded from config
@@ -74,4 +106,24 @@ void USoundsManager::BeginPlay()
 
 	USoundBase* BackgroundSound = USoundsDataAsset::Get().GetBackgroundSound();
 	UGameplayStatics::SpawnSound2D(World, BackgroundSound);
+
+	// Listed the ending the current game to play the End-Game sound on
+	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetCurrentPlayerState())
+	{
+		CurrentPlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	}
+}
+
+// Is called on ending the current game to play the End-Game sound
+void USoundsManager::OnEndGameStateChanged(EEndGameState EndGameState)
+{
+	if (EndGameState == EEndGameState::None)
+	{
+		return;
+	}
+
+	if (USoundBase* EndGameSFX = USoundsDataAsset::Get().GetEndGameSFX(EndGameState))
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), EndGameSFX);
+	}
 }

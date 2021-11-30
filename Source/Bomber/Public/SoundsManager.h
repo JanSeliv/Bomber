@@ -4,12 +4,13 @@
 
 #include "Components/AudioComponent.h"
 //---
+#include "Bomber.h"
 #include "Globals/LevelActorDataAsset.h"
 //---
 #include "SoundsManager.generated.h"
 
 /**
- * Contains all sound assets used in game.
+ * Contains all sound assets used in game that is used to manage the game sounds.
  */
 UCLASS(Blueprintable, BlueprintType)
 class USoundsDataAsset final : public UBomberDataAsset
@@ -50,6 +51,21 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class USoundBase* GetBackgroundSound() const { return BackgroundSoundInternal; }
 
+	/** Returns the blast SFX.
+	 * @see USoundsDataAsset::ExplosionSFXInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE USoundBase* GetExplosionSFX() const { return ExplosionSFXInternal; }
+
+	/** Returns the sound that is played on gathering any power-up.
+	 * @see USoundsDataAsset::ItemPickUpInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE USoundBase* GetItemPickUpSFX() const { return ItemPickUpSFXInternal; }
+
+	/** Returns the End-Game sound by specified End-Game state.
+	 * @see USoundsDataAsset::EndGameSoundsInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class USoundBase* GetEndGameSFX(EEndGameState EndGameState) const;
+
 protected:
 	/** The Sound Manager that controls player the audio in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sounds Manager Class", ShowOnlyInnerProperties))
@@ -75,6 +91,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Background Sound", ShowOnlyInnerProperties))
 	TObjectPtr<class USoundBase> BackgroundSoundInternal; //[D]
 
+	/** Returns the blast SFX. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Sound", ShowOnlyInnerProperties))
+	TObjectPtr<class USoundBase> ExplosionSFXInternal; //[D]
+
+	/** The sound that is played on gathering any power-up. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "ItemPickUp", ShowOnlyInnerProperties))
+	TObjectPtr<class USoundBase> ItemPickUpSFXInternal; //[D]
+
+	/** Contains all sounds of End-Game states. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game SFX", ShowOnlyInnerProperties))
+	TMap<EEndGameState, TObjectPtr<class USoundBase>> EndGameSFXInternal; //[D]
+
 private:
 	/** Is created dynamically by specified Sound Manager class.
 	 * @see USoundsDataAsset::SoundManagerClass */
@@ -91,6 +119,10 @@ class USoundsManager final : public UObject
 	GENERATED_BODY()
 
 public:
+	/* ---------------------------------------------------
+	 *		Public functions
+	 * --------------------------------------------------- */
+
 	/** Returns a world of stored level map. */
 	virtual class UWorld* GetWorld() const override;
 
@@ -100,6 +132,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetSoundVolumeByClass(class USoundClass* InSoundClass, float InVolume);
 
+	/** Set the general sound volume for all sound classes in game. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetMasterVolume(float InVolume);
+
+	/** Returns the general sound volume for all sound classes in game. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE float GetMasterVolume() const { return MasterVolumeInternal; }
+
 	/** Set new sound volume for music sound class. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMusicVolume(float InVolume);
@@ -108,7 +148,35 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE float GetMusicVolume() const { return MusicVolumeInternal; }
 
+	/** Set new sound volume for SFX sound class. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Set SFX Volume"))
+	void SetSFXVolume(float InVolume);
+
+	/** Returns the sound volume for SFX sound class. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get SFX Volume"))
+	FORCEINLINE float GetSFXVolume() const { return SFXVolumeInternal; }
+
 protected:
+	/* ---------------------------------------------------
+	 *		Protected properties
+	 * --------------------------------------------------- */
+
+	/** The general sound volume for all sound classes in game. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Volume"))
+	float MasterVolumeInternal; //[С]
+
+	/** The sound volume for music sound class. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
+	float MusicVolumeInternal; //[С]
+
+	/** The sound volume for SFX sound class. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
+	float SFXVolumeInternal; //[С]
+
+	/* ---------------------------------------------------
+	 *		Protected functions
+	 * --------------------------------------------------- */
+
 	/** Called after the C++ constructor and after the properties have been initialized, including those loaded from config.*/
 	virtual void PostInitProperties() override;
 
@@ -118,7 +186,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DisplayName = "Begin Play"))
 	void OnBeginPlay();
 
-	/** The sound volume for music sound class. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
-	float MusicVolumeInternal; //[С]
+	/** Is called to play the End-Game sound on ending the current game. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnEndGameStateChanged(EEndGameState EndGameState);
 };
