@@ -130,6 +130,7 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 
 	// locals
 	bool bUpdateGameState = false;
+	bool bUpdateEndGameState = false;
 	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
 	const APawn* PawnOwner = GetPawn();
 	if (!IS_VALID(PawnOwner)) // is dead owner
@@ -138,11 +139,13 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 		{
 			EndGameStateInternal = EEndGameState::Draw;
 			bUpdateGameState = true; // no players to play, game ended
+			bUpdateEndGameState = true;
 		}
 		else
 		{
 			EndGameStateInternal = EEndGameState::Lose;
 			bUpdateGameState = PlayerNum == 1;
+			bUpdateEndGameState = true;
 		}
 	}
 	else if (PlayerNum == 1) // is alive owner and is the last player
@@ -152,11 +155,18 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 			EndGameStateInternal = EEndGameState::Win;
 		}
 		bUpdateGameState = true; // we have winner, game ended
+		bUpdateEndGameState = true;
 	}
 
 	// Need to notify that the game was ended
 	if (bUpdateGameState)
 	{
 		USingletonLibrary::GetMyGameState()->ServerSetGameState(ECurrentGameState::EndGame);
+	}
+
+	if (bUpdateEndGameState
+	    && OnEndGameStateChanged.IsBound())
+	{
+		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 	}
 }

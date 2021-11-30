@@ -240,326 +240,6 @@
 		}
 	},
 	{
-		"Name": "Settings.TextLine.GameplayTab",
-		"SettingsPicker":
-		{
-			"SettingsType": "TextLine",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.TextLine.GameplayTab"
-				},
-				"StaticContext":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Setter":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Getter":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"788D42434311C2017FD979A633D31E4B\", \"GAMEPLAY\")",
-				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 0,
-					"Bottom": 15
-				},
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Center"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 0
-			}
-		}
-	},
-	{
-		"Name": "Settings.Checkbox.CameraLock",
-		"SettingsPicker":
-		{
-			"SettingsType": "Checkbox",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.Checkbox.CameraLock"
-				},
-				"StaticContext":
-				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
-					"FunctionName": "GetLevelCamera"
-				},
-				"Setter":
-				{
-					"FunctionClass": "Class'/Script/Bomber.MyCameraComponent'",
-					"FunctionName": "SetCameraLockedOnCenter"
-				},
-				"Getter":
-				{
-					"FunctionClass": "Class'/Script/Bomber.MyCameraComponent'",
-					"FunctionName": "IsCameraLockedOnCenter"
-				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"BB51A3194AE57C2B65A8EF915EAE4407\", \"Camera Lock\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"C523CF824AE2E0878B869792652B6AF6\", \"Check if you want to lock camera on center\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 30,
-					"Bottom": 15
-				},
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 0
-			}
-		}
-	},
-	{
-		"Name": "Settings.UserInput.PlayerName",
-		"SettingsPicker":
-		{
-			"SettingsType": "UserInput",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.UserInput.PlayerName"
-				},
-				"StaticContext":
-				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
-					"FunctionName": "GetCurrentPlayerState"
-				},
-				"Setter":
-				{
-					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
-					"FunctionName": "SetPlayerNameCustom"
-				},
-				"Getter":
-				{
-					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
-					"FunctionName": "GetPlayerNameCustom"
-				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"72219A3F4944330938ED3685430DF7A3\", \"Player Name\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"783B361E459F1C17B9852CB11D1D5BDB\", \"Enter your nickname\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 30,
-					"Bottom": 15
-				},
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 8
-			}
-		}
-	},
-	{
-		"Name": "Settings.Slider.MusicVolume",
-		"SettingsPicker":
-		{
-			"SettingsType": "Slider",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.Slider.MusicVolume"
-				},
-				"StaticContext":
-				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
-					"FunctionName": "GetSoundsManager"
-				},
-				"Setter":
-				{
-					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
-					"FunctionName": "SetMusicVolume"
-				},
-				"Getter":
-				{
-					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
-					"FunctionName": "GetMusicVolume"
-				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A66DE2E649B1E65ADBD8FE8105588DB0\", \"Music Volume\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"848C332C48030AC4947D7EBDFA94420C\", \"Set the sound volume for the background music\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 30,
-					"Bottom": 15
-				},
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 0
-			}
-		}
-	},
-	{
 		"Name": "Settings.TextLine.VideoTab",
 		"SettingsPicker":
 		{
@@ -995,6 +675,566 @@
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"1315620C476BCC916E6B50B474B3DC38\", \"FPS Counter\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"04341B454CFB45870906DE8307F3C665\", \"Check to show the current FPS\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			}
+		}
+	},
+	{
+		"Name": "Settings.TextLine.AudioTab",
+		"SettingsPicker":
+		{
+			"SettingsType": "TextLine",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.TextLine.AudioTab"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Setter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Getter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A2411C9847E824B14AB8A589F772412C\", \"AUDIO\")",
+				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Center"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			}
+		}
+	},
+	{
+		"Name": "Settings.Slider.MasterVolume",
+		"SettingsPicker":
+		{
+			"SettingsType": "Slider",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Slider.MasterVolume"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetSoundsManager"
+				},
+				"Setter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionName": "SetMasterVolume"
+				},
+				"Getter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionName": "GetMasterVolume"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"4D6564624528B29759FB98B3EAE17C92\", \"Master Volume\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"F241078F4234790AEC1C278F672DD327\", \"Set the overall volume for all sounds in the game\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			}
+		}
+	},
+	{
+		"Name": "Settings.Slider.MusicVolume",
+		"SettingsPicker":
+		{
+			"SettingsType": "Slider",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Slider.MusicVolume"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetSoundsManager"
+				},
+				"Setter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionName": "SetMusicVolume"
+				},
+				"Getter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionName": "GetMusicVolume"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"A66DE2E649B1E65ADBD8FE8105588DB0\", \"Music Volume\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"848C332C48030AC4947D7EBDFA94420C\", \"Set the sound volume for the background music\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			}
+		}
+	},
+	{
+		"Name": "Settings.Slider.SFXVolume",
+		"SettingsPicker":
+		{
+			"SettingsType": "Slider",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Slider.SFXVolume"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetSoundsManager"
+				},
+				"Setter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionName": "SetSFXVolume"
+				},
+				"Getter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionName": "GetSFXVolume"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"89A621864FBF5FA2C8D126894162E881\", \"Sound Effects Volume\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"270CF78544D3E79294A0A494AE05E03B\", \"Set the sound volume for the effects like bomb explosions\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			}
+		}
+	},
+	{
+		"Name": "Settings.TextLine.GameplayTab",
+		"SettingsPicker":
+		{
+			"SettingsType": "TextLine",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.TextLine.GameplayTab"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Setter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Getter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"788D42434311C2017FD979A633D31E4B\", \"GAMEPLAY\")",
+				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Center"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			}
+		}
+	},
+	{
+		"Name": "Settings.UserInput.PlayerName",
+		"SettingsPicker":
+		{
+			"SettingsType": "UserInput",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.UserInput.PlayerName"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetCurrentPlayerState"
+				},
+				"Setter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
+					"FunctionName": "SetPlayerNameCustom"
+				},
+				"Getter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
+					"FunctionName": "GetPlayerNameCustom"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"72219A3F4944330938ED3685430DF7A3\", \"Player Name\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"783B361E459F1C17B9852CB11D1D5BDB\", \"Enter your nickname\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill",
+				"LineHeight": 0
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 8
+			}
+		}
+	},
+	{
+		"Name": "Settings.Checkbox.CameraLock",
+		"SettingsPicker":
+		{
+			"SettingsType": "Checkbox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Checkbox.CameraLock"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionName": "GetLevelCamera"
+				},
+				"Setter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyCameraComponent'",
+					"FunctionName": "SetCameraLockedOnCenter"
+				},
+				"Getter":
+				{
+					"FunctionClass": "Class'/Script/Bomber.MyCameraComponent'",
+					"FunctionName": "IsCameraLockedOnCenter"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"BB51A3194AE57C2B65A8EF915EAE4407\", \"Camera Lock\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"C523CF824AE2E0878B869792652B6AF6\", \"Check if you want to lock camera on center\")",
 				"Padding":
 				{
 					"Left": 0,
