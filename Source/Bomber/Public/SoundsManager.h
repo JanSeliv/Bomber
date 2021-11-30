@@ -156,6 +156,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get SFX Volume"))
 	FORCEINLINE float GetSFXVolume() const { return SFXVolumeInternal; }
 
+	/** Play the blast sound of the bomb. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayExplosionSFX();
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties

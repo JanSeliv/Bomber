@@ -8,6 +8,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "SoundsManager.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -178,9 +179,9 @@ void ABombActor::LifeSpanExpired()
 // Destroy bomb and burst explosion cells
 void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 {
-	if (!ExplosionCellsInternal.Num()                                                // no cells to destroy
-	    || !IsValid(MapComponentInternal)                                            // The Map Component is not valid or is destroyed already
-	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame) // game was not started or already finished
+	if (!ExplosionCellsInternal.Num()                                   // no cells to destroy
+	    || !IsValid(MapComponentInternal)                               // The Map Component is not valid or is destroyed already
+	    || AMyGameStateBase::GetCurrentGameState(this) != ECGS::InGame) // game was not started or already finished
 	{
 		return;
 	}
@@ -206,6 +207,12 @@ void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 
 	// Destroy all actors from array of cells
 	LevelMap.DestroyActorsFromMap(UniqueBlastCells);
+
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayExplosionSFX();
+	}
 }
 
 // Triggers when character end to overlaps with this bomb.
