@@ -79,6 +79,21 @@ void USoundsManager::SetSFXVolume(float InVolume)
 	SetSoundVolumeByClass(SFXSoundClass, InVolume);
 }
 
+// Play the blast sound of the bomb
+void USoundsManager::PlayExplosionSFX()
+{
+	if (AMyGameStateBase::GetCurrentGameState(this) != ECGS::InGame)
+	{
+		return;
+	}
+
+	if (USoundBase* ExplosionSFX = USoundsDataAsset::Get().GetExplosionSFX())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSFX);
+	}
+}
+
+
 // Called after the C++ constructor and after the properties have been initialized, including those loaded from config
 void USoundsManager::PostInitProperties()
 {
