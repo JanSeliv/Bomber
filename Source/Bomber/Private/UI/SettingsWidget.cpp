@@ -2,6 +2,7 @@
 
 #include "UI/SettingsWidget.h"
 //---
+#include "SoundsManager.h"
 #include "GameFramework/MyGameUserSettings.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/MyHUD.h"
@@ -590,6 +591,12 @@ void USettingsWidget::TryBindStaticContext(FSettingsPrimary& Primary)
 // Display settings on UI
 void USettingsWidget::OpenSettings()
 {
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
 	SetVisibility(ESlateVisibility::Visible);
 }
 
@@ -601,6 +608,12 @@ void USettingsWidget::CloseSettings()
 	{
 		// Widget is already closed
 		return;
+	}
+
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
 	}
 
 	SetVisibility(ESlateVisibility::Collapsed);

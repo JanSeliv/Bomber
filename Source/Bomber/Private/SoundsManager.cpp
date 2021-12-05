@@ -107,6 +107,15 @@ void USoundsManager::PlayItemPickUpSFX()
 	}
 }
 
+// Play the sound of the clicked UI element
+void USoundsManager::PlayUIClickSFX()
+{
+	if (USoundBase* UIClickSFX = USoundsDataAsset::Get().GetUIClickSFXInternal())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), UIClickSFX);
+	}
+}
+
 // Called after the C++ constructor and after the properties have been initialized, including those loaded from config
 void USoundsManager::PostInitProperties()
 {

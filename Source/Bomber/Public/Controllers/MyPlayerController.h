@@ -78,6 +78,14 @@ public:
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
 	void ServerSetGameState(ECurrentGameState NewGameState);
 
+	/** Sets the GameStarting game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetGameStartingState();
+
+	/** Sets the Menu game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetMenuState();
+
 	/** Returns true if the mouse cursor can be hidden. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	bool CanHideMouse() const;
@@ -153,14 +161,6 @@ protected:
 	/** Executes spawning the bomb on controllable player. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SpawnBomb();
-
-	/** Sets the GameStarting game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetGameStartingState();
-
-	/** Sets the Menu game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetMenuState();
 
 	/** Is called when all game widgets are initialized. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

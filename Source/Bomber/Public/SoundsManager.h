@@ -34,17 +34,17 @@ public:
 	/** Returns the parent class of all sounds in game.
 	 * @see USoundsDataAsset::MasterSoundClassInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE USoundClass* GetMasterSoundClass() const { return MasterSoundClassInternal; }
+	FORCEINLINE class USoundClass* GetMasterSoundClass() const { return MasterSoundClassInternal; }
 
 	/** Returns the sound class of background music.
 	 * @see USoundsDataAsset::MasterSoundClassInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE USoundClass* GetMusicSoundClass() const { return MusicSoundClassInternal; }
+	FORCEINLINE class USoundClass* GetMusicSoundClass() const { return MusicSoundClassInternal; }
 
 	/** Returns the sound class of the sound effects like explosions.
 	 * @see USoundsDataAsset::MasterSoundClassInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get SFX Sound Class"))
-	FORCEINLINE USoundClass* GetSFXSoundClass() const { return SFXSoundClassInternal; }
+	FORCEINLINE class USoundClass* GetSFXSoundClass() const { return SFXSoundClassInternal; }
 
 	/** Returns the sound of the game background theme.
 	 * @see USoundsDataAsset::BackgroundCueInternal */
@@ -54,17 +54,22 @@ public:
 	/** Returns the blast SFX.
 	 * @see USoundsDataAsset::ExplosionSFXInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE USoundBase* GetExplosionSFX() const { return ExplosionSFXInternal; }
+	FORCEINLINE class USoundBase* GetExplosionSFX() const { return ExplosionSFXInternal; }
 
 	/** Returns the sound that is played on gathering any power-up.
 	 * @see USoundsDataAsset::ItemPickUpInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE USoundBase* GetItemPickUpSFX() const { return ItemPickUpSFXInternal; }
+	FORCEINLINE class USoundBase* GetItemPickUpSFX() const { return ItemPickUpSFXInternal; }
 
 	/** Returns the End-Game sound by specified End-Game state.
 	 * @see USoundsDataAsset::EndGameSoundsInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class USoundBase* GetEndGameSFX(EEndGameState EndGameState) const;
+
+	/** Returns the sound that is played on clicking any UI element.
+	 * @see USoundsDataAsset::UIClickSFXInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get UI Click SFX"))
+	FORCEINLINE class USoundBase* GetUIClickSFXInternal() const { return UIClickSFXInternal; }
 
 protected:
 	/** The Sound Manager that controls player the audio in game. */
@@ -102,6 +107,10 @@ protected:
 	/** Contains all sounds of End-Game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game SFX", ShowOnlyInnerProperties))
 	TMap<EEndGameState, TObjectPtr<class USoundBase>> EndGameSFXInternal; //[D]
+
+	/** The sound that is played on clicking any UI element. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "UI Click SFX", ShowOnlyInnerProperties))
+	TObjectPtr<class USoundBase> UIClickSFXInternal; //[D]
 
 private:
 	/** Is created dynamically by specified Sound Manager class.
@@ -163,6 +172,10 @@ public:
 	/** Play the sound of the picked power-up. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void PlayItemPickUpSFX();
+
+	/** Play the sound of the clicked UI element. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Play UI Click SFX"))
+	void PlayUIClickSFX();
 
 protected:
 	/* ---------------------------------------------------
