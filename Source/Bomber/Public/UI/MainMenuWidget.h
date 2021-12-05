@@ -36,11 +36,11 @@ public:
 	FORCEINLINE class ACarousel* GetMainMenuActor() const { return MainMenuActorInternal; }
 
 	/** Sets the next player in the Menu. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ChooseRight();
 
 	/** Sets the previous player in the Menu. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ChooseLeft();
 
 	/** Sets the next level in the Menu. */
@@ -54,6 +54,18 @@ public:
 	/** Sets the next skin in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void NextSkin();
+
+	/** Sets the chosen on UI the level type. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ChooseNewLevel(ELevelType LevelType);
+
+	/** Is executed when player pressed the button of starting the game. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void StartGame();
+
+	/** Is executed when player decided to close the game. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void QuitGame();
 
 protected:
 	/**
@@ -70,9 +82,14 @@ protected:
 	class ACarousel* MainMenuActorInternal; //[G]
 
 	/** Sets the level depending on specified incrementer.
-	 * @param Incrementer if +1 will set the next level, if -1 will set previous. */
+	 * @param Incrementer 1 set the next level, -1 set previous. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SwitchCurrentLevel(int32 Incrementer);
+
+	/** Sets the preview mesh of a player depending on specified incrementer.
+	 * @param Incrementer 1 set the next player, -1 set previous. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SwitchCurrentPlayer(int32 Incrementer);
 
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

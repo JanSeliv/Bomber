@@ -116,6 +116,18 @@ void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState Ne
 	}
 }
 
+// Sets the GameStarting game state
+void AMyPlayerController::SetGameStartingState()
+{
+	ServerSetGameState(ECurrentGameState::GameStarting);
+}
+
+// Sets the Menu game state
+void AMyPlayerController::SetMenuState()
+{
+	ServerSetGameState(ECurrentGameState::Menu);
+}
+
 // Returns true if the mouse cursor can be hidden
 bool AMyPlayerController::CanHideMouse() const
 {
@@ -403,18 +415,6 @@ void AMyPlayerController::SpawnBomb()
 	{
 		PlayerCharacter->SpawnBomb();
 	}
-}
-
-// Sets the GameStarting game state
-void AMyPlayerController::SetGameStartingState()
-{
-	ServerSetGameState(ECurrentGameState::GameStarting);
-}
-
-// Sets the Menu game state
-void AMyPlayerController::SetMenuState()
-{
-	ServerSetGameState(ECurrentGameState::Menu);
 }
 
 // Is called when all game widgets are initialized

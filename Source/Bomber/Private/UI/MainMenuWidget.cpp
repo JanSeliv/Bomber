@@ -3,7 +3,9 @@
 #include "UI/MainMenuWidget.h"
 //---
 #include "GeneratedMap.h"
+#include "SoundsManager.h"
 #include "Components/MySkeletalMeshComponent.h"
+#include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/SingletonLibrary.h"
@@ -26,17 +28,17 @@ void UMainMenuWidget::InitMainMenuWidget(ACarousel* InMainMenuActor)
 }
 
 // Sets the next player in the Menu
-void UMainMenuWidget::ChooseRight_Implementation()
+void UMainMenuWidget::ChooseRight()
 {
-	// BP implementation
-	// ...
+	static constexpr int32 NextPlayer = 1;
+	SwitchCurrentPlayer(NextPlayer);
 }
 
 // Sets the previous player in the Menu
-void UMainMenuWidget::ChooseLeft_Implementation()
+void UMainMenuWidget::ChooseLeft()
 {
-	// BP implementation
-	// ...
+	static constexpr int32 PrevPlayer = -1;
+	SwitchCurrentPlayer(PrevPlayer);
 }
 
 // Sets the next level in the Menu
@@ -63,13 +65,56 @@ void UMainMenuWidget::NextSkin()
 		return;
 	}
 
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
+	// Switch the preview skin
 	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + 1;
 	MySkeletalMeshComponent->SetSkin(NewSkinIndex);
 
+	// Update the player data
 	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetCurrentPlayerState())
 	{
 		MyPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
 	}
+}
+
+// Set the chosen on UI the level type
+void UMainMenuWidget::ChooseNewLevel(ELevelType LevelType)
+{
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
+	AGeneratedMap::Get().SetLevelType(LevelType);
+}
+
+// Is executed when player pressed the button of starting the game
+void UMainMenuWidget::StartGame()
+{
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
+	AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController();
+	if (MyPC)
+	{
+		MyPC->SetGameStartingState();
+	}
+}
+
+// Is executed when player decided to close the game
+void UMainMenuWidget::QuitGame()
+{
+	AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController();
+	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
 }
 
 // Called after the underlying slate widget is constructed. May be called multiple times due to adding and removing from the hierarchy.
@@ -126,7 +171,45 @@ void UMainMenuWidget::SwitchCurrentLevel(int32 Incrementer)
 	}
 
 	const ELevelType NewLevelType = TO_ENUM(ELevelType, NewLevelFlag);
-	AGeneratedMap::Get().SetLevelType(NewLevelType);
+	ChooseNewLevel(NewLevelType);
+}
+
+// Sets the preview mesh of a player depending on specified incrementer
+void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
+{
+	if (!ensureMsgf(MainMenuActorInternal, TEXT("ASSERT: 'MainMenuActorInternal' is not valid"))
+	    || !Incrementer)
+	{
+		return;
+	}
+
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
+	const bool bRotated = MainMenuActorInternal->RotateFloorBP(Incrementer);
+	if (!bRotated)
+	{
+		return;
+	}
+
+	const auto MySkeletalMeshComponent = MainMenuActorInternal->GetCurrentMeshComponent<UMySkeletalMeshComponent>();
+	if (!MySkeletalMeshComponent)
+	{
+		return;
+	}
+
+	// Update preview
+	const FCustomPlayerMeshData& CustomPlayerMeshData = MySkeletalMeshComponent->GetCustomPlayerMeshData();
+	MySkeletalMeshComponent->InitMySkeletalMesh(CustomPlayerMeshData);
+
+	// Update player data
+	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetCurrentPlayerState())
+	{
+		CurrentPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
+	}
 }
 
 // Called when the current game state was changed

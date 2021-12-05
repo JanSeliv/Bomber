@@ -52,6 +52,16 @@ public:
 	template <typename T>
 	FORCEINLINE T* GetCurrentMeshRow() const { return Cast<T>(CurrentMeshRowInternal); }
 
+	/** Rotate the Carousel to show another preview mesh on the same floor.
+	 * @param Incrementer 1 to rotate right, -1 to rotate left. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "C++")
+	bool RotateFloorBP(int32 Incrementer);
+
+	/** Move the Carousel to change the current level of preview meshes.
+	 * @param Incrementer 1 to raise floor up, -1 to raise floor down. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "C++")
+	bool RaiseFloorBP(int32 Incrementer);
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected
