@@ -2,10 +2,14 @@
 
 #include "UI/InGameWidget.h"
 //---
+#include "SoundsManager.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/MyHUD.h"
+#include "UI/SettingsWidget.h"
+//---
+#include "Components/Button.h"
 
 // Shows the in game menu.
 void UInGameWidget::ShowInGameMenu_Implementation()
@@ -65,6 +69,12 @@ void UInGameWidget::ToggleInGameMenu()
 		return;
 	}
 
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
 	if (IsVisibleInGameMenu())
 	{
 		HideInGameMenu();
@@ -97,6 +107,21 @@ void UInGameWidget::NativeConstruct()
 	if (AMyHUD* MyHUD = USingletonLibrary::GetMyHUD())
 	{
 		MyHUD->OnClose.AddUniqueDynamic(this, &ThisClass::ToggleInGameMenu);
+	}
+
+	if (RestartButtonInternal)
+	{
+		RestartButtonInternal->OnPressed.AddUniqueDynamic(this, &ThisClass::OnRestartButtonPressed);
+	}
+
+	if (MenuButtonInternal)
+	{
+		MenuButtonInternal->OnPressed.AddUniqueDynamic(this, &ThisClass::OnMenuButtonPressed);
+	}
+
+	if (SettingsButtonInternal)
+	{
+		SettingsButtonInternal->OnPressed.AddUniqueDynamic(this, &ThisClass::OnSettingsButtonPressed);
 	}
 }
 
@@ -159,5 +184,44 @@ void UInGameWidget::OnGameStateChanged_Implementation(ECurrentGameState CurrentG
 		}
 		default:
 			break;
+	}
+}
+
+// Is called when player pressed the button to restart the game
+void UInGameWidget::OnRestartButtonPressed()
+{
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
+	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController())
+	{
+		MyPC->SetGameStartingState();
+	}
+}
+
+// Is called when player pressed the button to go back to the Main Menu
+void UInGameWidget::OnMenuButtonPressed()
+{
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
+	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController())
+	{
+		MyPC->SetMenuState();
+	}
+}
+
+// Is called when player pressed the button to open in-game Settings
+void UInGameWidget::OnSettingsButtonPressed()
+{
+	if (USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget())
+	{
+		SettingsWidget->OpenSettings();
 	}
 }
