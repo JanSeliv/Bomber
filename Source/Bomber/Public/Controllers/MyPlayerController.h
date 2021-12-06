@@ -79,11 +79,11 @@ public:
 	void ServerSetGameState(ECurrentGameState NewGameState);
 
 	/** Sets the GameStarting game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetGameStartingState();
 
 	/** Sets the Menu game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMenuState();
 
 	/** Returns true if the mouse cursor can be hidden. */

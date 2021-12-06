@@ -16,17 +16,45 @@ class UInGameWidget final : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	/* ---------------------------------------------------
+	 *		Public properties
+	 * --------------------------------------------------- */
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToggledInGameMenu, bool, bIsVisible);
 
 	/** Is called to notify listeners is opened In-Game Menu. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnToggledInGameMenu OnToggledInGameMenu;
 
+	/* ---------------------------------------------------
+	 *		Public functions
+	 * --------------------------------------------------- */
+
 	/** Checks the visibilities of in-game menu subwidgets and returns true if are visible */
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintImplementableEvent, Category = "C++")
 	bool IsVisibleInGameMenu() const;
 
 protected:
+	/* ---------------------------------------------------
+	 *		Protected properties
+	 * --------------------------------------------------- */
+
+	/** The button to allow player restart the game. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "RestartButton"))
+	TObjectPtr<class UButton> RestartButtonInternal; //[B]
+
+	/** The button to allow player go back to the Main Menu. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "MenuButton"))
+	TObjectPtr<class UButton> MenuButtonInternal; //[B]
+
+	/** The button to allow player open in-game Settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "SettingsButton"))
+	TObjectPtr<class UButton> SettingsButtonInternal; //[B]
+
+	/* ---------------------------------------------------
+	 *		Protected functions
+	 * --------------------------------------------------- */
+
 	/**
 	 * Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy.
@@ -65,4 +93,16 @@ protected:
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Is called when player pressed the button to restart the game. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnRestartButtonPressed();
+
+	/** Is called when player pressed the button to go back to the Main Menu. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnMenuButtonPressed();
+
+	/** Is called when player pressed the button to open in-game Settings. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnSettingsButtonPressed();
 };
