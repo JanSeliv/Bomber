@@ -190,8 +190,8 @@ void UMyGameUserSettings::UpdateFullscreenEnabled()
 	}
 
 	static const FFunctionPicker SetFullscreenFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFullscreenEnabled));
-	const FName FullscreenTag = SettingsWidget->GetTagNameByFunction(SetFullscreenFunction);
-	if (FullscreenTag.IsNone())
+	const FGameplayTag& FullscreenTag = SettingsWidget->GetTagByFunctionPicker(SetFullscreenFunction);
+	if (!FullscreenTag.IsValid())
 	{
 		return;
 	}
@@ -210,14 +210,14 @@ void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 	}
 
 	static const FFunctionPicker ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
-	const FName TagName = SettingsWidget->GetTagNameByFunction(ThisFunction);
-	if (TagName.IsNone())
+	const FGameplayTag& FPSLockTag = SettingsWidget->GetTagByFunctionPicker(ThisFunction);
+	if (!FPSLockTag.IsValid())
 	{
 		return;
 	}
 
 	TArray<FText> ComboboxMembers;
-	SettingsWidget->GetComboboxMembers(TagName, ComboboxMembers);
+	SettingsWidget->GetComboboxMembers(FPSLockTag, ComboboxMembers);
 	if (!ComboboxMembers.IsValidIndex(Index))
 	{
 		return;

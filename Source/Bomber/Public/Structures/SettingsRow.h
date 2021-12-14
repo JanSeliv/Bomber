@@ -334,6 +334,10 @@ struct FSettingsPrimary
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	FMargin Padding = 0.f; //[D]
 
+	/** The custom line height for this setting. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	float LineHeight = 48.f; //[D]
+
 	/** Set true to add new column starting from this setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	bool bStartOnNextColumn; //[D]
@@ -342,8 +346,11 @@ struct FSettingsPrimary
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	FGameplayTagContainer SettingsToUpdate = FGameplayTagContainer::EmptyContainer; //[D]
 
+	/** Created widget of the chosen setting (button, checkbox, combobox, slider, text line, user input). */
+	TWeakObjectPtr<class USettingSubWidget> SettingSubWidget = nullptr;
+
 	/** The cached object obtained from the Static Context function. */
-	TWeakObjectPtr<UObject> StaticContextObject;
+	TWeakObjectPtr<UObject> StaticContextObject = nullptr;
 
 	/** Contains all cached functions of the Static Context object. */
 	TArray<FName> StaticContextFunctionList;
@@ -386,10 +393,6 @@ struct FSettingsButton : public FSettingsDataBase
 	/** Either Left, Right, Center, or Fill. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill; //[D]
-
-	/** Set custom line height for this setting, 0 to use current line height. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	float LineHeight = 0.f; //[D]
 
 	/** Cached bound delegate, is executed on pressing this button. */
 	USettingTemplate::FOnButtonPressed OnButtonPressed;

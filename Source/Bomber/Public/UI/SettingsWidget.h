@@ -38,6 +38,30 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal; }
 
+	/** Returns the sub-widget of Button settings. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class USettingButton> GetButtonClass() const { return ButtonClassInternal; }
+
+	/** Returns the sub-widget of Checkbox settings. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class USettingCheckbox> GetCheckboxClass() const { return CheckboxClassInternal; }
+
+	/** Returns the sub-widget of Combobox settings. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class USettingCombobox> GetComboboxClass() const { return ComboboxClassInternal; }
+
+	/** Returns the sub-widget of Slider settings. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class USettingSlider> GetSliderClass() const { return SliderClassInternal; }
+
+	/** Returns the sub-widget of Text Line settings. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class USettingTextLine> GetTextLineClass() const { return TextLineClassInternal; }
+
+	/** Returns the sub-widget of User Input settings. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class USettingUserInput> GetUserInputClass() const { return UserInputClassInternal; }
+
 	/** Returns the width and height of the settings widget in percentages of an entire screen. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FORCEINLINE FVector2D& GetSettingsPercentSize() const { return SettingsPercentSizeInternal; }
@@ -86,6 +110,30 @@ protected:
 	/** The data table with all settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table"))
 	TObjectPtr<class UDataTable> SettingsDataTableInternal = nullptr; //[D]
+
+	/** The sub-widget class of Button settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Button Class", ShowOnlyInnerProperties))
+	TSubclassOf<class USettingButton> ButtonClassInternal; //[D]
+
+	/** The sub-widget class of Checkbox settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Checkbox Class", ShowOnlyInnerProperties))
+	TSubclassOf<class USettingCheckbox> CheckboxClassInternal; //[D]
+
+	/** The sub-widget class of Combobox settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Combobox Class", ShowOnlyInnerProperties))
+	TSubclassOf<class USettingCombobox> ComboboxClassInternal; //[D]
+
+	/** The sub-widget class of Slider settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Slider Class", ShowOnlyInnerProperties))
+	TSubclassOf<class USettingSlider> SliderClassInternal; //[D]
+
+	/** The sub-widget class of Text Line settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Text Line Class", ShowOnlyInnerProperties))
+	TSubclassOf<class USettingTextLine> TextLineClassInternal; //[D]
+
+	/** The sub-widget class of User Input settings. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "User Input Class", ShowOnlyInnerProperties))
+	TSubclassOf<class USettingUserInput> UserInputClassInternal; //[D]
 
 	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Percent Size"))
@@ -157,12 +205,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetSettingsTableRowsNum() const { return SettingsTableRowsInternal.Num(); }
 
-	/** Returns the found row by specified tag.
-	* @param TagName The key by which the row will be find.
-	* @param bSubStringSearch true to return row by substring (for 'VSync' will find a row with 'Settings.Checkbox.VSync' tag).
+	/** Try to find the setting row.
+	* @param PotentialTagName The probable tag name by which the row will be found (for 'VSync' will find a row with 'Settings.Checkbox.VSync' tag).
 	* @see UMyGameUserSettings::SettingsTableRowsInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FSettingsPicker& FindSettingRow(FName TagName, bool bSubStringSearch = false) const;
+	const FSettingsPicker& FindSettingRow(FName PotentialTagName) const;
+
+	/** Returns the found row by specified tag.
+	* @param SettingTag The gameplay tag by which the row will be found.
+	* @see UMyGameUserSettings::SettingsTableRowsInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
+	const FSettingsPicker& GetSettingRow(const FGameplayTag& SettingTag) const;
 
 	/** Save all settings into their configs. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -175,7 +228,7 @@ public:
 
 	/** Returns the name of found tag by specified function. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FName GetTagNameByFunction(const FFunctionPicker& Function) const;
+	const FGameplayTag& GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const;
 
 	/* ---------------------------------------------------
 	 *		Setters by setting types
@@ -193,60 +246,70 @@ public:
 	void SetSettingValue(FName TagName, const FString& Value, bool bSubStringSearch = false);
 
 	/** Press button. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	bool SetButtonPressed(FName TagName);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "ButtonTag"))
+	void SetButtonPressed(const FGameplayTag& ButtonTag);
 
 	/** Toggle checkbox. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	bool SetCheckbox(FName TagName, bool InValue);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (OverrideNativeName = "SetCheckbox", AutoCreateRefTerm = "CheckboxTag"))
+	void SetCheckboxBP(const FGameplayTag& CheckboxTag, bool InValue);
+	void SetCheckbox(const FGameplayTag& CheckboxTag, bool InValue);
 
 	/** Set chosen member index for a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	bool SetComboboxIndex(FName TagName, int32 InValue);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (OverrideNativeName = "SetComboboxIndex", AutoCreateRefTerm = "ComboboxTag"))
+	void SetComboboxIndexBP(const FGameplayTag& ComboboxTag, int32 InValue);
+	void SetComboboxIndex(const FGameplayTag& ComboboxTag, int32 InValue);
 
 	/** Set new members for a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "InValue"))
-	bool SetComboboxMembers(FName TagName, const TArray<FText>& InValue);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (OverrideNativeName = "SetComboboxMembers", AutoCreateRefTerm = "ComboboxTag,InValue"))
+	void SetComboboxMembersBP(const FGameplayTag& ComboboxTag, const TArray<FText>& InValue);
+	void SetComboboxMembers(const FGameplayTag& ComboboxTag, const TArray<FText>& InValue);
 
 	/** Set current value for a slider [0...1]. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	bool SetSlider(FName TagName, float InValue);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (OverrideNativeName = "SetSlider", AutoCreateRefTerm = "SliderTag"))
+	void SetSliderBP(const FGameplayTag& SliderTag, float InValue);
+	void SetSlider(const FGameplayTag& SliderTag, float InValue);
 
 	/** Set new text. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (AutoCreateRefTerm = "InValue"))
-	bool SetTextLine(FName TagName, const FText& InValue);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (OverrideNativeName = "SetTextLine", AutoCreateRefTerm = "TextLineTag,InValue"))
+	void SetTextLineBP(const FGameplayTag& TextLineTag, const FText& InValue);
+	void SetTextLine(const FGameplayTag& TextLineTag, const FText& InValue);
 
 	/** Set new text for an input box. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	bool SetUserInput(FName TagName, FName InValue);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (OverrideNativeName = "SetUserInput", AutoCreateRefTerm = "UserInputTag"))
+	void SetUserInputBP(const FGameplayTag& UserInputTag, FName InValue);
+	void SetUserInput(const FGameplayTag& UserInputTag, FName InValue);
 
 	/* ---------------------------------------------------
 	 *		Getters by setting types
 	 * --------------------------------------------------- */
 
 	/** Returns is a checkbox toggled. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	bool GetCheckboxValue(FName TagName) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CheckboxTag"))
+	bool GetCheckboxValue(const FGameplayTag& CheckboxTag) const;
 
 	/** Returns chosen member index of a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	int32 GetComboboxIndex(FName TagName) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ComboboxTag"))
+	int32 GetComboboxIndex(const FGameplayTag& ComboboxTag) const;
 
 	/** Get all members of a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	void GetComboboxMembers(FName TagName, TArray<FText>& OutMembers) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ComboboxTag"))
+	void GetComboboxMembers(const FGameplayTag& ComboboxTag, TArray<FText>& OutMembers) const;
 
 	/** Get current value of a slider [0...1]. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	float GetSliderValue(FName TagName) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SliderTag"))
+	float GetSliderValue(const FGameplayTag& SliderTag) const;
 
-	/** Get current text of a simple or input text widget. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	void GetTextLineValue(FName TagName, FText& OutText) const;
+	/** Get current text of the text line setting. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "TextLineTag"))
+	void GetTextLineValue(const FGameplayTag& TextLineTag, FText& OutText) const;
 
-	/** Get current input name of the text input. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FName GetUserInputValue(FName TagName) const;
+	/** Get current input name of the text input setting. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "UserInputTag"))
+	FName GetUserInputValue(const FGameplayTag& UserInputTag) const;
+
+	/** Get setting widget object by specified tag. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
+	class USettingSubWidget* GetSettingSubWidget(const FGameplayTag& SettingTag) const;
 
 protected:
 	/* ---------------------------------------------------
@@ -301,22 +364,22 @@ protected:
 	/** Add button on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddButton", AutoCreateRefTerm = "Primary,Data"))
 	void AddButtonBP(const FSettingsPrimary& Primary, const FSettingsButton& Data);
-	void AddButton(const FSettingsPrimary& Primary, FSettingsButton& Data);
+	void AddButton(FSettingsPrimary& Primary, FSettingsButton& Data);
 
 	/** Add checkbox on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCheckbox", AutoCreateRefTerm = "Primary,Data"))
 	void AddCheckboxBP(const FSettingsPrimary& Primary, const FSettingsCheckbox& Data);
-	void AddCheckbox(const FSettingsPrimary& Primary, FSettingsCheckbox& Data);
+	void AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data);
 
 	/** Add combobox on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCombobox", AutoCreateRefTerm = "Primary,Data"))
 	void AddComboboxBP(const FSettingsPrimary& Primary, const FSettingsCombobox& Data);
-	void AddCombobox(const FSettingsPrimary& Primary, FSettingsCombobox& Data);
+	void AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data);
 
 	/** Add slider on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddSlider", AutoCreateRefTerm = "Primary,Data"))
 	void AddSliderBP(const FSettingsPrimary& Primary, const FSettingsSlider& Data);
-	void AddSlider(const FSettingsPrimary& Primary, FSettingsSlider& Data);
+	void AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data);
 
 	/** Add simple text on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddTextLine", AutoCreateRefTerm = "Primary,Data"))
@@ -326,7 +389,13 @@ protected:
 	/** Add text input on UI. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddUserInput", AutoCreateRefTerm = "Primary,Data"))
 	void AddUserInputBP(const FSettingsPrimary& Primary, const FSettingsUserInput& Data);
-	void AddUserInput(const FSettingsPrimary& Primary, FSettingsUserInput& Data);
+	void AddUserInput(FSettingsPrimary& Primary, FSettingsUserInput& Data);
+
+	/** Creates new widget based on specified setting class and sets it to specified primary data.
+	 * @param Primary The Data that should contain created setting class.
+	 * @param SettingSubWidgetClass The setting widget class to create. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Primary,SettingSubWidgetClass"))
+	void CreateSettingSubWidget(FSettingsPrimary& Primary, const TSubclassOf<USettingSubWidget>& SettingSubWidgetClass);
 
 	/** Starts adding settings on the next column. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
