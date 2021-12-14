@@ -34,6 +34,7 @@
 					"Right": 0,
 					"Bottom": 0
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -44,8 +45,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -114,6 +114,7 @@
 					"Right": 0,
 					"Bottom": 20
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -124,8 +125,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Footer",
-				"HorizontalAlignment": "HAlign_Center",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Center"
 			},
 			"Checkbox":
 			{
@@ -194,6 +194,7 @@
 					"Right": 0,
 					"Bottom": 0
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -204,8 +205,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Footer",
-				"HorizontalAlignment": "HAlign_Center",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Center"
 			},
 			"Checkbox":
 			{
@@ -274,6 +274,7 @@
 					"Right": 0,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -284,8 +285,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -354,6 +354,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -364,8 +365,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -434,6 +434,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -444,8 +445,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -514,6 +514,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -524,8 +525,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -594,6 +594,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -604,8 +605,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -682,6 +682,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -692,8 +693,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -762,6 +762,7 @@
 					"Right": 0,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -772,8 +773,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -842,6 +842,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -852,8 +853,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -922,6 +922,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -932,8 +933,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1002,6 +1002,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1012,8 +1013,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1082,6 +1082,7 @@
 					"Right": 0,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1092,8 +1093,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1162,6 +1162,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1172,8 +1173,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1242,6 +1242,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1252,8 +1253,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1322,6 +1322,7 @@
 					"Right": 0,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": true,
 				"SettingsToUpdate":
 				{
@@ -1332,8 +1333,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1402,6 +1402,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1444,8 +1445,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1521,6 +1521,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1542,8 +1543,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1618,6 +1618,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1639,8 +1640,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1715,6 +1715,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1736,8 +1737,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1812,6 +1812,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1833,8 +1834,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -1909,6 +1909,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -1930,8 +1931,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -2006,6 +2006,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -2027,8 +2028,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -2103,6 +2103,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -2124,8 +2125,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
@@ -2200,6 +2200,7 @@
 					"Right": 30,
 					"Bottom": 15
 				},
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -2221,8 +2222,7 @@
 			"Button":
 			{
 				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill",
-				"LineHeight": 0
+				"HorizontalAlignment": "HAlign_Fill"
 			},
 			"Checkbox":
 			{
