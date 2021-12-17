@@ -12,6 +12,14 @@
 #include "Components/SizeBox.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
+#include "Widgets/Input/SSlider.h"
+
+// Returns the slate widget from UMG widget
+template <typename T>
+TSharedPtr<T> USettingSubWidget::GetSlateWidget(const UWidget* ForWidget) const
+{
+	return ForWidget ? StaticCastSharedPtr<T>(ForWidget->GetCachedWidget()) : nullptr;
+}
 
 // Set the new setting tag for this widget
 void USettingSubWidget::SetSettingTag(const FGameplayTag& NewSettingTag)
@@ -68,6 +76,9 @@ void USettingButton::NativeConstruct()
 	if (ButtonWidgetInternal)
 	{
 		ButtonWidgetInternal->OnPressed.AddUniqueDynamic(this, &ThisClass::USettingButton::OnButtonPressed);
+
+		SlateButtonInternal = GetSlateWidget<SButton>(ButtonWidgetInternal);
+		check(SlateButtonInternal.IsValid());
 	}
 }
 
@@ -90,6 +101,9 @@ void USettingCheckbox::NativeConstruct()
 	if (CheckboxWidgetInternal)
 	{
 		CheckboxWidgetInternal->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::OnCheckStateChanged);
+
+		SlateCheckboxInternal = GetSlateWidget<SCheckBox>(CheckboxWidgetInternal);
+		check(SlateCheckboxInternal.IsValid());
 	}
 }
 
@@ -112,6 +126,9 @@ void USettingCombobox::NativeConstruct()
 	if (ComboboxWidgetInternal)
 	{
 		ComboboxWidgetInternal->OnSelectionChanged.AddUniqueDynamic(this, &ThisClass::OnSelectionChanged);
+
+		SlateComboboxInternal = GetSlateWidget<SComboboxString>(ComboboxWidgetInternal);
+		check(SlateComboboxInternal.IsValid());
 	}
 }
 
@@ -136,6 +153,9 @@ void USettingSlider::NativeConstruct()
 	if (SliderWidgetInternal)
 	{
 		SliderWidgetInternal->OnValueChanged.AddUniqueDynamic(this, &ThisClass::OnValueChanged);
+
+		SlateSliderInternal = GetSlateWidget<SSlider>(SliderWidgetInternal);
+		check(SlateSliderInternal.IsValid());
 	}
 }
 
@@ -179,6 +199,9 @@ void USettingUserInput::NativeConstruct()
 	if (EditableTextBoxInternal)
 	{
 		EditableTextBoxInternal->OnTextChanged.AddUniqueDynamic(this, &ThisClass::OnTextChanged);
+
+		SlateEditableTextBoxInternal = GetSlateWidget<SEditableTextBox>(EditableTextBoxInternal);
+		check(SlateEditableTextBoxInternal.IsValid());
 	}
 }
 
