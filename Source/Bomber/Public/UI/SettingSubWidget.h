@@ -8,6 +8,8 @@
 //---
 #include "SettingSubWidget.generated.h"
 
+typedef class SComboBox<TSharedPtr<FString>> SComboboxString;
+
 /**
  * The base class of specific setting like button, checkbox, combobox, slider, text line, user input.
  */
@@ -17,6 +19,11 @@ class USettingSubWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	/** Returns the slate widget from UMG widget.
+	 * For example: it will return SCheckbox from UCheckBox. */
+	template <typename T>
+	TSharedPtr<T> GetSlateWidget(const UWidget* ForWidget) const;
+
 	/** Returns the widget that shows the caption text of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UTextBlock* GetCaptionWidget() const { return CaptionWidgetInternal; }
@@ -84,7 +91,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UButton* GetButtonWidget() const { return ButtonWidgetInternal; }
 
+	/** Returns the slate button. */
+	FORCEINLINE TSharedPtr<class SButton> GetSlateButton() const { return SlateButtonInternal.Pin(); }
+
 protected:
+	/** The slate button.*/
+	TWeakPtr<class SButton> SlateButtonInternal = nullptr;
+
 	/** The actual button widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "ButtonWidget"))
 	TObjectPtr<class UButton> ButtonWidgetInternal = nullptr; //[I]
@@ -112,7 +125,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UCheckBox* GetCheckboxWidget() const { return CheckboxWidgetInternal; }
 
+	/** Returns the slate checkbox. */
+	FORCEINLINE TSharedPtr<class SCheckBox> GetSlateCheckbox() const { return SlateCheckboxInternal.Pin(); }
+
 protected:
+	/** The slate checkbox.*/
+	TWeakPtr<class SCheckBox> SlateCheckboxInternal = nullptr;
+
 	/** The actual checkbox widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "CheckboxWidget"))
 	TObjectPtr<class UCheckBox> CheckboxWidgetInternal = nullptr; //[I]
@@ -140,7 +159,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UComboBoxString* GetComboboxWidget() const { return ComboboxWidgetInternal; }
 
+	/** Returns the slate combobox. */
+	FORCEINLINE TSharedPtr<SComboboxString> GetSlateCombobox() const { return SlateComboboxInternal.Pin(); }
+
 protected:
+	/** The slate combobox.*/
+	TWeakPtr<SComboboxString> SlateComboboxInternal = nullptr;
+
 	/** The actual combobox widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "ComboboxWidget"))
 	TObjectPtr<class UComboBoxString> ComboboxWidgetInternal = nullptr; //[I]
@@ -168,7 +193,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class USlider* GetSliderWidget() const { return SliderWidgetInternal; }
 
+	/** Returns the slate slider. */
+	FORCEINLINE TSharedPtr<class SSlider> GetSlateSlider() const { return SlateSliderInternal.Pin(); }
+
 protected:
+	/** The slate slider.*/
+	TWeakPtr<class SSlider> SlateSliderInternal = nullptr;
+
 	/** The actual slider widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "SliderWidget"))
 	TObjectPtr<class USlider> SliderWidgetInternal = nullptr; //[I]
@@ -215,7 +246,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetEditableText(const FText& InText);
 
+	/** Returns the slate editable text box. */
+	FORCEINLINE TSharedPtr<class SEditableTextBox> GetSlateEditableTextBox() const { return SlateEditableTextBoxInternal.Pin(); }
+
 protected:
+	/** The slate editable text box.*/
+	TWeakPtr<class SEditableTextBox> SlateEditableTextBoxInternal = nullptr;
+
 	/** The actual Editable Text Box widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "EditableTextBox"))
 	TObjectPtr<class UEditableTextBox> EditableTextBoxInternal = nullptr; //[I]
