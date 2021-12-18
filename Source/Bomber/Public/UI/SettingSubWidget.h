@@ -162,6 +162,10 @@ public:
 	/** Returns the slate combobox. */
 	FORCEINLINE TSharedPtr<SComboboxString> GetSlateCombobox() const { return SlateComboboxInternal.Pin(); }
 
+	/** Returns true if combobox is opened. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsComboboxOpened() const { return bIsComboboxOpenedInternal; }
+
 protected:
 	/** The slate combobox.*/
 	TWeakPtr<SComboboxString> SlateComboboxInternal = nullptr;
@@ -170,14 +174,25 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "ComboboxWidget"))
 	TObjectPtr<class UComboBoxString> ComboboxWidgetInternal = nullptr; //[I]
 
+	/** Is true if combobox is currently opened in Settings. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Combobox Opened"))
+	bool bIsComboboxOpenedInternal; //[G]
+
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
+
+	/** Is executed every tick when widget is enabled. */
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	/** Called when a new item is selected in the combobox
 	 * @see USettingCheckbox::ComboboxWidgetInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnSelectionChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+
+	/** Called when the combobox is opened or closed. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnMenuOpenChanged();
 };
 
 /**
@@ -207,6 +222,10 @@ protected:
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
+
+	/** Invoked when the mouse is released and a capture ends. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnMouseCaptureEnd();
 
 	/** Called when the value is changed by slider or typing.
 	 * @see USettingCheckbox::SliderWidgetInternal */
