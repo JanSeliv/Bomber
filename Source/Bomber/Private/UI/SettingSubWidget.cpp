@@ -5,6 +5,7 @@
 #include "Globals/SingletonLibrary.h"
 #include "UI/SettingsWidget.h"
 //---
+#include "SoundsManager.h"
 #include "Components/Button.h"
 #include "Components/CheckBox.h"
 #include "Components/ComboBoxString.h"
@@ -91,6 +92,12 @@ void USettingButton::OnButtonPressed()
 	}
 
 	SettingsWidgetInternal->SetButtonPressed(SettingTagInternal);
+
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
 }
 
 // Called after the underlying slate widget is constructed
@@ -116,6 +123,12 @@ void USettingCheckbox::OnCheckStateChanged(bool bIsChecked)
 	}
 
 	SettingsWidgetInternal->SetCheckbox(SettingTagInternal, bIsChecked);
+
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
 }
 
 // Called after the underlying slate widget is constructed
@@ -129,6 +142,35 @@ void USettingCombobox::NativeConstruct()
 
 		SlateComboboxInternal = GetSlateWidget<SComboboxString>(ComboboxWidgetInternal);
 		check(SlateComboboxInternal.IsValid());
+	}
+}
+
+// Is executed every tick when widget is enabled
+void USettingCombobox::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (!ComboboxWidgetInternal)
+	{
+		return;
+	}
+
+	const bool bIsComboboxOpenedLast = bIsComboboxOpenedInternal;
+	bIsComboboxOpenedInternal = ComboboxWidgetInternal->IsOpen();
+
+	if (bIsComboboxOpenedLast != bIsComboboxOpenedInternal)
+	{
+		OnMenuOpenChanged();
+	}
+}
+
+// Called when the combobox is opened or closed/
+void USettingCombobox::OnMenuOpenChanged()
+{
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
 	}
 }
 
@@ -153,9 +195,20 @@ void USettingSlider::NativeConstruct()
 	if (SliderWidgetInternal)
 	{
 		SliderWidgetInternal->OnValueChanged.AddUniqueDynamic(this, &ThisClass::OnValueChanged);
+		SliderWidgetInternal->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::OnMouseCaptureEnd);
 
 		SlateSliderInternal = GetSlateWidget<SSlider>(SliderWidgetInternal);
 		check(SlateSliderInternal.IsValid());
+	}
+}
+
+// Invoked when the mouse is released and a capture ends
+void USettingSlider::OnMouseCaptureEnd()
+{
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
 	}
 }
 
@@ -215,4 +268,10 @@ void USettingUserInput::OnTextChanged(const FText& Text)
 
 	const FName MewValue(Text.ToString());
 	SettingsWidgetInternal->SetUserInput(SettingTagInternal, MewValue);
+
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
 }
