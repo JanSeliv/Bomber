@@ -5,10 +5,11 @@
 #include "Blueprint/UserWidget.h"
 //---
 #include "GameplayTagContainer.h"
+#include "Widgets/Input/SComboBox.h"
 //---
 #include "SettingSubWidget.generated.h"
 
-typedef class SComboBox<TSharedPtr<FString>> SComboboxString;
+typedef SComboBox<TSharedPtr<FString>> SComboboxString;
 
 /**
  * The base class of specific setting like button, checkbox, combobox, slider, text line, user input.
