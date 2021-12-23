@@ -85,7 +85,7 @@ void AMyPlayerState::BeginPlay()
 }
 
 // Listen game states to notify server about ending game for controlled player
-void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void AMyPlayerState::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{

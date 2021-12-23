@@ -115,7 +115,7 @@ void ABoxActor::UpdateItemChance()
 }
 
 // Listen to reset item chance for each new game
-void ABoxActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void ABoxActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	if (CurrentGameState == ECurrentGameState::GameStarting)
 	{

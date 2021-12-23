@@ -124,7 +124,7 @@ protected:
 	void OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	/** Listen by dragged bombs to handle game resetting. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Changes the response for specified player.

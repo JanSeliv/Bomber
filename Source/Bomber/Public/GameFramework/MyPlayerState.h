@@ -90,7 +90,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	/** Listen game states to notify server about ending game for controlled player. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Updated result of the game for controlled player after ending the game. Called when one of players is destroying. */

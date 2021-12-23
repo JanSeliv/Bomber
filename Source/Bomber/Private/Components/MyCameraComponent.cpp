@@ -143,7 +143,7 @@ void UMyCameraComponent::BeginPlay()
 }
 
 // Listen game states to manage the tick
-void UMyCameraComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void UMyCameraComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	bool bShouldTick = false;
 

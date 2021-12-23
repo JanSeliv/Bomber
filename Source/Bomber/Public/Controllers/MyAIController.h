@@ -119,6 +119,6 @@ protected:
 	void SetAI(bool bShouldEnable) const;
 
 	/** Listen game states to enable or disable AI. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

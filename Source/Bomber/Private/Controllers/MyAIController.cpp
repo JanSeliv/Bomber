@@ -373,7 +373,7 @@ void AMyAIController::SetAI(bool bShouldEnable) const
 }
 
 // Listen game states to enable or disable AI
-void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{

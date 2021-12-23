@@ -1009,7 +1009,7 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, int
 }
 
 // Listen game states to generate level actors
-void AGeneratedMap::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
