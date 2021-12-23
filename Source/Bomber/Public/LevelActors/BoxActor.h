@@ -82,6 +82,6 @@ protected:
 	void UpdateItemChance();
 
 	/** Listen to reset item chance for each new game. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

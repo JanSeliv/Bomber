@@ -127,7 +127,7 @@ protected:
 	void SetUIInputIgnored();
 
 	/** Listen to toggle movement input and mouse cursor. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Listens to handle input on opening and closing the InGame Menu widget. */

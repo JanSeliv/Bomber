@@ -24,13 +24,13 @@ public:
 
 	/** Called when the current game state was changed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnGameStateChanged OnGameStateChanged;
+	FOnGameStateChanged OnGameStateChanged; //[DMD]
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
 
 	/** Called when one of players was destroyed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnAnyPlayerDestroyed OnAnyPlayerDestroyed;
+	FOnAnyPlayerDestroyed OnAnyPlayerDestroyed; //[DMD]
 
 	/* ---------------------------------------------------
 	*		Public functions

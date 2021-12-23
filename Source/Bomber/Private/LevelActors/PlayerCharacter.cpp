@@ -469,7 +469,7 @@ void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
 }
 
 // Listen to manage the tick
-void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	UWorld* World = GetWorld();
 	if (!World)

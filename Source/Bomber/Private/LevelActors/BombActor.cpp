@@ -238,7 +238,7 @@ void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 }
 
 // Listen by dragged bombs to handle game resetting
-void ABombActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void ABombActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	if (CurrentGameState == ECurrentGameState::InGame)
 	{

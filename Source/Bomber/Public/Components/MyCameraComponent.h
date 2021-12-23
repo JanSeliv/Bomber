@@ -69,6 +69,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	/** Listen game states to manage the tick. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

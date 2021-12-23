@@ -293,7 +293,7 @@ void AMyPlayerController::SetUIInputIgnored()
 }
 
 // Listen to toggle movement input and mouse cursor
-void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
