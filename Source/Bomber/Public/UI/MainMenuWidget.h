@@ -79,7 +79,7 @@ protected:
 
 	/** The Main Menu actor on the scene.  */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Actor"))
-	class ACarousel* MainMenuActorInternal; //[G]
+	TObjectPtr<class ACarousel> MainMenuActorInternal; //[G]
 
 	/** Sets the level depending on specified incrementer.
 	 * @param Incrementer 1 set the next level, -1 set previous. */
