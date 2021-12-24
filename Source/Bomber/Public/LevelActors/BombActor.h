@@ -2,10 +2,10 @@
 
 #pragma once
 
+#include "GameFramework/Actor.h"
+//---
 #include "Structures/Cell.h"
 #include "Globals/LevelActorDataAsset.h"
-//---
-#include "GameFramework/Actor.h"
 //---
 #include "BombActor.generated.h"
 
@@ -30,7 +30,7 @@ public:
 
 	/** The emitter of the bomb explosion */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UParticleSystem> ExplosionParticle = nullptr; //[D]
+	TObjectPtr<class UNiagaraSystem> ExplosionParticle = nullptr; //[D]
 
 	/** Get the bomb lifetime. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (ShowOnlyInnerProperties))
