@@ -158,10 +158,17 @@ void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpda
 // Returns the name of found tag by specified function
 const FGameplayTag& USettingsWidget::GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const
 {
-	TArray<FSettingsPicker> Rows;
-	SettingsTableRowsInternal.GenerateValueArray(Rows);
-	const FSettingsPicker* FoundRow = Rows.FindByPredicate([&FunctionPicker](const FSettingsPicker& Row) { return Row.PrimaryData.Getter == FunctionPicker || Row.PrimaryData.Setter == FunctionPicker; });
-	return FoundRow ? FoundRow->PrimaryData.Tag : FGameplayTag::EmptyTag;
+	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
+	{
+		const FSettingsPrimary& PrimaryData = RowIt.Value.PrimaryData;
+		if (PrimaryData.Getter == FunctionPicker
+		    || PrimaryData.Setter == FunctionPicker)
+		{
+			return PrimaryData.Tag;
+		}
+	}
+
+	return FGameplayTag::EmptyTag;
 }
 
 // Set value to the option by tag
