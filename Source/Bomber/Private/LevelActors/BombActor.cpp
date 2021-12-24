@@ -11,7 +11,8 @@
 #include "SoundsManager.h"
 //---
 #include "Components/BoxComponent.h"
-#include "Particles/ParticleSystemComponent.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 const ABombActor::FOnBombDestroyed ABombActor::EmptyOnDestroyed = FOnBombDestroyed();
 
@@ -193,13 +194,10 @@ void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
 	LevelMap.GetDangerousCells(UniqueBlastCells, this);
 
 	// Spawn emitters
-	UWorld* World = GetWorld();
-	UParticleSystem* ExplosionParticle = UBombDataAsset::Get().ExplosionParticle;
-	FTransform Position(GetActorTransform());
+	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().ExplosionParticle;
 	for (const FCell& Cell : UniqueBlastCells)
 	{
-		Position.SetLocation(Cell.Location);
-		UGameplayStatics::SpawnEmitterAtLocation(World, ExplosionParticle, Position);
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionParticle, Cell.Location, GetActorRotation(), GetActorScale());
 	}
 
 	// Move explosion cells to avoid self destroying one more time by another bomb

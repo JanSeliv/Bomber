@@ -15,7 +15,8 @@ public class Bomber : ModuleRules
 			"AIModule", // AI
 			"GameplayTags", // Tags
 			"RHI", "ApplicationCore", // Resolutions
-			"EnhancedInput" // Enhanced Input plugin
+			"EnhancedInput", // Enhanced Input plugin
+			"Niagara" // VFX
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
