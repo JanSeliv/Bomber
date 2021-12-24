@@ -106,7 +106,7 @@
 					"FunctionName": "None"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA93E62C479C2490FA1B3580D36C0DEA\", \"Show Controls\")",
-				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
+				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2B00A42B40CFF583F76CE88226017D24\", \"Open the Controls Menu to remap input buttons\")",
 				"Padding":
 				{
 					"Left": 0,
