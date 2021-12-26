@@ -76,86 +76,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
-			}
-		}
-	},
-	{
-		"Name": "Settings.Button.Controls",
-		"SettingsPicker":
-		{
-			"SettingsType": "Button",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.Button.Controls"
-				},
-				"StaticContext":
-				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
-					"FunctionName": "GetInputControlsWidget"
-				},
-				"Setter":
-				{
-					"FunctionClass": "Class'/Script/Bomber.InputControlsWidget'",
-					"FunctionName": "OpenWidget"
-				},
-				"Getter":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"FA93E62C479C2490FA1B3580D36C0DEA\", \"Show Controls\")",
-				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2B00A42B40CFF583F76CE88226017D24\", \"Open the Controls Menu to remap input buttons\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 0,
-					"Bottom": 20
-				},
-				"LineHeight": 48,
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				}
 			},
-			"Button":
+			"CustomWidget":
 			{
-				"VerticalAlignment": "Footer",
-				"HorizontalAlignment": "HAlign_Center"
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 0
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -236,6 +160,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -316,6 +244,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -396,6 +328,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -476,6 +412,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -556,6 +496,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -644,6 +588,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -724,6 +672,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -804,6 +756,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -884,6 +840,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -964,6 +924,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1044,6 +1008,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1124,6 +1092,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1204,6 +1176,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 8
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1284,6 +1260,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1364,6 +1344,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1483,6 +1467,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1580,6 +1568,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1677,6 +1669,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1774,6 +1770,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1871,6 +1871,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -1968,6 +1972,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -2065,6 +2073,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -2162,6 +2174,10 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
 			}
 		}
 	},
@@ -2259,6 +2275,94 @@
 			"UserInput":
 			{
 				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
+	},
+	{
+		"Name": "Settings.CustomWidget.InputControls",
+		"SettingsPicker":
+		{
+			"SettingsType": "CustomWidget",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.CustomWidget.InputControls"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Setter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Getter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"2DB639F6421136C2D4F276B900CB04AF\", \"CONTROLS\")",
+				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 0,
+					"Bottom": 0
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": true,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "WidgetBlueprintGeneratedClass'/Game/Bomber/UI/UI1-3_Settings/WBP_InputControls.WBP_InputControls_C'"
 			}
 		}
 	}

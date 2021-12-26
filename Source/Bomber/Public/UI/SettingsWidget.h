@@ -242,7 +242,7 @@ public:
 	  * @param Value The value in a string format.
 	  * @param bSubStringSearch True to set row by substring (for 'VSync' will find a row with 'Settings.Checkbox.VSync' tag).
 	  */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Value"))
 	void SetSettingValue(FName TagName, const FString& Value, bool bSubStringSearch = false);
 
 	/** Press button. */
@@ -279,6 +279,10 @@ public:
 	void SetUserInputBP(const FGameplayTag& UserInputTag, FName InValue);
 	void SetUserInput(const FGameplayTag& UserInputTag, FName InValue);
 
+	/** Set new custom widget for setting by specified tag. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomWidgetTag"))
+	void SetCustomWidget(const FGameplayTag& CustomWidgetTag, class USettingCustomWidget* InCustomWidget);
+
 	/* ---------------------------------------------------
 	 *		Getters by setting types
 	 * --------------------------------------------------- */
@@ -306,6 +310,10 @@ public:
 	/** Get current input name of the text input setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "UserInputTag"))
 	FName GetUserInputValue(const FGameplayTag& UserInputTag) const;
+
+	/** Get custom widget of the setting by specified tag.  */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CustomWidgetTag"))
+	USettingCustomWidget* GetCustomWidget(const FGameplayTag& CustomWidgetTag) const;
 
 	/** Get setting widget object by specified tag. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
@@ -391,7 +399,12 @@ protected:
 	void AddUserInputBP(const FSettingsPrimary& Primary, const FSettingsUserInput& Data);
 	void AddUserInput(FSettingsPrimary& Primary, FSettingsUserInput& Data);
 
-	/** Creates new widget based on specified setting class and sets it to specified primary data.
+	/** Add custom widget on UI.  */
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected, OverrideNativeName = "AddCustomWidget", AutoCreateRefTerm = "Primary,Data"))
+	void AddCustomWidgetBP(const FSettingsPrimary& Primary, const FSettingsCustomWidget& Data);
+	void AddCustomWidget(FSettingsPrimary& Primary, FSettingsCustomWidget& Data);
+
+	/** Creates setting sub-widget (like button, checkbox etc.) based on specified setting class and sets it to specified primary data.
 	 * @param Primary The Data that should contain created setting class.
 	 * @param SettingSubWidgetClass The setting widget class to create. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Primary,SettingSubWidgetClass"))

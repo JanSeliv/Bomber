@@ -141,10 +141,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UInGameWidget* GetInGameWidget();
 
-	/** Returns the widget that allows player to rebind input mappings. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class UInputControlsWidget* GetInputControlsWidget();
-
 	/** Returns controlled player character. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class APlayerCharacter* GetControllablePlayer();

@@ -281,6 +281,8 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterName, FName, Param);
 
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterWidget, class USettingCustomWidget*, Param);
+
 	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetterInt);
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(float, FOnGetterFloat);
@@ -292,6 +294,8 @@ public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGetMembers, TArray<FText>&, OutParam);
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(FName, FOnGetterName);
+
+	DECLARE_DYNAMIC_DELEGATE_RetVal(class USettingCustomWidget*, FOnGetterWidget);
 };
 
 /**
@@ -518,7 +522,7 @@ struct FSettingsUserInput : public FSettingsDataBase
 	/** The maximal length of the player input that is allowed to type.
 	 * Set 0 to do not limit number of characters. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	int32 MaxCharactersNumber = 0;
+	int32 MaxCharactersNumber = 0; //[D]
 
 	/** The cached text shown left of the input box. */
 	FName UserInput = NAME_None;
@@ -528,6 +532,27 @@ struct FSettingsUserInput : public FSettingsDataBase
 
 	/** The cached bound delegate, is executed to get the input text. */
 	USettingTemplate::FOnSetterName OnSetterName;
+};
+
+/**
+  * The setting user input data.
+  */
+USTRUCT(BlueprintType, meta = (
+	FunctionSetterTemplate="SettingTemplate::OnSetterWidget__DelegateSignature",
+	FunctionGetterTemplate="SettingTemplate::OnGetterWidget__DelegateSignature"))
+struct FSettingsCustomWidget : public FSettingsDataBase
+{
+	GENERATED_BODY()
+
+	/** Contains created custom widget of the setting. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
+	TSubclassOf<class USettingCustomWidget> CustomWidgetClass; //[D]
+
+	/** The cached bound delegate, is executed to set the custom widget. */
+	USettingTemplate::FOnGetterWidget OnGetterWidget;
+
+	/** The cached bound delegate, is executed to get the custom widget. */
+	USettingTemplate::FOnSetterWidget OnSetterWidget;
 };
 
 /**
@@ -575,6 +600,10 @@ struct FSettingsPicker
 	/** The user input setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	FSettingsUserInput UserInput; //[D]
+
+	/** The custom widget setting data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	FSettingsCustomWidget CustomWidget; //[D]
 
 	/** Returns the pointer to one of the chosen in-game type.
 	  * It searches the member property of this struct by a value of SettingsType.

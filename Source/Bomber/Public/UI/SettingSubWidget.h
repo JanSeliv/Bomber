@@ -286,3 +286,14 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnTextChanged(const FText& Text);
 };
+
+/**
+ * The sub-widget of the custom widget settings.
+ */
+UCLASS()
+class USettingCustomWidget : public USettingSubWidget
+{
+	GENERATED_BODY()
+
+public:
+};

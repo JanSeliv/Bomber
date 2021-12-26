@@ -149,14 +149,6 @@ void AMyHUD::InitWidgets()
 		}
 	}
 
-	const TSubclassOf<UInputControlsWidget>& InputControlsWidgetClass = UIDataAsset.GetInputControlsWidgetClass();
-	if (ensureMsgf(InputControlsWidgetClass, TEXT("ASSERT: 'InputControlsWidgetClass' is not set in the UI data table")))
-	{
-		InputControlsWidgetInternal = CreateWidget<UInputControlsWidget>(PlayerController, InputControlsWidgetClass);
-		checkf(InputControlsWidgetInternal, TEXT("ERROR: InputControlsWidgetInternal failed to create"));
-		InputControlsWidgetInternal->AddToViewport();
-	}
-
 	bAreWidgetInitializedInternal = true;
 
 	if (OnWidgetsInitialized.IsBound())

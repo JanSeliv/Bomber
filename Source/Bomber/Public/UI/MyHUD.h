@@ -43,11 +43,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UUserWidget> GetFPSCounterWidgetClass() const { return FPSCounterWidgetClassInternal; }
 
-	/** Returns a class of a widget that allows player to rebind input mappings.
-	 * @see UUIDataAsset::InputControlsWidgetClassInternal.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UInputControlsWidget> GetInputControlsWidgetClass() const { return InputControlsWidgetClassInternal; }
-
 protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
@@ -68,10 +63,6 @@ protected:
 	/** The class of a FPS counter widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "FPS Counter Widget Class", ShowOnlyInnerProperties))
 	TSubclassOf<class UUserWidget> FPSCounterWidgetClassInternal; //[D]
-
-	/** The class of a widget that allows player to rebind input mappings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Input Controls Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UInputControlsWidget> InputControlsWidgetClassInternal; //[D]
 };
 
 /**
@@ -130,11 +121,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UUserWidget* GetNicknameWidget(int32 Index) const { return NicknameWidgetsInternal.IsValidIndex(Index) ? NicknameWidgetsInternal[Index] : nullptr; }
 
-	/** Returns the widget that allows player to rebind input mappings. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UInputControlsWidget* GetInputControlsWidget() const { return InputControlsWidgetInternal; }
-
-	/** Notify listen UI widgets to close widget. */
+	/** Notify listen UI widgets to
+	close widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void BroadcastOnClose();
 
@@ -178,10 +166,6 @@ protected:
 	/** If true, shows FPS counter widget on the HUD. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is FPS Counter Enabled"))
 	bool bIsFPSCounterEnabledInternal; //[С]
-
-	/** The widget widget that allows player to rebind input mappings. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Controls Widget"))
-	TObjectPtr<class UInputControlsWidget> InputControlsWidgetInternal = nullptr; //[G]
 
 	/* ---------------------------------------------------
 	*		Protected functions
