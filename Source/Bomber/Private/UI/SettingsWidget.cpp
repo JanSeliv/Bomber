@@ -818,6 +818,8 @@ void USettingsWidget::AddSetting(FSettingsPicker& Setting)
 	{
 		AddCustomWidget(PrimaryData, Setting.CustomWidget);
 	}
+
+	UpdateSettings(FGameplayTagContainer(PrimaryData.Tag));
 }
 
 // Add button on UI
@@ -833,8 +835,6 @@ void USettingsWidget::AddButton(FSettingsPrimary& Primary, FSettingsButton& Data
 		{
 			Data.OnButtonPressed.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
-
-		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddButtonBP(Primary, Data);
@@ -859,8 +859,6 @@ void USettingsWidget::AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& 
 		{
 			Data.OnSetterBool.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
-
-		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddCheckboxBP(Primary, Data);
@@ -899,8 +897,6 @@ void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& 
 		{
 			Data.OnSetterInt.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
-
-		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddComboboxBP(Primary, Data);
@@ -925,8 +921,6 @@ void USettingsWidget::AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data
 		{
 			Data.OnSetterFloat.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
-
-		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddSliderBP(Primary, Data);
@@ -951,8 +945,6 @@ void USettingsWidget::AddTextLine(FSettingsPrimary& Primary, FSettingsTextLine& 
 		{
 			Data.OnSetterText.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
-
-		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddTextLineBP(Primary, Data);
@@ -977,8 +969,6 @@ void USettingsWidget::AddUserInput(FSettingsPrimary& Primary, FSettingsUserInput
 		{
 			Data.OnSetterName.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
-
-		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddUserInputBP(Primary, Data);
@@ -1002,8 +992,6 @@ void USettingsWidget::AddCustomWidget(FSettingsPrimary& Primary, FSettingsCustom
 		{
 			Data.OnSetterWidget.BindUFunction(StaticContextObject, SetterFunctionName);
 		}
-
-		UpdateSettings(FGameplayTagContainer(Primary.Tag));
 	}
 
 	AddCustomWidgetBP(Primary, Data);
