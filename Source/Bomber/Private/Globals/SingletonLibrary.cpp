@@ -283,13 +283,6 @@ UInGameWidget* USingletonLibrary::GetInGameWidget()
 	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
 }
 
-// Returns the widget that allows player to rebind input mappings
-UInputControlsWidget* USingletonLibrary::GetInputControlsWidget()
-{
-	const AMyHUD* MyHUD = GetMyHUD();
-	return MyHUD ? MyHUD->GetInputControlsWidget() : nullptr;
-}
-
 // Returns controlled player character
 APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 {

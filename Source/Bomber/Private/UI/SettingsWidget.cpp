@@ -442,6 +442,32 @@ void USettingsWidget::SetUserInput(const FGameplayTag& UserInputTag, FName InVal
 	SetUserInputBP(UserInputTag, InValue);
 }
 
+// Set new custom widget for setting by specified tag
+void USettingsWidget::SetCustomWidget(const FGameplayTag& CustomWidgetTag, USettingCustomWidget* InCustomWidget)
+{
+	if (!CustomWidgetTag.IsValid())
+	{
+		return;
+	}
+
+	FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(CustomWidgetTag.GetTagName());
+	if (!SettingsRowPtr)
+	{
+		return;
+	}
+
+	TWeakObjectPtr<USettingSubWidget>& CustomWidgetRef = SettingsRowPtr->PrimaryData.SettingSubWidget;
+	if (CustomWidgetRef == InCustomWidget)
+	{
+		return;
+	}
+
+	CustomWidgetRef.Reset();
+	CustomWidgetRef = InCustomWidget;
+	SettingsRowPtr->CustomWidget.OnSetterWidget.ExecuteIfBound(InCustomWidget);
+	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
+}
+
 // Returns is a checkbox toggled
 bool USettingsWidget::GetCheckboxValue(const FGameplayTag& CheckboxTag) const
 {
@@ -554,6 +580,24 @@ FName USettingsWidget::GetUserInputValue(const FGameplayTag& UserInputTag) const
 		}
 	}
 	return Value;
+}
+
+// Get custom widget of the setting by specified tag
+USettingCustomWidget* USettingsWidget::GetCustomWidget(const FGameplayTag& CustomWidgetTag) const
+{
+	const FSettingsPicker& FoundRow = GetSettingRow(CustomWidgetTag);
+	USettingCustomWidget* CustomWidget = nullptr;
+	if (FoundRow.IsValid())
+	{
+		CustomWidget = Cast<USettingCustomWidget>(FoundRow.PrimaryData.SettingSubWidget.Get());
+
+		const USettingTemplate::FOnGetterWidget& Getter = FoundRow.CustomWidget.OnGetterWidget;
+		if (Getter.IsBound())
+		{
+			CustomWidget = Getter.Execute();
+		}
+	}
+	return CustomWidget;
 }
 
 // Get setting widget object by specified tag
@@ -770,6 +814,10 @@ void USettingsWidget::AddSetting(FSettingsPicker& Setting)
 	{
 		AddUserInput(PrimaryData, Setting.UserInput);
 	}
+	else if (ChosenData == &Setting.CustomWidget)
+	{
+		AddCustomWidget(PrimaryData, Setting.CustomWidget);
+	}
 }
 
 // Add button on UI
@@ -934,6 +982,31 @@ void USettingsWidget::AddUserInput(FSettingsPrimary& Primary, FSettingsUserInput
 	}
 
 	AddUserInputBP(Primary, Data);
+}
+
+// Add custom widget on UI
+void USettingsWidget::AddCustomWidget(FSettingsPrimary& Primary, FSettingsCustomWidget& Data)
+{
+	CreateSettingSubWidget(Primary, Data.CustomWidgetClass);
+
+	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
+	{
+		const FName GetterFunctionName = Primary.Getter.FunctionName;
+		if (Primary.StaticContextFunctionList.Contains(GetterFunctionName))
+		{
+			Data.OnGetterWidget.BindUFunction(StaticContextObject, GetterFunctionName);
+		}
+
+		const FName SetterFunctionName = Primary.Setter.FunctionName;
+		if (Primary.StaticContextFunctionList.Contains(SetterFunctionName))
+		{
+			Data.OnSetterWidget.BindUFunction(StaticContextObject, SetterFunctionName);
+		}
+
+		UpdateSettings(FGameplayTagContainer(Primary.Tag));
+	}
+
+	AddCustomWidgetBP(Primary, Data);
 }
 
 // Creates new widget based on specified setting class and sets it to specified primary data
