@@ -270,8 +270,7 @@ public:
 	void SetSlider(const FGameplayTag& SliderTag, float InValue);
 
 	/** Set new text. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (OverrideNativeName = "SetTextLine", AutoCreateRefTerm = "TextLineTag,InValue"))
-	void SetTextLineBP(const FGameplayTag& TextLineTag, const FText& InValue);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "TextLineTag,InValue"))
 	void SetTextLine(const FGameplayTag& TextLineTag, const FText& InValue);
 
 	/** Set new text for an input box. */
