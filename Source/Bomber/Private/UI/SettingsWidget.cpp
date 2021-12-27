@@ -386,7 +386,8 @@ void USettingsWidget::SetTextLine(const FGameplayTag& TextLineTag, const FText& 
 		return;
 	}
 
-	FText& CaptionRef = SettingsRowPtr->PrimaryData.Caption;
+	FSettingsPrimary& PrimaryRef = SettingsRowPtr->PrimaryData;
+	FText& CaptionRef = PrimaryRef.Caption;
 	if (CaptionRef.EqualTo(InValue))
 	{
 		return;
@@ -394,10 +395,12 @@ void USettingsWidget::SetTextLine(const FGameplayTag& TextLineTag, const FText& 
 
 	CaptionRef = InValue;
 	SettingsRowPtr->TextLine.OnSetterText.ExecuteIfBound(InValue);
-	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
+	UpdateSettings(PrimaryRef.SettingsToUpdate);
 
-	// BP implementation
-	SetTextLineBP(TextLineTag, InValue);;
+	if (USettingTextLine* SettingTextLine = Cast<USettingTextLine>(PrimaryRef.SettingSubWidget))
+	{
+		SettingTextLine->SetCaptionText(InValue);
+	}
 }
 
 // Set new text for an input box
