@@ -26,6 +26,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetAllInputContexts(TArray<class UMyInputMappingContext*>& OutInputContexts) const;
 
+	/** Returns the overall amount of all gameplay input contexts. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	int32 GetGameplayInputContextsNum() const { return GameplayInputContextClassesInternal.Num(); }
+
 	/** Returns the Enhanced Input Mapping Context of gameplay actions for specified local player.
 	* @param LocalPlayerIndex The index of a local player. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
