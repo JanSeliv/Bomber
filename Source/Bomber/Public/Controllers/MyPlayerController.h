@@ -45,6 +45,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class UMyInputMappingContext* GetInGameMenuInputContext() const { return InGameMenuInputContextInternal; }
 
+	/** Returns true if specified key is mapped to any gameplay input context. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Key"))
+	bool IsMappedKey(const FKey& Key) const;
+
 protected:
 	/** Enhanced Input Mapping Contexts of gameplay actions for local players
 	 *  Are selectable classes instead of objects directly to avoid changing data asset by MapKey\UnmapKey. */
