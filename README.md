@@ -8,7 +8,7 @@ explosion including their own. The procedural generation of a level map with a g
 diverse. Player competes with bots that will do everything but not let them win. The first rule is just to be the best
 bomber and do not let bots to bomb player!
 
-> **To download and play the game go to the [LINK](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi).**
+> **To download and play the game go to the [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi)**
 
 ## Content Team
 
@@ -18,7 +18,13 @@ bomber and do not let bots to bomb player!
 
 ## Changelog
 
-> `31.05.2021:`
+> `31.12.2021:`
+>   - The game migrated to the **Unreal Engine 5**.
+>   - Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
+>   - Added Controls tab in Settings to allow player remap input keys.
+> > ![Settings_31-12-21](https://user-images.githubusercontent.com/20540872/147825296-ce7d33da-dfda-4757-b070-bfd08f700134.jpg)
+>   ---
+> `03.06.2021:`
 >   - Completely updated the Maya level.
 >   - Added the Water level of the Pirate character.
 >   - Added settings.
