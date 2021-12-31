@@ -36,6 +36,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetMappingsByInputAction(TArray<FEnhancedActionKeyMapping>& OutMappings, const class UMyInputAction* InputAction) const;
 
+	/** Unmap previous key and map new one.
+	 * @param InputAction The input action to be remapped.
+	 * @param NewKey The key to set.
+	 * @param PrevKey The key need to remap. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewKey,PrevKey"))
+	void RemapKey(const class UMyInputAction* InputAction, const FKey& NewKey, const FKey& PrevKey);
+
 protected:
 	/** If higher, then block the same consumed inputs other contexts with lower priorities. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Context Priority"))
