@@ -3,6 +3,7 @@
 #include "Globals/MyInputMappingContext.h"
 //---
 #include "EnhancedInputModule.h"
+#include "Controllers/MyPlayerController.h"
 #include "Globals/MyInputAction.h"
 
 // Returns all input actions set in mappings
@@ -31,11 +32,13 @@ void UMyInputMappingContext::GetMappingsByInputAction(TArray<FEnhancedActionKeyM
 }
 
 // Unmap previous key and map new one
-void UMyInputMappingContext::RemapKey(const UMyInputAction* InputAction, const FKey& NewKey, const FKey& PrevKey)
+bool UMyInputMappingContext::RemapKey(const UMyInputAction* InputAction, const FKey& NewKey, const FKey& PrevKey)
 {
-	if (!ensureMsgf(InputAction, TEXT("ASSERT: 'InputAction' is not valid")))
+	if (!ensureMsgf(InputAction, TEXT("ASSERT: 'InputAction' is not valid"))
+	    || NewKey == PrevKey
+	    || UPlayerInputDataAsset::Get().IsMappedKey(NewKey))
 	{
-		return;
+		return false;
 	}
 
 	bool bRemapped = false;
@@ -52,10 +55,12 @@ void UMyInputMappingContext::RemapKey(const UMyInputAction* InputAction, const F
 
 	if (!bRemapped)
 	{
-		return;
+		return false;
 	}
 
 	UEnhancedInputLibrary::RequestRebuildControlMappingsUsingContext(this);
 
 	SaveConfig();
+
+	return true;
 }

@@ -39,9 +39,10 @@ public:
 	/** Unmap previous key and map new one.
 	 * @param InputAction The input action to be remapped.
 	 * @param NewKey The key to set.
-	 * @param PrevKey The key need to remap. */
+	 * @param PrevKey The key need to remap.
+	 * @return false if something went wrong, f.e the specified key is already mapped to any gameplay context. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewKey,PrevKey"))
-	void RemapKey(const class UMyInputAction* InputAction, const FKey& NewKey, const FKey& PrevKey);
+	bool RemapKey(const class UMyInputAction* InputAction, const FKey& NewKey, const FKey& PrevKey);
 
 protected:
 	/** If higher, then block the same consumed inputs other contexts with lower priorities. */

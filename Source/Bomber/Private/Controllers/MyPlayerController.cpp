@@ -93,6 +93,18 @@ UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 Loc
 	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
 }
 
+// Returns true if specified key is mapped to any gameplay input context
+bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
+{
+	return GameplayInputContextsInternal.ContainsByPredicate([&Key](UMyInputMappingContext* ContextIt)
+	{
+		return ContextIt && ContextIt->GetMappings().ContainsByPredicate([&Key](const FEnhancedActionKeyMapping& MappingIt)
+		{
+			return MappingIt.Key == Key;
+		});
+	});
+}
+
 // Sets default values for this controller's properties
 AMyPlayerController::AMyPlayerController()
 {
