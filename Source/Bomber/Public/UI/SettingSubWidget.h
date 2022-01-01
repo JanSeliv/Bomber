@@ -23,7 +23,7 @@ public:
 	/** Returns the slate widget from UMG widget.
 	 * For example: it will return SCheckbox from UCheckBox. */
 	template <typename T>
-	TSharedPtr<T> GetSlateWidget(const UWidget* ForWidget) const;
+	TSharedPtr<T> GetSlateWidget(const UWidget* ForWidget) const { return ForWidget ? StaticCastSharedPtr<T>(ForWidget->GetCachedWidget()) : nullptr; }
 
 	/** Returns the widget that shows the caption text of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

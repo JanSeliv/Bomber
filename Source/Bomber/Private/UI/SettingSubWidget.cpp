@@ -17,13 +17,7 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SSlider.h"
 
-// Returns the slate widget from UMG widget
-template <typename T>
-TSharedPtr<T> USettingSubWidget::GetSlateWidget(const UWidget* ForWidget) const
-{
-	return ForWidget ? StaticCastSharedPtr<T>(ForWidget->GetCachedWidget()) : nullptr;
-}
-
+// Set the new setting tag for this widget
 // Set the new setting tag for this widget
 void USettingSubWidget::SetSettingTag(const FGameplayTag& NewSettingTag)
 {
