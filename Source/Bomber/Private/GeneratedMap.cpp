@@ -724,6 +724,9 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	// Align transform and build cells
 	TransformLevelMap(Transform);
 
+	// Actors generation
+	GenerateLevelActors();
+
 	// Update level stream
 	SetLevelType(LevelTypeInternal);
 
