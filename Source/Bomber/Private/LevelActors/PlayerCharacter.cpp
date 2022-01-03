@@ -141,6 +141,11 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
+	// Replicate an actor
+	bReplicates = true;
+	NetUpdateFrequency = 10.f;
+	bAlwaysRelevant = true;
+
 	// Set the default AI controller class
 	AIControllerClass = AMyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::Disabled;

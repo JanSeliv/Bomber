@@ -47,6 +47,11 @@ AItemActor::AItemActor()
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
+	// Replicate an actor
+	bReplicates = true;
+	NetUpdateFrequency = 10.f;
+	bAlwaysRelevant = true;
+
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
