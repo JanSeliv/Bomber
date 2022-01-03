@@ -39,8 +39,10 @@ AGeneratedMap::AGeneratedMap()
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	// setup replication
+	// Replicate an actor
 	bReplicates = true;
+	NetUpdateFrequency = 10.f;
+	bAlwaysRelevant = true;
 
 #if WITH_EDITOR	 //[Editor]
 	// Should not call OnConstruction on drag events
@@ -785,7 +787,8 @@ void AGeneratedMap::Destroyed()
 // Spawns and fills the Grid Array values by level actors
 void AGeneratedMap::GenerateLevelActors()
 {
-	if (!ensureMsgf(GridCellsInternal.Num() > 0, TEXT("Is no cells for the actors generation")))
+	if (!ensureMsgf(GridCellsInternal.Num() > 0, TEXT("Is no cells for the actors generation"))
+		|| !HasAuthority())
 	{
 		return;
 	}
