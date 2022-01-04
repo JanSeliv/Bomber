@@ -122,7 +122,7 @@ AMyPlayerController::AMyPlayerController()
 void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
 {
 	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
 	{
 		MyGameState->ServerSetGameState(NewGameState);
 	}
@@ -200,7 +200,7 @@ void AMyPlayerController::BeginPlay()
 	SetUIInputIgnored();
 
 	// Listen to handle input for each game state
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -347,7 +347,7 @@ void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Listens to handle input on opening and closing the InGame Menu widget
 void AMyPlayerController::OnToggledInGameMenu(bool bIsVisible)
 {
-	if (ECurrentGameState::InGame == AMyGameStateBase::GetCurrentGameState(GetWorld()))
+	if (ECurrentGameState::InGame == AMyGameStateBase::GetCurrentGameState(this))
 	{
 		SetGameplayInputContextEnabled(!bIsVisible);
 		SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
@@ -401,7 +401,7 @@ void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMap
 // Move the player character by the forward vector
 void AMyPlayerController::MoveUpDown(const FInputActionValue& ActionValue)
 {
-	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetControllablePlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
 		const float ScaleValue = ActionValue.GetMagnitude();
 		const FVector RightVector(PlayerCharacter->GetActorRightVector());
@@ -412,7 +412,7 @@ void AMyPlayerController::MoveUpDown(const FInputActionValue& ActionValue)
 // Move the player character by the right vector.
 void AMyPlayerController::MoveRightLeft(const FInputActionValue& ActionValue)
 {
-	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetControllablePlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
 		const float ScaleValue = ActionValue.GetMagnitude();
 		const FVector ForwardVector(PlayerCharacter->GetActorForwardVector());
@@ -423,7 +423,7 @@ void AMyPlayerController::MoveRightLeft(const FInputActionValue& ActionValue)
 // Executes spawning the bomb on controllable player
 void AMyPlayerController::SpawnBomb()
 {
-	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetControllablePlayer())
+	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
 		PlayerCharacter->SpawnBomb();
 	}

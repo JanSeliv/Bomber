@@ -102,8 +102,8 @@ public:
 	static class AMyGameModeBase* GetMyGameMode();
 
 	/** Returns the Bomber Game state, nullptr otherwise. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class AMyGameStateBase* GetMyGameState();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static class AMyGameStateBase* GetMyGameState(const UObject* WorldContextObject = nullptr);
 
 	/** Returns the Bomber Player Controller, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

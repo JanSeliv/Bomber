@@ -219,9 +219,9 @@ AMyGameModeBase* USingletonLibrary::GetMyGameMode()
 }
 
 // Returns the Bomber Game state, nullptr otherwise.
-AMyGameStateBase* USingletonLibrary::GetMyGameState()
+AMyGameStateBase* USingletonLibrary::GetMyGameState(const UObject* WorldContextObject/* = nullptr*/)
 {
-	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(Get().GetWorld()));
+	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(WorldContextObject ? WorldContextObject : &Get()));
 }
 
 // Returns the Bomber Player Controller, nullptr otherwise

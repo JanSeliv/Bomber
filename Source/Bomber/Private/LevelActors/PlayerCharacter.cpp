@@ -143,7 +143,6 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 
 	// Replicate an actor
 	bReplicates = true;
-	NetUpdateFrequency = 10.f;
 	bAlwaysRelevant = true;
 
 	// Set the default AI controller class
@@ -273,17 +272,20 @@ void APlayerCharacter::BeginPlay()
 	}
 
 	// Posses the controller
-	if (!CharacterIDInternal) // Is the player (not AI)
+	if (HasAuthority())
 	{
-		if (APlayerController* PlayerController = USingletonLibrary::GetMyPlayerController())
+		if (!CharacterIDInternal) // Is the player (not AI)
 		{
-			PlayerController->Possess(this);
+			if (APlayerController* PlayerController = USingletonLibrary::GetMyPlayerController())
+			{
+				PlayerController->Possess(this);
+			}
 		}
-	}
-	else if (!IS_VALID(MyAIControllerInternal)) // has AI controller and was not spawned early
-	{
-		MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
-		MyAIControllerInternal->Possess(this);
+		else if (!IS_VALID(MyAIControllerInternal)) // has AI controller and was not spawned early
+		{
+			MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+			MyAIControllerInternal->Possess(this);
+		}
 	}
 
 	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
