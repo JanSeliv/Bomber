@@ -146,18 +146,21 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// ----- Cells finding -----
-	const int32 MaxWight = GetActorScale3D().X;
+	const int32 MaxWidth = GetCachedTransform().GetScale3D().X;
 	for (int32 bIsY = 0; bIsY <= 1; ++bIsY) // 0(X-raw direction) and 1(Y-column direction)
 	{
-		const int32 PositionC0 = bIsY ? /*Y-column*/ C0 % MaxWight : C0 / MaxWight /*raw*/;
+		const int32 PositionC0 = bIsY ? /*Y-column*/ C0 % MaxWidth : C0 / MaxWidth /*raw*/;
 		for (int32 SideMultiplier = -1; SideMultiplier <= 1; SideMultiplier += 2) // -1(Left|Down) and 1(Right|Up)
 		{
 			for (int32 i = 1; i <= SideLength; ++i)
 			{
 				int32 Distance = i * SideMultiplier;
-				if (bIsY) { Distance *= MaxWight; }
+				if (bIsY)
+				{
+					Distance *= MaxWidth;
+				}
 				const int32 FoundIndex = C0 + Distance;
-				if (PositionC0 != (bIsY ? FoundIndex % MaxWight : FoundIndex / MaxWight) // PositionC0 != PositionX
+				if (PositionC0 != (bIsY ? FoundIndex % MaxWidth : FoundIndex / MaxWidth) // PositionC0 != PositionX
 				    || !GridCellsInternal.IsValidIndex(FoundIndex))                      // is not in range
 				{
 					break; // to the next side
@@ -206,7 +209,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
 	    || !IS_VALID(ComponentOwner) // the component's owner is not valid or is transient
-		|| !ComponentOwner->HasAuthority()
+	    || !ComponentOwner->HasAuthority()
 	    || !ensureMsgf(Cell, TEXT("ASSERT: 'Cell' is zero")))
 	{
 		return;
@@ -270,7 +273,7 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 	}
 
 	// begin: find transform
-	FRotator ActorRotation{GetActorRotation()};
+	FRotator ActorRotation{GetCachedTransform().GetRotation()};
 	if (!(TO_FLAG(ActorType) & TO_FLAG(EAT::Item | EAT::Player)))
 	{
 		// Random rotate if is not item and not player
@@ -399,7 +402,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 	const bool bIsValidOwner = IS_VALID(ComponentOwner);
 
 	if (bIsValidOwner
-		&& !ComponentOwner->HasAuthority())
+	    && !ComponentOwner->HasAuthority())
 	{
 		return;
 	}
@@ -456,7 +459,8 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 
 	// Pre gameplay locals to find a nearest cell
 	const bool bHasNotBegunPlay = !HasActorBegunPlay(); // the game was not started
-	float LastFoundEditorLen = MAX_FLT;
+	static constexpr float MaxFloat = TNumericLimits<float>::Max();
+	float LastFoundEditorLen = MaxFloat;
 	if (bHasNotBegunPlay)
 	{
 		CellsToIterate.Append(GridCellsInternal); // union of two sets(initials+all) for finding a nearest cell
@@ -890,7 +894,7 @@ void AGeneratedMap::GenerateLevelActors()
 		TMap<FCell, EActorType> LActorsToSpawn;
 
 		// Locals
-		const FIntVector MapScale(GetActorScale3D());
+		const FIntVector MapScale(GetCachedTransform().GetScale3D());
 		const FIntVector MapHalfScale(MapScale / 2);
 		FCells WallsToSpawn;
 
@@ -987,7 +991,8 @@ void AGeneratedMap::GenerateLevelActors()
 		{
 			for (const FCell& CellIt : IteratedCells)
 			{
-				GetSidesCells(PathBreakers, CellIt, EPathType::Explosion, MAX_int32, true);
+				static constexpr float MaxInteger = TNumericLimits<int32>::Max();
+				GetSidesCells(PathBreakers, CellIt, EPathType::Explosion, MaxInteger, true);
 			}
 
 			IteratedCells = PathBreakers.Difference(LDraggedCells);

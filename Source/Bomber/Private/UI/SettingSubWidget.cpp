@@ -4,8 +4,8 @@
 //---
 #include "Globals/SingletonLibrary.h"
 #include "UI/SettingsWidget.h"
-//---
 #include "SoundsManager.h"
+//---
 #include "Components/Button.h"
 #include "Components/CheckBox.h"
 #include "Components/ComboBoxString.h"
@@ -17,7 +17,6 @@
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SSlider.h"
 
-// Set the new setting tag for this widget
 // Set the new setting tag for this widget
 void USettingSubWidget::SetSettingTag(const FGameplayTag& NewSettingTag)
 {
