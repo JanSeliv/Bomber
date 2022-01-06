@@ -145,11 +145,12 @@ void AMyAIController::UpdateAI()
 	const FCell F0 = MapComponent->Cell;
 
 	// Searching 'SAFE NEIGHBORS'
+	static constexpr float MaxInteger = TNumericLimits<int32>::Max();
 	FCells Free;
-	int32 bIsDangerous;
+	uint8 bIsDangerous;
 	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous) // two searches (safe and free)
 	{
-		LevelMap.GetSidesCells(Free, F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MAX_int32);
+		LevelMap.GetSidesCells(Free, F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MaxInteger);
 		if (!bIsDangerous && Free.Num() > 0)
 		{
 			// Remove this cell from array
@@ -249,7 +250,7 @@ void AMyAIController::UpdateAI()
 				FilteringStep = Filtered.Intersect(AllCrossways);
 				break;
 			case 1: // Without players
-				LevelMap.GetSidesCells(FilteringStep, F0, EPathType::Secure, MAX_int32);
+				LevelMap.GetSidesCells(FilteringStep, F0, EPathType::Secure, MaxInteger);
 				FilteringStep = Filtered.Intersect(FilteringStep);
 				break;
 			case 2: // Without crossways with another players

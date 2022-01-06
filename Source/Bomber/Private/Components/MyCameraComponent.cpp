@@ -40,11 +40,9 @@ UMyCameraComponent::UMyCameraComponent()
 // Set the maximum possible height
 void UMyCameraComponent::UpdateMaxHeight()
 {
-	if (const AGeneratedMap* LevelMap = Cast<AGeneratedMap>(GetOwner()))
-	{
-		static constexpr float Multiplier = 1.5f;
-		MaxHeightInternal = FCell::CellSize * LevelMap->GetActorScale3D().GetMax() * Multiplier;
-	}
+	static constexpr float Multiplier = 1.5f;
+	const float MaxLevelScale = AGeneratedMap::Get().GetCachedTransform().GetScale3D().GetMax();
+	MaxHeightInternal = FCell::CellSize * MaxLevelScale * Multiplier;
 }
 
 // Set the location between players
@@ -54,7 +52,7 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 
 	// If true, the camera will be forced moving to the start position
 	if (bIsCameraLockedOnCenterInternal
-	    || !USingletonLibrary::Get().GetAlivePlayersNum()
+	    || !USingletonLibrary::GetAlivePlayersNum()
 	    || bForceStartInternal)
 	{
 		static constexpr float Tolerance = 10.f;
