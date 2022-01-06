@@ -147,11 +147,26 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 	if (IsEditorNotPieWorld()
 	    && !Get().LevelMapInternal.IsValid())
 	{
-		SetLevelMap(nullptr); // Find the Level Map
+		const UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
+		AGeneratedMap* LevelMap = FindLevelMap(EditorWorld);
+		SetLevelMap(LevelMap);
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
 	return Get().LevelMapInternal.Get();
+}
+
+// Iterate the world to find first level map placed on scene.
+AGeneratedMap* USingletonLibrary::FindLevelMap(const UObject* WorldContextObject)
+{
+	TArray<AActor*> LevelMapsArray;
+	UGameplayStatics::GetAllActorsOfClass(WorldContextObject, AGeneratedMap::StaticClass(), LevelMapsArray);
+	if (LevelMapsArray.IsValidIndex(0))
+	{
+		return Cast<AGeneratedMap>(LevelMapsArray[0]);
+	}
+
+	return nullptr;
 }
 
 // Returns true if game was started
@@ -171,26 +186,11 @@ bool USingletonLibrary::HasWorldBegunPlay()
 // The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
 void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (IsEditorNotPieWorld() // IsEditorNotPieWorld only
-	    && LevelMap == nullptr)
+	USingletonLibrary* Singleton = GetSingleton();
+	if (Singleton
+	    && IS_VALID(LevelMap))
 	{
-		const UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
-		if (EditorWorld)
-		{
-			TArray<AActor*> LevelMapsArray;
-			UGameplayStatics::GetAllActorsOfClass(EditorWorld, AGeneratedMap::StaticClass(), LevelMapsArray);
-			if (LevelMapsArray.IsValidIndex(0))
-			{
-				LevelMap = Cast<AGeneratedMap>(LevelMapsArray[0]);
-			}
-		}
-	}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]
-
-	if (IS_VALID(LevelMap))
-	{
-		GetSingleton()->LevelMapInternal = LevelMap;
+		Singleton->LevelMapInternal = LevelMap;
 	}
 }
 
@@ -209,25 +209,25 @@ ELevelType USingletonLibrary::GetLevelType()
 // Contains a data of standalone and PIE games, nullptr otherwise
 UMyGameInstance* USingletonLibrary::GetMyGameInstance()
 {
-	return Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(Get().GetWorld()));
+	return Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(&Get()));
 }
 
 // Contains a data of Bomber Level, nullptr otherwise
 AMyGameModeBase* USingletonLibrary::GetMyGameMode()
 {
-	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(Get().GetWorld()));
+	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(&Get()));
 }
 
 // Returns the Bomber Game state, nullptr otherwise.
-AMyGameStateBase* USingletonLibrary::GetMyGameState(const UObject* WorldContextObject/* = nullptr*/)
+AMyGameStateBase* USingletonLibrary::GetMyGameState()
 {
-	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(WorldContextObject ? WorldContextObject : &Get()));
+	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(&Get()));
 }
 
 // Returns the Bomber Player Controller, nullptr otherwise
 AMyPlayerController* USingletonLibrary::GetMyPlayerController()
 {
-	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(Get().GetWorld(), 0));
+	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(&Get(), 0));
 }
 
 // Returns the Bomber Player State for specified player, nullptr otherwise
@@ -286,7 +286,7 @@ UInGameWidget* USingletonLibrary::GetInGameWidget()
 // Returns controlled player character
 APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 {
-	return Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(Get().GetWorld(), 0));
+	return Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(&Get(), 0));
 }
 
 // Returns the Sound Manager

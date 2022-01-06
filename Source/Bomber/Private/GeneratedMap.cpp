@@ -12,6 +12,7 @@
 //---
 #include "Engine/LevelStreaming.h"
 #include "Math/UnrealMathUtility.h"
+#include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
 #include "EditorLevelUtils.h"
@@ -182,7 +183,8 @@ void AGeneratedMap::GetSidesCells(
 AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 {
 	UWorld* World = GetWorld();
-	if (!World
+	if (!HasAuthority()
+	    || !World
 	    || ContainsMapComponents(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
 	    || Type == EAT::None)                                 // nothing to spawn
 	{
@@ -202,7 +204,9 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 {
 	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
-	if (!IS_VALID(ComponentOwner) // the component's owner is not valid or is transient
+	if (!HasAuthority()
+	    || !IS_VALID(ComponentOwner) // the component's owner is not valid or is transient
+		|| !ComponentOwner->HasAuthority()
 	    || !ensureMsgf(Cell, TEXT("ASSERT: 'Cell' is zero")))
 	{
 		return;
@@ -242,6 +246,9 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 		}
 
 		DraggedComponentsInternal.Emplace(AddedComponent);
+
+		// Attach to the Level Map actor
+		ComponentOwner->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -278,9 +285,6 @@ void AGeneratedMap::AddToGrid(const FCell& Cell, UMapComponent* AddedComponent)
 
 	// Locate actor on cell
 	ComponentOwner->SetActorTransform(FTransform(ActorRotation, ActorLocation, FVector::OneVector));
-
-	// Attach to the Level Map actor
-	ComponentOwner->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 }
 
 // The intersection of (OutCells ∩ ActorsTypesBitmask).
@@ -328,7 +332,8 @@ bool AGeneratedMap::ContainsMapComponents(const FCell& Cell, int32 ActorsTypesBi
 // Destroy all actors from the set of cells
 void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 {
-	if (!MapComponentsInternal.Num()
+	if (!HasAuthority()
+	    || !MapComponentsInternal.Num()
 	    || !Cells.Num())
 	{
 		return;
@@ -385,8 +390,19 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 // Removes the specified map component from the MapComponents_ array without an owner destroying
 void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
 	const bool bIsValidOwner = IS_VALID(ComponentOwner);
+
+	if (bIsValidOwner
+		&& !ComponentOwner->HasAuthority())
+	{
+		return;
+	}
 
 	// Remove from the array (MapComponent can be invalid)
 	MapComponentsInternal.Remove(MapComponent);
@@ -415,7 +431,9 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 {
 	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
-	if (!IS_VALID(ComponentOwner))
+	if (!HasAuthority()
+	    || !IS_VALID(ComponentOwner)
+	    || !ComponentOwner->HasAuthority())
 	{
 		return;
 	}
@@ -487,6 +505,11 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent) const
 // Change level by type
 void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	TArray<FLevelStreamRow> LevelStreamRows;
 	UGeneratedMapDataAsset::Get().GetLevelStreamRows(LevelStreamRows);
@@ -754,17 +777,21 @@ void AGeneratedMap::PostInitializeComponents()
 
 	RerunConstructionScripts();
 
-	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (HasAuthority())
 	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+		// Listen states
+		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+		{
+			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+		}
 	}
 }
 
 // Called when is explicitly being destroyed to destroy level actors, not called during level streaming or gameplay ending
 void AGeneratedMap::Destroyed()
 {
-	if (!IS_TRANSIENT(this))
+	if (!IS_TRANSIENT(this)
+	    && HasAuthority())
 	{
 		// Destroy level actors
 		FCells NonEmptyCells;
@@ -784,11 +811,22 @@ void AGeneratedMap::Destroyed()
 	Super::Destroyed();
 }
 
+// Returns properties that are replicated for the lifetime of the actor channel
+void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, MapComponentsInternal);
+	DOREPLIFETIME(ThisClass, PlayersNumInternal);
+	DOREPLIFETIME(ThisClass, LevelTypeInternal);
+	DOREPLIFETIME(ThisClass, bIsGameRunningInternal);
+}
+
 // Spawns and fills the Grid Array values by level actors
 void AGeneratedMap::GenerateLevelActors()
 {
 	if (!ensureMsgf(GridCellsInternal.Num() > 0, TEXT("Is no cells for the actors generation"))
-		|| !HasAuthority())
+	    || !HasAuthority())
 	{
 		return;
 	}
@@ -1017,10 +1055,7 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, int
 // Listen game states to generate level actors
 void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
-	UWorld* World = GetWorld();
-	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-	if (!World
-	    || !PC)
+	if (!HasAuthority())
 	{
 		return;
 	}

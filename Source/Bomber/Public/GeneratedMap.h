@@ -274,7 +274,7 @@ protected:
 	TArray<FCell> GridCellsInternal; //[M.IO]
 
 	/** Map components of all level actors. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal; //[M.IO]
 
 	/** Contains map components that were dragged to the scene, store it to avoid destroying and restore its owners after each regenerating. */
@@ -282,11 +282,11 @@ protected:
 	TSet<TObjectPtr<class UMapComponent>> DraggedComponentsInternal; //[M.IO]
 
 	/** Number of characters on the Level Map. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
 	int32 PlayersNumInternal = 0; //[G]
 
 	/** The current level type. Affects on the meshes of each level actor. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
 	ELevelType LevelTypeInternal = ELT::First; //[N]
 
 	/** Attached camera component. */
@@ -294,7 +294,7 @@ protected:
 	TObjectPtr<class UMyCameraComponent> CameraComponentInternal = nullptr; //[C.DO]
 
 	/** Is true when current state is Game Starting. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
 	bool bIsGameRunningInternal; //[G]
 
 	/** Contains the cached transform since the level actor does not move and is always static. */
@@ -313,6 +313,9 @@ protected:
 
 	/** Called when is explicitly being destroyed to destroy level actors, not called during level streaming or gameplay ending. */
 	virtual void Destroyed() override;
+
+	/** Returns properties that are replicated for the lifetime of the actor channel. */
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "C++", meta = (BlueprintProtected))

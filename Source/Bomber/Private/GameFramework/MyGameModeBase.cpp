@@ -2,9 +2,11 @@
 
 #include "GameFramework/MyGameModeBase.h"
 //---
+#include "GeneratedMap.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Globals/SingletonLibrary.h"
 #include "UI/MyHUD.h"
 
 // Sets default values for this actor's properties
@@ -32,6 +34,13 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 	if (!NewPlayer)
 	{
 		return;
+	}
+
+	// Set authority level map
+	if (AGeneratedMap* LevelMap = USingletonLibrary::FindLevelMap(this))
+	{
+		LevelMap->SetOwner(NewPlayer);
+		USingletonLibrary::SetLevelMap(LevelMap);
 	}
 
 	const int32 PlayersNum = GetNumPlayers();
