@@ -122,7 +122,7 @@ AMyPlayerController::AMyPlayerController()
 void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
 {
 	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->ServerSetGameState(NewGameState);
 	}
@@ -200,7 +200,7 @@ void AMyPlayerController::BeginPlay()
 	SetUIInputIgnored();
 
 	// Listen to handle input for each game state
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState(this))
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}

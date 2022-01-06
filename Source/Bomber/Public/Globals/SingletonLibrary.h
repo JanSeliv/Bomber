@@ -74,6 +74,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AGeneratedMap* GetLevelMap();
 
+	/** Iterate the world to find first level map placed on scene.
+	 * @see Call USingletonLibrary::GetLevelMap() instead to get cached one. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static class AGeneratedMap* FindLevelMap(const UObject* WorldContextObject);
+
 	/** Returns true if game was started. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static bool HasWorldBegunPlay();
@@ -102,8 +107,8 @@ public:
 	static class AMyGameModeBase* GetMyGameMode();
 
 	/** Returns the Bomber Game state, nullptr otherwise. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class AMyGameStateBase* GetMyGameState(const UObject* WorldContextObject = nullptr);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AMyGameStateBase* GetMyGameState();
 
 	/** Returns the Bomber Player Controller, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
