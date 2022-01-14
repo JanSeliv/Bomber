@@ -45,6 +45,21 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
 	static bool IsEditorNotPieWorld();
 
+	/** Returns true if game is started in the Editor. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
+	static bool IsPIE();
+
+	/** Returns true if is started multiplayer game (server + client(s)) right in the Editor. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
+	static bool IsEditorMultiplayer();
+
+	/** Returns the index of current player during editor multiplayer.
+	 * 0 is server.
+	 * 1 (or higher) is client.
+	 * -1 for the standalone game or multiplayer outside the Editor. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
+	static int32 GetEditorPlayerIndex();
+
 	/** Remove all text renders of the Owner */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
 	static void ClearOwnerTextRenders(class AActor* Owner);
@@ -68,7 +83,7 @@ public:
 	/** Returns the singleton, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static USingletonLibrary* GetSingleton();
-	static FORCEINLINE const USingletonLibrary& Get() { return *GetSingleton(); };
+	static FORCEINLINE const USingletonLibrary& Get() { return *GetSingleton(); }
 
 	/** The Level Map getter, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

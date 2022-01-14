@@ -13,7 +13,8 @@ public class BomberEditor : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", // Default
 			"EditorFramework", // FEditorDelegates::FToolkitManager
 			"Slate", "SlateCore", "PropertyEditor", "EditorStyle", // Property types customizations
-			"EditorWidgets" // SSearchableComboBox etc
+			"EditorWidgets", // SSearchableComboBox etc
+			"UnrealEd" // UMyUnrealEdEngine
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

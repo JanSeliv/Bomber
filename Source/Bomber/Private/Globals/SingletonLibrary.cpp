@@ -23,6 +23,7 @@
 //---
 #if WITH_EDITOR
 #include "Editor.h"	 // GEditor
+#include "MyUnrealEdEngine.h" // GetClientSingleton
 #endif
 
 // Binds to update movements of each AI controller.
@@ -44,10 +45,11 @@ UWorld* USingletonLibrary::GetWorld() const
 	return LevelMap ? LevelMap->GetWorld() : nullptr;
 }
 
+// Checks, is the current world placed in the editor
 bool USingletonLibrary::IsEditor()
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	return GIsEditor && GWorld && GWorld->IsEditorWorld();
+#if WITH_EDITOR
+	return GIsEditor && GEditor && GWorld && GWorld->IsEditorWorld();
 #endif
 	return false;
 }
@@ -55,10 +57,68 @@ bool USingletonLibrary::IsEditor()
 // Checks, that this actor placed in the editor world and the game is not started yet
 bool USingletonLibrary::IsEditorNotPieWorld()
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	return IsEditor() && GEditor && !GEditor->IsPlaySessionInProgress();
-#endif	// [IsEditorNotPieWorld]
+#if WITH_EDITOR
+	return IsEditor() && !GEditor->IsPlaySessionInProgress();
+#endif
 	return false;
+}
+
+// Returns true if game is started in the Editor
+bool USingletonLibrary::IsPIE()
+{
+#if WITH_EDITOR
+	return IsEditor() && GEditor->IsPlaySessionInProgress();
+#endif
+	return false;
+}
+
+// Returns true if is started multiplayer game (server + client(s)) right in the Editor
+bool USingletonLibrary::IsEditorMultiplayer()
+{
+#if WITH_EDITOR	 // [IsPIE]
+	if (IsPIE())
+	{
+		const TOptional<FPlayInEditorSessionInfo>& PIEInfo = GEditor->GetPlayInEditorSessionInfo();
+		return PIEInfo.IsSet() && PIEInfo->PIEInstanceCount > 0;
+	}
+#endif	// [IsPIE]
+	return false;
+}
+
+// Returns the index of current player during editor multiplayer
+int32 USingletonLibrary::GetEditorPlayerIndex()
+{
+#if WITH_EDITOR // [IsEditorMultiplayer]
+	if (IsEditorMultiplayer())
+	{
+		if (UWorld* CurrentWorld = GEditor->GetCurrentPlayWorld())
+		{
+			bool bFound = false;
+			int32 FoundAtIndex = INDEX_NONE;
+			const TIndirectArray<FWorldContext>& WorldContexts = GEditor->GetWorldContexts();
+			for (const FWorldContext& WorldContextIt : WorldContexts)
+			{
+				if (WorldContextIt.PIEInstance == INDEX_NONE)
+				{
+					continue;
+				}
+
+				++FoundAtIndex;
+
+				const UWorld* World = WorldContextIt.World();
+				if (World
+				    && World == CurrentWorld)
+				{
+					bFound = true;
+					break;
+				}
+			}
+
+			return bFound ? FoundAtIndex : INDEX_NONE;
+		}
+	}
+#endif // [IsEditorMultiplayer]
+	return INDEX_NONE;
 }
 
 // Remove all text renders of the Owner
@@ -135,6 +195,15 @@ void USingletonLibrary::AddDebugTextRenders(
 //  Returns the singleton, nullptr otherwise
 USingletonLibrary* USingletonLibrary::GetSingleton()
 {
+#if WITH_EDITOR // [IsEditorMultiplayer]
+	const int32 EditorPlayerIndex = GetEditorPlayerIndex();
+	if (EditorPlayerIndex > 0)
+	{
+		const int32 ClientSingletonIndex = EditorPlayerIndex - 1;
+		return UMyUnrealEdEngine::GetClientSingleton<USingletonLibrary>(ClientSingletonIndex);
+	}
+#endif // [IsEditorMultiplayer]
+
 	USingletonLibrary* Singleton = GEngine ? Cast<USingletonLibrary>(GEngine->GameSingleton) : nullptr;
 	checkf(Singleton, TEXT("The Singleton is null"));
 	return Singleton;
@@ -147,7 +216,7 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 	if (IsEditorNotPieWorld()
 	    && !Get().LevelMapInternal.IsValid())
 	{
-		const UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
+		const UWorld* EditorWorld = GEditor->GetCurrentPlayWorld();
 		AGeneratedMap* LevelMap = FindLevelMap(EditorWorld);
 		SetLevelMap(LevelMap);
 	}
@@ -173,10 +242,7 @@ AGeneratedMap* USingletonLibrary::FindLevelMap(const UObject* WorldContextObject
 bool USingletonLibrary::HasWorldBegunPlay()
 {
 #if WITH_EDITOR	// [IsEditor]
-	if (IsEditor())
-	{
-		return GEditor && GEditor->IsPlaySessionInProgress();
-	}
+	return IsPIE();
 #endif	// [IsEditor]
 
 	const UWorld* World = Get().GetWorld();

@@ -25,7 +25,8 @@ public class Bomber : ModuleRules
 			PrivateDependencyModuleNames.AddRange(
 				new[]
 				{
-					"UnrealEd", // FEditorDelegates::EndPIE
+					"UnrealEd", // FEditorDelegates
+					"BomberEditor", // UMyUnrealEdEngine
 					"Blutility" // UEditorUtilityLibrary::GetSelectionSet()
 				});
 
