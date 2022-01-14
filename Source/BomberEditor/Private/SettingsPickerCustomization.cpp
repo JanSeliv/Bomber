@@ -3,20 +3,25 @@
 #include "SettingsPickerCustomization.h"
 //---
 #include "FunctionPickerCustomization.h"
-#include "Structures/SettingsRow.h"
 
 typedef FSettingsPickerCustomization ThisClass;
 
 // The name of class to be customized
-const FName ThisClass::PropertyClassName = FSettingsPicker::StaticStruct()->GetFName();
+const FName ThisClass::PropertyClassName = TEXT("SettingsPicker");
 
-//Pointer to the FSettingsDataBase struct
-const UScriptStruct* const& ThisClass::SettingsDataBaseStruct = FSettingsDataBase::StaticStruct();
+// The name of the settings data base struct
+const FName ThisClass::SettingsDataBaseName = TEXT("SettingsDataBase");
+
+// The name of the Settings Primary struct
+const FName ThisClass::SettingsPrimaryName = TEXT("SettingsPrimary");
+
+// The name of the Function Picker struct
+const FName ThisClass::FunctionPickerName = TEXT("FunctionPicker");
 
 // Default constructor
 FSettingsPickerCustomization::FSettingsPickerCustomization()
 {
-	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
+	CustomPropertyInternal.PropertyName = TEXT("SettingsType");
 
 	SettingsFunctionProperties.Reserve(FFunctionPickerCustomization::TemplateMetaKeys.Num());
 	for (FName MetaNameIt : FFunctionPickerCustomization::TemplateMetaKeys)
@@ -55,12 +60,27 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 	 * ║	╚════FFunctionPicker (2)
 	 * ╚═════FSettingsDataBase (3)
 	 */
+
+	if (!SettingsDataBaseStructInternal.IsValid())
+	{
+		SettingsDataBaseStructInternal = !SettingsDataBaseName.IsNone() ? FindObject<UScriptStruct>(ANY_PACKAGE, *SettingsDataBaseName.ToString(), true) : nullptr;
+	}
+
+	if (!SettingsPrimaryStructInternal.IsValid())
+	{
+		SettingsPrimaryStructInternal = !SettingsDataBaseName.IsNone() ? FindObject<UScriptStruct>(ANY_PACKAGE, *SettingsPrimaryName.ToString(), true) : nullptr;
+	}
+
+	if (!FunctionPickerStructInternal.IsValid())
+	{
+		FunctionPickerStructInternal = !SettingsDataBaseName.IsNone() ? FindObject<UScriptStruct>(ANY_PACKAGE, *FunctionPickerName.ToString(), true) : nullptr;
+	}
+
 	const auto StructProperty = CastField<FStructProperty>(PropertyData.GetProperty());
 	const UScriptStruct* StructClass = StructProperty ? StructProperty->Struct : nullptr;
 	if (StructClass)
 	{
-		static const UScriptStruct* const& SettingsPrimaryStruct = FSettingsPrimary::StaticStruct();
-		if (StructClass->IsChildOf(SettingsPrimaryStruct)) //(1)
+		if (StructClass->IsChildOf(SettingsPrimaryStructInternal.Get())) //(1)
 		{
 			// Add lambda for visibility attribute to show\hide function properties when nothing is chosen
 			PropertyData.Visibility = MakeAttributeLambda([InCustomProperty = CustomPropertyInternal]() -> EVisibility
@@ -74,12 +94,11 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 			SettingsPrimaryHandle->GetNumChildren(NumChildren);
 			for (uint32 ChildIndex = 0; ChildIndex < NumChildren; ++ChildIndex)
 			{
-				static const UScriptStruct* const& SettingsFunctionStruct = FFunctionPicker::StaticStruct();
 				FPropertyData SettingsPrimaryData(SettingsPrimaryHandle->GetChildHandle(ChildIndex).ToSharedRef());
 				const FStructProperty* ChildProperty = CastField<FStructProperty>(SettingsPrimaryData.GetProperty());
 				const UScriptStruct* ChildClass = ChildProperty ? ChildProperty->Struct : nullptr;
 				if (ChildClass
-				    && ChildClass->IsChildOf(SettingsFunctionStruct)) //(2)
+				    && ChildClass->IsChildOf(FunctionPickerStructInternal.Get())) //(2)
 				{
 					// Find and set function properties into array
 					for (TTuple<FName, FPropertyData>& SettingsFunctionPropertyIt : SettingsFunctionProperties)
@@ -94,7 +113,7 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 				}
 			}
 		}
-		else if (StructClass->IsChildOf(SettingsDataBaseStruct)) //(3)
+		else if (StructClass->IsChildOf(SettingsDataBaseStructInternal.Get())) //(3)
 		{
 			// Add this to the searchable text box as an FString so users can type and find it
 			const FString SettingsDataBasePropertyName = PropertyData.PropertyName.ToString();
@@ -206,7 +225,7 @@ void FSettingsPickerCustomization::CopyMetas()
 				break;
 			}
 
-			if (StructIt == SettingsDataBaseStruct)
+			if (StructIt == SettingsDataBaseStructInternal)
 			{
 				// The meta key was not found
 				PropertyDataRef.SetMetaDataValue(TemplateMetaKey, NAME_None, true);

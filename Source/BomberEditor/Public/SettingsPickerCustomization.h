@@ -17,8 +17,14 @@ public:
 	/** The name of class to be customized. */
 	static const FName PropertyClassName;
 
-	/** Pointer to the FSettingsDataBase struct. */
-	static const UScriptStruct* const& SettingsDataBaseStruct;
+	/** The name of the settings data base struct. */
+	static const FName SettingsDataBaseName;
+
+	/** The name of the Settings Primary struct. */
+	static const FName SettingsPrimaryName;
+
+	/** The name of the Function Picker struct. */
+	static const FName FunctionPickerName;
 
 	/** Default constructor. */
 	FSettingsPickerCustomization();
@@ -55,6 +61,15 @@ protected:
 	 * MetaName: SettingsFunctionContextTemplate, SettingsFunctionSetterTemplate, SettingsFunctionGetterTemplate.
 	 * SettingsFunctionProperty: FSettingsPicker::StaticContext, FSettingsPicker::Setter, FSettingsPicker::Getter, */
 	TMap<FName/*TemplateMetaKey*/, FPropertyData/*SettingsFunctionProperty*/> SettingsFunctionProperties;
+
+	/** Pointer to the FSettingsDataBase struct. */
+	TWeakObjectPtr<UScriptStruct> SettingsDataBaseStructInternal = nullptr;
+
+	/** Pointer to the SettingsPrimary struct. */
+	TWeakObjectPtr<UScriptStruct> SettingsPrimaryStructInternal = nullptr;
+
+	/** Pointer to the FunctionPicker struct. */
+	TWeakObjectPtr<UScriptStruct> FunctionPickerStructInternal = nullptr;
 
 	/* ---------------------------------------------------
 	*		Protected functions

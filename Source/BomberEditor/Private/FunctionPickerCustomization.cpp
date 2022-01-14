@@ -1,13 +1,11 @@
 // Copyright 2021 Yevhenii Selivanov.
 
 #include "FunctionPickerCustomization.h"
-//---
-#include "Structures/FunctionPicker.h"
 
 typedef FFunctionPickerCustomization ThisClass;
 
 // The name of class to be customized
-const FName ThisClass::PropertyClassName = FFunctionPicker::StaticStruct()->GetFName();
+const FName ThisClass::PropertyClassName = TEXT("FunctionPicker");
 
 // Static const array, that contains names of metas used by this property
 const ThisClass::FNamesArray ThisClass::TemplateMetaKeys =
@@ -20,7 +18,7 @@ const ThisClass::FNamesArray ThisClass::TemplateMetaKeys =
 // Default constructor
 FFunctionPickerCustomization::FFunctionPickerCustomization()
 {
-	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FFunctionPicker, FunctionName);
+	CustomPropertyInternal.PropertyName = TEXT("FunctionName");
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -48,7 +46,7 @@ void FFunctionPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 // Is called for each property on building its row
 void FFunctionPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
-	static const FName FunctionClassPropertyName = GET_MEMBER_NAME_CHECKED(FFunctionPicker, FunctionClass);
+	static const FName FunctionClassPropertyName = TEXT("FunctionClass");
 	if (PropertyData.PropertyName == FunctionClassPropertyName)
 	{
 		FunctionClassPropertyInternal = PropertyData;

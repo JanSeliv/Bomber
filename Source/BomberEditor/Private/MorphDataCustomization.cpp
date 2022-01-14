@@ -2,17 +2,17 @@
 
 #include "MorphDataCustomization.h"
 //---
-#include "AnimNotifyState_PlayMorph.h"
+#include "Animation/AnimNotifies/AnimNotifyState.h"
 
 typedef FMorphDataCustomization ThisClass;
 
 // The name of class to be customized
-const FName ThisClass::PropertyClassName = FMorphData::StaticStruct()->GetFName();
+const FName ThisClass::PropertyClassName = TEXT("MorphData");
 
 // Default constructor
 FMorphDataCustomization::FMorphDataCustomization()
 {
-	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FMorphData, Morph);
+	CustomPropertyInternal.PropertyName = TEXT("Morph");
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it

@@ -2,8 +2,6 @@
 
 #include "AttachedMeshCustomization.h"
 //---
-#include "LevelActors/PlayerCharacter.h"
-//---
 #include "DetailLayoutBuilder.h"
 #include "IDetailChildrenBuilder.h"
 #include "LevelEditor.h"
@@ -14,12 +12,12 @@
 typedef FAttachedMeshCustomization ThisClass;
 
 // The name of class to be customized
-const FName ThisClass::PropertyClassName = FAttachedMesh::StaticStruct()->GetFName();
+const FName ThisClass::PropertyClassName = TEXT("AttachedMesh");
 
 // Default constructor
 FAttachedMeshCustomization::FAttachedMeshCustomization()
 {
-	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FAttachedMesh, Socket);
+	CustomPropertyInternal.PropertyName = TEXT("Socket");
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -106,7 +104,7 @@ void FAttachedMeshCustomization::OnBrowseSocket()
 
 	// Get mesh
 	USkeletalMesh* SkeletalMeshAsset = nullptr;
-	static const FName ParentMeshPropertyName = GET_MEMBER_NAME_CHECKED(UPlayerRow, Mesh);
+	static const FName ParentMeshPropertyName = TEXT("Mesh");
 	const UClass* PlayerRowClass = PlayerRowOuter->GetClass();
 	const FProperty* FoundProperty = PlayerRowClass ? PlayerRowClass->FindPropertyByName(ParentMeshPropertyName) : nullptr;
 	if (const auto ParentMeshProperty = CastField<FObjectProperty>(FoundProperty))

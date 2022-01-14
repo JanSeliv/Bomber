@@ -10,7 +10,6 @@ public class BomberEditor : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Bomber", // Bomber Editor sources
 			"Core", "CoreUObject", "Engine", "InputCore", // Default
 			"EditorFramework", // FEditorDelegates::FToolkitManager
 			"Slate", "SlateCore", "PropertyEditor", "EditorStyle", // Property types customizations
