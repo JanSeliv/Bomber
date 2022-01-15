@@ -103,8 +103,7 @@ void UMainMenuWidget::StartGame()
 		SoundsManager->PlayUIClickSFX();
 	}
 
-	AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController();
-	if (MyPC)
+	if (AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController())
 	{
 		MyPC->SetGameStartingState();
 	}
@@ -113,7 +112,7 @@ void UMainMenuWidget::StartGame()
 // Is executed when player decided to close the game
 void UMainMenuWidget::QuitGame()
 {
-	AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController();
+	AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController();
 	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
 }
 

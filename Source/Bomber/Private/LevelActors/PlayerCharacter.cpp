@@ -276,7 +276,7 @@ void APlayerCharacter::BeginPlay()
 	{
 		if (!CharacterIDInternal) // Is the player (not AI)
 		{
-			if (APlayerController* PlayerController = USingletonLibrary::GetMyPlayerController())
+			if (APlayerController* PlayerController = USingletonLibrary::GetLocalPlayerController())
 			{
 				PlayerController->Possess(this);
 			}

@@ -21,7 +21,7 @@ void UInGameWidget::ShowInGameMenu_Implementation()
 	}
 
 	// Show mouse cursor
-	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController())
+	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetLocalPlayerController())
 	{
 		MyPlayerController->SetMouseVisibility(true);
 	}
@@ -45,7 +45,7 @@ void UInGameWidget::HideInGameMenu_Implementation()
 	}
 
 	// Hide mouse cursor
-	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetMyPlayerController())
+	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetLocalPlayerController())
 	{
 		MyPlayerController->SetMouseVisibility(false);
 	}
@@ -196,7 +196,7 @@ void UInGameWidget::OnRestartButtonPressed()
 		SoundsManager->PlayUIClickSFX();
 	}
 
-	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController())
+	if (AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController())
 	{
 		MyPC->SetGameStartingState();
 	}
@@ -211,7 +211,7 @@ void UInGameWidget::OnMenuButtonPressed()
 		SoundsManager->PlayUIClickSFX();
 	}
 
-	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController())
+	if (AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController())
 	{
 		MyPC->SetMenuState();
 	}

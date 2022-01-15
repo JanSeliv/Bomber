@@ -2,11 +2,9 @@
 
 #include "GameFramework/MyGameModeBase.h"
 //---
-#include "GeneratedMap.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/SingletonLibrary.h"
 #include "UI/MyHUD.h"
 
 // Sets default values for this actor's properties
@@ -20,6 +18,16 @@ AMyGameModeBase::AMyGameModeBase()
 	PlayerStateClass = AMyPlayerState::StaticClass();
 }
 
+// Returns player controller by specified index
+AMyPlayerController* AMyGameModeBase::GetPlayerController(int32 Index) const
+{
+	if (PlayerControllersInternal.IsValidIndex(Index))
+	{
+		return PlayerControllersInternal[Index];
+	}
+	return nullptr;
+}
+
 // Called when the game starts or when spawned
 void AMyGameModeBase::BeginPlay()
 {
@@ -31,26 +39,24 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	if (!NewPlayer)
+	AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayer);
+	if (!MyPC)
 	{
 		return;
 	}
 
-	// Set authority level map
-	if (AGeneratedMap* LevelMap = USingletonLibrary::FindLevelMap(this))
-	{
-		LevelMap->SetOwner(NewPlayer);
-		USingletonLibrary::SetLevelMap(LevelMap);
-	}
-
-	const int32 PlayersNum = GetNumPlayers();
-	if (PlayersNum) // all players were connected
-	{
-		OnSessionStarted();
-	}
+	PlayerControllersInternal.AddUnique(MyPC);
 }
 
-// Called when all players were connected.
-void AMyGameModeBase::OnSessionStarted() const
+// Called when a Controller with a PlayerState leaves the game or is destroyed
+void AMyGameModeBase::Logout(AController* Exiting)
 {
+	AMyPlayerController* MyPC = Cast<AMyPlayerController>(Exiting);
+	if (MyPC
+	    && MyPC->HasClientLoadedCurrentWorld())
+	{
+		PlayerControllersInternal.Remove(MyPC);
+	}
+
+	Super::Logout(Exiting);
 }
