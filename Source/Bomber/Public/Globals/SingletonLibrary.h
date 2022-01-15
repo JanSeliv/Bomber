@@ -91,8 +91,8 @@ public:
 
 	/** Iterate the world to find first level map placed on scene.
 	 * @see Call USingletonLibrary::GetLevelMap() instead to get cached one. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static class AGeneratedMap* FindLevelMap(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AGeneratedMap* FindLevelMap();
 
 	/** Returns true if game was started. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -125,9 +125,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class AMyGameStateBase* GetMyGameState();
 
-	/** Returns the Bomber Player Controller, nullptr otherwise. */
+	/** Returns the specified Player Controller, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class AMyPlayerController* GetMyPlayerController();
+	static class AMyPlayerController* GetMyPlayerController(int32 PlayerIndex);
+
+	/** Returns the local Player Controller, nullptr otherwise. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AMyPlayerController* GetLocalPlayerController();
 
 	/** Returns the Bomber Player State for specified player, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -160,6 +164,10 @@ public:
 	/** Returns the In-Game Menu widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UInGameWidget* GetInGameWidget();
+
+	/** Returns specified player character. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class APlayerCharacter* GetPlayerCharacter(int32 PlayerIndex);
 
 	/** Returns controlled player character. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

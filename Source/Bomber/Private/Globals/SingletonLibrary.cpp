@@ -41,6 +41,20 @@ USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChan
 // Returns a world of stored level map
 UWorld* USingletonLibrary::GetWorld() const
 {
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (IsEditor()
+		&& !Get().LevelMapInternal.IsValid())
+	{
+		if (IsEditorNotPieWorld())
+		{
+			return GEditor->GetEditorWorldContext().World();
+		}
+		if (IsPIE())
+		{
+			return GEditor->GetCurrentPlayWorld();
+		}
+	}
+#endif	// WITH_EDITOR [IsEditorNotPieWorld]
 	const AGeneratedMap* LevelMap = GetLevelMap();
 	return LevelMap ? LevelMap->GetWorld() : nullptr;
 }
@@ -89,32 +103,33 @@ bool USingletonLibrary::IsEditorMultiplayer()
 int32 USingletonLibrary::GetEditorPlayerIndex()
 {
 #if WITH_EDITOR // [IsEditorMultiplayer]
-	if (IsEditorMultiplayer())
+	if (!IsEditorMultiplayer())
 	{
-		if (UWorld* CurrentWorld = GEditor->GetCurrentPlayWorld())
+		return INDEX_NONE;
+	}
+
+	const UWorld* CurrentEditorWorld = GEditor->GetCurrentPlayWorld();
+	if (!CurrentEditorWorld)
+	{
+		return INDEX_NONE;
+	}
+
+	int32 FoundAtIndex = INDEX_NONE;
+	const TIndirectArray<FWorldContext>& WorldContexts = GEditor->GetWorldContexts();
+	for (const FWorldContext& WorldContextIt : WorldContexts)
+	{
+		if (WorldContextIt.PIEInstance == INDEX_NONE)
 		{
-			bool bFound = false;
-			int32 FoundAtIndex = INDEX_NONE;
-			const TIndirectArray<FWorldContext>& WorldContexts = GEditor->GetWorldContexts();
-			for (const FWorldContext& WorldContextIt : WorldContexts)
-			{
-				if (WorldContextIt.PIEInstance == INDEX_NONE)
-				{
-					continue;
-				}
+			continue;
+		}
 
-				++FoundAtIndex;
+		++FoundAtIndex;
 
-				const UWorld* World = WorldContextIt.World();
-				if (World
-				    && World == CurrentWorld)
-				{
-					bFound = true;
-					break;
-				}
-			}
-
-			return bFound ? FoundAtIndex : INDEX_NONE;
+		const UWorld* WorldIt = WorldContextIt.World();
+		if (WorldIt
+		    && WorldIt == CurrentEditorWorld)
+		{
+			return FoundAtIndex;
 		}
 	}
 #endif // [IsEditorMultiplayer]
@@ -213,11 +228,10 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 AGeneratedMap* USingletonLibrary::GetLevelMap()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (IsEditorNotPieWorld()
+	if (IsEditor()
 	    && !Get().LevelMapInternal.IsValid())
 	{
-		const UWorld* EditorWorld = GEditor->GetCurrentPlayWorld();
-		AGeneratedMap* LevelMap = FindLevelMap(EditorWorld);
+		AGeneratedMap* LevelMap = FindLevelMap();
 		SetLevelMap(LevelMap);
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
@@ -226,16 +240,13 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 }
 
 // Iterate the world to find first level map placed on scene.
-AGeneratedMap* USingletonLibrary::FindLevelMap(const UObject* WorldContextObject)
+AGeneratedMap* USingletonLibrary::FindLevelMap()
 {
 	TArray<AActor*> LevelMapsArray;
-	UGameplayStatics::GetAllActorsOfClass(WorldContextObject, AGeneratedMap::StaticClass(), LevelMapsArray);
-	if (LevelMapsArray.IsValidIndex(0))
-	{
-		return Cast<AGeneratedMap>(LevelMapsArray[0]);
-	}
+	UGameplayStatics::GetAllActorsOfClass(&Get(), AGeneratedMap::StaticClass(), LevelMapsArray);
 
-	return nullptr;
+	static constexpr int32 LocalLevelMapIndex = 0;
+	return LevelMapsArray.IsValidIndex(LocalLevelMapIndex) ? Cast<AGeneratedMap>(LevelMapsArray[LocalLevelMapIndex]) : nullptr;
 }
 
 // Returns true if game was started
@@ -275,25 +286,42 @@ ELevelType USingletonLibrary::GetLevelType()
 // Contains a data of standalone and PIE games, nullptr otherwise
 UMyGameInstance* USingletonLibrary::GetMyGameInstance()
 {
-	return Cast<UMyGameInstance>(UGameplayStatics::GetGameInstance(&Get()));
+	const UWorld* World = Get().GetWorld();
+	return World ? World->GetGameInstance<UMyGameInstance>() : nullptr;
 }
 
 // Contains a data of Bomber Level, nullptr otherwise
 AMyGameModeBase* USingletonLibrary::GetMyGameMode()
 {
-	return Cast<AMyGameModeBase>(UGameplayStatics::GetGameMode(&Get()));
+	const UWorld* World = Get().GetWorld();
+	return World ? World->GetAuthGameMode<AMyGameModeBase>() : nullptr;
 }
 
 // Returns the Bomber Game state, nullptr otherwise.
 AMyGameStateBase* USingletonLibrary::GetMyGameState()
 {
-	return Cast<AMyGameStateBase>(UGameplayStatics::GetGameState(&Get()));
+	const UWorld* World = Get().GetWorld();
+	return World ? World->GetGameState<AMyGameStateBase>() : nullptr;
 }
 
 // Returns the Bomber Player Controller, nullptr otherwise
-AMyPlayerController* USingletonLibrary::GetMyPlayerController()
+AMyPlayerController* USingletonLibrary::GetMyPlayerController(int32 PlayerIndex)
 {
-	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(&Get(), 0));
+	const AMyGameModeBase* MyGameMode = GetMyGameMode();
+	AMyPlayerController* MyPC = MyGameMode ? MyGameMode->GetPlayerController(PlayerIndex) : nullptr;
+	if (MyPC)
+	{
+		return MyPC;
+	}
+
+	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(&Get(), PlayerIndex));
+}
+
+// Returns the local Player Controller, nullptr otherwise
+AMyPlayerController* USingletonLibrary::GetLocalPlayerController()
+{
+	static constexpr int32 LocalPlayerIndex = 0;
+	return GetMyPlayerController(LocalPlayerIndex);
 }
 
 // Returns the Bomber Player State for specified player, nullptr otherwise
@@ -305,7 +333,7 @@ AMyPlayerState* USingletonLibrary::GetMyPlayerState(const APawn* Pawn)
 // Returns the player state of current controller
 AMyPlayerState* USingletonLibrary::GetCurrentPlayerState()
 {
-	const AMyPlayerController* MyPlayerController = GetMyPlayerController();
+	const AMyPlayerController* MyPlayerController = GetLocalPlayerController();
 	return MyPlayerController ? MyPlayerController->GetPlayerState<AMyPlayerState>() : nullptr;
 }
 
@@ -331,7 +359,7 @@ UMyCameraComponent* USingletonLibrary::GetLevelCamera()
 // Returns the HUD actor
 AMyHUD* USingletonLibrary::GetMyHUD()
 {
-	const AMyPlayerController* MyPlayerController = GetMyPlayerController();
+	const AMyPlayerController* MyPlayerController = GetLocalPlayerController();
 	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
 }
 
@@ -349,10 +377,18 @@ UInGameWidget* USingletonLibrary::GetInGameWidget()
 	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
 }
 
+// Returns specified player character, by default returns local player
+APlayerCharacter* USingletonLibrary::GetPlayerCharacter(int32 PlayerIndex)
+{
+	const AMyPlayerController* MyPC = GetMyPlayerController(PlayerIndex);
+	return MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
+}
+
 // Returns controlled player character
 APlayerCharacter* USingletonLibrary::GetControllablePlayer()
 {
-	return Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(&Get(), 0));
+	static constexpr int32 LocalPlayerIndex = 0;
+	return GetPlayerCharacter(LocalPlayerIndex);
 }
 
 // Returns the Sound Manager
