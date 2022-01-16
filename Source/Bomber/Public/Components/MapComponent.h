@@ -38,7 +38,7 @@ public:
 	TObjectPtr<class UBoxComponent> BoxCollision = nullptr; //[C.DO]
 
 	/** Owner's cell location on the Level Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (ShowOnlyInnerProperties))
 	FCell Cell = FCell::ZeroCell; //[G]
 
 	/* ---------------------------------------------------
@@ -111,6 +111,9 @@ protected:
 
 	/** Called when a component is destroyed for removing the owner from the Level Map. */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
+
+	/** Returns properties that are replicated for the lifetime of the actor channel. */
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 #if WITH_EDITOR
 	/** Returns true whether this component or its owner is an editor-only object or not. */
