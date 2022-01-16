@@ -213,8 +213,8 @@ public:
 	void RotateToLocation(const FVector& Location, bool bShouldInterpolate) const;
 
 	/** Spawns bomb on character position */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SpawnBomb();
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "C++")
+	void ServerSpawnBomb();
 
 	/** Set and apply new skeletal mesh by specified data.
 	 * @param CustomPlayerMeshData Contains data about the skin to set. */

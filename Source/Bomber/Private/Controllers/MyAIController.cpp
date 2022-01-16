@@ -293,7 +293,7 @@ void AMyAIController::UpdateAI()
 		LevelMap.IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(EAT::Box | EAT::Player), false, MapComponent);
 		if (BoxesAndPlayers.Num() > 0) // Are bombs or players in own bomb radius
 		{
-			OwnerInternal->SpawnBomb();
+			OwnerInternal->ServerSpawnBomb();
 			Free.Empty(); // Delete all cells to make new choice
 
 #if WITH_EDITOR	 // [Editor]

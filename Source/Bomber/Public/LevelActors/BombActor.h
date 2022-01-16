@@ -49,11 +49,6 @@ class ABombActor final : public AActor
 	GENERATED_BODY()
 
 public:
-	/** Is used by player character to listen bomb destroying. */
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnBombDestroyed, AActor*, DestroyedBomb);
-
-	static const FOnBombDestroyed EmptyOnDestroyed;
-
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
@@ -67,15 +62,11 @@ public:
 
 	/**
 	 * Sets the defaults of the bomb
-	 * @param EventToBind Delegate that will be executed on bomb destroying
 	 * @param InFireRadius Setting explosion length of this bomb
 	 * @param CharacterID Setting a mesh material of bomb by the character ID
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void InitBomb(
-		const FOnBombDestroyed& EventToBind,
-		int32 InFireRadius = 1,
-		int32 CharacterID = -1);
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "C++")
+	void MulticastInitBomb(int32 InFireRadius = 1, int32 CharacterID = -1);
 
 protected:
 	/* ---------------------------------------------------

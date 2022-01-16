@@ -14,8 +14,6 @@
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 
-const ABombActor::FOnBombDestroyed ABombActor::EmptyOnDestroyed = FOnBombDestroyed();
-
 // Default constructor
 UBombDataAsset::UBombDataAsset()
 {
@@ -51,10 +49,7 @@ ABombActor::ABombActor()
 }
 
 // Sets the defaults of the bomb
-void ABombActor::InitBomb(
-	const FOnBombDestroyed& EventToBind,
-	int32 InFireRadius/* = 1*/,
-	int32 CharacterID/* = -1*/)
+void ABombActor::MulticastInitBomb_Implementation(int32 InFireRadius/* = 1*/, int32 CharacterID/* = -1*/)
 {
 	if (!MapComponentInternal
 	    || InFireRadius < 0) // Negative length of the explosion
@@ -75,12 +70,6 @@ void ABombActor::InitBomb(
 	ExplosionCellsInternal.Empty();
 	FireRadiusInternal = InFireRadius;
 	AGeneratedMap::Get().GetSidesCells(ExplosionCellsInternal, MapComponentInternal->Cell, EPathType::Explosion, InFireRadius);
-
-	// Notify player that bomb was detonated
-	if (EventToBind.IsBound())
-	{
-		OnDestroyed.Add(EventToBind);
-	}
 
 	// Set default collision to block all players
 	SetCollisionResponseToAllPlayers(ECR_Block);
@@ -122,7 +111,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 #if WITH_EDITOR //[IsEditorNotPieWorld]
 	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		InitBomb(EmptyOnDestroyed, FireRadiusInternal);
+		MulticastInitBomb(FireRadiusInternal);
 
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 
@@ -246,7 +235,7 @@ void ABombActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	if (CurrentGameState == ECurrentGameState::InGame)
 	{
 		// Reinit bomb and restart lifespan
-		InitBomb(EmptyOnDestroyed, FireRadiusInternal);
+		MulticastInitBomb(FireRadiusInternal);
 		SetLifeSpan(UBombDataAsset::Get().GetLifeSpan());
 	}
 }
