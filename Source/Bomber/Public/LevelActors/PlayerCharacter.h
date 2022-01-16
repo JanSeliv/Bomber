@@ -287,4 +287,8 @@ protected:
 	/** Updates collision object type by current character ID. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateCollisionObjectType();
+
+	/** Possess a player or AI controller in dependence of current Character ID. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void TryPossessController();
 };

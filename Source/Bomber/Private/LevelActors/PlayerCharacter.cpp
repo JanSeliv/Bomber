@@ -271,28 +271,20 @@ void APlayerCharacter::BeginPlay()
 		MeshComp->SetAnimInstanceClass(AnimInstanceClass);
 	}
 
-	// Posses the controller
-	if (HasAuthority())
+	static constexpr int32 LocalCharacterID = 0;
+	if (CharacterIDInternal == LocalCharacterID)
 	{
-		if (!CharacterIDInternal) // Is the player (not AI)
-		{
-			if (APlayerController* PlayerController = USingletonLibrary::GetLocalPlayerController())
-			{
-				PlayerController->Possess(this);
-			}
-		}
-		else if (!IS_VALID(MyAIControllerInternal)) // has AI controller and was not spawned early
-		{
-			MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
-			MyAIControllerInternal->Possess(this);
-		}
+		TryPossessController();
 	}
 
 	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (HasAuthority())
 	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+		{
+			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+		}
 	}
 
 	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(this))
@@ -478,8 +470,7 @@ void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
 // Listen to manage the tick
 void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
-	UWorld* World = GetWorld();
-	if (!World)
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -494,6 +485,7 @@ void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		}
 		case ECurrentGameState::InGame:
 		{
+			TryPossessController();
 			SetActorTickEnabled(true);
 			break;
 		}
@@ -554,4 +546,35 @@ void APlayerCharacter::UpdateCollisionObjectType()
 	}
 
 	CapsuleComp->SetCollisionObjectType(CollisionObjectType);
+}
+
+// Possess a player or AI controller in dependence of current Character ID
+void APlayerCharacter::TryPossessController()
+{
+	if (!HasAuthority()
+	    || CharacterIDInternal < 0)
+	{
+		return;
+	}
+
+	// Try possess the player
+	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController(CharacterIDInternal))
+	{
+		MyPC->Possess(this);
+		return;
+	}
+
+	// Spawn AI if is needed
+	UWorld* World = GetWorld();
+	if (World
+	    && !IS_VALID(MyAIControllerInternal))
+	{
+		MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+	}
+
+	// Try possess the AI
+	if (MyAIControllerInternal)
+	{
+		MyAIControllerInternal->Possess(this);
+	}
 }

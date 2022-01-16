@@ -112,10 +112,13 @@ void AMyAIController::OnPossess(APawn* InPawn)
 
 	OwnerInternal = Cast<APlayerCharacter>(InPawn);
 
-	if (USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this) == false)
+	if (!USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this))
 	{
 		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
 	}
+
+	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState(this) == ECGS::InGame;
+	SetAI(bMatchStarted);
 }
 
 // The main AI logic

@@ -245,7 +245,10 @@ void AMyPlayerController::OnUnPossess()
 // Allows the PlayerController to set up custom input bindings
 void AMyPlayerController::BindInputActions()
 {
-	Super::SetupInputComponent();
+	if (!IsLocalController())
+	{
+		return;
+	}
 
 	UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent();
 	if (!ensureMsgf(EnhancedInputComponent, TEXT("ASSERT: 'EnhancedInputComponent' is not valid")))
@@ -381,6 +384,11 @@ bool AMyPlayerController::IsInputContextEnabled(const UMyInputMappingContext* In
 // Enables or disables specified input context
 void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InputContext)
 {
+	if (!IsLocalController())
+	{
+		return;
+	}
+
 	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem();
 	if (!ensureMsgf(InputSubsystem, TEXT("ASSERT: 'InputSubsystem' is not valid"))
 	    || !ensureMsgf(InputContext, TEXT("ASSERT: 'InputContext' is not valid")))
