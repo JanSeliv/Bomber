@@ -433,7 +433,7 @@ void AMyPlayerController::SpawnBomb()
 {
 	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
-		PlayerCharacter->SpawnBomb();
+		PlayerCharacter->ServerSpawnBomb();
 	}
 }
 

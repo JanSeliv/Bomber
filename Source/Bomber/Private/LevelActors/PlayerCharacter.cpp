@@ -210,7 +210,7 @@ void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInt
 }
 
 // Spawns bomb on character position
-void APlayerCharacter::SpawnBomb()
+void APlayerCharacter::ServerSpawnBomb_Implementation()
 {
 	const AController* OwnedController = GetController();
 	if (!MapComponentInternal                       // The Map Component is not valid or transient
@@ -230,9 +230,8 @@ void APlayerCharacter::SpawnBomb()
 		PowerupsInternal.BombN--;
 
 		// Init Bomb
-		ABombActor::FOnBombDestroyed OnBombDestroyed;
-		OnBombDestroyed.BindDynamic(this, &ThisClass::OnBombDestroyed);
-		BombActor->InitBomb(OnBombDestroyed, PowerupsInternal.FireN, CharacterIDInternal);
+		BombActor->MulticastInitBomb(PowerupsInternal.FireN, CharacterIDInternal);
+		BombActor->OnDestroyed.AddUniqueDynamic(this, &ThisClass::OnBombDestroyed);
 	}
 }
 
