@@ -9,6 +9,7 @@
 #include "LevelActors/PlayerCharacter.h"
 //---
 #include "Components/BoxComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()
@@ -17,6 +18,9 @@ UMapComponent::UMapComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
+
+	// Replicate a component
+	SetIsReplicatedByDefault(true);
 
 	// Initialize the Box Collision component
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
@@ -216,6 +220,14 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
+}
+
+// Returns properties that are replicated for the lifetime of the actor channel
+void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, Cell);
 }
 
 #if WITH_EDITOR
