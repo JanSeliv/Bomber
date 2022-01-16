@@ -51,6 +51,7 @@ void AMyPlayerState::SetPlayerNameCustom(FName NewName)
 	}
 }
 
+// Returns custom player name
 FName AMyPlayerState::GetPlayerFNameCustom() const
 {
 	if (CustomPlayerNameInternal.IsNone())
