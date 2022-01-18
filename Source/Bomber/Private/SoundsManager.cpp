@@ -145,7 +145,7 @@ void USoundsManager::BeginPlay()
 	UGameplayStatics::SpawnSound2D(World, BackgroundSound);
 
 	// Listed the ending the current game to play the End-Game sound on
-	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetCurrentPlayerState())
+	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetLocalPlayerState())
 	{
 		CurrentPlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 	}

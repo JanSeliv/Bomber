@@ -331,7 +331,7 @@ AMyPlayerState* USingletonLibrary::GetMyPlayerState(const APawn* Pawn)
 }
 
 // Returns the player state of current controller
-AMyPlayerState* USingletonLibrary::GetCurrentPlayerState()
+AMyPlayerState* USingletonLibrary::GetLocalPlayerState()
 {
 	const AMyPlayerController* MyPlayerController = GetLocalPlayerController();
 	return MyPlayerController ? MyPlayerController->GetPlayerState<AMyPlayerState>() : nullptr;
@@ -385,7 +385,7 @@ APlayerCharacter* USingletonLibrary::GetPlayerCharacter(int32 PlayerIndex)
 }
 
 // Returns controlled player character
-APlayerCharacter* USingletonLibrary::GetControllablePlayer()
+APlayerCharacter* USingletonLibrary::GetLocalPlayerCharacter()
 {
 	static constexpr int32 LocalPlayerIndex = 0;
 	return GetPlayerCharacter(LocalPlayerIndex);

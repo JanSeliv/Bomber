@@ -76,7 +76,7 @@ void UMainMenuWidget::NextSkin()
 	MySkeletalMeshComponent->SetSkin(NewSkinIndex);
 
 	// Update the player data
-	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetCurrentPlayerState())
+	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetLocalPlayerState())
 	{
 		MyPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
 	}
@@ -205,7 +205,7 @@ void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	MySkeletalMeshComponent->InitMySkeletalMesh(CustomPlayerMeshData);
 
 	// Update player data
-	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetCurrentPlayerState())
+	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetLocalPlayerState())
 	{
 		CurrentPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
 	}

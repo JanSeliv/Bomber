@@ -139,7 +139,7 @@ public:
 
 	/** Returns the player state of current controller. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class AMyPlayerState* GetCurrentPlayerState();
+	static class AMyPlayerState* GetLocalPlayerState();
 
 	/** Returns the Bomber settings. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -171,7 +171,7 @@ public:
 
 	/** Returns controlled player character. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class APlayerCharacter* GetControllablePlayer();
+	static class APlayerCharacter* GetLocalPlayerCharacter();
 
 	/** Returns the Sounds Manager. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
