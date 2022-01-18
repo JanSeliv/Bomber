@@ -1113,7 +1113,7 @@
 				"StaticContext":
 				{
 					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
-					"FunctionName": "GetCurrentPlayerState"
+					"FunctionName": "GetLocalPlayerState"
 				},
 				"Setter":
 				{

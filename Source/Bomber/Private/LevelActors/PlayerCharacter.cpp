@@ -323,7 +323,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 
 	// Update mesh
 	FCustomPlayerMeshData CustomPlayerMeshData;
-	const AMyPlayerState* MyPlayerState = !CharacterIDInternal ? USingletonLibrary::GetCurrentPlayerState() : nullptr;
+	const AMyPlayerState* MyPlayerState = !CharacterIDInternal ? USingletonLibrary::GetLocalPlayerState() : nullptr;
 	if (MyPlayerState)
 	{
 		CustomPlayerMeshData = MyPlayerState->GetCustomPlayerMeshData();

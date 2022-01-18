@@ -111,7 +111,7 @@ void UMyCheatManager::SetItemChance(int32 Chance) const
 // Override the level of each powerup for a controlled player
 void UMyCheatManager::SetPowerups(int32 NewLevel) const
 {
-	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetControllablePlayer())
+	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetLocalPlayerCharacter())
 	{
 		static constexpr int32 MinItemsNum = 1;
 		const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
@@ -126,7 +126,7 @@ void UMyCheatManager::SetPowerups(int32 NewLevel) const
 // Enable or disable the God mode to make a controllable player undestroyable
 void UMyCheatManager::SetGodMode(bool bShouldEnable) const
 {
-	const APlayerCharacter* ControllablePlayer = USingletonLibrary::GetControllablePlayer();
+	const APlayerCharacter* ControllablePlayer = USingletonLibrary::GetLocalPlayerCharacter();
 	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(ControllablePlayer))
 	{
 		MapComponent->SetUndestroyable(bShouldEnable);
