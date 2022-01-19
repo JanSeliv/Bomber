@@ -412,8 +412,15 @@ void AMyPlayerController::MoveUpDown(const FInputActionValue& ActionValue)
 	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
 		const float ScaleValue = ActionValue.GetMagnitude();
-		const FVector RightVector(PlayerCharacter->GetActorRightVector());
-		PlayerCharacter->AddMovementInput(RightVector, ScaleValue);
+
+		// Find out which way is forward
+		const FRotator Rotation = GetControlRotation();
+		const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+		// Get forward vector
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		PlayerCharacter->AddMovementInput(Direction, ScaleValue);
 	}
 }
 
@@ -423,8 +430,15 @@ void AMyPlayerController::MoveRightLeft(const FInputActionValue& ActionValue)
 	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
 		const float ScaleValue = ActionValue.GetMagnitude();
-		const FVector ForwardVector(PlayerCharacter->GetActorForwardVector());
-		PlayerCharacter->AddMovementInput(ForwardVector, ScaleValue);
+
+		// Find out which way is right
+		const FRotator Rotation = GetControlRotation();
+		const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+		// Get right vector
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		PlayerCharacter->AddMovementInput(Direction, ScaleValue);
 	}
 }
 
