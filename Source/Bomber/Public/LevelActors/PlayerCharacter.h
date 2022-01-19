@@ -190,14 +190,6 @@ public:
 	/** Sets default values for this character's properties */
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
-	/** Adds the movement input along the given world direction vector.
-	*
-	* @param WorldDirection Direction in world space to apply input
-	* @param ScaleValue Scale to apply to input. This can be used for analog input, ie a value of 0.5 applies half the normal value, while -1.0 would reverse the direction.
-	* @param bForce If true always add the input, ignoring the result of IsMoveInputIgnored().
-	*/
-	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.f, bool bForce = false) override;
-
 	/** Returns current powerup levels */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FORCEINLINE FPowerUp& GetPowerups() const { return PowerupsInternal; }
@@ -205,12 +197,6 @@ public:
 	/** Returns the personal ID. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetCharacterID() const { return CharacterIDInternal; }
-
-	/** Finds and rotates the self at the current character's location to point at the specified location.
-	 * @param Location the character is looking at.
-	 * @param bShouldInterpolate if true, smoothly rotate the character toward the direction. */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AutoCreateRefTerm = "Location"))
-	void RotateToLocation(const FVector& Location, bool bShouldInterpolate) const;
 
 	/** Spawns bomb on character position */
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "C++")

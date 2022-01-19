@@ -38,9 +38,6 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	AIMoveToInternal = DestinationCell;
 	MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
 
-	// Rotate the character
-	OwnerInternal->RotateToLocation(AIMoveToInternal.Location, false);
-
 #if WITH_EDITOR	 // [IsEditor]
 	if (USingletonLibrary::IsEditor())
 	{

@@ -149,6 +149,9 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	AIControllerClass = AMyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::Disabled;
 
+	// Do not rotate player by camera
+	bUseControllerRotationYaw = false;
+
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
@@ -170,43 +173,18 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	NameplateMeshInternal->SetRelativeLocation_Direct(NameplateRelativeLocation);
 	static const FVector NameplateRelativeScale(1.75f, 1.f, 1.f);
 	NameplateMeshInternal->SetRelativeScale3D_Direct(NameplateRelativeScale);
+	NameplateMeshInternal->SetUsingAbsoluteRotation(true);
 
-	// Disable gravity
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
+		// Disable gravity
 		MovementComponent->GravityScale = 0.f;
-	}
-}
 
-// Finds and rotates the self at the current character's location to point at the specified location.
-void APlayerCharacter::RotateToLocation(const FVector& Location, bool bShouldInterpolate) const
-{
-	UWorld* World = GetWorld();
-	USkeletalMeshComponent* MeshComponent = GetMesh();
-	AController* OwnedController = GetController();
-	if (!World
-	    || !MeshComponent
-	    || !OwnedController
-	    || OwnedController->IsMoveInputIgnored())
-	{
-		return;
+		// Rotate player by movement
+		MovementComponent->bOrientRotationToMovement = true;
+		static const FRotator RotationRate(0.f, 540.f, 0.f);
+		MovementComponent->RotationRate = RotationRate;
 	}
-
-	FRotator TargetRotation = FRotator::ZeroRotator;
-	TargetRotation.Yaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), Location).Yaw - 90.F;
-
-	FRotator NewRotation;
-	if (bShouldInterpolate)
-	{
-		NewRotation = UKismetMathLibrary::RInterpTo(
-			MeshComponent->GetComponentRotation(), TargetRotation, World->GetDeltaSeconds() * 10.F, 1.F);
-	}
-	else
-	{
-		NewRotation = TargetRotation;
-	}
-
-	MeshComponent->SetWorldRotation(NewRotation);
 }
 
 // Spawns bomb on character position
@@ -394,19 +372,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	// Update a player location on the level map
 	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
-}
-
-// Adds the movement input along the given world direction vector.
-void APlayerCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue/* = 1.f*/, bool bForce/* = false*/)
-{
-	if (ScaleValue)
-	{
-		// Move the character
-		Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
-
-		// Rotate the character
-		RotateToLocation(GetActorLocation() + ScaleValue * WorldDirection, true);
-	}
 }
 
 // Triggers when this player character starts something overlap.
