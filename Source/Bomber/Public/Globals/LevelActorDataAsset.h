@@ -66,6 +66,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class ULevelActorRow* GetRowByLevelType(ELevelType LevelType) const;
 
+	/** Return first found row by specified level types. */
+	template <typename T>
+	FORCEINLINE T* GetRowByLevelType(ELevelType LevelType) const { return Cast<T>(GetRowByLevelType(LevelType)); }
+
 	/** Returns overall number of contained rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetRowsNum() const { return RowsInternal.Num(); }

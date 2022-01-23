@@ -207,6 +207,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
+	/** Returns the Skeletal Mesh of bombers. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const { return Cast<UMySkeletalMeshComponent>(GetMesh()); }
+
 protected:
 	/** ---------------------------------------------------
 	 *		Protected properties
