@@ -6,6 +6,7 @@
 #include "LevelActors/PlayerCharacter.h"
 //---
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Net/UnrealNetwork.h"
 
 // The empty data
 const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData();
@@ -14,6 +15,9 @@ const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData
 UMySkeletalMeshComponent::UMySkeletalMeshComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	// Replicate a component
+	SetIsReplicatedByDefault(true);
 }
 
 // Change the SkeletalMesh that is rendered for this Component
@@ -81,7 +85,7 @@ void UMySkeletalMeshComponent::GetAttachedPropsByClass(TArray<UMeshComponent*>& 
 	for (const TObjectPtr<UMeshComponent>& AttachedMeshIt : AttachedMeshesInternal)
 	{
 		if (AttachedMeshIt
-			&& AttachedMeshIt->IsA(FilterClass))
+		    && AttachedMeshIt->IsA(FilterClass))
 		{
 			OutMeshComponents.Emplace(AttachedMeshIt);
 		}
@@ -197,4 +201,18 @@ void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
 void UMySkeletalMeshComponent::OnRegister()
 {
 	Super::OnRegister();
+}
+
+// Returns properties that are replicated for the lifetime of the actor channel
+void UMySkeletalMeshComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, PlayerMeshDataInternal);
+}
+
+// Respond on changes in player mesh data to reset to set the mesh on client
+void UMySkeletalMeshComponent::OnRep_PlayerMeshData()
+{
+	InitMySkeletalMesh(PlayerMeshDataInternal);
 }
