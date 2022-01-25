@@ -71,12 +71,12 @@ protected:
 	EEndGameState EndGameStateInternal = EEndGameState::None; //[G]
 
 	/** A level type of chosen skeletal mesh. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Mesh Data"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
 
 	/** Config: custom name set by player.
 	 * Can contain different languages, uppercase, lowercase etc. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
 	FName CustomPlayerNameInternal; //[С]
 
 	/* ---------------------------------------------------
