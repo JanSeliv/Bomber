@@ -107,8 +107,11 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
-	/** Allows the PlayerController to set up custom input bindings. */
+	/** Allows the controller to react on possessing the pawn to enable AI. */
 	virtual void OnPossess(APawn* InPawn) override;
+
+	/** Allows the controller to react on unpossessing the pawn to disable AI. */
+	virtual void OnUnPossess() override;
 
 	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

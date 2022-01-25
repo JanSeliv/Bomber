@@ -248,11 +248,7 @@ void APlayerCharacter::BeginPlay()
 		MeshComp->SetAnimInstanceClass(AnimInstanceClass);
 	}
 
-	static constexpr int32 LocalCharacterID = 0;
-	if (CharacterIDInternal == LocalCharacterID)
-	{
-		TryPossessController();
-	}
+	TryPossessController();
 
 	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
@@ -262,6 +258,9 @@ void APlayerCharacter::BeginPlay()
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 		}
+
+		// Listen to handle possessing logic
+		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
 
 	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(this))
@@ -449,7 +448,6 @@ void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		}
 		case ECurrentGameState::InGame:
 		{
-			TryPossessController();
 			SetActorTickEnabled(true);
 			break;
 		}
@@ -541,4 +539,10 @@ void APlayerCharacter::TryPossessController()
 	{
 		MyAIControllerInternal->Possess(this);
 	}
+}
+
+// Is called on game mode post login to handle character logic when new player is connected
+void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
+{
+	TryPossessController();
 }
