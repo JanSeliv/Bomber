@@ -242,6 +242,20 @@ void AMyPlayerController::OnUnPossess()
 	SetIgnoreMoveInput(true);
 }
 
+// Is overriden to notify when this controller possesses new player character
+void AMyPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>();
+	if (PlayerCharacter
+	    && PlayerCharacter == InPawn
+	    && OnPossessed.IsBound())
+	{
+		OnPossessed.Broadcast(PlayerCharacter);
+	}
+}
+
 // Allows the PlayerController to set up custom input bindings
 void AMyPlayerController::BindInputActions()
 {

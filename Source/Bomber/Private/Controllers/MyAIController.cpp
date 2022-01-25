@@ -85,19 +85,13 @@ void AMyAIController::BeginPlay()
 		return;
 	}
 
-	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-	}
-
 	// Setup timer handle to update AI brain (initialized being paused)
 	FTimerManager& TimerManager = World->GetTimerManager();
 	TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, UGeneratedMapDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
 	TimerManager.PauseTimer(AIUpdateHandleInternal);
 }
 
-// Allows the PlayerController to set up custom input bindings
+// Allows the controller to react on possessing the pawn
 void AMyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -114,8 +108,31 @@ void AMyAIController::OnPossess(APawn* InPawn)
 		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
 	}
 
+	// Listen states
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	{
+		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+
 	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState(this) == ECGS::InGame;
 	SetAI(bMatchStarted);
+}
+
+// Allows the controller to react on unpossessing the pawn
+void AMyAIController::OnUnPossess()
+{
+	Super::OnUnPossess();
+
+	OwnerInternal = nullptr;
+
+	USingletonLibrary::GOnAIUpdatedDelegate.RemoveAll(this);
+
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	{
+		MyGameState->OnGameStateChanged.RemoveAll(this);
+	}
+
+	SetAI(false);
 }
 
 // The main AI logic

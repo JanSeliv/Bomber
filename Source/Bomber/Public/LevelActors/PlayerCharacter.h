@@ -281,4 +281,9 @@ protected:
 	/** Possess a player or AI controller in dependence of current Character ID. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryPossessController();
+
+	/** Is called on game mode post login to handle character logic when new player is connected. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPostLogin(class AGameModeBase* GameMode, APlayerController* NewPlayer);
+
 };

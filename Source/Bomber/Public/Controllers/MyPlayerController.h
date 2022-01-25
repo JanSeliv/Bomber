@@ -82,6 +82,12 @@ public:
 	/** Sets default values for this controller's properties. */
 	AMyPlayerController();
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPossessed, class APlayerCharacter*, PlayerCharacter);
+
+	/** Called when this controller possesses new player character. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnPossessed OnPossessed; //[DMD]
+
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
 	void ServerSetGameState(ECurrentGameState NewGameState);
@@ -126,6 +132,10 @@ protected:
 	/** Overridable native function for when this controller unpossesses its pawn. */
 	virtual void OnUnPossess() override;
 
+	/** Is overriden to notify when this controller possesses new player character.
+	 * @param InPawn The Pawn to be possessed. */
+	virtual void OnPossess(APawn* InPawn) override;
+
 	/** Set up custom input bindings. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BindInputActions();
@@ -149,7 +159,7 @@ protected:
 
 	/** Returns true if specified input context is enabled.
 	 * @param InputContext Context to verify. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	bool IsInputContextEnabled(const UMyInputMappingContext* InputContext) const;
 
 	/** Enables or disables specified input context.
@@ -171,6 +181,6 @@ protected:
 	void SpawnBomb();
 
 	/** Is called when all game widgets are initialized. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnWidgetsInitialized();
 };
