@@ -70,6 +70,8 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, EndGameStateInternal);
+	DOREPLIFETIME(ThisClass, PlayerMeshDataInternal);
+	DOREPLIFETIME(ThisClass, CustomPlayerNameInternal);
 }
 
 // Called when the game starts. Created widget
