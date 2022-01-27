@@ -110,7 +110,7 @@ protected:
 
 	/** Determines how this mesh looks like for now.
 	 * Is not transient, can be set in editor-time. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_PlayerMeshData", Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
 
 	/** Current level type of attached meshes.
@@ -128,11 +128,4 @@ protected:
 
 	/** Called when a component is registered (not loaded). */
 	virtual void OnRegister() override;
-
-	/** Returns properties that are replicated for the lifetime of the actor channel. */
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
-	/** Respond on changes in player mesh data to reset to set the mesh on client. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnRep_PlayerMeshData();
 };

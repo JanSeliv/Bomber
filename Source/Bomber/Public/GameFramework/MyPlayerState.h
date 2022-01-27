@@ -71,7 +71,7 @@ protected:
 	EEndGameState EndGameStateInternal = EEndGameState::None; //[G]
 
 	/** A level type of chosen skeletal mesh. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_PlayerMeshData", Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
 
 	/** Config: custom name set by player.
@@ -96,4 +96,8 @@ protected:
 	/** Updated result of the game for controlled player after ending the game. Called when one of players is destroying. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void ServerUpdateEndState();
+
+	/** Respond on changes in player mesh data to reset to set the mesh on client. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnRep_PlayerMeshData();
 };
