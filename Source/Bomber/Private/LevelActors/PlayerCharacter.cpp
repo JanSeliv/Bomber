@@ -299,7 +299,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	}
 
 	// Update mesh
-	FCustomPlayerMeshData CustomPlayerMeshData;
+	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
 	const AMyPlayerState* MyPlayerState = !CharacterIDInternal ? USingletonLibrary::GetLocalPlayerState() : nullptr;
 	if (MyPlayerState)
 	{
@@ -478,6 +478,7 @@ void APlayerCharacter::OnPlayerNameChanged_Implementation(FName NewName)
 	// ...
 }
 
+// Updates collision object type by current character ID
 void APlayerCharacter::UpdateCollisionObjectType()
 {
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
@@ -545,4 +546,12 @@ void APlayerCharacter::TryPossessController()
 void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
 {
 	TryPossessController();
+
+	// Set default custom player mesh
+	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(this))
+	{
+		FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
+		CustomPlayerMeshData.PlayerRow = UPlayerDataAsset::Get().GetRowByLevelType<UPlayerRow>(USingletonLibrary::GetLevelType());
+		MyPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
+	}
 }

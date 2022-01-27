@@ -23,12 +23,13 @@ AMyPlayerState::AMyPlayerState()
 // Set and apply how a player has to look like
 void AMyPlayerState::SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
-	PlayerMeshDataInternal = CustomPlayerMeshData;
-
-	if (const auto PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
+	if (!HasAuthority())
 	{
-		PlayerCharacter->InitMySkeletalMesh(CustomPlayerMeshData);
+		return;
 	}
+
+	PlayerMeshDataInternal = CustomPlayerMeshData;
+	OnRep_PlayerMeshData();
 }
 
 // Set the custom player name by user input
@@ -171,5 +172,14 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	    && OnEndGameStateChanged.IsBound())
 	{
 		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+	}
+}
+
+// Respond on changes in player mesh data to reset to set the mesh on client
+void AMyPlayerState::OnRep_PlayerMeshData()
+{
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
+	{
+		PlayerCharacter->InitMySkeletalMesh(PlayerMeshDataInternal);
 	}
 }
