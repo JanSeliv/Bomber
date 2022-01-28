@@ -227,11 +227,11 @@ protected:
 	TObjectPtr<class UStaticMeshComponent> NameplateMeshInternal = nullptr; //[C.DO]
 
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
 	FPowerUp PowerupsInternal; //[AW]
 
 	/** The ID identification of each character */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
 	int32 CharacterIDInternal = INDEX_NONE; //[G]
 
 	/** The character's AI controller */
@@ -250,6 +250,9 @@ protected:
 
 	/** Called every frame, is disabled on start, tick interval is decreased. */
 	virtual void Tick(float DeltaTime) override;
+
+	/** Returns properties that are replicated for the lifetime of the actor channel. */
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/**
 	 * Triggers when this player character starts something overlap.

@@ -22,6 +22,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Materials/MaterialInstance.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Net/UnrealNetwork.h"
 
 // Returns the dynamic material instance of a player with specified skin.
 UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const
@@ -371,6 +372,15 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	// Update a player location on the level map
 	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+}
+
+// Returns properties that are replicated for the lifetime of the actor channel
+void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, PowerupsInternal);
+	DOREPLIFETIME(ThisClass, CharacterIDInternal);
 }
 
 // Triggers when this player character starts something overlap.
