@@ -234,14 +234,6 @@ void AMyPlayerController::SetIgnoreMoveInput(bool bShouldIgnore)
 	IgnoreMoveInput = bShouldIgnore;
 }
 
-// Overridable native function for when this controller unpossesses its pawn
-void AMyPlayerController::OnUnPossess()
-{
-	Super::OnUnPossess();
-
-	SetIgnoreMoveInput(true);
-}
-
 // Is overriden to notify when this controller possesses new player character
 void AMyPlayerController::OnPossess(APawn* InPawn)
 {

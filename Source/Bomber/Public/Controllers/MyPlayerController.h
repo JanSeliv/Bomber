@@ -129,9 +129,6 @@ protected:
 	* @param bShouldIgnore	If true, move input is ignored. If false, input is not ignored.*/
 	virtual void SetIgnoreMoveInput(bool bShouldIgnore) override;
 
-	/** Overridable native function for when this controller unpossesses its pawn. */
-	virtual void OnUnPossess() override;
-
 	/** Is overriden to notify when this controller possesses new player character.
 	 * @param InPawn The Pawn to be possessed. */
 	virtual void OnPossess(APawn* InPawn) override;
