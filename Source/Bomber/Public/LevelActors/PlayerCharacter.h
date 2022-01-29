@@ -231,7 +231,7 @@ protected:
 	FPowerUp PowerupsInternal; //[AW]
 
 	/** The ID identification of each character */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CharacterID", Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
 	int32 CharacterIDInternal = INDEX_NONE; //[G]
 
 	/** The character's AI controller */
@@ -253,6 +253,9 @@ protected:
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/** Is overriden to handle the client login when is set new player state. */
+	virtual void OnRep_PlayerState() override;
 
 	/**
 	 * Triggers when this player character starts something overlap.
@@ -289,4 +292,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPostLogin(class AGameModeBase* GameMode, APlayerController* NewPlayer);
 
+	/** Apply default mesh for the local player. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetDefaultPlayerMeshData();
+
+	/** Is called on server and clients to apply the characterID-dependent logic for this character. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnRep_CharacterID();
 };

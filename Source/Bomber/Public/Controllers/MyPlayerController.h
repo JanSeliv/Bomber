@@ -84,9 +84,15 @@ public:
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPossessed, class APlayerCharacter*, PlayerCharacter);
 
-	/** Called when this controller possesses new player character. */
+	/** Notifies the server and clients when this controller possesses new player character. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnPossessed OnPossessed; //[DMD]
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetPlayerState, class AMyPlayerState*, MyPlayerState);
+
+	/** Notifies the server and clients when the player state is set. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnSetPlayerState OnSetPlayerState; //[DMD]
 
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
@@ -132,6 +138,12 @@ protected:
 	/** Is overriden to notify when this controller possesses new player character.
 	 * @param InPawn The Pawn to be possessed. */
 	virtual void OnPossess(APawn* InPawn) override;
+
+	/** Is overriden to notify the client when this controller possesses new player character. */
+	virtual void OnRep_Pawn() override;
+
+	/** Is overriden to notify the client when is set new player state. */
+	virtual void OnRep_PlayerState() override;
 
 	/** Set up custom input bindings. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -180,4 +192,12 @@ protected:
 	/** Is called when all game widgets are initialized. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnWidgetsInitialized();
+
+	/** Is called on server and on client when this controller possesses new player character. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BroadcastOnPossessed();
+
+	/** Is called on server and on client the player state is set. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BroadcastOnSetPlayerState();
 };

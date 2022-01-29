@@ -11,6 +11,7 @@
 //---
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
 #include "Globals/MyInputAction.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -239,13 +240,24 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>();
-	if (PlayerCharacter
-	    && PlayerCharacter == InPawn
-	    && OnPossessed.IsBound())
-	{
-		OnPossessed.Broadcast(PlayerCharacter);
-	}
+	BroadcastOnPossessed();
+	BroadcastOnSetPlayerState();
+}
+
+// Is overriden to notify the client when this controller possesses new player character
+void AMyPlayerController::OnRep_Pawn()
+{
+	Super::OnRep_Pawn();
+
+	BroadcastOnPossessed();
+}
+
+// Is overriden to notify the client when is set new player state
+void AMyPlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	BroadcastOnSetPlayerState();
 }
 
 // Allows the PlayerController to set up custom input bindings
@@ -490,4 +502,38 @@ void AMyPlayerController::OnWidgetsInitialized()
 	}
 
 	BindInputActions();
+}
+
+// Is called on server and on client when this controller possesses new player character
+void AMyPlayerController::BroadcastOnPossessed()
+{
+	if (!OnPossessed.IsBound())
+	{
+		return;
+	}
+
+	APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>();
+	if (!PlayerCharacter)
+	{
+		return;
+	}
+
+	OnPossessed.Broadcast(PlayerCharacter);
+}
+
+// Is called on server and on client the player state is set
+void AMyPlayerController::BroadcastOnSetPlayerState()
+{
+	if (!OnSetPlayerState.IsBound())
+	{
+		return;
+	}
+
+	AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>();
+	if (!MyPlayerState)
+	{
+		return;
+	}
+
+	OnSetPlayerState.Broadcast(MyPlayerState);
 }
