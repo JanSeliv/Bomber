@@ -303,8 +303,11 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		OnRep_CharacterID();
 	}
 
-	static const FName DefaultAIName(TEXT("AI"));
-	OnPlayerNameChanged(DefaultAIName);
+	if (!IsPlayerControlled())
+	{
+		static const FName DefaultAIName(TEXT("AI"));
+		OnPlayerNameChanged(DefaultAIName);
+	}
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
