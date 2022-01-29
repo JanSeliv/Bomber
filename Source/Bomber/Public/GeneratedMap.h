@@ -286,7 +286,7 @@ protected:
 	int32 PlayersNumInternal = 0; //[G]
 
 	/** The current level type. Affects on the meshes of each level actor. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = "OnRep_LevelType", Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
 	ELevelType LevelTypeInternal = ELT::First; //[N]
 
 	/** Attached camera component. */
@@ -339,6 +339,10 @@ protected:
 	* @param Transform New transform of the level map. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TransformLevelMap(const FTransform& Transform);
+
+	/** Is called on client and server to load new level. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnRep_LevelType();
 
 	/* ---------------------------------------------------
 	 *					Editor development

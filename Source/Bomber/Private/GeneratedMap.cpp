@@ -514,133 +514,8 @@ void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
 		return;
 	}
 
-	UWorld* World = GetWorld();
-	TArray<FLevelStreamRow> LevelStreamRows;
-	UGeneratedMapDataAsset::Get().GetLevelStreamRows(LevelStreamRows);
-	if (!LevelStreamRows.Num()
-	    || !World)
-	{
-		return;
-	}
-
-	// Get Level Streaming by Index in LevelStreamingRows, returns if found stream should be visible
-	auto GetLevelStreaming = [&LevelStreamRows, NewLevelType](const int32& Index, FName& OutLevelName) -> bool
-	{
-		if (!LevelStreamRows.IsValidIndex(Index))
-		{
-			return false;
-		}
-
-		const FLevelStreamRow& LevelStreamRowIt = LevelStreamRows[Index];
-		OutLevelName = *LevelStreamRowIt.Level.GetLongPackageName();
-		return LevelStreamRowIt.LevelType == NewLevelType;
-	};
-
-	// ---- Changing streaming levels in the preview world ----
-
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld())
-	{
-		if (NewLevelType == ELT::None)
-		{
-			// the level is not selected, choose persistent
-			UEditorLevelUtils::MakeLevelCurrent(World->PersistentLevel, false);
-			return;
-		}
-
-		// Iterate all levels, load all, show selected, hide others
-		UPackage* PersistentLevelPackage = World->PersistentLevel->GetPackage();
-		const bool bIsPersistentLevelDirty = PersistentLevelPackage && PersistentLevelPackage->IsDirty();
-		bool bClearPersistentLevelDirty = false;
-		for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
-		{
-			FName PackageName(NAME_None);
-			const bool bShouldBeVisibleIt = GetLevelStreaming(Index, PackageName);
-			if (PackageName.IsNone())
-			{
-				continue;
-			}
-
-			const TSubclassOf<ULevelStreaming>& StreamingClass = bShouldBeVisibleIt ? ULevelStreamingAlwaysLoaded::StaticClass() : ULevelStreamingDynamic::StaticClass();
-			ULevelStreaming* LevelStreamingIt = UGameplayStatics::GetStreamingLevel(World, PackageName);
-			if (!LevelStreamingIt) // level is not added to the persistent
-			{
-				LevelStreamingIt = UEditorLevelUtils::AddLevelToWorld(World, *PackageName.ToString(), StreamingClass);
-			}
-
-			// Set visibility
-			ULevel* LoadedLevel = LevelStreamingIt ? LevelStreamingIt->GetLoadedLevel() : nullptr;
-			if (LoadedLevel)
-			{
-				UEditorLevelUtils::SetLevelVisibility(LoadedLevel, bShouldBeVisibleIt, false, ELevelVisibilityDirtyMode::DontModify);
-				if (bShouldBeVisibleIt)
-				{
-					// Make the selected level as current (it will make persistent as dirty)
-					UEditorLevelUtils::MakeLevelCurrent(LoadedLevel, true);
-					bClearPersistentLevelDirty = !bIsPersistentLevelDirty;
-				}
-			}
-		}
-
-		// Reset dirty flag for persistent marked by UEditorLevelUtils if level was not modified before
-		if (bClearPersistentLevelDirty
-		    && PersistentLevelPackage)
-		{
-			PersistentLevelPackage->ClearDirtyFlag();
-		}
-
-		// The editor stream was overridden, no need to continue
-		return;
-	}
-#endif // [IsEditorNotPieWorld]
-
-	// ---- Changing levels during the game ----
-
-	// show the specified level, hide other levels
-	for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
-	{
-		FName PackageName;
-		const bool bShouldBeVisibleIt = GetLevelStreaming(Index, PackageName);
-		if (PackageName.IsNone())
-		{
-			continue;
-		}
-
-		FLatentActionInfo LatentInfo;
-		LatentInfo.UUID = Index;
-		ULevelStreaming* StreamingLevel = UGameplayStatics::GetStreamingLevel(World, PackageName);
-		if (!StreamingLevel
-		    || !StreamingLevel->IsLevelLoaded())
-		{
-			UGameplayStatics::LoadStreamLevel(World, PackageName, bShouldBeVisibleIt, false, LatentInfo);
-		}
-		else
-		{
-			StreamingLevel->SetShouldBeVisible(bShouldBeVisibleIt);
-		}
-	}
-
-	// Skip if the same level type
-	if (LevelTypeInternal == NewLevelType)
-	{
-		return;
-	}
-
 	LevelTypeInternal = NewLevelType;
-
-	if (OnSetNewLevelType.IsBound())
-	{
-		OnSetNewLevelType.Broadcast(NewLevelType);
-	}
-
-	// Once level is loading, prepare him
-	for (const TObjectPtr<UMapComponent>& MapComponentIt : MapComponentsInternal)
-	{
-		if (MapComponentIt)
-		{
-			MapComponentIt->RerunOwnerConstruction();
-		}
-	}
+	OnRep_LevelType();
 }
 
 // Returns cells that currently are chosen to be exploded
@@ -1142,6 +1017,130 @@ void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 			// Cell was found, add rotated cell to the array
 			const FCell FoundCell(FCell(FoundVector).RotateAngleAxis(1.f));
 			GridCellsInternal.AddUnique(FoundCell);
+		}
+	}
+}
+
+// Is called on client and server to load new level
+void AGeneratedMap::OnRep_LevelType()
+{
+	UWorld* World = GetWorld();
+	TArray<FLevelStreamRow> LevelStreamRows;
+	UGeneratedMapDataAsset::Get().GetLevelStreamRows(LevelStreamRows);
+	if (!LevelStreamRows.Num()
+	    || !World)
+	{
+		return;
+	}
+
+	// Get Level Streaming by Index in LevelStreamingRows, returns if found stream should be visible
+	auto GetLevelStreaming = [&LevelStreamRows, NewLevelType = LevelTypeInternal](const int32& Index, FName& OutLevelName) -> bool
+	{
+		if (!LevelStreamRows.IsValidIndex(Index))
+		{
+			return false;
+		}
+
+		const FLevelStreamRow& LevelStreamRowIt = LevelStreamRows[Index];
+		OutLevelName = *LevelStreamRowIt.Level.GetLongPackageName();
+		return LevelStreamRowIt.LevelType == NewLevelType;
+	};
+
+	// ---- Changing streaming levels in the preview world ----
+
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld())
+	{
+		if (LevelTypeInternal == ELT::None)
+		{
+			// the level is not selected, choose persistent
+			UEditorLevelUtils::MakeLevelCurrent(World->PersistentLevel, false);
+			return;
+		}
+
+		// Iterate all levels, load all, show selected, hide others
+		UPackage* PersistentLevelPackage = World->PersistentLevel->GetPackage();
+		const bool bIsPersistentLevelDirty = PersistentLevelPackage && PersistentLevelPackage->IsDirty();
+		bool bClearPersistentLevelDirty = false;
+		for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
+		{
+			FName PackageName(NAME_None);
+			const bool bShouldBeVisibleIt = GetLevelStreaming(Index, PackageName);
+			if (PackageName.IsNone())
+			{
+				continue;
+			}
+
+			const TSubclassOf<ULevelStreaming>& StreamingClass = bShouldBeVisibleIt ? ULevelStreamingAlwaysLoaded::StaticClass() : ULevelStreamingDynamic::StaticClass();
+			ULevelStreaming* LevelStreamingIt = UGameplayStatics::GetStreamingLevel(World, PackageName);
+			if (!LevelStreamingIt) // level is not added to the persistent
+			{
+				LevelStreamingIt = UEditorLevelUtils::AddLevelToWorld(World, *PackageName.ToString(), StreamingClass);
+			}
+
+			// Set visibility
+			ULevel* LoadedLevel = LevelStreamingIt ? LevelStreamingIt->GetLoadedLevel() : nullptr;
+			if (LoadedLevel)
+			{
+				UEditorLevelUtils::SetLevelVisibility(LoadedLevel, bShouldBeVisibleIt, false, ELevelVisibilityDirtyMode::DontModify);
+				if (bShouldBeVisibleIt)
+				{
+					// Make the selected level as current (it will make persistent as dirty)
+					UEditorLevelUtils::MakeLevelCurrent(LoadedLevel, true);
+					bClearPersistentLevelDirty = !bIsPersistentLevelDirty;
+				}
+			}
+		}
+
+		// Reset dirty flag for persistent marked by UEditorLevelUtils if level was not modified before
+		if (bClearPersistentLevelDirty
+		    && PersistentLevelPackage)
+		{
+			PersistentLevelPackage->ClearDirtyFlag();
+		}
+
+		// The editor stream was overridden, no need to continue
+		return;
+	}
+#endif // [IsEditorNotPieWorld]
+
+	// ---- Changing levels during the game ----
+
+	// show the specified level, hide other levels
+	for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
+	{
+		FName PackageName;
+		const bool bShouldBeVisibleIt = GetLevelStreaming(Index, PackageName);
+		if (PackageName.IsNone())
+		{
+			continue;
+		}
+
+		FLatentActionInfo LatentInfo;
+		LatentInfo.UUID = Index;
+		ULevelStreaming* StreamingLevel = UGameplayStatics::GetStreamingLevel(World, PackageName);
+		if (!StreamingLevel
+		    || !StreamingLevel->IsLevelLoaded())
+		{
+			UGameplayStatics::LoadStreamLevel(World, PackageName, bShouldBeVisibleIt, false, LatentInfo);
+		}
+		else
+		{
+			StreamingLevel->SetShouldBeVisible(bShouldBeVisibleIt);
+		}
+	}
+
+	if (OnSetNewLevelType.IsBound())
+	{
+		OnSetNewLevelType.Broadcast(LevelTypeInternal);
+	}
+
+	// Once level is loading, prepare him
+	for (const TObjectPtr<UMapComponent>& MapComponentIt : MapComponentsInternal)
+	{
+		if (MapComponentIt)
+		{
+			MapComponentIt->RerunOwnerConstruction();
 		}
 	}
 }
