@@ -67,24 +67,19 @@ void AMyHUD::BeginPlay()
 // Will try to start the process of initializing all widgets used in game
 void AMyHUD::TryInitWidgets()
 {
-#if WITH_EDITOR // [Editor]
-	if (USingletonLibrary::IsEditor())
+	UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
+	FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
+	if (Viewport)
 	{
-		UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
-		FViewport* EditorViewport = GameViewport ? GameViewport->Viewport : nullptr;
-		if (EditorViewport)
+		GameViewport->MouseEnter(Viewport, 0, 0);
+		if (Viewport->GetSizeXY() != FIntPoint::ZeroValue)
 		{
-			GameViewport->MouseEnter(EditorViewport, 0, 0);
-			if (EditorViewport->GetSizeXY() != FIntPoint::ZeroValue)
-			{
-				OnViewportResizedWhenInit(EditorViewport, 0);
-				return;
-			}
+			OnViewportResizedWhenInit(Viewport, 0);
+			return;
 		}
-		// Fallback on bounding to viewport resized event
 	}
-#endif // WITH_EDITOR
 
+	// Fallback on bounding to viewport resized event
 	FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
 }
 
