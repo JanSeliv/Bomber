@@ -23,11 +23,6 @@ AMyPlayerState::AMyPlayerState()
 // Set and apply how a player has to look like
 void AMyPlayerState::SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
-	if (!HasAuthority())
-	{
-		return;
-	}
-
 	PlayerMeshDataInternal = CustomPlayerMeshData;
 	OnRep_PlayerMeshData();
 }

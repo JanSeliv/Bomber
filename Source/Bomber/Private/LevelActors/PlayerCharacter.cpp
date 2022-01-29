@@ -268,6 +268,8 @@ void APlayerCharacter::BeginPlay()
 	{
 		MyPlayerState->OnPlayerNameChanged.AddDynamic(this, &ThisClass::OnPlayerNameChanged);
 		OnPlayerNameChanged(MyPlayerState->GetPlayerFNameCustom());
+
+		SetDefaultPlayerMeshData();
 	}
 
 	UpdateCollisionObjectType();
@@ -292,53 +294,17 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	}
 
 	// Set ID
-	if (CharacterIDInternal == INDEX_NONE)
+	if (HasAuthority()
+	    && CharacterIDInternal == INDEX_NONE)
 	{
 		FCells PlayerCells;
 		AGeneratedMap::Get().IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
 		CharacterIDInternal = PlayerCells.Num() - 1;
+		OnRep_CharacterID();
 	}
 
-	// Update mesh
-	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
-	const AMyPlayerState* MyPlayerState = !CharacterIDInternal ? USingletonLibrary::GetLocalPlayerState() : nullptr;
-	if (MyPlayerState)
-	{
-		CustomPlayerMeshData = MyPlayerState->GetCustomPlayerMeshData();
-	}
-	else // is bot
-	{
-		const ULevelActorDataAsset* PlayerDataAsset = MapComponentInternal->GetActorDataAsset();
-		const int32 MeshesNum = PlayerDataAsset ? PlayerDataAsset->GetRowsNum() : 0;
-		if (MeshesNum)
-		{
-			const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
-			if (UPlayerRow* Row = Cast<UPlayerRow>(PlayerDataAsset->GetRowByLevelType(TO_ENUM(ELevelType, LevelType))))
-			{
-				CustomPlayerMeshData.PlayerRow = Row;
-				CustomPlayerMeshData.SkinIndex = FMath::RandHelper(Row->GetMaterialInstancesDynamicNum());
-			}
-		}
-
-		static const FName DefaultAIName(TEXT("AI"));
-		OnPlayerNameChanged(DefaultAIName);
-	}
-	InitMySkeletalMesh(CustomPlayerMeshData);
-
-	// Set a nameplate material
-	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
-	{
-		const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
-		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
-		if (NameplateMeshesNum > 0)
-		{
-			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
-			if (UMaterialInterface* Material = PlayerDataAsset.GetNameplateMaterial(MaterialNo))
-			{
-				NameplateMeshInternal->SetMaterial(0, Material);
-			}
-		}
-	}
+	static const FName DefaultAIName(TEXT("AI"));
+	OnPlayerNameChanged(DefaultAIName);
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
@@ -381,6 +347,14 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(ThisClass, PowerupsInternal);
 	DOREPLIFETIME(ThisClass, CharacterIDInternal);
+}
+
+// Is overriden to handle the client login when is set new player state
+void APlayerCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	SetDefaultPlayerMeshData();
 }
 
 // Triggers when this player character starts something overlap.
@@ -557,11 +531,66 @@ void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* N
 {
 	TryPossessController();
 
-	// Set default custom player mesh
-	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(this))
+	SetDefaultPlayerMeshData();
+}
+
+// Apply default mesh for the local player
+void APlayerCharacter::SetDefaultPlayerMeshData()
+{
+	AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>();
+	if (!MyPlayerState)
 	{
-		FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
+		return;
+	}
+
+	FCustomPlayerMeshData CustomPlayerMeshData = MyPlayerState->GetCustomPlayerMeshData();
+	if (CustomPlayerMeshData.IsValid())
+	{
+		InitMySkeletalMesh(CustomPlayerMeshData);
+	}
+	else
+	{
+		// Set default custom player mesh
 		CustomPlayerMeshData.PlayerRow = UPlayerDataAsset::Get().GetRowByLevelType<UPlayerRow>(USingletonLibrary::GetLevelType());
 		MyPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
+	}
+}
+
+// Is called on server and clients to apply the characterID-dependent logic for this character
+void APlayerCharacter::OnRep_CharacterID()
+{
+	if (CharacterIDInternal == INDEX_NONE)
+	{
+		return;
+	}
+
+	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+
+	// Update mesh
+	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
+	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
+	if (MeshesNum > 0)
+	{
+		const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
+		if (UPlayerRow* Row = Cast<UPlayerRow>(PlayerDataAsset.GetRowByLevelType(TO_ENUM(ELevelType, LevelType))))
+		{
+			CustomPlayerMeshData.PlayerRow = Row;
+			CustomPlayerMeshData.SkinIndex = FMath::RandHelper(Row->GetMaterialInstancesDynamicNum());
+			InitMySkeletalMesh(CustomPlayerMeshData);
+		}
+	}
+
+	// Set a nameplate material
+	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
+	{
+		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
+		if (NameplateMeshesNum > 0)
+		{
+			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
+			if (UMaterialInterface* Material = PlayerDataAsset.GetNameplateMaterial(MaterialNo))
+			{
+				NameplateMeshInternal->SetMaterial(0, Material);
+			}
+		}
 	}
 }
