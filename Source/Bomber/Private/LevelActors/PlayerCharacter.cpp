@@ -555,7 +555,7 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	{
 		// Set default custom player mesh
 		CustomPlayerMeshData.PlayerRow = UPlayerDataAsset::Get().GetRowByLevelType<UPlayerRow>(USingletonLibrary::GetLevelType());
-		MyPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
+		MyPlayerState->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
 	}
 }
 

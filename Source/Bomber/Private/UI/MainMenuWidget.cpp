@@ -9,6 +9,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/SingletonLibrary.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "UI/Carousel.h"
 
 // Initializes the main menu widget
@@ -58,8 +59,15 @@ void UMainMenuWidget::ChooseBack()
 // Sets the next skin in the Menu
 void UMainMenuWidget::NextSkin()
 {
-	UMySkeletalMeshComponent* MySkeletalMeshComponent = MainMenuActorInternal ? MainMenuActorInternal->GetCurrentMeshComponent<UMySkeletalMeshComponent>() : nullptr;
-	const FCustomPlayerMeshData& CustomPlayerMeshData = MySkeletalMeshComponent ? MySkeletalMeshComponent->GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
+	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
+	AMyPlayerState* LocalPlayerState = LocalPlayerCharacter ? LocalPlayerCharacter->GetPlayerState<AMyPlayerState>() : nullptr;
+	if (!ensureMsgf(LocalPlayerState, TEXT("ASSERT: 'LocalPlayerState' is not valid")))
+	{
+		return;
+	}
+
+	UMySkeletalMeshComponent* MainMenuMeshComp = MainMenuActorInternal ? MainMenuActorInternal->GetCurrentMeshComponent<UMySkeletalMeshComponent>() : nullptr;
+	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp ? MainMenuMeshComp->GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
 	if (!CustomPlayerMeshData.IsValid())
 	{
 		return;
@@ -73,12 +81,15 @@ void UMainMenuWidget::NextSkin()
 
 	// Switch the preview skin
 	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + 1;
-	MySkeletalMeshComponent->SetSkin(NewSkinIndex);
+	MainMenuMeshComp->SetSkin(NewSkinIndex);
 
 	// Update the player data
-	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetLocalPlayerState())
+	LocalPlayerState->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
+
+	// Update player skin locally on client
+	if (!LocalPlayerCharacter->HasAuthority())
 	{
-		MyPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
+		LocalPlayerCharacter->InitMySkeletalMesh(CustomPlayerMeshData);
 	}
 }
 
@@ -176,8 +187,11 @@ void UMainMenuWidget::SwitchCurrentLevel(int32 Incrementer)
 // Sets the preview mesh of a player depending on specified incrementer
 void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 {
-	if (!ensureMsgf(MainMenuActorInternal, TEXT("ASSERT: 'MainMenuActorInternal' is not valid"))
-	    || !Incrementer)
+	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
+	AMyPlayerState* LocalPlayerState = LocalPlayerCharacter ? LocalPlayerCharacter->GetPlayerState<AMyPlayerState>() : nullptr;
+	if (!ensureMsgf(LocalPlayerState, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
+		|| !ensureMsgf(MainMenuActorInternal, TEXT("ASSERT: 'MainMenuActorInternal' is not valid"))
+		|| !Incrementer)
 	{
 		return;
 	}
@@ -194,20 +208,20 @@ void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 		return;
 	}
 
-	const auto MySkeletalMeshComponent = MainMenuActorInternal->GetCurrentMeshComponent<UMySkeletalMeshComponent>();
-	if (!MySkeletalMeshComponent)
+	UMySkeletalMeshComponent* MainMenuMeshComp = MainMenuActorInternal ? MainMenuActorInternal->GetCurrentMeshComponent<UMySkeletalMeshComponent>() : nullptr;
+	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp ? MainMenuMeshComp->GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
+	if (!CustomPlayerMeshData.IsValid())
 	{
 		return;
 	}
 
-	// Update preview
-	const FCustomPlayerMeshData& CustomPlayerMeshData = MySkeletalMeshComponent->GetCustomPlayerMeshData();
-	MySkeletalMeshComponent->InitMySkeletalMesh(CustomPlayerMeshData);
-
 	// Update player data
-	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetLocalPlayerState())
+	LocalPlayerState->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
+
+	// Update player mesh locally on client
+	if (!LocalPlayerCharacter->HasAuthority())
 	{
-		CurrentPlayerState->SetCustomPlayerMeshData(CustomPlayerMeshData);
+		LocalPlayerCharacter->InitMySkeletalMesh(CustomPlayerMeshData);
 	}
 }
 

@@ -43,8 +43,8 @@ public:
 
 	/** Set and apply how a player has to look like.
 	 * @param CustomPlayerMeshData New data to apply. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
-	void SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData);
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
+	void ServerSetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
 	/** By which level type a skeletal mesh is chosen. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
