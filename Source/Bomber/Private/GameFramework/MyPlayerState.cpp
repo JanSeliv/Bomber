@@ -21,7 +21,7 @@ AMyPlayerState::AMyPlayerState()
 }
 
 // Set and apply how a player has to look like
-void AMyPlayerState::SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData)
+void AMyPlayerState::ServerSetCustomPlayerMeshData_Implementation(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
 	PlayerMeshDataInternal = CustomPlayerMeshData;
 	OnRep_PlayerMeshData();

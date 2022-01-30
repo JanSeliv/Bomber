@@ -204,7 +204,7 @@ public:
 
 	/** Set and apply new skeletal mesh by specified data.
 	 * @param CustomPlayerMeshData Contains data about the skin to set. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
 	/** Returns the Skeletal Mesh of bombers. */
