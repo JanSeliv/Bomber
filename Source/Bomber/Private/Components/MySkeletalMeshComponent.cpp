@@ -47,13 +47,19 @@ void UMySkeletalMeshComponent::OnVisibilityChanged()
 {
 	Super::OnVisibilityChanged();
 
-	if (IsVisible())
+	const bool bIsVisible = IsVisible();
+	
+	const bool bIsAnimationAssetMode = GetSingleNodeInstance() != nullptr;
+	if (bIsAnimationAssetMode)
 	{
-		Play(true);
-	}
-	else
-	{
-		Stop();
+		if (bIsVisible)
+		{
+			Play(true);
+		}
+		else
+		{
+			Stop();
+		}
 	}
 }
 
