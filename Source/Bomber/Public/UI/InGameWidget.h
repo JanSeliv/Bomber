@@ -40,16 +40,16 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** The button to allow player restart the game. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "RestartButton"))
-	TObjectPtr<class UButton> RestartButtonInternal; //[B]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UButton> RestartButton = nullptr; //[B]
 
 	/** The button to allow player go back to the Main Menu. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "MenuButton"))
-	TObjectPtr<class UButton> MenuButtonInternal; //[B]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UButton> MenuButton = nullptr; //[B]
 
 	/** The button to allow player open in-game Settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "SettingsButton"))
-	TObjectPtr<class UButton> SettingsButtonInternal; //[B]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UButton> SettingsButton = nullptr; //[B]
 
 	/* ---------------------------------------------------
 	 *		Protected functions

@@ -109,19 +109,19 @@ void UInGameWidget::NativeConstruct()
 		MyHUD->OnClose.AddUniqueDynamic(this, &ThisClass::ToggleInGameMenu);
 	}
 
-	if (RestartButtonInternal)
+	if (RestartButton)
 	{
-		RestartButtonInternal->OnPressed.AddUniqueDynamic(this, &ThisClass::OnRestartButtonPressed);
+		RestartButton->OnPressed.AddUniqueDynamic(this, &ThisClass::OnRestartButtonPressed);
 	}
 
-	if (MenuButtonInternal)
+	if (MenuButton)
 	{
-		MenuButtonInternal->OnPressed.AddUniqueDynamic(this, &ThisClass::OnMenuButtonPressed);
+		MenuButton->OnPressed.AddUniqueDynamic(this, &ThisClass::OnMenuButtonPressed);
 	}
 
-	if (SettingsButtonInternal)
+	if (SettingsButton)
 	{
-		SettingsButtonInternal->OnPressed.AddUniqueDynamic(this, &ThisClass::OnSettingsButtonPressed);
+		SettingsButton->OnPressed.AddUniqueDynamic(this, &ThisClass::OnSettingsButtonPressed);
 	}
 }
 

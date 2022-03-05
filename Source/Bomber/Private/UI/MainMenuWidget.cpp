@@ -190,8 +190,8 @@ void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
 	AMyPlayerState* LocalPlayerState = LocalPlayerCharacter ? LocalPlayerCharacter->GetPlayerState<AMyPlayerState>() : nullptr;
 	if (!ensureMsgf(LocalPlayerState, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
-		|| !ensureMsgf(MainMenuActorInternal, TEXT("ASSERT: 'MainMenuActorInternal' is not valid"))
-		|| !Incrementer)
+	    || !ensureMsgf(MainMenuActorInternal, TEXT("ASSERT: 'MainMenuActorInternal' is not valid"))
+	    || !Incrementer)
 	{
 		return;
 	}
@@ -208,7 +208,7 @@ void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 		return;
 	}
 
-	UMySkeletalMeshComponent* MainMenuMeshComp = MainMenuActorInternal ? MainMenuActorInternal->GetCurrentMeshComponent<UMySkeletalMeshComponent>() : nullptr;
+	const UMySkeletalMeshComponent* MainMenuMeshComp = MainMenuActorInternal ? MainMenuActorInternal->GetCurrentMeshComponent<UMySkeletalMeshComponent>() : nullptr;
 	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp ? MainMenuMeshComp->GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
 	if (!CustomPlayerMeshData.IsValid())
 	{

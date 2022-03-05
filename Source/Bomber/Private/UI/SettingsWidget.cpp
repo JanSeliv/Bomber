@@ -129,28 +129,28 @@ void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpda
 		if (ChosenData == &Setting.Checkbox)
 		{
 			const bool NewValue = GetCheckboxValue(SettingTag);
-			SetCheckbox(SettingTag, NewValue);
+			SetSettingCheckbox(SettingTag, NewValue);
 		}
 		else if (ChosenData == &Setting.Combobox)
 		{
 			const int32 NewValue = GetComboboxIndex(SettingTag);
-			SetComboboxIndex(SettingTag, NewValue);
+			SetSettingComboboxIndex(SettingTag, NewValue);
 		}
 		else if (ChosenData == &Setting.Slider)
 		{
 			const float NewValue = GetSliderValue(SettingTag);
-			SetSlider(SettingTag, NewValue);
+			SetSettingSlider(SettingTag, NewValue);
 		}
 		else if (ChosenData == &Setting.TextLine)
 		{
 			FText NewValue = TEXT_NONE;
 			GetTextLineValue(SettingTag, /*Out*/NewValue);
-			SetTextLine(SettingTag, NewValue);
+			SetSettingTextLine(SettingTag, NewValue);
 		}
 		else if (ChosenData == &Setting.UserInput)
 		{
 			const FName NewValue = GetUserInputValue(SettingTag);
-			SetUserInput(SettingTag, NewValue);
+			SetSettingUserInput(SettingTag, NewValue);
 		}
 	}
 }
@@ -172,7 +172,7 @@ const FGameplayTag& USettingsWidget::GetTagByFunctionPicker(const FFunctionPicke
 }
 
 // Set value to the option by tag
-void USettingsWidget::SetSettingValue(FName TagName, const FString& Value, bool bSubStringSearch/* = false*/)
+void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 {
 	const FSettingsPicker& FoundRow = FindSettingRow(TagName);
 	if (!FoundRow.IsValid())
@@ -194,19 +194,19 @@ void USettingsWidget::SetSettingValue(FName TagName, const FString& Value, bool 
 
 	if (ChosenData == &FoundRow.Button)
 	{
-		SetButtonPressed(Tag);
+		SetSettingButtonPressed(Tag);
 	}
 	else if (ChosenData == &FoundRow.Checkbox)
 	{
 		const bool NewValue = Value.ToBool();
-		SetCheckbox(Tag, NewValue);
+		SetSettingCheckbox(Tag, NewValue);
 	}
 	else if (ChosenData == &FoundRow.Combobox)
 	{
 		if (Value.IsNumeric())
 		{
 			const int32 NewValue = FCString::Atoi(*Value);
-			SetComboboxIndex(Tag, NewValue);
+			SetSettingComboboxIndex(Tag, NewValue);
 		}
 		else
 		{
@@ -220,35 +220,35 @@ void USettingsWidget::SetSettingValue(FName TagName, const FString& Value, bool 
 			{
 				NewMembers.Emplace(FText::FromString(MoveTemp(StringIt)));
 			}
-			SetComboboxMembers(Tag, NewMembers);
+			SetSettingComboboxMembers(Tag, NewMembers);
 		}
 	}
 	else if (ChosenData == &FoundRow.Slider)
 	{
 		const float NewValue = FCString::Atof(*Value);
-		SetSlider(Tag, NewValue);
+		SetSettingSlider(Tag, NewValue);
 	}
 	else if (ChosenData == &FoundRow.TextLine)
 	{
 		const FText NewValue = FText::FromString(Value);
-		SetTextLine(Tag, NewValue);
+		SetSettingTextLine(Tag, NewValue);
 	}
 	else if (ChosenData == &FoundRow.UserInput)
 	{
 		const FName NewValue = *Value;
-		SetUserInput(Tag, NewValue);
+		SetSettingUserInput(Tag, NewValue);
 	}
 }
 
 // Press button
-void USettingsWidget::SetButtonPressed(const FGameplayTag& ButtonTag)
+void USettingsWidget::SetSettingButtonPressed(const FGameplayTag& ButtonTag)
 {
 	if (!ButtonTag.IsValid())
 	{
 		return;
 	}
 
-	FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(ButtonTag.GetTagName());
+	const FSettingsPicker* SettingsRowPtr = SettingsTableRowsInternal.Find(ButtonTag.GetTagName());
 	if (!SettingsRowPtr)
 	{
 		return;
@@ -260,7 +260,7 @@ void USettingsWidget::SetButtonPressed(const FGameplayTag& ButtonTag)
 }
 
 // Toggle checkbox
-void USettingsWidget::SetCheckbox(const FGameplayTag& CheckboxTag, bool InValue)
+void USettingsWidget::SetSettingCheckbox(const FGameplayTag& CheckboxTag, bool InValue)
 {
 	if (!CheckboxTag.IsValid())
 	{
@@ -284,11 +284,11 @@ void USettingsWidget::SetCheckbox(const FGameplayTag& CheckboxTag, bool InValue)
 	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 
 	// BP implementation
-	SetCheckboxBP(CheckboxTag, InValue);
+	SetCheckbox(CheckboxTag, InValue);
 }
 
 // Set chosen member index for a combobox
-void USettingsWidget::SetComboboxIndex(const FGameplayTag& ComboboxTag, int32 InValue)
+void USettingsWidget::SetSettingComboboxIndex(const FGameplayTag& ComboboxTag, int32 InValue)
 {
 	if (!ComboboxTag.IsValid())
 	{
@@ -317,11 +317,11 @@ void USettingsWidget::SetComboboxIndex(const FGameplayTag& ComboboxTag, int32 In
 	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 
 	// BP implementation
-	SetComboboxIndexBP(ComboboxTag, InValue);
+	SetComboboxIndex(ComboboxTag, InValue);
 }
 
 // Set new members for a combobox
-void USettingsWidget::SetComboboxMembers(const FGameplayTag& ComboboxTag, const TArray<FText>& InValue)
+void USettingsWidget::SetSettingComboboxMembers(const FGameplayTag& ComboboxTag, const TArray<FText>& InValue)
 {
 	if (!ComboboxTag.IsValid())
 	{
@@ -338,11 +338,11 @@ void USettingsWidget::SetComboboxMembers(const FGameplayTag& ComboboxTag, const 
 	SettingsRowPtr->Combobox.OnSetMembers.ExecuteIfBound(InValue);
 
 	// BP implementation
-	SetComboboxMembersBP(ComboboxTag, InValue);
+	SetComboboxMembers(ComboboxTag, InValue);
 }
 
 // Set current value for a slider
-void USettingsWidget::SetSlider(const FGameplayTag& SliderTag, float InValue)
+void USettingsWidget::SetSettingSlider(const FGameplayTag& SliderTag, float InValue)
 {
 	if (!SliderTag.IsValid())
 	{
@@ -369,11 +369,11 @@ void USettingsWidget::SetSlider(const FGameplayTag& SliderTag, float InValue)
 	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 
 	// BP implementation
-	SetSliderBP(SliderTag, InValue);
+	SetSlider(SliderTag, InValue);
 }
 
 // Set new text
-void USettingsWidget::SetTextLine(const FGameplayTag& TextLineTag, const FText& InValue)
+void USettingsWidget::SetSettingTextLine(const FGameplayTag& TextLineTag, const FText& InValue)
 {
 	if (!TextLineTag.IsValid())
 	{
@@ -404,7 +404,7 @@ void USettingsWidget::SetTextLine(const FGameplayTag& TextLineTag, const FText& 
 }
 
 // Set new text for an input box
-void USettingsWidget::SetUserInput(const FGameplayTag& UserInputTag, FName InValue)
+void USettingsWidget::SetSettingUserInput(const FGameplayTag& UserInputTag, FName InValue)
 {
 	if (!UserInputTag.IsValid())
 	{
@@ -442,11 +442,11 @@ void USettingsWidget::SetUserInput(const FGameplayTag& UserInputTag, FName InVal
 	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
 
 	// BP implementation
-	SetUserInputBP(UserInputTag, InValue);
+	SetUserInput(UserInputTag, InValue);
 }
 
 // Set new custom widget for setting by specified tag
-void USettingsWidget::SetCustomWidget(const FGameplayTag& CustomWidgetTag, USettingCustomWidget* InCustomWidget)
+void USettingsWidget::SetSettingCustomWidget(const FGameplayTag& CustomWidgetTag, USettingCustomWidget* InCustomWidget)
 {
 	if (!CustomWidgetTag.IsValid())
 	{
@@ -724,6 +724,28 @@ void USettingsWidget::TryBindStaticContext(FSettingsPrimary& Primary)
 	}
 }
 
+// Creates new widget based on specified setting class and sets it to specified primary data
+void USettingsWidget::CreateSettingSubWidget(FSettingsPrimary& Primary, const TSubclassOf<USettingSubWidget>& SettingSubWidgetClass)
+{
+	if (!SettingSubWidgetClass)
+	{
+		return;
+	}
+
+	USettingSubWidget* SettingSubWidget = CreateWidget<USettingSubWidget>(this, SettingSubWidgetClass);
+	Primary.SettingSubWidget = SettingSubWidget;
+	SettingSubWidget->SetSettingTag(Primary.Tag);
+	SettingSubWidget->SetLineHeight(Primary.LineHeight);
+	SettingSubWidget->SetCaptionText(Primary.Caption);
+}
+
+// Starts adding settings on the next column
+void USettingsWidget::StartNextColumn_Implementation()
+{
+	// BP implementation
+	// ...
+}
+
 // Display settings on UI
 void USettingsWidget::OpenSettings()
 {
@@ -795,38 +817,38 @@ void USettingsWidget::AddSetting(FSettingsPicker& Setting)
 
 	if (ChosenData == &Setting.Button)
 	{
-		AddButton(PrimaryData, Setting.Button);
+		AddSettingButton(PrimaryData, Setting.Button);
 	}
 	else if (ChosenData == &Setting.Checkbox)
 	{
-		AddCheckbox(PrimaryData, Setting.Checkbox);
+		AddSettingCheckbox(PrimaryData, Setting.Checkbox);
 	}
 	else if (ChosenData == &Setting.Combobox)
 	{
-		AddCombobox(PrimaryData, Setting.Combobox);
+		AddSettingCombobox(PrimaryData, Setting.Combobox);
 	}
 	else if (ChosenData == &Setting.Slider)
 	{
-		AddSlider(PrimaryData, Setting.Slider);
+		AddSettingSlider(PrimaryData, Setting.Slider);
 	}
 	else if (ChosenData == &Setting.TextLine)
 	{
-		AddTextLine(PrimaryData, Setting.TextLine);
+		AddSettingTextLine(PrimaryData, Setting.TextLine);
 	}
 	else if (ChosenData == &Setting.UserInput)
 	{
-		AddUserInput(PrimaryData, Setting.UserInput);
+		AddSettingUserInput(PrimaryData, Setting.UserInput);
 	}
 	else if (ChosenData == &Setting.CustomWidget)
 	{
-		AddCustomWidget(PrimaryData, Setting.CustomWidget);
+		AddSettingCustomWidget(PrimaryData, Setting.CustomWidget);
 	}
 
 	UpdateSettings(FGameplayTagContainer(PrimaryData.Tag));
 }
 
 // Add button on UI
-void USettingsWidget::AddButton(FSettingsPrimary& Primary, FSettingsButton& Data)
+void USettingsWidget::AddSettingButton(FSettingsPrimary& Primary, FSettingsButton& Data)
 {
 	const TSubclassOf<USettingButton>& ButtonClass = USettingsDataAsset::Get().GetButtonClass();
 	CreateSettingSubWidget(Primary, ButtonClass);
@@ -840,11 +862,11 @@ void USettingsWidget::AddButton(FSettingsPrimary& Primary, FSettingsButton& Data
 		}
 	}
 
-	AddButtonBP(Primary, Data);
+	AddButton(Primary, Data);
 }
 
 // Add checkbox on UI
-void USettingsWidget::AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data)
+void USettingsWidget::AddSettingCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data)
 {
 	const TSubclassOf<USettingCheckbox>& CheckboxClass = USettingsDataAsset::Get().GetCheckboxClass();
 	CreateSettingSubWidget(Primary, CheckboxClass);
@@ -864,11 +886,11 @@ void USettingsWidget::AddCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& 
 		}
 	}
 
-	AddCheckboxBP(Primary, Data);
+	AddCheckbox(Primary, Data);
 }
 
 // Add combobox on UI
-void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data)
+void USettingsWidget::AddSettingCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data)
 {
 	const TSubclassOf<USettingCombobox>& ComboboxClass = USettingsDataAsset::Get().GetComboboxClass();
 	CreateSettingSubWidget(Primary, ComboboxClass);
@@ -902,11 +924,11 @@ void USettingsWidget::AddCombobox(FSettingsPrimary& Primary, FSettingsCombobox& 
 		}
 	}
 
-	AddComboboxBP(Primary, Data);
+	AddCombobox(Primary, Data);
 }
 
 // Add slider on UI
-void USettingsWidget::AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data)
+void USettingsWidget::AddSettingSlider(FSettingsPrimary& Primary, FSettingsSlider& Data)
 {
 	const TSubclassOf<USettingSlider>& SliderClass = USettingsDataAsset::Get().GetSliderClass();
 	CreateSettingSubWidget(Primary, SliderClass);
@@ -926,11 +948,11 @@ void USettingsWidget::AddSlider(FSettingsPrimary& Primary, FSettingsSlider& Data
 		}
 	}
 
-	AddSliderBP(Primary, Data);
+	AddSlider(Primary, Data);
 }
 
 // Add simple text on UI
-void USettingsWidget::AddTextLine(FSettingsPrimary& Primary, FSettingsTextLine& Data)
+void USettingsWidget::AddSettingTextLine(FSettingsPrimary& Primary, FSettingsTextLine& Data)
 {
 	const TSubclassOf<USettingTextLine>& TextLineClass = USettingsDataAsset::Get().GetTextLineClass();
 	CreateSettingSubWidget(Primary, TextLineClass);
@@ -950,11 +972,11 @@ void USettingsWidget::AddTextLine(FSettingsPrimary& Primary, FSettingsTextLine& 
 		}
 	}
 
-	AddTextLineBP(Primary, Data);
+	AddTextLine(Primary, Data);
 }
 
 // Add text input on UI
-void USettingsWidget::AddUserInput(FSettingsPrimary& Primary, FSettingsUserInput& Data)
+void USettingsWidget::AddSettingUserInput(FSettingsPrimary& Primary, FSettingsUserInput& Data)
 {
 	const TSubclassOf<USettingUserInput>& UserInputClass = USettingsDataAsset::Get().GetUserInputClass();
 	CreateSettingSubWidget(Primary, UserInputClass);
@@ -974,11 +996,11 @@ void USettingsWidget::AddUserInput(FSettingsPrimary& Primary, FSettingsUserInput
 		}
 	}
 
-	AddUserInputBP(Primary, Data);
+	AddUserInput(Primary, Data);
 }
 
 // Add custom widget on UI
-void USettingsWidget::AddCustomWidget(FSettingsPrimary& Primary, FSettingsCustomWidget& Data)
+void USettingsWidget::AddSettingCustomWidget(FSettingsPrimary& Primary, FSettingsCustomWidget& Data)
 {
 	CreateSettingSubWidget(Primary, Data.CustomWidgetClass);
 
@@ -997,27 +1019,5 @@ void USettingsWidget::AddCustomWidget(FSettingsPrimary& Primary, FSettingsCustom
 		}
 	}
 
-	AddCustomWidgetBP(Primary, Data);
-}
-
-// Creates new widget based on specified setting class and sets it to specified primary data
-void USettingsWidget::CreateSettingSubWidget(FSettingsPrimary& Primary, const TSubclassOf<USettingSubWidget>& SettingSubWidgetClass)
-{
-	if (!SettingSubWidgetClass)
-	{
-		return;
-	}
-
-	USettingSubWidget* SettingSubWidget = CreateWidget<USettingSubWidget>(this, SettingSubWidgetClass);
-	Primary.SettingSubWidget = SettingSubWidget;
-	SettingSubWidget->SetSettingTag(Primary.Tag);
-	SettingSubWidget->SetLineHeight(Primary.LineHeight);
-	SettingSubWidget->SetCaptionText(Primary.Caption);
-}
-
-// Starts adding settings on the next column
-void USettingsWidget::StartNextColumn_Implementation()
-{
-	// BP implementation
-	// ...
+	AddCustomWidget(Primary, Data);
 }

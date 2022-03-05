@@ -211,6 +211,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const { return Cast<UMySkeletalMeshComponent>(GetMesh()); }
 
+	/** Actualize the player name for this character. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdateNicknameOnNameplate();
+	
 protected:
 	/** ---------------------------------------------------
 	 *		Protected properties

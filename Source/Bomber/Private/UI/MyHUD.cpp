@@ -92,7 +92,7 @@ void AMyHUD::InitWidgets()
 	}
 
 	APlayerController* PlayerController = PlayerOwner.Get();
-	if (!ensureMsgf(PlayerOwner, TEXT("ASSERT: 'PlayerOwner' is not valid")))
+	if (!ensureMsgf(PlayerController, TEXT("ASSERT: 'PlayerController' is not valid")))
 	{
 		return;
 	}

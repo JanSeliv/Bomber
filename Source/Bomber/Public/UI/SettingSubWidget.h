@@ -27,11 +27,11 @@ public:
 
 	/** Returns the widget that shows the caption text of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UTextBlock* GetCaptionWidget() const { return CaptionWidgetInternal; }
+	FORCEINLINE class UTextBlock* GetCaptionWidget() const { return CaptionWidget; }
 
 	/** Returns the Size Box widget . */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class USizeBox* GetSizeBoxWidget() const { return SizeBoxWidgetInternal; }
+	FORCEINLINE class USizeBox* GetSizeBoxWidget() const { return SizeBoxWidget; }
 
 	/** Returns the custom line height for this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -59,12 +59,12 @@ public:
 
 protected:
 	/** The Size Box widget. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "SizeBoxWidget"))
-	TObjectPtr<class USizeBox> SizeBoxWidgetInternal = nullptr; //[I]
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class USizeBox> SizeBoxWidget = nullptr; //[I]
 
 	/** The widget that shows the caption text of this setting. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "CaptionWidget"))
-	TObjectPtr<class UTextBlock> CaptionWidgetInternal = nullptr; //[I]
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UTextBlock> CaptionWidget = nullptr; //[I]
 
 	/** The setting tag of this widget. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Setting Tag"))
@@ -90,7 +90,7 @@ class USettingButton final : public USettingSubWidget
 public:
 	/** Returns the actual button widget of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UButton* GetButtonWidget() const { return ButtonWidgetInternal; }
+	FORCEINLINE class UButton* GetButtonWidget() const { return ButtonWidget; }
 
 	/** Returns the slate button. */
 	FORCEINLINE TSharedPtr<class SButton> GetSlateButton() const { return SlateButtonInternal.Pin(); }
@@ -100,8 +100,8 @@ protected:
 	TWeakPtr<class SButton> SlateButtonInternal = nullptr;
 
 	/** The actual button widget of this setting. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "ButtonWidget"))
-	TObjectPtr<class UButton> ButtonWidgetInternal = nullptr; //[I]
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UButton> ButtonWidget = nullptr; //[I]
 
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -124,7 +124,7 @@ class USettingCheckbox final : public USettingSubWidget
 public:
 	/** Returns the actual checkbox widget of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UCheckBox* GetCheckboxWidget() const { return CheckboxWidgetInternal; }
+	FORCEINLINE class UCheckBox* GetCheckboxWidget() const { return CheckboxWidget; }
 
 	/** Returns the slate checkbox. */
 	FORCEINLINE TSharedPtr<class SCheckBox> GetSlateCheckbox() const { return SlateCheckboxInternal.Pin(); }
@@ -134,8 +134,8 @@ protected:
 	TWeakPtr<class SCheckBox> SlateCheckboxInternal = nullptr;
 
 	/** The actual checkbox widget of this setting. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "CheckboxWidget"))
-	TObjectPtr<class UCheckBox> CheckboxWidgetInternal = nullptr; //[I]
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UCheckBox> CheckboxWidget = nullptr; //[I]
 
 	/** Called after the underlying slate widget is constructed.
  	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -158,7 +158,7 @@ class USettingCombobox final : public USettingSubWidget
 public:
 	/** Returns the actual combobox widget of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UComboBoxString* GetComboboxWidget() const { return ComboboxWidgetInternal; }
+	FORCEINLINE class UComboBoxString* GetComboboxWidget() const { return ComboboxWidget; }
 
 	/** Returns the slate combobox. */
 	FORCEINLINE TSharedPtr<SComboboxString> GetSlateCombobox() const { return SlateComboboxInternal.Pin(); }
@@ -172,8 +172,8 @@ protected:
 	TWeakPtr<SComboboxString> SlateComboboxInternal = nullptr;
 
 	/** The actual combobox widget of this setting. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "ComboboxWidget"))
-	TObjectPtr<class UComboBoxString> ComboboxWidgetInternal = nullptr; //[I]
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UComboBoxString> ComboboxWidget = nullptr; //[I]
 
 	/** Is true if combobox is currently opened in Settings. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Combobox Opened"))
@@ -207,7 +207,7 @@ class USettingSlider final : public USettingSubWidget
 public:
 	/** Returns the actual slider widget of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class USlider* GetSliderWidget() const { return SliderWidgetInternal; }
+	FORCEINLINE class USlider* GetSliderWidget() const { return SliderWidget; }
 
 	/** Returns the slate slider. */
 	FORCEINLINE TSharedPtr<class SSlider> GetSlateSlider() const { return SlateSliderInternal.Pin(); }
@@ -217,8 +217,8 @@ protected:
 	TWeakPtr<class SSlider> SlateSliderInternal = nullptr;
 
 	/** The actual slider widget of this setting. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "SliderWidget"))
-	TObjectPtr<class USlider> SliderWidgetInternal = nullptr; //[I]
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class USlider> SliderWidget = nullptr; //[I]
 
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -256,7 +256,7 @@ class USettingUserInput final : public USettingSubWidget
 public:
 	/** Returns the actual Editable Text Box widget of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UEditableTextBox* GetEditableTextBox() const { return EditableTextBoxInternal; }
+	FORCEINLINE class UEditableTextBox* GetEditableTextBox() const { return EditableTextBox; }
 
 	/** Returns current text set in the Editable Text Box. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -274,8 +274,8 @@ protected:
 	TWeakPtr<class SEditableTextBox> SlateEditableTextBoxInternal = nullptr;
 
 	/** The actual Editable Text Box widget of this setting. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget, OverrideNativeName = "EditableTextBox"))
-	TObjectPtr<class UEditableTextBox> EditableTextBoxInternal = nullptr; //[I]
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UEditableTextBox> EditableTextBox = nullptr; //[I]
 
 	/** Called after the underlying slate widget is constructed.
 	* May be called multiple times due to adding and removing from the hierarchy. */

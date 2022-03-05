@@ -55,7 +55,7 @@ public:
 	void SetPlayerNameCustom(FName NewName);
 
 	/** Returns custom player name. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (OverrideNativeName = "GetPlayerNameCustom"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Player Name Custom"))
 	FName GetPlayerFNameCustom() const;
 
 	/** Is overriden to return own player name that is saved to config. */

@@ -14,16 +14,16 @@ FString UAnimNotifyState_PlayMorph::GetNotifyName_Implementation() const
 	const FName MorphName = MorphDataInternal.Morph;
 	if (!MorphName.IsNone())
 	{
-		NotifyName += "_" + MorphName.ToString();
+		NotifyName += TEXT("_") + MorphName.ToString();
 	}
 
 	return NotifyName;
 }
 
 // Is called on an animation notify
-void UAnimNotifyState_PlayMorph::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
+void UAnimNotifyState_PlayMorph::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
-	Super::NotifyBegin(MeshComp, Animation, TotalDuration);
+	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
 	MeshCompInternal = MeshComp;
 
@@ -35,9 +35,9 @@ void UAnimNotifyState_PlayMorph::NotifyBegin(USkeletalMeshComponent* MeshComp, U
 }
 
 // Is called on an every animation tick
-void UAnimNotifyState_PlayMorph::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime)
+void UAnimNotifyState_PlayMorph::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference)
 {
-	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime);
+	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime, EventReference);
 
 	if (TimelineInternal.IsPlaying())
 	{
@@ -46,9 +46,9 @@ void UAnimNotifyState_PlayMorph::NotifyTick(USkeletalMeshComponent* MeshComp, UA
 }
 
 // Is called before destroying
-void UAnimNotifyState_PlayMorph::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
+void UAnimNotifyState_PlayMorph::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	Super::NotifyEnd(MeshComp, Animation);
+	Super::NotifyEnd(MeshComp, Animation, EventReference);
 }
 
 // Create a new curve, is created once

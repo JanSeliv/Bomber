@@ -226,6 +226,20 @@ void APlayerCharacter::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPla
 	MySkeletalMeshComp->InitMySkeletalMesh(CustomPlayerMeshData);
 }
 
+// Actualize the player name for this character
+void APlayerCharacter::UpdateNicknameOnNameplate()
+{
+	static const FName DefaultAIName(TEXT("AI"));
+	FName NewNickname = DefaultAIName;
+
+	if (const AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
+	{
+		NewNickname = MyPlayerState->GetPlayerFNameCustom();
+	}
+
+	OnPlayerNameChanged(NewNickname);
+}
+
 /* ---------------------------------------------------
  *					Protected functions
  * --------------------------------------------------- */
@@ -235,12 +249,6 @@ void APlayerCharacter::BeginPlay()
 {
 	// Call to super
 	Super::BeginPlay();
-
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
 
 	// Set the animation
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
@@ -303,11 +311,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		OnRep_CharacterID();
 	}
 
-	if (!IsPlayerControlled())
-	{
-		static const FName DefaultAIName(TEXT("AI"));
-		OnPlayerNameChanged(DefaultAIName);
-	}
+	UpdateNicknameOnNameplate();
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR

@@ -169,7 +169,7 @@ void UMyCheatManager::SetSetting(const FString& TagByValue) const
 	USettingsWidget* SettingsWidget = MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
 	if (SettingsWidget)
 	{
-		SettingsWidget->SetSettingValue(TagName, TagValue, true);
+		SettingsWidget->SetSettingValue(TagName, TagValue);
 		SettingsWidget->SaveSettings();
 	}
 }
