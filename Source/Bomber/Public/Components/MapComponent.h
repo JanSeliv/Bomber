@@ -74,8 +74,8 @@ public:
 	EActorType GetActorType() const;
 
 	/** Get the owner's data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAssetInternal; }
+	//UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAssetInternal; }
 
 	/** Returns true if an owner is set by cheat manager or skills to be undestroyable in game. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

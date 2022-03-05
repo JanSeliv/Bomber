@@ -454,7 +454,7 @@ void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>&
 }
 
 // Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type
-ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorType(EActorType ActorType)
+const ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorType(EActorType ActorType)
 {
 	TArray<ULevelActorDataAsset*> FoundDataAssets;
 	GetDataAssetsByActorTypes(FoundDataAssets, TO_FLAG(ActorType));

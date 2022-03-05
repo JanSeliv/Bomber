@@ -45,45 +45,37 @@ FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointer
 
 FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	const bool WhatToReturn = NeedExecuteAction(MyGeometry, MouseEvent);
-	if (WhatToReturn != bIsHovered)
+	const bool bHovered = NeedExecuteAction(MyGeometry, MouseEvent);
+	if (bHovered != IsHovered())
 	{
-		bIsHovered = WhatToReturn;
-		if (bIsHovered)
-		{
-			SButton::OnMouseEnter(MyGeometry, MouseEvent);
-		}
-		else
-		{
-			SButton::OnMouseLeave(MouseEvent);
-		}
+		SetHover(bHovered);
 	}
 	return SButton::OnMouseMove(MyGeometry, MouseEvent);
 }
 
-void SShapeButton::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	return SButton::OnMouseEnter(MyGeometry, MouseEvent);
-}
-
 void SShapeButton::OnMouseLeave(const FPointerEvent& MouseEvent)
 {
-	return SButton::OnMouseLeave(MouseEvent);
+	SButton::OnMouseLeave(MouseEvent);
+
+	if (IsHovered())
+	{
+		SetHover(false);
+	}
 }
 
 FCursorReply SShapeButton::OnCursorQuery(const FGeometry& MyGeometry, const FPointerEvent& CursorEvent) const
 {
-	if (!bIsHovered)
+	if (!IsHovered())
 	{
 		return FCursorReply::Unhandled();
 	}
-	const TOptional<EMouseCursor::Type> ThisCursor(GetCursor());
+	const TOptional<EMouseCursor::Type> ThisCursor = GetCursor();
 	return ThisCursor.IsSet() ? FCursorReply::Cursor(ThisCursor.GetValue()) : FCursorReply::Unhandled();
 }
 
 TSharedPtr<IToolTip> SShapeButton::GetToolTip()
 {
-	return bIsHovered ? SWidget::GetToolTip() : nullptr;
+	return IsHovered() ? SWidget::GetToolTip() : nullptr;
 }
 
 // Called on mouse moves and clicks
@@ -105,7 +97,7 @@ bool SShapeButton::NeedExecuteAction(const FGeometry& MyGeometry, const FPointer
 	}
 
 	FBulkDataInterface* BulkDataPtr = &PlatformData->Mips[0].BulkData;
-	void* RawImage = BulkDataPtr->Lock(LOCK_READ_ONLY);
+	const void* RawImage = BulkDataPtr->Lock(LOCK_READ_ONLY);
 	if (!ensureMsgf(RawImage, TEXT("ASSERT: 'RawImage' is not valid, could not lock the bulk data")))
 	{
 		BulkDataPtr->Unlock();
@@ -151,7 +143,7 @@ void UShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
 	}
 
 	AdvancedHitTexture = InTexture;
-	if (const auto& ShapeButton = static_cast<SShapeButton*>(MyButtonPtr))
+	if (SShapeButton* ShapeButton = static_cast<SShapeButton*>(MyButtonPtr))
 	{
 		ShapeButton->SetAdvancedHitTexture(AdvancedHitTexture);
 	}
@@ -167,7 +159,7 @@ void UShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
 	}
 
 	AdvancedHitAlpha = InAlpha;
-	if (const auto& ShapeButton = static_cast<SShapeButton*>(MyButtonPtr))
+	if (SShapeButton* ShapeButton = static_cast<SShapeButton*>(MyButtonPtr))
 	{
 		ShapeButton->SetAdvancedHitAlpha(AdvancedHitAlpha);
 	}
@@ -202,7 +194,7 @@ TSharedRef<SWidget> UShapeButton::RebuildWidget()
 
 	if (GetChildrenCount())
 	{
-		if (const auto& ButtonSlot = Cast<UButtonSlot>(GetContentSlot()))
+		if (UButtonSlot* ButtonSlot = Cast<UButtonSlot>(GetContentSlot()))
 		{
 			ButtonSlot->BuildSlot(NewButtonRef);
 		}

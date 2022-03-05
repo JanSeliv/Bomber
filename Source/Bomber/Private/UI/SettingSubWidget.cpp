@@ -26,33 +26,33 @@ void USettingSubWidget::SetSettingTag(const FGameplayTag& NewSettingTag)
 // Returns the custom line height for this setting
 float USettingSubWidget::GetLineHeight() const
 {
-	return SizeBoxWidgetInternal ? SizeBoxWidgetInternal->MinDesiredHeight : 0.f;
+	return SizeBoxWidget ? SizeBoxWidget->MinDesiredHeight : 0.f;
 }
 
 // Set custom line height for this setting
 void USettingSubWidget::SetLineHeight(float NewLineHeight)
 {
-	if (SizeBoxWidgetInternal)
+	if (SizeBoxWidget)
 	{
-		SizeBoxWidgetInternal->SetMinDesiredHeight(NewLineHeight);
+		SizeBoxWidget->SetMinDesiredHeight(NewLineHeight);
 	}
 }
 
 // Returns the caption text that is shown on UI
 void USettingSubWidget::GetCaptionText(FText& OutCaptionText) const
 {
-	if (CaptionWidgetInternal)
+	if (CaptionWidget)
 	{
-		OutCaptionText = CaptionWidgetInternal->GetText();
+		OutCaptionText = CaptionWidget->GetText();
 	}
 }
 
 // Set the new caption text on UI for this widget
 void USettingSubWidget::SetCaptionText(const FText& NewCaptionText)
 {
-	if (CaptionWidgetInternal)
+	if (CaptionWidget)
 	{
-		CaptionWidgetInternal->SetText(NewCaptionText);
+		CaptionWidget->SetText(NewCaptionText);
 	}
 }
 
@@ -69,11 +69,11 @@ void USettingButton::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (ButtonWidgetInternal)
+	if (ButtonWidget)
 	{
-		ButtonWidgetInternal->OnPressed.AddUniqueDynamic(this, &ThisClass::USettingButton::OnButtonPressed);
+		ButtonWidget->OnPressed.AddUniqueDynamic(this, &ThisClass::USettingButton::OnButtonPressed);
 
-		SlateButtonInternal = GetSlateWidget<SButton>(ButtonWidgetInternal);
+		SlateButtonInternal = GetSlateWidget<SButton>(ButtonWidget);
 		check(SlateButtonInternal.IsValid());
 	}
 }
@@ -86,7 +86,7 @@ void USettingButton::OnButtonPressed()
 		return;
 	}
 
-	SettingsWidgetInternal->SetButtonPressed(SettingTagInternal);
+	SettingsWidgetInternal->SetSettingButtonPressed(SettingTagInternal);
 
 	// Play the sound
 	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
@@ -100,11 +100,11 @@ void USettingCheckbox::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (CheckboxWidgetInternal)
+	if (CheckboxWidget)
 	{
-		CheckboxWidgetInternal->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::OnCheckStateChanged);
+		CheckboxWidget->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::OnCheckStateChanged);
 
-		SlateCheckboxInternal = GetSlateWidget<SCheckBox>(CheckboxWidgetInternal);
+		SlateCheckboxInternal = GetSlateWidget<SCheckBox>(CheckboxWidget);
 		check(SlateCheckboxInternal.IsValid());
 	}
 }
@@ -117,7 +117,7 @@ void USettingCheckbox::OnCheckStateChanged(bool bIsChecked)
 		return;
 	}
 
-	SettingsWidgetInternal->SetCheckbox(SettingTagInternal, bIsChecked);
+	SettingsWidgetInternal->SetSettingCheckbox(SettingTagInternal, bIsChecked);
 
 	// Play the sound
 	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
@@ -131,11 +131,11 @@ void USettingCombobox::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (ComboboxWidgetInternal)
+	if (ComboboxWidget)
 	{
-		ComboboxWidgetInternal->OnSelectionChanged.AddUniqueDynamic(this, &ThisClass::OnSelectionChanged);
+		ComboboxWidget->OnSelectionChanged.AddUniqueDynamic(this, &ThisClass::OnSelectionChanged);
 
-		SlateComboboxInternal = GetSlateWidget<SComboboxString>(ComboboxWidgetInternal);
+		SlateComboboxInternal = GetSlateWidget<SComboboxString>(ComboboxWidget);
 		check(SlateComboboxInternal.IsValid());
 	}
 }
@@ -145,13 +145,13 @@ void USettingCombobox::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	if (!ComboboxWidgetInternal)
+	if (!ComboboxWidget)
 	{
 		return;
 	}
 
 	const bool bIsComboboxOpenedLast = bIsComboboxOpenedInternal;
-	bIsComboboxOpenedInternal = ComboboxWidgetInternal->IsOpen();
+	bIsComboboxOpenedInternal = ComboboxWidget->IsOpen();
 
 	if (bIsComboboxOpenedLast != bIsComboboxOpenedInternal)
 	{
@@ -173,13 +173,13 @@ void USettingCombobox::OnMenuOpenChanged()
 void USettingCombobox::OnSelectionChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
 	if (!SettingsWidgetInternal
-	    || !ComboboxWidgetInternal)
+	    || !ComboboxWidget)
 	{
 		return;
 	}
 
-	const int32 SelectedIndex = ComboboxWidgetInternal->GetSelectedIndex();
-	SettingsWidgetInternal->SetComboboxIndex(SettingTagInternal, SelectedIndex);
+	const int32 SelectedIndex = ComboboxWidget->GetSelectedIndex();
+	SettingsWidgetInternal->SetSettingComboboxIndex(SettingTagInternal, SelectedIndex);
 }
 
 // Called after the underlying slate widget is constructed
@@ -187,12 +187,12 @@ void USettingSlider::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (SliderWidgetInternal)
+	if (SliderWidget)
 	{
-		SliderWidgetInternal->OnValueChanged.AddUniqueDynamic(this, &ThisClass::OnValueChanged);
-		SliderWidgetInternal->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::OnMouseCaptureEnd);
+		SliderWidget->OnValueChanged.AddUniqueDynamic(this, &ThisClass::OnValueChanged);
+		SliderWidget->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::OnMouseCaptureEnd);
 
-		SlateSliderInternal = GetSlateWidget<SSlider>(SliderWidgetInternal);
+		SlateSliderInternal = GetSlateWidget<SSlider>(SliderWidget);
 		check(SlateSliderInternal.IsValid());
 	}
 }
@@ -215,28 +215,28 @@ void USettingSlider::OnValueChanged(float Value)
 		return;
 	}
 
-	SettingsWidgetInternal->SetSlider(SettingTagInternal, Value);
+	SettingsWidgetInternal->SetSettingSlider(SettingTagInternal, Value);
 }
 
 // Returns current text set in the Editable Text Box
 void USettingUserInput::GetEditableText(FText& OutText) const
 {
-	if (EditableTextBoxInternal)
+	if (EditableTextBox)
 	{
-		OutText = EditableTextBoxInternal->GetText();
+		OutText = EditableTextBox->GetText();
 	}
 }
 
 // Set new text programmatically instead of by the user
 void USettingUserInput::SetEditableText(const FText& InText)
 {
-	if (!EditableTextBoxInternal
-	    || InText.EqualTo(EditableTextBoxInternal->GetText()))
+	if (!EditableTextBox
+	    || InText.EqualTo(EditableTextBox->GetText()))
 	{
 		return;
 	}
 
-	EditableTextBoxInternal->SetText(InText);
+	EditableTextBox->SetText(InText);
 }
 
 // Called after the underlying slate widget is constructed
@@ -244,11 +244,11 @@ void USettingUserInput::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (EditableTextBoxInternal)
+	if (EditableTextBox)
 	{
-		EditableTextBoxInternal->OnTextChanged.AddUniqueDynamic(this, &ThisClass::OnTextChanged);
+		EditableTextBox->OnTextChanged.AddUniqueDynamic(this, &ThisClass::OnTextChanged);
 
-		SlateEditableTextBoxInternal = GetSlateWidget<SEditableTextBox>(EditableTextBoxInternal);
+		SlateEditableTextBoxInternal = GetSlateWidget<SEditableTextBox>(EditableTextBox);
 		check(SlateEditableTextBoxInternal.IsValid());
 	}
 }
@@ -262,7 +262,7 @@ void USettingUserInput::OnTextChanged(const FText& Text)
 	}
 
 	const FName MewValue(Text.ToString());
-	SettingsWidgetInternal->SetUserInput(SettingTagInternal, MewValue);
+	SettingsWidgetInternal->SetSettingUserInput(SettingTagInternal, MewValue);
 
 	// Play the sound
 	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())

@@ -249,27 +249,27 @@ public:
 
 	/** Returns the Levels Data Asset*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return Get().LevelsDataAssetInternal; }
+	static const FORCEINLINE class UGeneratedMapDataAsset* GetLevelsDataAsset() { return Get().LevelsDataAssetInternal; }
 
 	/** Returns the UI Data Asset*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get UI Data Asset"))
-	static FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return Get().UIDataAssetInternal; }
+	static const FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return Get().UIDataAssetInternal; }
 
 	/** Returns the settings data.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() { return Get().SettingsDataAssetInternal; }
+	static const FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() { return Get().SettingsDataAssetInternal; }
 
 	/** Returns the AI data.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get AI Data Asset"))
-	static FORCEINLINE class UAIDataAsset* GetAIDataAsset() { return Get().AIDataAssetInternal; }
+	static const FORCEINLINE class UAIDataAsset* GetAIDataAsset() { return Get().AIDataAssetInternal; }
 
 	/** Returns the Player Input data.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class UPlayerInputDataAsset* GetPlayerInputDataAsset() { return Get().PlayerInputDataAssetInternal; }
+	static const FORCEINLINE class UPlayerInputDataAsset* GetPlayerInputDataAsset() { return Get().PlayerInputDataAssetInternal; }
 
 	/** Returns the Sounds data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE class USoundsDataAsset* GetSoundsDataAsset() { return Get().SoundsDataAssetInternal; }
+	static const FORCEINLINE class USoundsDataAsset* GetSoundsDataAsset() { return Get().SoundsDataAssetInternal; }
 
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
@@ -283,7 +283,7 @@ public:
 
 	/** Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class ULevelActorDataAsset* GetDataAssetByActorType(EActorType ActorType);
+	static const class ULevelActorDataAsset* GetDataAssetByActorType(EActorType ActorType);
 
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

@@ -197,7 +197,7 @@ void UMyGameUserSettings::UpdateFullscreenEnabled()
 	}
 
 	const bool bIsFullscreenEnabled = IsFullscreenEnabled();
-	SettingsWidget->SetCheckbox(FullscreenTag, bIsFullscreenEnabled);
+	SettingsWidget->SetSettingCheckbox(FullscreenTag, bIsFullscreenEnabled);
 }
 
 // Set the FPS cap by specified member index

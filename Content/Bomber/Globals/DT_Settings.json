@@ -1123,7 +1123,7 @@
 				"Getter":
 				{
 					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
-					"FunctionName": "GetPlayerNameCustom"
+					"FunctionName": "GetPlayerFNameCustom"
 				},
 				"Caption": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"72219A3F4944330938ED3685430DF7A3\", \"Player Name\")",
 				"Tooltip": "NSLOCTEXT(\"[3CF34D84407D9BEC571604BCBF2A07D5]\", \"783B361E459F1C17B9852CB11D1D5BDB\", \"Enter your nickname\")",

@@ -71,7 +71,7 @@ public:
 	 * @param Animation Current played animation.
 	 * @param TotalDuration How long the notify is played. Is determined by amount of frames dragged on an animation track.
 	 */
-	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) override;
+	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
 
 	/**
 	 * Is called on an every animation tick.
@@ -79,14 +79,14 @@ public:
 	 * @param Animation Current played animation.
 	 * @param FrameDeltaTime Tick time.
 	 */
-	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime) override;
+	virtual void NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference) override;
 
 	/**
 	 * Is called before destroying.
 	 * @param MeshComp Current used mesh component.
 	 * @param Animation Current played animation.
 	 */
-	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
 	/** Returns the whole data about chosen morph.
 	 * @see UAnimNotify_PlayMorph::MorphData */
