@@ -7,6 +7,7 @@
 #include "Globals/LevelActorDataAsset.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "PoolManager.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -23,7 +24,7 @@ UMapComponent::UMapComponent()
 	SetIsReplicatedByDefault(true);
 
 	// Initialize the Box Collision component
-	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
+	BoxCollisionComponentInternal = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
 }
 
 // Updates a owner's state. Should be called in the owner's OnConstruction event.
@@ -37,11 +38,23 @@ bool UMapComponent::OnConstruction()
 
 	AGeneratedMap& LevelMap = AGeneratedMap::Get();
 
+	const UPoolManager* PoolManager = LevelMap.GetPoolManager();
+	if (PoolManager
+	    && !PoolManager->IsActive(Owner))
+	{
+		return false;
+	}
+
 	// Find new Location at dragging and update-delegate
 	LevelMap.SetNearestCell(this);
 
+	if (CellInternal.IsZeroCell())
+	{
+		return false;
+	}
+
 	// Owner updating
-	LevelMap.AddToGrid(Cell, this);
+	LevelMap.AddToGrid(this);
 	if (!IS_VALID(Owner)) // Dragged owner can be moved to the persistent
 	{
 		return false;
@@ -51,7 +64,10 @@ bool UMapComponent::OnConstruction()
 	if (ActorDataAssetInternal)
 	{
 		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
-		SetMeshByRow(FoundRow);
+		SetLevelActorRow(FoundRow);
+
+		const ECollisionResponse CollisionResponse = ActorDataAssetInternal->GetCollisionResponse();
+		SetCollisionResponses(CollisionResponse);
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
@@ -66,7 +82,7 @@ bool UMapComponent::OnConstruction()
 		// Show current cell if type specified
 		if (TO_FLAG(GetActorType()) & LevelMap.RenderActorsTypes)
 		{
-			USingletonLibrary::AddDebugTextRenders(Owner, {Cell}, FColor::White);
+			USingletonLibrary::AddDebugTextRenders(Owner, {CellInternal}, FColor::White);
 		}
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
@@ -74,28 +90,35 @@ bool UMapComponent::OnConstruction()
 	return true;
 }
 
-// Set specified mesh to the Owner
-void UMapComponent::SetMeshByRow(const ULevelActorRow* Row, UMeshComponent* InMeshComponent/* = nullptr*/)
+// Override current cell data, where owner is located on the Level Map
+void UMapComponent::SetCell(const FCell& Cell)
 {
-	if (!Row
-	    || !Row->Mesh
-	    || !MeshComponentInternal && !InMeshComponent)
+	CellInternal = Cell;
+}
+
+// Set specified mesh to the Owner
+void UMapComponent::SetLevelActorRow(const ULevelActorRow* Row)
+{
+	if (!Row)
 	{
 		return;
 	}
 
-	if (InMeshComponent)
-	{
-		MeshComponentInternal = InMeshComponent;
-	}
+	LevelActorRowInternal = Row;
 
-	if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
+	// Update mesh
+	UStreamableRenderAsset* Mesh = Row->Mesh;
+	if (Mesh
+	    && MeshComponentInternal) // is invalid for characters since it's controller by themselves
 	{
-		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(Row->Mesh));
-	}
-	else if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponentInternal))
-	{
-		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(Row->Mesh));
+		if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
+		{
+			SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(Mesh));
+		}
+		else if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponentInternal))
+		{
+			StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(Mesh));
+		}
 	}
 }
 
@@ -131,6 +154,37 @@ void UMapComponent::SetUndestroyable(bool bIsUndestroyable)
 	bIsUndestroyableInternal = bIsUndestroyable;
 }
 
+// Set new collisions data for any channel of the Box Collision Component
+void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& NewResponses)
+{
+	const AActor* Owner = GetOwner();
+	if (!IS_VALID(Owner)
+	    || !Owner->HasAuthority()
+	    || NewResponses == ECR_MAX)
+	{
+		return;
+	}
+
+	CollisionResponseInternal = NewResponses;
+	ApplyCollisionResponse();
+}
+
+// Is called when an owner was destroyed on the Level Map
+void UMapComponent::OnDeactivated()
+{
+	if (OnDeactivatedMapComponent.IsBound())
+	{
+		OnDeactivatedMapComponent.Broadcast(this);
+	}
+
+	SetCollisionResponses(ECR_Ignore);
+
+	if (IsUndestroyable())
+	{
+		SetUndestroyable(false);
+	}
+}
+
 //  Called when a component is registered (not loaded
 void UMapComponent::OnRegister()
 {
@@ -160,18 +214,17 @@ void UMapComponent::OnRegister()
 	}
 
 	// Initialize the Box Collision Component
-	if (ensureMsgf(BoxCollision, TEXT("ASSERT: 'BoxCollisionInternal' is not valid")))
+	if (ensureMsgf(BoxCollisionComponentInternal, TEXT("ASSERT: 'BoxCollisionInternal' is not valid")))
 	{
-		BoxCollision->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-		BoxCollision->SetBoxExtent(ActorDataAssetInternal->GetCollisionExtent());
-		BoxCollision->SetCollisionResponseToAllChannels(ActorDataAssetInternal->GetCollisionResponse());
+		BoxCollisionComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		BoxCollisionComponentInternal->SetBoxExtent(ActorDataAssetInternal->GetCollisionExtent());
 #if WITH_EDITOR
-		BoxCollision->SetHiddenInGame(!bShouldShowRenders);
+		BoxCollisionComponentInternal->SetHiddenInGame(!bShouldShowRenders);
 #endif
 	}
 
 	// Initialize mesh component
-	if (ActorDataAssetInternal->GetActorType() != EActorType::Player) // the character class already has own initialized skeletal component
+	if (ActorDataAssetInternal->GetActorType() != EAT::Player) // the character class already has own initialized skeletal component
 	{
 		MeshComponentInternal = NewObject<UMeshComponent>(GetOwner(), UStaticMeshComponent::StaticClass(), TEXT("MeshComponent"));
 		if (!ensureMsgf(MeshComponentInternal, TEXT("ASSERT: 'MeshComponentInternal' was not initialized")))
@@ -183,7 +236,7 @@ void UMapComponent::OnRegister()
 
 		// Set default mesh asset
 		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
-		SetMeshByRow(FoundRow);
+		SetLevelActorRow(FoundRow);
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
@@ -198,20 +251,23 @@ void UMapComponent::OnRegister()
 // Called when a component is destroyed for removing the owner from the Level Map.
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	AActor* const ComponentOwner = GetOwner();
+	AActor* ComponentOwner = GetOwner();
 	if (!IS_TRANSIENT(ComponentOwner)) // Is not transient owner
 	{
 		// Disable collision for safety
 		ComponentOwner->SetActorEnableCollision(false);
 
 		// Delete spawned collision component
-		BoxCollision->DestroyComponent();
+		BoxCollisionComponentInternal->DestroyComponent();
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 		if (USingletonLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
-			AGeneratedMap::Get().DestroyLevelActor(this);
+			if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap()) // Can be invalid if remove the level map
+			{
+				LevelMap->DestroyLevelActor(this);
+			}
 
 			// Editor delegates
 			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
@@ -227,15 +283,46 @@ void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, Cell);
+	DOREPLIFETIME(ThisClass, CellInternal);
+	DOREPLIFETIME(ThisClass, LevelActorRowInternal);
+	DOREPLIFETIME(ThisClass, CollisionResponseInternal);
+}
+
+// Is called on client to update current level actor row
+void UMapComponent::OnRep_LevelActorRow()
+{
+	SetLevelActorRow(LevelActorRowInternal);
+}
+
+// Updates current collisions for the Box Collision Component
+void UMapComponent::ApplyCollisionResponse()
+{
+	if (!BoxCollisionComponentInternal
+	    || CollisionResponseInternal == ECR_MAX)
+	{
+		return;
+	}
+
+	BoxCollisionComponentInternal->SetCollisionResponseToChannels(CollisionResponseInternal);
+}
+
+// Is called on client to response on changes in collision responses
+void UMapComponent::OnRep_CollisionResponse()
+{
+	ApplyCollisionResponse();
 }
 
 #if WITH_EDITOR
 // Returns whether this component or its owner is an editor-only object or not
 bool UMapComponent::IsEditorOnly() const
 {
-	AActor* Owner = GetOwner();
-	return Super::IsEditorOnly() || Owner && Owner->IsEditorOnly();
+	if (Super::IsEditorOnly())
+	{
+		return true;
+	}
+
+	const AActor* Owner = GetOwner();
+	return Owner && Owner->IsEditorOnly();
 }
 
 // Destroy editoronly actor for the editor -game before registering the component

@@ -24,6 +24,9 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Net/UnrealNetwork.h"
 
+// Default amount on picked up items
+const FPowerUp FPowerUp::DefaultData = FPowerUp();
+
 // Returns the dynamic material instance of a player with specified skin.
 UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const
 {
@@ -145,6 +148,7 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	// Replicate an actor
 	bReplicates = true;
 	bAlwaysRelevant = true;
+	SetReplicatingMovement(true);
 
 	// Set the default AI controller class
 	AIControllerClass = AMyAIController::StaticClass();
@@ -203,27 +207,45 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 	}
 
 	// Spawn bomb
-	if (ABombActor* BombActor = AGeneratedMap::SpawnActorByType<ABombActor>(EAT::Bomb, MapComponentInternal->Cell)) // can return nullptr if the cell is not free
+	ABombActor* BombActor = AGeneratedMap::SpawnActorByType<ABombActor>(EAT::Bomb, MapComponentInternal->GetCell());
+	if (!BombActor) // can return nullptr if the cell is not free
 	{
-		// Updating explosion cells
-		PowerupsInternal.BombN--;
+		return;
+	}
 
-		// Init Bomb
-		BombActor->MulticastInitBomb(PowerupsInternal.FireN, CharacterIDInternal);
-		BombActor->OnDestroyed.AddUniqueDynamic(this, &ThisClass::OnBombDestroyed);
+	UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
+	if (!MapComponent)
+	{
+		return;
+	}
+
+	// Updating explosion cells
+	PowerupsInternal.BombN--;
+
+	// Init Bomb
+	BombActor->InitBomb(PowerupsInternal.FireN, CharacterIDInternal);
+
+	// Start listening this bomb
+	if (!MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(this, &ThisClass::OnBombDestroyed))
+	{
+		MapComponent->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnBombDestroyed);
 	}
 }
 
 // Set and apply new skeletal mesh by specified data
 void APlayerCharacter::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
-	const auto MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
-	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: 'MySkeletalMeshComp' is not valid")))
+	UMySkeletalMeshComponent* MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
+	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: 'MySkeletalMeshComp' is not valid"))
+	    || !MapComponentInternal
+	    || !CustomPlayerMeshData.IsValid())
 	{
 		return;
 	}
 
 	MySkeletalMeshComp->InitMySkeletalMesh(CustomPlayerMeshData);
+
+	MapComponentInternal->SetLevelActorRow(CustomPlayerMeshData.PlayerRow);
 }
 
 // Actualize the player name for this character
@@ -237,7 +259,7 @@ void APlayerCharacter::UpdateNicknameOnNameplate()
 		NewNickname = MyPlayerState->GetPlayerFNameCustom();
 	}
 
-	OnPlayerNameChanged(NewNickname);
+	SetNicknameOnNameplate(NewNickname);
 }
 
 /* ---------------------------------------------------
@@ -259,10 +281,10 @@ void APlayerCharacter::BeginPlay()
 
 	TryPossessController();
 
-	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
-
 	if (HasAuthority())
 	{
+		OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
+
 		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
@@ -272,12 +294,9 @@ void APlayerCharacter::BeginPlay()
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
 
-	if (AMyPlayerState* MyPlayerState = USingletonLibrary::GetMyPlayerState(this))
+	if (AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
 	{
-		MyPlayerState->OnPlayerNameChanged.AddDynamic(this, &ThisClass::OnPlayerNameChanged);
-		OnPlayerNameChanged(MyPlayerState->GetPlayerFNameCustom());
-
-		SetDefaultPlayerMeshData();
+		MyPlayerState->OnPlayerNameChanged.AddDynamic(this, &ThisClass::SetNicknameOnNameplate);
 	}
 
 	UpdateCollisionObjectType();
@@ -308,7 +327,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 		FCells PlayerCells;
 		AGeneratedMap::Get().IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
 		CharacterIDInternal = PlayerCells.Num() - 1;
-		OnRep_CharacterID();
+		ApplyCharacterID();
 	}
 
 	UpdateNicknameOnNameplate();
@@ -364,10 +383,41 @@ void APlayerCharacter::OnRep_PlayerState()
 	SetDefaultPlayerMeshData();
 }
 
+// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
+void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
+{
+	Super::SetActorHiddenInGame(bNewHidden);
+
+	ResetPowerups();
+
+	if (!bNewHidden)
+	{
+		// Is added on level map
+		TryPossessController();
+		return;
+	}
+
+	// Is removed from level map
+	if (Controller)
+	{
+		Controller->UnPossess();
+	}
+}
+
+// Called when this Pawn is possessed. Only called on the server (or in standalone)
+void APlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	SetDefaultPlayerMeshData();
+
+	UpdateNicknameOnNameplate();
+}
+
 // Triggers when this player character starts something overlap.
 void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	AItemActor* OverlappedItem = Cast<AItemActor>(OtherActor);
+	const AItemActor* OverlappedItem = Cast<AItemActor>(OtherActor);
 	const EItemType ItemType = OverlappedItem ? OverlappedItem->GetItemType() : EItemType::None;
 	if (ItemType == EItemType::None) // item is not valid
 	{
@@ -407,14 +457,23 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 	}
 
 	ApplyPowerups();
-
-	// Uninitialize item
-	OverlappedItem->ResetItemType();
 }
 
 // Event triggered when the bomb has been explicitly destroyed.
-void APlayerCharacter::OnBombDestroyed(AActor* DestroyedBomb)
+void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent)
 {
+	if (!MapComponent
+	    || MapComponent->GetActorType() != EAT::Bomb)
+	{
+		return;
+	}
+
+	// Stop listening this bomb
+	if (MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(this, &ThisClass::OnBombDestroyed))
+	{
+		MapComponent->OnDeactivatedMapComponent.RemoveDynamic(this, &ThisClass::OnBombDestroyed);
+	}
+
 	if (PowerupsInternal.BombN < UItemDataAsset::Get().GetMaxAllowedItemsNum())
 	{
 		++PowerupsInternal.BombN;
@@ -462,8 +521,21 @@ void APlayerCharacter::ApplyPowerups()
 	// Apply others
 }
 
+// Reset all picked up powerups
+void APlayerCharacter::ResetPowerups()
+{
+	PowerupsInternal = FPowerUp::DefaultData;
+	ApplyPowerups();
+}
+
+// Is called on clients to apply powerups
+void APlayerCharacter::OnRep_Powerups()
+{
+	ApplyPowerups();
+}
+
 // Update player name on a 3D widget component
-void APlayerCharacter::OnPlayerNameChanged_Implementation(FName NewName)
+void APlayerCharacter::SetNicknameOnNameplate_Implementation(FName NewName)
 {
 	// BP implementation
 	// ...
@@ -506,39 +578,55 @@ void APlayerCharacter::UpdateCollisionObjectType()
 void APlayerCharacter::TryPossessController()
 {
 	if (!HasAuthority()
-	    || CharacterIDInternal < 0)
+	    || CharacterIDInternal < 0
+	    || USingletonLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}
 
-	// Try possess the player
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	AController* ControllerToPossess = nullptr;
+
 	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController(CharacterIDInternal))
 	{
-		MyPC->Possess(this);
+		// Possess the player
+		ControllerToPossess = MyPC;
+	}
+	else // Possess the AI
+	{
+		// Spawn AI if is needed
+		if (!IS_VALID(MyAIControllerInternal))
+		{
+			MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+		}
+
+		ControllerToPossess = MyAIControllerInternal;
+	}
+
+	if (!ControllerToPossess
+	    || ControllerToPossess == Controller)
+	{
 		return;
 	}
 
-	// Spawn AI if is needed
-	UWorld* World = GetWorld();
-	if (World
-	    && !IS_VALID(MyAIControllerInternal))
+	if (Controller)
 	{
-		MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+		// At first, unpossess previous controller
+		Controller->UnPossess();
 	}
 
-	// Try possess the AI
-	if (MyAIControllerInternal)
-	{
-		MyAIControllerInternal->Possess(this);
-	}
+	ControllerToPossess->Possess(this);
 }
 
 // Is called on game mode post login to handle character logic when new player is connected
 void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
 {
 	TryPossessController();
-
-	SetDefaultPlayerMeshData();
 }
 
 // Apply default mesh for the local player
@@ -563,8 +651,7 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	}
 }
 
-// Is called on server and clients to apply the characterID-dependent logic for this character
-void APlayerCharacter::OnRep_CharacterID()
+void APlayerCharacter::ApplyCharacterID()
 {
 	if (CharacterIDInternal == INDEX_NONE)
 	{
@@ -574,13 +661,13 @@ void APlayerCharacter::OnRep_CharacterID()
 	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
 
 	// Update mesh
-	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
 	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
 	if (MeshesNum > 0)
 	{
 		const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
-		if (UPlayerRow* Row = Cast<UPlayerRow>(PlayerDataAsset.GetRowByLevelType(TO_ENUM(ELevelType, LevelType))))
+		if (const UPlayerRow* Row = Cast<UPlayerRow>(PlayerDataAsset.GetRowByLevelType(TO_ENUM(ELevelType, LevelType))))
 		{
+			FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
 			CustomPlayerMeshData.PlayerRow = Row;
 			CustomPlayerMeshData.SkinIndex = FMath::RandHelper(Row->GetMaterialInstancesDynamicNum());
 			InitMySkeletalMesh(CustomPlayerMeshData);
@@ -600,4 +687,10 @@ void APlayerCharacter::OnRep_CharacterID()
 			}
 		}
 	}
+}
+
+// Is called on clients to apply the characterID-dependent logic for this character
+void APlayerCharacter::OnRep_CharacterID()
+{
+	ApplyCharacterID();
 }

@@ -113,13 +113,16 @@ protected:
 	/** Allows the controller to react on unpossessing the pawn to disable AI. */
 	virtual void OnUnPossess() override;
 
+	/** Locks or unlocks movement input. */
+	virtual void SetIgnoreMoveInput(bool bShouldIgnore) override;
+
 	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateAI();
 
 	/** Enable or disable AI for this bot. */
 	UFUNCTION(BlueprintCallable, meta = (BlueprintProtected))
-	void SetAI(bool bShouldEnable) const;
+	void SetAI(bool bShouldEnable);
 
 	/** Listen game states to enable or disable AI. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

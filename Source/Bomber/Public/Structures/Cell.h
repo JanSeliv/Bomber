@@ -23,7 +23,7 @@ struct FCell
 
 	/** Always holds the free cell's FVector-coordinate.
 	 * If it is not empty or not found, holds the last succeeded due to copy operator. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
 	FVector Location = FVector::DownVector; //[AW]
 
 	/** Default constructor. */
@@ -44,6 +44,12 @@ struct FCell
 	 */
 	FCell RotateAngleAxis(float AxisZ) const;
 
+	/** Comparing with uninitialized Zero Cell. */
+	FORCEINLINE bool IsZeroCell() const { return *this == ZeroCell; }
+
+	/** Check is valid this cell. */
+	FORCEINLINE bool IsValid() const { return *this != ZeroCell; }
+
 	/**
 	 * Compares cells for equality.
 	 *
@@ -51,9 +57,10 @@ struct FCell
 	 * @return true if the points are equal, false otherwise
 	 */
 	FORCEINLINE bool operator==(const FCell& Other) const { return this->Location == Other.Location; }
+	FORCEINLINE bool operator!=(const FCell& Other) const { return !(*this == Other); }
 
-	/** Comparing with uninitialized Zero Cell. */
-	FORCEINLINE operator bool() const { return this->Location != ZeroCell.Location; }
+	/** Vector operator to return cell location. */
+	FORCEINLINE operator FVector() const { return this->Location; }
 
 	/**
 	* Creates a hash value from a FCell.

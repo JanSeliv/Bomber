@@ -36,6 +36,7 @@ ABoxActor::ABoxActor()
 	bReplicates = true;
 	NetUpdateFrequency = 10.f;
 	bAlwaysRelevant = true;
+	SetReplicatingMovement(true);
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
@@ -85,12 +86,14 @@ void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
 {
 	Super::SetActorHiddenInGame(bNewHidden);
 
-	if (bNewHidden)
+	if (!bNewHidden)
 	{
-		TrySpawnItem();
+		return;
 	}
-}
 
+	// Is removed from level map
+	TrySpawnItem();
+}
 
 // Spawn item with a chance
 void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
@@ -105,7 +108,7 @@ void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 	static constexpr int32 Max = 100;
 	if (FMath::RandHelper(Max) < SpawnItemChanceInternal)
 	{
-		AGeneratedMap::Get().SpawnActorByType(EAT::Item, FCell(GetActorLocation()));
+		AGeneratedMap::Get().SpawnActorByType(EAT::Item, MapComponentInternal->GetCell());
 	}
 }
 

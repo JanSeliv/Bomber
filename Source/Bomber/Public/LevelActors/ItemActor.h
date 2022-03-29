@@ -45,7 +45,7 @@ public:
 
 	/** Return row by specified item type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	UItemRow* GetRowByItemType(EItemType ItemType, ELevelType LevelType) const;
+	const UItemRow* GetRowByItemType(EItemType ItemType, ELevelType LevelType) const;
 
 	/** Returns max possible items to be picked up by player.
 	  * @see UItemDataAsset::MaxAllowedItemNumInternal */
@@ -82,10 +82,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE EItemType GetItemType() const { return ItemTypeInternal; }
 
-	/** Calls to uninitialize item type. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	FORCEINLINE EItemType ResetItemType() { return ItemTypeInternal = EItemType::None; }
-
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -100,7 +96,7 @@ protected:
 	* Bomb: Increase the number of bombs that can be set at one time.
 	* Fire: Increase the bomb blast radius.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DIsplayName = "Item Type"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DIsplayName = "Item Type"))
 	EItemType ItemTypeInternal = EItemType::None; // [AW]
 
 	/* ---------------------------------------------------
@@ -113,7 +109,17 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
+	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
+	virtual void SetActorHiddenInGame(bool bNewHidden) override;
+
+	/** Returns properties that are replicated for the lifetime of the actor channel. */
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	/** Triggers when this item starts overlap a player character to destroy itself. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
+	/** Calls to uninitialize item type. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	EItemType ResetItemType() { return ItemTypeInternal = EItemType::None; }
 };

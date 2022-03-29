@@ -7,6 +7,7 @@
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 //---
+#include "PoolManager.h"
 #include "Net/UnrealNetwork.h"
 
 /* ---------------------------------------------------
@@ -24,7 +25,7 @@ AMyPlayerState::AMyPlayerState()
 void AMyPlayerState::ServerSetCustomPlayerMeshData_Implementation(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
 	PlayerMeshDataInternal = CustomPlayerMeshData;
-	OnRep_PlayerMeshData();
+	ApplyPlayerMeshData();
 }
 
 // Set the custom player name by user input
@@ -113,6 +114,12 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 		return;
 	}
 
+	const UPoolManager* PoolManager = USingletonLibrary::GetPoolManager();
+	if (!PoolManager)
+	{
+		return;
+	}
+
 	// handle timer is 0
 	if (CurrentGameState == ECurrentGameState::EndGame) // game was finished
 	{
@@ -132,7 +139,8 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	bool bUpdateEndGameState = false;
 	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
 	const APawn* PawnOwner = GetPawn();
-	if (!IS_VALID(PawnOwner)) // is dead owner
+	if (!PawnOwner
+	    || !PoolManager->IsActive(PawnOwner)) // is dead owner
 	{
 		if (PlayerNum <= 0) // last players were blasted together
 		{
@@ -170,11 +178,17 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	}
 }
 
-// Respond on changes in player mesh data to reset to set the mesh on client
-void AMyPlayerState::OnRep_PlayerMeshData()
+// Updates current player mesh data
+void AMyPlayerState::ApplyPlayerMeshData()
 {
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
 	{
 		PlayerCharacter->InitMySkeletalMesh(PlayerMeshDataInternal);
 	}
+}
+
+// Respond on changes in player mesh data to reset to set the mesh on client
+void AMyPlayerState::OnRep_PlayerMeshData()
+{
+	ApplyPlayerMeshData();
 }

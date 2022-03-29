@@ -240,6 +240,8 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	SetControlRotation(FRotator::ZeroRotator);
+
 	BroadcastOnPossessed();
 	BroadcastOnSetPlayerState();
 }
@@ -332,22 +334,23 @@ void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::GameStarting:
 		{
+			SetIgnoreMoveInput(true);
 			SetMouseVisibility(false);
 			break;
 		}
 		case ECurrentGameState::Menu:
 		{
-			SetMouseVisibility(true);
+			SetIgnoreMoveInput(true);
 			break;
 		}
 		case ECurrentGameState::EndGame:
 		{
-			SetMouseVisibility(true);
+			SetIgnoreMoveInput(true);
 			break;
 		}
 		case ECurrentGameState::InGame:
 		{
-			SetMouseVisibility(false);
+			SetIgnoreMoveInput(false);
 			break;
 		}
 		default:

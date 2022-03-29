@@ -85,23 +85,28 @@ public:
 	static USingletonLibrary* GetSingleton();
 	static FORCEINLINE const USingletonLibrary& Get() { return *GetSingleton(); }
 
-	/** The Level Map getter, nullptr otherwise */
+	/** Returns true if specified actor is the Bomber Level Actor (player, box, wall or item). */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class AGeneratedMap* GetLevelMap();
+	static bool IsLevelActor(const class AActor* Actor);
 
-	/** Iterate the world to find first level map placed on scene.
-	 * @see Call USingletonLibrary::GetLevelMap() instead to get cached one. */
+	/** Iterates the current world to find an actor by specified class.
+	 * @warning use this functions carefully, try always avoid it and get cached actor instead. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static class AGeneratedMap* FindLevelMap();
+	static AActor* GetActorOfClass(TSubclassOf<AActor> ActorClass);
+
+	/** Iterates the current world to find an actor by specified class. */
+	template <typename T>
+	static FORCEINLINE T* GetActorOfClass(TSubclassOf<AActor> ActorClass) { return Cast<T>(GetActorOfClass(ActorClass)); }
 
 	/** Returns true if game was started. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static bool HasWorldBegunPlay();
 
-	/** The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
-	 *
-	 * @param LevelMap The level map to set in the Library
-	 */
+	/** Returns true if this instance is server. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static bool IsServer();
+
+	/** The Level Map setter. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetLevelMap(class AGeneratedMap* LevelMap);
 
@@ -112,6 +117,14 @@ public:
 	/** Returns the type of the current level. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static ELevelType GetLevelType();
+
+	/* ---------------------------------------------------
+	 *		Framework pointer getters
+	 * --------------------------------------------------- */
+
+	/** The Level Map getter, nullptr otherwise */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class AGeneratedMap* GetLevelMap();
 
 	/** Return rhe Bomber Game Instance, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -177,6 +190,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class USoundsManager* GetSoundsManager();
 
+	/** Returns the Pool Manager of the game that is used to reuse created objects. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UPoolManager* GetPoolManager();
+
 	/* ---------------------------------------------------
 	 *		Structs functions
 	 * --------------------------------------------------- */
@@ -191,7 +208,7 @@ public:
 
 	/** Returns the zero cell (0,0,0) */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static FORCEINLINE bool IsValidCell(const FCell& Cell) { return Cell; }
+	static FORCEINLINE bool IsValidCell(const FCell& Cell) { return Cell.IsValid(); }
 
 	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
 	 *
@@ -212,10 +229,7 @@ public:
 	 * @return The distance between to cells
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "C1,C2"))
-	static FORCEINLINE float CalculateCellsLength(const FCell& C1, const FCell& C2)
-	{
-		return fabsf((C1.Location - C2.Location).Size()) / GetCellSize();
-	}
+	static float CalculateCellsLength(const FCell& C1, const FCell& C2);
 
 	/** Find the average of an set of cells */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -273,7 +287,7 @@ public:
 
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
-	static class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
+	static const class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
 
 	/** Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -287,7 +301,7 @@ public:
 
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static TSubclassOf<AActor> GetActorClassByType(EActorType ActorType);
+	static UClass* GetActorClassByType(EActorType ActorType);
 
 protected:
 	/* ---------------------------------------------------
@@ -299,7 +313,11 @@ protected:
 	 * Is transient to not serialize it since will be set by AGeneratedMap::OnConstruction().
 	 * Is stored in singleton, so has weak reference field to be garbage collected on loading another maps where that actor does not exist. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
-	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal; //[G]
+	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal = nullptr; //[G]
+
+	/** Contains the Pool Manager of the game that is used to reuse created objects. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pool Manager"))
+	TWeakObjectPtr<class UPoolManager> PoolManagerInternal = nullptr; //[G]
 
 	/** Contains properties to setup the generated level. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))

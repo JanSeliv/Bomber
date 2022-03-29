@@ -161,6 +161,9 @@ struct FPowerUp
 {
 	GENERATED_BODY()
 
+	/** Default amount on picked up items. */
+	static const FPowerUp DefaultData;
+
 	/** The number of items, that increases the movement speed of the character */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	int32 SkateN = 1;
@@ -231,7 +234,7 @@ protected:
 	TObjectPtr<class UStaticMeshComponent> NameplateMeshInternal = nullptr; //[C.DO]
 
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_Powerups", Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
 	FPowerUp PowerupsInternal; //[AW]
 
 	/** The ID identification of each character */
@@ -261,6 +264,13 @@ protected:
 	/** Is overriden to handle the client login when is set new player state. */
 	virtual void OnRep_PlayerState() override;
 
+	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
+	virtual void SetActorHiddenInGame(bool bNewHidden) override;
+
+	/** Called when this Pawn is possessed. Only called on the server (or in standalone).
+	 * @param NewController The controller possessing this pawn. */
+	virtual void PossessedBy(AController* NewController) override;
+
 	/**
 	 * Triggers when this player character starts something overlap.
 	 * With item overlapping Increases +1 to numbers of character's powerups (Skate/Bomb/Fire).
@@ -269,8 +279,8 @@ protected:
 	void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	/** Event triggered when the bomb has been explicitly destroyed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedBomb"))
-	void OnBombDestroyed(AActor* DestroyedBomb);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnBombDestroyed(class UMapComponent* MapComponent);
 
 	/** Listen to manage the tick. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -280,9 +290,17 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyPowerups();
 
+	/** Reset all picked up powerups. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ResetPowerups();
+
+	/** Is called on clients to apply powerups for this character. */
+	UFUNCTION()
+	void OnRep_Powerups();
+	
 	/** Updates new player name on a 3D widget component. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++")
-	void OnPlayerNameChanged(FName NewName);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void SetNicknameOnNameplate(FName NewName);
 
 	/** Updates collision object type by current character ID. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -300,7 +318,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SetDefaultPlayerMeshData();
 
-	/** Is called on server and clients to apply the characterID-dependent logic for this character. */
+	/** Apply the characterID-dependent logic for this character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyCharacterID();
+	
+	/** Is called on clients to apply the characterID-dependent logic for this character. */
+	UFUNCTION()
 	void OnRep_CharacterID();
 };

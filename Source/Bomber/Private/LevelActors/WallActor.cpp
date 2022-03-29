@@ -32,7 +32,8 @@ AWallActor::AWallActor()
 	bReplicates = true;
 	NetUpdateFrequency = 10.f;
 	bAlwaysRelevant = true;
-
+	SetReplicatingMovement(true);
+	
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
@@ -63,4 +64,18 @@ void AWallActor::OnConstruction(const FTransform& Transform)
 void AWallActor::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
+void AWallActor::SetActorHiddenInGame(bool bNewHidden)
+{
+	Super::SetActorHiddenInGame(bNewHidden);
+
+	if (!bNewHidden)
+	{
+		// Is added on level map
+		return;
+	}
+
+	// Is removed from level map
 }

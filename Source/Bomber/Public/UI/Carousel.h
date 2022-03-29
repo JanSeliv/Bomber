@@ -46,11 +46,11 @@ public:
 	/** Returns the current Level Actor Row of chosen mesh component.
 	 * @see ACarousel::CurrentMeshRowInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class ULevelActorRow* GetCurrentMeshRow() const { return CurrentMeshRowInternal; }
+	const FORCEINLINE class ULevelActorRow* GetCurrentMeshRow() const { return CurrentMeshRowInternal; }
 
 	/** Returns the current Level Actor Row of chosen mesh component. */
 	template <typename T>
-	FORCEINLINE T* GetCurrentMeshRow() const { return Cast<T>(CurrentMeshRowInternal); }
+	const FORCEINLINE T* GetCurrentMeshRow() const { return Cast<T>(CurrentMeshRowInternal); }
 
 	/** Rotate the Carousel to show another preview mesh on the same floor.
 	 * @param Incrementer 1 to rotate right, -1 to rotate left. */
@@ -77,7 +77,7 @@ protected:
 
 	/** The current Level Actor Row of chosen mesh component. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Mesh Row"))
-	TObjectPtr<class ULevelActorRow> CurrentMeshRowInternal; //[G]
+	TObjectPtr<const class ULevelActorRow> CurrentMeshRowInternal; //[G]
 
 	/** Called every frame. */
 	virtual void Tick(float DeltaTime) override;

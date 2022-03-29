@@ -6,10 +6,10 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "Globals/SingletonLibrary.h"
-#include "LevelActors/PlayerCharacter.h"
 #include "SoundsManager.h"
 //---
 #include "Components/BoxComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Default constructor
 UItemDataAsset::UItemDataAsset()
@@ -28,11 +28,11 @@ const UItemDataAsset& UItemDataAsset::Get()
 }
 
 // Return row by specified item type
-UItemRow* UItemDataAsset::GetRowByItemType(EItemType ItemType, ELevelType LevelType) const
+const UItemRow* UItemDataAsset::GetRowByItemType(EItemType ItemType, ELevelType LevelType) const
 {
 	TArray<ULevelActorRow*> OutRows;
-	UItemDataAsset::Get().GetRowsByLevelType(OutRows, TO_FLAG(LevelType));
-	ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType](const ULevelActorRow* RowIt)
+	Get().GetRowsByLevelType(OutRows, TO_FLAG(LevelType));
+	const ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType](const ULevelActorRow* RowIt)
 	{
 		const auto ItemRow = Cast<UItemRow>(RowIt);
 		return ItemRow && ItemRow->ItemType == ItemType;
@@ -51,6 +51,7 @@ AItemActor::AItemActor()
 	bReplicates = true;
 	NetUpdateFrequency = 10.f;
 	bAlwaysRelevant = true;
+	SetReplicatingMovement(true);
 
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
@@ -89,7 +90,7 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	// Override mesh
 	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, USingletonLibrary::GetLevelType()))
 	{
-		MapComponentInternal->SetMeshByRow(FoundItemRow);
+		MapComponentInternal->SetLevelActorRow(FoundItemRow);
 	}
 }
 
@@ -101,12 +102,35 @@ void AItemActor::BeginPlay()
 	OnActorBeginOverlap.AddDynamic(this, &AItemActor::OnItemBeginOverlap);
 }
 
+// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
+void AItemActor::SetActorHiddenInGame(bool bNewHidden)
+{
+	Super::SetActorHiddenInGame(bNewHidden);
+
+	if (!bNewHidden)
+	{
+		// Is added on level map
+		return;
+	}
+
+	// Is removed from level map
+	ResetItemType();
+}
+
+// Returns properties that are replicated for the lifetime of the actor channel
+void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, ItemTypeInternal);
+}
+
 // Triggers when this item starts overlap a player character to destroy itself
 void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	const auto OverlappedCharacter = Cast<APlayerCharacter>(OtherActor);
-	if (!IS_VALID(this)          // is not pending killed
-	    || !OverlappedCharacter) // character is not valid)
+	if (!IS_VALID(this)
+	    || !OtherActor
+	    || !OtherActor->IsA(USingletonLibrary::GetActorClassByType(EAT::Player)))
 	{
 		return;
 	}

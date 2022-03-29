@@ -21,7 +21,7 @@ struct FCustomPlayerMeshData
 
 	/** The row that is used to visualize the bomber character. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<class UPlayerRow> PlayerRow = nullptr; //[G]
+	TObjectPtr<const class UPlayerRow> PlayerRow = nullptr; //[G]
 
 	/** The index of the texture to set. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
