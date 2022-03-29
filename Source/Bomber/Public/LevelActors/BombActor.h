@@ -58,15 +58,15 @@ public:
 
 	/** Returns explosion cells (by copy to avoid changes). */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSet<FCell> GetExplosionCells() const { return ExplosionCellsInternal; }
+	const FORCEINLINE TArray<FCell>& GetExplosionCells() const { return ExplosionCellsInternal; }
 
 	/**
 	 * Sets the defaults of the bomb
 	 * @param InFireRadius Setting explosion length of this bomb
 	 * @param CharacterID Setting a mesh material of bomb by the character ID
 	 */
-	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "C++")
-	void MulticastInitBomb(int32 InFireRadius = 1, int32 CharacterID = -1);
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void InitBomb(int32 InFireRadius = 1, int32 CharacterID = -1);
 
 protected:
 	/* ---------------------------------------------------
@@ -78,12 +78,16 @@ protected:
 	TObjectPtr<class UMapComponent> MapComponentInternal; //[C.AW]
 
 	/** The bomb blast path */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells", ShowOnlyInnerProperties))
-	TSet<FCell> ExplosionCellsInternal;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells"))
+	TArray<FCell> ExplosionCellsInternal;
 
 	/** The radius of the blast to each side. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
 	int32 FireRadiusInternal = 1; //[N]
+
+	/** Current material of this bomb, is different for each player. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
+	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr; //[G]
 
 	/* ---------------------------------------------------
  	 *		Protected functions
@@ -95,6 +99,9 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
+	/** Returns properties that are replicated for the lifetime of the actor channel. */
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	/** Set the lifespan of this actor. When it expires the object will be destroyed.
 	 * @param InLifespan overriden with a default value, time will be got from the data asset. */
 	virtual void SetLifeSpan(float InLifespan = INDEX_NONE) override;
@@ -102,10 +109,13 @@ protected:
 	/** Called when the lifespan of an actor expires (if he has one). */
 	virtual void LifeSpanExpired() override;
 
+	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
+	virtual void SetActorHiddenInGame(bool bNewHidden) override;
+
 	/** Destroy bomb and burst explosion cells.
 	  * Calls destroying request of all actors by cells in explosion cells array.*/
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DefaultToSelf = DestroyedActor))
-	void DetonateBomb(AActor* DestroyedActor = nullptr);
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
+	void MulticastDetonateBomb(AActor* DestroyedActor = nullptr);
 
 	/**
 	 * Triggers when character end to overlaps with this bomb.
@@ -132,6 +142,14 @@ protected:
 	void SetCollisionResponseToAllPlayers(ECollisionResponse NewResponse);
 
 	/** Returns all players overlapping with this bomb. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	void GetOverlappingPlayers(TArray<class AActor*>& OutPlayers) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	void GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const;
+
+	/** Updates current material for this bomb actor. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyMaterial();
+
+	/** Is called on client to respond on changes in material of the bomb. */
+	UFUNCTION()
+	void OnRep_BombMaterial();
 };

@@ -82,7 +82,7 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 		const bool bDestroy = PlayerCharacter && ((1 << PlayerCharacter->GetCharacterID()) & Bitmask) != 0;
 		if (bDestroy) // mark to destroy if specified in slot
 		{
-			CellsToDestroy.Emplace(MapComponentIt->Cell);
+			CellsToDestroy.Emplace(MapComponentIt->GetCell());
 		}
 	}
 

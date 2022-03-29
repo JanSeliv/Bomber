@@ -41,6 +41,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetCameraLockedOnCenter(bool bInCameraLockedOnCenter);
 
+	/** Returns the center location between all players and bots. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FVector GetLocationBetweenPlayers() const;
+	
 protected:
 	/** If true, it will prevent following camera by player locations. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Camera Locked On Center"))
@@ -63,7 +67,7 @@ protected:
 	FVector StartLocationInternal; //[N]
 
 	/** Called every frame. */
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;

@@ -18,6 +18,7 @@
 #include "UI/InputControlsWidget.h"
 //---
 #include "Engine.h"
+#include "PoolManager.h"
 #include "Components/TextRenderComponent.h"
 #include "Kismet/GameplayStatics.h"
 //---
@@ -43,7 +44,7 @@ UWorld* USingletonLibrary::GetWorld() const
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (IsEditor()
-		&& !Get().LevelMapInternal.IsValid())
+	    && !Get().LevelMapInternal.IsValid())
 	{
 		if (IsEditorNotPieWorld())
 		{
@@ -224,48 +225,50 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 	return Singleton;
 }
 
-// The Level Map getter, nullptr otherwise
-AGeneratedMap* USingletonLibrary::GetLevelMap()
+// Returns true if specified actor is the Bomber Level Actor (player, box, wall or item)
+bool USingletonLibrary::IsLevelActor(const AActor* Actor)
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (IsEditor()
-	    && !Get().LevelMapInternal.IsValid())
-	{
-		AGeneratedMap* LevelMap = FindLevelMap();
-		SetLevelMap(LevelMap);
-	}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]
-
-	return Get().LevelMapInternal.Get();
+	const TSubclassOf<AActor> ActorClass = Actor ? Actor->GetClass() : nullptr;
+	const ULevelActorDataAsset* LevelActorDataAsset = ActorClass ? GetDataAssetByActorClass(ActorClass) : nullptr;
+	return LevelActorDataAsset && LevelActorDataAsset->GetActorType() != EAT::None;
 }
 
-// Iterate the world to find first level map placed on scene.
-AGeneratedMap* USingletonLibrary::FindLevelMap()
+// Iterates the current world to find an actor by specified class
+AActor* USingletonLibrary::GetActorOfClass(TSubclassOf<AActor> ActorClass)
 {
-	TArray<AActor*> LevelMapsArray;
-	UGameplayStatics::GetAllActorsOfClass(&Get(), AGeneratedMap::StaticClass(), LevelMapsArray);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(&Get(), ActorClass, FoundActors);
 
-	static constexpr int32 LocalLevelMapIndex = 0;
-	return LevelMapsArray.IsValidIndex(LocalLevelMapIndex) ? Cast<AGeneratedMap>(LevelMapsArray[LocalLevelMapIndex]) : nullptr;
+	static constexpr int32 Index = 0;
+	return FoundActors.IsValidIndex(Index) ? FoundActors[Index] : nullptr;
 }
 
 // Returns true if game was started
 bool USingletonLibrary::HasWorldBegunPlay()
 {
 #if WITH_EDITOR	// [IsEditor]
-	return IsPIE();
+	if (IsEditor())
+	{
+		return IsPIE();
+	}
 #endif	// [IsEditor]
-
 	const UWorld* World = Get().GetWorld();
 	return World && World->HasBegunPlay();
 }
 
-// The Level Map setter. If the specified Level Map is not valid or is transient, find and set another one
+// Returns true if this instance is server
+bool USingletonLibrary::IsServer()
+{
+	const UWorld* World = Get().GetWorld();
+	return World && !World->IsNetMode(ENetMode::NM_Client);
+}
+
+// The Level Map setter
 void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
 	USingletonLibrary* Singleton = GetSingleton();
 	if (Singleton
-	    && IS_VALID(LevelMap))
+		&& IS_VALID(LevelMap))
 	{
 		Singleton->LevelMapInternal = LevelMap;
 	}
@@ -281,6 +284,25 @@ int32 USingletonLibrary::GetAlivePlayersNum()
 ELevelType USingletonLibrary::GetLevelType()
 {
 	return AGeneratedMap::Get().GetLevelType();
+}
+
+/* ---------------------------------------------------
+ *		Framework pointer getters
+ * --------------------------------------------------- */
+
+// The Level Map getter, nullptr otherwise
+AGeneratedMap* USingletonLibrary::GetLevelMap()
+{
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (IsEditor()
+	    && !Get().LevelMapInternal.IsValid())
+	{
+		AGeneratedMap* LevelMap = GetActorOfClass<AGeneratedMap>(AGeneratedMap::StaticClass());
+		SetLevelMap(LevelMap);
+	}
+#endif	// WITH_EDITOR [IsEditorNotPieWorld]
+
+	return Get().LevelMapInternal.Get();
 }
 
 // Contains a data of standalone and PIE games, nullptr otherwise
@@ -397,9 +419,27 @@ USoundsManager* USingletonLibrary::GetSoundsManager()
 	return USoundsDataAsset::Get().GetSoundsManager();
 }
 
+// Returns the Pool Manager of the game that is used to reuse created objects
+UPoolManager* USingletonLibrary::GetPoolManager()
+{
+	return AGeneratedMap::Get().GetPoolManager();
+}
+
 /* ---------------------------------------------------
  *		Structs functions
  * --------------------------------------------------- */
+
+// Calculate the length between two cells
+float USingletonLibrary::CalculateCellsLength(const FCell& C1, const FCell& C2)
+{
+	const float CellSize = GetCellSize();
+	if (!CellSize)
+	{
+		return 0.f;
+	}
+	
+	return FMath::Abs((C1.Location - C2.Location).Size()) / CellSize;	
+}
 
 // Find the average of an array of vectors
 FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
@@ -425,13 +465,19 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 * --------------------------------------------------- */
 
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
-ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass)
+const ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass)
 {
-	const TArray<TObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (const TObjectPtr<ULevelActorDataAsset>& DataAssetIt : ActorsDataAssets)
+	if (!ActorClass)
 	{
-		if (DataAssetIt
-		    && DataAssetIt->GetActorClass()->IsChildOf(ActorClass))
+		return nullptr;
+	}
+
+	const TArray<TObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
+	for (const ULevelActorDataAsset* DataAssetIt : ActorsDataAssets)
+	{
+		const UClass* ActorClassIt = DataAssetIt ? DataAssetIt->GetActorClass() : nullptr;
+		if (ActorClassIt
+		    && ActorClassIt->IsChildOf(ActorClass))
 		{
 			return DataAssetIt;
 		}
@@ -443,10 +489,10 @@ ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclas
 void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
 {
 	const TArray<TObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (const TObjectPtr<ULevelActorDataAsset>& DataAssetIt : ActorsDataAssets)
+	for (ULevelActorDataAsset* DataAssetIt : ActorsDataAssets)
 	{
 		if (DataAssetIt
-		    && EnumHasAnyFlags(DataAssetIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
+			&& BitwiseActorTypes(ActorsTypesBitmask, TO_FLAG(DataAssetIt->GetActorType())))
 		{
 			OutDataAssets.Emplace(DataAssetIt);
 		}
@@ -462,7 +508,7 @@ const ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorType(EActorTyp
 }
 
 // Iterate ActorsDataAssets array and returns the found actor class by specified actor type
-TSubclassOf<AActor> USingletonLibrary::GetActorClassByType(EActorType ActorType)
+UClass* USingletonLibrary::GetActorClassByType(EActorType ActorType)
 {
 	const ULevelActorDataAsset* FoundDataAsset = GetDataAssetByActorType(ActorType);
 	return FoundDataAsset ? FoundDataAsset->GetActorClass() : nullptr;

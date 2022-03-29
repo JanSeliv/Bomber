@@ -65,7 +65,7 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 // Return rows by specified level types in the bitmask
 void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, int32 LevelsTypesBitmask) const
 {
-	for (const TObjectPtr<ULevelActorRow>& RowIt : RowsInternal)
+	for (ULevelActorRow* RowIt : RowsInternal)
 	{
 		if (RowIt
 		    && RowIt->Mesh //is not empty
@@ -77,7 +77,7 @@ void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, 
 }
 
 // Return rows by specified level types in the bitmask
-ULevelActorRow* ULevelActorDataAsset::GetRowByLevelType(ELevelType LevelType) const
+const ULevelActorRow* ULevelActorDataAsset::GetRowByLevelType(ELevelType LevelType) const
 {
 	TArray<ULevelActorRow*> Rows;
 	GetRowsByLevelType(Rows, TO_FLAG(LevelType));

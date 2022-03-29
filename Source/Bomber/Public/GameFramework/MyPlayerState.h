@@ -97,7 +97,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void ServerUpdateEndState();
 
-	/** Respond on changes in player mesh data to reset to set the mesh on client. */
+	/** Updates current player mesh data. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyPlayerMeshData();
+
+	/** Respond on changes in player mesh data to reset to set the mesh on client. */
+	UFUNCTION()
 	void OnRep_PlayerMeshData();
 };

@@ -34,7 +34,7 @@ void AMyGameStateBase::ServerSetGameState_Implementation(ECurrentGameState NewGa
 	}
 
 	CurrentGameStateInternal = NewGameState;
-	OnRep_CurrentGameState();
+	ApplyGameState();
 }
 
 /* ---------------------------------------------------
@@ -55,8 +55,8 @@ void AMyGameStateBase::BeginPlay()
 	Super::BeginPlay();
 }
 
-// Called on the AMyGameState::CurrentGameState property updating.
-void AMyGameStateBase::OnRep_CurrentGameState()
+// Updates current game state
+void AMyGameStateBase::ApplyGameState()
 {
 	switch (CurrentGameStateInternal)
 	{
@@ -79,7 +79,16 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 	}
 
 	// Notify listeners
-	OnGameStateChanged.Broadcast(CurrentGameStateInternal);
+	if (OnGameStateChanged.IsBound())
+	{
+		OnGameStateChanged.Broadcast(CurrentGameStateInternal);
+	}
+}
+
+// Called on the AMyGameState::CurrentGameState property updating.
+void AMyGameStateBase::OnRep_CurrentGameState()
+{
+	ApplyGameState();
 }
 
 // Called when game enters to the Game Starting state and timer starts countdown

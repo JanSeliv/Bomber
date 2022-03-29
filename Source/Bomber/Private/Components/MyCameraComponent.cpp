@@ -69,7 +69,36 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 	}
 
 	// Distance finding between players
-	float Distance = 0;
+	NewLocation = GetLocationBetweenPlayers();
+
+	if (DeltaTime)
+	{
+		NewLocation = FMath::Lerp(GetComponentLocation(), NewLocation, DeltaTime);
+	}
+
+	SetWorldLocation(NewLocation);
+
+	return true;
+}
+
+// Calls to set following camera by player locations
+void UMyCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
+{
+	bIsCameraLockedOnCenterInternal = bInCameraLockedOnCenter;
+
+	// Enable camera if should be unlocked
+	if (!bInCameraLockedOnCenter
+	    && !IsComponentTickEnabled()
+	    && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+	{
+		SetComponentTickEnabled(true);
+	}
+}
+
+// Returns the center location between all players and bots
+FVector UMyCameraComponent::GetLocationBetweenPlayers() const
+{
+	float Distance = 0.f;
 	FCells PlayersCells;
 	AGeneratedMap::Get().IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
 	for (const FCell& C1 : PlayersCells)
@@ -90,29 +119,10 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 	}
 
 	// Set the new location
+	FVector NewLocation = FVector::ZeroVector;
 	NewLocation = USingletonLibrary::GetCellArrayAverage(PlayersCells).Location;
 	NewLocation.Z = FMath::Max(MinHeightInternal, NewLocation.Z + Distance);
-	if (DeltaTime)
-	{
-		NewLocation = FMath::Lerp(GetComponentLocation(), NewLocation, DeltaTime);
-	}
-	SetWorldLocation(NewLocation);
-
-	return true;
-}
-
-// Calls to set following camera by player locations
-void UMyCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
-{
-	bIsCameraLockedOnCenterInternal = bInCameraLockedOnCenter;
-
-	// Enable camera if should be unlocked
-	if (!bInCameraLockedOnCenter
-	    && !IsComponentTickEnabled()
-	    && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
-	{
-		SetComponentTickEnabled(true);
-	}
+	return NewLocation;
 }
 
 // Called every frame
@@ -131,7 +141,7 @@ void UMyCameraComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StartLocationInternal = GetComponentLocation();
+	StartLocationInternal = GetLocationBetweenPlayers();
 
 	// Listen states to manage the tick
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())

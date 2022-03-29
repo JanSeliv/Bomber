@@ -55,4 +55,7 @@ protected:
 
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
+
+	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
+	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 };

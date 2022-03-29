@@ -61,7 +61,7 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Store the game state for the current game. */
-	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = "OnRep_CurrentGameState", meta = (BlueprintProtected, DisplayName = "Current Game State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_CurrentGameState", meta = (BlueprintProtected, DisplayName = "Current Game State"))
 	ECurrentGameState CurrentGameStateInternal = ECurrentGameState::None;
 
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
@@ -90,6 +90,10 @@ protected:
 
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
+
+	/** Updates current game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyGameState();
 
 	/** Called on the AMyGameStateBase::CurrentGameState property updating. */
 	UFUNCTION()

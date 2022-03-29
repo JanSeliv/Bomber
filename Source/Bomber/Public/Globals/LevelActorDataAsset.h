@@ -56,19 +56,19 @@ class ULevelActorDataAsset : public UBomberDataAsset
 	GENERATED_BODY()
 
 public:
-	/**  Return rows by specified level types in the bitmask. */
+	/** Return rows by specified level types in the bitmask. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetRowsByLevelType(
-		TArray<class ULevelActorRow*>& OutRows,
+		TArray<ULevelActorRow*>& OutRows,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "ELevelType")) int32 LevelsTypesBitmask) const;
 
-	/**  Return first found row by specified level types. */
+	/** Return first found row by specified level types. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class ULevelActorRow* GetRowByLevelType(ELevelType LevelType) const;
+	const class ULevelActorRow* GetRowByLevelType(ELevelType LevelType) const;
 
 	/** Return first found row by specified level types. */
 	template <typename T>
-	FORCEINLINE T* GetRowByLevelType(ELevelType LevelType) const { return Cast<T>(GetRowByLevelType(LevelType)); }
+	const FORCEINLINE T* GetRowByLevelType(ELevelType LevelType) const { return Cast<T>(GetRowByLevelType(LevelType)); }
 
 	/** Returns overall number of contained rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

@@ -79,7 +79,7 @@ void AMyAIController::BeginPlay()
 	// Call to super
 	Super::BeginPlay();
 
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if (!World)
 	{
 		return;
@@ -135,6 +135,15 @@ void AMyAIController::OnUnPossess()
 	SetAI(false);
 }
 
+// Locks or unlocks movement input
+void AMyAIController::SetIgnoreMoveInput(bool bShouldIgnore)
+{
+	// Do not call super to avoid stacking, override it
+
+	IgnoreMoveInput = bShouldIgnore;
+	SetAI(!bShouldIgnore);
+}
+
 // The main AI logic
 void AMyAIController::UpdateAI()
 {
@@ -159,7 +168,7 @@ void AMyAIController::UpdateAI()
 	// ----- Part 0: Before iterations -----
 
 	// Set the START cell searching bot location
-	const FCell F0 = MapComponent->Cell;
+	const FCell& F0 = MapComponent->GetCell();
 
 	// Searching 'SAFE NEIGHBORS'
 	static constexpr float MaxInteger = TNumericLimits<int32>::Max();
@@ -371,14 +380,18 @@ void AMyAIController::UpdateAI()
 }
 
 // Enable or disable AI for this bot
-void AMyAIController::SetAI(bool bShouldEnable) const
+void AMyAIController::SetAI(bool bShouldEnable)
 {
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if (!World)
 	{
 		return;
 	}
 
+	// Reset target location
+	AIMoveToInternal = FCell::ZeroCell;
+
+	// Handle the Ai updating timer
 	FTimerManager& TimerManager = World->GetTimerManager();
 	if (bShouldEnable)
 	{
@@ -399,12 +412,12 @@ void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		case ECurrentGameState::GameStarting:
 		case ECurrentGameState::EndGame:
 		{
-			SetAI(false);
+			SetIgnoreMoveInput(true);
 			break;
 		}
 		case ECurrentGameState::InGame:
 		{
-			SetAI(true);
+			SetIgnoreMoveInput(false);
 			break;
 		}
 		default:
