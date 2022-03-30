@@ -1,4 +1,4 @@
-// Copyright 2021 Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #include "MorphDataCustomization.h"
 //---
