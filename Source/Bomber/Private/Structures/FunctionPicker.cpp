@@ -1,3 +1,5 @@
+// Copyright (c) Yevhenii Selivanov.
+
 #include "Structures/FunctionPicker.h"
 
 // Empty settings function

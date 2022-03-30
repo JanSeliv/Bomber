@@ -1,4 +1,4 @@
-﻿// Copyright Yevhenii Selivanov
+﻿// Copyright (c) Yevhenii Selivanov
 
 #include "MyUnrealEdEngine.h"
 //---
