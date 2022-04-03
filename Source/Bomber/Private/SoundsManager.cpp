@@ -132,7 +132,7 @@ void USoundsManager::PostInitProperties()
 	}
 	else if (UWorld* World = GetWorld())
 	{
-		World->OnWorldBeginPlay.AddUObject(this, &ThisClass::BeginPlay);
+		World->OnWorldMatchStarting.AddUObject(this, &ThisClass::BeginPlay);
 	}
 }
 
