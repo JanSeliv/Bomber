@@ -45,22 +45,8 @@ public:
 	/** Sets default values for this component's properties. */
 	UMySkeletalMeshComponent();
 
-	/**
-	* Change the SkeletalMesh that is rendered for this Component. Will re-initialize the animation tree etc.
-	* Is implemented to prepare it to be ready work with UPlayerDataAsset (find player row).
-	* @param NewMesh New mesh to set for this component
-	* @param bReinitPose Whether we should keep current pose or reinitialize.
-	*/
-	virtual void SetSkeletalMesh(USkeletalMesh* NewMesh, bool bReinitPose) override;
-
-	/**
-	* Changes the material applied to an element of the mesh.
-	* Is implemented to set specified material as dynamic material instance
-	* @param ElementIndex The element to access the material of.
-	* @param Material The material to set.
-	* @return the material used by the indexed element of this mesh.
-	*/
-	virtual void SetMaterial(int32 ElementIndex, class UMaterialInterface* Material) override;
+	/** Controls what kind of collision is enabled for this body and all attached props. */
+	virtual void SetCollisionEnabled(ECollisionEnabled::Type NewType) override;
 
 	/** Enables or disables gravity for the owner body and all attached meshes from the player row. */
 	virtual void SetEnableGravity(bool bGravityEnabled) override;

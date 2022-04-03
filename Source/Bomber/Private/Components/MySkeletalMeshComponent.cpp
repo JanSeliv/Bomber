@@ -16,16 +16,18 @@ UMySkeletalMeshComponent::UMySkeletalMeshComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-// Change the SkeletalMesh that is rendered for this Component
-void UMySkeletalMeshComponent::SetSkeletalMesh(USkeletalMesh* NewMesh, bool bReinitPose)
+// Controls what kind of collision is enabled for this body and all attached props
+void UMySkeletalMeshComponent::SetCollisionEnabled(ECollisionEnabled::Type NewType)
 {
-	Super::SetSkeletalMesh(NewMesh, bReinitPose);
-}
-
-// Changes the material applied to an element of the mesh
-void UMySkeletalMeshComponent::SetMaterial(int32 ElementIndex, UMaterialInterface* Material)
-{
-	Super::SetMaterial(ElementIndex, Material);
+	Super::SetCollisionEnabled(NewType);
+	
+	for (UMeshComponent* AttachedMesh : AttachedMeshesInternal)
+	{
+		if (AttachedMesh)
+		{
+			AttachedMesh->SetCollisionEnabled(NewType);
+		}
+	}
 }
 
 // Enables or disables gravity for the owner body and all attached meshes from the player row
@@ -33,7 +35,7 @@ void UMySkeletalMeshComponent::SetEnableGravity(bool bGravityEnabled)
 {
 	Super::SetEnableGravity(bGravityEnabled);
 
-	for (const TObjectPtr<UMeshComponent>& MeshComponentIt : AttachedMeshesInternal)
+	for (UMeshComponent* MeshComponentIt : AttachedMeshesInternal)
 	{
 		if (MeshComponentIt)
 		{
