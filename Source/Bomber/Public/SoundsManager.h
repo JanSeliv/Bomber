@@ -204,6 +204,7 @@ protected:
 	/** Called when the game starts. */
 	void BeginPlay();
 
+	/** Blueprint even called when the game starts. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DisplayName = "Begin Play"))
 	void OnBeginPlay();
 

@@ -129,13 +129,18 @@ void USoundsManager::PostInitProperties()
 	if (USingletonLibrary::HasWorldBegunPlay())
 	{
 		BeginPlay();
-		OnBeginPlay();
+	}
+	else if (UWorld* World = GetWorld())
+	{
+		World->OnWorldBeginPlay.AddUObject(this, &ThisClass::BeginPlay);
 	}
 }
 
 // Called when the game starts
 void USoundsManager::BeginPlay()
 {
+	OnBeginPlay();
+
 	const UWorld* World = GetWorld();
 
 	USoundMix* MainSoundMix = USoundsDataAsset::Get().GetMainSoundMix();
