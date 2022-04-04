@@ -14,6 +14,7 @@ AMyGameModeBase::AMyGameModeBase()
 	GameStateClass = AMyGameStateBase::StaticClass();
 	HUDClass = AMyHUD::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
+	ReplaySpectatorPlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = nullptr;
 	PlayerStateClass = AMyPlayerState::StaticClass();
 }
@@ -45,6 +46,12 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 		return;
 	}
 
+	if (APlayerState* PlayerState = MyPC->GetPlayerState<APlayerState>())
+	{
+		// Spectators are not supported
+		PlayerState->SetIsOnlyASpectator(false);
+	}
+
 	PlayerControllersInternal.AddUnique(MyPC);
 }
 
@@ -60,3 +67,12 @@ void AMyGameModeBase::Logout(AController* Exiting)
 
 	Super::Logout(Exiting);
 }
+
+#if WITH_EDITOR
+// Is called if start the game in 'Simulate in Editor' and then press 'Possess or eject player' button
+bool AMyGameModeBase::SpawnPlayerFromSimulate(const FVector& NewLocation, const FRotator& NewRotation)
+{
+	// Super is not called since there no need to spawn default player
+	return true;
+}
+#endif // WITH_EDITOR
