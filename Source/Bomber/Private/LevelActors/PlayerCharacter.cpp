@@ -390,6 +390,12 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 
 	ResetPowerups();
 
+	if (UMySkeletalMeshComponent* MySkeletalMeshComponent = GetMySkeletalMeshComponent())
+	{
+		const ECollisionEnabled::Type NewType = bNewHidden ? ECollisionEnabled::NoCollision : ECollisionEnabled::PhysicsOnly;
+		MySkeletalMeshComponent->SetCollisionEnabled(NewType);
+	}
+
 	if (!bNewHidden)
 	{
 		// Is added on level map
