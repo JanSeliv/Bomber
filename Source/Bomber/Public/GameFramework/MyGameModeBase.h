@@ -40,4 +40,9 @@ protected:
 
 	/** Called when a Controller with a PlayerState leaves the game or is destroyed. */
 	virtual void Logout(AController* Exiting) override;
+
+#if WITH_EDITOR
+	/** Is called if start the game in 'Simulate in Editor' and then press 'Possess or eject player' button. */
+	virtual bool SpawnPlayerFromSimulate(const FVector& NewLocation, const FRotator& NewRotation) override;
+#endif // WITH_EDITOR
 };
