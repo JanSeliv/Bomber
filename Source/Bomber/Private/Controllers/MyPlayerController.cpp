@@ -163,9 +163,20 @@ void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 		return;
 	}
 
-	bShowMouseCursor = bShouldShow;
+	SetShowMouseCursor(bShouldShow);
 	bEnableClickEvents = bShouldShow;
 	bEnableMouseOverEvents = bShouldShow;
+	
+	if (bShouldShow)
+	{
+		static const FInputModeGameAndUI GameAndUI{};
+		SetInputMode(GameAndUI);
+	}
+	else
+	{
+		static const FInputModeGameOnly GameOnly{};
+		SetInputMode(GameOnly);
+	}
 }
 
 // Returns the Enhanced Input Local Player Subsystem
