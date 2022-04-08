@@ -63,6 +63,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))
 	TObjectPtr<class UMyInputMappingContext> InGameMenuInputContextInternal; //[D]
 
+	/** Creates new contexts if is needed. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void TryCreateGameplayInputContexts() const;
+
 private:
 	/** Are created dynamically by specified input classes.
 	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
