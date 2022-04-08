@@ -56,12 +56,39 @@ void UPlayerInputDataAsset::GetAllInputContexts(TArray<UMyInputMappingContext*>&
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
 UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
-	// Create new objects if is null
+	TryCreateGameplayInputContexts();
+	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
+}
+
+// Returns true if specified key is mapped to any gameplay input context
+bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
+{
+	return GameplayInputContextsInternal.ContainsByPredicate([&Key](const UMyInputMappingContext* ContextIt)
+	{
+		return ContextIt && ContextIt->GetMappings().ContainsByPredicate([&Key](const FEnhancedActionKeyMapping& MappingIt)
+		{
+			return MappingIt.Key == Key;
+		});
+	});
+}
+
+// Creates new contexts if is needed
+void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
+{
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (USingletonLibrary::IsEditorNotPieWorld())
+	{
+		// Do not create input contexts since the game is not started yet
+		return;
+	}
+#endif // WITH_EDITOR [IsEditorNotPieWorld]
+
+	// Create new context if any is null
 	const int32 ClassesNum = GameplayInputContextClassesInternal.Num();
 	for (int32 Index = 0; Index < ClassesNum; ++Index)
 	{
 		const bool bIsValidIndex = GameplayInputContextsInternal.IsValidIndex(Index);
-		const TObjectPtr<UMyInputMappingContext>& GameplayInputContextsIt = bIsValidIndex ? GameplayInputContextsInternal[Index] : nullptr;
+		const UMyInputMappingContext* GameplayInputContextsIt = bIsValidIndex ? GameplayInputContextsInternal[Index] : nullptr;
 		if (GameplayInputContextsIt)
 		{
 			// Is already created
@@ -90,20 +117,6 @@ UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 Loc
 			GameplayInputContextsInternal.EmplaceAt(Index, NewGameplayInputContext);
 		}
 	}
-
-	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
-}
-
-// Returns true if specified key is mapped to any gameplay input context
-bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
-{
-	return GameplayInputContextsInternal.ContainsByPredicate([&Key](UMyInputMappingContext* ContextIt)
-	{
-		return ContextIt && ContextIt->GetMappings().ContainsByPredicate([&Key](const FEnhancedActionKeyMapping& MappingIt)
-		{
-			return MappingIt.Key == Key;
-		});
-	});
 }
 
 // Sets default values for this controller's properties
@@ -166,7 +179,7 @@ void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 	SetShowMouseCursor(bShouldShow);
 	bEnableClickEvents = bShouldShow;
 	bEnableMouseOverEvents = bShouldShow;
-	
+
 	if (bShouldShow)
 	{
 		static const FInputModeGameAndUI GameAndUI{};
@@ -403,7 +416,7 @@ void AMyPlayerController::SetGameplayInputContextEnabled(bool bEnable)
 // Returns true if specified input context is enabled
 bool AMyPlayerController::IsInputContextEnabled(const UMyInputMappingContext* InputContext) const
 {
-	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem();
+	const UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem();
 	if (!ensureMsgf(InputSubsystem, TEXT("ASSERT: 'InputSubsystem' is not valid"))
 	    || !ensureMsgf(InputContext, TEXT("ASSERT: 'InputContext' is not valid")))
 	{
