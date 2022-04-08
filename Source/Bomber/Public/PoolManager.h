@@ -7,6 +7,18 @@
 #include "PoolManager.generated.h"
 
 /**
+ * States of the object in Pool
+ */
+UENUM(BlueprintType)
+enum class EPoolObjectState : uint8
+{
+	None, ///< Is not handled by Pool Manager
+	Inactive, ///< Contains in pool, is free and ready to be taken
+	Active  ///< Was taken from pool and can be returned back.
+};
+
+//ENUM_RANGE_BY_FIRST_AND_LAST($ENUM$, $ENUM$::First, $ENUM$::Last);
+/**
  * Contains the data that describe specific object in a pool.
  */
 USTRUCT(BlueprintType)
@@ -113,10 +125,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void EmptyAllPools();
 
-	/** Returns true if specified object is handled by the Pool Manager and was taken from its pool.
-	 *  Returns false if handled object is free and ready to be taken. */
+	/** Returns current state of specified object. */ 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	EPoolObjectState GetPoolObjectState(const UObject* Object) const;
+
+	/** Returns true is specified object is handled by Pool Manager. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	bool Contains(const UObject* Object) const;
+	
+	/** Returns true if specified object is handled by the Pool Manager and was taken from its pool. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
 	bool IsActive(const UObject* Object) const;
+
+	/** Returns true if handled object is inactive and ready to be taken from pool. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	bool IsFree(const UObject* Object) const;
 
 protected:
 	/** Contains all pools that are handled by the Pool Manger. */

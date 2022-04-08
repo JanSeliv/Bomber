@@ -1142,7 +1142,7 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 		return;
 	}
 
-	const AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
+	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
 	if (!ComponentOwner
 	    || ComponentOwner->bIsEditorPreviewActor)
 	{
@@ -1187,6 +1187,11 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 	if (!DraggedCellsInternal.Contains(AddedComponent->GetCell()))
 	{
 		DraggedCellsInternal.Emplace(AddedComponent->GetCell(), AddedComponent->GetActorType());
+	}
+
+	if (PoolManagerInternal)
+	{
+		PoolManagerInternal->AddToPool(ComponentOwner);
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }

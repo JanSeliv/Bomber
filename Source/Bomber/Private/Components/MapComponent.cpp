@@ -40,8 +40,9 @@ bool UMapComponent::OnConstruction()
 
 	const UPoolManager* PoolManager = LevelMap.GetPoolManager();
 	if (PoolManager
-	    && !PoolManager->IsActive(Owner))
+	    && PoolManager->IsFree(Owner))
 	{
+		// Do not reconstruct inactive object
 		return false;
 	}
 
