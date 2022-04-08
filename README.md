@@ -8,7 +8,13 @@ explosion including their own. The procedural generation of a level map with a g
 diverse. Player competes with bots that will do everything but not let them win. The first rule is just to be the best
 bomber and do not let bots to bomb player!
 
-> **To download and play the game go to the [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi)**
+## Download
+
+> To download and play the game go to the [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi)
+
+## Kanban Board
+
+> Check current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban)
 
 ## Content Team
 
