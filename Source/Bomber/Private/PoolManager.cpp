@@ -254,13 +254,38 @@ void UPoolManager::SetActive(bool bShouldActivate, UObject* Object)
 	}
 }
 
-// Returns true if specified object is handled by the Pool Manager and was taken from its pool
-bool UPoolManager::IsActive(const UObject* Object) const
+// Returns current state of specified object
+EPoolObjectState UPoolManager::GetPoolObjectState(const UObject* Object) const
 {
 	const UClass* ClassInPool = Object ? Object->GetClass() : nullptr;
 	const FPoolContainer* Pool = FindPool(ClassInPool);;
 	const FPoolObject* PoolObject = Pool ? Pool->FindInPool(Object) : nullptr;
-	return PoolObject && PoolObject->IsActive();
+
+	if (!PoolObject)
+	{
+		// Is not contained in any pool
+		return EPoolObjectState::None;
+	}
+
+	return PoolObject->IsActive() ? EPoolObjectState::Active : EPoolObjectState::Inactive;
+}
+
+// Returns true is specified object is handled by Pool Manager
+bool UPoolManager::Contains(const UObject* Object) const
+{
+	return GetPoolObjectState(Object) != EPoolObjectState::None;
+}
+
+// Returns true if specified object is handled by the Pool Manager and was taken from its pool
+bool UPoolManager::IsActive(const UObject* Object) const
+{
+	return GetPoolObjectState(Object) == EPoolObjectState::Active;
+}
+
+// Returns true if handled object is inactive and ready to be taken from pool
+bool UPoolManager::IsFree(const UObject* Object) const
+{
+	return GetPoolObjectState(Object) == EPoolObjectState::Inactive;
 }
 
 // Returns the pointer to found pool by specified class
@@ -270,7 +295,7 @@ FPoolContainer* UPoolManager::FindPool(const UClass* ClassInPool)
 	{
 		return nullptr;
 	}
-	
+
 	return PoolsInternal.FindByPredicate([ClassInPool](const FPoolContainer& It)
 	{
 		return It.ClassInPool == ClassInPool;
