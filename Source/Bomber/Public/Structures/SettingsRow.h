@@ -4,6 +4,7 @@
 
 #include "GameplayTagContainer.h"
 #include "Engine/DataTable.h"
+#include "Components/SlateWrapperTypes.h"
 //---
 #include "Bomber.h"
 #include "FunctionPicker.h"
@@ -242,7 +243,7 @@ struct FMiscThemeData
 
 	/** Visibility of the border. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	ESlateVisibility MenuBorderVisibility; //[B]
+	ESlateVisibility MenuBorderVisibility = ESlateVisibility::Visible; //[B]
 };
 
 /* Structs dependencies:
@@ -344,7 +345,7 @@ struct FSettingsPrimary
 
 	/** Set true to add new column starting from this setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	bool bStartOnNextColumn; //[D]
+	bool bStartOnNextColumn = false; //[D]
 
 	/** Contains tags of settings which are needed to update after change of this setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")

@@ -25,7 +25,7 @@ struct FCustomPlayerMeshData
 
 	/** The index of the texture to set. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	int32 SkinIndex; //[N]
+	int32 SkinIndex = 0; //[N]
 
 	/** Returns true is data is valid. */
 	FORCEINLINE bool IsValid() const { return PlayerRow != nullptr; }
