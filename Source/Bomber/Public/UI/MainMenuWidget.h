@@ -2,8 +2,10 @@
 
 #pragma once
 
-#include "Bomber.h"
 #include "Blueprint/UserWidget.h"
+//---
+#include "Bomber.h"
+#include "InputActionValue.h"
 //---
 #include "MainMenuWidget.generated.h"
 
@@ -43,6 +45,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ChooseLeft();
 
+	/** Sets the previous or next player in the Menu. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ChooseRightLeft(const FInputActionValue& ActionValue);
+	
 	/** Sets the next level in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ChooseForward();
@@ -51,6 +57,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ChooseBack();
 
+	/** Sets the previous or next level in the Menu. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ChooseBackForward(const FInputActionValue& ActionValue);
+	
 	/** Sets the next skin in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void NextSkin();
