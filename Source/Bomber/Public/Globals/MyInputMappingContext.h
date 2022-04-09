@@ -52,4 +52,9 @@ protected:
 	/** Set the game states for which this input context should be active. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Active For States", Bitmask, BitmaskEnum = "ECurrentGameState"))
 	int32 ActiveForStatesInternal; //[D]
+
+#if WITH_EDITOR
+	/** Implemented to save input configs as well. */
+	virtual void PreSave(FObjectPreSaveContext SaveContext) override;
+#endif // WITH_EDITOR
 };

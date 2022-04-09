@@ -5,6 +5,8 @@
 #include "EnhancedInputModule.h"
 #include "Controllers/MyPlayerController.h"
 #include "Globals/MyInputAction.h"
+#include "Globals/SingletonLibrary.h"
+#include "UObject/ObjectSaveContext.h"
 
 // Returns all input actions set in mappings
 void UMyInputMappingContext::GetInputActions(TArray<UMyInputAction*>& OutInputActions) const
@@ -64,3 +66,17 @@ bool UMyInputMappingContext::RemapKey(const UMyInputAction* InputAction, const F
 
 	return true;
 }
+
+#if WITH_EDITOR //[IsEditorNotPieWorld]
+/** Implemented to save input configs as well. */
+void UMyInputMappingContext::PreSave(FObjectPreSaveContext SaveContext)
+{
+	Super::PreSave(SaveContext);
+
+	// Save only if [IsEditorNotPieWorld]
+	if (!USingletonLibrary::IsEditorNotPieWorld())
+	{
+		SaveConfig();
+	}
+}
+#endif // WITH_EDITOR [IsEditorNotPieWorld]
