@@ -42,6 +42,25 @@ void UMainMenuWidget::ChooseLeft()
 	SwitchCurrentPlayer(PrevPlayer);
 }
 
+// Sets the previous or next player in the Menu
+void UMainMenuWidget::ChooseRightLeft(const FInputActionValue& ActionValue)
+{
+	const float ScaleValue = ActionValue.GetMagnitude();
+	if (!ScaleValue)
+	{
+		return;
+	}
+
+	if (FMath::IsNegative(ScaleValue))
+	{
+		ChooseLeft();
+	}
+	else
+	{
+		ChooseRight();
+	}
+}
+
 // Sets the next level in the Menu
 void UMainMenuWidget::ChooseForward()
 {
@@ -54,6 +73,25 @@ void UMainMenuWidget::ChooseBack()
 {
 	static constexpr int32 PrevLevel = -1;
 	SwitchCurrentLevel(PrevLevel);
+}
+
+// Sets the previous or next level in the Menu
+void UMainMenuWidget::ChooseBackForward(const FInputActionValue& ActionValue)
+{
+	const float ScaleValue = ActionValue.GetMagnitude();
+	if (!ScaleValue)
+	{
+		return;
+	}
+
+	if (FMath::IsNegative(ScaleValue))
+	{
+		ChooseBack();
+	}
+	else
+	{
+		ChooseForward();
+	}
 }
 
 // Sets the next skin in the Menu
