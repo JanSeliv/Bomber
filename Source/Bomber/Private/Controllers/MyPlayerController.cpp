@@ -268,6 +268,8 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 
 	BroadcastOnPossessed();
 	BroadcastOnSetPlayerState();
+
+	BindInputActions();
 }
 
 // Is overriden to notify the client when this controller possesses new player character
@@ -276,6 +278,8 @@ void AMyPlayerController::OnRep_Pawn()
 	Super::OnRep_Pawn();
 
 	BroadcastOnPossessed();
+
+	BindInputActions();
 }
 
 // Is overriden to notify the client when is set new player state
@@ -319,13 +323,14 @@ void AMyPlayerController::BindInputActions()
 		}
 
 		UObject* FoundContextObj = nullptr;
+		const FFunctionPicker& StaticContextFunction = ActionIt->GetStaticContext();
 		if (UFunction* FunctionPtr = ActionIt->GetStaticContext().GetFunction())
 		{
 			FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
 		}
 
 		// Bind action
-		if (FoundContextObj)
+		if (ensureMsgf(FoundContextObj, TEXT("ASSERT: Unable to get static context from function: '%s'"), *StaticContextFunction.FunctionName.ToString()))
 		{
 			const ETriggerEvent TriggerEvent = ActionIt->GetTriggerEvent();
 			EnhancedInputComponent->BindAction(ActionIt, TriggerEvent, FoundContextObj, FunctionName);
@@ -451,15 +456,6 @@ void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMap
 	}
 }
 
-// Executes spawning the bomb on controllable player
-void AMyPlayerController::SpawnBomb()
-{
-	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
-	{
-		PlayerCharacter->ServerSpawnBomb();
-	}
-}
-
 // Is called when all game widgets are initialized
 void AMyPlayerController::OnWidgetsInitialized()
 {
@@ -491,8 +487,6 @@ void AMyPlayerController::OnWidgetsInitialized()
 	{
 		InGameWidget->OnToggledInGameMenu.AddUniqueDynamic(this, &ThisClass::OnToggledInGameMenu);
 	}
-
-	BindInputActions();
 }
 
 // Is called on server and on client when this controller possesses new player character
