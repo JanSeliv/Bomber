@@ -181,14 +181,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InputContext);
 
-	/** Move the player character by the forward vector. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void MoveUpDown(const FInputActionValue& ActionValue);
-
-	/** Move the player character by the right vector. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void MoveRightLeft(const FInputActionValue& ActionValue);
-
 	/** Executes spawning the bomb on controllable player. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SpawnBomb();

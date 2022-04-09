@@ -700,3 +700,33 @@ void APlayerCharacter::OnRep_CharacterID()
 {
 	ApplyCharacterID();
 }
+
+// Move the player character by the forward vector
+void APlayerCharacter::MoveBackForward(const FInputActionValue& ActionValue)
+{
+	const float ScaleValue = ActionValue.GetMagnitude();
+
+	// Find out which way is forward
+	const FRotator Rotation = GetControlRotation();
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+	// Get forward vector
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(Direction, ScaleValue);
+}
+
+// Move the player character by the right vector.
+void APlayerCharacter::MoveRightLeft(const FInputActionValue& ActionValue)
+{
+	const float ScaleValue = ActionValue.GetMagnitude();
+
+	// Find out which way is right
+	const FRotator Rotation = GetControlRotation();
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+	// Get right vector
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	AddMovementInput(Direction, ScaleValue);
+}

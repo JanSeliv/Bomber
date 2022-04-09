@@ -4,6 +4,7 @@
 
 #include "GameFramework/Character.h"
 //---
+#include "InputActionValue.h"
 #include "Components/MySkeletalMeshComponent.h"
 #include "Globals/LevelActorDataAsset.h"
 //---
@@ -325,4 +326,12 @@ protected:
 	/** Is called on clients to apply the characterID-dependent logic for this character. */
 	UFUNCTION()
 	void OnRep_CharacterID();
+
+	/** Move the player character by the forward vector. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
+	void MoveBackForward(const FInputActionValue& ActionValue);
+
+	/** Move the player character by the right vector. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
+	void MoveRightLeft(const FInputActionValue& ActionValue);
 };
