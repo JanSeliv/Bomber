@@ -323,18 +323,18 @@ void AMyPlayerController::BindInputActions()
 		}
 
 		UObject* FoundContextObj = nullptr;
-		const FFunctionPicker& StaticContextFunction = ActionIt->GetStaticContext();
 		if (UFunction* FunctionPtr = ActionIt->GetStaticContext().GetFunction())
 		{
 			FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
 		}
-
-		// Bind action
-		if (ensureMsgf(FoundContextObj, TEXT("ASSERT: Unable to get static context from function: '%s'"), *StaticContextFunction.FunctionName.ToString()))
+		
+		if (!FoundContextObj)
 		{
-			const ETriggerEvent TriggerEvent = ActionIt->GetTriggerEvent();
-			EnhancedInputComponent->BindAction(ActionIt, TriggerEvent, FoundContextObj, FunctionName);
+			continue;
 		}
+
+		const ETriggerEvent TriggerEvent = ActionIt->GetTriggerEvent();
+		EnhancedInputComponent->BindAction(ActionIt, TriggerEvent, FoundContextObj, FunctionName);
 	}
 }
 
