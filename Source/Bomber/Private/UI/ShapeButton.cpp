@@ -97,6 +97,12 @@ bool SShapeButton::NeedExecuteAction(const FGeometry& MyGeometry, const FPointer
 	}
 
 	FBulkDataInterface* BulkDataPtr = &PlatformData->Mips[0].BulkData;
+	if (!BulkDataPtr
+		|| BulkDataPtr->IsInlined())
+	{
+		return bSucceed;
+	}
+	
 	const void* RawImage = BulkDataPtr->Lock(LOCK_READ_ONLY);
 	if (!ensureMsgf(RawImage, TEXT("ASSERT: 'RawImage' is not valid, could not lock the bulk data")))
 	{
