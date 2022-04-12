@@ -65,7 +65,7 @@ public:
 	 * @param InFireRadius Setting explosion length of this bomb
 	 * @param CharacterID Setting a mesh material of bomb by the character ID
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void InitBomb(int32 InFireRadius = 1, int32 CharacterID = -1);
 
 protected:
