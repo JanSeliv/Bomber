@@ -173,7 +173,7 @@ public:
 	 * @param Cell Actors location
 	 * @return Spawned actor on the Level Map, nullptr otherwise.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	AActor* SpawnActorByType(EActorType Type, const FCell& Cell);
 
 	/** Spawns a level actor on the Level Map by the specified type. */
@@ -182,7 +182,7 @@ public:
 
 	/** Adding and attaching the specified Map Component to the Level
 	 * @param AddedComponent The Map Component of the generated or dragged level actor. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void AddToGrid(class UMapComponent* AddedComponent);
 
 	/** The intersection of (OutCells ∩ ActorsTypesBitmask).
@@ -214,25 +214,25 @@ public:
 	 *
 	 * @param Cells The set of cells for destroying the found actors.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void DestroyActorsFromMap(const TSet<FCell>& Cells);
 
 	/** Removes the specified map component from the MapComponents_ array without an owner destroying. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void DestroyLevelActor(class UMapComponent* MapComponent);
 
 	/** Finds the nearest cell pointer to the specified Map Component
 	 *
 	 * @param MapComponent The component whose owner is being searched
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetNearestCell(class UMapComponent* MapComponent);
 
 	/**
 	* Change level by type. Specified level will be shown, other levels will be hidden.
 	* @param NewLevelType the new level to apply.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetLevelType(ELevelType NewLevelType);
 
 	/** Returns true if specified map component has non-generated owner that is manually dragged to the scene. */
@@ -309,7 +309,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/** Spawns and fills the Grid Array values by level actors */
-	UFUNCTION(BlueprintCallable, CallInEditor, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "C++", meta = (BlueprintProtected))
 	void GenerateLevelActors();
 
 	/** Map components getter.
@@ -323,7 +323,7 @@ protected:
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
 
 	/** Listen game states to generate level actors. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Align transform and build cells.
@@ -340,7 +340,7 @@ protected:
 	void OnRep_LevelType();
 
 	/** Find and add all level actors to allow the Pool Manager to handle all of them. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void InitPoolManager();
 
 	/* ---------------------------------------------------

@@ -284,7 +284,7 @@ protected:
 	void OnBombDestroyed(class UMapComponent* MapComponent);
 
 	/** Listen to manage the tick. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Apply effect of picked up powerups. */
@@ -308,7 +308,7 @@ protected:
 	void UpdateCollisionObjectType();
 
 	/** Possess a player or AI controller in dependence of current Character ID. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void TryPossessController();
 
 	/** Is called on game mode post login to handle character logic when new player is connected. */
