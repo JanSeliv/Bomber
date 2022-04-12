@@ -304,6 +304,12 @@ void AMyPlayerController::BindInputActions()
 		return;
 	}
 
+	if (EnhancedInputComponent->HasBindings())
+	{
+		// Remove all previous bindings to do not have duplicates
+		EnhancedInputComponent->ClearActionEventBindings();
+	}
+	
 	TArray<UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
 
