@@ -20,16 +20,7 @@ void UInGameWidget::ShowInGameMenu_Implementation()
 		return;
 	}
 
-	// Show mouse cursor
-	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetLocalPlayerController())
-	{
-		MyPlayerController->SetMouseVisibility(true);
-	}
-
-	if (OnToggledInGameMenu.IsBound())
-	{
-		OnToggledInGameMenu.Broadcast(true);
-	}
+	OnToggleInGameMenu(true);
 
 	// Blueprint implementation
 	// ...
@@ -44,16 +35,7 @@ void UInGameWidget::HideInGameMenu_Implementation()
 		return;
 	}
 
-	// Hide mouse cursor
-	if (AMyPlayerController* MyPlayerController = USingletonLibrary::GetLocalPlayerController())
-	{
-		MyPlayerController->SetMouseVisibility(false);
-	}
-
-	if (OnToggledInGameMenu.IsBound())
-	{
-		OnToggledInGameMenu.Broadcast(false);
-	}
+	OnToggleInGameMenu(false);
 
 	// Blueprint implementation
 	// ...
@@ -69,12 +51,6 @@ void UInGameWidget::ToggleInGameMenu()
 		return;
 	}
 
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
-
 	if (IsVisibleInGameMenu())
 	{
 		HideInGameMenu();
@@ -82,6 +58,21 @@ void UInGameWidget::ToggleInGameMenu()
 	else
 	{
 		ShowInGameMenu();
+	}
+}
+
+// Is called when In-Game menu became opened or closed
+void UInGameWidget::OnToggleInGameMenu(bool bIsVisible)
+{
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
+	if (OnToggledInGameMenu.IsBound())
+	{
+		OnToggledInGameMenu.Broadcast(bIsVisible);
 	}
 }
 

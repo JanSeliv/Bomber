@@ -188,7 +188,22 @@ UCLASS()
 class USettingsWidget final : public UUserWidget
 {
 	GENERATED_BODY()
+	
 public:
+	/* ---------------------------------------------------
+	 *		Public properties
+	 * --------------------------------------------------- */
+	
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToggledInGameMenu, bool, bIsVisible);
+
+	/** Is called to notify listeners the Settings widget is opened or closed. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnToggledInGameMenu OnToggledSettings;
+
+	/* ---------------------------------------------------
+	 *		Public functions
+	 * --------------------------------------------------- */
+	
 	/** Display settings on UI. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OpenSettings();
@@ -345,8 +360,12 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnWidgetsInitialized();
 
+	/** Is called when In-Game menu became opened or closed. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnToggleSettings(bool bIsVisible);
+	
 	/** Is called when visibility is changed for this widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnVisibilityChange(ESlateVisibility InVisibility);
 
 	/** Bind and set static object delegate.
@@ -357,7 +376,7 @@ protected:
 	/** Creates setting sub-widget (like button, checkbox etc.) based on specified setting class and sets it to specified primary data.
 	* @param Primary The Data that should contain created setting class.
 	* @param SettingSubWidgetClass The setting widget class to create. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Primary,SettingSubWidgetClass"))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Primary,SettingSubWidgetClass"))
 	void CreateSettingSubWidget(FSettingsPrimary& Primary, const TSubclassOf<USettingSubWidget>& SettingSubWidgetClass);
 
 	/** Starts adding settings on the next column. */
