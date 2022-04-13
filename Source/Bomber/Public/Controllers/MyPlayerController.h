@@ -23,8 +23,7 @@ public:
 	static const UPlayerInputDataAsset& Get();
 
 	/** Returns all input contexts contained in this data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	void GetAllInputContexts(TArray<class UMyInputMappingContext*>& OutInputContexts) const;
+	void GetAllInputContexts(TArray<const class UMyInputMappingContext*>& OutInputContexts) const;
 
 	/** Returns the overall amount of all gameplay input contexts. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -33,17 +32,22 @@ public:
 	/** Returns the Enhanced Input Mapping Context of gameplay actions for specified local player.
 	* @param LocalPlayerIndex The index of a local player. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class UMyInputMappingContext* GetGameplayInputContext(int32 LocalPlayerIndex) const;
+	const class UMyInputMappingContext* GetGameplayInputContext(int32 LocalPlayerIndex) const;
 
-	/** Returns the Enhanced Input Mapping Context of actions on the User Interface.
+	/** Returns the Enhanced Input Mapping Context of actions on the Main Menu widget.
 	* @see UPlayerInputDataAsset::MainMenuInputContextInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class UMyInputMappingContext* GetMainMenuInputContext() const { return MainMenuInputContextInternal; }
+	const FORCEINLINE class UMyInputMappingContext* GetMainMenuInputContext() const { return MainMenuInputContextInternal; }
 
-	/** Returns the Enhanced Input Mapping Context of actions on the User Interface.
+	/** Returns the Enhanced Input Mapping Context of actions on the In-Game Menu widget.
 	  * @see UPlayerInputDataAsset:: */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class UMyInputMappingContext* GetInGameMenuInputContext() const { return InGameMenuInputContextInternal; }
+	const FORCEINLINE class UMyInputMappingContext* GetInGameMenuInputContext() const { return InGameMenuInputContextInternal; }
+
+	/** Returns the Enhanced Input Mapping Context of actions on the Settings widget.
+	  * @see ::SettingsInputContextInternalInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FORCEINLINE class UMyInputMappingContext* GetSettingsInputContext() const { return SettingsInputContextInternalInternal; }
 
 	/** Returns true if specified key is mapped to any gameplay input context. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Key"))
@@ -57,11 +61,15 @@ protected:
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<class UMyInputMappingContext> MainMenuInputContextInternal; //[D]
+	TObjectPtr<class UMyInputMappingContext> MainMenuInputContextInternal = nullptr; //[D]
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<class UMyInputMappingContext> InGameMenuInputContextInternal; //[D]
+	TObjectPtr<class UMyInputMappingContext> InGameMenuInputContextInternal = nullptr; //[D]
+
+	/** Enhanced Input Mapping Context of actions on the Settings widget*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Input Context", ShowOnlyInnerProperties))
+	TObjectPtr<class UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr; //[D]
 
 	/** Creates new contexts if is needed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -164,6 +172,10 @@ protected:
 	/** Listens to handle input on opening and closing the InGame Menu widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggledInGameMenu(bool bIsVisible);
+
+	/** Listens to handle input on opening and closing the Settings widget. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnToggledSettings(bool bIsVisible);
 
 	/** Enables or disables input contexts of gameplay input actions.
 	 * @param bEnable set true to add gameplay input context, otherwise it will be removed from local player. */

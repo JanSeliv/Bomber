@@ -18,6 +18,7 @@
 #include "UI/InGameWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/MyHUD.h"
+#include "UI/SettingsWidget.h"
 
 // Returns the player input data asset
 const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
@@ -28,33 +29,38 @@ const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
 }
 
 // Returns all input contexts contained in this data asset
-void UPlayerInputDataAsset::GetAllInputContexts(TArray<UMyInputMappingContext*>& OutInputContexts) const
+void UPlayerInputDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& OutInputContexts) const
 {
 	static constexpr int32 FirstPlayer = 0;
-	if (UMyInputMappingContext* GameplayInputContextP1 = GetGameplayInputContext(FirstPlayer))
+	if (const UMyInputMappingContext* GameplayInputContextP1 = GetGameplayInputContext(FirstPlayer))
 	{
 		OutInputContexts.Emplace(GameplayInputContextP1);
 	}
 
 	static constexpr int32 SecondPlayer = 1;
-	if (UMyInputMappingContext* GameplayInputContextP2 = GetGameplayInputContext(SecondPlayer))
+	if (const UMyInputMappingContext* GameplayInputContextP2 = GetGameplayInputContext(SecondPlayer))
 	{
 		OutInputContexts.Emplace(GameplayInputContextP2);
 	}
 
-	if (UMyInputMappingContext* MainMenuInputContext = GetMainMenuInputContext())
+	if (const UMyInputMappingContext* MainMenuInputContext = GetMainMenuInputContext())
 	{
 		OutInputContexts.Emplace(MainMenuInputContext);
 	}
 
-	if (UMyInputMappingContext* InGameMenuInputContext = GetInGameMenuInputContext())
+	if (const UMyInputMappingContext* InGameMenuInputContext = GetInGameMenuInputContext())
 	{
 		OutInputContexts.Emplace(InGameMenuInputContext);
+	}
+
+	if (const UMyInputMappingContext* SettingsInputContext = GetSettingsInputContext())
+	{
+		OutInputContexts.Emplace(SettingsInputContext);
 	}
 }
 
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
-UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
+const UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
 	TryCreateGameplayInputContexts();
 	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
@@ -309,8 +315,8 @@ void AMyPlayerController::BindInputActions()
 		// Remove all previous bindings to do not have duplicates
 		EnhancedInputComponent->ClearActionEventBindings();
 	}
-	
-	TArray<UMyInputMappingContext*> InputContexts;
+
+	TArray<const UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
 
 	TArray<UMyInputAction*> InputActions;
@@ -393,24 +399,51 @@ void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	}
 
 	// Enable or disable input contexts by specified game states
-	TArray<UMyInputMappingContext*> InputContexts;
+	TArray<const UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
 	for (const UMyInputMappingContext* InputContextIt : InputContexts)
 	{
-		const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
-		const bool bEnableContext = GameStatesBitmask & TO_FLAG(CurrentGameState);
-		SetInputContextEnabled(bEnableContext, InputContextIt);
+		if (InputContextIt)
+		{
+			const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
+			const bool bEnableContext = GameStatesBitmask & TO_FLAG(CurrentGameState);
+			SetInputContextEnabled(bEnableContext, InputContextIt);
+		}
 	}
 }
 
 // Listens to handle input on opening and closing the InGame Menu widget
 void AMyPlayerController::OnToggledInGameMenu(bool bIsVisible)
 {
-	if (ECurrentGameState::InGame == AMyGameStateBase::GetCurrentGameState(this))
+	if (ECurrentGameState::InGame != AMyGameStateBase::GetCurrentGameState(this))
 	{
-		SetGameplayInputContextEnabled(!bIsVisible);
-		SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
+		return;
 	}
+
+	SetGameplayInputContextEnabled(!bIsVisible);
+	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
+
+	SetMouseVisibility(bIsVisible);
+}
+
+// Listens to handle input on opening and closing the Settings widget
+void AMyPlayerController::OnToggledSettings(bool bIsVisible)
+{
+	// Toggle Settings Input Context
+	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetSettingsInputContext());
+
+	// Toggle previous Input Context
+	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState(this);
+	const UMyInputMappingContext* PreviousInputContext = nullptr;
+	if (CurrentGameState == ECGS::Menu)
+	{
+		PreviousInputContext = UPlayerInputDataAsset::Get().GetMainMenuInputContext();
+	}
+	else if (CurrentGameState == ECGS::InGame)
+	{
+		PreviousInputContext = UPlayerInputDataAsset::Get().GetInGameMenuInputContext();
+	}
+	SetInputContextEnabled(!bIsVisible, PreviousInputContext);
 }
 
 // Enables or disables input contexts of gameplay input actions
@@ -492,6 +525,13 @@ void AMyPlayerController::OnWidgetsInitialized()
 	if (ensureMsgf(InGameWidget, TEXT("ASSERT: 'InGameWidget' is not valid")))
 	{
 		InGameWidget->OnToggledInGameMenu.AddUniqueDynamic(this, &ThisClass::OnToggledInGameMenu);
+	}
+
+	// Listens to handle input on opening and closing the Settings widget
+	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	if (ensureMsgf(SettingsWidget, TEXT("ASSERT: 'SettingsWidget' is not valid")))
+	{
+		SettingsWidget->OnToggledSettings.AddUniqueDynamic(this, &ThisClass::OnToggledSettings);
 	}
 }
 

@@ -94,6 +94,12 @@ const FSettingsPicker& USettingsWidget::GetSettingRow(const FGameplayTag& Settin
 // Save all settings into their configs
 void USettingsWidget::SaveSettings()
 {
+	if (UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings())
+	{
+		// Will apply and save settings
+		MyGameUserSettings->ApplySettings(false);
+	}
+
 	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
 		if (UObject* ContextObject = RowIt.Value.PrimaryData.StaticContextObject.Get())
@@ -666,6 +672,21 @@ void USettingsWidget::OnWidgetsInitialized()
 	ConstructSettings();
 }
 
+// Is called when In-Game menu became opened or closed
+void USettingsWidget::OnToggleSettings(bool bIsVisible)
+{
+	// Play the sound
+	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	{
+		SoundsManager->PlayUIClickSFX();
+	}
+
+	if (OnToggledSettings.IsBound())
+	{
+		OnToggledSettings.Broadcast(bIsVisible);
+	}
+}
+
 // Is called when visibility is changed for this widget
 void USettingsWidget::OnVisibilityChange(ESlateVisibility InVisibility)
 {
@@ -749,13 +770,15 @@ void USettingsWidget::StartNextColumn_Implementation()
 // Display settings on UI
 void USettingsWidget::OpenSettings()
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	if (IsVisible())
 	{
-		SoundsManager->PlayUIClickSFX();
+		// Is already shown
+		return;
 	}
 
 	SetVisibility(ESlateVisibility::Visible);
+
+	OnToggleSettings(true);
 }
 
 // Save and close the settings widget
@@ -768,21 +791,11 @@ void USettingsWidget::CloseSettings()
 		return;
 	}
 
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
-
 	SetVisibility(ESlateVisibility::Collapsed);
 
-	if (UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings())
-	{
-		// Will apply and save settings
-		MyGameUserSettings->ApplySettings(false);
-	}
-
 	SaveSettings();
+
+	OnToggleSettings(false);
 }
 
 // Flip-flop opens and closes the Settings menu
