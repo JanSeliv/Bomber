@@ -5,9 +5,9 @@
 #include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/SingletonLibrary.h"
+#include "Controllers/MyPlayerController.h"
 //---
 #include "Camera/CameraComponent.h"
-#include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -141,8 +141,6 @@ void UMyCameraComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	StartLocationInternal = GetLocationBetweenPlayers();
-
 	// Listen states to manage the tick
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
@@ -159,13 +157,8 @@ void UMyCameraComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::GameStarting:
 		{
-			APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-			const AMyGameStateBase* GameStateBase = USingletonLibrary::GetMyGameState();
-			if (PlayerController
-			    && GameStateBase)
-			{
-				PlayerController->SetViewTargetWithBlend(GetOwner(), GameStateBase->GetStartingCountdown());
-			}
+			StartLocationInternal = GetLocationBetweenPlayers();
+			PossessCamera();
 			bShouldTick = true;
 			break;
 		}
@@ -186,4 +179,21 @@ void UMyCameraComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	}
 
 	SetComponentTickEnabled(bShouldTick);
+}
+
+// Starts viewing through this camera
+void UMyCameraComponent::PossessCamera()
+{
+	AActor* Owner = GetOwner();
+	AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController();
+	const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
+	if (!ensureMsgf(Owner, TEXT("ASSERT: 'Owner' is not valid"))
+	    || !ensureMsgf(MyPC, TEXT("ASSERT: 'MyPC' is not valid"))
+	    || !ensureMsgf(MyGameState, TEXT("ASSERT: 'MyGameState' is not valid")))
+	{
+		return;
+	}
+
+	const float BlendTime = MyGameState->GetStartingCountdown();
+	MyPC->SetViewTargetWithBlend(Owner, BlendTime);
 }
