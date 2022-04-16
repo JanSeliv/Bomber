@@ -75,4 +75,8 @@ protected:
 	/** Listen game states to manage the tick. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Starts viewing through this camera. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void PossessCamera();
 };
