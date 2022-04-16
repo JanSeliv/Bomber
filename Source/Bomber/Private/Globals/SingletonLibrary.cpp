@@ -216,7 +216,9 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 	if (EditorPlayerIndex > 0)
 	{
 		const int32 ClientSingletonIndex = EditorPlayerIndex - 1;
-		return UMyUnrealEdEngine::GetClientSingleton<USingletonLibrary>(ClientSingletonIndex);
+		USingletonLibrary* ClientSingleton = UMyUnrealEdEngine::GetClientSingleton<USingletonLibrary>(ClientSingletonIndex);
+		checkf(ClientSingleton, TEXT("The client Singleton is null"));
+		return ClientSingleton;
 	}
 #endif // [IsEditorMultiplayer]
 
@@ -268,7 +270,7 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
 	USingletonLibrary* Singleton = GetSingleton();
 	if (Singleton
-		&& IS_VALID(LevelMap))
+	    && IS_VALID(LevelMap))
 	{
 		Singleton->LevelMapInternal = LevelMap;
 	}
@@ -437,8 +439,8 @@ float USingletonLibrary::CalculateCellsLength(const FCell& C1, const FCell& C2)
 	{
 		return 0.f;
 	}
-	
-	return FMath::Abs((C1.Location - C2.Location).Size()) / CellSize;	
+
+	return FMath::Abs((C1.Location - C2.Location).Size()) / CellSize;
 }
 
 // Find the average of an array of vectors
@@ -492,7 +494,7 @@ void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>&
 	for (ULevelActorDataAsset* DataAssetIt : ActorsDataAssets)
 	{
 		if (DataAssetIt
-			&& BitwiseActorTypes(ActorsTypesBitmask, TO_FLAG(DataAssetIt->GetActorType())))
+		    && BitwiseActorTypes(ActorsTypesBitmask, TO_FLAG(DataAssetIt->GetActorType())))
 		{
 			OutDataAssets.Emplace(DataAssetIt);
 		}
