@@ -176,8 +176,9 @@ bool AMyPlayerController::CanHideMouse() const
 // Called to to set mouse cursor visibility
 void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 {
-	if (!bShouldShow
-	    && !CanHideMouse())
+	const bool bFailedToHide = !bShouldShow && !CanHideMouse();
+	if (bFailedToHide
+	    || !IsLocalController())
 	{
 		return;
 	}
@@ -185,8 +186,28 @@ void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 	SetShowMouseCursor(bShouldShow);
 	bEnableClickEvents = bShouldShow;
 	bEnableMouseOverEvents = bShouldShow;
+	SetMouseFocusOnUI(bShouldShow);
+}
 
-	if (bShouldShow)
+// If true, set the mouse focus on game and UI, otherwise only focusing on game inputs
+void AMyPlayerController::SetMouseFocusOnUI(bool bFocusOnUI)
+{
+#if WITH_EDITOR // [IsEditorMultiplayer]
+	if (USingletonLibrary::IsEditorMultiplayer())
+	{
+		UGameViewportClient* GameViewport = GetWorld()->GetGameViewport();
+		FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
+		if (!Viewport
+		    || !GameViewport->IsFocused(Viewport))
+		{
+			// Do not change the focus for inactive viewports in editor-multiplayer
+			// to avoid misleading focus on another game window
+			return;
+		}
+	}
+#endif // WITH_EDITOR [IsEditorMultiplayer]
+
+	if (bFocusOnUI)
 	{
 		static const FInputModeGameAndUI GameAndUI{};
 		SetInputMode(GameAndUI);
@@ -225,7 +246,7 @@ void AMyPlayerController::BeginPlay()
 	FSlateApplication::Get().SetAllUserFocusToGameViewport(EFocusCause::WindowActivate);
 
 	// Set mouse focus
-	SetInputMode(FInputModeGameAndUI());
+	SetMouseFocusOnUI(true);
 
 	// Prevents built-in slate input on UMG
 	SetUIInputIgnored();
@@ -339,7 +360,7 @@ void AMyPlayerController::BindInputActions()
 		{
 			FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
 		}
-		
+
 		if (!FoundContextObj)
 		{
 			continue;
