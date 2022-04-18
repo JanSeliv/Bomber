@@ -157,7 +157,10 @@ void UMyCameraComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::GameStarting:
 		{
-			StartLocationInternal = GetLocationBetweenPlayers();
+			if (StartLocationInternal.IsZero())
+			{
+				StartLocationInternal = GetLocationBetweenPlayers();
+			}
 			PossessCamera();
 			bShouldTick = true;
 			break;
