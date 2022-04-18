@@ -235,22 +235,6 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 	}
 }
 
-// Set and apply new skeletal mesh by specified data
-void APlayerCharacter::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
-{
-	UMySkeletalMeshComponent* MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
-	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: 'MySkeletalMeshComp' is not valid"))
-	    || !MapComponentInternal
-	    || !CustomPlayerMeshData.IsValid())
-	{
-		return;
-	}
-
-	MySkeletalMeshComp->InitMySkeletalMesh(CustomPlayerMeshData);
-
-	MapComponentInternal->SetLevelActorRow(CustomPlayerMeshData.PlayerRow);
-}
-
 // Actualize the player name for this character
 void APlayerCharacter::UpdateNicknameOnNameplate()
 {
@@ -263,6 +247,13 @@ void APlayerCharacter::UpdateNicknameOnNameplate()
 	}
 
 	SetNicknameOnNameplate(NewNickname);
+}
+
+// Set and apply how a player has to look lik
+void APlayerCharacter::ServerSetCustomPlayerMeshData_Implementation(const FCustomPlayerMeshData& CustomPlayerMeshData)
+{
+	PlayerMeshDataInternal = CustomPlayerMeshData;
+	ApplyCustomPlayerMeshData();
 }
 
 /* ---------------------------------------------------
@@ -301,8 +292,6 @@ void APlayerCharacter::BeginPlay()
 	{
 		MyPlayerState->OnPlayerNameChanged.AddDynamic(this, &ThisClass::SetNicknameOnNameplate);
 	}
-
-	UpdateCollisionObjectType();
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -376,6 +365,7 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(ThisClass, PowerupsInternal);
 	DOREPLIFETIME(ThisClass, CharacterIDInternal);
+	DOREPLIFETIME(ThisClass, PlayerMeshDataInternal);
 }
 
 // Is overriden to handle the client login when is set new player state
@@ -383,7 +373,7 @@ void APlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	SetDefaultPlayerMeshData();
+	ApplyCustomPlayerMeshData();
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -418,7 +408,7 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	SetDefaultPlayerMeshData();
+	ApplyCustomPlayerMeshData();
 
 	UpdateNicknameOnNameplate();
 }
@@ -638,26 +628,30 @@ void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* N
 	TryPossessController();
 }
 
-// Apply default mesh for the local player
-void APlayerCharacter::SetDefaultPlayerMeshData()
+// Set and apply new skeletal mesh by specified data
+void APlayerCharacter::ApplyCustomPlayerMeshData()
 {
-	AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>();
-	if (!MyPlayerState)
+	UMySkeletalMeshComponent* MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
+	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: 'MySkeletalMeshComp' is not valid"))
+	    || !MapComponentInternal)
 	{
 		return;
 	}
 
-	FCustomPlayerMeshData CustomPlayerMeshData = MyPlayerState->GetCustomPlayerMeshData();
-	if (CustomPlayerMeshData.IsValid())
+	if (!PlayerMeshDataInternal.IsValid())
 	{
-		InitMySkeletalMesh(CustomPlayerMeshData);
+		PlayerMeshDataInternal.PlayerRow = UPlayerDataAsset::Get().GetRowByLevelType<UPlayerRow>(USingletonLibrary::GetLevelType());
 	}
-	else
-	{
-		// Set default custom player mesh
-		CustomPlayerMeshData.PlayerRow = UPlayerDataAsset::Get().GetRowByLevelType<UPlayerRow>(USingletonLibrary::GetLevelType());
-		MyPlayerState->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
-	}
+
+	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
+
+	MapComponentInternal->SetLevelActorRow(PlayerMeshDataInternal.PlayerRow);
+}
+
+// Respond on changes in player mesh data to reset to set the mesh on client
+void APlayerCharacter::OnRep_PlayerMeshData()
+{
+	ApplyCustomPlayerMeshData();
 }
 
 void APlayerCharacter::ApplyCharacterID()
@@ -670,16 +664,19 @@ void APlayerCharacter::ApplyCharacterID()
 	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
 
 	// Update mesh
-	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
-	if (MeshesNum > 0)
+	if (HasAuthority())
 	{
-		const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
-		if (const UPlayerRow* Row = Cast<UPlayerRow>(PlayerDataAsset.GetRowByLevelType(TO_ENUM(ELevelType, LevelType))))
+		const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
+		if (MeshesNum > 0)
 		{
-			FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
-			CustomPlayerMeshData.PlayerRow = Row;
-			CustomPlayerMeshData.SkinIndex = FMath::RandHelper(Row->GetMaterialInstancesDynamicNum());
-			InitMySkeletalMesh(CustomPlayerMeshData);
+			const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
+			if (const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType)))
+			{
+				FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
+				CustomPlayerMeshData.PlayerRow = Row;
+				CustomPlayerMeshData.SkinIndex = FMath::RandHelper(Row->GetMaterialInstancesDynamicNum());
+				ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
+			}
 		}
 	}
 
@@ -696,6 +693,8 @@ void APlayerCharacter::ApplyCharacterID()
 			}
 		}
 	}
+
+	UpdateCollisionObjectType();
 }
 
 // Is called on clients to apply the characterID-dependent logic for this character

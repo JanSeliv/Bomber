@@ -98,8 +98,7 @@ void UMainMenuWidget::ChooseBackForward(const FInputActionValue& ActionValue)
 void UMainMenuWidget::NextSkin()
 {
 	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	AMyPlayerState* LocalPlayerState = LocalPlayerCharacter ? LocalPlayerCharacter->GetPlayerState<AMyPlayerState>() : nullptr;
-	if (!ensureMsgf(LocalPlayerState, TEXT("ASSERT: 'LocalPlayerState' is not valid")))
+	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid")))
 	{
 		return;
 	}
@@ -122,13 +121,7 @@ void UMainMenuWidget::NextSkin()
 	MainMenuMeshComp->SetSkin(NewSkinIndex);
 
 	// Update the player data
-	LocalPlayerState->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
-
-	// Update player skin locally on client
-	if (!LocalPlayerCharacter->HasAuthority())
-	{
-		LocalPlayerCharacter->InitMySkeletalMesh(CustomPlayerMeshData);
-	}
+	LocalPlayerCharacter->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
 }
 
 // Set the chosen on UI the level type
@@ -226,8 +219,7 @@ void UMainMenuWidget::SwitchCurrentLevel(int32 Incrementer)
 void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 {
 	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	AMyPlayerState* LocalPlayerState = LocalPlayerCharacter ? LocalPlayerCharacter->GetPlayerState<AMyPlayerState>() : nullptr;
-	if (!ensureMsgf(LocalPlayerState, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
+	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
 	    || !ensureMsgf(MainMenuActorInternal, TEXT("ASSERT: 'MainMenuActorInternal' is not valid"))
 	    || !Incrementer)
 	{
@@ -254,13 +246,7 @@ void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	}
 
 	// Update player data
-	LocalPlayerState->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
-
-	// Update player mesh locally on client
-	if (!LocalPlayerCharacter->HasAuthority())
-	{
-		LocalPlayerCharacter->InitMySkeletalMesh(CustomPlayerMeshData);
-	}
+	LocalPlayerCharacter->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
 }
 
 // Called when the current game state was changed

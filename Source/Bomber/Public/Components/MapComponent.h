@@ -66,6 +66,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FORCEINLINE class ULevelActorRow* GetLevelActorRow() const { return LevelActorRowInternal; }
 
+	/** Returns the owner's Level Actor Row. */
+	template <typename T>
+	const FORCEINLINE T* GetLevelActorRow() const { return Cast<T>(GetLevelActorRow()); }
+	
 	/** Set specified mesh to the Owner. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetLevelActorRow(const class ULevelActorRow* Row);
