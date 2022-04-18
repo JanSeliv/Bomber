@@ -383,6 +383,10 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void StartNextColumn();
 
+	/** Called when the current game state was changed, listens only when settings widget is opened. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	
 	/* ---------------------------------------------------
 	 *		Add by setting types
 	 * --------------------------------------------------- */
