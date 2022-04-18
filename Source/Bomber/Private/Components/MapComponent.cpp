@@ -161,7 +161,8 @@ void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& New
 	const AActor* Owner = GetOwner();
 	if (!IS_VALID(Owner)
 	    || !Owner->HasAuthority()
-	    || NewResponses == ECR_MAX)
+	    || NewResponses == ECR_MAX
+	    || NewResponses == CollisionResponseInternal)
 	{
 		return;
 	}
