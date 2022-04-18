@@ -189,6 +189,9 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 		MovementComponent->bOrientRotationToMovement = true;
 		static const FRotator RotationRate(0.f, 540.f, 0.f);
 		MovementComponent->RotationRate = RotationRate;
+
+		// Do not push out clients from collision
+		MovementComponent->MaxDepenetrationWithGeometryAsProxy = 0.f;
 	}
 }
 

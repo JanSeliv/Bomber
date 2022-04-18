@@ -128,19 +128,32 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-	/** Changes the response for specified player.
-	 *
+	/** Gets the response for specified player.
+	 * @param OutCollisionResponses Returns requested response. 
 	 * @param CharacterID Player to set response.
-	 * @param NewResponse New response to set.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetCollisionResponseToPlayer(int32 CharacterID, ECollisionResponse NewResponse);
-
-	/** Changes the response for all players.
 	 * @param NewResponse New response to set. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetCollisionResponseToAllPlayers(ECollisionResponse NewResponse);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	void GetCollisionResponseToPlayer(FCollisionResponseContainer& OutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse) const;
 
+	/** Gets the response for all players.
+	  * @param OutCollisionResponses Returns requested responses. 
+	  * @param NewResponse New response to set. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	void GetCollisionResponseToAllPlayers(FCollisionResponseContainer& OutCollisionResponses, ECollisionResponse NewResponse) const;
+
+	/** Gets the response for players by specified bitmask.
+	  * @param OutCollisionResponses Returns requested responses. 
+	  * @param Bitmask Each bit represents the character ID.
+	  * @param BitOnResponse Applies response for toggles bits.
+	  * @param BitOffResponse Applies response for clear bits.
+	  * Set 'ECollisionResponse::ECR_MAX' to avoid changing response for toggled or clear bits.
+	  * E.g: Bitmask = 11, BitOnResponse = ECR_Block, BitOffResponse = ECR_MAX:
+	  * specified '11' in binary is '1 0 1 1',
+	  * so characters with IDs '0', '1' and '3' will apply 'ECR_Block' response,
+	  * player with Character ID '2' won't change its response since it's specified as 'ECR_MAX'. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	void GetCollisionResponseToPlayers(FCollisionResponseContainer& OutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse) const;
+	
 	/** Returns all players overlapping with this bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const;
