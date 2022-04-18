@@ -3,6 +3,7 @@
 #include "UI/SettingsWidget.h"
 //---
 #include "SoundsManager.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyGameUserSettings.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/MyHUD.h"
@@ -778,6 +779,11 @@ void USettingsWidget::OpenSettings()
 
 	SetVisibility(ESlateVisibility::Visible);
 
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	{
+		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+
 	OnToggleSettings(true);
 }
 
@@ -785,13 +791,18 @@ void USettingsWidget::OpenSettings()
 void USettingsWidget::CloseSettings()
 {
 	if (!IsVisible()
-	    || !IsHovered())
+	    && !IsHovered())
 	{
 		// Widget is already closed
 		return;
 	}
 
 	SetVisibility(ESlateVisibility::Collapsed);
+
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	{
+		MyGameState->OnGameStateChanged.RemoveDynamic(this, &ThisClass::OnGameStateChanged);
+	}
 
 	SaveSettings();
 
@@ -808,6 +819,24 @@ void USettingsWidget::ToggleSettings()
 	else
 	{
 		OpenSettings();
+	}
+}
+
+// Called when the current game state was changed, listens only when settings widget is opened
+void USettingsWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	switch (CurrentGameState)
+	{
+		case ECurrentGameState::GameStarting:
+		{
+			if (IsVisible())
+			{
+				CloseSettings();
+			}
+			break;
+		}
+		default:
+			break;
 	}
 }
 

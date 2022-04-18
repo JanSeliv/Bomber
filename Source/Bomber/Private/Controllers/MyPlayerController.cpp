@@ -464,7 +464,11 @@ void AMyPlayerController::OnToggledSettings(bool bIsVisible)
 	{
 		PreviousInputContext = UPlayerInputDataAsset::Get().GetInGameMenuInputContext();
 	}
-	SetInputContextEnabled(!bIsVisible, PreviousInputContext);
+
+	if (PreviousInputContext)
+	{
+		SetInputContextEnabled(!bIsVisible, PreviousInputContext);
+	}
 }
 
 // Enables or disables input contexts of gameplay input actions
