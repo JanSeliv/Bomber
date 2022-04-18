@@ -41,15 +41,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE EEndGameState GetEndGameState() const { return EndGameStateInternal; }
 
-	/** Set and apply how a player has to look like.
-	 * @param CustomPlayerMeshData New data to apply. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
-	void ServerSetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData);
-
-	/** By which level type a skeletal mesh is chosen. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
-
 	/** Is created to expose APlayerState::SetPlayerName(NewName) to blueprints. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetPlayerNameCustom(FName NewName);
@@ -69,10 +60,6 @@ protected:
 	/** Contains result of the game for controlled player after ending the game. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
 	EEndGameState EndGameStateInternal = EEndGameState::None; //[G]
-
-	/** A level type of chosen skeletal mesh. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_PlayerMeshData", Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
-	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
 
 	/** Config: custom name set by player.
 	 * Can contain different languages, uppercase, lowercase etc. */
@@ -96,12 +83,4 @@ protected:
 	/** Updated result of the game for controlled player after ending the game. Called when one of players is destroying. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void ServerUpdateEndState();
-
-	/** Updates current player mesh data. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyPlayerMeshData();
-
-	/** Respond on changes in player mesh data to reset to set the mesh on client. */
-	UFUNCTION()
-	void OnRep_PlayerMeshData();
 };

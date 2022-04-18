@@ -21,13 +21,6 @@ AMyPlayerState::AMyPlayerState()
 	PrimaryActorTick.bStartWithTickEnabled = false;
 }
 
-// Set and apply how a player has to look like
-void AMyPlayerState::ServerSetCustomPlayerMeshData_Implementation(const FCustomPlayerMeshData& CustomPlayerMeshData)
-{
-	PlayerMeshDataInternal = CustomPlayerMeshData;
-	ApplyPlayerMeshData();
-}
-
 // Set the custom player name by user input
 void AMyPlayerState::SetPlayerNameCustom(FName NewName)
 {
@@ -67,7 +60,6 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, EndGameStateInternal);
-	DOREPLIFETIME(ThisClass, PlayerMeshDataInternal);
 	DOREPLIFETIME(ThisClass, CustomPlayerNameInternal);
 }
 
@@ -176,19 +168,4 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	{
 		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 	}
-}
-
-// Updates current player mesh data
-void AMyPlayerState::ApplyPlayerMeshData()
-{
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(GetPawn()))
-	{
-		PlayerCharacter->InitMySkeletalMesh(PlayerMeshDataInternal);
-	}
-}
-
-// Respond on changes in player mesh data to reset to set the mesh on client
-void AMyPlayerState::OnRep_PlayerMeshData()
-{
-	ApplyPlayerMeshData();
 }
