@@ -1028,17 +1028,25 @@ void AGeneratedMap::ApplyLevelType()
 			continue;
 		}
 
-		FLatentActionInfo LatentInfo;
-		LatentInfo.UUID = Index;
-		ULevelStreaming* StreamingLevel = UGameplayStatics::GetStreamingLevel(World, PackageName);
-		if (!StreamingLevel
-		    || !StreamingLevel->IsLevelLoaded())
+		ULevelStreaming* LevelStreaming = UGameplayStatics::GetStreamingLevel(World, PackageName);
+		if (!ensureMsgf(LevelStreaming, TEXT("ASSERT: 'LevelStreaming' is not valid")))
 		{
-			UGameplayStatics::LoadStreamLevel(World, PackageName, bShouldBeVisibleIt, false, LatentInfo);
+			continue;
+		}
+
+		if (!LevelStreaming->IsLevelLoaded())
+		{
+			LevelStreaming->OnLevelLoaded.AddUniqueDynamic(this, &ThisClass::ApplyLevelType);
+
+			FLatentActionInfo LatentInfo;
+			LatentInfo.UUID = Index;
+			constexpr bool bMakeVisibleAfterLoad = false;
+			constexpr bool bShouldBlockOnLoad = false;
+			UGameplayStatics::LoadStreamLevel(World, PackageName, bMakeVisibleAfterLoad, bShouldBlockOnLoad, LatentInfo);
 		}
 		else
 		{
-			StreamingLevel->SetShouldBeVisible(bShouldBeVisibleIt);
+			LevelStreaming->SetShouldBeVisible(bShouldBeVisibleIt);
 		}
 	}
 
