@@ -201,14 +201,50 @@ void UPoolManager::EmptyPool(const UClass* ClassInPool)
 // Destroy all objects in all pools that are handled by the Pool Manager
 void UPoolManager::EmptyAllPools()
 {
-	const int32 SubPoolsNum = PoolsInternal.Num();
-	for (int32 Index = SubPoolsNum - 1; Index >= 0; --Index)
+	const int32 PoolsNum = PoolsInternal.Num();
+	for (int32 Index = PoolsNum - 1; Index >= 0; --Index)
 	{
 		const UClass* ClassInPool = PoolsInternal.IsValidIndex(Index) ? PoolsInternal[Index].ClassInPool : nullptr;
 		EmptyPool(ClassInPool);
 	}
 
 	PoolsInternal.Empty();
+}
+
+// Destroy all objects in Pool Manager based on a predicate functor
+void UPoolManager::EmptyAllByPredicate(TFunctionRef<bool(const UObject* Object)> Predicate)
+{
+	const int32 PoolsNum = PoolsInternal.Num();
+	for (int32 PoolIndex = PoolsNum - 1; PoolIndex >= 0; --PoolIndex)
+	{
+		if (!PoolsInternal.IsValidIndex(PoolIndex))
+		{
+			continue;
+		}
+
+		TArray<FPoolObject>& PoolObjectsRef = PoolsInternal[PoolIndex].PoolObjects;
+		const int32 ObjectsNum = PoolObjectsRef.Num();
+		for (int32 ObjectIndex = ObjectsNum - 1; ObjectIndex >= 0; --ObjectIndex)
+		{
+			UObject* ObjectIt = PoolObjectsRef.IsValidIndex(ObjectIndex) ? PoolObjectsRef[ObjectIndex].Object : nullptr;
+			if (!IsValid(ObjectIt)
+			    || !Predicate(ObjectIt))
+			{
+				continue;
+			}
+
+			if (AActor* Actor = Cast<AActor>(ObjectIt))
+			{
+				Actor->Destroy();
+			}
+			else
+			{
+				ObjectIt->ConditionalBeginDestroy();
+			}
+
+			PoolObjectsRef.RemoveAt(ObjectIndex);
+		}
+	}
 }
 
 // Activates or deactivates the object if such object is handled by the Pool Manager

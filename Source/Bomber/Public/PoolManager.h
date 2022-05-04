@@ -48,6 +48,12 @@ struct FPoolObject
 
 	/** Returns true if the object is created. */
 	FORCEINLINE bool IsValid() const { return Object != nullptr; }
+
+	/** conversion to "bool" returning true if pool object is valid. */
+	FORCEINLINE operator bool() const { return IsValid(); }
+
+	/** Element access. */
+	FORCEINLINE UObject* operator->() const { return Object; }
 };
 
 /**
@@ -78,6 +84,9 @@ struct FPoolContainer
 	/** Returns the pointer to the Pool element by specified object. */
 	FPoolObject* FindInPool(const UObject* Object);
 	const FORCEINLINE FPoolObject* FindInPool(const UObject* Object) const { return const_cast<FPoolContainer*>(this)->FindInPool(Object); }
+
+	/** Returns true if the class is set for the Pool. */
+	FORCEINLINE bool IsValid() const { return ClassInPool != nullptr; }
 };
 
 /** The Pool Manager is used for commonly-spawning objects:
@@ -125,7 +134,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void EmptyAllPools();
 
-	/** Returns current state of specified object. */ 
+	/** Destroy all objects in Pool Manager based on a predicate functor. */
+	void EmptyAllByPredicate(TFunctionRef<bool(const UObject* PoolObject)> Predicate);
+
+	/** Returns current state of specified object. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
 	EPoolObjectState GetPoolObjectState(const UObject* Object) const;
 
