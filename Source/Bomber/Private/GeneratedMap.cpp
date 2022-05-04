@@ -551,6 +551,20 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	// Align transform and build cells
 	TransformLevelMap(Transform);
 
+#if WITH_EDITOR // [IsEditorMultiplayer]
+	if (USingletonLibrary::IsEditorMultiplayer()
+	    && PoolManagerInternal)
+	{
+		// Destroy from pool all unsaved level actors to avoid it being unsynced on clients
+		auto IsDirtyPredicate = [](const UObject* PoolObject) -> bool
+		{
+			return PoolObject && !PoolObject->HasAllFlags(RF_WasLoaded | RF_LoadCompleted);
+		};
+
+		PoolManagerInternal->EmptyAllByPredicate(IsDirtyPredicate);
+	}
+#endif // WITH_EDITOR // [IsEditorMultiplayer]
+
 	// Actors generation
 	GenerateLevelActors();
 
