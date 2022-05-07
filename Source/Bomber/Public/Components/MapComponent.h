@@ -148,7 +148,7 @@ protected:
 	TObjectPtr<class UBoxComponent> BoxCollisionComponentInternal = nullptr; //[C.DO]
 
 	/** Actual response type of the collision box of an actor. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response"))
 	FCollisionResponseContainer CollisionResponseInternal = ECR_MAX; //[G]
 
 	/* ---------------------------------------------------
