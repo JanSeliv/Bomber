@@ -127,9 +127,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMouseVisibility(bool bShouldShow);
 
-	/** If true, set the mouse focus on game and UI, otherwise only focusing on game inputs. */
+	/** Focus the keyboard and mouse inputs on current viewport. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMouseFocusOnUI(bool bFocusOnUI);
+	void SetFocusOnGameWindow();
 
 	/** Returns the Enhanced Input Local Player Subsystem. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
