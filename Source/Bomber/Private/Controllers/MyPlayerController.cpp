@@ -186,11 +186,10 @@ void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 	SetShowMouseCursor(bShouldShow);
 	bEnableClickEvents = bShouldShow;
 	bEnableMouseOverEvents = bShouldShow;
-	SetMouseFocusOnUI(bShouldShow);
 }
 
 // If true, set the mouse focus on game and UI, otherwise only focusing on game inputs
-void AMyPlayerController::SetMouseFocusOnUI(bool bFocusOnUI)
+void AMyPlayerController::SetFocusOnGameWindow()
 {
 #if WITH_EDITOR // [IsEditorMultiplayer]
 	if (USingletonLibrary::IsEditorMultiplayer())
@@ -207,15 +206,15 @@ void AMyPlayerController::SetMouseFocusOnUI(bool bFocusOnUI)
 	}
 #endif // WITH_EDITOR [IsEditorMultiplayer]
 
-	if (bFocusOnUI)
+	static const FInputModeGameOnly GameOnly{};
+	SetInputMode(GameOnly);
+
+	// Activate lest mouse button on single click
+	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	UGameViewportClient* GameViewportClient = LocalPlayer ? LocalPlayer->ViewportClient : nullptr;
+	if (GameViewportClient)
 	{
-		static const FInputModeGameAndUI GameAndUI{};
-		SetInputMode(GameAndUI);
-	}
-	else
-	{
-		static const FInputModeGameOnly GameOnly{};
-		SetInputMode(GameOnly);
+		GameViewportClient->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
 	}
 }
 
@@ -246,7 +245,7 @@ void AMyPlayerController::BeginPlay()
 	FSlateApplication::Get().SetAllUserFocusToGameViewport(EFocusCause::WindowActivate);
 
 	// Set mouse focus
-	SetMouseFocusOnUI(true);
+	SetFocusOnGameWindow();
 
 	// Prevents built-in slate input on UMG
 	SetUIInputIgnored();
