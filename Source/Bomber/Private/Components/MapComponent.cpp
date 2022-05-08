@@ -136,8 +136,7 @@ void UMapComponent::SetMaterial(UMaterialInterface* Material)
 // Rerun owner's construction scripts. The temporary only editor owner will not be updated
 void UMapComponent::RerunOwnerConstruction() const
 {
-	AActor* Owner = GetOwner();
-	if (ensureMsgf(IS_VALID(Owner), TEXT("RerunOwnerConstruction: The map owner is not valid")))
+	if (AActor* Owner = GetOwner())
 	{
 		Owner->RerunConstructionScripts();
 	}
