@@ -41,7 +41,8 @@ void UMyGameUserSettings::ValidateSettings()
 // Changes all scalability settings at once based on a single overall quality level
 void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
 {
-	if (Value == OverallQualityInternal)
+	if (Value == OverallQualityInternal
+	    || GetOverallScalabilityLevel() == Value)
 	{
 		return;
 	}
@@ -154,7 +155,8 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 // Set new resolution by index
 void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 {
-	if (!IntResolutionsInternal.IsValidIndex(Index))
+	if (!IntResolutionsInternal.IsValidIndex(Index)
+	    || GetResolutionIndex() == Index)
 	{
 		return;
 	}
@@ -172,6 +174,11 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 // Set and apply fullscreen mode. If false, the windowed mode will be applied
 void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 {
+	if (IsFullscreenEnabled() == bIsFullscreen)
+	{
+		return;
+	}
+
 	const EWindowMode::Type NewFullscreenMode = bIsFullscreen ? EWindowMode::Fullscreen : EWindowMode::Windowed;
 	SetFullscreenMode(NewFullscreenMode);
 
@@ -204,7 +211,8 @@ void UMyGameUserSettings::UpdateFullscreenEnabled()
 void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 {
 	const USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
-	if (!SettingsWidget)
+	if (!SettingsWidget
+	    || GetFPSLockIndex() == Index)
 	{
 		return;
 	}
