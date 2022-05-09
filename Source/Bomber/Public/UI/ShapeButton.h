@@ -32,11 +32,8 @@ protected:
 	virtual FCursorReply OnCursorQuery(const FGeometry& MyGeometry, const FPointerEvent& CursorEvent) const override;
 	virtual TSharedPtr<IToolTip> GetToolTip() override;
 
-	/**
-	 * Called on mouse moves and clicks.
-	 * @return true if collision detected.
-	 */
-	bool NeedExecuteAction(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const;
+	/** Returns true if cursor is hovered on a texture. */
+	bool IsAlphaPixelHovered(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const;
 };
 
 /**

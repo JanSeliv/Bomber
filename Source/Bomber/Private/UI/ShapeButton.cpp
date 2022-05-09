@@ -3,6 +3,7 @@
 #include "UI/ShapeButton.h"
 //---
 #include "UMG.h"
+#include "RenderingThread.h"
 
 // Set texture to collide with specified texture
 void SShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
@@ -18,7 +19,7 @@ void SShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
 
 FReply SShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (!NeedExecuteAction(MyGeometry, MouseEvent))
+	if (!IsAlphaPixelHovered(MyGeometry, MouseEvent))
 	{
 		return FReply::Unhandled();
 	}
@@ -27,7 +28,7 @@ FReply SShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPoint
 
 FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
 {
-	if (!NeedExecuteAction(InMyGeometry, InMouseEvent))
+	if (!IsAlphaPixelHovered(InMyGeometry, InMouseEvent))
 	{
 		return FReply::Unhandled();
 	}
@@ -36,7 +37,7 @@ FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, con
 
 FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (!NeedExecuteAction(MyGeometry, MouseEvent))
+	if (!IsAlphaPixelHovered(MyGeometry, MouseEvent))
 	{
 		return FReply::Unhandled();
 	}
@@ -45,7 +46,7 @@ FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointer
 
 FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	const bool bHovered = NeedExecuteAction(MyGeometry, MouseEvent);
+	const bool bHovered = IsAlphaPixelHovered(MyGeometry, MouseEvent);
 	if (bHovered != IsHovered())
 	{
 		SetHover(bHovered);
@@ -78,64 +79,85 @@ TSharedPtr<IToolTip> SShapeButton::GetToolTip()
 	return IsHovered() ? SWidget::GetToolTip() : nullptr;
 }
 
-// Called on mouse moves and clicks
-bool SShapeButton::NeedExecuteAction(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const
+// Returns true if cursor is hovered on a texture
+bool SShapeButton::IsAlphaPixelHovered(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const
 {
-	// Return true by default do not prevent player press the button
-	bool bSucceed = true;
+	const bool bIsCurrentlyHovered = IsHovered();
 
 	if (!AdvancedHitAlpha)
 	{
-		return bSucceed;
+		return bIsCurrentlyHovered;
 	}
 
-	UTexture2D* AdvancedHitTexture = TextureWeakPtr.Get();
-	FTexturePlatformData* PlatformData = AdvancedHitTexture ? AdvancedHitTexture->GetPlatformData() : nullptr;
-	if (!PlatformData)
+	const UTexture2D* HitTexture = TextureWeakPtr.Get();
+	if (!HitTexture)
 	{
-		return bSucceed;
+		return bIsCurrentlyHovered;
 	}
 
-	FBulkDataInterface* BulkDataPtr = &PlatformData->Mips[0].BulkData;
-	if (!BulkDataPtr
-		|| BulkDataPtr->IsInlined())
-	{
-		return bSucceed;
-	}
-	
-	const void* RawImage = BulkDataPtr->Lock(LOCK_READ_ONLY);
-	if (!ensureMsgf(RawImage, TEXT("ASSERT: 'RawImage' is not valid, could not lock the bulk data")))
-	{
-		BulkDataPtr->Unlock();
-		return bSucceed;
-	}
+	const uint32 SizeX = HitTexture->GetSizeX();
+	const uint32 SizeY = HitTexture->GetSizeY();
 
-	const FColor* RawColorArray = static_cast<const FColor*>(RawImage);
-	if (!ensureMsgf(RawColorArray, TEXT("ASSERT: 'RawColorArray' is not valid")))
+	struct FRawColorsData
 	{
-		BulkDataPtr->Unlock();
-		return bSucceed;
+		TArray<FColor> RawColors;
+		TPromise<bool> RawColorsCopied{nullptr};
+	};
+
+	TSharedPtr<FRawColorsData, ESPMode::ThreadSafe> RawColorsDataPtr = MakeShared<FRawColorsData, ESPMode::ThreadSafe>();
+	RawColorsDataPtr->RawColors.SetNum(SizeX * SizeY);
+
+	// Get Raw Colors data on Render thread
+	ENQUEUE_RENDER_COMMAND(NeedExecuteAction)([RawColorsDataPtr, WeakTexture = TextureWeakPtr](FRHICommandListImmediate&)
+	{
+		FRawColorsData* RawColorsData = RawColorsDataPtr.Get();
+		check(RawColorsData);
+
+		const UTexture2D* Texture2D = WeakTexture.Get();
+		const FTextureResource* TextureResource = Texture2D ? Texture2D->GetResource() : nullptr;
+		FRHITexture2D* RHITexture2D = TextureResource ? TextureResource->GetTexture2DRHI() : nullptr;
+		check(RHITexture2D);
+
+		// Lock		
+		uint32 DestPitch = 0;
+		constexpr int32 MipIndex = 0;
+		constexpr bool bLockWithinMipTail = false;
+		const uint8* MappedTextureMemory = static_cast<const uint8*>(RHILockTexture2D(RHITexture2D, MipIndex, RLM_ReadOnly, DestPitch, bLockWithinMipTail));
+
+		// Copy data
+		TArray<FColor>& RawColorsRef = RawColorsData->RawColors;
+		const int32 Count = RawColorsRef.Num() * sizeof(FColor);
+		FMemory::Memcpy(/*dest*/RawColorsRef.GetData(), /*source*/MappedTextureMemory, Count);
+
+		// Unlock
+		RHIUnlockTexture2D(RHITexture2D, MipIndex, bLockWithinMipTail);
+
+		// Notify
+		RawColorsDataPtr->RawColorsCopied.SetValue(true);
+	});
+
+	const bool bRawColorsCopied = RawColorsDataPtr->RawColorsCopied.GetFuture().Get();
+	if (!bRawColorsCopied)
+	{
+		return bIsCurrentlyHovered;
 	}
 
 	FVector2D LocalPosition = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
-	LocalPosition.X = floor(LocalPosition.X);
-	LocalPosition.Y = floor(LocalPosition.Y);
+	LocalPosition.X = FMath::Floor(LocalPosition.X);
+	LocalPosition.Y = FMath::Floor(LocalPosition.Y);
 	LocalPosition /= MyGeometry.GetLocalSize();
+	LocalPosition.X *= SizeX;
+	LocalPosition.Y *= SizeY;
+	const int32 BufferPosition = FMath::Floor(LocalPosition.Y) * SizeX + LocalPosition.X;
 
-	const int32 ImageWidth = PlatformData->SizeX;
-	LocalPosition.X *= ImageWidth;
-	LocalPosition.Y *= PlatformData->SizeY;
-
-	const int32 BufferPosition = floor(LocalPosition.Y) * ImageWidth + LocalPosition.X;
-
-	// Return false if alpha pixel hovered
-	if (RawColorArray[BufferPosition].A <= AdvancedHitAlpha)
+	const TArray<FColor>& RawColors = RawColorsDataPtr->RawColors;
+	if (!RawColors.IsValidIndex(BufferPosition))
 	{
-		bSucceed = false;
+		return bIsCurrentlyHovered;
 	}
 
-	BulkDataPtr->Unlock();
-	return bSucceed;
+	const bool bIsAlphaPixelHovered = RawColors[BufferPosition].A > AdvancedHitAlpha;
+	return bIsAlphaPixelHovered;
 }
 
 // Set texture to collide with specified texture
