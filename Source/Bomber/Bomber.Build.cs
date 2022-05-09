@@ -16,7 +16,8 @@ public class Bomber : ModuleRules
 			"GameplayTags", // Tags
 			"RHI", "ApplicationCore", // Resolutions
 			"EnhancedInput", // Enhanced Input plugin
-			"Niagara" // VFX
+			"Niagara", // VFX
+			"RenderCore" // Render threads
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
