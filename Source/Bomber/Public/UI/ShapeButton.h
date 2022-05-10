@@ -11,6 +11,8 @@
 class SShapeButton final : public SButton
 {
 public:
+	virtual ~SShapeButton() override;
+
 	/** Set texture to collide with specified texture. */
 	void SetAdvancedHitTexture(class UTexture2D* InTexture);
 
@@ -24,6 +26,12 @@ protected:
 	/** Current alpha. */
 	int32 AdvancedHitAlpha = 1;
 
+	/** Cached buffer data about all pixels of current texture, is set once on render thread. */
+	TSharedPtr<TArray<FColor>, ESPMode::ThreadSafe> RawColorsPtr = nullptr;
+
+	/** Contains the size of current texture. */
+	FIntPoint TextureRes = FIntPoint::ZeroValue;
+
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
@@ -31,9 +39,13 @@ protected:
 	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
 	virtual FCursorReply OnCursorQuery(const FGeometry& MyGeometry, const FPointerEvent& CursorEvent) const override;
 	virtual TSharedPtr<IToolTip> GetToolTip() override;
+	virtual void OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 	/** Returns true if cursor is hovered on a texture. */
 	bool IsAlphaPixelHovered(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const;
+
+	/** Set once on render thread the buffer data about all pixels of current texture if was not set before. */
+	void TryUpdateRawColorsOnce();
 };
 
 /**
