@@ -19,6 +19,9 @@ public:
 	/** Set new alpha. */
 	void SetAdvancedHitAlpha(int32 InAlpha);
 
+	/** Allows button to be hovered. */
+	void SetCanHover(bool bAllow);
+
 protected:
 	/** Current texture to determine collision shape. */
 	TWeakObjectPtr<class UTexture2D> TextureWeakPtr = nullptr;
@@ -32,20 +35,29 @@ protected:
 	/** Contains the size of current texture. */
 	FIntPoint TextureRes = FIntPoint::ZeroValue;
 
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	/** Is true when is allowed button to be hovered. */
+	bool bCanHover = false;
+
+	/** Contains cached geometry of the button. */
+	FGeometry CurrentGeometry;
+
+	/** Contains cached information about the mouse event. */
+	FPointerEvent CurrentMouseEvent;
+
+	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+	virtual void Release() override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
-	virtual FCursorReply OnCursorQuery(const FGeometry& MyGeometry, const FPointerEvent& CursorEvent) const override;
-	virtual TSharedPtr<IToolTip> GetToolTip() override;
 	virtual void OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
 	/** Returns true if cursor is hovered on a texture. */
-	bool IsAlphaPixelHovered(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const;
+	bool IsAlphaPixelHovered() const;
 
 	/** Set once on render thread the buffer data about all pixels of current texture if was not set before. */
 	void TryUpdateRawColorsOnce();
+
+	/** Try register leaving the button (e.g. another widget opens above). */
+	void TickDetectMouseLeave();
 };
 
 /**
