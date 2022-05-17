@@ -26,9 +26,9 @@ UObject* UMyUnrealEdEngine::GetClientSingleton(int32 Index) const
 // Creates a new Play in Editor instance (which may be in a new process if not running under one process
 void UMyUnrealEdEngine::CreateNewPlayInEditorInstance(FRequestPlaySessionParams& InRequestParams, const bool bInDedicatedInstance, const EPlayNetMode InNetMode)
 {
-	Super::CreateNewPlayInEditorInstance(InRequestParams, bInDedicatedInstance, InNetMode);
-
 	AddClientSingleton();
+
+	Super::CreateNewPlayInEditorInstance(InRequestParams, bInDedicatedInstance, InNetMode);
 }
 
 // Create new singleton for the editor client if is needed
@@ -42,7 +42,7 @@ void UMyUnrealEdEngine::AddClientSingleton()
 	auto GetCurrentClientIndex = [AllInstances = PlayInEditorSessionInfo->NumClientInstancesCreated]() -> int32
 	{
 		// All instances contain the server and all clients
-		static constexpr int32 AllInstancesToClientNum = 2;
+		constexpr int32 AllInstancesToClientNum = 1;
 		return AllInstances - AllInstancesToClientNum;
 	};
 
@@ -59,7 +59,7 @@ void UMyUnrealEdEngine::AddClientSingleton()
 		return;
 	}
 
-	UClass* SingletonClass = LoadClass<UObject>(nullptr, *GameSingletonClassName.ToString());
+	const UClass* SingletonClass = LoadClass<UObject>(nullptr, *GameSingletonClassName.ToString());
 	if (!ensureMsgf(SingletonClass, TEXT("ASSERT: 'SingletonClass' is not valid")))
 	{
 		return;
