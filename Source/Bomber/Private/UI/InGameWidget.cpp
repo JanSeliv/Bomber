@@ -102,17 +102,20 @@ void UInGameWidget::NativeConstruct()
 
 	if (RestartButton)
 	{
-		RestartButton->OnPressed.AddUniqueDynamic(this, &ThisClass::OnRestartButtonPressed);
+		RestartButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		RestartButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnRestartButtonPressed);
 	}
 
 	if (MenuButton)
 	{
-		MenuButton->OnPressed.AddUniqueDynamic(this, &ThisClass::OnMenuButtonPressed);
+		MenuButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		MenuButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnMenuButtonPressed);
 	}
 
 	if (SettingsButton)
 	{
-		SettingsButton->OnPressed.AddUniqueDynamic(this, &ThisClass::OnSettingsButtonPressed);
+		SettingsButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		SettingsButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnSettingsButtonPressed);
 	}
 }
 
