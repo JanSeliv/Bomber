@@ -71,7 +71,8 @@ void USettingButton::NativeConstruct()
 
 	if (ButtonWidget)
 	{
-		ButtonWidget->OnPressed.AddUniqueDynamic(this, &ThisClass::USettingButton::OnButtonPressed);
+		ButtonWidget->SetClickMethod(EButtonClickMethod::PreciseClick);
+		ButtonWidget->OnClicked.AddUniqueDynamic(this, &ThisClass::USettingButton::OnButtonPressed);
 
 		SlateButtonInternal = GetSlateWidget<SButton>(ButtonWidget);
 		check(SlateButtonInternal.IsValid());
