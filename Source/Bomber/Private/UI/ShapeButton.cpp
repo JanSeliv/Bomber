@@ -56,6 +56,36 @@ void SShapeButton::Release()
 	SetCanHover(false);
 }
 
+FReply SShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	if (!IsAlphaPixelHovered())
+	{
+		// Avoid press event
+		return FReply::Unhandled();
+	}
+	return SButton::OnMouseButtonDown(MyGeometry, MouseEvent);
+}
+
+FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
+{
+	if (!IsAlphaPixelHovered())
+	{
+		// Avoid press event
+		return FReply::Unhandled();
+	}
+	return SButton::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
+}
+
+FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	if (!IsAlphaPixelHovered())
+	{
+		// Avoid press event
+		return FReply::Unhandled();
+	}
+	return SButton::OnMouseButtonUp(MyGeometry, MouseEvent);
+}
+
 FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	CurrentGeometry = MyGeometry;
@@ -92,7 +122,9 @@ bool SShapeButton::IsAlphaPixelHovered() const
 {
 	const bool bIsCurrentlyHovered = IsHovered();
 
-	if (!AdvancedHitAlpha)
+	const FVector2D CurrentGeometrySize = CurrentGeometry.GetLocalSize();
+	if (CurrentGeometrySize.IsZero()
+	    || !AdvancedHitAlpha)
 	{
 		return bIsCurrentlyHovered;
 	}
@@ -108,7 +140,7 @@ bool SShapeButton::IsAlphaPixelHovered() const
 	FVector2D LocalPosition = CurrentGeometry.AbsoluteToLocal(CurrentMouseEvent.GetScreenSpacePosition());
 	LocalPosition.X = FMath::Floor(LocalPosition.X);
 	LocalPosition.Y = FMath::Floor(LocalPosition.Y);
-	LocalPosition /= CurrentGeometry.GetLocalSize();
+	LocalPosition /= CurrentGeometrySize;
 	LocalPosition.X *= TextureRes.X;
 	LocalPosition.Y *= TextureRes.Y;
 	const int32 BufferPosition = FMath::Floor(LocalPosition.Y) * TextureRes.X + LocalPosition.X;
@@ -175,7 +207,7 @@ void SShapeButton::TickDetectMouseLeave()
 {
 	if (bCanHover
 	    && IsHovered()
-	    && CurrentGeometry.Size.IsZero())
+	    && CurrentGeometry.GetLocalSize().IsZero())
 	{
 		// Current data is zero, so widget is not hovered anymore
 		OnMouseLeave(CurrentMouseEvent);
