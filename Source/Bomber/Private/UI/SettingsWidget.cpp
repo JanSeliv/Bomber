@@ -95,11 +95,7 @@ const FSettingsPicker& USettingsWidget::GetSettingRow(const FGameplayTag& Settin
 // Save all settings into their configs
 void USettingsWidget::SaveSettings()
 {
-	if (UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings())
-	{
-		// Will apply and save settings
-		MyGameUserSettings->ApplySettings(false);
-	}
+	ApplySettings();
 
 	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
@@ -108,6 +104,19 @@ void USettingsWidget::SaveSettings()
 			ContextObject->SaveConfig();
 		}
 	}
+}
+
+// Apply all current settings on device
+void USettingsWidget::ApplySettings()
+{
+	UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings();
+	if (!MyGameUserSettings)
+	{
+		return;
+	}
+
+	constexpr bool bCheckForCommandLineOverrides = false;
+	MyGameUserSettings->ApplySettings(bCheckForCommandLineOverrides);
 }
 
 // Update settings on UI
@@ -671,6 +680,14 @@ void USettingsWidget::OnWidgetsInitialized()
 	}
 
 	ConstructSettings();
+
+#if WITH_EDITOR // [IsEditor]
+	if (USingletonLibrary::IsEditor())
+	{
+		// Apply constructed settings on editor window during initializing
+		ApplySettings();
+	}
+#endif // WITH_EDITOR [IsEditor]
 }
 
 // Is called when In-Game menu became opened or closed
