@@ -188,12 +188,12 @@ UCLASS()
 class USettingsWidget final : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	/* ---------------------------------------------------
 	 *		Public properties
 	 * --------------------------------------------------- */
-	
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToggledInGameMenu, bool, bIsVisible);
 
 	/** Is called to notify listeners the Settings widget is opened or closed. */
@@ -203,7 +203,7 @@ public:
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
-	
+
 	/** Display settings on UI. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OpenSettings();
@@ -235,6 +235,10 @@ public:
 	/** Save all settings into their configs. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SaveSettings();
+
+	/** Apply all current settings on device. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplySettings();
 
 	/** Update settings on UI.
 	 * @param SettingsToUpdate Contains tags of settings that are needed to update. */
@@ -363,7 +367,7 @@ protected:
 	/** Is called when In-Game menu became opened or closed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggleSettings(bool bIsVisible);
-	
+
 	/** Is called when visibility is changed for this widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnVisibilityChange(ESlateVisibility InVisibility);
@@ -386,7 +390,7 @@ protected:
 	/** Called when the current game state was changed, listens only when settings widget is opened. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-	
+
 	/* ---------------------------------------------------
 	 *		Add by setting types
 	 * --------------------------------------------------- */
