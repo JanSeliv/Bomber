@@ -39,57 +39,61 @@ void SShapeButton::SetCanHover(bool bAllow)
 	}
 
 	SetHover(bHovered);
-	ExecuteHoverStateChanged(true);
+
+	TryDetectOnHovered();
 }
 
 void SShapeButton::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	SButton::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
 
-	TickDetectMouseLeave();
-}
-
-void SShapeButton::Release()
-{
-	SButton::Release();
-
-	SetCanHover(false);
+	TickDetectMouseLeave(InDeltaTime);
 }
 
 FReply SShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (!IsAlphaPixelHovered())
+	UpdateMouseData(MyGeometry, MouseEvent);
+
+	if (!IsHovered())
 	{
 		// Avoid press event
 		return FReply::Unhandled();
 	}
+
 	return SButton::OnMouseButtonDown(MyGeometry, MouseEvent);
 }
 
-FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
+FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (!IsAlphaPixelHovered())
+	UpdateMouseData(MyGeometry, MouseEvent);
+
+	if (!IsHovered())
 	{
 		// Avoid press event
 		return FReply::Unhandled();
 	}
-	return SButton::OnMouseButtonDoubleClick(InMyGeometry, InMouseEvent);
+
+	return SButton::OnMouseButtonDoubleClick(MyGeometry, MouseEvent);
 }
 
 FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if (!IsAlphaPixelHovered())
+	UpdateMouseData(MyGeometry, MouseEvent);
+
+	FReply Reply = FReply::Unhandled();
+	if (IsHovered())
 	{
-		// Avoid press event
-		return FReply::Unhandled();
+		Reply = SButton::OnMouseButtonUp(MyGeometry, MouseEvent);
 	}
-	return SButton::OnMouseButtonUp(MyGeometry, MouseEvent);
+
+	SetCanHover(false);
+
+	return Reply;
 }
 
 FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	CurrentGeometry = MyGeometry;
-	CurrentMouseEvent = MouseEvent;
+	UpdateMouseData(MyGeometry, MouseEvent);
 
 	if (!bCanHover
 	    && IsAlphaPixelHovered())
@@ -98,6 +102,8 @@ FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEven
 		SetCanHover(true);
 	}
 
+	TryDetectOnHovered();
+
 	return SButton::OnMouseMove(MyGeometry, MouseEvent);
 }
 
@@ -105,7 +111,10 @@ void SShapeButton::OnMouseLeave(const FPointerEvent& MouseEvent)
 {
 	SButton::OnMouseLeave(MouseEvent);
 
-	SetCanHover(false);
+	if (!IsAlphaPixelHovered())
+	{
+		SetCanHover(false);
+	}
 }
 
 void SShapeButton::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
@@ -120,13 +129,11 @@ void SShapeButton::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent
 // Returns true if cursor is hovered on a texture
 bool SShapeButton::IsAlphaPixelHovered() const
 {
-	const bool bIsCurrentlyHovered = IsHovered();
-
 	const FVector2D CurrentGeometrySize = CurrentGeometry.GetLocalSize();
 	if (CurrentGeometrySize.IsZero()
 	    || !AdvancedHitAlpha)
 	{
-		return bIsCurrentlyHovered;
+		return false;
 	}
 
 	const TArray<FColor>* RawColors = RawColorsPtr.Get();
@@ -134,7 +141,7 @@ bool SShapeButton::IsAlphaPixelHovered() const
 	    || !RawColors->Num())
 	{
 		// Raw Colors are not set
-		return bIsCurrentlyHovered;
+		return false;
 	}
 
 	FVector2D LocalPosition = CurrentGeometry.AbsoluteToLocal(CurrentMouseEvent.GetScreenSpacePosition());
@@ -148,7 +155,7 @@ bool SShapeButton::IsAlphaPixelHovered() const
 	const TArray<FColor>& RawColorsArray = *RawColors;
 	if (!RawColorsArray.IsValidIndex(BufferPosition))
 	{
-		return bIsCurrentlyHovered;
+		return false;
 	}
 
 	const bool bIsAlphaPixelHovered = RawColorsArray[BufferPosition].A > AdvancedHitAlpha;
@@ -203,10 +210,9 @@ void SShapeButton::TryUpdateRawColorsOnce()
 }
 
 // Try register leaving the button (e.g. another widget opens above)
-void SShapeButton::TickDetectMouseLeave()
+void SShapeButton::TickDetectMouseLeave(float DeltaTime)
 {
 	if (bCanHover
-	    && IsHovered()
 	    && CurrentGeometry.GetLocalSize().IsZero())
 	{
 		// Current data is zero, so widget is not hovered anymore
@@ -218,6 +224,26 @@ void SShapeButton::TickDetectMouseLeave()
 	// and widget is not hovered anymore
 	static const FGeometry EmptyGeometry{};
 	CurrentGeometry = EmptyGeometry;
+}
+
+// Try register On Hovered and On Unhovered events
+void SShapeButton::TryDetectOnHovered()
+{
+	const bool bIsHoveredNow = bCanHover && IsHovered();
+	if (bIsHovered != bIsHoveredNow)
+	{
+		// Call OnHovered\OnUnhovered event
+		ExecuteHoverStateChanged(true);
+	}
+
+	bIsHovered = bIsHoveredNow;
+}
+
+// Caching current geometry and last mouse event
+void SShapeButton::UpdateMouseData(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	CurrentGeometry = MyGeometry;
+	CurrentMouseEvent = MouseEvent;
 }
 
 // Set texture to collide with specified texture

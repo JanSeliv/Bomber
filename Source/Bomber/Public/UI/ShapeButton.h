@@ -38,6 +38,9 @@ protected:
 	/** Is true when is allowed button to be hovered. */
 	bool bCanHover = false;
 
+	/** Contains cached true if on last frame the button was hovered. */
+	bool bIsHovered = false;
+
 	/** Contains cached geometry of the button. */
 	FGeometry CurrentGeometry;
 
@@ -45,9 +48,8 @@ protected:
 	FPointerEvent CurrentMouseEvent;
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
-	virtual void Release() override;
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
@@ -60,7 +62,13 @@ protected:
 	void TryUpdateRawColorsOnce();
 
 	/** Try register leaving the button (e.g. another widget opens above). */
-	void TickDetectMouseLeave();
+	void TickDetectMouseLeave(float DeltaTime);
+
+	/** Try register On Hovered and On Unhovered events. */
+	void TryDetectOnHovered();
+
+	/** Caching current geometry and last mouse event. */
+	void UpdateMouseData(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent);
 };
 
 /**
