@@ -20,7 +20,7 @@ UMySkeletalMeshComponent::UMySkeletalMeshComponent()
 void UMySkeletalMeshComponent::SetCollisionEnabled(ECollisionEnabled::Type NewType)
 {
 	Super::SetCollisionEnabled(NewType);
-	
+
 	for (UMeshComponent* AttachedMesh : AttachedMeshesInternal)
 	{
 		if (AttachedMesh)
@@ -50,7 +50,7 @@ void UMySkeletalMeshComponent::OnVisibilityChanged()
 	Super::OnVisibilityChanged();
 
 	const bool bIsVisible = IsVisible();
-	
+
 	const bool bIsAnimationAssetMode = GetSingleNodeInstance() != nullptr;
 	if (bIsAnimationAssetMode)
 	{
@@ -99,27 +99,28 @@ void UMySkeletalMeshComponent::GetAttachedPropsByClass(TArray<UMeshComponent*>& 
 // Attach all FAttachedMeshes to specified parent mesh
 void UMySkeletalMeshComponent::AttachProps()
 {
-	if (!PlayerMeshDataInternal.PlayerRow
-	    || PlayerMeshDataInternal.PlayerRow->LevelType == AttachedMeshesTypeInternal)
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	if (!PlayerRow
+	    || ArePropsAttached())
 	{
 		return;
 	}
 
-	AttachedMeshesTypeInternal = PlayerMeshDataInternal.PlayerRow->LevelType;
+	AttachedMeshesTypeInternal = PlayerRow->LevelType;
 
 	// Destroy previous meshes
-	for (int32 i = AttachedMeshesInternal.Num() - 1; i >= 0; --i)
+	for (int32 Index = AttachedMeshesInternal.Num() - 1; Index >= 0; --Index)
 	{
-		const TObjectPtr<UMeshComponent>& MeshComponentIt = AttachedMeshesInternal.IsValidIndex(i) ? AttachedMeshesInternal[i] : nullptr;
+		UMeshComponent* MeshComponentIt = AttachedMeshesInternal.IsValidIndex(Index) ? AttachedMeshesInternal[Index] : nullptr;
 		if (MeshComponentIt)
 		{
-			AttachedMeshesInternal.RemoveAt(i);
+			AttachedMeshesInternal.RemoveAt(Index);
 			MeshComponentIt->DestroyComponent();
 		}
 	}
 
 	// Spawn new components and attach meshes
-	const TArray<FAttachedMesh>& PlayerProps = PlayerMeshDataInternal.PlayerRow->PlayerProps;
+	const TArray<FAttachedMesh>& PlayerProps = PlayerRow->PlayerProps;
 	for (const FAttachedMesh& AttachedMeshIt : PlayerProps)
 	{
 		UMeshComponent* MeshComponent = nullptr;
@@ -158,6 +159,48 @@ void UMySkeletalMeshComponent::AttachProps()
 			MeshComponent->RegisterComponent();
 		}
 	}
+}
+
+// Returns true if all props are attached
+bool UMySkeletalMeshComponent::ArePropsAttached() const
+{
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	if (!PlayerRow)
+	{
+		return false;
+	}
+
+	const TArray<FAttachedMesh>& PlayerProps = PlayerRow->PlayerProps;
+	const bool bEmptyPropsList = PlayerProps.Num() == 0;
+	if (bEmptyPropsList)
+	{
+		// Props are not required, so it could be not set
+		return true;
+	}
+
+	for (const FAttachedMesh& AttachedMeshIt : PlayerProps)
+	{
+		const bool bContains = AttachedMeshesInternal.ContainsByPredicate([&AttachedMeshIt](const UMeshComponent* MeshCompIt)
+		{
+			UMeshComponent* MeshComponent = nullptr;
+			if (const auto SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshCompIt))
+			{
+				return SkeletalMeshComp->SkeletalMesh == AttachedMeshIt.AttachedMesh;
+			}
+			else if (const auto StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
+			{
+				return StaticMeshComp->GetStaticMesh() == AttachedMeshIt.AttachedMesh;
+			}
+			return false;
+		});
+
+		if (!bContains)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 // Some bomber characters have more than 1 texture, it will change a player skin if possible

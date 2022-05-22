@@ -80,6 +80,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AttachProps();
 
+	/** Returns true if all props are attached. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	bool ArePropsAttached() const;
+	
 	/**
 	 * Set the skin, specified by index, to this mesh and its attached props
 	 * Some bomber characters have more than 1 diffuse, it will change a player skin if possible.
@@ -97,7 +101,7 @@ protected:
 	/** Determines how this mesh looks like for now.
 	 * Is not transient, can be set in editor-time. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
-	FCustomPlayerMeshData PlayerMeshDataInternal; //[G]
+	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty; //[G]
 
 	/** Current level type of attached meshes.
 	 * Is not transient, can be set in editor-time. */
