@@ -628,7 +628,7 @@ void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* N
 	TryPossessController();
 }
 
-// Set and apply new skeletal mesh by specified data
+// Set and apply new skeletal mesh from current data
 void APlayerCharacter::ApplyCustomPlayerMeshData()
 {
 	UMySkeletalMeshComponent* MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
@@ -640,12 +640,39 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 
 	if (!PlayerMeshDataInternal.IsValid())
 	{
-		PlayerMeshDataInternal.PlayerRow = UPlayerDataAsset::Get().GetRowByLevelType<UPlayerRow>(USingletonLibrary::GetLevelType());
+		return;
 	}
 
 	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
 
 	MapComponentInternal->SetLevelActorRow(PlayerMeshDataInternal.PlayerRow);
+}
+
+// Set and apply default skeletal mesh for this player
+void APlayerCharacter::SetDefaultPlayerMeshData()
+{
+	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
+	if (!MeshesNum)
+	{
+		return;
+	}
+
+	const bool bIsPlayer = IsLocallyControlled() || !CharacterIDInternal;
+	const ELevelType PlayerFlag = USingletonLibrary::GetLevelType();
+	constexpr ELevelType AIFlag = ELT::None;
+	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
+	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
+	if (!Row)
+	{
+		return;
+	}
+
+	const int32 SkinsNum = Row->GetMaterialInstancesDynamicNum();
+	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
+	CustomPlayerMeshData.PlayerRow = Row;
+	CustomPlayerMeshData.SkinIndex = CharacterIDInternal % SkinsNum;
+	ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
 }
 
 // Respond on changes in player mesh data to reset to set the mesh on client
@@ -661,28 +688,12 @@ void APlayerCharacter::ApplyCharacterID()
 		return;
 	}
 
-	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
-
-	// Update mesh
-	if (HasAuthority())
-	{
-		const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
-		if (MeshesNum > 0)
-		{
-			const int32 LevelType = 1 << (CharacterIDInternal % MeshesNum);
-			if (const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType)))
-			{
-				FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
-				CustomPlayerMeshData.PlayerRow = Row;
-				CustomPlayerMeshData.SkinIndex = FMath::RandHelper(Row->GetMaterialInstancesDynamicNum());
-				ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
-			}
-		}
-	}
+	SetDefaultPlayerMeshData();
 
 	// Set a nameplate material
 	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
 	{
+		const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
 		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
 		if (NameplateMeshesNum > 0)
 		{

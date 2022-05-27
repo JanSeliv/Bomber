@@ -70,6 +70,14 @@ public:
 	template <typename T>
 	const FORCEINLINE T* GetRowByLevelType(ELevelType LevelType) const { return Cast<T>(GetRowByLevelType(LevelType)); }
 
+	/** Return first found row by specified mesh. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const class ULevelActorRow* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const;
+
+	/** Return first found row by specified mesh. */
+	template <typename T>
+	const FORCEINLINE T* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const { return Cast<T>(GetRowByMesh(Mesh)); }
+
 	/** Returns overall number of contained rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetRowsNum() const { return RowsInternal.Num(); }

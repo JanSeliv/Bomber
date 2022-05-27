@@ -306,7 +306,7 @@ protected:
 	/** Is called on clients to apply powerups for this character. */
 	UFUNCTION()
 	void OnRep_Powerups();
-	
+
 	/** Updates new player name on a 3D widget component. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void SetNicknameOnNameplate(FName NewName);
@@ -323,10 +323,14 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPostLogin(class AGameModeBase* GameMode, class APlayerController* NewPlayer);
 
-	/** Set and apply new skeletal mesh by specified data. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "CustomPlayerMeshData"))
+	/** Set and apply new skeletal mesh from current data. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyCustomPlayerMeshData();
-	
+
+	/** Set and apply default skeletal mesh for this player. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetDefaultPlayerMeshData();
+
 	/** Respond on changes in player mesh data to update the mesh on client. */
 	UFUNCTION()
 	void OnRep_PlayerMeshData();
@@ -334,7 +338,7 @@ protected:
 	/** Apply the characterID-dependent logic for this character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyCharacterID();
-	
+
 	/** Is called on clients to apply the characterID-dependent logic for this character. */
 	UFUNCTION()
 	void OnRep_CharacterID();
