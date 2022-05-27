@@ -62,7 +62,7 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 }
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
-// Return rows by specified level types in the bitmask
+// Return first found row by specified level types
 void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, int32 LevelsTypesBitmask) const
 {
 	for (ULevelActorRow* RowIt : RowsInternal)
@@ -79,7 +79,33 @@ void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, 
 // Return rows by specified level types in the bitmask
 const ULevelActorRow* ULevelActorDataAsset::GetRowByLevelType(ELevelType LevelType) const
 {
-	TArray<ULevelActorRow*> Rows;
-	GetRowsByLevelType(Rows, TO_FLAG(LevelType));
-	return Rows.IsValidIndex(0) ? Rows[0] : nullptr;
+	for (const ULevelActorRow* RowIt : RowsInternal)
+	{
+		if (RowIt
+		    && RowIt->Mesh //is not empty
+		    && RowIt->LevelType == LevelType)
+		{
+			return RowIt;
+		}
+	}
+	return nullptr;
+}
+
+// Return first found row by specified mesh
+const ULevelActorRow* ULevelActorDataAsset::GetRowByMesh(const UStreamableRenderAsset* Mesh) const
+{
+	if (!Mesh)
+	{
+		return nullptr;
+	}
+
+	for (const ULevelActorRow* RowIt : RowsInternal)
+	{
+		if (RowIt
+		    && RowIt->Mesh == Mesh)
+		{
+			return RowIt;
+		}
+	}
+	return nullptr;
 }
