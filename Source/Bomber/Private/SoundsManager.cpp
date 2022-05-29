@@ -25,6 +25,28 @@ USoundsManager* USoundsDataAsset::GetSoundsManager() const
 	return SoundManager;
 }
 
+// Returns the music of specified level
+USoundBase* USoundsDataAsset::GetLevelMusic(ELevelType LevelType) const
+{
+	if (const TObjectPtr<USoundBase>* FoundMusic = LevelsMusicInternal.Find(LevelType))
+	{
+		return *FoundMusic;
+	}
+
+	return nullptr;
+}
+
+// Return the background music by specified game state and level type
+USoundBase* USoundsDataAsset::GetBackgroundMusic(ECurrentGameState CurrentGameState, ELevelType LevelType) const
+{
+	if (CurrentGameState == ECGS::Menu)
+	{
+		return GetMainMenuMusic();
+	}
+
+	return GetLevelMusic(LevelType);
+}
+
 // Returns the End-Game sound by specified End-Game state
 USoundBase* USoundsDataAsset::GetEndGameSFX(EEndGameState EndGameState) const
 {
@@ -146,13 +168,16 @@ void USoundsManager::BeginPlay()
 	USoundMix* MainSoundMix = USoundsDataAsset::Get().GetMainSoundMix();
 	UGameplayStatics::SetBaseSoundMix(World, MainSoundMix);
 
-	USoundBase* BackgroundSound = USoundsDataAsset::Get().GetBackgroundSound();
-	UGameplayStatics::SpawnSound2D(World, BackgroundSound);
-
 	// Listed the ending the current game to play the End-Game sound on
 	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetLocalPlayerState())
 	{
 		CurrentPlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	}
+
+	// Listen states
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	{
+		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 }
 
@@ -168,4 +193,31 @@ void USoundsManager::OnEndGameStateChanged(EEndGameState EndGameState)
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), EndGameSFX);
 	}
+}
+
+// Listen game states to switch background music
+void USoundsManager::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	USoundBase* BackgroundMusic = USoundsDataAsset::Get().GetBackgroundMusic(CurrentGameState, USingletonLibrary::GetLevelType());
+	if (!BackgroundMusic)
+	{
+		// Background music is not found for current state or level
+		return;
+	}
+
+	if (!BackgroundMusicComponentInternal)
+	{
+		BackgroundMusicComponentInternal = UGameplayStatics::CreateSound2D(GetWorld(), BackgroundMusic);
+		check(BackgroundMusicComponentInternal);
+	}
+
+	if (BackgroundMusicComponentInternal->IsPlaying()
+	    && BackgroundMusicComponentInternal->GetSound() == BackgroundMusic)
+	{
+		// Do not switch music since is the same
+		return;
+	}
+
+	BackgroundMusicComponentInternal->SetSound(BackgroundMusic);
+	BackgroundMusicComponentInternal->Play();
 }
