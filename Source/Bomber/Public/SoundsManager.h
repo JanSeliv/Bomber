@@ -46,10 +46,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get SFX Sound Class"))
 	FORCEINLINE class USoundClass* GetSFXSoundClass() const { return SFXSoundClassInternal; }
 
-	/** Returns the sound of the game background theme.
-	 * @see USoundsDataAsset::BackgroundCueInternal */
+	/** Returns the music of the Main-Menu theme.
+	 * @see USoundsDataAsset::MainMenuMusicInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class USoundBase* GetBackgroundSound() const { return BackgroundSoundInternal; }
+	FORCEINLINE class USoundBase* GetMainMenuMusic() const { return MainMenuMusicInternal; }
+
+	/** Returns the music of specified level.
+	 * @see USoundsDataAsset::LevelsMusicInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class USoundBase* GetLevelMusic(ELevelType LevelType) const;
+
+	/** Return the background music by specified game state and level type. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	USoundBase* GetBackgroundMusic(ECurrentGameState CurrentGameState, ELevelType LevelType) const;
 
 	/** Returns the blast SFX.
 	 * @see USoundsDataAsset::ExplosionSFXInternal */
@@ -93,8 +102,12 @@ protected:
 	TObjectPtr<class USoundClass> SFXSoundClassInternal; //[D]
 
 	/** The sound of the game background theme. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Background Sound", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundBase> BackgroundSoundInternal; //[D]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main-Menu Music", ShowOnlyInnerProperties))
+	TObjectPtr<class USoundBase> MainMenuMusicInternal; //[D]
+
+	/** Contains all sounds of each level in the game. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Music", ShowOnlyInnerProperties))
+	TMap<ELevelType, TObjectPtr<class USoundBase>> LevelsMusicInternal; //[D]
 
 	/** Returns the blast SFX. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Sound", ShowOnlyInnerProperties))
@@ -194,6 +207,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
 	float SFXVolumeInternal; //[С]
 
+	/** The component that is used to play different background musics.  */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))
+	TObjectPtr<class UAudioComponent> BackgroundMusicComponentInternal = nullptr; //[G]
+
 	/* ---------------------------------------------------
 	 *		Protected functions
 	 * --------------------------------------------------- */
@@ -211,4 +228,8 @@ protected:
 	/** Is called to play the End-Game sound on ending the current game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnEndGameStateChanged(EEndGameState EndGameState);
+
+	/** Listen game states to switch background music. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };
