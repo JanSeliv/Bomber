@@ -593,6 +593,12 @@ void APlayerCharacter::TryPossessController()
 
 	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController(CharacterIDInternal))
 	{
+		if (MyPC->bCinematicMode)
+		{
+			// Prevent crash on trying to posses the player during playing the sequencer
+			return;
+		}
+
 		// Possess the player
 		ControllerToPossess = MyPC;
 	}
