@@ -83,7 +83,8 @@ const ULevelActorRow* ULevelActorDataAsset::GetRowByLevelType(ELevelType LevelTy
 	{
 		if (RowIt
 		    && RowIt->Mesh //is not empty
-		    && RowIt->LevelType == LevelType)
+		    && (RowIt->LevelType == LevelType
+		    	|| RowIt->LevelType == ELevelType::Max))
 		{
 			return RowIt;
 		}
