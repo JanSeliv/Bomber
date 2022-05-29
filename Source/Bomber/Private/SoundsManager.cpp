@@ -101,6 +101,35 @@ void USoundsManager::SetSFXVolume(float InVolume)
 	SetSoundVolumeByClass(SFXSoundClass, InVolume);
 }
 
+// Play the background music for current game state and level
+void USoundsManager::PlayCurrentBackgroundMusic()
+{
+	const ECurrentGameState GameState = AMyGameStateBase::GetCurrentGameState(this);
+	const ELevelType LevelType = USingletonLibrary::GetLevelType();
+	USoundBase* BackgroundMusic = USoundsDataAsset::Get().GetBackgroundMusic(GameState, LevelType);
+	if (!BackgroundMusic)
+	{
+		// Background music is not found for current state or level
+		return;
+	}
+
+	if (!BackgroundMusicComponentInternal)
+	{
+		BackgroundMusicComponentInternal = UGameplayStatics::CreateSound2D(GetWorld(), BackgroundMusic);
+		check(BackgroundMusicComponentInternal);
+	}
+
+	if (BackgroundMusicComponentInternal->IsPlaying()
+	    && BackgroundMusicComponentInternal->GetSound() == BackgroundMusic)
+	{
+		// Do not switch music since is the same
+		return;
+	}
+
+	BackgroundMusicComponentInternal->SetSound(BackgroundMusic);
+	BackgroundMusicComponentInternal->Play();
+}
+
 // Play the blast sound of the bomb
 void USoundsManager::PlayExplosionSFX()
 {
@@ -179,6 +208,8 @@ void USoundsManager::BeginPlay()
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 	}
+
+	PlayCurrentBackgroundMusic();
 }
 
 // Is called on ending the current game to play the End-Game sound
@@ -198,26 +229,5 @@ void USoundsManager::OnEndGameStateChanged(EEndGameState EndGameState)
 // Listen game states to switch background music
 void USoundsManager::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
-	USoundBase* BackgroundMusic = USoundsDataAsset::Get().GetBackgroundMusic(CurrentGameState, USingletonLibrary::GetLevelType());
-	if (!BackgroundMusic)
-	{
-		// Background music is not found for current state or level
-		return;
-	}
-
-	if (!BackgroundMusicComponentInternal)
-	{
-		BackgroundMusicComponentInternal = UGameplayStatics::CreateSound2D(GetWorld(), BackgroundMusic);
-		check(BackgroundMusicComponentInternal);
-	}
-
-	if (BackgroundMusicComponentInternal->IsPlaying()
-	    && BackgroundMusicComponentInternal->GetSound() == BackgroundMusic)
-	{
-		// Do not switch music since is the same
-		return;
-	}
-
-	BackgroundMusicComponentInternal->SetSound(BackgroundMusic);
-	BackgroundMusicComponentInternal->Play();
+	PlayCurrentBackgroundMusic();
 }
