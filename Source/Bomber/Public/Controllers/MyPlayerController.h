@@ -106,6 +106,12 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnSetPlayerState OnSetPlayerState; //[DMD]
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateCreated, class AMyGameStateBase*, MyGameState);
+
+	/** Notifies the server and clients when the game state is initialized. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnGameStateCreated OnGameStateCreated; //[DMD]
+
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
 	void ServerSetGameState(ECurrentGameState NewGameState);
@@ -144,6 +150,9 @@ public:
 	class UEnhancedPlayerInput* GetEnhancedPlayerInput() const;
 
 protected:
+	/** Called when an instance of this class is placed (in editor) or spawned. */
+	virtual void OnConstruction(const FTransform& Transform) override;
+
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
 
@@ -205,7 +214,15 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BroadcastOnPossessed();
 
-	/** Is called on server and on client the player state is set. */
+	/** Is called on server and on client when the player state is set. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BroadcastOnSetPlayerState();
+
+	/** Start listening creating the game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BindOnGameStateCreated();
+	
+	/** Is called on server and on client when the game state is initialized. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BroadcastOnGameStateCreated(class AGameStateBase* GameState);
 };

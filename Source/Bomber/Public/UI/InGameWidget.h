@@ -109,4 +109,8 @@ protected:
 	/** Is called when player pressed the button to open in-game Settings. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnSettingsButtonPressed();
+
+	/** Is called to start listening game state changes. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
 };
