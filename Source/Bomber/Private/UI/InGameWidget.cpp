@@ -91,7 +91,11 @@ void UInGameWidget::NativeConstruct()
 	// Listen states to spawn widgets
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
-		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+		BindOnGameStateChanged(MyGameState);
+	}
+	else if (AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController())
+	{
+		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
 	}
 
 	// Listen to toggle the game state widget when is requested
@@ -218,4 +222,15 @@ void UInGameWidget::OnSettingsButtonPressed()
 	{
 		SettingsWidget->OpenSettings();
 	}
+}
+
+// Is called to start listening game state changes
+void UInGameWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
+{
+	if (!ensureMsgf(MyGameState, TEXT("ASSERT: 'MyGameState' is not valid")))
+	{
+		return;
+	}
+
+	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 }

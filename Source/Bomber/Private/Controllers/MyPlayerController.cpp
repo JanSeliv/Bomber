@@ -239,6 +239,14 @@ UEnhancedPlayerInput* AMyPlayerController::GetEnhancedPlayerInput() const
 	return Cast<UEnhancedPlayerInput>(PlayerInput);
 }
 
+// Called when an instance of this class is placed (in editor) or spawned
+void AMyPlayerController::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	BindOnGameStateCreated();
+}
+
 // Called when the game starts or when spawned
 void AMyPlayerController::BeginPlay()
 {
@@ -594,4 +602,35 @@ void AMyPlayerController::BroadcastOnSetPlayerState()
 	}
 
 	OnSetPlayerState.Broadcast(MyPlayerState);
+}
+
+// Start listening creating the game state
+void AMyPlayerController::BindOnGameStateCreated()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	UWorld::FOnGameStateSetEvent& GameStateSetEvent = World->GameStateSetEvent;
+	if (!GameStateSetEvent.IsBoundToObject(this))
+	{
+		GameStateSetEvent.AddUObject(this, &ThisClass::BroadcastOnGameStateCreated);
+	}
+}
+
+// Is called on server and on client when the game state is initialized
+void AMyPlayerController::BroadcastOnGameStateCreated(AGameStateBase* GameState)
+{
+	AMyGameStateBase* MyGameState = Cast<AMyGameStateBase>(GameState);
+	if (!MyGameState)
+	{
+		return;
+	}
+
+	if (OnGameStateCreated.IsBound())
+	{
+		OnGameStateCreated.Broadcast(MyGameState);
+	}
 }
