@@ -570,7 +570,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	GenerateLevelActors();
 
 	// Update level stream
-	SetLevelType(LevelTypeInternal);
+	ApplyLevelType();
 
 	// Update camera position
 	if (CameraComponentInternal)
