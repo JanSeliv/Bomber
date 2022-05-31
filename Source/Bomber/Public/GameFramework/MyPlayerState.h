@@ -58,7 +58,7 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** Contains result of the game for controlled player after ending the game. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_EndGameState", Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
 	EEndGameState EndGameStateInternal = EEndGameState::None; //[G]
 
 	/** Config: custom name set by player.
@@ -83,4 +83,8 @@ protected:
 	/** Updated result of the game for controlled player after ending the game. Called when one of players is destroying. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void ServerUpdateEndState();
+
+	/** Is called on clients to apply current End-Game state. */
+	UFUNCTION()
+	void OnRep_EndGameState();
 };

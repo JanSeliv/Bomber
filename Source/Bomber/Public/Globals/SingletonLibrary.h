@@ -174,9 +174,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UMainMenuWidget* GetMainMenuWidget();
 
-	/** Returns the In-Game Menu widget. */
+	/** Returns the In-Game widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UInGameWidget* GetInGameWidget();
+
+	/** Returns the In-Game Menu widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UInGameMenuWidget* GetInGameMenuWidget();
 
 	/** Returns specified player character. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

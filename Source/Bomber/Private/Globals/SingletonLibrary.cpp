@@ -15,7 +15,8 @@
 #include "Globals/MyGameInstance.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/MyHUD.h"
-#include "UI/InputControlsWidget.h"
+#include "UI/InGameWidget.h"
+#include "UI/InGameMenuWidget.h"
 //---
 #include "Engine.h"
 #include "PoolManager.h"
@@ -394,11 +395,18 @@ UMainMenuWidget* USingletonLibrary::GetMainMenuWidget()
 	return MyHUD ? MyHUD->GetMainMenuWidget() : nullptr;
 }
 
-// Returns the In-Game Menu widget
+// Returns the In-Game widget
 UInGameWidget* USingletonLibrary::GetInGameWidget()
 {
 	const AMyHUD* MyHUD = GetMyHUD();
 	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
+}
+
+// Returns the In-Game Menu widget
+UInGameMenuWidget* USingletonLibrary::GetInGameMenuWidget()
+{
+	const UInGameWidget* InGameWidget = GetInGameWidget();
+	return InGameWidget ? InGameWidget->GetInGameMenuWidget() : nullptr;
 }
 
 // Returns specified player character, by default returns local player

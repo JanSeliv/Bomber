@@ -15,7 +15,7 @@
 #include "Globals/MyInputAction.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "UI/InGameWidget.h"
+#include "UI/InGameMenuWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
@@ -303,7 +303,6 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 
 	SetControlRotation(FRotator::ZeroRotator);
 
-	BroadcastOnPossessed();
 	BroadcastOnSetPlayerState();
 
 	BindInputActions();
@@ -314,7 +313,8 @@ void AMyPlayerController::OnRep_Pawn()
 {
 	Super::OnRep_Pawn();
 
-	BroadcastOnPossessed();
+	// Notify client about pawn change
+	GetOnNewPawnNotifier().Broadcast(GetPawn());
 
 	BindInputActions();
 }
@@ -556,10 +556,10 @@ void AMyPlayerController::OnWidgetsInitialized()
 	}
 
 	// Listens to handle input on opening and closing the InGame Menu widget
-	UInGameWidget* InGameWidget = USingletonLibrary::GetInGameWidget();
-	if (ensureMsgf(InGameWidget, TEXT("ASSERT: 'InGameWidget' is not valid")))
+	UInGameMenuWidget* InGameMenuWidget = USingletonLibrary::GetInGameMenuWidget();
+	if (ensureMsgf(InGameMenuWidget, TEXT("ASSERT: 'InGameMenuWidget' is not valid")))
 	{
-		InGameWidget->OnToggledInGameMenu.AddUniqueDynamic(this, &ThisClass::OnToggledInGameMenu);
+		InGameMenuWidget->OnToggledInGameMenu.AddUniqueDynamic(this, &ThisClass::OnToggledInGameMenu);
 	}
 
 	// Listens to handle input on opening and closing the Settings widget
@@ -568,23 +568,6 @@ void AMyPlayerController::OnWidgetsInitialized()
 	{
 		SettingsWidget->OnToggledSettings.AddUniqueDynamic(this, &ThisClass::OnToggledSettings);
 	}
-}
-
-// Is called on server and on client when this controller possesses new player character
-void AMyPlayerController::BroadcastOnPossessed()
-{
-	if (!OnPossessed.IsBound())
-	{
-		return;
-	}
-
-	APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>();
-	if (!PlayerCharacter)
-	{
-		return;
-	}
-
-	OnPossessed.Broadcast(PlayerCharacter);
 }
 
 // Is called on server and on client the player state is set

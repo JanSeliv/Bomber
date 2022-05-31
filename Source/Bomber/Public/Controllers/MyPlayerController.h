@@ -209,11 +209,7 @@ protected:
 	/** Is called when all game widgets are initialized. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnWidgetsInitialized();
-
-	/** Is called on server and on client when this controller possesses new player character. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BroadcastOnPossessed();
-
+	
 	/** Is called on server and on client when the player state is set. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BroadcastOnSetPlayerState();
