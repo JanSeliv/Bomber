@@ -80,9 +80,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AttachProps();
 
-	/** Returns true if all props are attached. */
+	/** Returns true when is needed to attach or detach props. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	bool ArePropsAttached() const;
+	bool ArePropsWantToUpdate() const;
 	
 	/**
 	 * Set the skin, specified by index, to this mesh and its attached props
