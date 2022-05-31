@@ -101,7 +101,7 @@ void UMySkeletalMeshComponent::AttachProps()
 {
 	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
 	if (!PlayerRow
-	    || ArePropsAttached())
+	    || !ArePropsWantToUpdate())
 	{
 		return;
 	}
@@ -161,8 +161,8 @@ void UMySkeletalMeshComponent::AttachProps()
 	}
 }
 
-// Returns true if all props are attached
-bool UMySkeletalMeshComponent::ArePropsAttached() const
+// Returns true when is needed to attach or detach props
+bool UMySkeletalMeshComponent::ArePropsWantToUpdate() const
 {
 	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
 	if (!PlayerRow)
@@ -174,8 +174,9 @@ bool UMySkeletalMeshComponent::ArePropsAttached() const
 	const bool bEmptyPropsList = PlayerProps.Num() == 0;
 	if (bEmptyPropsList)
 	{
-		// Props are not required, so it could be not set
-		return true;
+		// Returns false to do not update when props list is empty and is nothing already attached
+		const bool bAttachedOutdated = AttachedMeshesInternal.Num() > 0;
+		return bAttachedOutdated;
 	}
 
 	for (const FAttachedMesh& AttachedMeshIt : PlayerProps)
@@ -196,11 +197,11 @@ bool UMySkeletalMeshComponent::ArePropsAttached() const
 
 		if (!bContains)
 		{
-			return false;
+			return true;
 		}
 	}
 
-	return true;
+	return false;
 }
 
 // Some bomber characters have more than 1 texture, it will change a player skin if possible
