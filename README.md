@@ -24,6 +24,12 @@ bomber and do not let bots to bomb player!
 
 ## Changelog
 
+> `31.05.2022:`
+>   - Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
+>   - Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
+>   - Added new **SteelMan** character for AI players with 3 different skins.
+> > ![SteelMan_31-05-22](https://user-images.githubusercontent.com/20540872/171299202-3422db3c-7061-4b75-b51c-a08a67d65ab5.gif)
+>   ---
 > `31.12.2021:`
 >   - The game migrated to the **Unreal Engine 5**.
 >   - Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
