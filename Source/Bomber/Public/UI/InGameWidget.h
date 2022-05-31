@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "Bomber.h"
 #include "Blueprint/UserWidget.h"
+//---
+#include "Bomber.h"
 //---
 #include "InGameWidget.generated.h"
 
@@ -17,39 +18,21 @@ class UInGameWidget final : public UUserWidget
 
 public:
 	/* ---------------------------------------------------
-	 *		Public properties
-	 * --------------------------------------------------- */
-
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToggledInGameMenu, bool, bIsVisible);
-
-	/** Is called to notify listeners the In-Game Menu is opened or closed. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnToggledInGameMenu OnToggledInGameMenu;
-
-	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
-
-	/** Checks the visibilities of in-game menu subwidgets and returns true if are visible */
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintImplementableEvent, Category = "C++")
-	bool IsVisibleInGameMenu() const;
+	
+	/** Returns the In-Game Menu widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UInGameMenuWidget* GetInGameMenuWidget() const { return InGameMenuWidget; }
 
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
-
-	/** The button to allow player restart the game. */
+		
+	/** Allows player to interact with UI during the match. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> RestartButton = nullptr; //[B]
-
-	/** The button to allow player go back to the Main Menu. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> MenuButton = nullptr; //[B]
-
-	/** The button to allow player open in-game Settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> SettingsButton = nullptr; //[B]
+	TObjectPtr<class UInGameMenuWidget> InGameMenuWidget = nullptr; //[B]
 
 	/* ---------------------------------------------------
 	 *		Protected functions
@@ -61,9 +44,6 @@ protected:
 	 */
 	virtual void NativeConstruct() override;
 
-	/* Updates appearance dynamically in the editor. */
-	virtual void SynchronizeProperties() override;
-
 	/** Launch 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void LaunchStartingCountdown();
@@ -72,43 +52,9 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void LaunchInGameCountdown();
 
-	/** The in game menu is shown the result of the games match (win, lose, draw).
-	 *	If the match has not yet finished, it could be minimized or opened out by ESC button in order to
-	 *	continue watching the game or restart the play, or to return to the main menu. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void ShowInGameMenu();
-
-	/** Hide the in game menu. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void HideInGameMenu();
-
-	/** Flip-floppy show and hide the end in-game menu subwidgets. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ToggleInGameMenu();
-
-	/** Is called when In-Game menu became opened or closed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnToggleInGameMenu(bool bIsVisible);
-
-	/** Called when the visibility of this widgets was changed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnWidgetVisibilityChanged(ESlateVisibility InVisibility);
-
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Is called when player pressed the button to restart the game. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnRestartButtonPressed();
-
-	/** Is called when player pressed the button to go back to the Main Menu. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnMenuButtonPressed();
-
-	/** Is called when player pressed the button to open in-game Settings. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnSettingsButtonPressed();
 
 	/** Is called to start listening game state changes. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

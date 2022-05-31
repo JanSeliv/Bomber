@@ -4,6 +4,8 @@
 
 #include "GameFramework/HUD.h"
 //---
+#include "Bomber.h"
+//---
 #include "MyHUD.generated.h"
 
 /**
@@ -43,6 +45,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UUserWidget> GetFPSCounterWidgetClass() const { return FPSCounterWidgetClassInternal; }
 
+	/** Returns the localized texts about specified end game to display on UI. 
+	 * @see UUIDataAsset::EndGameTexts. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FORCEINLINE FText& GetEndGameText(EEndGameState EndGameState) const { return EndGameTextsInternal.FindChecked(EndGameState); }
+
 protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
@@ -63,6 +70,10 @@ protected:
 	/** The class of a FPS counter widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "FPS Counter Widget Class", ShowOnlyInnerProperties))
 	TSubclassOf<class UUserWidget> FPSCounterWidgetClassInternal; //[D]
+
+	/** Contains the localized texts about specified end game to display on UI. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "End-Game Texts", ShowOnlyInnerProperties))
+	TMap<EEndGameState, FText> EndGameTextsInternal; //[D]
 };
 
 /**

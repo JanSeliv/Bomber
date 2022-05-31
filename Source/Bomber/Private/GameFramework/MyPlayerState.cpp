@@ -7,7 +7,6 @@
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 //---
-#include "PoolManager.h"
 #include "Net/UnrealNetwork.h"
 
 /* ---------------------------------------------------
@@ -106,12 +105,6 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 		return;
 	}
 
-	const UPoolManager* PoolManager = USingletonLibrary::GetPoolManager();
-	if (!PoolManager)
-	{
-		return;
-	}
-
 	// handle timer is 0
 	if (CurrentGameState == ECurrentGameState::EndGame) // game was finished
 	{
@@ -132,7 +125,7 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
 	const APawn* PawnOwner = GetPawn();
 	if (!PawnOwner
-	    || !PoolManager->IsActive(PawnOwner)) // is dead owner
+	    || !PawnOwner->GetController()) // is dead owner
 	{
 		if (PlayerNum <= 0) // last players were blasted together
 		{
@@ -149,7 +142,7 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	}
 	else if (PlayerNum == 1) // is alive owner and is the last player
 	{
-		if (PawnOwner->GetController<APlayerController>()) // is player
+		if (PawnOwner->IsPlayerControlled())
 		{
 			EndGameStateInternal = EEndGameState::Win;
 		}
@@ -168,4 +161,10 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	{
 		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 	}
+}
+
+// Is called on clients to apply current End-Game state
+void AMyPlayerState::OnRep_EndGameState()
+{
+	OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 }
