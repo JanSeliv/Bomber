@@ -83,6 +83,7 @@ void AMyPlayerState::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		case ECurrentGameState::GameStarting:
 		{
 			EndGameStateInternal = EEndGameState::None;
+			OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 			break;
 		}
 		case ECurrentGameState::EndGame:
@@ -109,6 +110,7 @@ void AMyPlayerState::ServerUpdateEndState_Implementation()
 	if (CurrentGameState == ECurrentGameState::EndGame) // game was finished
 	{
 		EndGameStateInternal = EEndGameState::Draw;
+		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 		return;
 	}
 

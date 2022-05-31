@@ -104,6 +104,8 @@ void UInGameMenuWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Called when the end-game state was changed
 void UInGameMenuWidget::OnEndGameStateChanged(EEndGameState EndGameState)
 {
+	UpdateEndGameText();
+
 	if (EndGameState != EEndGameState::None)
 	{
 		ShowInGameMenu();
@@ -200,8 +202,6 @@ void UInGameMenuWidget::ShowInGameMenu()
 		// Is already shown
 		return;
 	}
-
-	UpdateEndGameText();
 
 	OnToggleInGameMenu(true);
 
