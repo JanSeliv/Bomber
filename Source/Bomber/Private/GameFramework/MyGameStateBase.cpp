@@ -24,7 +24,7 @@ AMyGameStateBase::AMyGameStateBase()
 	PrimaryActorTick.bStartWithTickEnabled = false;
 }
 
-//  Returns the AMyGameStateBase::CurrentGameState property
+// Returns the AMyGameStateBase::CurrentGameState property
 ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 {
 	if (const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
@@ -56,12 +56,8 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, CurrentGameStateInternal);
-}
-
-// Called when the game starts or when spawned
-void AMyGameStateBase::BeginPlay()
-{
-	Super::BeginPlay();
+	DOREPLIFETIME(ThisClass, StartingTimerSecRemainInternal);
+	DOREPLIFETIME(ThisClass, InGameTimerSecRemainInternal);
 }
 
 // Updates current game state
@@ -73,14 +69,16 @@ void AMyGameStateBase::ApplyGameState()
 			break;
 		case ECurrentGameState::GameStarting:
 		{
-			ServerOnGameStarting();
+			StartingTimerSecRemainInternal = UGameStateDataAsset::Get().GetStartingCountdown();
+			InGameTimerSecRemainInternal = UGameStateDataAsset::Get().GetInGameCountdown();
+			TriggerStartingCountdown();
 			break;
 		}
 		case ECurrentGameState::EndGame:
 			break;
 		case ECurrentGameState::InGame:
 		{
-			ServerStartInGameCountdown();
+			TriggerInGameCountdown();
 			break;
 		}
 		default:
@@ -100,57 +98,84 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 	ApplyGameState();
 }
 
-// Called when game enters to the Game Starting state and timer starts countdown
-void AMyGameStateBase::ServerOnGameStarting_Implementation()
+// Called when game enters to the Game Starting state to trigger its timer
+void AMyGameStateBase::TriggerStartingCountdown()
 {
 	const UWorld* World = GetWorld();
 	if (!World
+	    || !HasAuthority()
 	    || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::GameStarting, TEXT("ASSERT: Is not the Game Starting event on the server side")))
 	{
 		return;
 	}
 
-	// Clear timer
-	FTimerManager& TimerManager = World->GetTimerManager();
-	TimerManager.ClearTimer(StartingTimerInternal);
-
 	// Decrement starting countdown timer
-	TWeakObjectPtr<ThisClass> WeakThis(this);
-	TimerManager.SetTimer(StartingTimerInternal, [WeakThis]
-	{
-		AMyGameStateBase* MyGameStateBase = WeakThis.Get();
-		if (MyGameStateBase
-		    && MyGameStateBase->CurrentGameStateInternal == ECurrentGameState::GameStarting) // state was not changed
-		{
-			MyGameStateBase->ServerSetGameState(ECurrentGameState::InGame);
-		}
-	}, UGameStateDataAsset::Get().GetStartingCountdown(), false);
+	constexpr bool bInLoop = true;
+	constexpr float InRate = 1.f;
+	World->GetTimerManager().SetTimer(StartingTimerInternal, this, &ThisClass::OnStartingTimerSecondDecremented, InRate, bInLoop);
 }
 
-// Decrement the countdown timer of the current game.
-void AMyGameStateBase::ServerStartInGameCountdown_Implementation()
+// Is called each second during the Game Starting state for the 'Three-two-one-GO' timer
+void AMyGameStateBase::OnStartingTimerSecondDecremented()
+{
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	if (CurrentGameStateInternal != ECurrentGameState::GameStarting)
+	{
+		World->GetTimerManager().ClearTimer(StartingTimerInternal);
+		return;
+	}
+
+	--StartingTimerSecRemainInternal;
+
+	if (StartingTimerSecRemainInternal <= 0)
+	{
+		World->GetTimerManager().ClearTimer(StartingTimerInternal);
+		ServerSetGameState(ECurrentGameState::InGame);
+	}
+}
+
+// Called when game enters to the In-Game state to trigger its timer
+void AMyGameStateBase::TriggerInGameCountdown()
 {
 	const UWorld* World = GetWorld();
 	if (!World
-	    || UGameStateDataAsset::Get().GetInGameCountdown() <= 0
+	    || !HasAuthority()
 	    || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::InGame, TEXT("ASSERT: 'CurrentGameStateInternal == ECurrentGameState::InGame' condition is FALSE")))
 	{
 		return;
 	}
 
-	// Clear timer
-	FTimerManager& TimerManager = World->GetTimerManager();
-	TimerManager.ClearTimer(InGameTimerInternal);
-
 	// Decrement in-game countdown timer
-	TWeakObjectPtr<ThisClass> WeakThis(this);
-	TimerManager.SetTimer(InGameTimerInternal, [WeakThis]
+	constexpr bool bInLoop = true;
+	constexpr float InRate = 1.f;
+	World->GetTimerManager().SetTimer(InGameTimerInternal, this, &ThisClass::OnInGameTimerSecondDecremented, InRate, bInLoop);
+}
+
+// Is called each second during the In-Game state
+void AMyGameStateBase::OnInGameTimerSecondDecremented()
+{
+	const UWorld* World = GetWorld();
+	if (!World)
 	{
-		AMyGameStateBase* MyGameStateBase = WeakThis.Get();
-		if (MyGameStateBase
-		    && MyGameStateBase->CurrentGameStateInternal == ECurrentGameState::InGame) // state was not changed
-		{
-			MyGameStateBase->ServerSetGameState(ECurrentGameState::EndGame);
-		}
-	}, UGameStateDataAsset::Get().GetInGameCountdown(), false);
+		return;
+	}
+
+	if (CurrentGameStateInternal != ECurrentGameState::InGame)
+	{
+		World->GetTimerManager().ClearTimer(InGameTimerInternal);
+		return;
+	}
+
+	--InGameTimerSecRemainInternal;
+
+	if (InGameTimerSecRemainInternal <= 0)
+	{
+		World->GetTimerManager().ClearTimer(InGameTimerInternal);
+		ServerSetGameState(ECurrentGameState::EndGame);
+	}
 }
