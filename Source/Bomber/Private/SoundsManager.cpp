@@ -105,7 +105,7 @@ void USoundsManager::SetSFXVolume(float InVolume)
 // Play the background music for current game state and level
 void USoundsManager::PlayCurrentBackgroundMusic()
 {
-	const ECurrentGameState GameState = AMyGameStateBase::GetCurrentGameState(this);
+	const ECurrentGameState GameState = AMyGameStateBase::GetCurrentGameState();
 	const ELevelType LevelType = USingletonLibrary::GetLevelType();
 	USoundBase* BackgroundMusic = USoundsDataAsset::Get().GetBackgroundMusic(GameState, LevelType);
 	if (!BackgroundMusic)
@@ -134,7 +134,7 @@ void USoundsManager::PlayCurrentBackgroundMusic()
 // Play the blast sound of the bomb
 void USoundsManager::PlayExplosionSFX()
 {
-	if (AMyGameStateBase::GetCurrentGameState(this) != ECGS::InGame)
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
@@ -148,7 +148,7 @@ void USoundsManager::PlayExplosionSFX()
 // Play the sound of the picked power-up
 void USoundsManager::PlayItemPickUpSFX()
 {
-	if (AMyGameStateBase::GetCurrentGameState(this) != ECGS::InGame)
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}

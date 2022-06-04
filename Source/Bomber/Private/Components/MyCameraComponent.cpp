@@ -89,7 +89,7 @@ void UMyCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
 	// Enable camera if should be unlocked
 	if (!bInCameraLockedOnCenter
 	    && !IsComponentTickEnabled()
-	    && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+	    && AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
 	{
 		SetComponentTickEnabled(true);
 	}

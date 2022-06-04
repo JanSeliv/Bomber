@@ -99,7 +99,7 @@ void AMyPlayerState::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Updated result of the game for controlled player after ending the game. Called when one of players is destroying
 void AMyPlayerState::ServerUpdateEndState_Implementation()
 {
-	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState(this);
+	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
 	if (CurrentGameState == ECurrentGameState::None     // is not valid game state, nullptr or not fully initialized
 	    || EndGameStateInternal != EEndGameState::None) // end state was set already for current game
 	{

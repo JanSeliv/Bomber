@@ -100,7 +100,7 @@ void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
 void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
 {
 	if (!IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
-	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame)
+	    || AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
 	{
 		return;
 	}

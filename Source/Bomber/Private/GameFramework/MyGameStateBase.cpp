@@ -16,7 +16,7 @@ AMyGameStateBase::AMyGameStateBase()
 }
 
 //  Returns the AMyGameStateBase::CurrentGameState property
-ECurrentGameState AMyGameStateBase::GetCurrentGameState(const UObject* WorldContextObject)
+ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 {
 	if (const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{

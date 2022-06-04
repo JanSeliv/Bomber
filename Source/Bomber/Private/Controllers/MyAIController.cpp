@@ -115,7 +115,7 @@ void AMyAIController::OnPossess(APawn* InPawn)
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState(this) == ECGS::InGame;
+	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
 	SetAI(bMatchStarted);
 }
 

@@ -44,8 +44,8 @@ public:
 	void ServerSetGameState(ECurrentGameState NewGameState);
 
 	/** Returns the AMyGameStateBase::CurrentGameState property. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static ECurrentGameState GetCurrentGameState(const class UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static ECurrentGameState GetCurrentGameState();
 
 	/** Return the summary time required to start the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

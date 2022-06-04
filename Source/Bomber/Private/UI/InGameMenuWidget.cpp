@@ -227,7 +227,7 @@ void UInGameMenuWidget::HideInGameMenu()
 // Flip-floppy show and hide the end game state window
 void UInGameMenuWidget::ToggleInGameMenu()
 {
-	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState(this);
+	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
 	if (CurrentGameState != ECurrentGameState::InGame
 	    && CurrentGameState != ECurrentGameState::EndGame)
 	{

@@ -334,7 +334,7 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 		{
 			// Do not destroy actor during the game session if required
 			if (MapComponentIt && MapComponentIt->IsUndestroyable()
-			    && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+			    && AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
 			{
 				continue;
 			}
@@ -359,7 +359,7 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 	{
 		const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
 		if (MyGameState
-		    && AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+		    && AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
 		{
 			MyGameState->OnAnyPlayerDestroyed.Broadcast();
 		}

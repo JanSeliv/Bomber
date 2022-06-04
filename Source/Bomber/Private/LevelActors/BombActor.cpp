@@ -159,7 +159,7 @@ void ABombActor::BeginPlay()
 	}
 
 	// Destroy itself after N seconds
-	if (AMyGameStateBase::GetCurrentGameState(this) == ECurrentGameState::InGame)
+	if (AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
 	{
 		SetLifeSpan();
 	}
@@ -183,7 +183,7 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 // Set the lifespan of this actor. When it expires the object will be destroyed
 void ABombActor::SetLifeSpan(float InLifespan/* = INDEX_NONE*/)
 {
-	if (AMyGameStateBase::GetCurrentGameState(this) != ECGS::InGame)
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		// Do not allow trigger life span when match is not started
 		return;
@@ -237,9 +237,9 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 // Destroy bomb and burst explosion cells
 void ABombActor::MulticastDetonateBomb_Implementation(AActor* DestroyedActor/* = nullptr*/)
 {
-	if (!ExplosionCellsInternal.Num()                                   // no cells to destroy
-	    || !IsValid(MapComponentInternal)                               // The Map Component is not valid or is destroyed already
-	    || AMyGameStateBase::GetCurrentGameState(this) != ECGS::InGame) // game was not started or already finished
+	if (!ExplosionCellsInternal.Num()                               // no cells to destroy
+	    || !IsValid(MapComponentInternal)                           // The Map Component is not valid or is destroyed already
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame) // game was not started or already finished
 	{
 		return;
 	}

@@ -164,7 +164,7 @@ void AMyPlayerController::SetMenuState()
 // Returns true if the mouse cursor can be hidden
 bool AMyPlayerController::CanHideMouse() const
 {
-	switch (AMyGameStateBase::GetCurrentGameState(this))
+	switch (AMyGameStateBase::GetCurrentGameState())
 	{
 		case ECurrentGameState::GameStarting:
 		case ECurrentGameState::InGame:
@@ -447,7 +447,7 @@ void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Listens to handle input on opening and closing the InGame Menu widget
 void AMyPlayerController::OnToggledInGameMenu(bool bIsVisible)
 {
-	if (ECurrentGameState::InGame != AMyGameStateBase::GetCurrentGameState(this))
+	if (ECurrentGameState::InGame != AMyGameStateBase::GetCurrentGameState())
 	{
 		return;
 	}
@@ -465,7 +465,7 @@ void AMyPlayerController::OnToggledSettings(bool bIsVisible)
 	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetSettingsInputContext());
 
 	// Toggle previous Input Context
-	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState(this);
+	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
 	const UMyInputMappingContext* PreviousInputContext = nullptr;
 	if (CurrentGameState == ECGS::Menu)
 	{
