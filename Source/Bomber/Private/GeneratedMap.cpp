@@ -7,6 +7,7 @@
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "PoolManager.h"
@@ -29,7 +30,7 @@
 // Returns the generated map data asset
 const UGeneratedMapDataAsset& UGeneratedMapDataAsset::Get()
 {
-	const UGeneratedMapDataAsset* GeneratedMapDataAsset = USingletonLibrary::GetLevelsDataAsset();
+	const UGeneratedMapDataAsset* GeneratedMapDataAsset = UDataAssetsContainer::GetLevelsDataAsset();
 	checkf(GeneratedMapDataAsset, TEXT("The Generated Map Data Asset is not valid"))
 	return *GeneratedMapDataAsset;
 }
@@ -197,7 +198,7 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 		return nullptr;
 	}
 
-	const UClass* ClassToSpawn = USingletonLibrary::GetActorClassByType(Type);
+	const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
 	AActor* SpawnedActor = PoolManagerInternal->TakeFromPool<AActor>(FTransform(Cell), ClassToSpawn);
 	if (!ensureMsgf(SpawnedActor, TEXT("ASSERT: 'SpawnedActor' is not valid")))
 	{

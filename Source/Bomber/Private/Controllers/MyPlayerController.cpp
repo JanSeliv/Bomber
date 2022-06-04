@@ -12,6 +12,7 @@
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/MyInputAction.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -23,7 +24,7 @@
 // Returns the player input data asset
 const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
 {
-	const UPlayerInputDataAsset* PlayerInputDataAsset = USingletonLibrary::GetPlayerInputDataAsset();
+	const UPlayerInputDataAsset* PlayerInputDataAsset = UDataAssetsContainer::GetPlayerInputDataAsset();
 	checkf(PlayerInputDataAsset, TEXT("The Player Input Data Asset is not valid"))
 	return *PlayerInputDataAsset;
 }

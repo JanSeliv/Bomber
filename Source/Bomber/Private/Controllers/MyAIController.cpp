@@ -5,6 +5,7 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -12,7 +13,7 @@
 // Returns the AI data asset
 const UAIDataAsset& UAIDataAsset::Get()
 {
-	const UAIDataAsset* AIDataAsset = USingletonLibrary::GetAIDataAsset();
+	const UAIDataAsset* AIDataAsset = UDataAssetsContainer::GetAIDataAsset();
 	checkf(AIDataAsset, TEXT("The AI Data Asset is not valid"));
 	return *AIDataAsset;
 }

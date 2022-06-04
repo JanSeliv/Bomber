@@ -6,6 +6,7 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
@@ -19,7 +20,7 @@ UBoxDataAsset::UBoxDataAsset()
 // Returns the box data asset
 const UBoxDataAsset& UBoxDataAsset::Get()
 {
-	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Box);
+	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Box);
 	const auto BoxDataAsset = Cast<UBoxDataAsset>(FoundDataAsset);
 	checkf(BoxDataAsset, TEXT("The Box Data Asset is not valid"));
 	return *BoxDataAsset;

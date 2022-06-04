@@ -21,6 +21,7 @@
 #include "Engine.h"
 #include "PoolManager.h"
 #include "Components/TextRenderComponent.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR
@@ -232,7 +233,7 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 bool USingletonLibrary::IsLevelActor(const AActor* Actor)
 {
 	const TSubclassOf<AActor> ActorClass = Actor ? Actor->GetClass() : nullptr;
-	const ULevelActorDataAsset* LevelActorDataAsset = ActorClass ? GetDataAssetByActorClass(ActorClass) : nullptr;
+	const ULevelActorDataAsset* LevelActorDataAsset = ActorClass ? UDataAssetsContainer::GetDataAssetByActorClass(ActorClass) : nullptr;
 	return LevelActorDataAsset && LevelActorDataAsset->GetActorType() != EAT::None;
 }
 
@@ -468,58 +469,4 @@ FCell USingletonLibrary::GetCellArrayAverage(const FCells& Cells)
 	}
 
 	return FCell(Average);
-}
-
-/* ---------------------------------------------------
-*		Data assets
-* --------------------------------------------------- */
-
-// Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
-const ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass)
-{
-	if (!ActorClass)
-	{
-		return nullptr;
-	}
-
-	const TArray<TObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (const ULevelActorDataAsset* DataAssetIt : ActorsDataAssets)
-	{
-		const UClass* ActorClassIt = DataAssetIt ? DataAssetIt->GetActorClass() : nullptr;
-		if (ActorClassIt
-		    && ActorClassIt->IsChildOf(ActorClass))
-		{
-			return DataAssetIt;
-		}
-	}
-	return nullptr;
-}
-
-// Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types.
-void USingletonLibrary::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
-{
-	const TArray<TObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (ULevelActorDataAsset* DataAssetIt : ActorsDataAssets)
-	{
-		if (DataAssetIt
-		    && BitwiseActorTypes(ActorsTypesBitmask, TO_FLAG(DataAssetIt->GetActorType())))
-		{
-			OutDataAssets.Emplace(DataAssetIt);
-		}
-	}
-}
-
-// Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type
-const ULevelActorDataAsset* USingletonLibrary::GetDataAssetByActorType(EActorType ActorType)
-{
-	TArray<ULevelActorDataAsset*> FoundDataAssets;
-	GetDataAssetsByActorTypes(FoundDataAssets, TO_FLAG(ActorType));
-	return FoundDataAssets.IsValidIndex(0) ? FoundDataAssets[0] : nullptr;
-}
-
-// Iterate ActorsDataAssets array and returns the found actor class by specified actor type
-UClass* USingletonLibrary::GetActorClassByType(EActorType ActorType)
-{
-	const ULevelActorDataAsset* FoundDataAsset = GetDataAssetByActorType(ActorType);
-	return FoundDataAsset ? FoundDataAsset->GetActorClass() : nullptr;
 }

@@ -5,6 +5,7 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "SoundsManager.h"
 //---
@@ -21,7 +22,7 @@ UItemDataAsset::UItemDataAsset()
 // Returns the item data asset
 const UItemDataAsset& UItemDataAsset::Get()
 {
-	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Item);
+	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Item);
 	const auto ItemDataAsset = Cast<UItemDataAsset>(FoundDataAsset);
 	checkf(ItemDataAsset, TEXT("The Item Data Asset is not valid"));
 	return *ItemDataAsset;
@@ -130,7 +131,7 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
 	if (!IS_VALID(this)
 	    || !OtherActor
-	    || !OtherActor->IsA(USingletonLibrary::GetActorClassByType(EAT::Player)))
+	    || !OtherActor->IsA(UDataAssetsContainer::GetActorClassByType(EAT::Player)))
 	{
 		return;
 	}

@@ -6,6 +6,7 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "SoundsManager.h"
@@ -24,7 +25,7 @@ UBombDataAsset::UBombDataAsset()
 // Returns the bomb data asset
 const UBombDataAsset& UBombDataAsset::Get()
 {
-	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Bomb);
+	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Bomb);
 	const auto BombDataAsset = Cast<UBombDataAsset>(FoundDataAsset);
 	checkf(BombDataAsset, TEXT("The Bomb Data Asset is not valid"));
 	return *BombDataAsset;
@@ -365,7 +366,7 @@ void ABombActor::GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const
 	const UBoxComponent* BombCollisionComponent = MapComponentInternal ? MapComponentInternal->GetBoxCollisionComponent() : nullptr;
 	if (BombCollisionComponent)
 	{
-		BombCollisionComponent->GetOverlappingActors(OutPlayers, USingletonLibrary::GetActorClassByType(EAT::Player));
+		BombCollisionComponent->GetOverlappingActors(OutPlayers, UDataAssetsContainer::GetActorClassByType(EAT::Player));
 	}
 }
 

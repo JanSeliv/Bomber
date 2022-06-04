@@ -8,6 +8,7 @@
 #include "Controllers/MyAIController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
@@ -121,7 +122,7 @@ UPlayerDataAsset::UPlayerDataAsset()
 // Returns the player data asset
 const UPlayerDataAsset& UPlayerDataAsset::Get()
 {
-	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Player);
+	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Player);
 	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(FoundDataAsset);
 	checkf(PlayerDataAsset, TEXT("The Player Data Asset is not valid"));
 	return *PlayerDataAsset;

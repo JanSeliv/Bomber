@@ -5,6 +5,7 @@
 #include "GeneratedMap.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Globals/LevelActorDataAsset.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "PoolManager.h"
@@ -208,7 +209,7 @@ void UMapComponent::OnRegister()
 	}
 
 	// Finding the actor data asset
-	ActorDataAssetInternal = USingletonLibrary::GetDataAssetByActorClass(Owner->GetClass());
+	ActorDataAssetInternal = UDataAssetsContainer::GetDataAssetByActorClass(Owner->GetClass());
 	if (!ensureMsgf(ActorDataAssetInternal, TEXT("ASSERT: 'The Actor Data Asset' was not found")))
 	{
 		return;

@@ -2,16 +2,16 @@
 
 #include "UI/MyHUD.h"
 //---
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
-#include "UI/InputControlsWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"
 
 // Returns the UI data asset
 const UUIDataAsset& UUIDataAsset::Get()
 {
-	const UUIDataAsset* UIDataAsset = USingletonLibrary::GetUIDataAsset();
+	const UUIDataAsset* UIDataAsset = UDataAssetsContainer::GetUIDataAsset();
 	checkf(UIDataAsset, TEXT("The UI Data Asset is not valid"));
 	return *UIDataAsset;
 }

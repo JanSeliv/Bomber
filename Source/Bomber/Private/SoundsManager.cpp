@@ -4,11 +4,12 @@
 //---
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 
 const USoundsDataAsset& USoundsDataAsset::Get()
 {
-	const USoundsDataAsset* SoundsDataAsset = USingletonLibrary::GetSoundsDataAsset();
+	const USoundsDataAsset* SoundsDataAsset = UDataAssetsContainer::GetSoundsDataAsset();
 	checkf(SoundsDataAsset, TEXT("The Sounds Data Asset is not valid"));
 	return *SoundsDataAsset;
 }

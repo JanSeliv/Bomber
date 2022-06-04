@@ -5,6 +5,7 @@
 #include "SoundsManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyGameUserSettings.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingSubWidget.h"
@@ -12,7 +13,7 @@
 // Returns the settings data asset
 const USettingsDataAsset& USettingsDataAsset::Get()
 {
-	const USettingsDataAsset* SettingsDataAsset = USingletonLibrary::GetSettingsDataAsset();
+	const USettingsDataAsset* SettingsDataAsset = UDataAssetsContainer::GetSettingsDataAsset();
 	checkf(SettingsDataAsset, TEXT("The Settings Data Asset is not valid"));
 	return *SettingsDataAsset;
 }
