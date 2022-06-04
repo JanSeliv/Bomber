@@ -12,7 +12,7 @@
  * Contains all core data.
  */
 UCLASS()
-class BOMBER_API UDataAssetsContainer : public UDataAsset
+class UDataAssetsContainer : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -47,7 +47,7 @@ public:
 	/** Returns the Game State data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static const FORCEINLINE class UGameStateDataAsset* GetGameStateDataAsset() { return Get().GameStateDataAssetInternal; }
-	
+
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
 	static const class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
@@ -68,34 +68,34 @@ public:
 
 protected:
 	/** Contains properties to setup the generated level. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Levels Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Data Asset", ShowOnlyInnerProperties))
 	TObjectPtr<class UGeneratedMapDataAsset> LevelsDataAssetInternal = nullptr; //[B]
 
 	/** Settings data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Asset", ShowOnlyInnerProperties))
 	TObjectPtr<class USettingsDataAsset> SettingsDataAssetInternal = nullptr; //[B]
 
 	/** Contains properties to setup UI. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "UI Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "UI Data Asset", ShowOnlyInnerProperties))
 	TObjectPtr<class UUIDataAsset> UIDataAssetInternal = nullptr; //[B]
 
 	/** AI data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "AI Data Asset", ShowOnlyInnerProperties))
 	TObjectPtr<class UAIDataAsset> AIDataAssetInternal = nullptr; //[B]
 
 	/** Player Input data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Input Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Player Input Data Asset", ShowOnlyInnerProperties))
 	TObjectPtr<class UPlayerInputDataAsset> PlayerInputDataAssetInternal = nullptr; //[B]
 
 	/** Sounds data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Sounds Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sounds Data Asset", ShowOnlyInnerProperties))
 	TObjectPtr<class USoundsDataAsset> SoundsDataAssetInternal = nullptr; //[B]
 
 	/** The data of the game match. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Game State Data Asset"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Game State Data Asset", ShowOnlyInnerProperties))
 	TObjectPtr<class UGameStateDataAsset> GameStateDataAssetInternal = nullptr; //[B]
 
 	/** Actor type and its associated class. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actors Data Assets"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actors Data Assets", ShowOnlyInnerProperties))
 	TArray<TObjectPtr<class ULevelActorDataAsset>> ActorsDataAssetsInternal; //[B]
 };

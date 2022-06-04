@@ -137,19 +137,19 @@ public:
 
 protected:
 	/** All materials that are used by nameplate meshes. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Materials", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nameplate Materials", ShowOnlyInnerProperties))
 	TArray<TObjectPtr<class UMaterialInterface>> NameplateMaterialsInternal; //[D]
 
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
 	TSubclassOf<UAnimInstance> AnimInstanceClassInternal; //[D]
 
 	/** The name of a material parameter with a diffuse array. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))
 	FName SkinArrayParameterInternal = TEXT("DiffuseArray"); //[D]
 
 	/** The name of a material parameter with a diffuse index. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skin Index Parameter", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Index Parameter", ShowOnlyInnerProperties))
 	FName SkinIndexParameterInternal = TEXT("DiffuseIndex"); //[D]
 };
 

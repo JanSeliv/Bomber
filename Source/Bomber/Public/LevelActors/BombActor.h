@@ -24,22 +24,35 @@ public:
 	/** Returns the bomb data asset. */
 	static const UBombDataAsset& Get();
 
-	/** All bomb materials. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class UMaterialInterface>> BombMaterials; //[D]
-
-	/** The emitter of the bomb explosion */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UNiagaraSystem> ExplosionParticle = nullptr; //[D]
-
 	/** Get the bomb lifetime. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (ShowOnlyInnerProperties))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
+
+	/** Returns the amount of bomb materials. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetBombMaterialsNum() const { return BombMaterialsInternal.Num(); }
+
+	/** Returns the bomb material by specified index.
+	 * @see UBombDataAsset::BombMaterialInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class UMaterialInterface* GetBombMaterial(int32 Index) const { return BombMaterialsInternal.IsValidIndex(Index) ? BombMaterialsInternal[Index] : nullptr; }
+
+	/** Get the bomb explosion VFX. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UNiagaraSystem* GetExplosionVFX() const { return ExplosionVFXInternal; }
 
 protected:
 	/** The lifetime of a bomb. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Life Span", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Life Span", ShowOnlyInnerProperties))
 	float LifeSpanInternal = 2.f; //[D]
+
+	/** All bomb materials. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Bomb Materials", ShowOnlyInnerProperties))
+	TArray<TObjectPtr<class UMaterialInterface>> BombMaterialsInternal; //[D]
+
+	/** The emitter of the bomb explosion */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Particle", ShowOnlyInnerProperties))
+	TObjectPtr<class UNiagaraSystem> ExplosionVFXInternal = nullptr; //[D]
 };
 
 /** Bombs are left by the character to destroy the level actors, trigger other bombs */
@@ -153,7 +166,7 @@ protected:
 	  * player with Character ID '2' won't change its response since it's specified as 'ECR_MAX'. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetCollisionResponseToPlayers(FCollisionResponseContainer& OutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse) const;
-	
+
 	/** Returns all players overlapping with this bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const;

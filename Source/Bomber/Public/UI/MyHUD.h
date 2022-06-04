@@ -72,7 +72,7 @@ protected:
 	TSubclassOf<class UUserWidget> FPSCounterWidgetClassInternal; //[D]
 
 	/** Contains the localized texts about specified end game to display on UI. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "End-Game Texts", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game Texts", ShowOnlyInnerProperties))
 	TMap<EEndGameState, FText> EndGameTextsInternal; //[D]
 };
 

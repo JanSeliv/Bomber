@@ -62,12 +62,12 @@ void ABombActor::InitBomb(int32 InFireRadius/* = DEFAULT_FIRE_RADIUS*/, int32 Ch
 	}
 
 	// Set material
-	const TArray<TObjectPtr<UMaterialInterface>>& BombMaterials = UBombDataAsset::Get().BombMaterials;
+	const int32 BombMaterialsNum = UBombDataAsset::Get().GetBombMaterialsNum();
 	if (CharacterID != INDEX_NONE // Is not debug character
-	    && BombMaterials.Num())   // As least one bomb material
+	    && BombMaterialsNum)      // As least one bomb material
 	{
-		const int32 MaterialIndex = FMath::Abs(CharacterID) % BombMaterials.Num();
-		BombMaterialInternal = BombMaterials[MaterialIndex];
+		const int32 MaterialIndex = FMath::Abs(CharacterID) % BombMaterialsNum;
+		BombMaterialInternal = UBombDataAsset::Get().GetBombMaterial(MaterialIndex);
 		ApplyMaterial();
 	}
 
@@ -247,7 +247,7 @@ void ABombActor::MulticastDetonateBomb_Implementation(AActor* DestroyedActor/* =
 	AGeneratedMap& LevelMap = AGeneratedMap::Get();
 
 	// Spawn emitters
-	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().ExplosionParticle;
+	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().GetExplosionVFX();
 	for (const FCell& Cell : ExplosionCellsInternal)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionParticle, Cell.Location, GetActorRotation(), GetActorScale());

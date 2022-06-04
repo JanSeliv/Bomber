@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/GameState.h"
+//---
 #include "Bomber.h"
 //---
 #include "MyGameStateBase.generated.h"
@@ -11,7 +12,7 @@
  * The data of the game match.
  */
 UCLASS()
-class BOMBER_API UGameStateDataAsset : public UDataAsset
+class UGameStateDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 

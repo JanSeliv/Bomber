@@ -69,7 +69,7 @@ public:
 	FORCEINLINE TSubclassOf<AActor> GetCollisionsAssetClass() const { return CollisionsAssetInternal; }
 
 	/** Get UGeneratedMapDataAsset::LockLocationOnZeroInternal.  */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsLockedOnZero() const { return LockOnZeroInternal; }
 
 protected:
