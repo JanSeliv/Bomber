@@ -189,14 +189,12 @@ void UMyCameraComponent::PossessCamera()
 {
 	AActor* Owner = GetOwner();
 	AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController();
-	const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
 	if (!ensureMsgf(Owner, TEXT("ASSERT: 'Owner' is not valid"))
-	    || !ensureMsgf(MyPC, TEXT("ASSERT: 'MyPC' is not valid"))
-	    || !ensureMsgf(MyGameState, TEXT("ASSERT: 'MyGameState' is not valid")))
+	    || !ensureMsgf(MyPC, TEXT("ASSERT: 'MyPC' is not valid")))
 	{
 		return;
 	}
 
-	const float BlendTime = MyGameState->GetStartingCountdown();
+	const float BlendTime = UGameStateDataAsset::Get().GetStartingCountdown();
 	MyPC->SetViewTargetWithBlend(Owner, BlendTime);
 }

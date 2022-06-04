@@ -8,7 +8,37 @@
 #include "MyGameStateBase.generated.h"
 
 /**
- *
+ * The data of the game match.
+ */
+UCLASS()
+class BOMBER_API UGameStateDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	/** Returns the Game State data asset. */
+	static const UGameStateDataAsset& Get();
+
+	/** Return the summary time required to start the 'Three-two-one-GO' timer. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetStartingCountdown() const { return StartingCountdownInternal; }
+
+	/** Returns the left second to the end of the game. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdownInternal; }
+
+protected:
+	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Starting Countdown"))
+	int32 StartingCountdownInternal = 3; //[D]
+
+	/** Seconds to the end of the round. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Countdown"))
+	int32 InGameCountdownInternal = 120; //[D]
+};
+
+/**
+ * Own implementation of managing the game's global state.
  */
 UCLASS()
 class AMyGameStateBase final : public AGameStateBase
@@ -47,38 +77,21 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static ECurrentGameState GetCurrentGameState();
 
-	/** Return the summary time required to start the 'Three-two-one-GO' timer. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetStartingCountdown() const { return StartingCountdownInternal; }
-
-	/** Returns the left second to the end of the game. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdownInternal; }
-
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
 	* --------------------------------------------------- */
 
 	/** Store the game state for the current game. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_CurrentGameState", meta = (BlueprintProtected, DisplayName = "Current Game State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CurrentGameState", meta = (BlueprintProtected, DisplayName = "Current Game State"))
 	ECurrentGameState CurrentGameStateInternal = ECurrentGameState::None;
 
-	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Starting Countdown"))
-	int32 StartingCountdownInternal = 3;
-
 	/** Decrement AMyGameStateBase::StartingCountdownInternal by 1 for each second.*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Starting Timer"))
+	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Starting Timer"))
 	FTimerHandle StartingTimerInternal;
 
-	/** Seconds to the end of the round,
-	 * @todo Move to Data asset */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Countdown"))
-	int32 InGameCountdownInternal = 120; //[B]
-
 	/** Decrement AMyGameStateBase::InGameCountdownInternal by 1 for each second. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Timer"))
+	UPROPERTY(BlueprintReadWrite, Transient, meta = (BlueprintProtected, DisplayName = "In-Game Timer"))
 	FTimerHandle InGameTimerInternal;
 
 	/* ---------------------------------------------------

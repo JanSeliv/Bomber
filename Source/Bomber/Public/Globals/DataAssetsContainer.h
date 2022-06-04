@@ -44,6 +44,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static const FORCEINLINE class USoundsDataAsset* GetSoundsDataAsset() { return Get().SoundsDataAssetInternal; }
 
+	/** Returns the Game State data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static const FORCEINLINE class UGameStateDataAsset* GetGameStateDataAsset() { return Get().GameStateDataAssetInternal; }
+	
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
 	static const class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
@@ -86,6 +90,10 @@ protected:
 	/** Sounds data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Sounds Data Asset"))
 	TObjectPtr<class USoundsDataAsset> SoundsDataAssetInternal = nullptr; //[B]
+
+	/** The data of the game match. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Game State Data Asset"))
+	TObjectPtr<class UGameStateDataAsset> GameStateDataAssetInternal = nullptr; //[B]
 
 	/** Actor type and its associated class. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actors Data Assets"))

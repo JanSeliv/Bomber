@@ -3,9 +3,18 @@
 #include "GameFramework/MyGameStateBase.h"
 //---
 #include "Controllers/MyPlayerController.h"
+#include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 //---
 #include "Net/UnrealNetwork.h"
+
+// Returns the Game State data asset
+const UGameStateDataAsset& UGameStateDataAsset::Get()
+{
+	const UGameStateDataAsset* GameStateDataAsset = Cast<UGameStateDataAsset>(UDataAssetsContainer::GetGameStateDataAsset());
+	checkf(GameStateDataAsset, TEXT("The Game State Data Asset is not valid"));
+	return *GameStateDataAsset;
+}
 
 // Default constructor
 AMyGameStateBase::AMyGameStateBase()
@@ -115,7 +124,7 @@ void AMyGameStateBase::ServerOnGameStarting_Implementation()
 		{
 			MyGameStateBase->ServerSetGameState(ECurrentGameState::InGame);
 		}
-	}, StartingCountdownInternal, false);
+	}, UGameStateDataAsset::Get().GetStartingCountdown(), false);
 }
 
 // Decrement the countdown timer of the current game.
@@ -123,7 +132,7 @@ void AMyGameStateBase::ServerStartInGameCountdown_Implementation()
 {
 	const UWorld* World = GetWorld();
 	if (!World
-	    || InGameCountdownInternal <= 0
+	    || UGameStateDataAsset::Get().GetInGameCountdown() <= 0
 	    || !ensureMsgf(CurrentGameStateInternal == ECurrentGameState::InGame, TEXT("ASSERT: 'CurrentGameStateInternal == ECurrentGameState::InGame' condition is FALSE")))
 	{
 		return;
@@ -143,5 +152,5 @@ void AMyGameStateBase::ServerStartInGameCountdown_Implementation()
 		{
 			MyGameStateBase->ServerSetGameState(ECurrentGameState::EndGame);
 		}
-	}, InGameCountdownInternal, false);
+	}, UGameStateDataAsset::Get().GetInGameCountdown(), false);
 }
