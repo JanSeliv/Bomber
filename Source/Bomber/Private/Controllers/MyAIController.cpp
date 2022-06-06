@@ -88,7 +88,7 @@ void AMyAIController::BeginPlay()
 
 	// Setup timer handle to update AI brain (initialized being paused)
 	FTimerManager& TimerManager = World->GetTimerManager();
-	TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, UGeneratedMapDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
+	TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, UGameStateDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
 	TimerManager.PauseTimer(AIUpdateHandleInternal);
 }
 

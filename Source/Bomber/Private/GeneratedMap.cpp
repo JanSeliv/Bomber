@@ -319,7 +319,6 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 	}
 
 	// Iterate and destroy
-	bool OnAnyPlayerDestroyed = false;
 	for (int32 i = MapComponentsInternal.Num() - 1; i >= 0; --i)
 	{
 		if (!MapComponentsInternal.IsValidIndex(i)) // the element already was removed
@@ -348,22 +347,10 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 			if (MapComponentIt && MapComponentIt->GetActorType() == EAT::Player) // Is a player
 			{
 				--PlayersNumInternal;
-				OnAnyPlayerDestroyed = true;
 			}
 		}
 	}
 	MapComponentsInternal.Shrink();
-
-	// Update endgame state
-	if (OnAnyPlayerDestroyed)
-	{
-		const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
-		if (MyGameState
-		    && AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
-		{
-			MyGameState->OnAnyPlayerDestroyed.Broadcast();
-		}
-	}
 }
 
 // Removes the specified map component from the MapComponents_ array without an owner destroying

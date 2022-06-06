@@ -52,6 +52,10 @@ public:
 	/** Is overriden to return own player name that is saved to config. */
 	virtual FString GetPlayerNameCustom() const override { return GetPlayerFNameCustom().ToString(); }
 
+	/** Updates result of the game for controlled player. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void UpdateEndGameState();
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -79,10 +83,6 @@ protected:
 	/** Listen game states to notify server about ending game for controlled player. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Updated result of the game for controlled player after ending the game. Called when one of players is destroying. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void ServerUpdateEndState();
 
 	/** Is called on clients to apply current End-Game state. */
 	UFUNCTION()

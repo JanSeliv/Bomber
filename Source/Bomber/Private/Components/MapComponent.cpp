@@ -11,6 +11,7 @@
 #include "PoolManager.h"
 //---
 #include "Components/BoxComponent.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -199,7 +200,7 @@ void UMapComponent::OnRegister()
 	}
 
 	// Set the tick disabled by default and decrease the interval
-	Owner->SetActorTickInterval(UGeneratedMapDataAsset::Get().GetTickInterval());
+	Owner->SetActorTickInterval(UGameStateDataAsset::Get().GetTickInterval());
 	Owner->SetActorTickEnabled(false);
 
 	// Set the movable mobility for in-game attaching

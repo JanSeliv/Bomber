@@ -20,6 +20,10 @@ public:
 	/** Returns the Game State data asset. */
 	static const UGameStateDataAsset& Get();
 
+	/** Returns general value how ofter update actors and states in the game. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE float GetTickInterval() const { return TickInternal; }
+
 	/** Return the summary time required to start the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetStartingCountdown() const { return StartingCountdownInternal; }
@@ -29,6 +33,10 @@ public:
 	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdownInternal; }
 
 protected:
+	/** General value how ofter update actors and states in the game. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))
+	float TickInternal = 0.2F; //[D]
+
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Starting Countdown"))
 	int32 StartingCountdownInternal = 3; //[D]
@@ -57,12 +65,6 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged; //[DMD]
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
-
-	/** Called when one of players was destroyed. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnAnyPlayerDestroyed OnAnyPlayerDestroyed; //[DMD]
-
 	/* ---------------------------------------------------
 	*		Public functions
 	* --------------------------------------------------- */
@@ -80,11 +82,19 @@ public:
 
 	/** Returns the left second of the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetStartingTimerSecondsRemain() const { return StartingTimerSecRemainInternal; }
+	FORCEINLINE float GetStartingTimerSecondsRemain() const { return StartingTimerSecRemainInternal; }
 
 	/** Returns the left second to the end of the match. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetInGameTimerSecondsRemain() const { return InGameTimerSecRemainInternal; }
+	FORCEINLINE float GetInGameTimerSecondsRemain() const { return InGameTimerSecRemainInternal; }
+
+	/** Returns true if 'Three-two-one-GO' timer was already finished, so the match was started. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsStartingTimerElapsed() const { return FMath::IsNearlyZero(StartingTimerSecRemainInternal) || FMath::IsNegative(StartingTimerSecRemainInternal); }
+
+	/** Returns true if there are no seconds remain to the end of the match, so the match was ended. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsInGameTimerElapsed() const { return FMath::IsNearlyZero(InGameTimerSecRemainInternal) || FMath::IsNegative(InGameTimerSecRemainInternal); }
 
 protected:
 	/* ---------------------------------------------------
@@ -95,21 +105,17 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CurrentGameState", meta = (BlueprintProtected, DisplayName = "Current Game State"))
 	ECurrentGameState CurrentGameStateInternal = ECurrentGameState::None; //[G]
 
-	/** Decrement AMyGameStateBase::StartingCountdownInternal by 1 for each second.*/
-	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Starting Timer"))
-	FTimerHandle StartingTimerInternal; //[G]
+	/** Handles time counting in the game.*/
+	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Countdown Timer"))
+	FTimerHandle CountdownTimerInternal; //[G]
 
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Replicated, meta = (BlueprintProtected, DisplayName = "Starting Timer Seconds Remain"))
-	int32 StartingTimerSecRemainInternal = 0; //[G]
-
-	/** Decrement AMyGameStateBase::InGameCountdownInternal by 1 for each second. */
-	UPROPERTY(BlueprintReadWrite, Transient, meta = (BlueprintProtected, DisplayName = "In-Game Timer"))
-	FTimerHandle InGameTimerInternal; //[G]
+	float StartingTimerSecRemainInternal = 0.F; //[G]
 
 	/** Seconds to the end of the round. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Replicated, meta = (BlueprintProtected, DisplayName = "In-Game Timer Seconds Remain"))
-	int32 InGameTimerSecRemainInternal = 0; //[G]
+	float InGameTimerSecRemainInternal = 0.F; //[G]
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -126,19 +132,23 @@ protected:
 	UFUNCTION()
 	void OnRep_CurrentGameState();
 
-	/** Called when game enters to the Game Starting state to trigger its timer. */
+	/** Called to starting counting different time in the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TriggerStartingCountdown();
+	void TriggerCountdowns();
 
-	/** Is called each second during the Game Starting state for the 'Three-two-one-GO' timer. */
+	/** Is called each UGameStateDataAsset::TickInternal to count different time in the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnStartingTimerSecondDecremented();
+	void OnCountdownTimerTicked();
 
-	/** Called when game enters to the In-Game state to trigger its timer. */
+	/** Is called during the Game Starting state to handle the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TriggerInGameCountdown();
+	void DecrementStartingCountdown();
 
-	/** Is called each second during the In-Game state. */
+	/** Is called during the In-Game state to handle time consuming for the current match. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnInGameTimerSecondDecremented();
+	void DecrementInGameCountdown();
+
+	/** Is called during the In-Game state to try to register the End-Game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void UpdateEndGameStates();
 };

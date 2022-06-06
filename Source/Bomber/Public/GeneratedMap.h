@@ -52,10 +52,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetLevelStreamRows(TArray<FLevelStreamRow>& OutRows) const { OutRows = LevelsInternal; }
 
-	/** Get UGeneratedMapDataAsset::TickInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE float GetTickInterval() const { return TickInternal; }
-
 	/** Get UGeneratedMapDataAsset::WallsChanceInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetWallsChance() const { return WallsChanceInternal; }
@@ -76,10 +72,6 @@ protected:
 	/** Contains all used levels. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels", TitleProperty = "LevelType", ShowOnlyInnerProperties))
 	TArray<FLevelStreamRow> LevelsInternal; //[D]
-
-	/** How ofter update actors on map. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))
-	float TickInternal = 0.2F; //[D]
 
 	/** The chance of walls generation. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Walls Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
