@@ -81,8 +81,7 @@ void AMyPlayerState::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::GameStarting:
 		{
-			EndGameStateInternal = EEndGameState::None;
-			OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+			MulticastSetEndGameState(EEndGameState::None);
 			break;
 		}
 		case ECurrentGameState::EndGame:
@@ -114,8 +113,7 @@ void AMyPlayerState::UpdateEndGameState()
 	// handle timer is 0
 	if (MyGameState->IsInGameTimerElapsed())
 	{
-		EndGameStateInternal = EEndGameState::Draw;
-		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+		MulticastSetEndGameState(EEndGameState::Draw);
 		return;
 	}
 
@@ -123,7 +121,6 @@ void AMyPlayerState::UpdateEndGameState()
 
 	// locals
 	bool bUpdateGameState = false;
-	const EEndGameState CurrentEndGameState = EndGameStateInternal;
 	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
 	const APawn* PawnOwner = GetPawn();
 	if (!PawnOwner
@@ -131,18 +128,18 @@ void AMyPlayerState::UpdateEndGameState()
 	{
 		if (PlayerNum <= 0) // last players were blasted together
 		{
-			EndGameStateInternal = EEndGameState::Draw;
+			MulticastSetEndGameState(EEndGameState::Draw);
 			bUpdateGameState = true; // no players to play, game ended
 		}
 		else
 		{
-			EndGameStateInternal = EEndGameState::Lose;
+			MulticastSetEndGameState(EEndGameState::Lose);
 			bUpdateGameState = PlayerNum == 1;
 		}
 	}
 	else if (PlayerNum == 1) // is alive owner and is the last player
 	{
-		EndGameStateInternal = EEndGameState::Win;
+		MulticastSetEndGameState(EEndGameState::Win);
 		bUpdateGameState = true; // we have winner, game ended
 	}
 
@@ -151,16 +148,20 @@ void AMyPlayerState::UpdateEndGameState()
 	{
 		MyGameState->ServerSetGameState(ECGS::EndGame);
 	}
+}
 
-	if (CurrentEndGameState != EndGameStateInternal
-	    && OnEndGameStateChanged.IsBound())
+// Set new End-Game state, is made as multicast to notify own client asap
+void AMyPlayerState::MulticastSetEndGameState_Implementation(EEndGameState NewEndGameState)
+{
+	if (NewEndGameState == EndGameStateInternal)
+	{
+		return;
+	}
+
+	EndGameStateInternal = NewEndGameState;
+
+	if (OnEndGameStateChanged.IsBound())
 	{
 		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 	}
-}
-
-// Is called on clients to apply current End-Game state
-void AMyPlayerState::OnRep_EndGameState()
-{
-	OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 }

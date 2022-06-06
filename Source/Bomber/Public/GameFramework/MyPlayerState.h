@@ -62,7 +62,7 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** Contains result of the game for controlled player after ending the game. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_EndGameState", Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
 	EEndGameState EndGameStateInternal = EEndGameState::None; //[G]
 
 	/** Config: custom name set by player.
@@ -84,7 +84,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-	/** Is called on clients to apply current End-Game state. */
-	UFUNCTION()
-	void OnRep_EndGameState();
+	/** Set new End-Game state, is made as multicast to notify own client asap. */
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void MulticastSetEndGameState(EEndGameState NewEndGameState);
 };
