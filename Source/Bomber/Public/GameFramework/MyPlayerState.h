@@ -56,6 +56,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void UpdateEndGameState();
 
+	/** Returns true if current player is alive.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	bool IsPlayerAlive() const;
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -77,7 +81,7 @@ protected:
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	/** Called when the game starts. Created widget. */
+	/** Called when the game starts. */
 	virtual void BeginPlay() override;
 
 	/** Listen game states to notify server about ending game for controlled player. */

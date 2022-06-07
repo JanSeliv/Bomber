@@ -5,6 +5,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "GeneratedMap.h"
 #include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 //---
@@ -60,6 +61,17 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ThisClass, CurrentGameStateInternal);
 	DOREPLIFETIME(ThisClass, StartingTimerSecRemainInternal);
 	DOREPLIFETIME(ThisClass, InGameTimerSecRemainInternal);
+}
+
+// Called when the game starts
+void AMyGameStateBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HasAuthority())
+	{
+		AGeneratedMap::Get().OnAnyCharacterDestroyed.AddDynamic(this, &ThisClass::OnAnyCharacterDestroyed);
+	}
 }
 
 // Updates current game state
@@ -160,11 +172,18 @@ void AMyGameStateBase::DecrementInGameCountdown()
 // Is called during the In-Game state to try to register the End-Game state
 void AMyGameStateBase::UpdateEndGameStates()
 {
+	if (!DoesWantUpdateEndState())
+	{
+		return;
+	}
+
 	const AMyGameModeBase* MyGameMode = USingletonLibrary::GetMyGameMode();
 	if (!MyGameMode)
 	{
 		return;
 	}
+
+	bWantsUpdateEndStateInternal = false;
 
 	const int32 PlayerControllersNum = MyGameMode->GetPlayerControllersNum();;
 	for (int32 Index = 0; Index < PlayerControllersNum; ++Index)
@@ -177,10 +196,17 @@ void AMyGameStateBase::UpdateEndGameStates()
 			continue;
 		}
 
-		const bool bIsDead = MyPC->GetPawn() == nullptr;
-		if (bIsDead)
-		{
-			MyPlayerState->UpdateEndGameState();
-		}
+		MyPlayerState->UpdateEndGameState();
 	}
+
+	if (USingletonLibrary::GetAlivePlayersNum() <= 1)
+	{
+		ServerSetGameState(ECGS::EndGame);
+	}
+}
+
+// Called when any player or bot was exploded
+void AMyGameStateBase::OnAnyCharacterDestroyed()
+{
+	bWantsUpdateEndStateInternal = true;
 }

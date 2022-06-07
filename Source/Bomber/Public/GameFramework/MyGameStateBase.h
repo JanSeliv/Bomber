@@ -96,6 +96,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsInGameTimerElapsed() const { return FMath::IsNearlyZero(InGameTimerSecRemainInternal) || FMath::IsNegative(InGameTimerSecRemainInternal); }
 
+	/** Returns true if there request to update the End-Game state for players. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool DoesWantUpdateEndState() const { return bWantsUpdateEndStateInternal; }
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -117,12 +121,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Replicated, meta = (BlueprintProtected, DisplayName = "In-Game Timer Seconds Remain"))
 	float InGameTimerSecRemainInternal = 0.F; //[G]
 
+	/** Is true where there request to update the End-Game state for players */
+	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Wants Update End State"))
+	bool bWantsUpdateEndStateInternal = false; //[G]
+
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/** Called when the game starts. */
+	virtual void BeginPlay() override;
 
 	/** Updates current game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -151,4 +162,8 @@ protected:
 	/** Is called during the In-Game state to try to register the End-Game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateEndGameStates();
+
+	/** Called when any player or bot was exploded. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnAnyCharacterDestroyed();
 };

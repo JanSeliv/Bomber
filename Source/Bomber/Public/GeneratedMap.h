@@ -116,6 +116,12 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnSetNewLevelType OnSetNewLevelType; //[DMD]
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
+
+	/** Called when any player or bot was exploded. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnAnyPlayerDestroyed OnAnyCharacterDestroyed; //[DMD]
+	
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- *

@@ -62,15 +62,18 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ThisClass, CustomPlayerNameInternal);
 }
 
-// Called when the game starts. Created widget
+// Called when the game starts
 void AMyPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (HasAuthority())
 	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+		// Listen states
+		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+		{
+			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+		}
 	}
 }
 
@@ -102,7 +105,7 @@ void AMyPlayerState::UpdateEndGameState()
 		return;
 	}
 
-	AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
+	const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
 	const ECurrentGameState CurrentGameState = MyGameState ? MyGameState->GetCurrentGameState() : ECGS::None;
 	if (CurrentGameState == ECGS::None                  // is not valid game state, nullptr or not fully initialized
 	    || EndGameStateInternal != EEndGameState::None) // end state was set already for current game
@@ -120,34 +123,30 @@ void AMyPlayerState::UpdateEndGameState()
 	// Game is running
 
 	// locals
-	bool bUpdateGameState = false;
 	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
-	const APawn* PawnOwner = GetPawn();
-	if (!PawnOwner
-	    || !PawnOwner->GetController()) // is dead owner
+
+	if (!IsPlayerAlive())
 	{
 		if (PlayerNum <= 0) // last players were blasted together
 		{
 			MulticastSetEndGameState(EEndGameState::Draw);
-			bUpdateGameState = true; // no players to play, game ended
 		}
 		else
 		{
 			MulticastSetEndGameState(EEndGameState::Lose);
-			bUpdateGameState = PlayerNum == 1;
 		}
 	}
 	else if (PlayerNum == 1) // is alive owner and is the last player
 	{
 		MulticastSetEndGameState(EEndGameState::Win);
-		bUpdateGameState = true; // we have winner, game ended
 	}
+}
 
-	// Need to notify that the game was ended
-	if (bUpdateGameState)
-	{
-		MyGameState->ServerSetGameState(ECGS::EndGame);
-	}
+// Returns true if current player is alive
+bool AMyPlayerState::IsPlayerAlive() const
+{
+	const APawn* PawnOwner = GetPawn();
+	return PawnOwner && PawnOwner->GetController() != nullptr;
 }
 
 // Set new End-Game state, is made as multicast to notify own client asap

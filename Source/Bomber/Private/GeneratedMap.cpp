@@ -331,23 +331,10 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 		if (!OwnerIt                                                        // if is null, destroy that object from the array
 		    || MapComponentIt && Cells.Contains(MapComponentIt->GetCell())) // the cell is contained on the grid
 		{
-			// Do not destroy actor during the game session if required
-			if (MapComponentIt && MapComponentIt->IsUndestroyable()
-			    && AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
-			{
-				continue;
-			}
-
 			// Remove from the array
 			// First removing, because after the box destroying the item can be spawned and starts searching for an empty cell
 			// MapComponentIt can be invalid here
 			DestroyLevelActor(MapComponentIt);
-
-			// Decrement the players number
-			if (MapComponentIt && MapComponentIt->GetActorType() == EAT::Player) // Is a player
-			{
-				--PlayersNumInternal;
-			}
 		}
 	}
 	MapComponentsInternal.Shrink();
@@ -375,6 +362,27 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 	if (!ComponentOwner)
 	{
 		return;
+	}
+
+	const bool bIsPlayer = MapComponent->GetActorType() == EAT::Player;
+	const bool bIsInGame = AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame;
+
+	if (bIsInGame
+	    && MapComponent->IsUndestroyable())
+	{
+		// Do not destroy actor during the game session if required
+		return;
+	}
+
+	if (bIsPlayer)
+	{
+		--PlayersNumInternal;
+
+		if (bIsInGame
+		    && OnAnyCharacterDestroyed.IsBound())
+		{
+			OnAnyCharacterDestroyed.Broadcast();
+		}
 	}
 
 	MapComponent->OnDeactivated();
