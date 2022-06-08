@@ -144,7 +144,7 @@ protected:
 	void OnRep_CurrentGameState();
 
 	/** Called to starting counting different time in the game. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void TriggerCountdowns();
 
 	/** Is called each UGameStateDataAsset::TickInternal to count different time in the game. */

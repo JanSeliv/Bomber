@@ -111,7 +111,7 @@ public:
 	const FORCEINLINE FCollisionResponseContainer& GetCollisionResponses() const { return CollisionResponseInternal; }
 
 	/** Set new collisions data for any channel of the Box Collision Component. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewResponses"))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "NewResponses"))
 	void SetCollisionResponses(const FCollisionResponseContainer& NewResponses);
 
 	/** Is called when an owner was destroyed on the Level Map. */
