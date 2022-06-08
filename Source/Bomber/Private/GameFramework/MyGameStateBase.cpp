@@ -2,8 +2,6 @@
 
 #include "GameFramework/MyGameStateBase.h"
 //---
-#include "Controllers/MyPlayerController.h"
-#include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "GeneratedMap.h"
 #include "Globals/DataAssetsContainer.h"
@@ -177,19 +175,11 @@ void AMyGameStateBase::UpdateEndGameStates()
 		return;
 	}
 
-	const AMyGameModeBase* MyGameMode = USingletonLibrary::GetMyGameMode();
-	if (!MyGameMode)
-	{
-		return;
-	}
-
 	bWantsUpdateEndStateInternal = false;
 
-	const int32 PlayerControllersNum = MyGameMode->GetPlayerControllersNum();;
-	for (int32 Index = 0; Index < PlayerControllersNum; ++Index)
+	for (APlayerState* PlayerStateIt : PlayerArray)
 	{
-		const AMyPlayerController* MyPC = MyGameMode->GetPlayerController(Index);
-		AMyPlayerState* MyPlayerState = MyPC ? MyPC->GetPlayerState<AMyPlayerState>() : nullptr;
+		AMyPlayerState* MyPlayerState = PlayerStateIt ? Cast<AMyPlayerState>(PlayerStateIt) : nullptr;
 		if (!MyPlayerState
 		    || MyPlayerState->GetEndGameState() != EEndGameState::None) // Already set the state
 		{
