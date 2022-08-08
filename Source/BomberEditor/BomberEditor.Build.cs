@@ -14,7 +14,8 @@ public class BomberEditor : ModuleRules
 			"EditorFramework", // FEditorDelegates::FToolkitManager
 			"Slate", "SlateCore", "PropertyEditor", "EditorStyle", // Property types customizations
 			"ToolWidgets", // SSearchableComboBox
-			"UnrealEd" // UMyUnrealEdEngine
+			"UnrealEd", // UMyUnrealEdEngine
+			"MyEditorUtils" // FPropertyData, FMyPropertyTypeCustomization
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

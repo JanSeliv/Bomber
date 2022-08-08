@@ -5,7 +5,7 @@
 /**
  * Contains data that describes property.
  */
-struct FPropertyData
+struct MYEDITORUTILS_API FPropertyData
 {
 	/** Empty property data. */
 	static const FPropertyData Empty;
