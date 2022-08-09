@@ -1,0 +1,34 @@
+﻿{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "My Settings",
+  "Description": "Plugin to allow automatically generate settings from data table",
+  "Category": "My Plugins",
+  "CreatedBy": "Yevhenii Selivanov",
+  "CreatedByURL": "https://github.com/JanSeliv",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": true,
+  "IsBetaVersion": true,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "MySettings",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "MySettingsEditor",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "MyEditorUtils",
+      "Enabled": true
+    }
+  ]
+}

@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "MyPropertyTypeCustomization.h"
+#include "MyPropertyType/MyPropertyTypeCustomization.h"
 
 /**
  * Is customized to show only selected in-game option.
  */
-class FSettingsPickerCustomization final : public FMyPropertyTypeCustomization
+class MYSETTINGSEDITOR_API FSettingsPickerCustomization final : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------

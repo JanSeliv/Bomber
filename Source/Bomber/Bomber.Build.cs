@@ -18,7 +18,8 @@ public class Bomber : ModuleRules
 			"EnhancedInput", // Enhanced Input plugin
 			"Niagara", // VFX
 			"RenderCore", // Render threads,
-			"MyUtils" // FFunctionPicker etc.
+			"MyUtils", // FFunctionPicker etc.
+			"MySettings"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
