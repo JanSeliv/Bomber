@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MyPropertyTypeCustomization.h"
+#include "MyPropertyType/MyPropertyTypeCustomization.h"
 
 /**
  * Reuse the socket chooser widget to allow choose the FAttachedMesh::Bone within UPlayerRow::Mesh.

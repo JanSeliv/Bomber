@@ -1,20 +1,46 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
 #include "MyEditorUtils.h"
+//---
+#include "FunctionPicker/FunctionPickerCustomization.h"
+//---
+#include "Modules/ModuleManager.h"
 
 #define LOCTEXT_NAMESPACE "FMyEditorUtilsModule"
 
+static const FName PropertyEditorModule = TEXT("PropertyEditor");
+
 void FMyEditorUtilsModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(
+		PropertyEditorModule);
+
+	// Allows to choose ufunction
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		FFunctionPickerCustomization::PropertyClassName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FFunctionPickerCustomization::MakeInstance)
+	);
+
+	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 void FMyEditorUtilsModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	PropertyModule.UnregisterCustomPropertyTypeLayout(FFunctionPickerCustomization::PropertyClassName);
 }
 
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FMyEditorUtilsModule, MyEditorUtils)

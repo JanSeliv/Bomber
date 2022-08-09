@@ -1,14 +1,12 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "MyPropertyTypeCustomization.h"
+#include "MyPropertyType/MyPropertyTypeCustomization.h"
 //---
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
 #include "IDetailChildrenBuilder.h"
 #include "PropertyCustomizationHelpers.h"
 #include "SSearchableComboBox.h"
-
-typedef Super ThisClass;
 
 // Called when the header of the property (the row in the details panel where the property is shown)
 void FMyPropertyTypeCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
@@ -35,7 +33,7 @@ void FMyPropertyTypeCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 
 	// Set parent property
 	ParentPropertyInternal = FPropertyData(PropertyHandle);
-	const TDelegate<void()>& RefreshCustomPropertyFunction = FSimpleDelegate::CreateSP(this, &ThisClass::RefreshCustomProperty);
+	const TDelegate<void()>& RefreshCustomPropertyFunction = FSimpleDelegate::CreateSP(this, &FMyPropertyTypeCustomization::RefreshCustomProperty);
 	PropertyHandle/*ref*/->SetOnPropertyValueChanged(RefreshCustomPropertyFunction);
 	PropertyHandle/*ref*/->SetOnChildPropertyValueChanged(RefreshCustomPropertyFunction);
 

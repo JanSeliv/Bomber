@@ -4,7 +4,7 @@
 
 #include "IPropertyTypeCustomization.h"
 //---
-#include "PropertyData.h"
+#include "MyPropertyType/PropertyData.h"
 
 typedef class FMyPropertyTypeCustomization Super;
 

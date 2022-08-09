@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "MyPropertyTypeCustomization.h"
+#include "MyPropertyType/MyPropertyTypeCustomization.h"
 
 /**
- * Allow to choose the function for UGameUserSettings instead of manually typing a name.
+ * Allow to choose the function in the list instead of manually typing a name.
  */
-class FFunctionPickerCustomization final : public FMyPropertyTypeCustomization
+class MYEDITORUTILS_API FFunctionPickerCustomization final : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------

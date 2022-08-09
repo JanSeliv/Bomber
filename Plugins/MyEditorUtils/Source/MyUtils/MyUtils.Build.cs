@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class MyEditorUtils : ModuleRules
+public class MyUtils : ModuleRules
 {
-	public MyEditorUtils(ReadOnlyTargetRules Target) : base(Target)
+	public MyUtils(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Latest;
@@ -28,10 +28,8 @@ public class MyEditorUtils : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new[]
 			{
-				"Core",
-				"EditorFramework", // FEditorDelegates::FToolkitManager
-				"PropertyEditor", "EditorStyle", // Property types customizations
-				"ToolWidgets", // SSearchableComboBox
+				"Core"
+				// ... add other public dependencies that you statically link with here ...
 			}
 		);
 

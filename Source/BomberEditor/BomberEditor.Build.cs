@@ -7,6 +7,7 @@ public class BomberEditor : ModuleRules
 	public BomberEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		CppStandard = CppStandardVersion.Latest;
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
@@ -15,7 +16,8 @@ public class BomberEditor : ModuleRules
 			"Slate", "SlateCore", "PropertyEditor", "EditorStyle", // Property types customizations
 			"ToolWidgets", // SSearchableComboBox
 			"UnrealEd", // UMyUnrealEdEngine
-			"MyEditorUtils" // FPropertyData, FMyPropertyTypeCustomization
+			"MyEditorUtils", // FPropertyData, FMyPropertyTypeCustomization
+			"MySettingsEditor"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "FunctionPickerCustomization.h"
+#include "FunctionPicker/FunctionPickerCustomization.h"
 
 typedef FFunctionPickerCustomization ThisClass;
 
@@ -78,7 +78,7 @@ void FFunctionPickerCustomization::RefreshCustomProperty()
 	FunctionClassPropertyInternal.PropertyValue = ChosenFunctionClassName;
 	const bool bIsNewTemplateFunction = UpdateTemplateFunction();
 	if (!bIsNewTemplateFunction && !bChosenNewClass // Settings Type and Class depend on each other
-	    && SearchableComboBoxValuesInternal.Num())  // List is not empty
+		&& SearchableComboBoxValuesInternal.Num()) // List is not empty
 	{
 		return;
 	}
@@ -101,9 +101,9 @@ void FFunctionPickerCustomization::RefreshCustomProperty()
 	{
 		const UFunction* FunctionIt = *It;
 		if (FunctionIt
-		    && FunctionIt != TemplateFunctionInternal
-		    && (!bIsStaticFunctionInternal || FunctionIt->FunctionFlags & FUNC_Static) // only static functions if specified
-		    && IsSignatureCompatible(FunctionIt))
+			&& FunctionIt != TemplateFunctionInternal
+			&& (!bIsStaticFunctionInternal || FunctionIt->FunctionFlags & FUNC_Static) // only static functions if specified
+			&& IsSignatureCompatible(FunctionIt))
 		{
 			FName FunctionNameIt = FunctionIt->GetFName();
 			if (FunctionNameIt == CustomPropertyInternal.PropertyValue)
@@ -198,7 +198,7 @@ bool FFunctionPickerCustomization::IsSignatureCompatible(const UFunction* Functi
 			// That part is implemented: if is return param with the same flags
 			// Will return true for any derived UObject
 			if (A->PropertyFlags & B->PropertyFlags & CPF_ReturnParm
-			    && A->IsA(B->GetClass()))
+				&& A->IsA(B->GetClass()))
 			{
 				return true;
 			}
@@ -294,7 +294,7 @@ bool FFunctionPickerCustomization::UpdateTemplateFunction()
 void FFunctionPickerCustomization::InitTemplateMetaKey()
 {
 	if (!TemplateMetaKeyInternal.IsNone() // set only once since the key never changes
-	    || !ParentPropertyInternal.IsValid())
+		|| !ParentPropertyInternal.IsValid())
 	{
 		return;
 	}

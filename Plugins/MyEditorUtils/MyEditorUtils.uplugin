@@ -15,6 +15,11 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "MyUtils",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "MyEditorUtils",
 			"Type": "Editor",
 			"LoadingPhase": "Default"

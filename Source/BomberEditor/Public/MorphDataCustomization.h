@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MyPropertyTypeCustomization.h"
+#include "MyPropertyType/MyPropertyTypeCustomization.h"
 
 /**
  * Allow to choose the morph for FMorphData::Morph within UAnimNotify instead of manually typing a name.
