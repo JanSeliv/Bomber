@@ -17,7 +17,8 @@ public class Bomber : ModuleRules
 			"RHI", "ApplicationCore", // Resolutions
 			"EnhancedInput", // Enhanced Input plugin
 			"Niagara", // VFX
-			"RenderCore" // Render threads
+			"RenderCore", // Render threads,
+			"MyUtils" // FFunctionPicker etc.
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });

@@ -24,7 +24,7 @@
   * FFunctionPicker SetMembers = FFunctionPicker::Empty;
   */
 USTRUCT(BlueprintType)
-struct FFunctionPicker
+struct MYUTILS_API FFunctionPicker
 {
 	GENERATED_BODY()
 
@@ -57,7 +57,7 @@ struct FFunctionPicker
 
 	/** Creates a hash value.
 	  * @param Other the other object to create a hash value for. */
-	friend uint32 GetTypeHash(const FFunctionPicker& Other);
+	friend MYUTILS_API uint32 GetTypeHash(const FFunctionPicker& Other);
 
 protected:
 	/** Contains cached function ptr for performance reasons. */

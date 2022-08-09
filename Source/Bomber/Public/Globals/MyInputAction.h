@@ -4,7 +4,7 @@
 
 #include "InputAction.h"
 //---
-#include "Structures/FunctionPicker.h"
+#include "FunctionPicker/FunctionPicker.h"
 //---
 #include "MyInputAction.generated.h"
 

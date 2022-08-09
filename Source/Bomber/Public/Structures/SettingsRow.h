@@ -7,7 +7,7 @@
 #include "Components/SlateWrapperTypes.h"
 //---
 #include "Bomber.h"
-#include "FunctionPicker.h"
+#include "FunctionPicker/FunctionPicker.h"
 //---
 #include "SettingsRow.generated.h"
 
