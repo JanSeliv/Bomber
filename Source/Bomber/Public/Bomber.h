@@ -11,6 +11,12 @@
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
 #define TO_ENUM(Enum, Bitmask) static_cast<Enum>(Bitmask)
 
+#define ECC_Player0 ECollisionChannel::ECC_GameTraceChannel1
+#define ECC_Player1 ECollisionChannel::ECC_GameTraceChannel2
+#define ECC_Player2 ECollisionChannel::ECC_GameTraceChannel3
+#define ECC_Player3 ECollisionChannel::ECC_GameTraceChannel4
+#define ECC_UI ECollisionChannel::ECC_GameTraceChannel5
+
 /**
 * Types of all actors on the Level Map
 * Where Walls, Boxes and Bombs are the physical barriers for players
