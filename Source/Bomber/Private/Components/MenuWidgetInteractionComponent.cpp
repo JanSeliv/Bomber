@@ -1,0 +1,135 @@
+﻿// Copyright (c) Yevhenii Selivanov
+
+#include "Components/MenuWidgetInteractionComponent.h"
+//---
+#include "GameFramework/MyGameStateBase.h"
+#include "Controllers/MyPlayerController.h"
+#include "Globals/SingletonLibrary.h"
+#include "UI/MyHUD.h"
+#include "UI/SettingsWidget.h"
+
+// Sets default values for this component's properties
+UMenuWidgetInteractionComponent::UMenuWidgetInteractionComponent()
+{
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = true;
+
+	TraceChannel = ECC_UI;
+	InteractionDistance = 50000.f;
+	InteractionSource = EWidgetInteractionSource::Mouse;
+}
+
+// Sends the press key event to slate, is overriden to ignore if component is not active
+bool UMenuWidgetInteractionComponent::PressKey(FKey Key, bool bRepeat)
+{
+	return IsActive() ? Super::PressKey(Key, bRepeat) : false;
+}
+
+// Sends the release key event to slate, is overriden to ignore if component is not active
+bool UMenuWidgetInteractionComponent::ReleaseKey(FKey Key)
+{
+	return IsActive() ? Super::ReleaseKey(Key) : false;
+}
+
+// Sets most suitable Virtual User index by current player index
+void UMenuWidgetInteractionComponent::UpdatePlayerIndex()
+{
+	int32 IndexToSet = 0;
+
+#if WITH_EDITOR // [IsEditorMultiplayer]
+	if (USingletonLibrary::IsEditorMultiplayer())
+	{
+		// Make widget interaction works in editor multiplayer,
+		// so interaction will not conflict with every local player
+		IndexToSet = USingletonLibrary::GetEditorPlayerIndex();
+	}
+#endif // [IsEditorMultiplayer]
+
+	VirtualUserIndex = IndexToSet;
+	PointerIndex = IndexToSet;
+}
+
+// Called when the game starts
+void UMenuWidgetInteractionComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Listen states to manage the tick
+	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	{
+		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+
+	UpdatePlayerIndex();
+
+	EnableInput();
+
+	BindOnToggledSettings();
+}
+
+// Listen game states to manage the enabling and disabling this component
+void UMenuWidgetInteractionComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	switch (CurrentGameState)
+	{
+		case ECurrentGameState::Menu:
+		{
+			SetActive(true);
+			break;
+		}
+		case ECurrentGameState::GameStarting:
+		{
+			SetActive(false);
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+// Pushes the owner actor to the stack of input to be able to send input key events
+void UMenuWidgetInteractionComponent::EnableInput()
+{
+	if (AActor* Owner = GetOwner())
+	{
+		AMyPlayerController* PC = USingletonLibrary::GetLocalPlayerController();
+		Owner->EnableInput(PC);
+	}
+}
+
+// Binds to toggle Settings to be able enable or disable this component
+void UMenuWidgetInteractionComponent::BindOnToggledSettings()
+{
+	if (USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget())
+	{
+		SettingsWidget->OnToggledSettings.AddUniqueDynamic(this, &ThisClass::OnToggledSettings);
+		return;
+	}
+
+	// Settings widget is not valid yet, so wait until it becomes initialized
+	AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
+	if (MyHUD && !MyHUD->AreWidgetInitialized())
+	{
+		MyHUD->OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
+	}
+}
+
+// Is called when all widgets are initialized to bind on settings toggle
+void UMenuWidgetInteractionComponent::OnWidgetsInitialized()
+{
+	AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
+	if (MyHUD
+	    && MyHUD->OnWidgetsInitialized.IsAlreadyBound(this, &ThisClass::OnWidgetsInitialized))
+	{
+		MyHUD->OnWidgetsInitialized.RemoveDynamic(this, &ThisClass::OnWidgetsInitialized);
+	}
+
+	BindOnToggledSettings();
+}
+
+// Disables this component while setting are opened and vice versa.
+void UMenuWidgetInteractionComponent::OnToggledSettings(bool bIsVisible)
+{
+	SetActive(!bIsVisible);
+}

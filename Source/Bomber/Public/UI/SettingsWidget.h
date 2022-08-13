@@ -194,11 +194,11 @@ public:
 	 *		Public properties
 	 * --------------------------------------------------- */
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToggledInGameMenu, bool, bIsVisible);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToggledSettings, bool, bIsVisible);
 
 	/** Is called to notify listeners the Settings widget is opened or closed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnToggledInGameMenu OnToggledSettings;
+	FOnToggledSettings OnToggledSettings;
 
 	/* ---------------------------------------------------
 	 *		Public functions
