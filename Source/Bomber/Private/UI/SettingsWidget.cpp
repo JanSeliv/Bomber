@@ -9,6 +9,10 @@
 #include "Globals/SingletonLibrary.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingSubWidget.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Returns the settings data asset
 const USettingsDataAsset& USettingsDataAsset::Get()
@@ -44,7 +48,7 @@ void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsPicker>& Out
 void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& EventToBind) const
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld()
+	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
 	    || !SettingsDataTableInternal
 	    || !EventToBind.IsBound())
 	{
@@ -683,7 +687,7 @@ void USettingsWidget::OnWidgetsInitialized()
 	ConstructSettings();
 
 #if WITH_EDITOR // [IsEditor]
-	if (USingletonLibrary::IsEditor())
+	if (UEditorUtilsLibrary::IsEditor())
 	{
 		// Apply constructed settings on editor window during initializing
 		ApplySettings();

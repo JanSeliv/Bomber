@@ -3,6 +3,10 @@
 #include "Globals/LevelActorDataAsset.h"
 //---
 #include "Globals/SingletonLibrary.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 // Called to handle row changes
@@ -16,7 +20,7 @@ void UBomberDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		USingletonLibrary::GOnAnyDataAssetChanged.Broadcast();
 	}
@@ -33,7 +37,7 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	}
 
 	// Continue only if [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld())
+	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}

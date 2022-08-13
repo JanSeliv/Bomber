@@ -30,7 +30,8 @@ public class Bomber : ModuleRules
 				{
 					"UnrealEd", // FEditorDelegates
 					"BomberEditor", // UMyUnrealEdEngine
-					"Blutility" // UEditorUtilityLibrary::GetSelectionSet()
+					"Blutility", // UEditorUtilityLibrary::GetSelectionSet()
+					"MyEditorUtils" // UEditorUtilsLibrary
 				});
 
 		// Uncomment if you are using online features

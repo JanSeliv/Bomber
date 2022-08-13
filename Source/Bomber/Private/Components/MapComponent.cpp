@@ -13,6 +13,10 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "Net/UnrealNetwork.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()
@@ -74,7 +78,7 @@ bool UMapComponent::OnConstruction()
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Remove all text renders of the Owner
 		USingletonLibrary::ClearOwnerTextRenders(Owner);
@@ -243,7 +247,7 @@ void UMapComponent::OnRegister()
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not call OnConstruction on drag events
 		Owner->bRunConstructionScriptOnDrag = false;
@@ -264,7 +268,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		BoxCollisionComponentInternal->DestroyComponent();
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-		if (USingletonLibrary::IsEditorNotPieWorld())
+		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
 			if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap()) // Can be invalid if remove the level map
@@ -333,7 +337,7 @@ bool UMapComponent::Modify(bool bAlwaysMarkDirty/* = true*/)
 {
 	AActor* Owner = GetOwner();
 	if (Owner
-	    && !USingletonLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
+	    && !UEditorUtilsLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
 	    && IsEditorOnly())                // was generated in the editor
 	{
 		Owner->Destroy();

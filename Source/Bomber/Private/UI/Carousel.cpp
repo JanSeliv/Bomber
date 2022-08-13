@@ -4,6 +4,10 @@
 //---
 #include "Bomber.h"
 #include "Globals/SingletonLibrary.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Sets default values
 ACarousel::ACarousel()
@@ -43,7 +47,7 @@ void ACarousel::BeginPlay()
 //  Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending.
 void ACarousel::Destroyed()
 {
-	if (USingletonLibrary::IsEditor()
+	if (UEditorUtilsLibrary::IsEditor()
 	    && !IS_TRANSIENT(this))
 	{
 		// Remove bound delegate

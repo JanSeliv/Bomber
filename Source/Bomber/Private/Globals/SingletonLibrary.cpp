@@ -25,6 +25,7 @@
 #include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
 #include "Editor.h"	 // GEditor
 #include "MyUnrealEdEngine.h" // GetClientSingleton
 #endif
@@ -44,106 +45,29 @@ USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChan
 // Returns a world of stored level map
 UWorld* USingletonLibrary::GetWorld() const
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (IsEditor()
+#if WITH_EDITOR	 // [UEditorUtils::IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditor()
 	    && !Get().LevelMapInternal.IsValid())
 	{
-		if (IsEditorNotPieWorld())
+		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			return GEditor->GetEditorWorldContext().World();
 		}
-		if (IsPIE())
+		if (UEditorUtilsLibrary::IsPIE())
 		{
 			return GEditor->GetCurrentPlayWorld();
 		}
 	}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]
+#endif	// WITH_EDITOR [UEditorUtils::IsEditorNotPieWorld]
 	const AGeneratedMap* LevelMap = GetLevelMap();
 	return LevelMap ? LevelMap->GetWorld() : nullptr;
-}
-
-// Checks, is the current world placed in the editor
-bool USingletonLibrary::IsEditor()
-{
-#if WITH_EDITOR
-	return GIsEditor && GEditor && GWorld && GWorld->IsEditorWorld();
-#endif
-	return false;
-}
-
-// Checks, that this actor placed in the editor world and the game is not started yet
-bool USingletonLibrary::IsEditorNotPieWorld()
-{
-#if WITH_EDITOR
-	return IsEditor() && !GEditor->IsPlaySessionInProgress();
-#endif
-	return false;
-}
-
-// Returns true if game is started in the Editor
-bool USingletonLibrary::IsPIE()
-{
-#if WITH_EDITOR
-	return IsEditor() && GEditor->IsPlaySessionInProgress();
-#endif
-	return false;
-}
-
-// Returns true if is started multiplayer game (server + client(s)) right in the Editor
-bool USingletonLibrary::IsEditorMultiplayer()
-{
-#if WITH_EDITOR	 // [IsPIE]
-	if (IsPIE())
-	{
-		const TOptional<FPlayInEditorSessionInfo>& PIEInfo = GEditor->GetPlayInEditorSessionInfo();
-		return PIEInfo.IsSet() && PIEInfo->PIEInstanceCount > 0;
-	}
-#endif	// [IsPIE]
-	return false;
-}
-
-// Returns the index of current player during editor multiplayer
-int32 USingletonLibrary::GetEditorPlayerIndex()
-{
-#if WITH_EDITOR // [IsEditorMultiplayer]
-	if (!IsEditorMultiplayer())
-	{
-		return INDEX_NONE;
-	}
-
-	const UWorld* CurrentEditorWorld = GEditor->GetCurrentPlayWorld();
-	if (!CurrentEditorWorld)
-	{
-		return INDEX_NONE;
-	}
-
-	int32 FoundAtIndex = INDEX_NONE;
-	const TIndirectArray<FWorldContext>& WorldContexts = GEditor->GetWorldContexts();
-	for (const FWorldContext& WorldContextIt : WorldContexts)
-	{
-		if (WorldContextIt.PIEInstance == INDEX_NONE)
-		{
-			continue;
-		}
-
-		++FoundAtIndex;
-
-		const UWorld* WorldIt = WorldContextIt.World();
-		if (WorldIt
-		    && WorldIt == CurrentEditorWorld)
-		{
-			return FoundAtIndex;
-		}
-	}
-#endif // [IsEditorMultiplayer]
-	return INDEX_NONE;
 }
 
 // Remove all text renders of the Owner
 void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 {
-#if WITH_EDITOR	 // [IsEditor]
-	if (!IsEditor()
+#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
+	if (!UEditorUtilsLibrary::IsEditor()
 	    || !IS_VALID(Owner)) // The owner is not valid
 	{
 		return;
@@ -168,14 +92,14 @@ void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
 			TextRenderIt->DestroyComponent();
 		}
 	}
-#endif	// WITH_EDITOR [IsEditor]
+#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
 }
 
 // Debug visualization by text renders
 void USingletonLibrary::AddDebugTextRenders_Implementation(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const
 {
-#if WITH_EDITOR	 // [IsEditor]
-	if (!IsEditor()
+#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
+	if (!UEditorUtilsLibrary::IsEditor()
 	    || !Cells.Num()      // Null length
 	    || !IS_VALID(Owner)) // Owner is not valid
 	{
@@ -189,7 +113,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(AActor* Owner, const 
 		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
 		TextRenderIt->RegisterComponent();
 	}
-#endif	// WITH_EDITOR [IsEditor]
+#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
 }
 
 void USingletonLibrary::AddDebugTextRenders(
@@ -213,8 +137,8 @@ void USingletonLibrary::AddDebugTextRenders(
 //  Returns the singleton, nullptr otherwise
 USingletonLibrary* USingletonLibrary::GetSingleton()
 {
-#if WITH_EDITOR // [IsEditorMultiplayer]
-	const int32 EditorPlayerIndex = GetEditorPlayerIndex();
+#if WITH_EDITOR // [UEditorUtils::IsEditorMultiplayer]
+	const int32 EditorPlayerIndex = UEditorUtilsLibrary::GetEditorPlayerIndex();
 	if (EditorPlayerIndex > 0)
 	{
 		const int32 ClientSingletonIndex = EditorPlayerIndex - 1;
@@ -222,7 +146,7 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 		checkf(ClientSingleton, TEXT("The client Singleton is null"));
 		return ClientSingleton;
 	}
-#endif // [IsEditorMultiplayer]
+#endif // [UEditorUtils::IsEditorMultiplayer]
 
 	USingletonLibrary* Singleton = GEngine ? Cast<USingletonLibrary>(GEngine->GameSingleton) : nullptr;
 	checkf(Singleton, TEXT("The Singleton is null"));
@@ -250,12 +174,12 @@ AActor* USingletonLibrary::GetActorOfClass(TSubclassOf<AActor> ActorClass)
 // Returns true if game was started
 bool USingletonLibrary::HasWorldBegunPlay()
 {
-#if WITH_EDITOR	// [IsEditor]
-	if (IsEditor())
+#if WITH_EDITOR	// [UEditorUtils::IsEditor]
+	if (UEditorUtilsLibrary::IsEditor())
 	{
-		return IsPIE();
+		return UEditorUtilsLibrary::IsPIE();
 	}
-#endif	// [IsEditor]
+#endif	// [UEditorUtils::IsEditor]
 	const UWorld* World = Get().GetWorld();
 	return World && World->HasBegunPlay();
 }
@@ -297,14 +221,14 @@ ELevelType USingletonLibrary::GetLevelType()
 // The Level Map getter, nullptr otherwise
 AGeneratedMap* USingletonLibrary::GetLevelMap()
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (IsEditor()
+#if WITH_EDITOR	 // [UEditorUtils::IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditor()
 	    && !Get().LevelMapInternal.IsValid())
 	{
 		AGeneratedMap* LevelMap = GetActorOfClass<AGeneratedMap>(AGeneratedMap::StaticClass());
 		SetLevelMap(LevelMap);
 	}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]
+#endif	// WITH_EDITOR [UEditorUtils::IsEditorNotPieWorld]
 
 	return Get().LevelMapInternal.Get();
 }

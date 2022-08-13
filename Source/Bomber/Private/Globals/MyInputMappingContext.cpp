@@ -5,8 +5,11 @@
 #include "EnhancedInputModule.h"
 #include "Controllers/MyPlayerController.h"
 #include "Globals/MyInputAction.h"
-#include "Globals/SingletonLibrary.h"
 #include "UObject/ObjectSaveContext.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Returns all input actions set in mappings
 void UMyInputMappingContext::GetInputActions(TArray<UMyInputAction*>& OutInputActions) const
@@ -74,7 +77,7 @@ void UMyInputMappingContext::PreSave(FObjectPreSaveContext SaveContext)
 	Super::PreSave(SaveContext);
 
 	// Save only if [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld())
+	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		SaveConfig();
 	}

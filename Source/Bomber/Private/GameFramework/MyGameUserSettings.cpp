@@ -6,12 +6,14 @@
 //---
 #include "Engine/DataTable.h"
 #include "UI/SettingsWidget.h"
-
-#if WITH_EDITOR //[OnDataTableChanged]
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+//--- [OnDataTableChanged]
 #include "DataTableEditorUtils.h"
 #include "EditorFramework/AssetImportData.h"
 #include "Misc/FileHelper.h"
-#endif // WITH_EDITOR [OnDataTableChanged]
+#endif
 
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()
@@ -294,7 +296,7 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	// Notify settings for any change in the settings data table
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Bind only once
 		static USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
@@ -311,7 +313,7 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 void UMyGameUserSettings::OnDataTableChanged()
 {
 #if WITH_EDITOR  // [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld())
+	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}

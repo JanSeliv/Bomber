@@ -29,6 +29,7 @@ public class MyEditorUtils : ModuleRules
 			new[]
 			{
 				"Core",
+				"UnrealEd", // Editor globals like GEditor
 				"EditorFramework", // FEditorDelegates::FToolkitManager
 				"PropertyEditor", "EditorStyle", // Property types customizations
 				"ToolWidgets", // SSearchableComboBox

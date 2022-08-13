@@ -9,6 +9,10 @@
 //---
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Sets default values
 UMyCameraComponent::UMyCameraComponent()
@@ -27,7 +31,7 @@ UMyCameraComponent::UMyCameraComponent()
 	// Camera defaults
 	SetConstraintAspectRatio(false); // viewport without black borders
 #if WITH_EDITOR // [Editor]
-	bCameraMeshHiddenInGame = !USingletonLibrary::IsEditor();
+	bCameraMeshHiddenInGame = !UEditorUtilsLibrary::IsEditor();
 #endif
 
 	// Disable Eye Adaptation

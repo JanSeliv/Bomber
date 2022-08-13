@@ -20,6 +20,10 @@
 #include "UI/MainMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Returns the player input data asset
 const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
@@ -83,7 +87,7 @@ bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
 void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Do not create input contexts since the game is not started yet
 		return;
@@ -194,7 +198,7 @@ void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 void AMyPlayerController::SetMouseFocusOnUI(bool bFocusOnUI)
 {
 #if WITH_EDITOR // [IsEditorMultiplayer]
-	if (USingletonLibrary::IsEditorMultiplayer())
+	if (UEditorUtilsLibrary::IsEditorMultiplayer())
 	{
 		const ULocalPlayer* LocalPlayer = GetLocalPlayer();
 		UGameViewportClient* GameViewport = LocalPlayer ? LocalPlayer->ViewportClient : nullptr;

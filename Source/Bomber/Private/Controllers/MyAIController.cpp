@@ -9,6 +9,10 @@
 #include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Returns the AI data asset
 const UAIDataAsset& UAIDataAsset::Get()
@@ -40,10 +44,10 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
 
 #if WITH_EDITOR	 // [IsEditor]
-	if (USingletonLibrary::IsEditor())
+	if (UEditorUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
-		if (!USingletonLibrary::IsEditorNotPieWorld()) // [PIE]
+		if (!UEditorUtilsLibrary::IsEditorNotPieWorld()) // [PIE]
 		{
 			USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
 		} // [IsEditorNotPieWorld]
@@ -159,7 +163,7 @@ void AMyAIController::UpdateAI()
 	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
 
 #if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
 		AIMoveToInternal = FCell::ZeroCell;

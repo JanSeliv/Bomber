@@ -17,6 +17,7 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
 #include "EditorLevelUtils.h"
 #include "EditorUtilityLibrary.h"
 #include "Engine/LevelStreamingAlwaysLoaded.h"
@@ -621,7 +622,7 @@ void AGeneratedMap::Destroyed()
 		}
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-		if (USingletonLibrary::IsEditorNotPieWorld())
+		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// Remove editor bound delegates
 			USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
@@ -972,7 +973,7 @@ void AGeneratedMap::ApplyLevelType()
 	// ---- Changing streaming levels in the preview world ----
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		if (LevelTypeInternal == ELT::None)
 		{
@@ -1156,7 +1157,7 @@ void AGeneratedMap::PostLoad()
 void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld())
+	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}
@@ -1219,7 +1220,7 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 void AGeneratedMap::SetNearestCellDragged(const UMapComponent* MapComponent, const FCell& NewCell)
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld()
+	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
 	    || !MapComponent
 	    || !IsDraggedMapComponent(MapComponent)
 	    || NewCell.IsZeroCell())
@@ -1238,11 +1239,11 @@ void AGeneratedMap::SetNearestCellDragged(const UMapComponent* MapComponent, con
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 }
 
-// The dragged version of the Destroy Level Actor function to hide the dragged level from the level
+// The dragged version of the Destroy Level Actor function to hide the dragged actor from the level
 void AGeneratedMap::DestroyLevelActorDragged(const UMapComponent* MapComponent)
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld()
+	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
 	    || !MapComponent
 	    || IS_VALID(MapComponent->GetOwner()))
 	{

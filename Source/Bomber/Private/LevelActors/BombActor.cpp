@@ -15,6 +15,10 @@
 #include "Components/BoxComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Net/UnrealNetwork.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Default constructor
 UBombDataAsset::UBombDataAsset()
@@ -132,7 +136,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	}
 
 #if WITH_EDITOR //[IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		InitBomb();
 

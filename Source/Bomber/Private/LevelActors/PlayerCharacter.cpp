@@ -24,6 +24,10 @@
 #include "Materials/MaterialInstance.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Net/UnrealNetwork.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Default amount on picked up items
 const FPowerUp FPowerUp::DefaultData = FPowerUp();
@@ -46,7 +50,7 @@ void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	// Continue only if [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld())
+	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}
@@ -199,11 +203,18 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 // Spawns bomb on character position
 void APlayerCharacter::ServerSpawnBomb_Implementation()
 {
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// Should not spawn bomb in PIE
+		return;
+	}
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+
 	const AController* OwnedController = GetController();
 	if (!MapComponentInternal                       // The Map Component is not valid or transient
 	    || PowerupsInternal.FireN <= 0              // Null length of explosion
 	    || PowerupsInternal.BombN <= 0              // No more bombs
-	    || USingletonLibrary::IsEditorNotPieWorld() // Should not spawn bomb in PIE
 	    || !OwnedController                         // controller is not valid
 	    || OwnedController->IsMoveInputIgnored())   // controller is blocked
 	{
@@ -327,7 +338,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
 	    && CharacterIDInternal > 0)              // Is a bot
 	{
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
@@ -577,9 +588,16 @@ void APlayerCharacter::UpdateCollisionObjectType()
 // Possess a player or AI controller in dependence of current Character ID
 void APlayerCharacter::TryPossessController()
 {
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// Should not spawn posses in PIE
+		return;
+	}
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+
 	if (!HasAuthority()
-	    || CharacterIDInternal < 0
-	    || USingletonLibrary::IsEditorNotPieWorld())
+	    || CharacterIDInternal < 0)
 	{
 		return;
 	}

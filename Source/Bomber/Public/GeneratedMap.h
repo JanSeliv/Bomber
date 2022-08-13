@@ -358,7 +358,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))
 	void SetNearestCellDragged(const class UMapComponent* MapComponent, const FCell& NewCell);
 
-	/** The dragged version of the Destroy Level Actor function to hide the dragged level from the level. */
+	/** The dragged version of the Destroy Level Actor function to hide the dragged actor from the level. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))
 	void DestroyLevelActorDragged(const class UMapComponent* MapComponent);
 };

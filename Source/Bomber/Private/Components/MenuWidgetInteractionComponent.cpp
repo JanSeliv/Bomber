@@ -7,6 +7,10 @@
 #include "Globals/SingletonLibrary.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Sets default values for this component's properties
 UMenuWidgetInteractionComponent::UMenuWidgetInteractionComponent()
@@ -38,11 +42,11 @@ void UMenuWidgetInteractionComponent::UpdatePlayerIndex()
 	int32 IndexToSet = 0;
 
 #if WITH_EDITOR // [IsEditorMultiplayer]
-	if (USingletonLibrary::IsEditorMultiplayer())
+	if (UEditorUtilsLibrary::IsEditorMultiplayer())
 	{
 		// Make widget interaction works in editor multiplayer,
 		// so interaction will not conflict with every local player
-		IndexToSet = USingletonLibrary::GetEditorPlayerIndex();
+		IndexToSet = UEditorUtilsLibrary::GetEditorPlayerIndex();
 	}
 #endif // [IsEditorMultiplayer]
 

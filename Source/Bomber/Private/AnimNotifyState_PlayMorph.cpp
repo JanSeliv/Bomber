@@ -4,7 +4,10 @@
 //
 #include "Components/MySkeletalMeshComponent.h"
 #include "Curves/CurveFloat.h"
-#include "Globals/SingletonLibrary.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif
 
 // Overridden from UAnimNotifyState to provide custom notify name
 FString UAnimNotifyState_PlayMorph::GetNotifyName_Implementation() const
@@ -85,7 +88,7 @@ void UAnimNotifyState_PlayMorph::ApplyCurveLengthOnce(float TotalDuration)
 	if (KeysNum) // Is updated before
 	{
 #if WITH_EDITOR //[IsEditorNotPieWorld]
-		if (USingletonLibrary::IsEditorNotPieWorld())
+		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// Remove [1] in editor
 			Keys.RemoveAt(KeysNum - 1);
