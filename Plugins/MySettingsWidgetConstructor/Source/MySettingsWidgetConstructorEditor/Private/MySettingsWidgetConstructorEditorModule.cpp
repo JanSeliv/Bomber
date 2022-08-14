@@ -1,22 +1,43 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "MySettingsEditor.h"
+#include "MySettingsWidgetConstructorEditorModule.h"
+//---
+#include "SettingsPickerCustomization.h"
+//---
+#include "Modules/ModuleManager.h"
 
-#define LOCTEXT_NAMESPACE "FMySettingsEditorModule"
+#define LOCTEXT_NAMESPACE "FMySettingsWidgetConstructorEditorModule"
 
 // Called right after the module DLL has been loaded and the module object has been created
-void FMySettingsEditorModule::StartupModule()
+void FMySettingsWidgetConstructorEditorModule::StartupModule()
 {
-	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	// Is customized to show only selected in-game option
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		FSettingsPickerCustomization::PropertyClassName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSettingsPickerCustomization::MakeInstance)
+	);
 }
 
 // Called before the module is unloaded, right before the module object is destroyed
-void FMySettingsEditorModule::ShutdownModule()
+void FMySettingsWidgetConstructorEditorModule::ShutdownModule()
 {
-	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
-	// we call this function before unloading the module.
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	PropertyModule.UnregisterCustomPropertyTypeLayout(FSettingsPickerCustomization::PropertyClassName);
 }
 
 #undef LOCTEXT_NAMESPACE
 	
-IMPLEMENT_MODULE(FMySettingsEditorModule, MySettingsEditor)
+IMPLEMENT_MODULE(FMySettingsWidgetConstructorEditorModule, MySettingsWidgetConstructorEditor)

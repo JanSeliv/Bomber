@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
+#include "Modules/ModuleInterface.h"
 
-class FMySettingsModule final : public IModuleInterface
+class FMySettingsWidgetConstructorModule final : public IModuleInterface
 {
 public:
 	/**

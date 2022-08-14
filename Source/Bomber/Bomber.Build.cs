@@ -18,25 +18,20 @@ public class Bomber : ModuleRules
 			"EnhancedInput", // Enhanced Input plugin
 			"Niagara", // VFX
 			"RenderCore", // Render threads,
-			"MyUtils", // FFunctionPicker etc.
-			"MySettings"
+			"MyUtils" // FFunctionPicker etc.
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
-
 		if (Target.Type == TargetType.Editor)
-			PrivateDependencyModuleNames.AddRange(
-				new[]
+		{
+			// Include Editor modules that are used in this Runtime module
+			PrivateDependencyModuleNames.AddRange(new[]
 				{
 					"UnrealEd", // FEditorDelegates
 					"BomberEditor", // UMyUnrealEdEngine
 					"Blutility", // UEditorUtilityLibrary::GetSelectionSet()
 					"MyEditorUtils" // UEditorUtilsLibrary
-				});
-
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+				}
+			);
+		}
 	}
 }

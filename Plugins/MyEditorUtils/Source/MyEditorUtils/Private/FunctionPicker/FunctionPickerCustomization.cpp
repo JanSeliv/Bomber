@@ -4,17 +4,6 @@
 
 typedef FFunctionPickerCustomization ThisClass;
 
-// The name of class to be customized
-const FName ThisClass::PropertyClassName = TEXT("FunctionPicker");
-
-// Static const array, that contains names of metas used by this property
-const ThisClass::FNamesArray ThisClass::TemplateMetaKeys =
-{
-	TEXT("FunctionContextTemplate"),
-	TEXT("FunctionSetterTemplate"),
-	TEXT("FunctionGetterTemplate")
-};
-
 // Default constructor
 FFunctionPickerCustomization::FFunctionPickerCustomization()
 {

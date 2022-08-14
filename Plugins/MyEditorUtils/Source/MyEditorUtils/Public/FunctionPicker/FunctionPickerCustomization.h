@@ -15,11 +15,14 @@ public:
 	* --------------------------------------------------- */
 
 	/** The name of class to be customized. */
-	static const FName PropertyClassName;
+	inline static const FName PropertyClassName = TEXT("FunctionPicker");
 
 	/** Fixed-size TemplateMetaKeys which contains names of metas used by this property. */
-	typedef TArray<FName, TFixedAllocator<3>> FNamesArray;
-	const static FNamesArray TemplateMetaKeys;
+	inline static const TArray<FName, TFixedAllocator<3>> TemplateMetaKeys = {
+		TEXT("FunctionContextTemplate"),
+		TEXT("FunctionSetterTemplate"),
+		TEXT("FunctionGetterTemplate")
+	};
 
 	/** Default constructor. */
 	FFunctionPickerCustomization();

@@ -2,8 +2,8 @@
   "FileVersion": 3,
   "Version": 1,
   "VersionName": "1.0",
-  "FriendlyName": "My Settings",
-  "Description": "Plugin to allow automatically generate settings from data table",
+  "FriendlyName": "My Settings Widget Constructor",
+  "Description": "Plugin allows automatically generate settings on the UI from data table",
   "Category": "My Plugins",
   "CreatedBy": "Yevhenii Selivanov",
   "CreatedByURL": "https://github.com/JanSeliv",
@@ -15,12 +15,12 @@
   "Installed": false,
   "Modules": [
     {
-      "Name": "MySettings",
+      "Name": "MySettingsWidgetConstructor",
       "Type": "Runtime",
       "LoadingPhase": "Default"
     },
     {
-      "Name": "MySettingsEditor",
+      "Name": "MySettingsWidgetConstructorEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
     }

@@ -6,18 +6,6 @@
 
 typedef FSettingsPickerCustomization ThisClass;
 
-// The name of class to be customized
-const FName ThisClass::PropertyClassName = TEXT("SettingsPicker");
-
-// The name of the settings data base struct
-const FName ThisClass::SettingsDataBaseName = TEXT("SettingsDataBase");
-
-// The name of the Settings Primary struct
-const FName ThisClass::SettingsPrimaryName = TEXT("SettingsPrimary");
-
-// The name of the Function Picker struct
-const FName ThisClass::FunctionPickerName = TEXT("FunctionPicker");
-
 // Default constructor
 FSettingsPickerCustomization::FSettingsPickerCustomization()
 {

@@ -2,55 +2,37 @@
 
 using UnrealBuildTool;
 
-public class MySettings : ModuleRules
+public class MySettingsWidgetConstructor : ModuleRules
 {
-	public MySettings(ReadOnlyTargetRules Target) : base(Target)
+	public MySettingsWidgetConstructor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Latest;
 
-		PublicIncludePaths.AddRange(
-			new string[]
+		PublicDependencyModuleNames.AddRange(new[]
 			{
-				// ... add public include paths required here ...
+				"Core"
 			}
 		);
 
-
-		PrivateIncludePaths.AddRange(
-			new string[]
-			{
-				// ... add other private include paths required here ...
-			}
-		);
-
-
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				"MyUtils"
-			}
-		);
-
-
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
+		PrivateDependencyModuleNames.AddRange(new[]
 			{
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
-				// ... add private dependencies that you statically link with here ...	
+				"SlateCore"
 			}
 		);
 
-
-		DynamicallyLoadedModuleNames.AddRange(
-			new string[]
-			{
-				// ... add any modules that your module loads dynamically here ...
-			}
-		);
+		if (Target.Type == TargetType.Editor)
+		{
+			// Include Editor modules that are used in this Runtime module
+			PrivateDependencyModuleNames.AddRange(new[]
+				{
+					// Include Editor modules that are used in this Runtime module
+					"MyEditorUtils" // UEditorUtilsLibrary
+				}
+			);
+		}
 	}
 }

@@ -5,9 +5,6 @@
 // Empty property data
 const FPropertyData FPropertyData::Empty = FPropertyData();
 
-// The 'None' string
-const FString& FPropertyData::NoneString = FCoreTexts::Get().None.ToString();
-
 // Custom constructor, is not required, but fully init property data.
 FPropertyData::FPropertyData(TSharedRef<IPropertyHandle> InPropertyHandle)
 	: PropertyHandle(InPropertyHandle)

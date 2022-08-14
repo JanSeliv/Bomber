@@ -11,7 +11,7 @@ struct MYEDITORUTILS_API FPropertyData
 	static const FPropertyData Empty;
 
 	/** The 'None' string. */
-	static const FString& NoneString;
+	inline static const FString& NoneString = FCoreTexts::Get().None.ToString();
 
 	/** Default empty constructor. */
 	FPropertyData() = default;

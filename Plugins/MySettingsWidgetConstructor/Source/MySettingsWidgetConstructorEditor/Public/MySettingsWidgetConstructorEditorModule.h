@@ -2,12 +2,14 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
+#include "Modules/ModuleInterface.h"
 
-class FMySettingsEditorModule final : public IModuleInterface
+class FMySettingsWidgetConstructorEditorModule final : public IModuleInterface
 {
 public:
+	/** Is used to to load and unload the Property Editor Module. */
+	inline static const FName PropertyEditorModule = TEXT("PropertyEditor");
+
 	/**
 	 * Called right after the module DLL has been loaded and the module object has been created.
 	 * Load dependent modules here, and they will be guaranteed to be available during ShutdownModule.

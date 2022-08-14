@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "MyEditorUtils.h"
+#include "MyEditorUtilsModule.h"
 //---
 #include "FunctionPicker/FunctionPickerCustomization.h"
 //---
@@ -8,8 +8,7 @@
 
 #define LOCTEXT_NAMESPACE "FMyEditorUtilsModule"
 
-static const FName PropertyEditorModule = TEXT("PropertyEditor");
-
+// Called right after the module DLL has been loaded and the module object has been created
 void FMyEditorUtilsModule::StartupModule()
 {
 	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
@@ -17,8 +16,7 @@ void FMyEditorUtilsModule::StartupModule()
 		return;
 	}
 
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(
-		PropertyEditorModule);
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
 
 	// Allows to choose ufunction
 	PropertyModule.RegisterCustomPropertyTypeLayout(
@@ -29,6 +27,7 @@ void FMyEditorUtilsModule::StartupModule()
 	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
+// Called before the module is unloaded, right before the module object is destroyed
 void FMyEditorUtilsModule::ShutdownModule()
 {
 	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))

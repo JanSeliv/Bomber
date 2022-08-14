@@ -16,23 +16,20 @@ public class BomberEditor : ModuleRules
 			"Slate", "SlateCore", "PropertyEditor", "EditorStyle", // Property types customizations
 			"ToolWidgets", // SSearchableComboBox
 			"UnrealEd", // UMyUnrealEdEngine
-			"MyEditorUtils", // FPropertyData, FMyPropertyTypeCustomization
-			"MySettingsEditor"
+			"MyEditorUtils" // FPropertyData, FMyPropertyTypeCustomization
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
-
 		//Include Public and Private folder paths
-		PublicIncludePaths.AddRange(
-			new[]
+		PublicIncludePaths.AddRange(new[]
 			{
 				"BomberEditor/Public"
-			});
+			}
+		);
 
-		PrivateIncludePaths.AddRange(
-			new[]
+		PrivateIncludePaths.AddRange(new[]
 			{
 				"BomberEditor/Private"
-			});
+			}
+		);
 	}
 }
