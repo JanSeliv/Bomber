@@ -117,7 +117,7 @@ protected:
 
 	/** The index of chosen resolution. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Resolution Index"))
-	int32 CurrentResolutionIndexInternal; //[G]
+	int32 CurrentResolutionIndexInternal = 0; //[G]
 
 	/** The index of chosen fps lock in array. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Lock Index"))

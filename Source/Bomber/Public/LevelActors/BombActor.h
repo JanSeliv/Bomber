@@ -88,7 +88,7 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
 
 	/** The bomb blast path */
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells"))

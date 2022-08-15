@@ -34,7 +34,7 @@ struct FMorphData
 
 	/** The name of morph. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FName Morph;
+	FName Morph = NAME_None;
 
 	/** In which way the morph should be played. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))

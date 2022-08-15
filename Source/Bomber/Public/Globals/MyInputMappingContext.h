@@ -47,11 +47,11 @@ public:
 protected:
 	/** If higher, then block the same consumed inputs other contexts with lower priorities. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Context Priority"))
-	int32 ContextPriorityInternal; //[D]
+	int32 ContextPriorityInternal = 0; //[D]
 
 	/** Set the game states for which this input context should be active. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Active For States", Bitmask, BitmaskEnum = "ECurrentGameState"))
-	int32 ActiveForStatesInternal; //[D]
+	int32 ActiveForStatesInternal = TO_FLAG(ECGS::None); //[D]
 
 #if WITH_EDITOR
 	/** Implemented to save input configs as well. */

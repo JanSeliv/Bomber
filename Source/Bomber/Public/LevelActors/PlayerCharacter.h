@@ -137,7 +137,7 @@ protected:
 
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
-	TSubclassOf<UAnimInstance> AnimInstanceClassInternal; //[D]
+	TSubclassOf<UAnimInstance> AnimInstanceClassInternal = nullptr; //[D]
 
 	/** The name of a material parameter with a diffuse array. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))
@@ -235,7 +235,7 @@ protected:
 
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_Powerups", Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
-	FPowerUp PowerupsInternal; //[AW]
+	FPowerUp PowerupsInternal = FPowerUp::DefaultData; //[AW]
 
 	/** The ID identification of each character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CharacterID", Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))

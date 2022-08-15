@@ -73,11 +73,11 @@ protected:
 
 	/** The chosen mesh component. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Mesh Component"))
-	TObjectPtr<class UMeshComponent> CurrentMeshComponentInternal; //[G]
+	TObjectPtr<class UMeshComponent> CurrentMeshComponentInternal = nullptr; //[G]
 
 	/** The current Level Actor Row of chosen mesh component. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Mesh Row"))
-	TObjectPtr<const class ULevelActorRow> CurrentMeshRowInternal; //[G]
+	TObjectPtr<const class ULevelActorRow> CurrentMeshRowInternal = nullptr; //[G]
 
 	/** Called every frame. */
 	virtual void Tick(float DeltaTime) override;

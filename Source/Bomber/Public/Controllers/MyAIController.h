@@ -91,7 +91,7 @@ protected:
 
 	/** Cell position of current path segment's end */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "AI Move To"))
-	FCell AIMoveToInternal; //[G]
+	FCell AIMoveToInternal = FCell::ZeroCell; //[G]
 
 	/** Controlled character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))

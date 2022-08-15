@@ -83,27 +83,27 @@ public:
 protected:
 	/** The Sound Manager that controls player the audio in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sounds Manager Class", ShowOnlyInnerProperties))
-	TSubclassOf<class USoundsManager> SoundsManagerClass; //[D]
+	TSubclassOf<class USoundsManager> SoundsManagerClass = nullptr; //[D]
 
 	/** The base Sound Mix used in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sound Mix", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundMix> MainSoundMixInternal; //[D]
+	TObjectPtr<class USoundMix> MainSoundMixInternal = nullptr; //[D]
 
 	/** The parent class of all sounds in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Master Sound Class", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundClass> MasterSoundClassInternal; //[D]
+	TObjectPtr<class USoundClass> MasterSoundClassInternal = nullptr; //[D]
 
 	/** The sound class of background music. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundClass> MusicSoundClassInternal; //[D]
+	TObjectPtr<class USoundClass> MusicSoundClassInternal = nullptr; //[D]
 
 	/** The sound class of the sound effects like explosions. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "SFX Sound Class", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundClass> SFXSoundClassInternal; //[D]
+	TObjectPtr<class USoundClass> SFXSoundClassInternal = nullptr; //[D]
 
 	/** The sound of the game background theme. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main-Menu Music", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundBase> MainMenuMusicInternal; //[D]
+	TObjectPtr<class USoundBase> MainMenuMusicInternal = nullptr; //[D]
 
 	/** Contains all sounds of each level in the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Music", ShowOnlyInnerProperties))
@@ -111,11 +111,11 @@ protected:
 
 	/** Returns the blast SFX. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Sound", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundBase> ExplosionSFXInternal; //[D]
+	TObjectPtr<class USoundBase> ExplosionSFXInternal = nullptr; //[D]
 
 	/** The sound that is played on gathering any power-up. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "ItemPickUp", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundBase> ItemPickUpSFXInternal; //[D]
+	TObjectPtr<class USoundBase> ItemPickUpSFXInternal = nullptr; //[D]
 
 	/** Contains all sounds of End-Game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game SFX", ShowOnlyInnerProperties))
@@ -123,7 +123,7 @@ protected:
 
 	/** The sound that is played on clicking any UI element. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "UI Click SFX", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundBase> UIClickSFXInternal; //[D]
+	TObjectPtr<class USoundBase> UIClickSFXInternal = nullptr; //[D]
 
 private:
 	/** Is created dynamically by specified Sound Manager class.

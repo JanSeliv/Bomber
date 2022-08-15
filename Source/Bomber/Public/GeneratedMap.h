@@ -25,7 +25,7 @@ struct FLevelStreamRow
 
 	/** The level asset */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
-	TSoftObjectPtr<class UWorld> Level; //[D]
+	TSoftObjectPtr<class UWorld> Level = nullptr; //[D]
 
 	/** The associated type of a level. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
@@ -33,7 +33,7 @@ struct FLevelStreamRow
 
 	/** The name of a level on UI. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
-	FText LevelName; //[D]
+	FText LevelName = TEXT_NONE; //[D]
 };
 
 /**
@@ -83,7 +83,7 @@ protected:
 
 	/** Asset that contains scalable collision. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collisions Asset", ShowOnlyInnerProperties))
-	TSubclassOf<AActor> CollisionsAssetInternal; //[D]
+	TSubclassOf<AActor> CollisionsAssetInternal = nullptr; //[D]
 
 	/** If true, the level position will be locked on the (0,0,0) location. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Lock Location On Zero", ShowOnlyInnerProperties))
@@ -107,7 +107,7 @@ public:
 #if WITH_EDITORONLY_DATA  // [Editor] Renders
 	/** Specify for which level actors should show debug renders. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "EActorType"))
-	int32 RenderActorsTypes; //[N]
+	int32 RenderActorsTypes = TO_FLAG(EAT::None); //[N]
 #endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetNewLevelType, ELevelType, NewLevelType);
@@ -278,11 +278,11 @@ protected:
 
 	/** Is true when current state is Game Starting. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
-	bool bIsGameRunningInternal; //[G]
+	bool bIsGameRunningInternal = false; //[G]
 
 	/** Contains the cached transform since the level actor does not move and is always static. */
 	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cached Transform"))
-	FTransform CachedTransformInternal; //[G]
+	FTransform CachedTransformInternal = FTransform::Identity; //[G]
 
 	/** Is used to avoid spawning and destroying level actors on every regeneration,
 	 *  instead they are created once, are activated when are taken from a pool
@@ -355,7 +355,7 @@ protected:
 	void AddToGridDragged(class UMapComponent* AddedComponent);
 
 	/** The dragged version of the Set Nearest Cell function to find closest cell for the dragged level actor. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly, AutoCreateRefTerm = "NewCell"))
 	void SetNearestCellDragged(const class UMapComponent* MapComponent, const FCell& NewCell);
 
 	/** The dragged version of the Destroy Level Actor function to hide the dragged actor from the level. */

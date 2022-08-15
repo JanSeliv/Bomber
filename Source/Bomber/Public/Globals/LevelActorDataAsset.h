@@ -109,7 +109,7 @@ protected:
 
 	/** Class of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))
-	TSubclassOf<class AActor> ActorClassInternal; //[D]
+	TSubclassOf<class AActor> ActorClassInternal = nullptr; //[D]
 
 	/** Actor type of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))

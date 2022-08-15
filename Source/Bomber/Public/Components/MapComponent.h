@@ -59,7 +59,7 @@ public:
 
 	/** Override current cell data, where owner is located on the Level Map.
 	 * It does not move an owner on the level, to move it call AGeneratedMap::SetNearestCell function as well. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	void SetCell(const FCell& Cell);
 
 	/** Returns the owner's Level Actor Row. */

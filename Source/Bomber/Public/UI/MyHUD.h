@@ -53,23 +53,23 @@ public:
 protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal; //[D]
+	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal = nullptr; //[D]
 
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UMainMenuWidget> MainMenuWidgetClassInternal; //[D]
+	TSubclassOf<class UMainMenuWidget> MainMenuWidgetClassInternal = nullptr; //[D]
 
 	/** The class of a Settings Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class USettingsWidget> SettingsWidgetClassInternal; //[D]
+	TSubclassOf<class USettingsWidget> SettingsWidgetClassInternal = nullptr; //[D]
 
 	/** The class of a Nickname Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nickname Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> NicknameWidgetClassInternal; //[D]
+	TSubclassOf<class UUserWidget> NicknameWidgetClassInternal = nullptr; //[D]
 
 	/** The class of a FPS counter widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "FPS Counter Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> FPSCounterWidgetClassInternal; //[D]
+	TSubclassOf<class UUserWidget> FPSCounterWidgetClassInternal = nullptr; //[D]
 
 	/** Contains the localized texts about specified end game to display on UI. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game Texts", ShowOnlyInnerProperties))
@@ -152,7 +152,7 @@ protected:
 
 	/** Is true if widgets are initialized. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Are Widget Initialized"))
-	bool bAreWidgetInitializedInternal; //[G]
+	bool bAreWidgetInitializedInternal = false; //[G]
 
 	/** The current in-game widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))

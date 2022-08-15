@@ -5,6 +5,7 @@
 #include "InputAction.h"
 //---
 #include "FunctionPicker/FunctionPicker.h"
+#include "Bomber.h"
 //---
 #include "MyInputAction.generated.h"
 
@@ -48,7 +49,7 @@ public:
 protected:
 	/** The input action name on UI. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Input Action Name", ShowOnlyInnerProperties))
-	FText InputActionNameInternal = FCoreTexts::Get().None; //[D]
+	FText InputActionNameInternal = TEXT_NONE; //[D]
 
 	/** Choose for which state the bound function has to be called. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Trigger Event", ShowOnlyInnerProperties))
