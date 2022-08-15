@@ -9,13 +9,11 @@
 //---
 #include "SettingSubWidget.generated.h"
 
-typedef SComboBox<TSharedPtr<FString>> SComboboxString;
-
 /**
- * The base class of specific setting like button, checkbox, combobox, slider, text line, user input.
+ * The base class of specific setting like button, checkbox, combobox, slider, text line, user input etc.
  */
 UCLASS()
-class USettingSubWidget : public UUserWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingSubWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -57,6 +55,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewSettingTag"))
 	void SetSettingTag(const FSettingTag& NewSettingTag);
 
+	/** Returns the main setting widget (the outer of this subwidget). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class USettingsWidget* GetSettingsWidget() const { return SettingsWidgetInternal; }
+
 protected:
 	/** The Size Box widget. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
@@ -83,7 +85,7 @@ protected:
  * The sub-widget of Button settings.
  */
 UCLASS()
-class USettingButton final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingButton final : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -117,7 +119,7 @@ protected:
  * The sub-widget of Checkbox settings.
  */
 UCLASS()
-class USettingCheckbox final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCheckbox final : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -151,7 +153,7 @@ protected:
  * The sub-widget of Combobox settings.
  */
 UCLASS()
-class USettingCombobox final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCombobox final : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -159,6 +161,8 @@ public:
 	/** Returns the actual combobox widget of this setting. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UComboBoxString* GetComboboxWidget() const { return ComboboxWidget; }
+
+	typedef SComboBox<TSharedPtr<FString>> SComboboxString;
 
 	/** Returns the slate combobox. */
 	FORCEINLINE TSharedPtr<SComboboxString> GetSlateCombobox() const { return SlateComboboxInternal.Pin(); }
@@ -200,7 +204,7 @@ protected:
  * The sub-widget of Slider settings.
  */
 UCLASS()
-class USettingSlider final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingSlider final : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -238,7 +242,7 @@ protected:
  * The sub-widget of Text Line settings.
  */
 UCLASS()
-class USettingTextLine final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingTextLine final : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -249,7 +253,7 @@ public:
  * The sub-widget of User Input settings.
  */
 UCLASS()
-class USettingUserInput final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingUserInput final : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -291,7 +295,7 @@ protected:
  * The sub-widget of the custom widget settings.
  */
 UCLASS()
-class USettingCustomWidget : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCustomWidget : public USettingSubWidget
 {
 	GENERATED_BODY()
 

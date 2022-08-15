@@ -298,12 +298,17 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 	// Notify settings for any change in the settings data table
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		// Bind only once
-		static USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
-		if (!OnDataTableChanged.IsBound())
+		const USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+		const USettingsDataAsset* SettingsDataAsset = SettingsWidget ? SettingsWidget->GetSettingsDataAsset() : nullptr;
+		if (SettingsDataAsset)
 		{
-			OnDataTableChanged.BindDynamic(this, &ThisClass::OnDataTableChanged);
-			USettingsDataAsset::Get().BindOnDataTableChanged(OnDataTableChanged);
+			// Bind only once
+			static USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
+			if (!OnDataTableChanged.IsBound())
+			{
+				OnDataTableChanged.BindDynamic(this, &ThisClass::OnDataTableChanged);
+				SettingsDataAsset->BindOnDataTableChanged(OnDataTableChanged);
+			}
 		}
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
@@ -318,7 +323,9 @@ void UMyGameUserSettings::OnDataTableChanged()
 		return;
 	}
 
-	UDataTable* SettingsDataTable = USettingsDataAsset::Get().GetSettingsDataTable();
+	const USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	const USettingsDataAsset* SettingsDataAsset = SettingsWidget ? SettingsWidget->GetSettingsDataAsset() : nullptr;
+	UDataTable* SettingsDataTable = SettingsDataAsset ? SettingsDataAsset->GetSettingsDataTable() : nullptr;
 	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
 	{
 		return;
@@ -326,7 +333,7 @@ void UMyGameUserSettings::OnDataTableChanged()
 
 	// Set row name by specified tag
 	TMap<FName, FSettingsPicker> SettingsArray;
-	USettingsDataAsset::Get().GenerateSettingsArray(SettingsArray);
+	SettingsDataAsset->GenerateSettingsArray(SettingsArray);
 	for (const TTuple<FName, FSettingsPicker>& SettingsTableRowIt : SettingsArray)
 	{
 		const FName RowKey = SettingsTableRowIt.Key;

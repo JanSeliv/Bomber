@@ -29,6 +29,10 @@
     {
       "Name": "MyEditorUtils",
       "Enabled": true
+    },
+    {
+      "Name": "GameplayTagsEditor",
+      "Enabled": true
     }
   ]
 }

@@ -2,25 +2,12 @@
 
 #include "UI/SettingsWidget.h"
 //---
-#include "SoundsManager.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyGameUserSettings.h"
-#include "Globals/DataAssetsContainer.h"
-#include "Globals/SingletonLibrary.h"
-#include "UI/MyHUD.h"
+#include "GameFramework/GameUserSettings.h"
 #include "UI/SettingSubWidget.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
 #endif
-
-// Returns the settings data asset
-const USettingsDataAsset& USettingsDataAsset::Get()
-{
-	const USettingsDataAsset* SettingsDataAsset = UDataAssetsContainer::GetSettingsDataAsset();
-	checkf(SettingsDataAsset, TEXT("The Settings Data Asset is not valid"));
-	return *SettingsDataAsset;
-}
 
 // Returns the table rows.
 void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsPicker>& OutRows) const
@@ -35,7 +22,7 @@ void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsPicker>& Out
 	OutRows.Reserve(RowMap.Num());
 	for (const TTuple<FName, uint8*>& RowIt : RowMap)
 	{
-		if (const auto FoundRowPtr = reinterpret_cast<FSettingsRow*>(RowIt.Value))
+		if (const FSettingsRow* FoundRowPtr = reinterpret_cast<const FSettingsRow*>(RowIt.Value))
 		{
 			const FSettingsPicker& SettingsTableRow = FoundRowPtr->SettingsPicker;
 			const FName RowName = RowIt.Key;
@@ -49,8 +36,8 @@ void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& Event
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
-	    || !SettingsDataTableInternal
-	    || !EventToBind.IsBound())
+		|| !SettingsDataTableInternal
+		|| !EventToBind.IsBound())
 	{
 		return;
 	}
@@ -114,14 +101,14 @@ void USettingsWidget::SaveSettings()
 // Apply all current settings on device
 void USettingsWidget::ApplySettings()
 {
-	UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings();
-	if (!MyGameUserSettings)
+	UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings();
+	if (!GameUserSettings)
 	{
 		return;
 	}
 
 	constexpr bool bCheckForCommandLineOverrides = false;
-	MyGameUserSettings->ApplySettings(bCheckForCommandLineOverrides);
+	GameUserSettings->ApplySettings(bCheckForCommandLineOverrides);
 }
 
 // Update settings on UI
@@ -183,7 +170,7 @@ const FSettingTag& USettingsWidget::GetTagByFunctionPicker(const FFunctionPicker
 	{
 		const FSettingsPrimary& PrimaryData = RowIt.Value.PrimaryData;
 		if (PrimaryData.Getter == FunctionPicker
-		    || PrimaryData.Setter == FunctionPicker)
+			|| PrimaryData.Setter == FunctionPicker)
 		{
 			return PrimaryData.Tag;
 		}
@@ -278,6 +265,8 @@ void USettingsWidget::SetSettingButtonPressed(const FSettingTag& ButtonTag)
 	SettingsRowPtr->Button.OnButtonPressed.ExecuteIfBound();
 
 	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
+
+	PlayUIClickSFX();
 }
 
 // Toggle checkbox
@@ -306,6 +295,7 @@ void USettingsWidget::SetSettingCheckbox(const FSettingTag& CheckboxTag, bool In
 
 	// BP implementation
 	SetCheckbox(CheckboxTag, InValue);
+	PlayUIClickSFX();
 }
 
 // Set chosen member index for a combobox
@@ -440,7 +430,7 @@ void USettingsWidget::SetSettingUserInput(const FSettingTag& UserInputTag, FName
 
 	FSettingsUserInput& UserInputRef = SettingsRowPtr->UserInput;
 	if (UserInputRef.UserInput.IsEqual(InValue)
-	    || InValue.IsNone())
+		|| InValue.IsNone())
 	{
 		// Is not needed to update
 		return;
@@ -464,6 +454,7 @@ void USettingsWidget::SetSettingUserInput(const FSettingTag& UserInputTag, FName
 
 	// BP implementation
 	SetUserInput(UserInputTag, InValue);
+	PlayUIClickSFX();
 }
 
 // Set new custom widget for setting by specified tag
@@ -636,7 +627,12 @@ void USettingsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	USettingsDataAsset::Get().GenerateSettingsArray(SettingsTableRowsInternal);
+	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
+	{
+		return;
+	}
+
+	SettingsDataAssetInternal->GenerateSettingsArray(/*Out*/SettingsTableRowsInternal);
 
 	// Set overall columns num by amount of rows that are marked to be started on next column
 	TArray<FSettingsPicker> Rows;
@@ -646,19 +642,9 @@ void USettingsWidget::NativeConstruct()
 	// Hide that widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
-	OnVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnVisibilityChange);
-
-	// Listen until all other widgets will be initialized
-	if (AMyHUD* MyHUD = USingletonLibrary::GetMyHUD())
+	if (SettingsDataAssetInternal->ShouldAutoConstructSettings())
 	{
-		if (MyHUD->AreWidgetInitialized())
-		{
-			OnWidgetsInitialized();
-		}
-		else
-		{
-			MyHUD->OnWidgetsInitialized.AddDynamic(this, &ThisClass::OnWidgetsInitialized);
-		}
+		ConstructSettings();
 	}
 }
 
@@ -674,58 +660,14 @@ void USettingsWidget::ConstructSettings_Implementation()
 	}
 }
 
-// Is called when all game widgets are initialized to construct settings
-void USettingsWidget::OnWidgetsInitialized()
-{
-	AMyHUD* HUD = USingletonLibrary::GetMyHUD();
-	if (HUD
-	    && HUD->OnWidgetsInitialized.IsAlreadyBound(this, &ThisClass::OnWidgetsInitialized))
-	{
-		HUD->OnWidgetsInitialized.RemoveDynamic(this, &ThisClass::OnWidgetsInitialized);
-	}
-
-	ConstructSettings();
-
-#if WITH_EDITOR // [IsEditor]
-	if (UEditorUtilsLibrary::IsEditor())
-	{
-		// Apply constructed settings on editor window during initializing
-		ApplySettings();
-	}
-#endif // WITH_EDITOR [IsEditor]
-}
-
 // Is called when In-Game menu became opened or closed
 void USettingsWidget::OnToggleSettings(bool bIsVisible)
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	PlayUIClickSFX();
 
 	if (OnToggledSettings.IsBound())
 	{
 		OnToggledSettings.Broadcast(bIsVisible);
-	}
-}
-
-// Is called when visibility is changed for this widget
-void USettingsWidget::OnVisibilityChange(ESlateVisibility InVisibility)
-{
-	AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
-	if (!MyHUD)
-	{
-		return;
-	}
-
-	if (InVisibility == ESlateVisibility::Visible)
-	{
-		MyHUD->OnClose.AddUniqueDynamic(this, &ThisClass::CloseSettings);
-	}
-	else if (MyHUD->OnClose.IsAlreadyBound(this, &ThisClass::CloseSettings))
-	{
-		MyHUD->OnClose.RemoveDynamic(this, &ThisClass::CloseSettings);
 	}
 }
 
@@ -801,19 +743,16 @@ void USettingsWidget::OpenSettings()
 
 	SetVisibility(ESlateVisibility::Visible);
 
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-	}
-
 	OnToggleSettings(true);
+
+	OnOpenSettings();
 }
 
 // Save and close the settings widget
 void USettingsWidget::CloseSettings()
 {
 	if (!IsVisible()
-	    && !IsHovered())
+		&& !IsHovered())
 	{
 		// Widget is already closed
 		return;
@@ -821,14 +760,11 @@ void USettingsWidget::CloseSettings()
 
 	SetVisibility(ESlateVisibility::Collapsed);
 
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.RemoveDynamic(this, &ThisClass::OnGameStateChanged);
-	}
-
 	SaveSettings();
 
 	OnToggleSettings(false);
+
+	OnCloseSettings();
 }
 
 // Flip-flop opens and closes the Settings menu
@@ -841,24 +777,6 @@ void USettingsWidget::ToggleSettings()
 	else
 	{
 		OpenSettings();
-	}
-}
-
-// Called when the current game state was changed, listens only when settings widget is opened
-void USettingsWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
-{
-	switch (CurrentGameState)
-	{
-		case ECurrentGameState::GameStarting:
-		{
-			if (IsVisible())
-			{
-				CloseSettings();
-			}
-			break;
-		}
-		default:
-			break;
 	}
 }
 
@@ -914,7 +832,12 @@ void USettingsWidget::AddSetting(FSettingsPicker& Setting)
 // Add button on UI
 void USettingsWidget::AddSettingButton(FSettingsPrimary& Primary, FSettingsButton& Data)
 {
-	const TSubclassOf<USettingButton>& ButtonClass = USettingsDataAsset::Get().GetButtonClass();
+	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
+	{
+		return;
+	}
+
+	const TSubclassOf<USettingButton> ButtonClass = SettingsDataAssetInternal->GetButtonClass();
 	CreateSettingSubWidget(Primary, ButtonClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -932,7 +855,12 @@ void USettingsWidget::AddSettingButton(FSettingsPrimary& Primary, FSettingsButto
 // Add checkbox on UI
 void USettingsWidget::AddSettingCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data)
 {
-	const TSubclassOf<USettingCheckbox>& CheckboxClass = USettingsDataAsset::Get().GetCheckboxClass();
+	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
+	{
+		return;
+	}
+
+	const TSubclassOf<USettingCheckbox> CheckboxClass = SettingsDataAssetInternal->GetCheckboxClass();
 	CreateSettingSubWidget(Primary, CheckboxClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -956,7 +884,12 @@ void USettingsWidget::AddSettingCheckbox(FSettingsPrimary& Primary, FSettingsChe
 // Add combobox on UI
 void USettingsWidget::AddSettingCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data)
 {
-	const TSubclassOf<USettingCombobox>& ComboboxClass = USettingsDataAsset::Get().GetComboboxClass();
+	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
+	{
+		return;
+	}
+
+	const TSubclassOf<USettingCombobox> ComboboxClass = SettingsDataAssetInternal->GetComboboxClass();
 	CreateSettingSubWidget(Primary, ComboboxClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -994,7 +927,12 @@ void USettingsWidget::AddSettingCombobox(FSettingsPrimary& Primary, FSettingsCom
 // Add slider on UI
 void USettingsWidget::AddSettingSlider(FSettingsPrimary& Primary, FSettingsSlider& Data)
 {
-	const TSubclassOf<USettingSlider>& SliderClass = USettingsDataAsset::Get().GetSliderClass();
+	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
+	{
+		return;
+	}
+
+	const TSubclassOf<USettingSlider>& SliderClass = SettingsDataAssetInternal->GetSliderClass();
 	CreateSettingSubWidget(Primary, SliderClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -1018,7 +956,12 @@ void USettingsWidget::AddSettingSlider(FSettingsPrimary& Primary, FSettingsSlide
 // Add simple text on UI
 void USettingsWidget::AddSettingTextLine(FSettingsPrimary& Primary, FSettingsTextLine& Data)
 {
-	const TSubclassOf<USettingTextLine>& TextLineClass = USettingsDataAsset::Get().GetTextLineClass();
+	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
+	{
+		return;
+	}
+
+	const TSubclassOf<USettingTextLine>& TextLineClass = SettingsDataAssetInternal->GetTextLineClass();
 	CreateSettingSubWidget(Primary, TextLineClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -1042,7 +985,12 @@ void USettingsWidget::AddSettingTextLine(FSettingsPrimary& Primary, FSettingsTex
 // Add text input on UI
 void USettingsWidget::AddSettingUserInput(FSettingsPrimary& Primary, FSettingsUserInput& Data)
 {
-	const TSubclassOf<USettingUserInput>& UserInputClass = USettingsDataAsset::Get().GetUserInputClass();
+	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
+	{
+		return;
+	}
+
+	const TSubclassOf<USettingUserInput>& UserInputClass = SettingsDataAssetInternal->GetUserInputClass();
 	CreateSettingSubWidget(Primary, UserInputClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())

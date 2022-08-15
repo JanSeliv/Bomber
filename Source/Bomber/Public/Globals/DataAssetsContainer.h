@@ -28,10 +28,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get UI Data Asset"))
 	static const FORCEINLINE class UUIDataAsset* GetUIDataAsset() { return Get().UIDataAssetInternal; }
 
-	/** Returns the settings data.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static const FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() { return Get().SettingsDataAssetInternal; }
-
 	/** Returns the AI data.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get AI Data Asset"))
 	static const FORCEINLINE class UAIDataAsset* GetAIDataAsset() { return Get().AIDataAssetInternal; }
@@ -70,10 +66,6 @@ protected:
 	/** Contains properties to setup the generated level. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Data Asset", ShowOnlyInnerProperties))
 	TObjectPtr<class UGeneratedMapDataAsset> LevelsDataAssetInternal = nullptr; //[B]
-
-	/** Settings data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Asset", ShowOnlyInnerProperties))
-	TObjectPtr<class USettingsDataAsset> SettingsDataAssetInternal = nullptr; //[B]
 
 	/** Contains properties to setup UI. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "UI Data Asset", ShowOnlyInnerProperties))

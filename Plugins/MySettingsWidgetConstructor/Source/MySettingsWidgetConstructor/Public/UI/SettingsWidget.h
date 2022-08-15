@@ -5,7 +5,6 @@
 #include "Blueprint/UserWidget.h"
 //---
 #include "Structures/SettingsRow.h"
-#include "Globals/LevelActorDataAsset.h"
 //---
 #include "SettingsWidget.generated.h"
 
@@ -13,14 +12,11 @@
  * Describes common data of settings.
  */
 UCLASS()
-class USettingsDataAsset final : public UBomberDataAsset
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataAsset final : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
-	/** Returns the settings data asset. */
-	static const USettingsDataAsset& Get();
-
 	/** Returns the table rows.
 	 * @see USettingsDataAsset::SettingsDataTableInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -106,6 +102,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FORCEINLINE FMiscThemeData& GetMiscThemeData() const { return MiscThemeDataInternal; }
 
+	/** Returns the misc theme data. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool ShouldAutoConstructSettings() const { return bAutoConstructSettingsInternal; }
+
 protected:
 	/** The data table with all settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table"))
@@ -134,6 +134,10 @@ protected:
 	/** The sub-widget class of User Input settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "User Input Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingUserInput> UserInputClassInternal = nullptr; //[D]
+
+	/** Set true to automatic construct settings during USettingsWidget::NativeConstruct() . */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Auto Construct Settings", ShowOnlyInnerProperties))
+	bool bAutoConstructSettingsInternal = true; //[D]
 
 	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Percent Size"))
@@ -185,7 +189,7 @@ protected:
  * It generates and manages settings specified in rows of the Settings Data Table.
  */
 UCLASS()
-class USettingsWidget final : public UUserWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -204,17 +208,33 @@ public:
 	 *		Public functions
 	 * --------------------------------------------------- */
 
+	/** Returns the settings data.*/
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE USettingsDataAsset* GetSettingsDataAsset() const { return SettingsDataAssetInternal; }
+
 	/** Display settings on UI. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OpenSettings();
+
+	/** Is called on displayed settings on UI. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "C++")
+	void OnOpenSettings();
 
 	/** Save and close the settings widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void CloseSettings();
 
+	/** Is called on closed settings on UI. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "C++")
+	void OnCloseSettings();
+
 	/** Flip-flop opens and closes the Settings menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ToggleSettings();
+
+	/** Is called to player sound effect on any setting click. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "C++")
+	void PlayUIClickSFX();
 
 	/** Returns the amount of settings rows. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -337,6 +357,10 @@ protected:
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
+	/** Settings data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Data Asset", ShowOnlyInnerProperties))
+	TObjectPtr<class USettingsDataAsset> SettingsDataAssetInternal = nullptr; //[B]
+
 	/** Contains all settings. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows"))
 	TMap<FName/*Tag*/, FSettingsPicker/*Row*/> SettingsTableRowsInternal; //[G]
@@ -361,17 +385,9 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void ConstructSettings();
 
-	/** Is called when all game widgets are initialized to construct settings. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void OnWidgetsInitialized();
-
 	/** Is called when In-Game menu became opened or closed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggleSettings(bool bIsVisible);
-
-	/** Is called when visibility is changed for this widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnVisibilityChange(ESlateVisibility InVisibility);
 
 	/** Bind and set static object delegate.
 	* @see FSettingsPrimary::OnStaticContext */
@@ -387,10 +403,6 @@ protected:
 	/** Starts adding settings on the next column. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void StartNextColumn();
-
-	/** Called when the current game state was changed, listens only when settings widget is opened. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/* ---------------------------------------------------
 	 *		Add by setting types

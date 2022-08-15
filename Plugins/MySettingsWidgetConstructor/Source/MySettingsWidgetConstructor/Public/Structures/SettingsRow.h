@@ -6,16 +6,17 @@
 #include "Engine/DataTable.h"
 #include "Components/SlateWrapperTypes.h"
 //---
-#include "Bomber.h"
 #include "FunctionPicker/FunctionPicker.h"
 //---
 #include "SettingsRow.generated.h"
+
+#define TEXT_NONE FCoreTexts::Get().None
 
 /**
  * Used to require all such tags start with 'Settings.X' as it specified in USTRUCT meta.
  */
 USTRUCT(BlueprintType, meta = (Categories = "Settings"))
-struct FSettingTag : public FGameplayTag
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingTag : public FGameplayTag
 {
 	GENERATED_BODY()
 
@@ -85,7 +86,7 @@ enum class ESettingsSliderState : uint8
   * The parent struct of the settings theme data.
   */
 USTRUCT(BlueprintType)
-struct FSettingsThemeData
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsThemeData
 {
 	GENERATED_BODY()
 
@@ -114,7 +115,7 @@ struct FSettingsThemeData
   * The theme data of the settings button.
   */
 USTRUCT(BlueprintType)
-struct FButtonThemeData : public FSettingsThemeData
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FButtonThemeData : public FSettingsThemeData
 {
 	GENERATED_BODY()
 
@@ -128,7 +129,7 @@ struct FButtonThemeData : public FSettingsThemeData
   * The parent Texture property determines of the unchecked checkbox.
   */
 USTRUCT(BlueprintType)
-struct FCheckboxThemeData : public FSettingsThemeData
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FCheckboxThemeData : public FSettingsThemeData
 {
 	GENERATED_BODY()
 
@@ -145,7 +146,7 @@ struct FCheckboxThemeData : public FSettingsThemeData
   * The theme data of the settings combobox.
   */
 USTRUCT(BlueprintType)
-struct FComboboxThemeData : public FSettingsThemeData
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FComboboxThemeData : public FSettingsThemeData
 {
 	GENERATED_BODY()
 
@@ -170,7 +171,7 @@ struct FComboboxThemeData : public FSettingsThemeData
   * The theme data of the settings slider.
   */
 USTRUCT(BlueprintType)
-struct FSliderThemeData : public FSettingsThemeData
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSliderThemeData : public FSettingsThemeData
 {
 	GENERATED_BODY()
 
@@ -183,7 +184,7 @@ struct FSliderThemeData : public FSettingsThemeData
   * The common theme data.
   */
 USTRUCT(BlueprintType)
-struct FMiscThemeData
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 {
 	GENERATED_BODY()
 
@@ -275,7 +276,7 @@ struct FMiscThemeData
   * DECLARE_DYNAMIC_DELEGATE can't be declared under USTRUCT
   */
 UCLASS(Abstract, Const, Transient)
-class USettingTemplate final : public UObject
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingTemplate final : public UObject
 {
 	GENERATED_BODY()
 
@@ -318,7 +319,7 @@ public:
   * Does not contain a default states for its value, because it should be set in the DefaultGameUserSettings.ini
   */
 USTRUCT(BlueprintType)
-struct FSettingsPrimary
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsPrimary
 {
 	GENERATED_BODY()
 
@@ -391,7 +392,7 @@ struct FSettingsPrimary
   */
 USTRUCT(BlueprintType, meta = (
 	FunctionContextTemplate="SettingTemplate::OnStaticContext__DelegateSignature"))
-struct FSettingsDataBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsDataBase
 {
 	GENERATED_BODY()
 };
@@ -401,7 +402,7 @@ struct FSettingsDataBase
   */
 USTRUCT(BlueprintType, meta = (
 	FunctionSetterTemplate="SettingTemplate::OnButtonPressed__DelegateSignature"))
-struct FSettingsButton : public FSettingsDataBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsButton : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
@@ -423,7 +424,7 @@ struct FSettingsButton : public FSettingsDataBase
 USTRUCT(BlueprintType, meta = (
 	FunctionSetterTemplate="SettingTemplate::OnSetterBool__DelegateSignature",
 	FunctionGetterTemplate="SettingTemplate::OnGetterBool__DelegateSignature"))
-struct FSettingsCheckbox : public FSettingsDataBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCheckbox : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
@@ -443,7 +444,7 @@ struct FSettingsCheckbox : public FSettingsDataBase
 USTRUCT(BlueprintType, meta = (
 	FunctionSetterTemplate="SettingTemplate::OnSetterInt__DelegateSignature",
 	FunctionGetterTemplate="SettingTemplate::OnGetterInt__DelegateSignature"))
-struct FSettingsCombobox : public FSettingsDataBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCombobox : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
@@ -485,7 +486,7 @@ struct FSettingsCombobox : public FSettingsDataBase
 USTRUCT(BlueprintType, meta = (
 	FunctionSetterTemplate="SettingTemplate::OnSetterFloat__DelegateSignature",
 	FunctionGetterTemplate="SettingTemplate::OnGetterFloat__DelegateSignature"))
-struct FSettingsSlider : public FSettingsDataBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsSlider : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
@@ -505,7 +506,7 @@ struct FSettingsSlider : public FSettingsDataBase
 USTRUCT(BlueprintType, meta = (
 	FunctionSetterTemplate="SettingTemplate::OnSetterText__DelegateSignature",
 	FunctionGetterTemplate="SettingTemplate::OnGetterText__DelegateSignature"))
-struct FSettingsTextLine : public FSettingsDataBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsTextLine : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
@@ -530,7 +531,7 @@ struct FSettingsTextLine : public FSettingsDataBase
 USTRUCT(BlueprintType, meta = (
 	FunctionSetterTemplate="SettingTemplate::OnSetterName__DelegateSignature",
 	FunctionGetterTemplate="SettingTemplate::OnGetterName__DelegateSignature"))
-struct FSettingsUserInput : public FSettingsDataBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsUserInput : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
@@ -555,7 +556,7 @@ struct FSettingsUserInput : public FSettingsDataBase
 USTRUCT(BlueprintType, meta = (
 	FunctionSetterTemplate="SettingTemplate::OnSetterWidget__DelegateSignature",
 	FunctionGetterTemplate="SettingTemplate::OnGetterWidget__DelegateSignature"))
-struct FSettingsCustomWidget : public FSettingsDataBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCustomWidget : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
@@ -577,7 +578,7 @@ struct FSettingsCustomWidget : public FSettingsDataBase
   * which allows to show only selected in-game option.
   */
 USTRUCT(BlueprintType)
-struct FSettingsPicker
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsPicker
 {
 	GENERATED_BODY()
 
@@ -645,7 +646,7 @@ struct FSettingsPicker
   * Executing UI getters/setters will call automatically bounded chosen functions.
   */
 USTRUCT(BlueprintType)
-struct FSettingsRow : public FTableRowBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsRow : public FTableRowBase
 {
 	GENERATED_BODY()
 

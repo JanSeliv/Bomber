@@ -2,9 +2,7 @@
 
 #include "UI/SettingSubWidget.h"
 //---
-#include "Globals/SingletonLibrary.h"
 #include "UI/SettingsWidget.h"
-#include "SoundsManager.h"
 #include "UtilsLibrary.h"
 //---
 #include "Components/Button.h"
@@ -90,12 +88,6 @@ void USettingButton::OnButtonPressed()
 	}
 
 	SettingsWidgetInternal->SetSettingButtonPressed(SettingTagInternal);
-
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
 }
 
 // Called after the underlying slate widget is constructed
@@ -121,12 +113,6 @@ void USettingCheckbox::OnCheckStateChanged(bool bIsChecked)
 	}
 
 	SettingsWidgetInternal->SetSettingCheckbox(SettingTagInternal, bIsChecked);
-
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
 }
 
 // Called after the underlying slate widget is constructed
@@ -166,9 +152,9 @@ void USettingCombobox::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 void USettingCombobox::OnMenuOpenChanged()
 {
 	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	if (SettingsWidgetInternal)
 	{
-		SoundsManager->PlayUIClickSFX();
+		SettingsWidgetInternal->PlayUIClickSFX();
 	}
 }
 
@@ -176,7 +162,7 @@ void USettingCombobox::OnMenuOpenChanged()
 void USettingCombobox::OnSelectionChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
 {
 	if (!SettingsWidgetInternal
-	    || !ComboboxWidget)
+		|| !ComboboxWidget)
 	{
 		return;
 	}
@@ -204,9 +190,9 @@ void USettingSlider::NativeConstruct()
 void USettingSlider::OnMouseCaptureEnd()
 {
 	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+	if (SettingsWidgetInternal)
 	{
-		SoundsManager->PlayUIClickSFX();
+		SettingsWidgetInternal->PlayUIClickSFX();
 	}
 }
 
@@ -234,7 +220,7 @@ void USettingUserInput::GetEditableText(FText& OutText) const
 void USettingUserInput::SetEditableText(const FText& InText)
 {
 	if (!EditableTextBox
-	    || InText.EqualTo(EditableTextBox->GetText()))
+		|| InText.EqualTo(EditableTextBox->GetText()))
 	{
 		return;
 	}
@@ -266,10 +252,4 @@ void USettingUserInput::OnTextChanged(const FText& Text)
 
 	const FName MewValue(Text.ToString());
 	SettingsWidgetInternal->SetSettingUserInput(SettingTagInternal, MewValue);
-
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
 }

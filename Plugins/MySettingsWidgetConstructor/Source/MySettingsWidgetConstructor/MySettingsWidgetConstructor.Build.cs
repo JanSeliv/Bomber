@@ -11,7 +11,10 @@ public class MySettingsWidgetConstructor : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 			{
-				"Core"
+				"Core",
+				"UMG",
+				"GameplayTags", // Tags
+				"MyUtils" // FFunctionPicker
 			}
 		);
 
