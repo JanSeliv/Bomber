@@ -11,7 +11,21 @@
 //---
 #include "SettingsRow.generated.h"
 
-#define TEXT_NONE FCoreTexts::Get().None
+/**
+ * Used to require all such tags start with 'Settings.X' as it specified in USTRUCT meta.
+ */
+USTRUCT(BlueprintType, meta = (Categories = "Settings"))
+struct FSettingTag : public FGameplayTag
+{
+	GENERATED_BODY()
+
+	FSettingTag() = default;
+
+	FSettingTag(const FGameplayTag& Tag)
+		: FGameplayTag(Tag) {}
+
+	static const FSettingTag EmptySettingTag;
+};
 
 /**	┌───────────────────────────┐
   *	│			[SETTINGS]		│ Header (title)
@@ -310,7 +324,7 @@ struct FSettingsPrimary
 
 	/** The tag of the setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FGameplayTag Tag = FGameplayTag::EmptyTag; //[D]
+	FSettingTag Tag = FSettingTag::EmptySettingTag; //[D]
 
 	/** The static function to obtain object to call Setters and Getters.
 	  * The FunctionContextTemplate meta will contain a name of one USettingTemplate delegate. */
@@ -348,7 +362,7 @@ struct FSettingsPrimary
 	bool bStartOnNextColumn = false; //[D]
 
 	/** Contains tags of settings which are needed to update after change of this setting. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (Categories = "Settings"))
 	FGameplayTagContainer SettingsToUpdate = FGameplayTagContainer::EmptyContainer; //[D]
 
 	/** Created widget of the chosen setting (button, checkbox, combobox, slider, text line, user input). */
@@ -547,7 +561,7 @@ struct FSettingsCustomWidget : public FSettingsDataBase
 
 	/** Contains created custom widget of the setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TSubclassOf<class USettingCustomWidget> CustomWidgetClass; //[D]
+	TSubclassOf<class USettingCustomWidget> CustomWidgetClass = nullptr; //[D]
 
 	/** The cached bound delegate, is executed to set the custom widget. */
 	USettingTemplate::FOnGetterWidget OnGetterWidget;

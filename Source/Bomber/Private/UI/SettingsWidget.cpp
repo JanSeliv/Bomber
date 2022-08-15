@@ -86,7 +86,7 @@ const FSettingsPicker& USettingsWidget::FindSettingRow(FName PotentialTagName) c
 }
 
 // Returns the found row by specified tag
-const FSettingsPicker& USettingsWidget::GetSettingRow(const FGameplayTag& SettingTag) const
+const FSettingsPicker& USettingsWidget::GetSettingRow(const FSettingTag& SettingTag) const
 {
 	if (!SettingTag.IsValid())
 	{
@@ -135,7 +135,7 @@ void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpda
 	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
 		const FSettingsPicker& Setting = RowIt.Value;
-		const FGameplayTag& SettingTag = Setting.PrimaryData.Tag;
+		const FSettingTag& SettingTag = Setting.PrimaryData.Tag;
 		if (!SettingTag.MatchesAny(SettingsToUpdate))
 		{
 			continue;
@@ -177,7 +177,7 @@ void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpda
 }
 
 // Returns the name of found tag by specified function
-const FGameplayTag& USettingsWidget::GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const
+const FSettingTag& USettingsWidget::GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const
 {
 	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
@@ -189,7 +189,7 @@ const FGameplayTag& USettingsWidget::GetTagByFunctionPicker(const FFunctionPicke
 		}
 	}
 
-	return FGameplayTag::EmptyTag;
+	return FSettingTag::EmptySettingTag;
 }
 
 // Set value to the option by tag
@@ -207,7 +207,7 @@ void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 		return;
 	}
 
-	const FGameplayTag& Tag = FoundRow.PrimaryData.Tag;
+	const FSettingTag& Tag = FoundRow.PrimaryData.Tag;
 	if (!Tag.IsValid())
 	{
 		return;
@@ -262,7 +262,7 @@ void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 }
 
 // Press button
-void USettingsWidget::SetSettingButtonPressed(const FGameplayTag& ButtonTag)
+void USettingsWidget::SetSettingButtonPressed(const FSettingTag& ButtonTag)
 {
 	if (!ButtonTag.IsValid())
 	{
@@ -281,7 +281,7 @@ void USettingsWidget::SetSettingButtonPressed(const FGameplayTag& ButtonTag)
 }
 
 // Toggle checkbox
-void USettingsWidget::SetSettingCheckbox(const FGameplayTag& CheckboxTag, bool InValue)
+void USettingsWidget::SetSettingCheckbox(const FSettingTag& CheckboxTag, bool InValue)
 {
 	if (!CheckboxTag.IsValid())
 	{
@@ -309,7 +309,7 @@ void USettingsWidget::SetSettingCheckbox(const FGameplayTag& CheckboxTag, bool I
 }
 
 // Set chosen member index for a combobox
-void USettingsWidget::SetSettingComboboxIndex(const FGameplayTag& ComboboxTag, int32 InValue)
+void USettingsWidget::SetSettingComboboxIndex(const FSettingTag& ComboboxTag, int32 InValue)
 {
 	if (!ComboboxTag.IsValid())
 	{
@@ -342,7 +342,7 @@ void USettingsWidget::SetSettingComboboxIndex(const FGameplayTag& ComboboxTag, i
 }
 
 // Set new members for a combobox
-void USettingsWidget::SetSettingComboboxMembers(const FGameplayTag& ComboboxTag, const TArray<FText>& InValue)
+void USettingsWidget::SetSettingComboboxMembers(const FSettingTag& ComboboxTag, const TArray<FText>& InValue)
 {
 	if (!ComboboxTag.IsValid())
 	{
@@ -363,7 +363,7 @@ void USettingsWidget::SetSettingComboboxMembers(const FGameplayTag& ComboboxTag,
 }
 
 // Set current value for a slider
-void USettingsWidget::SetSettingSlider(const FGameplayTag& SliderTag, float InValue)
+void USettingsWidget::SetSettingSlider(const FSettingTag& SliderTag, float InValue)
 {
 	if (!SliderTag.IsValid())
 	{
@@ -394,7 +394,7 @@ void USettingsWidget::SetSettingSlider(const FGameplayTag& SliderTag, float InVa
 }
 
 // Set new text
-void USettingsWidget::SetSettingTextLine(const FGameplayTag& TextLineTag, const FText& InValue)
+void USettingsWidget::SetSettingTextLine(const FSettingTag& TextLineTag, const FText& InValue)
 {
 	if (!TextLineTag.IsValid())
 	{
@@ -425,7 +425,7 @@ void USettingsWidget::SetSettingTextLine(const FGameplayTag& TextLineTag, const 
 }
 
 // Set new text for an input box
-void USettingsWidget::SetSettingUserInput(const FGameplayTag& UserInputTag, FName InValue)
+void USettingsWidget::SetSettingUserInput(const FSettingTag& UserInputTag, FName InValue)
 {
 	if (!UserInputTag.IsValid())
 	{
@@ -467,7 +467,7 @@ void USettingsWidget::SetSettingUserInput(const FGameplayTag& UserInputTag, FNam
 }
 
 // Set new custom widget for setting by specified tag
-void USettingsWidget::SetSettingCustomWidget(const FGameplayTag& CustomWidgetTag, USettingCustomWidget* InCustomWidget)
+void USettingsWidget::SetSettingCustomWidget(const FSettingTag& CustomWidgetTag, USettingCustomWidget* InCustomWidget)
 {
 	if (!CustomWidgetTag.IsValid())
 	{
@@ -493,7 +493,7 @@ void USettingsWidget::SetSettingCustomWidget(const FGameplayTag& CustomWidgetTag
 }
 
 // Returns is a checkbox toggled
-bool USettingsWidget::GetCheckboxValue(const FGameplayTag& CheckboxTag) const
+bool USettingsWidget::GetCheckboxValue(const FSettingTag& CheckboxTag) const
 {
 	if (!CheckboxTag.IsValid())
 	{
@@ -517,7 +517,7 @@ bool USettingsWidget::GetCheckboxValue(const FGameplayTag& CheckboxTag) const
 }
 
 // Returns chosen member index of a combobox
-int32 USettingsWidget::GetComboboxIndex(const FGameplayTag& ComboboxTag) const
+int32 USettingsWidget::GetComboboxIndex(const FSettingTag& ComboboxTag) const
 {
 	const FSettingsPicker& FoundRow = GetSettingRow(ComboboxTag);
 	int32 Value = false;
@@ -536,7 +536,7 @@ int32 USettingsWidget::GetComboboxIndex(const FGameplayTag& ComboboxTag) const
 }
 
 // Get all members of a combobox
-void USettingsWidget::GetComboboxMembers(const FGameplayTag& ComboboxTag, TArray<FText>& OutMembers) const
+void USettingsWidget::GetComboboxMembers(const FSettingTag& ComboboxTag, TArray<FText>& OutMembers) const
 {
 	const FSettingsPicker& FoundRow = GetSettingRow(ComboboxTag);
 	if (FoundRow.IsValid())
@@ -553,7 +553,7 @@ void USettingsWidget::GetComboboxMembers(const FGameplayTag& ComboboxTag, TArray
 }
 
 // Get current value of a slider [0...1]
-float USettingsWidget::GetSliderValue(const FGameplayTag& SliderTag) const
+float USettingsWidget::GetSliderValue(const FSettingTag& SliderTag) const
 {
 	const FSettingsPicker& FoundRow = GetSettingRow(SliderTag);
 	float Value = 0.f;
@@ -572,7 +572,7 @@ float USettingsWidget::GetSliderValue(const FGameplayTag& SliderTag) const
 }
 
 // Get current text of a simple text widget
-void USettingsWidget::GetTextLineValue(const FGameplayTag& TextLineTag, FText& OutText) const
+void USettingsWidget::GetTextLineValue(const FSettingTag& TextLineTag, FText& OutText) const
 {
 	const FSettingsPicker& FoundRow = GetSettingRow(TextLineTag);
 	if (FoundRow.IsValid())
@@ -588,7 +588,7 @@ void USettingsWidget::GetTextLineValue(const FGameplayTag& TextLineTag, FText& O
 }
 
 // Get current input name of the text input
-FName USettingsWidget::GetUserInputValue(const FGameplayTag& UserInputTag) const
+FName USettingsWidget::GetUserInputValue(const FSettingTag& UserInputTag) const
 {
 	const FSettingsPicker& FoundRow = GetSettingRow(UserInputTag);
 	FName Value = NAME_None;
@@ -607,7 +607,7 @@ FName USettingsWidget::GetUserInputValue(const FGameplayTag& UserInputTag) const
 }
 
 // Get custom widget of the setting by specified tag
-USettingCustomWidget* USettingsWidget::GetCustomWidget(const FGameplayTag& CustomWidgetTag) const
+USettingCustomWidget* USettingsWidget::GetCustomWidget(const FSettingTag& CustomWidgetTag) const
 {
 	const FSettingsPicker& FoundRow = GetSettingRow(CustomWidgetTag);
 	USettingCustomWidget* CustomWidget = nullptr;
@@ -625,7 +625,7 @@ USettingCustomWidget* USettingsWidget::GetCustomWidget(const FGameplayTag& Custo
 }
 
 // Get setting widget object by specified tag
-USettingSubWidget* USettingsWidget::GetSettingSubWidget(const FGameplayTag& SettingTag) const
+USettingSubWidget* USettingsWidget::GetSettingSubWidget(const FSettingTag& SettingTag) const
 {
 	const FSettingsPrimary& PrimaryData = GetSettingRow(SettingTag).PrimaryData;
 	return PrimaryData.IsValid() ? PrimaryData.SettingSubWidget.Get() : nullptr;

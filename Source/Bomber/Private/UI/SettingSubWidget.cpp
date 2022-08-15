@@ -18,7 +18,7 @@
 #include "Widgets/Input/SSlider.h"
 
 // Set the new setting tag for this widget
-void USettingSubWidget::SetSettingTag(const FGameplayTag& NewSettingTag)
+void USettingSubWidget::SetSettingTag(const FSettingTag& NewSettingTag)
 {
 	SettingTagInternal = NewSettingTag;
 }

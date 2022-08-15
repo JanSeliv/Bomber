@@ -17,6 +17,8 @@
 #define ECC_Player3 ECollisionChannel::ECC_GameTraceChannel4
 #define ECC_UI ECollisionChannel::ECC_GameTraceChannel5
 
+#define TEXT_NONE FCoreTexts::Get().None
+
 /**
 * Types of all actors on the Level Map
 * Where Walls, Boxes and Bombs are the physical barriers for players

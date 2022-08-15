@@ -24,7 +24,7 @@ public class MySettingsWidgetConstructor : ModuleRules
 			}
 		);
 
-		if (Target.Type == TargetType.Editor)
+		if (Target.bBuildEditor)
 		{
 			// Include Editor modules that are used in this Runtime module
 			PrivateDependencyModuleNames.AddRange(new[]

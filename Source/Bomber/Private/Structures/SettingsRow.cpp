@@ -2,6 +2,9 @@
 
 #include "Structures/SettingsRow.h"
 
+// Empty settings tag
+const FSettingTag FSettingTag::EmptySettingTag = EmptyTag;
+
 // Empty settings row
 const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
 

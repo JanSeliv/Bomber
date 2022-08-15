@@ -4,6 +4,7 @@
 //---
 #include "SettingsPickerCustomization.h"
 //---
+#include "GameplayTagsEditorModule.h"
 #include "Modules/ModuleManager.h"
 
 #define LOCTEXT_NAMESPACE "FMySettingsWidgetConstructorEditorModule"
@@ -23,6 +24,12 @@ void FMySettingsWidgetConstructorEditorModule::StartupModule()
 		FSettingsPickerCustomization::PropertyClassName,
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSettingsPickerCustomization::MakeInstance)
 	);
+
+	// Use default GameplayTag customization for inherited SettingTag to show Tags list
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		SettingTagStructureName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FGameplayTagCustomizationPublic::MakeInstance)
+	);
 }
 
 // Called before the module is unloaded, right before the module object is destroyed
@@ -36,6 +43,7 @@ void FMySettingsWidgetConstructorEditorModule::ShutdownModule()
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
 
 	PropertyModule.UnregisterCustomPropertyTypeLayout(FSettingsPickerCustomization::PropertyClassName);
+	PropertyModule.UnregisterCustomPropertyTypeLayout(SettingTagStructureName);
 }
 
 #undef LOCTEXT_NAMESPACE

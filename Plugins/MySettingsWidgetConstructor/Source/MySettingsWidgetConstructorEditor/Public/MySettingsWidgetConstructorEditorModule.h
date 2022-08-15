@@ -7,8 +7,11 @@
 class FMySettingsWidgetConstructorEditorModule final : public IModuleInterface
 {
 public:
-	/** Is used to to load and unload the Property Editor Module. */
+	/** Is used to load and unload the Property Editor Module. */
 	inline static const FName PropertyEditorModule = TEXT("PropertyEditor");
+
+	/** Is used to customize FSettingTag structure. */
+	inline static const FName SettingTagStructureName = TEXT("SettingTag");
 
 	/**
 	 * Called right after the module DLL has been loaded and the module object has been created.

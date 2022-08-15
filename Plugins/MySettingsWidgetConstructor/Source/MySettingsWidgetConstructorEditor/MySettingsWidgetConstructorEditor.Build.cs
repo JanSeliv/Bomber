@@ -12,6 +12,7 @@ public class MySettingsWidgetConstructorEditor : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core",
+				"GameplayTagsEditor", // FSettingTag customization
 				"MyEditorUtils" // FMyPropertyTypeCustomization
 			}
 		);

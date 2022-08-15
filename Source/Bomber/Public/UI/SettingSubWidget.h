@@ -4,7 +4,7 @@
 
 #include "Blueprint/UserWidget.h"
 //---
-#include "GameplayTagContainer.h"
+#include "Structures/SettingsRow.h"
 #include "Widgets/Input/SComboBox.h"
 //---
 #include "SettingSubWidget.generated.h"
@@ -46,16 +46,16 @@ public:
 	void GetCaptionText(FText& OutCaptionText) const;
 
 	/** Set the new caption text on UI for this widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewCaptionText"))
 	void SetCaptionText(const FText& NewCaptionText);
 
 	/** Returns the setting tag of this widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE FGameplayTag& GetSettingTag() const { return SettingTagInternal; }
+	const FORCEINLINE FSettingTag& GetSettingTag() const { return SettingTagInternal; }
 
 	/** Set the new setting tag for this widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetSettingTag(const FGameplayTag& NewSettingTag);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewSettingTag"))
+	void SetSettingTag(const FSettingTag& NewSettingTag);
 
 protected:
 	/** The Size Box widget. */
@@ -68,11 +68,11 @@ protected:
 
 	/** The setting tag of this widget. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Setting Tag"))
-	FGameplayTag SettingTagInternal; //[G]
+	FSettingTag SettingTagInternal = FSettingTag::EmptySettingTag; //[G]
 
 	/** The main settings widget. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))
-	TObjectPtr<class USettingsWidget> SettingsWidgetInternal; //[G]
+	TObjectPtr<class USettingsWidget> SettingsWidgetInternal = nullptr; //[G]
 
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -177,7 +177,7 @@ protected:
 
 	/** Is true if combobox is currently opened in Settings. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Combobox Opened"))
-	bool bIsComboboxOpenedInternal; //[G]
+	bool bIsComboboxOpenedInternal = false; //[G]
 
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -263,7 +263,7 @@ public:
 	void GetEditableText(FText& OutText) const;
 
 	/** Set new text programmatically instead of by the user. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "InText"))
 	void SetEditableText(const FText& InText);
 
 	/** Returns the slate editable text box. */
@@ -283,7 +283,7 @@ protected:
 
 	/** Called whenever the text is changed programmatically or interactively by the user.
 	 * @see USettingCheckbox::EditableTextBoxInternal */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Text"))
 	void OnTextChanged(const FText& Text);
 };
 

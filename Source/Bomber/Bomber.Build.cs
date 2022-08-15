@@ -7,6 +7,7 @@ public class Bomber : ModuleRules
 	public Bomber(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		CppStandard = CppStandardVersion.Cpp17; // Fails on CppStandardVersion.Latest by Niagara
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
@@ -21,7 +22,7 @@ public class Bomber : ModuleRules
 			"MyUtils" // FFunctionPicker etc.
 		});
 
-		if (Target.Type == TargetType.Editor)
+		if (Target.bBuildEditor)
 		{
 			// Include Editor modules that are used in this Runtime module
 			PrivateDependencyModuleNames.AddRange(new[]
