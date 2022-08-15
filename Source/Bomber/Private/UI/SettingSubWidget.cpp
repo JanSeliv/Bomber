@@ -5,6 +5,7 @@
 #include "Globals/SingletonLibrary.h"
 #include "UI/SettingsWidget.h"
 #include "SoundsManager.h"
+#include "UtilsLibrary.h"
 //---
 #include "Components/Button.h"
 #include "Components/CheckBox.h"
@@ -61,7 +62,8 @@ void USettingSubWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	SettingsWidgetInternal = USingletonLibrary::GetSettingsWidget();
+	SettingsWidgetInternal = UUtilsLibrary::GetParentWidgetOfClass<USettingsWidget>(this);
+	ensureAlwaysMsgf(SettingsWidgetInternal, TEXT("ASSERT: 'SettingsWidgetInternal' is nullptr"));
 }
 
 // Called after the underlying slate widget is constructed

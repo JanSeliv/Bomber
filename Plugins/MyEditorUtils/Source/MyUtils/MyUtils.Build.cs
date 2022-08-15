@@ -11,7 +11,8 @@ public class MyUtils : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 			{
-				"Core"
+				"Core",
+				"UMG"
 			}
 		);
 
