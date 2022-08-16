@@ -222,14 +222,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FCell GetCellArrayAverage(const TSet<FCell>& Cells);
 
-	/** Returns empty settings row. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static const FORCEINLINE FSettingsPicker& GetEmptySettingsRow() { return FSettingsPicker::Empty; }
-
-	/** Returns true if row is valid. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingsRow"))
-	static FORCEINLINE bool IsValidSettingsRow(const FSettingsPicker& SettingsRow) { return SettingsRow.IsValid(); }
-
 	/* ---------------------------------------------------
 	*		EActorType bitmask functions
 	* --------------------------------------------------- */

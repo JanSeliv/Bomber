@@ -271,6 +271,18 @@ public:
 	const FSettingTag& GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const;
 
 	/* ---------------------------------------------------
+	 *		Setting blueprint helpers
+	 * --------------------------------------------------- */
+
+	/** Returns empty settings row. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static const FORCEINLINE FSettingsPicker& GetEmptySettingsRow() { return FSettingsPicker::Empty; }
+
+	/** Returns true if row is valid. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingsRow"))
+	static FORCEINLINE bool IsValidSettingsRow(const FSettingsPicker& SettingsRow) { return SettingsRow.IsValid(); }
+
+	/* ---------------------------------------------------
 	 *		Setters by setting types
 	 * --------------------------------------------------- */
 
