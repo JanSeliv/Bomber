@@ -129,9 +129,4 @@ protected:
 
 	/** Loads the user settings from persistent storage */
 	virtual void LoadSettings(bool bForceReload) override;
-
-	/** Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks.
-	 * @warning DevelopmentOnly */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))
-	void OnDataTableChanged();
 };

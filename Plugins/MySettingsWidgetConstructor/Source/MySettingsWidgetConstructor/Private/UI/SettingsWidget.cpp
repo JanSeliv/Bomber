@@ -3,49 +3,10 @@
 #include "UI/SettingsWidget.h"
 //---
 #include "GameFramework/GameUserSettings.h"
-#include "UI/SettingSubWidget.h"
 //---
-#if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
-#endif
-
-// Returns the table rows.
-void USettingsDataAsset::GenerateSettingsArray(TMap<FName, FSettingsPicker>& OutRows) const
-{
-	if (!ensureMsgf(SettingsDataTableInternal, TEXT("ASSERT: 'SettingsDataTableInternal' is not valid")))
-	{
-		return;
-	}
-
-	const TMap<FName, uint8*>& RowMap = SettingsDataTableInternal->GetRowMap();
-	OutRows.Empty();
-	OutRows.Reserve(RowMap.Num());
-	for (const TTuple<FName, uint8*>& RowIt : RowMap)
-	{
-		if (const FSettingsRow* FoundRowPtr = reinterpret_cast<const FSettingsRow*>(RowIt.Value))
-		{
-			const FSettingsPicker& SettingsTableRow = FoundRowPtr->SettingsPicker;
-			const FName RowName = RowIt.Key;
-			OutRows.Emplace(RowName, SettingsTableRow);
-		}
-	}
-}
-
-// Get a multicast delegate that is called any time the data table changes
-void USettingsDataAsset::BindOnDataTableChanged(const FOnDataTableChanged& EventToBind) const
-{
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
-		|| !SettingsDataTableInternal
-		|| !EventToBind.IsBound())
-	{
-		return;
-	}
-
-	UDataTable::FOnDataTableChanged& OnDataTableChangedDelegate = SettingsDataTableInternal->OnDataTableChanged();
-	OnDataTableChangedDelegate.AddLambda([EventToBind]() { EventToBind.ExecuteIfBound(); });
-#endif // WITH_EDITOR
-}
+#include "Data/SettingsDataAsset.h"
+#include "Data/SettingsDataTable.h"
+#include "UI/SettingSubWidget.h"
 
 // Try to find the setting row
 const FSettingsPicker& USettingsWidget::FindSettingRow(FName PotentialTagName) const
@@ -627,12 +588,13 @@ void USettingsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
+	const USettingsDataTable* SettingsDataTable = SettingsDataAssetInternal ? SettingsDataAssetInternal->GetSettingsDataTable() : nullptr;
+	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
 	{
 		return;
 	}
 
-	SettingsDataAssetInternal->GenerateSettingsArray(/*Out*/SettingsTableRowsInternal);
+	SettingsDataTable->GenerateSettingsArray(/*Out*/SettingsTableRowsInternal);
 
 	// Set overall columns num by amount of rows that are marked to be started on next column
 	TArray<FSettingsPicker> Rows;

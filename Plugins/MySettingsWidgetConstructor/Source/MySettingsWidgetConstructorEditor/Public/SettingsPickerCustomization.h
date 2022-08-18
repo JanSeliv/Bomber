@@ -7,7 +7,7 @@
 /**
  * Is customized to show only selected in-game option.
  */
-class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API FSettingsPickerCustomization final : public FMyPropertyTypeCustomization
+class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API FSettingsPickerCustomization : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------

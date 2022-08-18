@@ -9,10 +9,6 @@
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
-//--- [OnDataTableChanged]
-#include "DataTableEditorUtils.h"
-#include "EditorFramework/AssetImportData.h"
-#include "Misc/FileHelper.h"
 #endif
 
 // Returns the game user settings
@@ -293,68 +289,4 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 		RunHardwareBenchmark();
 		ApplyHardwareBenchmarkResults();
 	}
-
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	// Notify settings for any change in the settings data table
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
-	{
-		const USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
-		const USettingsDataAsset* SettingsDataAsset = SettingsWidget ? SettingsWidget->GetSettingsDataAsset() : nullptr;
-		if (SettingsDataAsset)
-		{
-			// Bind only once
-			static USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
-			if (!OnDataTableChanged.IsBound())
-			{
-				OnDataTableChanged.BindDynamic(this, &ThisClass::OnDataTableChanged);
-				SettingsDataAsset->BindOnDataTableChanged(OnDataTableChanged);
-			}
-		}
-	}
-#endif // WITH_EDITOR [IsEditorNotPieWorld]
-}
-
-// Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks
-void UMyGameUserSettings::OnDataTableChanged()
-{
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
-	{
-		return;
-	}
-
-	const USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
-	const USettingsDataAsset* SettingsDataAsset = SettingsWidget ? SettingsWidget->GetSettingsDataAsset() : nullptr;
-	UDataTable* SettingsDataTable = SettingsDataAsset ? SettingsDataAsset->GetSettingsDataTable() : nullptr;
-	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
-	{
-		return;
-	}
-
-	// Set row name by specified tag
-	TMap<FName, FSettingsPicker> SettingsArray;
-	SettingsDataAsset->GenerateSettingsArray(SettingsArray);
-	for (const TTuple<FName, FSettingsPicker>& SettingsTableRowIt : SettingsArray)
-	{
-		const FName RowKey = SettingsTableRowIt.Key;
-		const FName RowValueTag = SettingsTableRowIt.Value.PrimaryData.Tag.GetTagName();
-		if (!RowValueTag.IsNone()                    // Tag is not empty
-		    && RowKey != RowValueTag                 // New tag name
-		    && !SettingsArray.Contains(RowValueTag)) // Unique tag
-		{
-			FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
-		}
-	}
-
-	// Export to json
-	if (const UAssetImportData* AssetImportData = SettingsDataTable->AssetImportData)
-	{
-		const FString CurrentFilename = AssetImportData->GetFirstFilename();
-		if (!CurrentFilename.IsEmpty())
-		{
-			const FString TableAsJSON = SettingsDataTable->GetTableAsJSON(EDataTableExportFlags::UseJsonObjectsForStructs);
-			FFileHelper::SaveStringToFile(TableAsJSON, *CurrentFilename);
-		}
-	}
-#endif // WITH_EDITOR [IsEditorNotPieWorld]
 }

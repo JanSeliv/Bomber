@@ -276,7 +276,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
   * DECLARE_DYNAMIC_DELEGATE can't be declared under USTRUCT
   */
 UCLASS(Abstract, Const, Transient)
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingTemplate final : public UObject
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingTemplate : public UObject
 {
 	GENERATED_BODY()
 

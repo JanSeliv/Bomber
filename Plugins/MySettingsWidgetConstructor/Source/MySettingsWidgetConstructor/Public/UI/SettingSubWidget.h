@@ -85,7 +85,7 @@ protected:
  * The sub-widget of Button settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingButton final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingButton : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -119,7 +119,7 @@ protected:
  * The sub-widget of Checkbox settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCheckbox final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCheckbox : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -153,7 +153,7 @@ protected:
  * The sub-widget of Combobox settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCombobox final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCombobox : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -204,7 +204,7 @@ protected:
  * The sub-widget of Slider settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingSlider final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingSlider : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -242,7 +242,7 @@ protected:
  * The sub-widget of Text Line settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingTextLine final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingTextLine : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -253,7 +253,7 @@ public:
  * The sub-widget of User Input settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingUserInput final : public USettingSubWidget
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingUserInput : public USettingSubWidget
 {
 	GENERATED_BODY()
 

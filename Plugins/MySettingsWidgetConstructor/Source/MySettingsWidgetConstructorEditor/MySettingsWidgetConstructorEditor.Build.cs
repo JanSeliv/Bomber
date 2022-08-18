@@ -12,6 +12,9 @@ public class MySettingsWidgetConstructorEditor : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core",
+				"AssetTools", // RegisterAdvancedAssetCategory
+				"UnrealEd", // Editor globals like GEditor
+				"MySettingsWidgetConstructor", // Runtime module of this plugin
 				"GameplayTagsEditor", // FSettingTag customization
 				"MyEditorUtils" // FMyPropertyTypeCustomization
 			}

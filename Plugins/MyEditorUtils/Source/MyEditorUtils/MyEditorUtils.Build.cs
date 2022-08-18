@@ -17,6 +17,8 @@ public class MyEditorUtils : ModuleRules
 				"EditorFramework", // FEditorDelegates::FToolkitManager
 				"PropertyEditor", "EditorStyle", // Property types customizations
 				"ToolWidgets", // SSearchableComboBox
+				"AssetTools", // RegisterAdvancedAssetCategory
+				"DataTableEditor", "DesktopPlatform", "EditorFramework", "ToolMenus" // FAssetTypeActions_MyDataTable
 			}
 		);
 
