@@ -3,7 +3,7 @@
 #include "MySettingsWidgetConstructorEditorModule.h"
 //---
 #include "SettingsPickerCustomization.h"
-//---
+#include "AssetTypeActions_SettingsDataAsset.h"
 #include "AssetTypeActions_SettingsDataTable.h"
 //---
 #include "GameplayTagsEditorModule.h"
@@ -75,6 +75,7 @@ void FMySettingsWidgetConstructorEditorModule::RegisterAssets()
 
 	RegisterSettingsCategory(AssetTools);
 	RegisterSettingsDataTable(AssetTools);
+	RegisterSettingsDataAsset(AssetTools);
 }
 
 // Removes all custom assets from context menu
@@ -110,6 +111,14 @@ void FMySettingsWidgetConstructorEditorModule::RegisterSettingsDataTable(IAssetT
 	TSharedPtr<FAssetTypeActions_SettingsDataTable> InputDataTableAction = MakeShared<FAssetTypeActions_SettingsDataTable>();
 	AssetTools.RegisterAssetTypeActions(InputDataTableAction.ToSharedRef());
 	RegisteredAssets.Emplace(MoveTemp(InputDataTableAction));
+}
+
+// Adds the 'Settings Data Asset' to the context menu
+void FMySettingsWidgetConstructorEditorModule::RegisterSettingsDataAsset(IAssetTools& AssetTools)
+{
+	TSharedPtr<FAssetTypeActions_SettingsDataAsset> InputDataAssetAction = MakeShared<FAssetTypeActions_SettingsDataAsset>();
+	AssetTools.RegisterAssetTypeActions(InputDataAssetAction.ToSharedRef());
+	RegisteredAssets.Emplace(MoveTemp(InputDataAssetAction));
 }
 
 #undef LOCTEXT_NAMESPACE

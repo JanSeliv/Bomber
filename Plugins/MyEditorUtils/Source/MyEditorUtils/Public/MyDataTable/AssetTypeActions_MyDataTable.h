@@ -37,6 +37,8 @@ public:
 class MYEDITORUTILS_API FAssetTypeActions_MyDataTable : public FAssetTypeActions_CSVAssetBase
 {
 public:
+	virtual ~FAssetTypeActions_MyDataTable() override = default;
+
 #pragma region OverrideInChild
 	virtual FText GetName() const override;
 	virtual FColor GetTypeColor() const override { return FColor::Blue; }

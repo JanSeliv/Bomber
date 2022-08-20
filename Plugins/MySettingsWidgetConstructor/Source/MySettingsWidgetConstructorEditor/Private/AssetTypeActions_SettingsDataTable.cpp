@@ -4,8 +4,6 @@
 //---
 #include "Data/SettingsDataTable.h"
 #include "MySettingsWidgetConstructorEditorModule.h"
-//---
-#include "DataTableEditorUtils.h"
 
 #define LOCTEXT_NAMESPACE "AssetTypeActions"
 

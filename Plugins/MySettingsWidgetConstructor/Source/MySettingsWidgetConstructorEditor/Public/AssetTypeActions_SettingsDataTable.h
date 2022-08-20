@@ -25,6 +25,8 @@ public:
 class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API FAssetTypeActions_SettingsDataTable : public FAssetTypeActions_MyDataTable
 {
 public:
+	virtual ~FAssetTypeActions_SettingsDataTable() override = default;
+
 	virtual FText GetName() const override;
 	virtual FColor GetTypeColor() const override;
 	virtual UClass* GetSupportedClass() const override;

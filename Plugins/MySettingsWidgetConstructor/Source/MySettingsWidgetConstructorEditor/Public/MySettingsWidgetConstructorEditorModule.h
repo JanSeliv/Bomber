@@ -55,6 +55,9 @@ protected:
 	/** Adds the 'Settings Data Table' asset to the context menu. */
 	void RegisterSettingsDataTable(IAssetTools& AssetTools);
 
+	/** Adds the 'Settings Data Asset' to the context menu. */
+	void RegisterSettingsDataAsset(IAssetTools& AssetTools);
+
 	/** Asset type actions */
 	TArray<TSharedPtr<class FAssetTypeActions_Base>> RegisteredAssets;
 };
