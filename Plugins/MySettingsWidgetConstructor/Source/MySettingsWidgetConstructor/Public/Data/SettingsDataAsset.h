@@ -17,6 +17,9 @@ class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	/** Default constructor.  */
+	USettingsDataAsset();
+
 	/** Returns the data table. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class USettingsDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal; }
@@ -128,7 +131,7 @@ protected:
 
 	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Percent Size"))
-	FVector2D SettingsPercentSizeInternal = FVector2D::UnitVector; //[D]
+	FVector2D SettingsPercentSizeInternal = FVector2D(0.95f, 0.8f); //[D]
 
 	/** The padding of the settings widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Padding"))
@@ -136,7 +139,7 @@ protected:
 
 	/** The height of the scrollbox widget in percentages of the entire settings widget, where 1 means fill all space under settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Scrollbox Percent Height", ClampMin = "0", ClampMax = "1"))
-	float ScrollboxPercentHeightInternal = 0.7f; //[D]
+	float ScrollboxPercentHeightInternal = 0.75f; //[D]
 
 	/** The padding of the scrollbox widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Scrollbox Padding"))

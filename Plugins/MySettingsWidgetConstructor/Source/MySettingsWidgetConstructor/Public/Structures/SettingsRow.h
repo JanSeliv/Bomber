@@ -119,6 +119,9 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FButtonThemeData : public FSettingsThemeD
 {
 	GENERATED_BODY()
 
+	/** Default constructor to set default values. */
+	FButtonThemeData();
+
 	/** The padding to used when button is pressed. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
 	FMargin PressedPadding; //[B]
@@ -132,6 +135,9 @@ USTRUCT(BlueprintType)
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FCheckboxThemeData : public FSettingsThemeData
 {
 	GENERATED_BODY()
+
+	/** Default constructor to set default values. */
+	FCheckboxThemeData();
 
 	/** The texture image of the toggled checkbox. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -150,6 +156,9 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FComboboxThemeData : public FSettingsThem
 {
 	GENERATED_BODY()
 
+	/** Default constructor to set default values. */
+	FComboboxThemeData();
+
 	/** The padding to used when combobox is pressed. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
 	FMargin PressedPadding; //[B]
@@ -164,7 +173,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FComboboxThemeData : public FSettingsThem
 
 	/** The combobox background color */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor ItemBackgroundColor; //[B]
+	FSlateColor ItemBackgroundColor = FColor::Transparent; //[B]
 };
 
 /**
@@ -174,6 +183,9 @@ USTRUCT(BlueprintType)
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSliderThemeData : public FSettingsThemeData
 {
 	GENERATED_BODY()
+
+	/** Default constructor to set default values. */
+	FSliderThemeData();
 
 	/** The theme of the slider thumb. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -188,17 +200,20 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 {
 	GENERATED_BODY()
 
+	/** Default constructor to set default values. */
+	FMiscThemeData();
+
 	/** The common color of normal state for all setting types. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor ThemeColorNormal; //[B]
+	FSlateColor ThemeColorNormal = FColor::White; //[B]
 
 	/** The common color of hover state for all setting types. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor ThemeColorHover; //[B]
+	FSlateColor ThemeColorHover = FColor::White; //[B]
 
 	/** The misc colors for all setting types. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor ThemeColorExtra; //[B]
+	FSlateColor ThemeColorExtra = FColor::White; //[B]
 
 	/** The font of text and captions. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -206,7 +221,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 
 	/** The color of text and captions. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TextAndCaptionColor; //[B]
+	FSlateColor TextAndCaptionColor = FColor::White; //[B]
 
 	/** The font of the header. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -214,7 +229,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 
 	/** The color of the header. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TextHeaderColor; //[B]
+	FSlateColor TextHeaderColor = FColor::White; //[B]
 
 	/** The font of the footer. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -222,7 +237,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 
 	/** The color of the footer. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TextFooterColor; //[B]
+	FSlateColor TextFooterColor = FColor::White; //[B]
 
 	/** The font of all setting values. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -230,7 +245,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 
 	/** The color of all setting values. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TextElementColor; //[B]
+	FSlateColor TextElementColor = FColor::White; //[B]
 
 	/** The theme data of tooltips. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -238,7 +253,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 
 	/** The background color of tooltips. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TooltipBackgroundTint; //[B]
+	FSlateColor TooltipBackgroundTint = FColor::White; //[B]
 
 	/** The theme data of the window background. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -246,7 +261,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 
 	/** The theme color of the window background. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor WindowBackgroundTint; //[B]
+	FSlateColor WindowBackgroundTint = FColor::White; //[B]
 
 	/** The theme data of the menu border. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
@@ -254,7 +269,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 
 	/** Color of the border. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor MenuBorderTint; //[B]
+	FSlateColor MenuBorderTint = FColor::White; //[B]
 
 	/** Visibility of the border. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
