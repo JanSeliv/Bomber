@@ -10,28 +10,37 @@ public class Bomber : ModuleRules
 		CppStandard = CppStandardVersion.Cpp17; // Fails on CppStandardVersion.Latest by Niagara
 
 		PublicDependencyModuleNames.AddRange(new[]
-		{
-			"Core", "CoreUObject", "Engine", "InputCore", // Default
-			"HeadMountedDisplay", "UMG", "Slate", "SlateCore", // UMG
-			"AIModule", // AI
-			"GameplayTags", // Tags
-			"RHI", "ApplicationCore", // Resolutions
-			"EnhancedInput", // Enhanced Input plugin
-			"Niagara", // VFX
-			"RenderCore", // Render threads,
-			"MyUtils", // FFunctionPicker etc.
-			"MySettingsWidgetConstructor" // Generates settings
-		});
+		    {
+                "Core" // Core
+                , "UMG" // UUserWidget creation
+                , "EnhancedInput" // Created UMyInputAction, UMyInputMappingContext
+		    }
+		);
+
+		PrivateDependencyModuleNames.AddRange(new[]
+			{
+				"CoreUObject", "Engine", "InputCore", "Slate", "SlateCore" // Core
+				, "RHI", "ApplicationCore" // Resolutions
+				, "AIModule" // AI
+				, "Niagara" // VFX
+				, "RenderCore" // Render threads
+                , "GameplayTags" // FGameplayTag
+				//My modules
+				, "MyUtils" // FFunctionPicker etc.
+				, "MySettingsWidgetConstructor" // Generates settings
+			}
+		);
 
 		if (Target.bBuildEditor)
 		{
 			// Include Editor modules that are used in this Runtime module
 			PrivateDependencyModuleNames.AddRange(new[]
 				{
-					"UnrealEd", // FEditorDelegates
-					"BomberEditor", // UMyUnrealEdEngine
-					"Blutility", // UEditorUtilityLibrary::GetSelectionSet()
-					"MyEditorUtils" // UEditorUtilsLibrary
+					"UnrealEd" // FEditorDelegates
+					, "Blutility" // UEditorUtilityLibrary::GetSelectionSet()
+					//My modules
+					, "BomberEditor" // UMyUnrealEdEngine
+					, "MyEditorUtils" // UEditorUtilsLibrary
 				}
 			);
 		}

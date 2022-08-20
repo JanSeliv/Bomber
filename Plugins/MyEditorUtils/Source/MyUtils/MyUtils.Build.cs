@@ -11,18 +11,25 @@ public class MyUtils : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 			{
-				"Core",
-				"UMG"
+				"Core"
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
-				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore"
+				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
+				, "UMG" // UUserWidget
 			}
 		);
+
+		if (Target.bBuildEditor)
+		{
+			// Include Editor modules that are used in this Runtime module
+			PrivateDependencyModuleNames.AddRange(new[]
+				{
+					"MyEditorUtils" // UEditorUtilsLibrary
+				}
+			);
+		}
 	}
 }

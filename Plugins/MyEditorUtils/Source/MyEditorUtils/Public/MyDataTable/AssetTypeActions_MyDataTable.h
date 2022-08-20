@@ -8,7 +8,7 @@
 #include "AssetTypeActions_MyDataTable.generated.h"
 
 /**
- * Base class of custom data tables.
+ * Is responsible for creating new custom Data Table asset in the 'Add' context menu.
  * Is abstract to ignore this factory by !CurrentClass->HasAnyClassFlags(CLASS_Abstract),
  * child should not be abstracted
  */
@@ -56,5 +56,5 @@ public:
 
 	/** Low-level .json exporter, is called when 'Export as JSON' actions was pressed. */
 	virtual void ExecuteExportAsJSON(TArray<TWeakObjectPtr<UObject>> Objects);
-#pragma region FAssetTypeActions_DataTable
+#pragma endregion FAssetTypeActions_DataTable
 };

@@ -594,12 +594,19 @@ void USettingsWidget::NativeConstruct()
 		return;
 	}
 
-	SettingsDataTable->GenerateSettingsArray(/*Out*/SettingsTableRowsInternal);
+	TMap<FName, FSettingsRow> SettingRows;
+	SettingsDataTable->GetSettingRows(/*Out*/SettingRows);
 
-	// Set overall columns num by amount of rows that are marked to be started on next column
-	TArray<FSettingsPicker> Rows;
-	SettingsTableRowsInternal.GenerateValueArray(Rows);
-	OverallColumnsNumInternal += Rows.FilterByPredicate([](const FSettingsPicker& Row) { return Row.PrimaryData.bStartOnNextColumn; }).Num();
+	SettingsTableRowsInternal.Empty();
+	SettingsTableRowsInternal.Reserve(SettingRows.Num());
+	for (const TTuple<FName, FSettingsRow>& SettingRowIt : SettingRows)
+	{
+		const FSettingsPicker& SettingsPicker = SettingRowIt.Value.SettingsPicker;
+		SettingsTableRowsInternal.Emplace(SettingRowIt.Key, SettingsPicker);
+
+		// Set overall columns num by amount of rows that are marked to be started on next column
+		OverallColumnsNumInternal += static_cast<int32>(SettingsPicker.PrimaryData.bStartOnNextColumn);
+	}
 
 	// Hide that widget by default
 	SetVisibility(ESlateVisibility::Collapsed);

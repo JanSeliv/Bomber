@@ -4,6 +4,8 @@
 //---
 #include "Editor.h"
 #include "Editor/EditorEngine.h"
+#include "EditorFramework/AssetImportData.h"
+#include "Misc/FileHelper.h"
 
 // Checks, is the current world placed in the editor
 bool UEditorUtilsLibrary::IsEditor()
@@ -67,4 +69,21 @@ int32 UEditorUtilsLibrary::GetEditorPlayerIndex()
 		}
 	}
 	return INDEX_NONE;
+}
+
+// Exports specified data table to already its .json
+void UEditorUtilsLibrary::ReExportTableAsJSON(const UDataTable* DataTable)
+{
+	const UAssetImportData* AssetImportData = DataTable ? DataTable->AssetImportData : nullptr;
+	if (!AssetImportData)
+	{
+		return;
+	}
+
+	const FString CurrentFilename = AssetImportData->GetFirstFilename();
+	if (!CurrentFilename.IsEmpty())
+	{
+		const FString TableAsJSON = DataTable->GetTableAsJSON(EDataTableExportFlags::UseJsonObjectsForStructs);
+		FFileHelper::SaveStringToFile(TableAsJSON, *CurrentFilename);
+	}
 }

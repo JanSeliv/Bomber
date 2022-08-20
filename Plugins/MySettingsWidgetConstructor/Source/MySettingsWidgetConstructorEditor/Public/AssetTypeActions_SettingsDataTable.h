@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "AssetTypeActions/AssetTypeActions_MyDataTable.h"
+#include "MyDataTable//AssetTypeActions_MyDataTable.h"
 //---
 #include "AssetTypeActions_SettingsDataTable.generated.h"
 
 /**
- * @todo
+ * Is responsible for creating new Settings Data Table asset in the 'Add' context menu.
  */
 UCLASS()
 class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsDataTableFactory : public UMyDataTableFactory
@@ -20,7 +20,7 @@ public:
 };
 
 /**
- * @todo
+ * Shows additional actions in the Context Menu.
  */
 class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API FAssetTypeActions_SettingsDataTable : public FAssetTypeActions_MyDataTable
 {

@@ -11,19 +11,17 @@ public class MySettingsWidgetConstructor : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 			{
-				"Core",
-				"UMG",
-				"GameplayTags", // Tags
-				"MyUtils" // FFunctionPicker
+				"Core"
+				, "UMG" // Created USettingsWidget
+				, "GameplayTags" // Created FSettingTag
+				// My modules
+                , "MyUtils" // Created USettingsDataTable
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
-				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore"
+				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
 			}
 		);
 
@@ -32,8 +30,9 @@ public class MySettingsWidgetConstructor : ModuleRules
 			// Include Editor modules that are used in this Runtime module
 			PrivateDependencyModuleNames.AddRange(new[]
 				{
-					// Include Editor modules that are used in this Runtime module
-					"MyEditorUtils" // UEditorUtilsLibrary
+					"UnrealEd" // FDataTableEditorUtils
+					// My plugins
+					, "MyEditorUtils" // UEditorUtilsLibrary
 				}
 			);
 		}

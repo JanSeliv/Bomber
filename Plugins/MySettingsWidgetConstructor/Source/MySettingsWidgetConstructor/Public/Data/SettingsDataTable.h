@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataTable.h"
+#include "MyDataTable/MyDataTable.h"
 //---
 #include "Structures/SettingsRow.h"
 //---
@@ -10,13 +10,10 @@
 
 /**
  * Settings data table with FSettingsRow members.
- * Provides additional in-editor functionality:
- * - automatic set the key name by specified tag.
- * - generate .json on asset change.
- * - reimport .json.
+ * Provides additional in-editor functionality like automatic set the key name by specified setting tag.
  */
 UCLASS(BlueprintType)
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataTable : public UDataTable
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataTable : public UMyDataTable
 {
 	GENERATED_BODY()
 
@@ -27,5 +24,11 @@ public:
 	/** Returns the table rows.
 	 * @see USettingsDataAsset::SettingsDataTableInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void GenerateSettingsArray(TMap<FName, FSettingsPicker>& OutRows) const;
+	void GetSettingRows(TMap<FName, FSettingsRow>& OutRows) const { GetRows(OutRows); }
+
+protected:
+#if WITH_EDITOR
+	/** Called on every change in this data table to automatic set the key name by specified setting tag. */
+	virtual void OnThisDataTableChanged(FName RowKey, const uint8& RowData) override;
+#endif // WITH_EDITOR
 };

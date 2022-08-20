@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "GameplayTagContainer.h"
-#include "Engine/DataTable.h"
-#include "Components/SlateWrapperTypes.h"
-//---
+#include "MyDataTable/MyDataTable.h"
 #include "FunctionPicker/FunctionPicker.h"
+//---
+#include "GameplayTagContainer.h"
+#include "Components/SlateWrapperTypes.h"
 //---
 #include "SettingsRow.generated.h"
 
@@ -646,7 +646,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsPicker
   * Executing UI getters/setters will call automatically bounded chosen functions.
   */
 USTRUCT(BlueprintType)
-struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsRow : public FTableRowBase
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsRow : public FMyTableRow
 {
 	GENERATED_BODY()
 

@@ -34,7 +34,7 @@ public:
 
 	/** Returns the settings data.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE USettingsDataAsset* GetSettingsDataAsset() const { return SettingsDataAssetInternal; }
+	const FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() const { return SettingsDataAssetInternal; }
 
 	/** Display settings on UI. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -61,19 +61,18 @@ public:
 	void PlayUIClickSFX();
 
 	/** Returns the amount of settings rows. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetSettingsTableRowsNum() const { return SettingsTableRowsInternal.Num(); }
 
 	/** Try to find the setting row.
 	* @param PotentialTagName The probable tag name by which the row will be found (for 'VSync' will find a row with 'Settings.Checkbox.VSync' tag).
 	* @see UMyGameUserSettings::SettingsTableRowsInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FSettingsPicker& FindSettingRow(FName PotentialTagName) const;
 
 	/** Returns the found row by specified tag.
-	* @param SettingTag The gameplay tag by which the row will be found.
-	* @see UMyGameUserSettings::SettingsTableRowsInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
+	* @param SettingTag The gameplay tag by which the row will be found. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
 	const FSettingsPicker& GetSettingRow(const FSettingTag& SettingTag) const;
 
 	/** Save all settings into their configs. */
@@ -91,7 +90,7 @@ public:
 		UPARAM(meta = (Categories = "Settings")) const FGameplayTagContainer& SettingsToUpdate);
 
 	/** Returns the name of found tag by specified function. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "FunctionPicker"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "FunctionPicker"))
 	const FSettingTag& GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const;
 
 	/* ---------------------------------------------------
@@ -99,11 +98,11 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Returns empty settings row. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	static const FORCEINLINE FSettingsPicker& GetEmptySettingsRow() { return FSettingsPicker::Empty; }
 
 	/** Returns true if row is valid. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingsRow"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingsRow"))
 	static FORCEINLINE bool IsValidSettingsRow(const FSettingsPicker& SettingsRow) { return SettingsRow.IsValid(); }
 
 	/* ---------------------------------------------------
@@ -157,35 +156,35 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Returns is a checkbox toggled. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CheckboxTag"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CheckboxTag"))
 	bool GetCheckboxValue(const FSettingTag& CheckboxTag) const;
 
 	/** Returns chosen member index of a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ComboboxTag"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ComboboxTag"))
 	int32 GetComboboxIndex(const FSettingTag& ComboboxTag) const;
 
 	/** Get all members of a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ComboboxTag"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ComboboxTag"))
 	void GetComboboxMembers(const FSettingTag& ComboboxTag, TArray<FText>& OutMembers) const;
 
 	/** Get current value of a slider [0...1]. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SliderTag"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SliderTag"))
 	float GetSliderValue(const FSettingTag& SliderTag) const;
 
 	/** Get current text of the text line setting. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "TextLineTag"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "TextLineTag"))
 	void GetTextLineValue(const FSettingTag& TextLineTag, FText& OutText) const;
 
 	/** Get current input name of the text input setting. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "UserInputTag"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "UserInputTag"))
 	FName GetUserInputValue(const FSettingTag& UserInputTag) const;
 
 	/** Get custom widget of the setting by specified tag.  */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CustomWidgetTag"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CustomWidgetTag"))
 	class USettingCustomWidget* GetCustomWidget(const FSettingTag& CustomWidgetTag) const;
 
 	/** Get setting widget object by specified tag. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
 	class USettingSubWidget* GetSettingSubWidget(const FSettingTag& SettingTag) const;
 
 protected:

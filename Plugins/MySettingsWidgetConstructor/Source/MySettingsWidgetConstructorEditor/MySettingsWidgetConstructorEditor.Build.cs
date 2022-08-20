@@ -11,21 +11,20 @@ public class MySettingsWidgetConstructorEditor : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 			{
-				"Core",
-				"AssetTools", // RegisterAdvancedAssetCategory
-				"UnrealEd", // Editor globals like GEditor
-				"MySettingsWidgetConstructor", // Runtime module of this plugin
-				"GameplayTagsEditor", // FSettingTag customization
-				"MyEditorUtils" // FMyPropertyTypeCustomization
+				"Core"
+				//My modules
+				, "MyEditorUtils" // Created FSettingsPickerCustomization, USettingsDataTableFactory, FAssetTypeActions_SettingsDataTable
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
-				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore"
+				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
+				, "GameplayTagsEditor" // FGameplayTagCustomizationPublic
+				, "AssetTools" // RegisterAdvancedAssetCategory
+				, "UnrealEd" // Editor globals like GEditor
+				// My modules
+				, "MySettingsWidgetConstructor" // USettingsDataTable
 			}
 		);
 	}

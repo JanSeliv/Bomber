@@ -12,23 +12,21 @@ public class MyEditorUtils : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new[]
 			{
-				"Core",
-				"UnrealEd", // Editor globals like GEditor
-				"EditorFramework", // FEditorDelegates::FToolkitManager
-				"PropertyEditor", "EditorStyle", // Property types customizations
-				"ToolWidgets", // SSearchableComboBox
-				"AssetTools", // RegisterAdvancedAssetCategory
-				"DataTableEditor", "DesktopPlatform", "EditorFramework", "ToolMenus" // FAssetTypeActions_MyDataTable
+				"Core"
+				, "PropertyEditor" // Created FFunctionPickerCustomization
+				, "AssetTools" // Created FAssetTypeActions_MyDataTable
+				, "UnrealEd" // Created UMyDataTableFactory
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(
 			new[]
 			{
-				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore"
+				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
+				, "EditorFramework" // FEditorDelegates::FToolkitManager
+				, "EditorStyle" // Property types customizations
+				, "ToolWidgets" // SSearchableComboBox
+				, "DataTableEditor", "DesktopPlatform", "EditorFramework", "ToolMenus" // Editor data table
 			}
 		);
 	}
