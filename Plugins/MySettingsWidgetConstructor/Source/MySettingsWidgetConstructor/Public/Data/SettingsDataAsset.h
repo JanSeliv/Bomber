@@ -11,7 +11,7 @@
 /**
  * Describes common data of settings.
  */
-UCLASS()
+UCLASS(Config = MySettingsWidgetConstructor, DefaultConfig)
 class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
@@ -102,74 +102,74 @@ protected:
 	TObjectPtr<class USettingsDataTable> SettingsDataTableInternal = nullptr; //[D]
 
 	/** The sub-widget class of Button settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Button Class", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Button Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingButton> ButtonClassInternal = nullptr; //[D]
 
 	/** The sub-widget class of Checkbox settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Checkbox Class", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Checkbox Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingCheckbox> CheckboxClassInternal = nullptr; //[D]
 
 	/** The sub-widget class of Combobox settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Combobox Class", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Combobox Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingCombobox> ComboboxClassInternal = nullptr; //[D]
 
 	/** The sub-widget class of Slider settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Slider Class", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Slider Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingSlider> SliderClassInternal = nullptr; //[D]
 
 	/** The sub-widget class of Text Line settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Text Line Class", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Text Line Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingTextLine> TextLineClassInternal = nullptr; //[D]
 
 	/** The sub-widget class of User Input settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "User Input Class", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "User Input Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingUserInput> UserInputClassInternal = nullptr; //[D]
 
 	/** Set true to automatic construct settings during USettingsWidget::NativeConstruct() . */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Auto Construct Settings", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Auto Construct Settings", ShowOnlyInnerProperties))
 	bool bAutoConstructSettingsInternal = true; //[D]
 
 	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Percent Size"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Settings Percent Size", ShowOnlyInnerProperties))
 	FVector2D SettingsPercentSizeInternal = FVector2D(0.95f, 0.8f); //[D]
 
 	/** The padding of the settings widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Padding"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Settings Padding", ShowOnlyInnerProperties))
 	FMargin SettingsPaddingInternal = 50.f; //[D]
 
 	/** The height of the scrollbox widget in percentages of the entire settings widget, where 1 means fill all space under settings. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Scrollbox Percent Height", ClampMin = "0", ClampMax = "1"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Scrollbox Percent Height", ClampMin = "0", ClampMax = "1", ShowOnlyInnerProperties))
 	float ScrollboxPercentHeightInternal = 0.75f; //[D]
 
 	/** The padding of the scrollbox widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Scrollbox Padding"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Scrollbox Padding", ShowOnlyInnerProperties))
 	FMargin ScrollboxPaddingInternal = 0.f; //[D]
 
 	/** The padding space, used on adding next column. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Space Between Columns"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Space Between Columns", ShowOnlyInnerProperties))
 	float SpaceBetweenColumnsInternal = 10.f; //[D]
 
 	/** The button theme data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Button Theme Data"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Button Theme Data"))
 	FButtonThemeData ButtonThemeDataInternal; //[D]
 
 	/** The checkbox theme data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Checkbox Theme Data"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Checkbox Theme Data"))
 	FCheckboxThemeData CheckboxThemeDataInternal; //[D]
 
 	/** The combobox theme data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Combobox Theme Data"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Combobox Theme Data"))
 	FComboboxThemeData ComboboxThemeDataInternal; //[D]
 
 	/** The slider theme data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Slider Theme Data"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Slider Theme Data"))
 	FSliderThemeData SliderThemeDataInternal; //[D]
 
 	/** The user input theme data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "User Input Theme Data"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "User Input Theme Data"))
 	FSettingsThemeData UserInputThemeDataInternal; //[D]
 
 	/** The misc theme data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Misc Theme Data"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Misc Theme Data"))
 	FMiscThemeData MiscThemeDataInternal; //[D]
 };
