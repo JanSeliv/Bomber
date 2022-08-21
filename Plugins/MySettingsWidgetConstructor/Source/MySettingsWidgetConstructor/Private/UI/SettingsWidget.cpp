@@ -608,9 +608,6 @@ void USettingsWidget::NativeConstruct()
 		OverallColumnsNumInternal += static_cast<int32>(SettingsPicker.PrimaryData.bStartOnNextColumn);
 	}
 
-	// Hide that widget by default
-	SetVisibility(ESlateVisibility::Collapsed);
-
 	if (SettingsDataAssetInternal->ShouldAutoConstructSettings())
 	{
 		ConstructSettings();
