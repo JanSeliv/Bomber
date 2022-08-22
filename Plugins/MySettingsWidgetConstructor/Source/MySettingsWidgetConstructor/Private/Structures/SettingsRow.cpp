@@ -1,12 +1,31 @@
 // Copyright (c) Yevhenii Selivanov.
 
 #include "Structures/SettingsRow.h"
+//---
+#include "GameplayTags/Classes/GameplayTagsManager.h"
 
 // Empty settings tag
 const FSettingTag FSettingTag::EmptySettingTag = EmptyTag;
 
 // Empty settings row
 const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
+
+// The global of Setting tag categories
+FGlobalSettingTags FGlobalSettingTags::GSettingTags;
+
+void FGlobalSettingTags::AddTags()
+{
+	UGameplayTagsManager& Manager = UGameplayTagsManager::Get();
+
+	ButtonSettingTag = Manager.AddNativeGameplayTag(TEXT("Settings.Button"));
+	CheckboxSettingTag = Manager.AddNativeGameplayTag(TEXT("Settings.Checkbox"));
+	ComboboxSettingTag = Manager.AddNativeGameplayTag(TEXT("Settings.Combobox"));
+	ScrollboxSettingTag = Manager.AddNativeGameplayTag(TEXT("Settings.Scrollbox"));
+	SliderSettingTag = Manager.AddNativeGameplayTag(TEXT("Settings.Slider"));
+	TextLineSettingTag = Manager.AddNativeGameplayTag(TEXT("Settings.TextLine"));
+	UserInputSettingTag = Manager.AddNativeGameplayTag(TEXT("Settings.UserInput"));
+	CustomWidgetSettingTag = Manager.AddNativeGameplayTag(TEXT("Settings.CustomWidget"));
+}
 
 // Default constructor to set default values
 FButtonThemeData::FButtonThemeData()

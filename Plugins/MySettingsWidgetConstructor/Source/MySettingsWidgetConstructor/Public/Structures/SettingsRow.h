@@ -28,6 +28,32 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingTag : public FGameplayTag
 	static const FSettingTag EmptySettingTag;
 };
 
+/**
+ * Allows automatically add native setting tags at startup.
+ */
+struct MYSETTINGSWIDGETCONSTRUCTOR_API FGlobalSettingTags : public FGameplayTagNativeAdder
+{
+	FSettingTag ButtonSettingTag = FSettingTag::EmptySettingTag;
+	FSettingTag CheckboxSettingTag = FSettingTag::EmptySettingTag;
+	FSettingTag ComboboxSettingTag = FSettingTag::EmptySettingTag;
+	FSettingTag ScrollboxSettingTag = FSettingTag::EmptySettingTag;
+	FSettingTag SliderSettingTag = FSettingTag::EmptySettingTag;
+	FSettingTag TextLineSettingTag = FSettingTag::EmptySettingTag;
+	FSettingTag UserInputSettingTag = FSettingTag::EmptySettingTag;
+	FSettingTag CustomWidgetSettingTag = FSettingTag::EmptySettingTag;
+
+	/** Returns global setting tags as const ref.
+	 * @see FGlobalSettingTags::GSettingTags. */
+	static const FORCEINLINE FGlobalSettingTags& Get() { return GSettingTags; }
+
+	virtual void AddTags() override;
+	virtual ~FGlobalSettingTags() = default;
+
+private:
+	/** The global of Setting tag categories. */
+	static FGlobalSettingTags GSettingTags;
+};
+
 /**	┌───────────────────────────┐
   *	│			[SETTINGS]		│ Header (title)
   *	│	[Option 1]	[Option 2]	│ Content (options)
