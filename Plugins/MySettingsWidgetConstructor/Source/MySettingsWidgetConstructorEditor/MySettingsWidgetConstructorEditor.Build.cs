@@ -23,6 +23,7 @@ public class MySettingsWidgetConstructorEditor : ModuleRules
 				, "GameplayTagsEditor" // FGameplayTagCustomizationPublic
 				, "AssetTools" // RegisterAdvancedAssetCategory
 				, "UnrealEd" // Editor globals like GEditor
+				, "Projects" // IPluginManager::Get()
 				// My modules
 				, "MySettingsWidgetConstructor" // USettingsDataTable
 			}

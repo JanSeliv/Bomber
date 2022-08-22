@@ -4,6 +4,9 @@
 //---
 #include "Data/SettingsDataTable.h"
 #include "MySettingsWidgetConstructorEditorModule.h"
+//---
+#include "EditorFramework/AssetImportData.h"
+#include "Interfaces/IPluginManager.h"
 
 #define LOCTEXT_NAMESPACE "AssetTypeActions"
 
@@ -15,6 +18,41 @@ USettingsDataTableFactory::USettingsDataTableFactory()
 FText USettingsDataTableFactory::GetDisplayName() const
 {
 	return LOCTEXT("SettingsDataTableFactory", "Settings Data Table");
+}
+
+UObject* USettingsDataTableFactory::FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
+{
+	UObject* NewObject = Super::FactoryCreateNew(InClass, InParent, InName, Flags, Context, Warn);
+
+	ImportDefaultSettingsDataTable(NewObject);
+
+	return NewObject;
+}
+
+// Imports default data into new Settings Data Table
+void USettingsDataTableFactory::ImportDefaultSettingsDataTable(UObject* NewSettingDataTable)
+{
+	USettingsDataTable* SettingsDataTable = CastChecked<USettingsDataTable>(NewSettingDataTable);
+	UAssetImportData* AssetImportData = SettingsDataTable->AssetImportData;
+	check(AssetImportData);
+
+	// Find the .json
+	static FString DataTableGlobalDir = TEXT("");
+	if (DataTableGlobalDir.IsEmpty())
+	{
+		const FString ThisPluginName = TEXT("MySettingsWidgetConstructor");
+		const FString DataTableRelativeDir = TEXT("Config/DefaultSettingsDataTable.json");
+		const TSharedPtr<IPlugin> ThisPlugin = IPluginManager::Get().FindPlugin(ThisPluginName);
+		checkf(ThisPlugin, TEXT("ASSERT: '%s' plugin is not found"), *ThisPluginName);
+		DataTableGlobalDir = ThisPlugin->GetBaseDir() / DataTableRelativeDir;
+	}
+
+	// Import the .json
+	AssetImportData->UpdateFilenameOnly(DataTableGlobalDir);
+	Reimport(SettingsDataTable);
+
+	// Clear import path to prevent reimporting default data for already created table
+	AssetImportData->SourceData = FAssetImportInfo();
 }
 
 FText FAssetTypeActions_SettingsDataTable::GetName() const

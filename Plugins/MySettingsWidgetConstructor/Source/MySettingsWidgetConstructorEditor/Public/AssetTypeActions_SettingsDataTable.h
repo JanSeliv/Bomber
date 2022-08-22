@@ -17,6 +17,11 @@ class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsDataTableFactory : public U
 public:
 	USettingsDataTableFactory();
 	virtual FText GetDisplayName() const override;
+	virtual UObject* FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn) override;
+
+protected:
+	/** Imports default data into new Settings Data Table. */
+	virtual void ImportDefaultSettingsDataTable(UObject* NewSettingDataTable);
 };
 
 /**
