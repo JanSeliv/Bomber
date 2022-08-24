@@ -9,6 +9,7 @@
 #include "Components/CheckBox.h"
 #include "Components/ComboBoxString.h"
 #include "Components/EditableTextBox.h"
+#include "Components/ScrollBox.h"
 #include "Components/SizeBox.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
@@ -252,4 +253,16 @@ void USettingUserInput::OnTextChanged(const FText& Text)
 
 	const FName MewValue(Text.ToString());
 	SettingsWidgetInternal->SetSettingUserInput(SettingTagInternal, MewValue);
+}
+
+// Called after the underlying slate widget is constructed
+void USettingScrollBox::NativeConstruct()
+{
+	Super::NativeConstruct();
+	
+	if (ScrollBoxWidget)
+	{
+		SlateScrollBoxInternal = GetSlateWidget<SScrollBox>(ScrollBoxWidget);
+		check(SlateScrollBoxInternal.IsValid());
+	}
 }

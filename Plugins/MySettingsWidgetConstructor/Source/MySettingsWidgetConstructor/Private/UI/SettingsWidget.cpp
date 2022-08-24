@@ -3,6 +3,8 @@
 #include "UI/SettingsWidget.h"
 //---
 #include "GameFramework/GameUserSettings.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/SizeBox.h"
 //---
 #include "Data/SettingsDataAsset.h"
 #include "Data/SettingsDataTable.h"
@@ -583,6 +585,101 @@ USettingSubWidget* USettingsWidget::GetSettingSubWidget(const FSettingTag& Setti
 	return PrimaryData.IsValid() ? PrimaryData.SettingSubWidget.Get() : nullptr;
 }
 
+// Returns the size of the Settings widget on the screen
+FVector2D USettingsWidget::GetSettingsSize() const
+{
+	if (!SettingsDataAssetInternal)
+	{
+		return FVector2D::ZeroVector;
+	}
+
+	const FVector2D PercentSize = FMath::Clamp<FVector2D>(SettingsDataAssetInternal->GetSettingsPercentSize(), FVector2D::ZeroVector, FVector2D::UnitVector);
+
+	UObject* WorldContextObject = GetOwningPlayer();
+	const FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(WorldContextObject);
+	const float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(WorldContextObject);
+
+	const FVector2D NewViewportSize = ViewportSize * PercentSize;
+	return ViewportScale ? NewViewportSize / ViewportScale : NewViewportSize;
+}
+
+// Returns the size of specified category on the screen
+FVector2D USettingsWidget::GetSubWidgetsSize(int32 SectionsBitmask) const
+{
+	if (!SectionsBitmask)
+	{
+		return FVector2D::ZeroVector;
+	}
+
+	TArray<const UWidget*> DesiredWidgets;
+
+	constexpr int32 HeaderAlignment = static_cast<int32>(EMyVerticalAlignment::Header);
+	if (HeaderAlignment & SectionsBitmask)
+	{
+		DesiredWidgets.Emplace(HeaderVerticalBox);
+	}
+
+	constexpr int32 ContentAlignment = static_cast<int32>(EMyVerticalAlignment::Content);
+	if (ContentAlignment & SectionsBitmask)
+	{
+		DesiredWidgets.Emplace(ContentHorizontalBox);
+	}
+
+	constexpr int32 FooterAlignment = static_cast<int32>(EMyVerticalAlignment::Footer);
+	if (FooterAlignment & SectionsBitmask)
+	{
+		DesiredWidgets.Emplace(FooterVerticalBox);
+	}
+
+	FVector2D SubWidgetsHeight = FVector2D::ZeroVector;
+	for (const UWidget* DesiredWidgetIt : DesiredWidgets)
+	{
+		if (DesiredWidgetIt)
+		{
+			const FVector2D SubWidgetHeight = DesiredWidgetIt->GetDesiredSize();
+			ensureAlwaysMsgf(!SubWidgetHeight.IsZero(), TEXT("ASSERT: 'SubWidgetHeight' is zero, can't get the size of subwidget, most likely widget is not initialized yet, call ForceLayoutPrepass()"));
+			SubWidgetsHeight += SubWidgetHeight;
+		}
+	}
+
+	const float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(GetOwningPlayer());
+	return ViewportScale ? SubWidgetsHeight / ViewportScale : SubWidgetsHeight;
+}
+
+
+// Returns the height of a setting scrollbox on the screen
+float USettingsWidget::GetScrollBoxHeight() const
+{
+	if (!SettingsDataAssetInternal)
+	{
+		return 0.f;
+	}
+
+	// The widget size
+	const FVector2D SettingsSize = GetSettingsSize();
+
+	// Margin size
+	constexpr int32 Margins = static_cast<int32>(EMyVerticalAlignment::Margins);
+	const FVector2D MarginsSize = GetSubWidgetsSize(Margins);
+
+	// Additional padding sizes
+	float Paddings = 0.f;
+	const FMargin SettingsPadding = SettingsDataAssetInternal->GetSettingsPadding();
+	Paddings += SettingsPadding.Top + SettingsPadding.Bottom;
+	const FMargin ScrollBoxPadding = SettingsDataAssetInternal->GetScrollboxPadding();
+	Paddings += ScrollBoxPadding.Top + ScrollBoxPadding.Bottom;
+	const float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(GetOwningPlayer());
+	Paddings = ViewportScale ? Paddings / ViewportScale : Paddings;
+
+	const float ScrollBoxHeight = (SettingsSize - MarginsSize).Y - Paddings;
+
+	// Scale scrollbox
+	const float PercentSize = FMath::Clamp(SettingsDataAssetInternal->GetScrollboxPercentHeight(), 0.f, 1.f);
+	const float ScaledHeight = ScrollBoxHeight * PercentSize;
+
+	return ScaledHeight;
+}
+
 // Called after the underlying slate widget is constructed
 void USettingsWidget::NativeConstruct()
 {
@@ -615,15 +712,17 @@ void USettingsWidget::NativeConstruct()
 }
 
 // Construct all settings from the settings data table
-void USettingsWidget::ConstructSettings_Implementation()
+void USettingsWidget::ConstructSettings()
 {
-	// BP implementation to create subsetting widgets
-	//...
+	// BP implementation to cache some data before creating subwidgets
+	OnConstructSettings();
 
 	for (TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
 		AddSetting(RowIt.Value);
 	}
+
+	UpdateScrollBoxesHeight();
 }
 
 // Is called when In-Game menu became opened or closed
@@ -696,6 +795,22 @@ void USettingsWidget::StartNextColumn_Implementation()
 {
 	// BP implementation
 	// ...
+}
+
+// Automatically sets the height for all scrollboxes in the Settings
+void USettingsWidget::UpdateScrollBoxesHeight()
+{
+	ForceLayoutPrepass(); // Call it to make GetSettingsHeight work since it is called during widget construction
+	const float ScrollBoxHeight = GetScrollBoxHeight();
+
+	for (const USettingScrollBox* ScrollBoxIt : SettingScrollBoxesInternal)
+	{
+		USizeBox* SizeBoxWidget = ScrollBoxIt ? ScrollBoxIt->GetSizeBoxWidget() : nullptr;
+		if (SizeBoxWidget)
+		{
+			SizeBoxWidget->SetMaxDesiredHeight(ScrollBoxHeight);
+		}
+	}
 }
 
 // Display settings on UI

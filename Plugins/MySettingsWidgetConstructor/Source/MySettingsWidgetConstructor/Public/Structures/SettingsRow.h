@@ -59,13 +59,17 @@ private:
   *	│	[Option 1]	[Option 2]	│ Content (options)
   *	│			[GO BACK]		│ Footer
   *	└───────────────────────────┘ */
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EMyVerticalAlignment : uint8
 {
-	Header,
-	Content,
-	Footer
+	None = 0 UMETA(Hidden),
+	Header = 1 << 0,
+	Content = 1 << 1,
+	Footer = 1 << 2,
+	Margins = Header | Footer UMETA(Hidden),
+	All = Header | Content | Footer UMETA(Hidden)
 };
+ENUM_CLASS_FLAGS(EMyVerticalAlignment)
 
 /**
   * All UI states of the button.

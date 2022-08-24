@@ -301,3 +301,32 @@ class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCustomWidget : public USettingSubW
 
 public:
 };
+
+/**
+* The sub-widget of the Scrollbox widget settings.
+ */
+UCLASS()
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingScrollBox : public USettingSubWidget
+{
+	GENERATED_BODY()
+
+public:
+	/** Returns the actual ScrollBox widget of this setting. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UScrollBox* GetScrollBoxWidget() const { return ScrollBoxWidget; }
+
+	/** Returns the slate ScrollBox. */
+	FORCEINLINE TSharedPtr<class SScrollBox> GetSlateScrollBox() const { return SlateScrollBoxInternal.Pin(); }
+
+protected:
+	/** The slate ScrollBox.*/
+	TWeakPtr<class SScrollBox> SlateScrollBoxInternal = nullptr;
+
+	/** The actual ScrollBox widget of this setting. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UScrollBox> ScrollBoxWidget = nullptr; //[I]
+
+	/** Called after the underlying slate widget is constructed.
+	 * May be called multiple times due to adding and removing from the hierarchy. */
+	virtual void NativeConstruct() override;
+};

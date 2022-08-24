@@ -130,8 +130,8 @@ protected:
 	bool bAutoConstructSettingsInternal = true; //[D]
 
 	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Settings Percent Size", ShowOnlyInnerProperties))
-	FVector2D SettingsPercentSizeInternal = FVector2D(0.95f, 0.8f); //[D]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Settings Percent Size", ClampMin = "0", ClampMax = "1", ShowOnlyInnerProperties))
+	FVector2D SettingsPercentSizeInternal = FVector2D(0.6f, 0.4f); //[D]
 
 	/** The padding of the settings widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Settings Padding", ShowOnlyInnerProperties))
@@ -139,7 +139,7 @@ protected:
 
 	/** The height of the scrollbox widget in percentages of the entire settings widget, where 1 means fill all space under settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Scrollbox Percent Height", ClampMin = "0", ClampMax = "1", ShowOnlyInnerProperties))
-	float ScrollboxPercentHeightInternal = 0.75f; //[D]
+	float ScrollboxPercentHeightInternal = 0.6f; //[D]
 
 	/** The padding of the scrollbox widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Scrollbox Padding", ShowOnlyInnerProperties))

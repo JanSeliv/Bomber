@@ -34,7 +34,7 @@
 					"Right": 0,
 					"Bottom": 48
 				},
-				"LineHeight": 96,
+				"LineHeight": 48,
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
@@ -70,8 +70,8 @@
 			},
 			"TextLine":
 			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
+				"VerticalAlignment": "Header",
+				"HorizontalAlignment": "HAlign_Center"
 			},
 			"UserInput":
 			{

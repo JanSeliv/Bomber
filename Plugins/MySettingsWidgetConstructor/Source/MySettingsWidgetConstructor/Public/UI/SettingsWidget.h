@@ -175,6 +175,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
 	class USettingSubWidget* GetSettingSubWidget(const FSettingTag& SettingTag) const;
 
+	/** Returns the size of the Settings widget on the screen. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FVector2D GetSettingsSize() const;
+
+	/** Returns the size of specified sections on the screen. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FVector2D GetSubWidgetsSize(
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EMyVerticalAlignment")) int32 SectionsBitmask) const;
+
+	/** Returns the height of a setting scrollbox on the screen. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	float GetScrollBoxHeight() const;
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -196,6 +209,26 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overall Columns Num"))
 	int32 OverallColumnsNumInternal = 1; //[G]
 
+	/** Contains all setting scrollboxes added to columns. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Setting ScrollBoxes"))
+	TArray<TObjectPtr<class USettingScrollBox>> SettingScrollBoxesInternal; //[G]
+
+	/* ---------------------------------------------------
+	 *		Bound widget properties
+	 * --------------------------------------------------- */
+
+	/** The section in the top margin of Settings, usually contains a title. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UVerticalBox> HeaderVerticalBox = nullptr; //[I]
+
+	/** The main section in the middle of Settings, contains all in-game settings. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UHorizontalBox> ContentHorizontalBox = nullptr; //[I]
+
+	/** The section in the bottom margin of Settings, usually contains the Back button*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UVerticalBox> FooterVerticalBox = nullptr; //[I]
+
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
@@ -205,8 +238,12 @@ protected:
 	virtual void NativeConstruct() override;
 
 	/** Construct all settings from the settings data table. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ConstructSettings();
+
+	/** Is blueprint-event called on settings construct to cache some data before creating subwidgets. */
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected))
+	void OnConstructSettings();
 
 	/** Is called when In-Game menu became opened or closed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -226,6 +263,10 @@ protected:
 	/** Starts adding settings on the next column. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void StartNextColumn();
+
+	/** Automatically sets the height for all scrollboxes in the Settings. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void UpdateScrollBoxesHeight();
 
 	/* ---------------------------------------------------
 	 *		Add by setting types
