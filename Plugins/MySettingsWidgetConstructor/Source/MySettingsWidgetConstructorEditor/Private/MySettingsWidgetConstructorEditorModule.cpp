@@ -5,6 +5,7 @@
 #include "SettingsPickerCustomization.h"
 #include "AssetTypeActions_SettingsDataAsset.h"
 #include "AssetTypeActions_SettingsDataTable.h"
+#include "AssetTypeActions_SettingsWidget.h"
 //---
 #include "GameplayTagsEditorModule.h"
 #include "AssetToolsModule.h"
@@ -76,6 +77,7 @@ void FMySettingsWidgetConstructorEditorModule::RegisterAssets()
 	RegisterSettingsCategory(AssetTools);
 	RegisterSettingsDataTable(AssetTools);
 	RegisterSettingsDataAsset(AssetTools);
+	RegisterSettingsWidget(AssetTools);
 }
 
 // Removes all custom assets from context menu
@@ -108,17 +110,25 @@ void FMySettingsWidgetConstructorEditorModule::RegisterSettingsCategory(IAssetTo
 // Adds the 'Settings Data Table' asset to the context menu
 void FMySettingsWidgetConstructorEditorModule::RegisterSettingsDataTable(IAssetTools& AssetTools)
 {
-	TSharedPtr<FAssetTypeActions_SettingsDataTable> InputDataTableAction = MakeShared<FAssetTypeActions_SettingsDataTable>();
-	AssetTools.RegisterAssetTypeActions(InputDataTableAction.ToSharedRef());
-	RegisteredAssets.Emplace(MoveTemp(InputDataTableAction));
+	TSharedPtr<FAssetTypeActions_SettingsDataTable> SettingsDataTableAction = MakeShared<FAssetTypeActions_SettingsDataTable>();
+	AssetTools.RegisterAssetTypeActions(SettingsDataTableAction.ToSharedRef());
+	RegisteredAssets.Emplace(MoveTemp(SettingsDataTableAction));
 }
 
 // Adds the 'Settings Data Asset' to the context menu
 void FMySettingsWidgetConstructorEditorModule::RegisterSettingsDataAsset(IAssetTools& AssetTools)
 {
-	TSharedPtr<FAssetTypeActions_SettingsDataAsset> InputDataAssetAction = MakeShared<FAssetTypeActions_SettingsDataAsset>();
-	AssetTools.RegisterAssetTypeActions(InputDataAssetAction.ToSharedRef());
-	RegisteredAssets.Emplace(MoveTemp(InputDataAssetAction));
+	TSharedPtr<FAssetTypeActions_SettingsDataAsset> SettingsDataAssetAction = MakeShared<FAssetTypeActions_SettingsDataAsset>();
+	AssetTools.RegisterAssetTypeActions(SettingsDataAssetAction.ToSharedRef());
+	RegisteredAssets.Emplace(MoveTemp(SettingsDataAssetAction));
+}
+
+// Adds the 'Settings Widget' to the context menu
+void FMySettingsWidgetConstructorEditorModule::RegisterSettingsWidget(IAssetTools& AssetTools)
+{
+	TSharedPtr<FAssetTypeActions_SettingsWidget> SettingsWidgetAction = MakeShared<FAssetTypeActions_SettingsWidget>();
+	AssetTools.RegisterAssetTypeActions(SettingsWidgetAction.ToSharedRef());
+	RegisteredAssets.Emplace(MoveTemp(SettingsWidgetAction));
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -13,7 +13,7 @@ public class MySettingsWidgetConstructorEditor : ModuleRules
 			{
 				"Core"
 				//My modules
-				, "MyEditorUtils" // Created FSettingsPickerCustomization, USettingsDataTableFactory, FAssetTypeActions_SettingsDataTable
+				, "MyEditorUtils" // Created FSettingsPickerCustomization, FAssetTypeActions_SettingsDataTable, FAssetTypeActions_SettingsUserWidget
 			}
 		);
 

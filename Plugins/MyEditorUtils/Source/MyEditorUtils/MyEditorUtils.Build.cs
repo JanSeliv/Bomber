@@ -16,6 +16,7 @@ public class MyEditorUtils : ModuleRules
 				, "PropertyEditor" // Created FFunctionPickerCustomization
 				, "AssetTools" // Created FAssetTypeActions_MyDataTable
 				, "UnrealEd" // Created UMyDataTableFactory
+				, "UMGEditor" // Created UMyUserWidgetFactory
 			}
 		);
 
@@ -27,6 +28,7 @@ public class MyEditorUtils : ModuleRules
 				, "EditorStyle" // Property types customizations
 				, "ToolWidgets" // SSearchableComboBox
 				, "DataTableEditor", "DesktopPlatform", "EditorFramework", "ToolMenus" // Editor data table
+				, "UMG", "Kismet" // Editor user widget
 			}
 		);
 	}

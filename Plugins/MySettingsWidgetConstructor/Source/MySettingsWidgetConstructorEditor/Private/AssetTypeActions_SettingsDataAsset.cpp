@@ -21,6 +21,7 @@ FText USettingsDataAssetFactory::GetDisplayName() const
 
 UObject* USettingsDataAssetFactory::FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
 {
+	check(InClass && InClass->IsChildOf<USettingsDataAsset>());
 	return NewObject<USettingsDataAsset>(InParent, InClass, InName, Flags);
 }
 
