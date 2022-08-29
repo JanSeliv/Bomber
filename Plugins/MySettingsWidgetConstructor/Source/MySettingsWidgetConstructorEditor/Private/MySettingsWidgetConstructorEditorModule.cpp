@@ -48,6 +48,8 @@ void FMySettingsWidgetConstructorEditorModule::RegisterPropertyCustomizations()
 		SettingTagStructureName,
 		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FGameplayTagCustomizationPublic::MakeInstance)
 	);
+
+	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 // Removes all custom property customizations

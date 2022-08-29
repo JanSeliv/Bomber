@@ -30,7 +30,7 @@ FText UMyUserWidgetFactory::GetDisplayName() const
 	return LOCTEXT("MyUserWidget", "My User Widget");
 }
 
-UObject* UMyUserWidgetFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
+UObject* UMyUserWidgetFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn, FName CallingContext)
 {
 	// Make sure we are trying to factory a blueprint, then create and init one
 	check(Class->IsChildOf(UMyUserWidgetBlueprint::StaticClass()));
@@ -38,19 +38,23 @@ UObject* UMyUserWidgetFactory::FactoryCreateNew(UClass* Class, UObject* InParent
 	FString ParentPath = InParent->GetPathName();
 
 	const TSubclassOf<UUserWidget> ParentClass = GetWidgetClass();
-	if ((ParentClass == nullptr) || !FKismetEditorUtilities::CanCreateBlueprintOfClass(ParentClass))
+	if (ParentClass == nullptr || !FKismetEditorUtilities::CanCreateBlueprintOfClass(ParentClass))
 	{
 		FFormatNamedArguments Args;
-		Args.Add(TEXT("ClassName"), (ParentClass != nullptr) ? FText::FromString(ParentClass->GetName()) : NSLOCTEXT("UnrealEd", "Null", "(null)"));
+		Args.Add(TEXT("ClassName"), ParentClass != nullptr ? FText::FromString(ParentClass->GetName()) : NSLOCTEXT("UnrealEd", "Null", "(null)"));
 		FMessageDialog::Open(EAppMsgType::Ok, FText::Format(NSLOCTEXT("UnrealEd", "CannotCreateBlueprintFromClass", "Cannot create a blueprint based on the class '{0}'."), Args));
 		return nullptr;
 	}
+
 	// If the root widget selection dialog is not enabled, use a canvas panel as the root by default
 	TSubclassOf<UPanelWidget> RootWidgetClass = nullptr;
-	if (!GetDefault<UUMGEditorProjectSettings>()->bUseWidgetTemplateSelector)
+	const UUMGEditorProjectSettings* UMGProjectSettings = GetDefault<UUMGEditorProjectSettings>();
+	check(UMGProjectSettings);
+	if (!UMGProjectSettings->bUseWidgetTemplateSelector)
 	{
-		RootWidgetClass = UCanvasPanel::StaticClass();
+		RootWidgetClass = UMGProjectSettings->DefaultRootWidget;
 	}
+
 	UMyUserWidgetBlueprint* NewBP = CastChecked<UMyUserWidgetBlueprint>(FKismetEditorUtilities::CreateBlueprint(ParentClass, InParent, Name, BPTYPE_Normal, UMyUserWidgetBlueprint::StaticClass(), UWidgetBlueprintGeneratedClass::StaticClass(), NAME_None));
 
 	// Create the selected root widget
@@ -66,6 +70,11 @@ UObject* UMyUserWidgetFactory::FactoryCreateNew(UClass* Class, UObject* InParent
 	return NewBP;
 }
 
+UObject* UMyUserWidgetFactory::FactoryCreateNew(UClass* Class, UObject* InParent, FName Name, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn)
+{
+	return FactoryCreateNew(Class, InParent, Name, Flags, Context, Warn, NAME_None);
+}
+
 TSubclassOf<UUserWidget> UMyUserWidgetFactory::GetWidgetClass() const
 {
 	return UUserWidget::StaticClass();
@@ -78,7 +87,7 @@ FText FAssetTypeActions_MyUserWidget::GetName() const
 
 void FAssetTypeActions_MyUserWidget::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<IToolkitHost> EditWithinLevelEditor)
 {
-	EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
+	const EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 
 	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
 	{

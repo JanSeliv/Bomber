@@ -10,6 +10,10 @@ public:
 	/** Is used to to load and unload the Property Editor Module. */
 	inline static const FName PropertyEditorModule = TEXT("PropertyEditor");
 
+	/** Are used to register and unregister custom widget blueprint. */
+	inline static const FName UMGEditorModuleName = TEXT("UMGEditor");
+	inline static const FName KismetCompilerModuleName = TEXT("KismetCompiler");
+
 	/**
 	 * Called right after the module DLL has been loaded and the module object has been created.
 	 * Load dependent modules here, and they will be guaranteed to be available during ShutdownModule.
@@ -23,4 +27,17 @@ public:
 	* can safely reference those dependencies in ShutdownModule() as well.
 	*/
 	virtual void ShutdownModule() override;
+
+protected:
+	/** Creates all customizations for custom properties. */
+	void RegisterPropertyCustomizations();
+
+	/** Removes all custom property customizations. */
+	void UnregisterPropertyCustomizations();
+
+	/** Registers My User Widget Blueprint, so custom widget could be compiled. */
+	void RegisterMyUserWidgetBlueprint();
+
+	/** Unregisters My User Widget Blueprint. */
+	void UnregisterMyUserWidgetBlueprint();
 };

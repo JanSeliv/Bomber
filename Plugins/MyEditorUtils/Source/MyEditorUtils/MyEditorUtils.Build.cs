@@ -28,7 +28,7 @@ public class MyEditorUtils : ModuleRules
 				, "EditorStyle" // Property types customizations
 				, "ToolWidgets" // SSearchableComboBox
 				, "DataTableEditor", "DesktopPlatform", "EditorFramework", "ToolMenus" // Editor data table
-				, "UMG", "Kismet" // Editor user widget
+				, "UMG", "Kismet", "KismetCompiler" // Editor user widget
 			}
 		);
 	}
