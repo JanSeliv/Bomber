@@ -92,10 +92,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FORCEINLINE FMiscThemeData& GetMiscThemeData() const { return MiscThemeDataInternal; }
 
-	/** Returns the misc theme data. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool ShouldAutoConstructSettings() const { return bAutoConstructSettingsInternal; }
-
 protected:
 	/** The data table with all settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Data Table"))
@@ -124,10 +120,6 @@ protected:
 	/** The sub-widget class of User Input settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "User Input Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingUserInput> UserInputClassInternal = nullptr; //[D]
-
-	/** Set true to automatic construct settings during USettingsWidget::NativeConstruct() . */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Auto Construct Settings", ShowOnlyInnerProperties))
-	bool bAutoConstructSettingsInternal = true; //[D]
 
 	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Settings Percent Size", ClampMin = "0", ClampMax = "1", ShowOnlyInnerProperties))

@@ -6,6 +6,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/SizeBox.h"
 //---
+#include "UtilsLibrary.h"
 #include "Data/SettingsDataAsset.h"
 #include "Data/SettingsDataTable.h"
 #include "UI/SettingSubWidget.h"
@@ -80,6 +81,11 @@ void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpda
 	if (SettingsToUpdate.IsEmpty())
 	{
 		return;
+	}
+
+	if (SettingsTableRowsInternal.IsEmpty())
+	{
+		UpdateSettingsTableRows();
 	}
 
 	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
@@ -685,30 +691,33 @@ void USettingsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	const USettingsDataTable* SettingsDataTable = SettingsDataAssetInternal ? SettingsDataAssetInternal->GetSettingsDataTable() : nullptr;
-	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
-	{
-		return;
-	}
+	UpdateSettingsTableRows();
 
-	TMap<FName, FSettingsRow> SettingRows;
-	SettingsDataTable->GetSettingRows(/*Out*/SettingRows);
+	TryConstructSettings();
+}
 
-	SettingsTableRowsInternal.Empty();
-	SettingsTableRowsInternal.Reserve(SettingRows.Num());
-	for (const TTuple<FName, FSettingsRow>& SettingRowIt : SettingRows)
-	{
-		const FSettingsPicker& SettingsPicker = SettingRowIt.Value.SettingsPicker;
-		SettingsTableRowsInternal.Emplace(SettingRowIt.Key, SettingsPicker);
-
-		// Set overall columns num by amount of rows that are marked to be started on next column
-		OverallColumnsNumInternal += static_cast<int32>(SettingsPicker.PrimaryData.bStartOnNextColumn);
-	}
-
-	if (SettingsDataAssetInternal->ShouldAutoConstructSettings())
+// Constructs settings if viewport is ready otherwise Wait until viewport become initialized
+void USettingsWidget::TryConstructSettings()
+{
+	if (UUtilsLibrary::IsViewportInitialized())
 	{
 		ConstructSettings();
 	}
+	else if (!FViewport::ViewportResizedEvent.IsBoundToObject(this))
+	{
+		FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
+	}
+}
+
+// Is called right after the game was started and windows size is set to construct settings
+void USettingsWidget::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
+{
+	if (FViewport::ViewportResizedEvent.IsBoundToObject(this))
+	{
+		FViewport::ViewportResizedEvent.RemoveAll(this);
+	}
+
+	ConstructSettings();
 }
 
 // Construct all settings from the settings data table
@@ -723,6 +732,36 @@ void USettingsWidget::ConstructSettings()
 	}
 
 	UpdateScrollBoxesHeight();
+}
+
+void USettingsWidget::UpdateSettingsTableRows()
+{
+	const USettingsDataTable* SettingsDataTable = SettingsDataAssetInternal ? SettingsDataAssetInternal->GetSettingsDataTable() : nullptr;
+	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
+	{
+		return;
+	}
+
+	TMap<FName, FSettingsRow> SettingRows;
+	SettingsDataTable->GetSettingRows(/*Out*/SettingRows);
+	if (!ensureMsgf(!SettingRows.IsEmpty(), TEXT("ASSERT: 'SettingRows' are empty")))
+	{
+		return;
+	}
+
+	// Reset values if currently are set
+	OverallColumnsNumInternal = 1;
+	SettingsTableRowsInternal.Empty();
+
+	SettingsTableRowsInternal.Reserve(SettingRows.Num());
+	for (const TTuple<FName, FSettingsRow>& SettingRowIt : SettingRows)
+	{
+		const FSettingsPicker& SettingsPicker = SettingRowIt.Value.SettingsPicker;
+		SettingsTableRowsInternal.Emplace(SettingRowIt.Key, SettingsPicker);
+
+		// Set overall columns num by amount of rows that are marked to be started on next column
+		OverallColumnsNumInternal += static_cast<int32>(SettingsPicker.PrimaryData.bStartOnNextColumn);
+	}
 }
 
 // Is called when In-Game menu became opened or closed

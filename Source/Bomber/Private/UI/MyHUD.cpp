@@ -2,6 +2,7 @@
 
 #include "UI/MyHUD.h"
 //---
+#include "UtilsLibrary.h"
 #include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
@@ -67,20 +68,14 @@ void AMyHUD::BeginPlay()
 // Will try to start the process of initializing all widgets used in game
 void AMyHUD::TryInitWidgets()
 {
-	UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
-	FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
-	if (Viewport)
+	if (UUtilsLibrary::IsViewportInitialized())
 	{
-		GameViewport->MouseEnter(Viewport, 0, 0);
-		if (Viewport->GetSizeXY() != FIntPoint::ZeroValue)
-		{
-			OnViewportResizedWhenInit(Viewport, 0);
-			return;
-		}
+		InitWidgets();
 	}
-
-	// Fallback on bounding to viewport resized event
-	FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
+	else if (!FViewport::ViewportResizedEvent.IsBoundToObject(this))
+	{
+		FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
+	}
 }
 
 // Create and set widget objects once
@@ -152,13 +147,9 @@ void AMyHUD::InitWidgets()
 	}
 }
 
+// Is called right after the game was started and windows size is set
 void AMyHUD::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
 {
-	if (!Viewport)
-	{
-		return;
-	}
-
 	if (FViewport::ViewportResizedEvent.IsBoundToObject(this))
 	{
 		FViewport::ViewportResizedEvent.RemoveAll(this);

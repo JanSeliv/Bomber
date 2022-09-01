@@ -237,13 +237,21 @@ protected:
 	* May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
 
-	/** Construct all settings from the settings data table. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ConstructSettings();
+	/** Constructs settings if viewport is ready otherwise Wait until viewport become initialized. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void TryConstructSettings();
+
+	/** Is called right after the game was started and windows size is set to construct settings. */
+	void OnViewportResizedWhenInit(class FViewport* Viewport, uint32 Index);
 
 	/** Is blueprint-event called on settings construct to cache some data before creating subwidgets. */
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnConstructSettings();
+	void ConstructSettings();
+
+	/** Internal function to cache setting rows from Settings Data Table. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void UpdateSettingsTableRows();
 
 	/** Is called when In-Game menu became opened or closed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

@@ -24,4 +24,8 @@ public:
 	/** Return the parent widget of a specific class in the widget tree hierarchy. */
 	template <typename T>
 	static FORCEINLINE T* GetParentWidgetOfClass(const UWidget* ChildWidget) { return Cast<T>(GetParentWidgetOfClass(ChildWidget, T::StaticClass())); }
+
+	/** Returns true if viewport is initialized, is always true in PIE, but takes a while in builds. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static bool IsViewportInitialized();
 };
