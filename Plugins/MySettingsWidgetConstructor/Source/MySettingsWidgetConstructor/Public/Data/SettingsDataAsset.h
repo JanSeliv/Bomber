@@ -129,9 +129,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Settings Padding", ShowOnlyInnerProperties))
 	FMargin SettingsPaddingInternal = 50.f; //[D]
 
-	/** The height of the scrollbox widget in percentages of the entire settings widget, where 1 means fill all space under settings. */
+	/** The height of the scrollbox widget in percentages relatively to the content section, where 1 means fill all space under settings content section. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Scrollbox Percent Height", ClampMin = "0", ClampMax = "1", ShowOnlyInnerProperties))
-	float ScrollboxPercentHeightInternal = 0.6f; //[D]
+	float ScrollboxPercentHeightInternal = 1.f; //[D]
 
 	/** The padding of the scrollbox widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Scrollbox Padding", ShowOnlyInnerProperties))

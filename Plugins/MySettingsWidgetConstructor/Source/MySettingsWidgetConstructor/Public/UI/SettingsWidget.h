@@ -238,7 +238,7 @@ protected:
 	virtual void NativeConstruct() override;
 
 	/** Constructs settings if viewport is ready otherwise Wait until viewport become initialized. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryConstructSettings();
 
 	/** Is called right after the game was started and windows size is set to construct settings. */

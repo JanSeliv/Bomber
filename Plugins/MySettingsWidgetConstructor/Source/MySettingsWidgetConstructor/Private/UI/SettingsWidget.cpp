@@ -647,9 +647,7 @@ FVector2D USettingsWidget::GetSubWidgetsSize(int32 SectionsBitmask) const
 			SubWidgetsHeight += SubWidgetHeight;
 		}
 	}
-
-	const float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(GetOwningPlayer());
-	return ViewportScale ? SubWidgetsHeight / ViewportScale : SubWidgetsHeight;
+	return SubWidgetsHeight;
 }
 
 
@@ -674,8 +672,6 @@ float USettingsWidget::GetScrollBoxHeight() const
 	Paddings += SettingsPadding.Top + SettingsPadding.Bottom;
 	const FMargin ScrollBoxPadding = SettingsDataAssetInternal->GetScrollboxPadding();
 	Paddings += ScrollBoxPadding.Top + ScrollBoxPadding.Bottom;
-	const float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(GetOwningPlayer());
-	Paddings = ViewportScale ? Paddings / ViewportScale : Paddings;
 
 	const float ScrollBoxHeight = (SettingsSize - MarginsSize).Y - Paddings;
 
