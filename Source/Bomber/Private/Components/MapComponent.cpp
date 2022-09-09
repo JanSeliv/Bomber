@@ -2,6 +2,7 @@
 
 #include "Components/MapComponent.h"
 //---
+#include "GameFramework/MyGameStateBase.h"
 #include "GeneratedMap.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Globals/LevelActorDataAsset.h"
@@ -11,7 +12,7 @@
 #include "PoolManager.h"
 //---
 #include "Components/BoxComponent.h"
-#include "GameFramework/MyGameStateBase.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
@@ -203,6 +204,9 @@ void UMapComponent::OnRegister()
 		return;
 	}
 
+	// Register level actors for game features
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(Owner);
+
 	// Set the tick disabled by default and decrease the interval
 	Owner->SetActorTickInterval(UGameStateDataAsset::Get().GetTickInterval());
 	Owner->SetActorTickEnabled(false);
@@ -338,7 +342,7 @@ bool UMapComponent::Modify(bool bAlwaysMarkDirty/* = true*/)
 	AActor* Owner = GetOwner();
 	if (Owner
 	    && !UEditorUtilsLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
-	    && IsEditorOnly())                // was generated in the editor
+	    && IsEditorOnly())                  // was generated in the editor
 	{
 		Owner->Destroy();
 		return false;

@@ -297,6 +297,9 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	/** Called right before components are initialized, only called during gameplay. */
+	virtual void PreInitializeComponents() override;
+
 	/** This is called only in the gameplay before calling begin play to generate level actors */
 	virtual void PostInitializeComponents() override;
 

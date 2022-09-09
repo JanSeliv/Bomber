@@ -12,6 +12,7 @@
 #include "LevelActors/BombActor.h"
 #include "PoolManager.h"
 //---
+#include "Components/GameFrameworkComponentManager.h"
 #include "Engine/LevelStreaming.h"
 #include "Math/UnrealMathUtility.h"
 #include "Net/UnrealNetwork.h"
@@ -575,6 +576,15 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 		CameraComponentInternal->UpdateMaxHeight();
 		CameraComponentInternal->UpdateLocation();
 	}
+}
+
+// Called right before components are initialized, only called during gameplay
+void AGeneratedMap::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+
+	// Register level actors for game features
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(Owner);
 }
 
 // This is called only in the gameplay before calling begin play to generate level actors

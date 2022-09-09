@@ -28,6 +28,7 @@ public class Bomber : ModuleRules
 				//My modules
 				, "MyUtils" // FFunctionPicker etc.
 				, "MySettingsWidgetConstructor" // Generates settings
+				, "ModularGameplay" // UGameFrameworkComponentManager
 			}
 		);
 
