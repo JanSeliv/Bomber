@@ -344,9 +344,8 @@ healthchecksdb
 **/Build/
 **/docs/
 **/Binaries/
+**/Config/HoloLens/
 **/DerivedDataCache/
-**/Content/Developers/
-**/Plugins/Developer/RiderLink/
 *.sln
 *.uproject
 *_BuiltData.uasset
@@ -356,7 +355,6 @@ healthchecksdb
 *.modules
 *.target
 *.udd
-*.bak
 **/Binaries/UE4Editor-*-0*.dll
 **/Binaries/UE4Editor-*-1*.dll
 **/Binaries/UE4Editor-*-2*.dll
@@ -368,4 +366,5 @@ healthchecksdb
 **/Binaries/UE4Editor-*-8*.dll
 **/Binaries/UE4Editor-*-9*.dll
 doxygen.tag
+**/Plugins/
 
