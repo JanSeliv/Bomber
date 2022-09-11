@@ -14,7 +14,7 @@
  * 	The static functions library
  */
 UCLASS(Blueprintable, BlueprintType)
-class USingletonLibrary final : public UBlueprintFunctionLibrary
+class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 

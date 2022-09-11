@@ -12,7 +12,7 @@
  * Contains all core data.
  */
 UCLASS()
-class UDataAssetsContainer : public UDataAsset
+class BOMBER_API UDataAssetsContainer : public UDataAsset
 {
 	GENERATED_BODY()
 

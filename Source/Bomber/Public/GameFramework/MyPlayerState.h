@@ -13,7 +13,7 @@
  * The player state of a bomber player.
  */
 UCLASS(Config = "GameUserSettings")
-class AMyPlayerState final : public APlayerState
+class BOMBER_API AMyPlayerState final : public APlayerState
 {
 	GENERATED_BODY()
 

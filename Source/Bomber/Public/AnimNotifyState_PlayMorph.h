@@ -28,7 +28,7 @@ enum class EPlaybackType : uint8
  * Data about morph target (shape key) to be played.
  */
 USTRUCT(BlueprintType)
-struct FMorphData
+struct BOMBER_API FMorphData
 {
 	GENERATED_BODY()
 
@@ -53,7 +53,7 @@ struct FMorphData
  * Play the chosen morph for picked frames.
  */
 UCLASS(Blueprintable, meta = (DisplayName = "Play Morph"))
-class UAnimNotifyState_PlayMorph final : public UAnimNotifyState
+class BOMBER_API UAnimNotifyState_PlayMorph final : public UAnimNotifyState
 {
 	GENERATED_BODY()
 

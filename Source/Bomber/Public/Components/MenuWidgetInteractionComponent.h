@@ -14,7 +14,7 @@
  * @see UMainMenuWidget
  */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class UMenuWidgetInteractionComponent final : public UWidgetInteractionComponent
+class BOMBER_API UMenuWidgetInteractionComponent final : public UWidgetInteractionComponent
 {
 	GENERATED_BODY()
 

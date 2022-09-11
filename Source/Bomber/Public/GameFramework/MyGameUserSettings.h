@@ -10,7 +10,7 @@
  * The Bomber settings.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UMyGameUserSettings final : public UGameUserSettings
+class BOMBER_API UMyGameUserSettings final : public UGameUserSettings
 {
 	GENERATED_BODY()
 

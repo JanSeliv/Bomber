@@ -12,7 +12,7 @@
  * In game user widget.
  */
 UCLASS()
-class UInGameWidget final : public UUserWidget
+class BOMBER_API UInGameWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 

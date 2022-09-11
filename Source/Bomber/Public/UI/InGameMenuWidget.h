@@ -14,7 +14,7 @@
  * It could be opened by ESC button during the game.
  */
 UCLASS()
-class UInGameMenuWidget final : public UUserWidget
+class BOMBER_API UInGameMenuWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 

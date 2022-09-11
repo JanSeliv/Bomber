@@ -12,7 +12,7 @@
 * Contains AI data.
 */
 UCLASS(Blueprintable, BlueprintType)
-class UAIDataAsset final : public UDataAsset
+class BOMBER_API UAIDataAsset final : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -62,7 +62,7 @@ protected:
  * Characters controlled by bots
  */
 UCLASS()
-class AMyAIController final : public AAIController
+class BOMBER_API AMyAIController final : public AAIController
 {
 	GENERATED_BODY()
 

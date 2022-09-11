@@ -14,7 +14,7 @@
 * Contains all data that describe player input.
 */
 UCLASS(Blueprintable, BlueprintType)
-class UPlayerInputDataAsset final : public UBomberDataAsset
+class BOMBER_API UPlayerInputDataAsset final : public UBomberDataAsset
 {
 	GENERATED_BODY()
 
@@ -86,7 +86,7 @@ private:
  * The player controller class
  */
 UCLASS()
-class AMyPlayerController final : public APlayerController
+class BOMBER_API AMyPlayerController final : public APlayerController
 {
 	GENERATED_BODY()
 

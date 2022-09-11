@@ -9,7 +9,7 @@
  * Data about spawned meshes for that floor.
  */
 USTRUCT(BlueprintType)
-struct FFloor
+struct BOMBER_API FFloor
 {
 	GENERATED_BODY()
 
@@ -22,7 +22,7 @@ struct FFloor
  * Spawn meshes of specified level type to preview and switch between them.
  */
 UCLASS(Blueprintable, BlueprintType)
-class ACarousel final : public AActor
+class BOMBER_API ACarousel final : public AActor
 {
 	GENERATED_BODY()
 

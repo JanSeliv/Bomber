@@ -11,7 +11,7 @@
  * The main camera viewpoint of the game.
  */
 UCLASS(Config = "GameUserSettings", ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class UMyCameraComponent final : public UCameraComponent
+class BOMBER_API UMyCameraComponent final : public UCameraComponent
 {
 	GENERATED_BODY()
 

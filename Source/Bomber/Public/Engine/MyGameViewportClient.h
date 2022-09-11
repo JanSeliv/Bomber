@@ -11,7 +11,7 @@
  * Implements parent to have more control on input events.
  */
 UCLASS()
-class UMyGameViewportClient : public UGameViewportClient
+class BOMBER_API UMyGameViewportClient : public UGameViewportClient
 {
 	GENERATED_BODY()
 

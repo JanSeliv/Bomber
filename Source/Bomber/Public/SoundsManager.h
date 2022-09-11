@@ -13,7 +13,7 @@
  * Contains all sound assets used in game that is used to manage the game sounds.
  */
 UCLASS(Blueprintable, BlueprintType)
-class USoundsDataAsset final : public UBomberDataAsset
+class BOMBER_API USoundsDataAsset final : public UBomberDataAsset
 {
 	GENERATED_BODY()
 
@@ -136,7 +136,7 @@ private:
  * Is used to manage the game sounds.
  */
 UCLASS(Config = "GameUserSettings", Blueprintable, BlueprintType)
-class USoundsManager final : public UObject
+class BOMBER_API USoundsManager final : public UObject
 {
 	GENERATED_BODY()
 

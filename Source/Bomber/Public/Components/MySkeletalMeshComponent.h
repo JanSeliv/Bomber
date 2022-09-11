@@ -12,7 +12,7 @@
  * Contains additional data.
  */
 USTRUCT(BlueprintType)
-struct FCustomPlayerMeshData
+struct BOMBER_API FCustomPlayerMeshData
 {
 	GENERATED_BODY()
 
@@ -37,7 +37,7 @@ struct FCustomPlayerMeshData
  * but in different UI actors and widgets to visualize the player's mannequin.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class UMySkeletalMeshComponent final : public USkeletalMeshComponent
+class BOMBER_API UMySkeletalMeshComponent final : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
 

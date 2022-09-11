@@ -14,7 +14,7 @@
  * Determines each mesh to attach.
  */
 USTRUCT(BlueprintType)
-struct FAttachedMesh
+struct BOMBER_API FAttachedMesh
 {
 	GENERATED_BODY()
 
@@ -35,7 +35,7 @@ struct FAttachedMesh
  * The player archetype of level actor rows. Determines the individual of the character model
  */
 UCLASS(Blueprintable, BlueprintType)
-class UPlayerRow final : public ULevelActorRow
+class BOMBER_API UPlayerRow final : public ULevelActorRow
 {
 	GENERATED_BODY()
 
@@ -95,7 +95,7 @@ protected:
  * The data asset of the Bomber characters
  */
 UCLASS(Blueprintable, BlueprintType)
-class UPlayerDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UPlayerDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
@@ -153,7 +153,7 @@ protected:
  * @todo rewrite as attributes of ability system
  */
 USTRUCT(BlueprintType)
-struct FPowerUp
+struct BOMBER_API FPowerUp
 {
 	GENERATED_BODY()
 
@@ -177,7 +177,7 @@ struct FPowerUp
  * Players and AI, whose goal is to remain the last survivor for the win.
  */
 UCLASS()
-class APlayerCharacter final : public ACharacter
+class BOMBER_API APlayerCharacter final : public ACharacter
 {
 	GENERATED_BODY()
 

@@ -10,7 +10,7 @@
  * Contains a data of standalone and PIE games
  */
 UCLASS()
-class UMyGameInstance final : public UGameInstance
+class BOMBER_API UMyGameInstance final : public UGameInstance
 {
 	GENERATED_BODY()
 

@@ -12,7 +12,7 @@
  * Describes common data for all boxes.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UBoxDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UBoxDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
@@ -37,7 +37,7 @@ protected:
  * Boxes on destruction with some chances spawns an item.
  */
 UCLASS()
-class ABoxActor final : public AActor
+class BOMBER_API ABoxActor final : public AActor
 {
 	GENERATED_BODY()
 

@@ -22,7 +22,7 @@ enum class EPoolObjectState : uint8
  * Contains the data that describe specific object in a pool.
  */
 USTRUCT(BlueprintType)
-struct FPoolObject
+struct BOMBER_API FPoolObject
 {
 	GENERATED_BODY()
 
@@ -60,7 +60,7 @@ struct FPoolObject
  * Keeps the objects by class to be handled by the Pool Manager.
  */
 USTRUCT(BlueprintType)
-struct FPoolContainer
+struct BOMBER_API FPoolContainer
 {
 	GENERATED_BODY()
 
@@ -98,7 +98,7 @@ struct FPoolContainer
  * Deactivated actors are placed outside a level, are hidden, their collisions are disabled and tick is turned off. 
  */
 UCLASS(DefaultToInstanced, BlueprintType, Blueprintable)
-class UPoolManager final : public UObject
+class BOMBER_API UPoolManager final : public UObject
 {
 	GENERATED_BODY()
 

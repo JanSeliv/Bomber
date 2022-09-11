@@ -13,7 +13,7 @@
  * Main menu user widget.
  */
 UCLASS()
-class UMainMenuWidget final : public UUserWidget
+class BOMBER_API UMainMenuWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 

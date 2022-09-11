@@ -11,7 +11,7 @@ typedef TSet<struct FCell> FCells;
  * The structure that contains a location of an one cell on a grid of the Level Map.
  */
 USTRUCT(BlueprintType)
-struct FCell
+struct BOMBER_API FCell
 {
 	GENERATED_BODY()
 

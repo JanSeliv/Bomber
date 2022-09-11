@@ -13,7 +13,7 @@
  * Unique data about one separated level.
  */
 USTRUCT(BlueprintType)
-struct FLevelStreamRow
+struct BOMBER_API FLevelStreamRow
 {
 	GENERATED_BODY()
 
@@ -40,7 +40,7 @@ struct FLevelStreamRow
  * Contains all data that describe all levels.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UGeneratedMapDataAsset final : public UBomberDataAsset
+class BOMBER_API UGeneratedMapDataAsset final : public UBomberDataAsset
 {
 	GENERATED_BODY()
 
@@ -95,7 +95,7 @@ protected:
  * @see USingletonLibrary::LevelMap_ reference to this Level Map.
  */
 UCLASS()
-class AGeneratedMap final : public AActor
+class BOMBER_API AGeneratedMap final : public AActor
 {
 	GENERATED_BODY()
 

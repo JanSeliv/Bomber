@@ -13,7 +13,7 @@
  * Row that describes each unique item.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UItemRow final : public ULevelActorRow
+class BOMBER_API UItemRow final : public ULevelActorRow
 {
 	GENERATED_BODY()
 
@@ -27,7 +27,7 @@ public:
  * Describes common data for all items.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UItemDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UItemDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
@@ -66,7 +66,7 @@ protected:
  * Affects the abilities of a player during gameplay
  */
 UCLASS()
-class AItemActor final : public AActor
+class BOMBER_API AItemActor final : public AActor
 {
 	GENERATED_BODY()
 

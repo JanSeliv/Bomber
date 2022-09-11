@@ -11,7 +11,7 @@
  * Contains debugging code for non-shipping builds to check general game functionality.
  */
 UCLASS()
-class UMyCheatManager : public UCheatManager
+class BOMBER_API UMyCheatManager : public UCheatManager
 {
 	GENERATED_BODY()
 

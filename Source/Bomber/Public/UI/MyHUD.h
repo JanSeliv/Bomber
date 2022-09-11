@@ -12,7 +12,7 @@
  * Contains in-game UI data.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UUIDataAsset final : public UDataAsset
+class BOMBER_API UUIDataAsset final : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -80,7 +80,7 @@ protected:
  * The custom HUD class. Also manages other widgets.
  */
 UCLASS(Config = "GameUserSettings")
-class AMyHUD final : public AHUD
+class BOMBER_API AMyHUD final : public AHUD
 {
 	GENERATED_BODY()
 

@@ -11,7 +11,7 @@
  * Contains specific for this project data and is intended to with UMyInputAction
  */
 UCLASS(Blueprintable, Const, AutoExpandCategories=("C++"))
-class UMyInputMappingContext final : public UInputMappingContext
+class BOMBER_API UMyInputMappingContext final : public UInputMappingContext
 {
 	GENERATED_BODY()
 

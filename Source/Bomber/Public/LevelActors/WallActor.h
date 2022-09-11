@@ -12,7 +12,7 @@
  * Describes common data for all walls.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UWallDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UWallDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
@@ -29,7 +29,7 @@ public:
  * Walls are not destroyed by a bomb explosion and stop the explosion.
  */
 UCLASS()
-class AWallActor final : public AActor
+class BOMBER_API AWallActor final : public AActor
 {
 	GENERATED_BODY()
 

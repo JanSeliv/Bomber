@@ -13,7 +13,7 @@
   * Is inherited data asset, has additional data to setup input action.
   */
 UCLASS(Blueprintable, Const, AutoExpandCategories=("C++"))
-class UMyInputAction final : public UInputAction
+class BOMBER_API UMyInputAction final : public UInputAction
 {
 	GENERATED_BODY()
 

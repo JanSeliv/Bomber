@@ -12,7 +12,7 @@
  * The data of the game match.
  */
 UCLASS()
-class UGameStateDataAsset : public UDataAsset
+class BOMBER_API UGameStateDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -50,7 +50,7 @@ protected:
  * Own implementation of managing the game's global state.
  */
 UCLASS()
-class AMyGameStateBase final : public AGameStateBase
+class BOMBER_API AMyGameStateBase final : public AGameStateBase
 {
 	GENERATED_BODY()
 

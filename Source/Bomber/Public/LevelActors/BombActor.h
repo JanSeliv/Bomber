@@ -13,7 +13,7 @@
  * Describes common data for all bombs.
  */
 UCLASS(Blueprintable, BlueprintType)
-class UBombDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UBombDataAsset final : public ULevelActorDataAsset
 {
 	GENERATED_BODY()
 
@@ -57,7 +57,7 @@ protected:
 
 /** Bombs are left by the character to destroy the level actors, trigger other bombs */
 UCLASS()
-class ABombActor final : public AActor
+class BOMBER_API ABombActor final : public AActor
 {
 	GENERATED_BODY()
 
