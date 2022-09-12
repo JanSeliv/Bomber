@@ -197,15 +197,19 @@ void UMapComponent::OnDeactivated()
 void UMapComponent::OnRegister()
 {
 	Super::OnRegister();
+
 	AActor* Owner = GetOwner();
-	if (!Owner
-	    || ActorDataAssetInternal) // is already registered
+	check(Owner);
+
+	// Register level actors for game features only if the game was started
+	constexpr bool bAddOnlyInGameWorlds = true;
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(Owner, bAddOnlyInGameWorlds);
+
+	if (!ActorDataAssetInternal)
 	{
+		// Is already registered, most likely in editor before game was started
 		return;
 	}
-
-	// Register level actors for game features
-	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(Owner);
 
 	// Set the tick disabled by default and decrease the interval
 	Owner->SetActorTickInterval(UGameStateDataAsset::Get().GetTickInterval());

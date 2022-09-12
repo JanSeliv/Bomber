@@ -25,10 +25,10 @@ public class Bomber : ModuleRules
 				, "Niagara" // VFX
 				, "RenderCore" // Render threads
                 , "GameplayTags" // FGameplayTag
+                , "GameFeatures", "ModularGameplay" // Modular Game Features
 				//My modules
 				, "MyUtils" // FFunctionPicker etc.
 				, "MySettingsWidgetConstructor" // Generates settings
-				, "ModularGameplay" // UGameFrameworkComponentManager
 			}
 		);
 

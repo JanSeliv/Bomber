@@ -7,6 +7,7 @@
 #include "Globals/DataAssetsContainer.h"
 #include "Globals/SingletonLibrary.h"
 //---
+#include "GameFeaturesSubsystem.h"
 #include "Net/UnrealNetwork.h"
 
 // Returns the Game State data asset
@@ -70,6 +71,16 @@ void AMyGameStateBase::BeginPlay()
 	{
 		AGeneratedMap::Get().OnAnyCharacterDestroyed.AddDynamic(this, &ThisClass::OnAnyCharacterDestroyed);
 	}
+
+	SetGameFeaturesEnabled(true);
+}
+
+// Overridable function called whenever this actor is being removed from a level
+void AMyGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	SetGameFeaturesEnabled(false);
 }
 
 // Updates current game state
@@ -199,4 +210,35 @@ void AMyGameStateBase::UpdateEndGameStates()
 void AMyGameStateBase::OnAnyCharacterDestroyed()
 {
 	bWantsUpdateEndStateInternal = true;
+}
+
+// Enables or disable all game features
+void AMyGameStateBase::SetGameFeaturesEnabled(bool bEnable)
+{
+	UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
+	const TArray<FName>& GameFeaturesToEnable = UGameStateDataAsset::Get().GetGameFeaturesToEnable();
+	for (const FName GameFeatureName : GameFeaturesToEnable)
+	{
+		if (GameFeatureName.IsNone())
+		{
+			continue;
+		}
+
+		FString GameFeatureURL;
+		GameFeaturesSubsystem.GetPluginURLForBuiltInPluginByName(GameFeatureName.ToString(), /*out*/ GameFeatureURL);
+		if (!ensureMsgf(!GameFeatureURL.IsEmpty(), TEXT("ASSERT: Can't load '%s' game feature"), *GameFeatureName.ToString()))
+		{
+			continue;
+		}
+
+		static const FGameFeaturePluginLoadComplete EmptyCallback{};
+		if (bEnable)
+		{
+			GameFeaturesSubsystem.LoadAndActivateGameFeaturePlugin(GameFeatureURL, EmptyCallback);
+		}
+		else
+		{
+			GameFeaturesSubsystem.DeactivateGameFeaturePlugin(GameFeatureURL, EmptyCallback);
+		}
+	}
 }

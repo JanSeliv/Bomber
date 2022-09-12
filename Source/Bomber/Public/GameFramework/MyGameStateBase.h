@@ -12,7 +12,7 @@
  * The data of the game match.
  */
 UCLASS()
-class BOMBER_API UGameStateDataAsset : public UDataAsset
+class BOMBER_API UGameStateDataAsset final : public UDataAsset
 {
 	GENERATED_BODY()
 
@@ -32,6 +32,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdownInternal; }
 
+	/** Returns all game features need to be loaded and activated on starting the game. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FORCEINLINE TArray<FName>& GetGameFeaturesToEnable() const { return GameFeaturesToEnableInternal; }
+
 protected:
 	/** General value how ofter update actors and states in the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))
@@ -44,6 +48,10 @@ protected:
 	/** Seconds to the end of the round. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Countdown"))
 	int32 InGameCountdownInternal = 120; //[D]
+
+	/** All game features need to be loaded and activated on starting the game. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Game Features To Enable", ShowOnlyInnerProperties))
+	TArray<FName> GameFeaturesToEnableInternal; //[D]
 };
 
 /**
@@ -135,6 +143,9 @@ protected:
 	/** Called when the game starts. */
 	virtual void BeginPlay() override;
 
+	/** Overridable function called whenever this actor is being removed from a level. */
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	/** Updates current game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyGameState();
@@ -166,4 +177,9 @@ protected:
 	/** Called when any player or bot was exploded. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnAnyCharacterDestroyed();
+
+	/** Enables or disable all game features.
+	 * @see UGameStateDataAsset::GetGameFeaturesToEnable() */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetGameFeaturesEnabled(bool bEnable);
 };

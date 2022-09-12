@@ -584,7 +584,7 @@ void AGeneratedMap::PreInitializeComponents()
 	Super::PreInitializeComponents();
 
 	// Register level actors for game features
-	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(Owner);
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
 // This is called only in the gameplay before calling begin play to generate level actors
