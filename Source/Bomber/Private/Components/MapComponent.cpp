@@ -205,9 +205,9 @@ void UMapComponent::OnRegister()
 	constexpr bool bAddOnlyInGameWorlds = true;
 	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(Owner, bAddOnlyInGameWorlds);
 
-	if (!ActorDataAssetInternal)
+	if (ActorDataAssetInternal)
 	{
-		// Is already registered, most likely in editor before game was started
+		// Its data asset is valid, so initialization was already performed before
 		return;
 	}
 
