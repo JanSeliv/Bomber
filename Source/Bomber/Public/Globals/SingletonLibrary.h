@@ -62,7 +62,7 @@ public:
 	/** Returns the singleton, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static USingletonLibrary* GetSingleton();
-	static FORCEINLINE const USingletonLibrary& Get() { return *GetSingleton(); }
+	static const FORCEINLINE USingletonLibrary& Get() { return *GetSingleton(); }
 
 	/** Returns true if specified actor is the Bomber Level Actor (player, box, wall or item). */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -180,47 +180,6 @@ public:
 	/** Returns the Levels Data Asset*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static const FORCEINLINE class UDataAssetsContainer* GetDataAssetsContainer() { return Get().DataAssetsContainerInternal; }
-
-	/* ---------------------------------------------------
-	 *		Structs functions
-	 * --------------------------------------------------- */
-
-	/** Returns the length of the one cell (a floor bound) */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FORCEINLINE float GetCellSize() { return FCell::CellSize; }
-
-	/** Returns the zero cell (0,0,0) */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static const FORCEINLINE FCell& GetZeroCell() { return FCell::ZeroCell; }
-
-	/** Returns the zero cell (0,0,0) */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static FORCEINLINE bool IsValidCell(const FCell& Cell) { return Cell.IsValid(); }
-
-	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
-	 *
-	 * @param Cell The cell, that will be rotated
-	 * @param AxisZ The Z param of the axis to rotate around
-	 * @return Rotated to the Level Map cell
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static FORCEINLINE FCell RotateCellAngleAxis(const FCell& Cell, float AxisZ)
-	{
-		return Cell.RotateAngleAxis(AxisZ);
-	}
-
-	/** Calculate the length between two cells
-	 *
-	 * @param C1 The first cell
-	 * @param C2 The other cell
-	 * @return The distance between to cells
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "C1,C2"))
-	static float CalculateCellsLength(const FCell& C1, const FCell& C2);
-
-	/** Find the average of an set of cells */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FCell GetCellArrayAverage(const TSet<FCell>& Cells);
 
 	/* ---------------------------------------------------
 	*		EActorType bitmask functions

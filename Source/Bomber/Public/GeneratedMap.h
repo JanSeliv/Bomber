@@ -238,8 +238,12 @@ public:
 	bool IsDraggedMapComponent(const class UMapComponent* MapComponent) const;
 
 	/** Returns the cached transform. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FTransform& GetCachedTransform() const { return CachedTransformInternal; }
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE FTransform& GetCachedTransform() const { return CachedTransformInternal; }
+
+	/** Returns the cell location of the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE FCell GetCenterCell() const { return FCell(CachedTransformInternal.GetLocation()); }
 
 protected:
 	/* ---------------------------------------------------

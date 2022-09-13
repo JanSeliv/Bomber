@@ -109,7 +109,7 @@ FVector UMyCameraComponent::GetLocationBetweenPlayers() const
 	{
 		for (const FCell& C2 : PlayersCells)
 		{
-			const float LengthIt = USingletonLibrary::CalculateCellsLength(C1, C2);
+			const float LengthIt = UCellsUtilsLibrary::GetLengthBetweenCells(C1, C2);
 			if (LengthIt > Distance)
 			{
 				Distance = LengthIt;
@@ -124,7 +124,7 @@ FVector UMyCameraComponent::GetLocationBetweenPlayers() const
 
 	// Set the new location
 	FVector NewLocation = FVector::ZeroVector;
-	NewLocation = USingletonLibrary::GetCellArrayAverage(PlayersCells).Location;
+	NewLocation = UCellsUtilsLibrary::GetCellArrayAverage(PlayersCells).Location;
 	NewLocation.Z = FMath::Max(MinHeightInternal, NewLocation.Z + Distance);
 	return NewLocation;
 }

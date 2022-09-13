@@ -212,7 +212,7 @@ void AMyAIController::UpdateAI()
 	for (auto F = Free.CreateIterator(); F; ++F)
 	{
 		if (bIsDangerous // is not dangerous situation
-		    && USingletonLibrary::CalculateCellsLength(F0, *F) > AIDataAsset.GetNearDangerousRadius())
+		    && UCellsUtilsLibrary::GetLengthBetweenCells(F0, *F) > AIDataAsset.GetNearDangerousRadius())
 		{
 			F.RemoveCurrent(); // removing distant cells
 			continue;
@@ -290,7 +290,7 @@ void AMyAIController::UpdateAI()
 			case 3: // Only nearest cells (length <= near radius)
 				for (const FCell& It : Filtered)
 				{
-					if (USingletonLibrary::CalculateCellsLength(F0, It) <= AIDataAsset.GetNearFilterRadius())
+					if (UCellsUtilsLibrary::GetLengthBetweenCells(F0, It) <= AIDataAsset.GetNearFilterRadius())
 					{
 						FilteringStep.Emplace(It);
 					}

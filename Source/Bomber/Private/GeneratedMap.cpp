@@ -458,7 +458,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 		if (bHasNotBegunPlay               // the game was not started
 		    && Counter >= InitialCellsNum) // if iterated cell is not initial
 		{
-			const float EditorLenIt = USingletonLibrary::CalculateCellsLength(OwnerCell, CellIt);
+			const float EditorLenIt = UCellsUtilsLibrary::GetLengthBetweenCells(OwnerCell, CellIt);
 			if (EditorLenIt < LastFoundEditorLen) // Distance closer
 			{
 				LastFoundEditorLen = EditorLenIt;
@@ -905,7 +905,7 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 {
 	CachedTransformInternal = FTransform::Identity;
-	const float CellSize = USingletonLibrary::GetCellSize();
+	const float CellSize = UCellsUtilsLibrary::GetCellSize();
 
 	// Align the Transform
 	const FVector NewLocation = UGeneratedMapDataAsset::Get().IsLockedOnZero()
