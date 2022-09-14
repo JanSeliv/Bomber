@@ -95,11 +95,11 @@ public:
 	*		Level Map related cell functions
 	* --------------------------------------------------- */
 
-	/** Returns all grid cell location on the Level Map. */
+	/** Returns all grid cell locations on the Level Map as Set. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static void GetAllCellsOnLevel(TSet<FCell>& OutCells);
 
-	/** Returns all grid cell location on the Level Map. */
+	/** Returns all grid cell locations on the Level Map as Array. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static const TArray<FCell>& GetAllCellsOnLevelAsArray();
 
@@ -107,13 +107,23 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FCell GetCenterCellOnLevel();
 
-	/** Returns all grid cell location on the Level Map by specified actor types. */
+	/** Returns all empty grid cell locations on the Level Map where non of actors are present. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static void GetAllEmptyCellsWithoutActors(TSet<FCell>& OutCells);
+
+	/** Returns all grid cell locations on the Level Map by specified actor types.
+	 * Returns all empty cells without actors if non of actors are chosen. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static void GetAllCellsByActors(
 		TSet<FCell>& OutCells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
+	/** Takes cells and returns only empty cells where non of actors are present. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static void FilterEmptyCellsWithoutActors(const TSet<FCell>& InCells, TSet<FCell>& OutCells);
+
 	/** Takes cells and returns only matching with specified actor types.
+	 * Returns matching empty cells without actors if non of actors are chosen.
 	 *
 	 * @param InCells Cells to filter.
 	 * @param OutCells Will contain cells with actors of specified types.
@@ -125,19 +135,34 @@ public:
 		TSet<FCell>& OutCells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
-	/** Returns true if a cell has an actor of specified type (or its type matches with at least one type if put more than one type). */
+	/** Returns true if specified cell is empty, so it does not have own actor. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static bool IsEmptyCellWithoutActor(const FCell& Cell);
+
+	/** Returns true if a cell has an actor of specified type (or its type matches with at least one type if put more than one type).
+	 * If non of actors are chosen, then returns true if specified cell is empty, so it does not have own actor. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	static bool IsCellHasAnyMatchingActor(
 		const FCell& Cell,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
-	/** Returns true if at least one cell has actors of specified types. */
+	/** Returns true if at least one cell  along specified is empty, so it does not have own actor. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static bool IsAnyCellEmptyWithoutActor(const TSet<FCell>& Cells);
+
+	/** Returns true if at least one cell has actors of specified types.
+	 * If non of actors are chosen, then returns true if at least one cell along specified is empty, so it does not have own actor. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool AreCellsHaveAnyMatchingActors(
 		const TSet<FCell>& Cells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
-	/** Returns true if all cells have actors of specified types. */
+	/** Returns true if all specified cells are empty, so don't have own actors. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static bool AreAllCellsEmptyWithoutActors(const TSet<FCell>& Cells);
+
+	/** Returns true if all cells have actors of specified types.
+	 * If non of actors are chosen, then returns true if all specified cells are empty, so don't have own actors .*/
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool AreCellsHaveAllMatchingActors(
 		const TSet<FCell>& Cells,

@@ -121,7 +121,7 @@ public:
 	/** Called when any player or bot was exploded. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnAnyPlayerDestroyed OnAnyCharacterDestroyed; //[DMD]
-	
+
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- *

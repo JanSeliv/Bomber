@@ -281,16 +281,40 @@ void AGeneratedMap::IntersectCellsByTypes(
 		return;
 	}
 
+	if (!ActorsTypesBitmask)
+	{
+		// Find all empty grid cell locations where non of actors are present
+		const FCells AllEmptyCells = FCells(
+			GridCellsInternal.FilterByPredicate([&MapComponents = MapComponentsInternal](const FCell& CellIt)
+			{
+				return !MapComponents.ContainsByPredicate([&CellIt](const UMapComponent* MapComponentIt)
+				{
+					return MapComponentIt && MapComponentIt->GetCell() == CellIt;
+				});
+			}));
+
+		if (InOutCells.Num())
+		{
+			InOutCells = InOutCells.Intersect(AllEmptyCells);
+		}
+		else
+		{
+			InOutCells = AllEmptyCells;
+		}
+
+		return;
+	}
+
 	FMapComponents BitmaskedComponents;
 	GetMapComponents(BitmaskedComponents, ActorsTypesBitmask);
-	if (BitmaskedComponents.Num() == 0)
+	if (!BitmaskedComponents.Num())
 	{
 		InOutCells.Empty(); // nothing found, returns empty OutCells array
 		return;
 	}
 
 	FCells BitmaskedCells;
-	for (const UMapComponent* const& MapCompIt : BitmaskedComponents)
+	for (const UMapComponent* MapCompIt : BitmaskedComponents)
 	{
 		if (MapCompIt)
 		{
@@ -298,7 +322,14 @@ void AGeneratedMap::IntersectCellsByTypes(
 		}
 	}
 
-	InOutCells = InOutCells.Num() > 0 ? InOutCells.Intersect(BitmaskedCells) : BitmaskedCells;
+	if (InOutCells.Num())
+	{
+		InOutCells = InOutCells.Intersect(BitmaskedCells);
+	}
+	else
+	{
+		InOutCells = BitmaskedCells;
+	}
 }
 
 // Destroy all actors from the set of cells
@@ -849,7 +880,7 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, int
 		return;
 	}
 
-	for (const TObjectPtr<UMapComponent>& MapComponentIt : MapComponentsInternal)
+	for (UMapComponent* MapComponentIt : MapComponentsInternal)
 	{
 		if (MapComponentIt
 		    && EnumHasAnyFlags(MapComponentIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
@@ -1070,7 +1101,7 @@ void AGeneratedMap::ApplyLevelType()
 	}
 
 	// Once level is loading, prepare him
-	for (const TObjectPtr<UMapComponent>& MapComponentIt : MapComponentsInternal)
+	for (const UMapComponent* MapComponentIt : MapComponentsInternal)
 	{
 		if (MapComponentIt)
 		{
