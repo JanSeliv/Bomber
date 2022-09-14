@@ -43,7 +43,7 @@ FCell& FCell::operator-=(const FCell& Other)
 }
 
 // Find the average of an array of vectors
-FCell UCellsUtilsLibrary::GetCellArrayAverage(const FCells& Cells)
+FCell FCell::GetCellArrayAverage(const FCells& Cells)
 {
 	FVector Sum = FVector::ZeroVector;
 	FVector Average = FVector::ZeroVector;

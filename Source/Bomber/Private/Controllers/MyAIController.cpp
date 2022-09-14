@@ -9,6 +9,7 @@
 #include "Globals/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
@@ -194,9 +195,11 @@ void AMyAIController::UpdateAI()
 	// Is there an item nearby?
 	if (bIsDangerous == false)
 	{
+		FCells SafeCells;
+		LevelMap.GetSidesCells(SafeCells, F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius());
+
 		FCells ItemsFromF0;
-		LevelMap.GetSidesCells(ItemsFromF0, F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius());
-		LevelMap.IntersectCellsByTypes(ItemsFromF0, TO_FLAG(EAT::Item), false);
+		UCellsUtilsLibrary::FilterCellsByActors(/*in*/SafeCells, /*out*/ItemsFromF0, TO_FLAG(EAT::Item));
 		if (ItemsFromF0.Num() > 0)
 		{
 			MoveToCell(ItemsFromF0.Array()[0]);
@@ -213,7 +216,7 @@ void AMyAIController::UpdateAI()
 	for (auto F = Free.CreateIterator(); F; ++F)
 	{
 		if (bIsDangerous // is not dangerous situation
-		    && UCellsUtilsLibrary::Cell_Distance(F0, *F) > AIDataAsset.GetNearDangerousRadius())
+		    && FCell::Distance<float>(F0, *F) > AIDataAsset.GetNearDangerousRadius())
 		{
 			F.RemoveCurrent(); // removing distant cells
 			continue;
@@ -229,25 +232,27 @@ void AMyAIController::UpdateAI()
 		{
 			// Finding crossways
 			AllCrossways.Emplace(*F); // is the crossway
-			LevelMap.IntersectCellsByTypes(Way = ThisCrossway, TO_FLAG(EAT::Player), false, MapComponent);
+			UCellsUtilsLibrary::FilterCellsByActors(/*in*/ThisCrossway, /*out*/Way, TO_FLAG(EAT::Player));
+			Way.Remove(MapComponent->GetCell());
 			if (Way.Num() == 0)
 			{
 				SecureCrossways.Emplace(*F);
 			}
 
 			// Finding items
-			LevelMap.IntersectCellsByTypes(ThisCrossway, TO_FLAG(EAT::Item), false);
-			if (ThisCrossway.Num() > 0) // Is there items in this crossway?
+			FCells ItemsAround;
+			UCellsUtilsLibrary::FilterCellsByActors(/*in*/ThisCrossway, /*out*/ItemsAround, TO_FLAG(EAT::Item));
+			if (ItemsAround.Num() > 0) // Is there items in this crossway?
 			{
-				ThisCrossway = ThisCrossway.Intersect(Free); // ThisCrossway = ThisCrossway ∪ Free
-				if (ThisCrossway.Num() > 0)                  // Is there direct items in this crossway?
+				ItemsAround = ItemsAround.Intersect(Free); // ItemsArouns = ItemsArouns ∪ Free
+				if (ItemsAround.Num() > 0)                  // Is there direct items in this crossway?
 				{
 					if (bIsItemInDirect == false) // is the first found direct item
 					{
 						bIsItemInDirect = true;
 						FoundItems.Empty(); // clear all previously found corner items
 					}
-					FoundItems = FoundItems.Union(ThisCrossway); // Add found direct items
+					FoundItems = FoundItems.Union(ItemsAround); // Add found direct items
 				}                                                // item around the corner
 				else if (bIsItemInDirect == false)               // Need corner item?
 				{
@@ -291,7 +296,7 @@ void AMyAIController::UpdateAI()
 			case 3: // Only nearest cells (length <= near radius)
 				for (const FCell& It : Filtered)
 				{
-					if (UCellsUtilsLibrary::Cell_Distance(F0, It) <= AIDataAsset.GetNearFilterRadius())
+					if (FCell::Distance<float>(F0, It) <= AIDataAsset.GetNearFilterRadius())
 					{
 						FilteringStep.Emplace(It);
 					}
@@ -317,9 +322,12 @@ void AMyAIController::UpdateAI()
 	    && bIsFilteringFailed == false // filtering was not failed
 	    && bIsItemInDirect == false)   // was not found direct items
 	{
+		FCells ExplosionCells;
+		LevelMap.GetSidesCells(/*out*/ExplosionCells, F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
+
 		FCells BoxesAndPlayers;
-		LevelMap.GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
-		LevelMap.IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(EAT::Box | EAT::Player), false, MapComponent);
+		UCellsUtilsLibrary::FilterCellsByActors(/*in*/ExplosionCells, /*out*/BoxesAndPlayers, TO_FLAG(EAT::Box | EAT::Player));
+		BoxesAndPlayers.Remove(MapComponent->GetCell());
 		if (BoxesAndPlayers.Num() > 0) // Are bombs or players in own bomb radius
 		{
 			OwnerInternal->ServerSpawnBomb();

@@ -11,6 +11,7 @@
 #include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "PoolManager.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/LevelStreaming.h"
@@ -194,8 +195,8 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 {
 	if (!HasAuthority()
 	    || !ensureMsgf(PoolManagerInternal, TEXT("ASSERT: 'PoolManagerInternal' is not valid"))
-	    || IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
-	    || Type == EAT::None)                                    // nothing to spawn
+	    || UCellsUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
+	    || Type == EAT::None)                                                         // nothing to spawn
 	{
 		return nullptr;
 	}
@@ -270,13 +271,12 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 
 // The intersection of (OutCells ∩ ActorsTypesBitmask).
 void AGeneratedMap::IntersectCellsByTypes(
-	FCells& OutCells,
+	FCells& InOutCells,
 	int32 ActorsTypesBitmask,
-	bool bIntersectAllIfEmpty,
-	const UMapComponent* ExceptedComponent) const
+	bool bIntersectAllIfEmpty) const
 {
-	if (!GridCellsInternal.Num()                     // nothing to intersect
-	    || !bIntersectAllIfEmpty && !OutCells.Num()) // should not intersect with all existed cells but the specified array is empty
+	if (!GridCellsInternal.Num()                       // nothing to intersect
+	    || !bIntersectAllIfEmpty && !InOutCells.Num()) // should not intersect with all existed cells but the specified array is empty
 	{
 		return;
 	}
@@ -285,56 +285,20 @@ void AGeneratedMap::IntersectCellsByTypes(
 	GetMapComponents(BitmaskedComponents, ActorsTypesBitmask);
 	if (BitmaskedComponents.Num() == 0)
 	{
-		OutCells.Empty(); // nothing found, returns empty OutCells array
+		InOutCells.Empty(); // nothing found, returns empty OutCells array
 		return;
 	}
 
 	FCells BitmaskedCells;
 	for (const UMapComponent* const& MapCompIt : BitmaskedComponents)
 	{
-		if (MapCompIt
-		    && MapCompIt != ExceptedComponent)
+		if (MapCompIt)
 		{
 			BitmaskedCells.Emplace(MapCompIt->GetCell());
 		}
 	}
 
-	OutCells = OutCells.Num() > 0 ? OutCells.Intersect(BitmaskedCells) : BitmaskedCells;
-}
-
-// Takes cells and returns only matching with specified actor types
-void AGeneratedMap::FilterCellsByActors(const TSet<FCell>& InCells, TSet<FCell>& OutCells, int32 ActorsTypesBitmask)
-{
-	constexpr bool bIntersectAllIfEmpty = false;
-	OutCells = InCells;
-	IntersectCellsByTypes(OutCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
-}
-
-// Checking the containing of the specified cell among owners locations of the Map Components array
-bool AGeneratedMap::IsCellHasAnyMatchingActor(const FCell& Cell, int32 ActorsTypesBitmask) const
-{
-	constexpr bool bIntersectAllIfEmpty = false;
-	FCells NonEmptyCells{Cell};
-	IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
-	return NonEmptyCells.Contains(Cell);
-}
-
-// Returns true if at least one cell has actors of specified types
-bool AGeneratedMap::AreCellsHaveAnyMatchingActors(const TSet<FCell>& Cells, int32 ActorsTypesBitmask) const
-{
-	constexpr bool bIntersectAllIfEmpty = false;
-	FCells NonEmptyCells{Cells};
-	IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
-	return NonEmptyCells.Num() > 0;
-}
-
-// Returns true if all cells have actors of specified types
-bool AGeneratedMap::AreCellsHaveAllMatchingActors(const TSet<FCell>& Cells, int32 ActorsTypesBitmask) const
-{
-	constexpr bool bIntersectAllIfEmpty = false;
-	FCells NonEmptyCells{Cells};
-	IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
-	return NonEmptyCells.Num() == Cells.Num();
+	InOutCells = InOutCells.Num() > 0 ? InOutCells.Intersect(BitmaskedCells) : BitmaskedCells;
 }
 
 // Destroy all actors from the set of cells
@@ -448,9 +412,11 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 		return InitialCells.Contains(Cell);
 	}));
 
-	const int32 InitialCellsNum = CellsToIterate.Num();                              // The number of initial cells
-	FCells NonEmptyCells;                                                            // all cells of each level actor
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EAT::Player), true, MapComponent); //AT::Bomb | AT::Item | AT::Wall | AT::Box
+	const int32 InitialCellsNum = CellsToIterate.Num(); // The number of initial cells
+
+	FCells NonEmptyCells;
+	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EAT::Player)); //AT::Bomb | AT::Item | AT::Wall | AT::Box
+	NonEmptyCells.Remove(MapComponent->GetCell());
 
 	// Pre gameplay locals to find a nearest cell
 	const bool bHasNotBegunPlay = !HasActorBegunPlay(); // the game was not started
@@ -485,7 +451,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 		if (bHasNotBegunPlay               // the game was not started
 		    && Counter >= InitialCellsNum) // if iterated cell is not initial
 		{
-			const float EditorLenIt = UCellsUtilsLibrary::Cell_Distance(OwnerCell, CellIt);
+			const float EditorLenIt = FCell::Distance<float>(OwnerCell, CellIt);
 			if (EditorLenIt < LastFoundEditorLen) // Distance closer
 			{
 				LastFoundEditorLen = EditorLenIt;
@@ -535,14 +501,6 @@ bool AGeneratedMap::IsDraggedMapComponent(const UMapComponent* MapComponent) con
 
 	const EActorType* FoundCell = DraggedCellsInternal.Find(Cell);
 	return FoundCell && *FoundCell == ActorType;
-}
-
-// Returns all grid cell location on the Level Map by specified actor types
-void AGeneratedMap::GetAllCellsByActors(TSet<FCell>& OutCells, int32 ActorsTypesBitmask) const
-{
-	constexpr bool bIntersectAllIfEmpty = true;
-	OutCells.Empty();
-	IntersectCellsByTypes(OutCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
 }
 
 /* ---------------------------------------------------
@@ -940,12 +898,11 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 {
 	CachedTransformInternal = FTransform::Identity;
-	const float CellSize = UCellsUtilsLibrary::GetCellSize();
 
 	// Align the Transform
 	const FVector NewLocation = UGeneratedMapDataAsset::Get().IsLockedOnZero()
 		                            ? FVector::ZeroVector
-		                            : Transform.GetLocation().GridSnap(CellSize);
+		                            : Transform.GetLocation().GridSnap(FCell::CellSize);
 	CachedTransformInternal.SetLocation(NewLocation);
 
 	const FRotator NewRotation(0.f, Transform.GetRotation().Rotator().Yaw, 0.f);
@@ -976,13 +933,13 @@ void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 		{
 			FVector FoundVector(X, Y, 0.f);
 			// Calculate a length of iteration cell
-			FoundVector *= CellSize;
+			FoundVector *= FCell::CellSize;
 			// Locate the cell relative to the Level Map
 			FoundVector += NewLocation;
 			// Subtract the deviation from the center
-			FoundVector -= (NewScale3D / 2) * CellSize;
+			FoundVector -= (NewScale3D / 2) * FCell::CellSize;
 			// Snap to the cell
-			FoundVector = FoundVector.GridSnap(CellSize);
+			FoundVector = FoundVector.GridSnap(FCell::CellSize);
 			// Cell was found, add rotated cell to the array
 			const FCell FoundCell(FCell(FoundVector).RotateAngleAxis(1.f));
 			GridCellsInternal.AddUnique(FoundCell);

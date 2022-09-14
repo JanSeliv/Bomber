@@ -6,6 +6,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/SingletonLibrary.h"
 #include "Controllers/MyPlayerController.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -104,12 +105,12 @@ FVector UMyCameraComponent::GetLocationBetweenPlayers() const
 {
 	float Distance = 0.f;
 	FCells PlayersCells;
-	AGeneratedMap::Get().IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
+	UCellsUtilsLibrary::GetAllCellsByActors(PlayersCells, TO_FLAG(EAT::Player));
 	for (const FCell& C1 : PlayersCells)
 	{
 		for (const FCell& C2 : PlayersCells)
 		{
-			const float LengthIt = UCellsUtilsLibrary::Cell_Distance(C1, C2);
+			const float LengthIt = FCell::Distance<float>(C1, C2);
 			if (LengthIt > Distance)
 			{
 				Distance = LengthIt;
@@ -124,7 +125,7 @@ FVector UMyCameraComponent::GetLocationBetweenPlayers() const
 
 	// Set the new location
 	FVector NewLocation = FVector::ZeroVector;
-	NewLocation = UCellsUtilsLibrary::GetCellArrayAverage(PlayersCells).Location;
+	NewLocation = FCell::GetCellArrayAverage(PlayersCells).Location;
 	NewLocation.Z = FMath::Max(MinHeightInternal, NewLocation.Z + Distance);
 	return NewLocation;
 }

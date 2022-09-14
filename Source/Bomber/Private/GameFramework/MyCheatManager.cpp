@@ -11,6 +11,7 @@
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 
 // Called when CheatManager is created to allow any needed initialization
 void UMyCheatManager::InitCheatManager()
@@ -55,9 +56,8 @@ void UMyCheatManager::SetAI(bool bShouldEnable) const
 void UMyCheatManager::DestroyAllByType(EActorType ActorType) const
 {
 	FCells Cells;
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
-	LevelMap.IntersectCellsByTypes(Cells, TO_FLAG(ActorType), true);
-	LevelMap.DestroyActorsFromMap(Cells);
+	UCellsUtilsLibrary::GetAllCellsByActors(Cells, TO_FLAG(ActorType));
+	AGeneratedMap::Get().DestroyActorsFromMap(Cells);
 }
 
 // Destroy characters in specified slots

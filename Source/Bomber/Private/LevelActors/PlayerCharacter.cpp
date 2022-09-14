@@ -14,6 +14,7 @@
 #include "LevelActors/ItemActor.h"
 #include "Components/MySkeletalMeshComponent.h"
 #include "Controllers/MyPlayerController.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -329,7 +330,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	    && CharacterIDInternal == INDEX_NONE)
 	{
 		FCells PlayerCells;
-		AGeneratedMap::Get().IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
+		UCellsUtilsLibrary::GetAllCellsByActors(PlayerCells, TO_FLAG(EAT::Player));
 		CharacterIDInternal = PlayerCells.Num() - 1;
 		ApplyCharacterID();
 	}

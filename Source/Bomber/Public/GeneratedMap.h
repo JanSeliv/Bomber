@@ -183,45 +183,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void AddToGrid(class UMapComponent* AddedComponent);
 
-	/** The intersection of (OutCells ∩ ActorsTypesBitmask).
-	 *
-	 * @param OutCells Will contains cells with actors of specified types.
-	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
-	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
-	 * @param ExceptedComponent Is not included for intersecting.
-	 */
-	void IntersectCellsByTypes(TSet<FCell>& OutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty = true, const class UMapComponent* ExceptedComponent = nullptr) const;
-
-	/** Takes cells and returns only matching with specified actor types.
-	 *
-	 * @param InCells Cells to filter.
-	 * @param OutCells Will contain cells with actors of specified types.
-	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
-	 */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	void FilterCellsByActors(
-		const TSet<FCell>& InCells,
-		TSet<FCell>& OutCells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
-
-	/** Returns true if a cell has an actor of specified type (or its type matches with at least one type if put more than one type). */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	bool IsCellHasAnyMatchingActor(
-		const FCell& Cell,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
-
-	/** Returns true if at least one cell has actors of specified types. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	bool AreCellsHaveAnyMatchingActors(
-		const TSet<FCell>& Cells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
-
-	/** Returns true if all cells have actors of specified types. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	bool AreCellsHaveAllMatchingActors(
-		const TSet<FCell>& Cells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
-
 	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
 	 *
 	 * @param Cells The set of cells for destroying the found actors.
@@ -255,30 +216,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FTransform& GetCachedTransform() const { return CachedTransformInternal; }
 
-	/** Returns the cell location of the Level Map. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE FCell GetCenterCell() const { return FCell(CachedTransformInternal.GetLocation()); }
-
-	/** Returns all grid cell location on the Level Map. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE TArray<FCell>& GetAllCellsInArray() const { return GridCellsInternal; }
-
-	/** Returns all grid cell location on the Level Map. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	void GetAllCellsInSet(TSet<FCell>& OutCells) const { OutCells = FCells{GridCellsInternal}; }
-
-	/** Returns all grid cell location on the Level Map by specified actor types. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	void GetAllCellsByActors(
-		TSet<FCell>& OutCells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
-
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
+	/** Gives access for the Cheat Manager to 'cheat'. */
 	friend class UMyCheatManager;
+
+	/** Gives access for helper utilities to expand cells operations on the Level Map. */
+	friend class UCellsUtilsLibrary;
 
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
@@ -340,6 +287,16 @@ protected:
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/** The intersection of (OutCells ∩ ActorsTypesBitmask).
+	 *	Is not blueprintable since all needed ufunctions are already use this method.
+	 *	@see UCellsUtilsLibrary
+	 *
+	 * @param InOutCells Will contain cells with actors of specified types.
+	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
+	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
+	 */
+	void IntersectCellsByTypes(FCells& InOutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty = true) const;
 
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "C++", meta = (BlueprintProtected))

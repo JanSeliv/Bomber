@@ -104,7 +104,7 @@ public:
 	 * --------------------------------------------------- */
 
 	/** The Level Map getter, nullptr otherwise */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (Keywords = "Generated"))
 	static class AGeneratedMap* GetLevelMap();
 
 	/** Return rhe Bomber Game Instance, nullptr otherwise */
