@@ -64,3 +64,21 @@ bool UCellsUtilsLibrary::AreCellsHaveAllMatchingActors(const FCells& Cells, int3
 	AGeneratedMap::Get().IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
 	return NonEmptyCells.Num() == Cells.Num();
 }
+
+// Returns true if specified cell is present on the Level Map.
+bool UCellsUtilsLibrary::IsCellExistsOnLevel(const FCell& Cell)
+{
+	return AGeneratedMap::Get().GridCellsInternal.Contains(Cell);
+}
+
+// Returns true if at least one cell is present on the Level Map
+bool UCellsUtilsLibrary::IsAnyCellExistsOnLevel(const TSet<FCell>& Cells)
+{
+	return FCells{AGeneratedMap::Get().GridCellsInternal}.Intersect(Cells).Num() > 0;
+}
+
+// Returns true if all specified cells are present on the Level Map
+bool UCellsUtilsLibrary::AreAllCellsExistOnLevel(const TSet<FCell>& Cells)
+{
+	return FCells{AGeneratedMap::Get().GridCellsInternal}.Includes(Cells);
+}

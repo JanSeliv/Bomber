@@ -126,7 +126,7 @@ public:
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns true if a cell has an actor of specified type (or its type matches with at least one type if put more than one type). */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	static bool IsCellHasAnyMatchingActor(
 		const FCell& Cell,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
@@ -142,4 +142,16 @@ public:
 	static bool AreCellsHaveAllMatchingActors(
 		const TSet<FCell>& Cells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+
+	/** Returns true if specified cell is present on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static bool IsCellExistsOnLevel(const FCell& Cell);
+
+	/** Returns true if at least one cell is present on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static bool IsAnyCellExistsOnLevel(const TSet<FCell>& Cells);
+
+	/** Returns true if all specified cells are present on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static bool AreAllCellsExistOnLevel(const TSet<FCell>& Cells);
 };
