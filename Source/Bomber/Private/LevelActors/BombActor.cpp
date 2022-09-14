@@ -144,8 +144,9 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 
 		if (MapComponentInternal->bShouldShowRenders)
 		{
-			USingletonLibrary::ClearOwnerTextRenders(this);
-			USingletonLibrary::Get().AddDebugTextRenders(this, FCells(ExplosionCellsInternal), FLinearColor::Red);
+			USingletonLibrary::ClearDisplayedCells(this);
+			static const FDisplayCellsParams DisplayParams{FLinearColor::Red};
+			USingletonLibrary::DisplayCells(this, FCells(ExplosionCellsInternal), DisplayParams);
 		}
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]

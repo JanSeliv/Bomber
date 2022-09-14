@@ -23,7 +23,7 @@ FCell FCell::RotateAngleAxis(float AxisZ) const
 	const FTransform& LevelTransform = AGeneratedMap::Get().GetCachedTransform();
 	const FVector Dimensions = Location - LevelTransform.GetLocation();
 	const float AngleDeg = LevelTransform.GetRotation().Rotator().Yaw;
-	const FVector Axis(0, 0, AxisZ);
+	const FVector Axis(FVector2D::ZeroVector, AxisZ);
 	const FVector RotatedVector = Dimensions.RotateAngleAxis(AngleDeg, Axis);
 	return FCell(Location + RotatedVector - Dimensions);
 }
@@ -40,18 +40,6 @@ FCell& FCell::operator-=(const FCell& Other)
 {
 	Location -= Other.Location;
 	return *this;
-}
-
-// Calculate the length between two cells
-float UCellsUtilsLibrary::GetLengthBetweenCells(const FCell& C1, const FCell& C2)
-{
-	const float CellSize = GetCellSize();
-	if (!CellSize)
-	{
-		return 0.f;
-	}
-
-	return FMath::Abs((C1.Location - C2.Location).Size()) / CellSize;
 }
 
 // Find the average of an array of vectors

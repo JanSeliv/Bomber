@@ -49,14 +49,15 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 		// Visualize and show destination cell
 		if (!UEditorUtilsLibrary::IsEditorNotPieWorld()) // [PIE]
 		{
-			USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
+			USingletonLibrary::ClearDisplayedCells(OwnerInternal);
 		} // [IsEditorNotPieWorld]
 
 		const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
 		if (MapComponent // is valid  map component
 		    && MapComponent->bShouldShowRenders)
 		{
-			USingletonLibrary::AddDebugTextRenders(OwnerInternal, {AIMoveToInternal}, FLinearColor::Gray, 255.f, 300.f, TEXT("x"));
+			static const FDisplayCellsParams DisplayParams{FLinearColor::Gray, 255.f, 300.f, TEXT("x")};
+			USingletonLibrary::DisplayCells(OwnerInternal, {AIMoveToInternal}, DisplayParams);
 		}
 	}
 #endif
@@ -165,7 +166,7 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
+		USingletonLibrary::ClearDisplayedCells(OwnerInternal);
 		AIMoveToInternal = FCell::ZeroCell;
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
@@ -212,7 +213,7 @@ void AMyAIController::UpdateAI()
 	for (auto F = Free.CreateIterator(); F; ++F)
 	{
 		if (bIsDangerous // is not dangerous situation
-		    && UCellsUtilsLibrary::GetLengthBetweenCells(F0, *F) > AIDataAsset.GetNearDangerousRadius())
+		    && UCellsUtilsLibrary::Cell_Distance(F0, *F) > AIDataAsset.GetNearDangerousRadius())
 		{
 			F.RemoveCurrent(); // removing distant cells
 			continue;
@@ -290,7 +291,7 @@ void AMyAIController::UpdateAI()
 			case 3: // Only nearest cells (length <= near radius)
 				for (const FCell& It : Filtered)
 				{
-					if (UCellsUtilsLibrary::GetLengthBetweenCells(F0, It) <= AIDataAsset.GetNearFilterRadius())
+					if (UCellsUtilsLibrary::Cell_Distance(F0, It) <= AIDataAsset.GetNearFilterRadius())
 					{
 						FilteringStep.Emplace(It);
 					}
@@ -327,7 +328,8 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR	 // [Editor]
 			if (MapComponent->bShouldShowRenders)
 			{
-				USingletonLibrary::AddDebugTextRenders(OwnerInternal, {F0}, FLinearColor::Red, 261.F, 95.F, TEXT("Attack"));
+				static const FDisplayCellsParams DisplayParams{FLinearColor::Red, 261.F, 95.F, TEXT("Attack")};
+				USingletonLibrary::DisplayCells(OwnerInternal, {F0}, DisplayParams);
 			}
 #endif	// [Editor]
 		}
@@ -378,7 +380,8 @@ void AMyAIController::UpdateAI()
 				default:
 					break;
 			}
-			USingletonLibrary::AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, 263.f, 124.f, String, Position);
+			static const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, String, Position};
+			USingletonLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
 		} // [Loopy visualization]
 	}
 #endif	// [Editor]

@@ -190,22 +190,36 @@ public:
 	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
 	 * @param ExceptedComponent Is not included for intersecting.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (AdvancedDisplay = 2))
-	void IntersectCellsByTypes(
-		UPARAM(ref) TSet<FCell>& OutCells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask,
-		bool bIntersectAllIfEmpty = true,
-		const class UMapComponent* ExceptedComponent = nullptr) const;
+	void IntersectCellsByTypes(TSet<FCell>& OutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty = true, const class UMapComponent* ExceptedComponent = nullptr) const;
 
-	/** Checking the containing of the specified cell among owners locations of MapComponents_ array.
+	/** Takes cells and returns only matching with specified actor types.
 	 *
-	 * @param Cell The cell to check.
-	 * @param ActorsTypesBitmask Bitmask of actors types to check.
-	 * @return true if at least one level actor is contained.
+	 * @param InCells Cells to filter.
+	 * @param OutCells Will contain cells with actors of specified types.
+	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	bool ContainsMapComponents(
+	UFUNCTION(BlueprintPure, Category = "C++")
+	void FilterCellsByActors(
+		const TSet<FCell>& InCells,
+		TSet<FCell>& OutCells,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+
+	/** Returns true if a cell has an actor of specified type (or its type matches with at least one type if put more than one type). */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsCellHasAnyMatchingActor(
 		const FCell& Cell,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
+
+	/** Returns true if at least one cell has actors of specified types. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool AreCellsHaveAnyMatchingActors(
+		const TSet<FCell>& Cells,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
+
+	/** Returns true if all cells have actors of specified types. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool AreCellsHaveAllMatchingActors(
+		const TSet<FCell>& Cells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
 
 	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
@@ -244,6 +258,20 @@ public:
 	/** Returns the cell location of the Level Map. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE FCell GetCenterCell() const { return FCell(CachedTransformInternal.GetLocation()); }
+
+	/** Returns all grid cell location on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE TArray<FCell>& GetAllCellsInArray() const { return GridCellsInternal; }
+
+	/** Returns all grid cell location on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	void GetAllCellsInSet(TSet<FCell>& OutCells) const { OutCells = FCells{GridCellsInternal}; }
+
+	/** Returns all grid cell location on the Level Map by specified actor types. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	void GetAllCellsByActors(
+		TSet<FCell>& OutCells,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
 
 protected:
 	/* ---------------------------------------------------

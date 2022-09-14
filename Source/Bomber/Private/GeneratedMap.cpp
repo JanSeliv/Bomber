@@ -194,8 +194,8 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 {
 	if (!HasAuthority()
 	    || !ensureMsgf(PoolManagerInternal, TEXT("ASSERT: 'PoolManagerInternal' is not valid"))
-	    || ContainsMapComponents(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
-	    || Type == EAT::None)                                 // nothing to spawn
+	    || IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
+	    || Type == EAT::None)                                    // nothing to spawn
 	{
 		return nullptr;
 	}
@@ -302,12 +302,39 @@ void AGeneratedMap::IntersectCellsByTypes(
 	OutCells = OutCells.Num() > 0 ? OutCells.Intersect(BitmaskedCells) : BitmaskedCells;
 }
 
-// Checking the containing of the specified cell among owners locations of the Map Components array
-bool AGeneratedMap::ContainsMapComponents(const FCell& Cell, int32 ActorsTypesBitmask) const
+// Takes cells and returns only matching with specified actor types
+void AGeneratedMap::FilterCellsByActors(const TSet<FCell>& InCells, TSet<FCell>& OutCells, int32 ActorsTypesBitmask)
 {
-	FCells NonEmptyCells;
-	IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask);
+	constexpr bool bIntersectAllIfEmpty = false;
+	OutCells = InCells;
+	IntersectCellsByTypes(OutCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
+}
+
+// Checking the containing of the specified cell among owners locations of the Map Components array
+bool AGeneratedMap::IsCellHasAnyMatchingActor(const FCell& Cell, int32 ActorsTypesBitmask) const
+{
+	constexpr bool bIntersectAllIfEmpty = false;
+	FCells NonEmptyCells{Cell};
+	IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
 	return NonEmptyCells.Contains(Cell);
+}
+
+// Returns true if at least one cell has actors of specified types
+bool AGeneratedMap::AreCellsHaveAnyMatchingActors(const TSet<FCell>& Cells, int32 ActorsTypesBitmask) const
+{
+	constexpr bool bIntersectAllIfEmpty = false;
+	FCells NonEmptyCells{Cells};
+	IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
+	return NonEmptyCells.Num() > 0;
+}
+
+// Returns true if all cells have actors of specified types
+bool AGeneratedMap::AreCellsHaveAllMatchingActors(const TSet<FCell>& Cells, int32 ActorsTypesBitmask) const
+{
+	constexpr bool bIntersectAllIfEmpty = false;
+	FCells NonEmptyCells{Cells};
+	IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
+	return NonEmptyCells.Num() == Cells.Num();
 }
 
 // Destroy all actors from the set of cells
@@ -458,7 +485,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 		if (bHasNotBegunPlay               // the game was not started
 		    && Counter >= InitialCellsNum) // if iterated cell is not initial
 		{
-			const float EditorLenIt = UCellsUtilsLibrary::GetLengthBetweenCells(OwnerCell, CellIt);
+			const float EditorLenIt = UCellsUtilsLibrary::Cell_Distance(OwnerCell, CellIt);
 			if (EditorLenIt < LastFoundEditorLen) // Distance closer
 			{
 				LastFoundEditorLen = EditorLenIt;
@@ -508,6 +535,14 @@ bool AGeneratedMap::IsDraggedMapComponent(const UMapComponent* MapComponent) con
 
 	const EActorType* FoundCell = DraggedCellsInternal.Find(Cell);
 	return FoundCell && *FoundCell == ActorType;
+}
+
+// Returns all grid cell location on the Level Map by specified actor types
+void AGeneratedMap::GetAllCellsByActors(TSet<FCell>& OutCells, int32 ActorsTypesBitmask) const
+{
+	constexpr bool bIntersectAllIfEmpty = true;
+	OutCells.Empty();
+	IntersectCellsByTypes(OutCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
 }
 
 /* ---------------------------------------------------

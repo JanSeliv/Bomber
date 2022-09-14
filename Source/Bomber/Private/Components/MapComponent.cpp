@@ -81,16 +81,13 @@ bool UMapComponent::OnConstruction()
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		// Remove all text renders of the Owner
-		USingletonLibrary::ClearOwnerTextRenders(Owner);
-
 		// Update AI renders after adding obj to map
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 
 		// Show current cell if type specified
 		if (TO_FLAG(GetActorType()) & LevelMap.RenderActorsTypes)
 		{
-			USingletonLibrary::AddDebugTextRenders(Owner, {CellInternal}, FColor::White);
+			USingletonLibrary::DisplayCells(Owner, {CellInternal}, FDisplayCellsParams::EmptyParams);
 		}
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
@@ -191,6 +188,14 @@ void UMapComponent::OnDeactivated()
 	{
 		SetUndestroyable(false);
 	}
+
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditor())
+	{
+		// Remove all text renders of the Owner
+		USingletonLibrary::ClearDisplayedCells(GetOwner());
+	}
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 //  Called when a component is registered (not loaded

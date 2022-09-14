@@ -11,6 +11,34 @@
 #include "SingletonLibrary.generated.h"
 
 /**
+ * Utility structure to display cells
+ * @see USingletonLibrary::DisplayCells()
+ */
+USTRUCT(BlueprintType)
+struct BOMBER_API FDisplayCellsParams
+{
+	GENERATED_BODY()
+
+	/** Default params to display cells. */
+	static const FDisplayCellsParams EmptyParams;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FLinearColor TextColor = FLinearColor::White;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	float TextHeight = 261.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	float TextSize = 124.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FString RenderString;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FVector CoordinatePosition = FVector::ZeroVector;
+};
+
+/**
  * 	The static functions library
  */
 UCLASS(Blueprintable, BlueprintType)
@@ -28,32 +56,6 @@ public:
 
 	/** Returns a world of stored level map. */
 	virtual class UWorld* GetWorld() const override;
-
-	/* ---------------------------------------------------
-	 *		Editor development
-	 * --------------------------------------------------- */
-
-#if WITH_EDITOR
-	DECLARE_MULTICAST_DELEGATE(FOnAnyDataAssetChanged);
-	/** Will notify on any data asset changes. */
-	static FOnAnyDataAssetChanged GOnAnyDataAssetChanged;
-#endif //WITH_EDITOR
-
-	/** Remove all text renders of the Owner */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
-	static void ClearOwnerTextRenders(class AActor* Owner);
-
-	/** Debug visualization by text renders. Has blueprint implementation. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderString,CoordinatePosition", DefaultToSelf = "Owner"))
-	void AddDebugTextRenders(class AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<class UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const;
-	static void AddDebugTextRenders(
-		class AActor* Owner,
-		const TSet<FCell>& Cells,
-		const FLinearColor& TextColor,
-		float TextHeight = 261.f,
-		float TextSize = 124.f,
-		const FString& RenderString = TEXT(""),
-		const FVector& CoordinatePosition = FVector::ZeroVector);
 
 	/* ---------------------------------------------------
 	 *		Static library functions
@@ -195,7 +197,6 @@ public:
 		return (LBitmask & RBitmask) != 0;
 	}
 
-
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -215,4 +216,27 @@ protected:
 	/** Contains core data of the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Data Assets Container"))
 	TObjectPtr<class UDataAssetsContainer> DataAssetsContainerInternal = nullptr; //[B]
+
+	/* ---------------------------------------------------
+	 *		Editor development
+	 * --------------------------------------------------- */
+public:
+#if WITH_EDITORONLY_DATA
+	DECLARE_MULTICAST_DELEGATE(FOnAnyDataAssetChanged);
+	/** Will notify on any data asset changes. */
+	static FOnAnyDataAssetChanged GOnAnyDataAssetChanged;
+#endif //WITH_EDITOR
+
+	/** Remove all text renders of the Owner */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
+	static void ClearDisplayedCells(AActor* Owner);
+
+	/** Debug visualization by text renders. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
+	static void DisplayCells(AActor* Owner, const TSet<FCell>& Cells, const FDisplayCellsParams& Params);
+
+protected:
+	/** Debug visualization by text renders. Has blueprint implementation. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, BlueprintProtected, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderString,CoordinatePosition", DefaultToSelf = "Owner"))
+	void AddDebugTextRenders(class AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<class UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const;
 };

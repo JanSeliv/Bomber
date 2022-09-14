@@ -50,6 +50,10 @@ struct BOMBER_API FCell
 	/** Check is valid this cell. */
 	FORCEINLINE bool IsValid() const { return *this != ZeroCell; }
 
+	/** Returns how many cells are between two cells. */
+	template <typename T>
+	static FORCEINLINE T Distance(const FCell& C1, const FCell& C2) { return FMath::Abs<T>((C1.Location - C2.Location).Size()) / CellSize; }
+
 	/**
 	 * Compares cells for equality.
 	 *
@@ -92,6 +96,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", NativeMakeFunc, Keywords = "construct build"))
 	static FORCEINLINE FCell MakeCell(const FVector& InVector) { return FCell(InVector); }
 
+	/** Set the values of the cell directly. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "InVector", ScriptMethod = "SetFromVector"))
+	static void Cell_SetFromVector(UPARAM(ref) FCell& InCell, const FVector& InVector) { InCell.Location = InVector; }
+
 	/** Converts a Cell to a Vector. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", DisplayName = "To Vector (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FORCEINLINE FCell Conv_CellToVector(const FVector& InVector) { return FCell(InVector); }
@@ -103,6 +111,14 @@ public:
 	/** Converts a Vector to a Cell. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cell (Vector)", CompactNodeTitle = "->", BlueprintAutocast))
 	static const FORCEINLINE FVector& Conv_VectorToCell(const FCell& InCell) { return InCell.Location; }
+
+	/** Returns true if cell A is equal to cell B (A == B) */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "A,B", DisplayName = "Equal Exactly (Cell)", CompactNodeTitle = "==", ScriptMethod = "IsNearEqual", ScriptOperator = "==", Keywords = "== equal"))
+	static FORCEINLINE bool EqualEqual_CellCell(const FCell& A, const FCell& B) { return A == B; }
+
+	/** Returns true if cell A is not equal to cell B (A != B). */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Not Equal Exactly (Cell)", CompactNodeTitle = "!=", ScriptMethod = "IsNotNearEqual", ScriptOperator = "!=", Keywords = "!= not equal"))
+	static bool NotEqual_CellCell(const FCell& A, const FCell& B) { return A != B; }
 
 	/** Returns addition of Cell A and Cell B (A + B). */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "A,B", DisplayName = "Cell + Cell", CompactNodeTitle = "+", ScriptMethod = "Add", ScriptOperator = "+;+=", Keywords = "+ add plus", CommutativeAssociativeBinaryOperator = "true"))
@@ -117,12 +133,12 @@ public:
 	static FORCEINLINE float GetCellSize() { return FCell::CellSize; }
 
 	/** Returns the zero cell (0,0,0) */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static const FORCEINLINE FCell& GetZeroCell() { return FCell::ZeroCell; }
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Zero", ScriptConstantHost = "Cell"))
+	static const FORCEINLINE FCell& Cell_Zero() { return FCell::ZeroCell; }
 
 	/** Returns true if cell is zero. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static FORCEINLINE bool IsZeroCell(const FCell& Cell) { return Cell.IsValid(); }
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", ScriptMethod = "IsZero"))
+	static FORCEINLINE bool Cell_IsZero(const FCell& Cell) { return Cell.IsZeroCell(); }
 
 	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
 	 *
@@ -139,8 +155,8 @@ public:
 	 * @param C2 The other cell
 	 * @return The distance between to cells
 	 */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "C1,C2"))
-	static float GetLengthBetweenCells(const FCell& C1, const FCell& C2);
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "C1,C2", DisplayName = "Distance (Cell)", ScriptMethod = "Distance", Keywords = "magnitude,length"))
+	static FORCEINLINE double Cell_Distance(const FCell& C1, const FCell& C2) { return FCell::Distance<double>(C1, C2); }
 
 	/** Find the average of an set of cells */
 	UFUNCTION(BlueprintPure, Category = "C++")

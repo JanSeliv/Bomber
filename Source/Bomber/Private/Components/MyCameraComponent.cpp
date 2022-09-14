@@ -109,7 +109,7 @@ FVector UMyCameraComponent::GetLocationBetweenPlayers() const
 	{
 		for (const FCell& C2 : PlayersCells)
 		{
-			const float LengthIt = UCellsUtilsLibrary::GetLengthBetweenCells(C1, C2);
+			const float LengthIt = UCellsUtilsLibrary::Cell_Distance(C1, C2);
 			if (LengthIt > Distance)
 			{
 				Distance = LengthIt;

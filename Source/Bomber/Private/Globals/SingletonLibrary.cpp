@@ -33,14 +33,8 @@
 // Binds to update movements of each AI controller.
 USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
 
-/* ---------------------------------------------------
- *		Editor development
- * --------------------------------------------------- */
-
-#if WITH_EDITOR
-// Will notify on any data asset changes
-USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChanged;
-#endif //WITH_EDITOR
+// Default params to display cells
+const FDisplayCellsParams FDisplayCellsParams::EmptyParams = FDisplayCellsParams();
 
 // Returns a world of stored level map
 UWorld* USingletonLibrary::GetWorld() const
@@ -61,73 +55,6 @@ UWorld* USingletonLibrary::GetWorld() const
 #endif	// WITH_EDITOR [UEditorUtils::IsEditorNotPieWorld]
 	const AGeneratedMap* LevelMap = GetLevelMap();
 	return LevelMap ? LevelMap->GetWorld() : nullptr;
-}
-
-// Remove all text renders of the Owner
-void USingletonLibrary::ClearOwnerTextRenders(AActor* Owner)
-{
-#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
-	if (!UEditorUtilsLibrary::IsEditor()
-	    || !IS_VALID(Owner)) // The owner is not valid
-	{
-		return;
-	}
-
-	TArray<UActorComponent*> TextRendersArray;
-	Owner->GetComponents(UTextRenderComponent::StaticClass(), TextRendersArray);
-	for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
-	{
-		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(i) ? Cast<UTextRenderComponent>(TextRendersArray[i]) : nullptr;
-		if (!TextRenderIt)
-		{
-			continue;
-		}
-
-		const FName NameIt = *TextRenderIt->Text.ToString();
-		static const FName DefaultPlayerName = "Player";
-		static const FName DefaultAIName = "AI";
-		if (NameIt != DefaultPlayerName
-		    && NameIt != DefaultAIName)
-		{
-			TextRenderIt->DestroyComponent();
-		}
-	}
-#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
-}
-
-// Debug visualization by text renders
-void USingletonLibrary::AddDebugTextRenders_Implementation(AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const
-{
-#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
-	if (!UEditorUtilsLibrary::IsEditor()
-	    || !Cells.Num()      // Null length
-	    || !IS_VALID(Owner)) // Owner is not valid
-	{
-		return;
-	}
-
-	bOutHasCoordinateRenders = (CoordinatePosition.IsZero() == false && RenderString.IsEmpty() == false);
-	OutTextRenderComponents.SetNum(bOutHasCoordinateRenders ? Cells.Num() * 2 : Cells.Num());
-	for (UTextRenderComponent*& TextRenderIt : OutTextRenderComponents)
-	{
-		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
-		TextRenderIt->RegisterComponent();
-	}
-#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
-}
-
-void USingletonLibrary::AddDebugTextRenders(
-	AActor* Owner,
-	const FCells& Cells,
-	const FLinearColor& TextColor,
-	float TextHeight/* = 261.f*/,
-	float TextSize/* = 124.f*/,
-	const FString& RenderString/* = TEXT("")*/,
-	const FVector& CoordinatePosition/* = FVector::ZeroVector*/)
-{
-	bool bOutBool = false;
-	TArray<UTextRenderComponent*> OutArray;
-	Get().AddDebugTextRenders(Owner, Cells, TextColor, bOutBool, OutArray, TextHeight, TextSize, RenderString, CoordinatePosition);
 }
 
 /* ---------------------------------------------------
@@ -358,4 +285,78 @@ USoundsManager* USingletonLibrary::GetSoundsManager()
 UPoolManager* USingletonLibrary::GetPoolManager()
 {
 	return AGeneratedMap::Get().GetPoolManager();
+}
+
+/* ---------------------------------------------------
+ *		Editor development
+ * --------------------------------------------------- */
+
+#if WITH_EDITOR
+// Will notify on any data asset changes
+USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChanged;
+#endif //WITH_EDITOR
+
+// Remove all text renders of the Owner
+void USingletonLibrary::ClearDisplayedCells(AActor* Owner)
+{
+	#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
+	if (!UEditorUtilsLibrary::IsEditor()
+	    || !IS_VALID(Owner)) // The owner is not valid
+	{
+		return;
+	}
+
+	TArray<UActorComponent*> TextRendersArray;
+	Owner->GetComponents(UTextRenderComponent::StaticClass(), TextRendersArray);
+	for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
+	{
+		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(i) ? Cast<UTextRenderComponent>(TextRendersArray[i]) : nullptr;
+		if (!TextRenderIt)
+		{
+			continue;
+		}
+
+		const FName NameIt = *TextRenderIt->Text.ToString();
+		static const FName DefaultPlayerName = "Player";
+		static const FName DefaultAIName = "AI";
+		if (NameIt != DefaultPlayerName
+		    && NameIt != DefaultAIName)
+		{
+			TextRenderIt->DestroyComponent();
+		}
+	}
+#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
+}
+
+// Debug visualization by text renders
+void USingletonLibrary::AddDebugTextRenders_Implementation(AActor* Owner, const FCells& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const
+{
+#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
+	if (!UEditorUtilsLibrary::IsEditor()
+	    || !Cells.Num()      // Null length
+	    || !IS_VALID(Owner)) // Owner is not valid
+	{
+		return;
+	}
+
+	bOutHasCoordinateRenders = (CoordinatePosition.IsZero() == false && RenderString.IsEmpty() == false);
+	OutTextRenderComponents.SetNum(bOutHasCoordinateRenders ? Cells.Num() * 2 : Cells.Num());
+	for (UTextRenderComponent*& TextRenderIt : OutTextRenderComponents)
+	{
+		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
+		TextRenderIt->RegisterComponent();
+	}
+#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
+}
+
+void USingletonLibrary::DisplayCells(AActor* Owner, const FCells& Cells, const FDisplayCellsParams& Params)
+{
+#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
+	if (UEditorUtilsLibrary::IsEditor())
+	{
+		bool bOutBool = false;
+		TArray<UTextRenderComponent*> OutArray;
+		Get().AddDebugTextRenders(Owner, Cells, Params.TextColor, bOutBool, OutArray, Params.TextHeight, Params.TextSize, Params.RenderString, Params.CoordinatePosition);
+	}
+#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
 }
