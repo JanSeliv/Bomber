@@ -4,7 +4,7 @@
 //---
 #include "EnhancedInputSubsystems.h"
 #include "Controllers/MyPlayerController.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 
 // Returns the keys mapped to this action in the active input mapping contexts
 void UMyInputAction::GetKeys(TArray<FKey>& OutKeys) const

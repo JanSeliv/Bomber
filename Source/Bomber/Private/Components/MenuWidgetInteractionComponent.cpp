@@ -4,7 +4,7 @@
 //---
 #include "GameFramework/MyGameStateBase.h"
 #include "Controllers/MyPlayerController.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
 //---

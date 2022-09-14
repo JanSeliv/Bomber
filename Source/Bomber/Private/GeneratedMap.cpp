@@ -8,7 +8,7 @@
 #include "Components/MyCameraComponent.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/DataAssetsContainer.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "PoolManager.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"

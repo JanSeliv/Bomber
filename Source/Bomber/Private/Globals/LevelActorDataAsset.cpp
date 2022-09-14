@@ -2,7 +2,7 @@
 
 #include "Globals/LevelActorDataAsset.h"
 //---
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"

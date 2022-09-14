@@ -8,7 +8,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/Carousel.h"
 

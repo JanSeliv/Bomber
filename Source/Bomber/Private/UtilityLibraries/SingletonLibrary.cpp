@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"

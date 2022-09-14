@@ -5,7 +5,7 @@
 #include "GameFramework/MyPlayerState.h"
 #include "GeneratedMap.h"
 #include "Globals/DataAssetsContainer.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "GameFeaturesSubsystem.h"
 #include "Net/UnrealNetwork.h"

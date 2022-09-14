@@ -3,7 +3,7 @@
 #include "Globals/DataAssetsContainer.h"
 //---
 #include "Globals/LevelActorDataAsset.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 
 // Returns the data assets container
 const UDataAssetsContainer& UDataAssetsContainer::Get()

@@ -2,7 +2,7 @@
 
 #include "Components/MySkeletalMeshComponent.h"
 //---
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 //---
 #include "Materials/MaterialInstanceDynamic.h"

@@ -14,7 +14,7 @@
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/DataAssetsContainer.h"
 #include "Globals/MyInputAction.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/MainMenuWidget.h"

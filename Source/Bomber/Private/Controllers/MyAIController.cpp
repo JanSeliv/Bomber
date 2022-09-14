@@ -6,7 +6,7 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "Globals/DataAssetsContainer.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"

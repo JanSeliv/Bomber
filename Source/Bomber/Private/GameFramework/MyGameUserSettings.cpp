@@ -2,7 +2,7 @@
 
 #include "GameFramework/MyGameUserSettings.h"
 //---
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Engine/DataTable.h"
 #include "UI/SettingsWidget.h"

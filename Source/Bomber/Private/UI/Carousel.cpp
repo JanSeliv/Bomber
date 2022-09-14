@@ -3,7 +3,7 @@
 #include "UI/Carousel.h"
 //---
 #include "Bomber.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"

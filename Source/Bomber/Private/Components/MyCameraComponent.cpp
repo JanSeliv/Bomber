@@ -4,7 +4,7 @@
 //---
 #include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "Controllers/MyPlayerController.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---

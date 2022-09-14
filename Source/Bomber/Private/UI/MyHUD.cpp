@@ -4,7 +4,7 @@
 //---
 #include "UtilsLibrary.h"
 #include "Globals/DataAssetsContainer.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "UI/InGameWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"

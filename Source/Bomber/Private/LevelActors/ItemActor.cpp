@@ -6,7 +6,7 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "Globals/DataAssetsContainer.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 #include "SoundsManager.h"
 //---
 #include "Components/BoxComponent.h"

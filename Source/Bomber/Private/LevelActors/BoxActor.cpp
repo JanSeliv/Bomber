@@ -7,7 +7,7 @@
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/DataAssetsContainer.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
 

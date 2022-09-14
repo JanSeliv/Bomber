@@ -5,7 +5,7 @@
 #include "Bomber.h"
 #include "Components/MapComponent.h"
 #include "Globals/DataAssetsContainer.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 
 // Default constructor
 UWallDataAsset::UWallDataAsset()

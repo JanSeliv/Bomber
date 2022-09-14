@@ -4,7 +4,7 @@
 //---
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 
 // Called after the underlying slate widget is constructed. May be called multiple times due to adding and removing from the hierarchy.
 void UInGameWidget::NativeConstruct()
