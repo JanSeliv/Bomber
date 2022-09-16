@@ -351,7 +351,7 @@ void AMyAIController::UpdateAI()
 		{
 			FCells VisualizingStep;
 			FLinearColor Color;
-			FString String = "+";
+			FName Symbol = TEXT("+");
 			FVector Position = FVector::ZeroVector;
 			switch (Index)
 			{
@@ -371,7 +371,7 @@ void AMyAIController::UpdateAI()
 				{
 					VisualizingStep = Filtered;
 					Color = FLinearColor::Yellow;
-					String = TEXT("F");
+					Symbol = TEXT("F");
 					static const FVector DefaultPosition(-50.0F, -50.0F, 0.0F);
 					Position = DefaultPosition;
 					break;
@@ -379,7 +379,7 @@ void AMyAIController::UpdateAI()
 				default:
 					break;
 			}
-			static const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, String, Position};
+			static const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, Symbol, Position};
 			USingletonLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
 		} // [Loopy visualization]
 	}

@@ -22,20 +22,29 @@ struct BOMBER_API FDisplayCellsParams
 	/** Default params to display cells. */
 	static const FDisplayCellsParams EmptyParams;
 
+	/** Color of displayed text.  */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FLinearColor TextColor = FLinearColor::White;
 
+	/** Height offset for displayed text above the cell. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	float TextHeight = 261.f;
 
+	/** Size of displayed text. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	float TextSize = 124.f;
 
+	/** Addition text to mark the cell, keep it short like 1-2 symbols. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FString RenderString;
+	FName RenderString = NAME_None;
 
+	/** Offset for the Render String. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FVector CoordinatePosition = FVector::ZeroVector;
+
+	/** Set true to remove all displays that were added on that owner before. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	bool bClearPreviousDisplays = false;
 };
 
 /**
@@ -229,14 +238,18 @@ public:
 
 	/** Remove all text renders of the Owner */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
-	static void ClearDisplayedCells(AActor* Owner);
+	static void ClearDisplayedCells(const UObject* Owner);
 
-	/** Debug visualization by text renders. */
+	/** Display coordinates of specified cells on the level. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
-	static void DisplayCells(AActor* Owner, const TSet<FCell>& Cells, const FDisplayCellsParams& Params);
+	static void DisplayCells(UObject* Owner, const TSet<FCell>& Cells, const FDisplayCellsParams& Params);
+
+	/** Display only specified cell. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
+	static void DisplayCell(UObject* Owner, const FCell& Cell, const FDisplayCellsParams& Params) { DisplayCells(Owner, {Cell}, Params); }
 
 protected:
 	/** Debug visualization by text renders. Has blueprint implementation. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure = false, Category = "C++", meta = (DevelopmentOnly, BlueprintProtected, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderString,CoordinatePosition", DefaultToSelf = "Owner"))
+	UFUNCTION(BlueprintNativeEvent, meta = (DevelopmentOnly, BlueprintProtected, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderString,CoordinatePosition", DefaultToSelf = "Owner"))
 	void AddDebugTextRenders(class AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<class UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const;
 };

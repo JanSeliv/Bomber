@@ -297,17 +297,27 @@ USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChan
 #endif //WITH_EDITOR
 
 // Remove all text renders of the Owner
-void USingletonLibrary::ClearDisplayedCells(AActor* Owner)
+void USingletonLibrary::ClearDisplayedCells(const UObject* Owner)
 {
-	#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
-	if (!UEditorUtilsLibrary::IsEditor()
-	    || !IS_VALID(Owner)) // The owner is not valid
+#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
+	if (!UEditorUtilsLibrary::IsEditor())
 	{
 		return;
 	}
 
+	const AActor* OwnerActor = Cast<AActor>(Owner);
+	if (!OwnerActor)
+	{
+		const UActorComponent* Component = Cast<UActorComponent>(Owner);
+		OwnerActor = Component ? Component->GetOwner() : nullptr;
+		if (!ensureMsgf(OwnerActor, TEXT("ASSERT: 'OwnerActor' is null, can't Display Cells")))
+		{
+			return;
+		}
+	}
+
 	TArray<UActorComponent*> TextRendersArray;
-	Owner->GetComponents(UTextRenderComponent::StaticClass(), TextRendersArray);
+	OwnerActor->GetComponents(UTextRenderComponent::StaticClass(), TextRendersArray);
 	for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
 	{
 		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(i) ? Cast<UTextRenderComponent>(TextRendersArray[i]) : nullptr;
@@ -349,14 +359,34 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(AActor* Owner, const 
 #endif	// WITH_EDITOR [UEditorUtils::IsEditor]
 }
 
-void USingletonLibrary::DisplayCells(AActor* Owner, const FCells& Cells, const FDisplayCellsParams& Params)
+// Display coordinates of specified cells on the level
+void USingletonLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const FDisplayCellsParams& Params)
 {
 #if WITH_EDITOR	 // [UEditorUtils::IsEditor]
-	if (UEditorUtilsLibrary::IsEditor())
+	if (!UEditorUtilsLibrary::IsEditor())
 	{
-		bool bOutBool = false;
-		TArray<UTextRenderComponent*> OutArray;
-		Get().AddDebugTextRenders(Owner, Cells, Params.TextColor, bOutBool, OutArray, Params.TextHeight, Params.TextSize, Params.RenderString, Params.CoordinatePosition);
+		return;
 	}
+
+	AActor* OwnerActor = Cast<AActor>(Owner);
+	if (!OwnerActor)
+	{
+		const UActorComponent* Component = Cast<UActorComponent>(Owner);
+		OwnerActor = Component ? Component->GetOwner() : nullptr;
+		if (!ensureMsgf(OwnerActor, TEXT("ASSERT: 'OwnerActor' is null, can't Display Cells")))
+		{
+			return;
+		}
+	}
+
+	if (Params.bClearPreviousDisplays)
+	{
+		ClearDisplayedCells(Owner);
+	}
+
+	bool bOutBool = false;
+	TArray<UTextRenderComponent*> OutArray;
+	const FString RenderString = !Params.RenderString.IsNone() ? Params.RenderString.ToString() : TEXT("");
+	Get().AddDebugTextRenders(OwnerActor, Cells, Params.TextColor, bOutBool, OutArray, Params.TextHeight, Params.TextSize, RenderString, Params.CoordinatePosition);
 #endif	// WITH_EDITOR [UEditorUtils::IsEditor]
 }
