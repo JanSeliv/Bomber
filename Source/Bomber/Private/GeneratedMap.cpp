@@ -113,7 +113,7 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// the index of the specified cell
-	const int32 C0 = GridCellsInternal.IndexOfByPredicate([Cell](const FCell& InCell) { return InCell == Cell; });
+	const int32 C0 = GridCellsInternal.IndexOfByPredicate([&Cell](const FCell& InCell) { return InCell == Cell; });
 	if (C0 == INDEX_NONE) // if index was found and cell is contained in the array
 	{
 		return;

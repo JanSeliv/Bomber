@@ -113,6 +113,14 @@ public:
 	*		@see trello.com/c/b2IzcOhg
 	* --------------------------------------------------- */
 
+	/** Returns the cell by specified row and column number if exists, zero cell otherwise. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static const FCell& GetCellOnLevel(int32 Row, int32 Column);
+
+	/** Takes the cell and returns its row and column position on the level if exists, -1 otherwise. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell"))
+	static void GetCellPositionOnLevel(const FCell& InCell, int32& OutRow, int32& OutColumn);
+
 	/** Returns all grid cell locations on the Level Map as Set. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static TSet<FCell> GetAllCellsOnLevel();
@@ -187,6 +195,10 @@ public:
 	/** Returns true if specified cell is present on the Level Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	static bool IsCellExistsOnLevel(const FCell& Cell);
+
+	/** Returns true if the cell is present on the Level Map with such row and column indexes. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static bool IsCellPositionExistsOnLevel(int32 Row, int32 Column);
 
 	/** Returns true if at least one cell is present on the Level Map. */
 	UFUNCTION(BlueprintPure, Category = "C++")

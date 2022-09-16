@@ -4,6 +4,25 @@
 //---
 #include "GeneratedMap.h"
 
+// Returns the cell by specified row and column number if exists, zero cell otherwise
+const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
+{
+	const int32 MaxWidth = AGeneratedMap::Get().GetCachedTransform().GetScale3D().X;
+	const int32 CellIndex = Row * MaxWidth + Column;
+	const TArray<FCell>& AllCells = GetAllCellsOnLevelAsArray();
+	return AllCells.IsValidIndex(CellIndex) ? AllCells[CellIndex] : FCell::ZeroCell;
+}
+
+// Takes the cell and returns its row and column position on the level if exists, -1 otherwise
+void UCellsUtilsLibrary::GetCellPositionOnLevel(const FCell& InCell, int32& OutRow, int32& OutColumn)
+{
+	const int32 MaxWidth = AGeneratedMap::Get().GetCachedTransform().GetScale3D().X;
+	const int32 CellIdx = GetAllCellsOnLevelAsArray().IndexOfByPredicate([&InCell](const FCell& CellIt) { return CellIt == InCell; });
+	const bool bFound = CellIdx != INDEX_NONE && MaxWidth;
+	OutRow = bFound ? CellIdx / MaxWidth : INDEX_NONE;
+	OutColumn = bFound ? CellIdx % MaxWidth : INDEX_NONE;
+}
+
 // Returns all grid cell location on the Level Map
 FCells UCellsUtilsLibrary::GetAllCellsOnLevel()
 {
@@ -106,6 +125,12 @@ bool UCellsUtilsLibrary::AreCellsHaveAllMatchingActors(const FCells& Cells, int3
 bool UCellsUtilsLibrary::IsCellExistsOnLevel(const FCell& Cell)
 {
 	return AGeneratedMap::Get().GridCellsInternal.Contains(Cell);
+}
+
+// Returns true if the cell is present on the Level Map with such row and column indexes
+bool UCellsUtilsLibrary::IsCellPositionExistsOnLevel(int32 Row, int32 Column)
+{
+	return GetCellOnLevel(Row, Column).IsValid();
 }
 
 // Returns true if at least one cell is present on the Level Map
