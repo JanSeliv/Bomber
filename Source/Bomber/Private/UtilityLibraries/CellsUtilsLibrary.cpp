@@ -123,8 +123,9 @@ bool UCellsUtilsLibrary::AreAllCellsExistOnLevel(const FCells& Cells)
 // Returns cells around the center in specified radius and according desired type of breaks
 FCells UCellsUtilsLibrary::GetCellsAround(const FCell& CenterCell, EPathType Pathfinder, int32 Radius)
 {
+	constexpr int32 AllDirections = TO_FLAG(ECellDirection::All);
 	FCells OutCells;
-	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, Radius);
+	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, Radius, AllDirections);
 	return OutCells;
 }
 
@@ -132,16 +133,16 @@ FCells UCellsUtilsLibrary::GetCellsAround(const FCell& CenterCell, EPathType Pat
 FCell UCellsUtilsLibrary::GetCellInDirection(const FCell& CenterCell, EPathType Pathfinder, ECellDirection Direction)
 {
 	constexpr int32 SideLength = 1;
-	const FCells Cells = GetCellsInDirection(CenterCell, Pathfinder, SideLength, Direction);
-	return !Cells.IsEmpty() ? Cells.Array()[0] : FCell::ZeroCell;
+	FCells OutCells;
+	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, SideLength, TO_FLAG(Direction));
+	OutCells.Remove(CenterCell);
+	return !OutCells.IsEmpty() ? OutCells.Array()[0] : FCell::ZeroCell;
 }
 
 // Returns cells in specified direction from a center
-FCells UCellsUtilsLibrary::GetCellsInDirection(const FCell& CenterCell, EPathType Pathfinder, int32 SideLength, ECellDirection Direction)
+FCells UCellsUtilsLibrary::GetCellsInDirections(const FCell& CenterCell, EPathType Pathfinder, int32 SideLength, int32 DirectionsBitmask)
 {
 	FCells OutCells;
-	const FCell& CellDirection = FCell::GetCellDirection(Direction);
-	//@TODO implement next
-	//AGeneratedMap::Get().GetSidesCellInDirection(OutCells, CenterCell, Pathfinder, SideLength, CellDirection);
+	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, SideLength, DirectionsBitmask);
 	return OutCells;
 }

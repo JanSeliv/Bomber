@@ -149,22 +149,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UPoolManager* GetPoolManager() const { return PoolManagerInternal; }
 
-	/** Getting an array of cells by four sides of an input center cell and type of breaks.
-	 *
-	 * @param OutCells Will contain found cells.
-	 * @param Cell The start of searching by the sides.
-	 * @param SideLength Length of each side.
-	 * @param bBreakInputCells In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
-	 * @param Pathfinder Type of cells searching.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	void GetSidesCells(
-		TSet<FCell>& OutCells,
-		const FCell& Cell,
-		EPathType Pathfinder,
-		int32 SideLength,
-		bool bBreakInputCells = false) const;
-
 	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
 	 *
 	 * @param Type Which type of level actors
@@ -289,7 +273,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/** The intersection of (OutCells ∩ ActorsTypesBitmask).
-	 *	Is not blueprintable since all needed ufunctions are already use this method.
+	 *	Is not public blueprintable since all needed ufunctions are already use this method.
 	 *	@see UCellsUtilsLibrary
 	 *
 	 * @param InOutCells Will contain cells with actors of specified types.
@@ -297,6 +281,25 @@ protected:
 	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
 	 */
 	void IntersectCellsByTypes(FCells& InOutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty = true) const;
+
+	/** Getting an array of cells by any sides from an input center cell and type of breaks.
+	 *	Is not public blueprintable since all needed ufunctions are already use this method.
+	 *	@see UCellsUtilsLibrary
+	 *
+	 * @param OutCells Will contain found cells.
+	 * @param Cell The start of searching by the sides.
+	 * @param Pathfinder Type of cells searching.
+	 * @param SideLength Distance in number of cells from a center.
+	 * @param DirectionsBitmask All sides need to iterate.
+	 * @param bBreakInputCells In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
+	 */
+	void GetSidesCells(
+		TSet<FCell>& OutCells,
+		const FCell& Cell,
+		EPathType Pathfinder,
+		int32 SideLength,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask,
+		bool bBreakInputCells = false) const;
 
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "C++", meta = (BlueprintProtected))

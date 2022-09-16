@@ -225,12 +225,12 @@ public:
 	 * @param CenterCell The start of searching in specified direction.
 	 * @param SideLength Distance in number of cells from a center.
 	 * @param Pathfinder Type of cells searching.
-	 * @param Direction Side to find the cells.
+	 * @param DirectionsBitmask Side to find the cells.
 	 */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CenterCell"))
-	static TSet<FCell> GetCellsInDirection(
+	static TSet<FCell> GetCellsInDirections(
 		const FCell& CenterCell,
 		EPathType Pathfinder,
 		int32 SideLength,
-		ECellDirection Direction);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask);
 };

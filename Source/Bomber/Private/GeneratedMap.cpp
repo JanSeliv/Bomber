@@ -86,8 +86,17 @@ void AGeneratedMap::GetSidesCells(
 	const FCell& Cell,
 	EPathType Pathfinder,
 	int32 SideLength,
+	int32 DirectionsBitmask,
 	bool bBreakInputCells) const
 {
+	const int32 MaxWidth = GetCachedTransform().GetScale3D().X;
+	if (!ensureMsgf(MaxWidth, TEXT("ASSERT: Level has zero width (Scale.X)"))
+	    || !ensureMsgf(DirectionsBitmask, TEXT("ASSERT: 'DirectionsBitmask' is not set"))
+	    || !ensureMsgf(SideLength > 0, TEXT("ASSERT: 'SideLength' is less than 1")))
+	{
+		return;
+	}
+
 	// ----- Walls definition -----
 	FCells Walls;
 	if (OutCells.Num() == 0)
@@ -154,13 +163,19 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// ----- Cells finding -----
-	const int32 MaxWidth = GetCachedTransform().GetScale3D().X;
-	for (int32 bIsY = 0; bIsY <= 1; ++bIsY) // 0(X-raw direction) and 1(Y-column direction)
+	for (int8 bIsY = 0; bIsY <= 1; ++bIsY) // 0(X-raw direction) and 1(Y-column direction)
 	{
 		const int32 PositionC0 = bIsY ? /*Y-column*/ C0 % MaxWidth : C0 / MaxWidth /*raw*/;
-		for (int32 SideMultiplier = -1; SideMultiplier <= 1; SideMultiplier += 2) // -1(Left|Down) and 1(Right|Up)
+		for (int8 SideMultiplier = -1; SideMultiplier <= 1; SideMultiplier += 2) // -1(Left|Down) and 1(Right|Up)
 		{
-			for (int32 i = 1; i <= SideLength; ++i)
+			const FCell CellDirection = SideMultiplier * (bIsY ? FVector::BackwardVector : FVector::RightVector);
+			const ECellDirection EnumDirection = FCell::GetCellDirection(CellDirection);
+			if (!EnumHasAnyFlags(EnumDirection, TO_ENUM(ECellDirection, DirectionsBitmask)))
+			{
+				continue;
+			}
+
+			for (int8 i = 1; i <= SideLength; ++i)
 			{
 				int32 Distance = i * SideMultiplier;
 				if (bIsY)
@@ -837,8 +852,9 @@ void AGeneratedMap::GenerateLevelActors()
 		{
 			for (const FCell& CellIt : IteratedCells)
 			{
-				static constexpr float MaxInteger = TNumericLimits<int32>::Max();
-				GetSidesCells(PathBreakers, CellIt, EPathType::Explosion, MaxInteger, true);
+				constexpr float MaxInteger = TNumericLimits<int32>::Max();
+				constexpr bool bBreakInputCells = true;
+				GetSidesCells(PathBreakers, CellIt, EPathType::Explosion, MaxInteger, TO_FLAG(ECellDirection::All), bBreakInputCells);
 			}
 
 			IteratedCells = PathBreakers.Difference(LDraggedCells);

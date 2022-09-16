@@ -10,15 +10,19 @@ typedef TSet<struct FCell> FCells;
 /**
  * Represents one of direction of a cell.
  */
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ECellDirection : uint8
 {
-	None,
-	Forward,
-	Backward,
-	Right,
-	Left
+	None = 0,
+	Forward = 1 << 0,
+	Backward = 1 << 1,
+	Right = 1 << 2,
+	Left = 1 << 3,
+	All = Forward | Backward | Right | Left
 };
+
+ENUM_CLASS_FLAGS(ECellDirection);
+using ECD = ECellDirection;
 
 /**
  * The structure that contains a location of an one cell on a grid of the Level Map.
@@ -98,6 +102,7 @@ struct BOMBER_API FCell
 
 	/** Returns the cell direction by its enum. */
 	static const FCell& GetCellDirection(ECellDirection CellDirection);
+	static ECellDirection GetCellDirection(const FCell& CellDirection);
 
 	/**
 	* Creates a hash value from a FCell.

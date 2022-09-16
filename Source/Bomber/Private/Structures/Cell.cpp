@@ -6,7 +6,6 @@
 #include "Components/MapComponent.h"
 //---
 
-// The zero cell
 const FCell FCell::ZeroCell = FVector::DownVector;
 const FCell FCell::ForwardCell = FVector::ForwardVector;
 const FCell FCell::BackwardCell = FVector::BackwardVector;
@@ -88,4 +87,26 @@ const FCell& FCell::GetCellDirection(ECellDirection CellDirection)
 		default:
 			return ZeroCell;
 	}
+}
+
+// Returns the enum direction by its cell
+ECellDirection FCell::GetCellDirection(const FCell& CellDirection)
+{
+	if (CellDirection == ForwardCell)
+	{
+		return ECellDirection::Forward;
+	}
+	if (CellDirection == BackwardCell)
+	{
+		return ECellDirection::Backward;
+	}
+	if (CellDirection == RightCell)
+	{
+		return ECellDirection::Right;
+	}
+	if (CellDirection == LeftCell)
+	{
+		return ECellDirection::Left;
+	}
+	return ECellDirection::None;
 }
