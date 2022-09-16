@@ -193,8 +193,7 @@ void AMyAIController::UpdateAI()
 	// Is there an item nearby?
 	if (bIsDangerous == false)
 	{
-		const FCells SafeCells = UCellsUtilsLibrary::GetCellsAround(F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius());
-		const FCells ItemsFromF0 = UCellsUtilsLibrary::FilterCellsByActors(SafeCells, TO_FLAG(EAT::Item));
+		const FCells ItemsFromF0 = UCellsUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius(), TO_FLAG(EAT::Item));
 		if (ItemsFromF0.Num() > 0)
 		{
 			MoveToCell(ItemsFromF0.Array()[0]);
@@ -315,9 +314,7 @@ void AMyAIController::UpdateAI()
 	    && bIsFilteringFailed == false // filtering was not failed
 	    && bIsItemInDirect == false)   // was not found direct items
 	{
-		const FCells ExplosionCells = UCellsUtilsLibrary::GetCellsAround(F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
-
-		FCells BoxesAndPlayers = UCellsUtilsLibrary::FilterCellsByActors(ExplosionCells, TO_FLAG(EAT::Box | EAT::Player));
+		FCells BoxesAndPlayers = UCellsUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN, TO_FLAG(EAT::Box | EAT::Player));
 		BoxesAndPlayers.Remove(MapComponent->GetCell());
 		if (BoxesAndPlayers.Num() > 0) // Are bombs or players in own bomb radius
 		{

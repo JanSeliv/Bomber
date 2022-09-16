@@ -34,6 +34,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", DisplayName = "To Vector (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FORCEINLINE FCell Conv_CellToVector(const FVector& InVector) { return FCell(InVector); }
 
+	/** Converts a cell value to a string, in the form 'X= Y=' */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To String (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FORCEINLINE FString Conv_CellToString(const FCell& InCell) { return FVector2D(InCell.Location).ToString(); }
+
 	/** Creates 'Break Cell' node with Vector as an output parameter. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", NativeBreakFunc))
 	static const FORCEINLINE FVector& BreakCell(const FCell& InCell) { return InCell.Location; }
@@ -140,7 +144,7 @@ public:
 	/** Returns all grid cell locations on the Level Map by specified actor types.
 	 * Returns all empty cells without actors if non of actors are chosen. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static TSet<FCell> GetAllCellsByActors(
+	static TSet<FCell> GetAllCellsWithActors(
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
 	/** Takes cells and returns only empty cells where non of actors are present. */
@@ -151,7 +155,7 @@ public:
 	 * Returns matching empty cells without actors if non of actors are chosen.
 	 *
 	 * @param InCells Cells to filter.
-	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
+	 * @param ActorsTypesBitmask Bitmask of actors types to filter.
 	 * @return cells with actors of specified types.
 	 */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -220,7 +224,23 @@ public:
 		EPathType Pathfinder,
 		int32 Radius);
 
-	/** Returns first cell in specified direction from a center.
+	/** Returns cells that match specified actors in specified radius from a center, according desired type of breaks.
+	 * Could be useful to determine are there any players or items around.
+	 *
+	 * @param CenterCell The start of searching in specified direction.
+	 * @param Radius Distance in number of cells from a center.
+	 * @param Pathfinder Type of cells searching.
+	 * @param ActorsTypesBitmask Bitmask of actors types to filter.
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CenterCell"))
+	static TSet<FCell> GetCellsAroundWithActors(
+		const FCell& CenterCell,
+		EPathType Pathfinder,
+		int32 Radius,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+
+	/** Returns first cell in specified direction from a center, according desired type of breaks.
+	 * Could be useful to get next cell.
 	 *
 	 * @param CenterCell The start of searching in specified direction.
 	 * @param Pathfinder Type of cells searching.
@@ -232,7 +252,21 @@ public:
 		EPathType Pathfinder,
 		ECellDirection Direction);
 
-	/** Returns cells in specified direction from a center.
+	/** Returns true if a cell was found in specified direction from a center, according desired type of breaks.
+	 * Could be useful to determine can the next cell be taken.
+	 *
+	 * @param CenterCell The start of searching in specified direction.
+	 * @param Pathfinder Type of cells searching.
+	 * @param Direction Side to find the cells.
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CenterCell"))
+	static bool CanGetCellInDirection(
+		const FCell& CenterCell,
+		EPathType Pathfinder,
+		ECellDirection Direction);
+
+	/** Returns cells in specified direction from a center, according desired type of breaks.
+	 * Could be useful to get horizontal cells in left and right direction or vertical cells in forward and backward directions.
 	 *
 	 * @param CenterCell The start of searching in specified direction.
 	 * @param SideLength Distance in number of cells from a center.
@@ -245,4 +279,21 @@ public:
 		EPathType Pathfinder,
 		int32 SideLength,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask);
+
+	/** Returns cells that match specified actors in specified direction from a center, according desired type of breaks.
+	 * Could be useful to determine are there any players or items on the way.
+	 *
+	 * @param CenterCell The start of searching in specified direction.
+	 * @param SideLength Distance in number of cells from a center.
+	 * @param Pathfinder Type of cells searching.
+	 * @param DirectionsBitmask Side to find the cells.
+	 * @param ActorsTypesBitmask Bitmask of actors types to filter.
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CenterCell"))
+	static TSet<FCell> GetCellsInDirectionsWithActors(
+		const FCell& CenterCell,
+		EPathType Pathfinder,
+		int32 SideLength,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 };

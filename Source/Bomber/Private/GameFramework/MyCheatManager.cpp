@@ -55,7 +55,7 @@ void UMyCheatManager::SetAI(bool bShouldEnable) const
 // Destroy all specified level actors on the map
 void UMyCheatManager::DestroyAllByType(EActorType ActorType) const
 {
-	const FCells Cells = UCellsUtilsLibrary::GetAllCellsByActors(TO_FLAG(ActorType));
+	const FCells Cells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorType));
 	AGeneratedMap::Get().DestroyActorsFromMap(Cells);
 }
 

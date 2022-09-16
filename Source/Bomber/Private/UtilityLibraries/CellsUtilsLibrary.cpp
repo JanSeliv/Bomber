@@ -45,11 +45,11 @@ FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
 FCells UCellsUtilsLibrary::GetAllEmptyCellsWithoutActors()
 {
 	constexpr int32 NoneActorType = TO_FLAG(ELevelType::None);
-	return GetAllCellsByActors(NoneActorType);
+	return GetAllCellsWithActors(NoneActorType);
 }
 
 // Returns all grid cell location on the Level Map by specified actor types
-FCells UCellsUtilsLibrary::GetAllCellsByActors(int32 ActorsTypesBitmask)
+FCells UCellsUtilsLibrary::GetAllCellsWithActors(int32 ActorsTypesBitmask)
 {
 	constexpr bool bIntersectAllIfEmpty = true;
 	FCells OutCells;
@@ -154,6 +154,13 @@ FCells UCellsUtilsLibrary::GetCellsAround(const FCell& CenterCell, EPathType Pat
 	return OutCells;
 }
 
+// Returns cells that match specified actors in specified radius from a center, according desired type of breaks
+FCells UCellsUtilsLibrary::GetCellsAroundWithActors(const FCell& CenterCell, EPathType Pathfinder, int32 Radius, int32 ActorsTypesBitmask)
+{
+	const FCells CellsAround = GetCellsAround(CenterCell, Pathfinder, Radius);
+	return FilterCellsByActors(CellsAround, ActorsTypesBitmask);
+}
+
 // Returns first cell in specified direction from a center
 FCell UCellsUtilsLibrary::GetCellInDirection(const FCell& CenterCell, EPathType Pathfinder, ECellDirection Direction)
 {
@@ -164,10 +171,23 @@ FCell UCellsUtilsLibrary::GetCellInDirection(const FCell& CenterCell, EPathType 
 	return !OutCells.IsEmpty() ? OutCells.Array()[0] : FCell::ZeroCell;
 }
 
+// Returns true if a cell was found in specified direction from a center, according desired type of breaks
+bool UCellsUtilsLibrary::CanGetCellInDirection(const FCell& CenterCell, EPathType Pathfinder, ECellDirection Direction)
+{
+	return GetCellInDirection(CenterCell, Pathfinder, Direction).IsValid();
+}
+
 // Returns cells in specified direction from a center
 FCells UCellsUtilsLibrary::GetCellsInDirections(const FCell& CenterCell, EPathType Pathfinder, int32 SideLength, int32 DirectionsBitmask)
 {
 	FCells OutCells;
 	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, SideLength, DirectionsBitmask);
 	return OutCells;
+}
+
+// Returns cells that match specified actors in specified direction from a center
+FCells UCellsUtilsLibrary::GetCellsInDirectionsWithActors(const FCell& CenterCell, EPathType Pathfinder, int32 SideLength, int32 DirectionsBitmask, int32 ActorsTypesBitmask)
+{
+	const FCells CellsInDirections = GetCellsInDirections(CenterCell, Pathfinder, SideLength, DirectionsBitmask);
+	return FilterCellsByActors(CellsInDirections, ActorsTypesBitmask);
 }
