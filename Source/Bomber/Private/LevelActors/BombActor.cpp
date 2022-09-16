@@ -8,6 +8,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/DataAssetsContainer.h"
 #include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "SoundsManager.h"
 #include "PoolManager.h"
@@ -76,9 +77,9 @@ void ABombActor::InitBomb(int32 InFireRadius/* = DEFAULT_FIRE_RADIUS*/, int32 Ch
 	}
 
 	// Update explosion information
-	FCells ExplosionCells;
+
 	FireRadiusInternal = InFireRadius;
-	AGeneratedMap::Get().GetSidesCells(ExplosionCells, MapComponentInternal->GetCell(), EPathType::Explosion, InFireRadius);
+	const FCells ExplosionCells = UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, InFireRadius);
 	ExplosionCellsInternal = ExplosionCells.Array();
 
 	FCollisionResponseContainer CollisionResponses = MapComponentInternal->GetCollisionResponses();
@@ -249,8 +250,6 @@ void ABombActor::MulticastDetonateBomb_Implementation(AActor* DestroyedActor/* =
 		return;
 	}
 
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
-
 	// Spawn emitters
 	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().GetExplosionVFX();
 	for (const FCell& Cell : ExplosionCellsInternal)
@@ -263,7 +262,7 @@ void ABombActor::MulticastDetonateBomb_Implementation(AActor* DestroyedActor/* =
 	ExplosionCellsInternal.Empty();
 
 	// Destroy all actors from array of cells
-	LevelMap.DestroyActorsFromMap(CellsToDestroy);
+	AGeneratedMap::Get().DestroyActorsFromMap(CellsToDestroy);
 
 	// Play the sound
 	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())

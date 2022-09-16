@@ -3,7 +3,6 @@
 #include "Controllers/MyAIController.h"
 //---
 #include "Bomber.h"
-#include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "Globals/DataAssetsContainer.h"
 #include "UtilityLibraries/SingletonLibrary.h"
@@ -160,8 +159,7 @@ void AMyAIController::UpdateAI()
 	{
 		return;
 	}
-
-	const AGeneratedMap& LevelMap = AGeneratedMap::Get();
+	
 	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
 
 #if WITH_EDITOR
@@ -183,7 +181,7 @@ void AMyAIController::UpdateAI()
 	uint8 bIsDangerous;
 	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous) // two searches (safe and free)
 	{
-		LevelMap.GetSidesCells(Free, F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MaxInteger);
+		Free = UCellsUtilsLibrary::GetCellsAround(F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MaxInteger);
 		if (!bIsDangerous && Free.Num() > 0)
 		{
 			// Remove this cell from array
@@ -195,11 +193,8 @@ void AMyAIController::UpdateAI()
 	// Is there an item nearby?
 	if (bIsDangerous == false)
 	{
-		FCells SafeCells;
-		LevelMap.GetSidesCells(SafeCells, F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius());
-
-		FCells ItemsFromF0;
-		UCellsUtilsLibrary::FilterCellsByActors(/*in*/SafeCells, /*out*/ItemsFromF0, TO_FLAG(EAT::Item));
+		const FCells SafeCells = UCellsUtilsLibrary::GetCellsAround(F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius());
+		const FCells ItemsFromF0 = UCellsUtilsLibrary::FilterCellsByActors(SafeCells, TO_FLAG(EAT::Item));
 		if (ItemsFromF0.Num() > 0)
 		{
 			MoveToCell(ItemsFromF0.Array()[0]);
@@ -222,8 +217,7 @@ void AMyAIController::UpdateAI()
 			continue;
 		}
 
-		FCells ThisCrossway;
-		LevelMap.GetSidesCells(ThisCrossway, *F, EPathType::Safe, AIDataAsset.GetCrosswaySearchRadius());
+		const FCells ThisCrossway = UCellsUtilsLibrary::GetCellsAround(*F, EPathType::Safe, AIDataAsset.GetCrosswaySearchRadius());
 		FCells Way = Free;                  // Way = Safe / (Free + F0)
 		Way.Emplace(F0);                    // Way = Free + F0
 		Way = ThisCrossway.Difference(Way); // Way = Safe / Way
@@ -232,7 +226,7 @@ void AMyAIController::UpdateAI()
 		{
 			// Finding crossways
 			AllCrossways.Emplace(*F); // is the crossway
-			UCellsUtilsLibrary::FilterCellsByActors(/*in*/ThisCrossway, /*out*/Way, TO_FLAG(EAT::Player));
+			Way = UCellsUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Player));
 			Way.Remove(MapComponent->GetCell());
 			if (Way.Num() == 0)
 			{
@@ -240,8 +234,7 @@ void AMyAIController::UpdateAI()
 			}
 
 			// Finding items
-			FCells ItemsAround;
-			UCellsUtilsLibrary::FilterCellsByActors(/*in*/ThisCrossway, /*out*/ItemsAround, TO_FLAG(EAT::Item));
+			FCells ItemsAround = UCellsUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Item));
 			if (ItemsAround.Num() > 0) // Is there items in this crossway?
 			{
 				ItemsAround = ItemsAround.Intersect(Free); // ItemsArouns = ItemsArouns ∪ Free
@@ -287,7 +280,7 @@ void AMyAIController::UpdateAI()
 				FilteringStep = Filtered.Intersect(AllCrossways);
 				break;
 			case 1: // Without players
-				LevelMap.GetSidesCells(FilteringStep, F0, EPathType::Secure, MaxInteger);
+				FilteringStep = UCellsUtilsLibrary::GetCellsAround(F0, EPathType::Secure, MaxInteger);
 				FilteringStep = Filtered.Intersect(FilteringStep);
 				break;
 			case 2: // Without crossways with another players
@@ -322,11 +315,9 @@ void AMyAIController::UpdateAI()
 	    && bIsFilteringFailed == false // filtering was not failed
 	    && bIsItemInDirect == false)   // was not found direct items
 	{
-		FCells ExplosionCells;
-		LevelMap.GetSidesCells(/*out*/ExplosionCells, F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
+		const FCells ExplosionCells = UCellsUtilsLibrary::GetCellsAround(F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
 
-		FCells BoxesAndPlayers;
-		UCellsUtilsLibrary::FilterCellsByActors(/*in*/ExplosionCells, /*out*/BoxesAndPlayers, TO_FLAG(EAT::Box | EAT::Player));
+		FCells BoxesAndPlayers = UCellsUtilsLibrary::FilterCellsByActors(ExplosionCells, TO_FLAG(EAT::Box | EAT::Player));
 		BoxesAndPlayers.Remove(MapComponent->GetCell());
 		if (BoxesAndPlayers.Num() > 0) // Are bombs or players in own bomb radius
 		{

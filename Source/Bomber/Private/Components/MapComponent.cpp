@@ -78,8 +78,8 @@ bool UMapComponent::OnConstruction()
 		SetCollisionResponses(CollisionResponse);
 	}
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+#if WITH_EDITOR	 // [IsEditor]
+	if (UEditorUtilsLibrary::IsEditor())
 	{
 		// Update AI renders after adding obj to map
 		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
@@ -90,7 +90,7 @@ bool UMapComponent::OnConstruction()
 			USingletonLibrary::DisplayCells(Owner, {CellInternal}, FDisplayCellsParams::EmptyParams);
 		}
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+#endif	//WITH_EDITOR [IsEditor]
 
 	return true;
 }

@@ -329,8 +329,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	if (HasAuthority()
 	    && CharacterIDInternal == INDEX_NONE)
 	{
-		FCells PlayerCells;
-		UCellsUtilsLibrary::GetAllCellsByActors(PlayerCells, TO_FLAG(EAT::Player));
+		const FCells PlayerCells = UCellsUtilsLibrary::GetAllCellsByActors(TO_FLAG(EAT::Player));
 		CharacterIDInternal = PlayerCells.Num() - 1;
 		ApplyCharacterID();
 	}

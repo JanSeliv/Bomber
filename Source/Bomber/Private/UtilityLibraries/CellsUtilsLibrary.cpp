@@ -5,9 +5,9 @@
 #include "GeneratedMap.h"
 
 // Returns all grid cell location on the Level Map
-void UCellsUtilsLibrary::GetAllCellsOnLevel(FCells& OutCells)
+FCells UCellsUtilsLibrary::GetAllCellsOnLevel()
 {
-	OutCells = FCells{AGeneratedMap::Get().GridCellsInternal};
+	return FCells{AGeneratedMap::Get().GridCellsInternal};
 }
 
 // Returns all grid cell location on the Level Map
@@ -23,33 +23,35 @@ FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
 }
 
 // Returns all empty grid cell locations on the Level Map where non of actors are present
-void UCellsUtilsLibrary::GetAllEmptyCellsWithoutActors(FCells& OutCells)
+FCells UCellsUtilsLibrary::GetAllEmptyCellsWithoutActors()
 {
 	constexpr int32 NoneActorType = TO_FLAG(ELevelType::None);
-	GetAllCellsByActors(OutCells, NoneActorType);
+	return GetAllCellsByActors(NoneActorType);
 }
 
 // Returns all grid cell location on the Level Map by specified actor types
-auto UCellsUtilsLibrary::GetAllCellsByActors(FCells& OutCells, int32 ActorsTypesBitmask) -> void
+FCells UCellsUtilsLibrary::GetAllCellsByActors(int32 ActorsTypesBitmask)
 {
 	constexpr bool bIntersectAllIfEmpty = true;
-	OutCells.Empty();
+	FCells OutCells;
 	AGeneratedMap::Get().IntersectCellsByTypes(OutCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
+	return OutCells;
 }
 
 // Takes cells and returns only empty cells where non of actors are present
-void UCellsUtilsLibrary::FilterEmptyCellsWithoutActors(const TSet<FCell>& InCells, TSet<FCell>& OutCells)
+FCells UCellsUtilsLibrary::FilterEmptyCellsWithoutActors(const FCells& InCells)
 {
 	constexpr int32 NoneActorType = TO_FLAG(ELevelType::None);
-	FilterCellsByActors(InCells, OutCells, NoneActorType);
+	return FilterCellsByActors(InCells, NoneActorType);
 }
 
 // Takes cells and returns only matching with specified actor types
-void UCellsUtilsLibrary::FilterCellsByActors(const FCells& InCells, FCells& OutCells, int32 ActorsTypesBitmask)
+FCells UCellsUtilsLibrary::FilterCellsByActors(const FCells& InCells, int32 ActorsTypesBitmask)
 {
 	constexpr bool bIntersectAllIfEmpty = false;
-	OutCells = InCells;
+	FCells OutCells = InCells;
 	AGeneratedMap::Get().IntersectCellsByTypes(OutCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
+	return OutCells;
 }
 
 // Returns true if cell is empty, so it does not have own actor
@@ -81,7 +83,7 @@ bool UCellsUtilsLibrary::AreCellsHaveAnyMatchingActors(const FCells& Cells, int3
 	constexpr bool bIntersectAllIfEmpty = false;
 	FCells NonEmptyCells{Cells};
 	AGeneratedMap::Get().IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
-	return NonEmptyCells.Num() > 0;
+	return !NonEmptyCells.IsEmpty();
 }
 
 // Returns true if all cells are empty, so don't have own actors
@@ -116,4 +118,30 @@ bool UCellsUtilsLibrary::IsAnyCellExistsOnLevel(const FCells& Cells)
 bool UCellsUtilsLibrary::AreAllCellsExistOnLevel(const FCells& Cells)
 {
 	return FCells{AGeneratedMap::Get().GridCellsInternal}.Includes(Cells);
+}
+
+// Returns cells around the center in specified radius and according desired type of breaks
+FCells UCellsUtilsLibrary::GetCellsAround(const FCell& CenterCell, EPathType Pathfinder, int32 Radius)
+{
+	FCells OutCells;
+	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, Radius);
+	return OutCells;
+}
+
+// Returns first cell in specified direction from a center
+FCell UCellsUtilsLibrary::GetCellInDirection(const FCell& CenterCell, EPathType Pathfinder, ECellDirection Direction)
+{
+	constexpr int32 SideLength = 1;
+	const FCells Cells = GetCellsInDirection(CenterCell, Pathfinder, SideLength, Direction);
+	return !Cells.IsEmpty() ? Cells.Array()[0] : FCell::ZeroCell;
+}
+
+// Returns cells in specified direction from a center
+FCells UCellsUtilsLibrary::GetCellsInDirection(const FCell& CenterCell, EPathType Pathfinder, int32 SideLength, ECellDirection Direction)
+{
+	FCells OutCells;
+	const FCell& CellDirection = FCell::GetCellDirection(Direction);
+	//@TODO implement next
+	//AGeneratedMap::Get().GetSidesCellInDirection(OutCells, CenterCell, Pathfinder, SideLength, CellDirection);
+	return OutCells;
 }

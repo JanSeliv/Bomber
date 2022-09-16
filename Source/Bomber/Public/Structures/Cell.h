@@ -8,6 +8,19 @@
 typedef TSet<struct FCell> FCells;
 
 /**
+ * Represents one of direction of a cell.
+ */
+UENUM(BlueprintType)
+enum class ECellDirection : uint8
+{
+	None,
+	Forward,
+	Backward,
+	Right,
+	Left
+};
+
+/**
  * The structure that contains a location of an one cell on a grid of the Level Map.
  */
 USTRUCT(BlueprintType, meta = (HasNativeMake = "Bomber.CellsUtilsLibrary.MakeCell", HasNativeBreak = "Bomber.CellsUtilsLibrary.BreakCell"))
@@ -15,8 +28,11 @@ struct BOMBER_API FCell
 {
 	GENERATED_BODY()
 
-	/** The zero cell (0,0,-1) */
 	static const FCell ZeroCell;
+	static const FCell ForwardCell;
+	static const FCell BackwardCell;
+	static const FCell RightCell;
+	static const FCell LeftCell;
 
 	/** The length of the one cell */
 	static constexpr float CellSize = 200.f;
@@ -35,7 +51,10 @@ struct BOMBER_API FCell
 	*
 	* @param Vector The other vector.
 	*/
-	explicit FCell(const FVector& Vector);
+	FCell(const FVector& Vector);
+
+	/** Equal operator for vectors to directly copy its value to the cell. */
+	FCell& operator=(const FVector& Vector);
 
 	/** Rotates around the center of the Level Map to the same yaw degree.
 	 *
@@ -76,6 +95,9 @@ struct BOMBER_API FCell
 
 	/** Find the average of an set of cells. */
 	static FCell GetCellArrayAverage(const TSet<FCell>& Cells);
+
+	/** Returns the cell direction by its enum. */
+	static const FCell& GetCellDirection(ECellDirection CellDirection);
 
 	/**
 	* Creates a hash value from a FCell.

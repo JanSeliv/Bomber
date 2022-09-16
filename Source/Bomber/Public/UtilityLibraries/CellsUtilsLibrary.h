@@ -4,6 +4,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
+#include "Bomber.h"
 #include "Structures/Cell.h"
 //---
 #include "CellsUtilsLibrary.generated.h"
@@ -61,7 +62,23 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE float GetCellSize() { return FCell::CellSize; }
 
-	/** Returns the zero cell (0,0,0) */
+	/** Cell forward direction constant (1,0,0) */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Forward", ScriptConstantHost = "Cell"))
+	static const FORCEINLINE FCell& Cell_Forward() { return FCell::ForwardCell; }
+
+	/** Cell backward direction constant (-1,0,0) */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Backward", ScriptConstantHost = "Cell"))
+	static const FORCEINLINE FCell& Cell_Backward() { return FCell::BackwardCell; }
+
+	/** Cell right direction constant (0,1,0) */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Right", ScriptConstantHost = "Cell"))
+	static const FORCEINLINE FCell& Cell_Right() { return FCell::RightCell; }
+
+	/** Cell left direction constant (0,-1,0) */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Left", ScriptConstantHost = "Cell"))
+	static const FORCEINLINE FCell& Cell_Left() { return FCell::LeftCell; }
+
+	/** Returns the zero cell (0,0,-1) */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Zero", ScriptConstantHost = "Cell"))
 	static const FORCEINLINE FCell& Cell_Zero() { return FCell::ZeroCell; }
 
@@ -93,11 +110,12 @@ public:
 
 	/* ---------------------------------------------------
 	*		Level Map related cell functions
+	*		@see trello.com/c/b2IzcOhg
 	* --------------------------------------------------- */
 
 	/** Returns all grid cell locations on the Level Map as Set. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static void GetAllCellsOnLevel(TSet<FCell>& OutCells);
+	static TSet<FCell> GetAllCellsOnLevel();
 
 	/** Returns all grid cell locations on the Level Map as Array. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -108,35 +126,33 @@ public:
 	static FCell GetCenterCellOnLevel();
 
 	/** Returns all empty grid cell locations on the Level Map where non of actors are present. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static void GetAllEmptyCellsWithoutActors(TSet<FCell>& OutCells);
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "free"))
+	static TSet<FCell> GetAllEmptyCellsWithoutActors();
 
 	/** Returns all grid cell locations on the Level Map by specified actor types.
 	 * Returns all empty cells without actors if non of actors are chosen. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static void GetAllCellsByActors(
-		TSet<FCell>& OutCells,
+	static TSet<FCell> GetAllCellsByActors(
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
 	/** Takes cells and returns only empty cells where non of actors are present. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static void FilterEmptyCellsWithoutActors(const TSet<FCell>& InCells, TSet<FCell>& OutCells);
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "free"))
+	static TSet<FCell> FilterEmptyCellsWithoutActors(const TSet<FCell>& InCells);
 
 	/** Takes cells and returns only matching with specified actor types.
 	 * Returns matching empty cells without actors if non of actors are chosen.
 	 *
 	 * @param InCells Cells to filter.
-	 * @param OutCells Will contain cells with actors of specified types.
 	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
+	 * @return cells with actors of specified types.
 	 */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static void FilterCellsByActors(
+	static TSet<FCell> FilterCellsByActors(
 		const TSet<FCell>& InCells,
-		TSet<FCell>& OutCells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns true if specified cell is empty, so it does not have own actor. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "free"))
 	static bool IsEmptyCellWithoutActor(const FCell& Cell);
 
 	/** Returns true if a cell has an actor of specified type (or its type matches with at least one type if put more than one type).
@@ -146,8 +162,8 @@ public:
 		const FCell& Cell,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
-	/** Returns true if at least one cell  along specified is empty, so it does not have own actor. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	/** Returns true if at least one cell along specified is empty, so it does not have own actor. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "free"))
 	static bool IsAnyCellEmptyWithoutActor(const TSet<FCell>& Cells);
 
 	/** Returns true if at least one cell has actors of specified types.
@@ -158,7 +174,7 @@ public:
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns true if all specified cells are empty, so don't have own actors. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "free"))
 	static bool AreAllCellsEmptyWithoutActors(const TSet<FCell>& Cells);
 
 	/** Returns true if all cells have actors of specified types.
@@ -179,4 +195,42 @@ public:
 	/** Returns true if all specified cells are present on the Level Map. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool AreAllCellsExistOnLevel(const TSet<FCell>& Cells);
+
+	/** Returns cells around the center in specified radius and according desired type of breaks.
+	 *
+	 * @param CenterCell The start of searching in all directions.
+	 * @param Radius Distance in number of cells from a center.
+	 * @param Pathfinder Type of cells searching.
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CenterCell"))
+	static TSet<FCell> GetCellsAround(
+		const FCell& CenterCell,
+		EPathType Pathfinder,
+		int32 Radius);
+
+	/** Returns first cell in specified direction from a center.
+	 *
+	 * @param CenterCell The start of searching in specified direction.
+	 * @param Pathfinder Type of cells searching.
+	 * @param Direction Side to find the cells.
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CenterCell"))
+	static FCell GetCellInDirection(
+		const FCell& CenterCell,
+		EPathType Pathfinder,
+		ECellDirection Direction);
+
+	/** Returns cells in specified direction from a center.
+	 *
+	 * @param CenterCell The start of searching in specified direction.
+	 * @param SideLength Distance in number of cells from a center.
+	 * @param Pathfinder Type of cells searching.
+	 * @param Direction Side to find the cells.
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CenterCell"))
+	static TSet<FCell> GetCellsInDirection(
+		const FCell& CenterCell,
+		EPathType Pathfinder,
+		int32 SideLength,
+		ECellDirection Direction);
 };

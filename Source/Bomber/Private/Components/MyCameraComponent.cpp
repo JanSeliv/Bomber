@@ -104,8 +104,7 @@ void UMyCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
 FVector UMyCameraComponent::GetLocationBetweenPlayers() const
 {
 	float Distance = 0.f;
-	FCells PlayersCells;
-	UCellsUtilsLibrary::GetAllCellsByActors(PlayersCells, TO_FLAG(EAT::Player));
+	const FCells PlayersCells = UCellsUtilsLibrary::GetAllCellsByActors(TO_FLAG(EAT::Player));
 	for (const FCell& C1 : PlayersCells)
 	{
 		for (const FCell& C2 : PlayersCells)

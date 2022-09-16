@@ -7,14 +7,25 @@
 //---
 
 // The zero cell
-const FCell FCell::ZeroCell = FCell();
+const FCell FCell::ZeroCell = FVector::DownVector;
+const FCell FCell::ForwardCell = FVector::ForwardVector;
+const FCell FCell::BackwardCell = FVector::BackwardVector;
+const FCell FCell::RightCell = FVector::RightVector;
+const FCell FCell::LeftCell = FVector::LeftVector;
 
 // Initial constructor for cells filling into the array. Round another FVector into this cell.
 FCell::FCell(const FVector& Vector)
 {
 	Location.X = FMath::RoundToFloat(Vector.X);
 	Location.Y = FMath::RoundToFloat(Vector.Y);
-	Location.Z = FMath::RoundToFloat(AGeneratedMap::Get().GetCachedTransform().GetLocation().Z);
+	Location.Z = FMath::RoundToFloat(GEngine && GEngine->GameSingleton ? AGeneratedMap::Get().GetCachedTransform().GetLocation().Z : Vector.Z);
+}
+
+// Equal operator for vectors to directly copy its value to the cell
+FCell& FCell::operator=(const FVector& Vector)
+{
+	Location = Vector;
+	return *this;
 }
 
 // Rotates around the center of the Level Map to the same yaw degree
@@ -59,4 +70,22 @@ FCell FCell::GetCellArrayAverage(const FCells& Cells)
 	}
 	FVector2D V(FVector::UpVector);
 	return FCell(Average);
+}
+
+// Returns the cell direction by its enum.
+const FCell& FCell::GetCellDirection(ECellDirection CellDirection)
+{
+	switch (CellDirection)
+	{
+		case ECellDirection::Forward:
+			return ForwardCell;
+		case ECellDirection::Backward:
+			return BackwardCell;
+		case ECellDirection::Right:
+			return RightCell;
+		case ECellDirection::Left:
+			return LeftCell;
+		default:
+			return ZeroCell;
+	}
 }
