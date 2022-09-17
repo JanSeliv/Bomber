@@ -384,9 +384,17 @@ void USingletonLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const 
 		ClearDisplayedCells(Owner);
 	}
 
+	// Remove invalid cell if passed
+	// @TODO Instead of removing, do not add such render component
+	FCells InCells = Cells;
+	if (InCells.Contains(FCell::ZeroCell))
+	{
+		InCells.Remove(FCell::ZeroCell);
+	}
+
 	bool bOutBool = false;
 	TArray<UTextRenderComponent*> OutArray;
 	const FString RenderString = !Params.RenderString.IsNone() ? Params.RenderString.ToString() : TEXT("");
-	Get().AddDebugTextRenders(OwnerActor, Cells, Params.TextColor, bOutBool, OutArray, Params.TextHeight, Params.TextSize, RenderString, Params.CoordinatePosition);
+	Get().AddDebugTextRenders(OwnerActor, InCells, Params.TextColor, bOutBool, OutArray, Params.TextHeight, Params.TextSize, RenderString, Params.CoordinatePosition);
 #endif	// WITH_EDITOR [UEditorUtils::IsEditor]
 }

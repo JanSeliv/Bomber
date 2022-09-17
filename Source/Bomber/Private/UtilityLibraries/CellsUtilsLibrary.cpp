@@ -161,6 +161,13 @@ FCells UCellsUtilsLibrary::GetCellsAroundWithActors(const FCell& CenterCell, EPa
 	return FilterCellsByActors(CellsAround, ActorsTypesBitmask);
 }
 
+// Returns matching empty cells around without actors, according desired type of breaks
+FCells UCellsUtilsLibrary::GetEmptyCellsAroundWithoutActors(const FCell& CenterCell, EPathType Pathfinder, int32 Radius)
+{
+	constexpr int32 NoneActorType = TO_FLAG(ELevelType::None);
+	return GetCellsAroundWithActors(CenterCell, Pathfinder, Radius, NoneActorType);
+}
+
 // Returns first cell in specified direction from a center
 FCell UCellsUtilsLibrary::GetCellInDirection(const FCell& CenterCell, EPathType Pathfinder, ECellDirection Direction)
 {
@@ -190,4 +197,11 @@ FCells UCellsUtilsLibrary::GetCellsInDirectionsWithActors(const FCell& CenterCel
 {
 	const FCells CellsInDirections = GetCellsInDirections(CenterCell, Pathfinder, SideLength, DirectionsBitmask);
 	return FilterCellsByActors(CellsInDirections, ActorsTypesBitmask);
+}
+
+// Returns matching empty cells without actors in chosen direction(s), according desired type of breaks
+FCells UCellsUtilsLibrary::GetEmptyCellsInDirectionsWithoutActors(const FCell& CenterCell, EPathType Pathfinder, int32 SideLength, int32 DirectionsBitmask)
+{
+	constexpr int32 NoneActorType = TO_FLAG(ELevelType::None);
+	return GetCellsInDirectionsWithActors(CenterCell, Pathfinder, SideLength, DirectionsBitmask, NoneActorType);
 }

@@ -249,7 +249,8 @@ public:
 	static void DisplayCell(UObject* Owner, const FCell& Cell, const FDisplayCellsParams& Params) { DisplayCells(Owner, {Cell}, Params); }
 
 protected:
-	/** Debug visualization by text renders. Has blueprint implementation. */
+	/** Debug visualization by text renders. Has blueprint implementation
+	 * @TODO Move blueprint implementation to code, get rif of this function and move DisplayCell functions to UCellsUtilsLibrary. */
 	UFUNCTION(BlueprintNativeEvent, meta = (DevelopmentOnly, BlueprintProtected, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderString,CoordinatePosition", DefaultToSelf = "Owner"))
 	void AddDebugTextRenders(class AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<class UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const;
 };
