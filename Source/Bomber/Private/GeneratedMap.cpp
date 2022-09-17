@@ -97,17 +97,21 @@ void AGeneratedMap::GetSidesCells(
 		return;
 	}
 
+	const bool bIsAnyPath = Pathfinder == EPathType::Any;
+
 	// ----- Walls definition -----
 	FCells Walls;
-	if (OutCells.Num() == 0)
+	bool bBreakOnWalls = !bIsAnyPath && !OutCells.Num();
+	if (bBreakOnWalls)
 	{
 		IntersectCellsByTypes(Walls, TO_FLAG(EAT::Wall)); // just finding the walls on the map
 	}
 	else if (bBreakInputCells) // specified OutCells is not empty, these cells break lines as the Wall behavior
 	{
+		bBreakOnWalls = true;
 		Walls = OutCells; // these cells break lines as the Wall behavior, don't empty specified array
 	}
-	else //OutCells > 0 && !bBreakInputCells
+	else // !bBreakOnWalls && !bBreakInputCells
 	{
 		OutCells.Empty(); // should empty array in order to return only sides cells
 	}
@@ -121,24 +125,24 @@ void AGeneratedMap::GetSidesCells(
 
 	// ----- A path without obstacles -----
 	FCells Obstacles;
-	const bool bWithoutObstacles = Pathfinder != EPathType::Explosion;
-	if (bWithoutObstacles) // if is the request to find the path without Bombs/Boxes
+	const bool bBreakOnObstacles = !bIsAnyPath && Pathfinder != EPathType::Explosion;
+	if (bBreakOnObstacles) // if is the request to find the path without Bombs/Boxes
 	{
 		IntersectCellsByTypes(Obstacles, TO_FLAG(EAT::Bomb | EAT::Box));
 	}
 
 	// ----- Secure: a path without players -----
 	FCells PlayersCells;
-	const bool bWithoutPlayers = Pathfinder == EPathType::Secure;
-	if (bWithoutPlayers) // if is the request to find the path without players cells.
+	const bool bBreakOnPlayers = Pathfinder == EPathType::Secure;
+	if (bBreakOnPlayers) // if is the request to find the path without players cells.
 	{
 		IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
 	}
 
 	// ----- A path without explosions -----
 	FCells DangerousCells;
-	const bool bWithoutExplosions = Pathfinder == EPathType::Safe || Pathfinder == EPathType::Secure;
-	if (bWithoutExplosions) // if is the request to find the path without explosions.
+	const bool bBreakOnExplosions = Pathfinder == EPathType::Safe || Pathfinder == EPathType::Secure;
+	if (bBreakOnExplosions) // if is the request to find the path without explosions.
 	{
 		FMapComponents BombsMapComponents;
 		GetMapComponents(BombsMapComponents, TO_FLAG(EAT::Bomb));
@@ -156,7 +160,7 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// ----- The specified cell adding -----
-	if (bWithoutExplosions == false        // can be danger
+	if (bBreakOnExplosions == false        // can be danger
 	    || !DangerousCells.Contains(Cell)) // is not dangerous cell
 	{
 		OutCells.Emplace(Cell);
@@ -191,10 +195,10 @@ void AGeneratedMap::GetSidesCells(
 
 				const FCell FoundCell = GridCellsInternal[FoundIndex];
 
-				if (Walls.Contains(FoundCell)                                    // cell contains a wall
-				    || bWithoutObstacles && Obstacles.Contains(FoundCell)        // cell contains an obstacle (Bombs/Boxes)
-				    || bWithoutPlayers && PlayersCells.Contains(FoundCell)       // cell contains a player
-				    || bWithoutExplosions && DangerousCells.Contains(FoundCell)) // cell contains an explosion
+				if (bBreakOnWalls && Walls.Contains(FoundCell)                   // cell contains a wall
+				    || bBreakOnObstacles && Obstacles.Contains(FoundCell)        // cell contains an obstacle (Bombs/Boxes)
+				    || bBreakOnPlayers && PlayersCells.Contains(FoundCell)       // cell contains a player
+				    || bBreakOnExplosions && DangerousCells.Contains(FoundCell)) // cell contains an explosion
 				{
 					break; // to the next side
 				}

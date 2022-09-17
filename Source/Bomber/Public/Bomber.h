@@ -27,19 +27,20 @@
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EActorType : uint8
 {
-	None = 0,
 	///< None of the types for comparisons
-	Bomb = 1 << 0,
+	None = 0,
 	///< A destroyable exploding Obstacle
-	Box = 1 << 1,
+	Bomb = 1 << 0,
 	///< A destroyable Obstacle
-	Item = 1 << 2,
+	Box = 1 << 1,
 	///< A picked element giving power-up (FPowerUp struct)
-	Player = 1 << 3,
+	Item = 1 << 2,
 	///< A character that is controlled by a person or bot
-	Wall = 1 << 4,
+	Player = 1 << 3,
 	///< An absolute static and unchangeable block throughout the game
-	All = Bomb | Item | Player | Wall | Box ///< All actor types
+	Wall = 1 << 4,
+	///< All actor types
+	All = Bomb | Item | Player | Wall | Box
 };
 
 ENUM_CLASS_FLAGS(EActorType);
@@ -65,18 +66,21 @@ using ELT = ELevelType;
 #define ELT_LAST_FLAG TO_FLAG(ELT::Fourth)
 
 /**
- * Pathfinding types by danger extents.
+ * Pathfinding types by which cells could be found.
  */
 UENUM(BlueprintType)
 enum class EPathType : uint8
 {
+	///< Break by the first AT::Wall without obstacles
 	Explosion,
-	///< Break to the first AT::Wall without obstacles
+	///< Break by the first AT::Wall + EAT::Bomb + EAT::Box
 	Free,
-	///< Break to the first AT::Wall + obstacles
+	///< Break by the first AT::Wall + EAT::Bomb + EAT::Box + explosions
 	Safe,
-	///< Break to the first AT::Wall + obstacles + explosions
-	Secure ///< Break to the first AT::Wall + obstacles + explosions + AT::Player
+	///< Break by the first AT::Wall + EAT::Bomb + EAT::Box + explosions + AT::Player
+	Secure,
+	///< Do not break the path
+	Any
 };
 
 /**
