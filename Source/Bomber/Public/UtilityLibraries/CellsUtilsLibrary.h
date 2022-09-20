@@ -140,6 +140,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FCell GetCenterCellOnLevel();
 
+	/** Returns the number of columns on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static int32 GetCellColumnsNumOnLevel();
+
+	/** Returns the number of rows on the Level Map */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static int32 GetCellRowsNumOnLevel();
+
+	/** Returns any cell rotation on the Level Map */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static float GetCellRotation();
+
 	/** Returns all empty grid cell locations on the Level Map where non of actors are present. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "free"))
 	static TSet<FCell> GetAllEmptyCellsWithoutActors();

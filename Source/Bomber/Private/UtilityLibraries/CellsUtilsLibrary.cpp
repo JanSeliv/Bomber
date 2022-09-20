@@ -7,7 +7,7 @@
 // Returns the cell by specified row and column number if exists, zero cell otherwise
 const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
 {
-	const int32 MaxWidth = AGeneratedMap::Get().GetCachedTransform().GetScale3D().X;
+	const int32 MaxWidth = GetCellColumnsNumOnLevel();
 	const int32 CellIndex = Row * MaxWidth + Column;
 	const TArray<FCell>& AllCells = GetAllCellsOnLevelAsArray();
 	return AllCells.IsValidIndex(CellIndex) ? AllCells[CellIndex] : FCell::ZeroCell;
@@ -39,6 +39,24 @@ const TArray<FCell>& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
 FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
 {
 	return FCell(AGeneratedMap::Get().GetCachedTransform().GetLocation());
+}
+
+// Returns the number of columns on the Level Map
+int32 UCellsUtilsLibrary::GetCellColumnsNumOnLevel()
+{
+	return AGeneratedMap::Get().GetCachedTransform().GetScale3D().X;
+}
+
+// Returns the number of rows on the Level Map
+int32 UCellsUtilsLibrary::GetCellRowsNumOnLevel()
+{
+	return AGeneratedMap::Get().GetCachedTransform().GetScale3D().Y;
+}
+
+// Returns any cell rotation on the Level Map
+float UCellsUtilsLibrary::GetCellRotation()
+{
+	return AGeneratedMap::Get().GetCachedTransform().GetRotation().Rotator().Yaw;
 }
 
 // Returns all empty grid cell locations on the Level Map where non of actors are present
