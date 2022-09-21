@@ -223,3 +223,9 @@ FCells UCellsUtilsLibrary::GetEmptyCellsInDirectionsWithoutActors(const FCell& C
 	constexpr int32 NoneActorType = TO_FLAG(ELevelType::None);
 	return GetCellsInDirectionsWithActors(CenterCell, Pathfinder, SideLength, DirectionsBitmask, NoneActorType);
 }
+
+// Returns true if player is not able to reach specified cell by any any path
+bool UCellsUtilsLibrary::IsIslandCell(const FCell& Cell)
+{
+	return !AGeneratedMap::Get().DoesPathExistToCells({Cell});
+}

@@ -89,7 +89,7 @@ void AGeneratedMap::GetSidesCells(
 	int32 DirectionsBitmask,
 	bool bBreakInputCells) const
 {
-	const int32 MaxWidth = GetCachedTransform().GetScale3D().X;
+	const int32 MaxWidth = UCellsUtilsLibrary::GetCellColumnsNumOnLevel();
 	if (!ensureMsgf(MaxWidth, TEXT("ASSERT: Level has zero width (Scale.X)"))
 	    || !ensureMsgf(DirectionsBitmask, TEXT("ASSERT: 'DirectionsBitmask' is not set"))
 	    || !ensureMsgf(SideLength > 0, TEXT("ASSERT: 'SideLength' is less than 1")))
@@ -207,6 +207,48 @@ void AGeneratedMap::GetSidesCells(
 			} // Cells iterating
 		}     // Each side iterating: -1(Left|Down) and 1(Right|Up)
 	}         // Each direction iterating: 0(X-raw) and 1(Y-column)
+}
+
+// Returns true if any player is able to reach all specified cells by any any path
+bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells& OptionalPathBreakers/* = FCell::EmptyCells*/)
+{
+	FCells InOutSideCells = OptionalPathBreakers;
+	if (OptionalPathBreakers.IsEmpty())
+	{
+		// Include walls to prevent finding way through their cells
+		InOutSideCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Wall));
+	}
+
+	// Contains all cells need to find their side cells
+	check(GridCellsInternal.IsValidIndex(0));
+	FCells CellsToIterate{GridCellsInternal[0]};
+
+	FCells FoundCells = FCell::EmptyCells;
+	while (CellsToIterate.Num())
+	{
+		// Cache all previous side cells
+		const FCells PrevSideCells = InOutSideCells;
+
+		for (const FCell& CellIt : CellsToIterate)
+		{
+			constexpr float MaxInteger = TNumericLimits<int32>::Max();
+			constexpr bool bBreakInputCells = true;
+			// InOutAllFoundCells include as wall cells as well all previous iterated cells
+			GetSidesCells(/*InOut*/InOutSideCells, CellIt, EPathType::Explosion, MaxInteger, TO_FLAG(ECellDirection::All), bBreakInputCells);
+		}
+
+		// Extract newly found cells
+		CellsToIterate = InOutSideCells.Difference(PrevSideCells);
+
+		const FCells NotFoundCells = CellsToFind.Difference(FoundCells);
+		FoundCells = CellsToIterate.Intersect(NotFoundCells).Union(FoundCells);
+		if (FoundCells.Includes(CellsToFind))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // Spawns level actor on the Level Map by the specified type
@@ -847,30 +889,8 @@ void AGeneratedMap::GenerateLevelActors()
 
 		// --- Part 1 : Checking if there is a path to the bottom and side edges. If not, go to the 0 step._ ---
 
-		// Locals
-		FCells IteratedCells{GridCellsInternal[0]};
-		FCells PathBreakers = LDraggedCells = WallsToSpawn.Union(DraggedWalls);
-
-		while (IteratedCells.Num()
-		       && !bFoundPath)
-		{
-			for (const FCell& CellIt : IteratedCells)
-			{
-				constexpr float MaxInteger = TNumericLimits<int32>::Max();
-				constexpr bool bBreakInputCells = true;
-				GetSidesCells(PathBreakers, CellIt, EPathType::Explosion, MaxInteger, TO_FLAG(ECellDirection::All), bBreakInputCells);
-			}
-
-			IteratedCells = PathBreakers.Difference(LDraggedCells);
-			LDraggedCells = PathBreakers;
-
-			if (LCellsToFind.Num())
-			{
-				LCellsToFind = LCellsToFind.Difference(IteratedCells);
-			}
-
-			bFoundPath = !LCellsToFind.Num();
-		}
+		const FCells PathBreakers = WallsToSpawn.Union(DraggedWalls);
+		bFoundPath = DoesPathExistToCells(LCellsToFind, PathBreakers);
 
 		// Go to the step 0 if don't found
 		if (!bFoundPath)

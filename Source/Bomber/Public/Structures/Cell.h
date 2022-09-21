@@ -37,6 +37,7 @@ struct BOMBER_API FCell
 	static const FCell BackwardCell;
 	static const FCell RightCell;
 	static const FCell LeftCell;
+	static const FCells EmptyCells;
 
 	/** The length of the one cell */
 	static constexpr float CellSize = 200.f;

@@ -11,6 +11,7 @@ const FCell FCell::ForwardCell = FVector::ForwardVector;
 const FCell FCell::BackwardCell = FVector::BackwardVector;
 const FCell FCell::RightCell = FVector::RightVector;
 const FCell FCell::LeftCell = FVector::LeftVector;
+const FCells FCell::EmptyCells = FCells{};
 
 // Initial constructor for cells filling into the array. Round another FVector into this cell.
 FCell::FCell(const FVector& Vector)

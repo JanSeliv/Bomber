@@ -352,4 +352,8 @@ public:
 		EPathType Pathfinder,
 		int32 SideLength,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask);
+
+	/** Returns true if player is not able to reach specified cell by any any path. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Path"))
+	static bool IsIslandCell(const FCell& Cell);
 };

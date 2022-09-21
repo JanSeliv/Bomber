@@ -301,6 +301,16 @@ protected:
 		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask,
 		bool bBreakInputCells = false) const;
 
+	/**
+	 * Returns true if any player is able to reach all specified cells by any any path.
+	 * Is not public blueprintable since all needed ufunctions are already use this method.
+	 * @see UCellsUtilsLibrary
+	 *
+	 * @param CellsToFind Cells to which needs to find any path.
+	 * @param OptionalPathBreakers Optional value for a cells that make an island, if empty, all walls on the level will break the path.
+	 */
+	bool DoesPathExistToCells(const FCells& CellsToFind, const FCells& OptionalPathBreakers = FCell::EmptyCells);
+
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "C++", meta = (BlueprintProtected))
 	void GenerateLevelActors();
