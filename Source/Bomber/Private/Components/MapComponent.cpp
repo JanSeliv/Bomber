@@ -69,14 +69,11 @@ bool UMapComponent::OnConstruction()
 	}
 
 	// Update default mesh asset
-	if (ActorDataAssetInternal)
-	{
-		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
-		SetLevelActorRow(FoundRow);
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(USingletonLibrary::GetLevelType());
+	SetLevelActorRow(FoundRow);
 
-		const ECollisionResponse CollisionResponse = ActorDataAssetInternal->GetCollisionResponse();
-		SetCollisionResponses(CollisionResponse);
-	}
+	const ECollisionResponse CollisionResponse = GetActorDataAssetChecked().GetCollisionResponse();
+	SetCollisionResponses(CollisionResponse);
 
 #if WITH_EDITOR	 // [IsEditor]
 	if (UEditorUtilsLibrary::IsEditor())
@@ -114,7 +111,7 @@ void UMapComponent::SetLevelActorRow(const ULevelActorRow* Row)
 	// Update mesh
 	UStreamableRenderAsset* Mesh = Row->Mesh;
 	if (Mesh
-	    && MeshComponentInternal) // is invalid for characters since it's controller by themselves
+	    && GetActorDataAssetChecked().GetActorType() != EActorType::Player) // characters are managing their mesh by themselves
 	{
 		if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
 		{
@@ -149,7 +146,14 @@ void UMapComponent::RerunOwnerConstruction() const
 // Get the owner's data asset
 EActorType UMapComponent::GetActorType() const
 {
-	return ActorDataAssetInternal ? ActorDataAssetInternal->GetActorType() : EAT::None;
+	return GetActorDataAssetChecked().GetActorType();
+}
+
+// Get the owner's data asset
+const ULevelActorDataAsset& UMapComponent::GetActorDataAssetChecked() const
+{
+	checkf(ActorDataAssetInternal, TEXT("EROR: 'ActorDataAssetInternal' is null"));
+	return *ActorDataAssetInternal;
 }
 
 // Set true to make an owner to be undestroyable on this level
@@ -249,6 +253,7 @@ void UMapComponent::OnRegister()
 		// The character class already has own initialized skeletal component
 		const ACharacter* Player = CastChecked<ACharacter>(GetOwner());
 		MeshComponentInternal = Player->GetMesh();
+		check(MeshComponentInternal);
 	}
 	else
 	{
@@ -260,6 +265,9 @@ void UMapComponent::OnRegister()
 		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
 		SetLevelActorRow(FoundRow);
 	}
+
+	// Do not receive decals for level actors by default
+	MeshComponentInternal->SetReceivesDecals(false);
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
