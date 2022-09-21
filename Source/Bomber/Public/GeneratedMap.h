@@ -200,6 +200,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FTransform& GetCachedTransform() const { return CachedTransformInternal; }
 
+	/**
+	 * Returns map component that owns found level actor by specified cells, nullptr if was not found.
+	 * @param CellWithActor The cell where located level actor could be found on the Level Map.
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CellWithActor", Keywords = "Map Component"))
+	const class UMapComponent* GetLevelActorByCell(const FCell& CellWithActor) const;
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties

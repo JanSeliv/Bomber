@@ -118,6 +118,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnDeactivated();
 
+	/** Returns a mesh component of own level actor.  */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE class UMeshComponent* GetMeshComponent() const { return MeshComponentInternal; }
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -141,7 +145,7 @@ protected:
 
 	/** If true the owner is undestroyable, is used by skills and cheat manager. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
-	bool bIsUndestroyableInternal; //[G]
+	bool bIsUndestroyableInternal = false; //[G]
 
 	/** The Collision Component, is attached to an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Collision Component"))

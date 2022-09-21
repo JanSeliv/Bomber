@@ -244,13 +244,15 @@ void UMapComponent::OnRegister()
 	}
 
 	// Initialize mesh component
-	if (ActorDataAssetInternal->GetActorType() != EAT::Player) // the character class already has own initialized skeletal component
+	if (ActorDataAssetInternal->GetActorType() == EAT::Player)
+	{
+		// The character class already has own initialized skeletal component
+		const ACharacter* Player = CastChecked<ACharacter>(GetOwner());
+		MeshComponentInternal = Player->GetMesh();
+	}
+	else
 	{
 		MeshComponentInternal = NewObject<UMeshComponent>(GetOwner(), UStaticMeshComponent::StaticClass(), TEXT("MeshComponent"));
-		if (!ensureMsgf(MeshComponentInternal, TEXT("ASSERT: 'MeshComponentInternal' was not initialized")))
-		{
-			return;
-		}
 		MeshComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		MeshComponentInternal->RegisterComponent();
 

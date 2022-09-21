@@ -595,6 +595,19 @@ bool AGeneratedMap::IsDraggedMapComponent(const UMapComponent* MapComponent) con
 	return FoundCell && *FoundCell == ActorType;
 }
 
+// Returns found level actors by specified cells
+const UMapComponent* AGeneratedMap::GetLevelActorByCell(const FCell& CellWithActor) const
+{
+	for (const UMapComponent* MapComponentIt : MapComponentsInternal)
+	{
+		if (MapComponentIt && MapComponentIt->GetCell() == CellWithActor)
+		{
+			return MapComponentIt;
+		}
+	}
+	return nullptr;
+}
+
 /* ---------------------------------------------------
  *		Level map protected functions
  * --------------------------------------------------- */
