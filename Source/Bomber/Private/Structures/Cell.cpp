@@ -3,10 +3,9 @@
 #include "Structures/Cell.h"
 //---
 #include "GeneratedMap.h"
-#include "Components/MapComponent.h"
-//---
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 
-const FCell FCell::ZeroCell = FVector::DownVector;
+const FCell FCell::InvalidCell = FVector::DownVector;
 const FCell FCell::ForwardCell = FVector::ForwardVector;
 const FCell FCell::BackwardCell = FVector::BackwardVector;
 const FCell FCell::RightCell = FVector::RightVector;
@@ -18,7 +17,7 @@ FCell::FCell(const FVector& Vector)
 {
 	Location.X = FMath::RoundToFloat(Vector.X);
 	Location.Y = FMath::RoundToFloat(Vector.Y);
-	Location.Z = FMath::RoundToFloat(GEngine && GEngine->GameSingleton ? AGeneratedMap::Get().GetCachedTransform().GetLocation().Z : Vector.Z);
+	Location.Z = FMath::RoundToFloat(GEngine && GEngine->GameSingleton ? UCellsUtilsLibrary::GetCellHeightLocation() : Vector.Z);
 }
 
 // Equal operator for vectors to directly copy its value to the cell
@@ -68,7 +67,6 @@ FCell FCell::GetCellArrayAverage(const FCells& Cells)
 
 		Average = Sum / CellsNum;
 	}
-	FVector2D V(FVector::UpVector);
 	return FCell(Average);
 }
 
@@ -86,7 +84,7 @@ const FCell& FCell::GetCellDirection(ECellDirection CellDirection)
 		case ECellDirection::Left:
 			return LeftCell;
 		default:
-			return ZeroCell;
+			return InvalidCell;
 	}
 }
 

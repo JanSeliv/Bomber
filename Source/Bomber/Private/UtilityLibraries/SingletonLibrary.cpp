@@ -387,9 +387,9 @@ void USingletonLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const 
 	// Remove invalid cell if passed
 	// @TODO Instead of removing, do not add such render component
 	FCells InCells = Cells;
-	if (InCells.Contains(FCell::ZeroCell))
+	if (InCells.Contains(FCell::InvalidCell))
 	{
-		InCells.Remove(FCell::ZeroCell);
+		InCells.Remove(FCell::InvalidCell);
 	}
 
 	bool bOutBool = false;

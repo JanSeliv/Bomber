@@ -130,7 +130,7 @@ protected:
 
 	/** Owner's cell location on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
-	FCell CellInternal = FCell::ZeroCell; //[G]
+	FCell CellInternal = FCell::InvalidCell; //[G]
 
 	/** Contains exposed for designers properties for the spawned owner. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))

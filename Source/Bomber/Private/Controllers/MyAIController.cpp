@@ -166,7 +166,7 @@ void AMyAIController::UpdateAI()
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		USingletonLibrary::ClearDisplayedCells(OwnerInternal);
-		AIMoveToInternal = FCell::ZeroCell;
+		AIMoveToInternal = FCell::InvalidCell;
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -393,7 +393,7 @@ void AMyAIController::SetAI(bool bShouldEnable)
 	}
 
 	// Reset target location
-	AIMoveToInternal = FCell::ZeroCell;
+	AIMoveToInternal = FCell::InvalidCell;
 
 	// Handle the Ai updating timer
 	FTimerManager& TimerManager = World->GetTimerManager();

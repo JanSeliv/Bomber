@@ -92,7 +92,8 @@ void AGeneratedMap::GetSidesCells(
 	const int32 MaxWidth = UCellsUtilsLibrary::GetCellColumnsNumOnLevel();
 	if (!ensureMsgf(MaxWidth, TEXT("ASSERT: Level has zero width (Scale.X)"))
 	    || !ensureMsgf(DirectionsBitmask, TEXT("ASSERT: 'DirectionsBitmask' is not set"))
-	    || !ensureMsgf(SideLength > 0, TEXT("ASSERT: 'SideLength' is less than 1")))
+	    || !ensureMsgf(SideLength > 0, TEXT("ASSERT: 'SideLength' is less than 1"))
+	    || !ensureMsgf(Cell.IsValid(), TEXT("ASSERT: 'Cell' is invalid")))
 	{
 		return;
 	}
@@ -493,7 +494,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 	}
 
 	// ----- Part 0: Locals -----
-	FCell FoundCell = FCell::ZeroCell;
+	FCell FoundCell = FCell::InvalidCell;
 	const FCell OwnerCell(ComponentOwner->GetActorLocation()); // The owner location
 	// Check if the owner already standing on:
 	FCells InitialCells({OwnerCell,                                                                                        // 0: exactly the current his cell
@@ -553,7 +554,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 	} //[Cells  Iteration]
 
 	// Checks the cell is contained in the grid and free from other level actors.
-	if (FoundCell.IsZeroCell()) // can be invalid if nothing was found, check to avoid such rewriting
+	if (FoundCell.IsInvalidCell()) // can be invalid if nothing was found, check to avoid such rewriting
 	{
 		return;
 	}
@@ -586,7 +587,7 @@ bool AGeneratedMap::IsDraggedMapComponent(const UMapComponent* MapComponent) con
 	const EActorType ActorType = MapComponent->GetActorType();
 	const FCell& Cell = MapComponent->GetCell();
 	if (MapComponent->GetActorType() == EAT::None
-	    || Cell.IsZeroCell())
+	    || Cell.IsInvalidCell())
 	{
 		return false;
 	}
@@ -1309,7 +1310,7 @@ void AGeneratedMap::SetNearestCellDragged(const UMapComponent* MapComponent, con
 	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
 	    || !MapComponent
 	    || !IsDraggedMapComponent(MapComponent)
-	    || NewCell.IsZeroCell())
+	    || NewCell.IsInvalidCell())
 	{
 		return;
 	}

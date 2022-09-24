@@ -56,7 +56,7 @@ bool UMapComponent::OnConstruction()
 	// Find new Location at dragging and update-delegate
 	LevelMap.SetNearestCell(this);
 
-	if (CellInternal.IsZeroCell())
+	if (CellInternal.IsInvalidCell())
 	{
 		return false;
 	}

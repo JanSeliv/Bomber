@@ -32,7 +32,7 @@ struct BOMBER_API FCell
 {
 	GENERATED_BODY()
 
-	static const FCell ZeroCell;
+	static const FCell InvalidCell;
 	static const FCell ForwardCell;
 	static const FCell BackwardCell;
 	static const FCell RightCell;
@@ -68,11 +68,11 @@ struct BOMBER_API FCell
 	 */
 	FCell RotateAngleAxis(float AxisZ) const;
 
-	/** Comparing with uninitialized Zero Cell. */
-	FORCEINLINE bool IsZeroCell() const { return *this == ZeroCell; }
+	/** Comparing with uninitialized Invalid Cell. */
+	FORCEINLINE bool IsInvalidCell() const { return *this == InvalidCell; }
 
 	/** Check is valid this cell. */
-	FORCEINLINE bool IsValid() const { return *this != ZeroCell; }
+	FORCEINLINE bool IsValid() const { return *this != InvalidCell; }
 
 	/** Returns how many cells are between two cells. */
 	template <typename T>

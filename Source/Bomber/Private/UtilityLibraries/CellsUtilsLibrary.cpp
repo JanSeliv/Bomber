@@ -4,13 +4,13 @@
 //---
 #include "GeneratedMap.h"
 
-// Returns the cell by specified row and column number if exists, zero cell otherwise
+// Returns the cell by specified row and column number if exists, invalid cell otherwise
 const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
 {
 	const int32 MaxWidth = GetCellColumnsNumOnLevel();
 	const int32 CellIndex = Row * MaxWidth + Column;
 	const TArray<FCell>& AllCells = GetAllCellsOnLevelAsArray();
-	return AllCells.IsValidIndex(CellIndex) ? AllCells[CellIndex] : FCell::ZeroCell;
+	return AllCells.IsValidIndex(CellIndex) ? AllCells[CellIndex] : FCell::InvalidCell;
 }
 
 // Takes the cell and returns its row and column position on the level if exists, -1 otherwise
@@ -59,6 +59,12 @@ float UCellsUtilsLibrary::GetCellRotation()
 	return AGeneratedMap::Get().GetCachedTransform().GetRotation().Rotator().Yaw;
 }
 
+// Returns any cell Z-location on the Level Map
+float UCellsUtilsLibrary::GetCellHeightLocation()
+{
+	return AGeneratedMap::Get().GetCachedTransform().GetLocation().Z;
+}
+
 // Returns all empty grid cell locations on the Level Map where non of actors are present
 FCells UCellsUtilsLibrary::GetAllEmptyCellsWithoutActors()
 {
@@ -70,7 +76,7 @@ FCells UCellsUtilsLibrary::GetAllEmptyCellsWithoutActors()
 FCells UCellsUtilsLibrary::GetAllCellsWithActors(int32 ActorsTypesBitmask)
 {
 	constexpr bool bIntersectAllIfEmpty = true;
-	FCells OutCells;
+	FCells OutCells = FCell::EmptyCells;
 	AGeneratedMap::Get().IntersectCellsByTypes(OutCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
 	return OutCells;
 }
@@ -142,7 +148,7 @@ bool UCellsUtilsLibrary::AreCellsHaveAllMatchingActors(const FCells& Cells, int3
 // Returns true if specified cell is present on the Level Map.
 bool UCellsUtilsLibrary::IsCellExistsOnLevel(const FCell& Cell)
 {
-	return AGeneratedMap::Get().GridCellsInternal.Contains(Cell);
+	return Cell.IsValid() && AGeneratedMap::Get().GridCellsInternal.Contains(Cell);
 }
 
 // Returns true if the cell is present on the Level Map with such row and column indexes
@@ -167,7 +173,7 @@ bool UCellsUtilsLibrary::AreAllCellsExistOnLevel(const FCells& Cells)
 FCells UCellsUtilsLibrary::GetCellsAround(const FCell& CenterCell, EPathType Pathfinder, int32 Radius)
 {
 	constexpr int32 AllDirections = TO_FLAG(ECellDirection::All);
-	FCells OutCells;
+	FCells OutCells = FCell::EmptyCells;
 	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, Radius, AllDirections);
 	return OutCells;
 }
@@ -175,6 +181,7 @@ FCells UCellsUtilsLibrary::GetCellsAround(const FCell& CenterCell, EPathType Pat
 // Returns cells that match specified actors in specified radius from a center, according desired type of breaks
 FCells UCellsUtilsLibrary::GetCellsAroundWithActors(const FCell& CenterCell, EPathType Pathfinder, int32 Radius, int32 ActorsTypesBitmask)
 {
+	ensureMsgf(Pathfinder == EPathType::Any || !EnumHasAnyFlags(EAT::Wall, TO_ENUM(EAT, ActorsTypesBitmask)), TEXT("ASSERT: Is trying to find walls for a pathfinder that breaks a path by walls"));
 	const FCells CellsAround = GetCellsAround(CenterCell, Pathfinder, Radius);
 	return FilterCellsByActors(CellsAround, ActorsTypesBitmask);
 }
@@ -189,11 +196,12 @@ FCells UCellsUtilsLibrary::GetEmptyCellsAroundWithoutActors(const FCell& CenterC
 // Returns first cell in specified direction from a center
 FCell UCellsUtilsLibrary::GetCellInDirection(const FCell& CenterCell, EPathType Pathfinder, ECellDirection Direction)
 {
+	ensureMsgf(Direction != ECellDirection::All, TEXT("ASSERT: Is specified 'ECellDirection::All' while function could return only cell in 1 direction"));
 	constexpr int32 SideLength = 1;
-	FCells OutCells;
+	FCells OutCells = FCell::EmptyCells;
 	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, SideLength, TO_FLAG(Direction));
 	OutCells.Remove(CenterCell);
-	return !OutCells.IsEmpty() ? OutCells.Array()[0] : FCell::ZeroCell;
+	return !OutCells.IsEmpty() ? OutCells.Array()[0] : FCell::InvalidCell;
 }
 
 // Returns true if a cell was found in specified direction from a center, according desired type of breaks
@@ -205,7 +213,7 @@ bool UCellsUtilsLibrary::CanGetCellInDirection(const FCell& CenterCell, EPathTyp
 // Returns cells in specified direction from a center
 FCells UCellsUtilsLibrary::GetCellsInDirections(const FCell& CenterCell, EPathType Pathfinder, int32 SideLength, int32 DirectionsBitmask)
 {
-	FCells OutCells;
+	FCells OutCells = FCell::EmptyCells;
 	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, SideLength, DirectionsBitmask);
 	return OutCells;
 }
@@ -213,6 +221,7 @@ FCells UCellsUtilsLibrary::GetCellsInDirections(const FCell& CenterCell, EPathTy
 // Returns cells that match specified actors in specified direction from a center
 FCells UCellsUtilsLibrary::GetCellsInDirectionsWithActors(const FCell& CenterCell, EPathType Pathfinder, int32 SideLength, int32 DirectionsBitmask, int32 ActorsTypesBitmask)
 {
+	ensureMsgf(Pathfinder == EPathType::Any || !EnumHasAnyFlags(EAT::Wall, TO_ENUM(EAT, ActorsTypesBitmask)), TEXT("ASSERT: Is trying to find walls for a pathfinder that breaks a path by walls"));
 	const FCells CellsInDirections = GetCellsInDirections(CenterCell, Pathfinder, SideLength, DirectionsBitmask);
 	return FilterCellsByActors(CellsInDirections, ActorsTypesBitmask);
 }
