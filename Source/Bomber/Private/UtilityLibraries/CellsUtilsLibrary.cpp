@@ -3,6 +3,7 @@
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "GeneratedMap.h"
+#include "Components/MapComponent.h"
 
 // Returns the cell by specified row and column number if exists, invalid cell otherwise
 const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
@@ -111,6 +112,13 @@ bool UCellsUtilsLibrary::IsCellHasAnyMatchingActor(const FCell& Cell, int32 Acto
 	FCells NonEmptyCells{Cell};
 	AGeneratedMap::Get().IntersectCellsByTypes(NonEmptyCells, ActorsTypesBitmask, bIntersectAllIfEmpty);
 	return NonEmptyCells.Contains(Cell);
+}
+
+// Returns actor type of specified cell if it has own actor, EActorType::None otherwise
+EActorType UCellsUtilsLibrary::GetCellActorType(const FCell& Cell)
+{
+	const UMapComponent* MapComponent = AGeneratedMap::Get().GetLevelActorByCell(Cell);
+	return MapComponent ? MapComponent->GetActorType() : EActorType::None;
 }
 
 // Returns true if at least one cell is empty, so it does not have own actor

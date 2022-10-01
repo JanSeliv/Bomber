@@ -202,6 +202,11 @@ public:
 		const FCell& Cell,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
 
+	/** Returns actor type of specified cell if it has own actor, EActorType::None otherwise.
+	 * Could be useful to determine what kind of actor is located on specified cell. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static EActorType GetCellActorType(const FCell& Cell);
+
 	/** Returns true if at least one cell along specified is empty, so it does not have own actor.*/
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Free"))
 	static bool IsAnyCellEmptyWithoutActor(const TSet<FCell>& Cells);
