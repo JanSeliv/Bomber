@@ -54,6 +54,18 @@ int32 UCellsUtilsLibrary::GetCellRowsNumOnLevel()
 	return AGeneratedMap::Get().GetCachedTransform().GetScale3D().Y;
 }
 
+// Returns GetCellColumnsNumOnLevel - 1
+int32 UCellsUtilsLibrary::GetLastColumnIndexOnLevel()
+{
+	return GetCellColumnsNumOnLevel() - 1;
+}
+
+// Returns Returns GetCellRowsNumOnLevel - 1
+int32 UCellsUtilsLibrary::GetLastRowIndexOnLevel()
+{
+	return GetCellRowsNumOnLevel() - 1;
+}
+
 // Returns any cell rotation on the Level Map
 float UCellsUtilsLibrary::GetCellRotation()
 {

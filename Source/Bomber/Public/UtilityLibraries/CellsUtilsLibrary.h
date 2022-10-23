@@ -153,6 +153,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Length"))
 	static int32 GetCellRowsNumOnLevel();
 
+	/** Returns GetCellColumnsNumOnLevel - 1. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static int32 GetLastColumnIndexOnLevel();
+
+	/** Returns Returns GetCellRowsNumOnLevel - 1. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static int32 GetLastRowIndexOnLevel();
+
 	/** Returns any cell rotation on the Level Map. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static float GetCellRotation();

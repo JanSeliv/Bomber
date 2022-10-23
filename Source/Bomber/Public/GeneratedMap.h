@@ -122,6 +122,11 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnAnyPlayerDestroyed OnAnyCharacterDestroyed; //[DMD]
 
+	/** Contains outside added dangerous cells, is useful for Game Features to notify bots that some cells are not safe.
+	 * @TODO: Move to AI Manager. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
+	TSet<FCell> AdditionalDangerousCells; //[G]
+
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- *

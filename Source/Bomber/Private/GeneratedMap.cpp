@@ -141,7 +141,7 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// ----- A path without explosions -----
-	FCells DangerousCells;
+	FCells DangerousCells = AdditionalDangerousCells;
 	const bool bBreakOnExplosions = Pathfinder == EPathType::Safe || Pathfinder == EPathType::Secure;
 	if (bBreakOnExplosions) // if is the request to find the path without explosions.
 	{
@@ -971,6 +971,7 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 			}
 
 			bIsGameRunningInternal = true;
+			AdditionalDangerousCells.Reset();
 			break;
 		}
 
