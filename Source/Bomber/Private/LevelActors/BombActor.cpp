@@ -11,7 +11,6 @@
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "SoundsManager.h"
-#include "PoolManager.h"
 //---
 #include "Components/BoxComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -56,12 +55,25 @@ ABombActor::ABombActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
+// Returns cells that bombs is going to destroy
+FCells ABombActor::GetExplosionCells() const
+{
+	if (IsHidden()
+		|| FireRadiusInternal < DEFAULT_FIRE_RADIUS
+	    || !MapComponentInternal)
+	{
+		return FCell::EmptyCells;
+	}
+
+	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, FireRadiusInternal);
+}
+
 // Sets the defaults of the bomb
-void ABombActor::InitBomb(int32 InFireRadius/* = DEFAULT_FIRE_RADIUS*/, int32 CharacterID/* = -1*/)
+void ABombActor::InitBomb(int32 InFireRadius/* = DEFAULT_FIRE_RADIUS*/, int32 CharacterID/* = INDEX_NONE*/)
 {
 	if (!HasAuthority()
 	    || !MapComponentInternal
-	    || InFireRadius < 0) // Negative length of the explosion
+	    || !ensureMsgf(InFireRadius >= DEFAULT_FIRE_RADIUS, TEXT("ASSERT: 'InFireRadius' is less than DEFAULT_FIRE_RADIUS")))
 	{
 		return;
 	}
@@ -79,8 +91,6 @@ void ABombActor::InitBomb(int32 InFireRadius/* = DEFAULT_FIRE_RADIUS*/, int32 Ch
 	// Update explosion information
 
 	FireRadiusInternal = InFireRadius;
-	const FCells ExplosionCells = UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, InFireRadius);
-	ExplosionCellsInternal = ExplosionCells.Array();
 
 	FCollisionResponseContainer CollisionResponses = MapComponentInternal->GetCollisionResponses();
 
@@ -147,7 +157,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 		{
 			USingletonLibrary::ClearDisplayedCells(this);
 			static const FDisplayCellsParams DisplayParams{FLinearColor::Red};
-			USingletonLibrary::DisplayCells(this, FCells(ExplosionCellsInternal), DisplayParams);
+			USingletonLibrary::DisplayCells(this, GetExplosionCells(), DisplayParams);
 		}
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
@@ -161,7 +171,7 @@ void ABombActor::BeginPlay()
 	if (HasAuthority())
 	{
 		// Binding to the event, that triggered when the actor has been explicitly destroyed
-		OnDestroyed.AddDynamic(this, &ThisClass::MulticastDetonateBomb);
+		OnDestroyed.AddDynamic(this, &ThisClass::DetonateBomb);
 	}
 
 	// Destroy itself after N seconds
@@ -181,7 +191,6 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, ExplosionCellsInternal);
 	DOREPLIFETIME(ThisClass, FireRadiusInternal);
 	DOREPLIFETIME(ThisClass, BombMaterialInternal);
 }
@@ -209,60 +218,69 @@ void ABombActor::LifeSpanExpired()
 {
 	// Override to prevent destroying, do not call super
 
-	MulticastDetonateBomb();
+	DetonateBomb();
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
 void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 {
+	if (HasAuthority())
+	{
+		if (!bNewHidden)
+		{
+			// Is added on level map
+			SetLifeSpan();
+
+			// Binding to the event, that triggered when character end to overlaps the collision component
+			OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
+		}
+		else
+		{
+			// Bomb is removed from level map, detonate it
+			DetonateBomb();
+			FireRadiusInternal = INDEX_NONE;
+
+			OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
+		}
+	}
+
+	// Apply hidden flag
 	Super::SetActorHiddenInGame(bNewHidden);
+}
 
-	if (!HasAuthority())
+void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
+{
+	if (!HasAuthority()
+	    || IsHidden()
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
 
-	if (!bNewHidden)
+	const FCells ExplosionCells = GetExplosionCells();
+	if (!ExplosionCells.Num())
 	{
-		// Is added on level map
-		SetLifeSpan();
-
-		// Binding to the event, that triggered when character end to overlaps the collision component
-		OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
-
+		// No cells to destroy
 		return;
 	}
 
-	// Bomb is removed from level map, detonate it
 	MulticastDetonateBomb();
-	FireRadiusInternal = 1;
-
-	OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
 }
 
 // Destroy bomb and burst explosion cells
-void ABombActor::MulticastDetonateBomb_Implementation(AActor* DestroyedActor/* = nullptr*/)
+void ABombActor::MulticastDetonateBomb_Implementation()
 {
-	if (!ExplosionCellsInternal.Num()                               // no cells to destroy
-	    || !IsValid(MapComponentInternal)                           // The Map Component is not valid or is destroyed already
-	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame) // game was not started or already finished
-	{
-		return;
-	}
+	const FCells ExplosionCells = GetExplosionCells();
 
 	// Spawn emitters
 	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().GetExplosionVFX();
-	for (const FCell& Cell : ExplosionCellsInternal)
+	for (const FCell& Cell : ExplosionCells)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionParticle, Cell.Location, GetActorRotation(), GetActorScale());
 	}
 
-	// Move explosion cells to avoid self destroying one more time by another bomb
-	const FCells CellsToDestroy(ExplosionCellsInternal);
-	ExplosionCellsInternal.Empty();
-
 	// Destroy all actors from array of cells
-	AGeneratedMap::Get().DestroyActorsFromMap(CellsToDestroy);
+	AGeneratedMap::Get().DestroyActorsFromMap(ExplosionCells);
 
 	// Play the sound
 	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())

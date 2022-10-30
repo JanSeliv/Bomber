@@ -151,10 +151,10 @@ void AGeneratedMap::GetSidesCells(
 		{
 			for (const UMapComponent* MapComponentIt : BombsMapComponents)
 			{
-				const ABombActor* BombOwner = MapComponentIt ? Cast<ABombActor>(MapComponentIt->GetOwner()) : nullptr;
+				const ABombActor* BombOwner = MapComponentIt ? MapComponentIt->GetOwner<ABombActor>() : nullptr;
 				if (IS_VALID(BombOwner)) // is valid and is not transient
 				{
-					DangerousCells = DangerousCells.Union(FCells(BombOwner->GetExplosionCells()));
+					DangerousCells = DangerousCells.Union(BombOwner->GetExplosionCells());
 				}
 			}
 		}
@@ -637,7 +637,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 	if (CollisionComponentInternal                       // Is accessible
 	    && !CollisionComponentInternal->GetChildActor()) // Is not created yet
 	{
-		const TSubclassOf<AActor>& CollisionsAssetClass = UGeneratedMapDataAsset::Get().GetCollisionsAssetClass();
+		const TSubclassOf<AActor> CollisionsAssetClass = UGeneratedMapDataAsset::Get().GetCollisionsAssetClass();
 		CollisionComponentInternal->SetChildActorClass(CollisionsAssetClass);
 		CollisionComponentInternal->CreateChildActor();
 	}

@@ -9,6 +9,8 @@
 //---
 #include "BombActor.generated.h"
 
+#define DEFAULT_FIRE_RADIUS 1
+
 /**
  * Describes common data for all bombs.
  */
@@ -25,20 +27,20 @@ public:
 	static const UBombDataAsset& Get();
 
 	/** Get the bomb lifetime. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
 
 	/** Returns the amount of bomb materials. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetBombMaterialsNum() const { return BombMaterialsInternal.Num(); }
 
 	/** Returns the bomb material by specified index.
 	 * @see UBombDataAsset::BombMaterialInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMaterialInterface* GetBombMaterial(int32 Index) const { return BombMaterialsInternal.IsValidIndex(Index) ? BombMaterialsInternal[Index] : nullptr; }
 
 	/** Get the bomb explosion VFX. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UNiagaraSystem* GetExplosionVFX() const { return ExplosionVFXInternal; }
 
 protected:
@@ -69,9 +71,13 @@ public:
 	/** Sets default values for this actor's properties */
 	ABombActor();
 
-	/** Returns explosion cells (by copy to avoid changes). */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE TArray<FCell>& GetExplosionCells() const { return ExplosionCellsInternal; }
+	/** Returns cells that bombs is going to destroy. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	TSet<FCell> GetExplosionCells() const;
+
+	/** Returns radius of the blast to each side. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetExplosionRadius() const { return FireRadiusInternal; }
 
 	/**
 	 * Sets the defaults of the bomb
@@ -90,13 +96,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
 
-	/** The bomb blast path */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells"))
-	TArray<FCell> ExplosionCellsInternal;
-
-	/** The radius of the blast to each side. */
+	/** The radius of the blast to each side, is set by player with InitBomb on spawning. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
-	int32 FireRadiusInternal = 1; //[N]
+	int32 FireRadiusInternal = INDEX_NONE; //[N]
 
 	/** Current material of this bomb, is different for each player. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
@@ -125,10 +127,14 @@ protected:
 	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 
+	/** Destroy bomb and burst explosion cells, calls multicast event.*/
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
+	void DetonateBomb(AActor* DestroyedActor = nullptr);
+
 	/** Destroy bomb and burst explosion cells.
 	  * Calls destroying request of all actors by cells in explosion cells array.*/
-	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
-	void MulticastDetonateBomb(AActor* DestroyedActor = nullptr);
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void MulticastDetonateBomb();
 
 	/**
 	 * Triggers when character end to overlaps with this bomb.
@@ -145,13 +151,13 @@ protected:
 	 * @param OutCollisionResponses Returns requested response. 
 	 * @param CharacterID Player to set response.
 	 * @param NewResponse New response to set. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetCollisionResponseToPlayer(FCollisionResponseContainer& OutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse) const;
 
 	/** Gets the response for all players.
 	  * @param OutCollisionResponses Returns requested responses. 
 	  * @param NewResponse New response to set. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetCollisionResponseToAllPlayers(FCollisionResponseContainer& OutCollisionResponses, ECollisionResponse NewResponse) const;
 
 	/** Gets the response for players by specified bitmask.
@@ -164,11 +170,11 @@ protected:
 	  * specified '11' in binary is '1 0 1 1',
 	  * so characters with IDs '0', '1' and '3' will apply 'ECR_Block' response,
 	  * player with Character ID '2' won't change its response since it's specified as 'ECR_MAX'. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetCollisionResponseToPlayers(FCollisionResponseContainer& OutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse) const;
 
 	/** Returns all players overlapping with this bomb. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const;
 
 	/** Updates current material for this bomb actor. */
