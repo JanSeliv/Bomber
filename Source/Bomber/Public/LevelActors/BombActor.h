@@ -9,7 +9,7 @@
 //---
 #include "BombActor.generated.h"
 
-#define DEFAULT_FIRE_RADIUS 1
+#define MIN_FIRE_RADIUS 1
 
 /**
  * Describes common data for all bombs.

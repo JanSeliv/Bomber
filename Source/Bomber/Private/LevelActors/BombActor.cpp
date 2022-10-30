@@ -59,7 +59,7 @@ ABombActor::ABombActor()
 FCells ABombActor::GetExplosionCells() const
 {
 	if (IsHidden()
-	    || FireRadiusInternal < DEFAULT_FIRE_RADIUS
+	    || FireRadiusInternal < MIN_FIRE_RADIUS
 	    || !MapComponentInternal)
 	{
 		return FCell::EmptyCells;
@@ -69,11 +69,11 @@ FCells ABombActor::GetExplosionCells() const
 }
 
 // Sets the defaults of the bomb
-void ABombActor::InitBomb(int32 InFireRadius/* = DEFAULT_FIRE_RADIUS*/, int32 CharacterID/* = INDEX_NONE*/)
+void ABombActor::InitBomb(int32 InFireRadius/* = MIN_FIRE_RADIUS*/, int32 CharacterID/* = INDEX_NONE*/)
 {
 	if (!HasAuthority()
 	    || !MapComponentInternal
-	    || !ensureMsgf(InFireRadius >= DEFAULT_FIRE_RADIUS, TEXT("ASSERT: 'InFireRadius' is less than DEFAULT_FIRE_RADIUS")))
+	    || !ensureMsgf(InFireRadius >= MIN_FIRE_RADIUS, TEXT("ASSERT: 'InFireRadius' is less than MIN_FIRE_RADIUS")))
 	{
 		return;
 	}
@@ -232,7 +232,6 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 		{
 			// Bomb is removed from level map, detonate it
 			DetonateBomb();
-			FireRadiusInternal = INDEX_NONE;
 
 			OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
 		}
@@ -246,15 +245,9 @@ void ABombActor::DetonateBomb()
 {
 	if (!HasAuthority()
 	    || IsHidden()
+	    || FireRadiusInternal < MIN_FIRE_RADIUS
 	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
-		return;
-	}
-
-	const FCells ExplosionCells = GetExplosionCells();
-	if (!ExplosionCells.Num())
-	{
-		// No cells to destroy
 		return;
 	}
 
@@ -265,6 +258,14 @@ void ABombActor::DetonateBomb()
 void ABombActor::MulticastDetonateBomb_Implementation()
 {
 	const FCells ExplosionCells = GetExplosionCells();
+	if (ExplosionCells.IsEmpty())
+	{
+		// No cells to destroy
+		return;
+	}
+
+	// Reset Fire Radius to avoid destroying the bomb again
+	FireRadiusInternal = INDEX_NONE;
 
 	// Spawn emitters
 	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().GetExplosionVFX();
