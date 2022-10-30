@@ -172,16 +172,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void AddToGrid(class UMapComponent* AddedComponent);
 
-	/** Destroy all actors from the scene and calls RemoveMapComponent(...) function.
-	 *
+	/** Destroy all actors from the level on specified cells.
 	 * @param Cells The set of cells for destroying the found actors.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void DestroyActorsFromMap(const TSet<FCell>& Cells);
+	 * @param DestroyCauser The actor that caused the destruction of the level actor. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
+	void DestroyLevelActorsOnCells(const TSet<FCell>& Cells, UObject* DestroyCauser = nullptr);
 
-	/** Removes the specified map component from the MapComponents_ array without an owner destroying. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void DestroyLevelActor(class UMapComponent* MapComponent);
+	/** Destroy level actor by specified Map Component from the level.
+	 * @param MapComponent Its owner will be destroyed.
+	 * @param DestroyCauser The actor that caused the destruction of the level actor. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
+	void DestroyLevelActor(UMapComponent* MapComponent, UObject* DestroyCauser = nullptr);
 
 	/** Finds the nearest cell pointer to the specified Map Component
 	 *
@@ -204,13 +205,6 @@ public:
 	/** Returns the cached transform. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FTransform& GetCachedTransform() const { return CachedTransformInternal; }
-
-	/**
-	 * Returns map component that owns found level actor by specified cells, nullptr if was not found.
-	 * @param CellWithActor The cell where located level actor could be found on the Level Map.
-	 */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CellWithActor", Keywords = "Map Component"))
-	const class UMapComponent* GetLevelActorByCell(const FCell& CellWithActor) const;
 
 protected:
 	/* ---------------------------------------------------

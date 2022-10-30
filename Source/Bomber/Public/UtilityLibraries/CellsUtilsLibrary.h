@@ -38,6 +38,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To String (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FORCEINLINE FString Conv_CellToString(const FCell& InCell) { return FVector2D(InCell.Location).ToString(); }
 
+	/** Puts specified cell in the cells set.*/
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cells (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FORCEINLINE TSet<FCell> Conv_CellToCells(const FCell& InCell) { return InCell.ToCells(); }
+
+	/** Extracts first cell from specified cells set.*/
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cell (Cells)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FORCEINLINE FCell Conv_CellsToCell(const TSet<FCell>& InCells) { return FCell::GetFirstCellInSet(InCells); }
+
 	/** Creates 'Break Cell' node with Vector as an output parameter. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", NativeBreakFunc))
 	static const FORCEINLINE FVector& BreakCell(const FCell& InCell) { return InCell.Location; }
@@ -209,11 +217,6 @@ public:
 	static bool IsCellHasAnyMatchingActor(
 		const FCell& Cell,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
-
-	/** Returns actor type of specified cell if it has own actor, EActorType::None otherwise.
-	 * Could be useful to determine what kind of actor is located on specified cell. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static EActorType GetCellActorType(const FCell& Cell);
 
 	/** Returns true if at least one cell along specified is empty, so it does not have own actor.*/
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Free"))

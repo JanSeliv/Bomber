@@ -56,7 +56,7 @@ void UMyCheatManager::SetAI(bool bShouldEnable) const
 void UMyCheatManager::DestroyAllByType(EActorType ActorType) const
 {
 	const FCells Cells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorType));
-	AGeneratedMap::Get().DestroyActorsFromMap(Cells);
+	AGeneratedMap::Get().DestroyLevelActorsOnCells(Cells);
 }
 
 // Destroy characters in specified slots
@@ -86,7 +86,7 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 	}
 
 	// Destroy all specified
-	LevelMap.DestroyActorsFromMap(CellsToDestroy);
+	LevelMap.DestroyLevelActorsOnCells(CellsToDestroy);
 }
 
 // Override the chance to spawn item after box destroying

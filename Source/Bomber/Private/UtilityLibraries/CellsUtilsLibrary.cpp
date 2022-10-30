@@ -126,13 +126,6 @@ bool UCellsUtilsLibrary::IsCellHasAnyMatchingActor(const FCell& Cell, int32 Acto
 	return NonEmptyCells.Contains(Cell);
 }
 
-// Returns actor type of specified cell if it has own actor, EActorType::None otherwise
-EActorType UCellsUtilsLibrary::GetCellActorType(const FCell& Cell)
-{
-	const UMapComponent* MapComponent = AGeneratedMap::Get().GetLevelActorByCell(Cell);
-	return MapComponent ? MapComponent->GetActorType() : EActorType::None;
-}
-
 // Returns true if at least one cell is empty, so it does not have own actor
 bool UCellsUtilsLibrary::IsAnyCellEmptyWithoutActor(const FCells& Cells)
 {
@@ -221,7 +214,7 @@ FCell UCellsUtilsLibrary::GetCellInDirection(const FCell& CenterCell, EPathType 
 	FCells OutCells = FCell::EmptyCells;
 	AGeneratedMap::Get().GetSidesCells(OutCells, CenterCell, Pathfinder, SideLength, TO_FLAG(Direction));
 	OutCells.Remove(CenterCell);
-	return !OutCells.IsEmpty() ? OutCells.Array()[0] : FCell::InvalidCell;
+	return FCell::GetFirstCellInSet(OutCells);
 }
 
 // Returns true if a cell was found in specified direction from a center, according desired type of breaks

@@ -129,7 +129,7 @@ protected:
 
 	/** Destroy bomb and burst explosion cells, calls multicast event.*/
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
-	void DetonateBomb(AActor* DestroyedActor = nullptr);
+	void DetonateBomb();
 
 	/** Destroy bomb and burst explosion cells.
 	  * Calls destroying request of all actors by cells in explosion cells array.*/

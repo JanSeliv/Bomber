@@ -179,11 +179,11 @@ void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& New
 }
 
 // Is called when an owner was destroyed on the Level Map
-void UMapComponent::OnDeactivated()
+void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 {
 	if (OnDeactivatedMapComponent.IsBound())
 	{
-		OnDeactivatedMapComponent.Broadcast(this);
+		OnDeactivatedMapComponent.Broadcast(this, DestroyCauser);
 	}
 
 	SetCollisionResponses(ECR_Ignore);
@@ -202,7 +202,7 @@ void UMapComponent::OnDeactivated()
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
-//  Called when a component is registered (not loaded
+//  Called when a component is registered (not loaded)
 void UMapComponent::OnRegister()
 {
 	Super::OnRegister();
@@ -284,6 +284,8 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	AActor* ComponentOwner = GetOwner();
 	if (!IS_TRANSIENT(ComponentOwner)) // Is not transient owner
 	{
+		ensureAlwaysMsgf(AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame, TEXT("ASSERT: '%s' became explicity destroyed during the game, use the Pool Manager instead"), *ComponentOwner->GetName());
+
 		// Disable collision for safety
 		ComponentOwner->SetActorEnableCollision(false);
 

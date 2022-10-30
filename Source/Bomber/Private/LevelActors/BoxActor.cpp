@@ -72,8 +72,11 @@ void ABoxActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Binding to the event, that triggered when the actor has been explicitly destroyed
-	OnDestroyed.AddDynamic(this, &ABoxActor::TrySpawnItem);
+	if (HasAuthority())
+	{
+		check(MapComponentInternal);
+		MapComponentInternal->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnDeactivatedMapComponent);
+	}
 
 	// Listen states
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
@@ -82,22 +85,18 @@ void ABoxActor::BeginPlay()
 	}
 }
 
-// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
-void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
+// Called when owned map component is destroyed on the level map
+void ABoxActor::OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
-	Super::SetActorHiddenInGame(bNewHidden);
-
-	if (!bNewHidden)
+	const bool bIsCauserAllowedForItems = USingletonLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
+	if (bIsCauserAllowedForItems)
 	{
-		return;
+		TrySpawnItem();
 	}
-
-	// Is removed from level map
-	TrySpawnItem();
 }
 
 // Spawn item with a chance
-void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
+void ABoxActor::TrySpawnItem()
 {
 	if (!IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
 	    || AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)

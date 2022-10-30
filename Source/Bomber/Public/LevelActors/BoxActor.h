@@ -70,12 +70,13 @@ protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
-	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
-	virtual void SetActorHiddenInGame(bool bNewHidden) override;
+	/** Called when owned map component is destroyed on the level map. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser);
 
 	/** Spawn item with a chance. */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
-	void TrySpawnItem(AActor* DestroyedActor = nullptr);
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (BlueprintProtected))
+	void TrySpawnItem();
 
 	/** The item chance can be overrided in game, so it should be reset for each new game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

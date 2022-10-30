@@ -284,7 +284,7 @@ protected:
 
 	/** Event triggered when the bomb has been explicitly destroyed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnBombDestroyed(class UMapComponent* MapComponent);
+	void OnBombDestroyed(class UMapComponent* MapComponent, UObject* DestroyCauser = nullptr);
 
 	/** Listen to manage the tick. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))

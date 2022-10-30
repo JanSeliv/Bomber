@@ -194,9 +194,9 @@ void AMyAIController::UpdateAI()
 	if (bIsDangerous == false)
 	{
 		const FCells ItemsFromF0 = UCellsUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius(), TO_FLAG(EAT::Item));
-		if (ItemsFromF0.Num() > 0)
+		if (!ItemsFromF0.IsEmpty())
 		{
-			MoveToCell(ItemsFromF0.Array()[0]);
+			MoveToCell(FCell::GetFirstCellInSet(ItemsFromF0));
 			return;
 		}
 	}

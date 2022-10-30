@@ -29,10 +29,10 @@ public:
 	 *		Public properties
 	 * --------------------------------------------------- */
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeactivatedMapComponent, UMapComponent*, MapComponent);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDeactivatedMapComponent, UMapComponent*, MapComponent, UObject*, DestroyCauser);
 
-	/** Called when this component is destroyed on the level map. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	/** Called when this component is destroyed on the level map, is called only on the server. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, BlueprintAuthorityOnly, Category = "C++")
 	FOnDeactivatedMapComponent OnDeactivatedMapComponent; //[DMD]
 
 #if WITH_EDITORONLY_DATA  // bShouldShowRenders
@@ -69,7 +69,7 @@ public:
 	/** Returns the owner's Level Actor Row. */
 	template <typename T>
 	const FORCEINLINE T* GetLevelActorRow() const { return Cast<T>(GetLevelActorRow()); }
-	
+
 	/** Set specified mesh to the Owner. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetLevelActorRow(const class ULevelActorRow* Row);
@@ -93,6 +93,7 @@ public:
 	/** Get the owner's data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAssetInternal; }
+
 	const ULevelActorDataAsset& GetActorDataAssetChecked() const;
 
 	/** Returns true if an owner is set by cheat manager or skills to be undestroyable in game. */
@@ -117,7 +118,7 @@ public:
 
 	/** Is called when an owner was destroyed on the Level Map. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void OnDeactivated();
+	void OnDeactivated(UObject* DestroyCauser = nullptr);
 
 	/** Returns a mesh component of own level actor.  */
 	UFUNCTION(BlueprintPure, Category = "C++")

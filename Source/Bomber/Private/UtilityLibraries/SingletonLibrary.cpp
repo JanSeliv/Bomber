@@ -80,14 +80,6 @@ USingletonLibrary* USingletonLibrary::GetSingleton()
 	return Singleton;
 }
 
-// Returns true if specified actor is the Bomber Level Actor (player, box, wall or item)
-bool USingletonLibrary::IsLevelActor(const AActor* Actor)
-{
-	const TSubclassOf<AActor> ActorClass = Actor ? Actor->GetClass() : nullptr;
-	const ULevelActorDataAsset* LevelActorDataAsset = ActorClass ? UDataAssetsContainer::GetDataAssetByActorClass(ActorClass) : nullptr;
-	return LevelActorDataAsset && LevelActorDataAsset->GetActorType() != EAT::None;
-}
-
 // Iterates the current world to find an actor by specified class
 AActor* USingletonLibrary::GetActorOfClass(TSubclassOf<AActor> ActorClass)
 {
@@ -285,6 +277,36 @@ USoundsManager* USingletonLibrary::GetSoundsManager()
 UPoolManager* USingletonLibrary::GetPoolManager()
 {
 	return AGeneratedMap::Get().GetPoolManager();
+}
+
+const UDataAssetsContainer* USingletonLibrary::GetDataAssetsContainer()
+{
+	return Get().DataAssetsContainerInternal;
+}
+
+/* ---------------------------------------------------
+ *		EActorType functions
+ * --------------------------------------------------- */
+
+// Returns Actor Type of specified actor, None is not level actor
+EActorType USingletonLibrary::GetActorType(const AActor* Actor)
+{
+	const TSubclassOf<AActor> ActorClass = Actor ? Actor->GetClass() : nullptr;
+	const ULevelActorDataAsset* LevelActorDataAsset = ActorClass ? UDataAssetsContainer::GetDataAssetByActorClass(ActorClass) : nullptr;
+	return LevelActorDataAsset ? LevelActorDataAsset->GetActorType() : EAT::None;
+}
+
+// Returns true if specified actor is the Bomber Level Actor (player, box, wall or item)
+bool USingletonLibrary::IsLevelActor(const AActor* Actor)
+{
+	return GetActorType(Actor) != EAT::None;
+}
+
+// Returns true if specified level actor has at least one specified type
+bool USingletonLibrary::IsActorHasAnyMatchingType(const AActor* Actor, int32 ActorsTypesBitmask)
+{
+	const EActorType ActorType = GetActorType(Actor);
+	return BitwiseActorTypes(TO_FLAG(ActorType), ActorsTypesBitmask);
 }
 
 /* ---------------------------------------------------

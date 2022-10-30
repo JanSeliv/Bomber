@@ -471,7 +471,7 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 }
 
 // Event triggered when the bomb has been explicitly destroyed.
-void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent)
+void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent, UObject* DestroyCauser/* = nullptr*/)
 {
 	if (!MapComponent
 	    || MapComponent->GetActorType() != EAT::Bomb)

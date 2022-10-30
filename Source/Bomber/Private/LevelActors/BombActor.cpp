@@ -59,7 +59,7 @@ ABombActor::ABombActor()
 FCells ABombActor::GetExplosionCells() const
 {
 	if (IsHidden()
-		|| FireRadiusInternal < DEFAULT_FIRE_RADIUS
+	    || FireRadiusInternal < DEFAULT_FIRE_RADIUS
 	    || !MapComponentInternal)
 	{
 		return FCell::EmptyCells;
@@ -168,12 +168,6 @@ void ABombActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority())
-	{
-		// Binding to the event, that triggered when the actor has been explicitly destroyed
-		OnDestroyed.AddDynamic(this, &ThisClass::DetonateBomb);
-	}
-
 	// Destroy itself after N seconds
 	if (AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
 	{
@@ -248,7 +242,7 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 	Super::SetActorHiddenInGame(bNewHidden);
 }
 
-void ABombActor::DetonateBomb(AActor* DestroyedActor/* = nullptr*/)
+void ABombActor::DetonateBomb()
 {
 	if (!HasAuthority()
 	    || IsHidden()
@@ -280,7 +274,7 @@ void ABombActor::MulticastDetonateBomb_Implementation()
 	}
 
 	// Destroy all actors from array of cells
-	AGeneratedMap::Get().DestroyActorsFromMap(ExplosionCells);
+	AGeneratedMap::Get().DestroyLevelActorsOnCells(ExplosionCells, this);
 
 	// Play the sound
 	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())

@@ -143,5 +143,5 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	}
 
 	// Destroy itself on overlapping
-	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal);
+	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal, OtherActor);
 }

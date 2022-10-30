@@ -395,7 +395,7 @@ void AGeneratedMap::IntersectCellsByTypes(
 }
 
 // Destroy all actors from the set of cells
-void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
+void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* DestroyCauser/* = nullptr*/)
 {
 	if (!HasAuthority()
 	    || !MapComponentsInternal.Num()
@@ -420,14 +420,14 @@ void AGeneratedMap::DestroyActorsFromMap(const FCells& Cells)
 			// Remove from the array
 			// First removing, because after the box destroying the item can be spawned and starts searching for an empty cell
 			// MapComponentIt can be invalid here
-			DestroyLevelActor(MapComponentIt);
+			DestroyLevelActor(MapComponentIt, DestroyCauser);
 		}
 	}
 	MapComponentsInternal.Shrink();
 }
 
 // Removes the specified map component from the MapComponents_ array without an owner destroying
-void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
+void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* DestroyCauser/* = nullptr*/)
 {
 	if (!HasAuthority())
 	{
@@ -435,12 +435,6 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 	}
 
 	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
-
-	if (ComponentOwner
-	    && !ComponentOwner->HasAuthority())
-	{
-		return;
-	}
 
 	// Remove from the array (MapComponent can be invalid)
 	MapComponentsInternal.Remove(MapComponent);
@@ -471,7 +465,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent)
 		}
 	}
 
-	MapComponent->OnDeactivated();
+	MapComponent->OnDeactivated(DestroyCauser);
 
 	// Deactivate the iterated owner
 	if (PoolManagerInternal)
@@ -594,19 +588,6 @@ bool AGeneratedMap::IsDraggedMapComponent(const UMapComponent* MapComponent) con
 
 	const EActorType* FoundCell = DraggedCellsInternal.Find(Cell);
 	return FoundCell && *FoundCell == ActorType;
-}
-
-// Returns found level actors by specified cells
-const UMapComponent* AGeneratedMap::GetLevelActorByCell(const FCell& CellWithActor) const
-{
-	for (const UMapComponent* MapComponentIt : MapComponentsInternal)
-	{
-		if (MapComponentIt && MapComponentIt->GetCell() == CellWithActor)
-		{
-			return MapComponentIt;
-		}
-	}
-	return nullptr;
 }
 
 /* ---------------------------------------------------
@@ -766,7 +747,7 @@ void AGeneratedMap::GenerateLevelActors()
 	// Destroy all editor-only non-PIE actors
 	FCells NonEmptyCells;
 	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
-	DestroyActorsFromMap(NonEmptyCells);
+	DestroyLevelActorsOnCells(NonEmptyCells);
 	PlayersNumInternal = 0;
 
 	// Calls before generation preview actors to updating of all dragged to the Level Map actors

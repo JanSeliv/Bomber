@@ -99,11 +99,18 @@ struct BOMBER_API FCell
 	FORCEINLINE operator FVector() const { return this->Location; }
 
 	/** Find the average of an set of cells. */
-	static FCell GetCellArrayAverage(const TSet<FCell>& Cells);
+	static FCell GetCellArrayAverage(const FCells& Cells);
 
 	/** Returns the cell direction by its enum. */
 	static const FCell& GetCellDirection(ECellDirection CellDirection);
 	static ECellDirection GetCellDirection(const FCell& CellDirection);
+
+	/** Puts specified cell in the cells set.*/
+	static FORCEINLINE FCells CellToCells(const FCell& InCell) { return FCells{InCell}; }
+	FCells ToCells() const { return CellToCells(*this); }
+
+	/** Extracts first cell from specified cells set.*/
+	static FORCEINLINE FCell GetFirstCellInSet(const FCells& InCells) { return !InCells.IsEmpty() ? InCells.Array()[0] : InvalidCell; }
 
 	/**
 	* Creates a hash value from a FCell.
