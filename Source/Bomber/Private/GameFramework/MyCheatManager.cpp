@@ -43,7 +43,7 @@ void UMyCheatManager::SetAI(bool bShouldEnable) const
 	AGeneratedMap::Get().GetMapComponents(PlayerComponents, TO_FLAG(EActorType::Player));
 	for (const UActorComponent* MapComponentIt : PlayerComponents)
 	{
-		const APawn* Pawn = MapComponentIt ? Cast<APawn>(MapComponentIt->GetOwner()) : nullptr;
+		const APawn* Pawn = MapComponentIt ? MapComponentIt->GetOwner<APawn>() : nullptr;
 		const auto MyAIController = Pawn->GetController<AMyAIController>();
 		if (MyAIController)
 		{
@@ -77,7 +77,7 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 	LevelMap.GetMapComponents(MapComponents, TO_FLAG(EActorType::Player));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
-		const APlayerCharacter* PlayerCharacter = MapComponentIt ? Cast<APlayerCharacter>(MapComponentIt->GetOwner()) : nullptr;
+		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
 		const bool bDestroy = PlayerCharacter && ((1 << PlayerCharacter->GetCharacterID()) & Bitmask) != 0;
 		if (bDestroy) // mark to destroy if specified in slot
 		{
@@ -98,7 +98,7 @@ void UMyCheatManager::SetItemChance(int32 Chance) const
 	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EActorType::Box));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
-		ABoxActor* BoxActor = MapComponentIt ? Cast<ABoxActor>(MapComponentIt->GetOwner()) : nullptr;
+		ABoxActor* BoxActor = MapComponentIt ? MapComponentIt->GetOwner<ABoxActor>() : nullptr;
 		if (BoxActor)
 		{
 			// Override new chance

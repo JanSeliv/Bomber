@@ -46,7 +46,7 @@ public:
 
 	/** Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorClass"))
-	static const class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass);
+	static const class ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<AActor> ActorClass);
 
 	/** Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

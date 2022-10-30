@@ -14,7 +14,7 @@ const UDataAssetsContainer& UDataAssetsContainer::Get()
 }
 
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
-const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorClass(const TSubclassOf<AActor>& ActorClass)
+const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorClass(const TSubclassOf<AActor> ActorClass)
 {
 	if (!ActorClass)
 	{
