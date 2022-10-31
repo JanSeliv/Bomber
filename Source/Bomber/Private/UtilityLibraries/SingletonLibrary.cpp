@@ -30,9 +30,6 @@
 #include "MyUnrealEdEngine.h" // GetClientSingleton
 #endif
 
-// Binds to update movements of each AI controller.
-USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
-
 // Default params to display cells
 const FDisplayCellsParams FDisplayCellsParams::EmptyParams = FDisplayCellsParams();
 
@@ -316,6 +313,9 @@ bool USingletonLibrary::IsActorHasAnyMatchingType(const AActor* Actor, int32 Act
 #if WITH_EDITOR
 // Will notify on any data asset changes
 USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChanged;
+
+// Binds to update movements of each AI controller.
+USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
 #endif //WITH_EDITOR
 
 // Remove all text renders of the Owner

@@ -35,7 +35,8 @@ AMyAIController::AMyAIController()
 // Makes AI go toward specified destination cell
 void AMyAIController::MoveToCell(const FCell& DestinationCell)
 {
-	if (!IS_VALID(OwnerInternal)) // The controlled character is not valid or is transient
+	if (!IS_VALID(OwnerInternal)
+	    || IsMoveInputIgnored())
 	{
 		return;
 	}
@@ -85,15 +86,10 @@ void AMyAIController::BeginPlay()
 	// Call to super
 	Super::BeginPlay();
 
-	const UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
 	// Setup timer handle to update AI brain (initialized being paused)
-	FTimerManager& TimerManager = World->GetTimerManager();
-	TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, UGameStateDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
+	constexpr bool bInLoop = true;
+	FTimerManager& TimerManager = GetWorldTimerManager();
+	TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, UGameStateDataAsset::Get().GetTickInterval(), bInLoop, KINDA_SMALL_NUMBER);
 	TimerManager.PauseTimer(AIUpdateHandleInternal);
 }
 
@@ -109,10 +105,13 @@ void AMyAIController::OnPossess(APawn* InPawn)
 
 	OwnerInternal = Cast<APlayerCharacter>(InPawn);
 
-	if (!USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this))
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld()
+	    && !USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this))
 	{
 		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
 	}
+#endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Listen states
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
@@ -131,7 +130,12 @@ void AMyAIController::OnUnPossess()
 
 	OwnerInternal = nullptr;
 
-	USingletonLibrary::GOnAIUpdatedDelegate.RemoveAll(this);
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	{
+		USingletonLibrary::GOnAIUpdatedDelegate.RemoveAll(this);
+	}
+#endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
@@ -147,7 +151,16 @@ void AMyAIController::SetIgnoreMoveInput(bool bShouldIgnore)
 	// Do not call super to avoid stacking, override it
 
 	IgnoreMoveInput = bShouldIgnore;
-	SetAI(!bShouldIgnore);
+}
+
+// Stops running to target
+void AMyAIController::Reset()
+{
+	// Abort current movement task
+	Super::Reset();
+
+	// Reset target location
+	AIMoveToInternal = FCell::InvalidCell;
 }
 
 // The main AI logic
@@ -159,7 +172,7 @@ void AMyAIController::UpdateAI()
 	{
 		return;
 	}
-	
+
 	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
 
 #if WITH_EDITOR
@@ -237,7 +250,7 @@ void AMyAIController::UpdateAI()
 			if (ItemsAround.Num() > 0) // Is there items in this crossway?
 			{
 				ItemsAround = ItemsAround.Intersect(Free); // ItemsArouns = ItemsArouns ∪ Free
-				if (ItemsAround.Num() > 0)                  // Is there direct items in this crossway?
+				if (ItemsAround.Num() > 0)                 // Is there direct items in this crossway?
 				{
 					if (bIsItemInDirect == false) // is the first found direct item
 					{
@@ -245,8 +258,8 @@ void AMyAIController::UpdateAI()
 						FoundItems.Empty(); // clear all previously found corner items
 					}
 					FoundItems = FoundItems.Union(ItemsAround); // Add found direct items
-				}                                                // item around the corner
-				else if (bIsItemInDirect == false)               // Need corner item?
+				}                                               // item around the corner
+				else if (bIsItemInDirect == false)              // Need corner item?
 				{
 					FoundItems.Emplace(*F); // Add found corner item
 				}
@@ -392,8 +405,9 @@ void AMyAIController::SetAI(bool bShouldEnable)
 		return;
 	}
 
-	// Reset target location
-	AIMoveToInternal = FCell::InvalidCell;
+	Reset();
+
+	SetIgnoreMoveInput(!bShouldEnable);
 
 	// Handle the Ai updating timer
 	FTimerManager& TimerManager = World->GetTimerManager();
@@ -416,12 +430,12 @@ void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		case ECurrentGameState::GameStarting:
 		case ECurrentGameState::EndGame:
 		{
-			SetIgnoreMoveInput(true);
+			SetAI(false);
 			break;
 		}
 		case ECurrentGameState::InGame:
 		{
-			SetIgnoreMoveInput(false);
+			SetAI(true);
 			break;
 		}
 		default:

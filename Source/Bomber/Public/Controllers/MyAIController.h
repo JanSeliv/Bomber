@@ -76,7 +76,7 @@ public:
 
 	/** Makes AI go toward specified destination cell */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void MoveToCell(const struct FCell& DestinationCell);
+	void MoveToCell(const FCell& DestinationCell);
 
 protected:
 	/* ---------------------------------------------------
@@ -115,6 +115,9 @@ protected:
 
 	/** Locks or unlocks movement input. */
 	virtual void SetIgnoreMoveInput(bool bShouldIgnore) override;
+
+	/** Stops running to target. */
+	virtual void Reset() override;
 
 	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

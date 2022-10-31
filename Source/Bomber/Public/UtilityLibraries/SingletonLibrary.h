@@ -56,10 +56,6 @@ class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	DECLARE_MULTICAST_DELEGATE(FUpdateAI);
-	/** Binds to update movements of each AI controller. */
-	static FUpdateAI GOnAIUpdatedDelegate;
-
 	/** Sets default values for this actor's properties */
 	USingletonLibrary() = default;
 
@@ -244,6 +240,10 @@ public:
 	DECLARE_MULTICAST_DELEGATE(FOnAnyDataAssetChanged);
 	/** Will notify on any data asset changes. */
 	static FOnAnyDataAssetChanged GOnAnyDataAssetChanged;
+
+	DECLARE_MULTICAST_DELEGATE(FUpdateAI);
+	/** Binds to update movements of each AI controller. */
+	static FUpdateAI GOnAIUpdatedDelegate;
 #endif //WITH_EDITOR
 
 	/** Remove all text renders of the Owner */

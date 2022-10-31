@@ -78,8 +78,11 @@ bool UMapComponent::OnConstruction()
 #if WITH_EDITOR	 // [IsEditor]
 	if (UEditorUtilsLibrary::IsEditor())
 	{
-		// Update AI renders after adding obj to map
-		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+		{
+			// Update AI renders after adding obj to map
+			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+		}
 
 		// Show current cell if type specified
 		if (TO_FLAG(GetActorType()) & LevelMap.RenderActorsTypes)
