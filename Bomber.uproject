@@ -64,6 +64,10 @@
 		{
 			"Name": "ModularGameplay",
 			"Enabled": true
+		},
+		{
+			"Name": "PlayAreaSurrounder",
+			"Enabled": true
 		}
 	]
 }

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Bomber.generated.h"
 
 #define IS_TRANSIENT(Obj) (!(Obj) || !(Obj)->IsValidLowLevelFast() || (Obj)->HasAnyFlags(RF_Transient | RF_ClassDefaultObject) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
 #define IS_VALID(Obj) (IsValid(Obj) && !(Obj)->IsPendingKillPending() && !IS_TRANSIENT(Obj))
@@ -52,7 +52,7 @@ using EAT = EActorType;
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ELevelType : uint8
 {
-	None = 0 UMETA(DisplayName = "None"),
+	None = 0,
 	First = 1 << 0 UMETA(DisplayName = "Maya"),
 	Second = 1 << 1 UMETA(DisplayName = "City"),
 	Third = 1 << 2 UMETA(DisplayName = "Forest"),

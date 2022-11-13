@@ -3,7 +3,6 @@
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "GeneratedMap.h"
-#include "Components/MapComponent.h"
 
 // Returns the cell by specified row and column number if exists, invalid cell otherwise
 const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
