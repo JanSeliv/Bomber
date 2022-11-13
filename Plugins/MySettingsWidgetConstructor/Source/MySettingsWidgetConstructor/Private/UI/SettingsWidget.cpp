@@ -115,7 +115,7 @@ void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpda
 		}
 		else if (ChosenData == &Setting.Slider)
 		{
-			const float NewValue = GetSliderValue(SettingTag);
+			const double NewValue = GetSliderValue(SettingTag);
 			SetSettingSlider(SettingTag, NewValue);
 		}
 		else if (ChosenData == &Setting.TextLine)
@@ -202,7 +202,7 @@ void USettingsWidget::SetSettingValue(FName TagName, const FString& Value)
 	}
 	else if (ChosenData == &FoundRow.Slider)
 	{
-		const float NewValue = FCString::Atof(*Value);
+		const double NewValue = FCString::Atod(*Value);
 		SetSettingSlider(Tag, NewValue);
 	}
 	else if (ChosenData == &FoundRow.TextLine)
@@ -322,7 +322,7 @@ void USettingsWidget::SetSettingComboboxMembers(const FSettingTag& ComboboxTag, 
 }
 
 // Set current value for a slider
-void USettingsWidget::SetSettingSlider(const FSettingTag& SliderTag, float InValue)
+void USettingsWidget::SetSettingSlider(const FSettingTag& SliderTag, double InValue)
 {
 	if (!SliderTag.IsValid())
 	{
@@ -335,10 +335,10 @@ void USettingsWidget::SetSettingSlider(const FSettingTag& SliderTag, float InVal
 		return;
 	}
 
-	static constexpr float MinValue = 0.f;
-	static constexpr float MaxValue = 1.f;
-	const float NewValue = FMath::Clamp(InValue, MinValue, MaxValue);
-	float& ChosenValueRef = SettingsRowPtr->Slider.ChosenValue;
+	static constexpr double MinValue = 0.0;
+	static constexpr float MaxValue = 1.0;
+	const double NewValue = FMath::Clamp(InValue, MinValue, MaxValue);
+	double& ChosenValueRef = SettingsRowPtr->Slider.ChosenValue;
 	if (ChosenValueRef == NewValue)
 	{
 		return;
@@ -513,10 +513,10 @@ void USettingsWidget::GetComboboxMembers(const FSettingTag& ComboboxTag, TArray<
 }
 
 // Get current value of a slider [0...1]
-float USettingsWidget::GetSliderValue(const FSettingTag& SliderTag) const
+double USettingsWidget::GetSliderValue(const FSettingTag& SliderTag) const
 {
 	const FSettingsPicker& FoundRow = GetSettingRow(SliderTag);
-	float Value = 0.f;
+	double Value = 0.0;
 	if (FoundRow.IsValid())
 	{
 		const FSettingsSlider& Data = FoundRow.Slider;

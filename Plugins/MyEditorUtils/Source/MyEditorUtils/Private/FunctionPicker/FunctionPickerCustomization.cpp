@@ -91,7 +91,7 @@ void FFunctionPickerCustomization::RefreshCustomProperty()
 		const UFunction* FunctionIt = *It;
 		if (FunctionIt
 			&& FunctionIt != TemplateFunctionInternal
-			&& (!bIsStaticFunctionInternal || FunctionIt->FunctionFlags & FUNC_Static) // only static functions if specified
+			&& (!bIsStaticFunctionInternal || (FunctionIt->FunctionFlags & FUNC_Static) != 0) // only static functions if specified
 			&& IsSignatureCompatible(FunctionIt))
 		{
 			FName FunctionNameIt = FunctionIt->GetFName();
@@ -100,7 +100,7 @@ void FFunctionPickerCustomization::RefreshCustomProperty()
 				bValidCustomProperty = true;
 			}
 
-			FoundList.Emplace(MoveTemp(FunctionNameIt));
+			FoundList.AddUnique(MoveTemp(FunctionNameIt));
 		}
 	}
 
@@ -112,6 +112,17 @@ void FFunctionPickerCustomization::RefreshCustomProperty()
 
 	for (const FName& ItemData : FoundList)
 	{
+		const FString ItemDataStr = ItemData.ToString();
+		const bool bAlreadyContains = SearchableComboBoxValuesInternal.ContainsByPredicate([&ItemDataStr](const TSharedPtr<FString>& SearchableComboBoxValue)
+		{
+			return SearchableComboBoxValue && SearchableComboBoxValue->Equals(ItemDataStr);
+		});
+
+		if (bAlreadyContains)
+		{
+			continue;
+		}
+
 		// Add this to the searchable text box as an FString so users can type and find it
 		SearchableComboBoxValuesInternal.Emplace(MakeShareable(new FString(ItemData.ToString())));
 	}
@@ -197,7 +208,7 @@ bool FFunctionPickerCustomization::IsSignatureCompatible(const UFunction* Functi
 		return true;
 	};
 
-	const uint64 IgnoreFlags = CPF_OutParm | UFunction::GetDefaultIgnoredSignatureCompatibilityFlags();
+	const uint64 IgnoreFlags = CPF_ReturnParm | UFunction::GetDefaultIgnoredSignatureCompatibilityFlags();
 
 	// Run through the parameter property chains to compare each property
 	TFieldIterator<FProperty> IteratorA(TemplateFunction);

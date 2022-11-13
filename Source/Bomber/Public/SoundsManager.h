@@ -156,27 +156,27 @@ public:
 
 	/** Set the general sound volume for all sound classes in game. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMasterVolume(float InVolume);
+	void SetMasterVolume(double InVolume);
 
 	/** Returns the general sound volume for all sound classes in game. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE float GetMasterVolume() const { return MasterVolumeInternal; }
+	FORCEINLINE double GetMasterVolume() const { return MasterVolumeInternal; }
 
 	/** Set new sound volume for music sound class. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMusicVolume(float InVolume);
+	void SetMusicVolume(double InVolume);
 
 	/** Returns the sound volume for music sound class. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE float GetMusicVolume() const { return MusicVolumeInternal; }
+	FORCEINLINE double GetMusicVolume() const { return MusicVolumeInternal; }
 
 	/** Set new sound volume for SFX sound class. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Set SFX Volume"))
-	void SetSFXVolume(float InVolume);
+	void SetSFXVolume(double InVolume);
 
 	/** Returns the sound volume for SFX sound class. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get SFX Volume"))
-	FORCEINLINE float GetSFXVolume() const { return SFXVolumeInternal; }
+	FORCEINLINE double GetSFXVolume() const { return SFXVolumeInternal; }
 
 	/** Play the background music for current game state and level. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -201,15 +201,15 @@ protected:
 
 	/** The general sound volume for all sound classes in game. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Volume"))
-	float MasterVolumeInternal; //[С]
+	double MasterVolumeInternal; //[С]
 
 	/** The sound volume for music sound class. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
-	float MusicVolumeInternal; //[С]
+	double MusicVolumeInternal; //[С]
 
 	/** The sound volume for SFX sound class. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
-	float SFXVolumeInternal; //[С]
+	double SFXVolumeInternal; //[С]
 
 	/** The component that is used to play different background musics.  */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))

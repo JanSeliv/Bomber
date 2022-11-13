@@ -332,7 +332,7 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterInt, int32, Param);
 
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterFloat, float, Param);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterFloat, double, Param);
 
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnSetterBool, bool, Param);
 
@@ -346,7 +346,7 @@ public:
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(int32, FOnGetterInt);
 
-	DECLARE_DYNAMIC_DELEGATE_RetVal(float, FOnGetterFloat);
+	DECLARE_DYNAMIC_DELEGATE_RetVal(double, FOnGetterFloat);
 
 	DECLARE_DYNAMIC_DELEGATE_RetVal(bool, FOnGetterBool);
 
@@ -536,7 +536,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsSlider : public FSettingsDataBas
 	GENERATED_BODY()
 
 	/** Cached slider value (0..1). */
-	float ChosenValue = static_cast<float>(INDEX_NONE);
+	double ChosenValue = INDEX_NONE;
 
 	/** The cached bound delegate, is executed to get the current slider value. */
 	USettingTemplate::FOnGetterFloat OnGetterFloat;

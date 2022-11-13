@@ -125,7 +125,7 @@ public:
 
 	/** Set current value for a slider [0...1]. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "SliderTag"))
-	void SetSettingSlider(const FSettingTag& SliderTag, float InValue);
+	void SetSettingSlider(const FSettingTag& SliderTag, double InValue);
 
 	/** Set new text. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "TextLineTag,InValue"))
@@ -157,7 +157,7 @@ public:
 
 	/** Get current value of a slider [0...1]. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SliderTag"))
-	float GetSliderValue(const FSettingTag& SliderTag) const;
+	double GetSliderValue(const FSettingTag& SliderTag) const;
 
 	/** Get current text of the text line setting. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "TextLineTag"))

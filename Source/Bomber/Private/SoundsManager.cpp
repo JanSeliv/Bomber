@@ -76,7 +76,7 @@ void USoundsManager::SetSoundVolumeByClass(USoundClass* InSoundClass, float InVo
 }
 
 // Set the general sound volume for all sound classes in game
-void USoundsManager::SetMasterVolume(float InVolume)
+void USoundsManager::SetMasterVolume(double InVolume)
 {
 	MasterVolumeInternal = InVolume;
 
@@ -85,7 +85,7 @@ void USoundsManager::SetMasterVolume(float InVolume)
 }
 
 // Set new sound volume for music sound class
-void USoundsManager::SetMusicVolume(float InVolume)
+void USoundsManager::SetMusicVolume(double InVolume)
 {
 	MusicVolumeInternal = InVolume;
 
@@ -94,7 +94,7 @@ void USoundsManager::SetMusicVolume(float InVolume)
 }
 
 // Set new sound volume for SFX sound class
-void USoundsManager::SetSFXVolume(float InVolume)
+void USoundsManager::SetSFXVolume(double InVolume)
 {
 	SFXVolumeInternal = InVolume;
 
