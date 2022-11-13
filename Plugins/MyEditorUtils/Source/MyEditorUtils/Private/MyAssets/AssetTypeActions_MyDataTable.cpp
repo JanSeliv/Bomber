@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "MyDataTable/AssetTypeActions_MyDataTable.h"
+#include "MyAssets/AssetTypeActions_MyDataTable.h"
 //---
 #include "DataTableEditorModule.h"
 #include "DesktopPlatformModule.h"

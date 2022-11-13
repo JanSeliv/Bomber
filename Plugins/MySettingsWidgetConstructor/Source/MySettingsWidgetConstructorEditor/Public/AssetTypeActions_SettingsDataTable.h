@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MyDataTable//AssetTypeActions_MyDataTable.h"
+#include "MyAssets/AssetTypeActions_MyDataTable.h"
 //---
 #include "AssetTypeActions_SettingsDataTable.generated.h"
 
