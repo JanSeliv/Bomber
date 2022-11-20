@@ -186,7 +186,7 @@ bool UMySkeletalMeshComponent::ArePropsWantToUpdate() const
 			UMeshComponent* MeshComponent = nullptr;
 			if (const auto SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshCompIt))
 			{
-				return SkeletalMeshComp->SkeletalMesh == AttachedMeshIt.AttachedMesh;
+				return SkeletalMeshComp->GetSkinnedAsset() == AttachedMeshIt.AttachedMesh;
 			}
 			else if (const auto StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
 			{

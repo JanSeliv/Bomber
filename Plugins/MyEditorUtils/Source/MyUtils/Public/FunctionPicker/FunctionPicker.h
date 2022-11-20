@@ -20,7 +20,7 @@
   * ClassName::FunctionName
   *
   * Example:
-  * UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate="SettingTemplate::OnSetMembers__DelegateSignature"))
+  * UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetMembers__DelegateSignature"))
   * FFunctionPicker SetMembers = FFunctionPicker::Empty;
   */
 USTRUCT(BlueprintType)

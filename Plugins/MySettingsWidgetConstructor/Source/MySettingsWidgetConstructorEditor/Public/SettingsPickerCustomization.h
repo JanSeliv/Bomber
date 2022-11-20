@@ -18,13 +18,13 @@ public:
 	inline static const FName PropertyClassName = TEXT("SettingsPicker");
 
 	/** The name of the settings data base struct. */
-	inline static const FName SettingsDataBaseName = TEXT("SettingsDataBase");
+	inline static const FName SettingsDataBasePathName = TEXT("/Script/MySettingsWidgetConstructor.SettingsDataBase");
 
 	/** The name of the Settings Primary struct. */
-	inline static const FName SettingsPrimaryName = TEXT("SettingsPrimary");
+	inline static const FName SettingsPrimaryPathName = TEXT("/Script/MySettingsWidgetConstructor.SettingsPrimary");
 
 	/** The name of the Function Picker struct. */
-	inline static const FName FunctionPickerName = TEXT("FunctionPicker");
+	inline static const FName FunctionPickerPathName = TEXT("/Script/MyUtils.FunctionPicker");
 
 	/** Default constructor. */
 	FSettingsPickerCustomization();

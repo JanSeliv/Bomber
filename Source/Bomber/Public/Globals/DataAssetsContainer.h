@@ -52,7 +52,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static void GetDataAssetsByActorTypes(
 		TArray<class ULevelActorDataAsset*>& OutDataAssets,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
 	/** Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

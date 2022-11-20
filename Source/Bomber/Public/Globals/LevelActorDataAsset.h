@@ -60,7 +60,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	void GetRowsByLevelType(
 		TArray<ULevelActorRow*>& OutRows,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "ELevelType")) int32 LevelsTypesBitmask) const;
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ELevelType")) int32 LevelsTypesBitmask) const;
 
 	/** Return first found row by specified level types. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

@@ -599,7 +599,9 @@ FVector2D USettingsWidget::GetSettingsSize() const
 		return FVector2D::ZeroVector;
 	}
 
-	const FVector2D PercentSize = FMath::Clamp<FVector2D>(SettingsDataAssetInternal->GetSettingsPercentSize(), FVector2D::ZeroVector, FVector2D::UnitVector);
+	constexpr double MinPercent = 0.0;
+	constexpr double MaxPercent = 1.0;
+	const FVector2D PercentSize = SettingsDataAssetInternal->GetSettingsPercentSize().ClampAxes(MinPercent, MaxPercent);
 
 	UObject* WorldContextObject = GetOwningPlayer();
 	const FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(WorldContextObject);

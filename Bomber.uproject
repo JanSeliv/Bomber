@@ -1,17 +1,13 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.0",
+	"EngineAssociation": "5.1",
 	"Category": "",
-	"Description": "",
+	"Description": "Open-source Bomberman game made in Unreal Engine 5",
 	"Modules": [
 		{
 			"Name": "Bomber",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine",
-				"AIModule"
-			]
+			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "BomberEditor",
@@ -22,28 +18,15 @@
 	"Plugins": [
 		{
 			"Name": "MagicLeapMedia",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Lumin"
-			]
+			"Enabled": false
 		},
 		{
 			"Name": "MagicLeap",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Lumin",
-				"Mac",
-				"Win64"
-			]
+			"Enabled": false
 		},
 		{
 			"Name": "Bridge",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Win64",
-				"Mac",
-				"Linux"
-			]
+			"Enabled": false
 		},
 		{
 			"Name": "EnhancedInput",
@@ -63,10 +46,6 @@
 		},
 		{
 			"Name": "ModularGameplay",
-			"Enabled": true
-		},
-		{
-			"Name": "PlayAreaSurrounder",
 			"Enabled": true
 		}
 	]

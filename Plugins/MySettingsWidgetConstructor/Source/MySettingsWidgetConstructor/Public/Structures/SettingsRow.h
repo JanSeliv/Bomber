@@ -436,7 +436,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsPrimary
   * The base archetype of some setting.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionContextTemplate="SettingTemplate::OnStaticContext__DelegateSignature"))
+	FunctionContextTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnStaticContext__DelegateSignature"))
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -446,7 +446,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsDataBase
   * The setting button data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate="SettingTemplate::OnButtonPressed__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnButtonPressed__DelegateSignature"))
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsButton : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -467,8 +467,8 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsButton : public FSettingsDataBas
   * The setting checkbox data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate="SettingTemplate::OnSetterBool__DelegateSignature",
-	FunctionGetterTemplate="SettingTemplate::OnGetterBool__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetterBool__DelegateSignature",
+	FunctionGetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnGetterBool__DelegateSignature"))
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCheckbox : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -487,18 +487,18 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCheckbox : public FSettingsDataB
   * The setting combobox data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate="SettingTemplate::OnSetterInt__DelegateSignature",
-	FunctionGetterTemplate="SettingTemplate::OnGetterInt__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetterInt__DelegateSignature",
+	FunctionGetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnGetterInt__DelegateSignature"))
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCombobox : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
 	/** The Setter function to be called to set all combobox members. */
-	UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate="SettingTemplate::OnSetMembers__DelegateSignature"))
+	UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetMembers__DelegateSignature"))
 	FFunctionPicker SetMembers = FFunctionPicker::Empty; //[D]
 
 	/** The Setter function to be called to get all combobox members. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionGetterTemplate="SettingTemplate::OnGetMembers__DelegateSignature"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionGetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnGetMembers__DelegateSignature"))
 	FFunctionPicker GetMembers = FFunctionPicker::Empty; //[D]
 
 	/** Contains all combobox members. */
@@ -529,8 +529,8 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCombobox : public FSettingsDataB
   * The setting slider data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate="SettingTemplate::OnSetterFloat__DelegateSignature",
-	FunctionGetterTemplate="SettingTemplate::OnGetterFloat__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetterFloat__DelegateSignature",
+	FunctionGetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnGetterFloat__DelegateSignature"))
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsSlider : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -549,8 +549,8 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsSlider : public FSettingsDataBas
   * The setting text line data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate="SettingTemplate::OnSetterText__DelegateSignature",
-	FunctionGetterTemplate="SettingTemplate::OnGetterText__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetterText__DelegateSignature",
+	FunctionGetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnGetterText__DelegateSignature"))
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsTextLine : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -574,8 +574,8 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsTextLine : public FSettingsDataB
   * The setting user input data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate="SettingTemplate::OnSetterName__DelegateSignature",
-	FunctionGetterTemplate="SettingTemplate::OnGetterName__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetterName__DelegateSignature",
+	FunctionGetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnGetterName__DelegateSignature"))
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsUserInput : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -599,8 +599,8 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsUserInput : public FSettingsData
   * The setting user input data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate="SettingTemplate::OnSetterWidget__DelegateSignature",
-	FunctionGetterTemplate="SettingTemplate::OnGetterWidget__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetterWidget__DelegateSignature",
+	FunctionGetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnGetterWidget__DelegateSignature"))
 struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCustomWidget : public FSettingsDataBase
 {
 	GENERATED_BODY()

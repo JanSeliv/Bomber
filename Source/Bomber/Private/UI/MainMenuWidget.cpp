@@ -51,7 +51,7 @@ void UMainMenuWidget::ChooseRightLeft(const FInputActionValue& ActionValue)
 		return;
 	}
 
-	if (FMath::IsNegative(ScaleValue))
+	if (ScaleValue < 0.f)
 	{
 		ChooseLeft();
 	}
@@ -84,7 +84,7 @@ void UMainMenuWidget::ChooseBackForward(const FInputActionValue& ActionValue)
 		return;
 	}
 
-	if (FMath::IsNegative(ScaleValue))
+	if (ScaleValue < 0.f)
 	{
 		ChooseBack();
 	}

@@ -27,7 +27,7 @@ using ECD = ECellDirection;
 /**
  * The structure that contains a location of an one cell on a grid of the Level Map.
  */
-USTRUCT(BlueprintType, meta = (HasNativeMake = "Bomber.CellsUtilsLibrary.MakeCell", HasNativeBreak = "Bomber.CellsUtilsLibrary.BreakCell"))
+USTRUCT(BlueprintType, meta = (HasNativeMake = "/Script/Bomber.CellsUtilsLibrary.MakeCell", HasNativeBreak = "/Script/Bomber.CellsUtilsLibrary.BreakCell"))
 struct BOMBER_API FCell
 {
 	GENERATED_BODY()

@@ -82,7 +82,8 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	// Rand the item type if not set yet
 	if (ItemTypeInternal == EItemType::None)
 	{
-		if (static const UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, TEXT("EItemType"), true))
+		const static FString ItemTypeEnumPathName = TEXT("/Script/Bomber.EItemType");
+		if (static const UEnum* Enum = UClass::TryFindTypeSlow<UEnum>(ItemTypeEnumPathName, EFindFirstObjectOptions::ExactClass))
 		{
 			ItemTypeInternal = TO_ENUM(EItemType, Enum->GetValueByIndex(FMath::RandRange(1, TO_FLAG(Enum->GetMaxEnumValue() - 1))));
 		}

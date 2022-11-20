@@ -75,23 +75,23 @@ public:
 	static FORCEINLINE float GetCellSize() { return FCell::CellSize; }
 
 	/** Cell forward direction constant (1,0,0) */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Forward", ScriptConstantHost = "Cell"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Forward", ScriptConstantHost = "/Script/Bomber.Cell"))
 	static const FORCEINLINE FCell& Cell_Forward() { return FCell::ForwardCell; }
 
 	/** Cell backward direction constant (-1,0,0) */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Backward", ScriptConstantHost = "Cell"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Backward", ScriptConstantHost = "/Script/Bomber.Cell"))
 	static const FORCEINLINE FCell& Cell_Backward() { return FCell::BackwardCell; }
 
 	/** Cell right direction constant (0,1,0) */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Right", ScriptConstantHost = "Cell"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Right", ScriptConstantHost = "/Script/Bomber.Cell"))
 	static const FORCEINLINE FCell& Cell_Right() { return FCell::RightCell; }
 
 	/** Cell left direction constant (0,-1,0) */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Left", ScriptConstantHost = "Cell"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Left", ScriptConstantHost = "/Script/Bomber.Cell"))
 	static const FORCEINLINE FCell& Cell_Left() { return FCell::LeftCell; }
 
 	/** Returns the invalid cell (0,0,-1) */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Invalid", ScriptConstantHost = "Cell", Keywords = "Zero"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Invalid", ScriptConstantHost = "/Script/Bomber.Cell", Keywords = "Zero"))
 	static const FORCEINLINE FCell& Cell_Invalid() { return FCell::InvalidCell; }
 
 	/** Returns true if cell is invalid (Cell == InvalidCell), to check is not the same as UCellUtillsLibrary::IsCellExistsOnLevel
@@ -185,7 +185,7 @@ public:
 	 * If non of actors are chosen, returns all empty cells without actors. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Cell By Actor"))
 	static TSet<FCell> GetAllCellsWithActors(
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
 	/** Takes cells and returns only empty cells where non of actors are present.
 	 * Could be useful to extract only free no actor cells with within given cells. */
@@ -203,7 +203,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static TSet<FCell> FilterCellsByActors(
 		const TSet<FCell>& InCells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns true if specified cell is empty, so it does not have own actor.
 	* Could be useful to make sure there is nothing on cell, so some actor could be spawned there. */
@@ -216,7 +216,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	static bool IsCellHasAnyMatchingActor(
 		const FCell& Cell,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns true if at least one cell along specified is empty, so it does not have own actor.*/
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Free"))
@@ -228,7 +228,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool AreCellsHaveAnyMatchingActors(
 		const TSet<FCell>& Cells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns true if all specified cells are empty, so don't have own actors.
 	 * Could be useful to make sure there are nothing on cells, so some actors could be spawned there. */
@@ -241,7 +241,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool AreCellsHaveAllMatchingActors(
 		const TSet<FCell>& Cells,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns true if specified cell is present on the Level Map.
 	 * Could be useful to check is input cell valid. */
@@ -289,7 +289,7 @@ public:
 		const FCell& CenterCell,
 		EPathType Pathfinder,
 		int32 Radius,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns matching empty cells around without actors, according desired type of breaks.
 	 * Could be useful to determine are there empty cells around.
@@ -343,7 +343,7 @@ public:
 		const FCell& CenterCell,
 		EPathType Pathfinder,
 		int32 SideLength,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECellDirection")) int32 DirectionsBitmask);
 
 	/** Returns cells that match specified actors in specified direction from a center, according desired type of breaks.
 	 * If non of actors are chosen, returns matching empty cells without actors in chosen direction(s).
@@ -360,8 +360,8 @@ public:
 		const FCell& CenterCell,
 		EPathType Pathfinder,
 		int32 SideLength,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECellDirection")) int32 DirectionsBitmask,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
 	/** Returns matching empty cells without actors in chosen direction(s), according desired type of breaks.
 	 * Could be useful to determine are there empty cells on the way.
@@ -376,7 +376,7 @@ public:
 		const FCell& CenterCell,
 		EPathType Pathfinder,
 		int32 SideLength,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask);
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECellDirection")) int32 DirectionsBitmask);
 
 	/** Returns true if player is not able to reach specified cell by any any path. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Path"))

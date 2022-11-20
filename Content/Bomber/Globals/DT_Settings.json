@@ -96,12 +96,12 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
 					"FunctionName": "GetSettingsWidget"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/MySettingsWidgetConstructor.SettingsWidget'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/MySettingsWidgetConstructor.SettingsWidget'",
 					"FunctionName": "CloseSettings"
 				},
 				"Getter":
@@ -264,17 +264,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetVSyncEnabled"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "IsVSyncEnabled"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E3C445BF447C7C7057DD6FBC4387E065\", \"V-Sync\")",
@@ -348,17 +348,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
 					"FunctionName": "SetFullscreenEnabled"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
 					"FunctionName": "IsFullscreenEnabled"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"30E1B9914168CFDFD022ACAAF72408A2\", \"Fullscreen\")",
@@ -432,17 +432,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
 					"FunctionName": "SetResolutionByIndex"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
 					"FunctionName": "GetResolutionIndex"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"CDB22C8D449DFC08EA86DC8127FB526E\", \"Screen Resolutions\")",
@@ -479,7 +479,7 @@
 				},
 				"GetMembers":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
 					"FunctionName": "GetTextResolutions"
 				},
 				"Members": [],
@@ -516,17 +516,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
 					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
 					"FunctionName": "SetFPSLockByIndex"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
 					"FunctionName": "GetFPSLockIndex"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"830704614CB4A9294A1192AC105A706A\", \"Framerate Lock\")",
@@ -608,17 +608,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
 					"FunctionName": "GetMyHUD"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyHUD'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyHUD'",
 					"FunctionName": "SetFPSCounterEnabled"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyHUD'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyHUD'",
 					"FunctionName": "IsFPSCounterEnabled"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E0880BDD4241E60FB2A3008CDB5CCA63\", \"FPS Counter\")",
@@ -776,17 +776,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
 					"FunctionName": "GetSoundsManager"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
 					"FunctionName": "SetMasterVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
 					"FunctionName": "GetMasterVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"3FC144E945D22BA8DB903BB7FBD1AE1E\", \"Master Volume\")",
@@ -860,17 +860,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
 					"FunctionName": "GetSoundsManager"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
 					"FunctionName": "SetMusicVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
 					"FunctionName": "GetMusicVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"FDDC03E84D349EAC5743FEB1C9E6B87D\", \"Music Volume\")",
@@ -944,17 +944,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
 					"FunctionName": "GetSoundsManager"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
 					"FunctionName": "SetSFXVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
 					"FunctionName": "GetSFXVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"DC1E69F1449E9C4CD8B1D58CFCBB7676\", \"Sound Effects Volume\")",
@@ -1112,17 +1112,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
 					"FunctionName": "GetLocalPlayerState"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
 					"FunctionName": "SetPlayerNameCustom"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyPlayerState'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
 					"FunctionName": "GetPlayerFNameCustom"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0A4D44494F98A414FFD6F399B8C3DAFE\", \"Player Name\")",
@@ -1196,17 +1196,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
 					"FunctionName": "GetLevelCamera"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyCameraComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyCameraComponent'",
 					"FunctionName": "SetCameraLockedOnCenter"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Bomber.MyCameraComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyCameraComponent'",
 					"FunctionName": "IsCameraLockedOnCenter"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"2214E63746C2245B5A145EB3F845C43F\", \"Camera Lock\")",
@@ -1364,17 +1364,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetOverallScalabilityLevel"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetOverallScalabilityLevel"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"C5758D8D4760AC9C55185480331D72DB\", \"Overall Quality\")",
@@ -1487,17 +1487,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetViewDistanceQuality"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetViewDistanceQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0AFFFA6E41922B98E518148C195366C8\", \"View DIstance\")",
@@ -1588,17 +1588,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetAntiAliasingQuality"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetAntiAliasingQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"AA661EBE442C495F179EEB9102E7D050\", \"Anti Aliasing\")",
@@ -1689,17 +1689,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetPostProcessingQuality"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetPostProcessingQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"47AE80804DE9530F324B9BBBC8695072\", \"Post Processing\")",
@@ -1790,17 +1790,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetShadowQuality"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetShadowQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"DF0944CD4A8D9C68EEB68FBB2F915930\", \"Shadows\")",
@@ -1891,17 +1891,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetTextureQuality"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetTextureQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"450D242C4BCE9E1D850422BAD4296944\", \"Textures\")",
@@ -1992,17 +1992,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetVisualEffectQuality"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetVisualEffectQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"84B5B6574293D5119E2DEEBFCD7F6029\", \"Effects\")",
@@ -2093,17 +2093,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetFoliageQuality"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetFoliageQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"09E71C2742B9A57C9C3AEDA5CA9F1D82\", \"Foliage\")",
@@ -2194,17 +2194,17 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "SetShadingQuality"
 				},
 				"Getter":
 				{
-					"FunctionClass": "Class'/Script/Engine.GameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
 					"FunctionName": "GetShadingQuality"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"A7FA66064B59FEC6F8E727B54716A864\", \"Shading\")",
@@ -2362,7 +2362,7 @@
 			},
 			"CustomWidget":
 			{
-				"CustomWidgetClass": "WidgetBlueprintGeneratedClass'/Game/Bomber/UI/UI1-3_Settings/WBP_InputControls.WBP_InputControls_C'"
+				"CustomWidgetClass": "/Script/UMG.WidgetBlueprintGeneratedClass'/Game/Bomber/UI/UI1-3_Settings/WBP_InputControls.WBP_InputControls_C'"
 			}
 		}
 	}

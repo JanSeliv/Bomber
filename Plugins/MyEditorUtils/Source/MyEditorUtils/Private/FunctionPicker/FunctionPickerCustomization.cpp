@@ -271,8 +271,8 @@ bool FFunctionPickerCustomization::UpdateTemplateFunction()
 
 	// Find class
 	static constexpr int32 ClassNameIndex = 0;
-	const FString ClassName = ParsedStrArray.IsValidIndex(ClassNameIndex) ? ParsedStrArray[ClassNameIndex] : TEXT("");
-	const UClass* ScopeClass = !ClassName.IsEmpty() ? FindObject<UClass>(ANY_PACKAGE, *ClassName, true) : nullptr;
+	const FString ClassPathName = ParsedStrArray.IsValidIndex(ClassNameIndex) ? ParsedStrArray[ClassNameIndex] : TEXT("");
+	const UClass* ScopeClass = !ClassPathName.IsEmpty() ? UClass::TryFindTypeSlow<UClass>(ClassPathName, EFindFirstObjectOptions::ExactClass) : nullptr;
 	if (!ensureMsgf(ScopeClass, TEXT("ASSERT: 'ScopeClass' is not valid")))
 	{
 		return false;;

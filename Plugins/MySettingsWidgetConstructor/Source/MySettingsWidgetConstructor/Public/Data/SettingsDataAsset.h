@@ -18,9 +18,6 @@ class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	/** Default constructor.  */
-	USettingsDataAsset();
-
 	/** Returns the data table. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE USettingsDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal.LoadSynchronous(); }

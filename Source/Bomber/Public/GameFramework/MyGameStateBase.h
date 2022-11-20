@@ -98,11 +98,11 @@ public:
 
 	/** Returns true if 'Three-two-one-GO' timer was already finished, so the match was started. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsStartingTimerElapsed() const { return FMath::IsNearlyZero(StartingTimerSecRemainInternal) || FMath::IsNegative(StartingTimerSecRemainInternal); }
+	FORCEINLINE bool IsStartingTimerElapsed() const { return FMath::IsNearlyZero(StartingTimerSecRemainInternal) || StartingTimerSecRemainInternal < 0.f; }
 
 	/** Returns true if there are no seconds remain to the end of the match, so the match was ended. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsInGameTimerElapsed() const { return FMath::IsNearlyZero(InGameTimerSecRemainInternal) || FMath::IsNegative(InGameTimerSecRemainInternal); }
+	FORCEINLINE bool IsInGameTimerElapsed() const { return FMath::IsNearlyZero(InGameTimerSecRemainInternal) || InGameTimerSecRemainInternal < 0.f; }
 
 	/** Returns true if there request to update the End-Game state for players. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

@@ -26,7 +26,7 @@ void USettingSubWidget::SetSettingTag(const FSettingTag& NewSettingTag)
 // Returns the custom line height for this setting
 float USettingSubWidget::GetLineHeight() const
 {
-	return SizeBoxWidget ? SizeBoxWidget->MinDesiredHeight : 0.f;
+	return SizeBoxWidget ? SizeBoxWidget->GetMinDesiredHeight() : 0.f;
 }
 
 // Set custom line height for this setting

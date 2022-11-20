@@ -51,17 +51,17 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 
 	if (!SettingsDataBaseStructInternal.IsValid())
 	{
-		SettingsDataBaseStructInternal = !SettingsDataBaseName.IsNone() ? FindObject<UScriptStruct>(ANY_PACKAGE, *SettingsDataBaseName.ToString(), true) : nullptr;
+		SettingsDataBaseStructInternal = !SettingsDataBasePathName.IsNone() ? UClass::TryFindTypeSlow<UScriptStruct>(SettingsDataBasePathName.ToString(), EFindFirstObjectOptions::ExactClass) : nullptr;
 	}
 
 	if (!SettingsPrimaryStructInternal.IsValid())
 	{
-		SettingsPrimaryStructInternal = !SettingsDataBaseName.IsNone() ? FindObject<UScriptStruct>(ANY_PACKAGE, *SettingsPrimaryName.ToString(), true) : nullptr;
+		SettingsPrimaryStructInternal = !SettingsDataBasePathName.IsNone() ? UClass::TryFindTypeSlow<UScriptStruct>(SettingsPrimaryPathName.ToString(), EFindFirstObjectOptions::ExactClass) : nullptr;
 	}
 
 	if (!FunctionPickerStructInternal.IsValid())
 	{
-		FunctionPickerStructInternal = !SettingsDataBaseName.IsNone() ? FindObject<UScriptStruct>(ANY_PACKAGE, *FunctionPickerName.ToString(), true) : nullptr;
+		FunctionPickerStructInternal = !SettingsDataBasePathName.IsNone() ? UClass::TryFindTypeSlow<UScriptStruct>(FunctionPickerPathName.ToString(), EFindFirstObjectOptions::ExactClass) : nullptr;
 	}
 
 	const auto StructProperty = CastField<FStructProperty>(PropertyData.GetProperty());

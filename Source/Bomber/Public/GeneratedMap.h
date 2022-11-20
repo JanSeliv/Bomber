@@ -106,7 +106,7 @@ public:
 
 #if WITH_EDITORONLY_DATA  // [Editor] Renders
 	/** Specify for which level actors should show debug renders. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "EActorType"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
 	int32 RenderActorsTypes = TO_FLAG(EAT::None); //[N]
 #endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
@@ -304,7 +304,7 @@ protected:
 		const FCell& Cell,
 		EPathType Pathfinder,
 		int32 SideLength,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "ECellDirection")) int32 DirectionsBitmask,
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECellDirection")) int32 DirectionsBitmask,
 		bool bBreakInputCells = false) const;
 
 	/**
@@ -329,7 +329,7 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetMapComponents(
 		TSet<class UMapComponent*>& OutBitmaskedComponents,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "EActorType")) int32 ActorsTypesBitmask) const;
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask) const;
 
 	/** Listen game states to generate level actors. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))

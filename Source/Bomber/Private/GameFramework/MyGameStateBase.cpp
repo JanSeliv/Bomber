@@ -225,7 +225,7 @@ void AMyGameStateBase::SetGameFeaturesEnabled(bool bEnable)
 		}
 
 		FString GameFeatureURL;
-		GameFeaturesSubsystem.GetPluginURLForBuiltInPluginByName(GameFeatureName.ToString(), /*out*/ GameFeatureURL);
+		GameFeaturesSubsystem.GetPluginURLByName(GameFeatureName.ToString(), /*out*/ GameFeatureURL);
 		if (!ensureMsgf(!GameFeatureURL.IsEmpty(), TEXT("ASSERT: Can't load '%s' game feature"), *GameFeatureName.ToString()))
 		{
 			continue;

@@ -50,7 +50,7 @@ protected:
 	int32 ContextPriorityInternal = 0; //[D]
 
 	/** Set the game states for which this input context should be active. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Active For States", Bitmask, BitmaskEnum = "ECurrentGameState"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Active For States", Bitmask, BitmaskEnum = "/Script/Bomber.ECurrentGameState"))
 	int32 ActiveForStatesInternal = TO_FLAG(ECGS::None); //[D]
 
 #if WITH_EDITOR
