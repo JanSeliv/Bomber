@@ -74,12 +74,12 @@ protected:
 	TArray<FLevelStreamRow> LevelsInternal; //[D]
 
 	/** The chance of walls generation. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Walls Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
-	int32 WallsChanceInternal = 35; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Walls Chance", ShowOnlyInnerProperties, Units = "Percent", ClampMin = "0", ClampMax = "100"))
+	int32 WallsChanceInternal = 35; //[D]
 
 	/** The chance of boxes generation. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Boxes Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
-	int32 BoxesChanceInternal = 70; //[AW]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Boxes Chance", ShowOnlyInnerProperties, Units = "Percent", ClampMin = "0", ClampMax = "100"))
+	int32 BoxesChanceInternal = 70; //[D]
 
 	/** Asset that contains scalable collision. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collisions Asset", ShowOnlyInnerProperties))
@@ -110,6 +110,13 @@ public:
 	int32 RenderActorsTypes = TO_FLAG(EAT::None); //[N]
 #endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelMapWantsReconstruct, const FTransform&, Transform);
+
+	/** Called when this level map actor wants to be reconstructed.
+	* Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructLevelMap(). */
+	UPROPERTY(BlueprintAssignable, Category = "C++")
+	FOnLevelMapWantsReconstruct OnLevelMapWantsReconstruct; //[DMD]
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetNewLevelType, ELevelType, NewLevelType);
 
 	/** Called when new level type is set. */
@@ -137,6 +144,10 @@ public:
 	/** Returns the generated map.
 	 * Is created only once, can not be destroyed and always exist in persistent level. */
 	static AGeneratedMap& Get();
+
+	/** Initialize this Level Map actor, could be called multiple times. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ConstructLevelMap(const FTransform& Transform);
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -265,6 +276,14 @@ protected:
 
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Is called on a this level map actor construction, could be called multiple times.
+	 * Could be listened by binding to ThisClass::OnLevelMapWantsReconstruct delegate.
+	 * See the call stack below for more details:
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructLevelMap() -> ThisClass::OnConstructionLevelMap().
+	 * @warning Do not call directly, use ThisClass::ConstructLevelMap() instead. */
+	UFUNCTION()
+	void OnConstructionLevelMap(const FTransform& Transform);
 
 	/** Called right before components are initialized, only called during gameplay. */
 	virtual void PreInitializeComponents() override;

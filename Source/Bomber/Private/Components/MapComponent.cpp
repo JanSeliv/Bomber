@@ -34,8 +34,24 @@ UMapComponent::UMapComponent()
 	BoxCollisionComponentInternal = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
 }
 
-// Updates a owner's state. Should be called in the owner's OnConstruction event.
-bool UMapComponent::OnConstruction()
+// Rerun owner's construction scripts. The temporary only editor owner will not be updated
+void UMapComponent::ConstructOwnerActor()
+{
+	// Construct the actor's map component
+	const bool bIsConstructed = OnConstructionOwnerActor();
+	if (!bIsConstructed)
+	{
+		return;
+	}
+
+	if (OnOwnerWantsReconstruct.IsBound())
+	{
+		OnOwnerWantsReconstruct.Broadcast();
+	}
+}
+
+// Is called on an owner actor construction, could be called multiple times
+bool UMapComponent::OnConstructionOwnerActor()
 {
 	AActor* Owner = GetOwner();
 	if (IS_TRANSIENT(Owner))
@@ -134,15 +150,6 @@ void UMapComponent::SetMaterial(UMaterialInterface* Material)
 	    && Material)
 	{
 		MeshComponentInternal->SetMaterial(0, Material);
-	}
-}
-
-// Rerun owner's construction scripts. The temporary only editor owner will not be updated
-void UMapComponent::RerunOwnerConstruction() const
-{
-	if (AActor* Owner = GetOwner())
-	{
-		Owner->RerunConstructionScripts();
 	}
 }
 

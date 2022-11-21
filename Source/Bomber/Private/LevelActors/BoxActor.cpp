@@ -44,6 +44,16 @@ ABoxActor::ABoxActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionBoxActor);
+}
+
+// Initialize a box actor, could be called multiple times
+void ABoxActor::ConstructBoxActor()
+{
+	if (IsValid(MapComponentInternal))
+	{
+		MapComponentInternal->ConstructOwnerActor();
+	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned.
@@ -51,15 +61,14 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ConstructBoxActor();
+}
+
+// Is called on a box actor construction, could be called multiple times
+void ABoxActor::OnConstructionBoxActor()
+{
 	if (IS_TRANSIENT(this)                 // This actor is transient
 	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Construct the actor's map component.
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
 	{
 		return;
 	}
@@ -82,6 +91,17 @@ void ABoxActor::BeginPlay()
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+	}
+}
+
+void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
+{
+	Super::SetActorHiddenInGame(bNewHidden);
+
+	if (!bNewHidden)
+	{
+		// Is added on level map
+		ConstructBoxActor();
 	}
 }
 

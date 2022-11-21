@@ -53,6 +53,16 @@ ABombActor::ABombActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionBombActor);
+}
+
+// Initialize a bomb actor, could be called multiple times
+void ABombActor::ConstructBombActor()
+{
+	if (IsValid(MapComponentInternal))
+	{
+		MapComponentInternal->ConstructOwnerActor();
+	}
 }
 
 // Returns cells that bombs is going to destroy
@@ -133,15 +143,14 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ConstructBombActor();
+}
+
+// Is called on a bomb actor construction, could be called multiple times
+void ABombActor::OnConstructionBombActor()
+{
 	if (IS_TRANSIENT(this)                 // This actor is transient
 	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Construct the actor's map component
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
 	{
 		return;
 	}
@@ -160,7 +169,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 			USingletonLibrary::DisplayCells(this, GetExplosionCells(), DisplayParams);
 		}
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 // Called when the game starts or when spawned
@@ -223,6 +232,9 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 		if (!bNewHidden)
 		{
 			// Is added on level map
+
+			ConstructBombActor();
+
 			SetLifeSpan();
 
 			// Binding to the event, that triggered when character end to overlaps the collision component

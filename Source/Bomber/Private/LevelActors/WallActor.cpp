@@ -34,12 +34,22 @@ AWallActor::AWallActor()
 	NetUpdateFrequency = 10.f;
 	bAlwaysRelevant = true;
 	SetReplicatingMovement(true);
-	
+
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionWallActor);
+}
+
+// Initialize a wall actor, could be called multiple times
+void AWallActor::ConstructWallActor()
+{
+	if (IsValid(MapComponentInternal))
+	{
+		MapComponentInternal->ConstructOwnerActor();
+	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -47,24 +57,7 @@ void AWallActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_TRANSIENT(this)                 // This actor is transient
-	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Update this actor on the Level Map
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
-	{
-		return;
-	}
-}
-
-// Called when the game starts or when spawned
-void AWallActor::BeginPlay()
-{
-	Super::BeginPlay();
+	ConstructWallActor();
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -75,8 +68,6 @@ void AWallActor::SetActorHiddenInGame(bool bNewHidden)
 	if (!bNewHidden)
 	{
 		// Is added on level map
-		return;
+		ConstructWallActor();
 	}
-
-	// Is removed from level map
 }

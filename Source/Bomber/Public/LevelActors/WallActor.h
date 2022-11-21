@@ -26,7 +26,7 @@ public:
 
 
 /**
- * Walls are not destroyed by a bomb explosion and stop the explosion.
+ * Walls are not destroyed by a bomb explosion and break the explosion.
  */
 UCLASS()
 class BOMBER_API AWallActor final : public AActor
@@ -36,6 +36,10 @@ class BOMBER_API AWallActor final : public AActor
 public:
 	/** Sets default values for this actor's properties */
 	AWallActor();
+
+	/** Initialize a wall actor, could be called multiple times. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ConstructWallActor();
 
 protected:
 	/* ---------------------------------------------------
@@ -53,8 +57,13 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() override;
+	/** Is called on a wall actor construction, could be called multiple times.
+	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
+	 * See the call stack below for more details:
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructWallActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionWallActor().
+	 * @warning Do not call directly, use ThisClass::ConstructWallActor() instead. */
+	UFUNCTION()
+	void OnConstructionWallActor() {}
 
 	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;

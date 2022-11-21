@@ -165,6 +165,7 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionPlayerCharacter);
 
 	// Initialize skeletal mesh
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
@@ -198,6 +199,15 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 
 		// Do not push out clients from collision
 		MovementComponent->MaxDepenetrationWithGeometryAsProxy = 0.f;
+	}
+}
+
+// Initialize a player actor, could be called multiple times
+void APlayerCharacter::ConstructPlayerCharacter()
+{
+	if (IsValid(MapComponentInternal))
+	{
+		MapComponentInternal->ConstructOwnerActor();
 	}
 }
 
@@ -312,15 +322,14 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ConstructPlayerCharacter();
+}
+
+// Is called on a player character construction, could be called multiple times
+void APlayerCharacter::OnConstructionPlayerCharacter()
+{
 	if (IS_TRANSIENT(this)        // This actor is transient
 	    || !MapComponentInternal) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Construct the actor's map component
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
 	{
 		return;
 	}
@@ -339,7 +348,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
-	    && CharacterIDInternal > 0)              // Is a bot
+	    && CharacterIDInternal > 0)                // Is a bot
 	{
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
 		if (!MapComponentInternal->bShouldShowRenders)
@@ -404,7 +413,11 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 	if (!bNewHidden)
 	{
 		// Is added on level map
+
+		ConstructPlayerCharacter();
+
 		TryPossessController();
+
 		return;
 	}
 

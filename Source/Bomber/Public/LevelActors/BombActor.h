@@ -71,6 +71,10 @@ public:
 	/** Sets default values for this actor's properties */
 	ABombActor();
 
+	/** Preinitialize a bomb actor, could be called multiple times. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ConstructBombActor();
+
 	/** Returns cells that bombs is going to destroy. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	TSet<FCell> GetExplosionCells() const;
@@ -110,6 +114,14 @@ protected:
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Is called on a bomb actor construction, could be called multiple times.
+	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
+	 * See the call stack below for more details:
+	* AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructBombActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionBombActor().
+	 * @warning Do not call directly, use ThisClass::ConstructBombActor() instead. */
+	UFUNCTION()
+	void OnConstructionBombActor();
 
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;

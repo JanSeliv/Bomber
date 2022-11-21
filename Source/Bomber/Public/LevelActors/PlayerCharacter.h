@@ -189,6 +189,10 @@ public:
 	/** Sets default values for this character's properties */
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
+	/** Initialize a player actor, could be called multiple times. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ConstructPlayerCharacter();
+
 	/** Returns current powerup levels */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FORCEINLINE FPowerUp& GetPowerups() const { return PowerupsInternal; }
@@ -258,6 +262,14 @@ protected:
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Is called on a player character construction, could be called multiple times.
+	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
+	 * See the call stack below for more details:
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructPlayerCharacter() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionPlayerCharacter().
+	 * @warning Do not call directly, use ThisClass::ConstructPlayerCharacter() instead. */
+	UFUNCTION()
+	void OnConstructionPlayerCharacter();
 
 	/** Called every frame, is disabled on start, tick interval is decreased. */
 	virtual void Tick(float DeltaTime) override;

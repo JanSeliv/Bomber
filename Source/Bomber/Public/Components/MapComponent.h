@@ -29,6 +29,13 @@ public:
 	 *		Public properties
 	 * --------------------------------------------------- */
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOwnerWantsReconstruct);
+
+	/** Called when this component wants to be reconstructed on the level map.
+	 * Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructOwnerActor(). */
+	UPROPERTY(BlueprintAssignable, Category = "C++")
+	FOnOwnerWantsReconstruct OnOwnerWantsReconstruct; //[DMD]
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDeactivatedMapComponent, UMapComponent*, MapComponent, UObject*, DestroyCauser);
 
 	/** Called when this component is destroyed on the level map, is called only on the server. */
@@ -48,10 +55,11 @@ public:
 	/** Sets default values for this component's properties */
 	UMapComponent();
 
-	/** Updates an owner's state. Should be called in the owner's OnConstruction event.
-	 * @return false if owner was not constructed. */
+	/** Rerun owner's construction. Is created to:
+	 * - Bypass RerunConstructionScripts() limitation that could be called only in editor.
+	 * - Let others to react on construction of this actor like editor objects that implements its behaviour by binding to UMapComponent::OnOwnerWantsReconstruct.*/
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	bool OnConstruction();
+	void ConstructOwnerActor();
 
 	/** Returns the current cell, where owner is located on the Level Map. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -81,10 +89,6 @@ public:
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Owner"))
 	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner) { return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr; }
-
-	/**  Rerun owner's construction scripts. The temporary only editor owner will not be updated. */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++")
-	void RerunOwnerConstruction() const;
 
 	/** Get the owner's data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -169,6 +173,14 @@ protected:
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/** Is called on an owner actor construction, could be called multiple times.
+	 * Could be listened by binding to ThisClass::OnOwnerWantsReconstruct delegate.
+	 * See the call stack below for more details:
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> [OwnerActor]::Construct[OwnerName]() -> ThisClass::ConstructOwnerActor() -> ThisClass::OnConstructionOwnerActor().
+	 * @warning Do not call directly, use ThisClass::ConstructOwnerActor() instead. */
+	UFUNCTION()
+	bool OnConstructionOwnerActor();
 
 	/** Is called on client to update current level actor row. */
 	UFUNCTION()

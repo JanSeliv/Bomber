@@ -250,7 +250,8 @@ void UPoolManager::EmptyAllByPredicate(TFunctionRef<bool(const UObject* Object)>
 // Activates or deactivates the object if such object is handled by the Pool Manager
 void UPoolManager::SetActive(bool bShouldActivate, UObject* Object)
 {
-	if (!Object)
+	const UWorld* World = Object ? Object->GetWorld() : nullptr;
+	if (!World)
 	{
 		return;
 	}
@@ -267,27 +268,21 @@ void UPoolManager::SetActive(bool bShouldActivate, UObject* Object)
 
 	PoolObject->bIsActive = bShouldActivate;
 
-	if (AActor* Actor = Cast<AActor>(PoolObject->Object))
+	AActor* Actor = Cast<AActor>(PoolObject->Object);
+	if (!Actor)
 	{
-		if (bShouldActivate)
-		{
-			Actor->RerunConstructionScripts();
-		}
-		else
-		{
-			// SetCollisionEnabled is not replicated, client collides with hidden actor, so move it
-			Actor->SetActorLocation(VECTOR_HALF_WORLD_MAX);
-		}
-
-		const UWorld* World = GetWorld();
-		if (World
-		    && World->HasBegunPlay())
-		{
-			Actor->SetActorHiddenInGame(!bShouldActivate);
-			Actor->SetActorEnableCollision(bShouldActivate);
-			Actor->SetActorTickEnabled(bShouldActivate);
-		}
+		return;
 	}
+
+	if (!bShouldActivate)
+	{
+		// SetCollisionEnabled is not replicated, client collides with hidden actor, so move it
+		Actor->SetActorLocation(VECTOR_HALF_WORLD_MAX);
+	}
+
+	Actor->SetActorHiddenInGame(!bShouldActivate);
+	Actor->SetActorEnableCollision(bShouldActivate);
+	Actor->SetActorTickEnabled(bShouldActivate);
 }
 
 // Returns current state of specified object

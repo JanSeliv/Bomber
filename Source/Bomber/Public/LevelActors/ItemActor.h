@@ -78,6 +78,10 @@ public:
 	/** Sets default values for this actor's properties */
 	AItemActor();
 
+	/** Initialize an item actor, could be called multiple times. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ConstructItemActor();
+
 	/** Return current item type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE EItemType GetItemType() const { return ItemTypeInternal; }
@@ -105,6 +109,14 @@ protected:
 
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Is called on an item actor construction, could be called multiple times.
+	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
+	 * See the call stack below for more details:
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructItemActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionItemActor().
+	 * @warning Do not call directly, use ThisClass::ConstructItemActor() instead. */
+	UFUNCTION()
+	void OnConstructionItemActor();
 
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;

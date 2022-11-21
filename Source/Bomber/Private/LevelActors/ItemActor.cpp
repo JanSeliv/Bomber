@@ -59,6 +59,16 @@ AItemActor::AItemActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionItemActor);
+}
+
+// Initialize an item actor, could be called multiple times
+void AItemActor::ConstructItemActor()
+{
+	if (IsValid(MapComponentInternal))
+	{
+		MapComponentInternal->ConstructOwnerActor();
+	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -66,15 +76,14 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ConstructItemActor();
+}
+
+// Is called on an item actor construction, could be called multiple times
+void AItemActor::OnConstructionItemActor()
+{
 	if (IS_TRANSIENT(this)                 // This actor is transient
 	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Construct the map component
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
 	{
 		return;
 	}
@@ -112,6 +121,7 @@ void AItemActor::SetActorHiddenInGame(bool bNewHidden)
 	if (!bNewHidden)
 	{
 		// Is added on level map
+		ConstructItemActor();
 		return;
 	}
 

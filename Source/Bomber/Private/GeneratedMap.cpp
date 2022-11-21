@@ -80,6 +80,17 @@ AGeneratedMap& AGeneratedMap::Get()
 	return *LevelMap;
 }
 
+// Initialize this Level Map actor, could be called multiple times
+void AGeneratedMap::ConstructLevelMap(const FTransform& Transform)
+{
+	if (OnLevelMapWantsReconstruct.IsBound())
+	{
+		OnLevelMapWantsReconstruct.Broadcast(Transform);
+	}
+
+	OnConstructionLevelMap(Transform);
+}
+
 // Getting an array of cells by four sides of an input center cell and type of breaks
 void AGeneratedMap::GetSidesCells(
 	FCells& OutCells,
@@ -599,6 +610,12 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ConstructLevelMap(Transform);
+}
+
+// Initialize this Level Map actor, could be called multiple times
+void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
+{
 	if (IS_TRANSIENT(this)) // the level map is transient
 	{
 		return;
@@ -679,7 +696,7 @@ void AGeneratedMap::PostInitializeComponents()
 	// Update the gameplay LevelMap reference in the singleton library
 	USingletonLibrary::SetLevelMap(this);
 
-	RerunConstructionScripts();
+	ConstructLevelMap(GetActorTransform());
 
 	if (HasAuthority())
 	{
@@ -1137,11 +1154,11 @@ void AGeneratedMap::ApplyLevelType()
 	}
 
 	// Once level is loading, prepare him
-	for (const UMapComponent* MapComponentIt : MapComponentsInternal)
+	for (UMapComponent* MapComponentIt : MapComponentsInternal)
 	{
 		if (MapComponentIt)
 		{
-			MapComponentIt->RerunOwnerConstruction();
+			MapComponentIt->ConstructOwnerActor();
 		}
 	}
 }

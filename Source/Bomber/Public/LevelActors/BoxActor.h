@@ -45,6 +45,10 @@ public:
 	/** Sets default values for this actor's properties */
 	ABoxActor();
 
+	/** Initialize a box actor, could be called multiple times. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ConstructBoxActor();
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -67,8 +71,19 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	/** Is called on a box actor construction, could be called multiple times.
+	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
+	 * See the call stack below for more details:
+	* AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructBoxActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionBoxActor().
+	 * @warning Do not call directly, use ThisClass::ConstructBoxActor() instead. */
+	UFUNCTION()
+	void OnConstructionBoxActor();
+
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
+
+	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
+	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 
 	/** Called when owned map component is destroyed on the level map. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
