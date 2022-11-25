@@ -7,7 +7,7 @@
 /**
  * Allow to choose the function in the list instead of manually typing a name.
  */
-class MYEDITORUTILS_API FFunctionPickerCustomization final : public FMyPropertyTypeCustomization
+class FUNCTIONPICKEREDITOR_API FFunctionPickerCustomization final : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------

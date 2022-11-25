@@ -14,6 +14,8 @@ public class Bomber : ModuleRules
                 "Core" // Core
                 , "UMG" // UUserWidget creation
                 , "EnhancedInput" // Created UMyInputAction, UMyInputMappingContext
+                //My modules
+                , "FunctionPicker" // Used by MyInputAction.h
 		    }
 		);
 
@@ -27,7 +29,7 @@ public class Bomber : ModuleRules
                 , "GameplayTags" // FGameplayTag
                 , "GameFeatures", "ModularGameplay" // Modular Game Features
 				//My modules
-				, "MyUtils" // FFunctionPicker etc.
+				, "MyUtils" // UUtilsLibrary.
 				, "MySettingsWidgetConstructor" // Generates settings
 			}
 		);

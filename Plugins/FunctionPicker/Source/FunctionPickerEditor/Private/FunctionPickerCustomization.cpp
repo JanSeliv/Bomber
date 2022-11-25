@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "FunctionPicker/FunctionPickerCustomization.h"
+#include "FunctionPickerCustomization.h"
 
 typedef FFunctionPickerCustomization ThisClass;
 

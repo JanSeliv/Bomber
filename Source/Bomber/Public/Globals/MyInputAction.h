@@ -4,7 +4,7 @@
 
 #include "InputAction.h"
 //---
-#include "FunctionPicker/FunctionPicker.h"
+#include "FunctionPicker.h"
 #include "Bomber.h"
 //---
 #include "MyInputAction.generated.h"
@@ -56,7 +56,7 @@ protected:
 	ETriggerEvent TriggerEventInternal = ETriggerEvent::Triggered; //[D]
 
 	/** Contains data about static function object getter of a function to bind. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Static Context", ShowOnlyInnerProperties, FunctionContextTemplate))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Static Context", ShowOnlyInnerProperties, FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnStaticContext__DelegateSignature"))
 	FFunctionPicker StaticContextInternal = FFunctionPicker::Empty; //[D]
 
 	/** Allows to set function that is used to be called when input will be triggered. */

@@ -6,7 +6,7 @@
 //---
 #include "AssetTypeCategories.h"
 
-class FMySettingsWidgetConstructorEditorModule : public IModuleInterface
+class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API FMySettingsWidgetConstructorEditorModule : public IModuleInterface
 {
 public:
 	/** Is used to load and unload the Property Editor Module. */

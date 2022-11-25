@@ -26,6 +26,7 @@ public class MySettingsWidgetConstructorEditor : ModuleRules
 				, "Projects" // IPluginManager::Get()
 				// My modules
 				, "MySettingsWidgetConstructor" // USettingsDataTable
+				, "FunctionPickerEditor" // FFunctionPickerCustomization
 			}
 		);
 	}

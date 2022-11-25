@@ -17,6 +17,7 @@ public class MySettingsWidgetConstructor : ModuleRules
 				, "DeveloperSettings" // Created USettingsDataAsset
 				// My modules
                 , "MyUtils" // Created USettingsDataTable
+                , "FunctionPicker" // Used by SettingsRow.h
 			}
 		);
 

@@ -2,8 +2,8 @@
   "FileVersion": 3,
   "Version": 1,
   "VersionName": "1.0",
-  "FriendlyName": "My Settings Widget Constructor",
-  "Description": "Plugin allows automatically generate settings on the UI from data table",
+  "FriendlyName": "Function Picker",
+  "Description": "Plugin allows select the function right in the uproperty.",
   "Category": "My Plugins",
   "CreatedBy": "Yevhenii Selivanov",
   "CreatedByURL": "https://github.com/JanSeliv/Bomber",
@@ -17,12 +17,12 @@
   "Installed": false,
   "Modules": [
     {
-      "Name": "MySettingsWidgetConstructor",
+      "Name": "FunctionPicker",
       "Type": "Runtime",
       "LoadingPhase": "Default"
     },
     {
-      "Name": "MySettingsWidgetConstructorEditor",
+      "Name": "FunctionPickerEditor",
       "Type": "Editor",
       "LoadingPhase": "Default"
     }
@@ -30,14 +30,6 @@
   "Plugins": [
     {
       "Name": "MyEditorUtils",
-      "Enabled": true
-    },
-    {
-      "Name": "GameplayTagsEditor",
-      "Enabled": true
-    },
-    {
-      "Name": "FunctionPicker",
       "Enabled": true
     }
   ]

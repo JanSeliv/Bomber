@@ -4,7 +4,7 @@
 
 #include "Modules/ModuleInterface.h"
 
-class FMyUtilsModule final : public IModuleInterface
+class MYUTILS_API FMyUtilsModule final : public IModuleInterface
 {
 public:
 	/**

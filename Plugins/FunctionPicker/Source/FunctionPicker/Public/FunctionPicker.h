@@ -20,11 +20,11 @@
   * /Script/ModuleName.ClassName::FunctionName
   *
   * Example:
-  * UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/MyUtils.FunctionPickerTemplate::OnSetMembers__DelegateSignature"))
+  * UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnSetMembers__DelegateSignature"))
   * FFunctionPicker SetMembers = FFunctionPicker::Empty;
   */
 USTRUCT(BlueprintType)
-struct MYUTILS_API FFunctionPicker
+struct FUNCTIONPICKER_API FFunctionPicker
 {
 	GENERATED_BODY()
 
@@ -57,7 +57,7 @@ struct MYUTILS_API FFunctionPicker
 
 	/** Creates a hash value.
 	  * @param Other the other object to create a hash value for. */
-	friend MYUTILS_API uint32 GetTypeHash(const FFunctionPicker& Other);
+	friend FUNCTIONPICKER_API uint32 GetTypeHash(const FFunctionPicker& Other);
 
 protected:
 	/** Contains cached function ptr for performance reasons. */

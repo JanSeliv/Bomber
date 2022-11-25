@@ -2,7 +2,7 @@
 
 #include "SettingsPickerCustomization.h"
 //---
-#include "FunctionPicker/FunctionPickerCustomization.h"
+#include "FunctionPickerCustomization.h"
 
 typedef FSettingsPickerCustomization ThisClass;
 

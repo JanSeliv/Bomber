@@ -13,7 +13,6 @@ public class MyEditorUtils : ModuleRules
 			new[]
 			{
 				"Core"
-				, "PropertyEditor" // Created FFunctionPickerCustomization
 				, "AssetTools" // Created FAssetTypeActions_MyDataTable
 				, "UnrealEd" // Created UMyDataTableFactory
 				, "UMGEditor" // Created UMyUserWidgetFactory

@@ -24,7 +24,7 @@ public:
 	inline static const FName SettingsPrimaryPathName = TEXT("/Script/MySettingsWidgetConstructor.SettingsPrimary");
 
 	/** The name of the Function Picker struct. */
-	inline static const FName FunctionPickerPathName = TEXT("/Script/MyUtils.FunctionPicker");
+	inline static const FName FunctionPickerPathName = TEXT("/Script/FunctionPicker.FunctionPicker");
 
 	/** Default constructor. */
 	FSettingsPickerCustomization();

@@ -2,7 +2,6 @@
 
 #include "MyEditorUtilsModule.h"
 //---
-#include "FunctionPicker/FunctionPickerCustomization.h"
 #include "MyAssets/AssetTypeActions_MyUserWidget.h"
 //---
 #include "KismetCompiler.h"
@@ -16,47 +15,13 @@
 // Called right after the module DLL has been loaded and the module object has been created
 void FMyEditorUtilsModule::StartupModule()
 {
-	RegisterPropertyCustomizations();
 	RegisterMyUserWidgetBlueprint();
 }
 
 // Called before the module is unloaded, right before the module object is destroyed
 void FMyEditorUtilsModule::ShutdownModule()
 {
-	UnregisterPropertyCustomizations();
 	UnregisterMyUserWidgetBlueprint();
-}
-
-// Creates all customizations for custom properties
-void FMyEditorUtilsModule::RegisterPropertyCustomizations()
-{
-	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
-	{
-		return;
-	}
-
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
-
-	// Allows to choose ufunction
-	PropertyModule.RegisterCustomPropertyTypeLayout(
-		FFunctionPickerCustomization::PropertyClassName,
-		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FFunctionPickerCustomization::MakeInstance)
-	);
-
-	PropertyModule.NotifyCustomizationModuleChanged();
-}
-
-// Removes all custom property customizations
-void FMyEditorUtilsModule::UnregisterPropertyCustomizations()
-{
-	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
-	{
-		return;
-	}
-
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
-
-	PropertyModule.UnregisterCustomPropertyTypeLayout(FFunctionPickerCustomization::PropertyClassName);
 }
 
 // Registers My User Widget Blueprint, so custom widget could be compiled
