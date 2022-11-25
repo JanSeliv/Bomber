@@ -467,7 +467,7 @@ bool USettingsWidget::GetCheckboxValue(const FSettingTag& CheckboxTag) const
 		const FSettingsCheckbox& Data = FoundRow.Checkbox;
 		Value = Data.bIsSet;
 
-		const USettingTemplate::FOnGetterBool& Getter = Data.OnGetterBool;
+		const UFunctionPickerTemplate::FOnGetterBool& Getter = Data.OnGetterBool;
 		if (Getter.IsBound())
 		{
 			Value = Getter.Execute();
@@ -486,7 +486,7 @@ int32 USettingsWidget::GetComboboxIndex(const FSettingTag& ComboboxTag) const
 		const FSettingsCombobox& Data = FoundRow.Combobox;
 		Value = Data.ChosenMemberIndex;
 
-		const USettingTemplate::FOnGetterInt& Getter = Data.OnGetterInt;
+		const UFunctionPickerTemplate::FOnGetterInt& Getter = Data.OnGetterInt;
 		if (Getter.IsBound())
 		{
 			Value = Getter.Execute();
@@ -504,7 +504,7 @@ void USettingsWidget::GetComboboxMembers(const FSettingTag& ComboboxTag, TArray<
 		const FSettingsCombobox& Data = FoundRow.Combobox;
 		OutMembers = Data.Members;
 
-		const USettingTemplate::FOnGetMembers& Getter = Data.OnGetMembers;
+		const UFunctionPickerTemplate::FOnGetMembers& Getter = Data.OnGetMembers;
 		if (Getter.IsBound())
 		{
 			Getter.Execute(OutMembers);
@@ -522,7 +522,7 @@ double USettingsWidget::GetSliderValue(const FSettingTag& SliderTag) const
 		const FSettingsSlider& Data = FoundRow.Slider;
 		Value = Data.ChosenValue;
 
-		const USettingTemplate::FOnGetterFloat& Getter = Data.OnGetterFloat;
+		const UFunctionPickerTemplate::FOnGetterFloat& Getter = Data.OnGetterFloat;
 		if (Getter.IsBound())
 		{
 			Value = Getter.Execute();
@@ -539,7 +539,7 @@ void USettingsWidget::GetTextLineValue(const FSettingTag& TextLineTag, FText& Ou
 	{
 		OutText = FoundRow.PrimaryData.Caption;
 
-		const USettingTemplate::FOnGetterText& Getter = FoundRow.TextLine.OnGetterText;
+		const UFunctionPickerTemplate::FOnGetterText& Getter = FoundRow.TextLine.OnGetterText;
 		if (Getter.IsBound())
 		{
 			Getter.Execute(OutText);
@@ -557,7 +557,7 @@ FName USettingsWidget::GetUserInputValue(const FSettingTag& UserInputTag) const
 		const FSettingsUserInput& Data = FoundRow.UserInput;
 		Value = Data.UserInput;
 
-		const USettingTemplate::FOnGetterName& Getter = Data.OnGetterName;
+		const UFunctionPickerTemplate::FOnGetterName& Getter = Data.OnGetterName;
 		if (Getter.IsBound())
 		{
 			Value = Getter.Execute();

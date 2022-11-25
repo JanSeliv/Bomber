@@ -12,15 +12,15 @@
   *	If none meta is set, all functions will appear in the list without any filtering.
   *
   * Meta keys:
-  * FunctionContextTemplate (only to show static functions)
+  * FunctionContextTemplate (only to show static functions or Blueprint Library functions)
   * FunctionGetterTemplate
   * FunctionSetterTemplate
   *
   * Meta value (without prefixes):
-  * ClassName::FunctionName
+  * /Script/ModuleName.ClassName::FunctionName
   *
   * Example:
-  * UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/MySettingsWidgetConstructor.SettingTemplate::OnSetMembers__DelegateSignature"))
+  * UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/MyUtils.FunctionPickerTemplate::OnSetMembers__DelegateSignature"))
   * FFunctionPicker SetMembers = FFunctionPicker::Empty;
   */
 USTRUCT(BlueprintType)
