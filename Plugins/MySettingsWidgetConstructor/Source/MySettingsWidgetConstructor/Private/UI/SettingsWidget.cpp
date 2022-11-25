@@ -594,14 +594,7 @@ USettingSubWidget* USettingsWidget::GetSettingSubWidget(const FSettingTag& Setti
 // Returns the size of the Settings widget on the screen
 FVector2D USettingsWidget::GetSettingsSize() const
 {
-	if (!SettingsDataAssetInternal)
-	{
-		return FVector2D::ZeroVector;
-	}
-
-	constexpr double MinPercent = 0.0;
-	constexpr double MaxPercent = 1.0;
-	const FVector2D PercentSize = SettingsDataAssetInternal->GetSettingsPercentSize().ClampAxes(MinPercent, MaxPercent);
+	const FVector2D PercentSize = USettingsDataAsset::Get().GetSettingsPercentSize();
 
 	UObject* WorldContextObject = GetOwningPlayer();
 	const FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(WorldContextObject);
@@ -656,10 +649,7 @@ FVector2D USettingsWidget::GetSubWidgetsSize(int32 SectionsBitmask) const
 // Returns the height of a setting scrollbox on the screen
 float USettingsWidget::GetScrollBoxHeight() const
 {
-	if (!SettingsDataAssetInternal)
-	{
-		return 0.f;
-	}
+	const USettingsDataAsset& SettingsData = USettingsDataAsset::Get();
 
 	// The widget size
 	const FVector2D SettingsSize = GetSettingsSize();
@@ -670,15 +660,15 @@ float USettingsWidget::GetScrollBoxHeight() const
 
 	// Additional padding sizes
 	float Paddings = 0.f;
-	const FMargin SettingsPadding = SettingsDataAssetInternal->GetSettingsPadding();
+	const FMargin SettingsPadding = SettingsData.GetSettingsPadding();
 	Paddings += SettingsPadding.Top + SettingsPadding.Bottom;
-	const FMargin ScrollBoxPadding = SettingsDataAssetInternal->GetScrollboxPadding();
+	const FMargin ScrollBoxPadding = SettingsData.GetScrollboxPadding();
 	Paddings += ScrollBoxPadding.Top + ScrollBoxPadding.Bottom;
 
 	const float ScrollBoxHeight = (SettingsSize - MarginsSize).Y - Paddings;
 
 	// Scale scrollbox
-	const float PercentSize = FMath::Clamp(SettingsDataAssetInternal->GetScrollboxPercentHeight(), 0.f, 1.f);
+	const float PercentSize = FMath::Clamp(SettingsData.GetScrollboxPercentHeight(), 0.f, 1.f);
 	const float ScaledHeight = ScrollBoxHeight * PercentSize;
 
 	return ScaledHeight;
@@ -734,7 +724,7 @@ void USettingsWidget::ConstructSettings()
 
 void USettingsWidget::UpdateSettingsTableRows()
 {
-	const USettingsDataTable* SettingsDataTable = SettingsDataAssetInternal ? SettingsDataAssetInternal->GetSettingsDataTable() : nullptr;
+	const USettingsDataTable* SettingsDataTable = USettingsDataAsset::Get().GetSettingsDataTable();
 	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
 	{
 		return;
@@ -950,12 +940,7 @@ void USettingsWidget::AddSetting(FSettingsPicker& Setting)
 // Add button on UI
 void USettingsWidget::AddSettingButton(FSettingsPrimary& Primary, FSettingsButton& Data)
 {
-	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
-	{
-		return;
-	}
-
-	const TSubclassOf<USettingButton> ButtonClass = SettingsDataAssetInternal->GetButtonClass();
+	const TSubclassOf<USettingButton> ButtonClass = USettingsDataAsset::Get().GetButtonClass();
 	CreateSettingSubWidget(Primary, ButtonClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -973,12 +958,7 @@ void USettingsWidget::AddSettingButton(FSettingsPrimary& Primary, FSettingsButto
 // Add checkbox on UI
 void USettingsWidget::AddSettingCheckbox(FSettingsPrimary& Primary, FSettingsCheckbox& Data)
 {
-	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
-	{
-		return;
-	}
-
-	const TSubclassOf<USettingCheckbox> CheckboxClass = SettingsDataAssetInternal->GetCheckboxClass();
+	const TSubclassOf<USettingCheckbox> CheckboxClass = USettingsDataAsset::Get().GetCheckboxClass();
 	CreateSettingSubWidget(Primary, CheckboxClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -1002,12 +982,7 @@ void USettingsWidget::AddSettingCheckbox(FSettingsPrimary& Primary, FSettingsChe
 // Add combobox on UI
 void USettingsWidget::AddSettingCombobox(FSettingsPrimary& Primary, FSettingsCombobox& Data)
 {
-	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
-	{
-		return;
-	}
-
-	const TSubclassOf<USettingCombobox> ComboboxClass = SettingsDataAssetInternal->GetComboboxClass();
+	const TSubclassOf<USettingCombobox> ComboboxClass = USettingsDataAsset::Get().GetComboboxClass();
 	CreateSettingSubWidget(Primary, ComboboxClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -1045,12 +1020,7 @@ void USettingsWidget::AddSettingCombobox(FSettingsPrimary& Primary, FSettingsCom
 // Add slider on UI
 void USettingsWidget::AddSettingSlider(FSettingsPrimary& Primary, FSettingsSlider& Data)
 {
-	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
-	{
-		return;
-	}
-
-	const TSubclassOf<USettingSlider>& SliderClass = SettingsDataAssetInternal->GetSliderClass();
+	const TSubclassOf<USettingSlider>& SliderClass = USettingsDataAsset::Get().GetSliderClass();
 	CreateSettingSubWidget(Primary, SliderClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -1074,12 +1044,7 @@ void USettingsWidget::AddSettingSlider(FSettingsPrimary& Primary, FSettingsSlide
 // Add simple text on UI
 void USettingsWidget::AddSettingTextLine(FSettingsPrimary& Primary, FSettingsTextLine& Data)
 {
-	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
-	{
-		return;
-	}
-
-	const TSubclassOf<USettingTextLine>& TextLineClass = SettingsDataAssetInternal->GetTextLineClass();
+	const TSubclassOf<USettingTextLine>& TextLineClass = USettingsDataAsset::Get().GetTextLineClass();
 	CreateSettingSubWidget(Primary, TextLineClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())
@@ -1103,12 +1068,7 @@ void USettingsWidget::AddSettingTextLine(FSettingsPrimary& Primary, FSettingsTex
 // Add text input on UI
 void USettingsWidget::AddSettingUserInput(FSettingsPrimary& Primary, FSettingsUserInput& Data)
 {
-	if (!ensureMsgf(SettingsDataAssetInternal, TEXT("ASSERT: 'SettingsDataAsset' is not set")))
-	{
-		return;
-	}
-
-	const TSubclassOf<USettingUserInput>& UserInputClass = SettingsDataAssetInternal->GetUserInputClass();
+	const TSubclassOf<USettingUserInput>& UserInputClass = USettingsDataAsset::Get().GetUserInputClass();
 	CreateSettingSubWidget(Primary, UserInputClass);
 
 	if (UObject* StaticContextObject = Primary.StaticContextObject.Get())

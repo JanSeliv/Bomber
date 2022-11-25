@@ -87,3 +87,23 @@ void UEditorUtilsLibrary::ReExportTableAsJSON(const UDataTable* DataTable)
 		FFileHelper::SaveStringToFile(TableAsJSON, *CurrentFilename);
 	}
 }
+
+// Removes all custom assets from context menu
+void UEditorUtilsLibrary::UnregisterAssets(TArray<TSharedPtr<FAssetTypeActions_Base>>& RegisteredAssets)
+{
+	static const FName AssetToolsModuleName = TEXT("AssetTools");
+	const FAssetToolsModule* AssetToolsPtr = FModuleManager::GetModulePtr<FAssetToolsModule>(AssetToolsModuleName);
+	if (!AssetToolsPtr)
+	{
+		return;
+	}
+
+	IAssetTools& AssetTools = AssetToolsPtr->Get();
+	for (TSharedPtr<FAssetTypeActions_Base>& AssetTypeActionIt : RegisteredAssets)
+	{
+		if (AssetTypeActionIt.IsValid())
+		{
+			AssetTools.UnregisterAssetTypeActions(AssetTypeActionIt.ToSharedRef());
+		}
+	}
+}

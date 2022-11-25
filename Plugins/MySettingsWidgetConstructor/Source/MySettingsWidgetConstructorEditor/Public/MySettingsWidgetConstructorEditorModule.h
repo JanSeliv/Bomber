@@ -5,16 +5,12 @@
 #include "Modules/ModuleInterface.h"
 //---
 #include "AssetTypeCategories.h"
-#include "IAssetTools.h"
 
 class FMySettingsWidgetConstructorEditorModule : public IModuleInterface
 {
 public:
 	/** Is used to load and unload the Property Editor Module. */
 	inline static const FName PropertyEditorModule = TEXT("PropertyEditor");
-
-	/** Is used to load and unload the Asset Tools Module. */
-	inline static const FName AssetToolsModule = TEXT("AssetTools");
 
 	/** Is used to customize FSettingTag structure. */
 	inline static const FName SettingTagStructureName = TEXT("SettingTag");
@@ -44,22 +40,10 @@ protected:
 	void UnregisterPropertyCustomizations();
 
 	/** Adds to context menu custom assets to be created. */
-	void RegisterAssets();
-
-	/** Removes all custom assets from context menu. */
-	void UnregisterAssets();
+	void RegisterSettingAssets();
 
 	/** Adds the category of this plugin to the 'Add' context menu. */
-	void RegisterSettingsCategory(IAssetTools& AssetTools);
-
-	/** Adds the 'Settings Data Table' asset to the context menu. */
-	void RegisterSettingsDataTable(IAssetTools& AssetTools);
-
-	/** Adds the 'Settings Data Asset' to the context menu. */
-	void RegisterSettingsDataAsset(IAssetTools& AssetTools);
-
-	/** Adds the 'Settings Widget' to the context menu. */
-	void RegisterSettingsWidget(IAssetTools& AssetTools);
+	void RegisterSettingsCategory();
 
 	/** Asset type actions */
 	TArray<TSharedPtr<class FAssetTypeActions_Base>> RegisteredAssets;

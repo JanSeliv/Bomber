@@ -14,6 +14,7 @@ public class MySettingsWidgetConstructor : ModuleRules
 				"Core"
 				, "UMG" // Created USettingsWidget
 				, "GameplayTags" // Created FSettingTag
+				, "DeveloperSettings" // Created USettingsDataAsset
 				// My modules
                 , "MyUtils" // Created USettingsDataTable
 			}

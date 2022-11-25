@@ -41,7 +41,7 @@ void USettingsDataTableFactory::ImportDefaultSettingsDataTable(UObject* NewSetti
 	if (DataTableGlobalDir.IsEmpty())
 	{
 		const FString ThisPluginName = TEXT("MySettingsWidgetConstructor");
-		const FString DataTableRelativeDir = TEXT("Config/DefaultSettingsDataTable.json");
+		const FString DataTableRelativeDir = TEXT("Config/BaseSettingsDataTable.json");
 		const TSharedPtr<IPlugin> ThisPlugin = IPluginManager::Get().FindPlugin(ThisPluginName);
 		checkf(ThisPlugin, TEXT("ASSERT: '%s' plugin is not found"), *ThisPluginName);
 		DataTableGlobalDir = ThisPlugin->GetBaseDir() / DataTableRelativeDir;

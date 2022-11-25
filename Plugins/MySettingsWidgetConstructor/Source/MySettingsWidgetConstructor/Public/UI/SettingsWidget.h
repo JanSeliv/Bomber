@@ -32,10 +32,6 @@ public:
 	 *		Public functions
 	 * --------------------------------------------------- */
 
-	/** Returns the settings data.*/
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE class USettingsDataAsset* GetSettingsDataAsset() const { return SettingsDataAssetInternal; }
-
 	/** Display settings on UI. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OpenSettings();
@@ -192,10 +188,6 @@ protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
-
-	/** Settings data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Data Asset", ShowOnlyInnerProperties))
-	TObjectPtr<class USettingsDataAsset> SettingsDataAssetInternal = nullptr; //[B]
 
 	/** Contains all settings. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows"))

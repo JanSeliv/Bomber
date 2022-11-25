@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Engine/DeveloperSettings.h"
 //---
 #include "Structures/SettingsRow.h"
 #include "SettingsDataTable.h"
@@ -10,14 +10,28 @@
 #include "SettingsDataAsset.generated.h"
 
 /**
- * Describes common data of settings.
+ * Contains common settings data of the Constructor Widget plugin.
+ * Is set up in 'Project Settings' -> "Plugins" -> "Settings Widget Constructor".
  */
-UCLASS(Config = MySettingsWidgetConstructor, DefaultConfig)
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataAsset : public UDataAsset
+UCLASS(Config = MySettingsWidgetConstructor, DefaultConfig, DisplayName = "Settings Widget Constructor")
+class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataAsset : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
+	/** Returns Project Settings Data of the Settings Widget Constructor plugin. */
+	static const FORCEINLINE USettingsDataAsset& Get() { return *GetDefault<ThisClass>(); }
+
+	/** Returns Project Settings Data of the Settings Widget Constructor plugin. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static const FORCEINLINE USettingsDataAsset* GetSettingsDataAsset() { return &Get(); }
+
+	/** Gets the settings container name for the settings, either Project or Editor */
+	virtual FName GetContainerName() const override { return TEXT("Project"); }
+
+	/** Gets the category for the settings, some high level grouping like, Editor, Engine, Game...etc. */
+	virtual FName GetCategoryName() const override { return TEXT("Plugins"); }
+
 	/** Returns the data table. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE USettingsDataTable* GetSettingsDataTable() const { return SettingsDataTableInternal.LoadSynchronous(); }

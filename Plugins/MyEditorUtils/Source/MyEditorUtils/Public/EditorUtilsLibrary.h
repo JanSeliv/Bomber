@@ -4,6 +4,9 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
+#include "AssetTypeActions_Base.h"
+#include "IAssetTools.h"
+//---
 #include "EditorUtilsLibrary.generated.h"
 
 /**
@@ -44,4 +47,23 @@ public:
 	/** Exports specified data table to already its .json. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	static void ReExportTableAsJSON(const class UDataTable* DataTable);
+
+#pragma region EditorExtensions
+	/** Adds the asset to the context menu
+	 * @param InOutRegisteredAssets Input: the list of registered assets. Output: the list of registered assets + the new one. */
+	template <typename T>
+	static void RegisterAsset(TArray<TSharedPtr<FAssetTypeActions_Base>>& InOutRegisteredAssets);
+
+	/** Removes all custom assets from context menu. */
+	static void UnregisterAssets(TArray<TSharedPtr<FAssetTypeActions_Base>>& RegisteredAssets);
+#pragma endregion EditorExtensions
 };
+
+// Adds the asset to the context menu
+template <typename T>
+void UEditorUtilsLibrary::RegisterAsset(TArray<TSharedPtr<FAssetTypeActions_Base>>& InOutRegisteredAssets)
+{
+	TSharedPtr<T> SettingsDataTableAction = MakeShared<T>();
+	IAssetTools::Get().RegisterAssetTypeActions(SettingsDataTableAction.ToSharedRef());
+	InOutRegisteredAssets.Emplace(MoveTemp(SettingsDataTableAction));
+}
