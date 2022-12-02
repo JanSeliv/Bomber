@@ -189,9 +189,6 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
-		// Disable gravity
-		MovementComponent->GravityScale = 0.f;
-
 		// Rotate player by movement
 		MovementComponent->bOrientRotationToMovement = true;
 		static const FRotator RotationRate(0.f, 540.f, 0.f);
