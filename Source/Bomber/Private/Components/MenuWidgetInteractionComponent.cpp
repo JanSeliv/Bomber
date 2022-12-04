@@ -2,6 +2,8 @@
 
 #include "Components/MenuWidgetInteractionComponent.h"
 //---
+#include "Framework/Application/SlateUser.h"
+//---
 #include "GameFramework/MyGameStateBase.h"
 #include "Controllers/MyPlayerController.h"
 #include "UtilityLibraries/SingletonLibrary.h"
@@ -70,6 +72,52 @@ void UMenuWidgetInteractionComponent::BeginPlay()
 	EnableInput();
 
 	BindOnToggledSettings();
+}
+
+// Presses a key as if the mouse/pointer were the source of it
+void UMenuWidgetInteractionComponent::PressPointerKey(FKey Key)
+{
+	// Do not call super, override behavior instead
+
+	if (!VirtualUser.IsValid()
+		|| !CanSendInput()
+		|| PressedKeys.Contains(Key))
+	{
+		return;
+	}
+
+	PressedKeys.Emplace(Key);
+
+	FPointerEvent PointerEvent;
+	const uint32 InUserIndex = static_cast<uint32>(VirtualUser->GetUserIndex());
+	const uint32 InPointerIndex = static_cast<uint32>(PointerIndex);
+	if (Key.IsTouch())
+	{
+		constexpr float InForce = 1.f;
+		constexpr bool bPressLeftMouseButton = false;
+		PointerEvent = {
+			InUserIndex,
+			InPointerIndex,
+			LocalHitLocation,
+			LastLocalHitLocation,
+			InForce,
+			bPressLeftMouseButton};
+	}
+	else
+	{
+		constexpr float InWheelDelta = 0.f;
+		PointerEvent = {
+			InUserIndex,
+			InPointerIndex,
+			LocalHitLocation,
+			LastLocalHitLocation,
+			PressedKeys,
+			Key,
+			InWheelDelta,
+			ModifierKeys};
+	}
+
+	FSlateApplication::Get().RoutePointerDownEvent(LastWidgetPath.ToWidgetPath(), PointerEvent);
 }
 
 // Listen game states to manage the enabling and disabling this component

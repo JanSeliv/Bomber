@@ -36,6 +36,13 @@ protected:
 	/** Called when the game starts. */
 	virtual void BeginPlay() override;
 
+	/**
+	 * Presses a key as if the mouse/pointer were the source of it.  Normally you would just use
+	 * Left/Right mouse button for the Key.  However - advanced uses could also be imagined where you
+	 * send other keys to signal widgets to take special actions if they're under the cursor.
+	 */
+	virtual void PressPointerKey(FKey Key) override;
+
 	/** Listen game states to manage the enabling and disabling this component. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
