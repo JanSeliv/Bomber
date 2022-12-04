@@ -220,11 +220,11 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
 	const AController* OwnedController = GetController();
-	if (!MapComponentInternal                       // The Map Component is not valid or transient
-	    || PowerupsInternal.FireN <= 0              // Null length of explosion
-	    || PowerupsInternal.BombN <= 0              // No more bombs
-	    || !OwnedController                         // controller is not valid
-	    || OwnedController->IsMoveInputIgnored())   // controller is blocked
+	if (!MapComponentInternal                     // The Map Component is not valid or transient
+	    || PowerupsInternal.FireN <= 0            // Null length of explosion
+	    || PowerupsInternal.BombN <= 0            // No more bombs
+	    || !OwnedController                       // controller is not valid
+	    || OwnedController->IsMoveInputIgnored()) // controller is blocked
 	{
 		return;
 	}
@@ -749,32 +749,21 @@ void APlayerCharacter::OnRep_CharacterID()
 	ApplyCharacterID();
 }
 
-// Move the player character by the forward vector
-void APlayerCharacter::MoveBackForward(const FInputActionValue& ActionValue)
+// Move the player character
+void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 {
-	const float ScaleValue = ActionValue.GetMagnitude();
+	// input is a Vector2D
+	const FVector2D MovementVector = ActionValue.Get<FVector2D>();
 
 	// Find out which way is forward
-	const FRotator Rotation = GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+	const FRotator YawRotation(0.f, UCellsUtilsLibrary::GetCellRotation(), 0.f);
 
 	// Get forward vector
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	AddMovementInput(Direction, ScaleValue);
-}
-
-// Move the player character by the right vector.
-void APlayerCharacter::MoveRightLeft(const FInputActionValue& ActionValue)
-{
-	const float ScaleValue = ActionValue.GetMagnitude();
-
-	// Find out which way is right
-	const FRotator Rotation = GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
 	// Get right vector
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-	AddMovementInput(Direction, ScaleValue);
+	AddMovementInput(ForwardDirection, MovementVector.Y);
+	AddMovementInput(RightDirection, MovementVector.X);
 }

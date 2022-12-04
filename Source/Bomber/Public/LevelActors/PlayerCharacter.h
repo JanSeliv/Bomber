@@ -350,11 +350,7 @@ protected:
 	UFUNCTION()
 	void OnRep_CharacterID();
 
-	/** Move the player character by the forward vector. */
+	/** Move the player character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
-	void MoveBackForward(const FInputActionValue& ActionValue);
-
-	/** Move the player character by the right vector. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
-	void MoveRightLeft(const FInputActionValue& ActionValue);
+	void MovePlayer(const FInputActionValue& ActionValue);
 };
