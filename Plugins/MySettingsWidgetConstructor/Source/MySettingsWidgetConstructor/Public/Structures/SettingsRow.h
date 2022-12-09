@@ -339,6 +339,9 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsPrimary
 {
 	GENERATED_BODY()
 
+	/** Empty settings primary row. */
+	static const FSettingsPrimary EmptyPrimary;
+
 	/** The tag of the setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
 	FSettingTag Tag = FSettingTag::EmptySettingTag; //[D]

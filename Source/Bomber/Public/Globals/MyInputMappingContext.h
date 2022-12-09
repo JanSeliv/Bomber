@@ -3,7 +3,9 @@
 #pragma once
 
 #include "InputMappingContext.h"
+//---
 #include "Bomber.h"
+#include "InputCoreTypes.h"
 //---
 #include "MyInputMappingContext.generated.h"
 
@@ -18,31 +20,36 @@ class BOMBER_API UMyInputMappingContext final : public UInputMappingContext
 public:
 	/** Returns the priority of the context. If higher, then block the same consumed inputs other contexts with lower priorities.
 	 * @see UMyInputMappingContext::ContextPriorityInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetContextPriority() const { return ContextPriorityInternal; }
 
 	/** Returns the game states for which this input context is active.
 	 * @see UMyInputMappingContext::ActiveForStatesInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetChosenGameStatesBitmask() const { return ActiveForStatesInternal; }
 
 	/** Returns all input actions set in mappings. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	void GetInputActions(TArray<class UMyInputAction*>& OutInputActions) const;
 
 	/** Returns mappings by specified input action.
 	 * @param OutMappings Contains found mappings
 	 * @param InputAction Action by that*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	void GetMappingsByInputAction(TArray<FEnhancedActionKeyMapping>& OutMappings, const class UMyInputAction* InputAction) const;
 
+	/** Returns all mappings where bIsPlayerMappable is true. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	void GetAllMappings(TArray<FEnhancedActionKeyMapping>& OutMappableData) const;
+
 	/** Unmap previous key and map new one.
-	 * @param InputAction The input action to be remapped.
+	 * @param InInputAction The input action to be remapped.
 	 * @param NewKey The key to set.
 	 * @param PrevKey The key need to remap.
 	 * @return false if something went wrong, f.e the specified key is already mapped to any gameplay context. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewKey,PrevKey"))
-	bool RemapKey(const class UMyInputAction* InputAction, const FKey& NewKey, const FKey& PrevKey);
+	bool RemapKey(const class UInputAction* InInputAction, const FKey& NewKey, const FKey& PrevKey);
+	static bool RemapKey(const UMyInputMappingContext* InContext, const FEnhancedActionKeyMapping& InMapping, const FKey& NewKey);
 
 protected:
 	/** If higher, then block the same consumed inputs other contexts with lower priorities. */

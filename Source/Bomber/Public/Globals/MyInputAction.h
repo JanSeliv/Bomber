@@ -5,7 +5,6 @@
 #include "InputAction.h"
 //---
 #include "FunctionPicker.h"
-#include "Bomber.h"
 //---
 #include "MyInputAction.generated.h"
 
@@ -18,11 +17,6 @@ class BOMBER_API UMyInputAction final : public UInputAction
 	GENERATED_BODY()
 
 public:
-	/** Returns the input action name on UI.
-	 * @see UMyInputAction::InputActionNameInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE FText& GetInputActionName() const { return InputActionNameInternal; }
-
 	/** Returns the chosen state when function has to be called.
 	 * @see UMyInputAction::TriggerEventInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -47,10 +41,6 @@ public:
 	FKey GetKey() const;
 
 protected:
-	/** The input action name on UI. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Input Action Name", ShowOnlyInnerProperties))
-	FText InputActionNameInternal = TEXT_NONE; //[D]
-
 	/** Choose for which state the bound function has to be called. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Trigger Event", ShowOnlyInnerProperties))
 	ETriggerEvent TriggerEventInternal = ETriggerEvent::Triggered; //[D]

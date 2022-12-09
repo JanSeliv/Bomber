@@ -3,7 +3,7 @@
 #include "UI/SettingSubWidget.h"
 //---
 #include "UI/SettingsWidget.h"
-#include "UtilsLibrary.h"
+#include "WidgetUtilsLibrary.h"
 //---
 #include "Components/Button.h"
 #include "Components/CheckBox.h"
@@ -18,9 +18,34 @@
 #include "Widgets/Input/SSlider.h"
 
 // Set the new setting tag for this widget
-void USettingSubWidget::SetSettingTag(const FSettingTag& NewSettingTag)
+void USettingSubWidget::SetSettingPrimaryRow(const FSettingsPrimary& InSettingPrimaryRow)
 {
-	SettingTagInternal = NewSettingTag;
+	SettingPrimaryRowInternal = InSettingPrimaryRow;
+}
+
+// Returns the main setting widget (the outer of this subwidget)
+USettingsWidget* USettingSubWidget::GetSettingsWidget() const
+{
+	if (!SettingsWidgetInternal)
+	{
+		// Try to find the parent widget
+		return UWidgetUtilsLibrary::GetParentWidgetOfClass<USettingsWidget>(this);
+	}
+	return SettingsWidgetInternal;
+}
+
+// Returns the main setting widget checked
+USettingsWidget& USettingSubWidget::GetSettingsWidgetChecked() const
+{
+	USettingsWidget* SettingsWidget = GetSettingsWidget();
+	checkf(SettingsWidget, TEXT("%s: 'SettingsWidgetInternal' is null"), *FString(__FUNCTION__));
+	return *SettingsWidget;
+}
+
+// Sets the main settings widget for this subwidget
+void USettingSubWidget::SetSettingsWidget(USettingsWidget* InSettingsWidget)
+{
+	SettingsWidgetInternal = InSettingsWidget;
 }
 
 // Returns the custom line height for this setting
@@ -56,15 +81,6 @@ void USettingSubWidget::SetCaptionText(const FText& NewCaptionText)
 	}
 }
 
-// Set the new caption text on UI for this widget
-void USettingSubWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	SettingsWidgetInternal = UUtilsLibrary::GetParentWidgetOfClass<USettingsWidget>(this);
-	ensureAlwaysMsgf(SettingsWidgetInternal, TEXT("ASSERT: 'SettingsWidgetInternal' is nullptr"));
-}
-
 // Called after the underlying slate widget is constructed
 void USettingButton::NativeConstruct()
 {
@@ -75,7 +91,7 @@ void USettingButton::NativeConstruct()
 		ButtonWidget->SetClickMethod(EButtonClickMethod::PreciseClick);
 		ButtonWidget->OnClicked.AddUniqueDynamic(this, &ThisClass::USettingButton::OnButtonPressed);
 
-		SlateButtonInternal = GetSlateWidget<SButton>(ButtonWidget);
+		SlateButtonInternal = UWidgetUtilsLibrary::GetSlateWidget<SButton>(ButtonWidget);
 		check(SlateButtonInternal.IsValid());
 	}
 }
@@ -88,7 +104,7 @@ void USettingButton::OnButtonPressed()
 		return;
 	}
 
-	SettingsWidgetInternal->SetSettingButtonPressed(SettingTagInternal);
+	SettingsWidgetInternal->SetSettingButtonPressed(GetSettingTag());
 }
 
 // Called after the underlying slate widget is constructed
@@ -100,7 +116,7 @@ void USettingCheckbox::NativeConstruct()
 	{
 		CheckboxWidget->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::OnCheckStateChanged);
 
-		SlateCheckboxInternal = GetSlateWidget<SCheckBox>(CheckboxWidget);
+		SlateCheckboxInternal = UWidgetUtilsLibrary::GetSlateWidget<SCheckBox>(CheckboxWidget);
 		check(SlateCheckboxInternal.IsValid());
 	}
 }
@@ -113,7 +129,7 @@ void USettingCheckbox::OnCheckStateChanged(bool bIsChecked)
 		return;
 	}
 
-	SettingsWidgetInternal->SetSettingCheckbox(SettingTagInternal, bIsChecked);
+	SettingsWidgetInternal->SetSettingCheckbox(GetSettingTag(), bIsChecked);
 }
 
 // Called after the underlying slate widget is constructed
@@ -125,7 +141,7 @@ void USettingCombobox::NativeConstruct()
 	{
 		ComboboxWidget->OnSelectionChanged.AddUniqueDynamic(this, &ThisClass::OnSelectionChanged);
 
-		SlateComboboxInternal = GetSlateWidget<SComboboxString>(ComboboxWidget);
+		SlateComboboxInternal = UWidgetUtilsLibrary::GetSlateWidget<SComboboxString>(ComboboxWidget);
 		check(SlateComboboxInternal.IsValid());
 	}
 }
@@ -169,7 +185,7 @@ void USettingCombobox::OnSelectionChanged(FString SelectedItem, ESelectInfo::Typ
 	}
 
 	const int32 SelectedIndex = ComboboxWidget->GetSelectedIndex();
-	SettingsWidgetInternal->SetSettingComboboxIndex(SettingTagInternal, SelectedIndex);
+	SettingsWidgetInternal->SetSettingComboboxIndex(GetSettingTag(), SelectedIndex);
 }
 
 // Called after the underlying slate widget is constructed
@@ -182,7 +198,7 @@ void USettingSlider::NativeConstruct()
 		SliderWidget->OnValueChanged.AddUniqueDynamic(this, &ThisClass::OnValueChanged);
 		SliderWidget->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::OnMouseCaptureEnd);
 
-		SlateSliderInternal = GetSlateWidget<SSlider>(SliderWidget);
+		SlateSliderInternal = UWidgetUtilsLibrary::GetSlateWidget<SSlider>(SliderWidget);
 		check(SlateSliderInternal.IsValid());
 	}
 }
@@ -205,7 +221,7 @@ void USettingSlider::OnValueChanged(float Value)
 		return;
 	}
 
-	SettingsWidgetInternal->SetSettingSlider(SettingTagInternal, Value);
+	SettingsWidgetInternal->SetSettingSlider(GetSettingTag(), Value);
 }
 
 // Returns current text set in the Editable Text Box
@@ -238,7 +254,7 @@ void USettingUserInput::NativeConstruct()
 	{
 		EditableTextBox->OnTextChanged.AddUniqueDynamic(this, &ThisClass::OnTextChanged);
 
-		SlateEditableTextBoxInternal = GetSlateWidget<SEditableTextBox>(EditableTextBox);
+		SlateEditableTextBoxInternal = UWidgetUtilsLibrary::GetSlateWidget<SEditableTextBox>(EditableTextBox);
 		check(SlateEditableTextBoxInternal.IsValid());
 	}
 }
@@ -252,7 +268,7 @@ void USettingUserInput::OnTextChanged(const FText& Text)
 	}
 
 	const FName MewValue(Text.ToString());
-	SettingsWidgetInternal->SetSettingUserInput(SettingTagInternal, MewValue);
+	SettingsWidgetInternal->SetSettingUserInput(GetSettingTag(), MewValue);
 }
 
 // Called after the underlying slate widget is constructed
@@ -262,7 +278,7 @@ void USettingScrollBox::NativeConstruct()
 	
 	if (ScrollBoxWidget)
 	{
-		SlateScrollBoxInternal = GetSlateWidget<SScrollBox>(ScrollBoxWidget);
+		SlateScrollBoxInternal = UWidgetUtilsLibrary::GetSlateWidget<SScrollBox>(ScrollBoxWidget);
 		check(SlateScrollBoxInternal.IsValid());
 	}
 }

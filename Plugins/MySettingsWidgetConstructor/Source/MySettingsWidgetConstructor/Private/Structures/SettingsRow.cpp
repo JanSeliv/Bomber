@@ -7,6 +7,9 @@
 // Empty settings tag
 const FSettingTag FSettingTag::EmptySettingTag = EmptyTag;
 
+// Empty settings primary row
+const FSettingsPrimary FSettingsPrimary::EmptyPrimary = FSettingsPrimary();
+
 // Empty settings row
 const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
 

@@ -5,17 +5,16 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedPlayerInput.h"
-#include "Globals/MyInputMappingContext.h"
 #include "Framework/Application/NavigationConfig.h"
 #include "Engine/LocalPlayer.h"
 //---
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/DataAssetsContainer.h"
 #include "Globals/MyInputAction.h"
+#include "Globals/MyInputMappingContext.h"
+#include "Globals/PlayerInputDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
-#include "LevelActors/PlayerCharacter.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/MyHUD.h"
@@ -24,111 +23,6 @@
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
 #endif
-
-// Returns the player input data asset
-const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
-{
-	const UPlayerInputDataAsset* PlayerInputDataAsset = UDataAssetsContainer::GetPlayerInputDataAsset();
-	checkf(PlayerInputDataAsset, TEXT("The Player Input Data Asset is not valid"))
-	return *PlayerInputDataAsset;
-}
-
-// Returns all input contexts contained in this data asset
-void UPlayerInputDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& OutInputContexts) const
-{
-	static constexpr int32 FirstPlayer = 0;
-	if (const UMyInputMappingContext* GameplayInputContextP1 = GetGameplayInputContext(FirstPlayer))
-	{
-		OutInputContexts.Emplace(GameplayInputContextP1);
-	}
-
-	static constexpr int32 SecondPlayer = 1;
-	if (const UMyInputMappingContext* GameplayInputContextP2 = GetGameplayInputContext(SecondPlayer))
-	{
-		OutInputContexts.Emplace(GameplayInputContextP2);
-	}
-
-	if (const UMyInputMappingContext* MainMenuInputContext = GetMainMenuInputContext())
-	{
-		OutInputContexts.Emplace(MainMenuInputContext);
-	}
-
-	if (const UMyInputMappingContext* InGameMenuInputContext = GetInGameMenuInputContext())
-	{
-		OutInputContexts.Emplace(InGameMenuInputContext);
-	}
-
-	if (const UMyInputMappingContext* SettingsInputContext = GetSettingsInputContext())
-	{
-		OutInputContexts.Emplace(SettingsInputContext);
-	}
-}
-
-// Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
-const UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
-{
-	TryCreateGameplayInputContexts();
-	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
-}
-
-// Returns true if specified key is mapped to any gameplay input context
-bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
-{
-	return GameplayInputContextsInternal.ContainsByPredicate([&Key](const UMyInputMappingContext* ContextIt)
-	{
-		return ContextIt && ContextIt->GetMappings().ContainsByPredicate([&Key](const FEnhancedActionKeyMapping& MappingIt)
-		{
-			return MappingIt.Key == Key;
-		});
-	});
-}
-
-// Creates new contexts if is needed
-void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
-{
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
-	{
-		// Do not create input contexts since the game is not started yet
-		return;
-	}
-#endif // WITH_EDITOR [IsEditorNotPieWorld]
-
-	// Create new context if any is null
-	const int32 ClassesNum = GameplayInputContextClassesInternal.Num();
-	for (int32 Index = 0; Index < ClassesNum; ++Index)
-	{
-		const bool bIsValidIndex = GameplayInputContextsInternal.IsValidIndex(Index);
-		const UMyInputMappingContext* GameplayInputContextsIt = bIsValidIndex ? GameplayInputContextsInternal[Index] : nullptr;
-		if (GameplayInputContextsIt)
-		{
-			// Is already created
-			continue;
-		}
-
-		// Initialize new gameplay contexts
-		UWorld* World = USingletonLibrary::Get().GetWorld();
-		const TSubclassOf<UMyInputMappingContext>& ContextClassIt = GameplayInputContextClassesInternal[Index];
-		if (!World
-		    || !ContextClassIt)
-		{
-			// Is empty class
-			continue;
-		}
-
-		const FName ContextClassName(*FString::Printf(TEXT("%s_%i"), *ContextClassIt->GetName(), Index));
-		UMyInputMappingContext* NewGameplayInputContext = NewObject<UMyInputMappingContext>(World, ContextClassIt, ContextClassName, RF_Public | RF_Transactional);
-
-		if (bIsValidIndex)
-		{
-			GameplayInputContextsInternal[Index] = NewGameplayInputContext;
-		}
-		else
-		{
-			GameplayInputContextsInternal.EmplaceAt(Index, NewGameplayInputContext);
-		}
-	}
-}
 
 // Sets default values for this controller's properties
 AMyPlayerController::AMyPlayerController()
@@ -489,10 +383,10 @@ void AMyPlayerController::OnToggledSettings(bool bIsVisible)
 // Enables or disables input contexts of gameplay input actions
 void AMyPlayerController::SetGameplayInputContextEnabled(bool bEnable)
 {
-	static constexpr int32 LocalPlayers = 2;
-	for (int32 PlayerIndex = 0; PlayerIndex < LocalPlayers; ++PlayerIndex)
+	TArray<const UMyInputMappingContext*> OutGameplayInputContexts;
+	UPlayerInputDataAsset::Get().GetAllGameplayInputContexts(OutGameplayInputContexts);
+	for (const UMyInputMappingContext* InputContextIt : OutGameplayInputContexts)
 	{
-		const UMyInputMappingContext* InputContextIt = UPlayerInputDataAsset::Get().GetGameplayInputContext(PlayerIndex);
 		SetInputContextEnabled(bEnable, InputContextIt);
 	}
 }

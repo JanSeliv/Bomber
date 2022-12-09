@@ -89,6 +89,23 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "FunctionPicker"))
 	const FSettingTag& GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const;
 
+	/** Returns the size of the Settings widget on the screen. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FVector2D GetSettingsSize() const;
+
+	/** Returns the size of specified sections on the screen. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FVector2D GetSubWidgetsSize(
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/MySettingsWidgetConstructor.EMyVerticalAlignment")) int32 SectionsBitmask) const;
+
+	/** Returns the height of a setting scrollbox on the screen. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	float GetScrollBoxHeight() const;
+
+	/** Is blueprint-event called that returns the style brush by specified button state. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	FSlateBrush GetButtonBrush(ESettingsButtonState State) const;
+
 	/* ---------------------------------------------------
 	 *		Setters by setting types
 	 * --------------------------------------------------- */
@@ -135,6 +152,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomWidgetTag"))
 	void SetSettingCustomWidget(const FSettingTag& CustomWidgetTag, class USettingCustomWidget* InCustomWidget);
 
+	/** Creates setting sub-widget (like button, checkbox etc.) based on specified setting class and sets it to specified primary data.
+	 * @param InOutPrimary The Data that should contain created setting class.
+	 * @param SettingSubWidgetClass The setting widget class to create. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "InOutPrimary"))
+	USettingSubWidget* CreateSettingSubWidget(UPARAM(ref) FSettingsPrimary& InOutPrimary, const TSubclassOf<USettingSubWidget> SettingSubWidgetClass);
+
+	/** Creates setting sub-widget (like button, checkbox etc.) based on specified setting class and sets it to specified primary data. */
+	template <typename T = USettingSubWidget>
+	FORCEINLINE T* CreateSettingSubWidget(FSettingsPrimary& InOutPrimary, const TSubclassOf<USettingSubWidget> SettingSubWidgetClass) { return Cast<T>(CreateSettingSubWidget(InOutPrimary, SettingSubWidgetClass)); }
+
 	/* ---------------------------------------------------
 	 *		Getters by setting types
 	 * --------------------------------------------------- */
@@ -170,19 +197,6 @@ public:
 	/** Get setting widget object by specified tag. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "SettingTag"))
 	class USettingSubWidget* GetSettingSubWidget(const FSettingTag& SettingTag) const;
-
-	/** Returns the size of the Settings widget on the screen. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FVector2D GetSettingsSize() const;
-
-	/** Returns the size of specified sections on the screen. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FVector2D GetSubWidgetsSize(
-		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/MySettingsWidgetConstructor.EMyVerticalAlignment")) int32 SectionsBitmask) const;
-
-	/** Returns the height of a setting scrollbox on the screen. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	float GetScrollBoxHeight() const;
 
 protected:
 	/* ---------------------------------------------------
@@ -253,12 +267,6 @@ protected:
 	* @see FSettingsPrimary::OnStaticContext */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryBindStaticContext(UPARAM(ref)FSettingsPrimary& Primary);
-
-	/** Creates setting sub-widget (like button, checkbox etc.) based on specified setting class and sets it to specified primary data.
-	* @param Primary The Data that should contain created setting class.
-	* @param SettingSubWidgetClass The setting widget class to create. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "Primary,SettingSubWidgetClass"))
-	void CreateSettingSubWidget(FSettingsPrimary& Primary, const TSubclassOf<USettingSubWidget>& SettingSubWidgetClass);
 
 	/** Starts adding settings on the next column. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))

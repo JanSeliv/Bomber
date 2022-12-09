@@ -3,9 +3,10 @@
 #include "Globals/MyInputMappingContext.h"
 //---
 #include "EnhancedInputModule.h"
-#include "Controllers/MyPlayerController.h"
-#include "Globals/MyInputAction.h"
 #include "UObject/ObjectSaveContext.h"
+//---
+#include "Globals/MyInputAction.h"
+#include "Globals/PlayerInputDataAsset.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
@@ -27,7 +28,8 @@ void UMyInputMappingContext::GetInputActions(TArray<UMyInputAction*>& OutInputAc
 // Returns mappings by specified input action
 void UMyInputMappingContext::GetMappingsByInputAction(TArray<FEnhancedActionKeyMapping>& OutMappings, const UMyInputAction* InputAction) const
 {
-	for (const FEnhancedActionKeyMapping& MappingIt : Mappings)
+	TArray<FEnhancedActionKeyMapping> AllMappings;
+	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
 	{
 		if (MappingIt.Action == InputAction)
 		{
@@ -36,10 +38,22 @@ void UMyInputMappingContext::GetMappingsByInputAction(TArray<FEnhancedActionKeyM
 	}
 }
 
-// Unmap previous key and map new one
-bool UMyInputMappingContext::RemapKey(const UMyInputAction* InputAction, const FKey& NewKey, const FKey& PrevKey)
+// Returns all mappings where bIsPlayerMappable is true
+void UMyInputMappingContext::GetAllMappings(TArray<FEnhancedActionKeyMapping>& OutMappableData) const
 {
-	if (!ensureMsgf(InputAction, TEXT("ASSERT: 'InputAction' is not valid"))
+	for (const FEnhancedActionKeyMapping& MappingIt : Mappings)
+	{
+		if (MappingIt.bIsPlayerMappable)
+		{
+			OutMappableData.Emplace(MappingIt);
+		}
+	}
+}
+
+// Unmap previous key and map new one
+bool UMyInputMappingContext::RemapKey(const UInputAction* InInputAction, const FKey& NewKey, const FKey& PrevKey)
+{
+	if (!ensureMsgf(InInputAction, TEXT("ASSERT: 'InInputAction' is not valid"))
 	    || NewKey == PrevKey
 	    || UPlayerInputDataAsset::Get().IsMappedKey(NewKey))
 	{
@@ -49,7 +63,7 @@ bool UMyInputMappingContext::RemapKey(const UMyInputAction* InputAction, const F
 	bool bRemapped = false;
 	for (FEnhancedActionKeyMapping& MappingIt : Mappings)
 	{
-		if (MappingIt.Action == InputAction
+		if (MappingIt.Action == InInputAction
 		    && MappingIt.Key == PrevKey)
 		{
 			MappingIt.Key = NewKey;
@@ -68,6 +82,19 @@ bool UMyInputMappingContext::RemapKey(const UMyInputAction* InputAction, const F
 	SaveConfig();
 
 	return true;
+}
+
+// Unmap previous key and map new one
+bool UMyInputMappingContext::RemapKey(const UMyInputMappingContext* InContext, const FEnhancedActionKeyMapping& InMapping, const FKey& NewKey)
+{
+	if (!ensureMsgf(InContext, TEXT("%s: 'InContext' is not valid"), *FString(__FUNCTION__)))
+	{
+		return false;
+	}
+
+	UMyInputMappingContext* ContextToRemap = const_cast<UMyInputMappingContext*>(InContext);
+	checkf(ContextToRemap, TEXT("%s: 'ContextToRemap' is null"), *FString(__FUNCTION__));
+	return ContextToRemap->RemapKey(InMapping.Action, NewKey, InMapping.Key);
 }
 
 #if WITH_EDITOR //[IsEditorNotPieWorld]

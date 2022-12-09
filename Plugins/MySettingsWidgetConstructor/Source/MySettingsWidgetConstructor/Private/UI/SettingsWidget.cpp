@@ -674,6 +674,39 @@ float USettingsWidget::GetScrollBoxHeight() const
 	return ScaledHeight;
 }
 
+// Is blueprint-event called that returns the style brush by specified button state
+FSlateBrush USettingsWidget::GetButtonBrush(ESettingsButtonState State) const
+{
+	const USettingsDataAsset& SettingsDataAsset = USettingsDataAsset::Get();
+	const FMiscThemeData& MiscThemeData = SettingsDataAsset.GetMiscThemeData();
+	const FButtonThemeData& ButtonThemeData = SettingsDataAsset.GetButtonThemeData();
+
+	FSlateColor SlateColor;
+	switch (State)
+	{
+	case ESettingsButtonState::Normal:
+		SlateColor = MiscThemeData.ThemeColorNormal;
+		break;
+	case ESettingsButtonState::Hovered:
+		SlateColor = MiscThemeData.ThemeColorHover;
+		break;
+	case ESettingsButtonState::Pressed:
+		SlateColor = MiscThemeData.ThemeColorExtra;
+		break;
+	default:
+		SlateColor = FLinearColor::White;
+	}
+
+	FSlateBrush SlateBrush;
+	SlateBrush.TintColor = SlateColor;
+	SlateBrush.DrawAs = ButtonThemeData.DrawAs;
+	SlateBrush.Margin = ButtonThemeData.Margin;
+	SlateBrush.SetImageSize(ButtonThemeData.Size);
+	SlateBrush.SetResourceObject(ButtonThemeData.Texture);
+
+	return SlateBrush;
+}
+
 // Called after the underlying slate widget is constructed
 void USettingsWidget::NativeConstruct()
 {
@@ -803,18 +836,21 @@ void USettingsWidget::TryBindStaticContext(FSettingsPrimary& Primary)
 }
 
 // Creates new widget based on specified setting class and sets it to specified primary data
-void USettingsWidget::CreateSettingSubWidget(FSettingsPrimary& Primary, const TSubclassOf<USettingSubWidget>& SettingSubWidgetClass)
+USettingSubWidget* USettingsWidget::CreateSettingSubWidget(FSettingsPrimary& InOutPrimary, const TSubclassOf<USettingSubWidget> SettingSubWidgetClass)
 {
 	if (!SettingSubWidgetClass)
 	{
-		return;
+		return nullptr;
 	}
 
 	USettingSubWidget* SettingSubWidget = CreateWidget<USettingSubWidget>(this, SettingSubWidgetClass);
-	Primary.SettingSubWidget = SettingSubWidget;
-	SettingSubWidget->SetSettingTag(Primary.Tag);
-	SettingSubWidget->SetLineHeight(Primary.LineHeight);
-	SettingSubWidget->SetCaptionText(Primary.Caption);
+	InOutPrimary.SettingSubWidget = SettingSubWidget;
+	SettingSubWidget->SetSettingsWidget(this);
+	SettingSubWidget->SetSettingPrimaryRow(InOutPrimary);
+	SettingSubWidget->SetLineHeight(InOutPrimary.LineHeight);
+	SettingSubWidget->SetCaptionText(InOutPrimary.Caption);
+
+	return SettingSubWidget;
 }
 
 // Starts adding settings on the next column

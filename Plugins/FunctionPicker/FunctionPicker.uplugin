@@ -12,7 +12,7 @@
   "SupportURL": "mailto:janseliw@gmail.com",
   "EngineVersion": "5.1.0",
   "EnabledByDefault": true,
-  "CanContainContent": true,
+  "CanContainContent": false,
   "IsBetaVersion": true,
   "Installed": false,
   "Modules": [

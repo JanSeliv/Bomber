@@ -2362,7 +2362,7 @@
 			},
 			"CustomWidget":
 			{
-				"CustomWidgetClass": "/Script/UMG.WidgetBlueprintGeneratedClass'/Game/Bomber/UI/UI1-3_Settings/WBP_InputControls.WBP_InputControls_C'"
+				"CustomWidgetClass": "/Script/UMG.WidgetBlueprintGeneratedClass'/Game/Bomber/UI/UI1-3_Settings/Input/WBP_InputControls.WBP_InputControls_C'"
 			}
 		}
 	}
