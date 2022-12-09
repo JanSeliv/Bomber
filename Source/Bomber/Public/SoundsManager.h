@@ -70,6 +70,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class USoundBase* GetItemPickUpSFX() const { return ItemPickUpSFXInternal; }
 
+	/** Returns the sound that is played in the last seconds of the game
+	 * @see USoundsDataAsset::TimerTickTackSFXInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class USoundBase* GetTimerTickTackSFX() const { return TimerTickTackSFXInternal; }
+
 	/** Returns the End-Game sound by specified End-Game state.
 	 * @see USoundsDataAsset::EndGameSoundsInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -116,6 +121,10 @@ protected:
 	/** The sound that is played on gathering any power-up. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "ItemPickUp", ShowOnlyInnerProperties))
 	TObjectPtr<class USoundBase> ItemPickUpSFXInternal; //[D]
+	
+	/** The sound that is played in the last seconds of the game */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "TimerTickTack", ShowOnlyInnerProperties))
+	TObjectPtr<class USoundBase> TimerTickTackSFXInternal; //[D]
 
 	/** Contains all sounds of End-Game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game SFX", ShowOnlyInnerProperties))
@@ -189,6 +198,10 @@ public:
 	/** Play the sound of the picked power-up. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void PlayItemPickUpSFX();
+
+	/** Play the sound that is played in the last seconds of the game */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayTimerTickTackSFX();
 
 	/** Play the sound of the clicked UI element. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Play UI Click SFX"))

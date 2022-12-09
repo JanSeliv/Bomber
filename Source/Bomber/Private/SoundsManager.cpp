@@ -158,6 +158,20 @@ void USoundsManager::PlayItemPickUpSFX()
 	}
 }
 
+/** Play the sound that is played in the last seconds of the game */
+void USoundsManager::PlayTimerTickTackSFX()
+{
+	if (AMyGameStateBase::GetCurrentGameState(this) != ECGS::InGame)
+	{
+		return;
+	}
+
+	if (USoundBase* TimerTickTack = USoundsDataAsset::Get().GetTimerTickTackSFX())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), TimerTickTack);
+	}
+}
+
 // Play the sound of the clicked UI element
 void USoundsManager::PlayUIClickSFX()
 {
