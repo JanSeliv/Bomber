@@ -75,7 +75,7 @@ protected:
 	/** Seconds to the end of the round,
 	 * @todo Move to Data asset */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Countdown"))
-	int32 InGameCountdownInternal = 15; //[B] 
+	int32 InGameCountdownInternal = 120; //[B] 
 
 	/** Decrement AMyGameStateBase::InGameCountdownInternal by 1 for each second. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Timer"))
