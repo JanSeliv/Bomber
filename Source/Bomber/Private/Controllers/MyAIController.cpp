@@ -4,15 +4,24 @@
 //---
 #include "Bomber.h"
 #include "Components/MapComponent.h"
-#include "Globals/DataAssetsContainer.h"
-#include "UtilityLibraries/SingletonLibrary.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/DataAssetsContainer.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
+//---
+#include "Components/GameFrameworkComponentManager.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
 #endif
+
+// Enable or disable all bots
+static TAutoConsoleVariable<bool> CVarAISetEnabled(
+	TEXT("Bomber.AI.SetEnabled"),
+	false,
+	TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
+	ECVF_Default);
 
 // Returns the AI data asset
 const UAIDataAsset& UAIDataAsset::Get()
@@ -80,6 +89,15 @@ void AMyAIController::OnConstruction(const FTransform& Transform)
 	Possess(OwnerInternal);
 }
 
+// This is called only in the gameplay before calling begin play
+void AMyAIController::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// Register controller to let to be implemented by game features
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+}
+
 //  Called when the game starts or when spawned
 void AMyAIController::BeginPlay()
 {
@@ -98,7 +116,7 @@ void AMyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	if (IS_VALID(InPawn) == false)
+	if (!IS_VALID(InPawn))
 	{
 		return;
 	}
@@ -167,8 +185,9 @@ void AMyAIController::Reset()
 void AMyAIController::UpdateAI()
 {
 	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
-	if (!IS_VALID(OwnerInternal)   // The controller character is not valid or is transient
-	    || !IsValid(MapComponent)) // The Map Component is not valid
+	if (!IS_VALID(OwnerInternal)
+	    || !IsValid(MapComponent)
+	    || !CVarAISetEnabled.GetValueOnAnyThread()) // AI is disabled
 	{
 		return;
 	}
@@ -249,7 +268,7 @@ void AMyAIController::UpdateAI()
 			FCells ItemsAround = UCellsUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Item));
 			if (ItemsAround.Num() > 0) // Is there items in this crossway?
 			{
-				ItemsAround = ItemsAround.Intersect(Free); // ItemsArouns = ItemsArouns ∪ Free
+				ItemsAround = ItemsAround.Intersect(Free); // ItemsAround = ItemsAround ∪ Free
 				if (ItemsAround.Num() > 0)                 // Is there direct items in this crossway?
 				{
 					if (bIsItemInDirect == false) // is the first found direct item

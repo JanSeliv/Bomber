@@ -2,11 +2,12 @@
 
 #include "Controllers/MyPlayerController.h"
 //---
-#include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "EnhancedPlayerInput.h"
-#include "Framework/Application/NavigationConfig.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Engine/LocalPlayer.h"
+#include "Framework/Application/NavigationConfig.h"
 //---
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
@@ -14,11 +15,11 @@
 #include "Globals/MyInputAction.h"
 #include "Globals/MyInputMappingContext.h"
 #include "Globals/PlayerInputDataAsset.h"
-#include "UtilityLibraries/SingletonLibrary.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
@@ -144,6 +145,15 @@ void AMyPlayerController::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	BindOnGameStateCreated();
+}
+
+// This is called only in the gameplay before calling begin play
+void AMyPlayerController::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// Register controller to let to be implemented by game features
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
 // Called when the game starts or when spawned

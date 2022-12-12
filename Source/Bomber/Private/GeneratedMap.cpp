@@ -680,7 +680,7 @@ void AGeneratedMap::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 
-	// Register level actors for game features
+	// Register level map to let to be implemented by game features
 	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 

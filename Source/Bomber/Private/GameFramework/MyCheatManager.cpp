@@ -36,22 +36,6 @@ int32 UMyCheatManager::GetBitmask(const FString& String) const
 	return Bitmask;
 }
 
-// Enable or disable all bots
-void UMyCheatManager::SetAI(bool bShouldEnable) const
-{
-	FMapComponents PlayerComponents;
-	AGeneratedMap::Get().GetMapComponents(PlayerComponents, TO_FLAG(EActorType::Player));
-	for (const UActorComponent* MapComponentIt : PlayerComponents)
-	{
-		const APawn* Pawn = MapComponentIt ? MapComponentIt->GetOwner<APawn>() : nullptr;
-		const auto MyAIController = Pawn->GetController<AMyAIController>();
-		if (MyAIController)
-		{
-			MyAIController->SetAI(bShouldEnable);
-		}
-	}
-}
-
 // Destroy all specified level actors on the map
 void UMyCheatManager::DestroyAllByType(EActorType ActorType) const
 {

@@ -79,6 +79,9 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	/** This is called only in the gameplay before calling begin play. */
+	virtual void PostInitializeComponents() override;
+
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
 

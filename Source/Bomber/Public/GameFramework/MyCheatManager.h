@@ -31,16 +31,6 @@ protected:
 	int32 GetBitmask(const FString& String) const;
 
 	/* ---------------------------------------------------
-	*		AI
-	* --------------------------------------------------- */
-	/**
-	 * Enable or disable all bots.
-	 * @param bShouldEnable 1 (Enable) OR 0 (Disable) AI.
-	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.AI.Set"))
-	void SetAI(bool bShouldEnable) const;
-
-	/* ---------------------------------------------------
 	*		Destroy
 	* --------------------------------------------------- */
 
