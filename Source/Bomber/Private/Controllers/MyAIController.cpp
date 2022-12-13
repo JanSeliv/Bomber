@@ -19,7 +19,7 @@
 // Enable or disable all bots
 static TAutoConsoleVariable<bool> CVarAISetEnabled(
 	TEXT("Bomber.AI.SetEnabled"),
-	false,
+	true,
 	TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
 	ECVF_Default);
 
