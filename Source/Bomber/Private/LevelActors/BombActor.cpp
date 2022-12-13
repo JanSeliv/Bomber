@@ -53,16 +53,14 @@ ABombActor::ABombActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
-	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionBombActor);
 }
 
 // Initialize a bomb actor, could be called multiple times
 void ABombActor::ConstructBombActor()
 {
-	if (IsValid(MapComponentInternal))
-	{
-		MapComponentInternal->ConstructOwnerActor();
-	}
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionBombActor);
+	MapComponentInternal->ConstructOwnerActor();
 }
 
 // Returns cells that bombs is going to destroy

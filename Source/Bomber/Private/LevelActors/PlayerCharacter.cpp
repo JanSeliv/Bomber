@@ -165,7 +165,6 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
-	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionPlayerCharacter);
 
 	// Initialize skeletal mesh
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
@@ -202,10 +201,9 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 // Initialize a player actor, could be called multiple times
 void APlayerCharacter::ConstructPlayerCharacter()
 {
-	if (IsValid(MapComponentInternal))
-	{
-		MapComponentInternal->ConstructOwnerActor();
-	}
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionPlayerCharacter);
+	MapComponentInternal->ConstructOwnerActor();
 }
 
 // Spawns bomb on character position

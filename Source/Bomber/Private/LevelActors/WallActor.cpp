@@ -40,16 +40,14 @@ AWallActor::AWallActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
-	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionWallActor);
 }
 
 // Initialize a wall actor, could be called multiple times
 void AWallActor::ConstructWallActor()
 {
-	if (IsValid(MapComponentInternal))
-	{
-		MapComponentInternal->ConstructOwnerActor();
-	}
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionWallActor);
+	MapComponentInternal->ConstructOwnerActor();
 }
 
 // Called when an instance of this class is placed (in editor) or spawned

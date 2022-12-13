@@ -59,16 +59,14 @@ AItemActor::AItemActor()
 
 	// Initialize MapComponent
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
-	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionItemActor);
 }
 
 // Initialize an item actor, could be called multiple times
 void AItemActor::ConstructItemActor()
 {
-	if (IsValid(MapComponentInternal))
-	{
-		MapComponentInternal->ConstructOwnerActor();
-	}
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionItemActor);
+	MapComponentInternal->ConstructOwnerActor();
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
