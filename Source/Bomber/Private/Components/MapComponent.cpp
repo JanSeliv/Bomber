@@ -79,7 +79,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 
 	// Owner updating
 	LevelMap.AddToGrid(this);
-	if (!IS_VALID(Owner)) // Dragged owner can be moved to the persistent
+	if (IS_TRANSIENT(Owner)) // Check again, dragged owner can be moved to the persistent
 	{
 		return false;
 	}
@@ -176,7 +176,7 @@ void UMapComponent::SetUndestroyable(bool bIsUndestroyable)
 void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& NewResponses)
 {
 	const AActor* Owner = GetOwner();
-	if (!IS_VALID(Owner)
+	if (!Owner
 	    || !Owner->HasAuthority()
 	    || NewResponses == ECR_MAX
 	    || NewResponses == CollisionResponseInternal)

@@ -91,9 +91,9 @@ AActor* USingletonLibrary::GetActorOfClass(TSubclassOf<AActor> ActorClass)
 bool USingletonLibrary::HasWorldBegunPlay()
 {
 #if WITH_EDITOR	// [UEditorUtils::IsEditor]
-	if (UEditorUtilsLibrary::IsEditor())
+	if (UEditorUtilsLibrary::IsPIE())
 	{
-		return UEditorUtilsLibrary::IsPIE();
+		return true;
 	}
 #endif	// [UEditorUtils::IsEditor]
 	const UWorld* World = Get().GetWorld();
@@ -111,8 +111,7 @@ bool USingletonLibrary::IsServer()
 void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
 	USingletonLibrary* Singleton = GetSingleton();
-	if (Singleton
-	    && IS_VALID(LevelMap))
+	if (Singleton && LevelMap)
 	{
 		Singleton->LevelMapInternal = LevelMap;
 	}
@@ -366,7 +365,7 @@ void USingletonLibrary::AddDebugTextRenders_Implementation(AActor* Owner, const 
 #if WITH_EDITOR	 // [UEditorUtils::IsEditor]
 	if (!UEditorUtilsLibrary::IsEditor()
 	    || !Cells.Num()      // Null length
-	    || !IS_VALID(Owner)) // Owner is not valid
+	    || !Owner) // Owner is not valid
 	{
 		return;
 	}

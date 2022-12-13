@@ -163,7 +163,7 @@ void AGeneratedMap::GetSidesCells(
 			for (const UMapComponent* MapComponentIt : BombsMapComponents)
 			{
 				const ABombActor* BombOwner = MapComponentIt ? MapComponentIt->GetOwner<ABombActor>() : nullptr;
-				if (IS_VALID(BombOwner)) // is valid and is not transient
+				if (BombOwner)
 				{
 					DangerousCells = DangerousCells.Union(BombOwner->GetExplosionCells());
 				}
@@ -290,7 +290,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 {
 	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
-	    || !IS_VALID(ComponentOwner) // the component's owner is not valid or is transient
+	    || !ComponentOwner
 	    || !ComponentOwner->HasAuthority()
 	    || !ensureMsgf(PoolManagerInternal, TEXT("ASSERT: 'PoolManagerInternal' is not valid")))
 	{
@@ -437,7 +437,7 @@ void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* Dest
 	MapComponentsInternal.Shrink();
 }
 
-// Removes the specified map component from the MapComponents_ array without an owner destroying
+// Destroy level actor by specified Map Component from the level
 void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* DestroyCauser/* = nullptr*/)
 {
 	if (!HasAuthority())
@@ -491,8 +491,8 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 {
 	const AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
-	if (!IS_VALID(ComponentOwner)
-	    || !HasAuthority()
+	if (!HasAuthority()
+		|| !ComponentOwner
 	    || !ComponentOwner->HasAuthority())
 	{
 		return;
@@ -1331,7 +1331,7 @@ void AGeneratedMap::DestroyLevelActorDragged(const UMapComponent* MapComponent)
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
 	    || !MapComponent
-	    || IS_VALID(MapComponent->GetOwner()))
+	    || !IS_TRANSIENT(MapComponent->GetOwner())) // Never destroy valid actors, hide them instead
 	{
 		return;
 	}

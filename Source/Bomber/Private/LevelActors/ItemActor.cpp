@@ -138,8 +138,7 @@ void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 // Triggers when this item starts overlap a player character to destroy itself
 void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	if (!IS_VALID(this)
-	    || !OtherActor
+	if (!OtherActor
 	    || !OtherActor->IsA(UDataAssetsContainer::GetActorClassByType(EAT::Player)))
 	{
 		return;

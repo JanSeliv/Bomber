@@ -5,9 +5,16 @@
 #include "Kismet/GameplayStatics.h"
 #include "Bomber.generated.h"
 
-// @TODO PoolManager Remove IS_TRANSIENT and IS_VALID macros since level actors do not become pending kill with pool manager anymore, regular null check would be enough.
-#define IS_TRANSIENT(Obj) (!(Obj) || !(Obj)->IsValidLowLevelFast() || (Obj)->HasAnyFlags(RF_Transient | RF_ClassDefaultObject) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
-#define IS_VALID(Obj) (IsValid(Obj) && !(Obj)->IsPendingKillPending() && !IS_TRANSIENT(Obj))
+/** IS_TRANSIENT returns true is specified object is pending kill, CDO or exists on the Transient level. */
+static const FString TransientLevelName = TEXT("Transient");
+#define IS_TRANSIENT(Obj) \
+	( \
+		!IsValid(Obj) \
+		|| !(Obj)->IsValidLowLevelFast() \
+		|| (Obj)->HasAnyFlags(RF_Transient | RF_ClassDefaultObject) \
+		|| !(Obj)->GetWorld() \
+		|| UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == TransientLevelName \
+	)
 
 /**
  * Is useful for work with bit flags.

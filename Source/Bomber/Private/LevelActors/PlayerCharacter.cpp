@@ -632,7 +632,7 @@ void APlayerCharacter::TryPossessController()
 	else // Possess the AI
 	{
 		// Spawn AI if is needed
-		if (!IS_VALID(MyAIControllerInternal))
+		if (!MyAIControllerInternal)
 		{
 			MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		}

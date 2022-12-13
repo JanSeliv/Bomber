@@ -44,7 +44,7 @@ AMyAIController::AMyAIController()
 // Makes AI go toward specified destination cell
 void AMyAIController::MoveToCell(const FCell& DestinationCell)
 {
-	if (!IS_VALID(OwnerInternal)
+	if (!OwnerInternal
 	    || IsMoveInputIgnored())
 	{
 		return;
@@ -116,7 +116,7 @@ void AMyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	if (!IS_VALID(InPawn))
+	if (!InPawn)
 	{
 		return;
 	}
@@ -185,7 +185,7 @@ void AMyAIController::Reset()
 void AMyAIController::UpdateAI()
 {
 	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
-	if (!IS_VALID(OwnerInternal)
+	if (!OwnerInternal
 	    || !IsValid(MapComponent)
 	    || !CVarAISetEnabled.GetValueOnAnyThread()) // AI is disabled
 	{
