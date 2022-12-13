@@ -43,7 +43,6 @@ void UPlayerInputDataAsset::GetAllInputContexts(TArray<const UMyInputMappingCont
 
 void UPlayerInputDataAsset::GetAllGameplayInputContexts(TArray<const UMyInputMappingContext*>& OutGameplayInputContexts) const
 {
-	TryCreateGameplayInputContexts();
 	for (const UMyInputMappingContext* GameplayContextIt : GameplayInputContextsInternal)
 	{
 		if (GameplayContextIt)
@@ -56,7 +55,6 @@ void UPlayerInputDataAsset::GetAllGameplayInputContexts(TArray<const UMyInputMap
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
 const UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
-	TryCreateGameplayInputContexts();
 	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
 }
 
@@ -70,51 +68,4 @@ bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
 			return MappingIt.Key == Key;
 		});
 	});
-}
-
-// Creates new contexts if is needed
-void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
-{
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
-	{
-		// Do not create input contexts since the game is not started yet
-		return;
-	}
-#endif // WITH_EDITOR [IsEditorNotPieWorld]
-
-	// Create new context if any is null
-	const int32 ClassesNum = GameplayInputContextClassesInternal.Num();
-	for (int32 Index = 0; Index < ClassesNum; ++Index)
-	{
-		const bool bIsValidIndex = GameplayInputContextsInternal.IsValidIndex(Index);
-		const UMyInputMappingContext* GameplayInputContextsIt = bIsValidIndex ? GameplayInputContextsInternal[Index] : nullptr;
-		if (GameplayInputContextsIt)
-		{
-			// Is already created
-			continue;
-		}
-
-		// Initialize new gameplay contexts
-		UWorld* World = USingletonLibrary::Get().GetWorld();
-		const TSubclassOf<UMyInputMappingContext>& ContextClassIt = GameplayInputContextClassesInternal[Index];
-		if (!World
-		    || !ContextClassIt)
-		{
-			// Is empty class
-			continue;
-		}
-
-		const FName ContextClassName(*FString::Printf(TEXT("%s_%i"), *ContextClassIt->GetName(), Index));
-		UMyInputMappingContext* NewGameplayInputContext = NewObject<UMyInputMappingContext>(World, ContextClassIt, ContextClassName, RF_Public | RF_Transactional);
-
-		if (bIsValidIndex)
-		{
-			GameplayInputContextsInternal[Index] = NewGameplayInputContext;
-		}
-		else
-		{
-			GameplayInputContextsInternal.EmplaceAt(Index, NewGameplayInputContext);
-		}
-	}
 }
