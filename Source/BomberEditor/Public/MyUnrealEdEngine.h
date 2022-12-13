@@ -20,12 +20,12 @@ public:
 	static const UMyUnrealEdEngine& Get();
 
 	/** Returns overall number of all such singletons of editor clients. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetClientSingletonsNum() const { return ClientSingletonsInternal.Num(); }
 
 	/** Returns singleton of the editor client by specified player index.
 	 * @see UMyUnrealEdEngine::ClientSingletonsInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	UObject* GetClientSingleton(int32 Index) const;
 
 	/** Returns singleton of the editor client by specified player index. */

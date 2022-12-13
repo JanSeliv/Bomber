@@ -40,16 +40,16 @@ public:
 
 	/** Returns speed value that is added to the player speed on taking a skate item.
 	  * @see UItemDataAsset::SkateStrengthInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE float GetSkateAdditiveStrength() const { return SkateAdditiveStrengthInternal; }
 
 	/** Return row by specified item type. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const UItemRow* GetRowByItemType(EItemType ItemType, ELevelType LevelType) const;
 
 	/** Returns max possible items to be picked up by player.
 	  * @see UItemDataAsset::MaxAllowedItemNumInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetMaxAllowedItemsNum() const { return MaxAllowedItemsNumInternal; }
 
 protected:
@@ -83,7 +83,7 @@ public:
 	void ConstructItemActor();
 
 	/** Return current item type. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EItemType GetItemType() const { return ItemTypeInternal; }
 
 protected:

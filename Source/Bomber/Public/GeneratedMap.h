@@ -49,23 +49,23 @@ public:
 	static const UGeneratedMapDataAsset& Get();
 
 	/** Returns level rows. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	void GetLevelStreamRows(TArray<FLevelStreamRow>& OutRows) const { OutRows = LevelsInternal; }
 
 	/** Get UGeneratedMapDataAsset::WallsChanceInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetWallsChance() const { return WallsChanceInternal; }
 
 	/** Get UGeneratedMapDataAsset::BoxesChanceInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetBoxesChance() const { return BoxesChanceInternal; }
 
 	/** Get UGeneratedMapDataAsset::CollisionsAssetInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<AActor> GetCollisionsAssetClass() const { return CollisionsAssetInternal; }
 
 	/** Get UGeneratedMapDataAsset::LockLocationOnZeroInternal.  */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsLockedOnZero() const { return LockOnZeroInternal; }
 
 protected:
@@ -150,19 +150,19 @@ public:
 	void ConstructLevelMap(const FTransform& Transform);
 
 	/** Returns number of characters in the array. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetAlivePlayersNum() const { return PlayersNumInternal; };
 
 	/** Get the current level type. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE ELevelType GetLevelType() const { return LevelTypeInternal; }
 
 	/** Returns the camera component of the level. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMyCameraComponent* GetCameraComponent() const { return CameraComponentInternal; }
 
 	/** Returns the Pool Manager. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UPoolManager* GetPoolManager() const { return PoolManagerInternal; }
 
 	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
@@ -210,7 +210,7 @@ public:
 	void SetLevelType(ELevelType NewLevelType);
 
 	/** Returns true if specified map component has non-generated owner that is manually dragged to the scene. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsDraggedMapComponent(const class UMapComponent* MapComponent) const;
 
 	/** Returns the cached transform. */
@@ -345,7 +345,7 @@ protected:
 	 * @param OutBitmaskedComponents Will contains map components of owners having the specified types.
 	 * @param ActorsTypesBitmask EActorType bitmask of actors types.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetMapComponents(
 		TSet<class UMapComponent*>& OutBitmaskedComponents,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask) const;

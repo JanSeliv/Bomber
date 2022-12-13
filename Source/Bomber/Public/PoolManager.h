@@ -138,19 +138,19 @@ public:
 	void EmptyAllByPredicate(TFunctionRef<bool(const UObject* PoolObject)> Predicate);
 
 	/** Returns current state of specified object. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
 	EPoolObjectState GetPoolObjectState(const UObject* Object) const;
 
 	/** Returns true is specified object is handled by Pool Manager. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	bool Contains(const UObject* Object) const;
 	
 	/** Returns true if specified object is handled by the Pool Manager and was taken from its pool. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
 	bool IsActive(const UObject* Object) const;
 
 	/** Returns true if handled object is inactive and ready to be taken from pool. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
 	bool IsFree(const UObject* Object) const;
 
 protected:

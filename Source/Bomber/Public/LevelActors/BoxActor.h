@@ -24,7 +24,7 @@ public:
 	static const UBoxDataAsset& Get();
 
 	/** Returns the chance to spawn item after box destroying. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetSpawnItemChance() const { return SpawnItemChanceInternal; }
 
 protected:
@@ -90,7 +90,7 @@ protected:
 	void OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser);
 
 	/** Spawn item with a chance. */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintPure = false, Category = "C++", meta = (BlueprintProtected))
 	void TrySpawnItem();
 
 	/** The item chance can be overrided in game, so it should be reset for each new game. */

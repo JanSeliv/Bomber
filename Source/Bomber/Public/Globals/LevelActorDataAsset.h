@@ -57,13 +57,13 @@ class BOMBER_API ULevelActorDataAsset : public UBomberDataAsset
 
 public:
 	/** Return rows by specified level types in the bitmask. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	void GetRowsByLevelType(
 		TArray<ULevelActorRow*>& OutRows,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ELevelType")) int32 LevelsTypesBitmask) const;
 
 	/** Return first found row by specified level types. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const class ULevelActorRow* GetRowByLevelType(ELevelType LevelType) const;
 
 	/** Return first found row by specified level types. */
@@ -71,7 +71,7 @@ public:
 	const FORCEINLINE T* GetRowByLevelType(ELevelType LevelType) const { return Cast<T>(GetRowByLevelType(LevelType)); }
 
 	/** Return first found row by specified mesh. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const class ULevelActorRow* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const;
 
 	/** Return first found row by specified mesh. */
@@ -79,23 +79,23 @@ public:
 	const FORCEINLINE T* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const { return Cast<T>(GetRowByMesh(Mesh)); }
 
 	/** Returns overall number of contained rows. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetRowsNum() const { return RowsInternal.Num(); }
 
 	/** Returns the class of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE UClass* GetActorClass() const { return ActorClassInternal; }
 
 	/** Returns the actor type of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
 
 	/** Returns a extent size of the collision box of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FVector& GetCollisionExtent() const { return CollisionExtentInternal; }
 
 	/** Returns a response type of the collision box of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
 
 protected:

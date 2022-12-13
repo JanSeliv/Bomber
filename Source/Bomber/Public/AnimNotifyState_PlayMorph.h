@@ -90,7 +90,7 @@ public:
 
 	/** Returns the whole data about chosen morph.
 	 * @see UAnimNotify_PlayMorph::MorphData */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FMorphData& GetMorphData() const { return MorphDataInternal; }
 
 protected:

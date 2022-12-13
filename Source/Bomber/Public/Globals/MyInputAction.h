@@ -19,25 +19,25 @@ class BOMBER_API UMyInputAction final : public UInputAction
 public:
 	/** Returns the chosen state when function has to be called.
 	 * @see UMyInputAction::TriggerEventInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE ETriggerEvent GetTriggerEvent() const { return TriggerEventInternal; }
 
 	/** Returns the data about static function object getter of a function to bind.
 	 * @see UMyInputAction::StaticContextInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FFunctionPicker& GetStaticContext() const { return StaticContextInternal; }
 
 	/** Returns the function data that is used to be called when input will be triggered.
 	 * @see UMyInputAction::FunctionToBindInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FFunctionPicker& GetFunctionToBind() const { return FunctionToBindInternal; }
 
 	/** Returns keys mapped to this action in the active input mapping contexts sorted by its priorities. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	void GetKeys(TArray<FKey>& OutKeys) const;
 
 	/** Returns the first mapped key to this action in most priority active input context. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FKey GetKey() const;
 
 protected:

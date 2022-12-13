@@ -56,7 +56,7 @@ public:
 
 	/** Returns how this mesh looks like for now.
 	 * @see UMySkeletalMeshComponent::PlayerMeshDataInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
 
 	/**
@@ -70,7 +70,7 @@ public:
 	 * @param OutMeshComponents Contains returned components.
 	 * @param FilterClass By this class components will be filtered.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "FilterClass"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "FilterClass"))
 	void GetAttachedPropsByClass(TArray<class UMeshComponent*>& OutMeshComponents, const TSubclassOf<class UMeshComponent>& FilterClass) const;
 
 	/**
@@ -81,7 +81,7 @@ public:
 	void AttachProps();
 
 	/** Returns true when is needed to attach or detach props. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	bool ArePropsWantToUpdate() const;
 	
 	/**

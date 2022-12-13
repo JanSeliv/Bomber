@@ -19,12 +19,12 @@ public:
 	AMyGameModeBase();
 
 	/** Get overall number of all player controllers. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetPlayerControllersNum() const { return PlayerControllersInternal.Num(); }
 
 	/** Returns player controller by specified index.
 	 * @see AMyGameModeBase::PlayerControllersInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	class AMyPlayerController* GetPlayerController(int32 Index) const;
 
 protected:

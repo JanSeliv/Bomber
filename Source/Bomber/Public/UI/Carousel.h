@@ -36,7 +36,7 @@ public:
 
 	/** Returns the chosen mesh component.
 	 * @see ACarousel::CurrentMeshComponentInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMeshComponent* GetCurrentMeshComponent() const { return CurrentMeshComponentInternal; }
 
 	/** Returns the chosen mesh component. */
@@ -45,7 +45,7 @@ public:
 
 	/** Returns the current Level Actor Row of chosen mesh component.
 	 * @see ACarousel::CurrentMeshRowInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class ULevelActorRow* GetCurrentMeshRow() const { return CurrentMeshRowInternal; }
 
 	/** Returns the current Level Actor Row of chosen mesh component. */

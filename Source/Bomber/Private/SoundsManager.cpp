@@ -7,6 +7,7 @@
 #include "Globals/DataAssetsContainer.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 
+// Returns the settings data asset
 const USoundsDataAsset& USoundsDataAsset::Get()
 {
 	const USoundsDataAsset* SoundsDataAsset = UDataAssetsContainer::GetSoundsDataAsset();
@@ -17,13 +18,13 @@ const USoundsDataAsset& USoundsDataAsset::Get()
 // Returns the sound manager
 USoundsManager* USoundsDataAsset::GetSoundsManager() const
 {
-	if (!SoundManager)
+	if (!SoundsManager)
 	{
 		UWorld* World = USingletonLibrary::Get().GetWorld();
-		SoundManager = NewObject<USoundsManager>(World, SoundsManagerClass, NAME_None, RF_Public | RF_Transactional);
+		SoundsManager = NewObject<USoundsManager>(World, SoundsManagerClass, NAME_None, RF_Public | RF_Transactional);
 	}
 
-	return SoundManager;
+	return SoundsManager;
 }
 
 // Returns the music of specified level
@@ -162,7 +163,7 @@ void USoundsManager::PlayItemPickUpSFX()
 // Play the sound of the clicked UI element
 void USoundsManager::PlayUIClickSFX()
 {
-	if (USoundBase* UIClickSFX = USoundsDataAsset::Get().GetUIClickSFXInternal())
+	if (USoundBase* UIClickSFX = USoundsDataAsset::Get().GetUIClickSFX())
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), UIClickSFX);
 	}

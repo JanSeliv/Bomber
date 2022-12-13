@@ -53,13 +53,13 @@ public:
 	TObjectPtr<class UAnimSequence> DanceAnimation = nullptr; //[D]
 
 	/** Returns the num of skin textures in the array of diffuse maps specified a player material instance. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetMaterialInstancesDynamicNum() const { return MaterialInstancesDynamicInternal.Num(); }
 
 	/** Returns the dynamic material instance of a player with specified skin.
 	 * @param SkinIndex The skin position to get.
 	 * @see UPlayerRow::MaterialInstancesDynamicInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMaterialInstanceDynamic* GetMaterialInstanceDynamic(int32 SkinIndex) const;
 
 protected:
@@ -107,27 +107,27 @@ public:
 	static const UPlayerDataAsset& Get();
 
 	/** The num of nameplate materials.  */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetNameplateMaterialsNum() const { return NameplateMaterialsInternal.Num(); }
 
 	/** Returns a nameplate material by index, is used by nameplate meshes.
 	 * @see UPlayerDataAsset::NameplateMaterials */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMaterialInterface* GetNameplateMaterial(int32 Index) const;
 
 	/** Returns the Anim Blueprint class to use.
 	 * @see UPlayerDataAsset::AnimInstanceClassInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClassInternal; }
 
 	/** Returns the name of a material parameter with a diffuse array.
 	 * @see UPlayerDataAsset::SkinSlotNameInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE FName GetSkinArrayParameter() const { return SkinArrayParameterInternal; }
 
 	/** Returns the name of a material parameter with a diffuse index.
 	* @see UPlayerDataAsset::SkinSlotNameInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE FName GetSkinIndexParameter() const { return SkinIndexParameterInternal; }
 
 protected:
@@ -194,11 +194,11 @@ public:
 	void ConstructPlayerCharacter();
 
 	/** Returns current powerup levels */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FPowerUp& GetPowerups() const { return PowerupsInternal; }
 
 	/** Returns the personal ID. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetCharacterID() const { return CharacterIDInternal; }
 
 	/** Spawns bomb on character position */
@@ -206,7 +206,7 @@ public:
 	void ServerSpawnBomb();
 
 	/** Returns the Skeletal Mesh of bombers. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const { return Cast<UMySkeletalMeshComponent>(GetMesh()); }
 
 	/** Actualize the player name for this character. */
@@ -219,7 +219,7 @@ public:
 	void ServerSetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData);
 
 	/** Returns current player mesh data of  the local player applied to skeletal mesh. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
 
 protected:

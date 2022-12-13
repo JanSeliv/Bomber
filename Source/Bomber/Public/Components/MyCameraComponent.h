@@ -33,7 +33,7 @@ public:
 
 	/** Returns true if camera does not follow by players.
 	 * @see UMyCameraComponent::bLockCameraOnCenterInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsCameraLockedOnCenter() const { return bIsCameraLockedOnCenterInternal; }
 
 	/** Calls to set following camera by player locations.
@@ -42,7 +42,7 @@ public:
 	void SetCameraLockedOnCenter(bool bInCameraLockedOnCenter);
 
 	/** Returns the center location between all players and bots. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FVector GetLocationBetweenPlayers() const;
 	
 protected:

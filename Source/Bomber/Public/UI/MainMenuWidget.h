@@ -30,11 +30,11 @@ public:
 	void InitMainMenuWidget(class ACarousel* InMainMenuActor);
 
 	/** Returns true if the Main Menu is ready. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsReadyMainMenu() const { return MainMenuActorInternal != nullptr; }
 
 	/** Returns the Main Menu actor on the scene. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class ACarousel* GetMainMenuActor() const { return MainMenuActorInternal; }
 
 	/** Sets the next player in the Menu. */

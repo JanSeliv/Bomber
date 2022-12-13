@@ -22,32 +22,32 @@ public:
 
 	/** Returns a class of the in-game widget.
 	 * @see UUIDataAsset::InGameWidgetClassInternal.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UInGameWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
 
 	/** Returns a class of the main menu widget.
 	 * @see UUIDataAsset::MainMenuWidgetClassInternal.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UMainMenuWidget> GetMainMenuWidgetClass() const { return MainMenuWidgetClassInternal; }
 
 	/** Returns a class of the settings widget.
 	 * @see UUIDataAsset::SettingsWidgetClassInternal.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class USettingsWidget> GetSettingsWidgetClass() const { return SettingsWidgetClassInternal; }
 
 	/** Returns a class of the nickname widget.
 	 * @see UUIDataAsset::NicknameWidgetClassInternal.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UUserWidget> GetNicknameWidgetClass() const { return NicknameWidgetClassInternal; }
 
 	/** Returns a class of the FPS counter widget.
 	 * @see UUIDataAsset::FPSCounterWidgetClassInternal.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UUserWidget> GetFPSCounterWidgetClass() const { return FPSCounterWidgetClassInternal; }
 
 	/** Returns the localized texts about specified end game to display on UI. 
 	 * @see UUIDataAsset::EndGameTexts. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FText& GetEndGameText(EEndGameState EndGameState) const { return EndGameTextsInternal.FindChecked(EndGameState); }
 
 protected:
@@ -109,27 +109,27 @@ public:
 	AMyHUD();
 
 	/** Returns true if widgets ere initialized. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool AreWidgetInitialized() const { return bAreWidgetInitializedInternal; }
 
 	/** Returns the current in-game widget object. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UInGameWidget* GetInGameWidget() const { return InGameWidgetInternal; }
 
 	/** Returns the current Main Menu widget object. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidgetInternal; }
 
 	/** Returns the current settings widget object. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class USettingsWidget* GetSettingsWidget() const { return SettingsWidgetInternal; }
 
 	/** Returns the current FPS counter widget object. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UUserWidget* GetFPSCounterWidget() const { return FPSCounterWidgetInternal; }
 
 	/** Returns the nickname widget by a player index. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UUserWidget* GetNicknameWidget(int32 Index) const { return NicknameWidgetsInternal.IsValidIndex(Index) ? NicknameWidgetsInternal[Index] : nullptr; }
 
 	/** Notify listen UI widgets to
@@ -142,7 +142,7 @@ public:
 	void SetFPSCounterEnabled(bool bEnable);
 
 	/** Returns true if the FPS counter widget is shown on the HUD. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsFPSCounterEnabled() const { return bIsFPSCounterEnabledInternal; }
 
 protected:

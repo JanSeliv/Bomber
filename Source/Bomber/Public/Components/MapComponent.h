@@ -62,7 +62,7 @@ public:
 	void ConstructOwnerActor();
 
 	/** Returns the current cell, where owner is located on the Level Map. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FCell& GetCell() const { return CellInternal; }
 
 	/** Override current cell data, where owner is located on the Level Map.
@@ -71,7 +71,7 @@ public:
 	void SetCell(const FCell& Cell);
 
 	/** Returns the owner's Level Actor Row. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class ULevelActorRow* GetLevelActorRow() const { return LevelActorRowInternal; }
 
 	/** Returns the owner's Level Actor Row. */
@@ -87,21 +87,21 @@ public:
 	void SetMaterial(class UMaterialInterface* Material);
 
 	/** Returns the map component of the specified owner. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Owner"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Owner"))
 	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner) { return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr; }
 
 	/** Get the owner's data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	EActorType GetActorType() const;
 
 	/** Get the owner's data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAssetInternal; }
 
 	const ULevelActorDataAsset& GetActorDataAssetChecked() const;
 
 	/** Returns true if an owner is set by cheat manager or skills to be undestroyable in game. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsUndestroyable() const { return bIsUndestroyableInternal; }
 
 	/** Set true to make an owner to be undestroyable on this level. */
@@ -109,11 +109,11 @@ public:
 	void SetUndestroyable(bool bIsUndestroyable);
 
 	/** Returns the collision component. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UBoxComponent* GetBoxCollisionComponent() const { return BoxCollisionComponentInternal; }
 
 	/** Returns current collisions data of the Box Collision Component. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FCollisionResponseContainer& GetCollisionResponses() const { return CollisionResponseInternal; }
 
 	/** Set new collisions data for any channel of the Box Collision Component. */

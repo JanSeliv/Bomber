@@ -38,7 +38,7 @@ public:
 	AMyPlayerState();
 
 	/** Returns result of the game for controlled player after ending the game. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EEndGameState GetEndGameState() const { return EndGameStateInternal; }
 
 	/** Is created to expose APlayerState::SetPlayerName(NewName) to blueprints. */
@@ -46,7 +46,7 @@ public:
 	void SetPlayerNameCustom(FName NewName);
 
 	/** Returns custom player name. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Player Name Custom"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get Player Name Custom"))
 	FName GetPlayerFNameCustom() const;
 
 	/** Is overriden to return own player name that is saved to config. */
@@ -57,7 +57,7 @@ public:
 	void UpdateEndGameState();
 
 	/** Returns true if current player is alive.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsPlayerAlive() const;
 
 protected:

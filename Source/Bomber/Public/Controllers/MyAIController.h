@@ -22,22 +22,22 @@ public:
 
 	/** Returns the search radius of items.
 	  * @see UAIDataAsset::ItemSearchRadiusInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetItemSearchRadius() const { return ItemSearchRadiusInternal; }
 
 	/** Returns the search radius of crossways
 	  * @see UAIDataAsset::CrosswaySearchRadiusInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetCrosswaySearchRadius() const { return CrosswaySearchRadiusInternal; }
 
 	/** Returns the filter radius of near cells.
 	  * @see UAIDataAsset::NearFilterRadiusInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetNearFilterRadius() const { return NearFilterRadiusInternal; }
 
 	/** Returns the radius of dangerous cells.
 	* @see UAIDataAsset::DangerousCellRadiusInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetNearDangerousRadius() const { return NearDangerousRadiusInternal; }
 
 protected:

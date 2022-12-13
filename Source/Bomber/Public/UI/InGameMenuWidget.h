@@ -34,7 +34,7 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Returns true if the In-Game widget is shown on user screen. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsVisibleInGameMenu() const;
 
 protected:

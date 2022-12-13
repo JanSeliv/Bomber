@@ -22,7 +22,7 @@ public:
 	 * --------------------------------------------------- */
 	
 	/** Returns the In-Game Menu widget. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UInGameMenuWidget* GetInGameMenuWidget() const { return InGameMenuWidget; }
 
 protected:

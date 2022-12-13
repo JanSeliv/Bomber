@@ -38,19 +38,19 @@ public:
 	virtual void ConfirmVideoMode() override;
 
 	/** Returns the min allowed resolution width. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetMinResolutionSizeX() const { return MinResolutionSizeXInternal; }
 
 	/** Returns the min allowed resolution height. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetMinResolutionSizeY() const { return MinResolutionSizeYInternal; }
 
 	/** Get all supported resolutions of the primary monitor in the text format. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	void GetTextResolutions(TArray<FText>& OutTextResolutions) const { OutTextResolutions = TextResolutionsInternal; }
 
 	/** Get all supported resolutions of the primary monitor in the int point format.. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	void GetIntResolutions(TArray<FIntPoint>& OutIntResolutions) const { OutIntResolutions = IntResolutionsInternal; }
 
 	/** Call to update supported resolutions in arrays. */
@@ -62,11 +62,11 @@ public:
 	void SetResolutionByIndex(int32 Index);
 
 	/** Returns the index of chosen resolution*/
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetResolutionIndex() const { return CurrentResolutionIndexInternal; }
 
 	/** Returns true if the game is in fullscreen mode. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsFullscreenEnabled() const { return GetFullscreenMode() == EWindowMode::Fullscreen; }
 
 	/** Set and apply fullscreen mode. If false, the windowed mode will be applied. */
@@ -78,7 +78,7 @@ public:
 	void UpdateFullscreenEnabled();
 
 	/** Returns the index of chosen fps lock in array. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetFPSLockIndex() const { return FPSLockIndexInternal; }
 
 	/** Set the FPS cap by specified member index. */
