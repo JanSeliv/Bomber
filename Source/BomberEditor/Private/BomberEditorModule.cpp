@@ -9,6 +9,8 @@
 
 IMPLEMENT_GAME_MODULE(FBomberEditorModule, BomberEditor);
 
+DEFINE_LOG_CATEGORY(LogBomberEditor);
+
 // Called right after the module DLL has been loaded and the module object has been created
 void FBomberEditorModule::StartupModule()
 {

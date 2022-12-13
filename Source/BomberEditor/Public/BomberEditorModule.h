@@ -4,7 +4,10 @@
 
 #include "Modules/ModuleInterface.h"
 
-class FBomberEditorModule final : public IModuleInterface
+/** Define Bomber Editor log category. */
+BOMBEREDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogBomberEditor, Log, All);
+
+class BOMBEREDITOR_API FBomberEditorModule final : public IModuleInterface
 {
 public:
 	/** Is used to to load and unload the Property Editor Module. */

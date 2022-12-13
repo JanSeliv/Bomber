@@ -5,19 +5,30 @@
 #include "Kismet/GameplayStatics.h"
 #include "Bomber.generated.h"
 
+// @TODO PoolManager Remove IS_TRANSIENT and IS_VALID macros since level actors do not become pending kill with pool manager anymore, regular null check would be enough.
 #define IS_TRANSIENT(Obj) (!(Obj) || !(Obj)->IsValidLowLevelFast() || (Obj)->HasAnyFlags(RF_Transient | RF_ClassDefaultObject) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
 #define IS_VALID(Obj) (IsValid(Obj) && !(Obj)->IsPendingKillPending() && !IS_TRANSIENT(Obj))
 
+/**
+ * Is useful for work with bit flags.
+ */
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
 #define TO_ENUM(Enum, Bitmask) static_cast<Enum>(Bitmask)
 
+/**
+ * Custom collision channels.
+ */
 #define ECC_Player0 ECollisionChannel::ECC_GameTraceChannel1
 #define ECC_Player1 ECollisionChannel::ECC_GameTraceChannel2
 #define ECC_Player2 ECollisionChannel::ECC_GameTraceChannel3
 #define ECC_Player3 ECollisionChannel::ECC_GameTraceChannel4
 #define ECC_UI ECollisionChannel::ECC_GameTraceChannel5
 
+/** Is init version of TEXT("None"). */
 #define TEXT_NONE FCoreTexts::Get().None
+
+/** Define Bomber log category. */
+BOMBER_API DECLARE_LOG_CATEGORY_EXTERN(LogBomber, Log, All);
 
 /**
 * Types of all actors on the Level Map
