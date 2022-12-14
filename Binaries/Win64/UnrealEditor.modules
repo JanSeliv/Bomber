@@ -1,8 +1,0 @@
-{
-	"BuildId": "19505902",
-	"Modules": 
-	{
-		"Bomber": "UnrealEditor-Bomber.dll",
-		"BomberEditor": "UnrealEditor-BomberEditor.dll"
-	}
-}
