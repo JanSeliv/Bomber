@@ -30,7 +30,7 @@ public:
 protected:
 	/** Contains all player controllers.  */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Controllers"))
-	TArray<TObjectPtr<class AMyPlayerController>> PlayerControllersInternal; //[G]
+	TArray<TObjectPtr<class AMyPlayerController>> PlayerControllersInternal;
 
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;

@@ -43,13 +43,13 @@ public:
 protected:
 	/** Choose for which state the bound function has to be called. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Trigger Event", ShowOnlyInnerProperties))
-	ETriggerEvent TriggerEventInternal = ETriggerEvent::Triggered; //[D]
+	ETriggerEvent TriggerEventInternal = ETriggerEvent::Triggered;
 
 	/** Contains data about static function object getter of a function to bind. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Static Context", ShowOnlyInnerProperties, FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnStaticContext__DelegateSignature"))
-	FFunctionPicker StaticContextInternal = FFunctionPicker::Empty; //[D]
+	FFunctionPicker StaticContextInternal = FFunctionPicker::Empty;
 
 	/** Allows to set function that is used to be called when input will be triggered. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Function To Bind", ShowOnlyInnerProperties))
-	FFunctionPicker FunctionToBindInternal = FFunctionPicker::Empty; //[D]
+	FFunctionPicker FunctionToBindInternal = FFunctionPicker::Empty;
 };

@@ -222,15 +222,15 @@ protected:
 	 * Is transient to not serialize it since will be set by AGeneratedMap::OnConstruction().
 	 * Is stored in singleton, so has weak reference field to be garbage collected on loading another maps where that actor does not exist. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
-	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal = nullptr; //[G]
+	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal = nullptr;
 
 	/** Contains the Pool Manager of the game that is used to reuse created objects. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pool Manager"))
-	TWeakObjectPtr<class UPoolManager> PoolManagerInternal = nullptr; //[G]
+	TWeakObjectPtr<class UPoolManager> PoolManagerInternal = nullptr;
 
 	/** Contains core data of the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Data Assets Container"))
-	TObjectPtr<class UDataAssetsContainer> DataAssetsContainerInternal = nullptr; //[B]
+	TObjectPtr<class UDataAssetsContainer> DataAssetsContainerInternal = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Editor development

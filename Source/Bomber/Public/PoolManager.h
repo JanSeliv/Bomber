@@ -39,11 +39,11 @@ struct BOMBER_API FPoolObject
 
 	/** Is true whenever the object is taken from the pool. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	bool bIsActive = false; //[AW]
+	bool bIsActive = false;
 
 	/** The object that is handled by the pool. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<UObject> Object = nullptr; //[AW]
+	TObjectPtr<UObject> Object = nullptr;
 
 	/** Returns true if the object is taken from the pool. */
 	FORCEINLINE bool IsActive() const { return bIsActive && Object; }
@@ -158,7 +158,7 @@ public:
 protected:
 	/** Contains all pools that are handled by the Pool Manger. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pools", TitleProperty = "ClassInPool"))
-	TArray<FPoolContainer> PoolsInternal; //[G]
+	TArray<FPoolContainer> PoolsInternal;
 
 	/** Returns the pointer to found pool by specified class. */
 	FPoolContainer* FindPool(const UClass* ClassInPool);

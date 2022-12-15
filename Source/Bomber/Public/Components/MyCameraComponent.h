@@ -60,21 +60,21 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** If true, it will prevent following camera by player locations. */
+	/** If true, it will prevent following camera by player locations, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Camera Locked On Center"))
-	bool bIsCameraLockedOnCenterInternal; //[C]
+	bool bIsCameraLockedOnCenterInternal;
 
 	/** The minimal camera height. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Height"))
-	float MinHeightInternal = 1500.f; //[N]
+	float MinHeightInternal = 1500.f;
 
 	/** The maximal camera height. Is set dynamically by UMyCameraComponent::UpdateMaxHeights(). */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Max Height"))
-	float MaxHeightInternal; //[G]
+	float MaxHeightInternal;
 
 	/** If UMyCameraComponent::StartLocation is true, then should forced moving to the start position. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))
-	bool bForceStartInternal; //[N]
+	bool bForceStartInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions

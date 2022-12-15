@@ -30,7 +30,7 @@ public:
 protected:
 	/** The chance to spawn item after box destroying. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Spawn Item Chance", ShowOnlyInnerProperties, ClampMin = "0", ClampMax = "100"))
-	int32 SpawnItemChanceInternal = 30.F; //[D]
+	int32 SpawnItemChanceInternal = 30.F;
 };
 
 /**
@@ -58,11 +58,11 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
 	/** Contains current spawn chance to spawn item. Can be overriden by the Cheat Manager. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
-	int32 SpawnItemChanceInternal = INDEX_NONE; //[G]
+	int32 SpawnItemChanceInternal = INDEX_NONE;
 
 	/* ---------------------------------------------------
 	*		Protected functions

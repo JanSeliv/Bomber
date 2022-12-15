@@ -44,19 +44,19 @@ protected:
 
 	/** The button to allow player restart the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> RestartButton = nullptr; //[B]
+	TObjectPtr<class UButton> RestartButton = nullptr;
 
 	/** The button to allow player go back to the Main Menu. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> MenuButton = nullptr; //[B]
+	TObjectPtr<class UButton> MenuButton = nullptr;
 
 	/** The button to allow player open in-game Settings. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> SettingsButton = nullptr; //[B]
+	TObjectPtr<class UButton> SettingsButton = nullptr;
 
 	/** Contains the localized text with the match result when the match was ended. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UTextBlock> EndGameTextWidget = nullptr; //[B]
+	TObjectPtr<class UTextBlock> EndGameTextWidget = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Protected functions

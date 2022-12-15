@@ -87,47 +87,47 @@ public:
 protected:
 	/** The Sound Manager that controls player the audio in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sounds Manager Class", ShowOnlyInnerProperties))
-	TSubclassOf<USoundsManager> SoundsManagerClass = nullptr; //[D]
+	TSubclassOf<USoundsManager> SoundsManagerClass = nullptr;
 
 	/** The base Sound Mix used in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sound Mix", ShowOnlyInnerProperties))
-	TObjectPtr<USoundMix> MainSoundMixInternal = nullptr; //[D]
+	TObjectPtr<USoundMix> MainSoundMixInternal = nullptr;
 
 	/** The parent of all sounds in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Master Sound Class", ShowOnlyInnerProperties))
-	TObjectPtr<USoundClass> MasterSoundClassInternal = nullptr; //[D]
+	TObjectPtr<USoundClass> MasterSoundClassInternal = nullptr;
 
 	/** The sound of background music. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
-	TObjectPtr<USoundClass> MusicSoundClassInternal = nullptr; //[D]
+	TObjectPtr<USoundClass> MusicSoundClassInternal = nullptr;
 
 	/** The sound of the sound effects like explosions. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "SFX Sound Class", ShowOnlyInnerProperties))
-	TObjectPtr<USoundClass> SFXSoundClassInternal = nullptr; //[D]
+	TObjectPtr<USoundClass> SFXSoundClassInternal = nullptr;
 
 	/** The sound of the game background theme. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main-Menu Music", ShowOnlyInnerProperties))
-	TObjectPtr<USoundBase> MainMenuMusicInternal = nullptr; //[D]
+	TObjectPtr<USoundBase> MainMenuMusicInternal = nullptr;
 
 	/** Contains all sounds of each level in the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Music", ShowOnlyInnerProperties))
-	TMap<ELevelType, TObjectPtr<USoundBase>> LevelsMusicInternal; //[D]
+	TMap<ELevelType, TObjectPtr<USoundBase>> LevelsMusicInternal;
 
 	/** Returns the blast SFX. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Sound", ShowOnlyInnerProperties))
-	TObjectPtr<USoundBase> ExplosionSFXInternal = nullptr; //[D]
+	TObjectPtr<USoundBase> ExplosionSFXInternal = nullptr;
 
 	/** The sound that is played on gathering any power-up. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Item Pick-Up SFX", ShowOnlyInnerProperties))
-	TObjectPtr<USoundBase> ItemPickUpSFXInternal = nullptr; //[D]
+	TObjectPtr<USoundBase> ItemPickUpSFXInternal = nullptr;
 
 	/** Contains all sounds of End-Game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game SFX", ShowOnlyInnerProperties))
-	TMap<EEndGameState, TObjectPtr<USoundBase>> EndGameSFXInternal; //[D]
+	TMap<EEndGameState, TObjectPtr<USoundBase>> EndGameSFXInternal;
 
 	/** The sound that is played on clicking any UI element. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "UI Click SFX", ShowOnlyInnerProperties))
-	TObjectPtr<USoundBase> UIClickSFXInternal = nullptr; //[D]
+	TObjectPtr<USoundBase> UIClickSFXInternal = nullptr;
 
 private:
 	/** Is created dynamically by specified Sound Manager class.
@@ -203,21 +203,21 @@ protected:
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
-	/** The general sound volume for all sound classes in game. */
+	/** The general sound volume for all sound classes in game, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Volume"))
-	double MasterVolumeInternal; //[С]
+	double MasterVolumeInternal;
 
-	/** The sound volume for music sound class. */
+	/** The sound volume for music sound class, is config property, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
-	double MusicVolumeInternal; //[С]
+	double MusicVolumeInternal;
 
-	/** The sound volume for SFX sound class. */
+	/** The sound volume for SFX sound class, is config property, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
-	double SFXVolumeInternal; //[С]
+	double SFXVolumeInternal;
 
 	/** The component that is used to play different background musics.  */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))
-	TObjectPtr<UAudioComponent> BackgroundMusicComponentInternal = nullptr; //[G]
+	TObjectPtr<UAudioComponent> BackgroundMusicComponentInternal = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Protected functions

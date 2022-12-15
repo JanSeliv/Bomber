@@ -35,7 +35,7 @@ public:
 protected:
 	/** Contains singletons for editor clients.  */
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<UObject>> ClientSingletonsInternal; //[D]
+	TArray<TObjectPtr<UObject>> ClientSingletonsInternal;
 
 	/** Creates a new Play in Editor instance (which may be in a new process if not running under one process. */
 	virtual void CreateNewPlayInEditorInstance(FRequestPlaySessionParams& InRequestParams, const bool bInDedicatedInstance, const EPlayNetMode InNetMode) override;

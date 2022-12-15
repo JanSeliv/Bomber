@@ -45,7 +45,7 @@ struct BOMBER_API FCell
 	/** Always holds the free cell's FVector-coordinate.
 	 * If it is not empty or not found, holds the last succeeded due to copy operator. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FVector Location = FVector::DownVector; //[AW]
+	FVector Location = FVector::DownVector;
 
 	/** Default constructor. */
 	FCell() = default;

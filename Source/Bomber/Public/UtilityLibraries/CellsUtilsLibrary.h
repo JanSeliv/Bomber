@@ -123,11 +123,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "C1,C2", DisplayName = "Distance (Cell)", ScriptMethod = "Distance", Keywords = "magnitude,length"))
 	static FORCEINLINE double Cell_Distance(const FCell& C1, const FCell& C2) { return FCell::Distance<double>(C1, C2); }
 
-	/** Find the max distance between cells within specified set. */
+	/** Find the max distance between cells within specified set, where each 1 unit means one cell. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE double GetCellArrayMaxDistance(const TSet<FCell>& Cells) { return FCell::GetCellArrayMaxDistance<double>(Cells); }
 
-	/** Find the average of an set of cells, where each 1 unit means one cell. */
+	/** Find the average of an set of cells. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FCell GetCellArrayAverage(const TSet<FCell>& Cells) { return FCell::GetCellArrayAverage(Cells); }
 

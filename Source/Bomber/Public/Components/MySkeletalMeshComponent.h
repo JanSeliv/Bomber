@@ -21,11 +21,11 @@ struct BOMBER_API FCustomPlayerMeshData
 
 	/** The row that is used to visualize the bomber character. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<const class UPlayerRow> PlayerRow = nullptr; //[G]
+	TObjectPtr<const class UPlayerRow> PlayerRow = nullptr;
 
 	/** The index of the texture to set. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	int32 SkinIndex = 0; //[N]
+	int32 SkinIndex = 0;
 
 	/** Returns true is data is valid. */
 	FORCEINLINE bool IsValid() const { return PlayerRow != nullptr; }
@@ -101,16 +101,16 @@ protected:
 	/** Determines how this mesh looks like for now.
 	 * Is not transient, can be set in editor-time. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
-	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty; //[G]
+	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty;
 
 	/** Current level type of attached meshes.
 	 * Is not transient, can be set in editor-time. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes Type"))
-	ELevelType AttachedMeshesTypeInternal = ELT::None; //[G]
+	ELevelType AttachedMeshesTypeInternal = ELT::None;
 
 	/** Current attached mesh components. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))
-	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal; //[M.IO]
+	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions

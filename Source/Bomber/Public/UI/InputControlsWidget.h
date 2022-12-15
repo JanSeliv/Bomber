@@ -48,15 +48,15 @@ protected:
 
 	/** A widget for remapping a single key. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UInputKeySelector> InputKeySelector = nullptr; //[B]
+	TObjectPtr<class UInputKeySelector> InputKeySelector = nullptr;
 
 	/** Contains mappable data for this button. */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mappable Data"))
-	FEnhancedActionKeyMapping MappableDataInternal; //[G]
+	FEnhancedActionKeyMapping MappableDataInternal;
 
 	/** An input context that is owns this input button. */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Context"))
-	TObjectPtr<const class UMyInputMappingContext> InputContextInternal = nullptr; //[G]
+	TObjectPtr<const class UMyInputMappingContext> InputContextInternal = nullptr;
 
 	/** ---------------------------------------------------
 	 *		Protected functions
@@ -98,19 +98,19 @@ protected:
 
 	/** Is parent widget of all dynamically created buttons. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UHorizontalBox> HorizontalBoxInputButtons = nullptr; //[B]
+	TObjectPtr<class UHorizontalBox> HorizontalBoxInputButtons = nullptr;
 
 	/** The class of the Input Button Widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Button Class"))
-	TSubclassOf<UInputButtonWidget> InputButtonClassInternal = UInputButtonWidget::StaticClass(); //[B]
+	TSubclassOf<UInputButtonWidget> InputButtonClassInternal = UInputButtonWidget::StaticClass();
 
 	/** Owned input context that is represented by this widget. */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Context"))
-	TObjectPtr<const class UMyInputMappingContext> InputContextInternal = nullptr; //[G]
+	TObjectPtr<const class UMyInputMappingContext> InputContextInternal = nullptr;
 
 	/** All dynamically created input button for each mappable input in own Input Context. */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Buttons"))
-	TArray<TObjectPtr<UInputButtonWidget>> InputButtonsInternal; //[M.IO]
+	TArray<TObjectPtr<UInputButtonWidget>> InputButtonsInternal;
 
 	/** ---------------------------------------------------
 	 *		Protected functions
@@ -139,15 +139,15 @@ protected:
 
 	/** Is parent widget of all dynamically created categories. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UScrollBox> ScrollBoxInputCategories = nullptr; //[B]
+	TObjectPtr<class UScrollBox> ScrollBoxInputCategories = nullptr;
 
 	/** The class of the Input Button Widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Category Class"))
-	TSubclassOf<UInputCategoryWidget> InputCategoryClassInternal = UInputCategoryWidget::StaticClass(); //[B]
+	TSubclassOf<UInputCategoryWidget> InputCategoryClassInternal = UInputCategoryWidget::StaticClass();
 
 	/** Contains all dynamically created categories, where every category represents own mapping context. */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Categories"))
-	TArray<TObjectPtr<UInputCategoryWidget>> InputCategoriesInternal; //[M.IO]
+	TArray<TObjectPtr<UInputCategoryWidget>> InputCategoriesInternal;
 
 	/** ---------------------------------------------------
 	 *		Protected functions
