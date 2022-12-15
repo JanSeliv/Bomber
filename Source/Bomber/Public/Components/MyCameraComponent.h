@@ -3,7 +3,8 @@
 #pragma once
 
 #include "Camera/CameraComponent.h"
-#include "Bomber.h"
+//---
+#include "Structures/Cell.h"
 //---
 #include "MyCameraComponent.generated.h"
 
@@ -42,7 +43,7 @@ public:
 	void SetCameraLockedOnCenter(bool bInCameraLockedOnCenter);
 
 	/** Returns the center camera location between all specified cells. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FVector GetCameraLocationBetweenCells(const TSet<FCell>& Cells) const;
 
 	/** Returns the center camera location between all players and bots. */
@@ -52,7 +53,7 @@ public:
 	/** Returns the default camera location between all players and bots.
 	 * Is absolute center position, where the camera starts game and returns to it on endgame.
 	 * Camera always stays there if IsCameraLockedOnCenter() returns true. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FVector GetCameraLockedLocation() const;
 
 protected:
@@ -70,11 +71,11 @@ protected:
 
 	/** The maximal camera height. Is set dynamically by UMyCameraComponent::UpdateMaxHeights(). */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Max Height"))
-	float MaxHeightInternal;
+	float MaxHeightInternal = 4000.f;
 
 	/** If UMyCameraComponent::StartLocation is true, then should forced moving to the start position. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))
-	bool bForceStartInternal;
+	bool bForceStartInternal = false;
 
 	/* ---------------------------------------------------
 	*		Protected functions

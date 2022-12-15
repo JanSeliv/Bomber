@@ -2,6 +2,7 @@
 
 #include "Components/MyCameraComponent.h"
 //---
+#include "Bomber.h"
 #include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/SingletonLibrary.h"
@@ -9,7 +10,6 @@
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "Camera/CameraComponent.h"
-#include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
