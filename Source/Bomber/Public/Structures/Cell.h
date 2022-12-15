@@ -74,9 +74,13 @@ struct BOMBER_API FCell
 	/** Check is valid this cell. */
 	FORCEINLINE bool IsValid() const { return *this != InvalidCell; }
 
-	/** Returns how many cells are between two cells. */
+	/** Returns how many cells are between two cells, where each 1 unit means one cell. */
 	template <typename T>
 	static FORCEINLINE T Distance(const FCell& C1, const FCell& C2) { return FMath::Abs<T>((C1.Location - C2.Location).Size()) / CellSize; }
+
+	/** Find the max distance between cells within specified set, where each 1 unit means one cell. */
+	template <typename T>
+	static float GetCellArrayMaxDistance(const FCells& Cells);
 
 	/**
 	 * Compares cells for equality.
@@ -120,3 +124,22 @@ struct BOMBER_API FCell
 	*/
 	friend FORCEINLINE uint32 GetTypeHash(const FCell& Vector) { return GetTypeHash(Vector.Location); }
 };
+
+// Find the max distance between cells within specified set, where each 1 unit means one cell
+template <typename T>
+float FCell::GetCellArrayMaxDistance(const FCells& Cells)
+{
+	T MaxDistance{};
+	for (const FCell& C1 : Cells)
+	{
+		for (const FCell& C2 : Cells)
+		{
+			const T LengthIt = FCell::Distance<T>(C1, C2);
+			if (LengthIt > MaxDistance)
+			{
+				MaxDistance = LengthIt;
+			}
+		}
+	}
+	return MaxDistance;
+}

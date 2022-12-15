@@ -41,11 +41,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetCameraLockedOnCenter(bool bInCameraLockedOnCenter);
 
-	/** Returns the center location between all players and bots. */
+	/** Returns the center camera location between all specified cells. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FVector GetCameraLocationBetweenCells(const TSet<FCell>& Cells) const;
+
+	/** Returns the center camera location between all players and bots. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FVector GetLocationBetweenPlayers() const;
-	
+	FVector GetCameraLocationBetweenPlayers() const;
+
+	/** Returns the default camera location between all players and bots.
+	 * Is absolute center position, where the camera starts game and returns to it on endgame.
+	 * Camera always stays there if IsCameraLockedOnCenter() returns true. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FVector GetCameraLockedLocation() const;
+
 protected:
+	/* ---------------------------------------------------
+	*		Protected properties
+	* --------------------------------------------------- */
+
 	/** If true, it will prevent following camera by player locations. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Camera Locked On Center"))
 	bool bIsCameraLockedOnCenterInternal; //[C]
@@ -62,9 +76,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))
 	bool bForceStartInternal; //[N]
 
-	/** The absolute center position between players. The camera starts game from that position and returns to it on endgame. Is not visible in editor, is set on Begin Play*/
-	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Start Location"))
-	FVector StartLocationInternal; //[N]
+	/* ---------------------------------------------------
+	*		Protected functions
+	* --------------------------------------------------- */
 
 	/** Called every frame. */
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

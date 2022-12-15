@@ -62,10 +62,11 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 	{
 		static constexpr float Tolerance = 10.f;
 		const FVector CameraWorldLocation = GetComponentLocation();
-		const bool bShouldLerp = !CameraWorldLocation.Equals(StartLocationInternal, Tolerance);
+		const FVector CameraLockedLocation = GetCameraLockedLocation();
+		const bool bShouldLerp = !CameraWorldLocation.Equals(CameraLockedLocation, Tolerance);
 		if (bShouldLerp)
 		{
-			NewLocation = FMath::Lerp(CameraWorldLocation, StartLocationInternal, DeltaTime);
+			NewLocation = FMath::Lerp(CameraWorldLocation, CameraLockedLocation, DeltaTime);
 			SetWorldLocation(NewLocation);
 		}
 
@@ -74,7 +75,7 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 	}
 
 	// Distance finding between players
-	NewLocation = GetLocationBetweenPlayers();
+	NewLocation = GetCameraLocationBetweenPlayers();
 
 	if (DeltaTime)
 	{
@@ -100,33 +101,40 @@ void UMyCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
 	}
 }
 
-// Returns the center location between all players and bots
-FVector UMyCameraComponent::GetLocationBetweenPlayers() const
+// Returns the center camera location between all specified cells
+FVector UMyCameraComponent::GetCameraLocationBetweenCells(const FCells& Cells) const
 {
-	float Distance = 0.f;
-	const FCells PlayersCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
-	for (const FCell& C1 : PlayersCells)
-	{
-		for (const FCell& C2 : PlayersCells)
-		{
-			const float LengthIt = FCell::Distance<float>(C1, C2);
-			if (LengthIt > Distance)
-			{
-				Distance = LengthIt;
-			}
-		}
-	}
+	float Distance = FCell::GetCellArrayMaxDistance<float>(Cells);
 	Distance *= FCell::CellSize;
-	if (Distance > MaxHeightInternal)
-	{
-		Distance = MaxHeightInternal;
-	}
+	Distance = FMath::Min(Distance, MaxHeightInternal);
 
-	// Set the new location
-	FVector NewLocation = FVector::ZeroVector;
-	NewLocation = FCell::GetCellArrayAverage(PlayersCells).Location;
+	FVector NewLocation = FCell::GetCellArrayAverage(Cells).Location;
 	NewLocation.Z = FMath::Max(MinHeightInternal, NewLocation.Z + Distance);
 	return NewLocation;
+}
+
+// Returns the center location between all players and bots
+FVector UMyCameraComponent::GetCameraLocationBetweenPlayers() const
+{
+	const FCells PlayersCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
+	return GetCameraLocationBetweenCells(PlayersCells);
+}
+
+// Returns the default location between all players and bots
+FVector UMyCameraComponent::GetCameraLockedLocation() const
+{
+	constexpr int32 FirstCellIndex = 0;
+	const int32 LastColumnIndex = UCellsUtilsLibrary::GetLastColumnIndexOnLevel();
+	const int32 LastRowIndex = UCellsUtilsLibrary::GetLastRowIndexOnLevel();
+
+	const FCells CornerCells = {
+		UCellsUtilsLibrary::GetCellOnLevel(FirstCellIndex, FirstCellIndex),
+		UCellsUtilsLibrary::GetCellOnLevel(FirstCellIndex, LastColumnIndex),
+		UCellsUtilsLibrary::GetCellOnLevel(LastRowIndex, FirstCellIndex),
+		UCellsUtilsLibrary::GetCellOnLevel(LastRowIndex, LastColumnIndex)
+	};
+
+	return GetCameraLocationBetweenCells(CornerCells);
 }
 
 // Called every frame
@@ -161,10 +169,6 @@ void UMyCameraComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::GameStarting:
 		{
-			if (StartLocationInternal.IsZero())
-			{
-				StartLocationInternal = GetLocationBetweenPlayers();
-			}
 			PossessCamera();
 			bShouldTick = true;
 			break;
