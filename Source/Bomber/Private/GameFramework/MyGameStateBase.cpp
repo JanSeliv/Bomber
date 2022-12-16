@@ -8,7 +8,10 @@
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "GameFeaturesSubsystem.h"
+#include "InterchangeResult.h"
+#include "SoundsManager.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundNodeWavePlayer.h"
 
 // Returns the Game State data asset
 const UGameStateDataAsset& UGameStateDataAsset::Get()
@@ -171,6 +174,14 @@ void AMyGameStateBase::DecrementInGameCountdown()
 	}
 
 	InGameTimerSecRemainInternal -= UGameStateDataAsset::Get().GetTickInterval();
+	if (InGameTimerSecRemainInternal <= 10.0f)
+	{
+		USoundsManager 
+		if (USoundBase* EndGameCountdownTimerSFX = USoundsDataAsset::Get().GetEndGameCountdownSFX())
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), EndGameCountdownTimerSFX);
+		}
+	}
 
 	if (IsInGameTimerElapsed())
 	{

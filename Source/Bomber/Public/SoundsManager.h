@@ -74,6 +74,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE USoundBase* GetItemPickUpSFX() const { return ItemPickUpSFXInternal; }
 
+	/** Returns the sound that is played right before the match ends.
+	 * @see USoundsDataAsset::EndGameCountdownInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class USoundBase* GetEndGameCountdownSFX() const { return EndGameCountdownSFXInternal; }
+
 	/** Returns the End-Game sound by specified End-Game state.
 	 * @see USoundsDataAsset::EndGameSoundsInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -116,10 +121,15 @@ protected:
 	/** Returns the blast SFX. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Sound", ShowOnlyInnerProperties))
 	TObjectPtr<USoundBase> ExplosionSFXInternal = nullptr; //[D]
-
+	
 	/** The sound that is played on gathering any power-up. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Item Pick-Up SFX", ShowOnlyInnerProperties))
 	TObjectPtr<USoundBase> ItemPickUpSFXInternal = nullptr; //[D]
+
+	/** The sound that is played right before the match ends. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "EndGame Countdown SFX ", ShowOnlyInnerProperties))
+	TObjectPtr<class USoundBase> EndGameCountdownSFXInternal = nullptr; //[D]
+	
 
 	/** Contains all sounds of End-Game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game SFX", ShowOnlyInnerProperties))
@@ -193,6 +203,10 @@ public:
 	/** Play the sound of the picked power-up. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void PlayItemPickUpSFX();
+
+	/** Play the sound that is played right before the match ends. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayEndGameCountdownSFX();
 
 	/** Play the sound of the clicked UI element. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Play UI Click SFX"))
