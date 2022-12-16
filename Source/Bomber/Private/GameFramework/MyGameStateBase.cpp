@@ -11,7 +11,6 @@
 #include "InterchangeResult.h"
 #include "SoundsManager.h"
 #include "Net/UnrealNetwork.h"
-#include "Sound/SoundNodeWavePlayer.h"
 
 // Returns the Game State data asset
 const UGameStateDataAsset& UGameStateDataAsset::Get()
@@ -174,18 +173,18 @@ void AMyGameStateBase::DecrementInGameCountdown()
 	}
 
 	InGameTimerSecRemainInternal -= UGameStateDataAsset::Get().GetTickInterval();
-	if (InGameTimerSecRemainInternal <= 10.0f)
-	{
-		USoundsManager 
-		if (USoundBase* EndGameCountdownTimerSFX = USoundsDataAsset::Get().GetEndGameCountdownSFX())
-		{
-			UGameplayStatics::PlaySound2D(GetWorld(), EndGameCountdownTimerSFX);
-		}
-	}
 
 	if (IsInGameTimerElapsed())
 	{
 		ServerSetGameState(ECurrentGameState::EndGame);
+	} else
+	{
+		/** to do: adjust the value of 10.0f to match the duration of the file from meta sound. */
+		if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+		{
+			if(FMath::IsNearlyEqual(InGameTimerSecRemainInternal, 10.0f, UGameStateDataAsset::Get().GetTickInterval() - 0.01f))
+				SoundsManager->PlayEndGameCountdownSFX();
+		}
 	}
 }
 
