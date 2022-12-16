@@ -205,19 +205,19 @@ protected:
 
 	/** Contains all settings. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Table Rows"))
-	TMap<FName/*Tag*/, FSettingsPicker/*Row*/> SettingsTableRowsInternal; //[G]
+	TMap<FName/*Tag*/, FSettingsPicker/*Row*/> SettingsTableRowsInternal;
 
 	/** The index of the current column. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Column Index"))
-	int32 CurrentColumnIndexInternal = 0; //[G]
+	int32 CurrentColumnIndexInternal = 0;
 
 	/** Is set automatically on started by amount of rows that are marked to be started on next column. Settings have at least one column. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overall Columns Num"))
-	int32 OverallColumnsNumInternal = 1; //[G]
+	int32 OverallColumnsNumInternal = 1;
 
 	/** Contains all setting scrollboxes added to columns. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Setting ScrollBoxes"))
-	TArray<TObjectPtr<class USettingScrollBox>> SettingScrollBoxesInternal; //[G]
+	TArray<TObjectPtr<class USettingScrollBox>> SettingScrollBoxesInternal;
 
 	/* ---------------------------------------------------
 	 *		Bound widget properties
@@ -225,15 +225,15 @@ protected:
 
 	/** The section in the top margin of Settings, usually contains a title. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UVerticalBox> HeaderVerticalBox = nullptr; //[I]
+	TObjectPtr<class UVerticalBox> HeaderVerticalBox = nullptr;
 
 	/** The main section in the middle of Settings, contains all in-game settings. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UHorizontalBox> ContentHorizontalBox = nullptr; //[I]
+	TObjectPtr<class UHorizontalBox> ContentHorizontalBox = nullptr;
 
 	/** The section in the bottom margin of Settings, usually contains the Back button*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UVerticalBox> FooterVerticalBox = nullptr; //[I]
+	TObjectPtr<class UVerticalBox> FooterVerticalBox = nullptr;
 
 	/* ---------------------------------------------------
 	*		Protected functions

@@ -43,19 +43,19 @@ public:
 protected:
 	/** The search radius of items. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Item Search Radius", ShowOnlyInnerProperties))
-	int32 ItemSearchRadiusInternal = 2; //[D]
+	int32 ItemSearchRadiusInternal = 2;
 
 	/** The search radius of crossways. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Crossway Search Radius", ShowOnlyInnerProperties))
-	int32 CrosswaySearchRadiusInternal = 2; //[D]
+	int32 CrosswaySearchRadiusInternal = 2;
 
 	/** Determine radius of near dangerous cells (length <= near dangerous radius). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Near Dangerous Radius", ShowOnlyInnerProperties))
-	int32 NearDangerousRadiusInternal = 3; //[D]
+	int32 NearDangerousRadiusInternal = 3;
 
 	/** Determine filter radius of near cells (length <= near radius). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Near Filter Radius", ShowOnlyInnerProperties))
-	int32 NearFilterRadiusInternal = 3; //[D]
+	int32 NearFilterRadiusInternal = 3;
 };
 
 /**
@@ -85,15 +85,15 @@ protected:
 
 	/** Timer to update AI. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
-	FTimerHandle AIUpdateHandleInternal; //[G]
+	FTimerHandle AIUpdateHandleInternal;
 
 	/** Cell position of current path segment's end */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "AI Move To"))
-	FCell AIMoveToInternal = FCell::InvalidCell; //[G]
+	FCell AIMoveToInternal = FCell::InvalidCell;
 
 	/** Controlled character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))
-	TObjectPtr<class APlayerCharacter> OwnerInternal = nullptr; //[G]
+	TObjectPtr<class APlayerCharacter> OwnerInternal = nullptr;
 
 	/* ---------------------------------------------------
 	*		Protected functions

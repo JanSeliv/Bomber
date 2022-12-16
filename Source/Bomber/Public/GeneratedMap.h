@@ -25,15 +25,15 @@ struct BOMBER_API FLevelStreamRow
 
 	/** The level asset */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
-	TSoftObjectPtr<class UWorld> Level = nullptr; //[D]
+	TSoftObjectPtr<class UWorld> Level = nullptr;
 
 	/** The associated type of a level. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
-	ELevelType LevelType = ELT::None; //[D]
+	ELevelType LevelType = ELT::None;
 
 	/** The name of a level on UI. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level")
-	FText LevelName = TEXT_NONE; //[D]
+	FText LevelName = TEXT_NONE;
 };
 
 /**
@@ -71,23 +71,23 @@ public:
 protected:
 	/** Contains all used levels. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels", TitleProperty = "LevelType", ShowOnlyInnerProperties))
-	TArray<FLevelStreamRow> LevelsInternal; //[D]
+	TArray<FLevelStreamRow> LevelsInternal;
 
 	/** The chance of walls generation. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Walls Chance", ShowOnlyInnerProperties, Units = "Percent", ClampMin = "0", ClampMax = "100"))
-	int32 WallsChanceInternal = 35; //[D]
+	int32 WallsChanceInternal = 35;
 
 	/** The chance of boxes generation. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Boxes Chance", ShowOnlyInnerProperties, Units = "Percent", ClampMin = "0", ClampMax = "100"))
-	int32 BoxesChanceInternal = 70; //[D]
+	int32 BoxesChanceInternal = 70;
 
 	/** Asset that contains scalable collision. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collisions Asset", ShowOnlyInnerProperties))
-	TSubclassOf<AActor> CollisionsAssetInternal = nullptr; //[D]
+	TSubclassOf<AActor> CollisionsAssetInternal = nullptr;
 
 	/** If true, the level position will be locked on the (0,0,0) location. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Lock Location On Zero", ShowOnlyInnerProperties))
-	bool LockOnZeroInternal = true; //[D]
+	bool LockOnZeroInternal = true;
 };
 
 /**
@@ -107,7 +107,7 @@ public:
 #if WITH_EDITORONLY_DATA  // [Editor] Renders
 	/** Specify for which level actors should show debug renders. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
-	int32 RenderActorsTypes = TO_FLAG(EAT::None); //[N]
+	int32 RenderActorsTypes = TO_FLAG(EAT::None);
 #endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelMapWantsReconstruct, const FTransform&, Transform);
@@ -115,24 +115,24 @@ public:
 	/** Called when this level map actor wants to be reconstructed.
 	* Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructLevelMap(). */
 	UPROPERTY(BlueprintAssignable, Category = "C++")
-	FOnLevelMapWantsReconstruct OnLevelMapWantsReconstruct; //[DMD]
+	FOnLevelMapWantsReconstruct OnLevelMapWantsReconstruct;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetNewLevelType, ELevelType, NewLevelType);
 
 	/** Called when new level type is set. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnSetNewLevelType OnSetNewLevelType; //[DMD]
+	FOnSetNewLevelType OnSetNewLevelType;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
 
 	/** Called when any player or bot was exploded. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnAnyPlayerDestroyed OnAnyCharacterDestroyed; //[DMD]
+	FOnAnyPlayerDestroyed OnAnyCharacterDestroyed;
 
 	/** Contains outside added dangerous cells, is useful for Game Features to notify bots that some cells are not safe.
 	 * @TODO: Move to AI Manager. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	TSet<FCell> AdditionalDangerousCells; //[G]
+	TSet<FCell> AdditionalDangerousCells;
 
 	/* ---------------------------------------------------
 	 *		Public functions
@@ -230,45 +230,45 @@ protected:
 
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
-	TObjectPtr<class UChildActorComponent> CollisionComponentInternal = nullptr; //[C.DO]
+	TObjectPtr<class UChildActorComponent> CollisionComponentInternal = nullptr;
 
 	/** Cells storage. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
-	TArray<FCell> GridCellsInternal; //[M.IO]
+	TArray<FCell> GridCellsInternal;
 
 	/** Map components of all level actors. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
-	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal; //[M.IO]
+	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal;
 
 	/** Contains map components that were dragged to the scene. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
-	TMap<FCell, EActorType> DraggedCellsInternal; //[M.IO]
+	TMap<FCell, EActorType> DraggedCellsInternal;
 
 	/** Number of characters on the Level Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
-	int32 PlayersNumInternal = 0; //[G]
+	int32 PlayersNumInternal = 0;
 
 	/** The current level type. Affects on the meshes of each level actor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = "OnRep_LevelType", Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
-	ELevelType LevelTypeInternal = ELT::First; //[N]
+	ELevelType LevelTypeInternal = ELT::First;
 
 	/** Attached camera component. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Component"))
-	TObjectPtr<class UMyCameraComponent> CameraComponentInternal = nullptr; //[C.DO]
+	TObjectPtr<class UMyCameraComponent> CameraComponentInternal = nullptr;
 
 	/** Is true when current state is Game Starting. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
-	bool bIsGameRunningInternal = false; //[G]
+	bool bIsGameRunningInternal = false;
 
 	/** Contains the cached transform since the level actor does not move and is always static. */
 	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cached Transform"))
-	FTransform CachedTransformInternal = FTransform::Identity; //[G]
+	FTransform CachedTransformInternal = FTransform::Identity;
 
 	/** Is used to avoid spawning and destroying level actors on every regeneration,
 	 *  instead they are created once, are activated when are taken from a pool
 	 *  and deactivated when are returned to a pool. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pool Manager"))
-	TObjectPtr<class UPoolManager> PoolManagerInternal = nullptr; //[C.DO]
+	TObjectPtr<class UPoolManager> PoolManagerInternal = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Protected functions

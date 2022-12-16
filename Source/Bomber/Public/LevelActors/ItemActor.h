@@ -20,7 +20,7 @@ class BOMBER_API UItemRow final : public ULevelActorRow
 public:
 	/** Of each type this item is. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
-	EItemType ItemType = EItemType::None; //[D]
+	EItemType ItemType = EItemType::None;
 };
 
 /**
@@ -55,11 +55,11 @@ public:
 protected:
 	/** The speed additive value when player takes the skate item. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skate Additive Strength", ShowOnlyInnerProperties))
-	float SkateAdditiveStrengthInternal = 500.f; //[D]
+	float SkateAdditiveStrengthInternal = 500.f;
 
 	/** Max possible items to be picked up by player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Max Allowed Items Num", ShowOnlyInnerProperties))
-	int32 MaxAllowedItemsNumInternal = 5; //[D]
+	int32 MaxAllowedItemsNumInternal = 5;
 };
 
 /**
@@ -93,7 +93,7 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
 	/**
 	* Skate: Increase the movement speed of the character.
@@ -101,7 +101,7 @@ protected:
 	* Fire: Increase the bomb blast radius.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DIsplayName = "Item Type"))
-	EItemType ItemTypeInternal = EItemType::None; // [AW]
+	EItemType ItemTypeInternal = EItemType::None;
 
 	/* ---------------------------------------------------
 	*		Protected functions

@@ -66,19 +66,19 @@ public:
 protected:
 	/** The Size Box widget. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class USizeBox> SizeBoxWidget = nullptr; //[I]
+	TObjectPtr<class USizeBox> SizeBoxWidget = nullptr;
 
 	/** The widget that shows the caption text of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UTextBlock> CaptionWidget = nullptr; //[I]
+	TObjectPtr<class UTextBlock> CaptionWidget = nullptr;
 
 	/** The setting primary row of this widget. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Setting Primary Row"))
-	FSettingsPrimary SettingPrimaryRowInternal = FSettingsPrimary::EmptyPrimary; //[G]
+	FSettingsPrimary SettingPrimaryRowInternal = FSettingsPrimary::EmptyPrimary;
 
 	/** The main settings widget. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))
-	TObjectPtr<class USettingsWidget> SettingsWidgetInternal = nullptr; //[G]
+	TObjectPtr<class USettingsWidget> SettingsWidgetInternal = nullptr;
 };
 
 /**
@@ -103,7 +103,7 @@ protected:
 
 	/** The actual button widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> ButtonWidget = nullptr; //[I]
+	TObjectPtr<class UButton> ButtonWidget = nullptr;
 
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -137,7 +137,7 @@ protected:
 
 	/** The actual checkbox widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UCheckBox> CheckboxWidget = nullptr; //[I]
+	TObjectPtr<class UCheckBox> CheckboxWidget = nullptr;
 
 	/** Called after the underlying slate widget is constructed.
  	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -177,11 +177,11 @@ protected:
 
 	/** The actual combobox widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UComboBoxString> ComboboxWidget = nullptr; //[I]
+	TObjectPtr<class UComboBoxString> ComboboxWidget = nullptr;
 
 	/** Is true if combobox is currently opened in Settings. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Combobox Opened"))
-	bool bIsComboboxOpenedInternal = false; //[G]
+	bool bIsComboboxOpenedInternal = false;
 
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -222,7 +222,7 @@ protected:
 
 	/** The actual slider widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class USlider> SliderWidget = nullptr; //[I]
+	TObjectPtr<class USlider> SliderWidget = nullptr;
 
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
@@ -279,7 +279,7 @@ protected:
 
 	/** The actual Editable Text Box widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UEditableTextBox> EditableTextBox = nullptr; //[I]
+	TObjectPtr<class UEditableTextBox> EditableTextBox = nullptr;
 
 	/** Called after the underlying slate widget is constructed.
 	* May be called multiple times due to adding and removing from the hierarchy. */
@@ -324,7 +324,7 @@ protected:
 
 	/** The actual ScrollBox widget of this setting. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UScrollBox> ScrollBoxWidget = nullptr; //[I]
+	TObjectPtr<class UScrollBox> ScrollBoxWidget = nullptr;
 
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */

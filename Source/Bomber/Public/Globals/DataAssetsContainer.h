@@ -65,29 +65,29 @@ public:
 protected:
 	/** Contains properties to setup the generated level. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Data Asset", ShowOnlyInnerProperties))
-	TObjectPtr<class UGeneratedMapDataAsset> LevelsDataAssetInternal = nullptr; //[B]
+	TObjectPtr<class UGeneratedMapDataAsset> LevelsDataAssetInternal = nullptr;
 
 	/** Contains properties to setup UI. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "UI Data Asset", ShowOnlyInnerProperties))
-	TObjectPtr<class UUIDataAsset> UIDataAssetInternal = nullptr; //[B]
+	TObjectPtr<class UUIDataAsset> UIDataAssetInternal = nullptr;
 
 	/** AI data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "AI Data Asset", ShowOnlyInnerProperties))
-	TObjectPtr<class UAIDataAsset> AIDataAssetInternal = nullptr; //[B]
+	TObjectPtr<class UAIDataAsset> AIDataAssetInternal = nullptr;
 
 	/** Player Input data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Player Input Data Asset", ShowOnlyInnerProperties))
-	TObjectPtr<class UPlayerInputDataAsset> PlayerInputDataAssetInternal = nullptr; //[B]
+	TObjectPtr<class UPlayerInputDataAsset> PlayerInputDataAssetInternal = nullptr;
 
 	/** Sounds data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sounds Data Asset", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundsDataAsset> SoundsDataAssetInternal = nullptr; //[B]
+	TObjectPtr<class USoundsDataAsset> SoundsDataAssetInternal = nullptr;
 
 	/** The data of the game match. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Game State Data Asset", ShowOnlyInnerProperties))
-	TObjectPtr<class UGameStateDataAsset> GameStateDataAssetInternal = nullptr; //[B]
+	TObjectPtr<class UGameStateDataAsset> GameStateDataAssetInternal = nullptr;
 
 	/** Actor type and its associated class. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actors Data Assets", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class ULevelActorDataAsset>> ActorsDataAssetsInternal; //[B]
+	TArray<TObjectPtr<class ULevelActorDataAsset>> ActorsDataAssetsInternal;
 };

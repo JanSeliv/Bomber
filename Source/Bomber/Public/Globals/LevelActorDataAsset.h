@@ -19,11 +19,11 @@ class BOMBER_API ULevelActorRow : public UObject
 public:
 	/** The level where should be used a mesh */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	ELevelType LevelType = ELT::None; //[D]
+	ELevelType LevelType = ELT::None;
 
 	/** The static mesh, skeletal mesh or texture */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties, ExposeOnSpawn = "true"))
-	TObjectPtr<class UStreamableRenderAsset> Mesh = nullptr; //[D]
+	TObjectPtr<class UStreamableRenderAsset> Mesh = nullptr;
 
 protected:
 #if WITH_EDITOR
@@ -105,23 +105,23 @@ protected:
 
 	/** All rows contained by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (BlueprintProtected, DisplayName = "Rows", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class ULevelActorRow>> RowsInternal; //[D]
+	TArray<TObjectPtr<class ULevelActorRow>> RowsInternal;
 
 	/** Class of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))
-	TSubclassOf<class AActor> ActorClassInternal = nullptr; //[D]
+	TSubclassOf<class AActor> ActorClassInternal = nullptr;
 
 	/** Actor type of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))
-	EActorType ActorTypeInternal = EAT::None; //[D]
+	EActorType ActorTypeInternal = EAT::None;
 
 	/** Extent size of the collision box of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collision Extent", ShowOnlyInnerProperties))
-	FVector CollisionExtentInternal = FVector(100.f); //[D]
+	FVector CollisionExtentInternal = FVector(100.f);
 
 	/** Response type of the collision box of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties))
-	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap; //[D]
+	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap;
 
 #if WITH_EDITOR
 	/** Handle adding new rows. */

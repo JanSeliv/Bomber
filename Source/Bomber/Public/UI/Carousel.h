@@ -15,7 +15,7 @@ struct BOMBER_API FFloor
 
 	/** Names and relative locations of spawned floors. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	TMap<FString, FTransform> Meshes; //[M.AW]
+	TMap<FString, FTransform> Meshes;
 };
 
 /**
@@ -69,15 +69,15 @@ protected:
 
 	/** Contains level actors data of spawned meshes for each floor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Floors", ShowOnlyInnerProperties))
-	TArray<FFloor> FloorsInternal; //[M.AW]
+	TArray<FFloor> FloorsInternal;
 
 	/** The chosen mesh component. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Mesh Component"))
-	TObjectPtr<class UMeshComponent> CurrentMeshComponentInternal = nullptr; //[G]
+	TObjectPtr<class UMeshComponent> CurrentMeshComponentInternal = nullptr;
 
 	/** The current Level Actor Row of chosen mesh component. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Mesh Row"))
-	TObjectPtr<const class ULevelActorRow> CurrentMeshRowInternal = nullptr; //[G]
+	TObjectPtr<const class ULevelActorRow> CurrentMeshRowInternal = nullptr;
 
 	/** Called every frame. */
 	virtual void Tick(float DeltaTime) override;

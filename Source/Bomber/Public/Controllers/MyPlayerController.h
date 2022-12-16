@@ -24,19 +24,19 @@ public:
 
 	/** Notifies the server and clients when this controller possesses new player character. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnPossessed OnPossessed; //[DMD]
+	FOnPossessed OnPossessed;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetPlayerState, class AMyPlayerState*, MyPlayerState);
 
 	/** Notifies the server and clients when the player state is set. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnSetPlayerState OnSetPlayerState; //[DMD]
+	FOnSetPlayerState OnSetPlayerState;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateCreated, class AMyGameStateBase*, MyGameState);
 
 	/** Notifies the server and clients when the game state is initialized. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnGameStateCreated OnGameStateCreated; //[DMD]
+	FOnGameStateCreated OnGameStateCreated;
 
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))

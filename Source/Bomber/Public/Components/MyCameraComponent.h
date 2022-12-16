@@ -3,7 +3,8 @@
 #pragma once
 
 #include "Camera/CameraComponent.h"
-#include "Bomber.h"
+//---
+#include "Structures/Cell.h"
 //---
 #include "MyCameraComponent.generated.h"
 
@@ -41,30 +42,44 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetCameraLockedOnCenter(bool bInCameraLockedOnCenter);
 
-	/** Returns the center location between all players and bots. */
+	/** Returns the center camera location between all specified cells. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FVector GetLocationBetweenPlayers() const;
-	
+	FVector GetCameraLocationBetweenCells(const TSet<FCell>& Cells) const;
+
+	/** Returns the center camera location between all players and bots. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FVector GetCameraLocationBetweenPlayers() const;
+
+	/** Returns the default camera location between all players and bots.
+	 * Is absolute center position, where the camera starts game and returns to it on endgame.
+	 * Camera always stays there if IsCameraLockedOnCenter() returns true. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FVector GetCameraLockedLocation() const;
+
 protected:
-	/** If true, it will prevent following camera by player locations. */
+	/* ---------------------------------------------------
+	*		Protected properties
+	* --------------------------------------------------- */
+
+	/** If true, it will prevent following camera by player locations, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Camera Locked On Center"))
-	bool bIsCameraLockedOnCenterInternal; //[C]
+	bool bIsCameraLockedOnCenterInternal;
 
 	/** The minimal camera height. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Height"))
-	float MinHeightInternal = 1500.f; //[N]
+	float MinHeightInternal = 1500.f;
 
 	/** The maximal camera height. Is set dynamically by UMyCameraComponent::UpdateMaxHeights(). */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Max Height"))
-	float MaxHeightInternal; //[G]
+	float MaxHeightInternal = 4000.f;
 
 	/** If UMyCameraComponent::StartLocation is true, then should forced moving to the start position. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))
-	bool bForceStartInternal; //[N]
+	bool bForceStartInternal = false;
 
-	/** The absolute center position between players. The camera starts game from that position and returns to it on endgame. Is not visible in editor, is set on Begin Play*/
-	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Start Location"))
-	FVector StartLocationInternal; //[N]
+	/* ---------------------------------------------------
+	*		Protected functions
+	* --------------------------------------------------- */
 
 	/** Called every frame. */
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

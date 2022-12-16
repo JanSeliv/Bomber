@@ -48,7 +48,7 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
 	/* ---------------------------------------------------
 	*		Protected functions

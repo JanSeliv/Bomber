@@ -1202,7 +1202,7 @@ void AGeneratedMap::InitPoolManager()
 			continue;
 		}
 
-		PoolManagerInternal->AddToPool(OwnerIt);
+		PoolManagerInternal->AddToPool(OwnerIt, EPoolObjectState::Inactive);
 	}
 }
 
@@ -1297,7 +1297,7 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 
 	if (PoolManagerInternal)
 	{
-		PoolManagerInternal->AddToPool(ComponentOwner);
+		PoolManagerInternal->AddToPool(ComponentOwner, EPoolObjectState::Active);
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
