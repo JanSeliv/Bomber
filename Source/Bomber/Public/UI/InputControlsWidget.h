@@ -4,6 +4,7 @@
 
 #include "UI/SettingSubWidget.h"
 //---
+#include "Bomber.h"
 #include "EnhancedActionKeyMapping.h"
 #include "InputCoreTypes.h"
 //---
@@ -25,10 +26,6 @@ class BOMBER_API UInputButtonWidget final : public USettingSubWidget
 	GENERATED_BODY()
 
 public:
-	/** Sets the style of the button and its text. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "TextStyle,ButtonStyle"))
-	void SetInputKeySelectorStyle(const FTextBlockStyle& TextStyle, const FButtonStyle& ButtonStyle);
-
 	/** Sets this button to let player remap input specified in mappable data. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void InitButton(const FEnhancedActionKeyMapping& InMappableData, const UMyInputMappingContext* InInputMappingContext);
@@ -79,6 +76,30 @@ protected:
 };
 
 /**
+ * The data structure that holds the information about the input category.
+ */
+USTRUCT(BlueprintType)
+struct FInputCategoryData
+{
+	GENERATED_BODY()
+
+	/** The name of the input category. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FText CategoryName = TEXT_NONE;
+
+	/** The input context that contains mappings of this input category data. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
+	TObjectPtr<const class UMyInputMappingContext> InputMappingContext = nullptr;
+
+	/** All mappings with this input category name. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	TArray<FEnhancedActionKeyMapping> Mappings;
+
+	/** Returns all categories from the specified input mapping context. */
+	static void GetCategoriesDataFromMappings(const UMyInputMappingContext* InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData);
+};
+
+/**
  * Contains inputs for along own input context.
  */
 UCLASS()
@@ -89,7 +110,7 @@ class BOMBER_API UInputCategoryWidget final : public USettingSubWidget
 public:
 	/** Sets the input context to be represented by this widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void CreateInputButtons(const class UMyInputMappingContext* InInputMappingContext);
+	void CreateInputButtons(const FInputCategoryData& InInputCategoryData);
 
 protected:
 	/** ---------------------------------------------------
@@ -98,15 +119,15 @@ protected:
 
 	/** Is parent widget of all dynamically created buttons. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UHorizontalBox> HorizontalBoxInputButtons = nullptr;
+	TObjectPtr<class UVerticalBox> VerticalBoxInputButtons = nullptr;
 
 	/** The class of the Input Button Widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Button Class"))
 	TSubclassOf<UInputButtonWidget> InputButtonClassInternal = UInputButtonWidget::StaticClass();
 
 	/** Owned input context that is represented by this widget. */
-	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Context"))
-	TObjectPtr<const class UMyInputMappingContext> InputContextInternal = nullptr;
+	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Category Data"))
+	FInputCategoryData InputCategoryDataInternal;
 
 	/** All dynamically created input button for each mappable input in own Input Context. */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Buttons"))
@@ -161,5 +182,5 @@ protected:
 
 	/** Adds input categories for each mapping context. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void CreateInputCategories();
+	void CreateAllInputCategories();
 };

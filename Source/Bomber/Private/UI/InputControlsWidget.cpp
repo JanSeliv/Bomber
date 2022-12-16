@@ -9,39 +9,23 @@
 #include "UI/SettingsWidget.h"
 #include "SoundsManager.h"
 //---
-#include "Components/HorizontalBox.h"
+#include "Components/VerticalBox.h"
 #include "Components/InputKeySelector.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 #include "Widgets/Input/SInputKeySelector.h"
 
-// Sets the style of the button and its text
-void UInputButtonWidget::SetInputKeySelectorStyle(const FTextBlockStyle& TextStyle, const FButtonStyle& ButtonStyle)
-{
-	SInputKeySelector* SlateInputKeySelector = UWidgetUtilsLibrary::GetSlateWidget<SInputKeySelector>(InputKeySelector).Get();
-	if (!ensureMsgf(SlateInputKeySelector, TEXT("ASSERT: 'SlateInputKeySelector' is not valid")))
-	{
-		return;
-	}
-
-	SlateInputKeySelector->SetTextStyle(&TextStyle);
-	InputKeySelector->TextStyle = TextStyle;
-
-	SlateInputKeySelector->SetButtonStyle(&ButtonStyle);
-	InputKeySelector->WidgetStyle = ButtonStyle;
-}
-
 // Sets this button to let player remap input specified in mappable data
 void UInputButtonWidget::InitButton(const FEnhancedActionKeyMapping& InMappableData, const UMyInputMappingContext* InInputMappingContext)
 {
 	if (!ensureMsgf(InMappableData.Action, TEXT("%s: 'InMappableData.Action' is not valid"), *FString(__FUNCTION__))
-		|| !ensureMsgf(InInputMappingContext, TEXT("ASSERT: 'InInputMappingContext' is not valid")))
+	    || !ensureMsgf(InInputMappingContext, TEXT("ASSERT: 'InInputMappingContext' is not valid")))
 	{
 		return;
 	}
 
-	MappableDataInternal = InMappableData;;
+	MappableDataInternal = InMappableData;
 	InputContextInternal = InInputMappingContext;
 }
 
@@ -82,9 +66,11 @@ void UInputButtonWidget::NativeConstruct()
 // Sets the style for the Input Key Selector
 void UInputButtonWidget::UpdateStyle()
 {
-	if (!ensureMsgf(InputKeySelector, TEXT("%s: 'InputKeySelector' is not set as BindWidget"), *FString(__FUNCTION__))
-		|| !ensureMsgf(CaptionWidget, TEXT("%s: 'CaptionWidget' is not set as BindWidget"), *FString(__FUNCTION__))
-		|| !ensureMsgf(SettingsWidgetInternal, TEXT("%s: 'SettingsWidgetInternal' is null"), *FString(__FUNCTION__)))
+	SInputKeySelector* SlateInputKeySelector = UWidgetUtilsLibrary::GetSlateWidget<SInputKeySelector>(InputKeySelector).Get();
+	if (!ensureMsgf(SlateInputKeySelector, TEXT("%s: 'SlateInputKeySelector' is not valid"), *FString(__FUNCTION__))
+	    || !ensureMsgf(InputKeySelector, TEXT("%s: 'InputKeySelector' is not set as BindWidget"), *FString(__FUNCTION__))
+	    || !ensureMsgf(CaptionWidget, TEXT("%s: 'CaptionWidget' is not set as BindWidget"), *FString(__FUNCTION__))
+	    || !ensureMsgf(SettingsWidgetInternal, TEXT("%s: 'SettingsWidgetInternal' is null"), *FString(__FUNCTION__)))
 	{
 		return;
 	}
@@ -97,6 +83,7 @@ void UInputButtonWidget::UpdateStyle()
 	FTextBlockStyle& TextStyleRef = InputKeySelector->TextStyle;
 	TextStyleRef.SetFont(MiscThemeData.TextAndCaptionFont);
 	TextStyleRef.SetColorAndOpacity(MiscThemeData.TextAndCaptionColor);
+	SlateInputKeySelector->SetTextStyle(&TextStyleRef);
 
 	// Update the widget style of the button
 	FButtonStyle& WidgetStyleRef = InputKeySelector->WidgetStyle;
@@ -106,6 +93,7 @@ void UInputButtonWidget::UpdateStyle()
 	WidgetStyleRef.Disabled = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Disabled);
 	WidgetStyleRef.NormalPadding = ButtonThemeData.Padding;
 	WidgetStyleRef.PressedPadding = ButtonThemeData.PressedPadding;
+	SlateInputKeySelector->SetButtonStyle(&WidgetStyleRef);
 
 	// Update text
 	CaptionWidget->SetText(MappableDataInternal.PlayerMappableOptions.DisplayName);
@@ -128,26 +116,56 @@ void UInputButtonWidget::OnIsSelectingKeyChanged()
 	}
 }
 
-// Sets the input context to be represented by this widget
-void UInputCategoryWidget::CreateInputButtons(const UMyInputMappingContext* InInputMappingContext)
+// Returns all categories from the specified input mapping context
+void FInputCategoryData::GetCategoriesDataFromMappings(const UMyInputMappingContext* InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData)
 {
-	if (!ensureMsgf(InInputMappingContext, TEXT("%s: 'InInputMappingContext' is not valid"), *FString(__FUNCTION__))
-		|| !ensureMsgf(InputButtonClassInternal, TEXT("%s: 'Input Button Class' is not set"), *FString(__FUNCTION__)))
+	checkf(InInputMappingContext, TEXT("%s: 'InInputMappingContext' is null"), *FString(__FUNCTION__));
+	TArray<FEnhancedActionKeyMapping> AllMappings;
+	InInputMappingContext->GetAllMappings(/*Out*/AllMappings);
+
+	// Find all categories in every mapping
+	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
+	{
+		const FText& DisplayCategory = MappingIt.PlayerMappableOptions.DisplayCategory;
+		FInputCategoryData* CategoryData = OutInputCategoriesData.FindByPredicate([&DisplayCategory](const FInputCategoryData& CategoryDataIt)
+		{
+			return CategoryDataIt.CategoryName.EqualTo(DisplayCategory);
+		});
+
+		if (CategoryData)
+		{
+			// Add mapping to existing category
+			CategoryData->Mappings.AddUnique(MappingIt);
+		}
+		else
+		{
+			// Is not created yet, add new category
+			FInputCategoryData NewCategoryData;
+			NewCategoryData.Mappings.AddUnique(MappingIt);
+			NewCategoryData.CategoryName = DisplayCategory;
+			NewCategoryData.InputMappingContext = InInputMappingContext;
+			OutInputCategoriesData.Emplace(MoveTemp(NewCategoryData));
+		}
+	}
+}
+
+// Sets the input context to be represented by this widget
+void UInputCategoryWidget::CreateInputButtons(const FInputCategoryData& InInputCategoryData)
+{
+	if (!ensureMsgf(InputButtonClassInternal, TEXT("%s: 'Input Button Class' is not set, can not create input buttons"), *FString(__FUNCTION__)))
 	{
 		return;
 	}
 
-	InputContextInternal = InInputMappingContext;
+	InputCategoryDataInternal = InInputCategoryData;
 
-	TArray<FEnhancedActionKeyMapping> OutMappableData;
-	InputContextInternal->GetAllMappings(OutMappableData);
-	for (const FEnhancedActionKeyMapping& MappableDataIt : OutMappableData)
+	for (const FEnhancedActionKeyMapping& MappableDataIt : InInputCategoryData.Mappings)
 	{
 		FSettingsPrimary NewPrimaryRow = SettingPrimaryRowInternal;
 		UInputButtonWidget* InputButtonWidget = GetSettingsWidgetChecked().CreateSettingSubWidget<UInputButtonWidget>(NewPrimaryRow, InputButtonClassInternal);
 
 		InputButtonsInternal.Emplace(InputButtonWidget);
-		InputButtonWidget->InitButton(MappableDataIt, InInputMappingContext);
+		InputButtonWidget->InitButton(MappableDataIt, InInputCategoryData.InputMappingContext);
 	}
 }
 
@@ -162,14 +180,14 @@ void UInputCategoryWidget::NativeConstruct()
 // Adds all input buttons to the root of this widget
 void UInputCategoryWidget::AttachInputButtons()
 {
-	if (!ensureMsgf(HorizontalBoxInputButtons, TEXT("%s: 'HorizontalBoxInputButtons' is not set as BindWidget"), *FString(__FUNCTION__)))
+	if (!ensureMsgf(VerticalBoxInputButtons, TEXT("%s: 'VerticalBoxInputButtons' is not set as BindWidget"), *FString(__FUNCTION__)))
 	{
 		return;
 	}
 
 	for (UInputButtonWidget* InputButtonIt : InputButtonsInternal)
 	{
-		HorizontalBoxInputButtons->AddChild(InputButtonIt);
+		VerticalBoxInputButtons->AddChild(InputButtonIt);
 	}
 }
 
@@ -178,14 +196,14 @@ void UInputControlsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	CreateInputCategories();
+	CreateAllInputCategories();
 }
 
 // Adds input categories for each mapping context
-void UInputControlsWidget::CreateInputCategories()
+void UInputControlsWidget::CreateAllInputCategories()
 {
 	if (!InputCategoriesInternal.IsEmpty()
-		|| !ensureMsgf(InputCategoryClassInternal, TEXT("ASSERT: 'Input Category Class' is null")))
+	    || !ensureMsgf(InputCategoryClassInternal, TEXT("ASSERT: 'Input Category Class' is null")))
 	{
 		return;
 	}
@@ -195,13 +213,21 @@ void UInputControlsWidget::CreateInputCategories()
 
 	for (const UMyInputMappingContext* InputContextIt : OutGameplayInputContexts)
 	{
-		FSettingsPrimary NewPrimaryRow = SettingPrimaryRowInternal;
-		UInputCategoryWidget* InputCategoryWidget = GetSettingsWidgetChecked().CreateSettingSubWidget<UInputCategoryWidget>(NewPrimaryRow, InputCategoryClassInternal);
+		// Inside each input context, there could be different input categories
+		TArray<FInputCategoryData> InputCategoriesData;
+		FInputCategoryData::GetCategoriesDataFromMappings(InputContextIt, /*Out*/InputCategoriesData);
 
-		InputCategoriesInternal.Emplace(InputCategoryWidget);
-		InputCategoryWidget->CreateInputButtons(InputContextIt);
+		for (const FInputCategoryData& InputCategoryDataIt : InputCategoriesData)
+		{
+			FSettingsPrimary NewPrimaryRow = SettingPrimaryRowInternal;
+			NewPrimaryRow.Caption = InputCategoryDataIt.CategoryName;
+			UInputCategoryWidget* InputCategoryWidget = GetSettingsWidgetChecked().CreateSettingSubWidget<UInputCategoryWidget>(NewPrimaryRow, InputCategoryClassInternal);
 
-		checkf(ScrollBoxInputCategories, TEXT("%s: 'ScrollBoxInputCategories' is not set as BindWidget"), *FString(__FUNCTION__));
-		ScrollBoxInputCategories->AddChild(InputCategoryWidget);
+			InputCategoriesInternal.Emplace(InputCategoryWidget);
+			InputCategoryWidget->CreateInputButtons(InputCategoryDataIt);
+
+			checkf(ScrollBoxInputCategories, TEXT("%s: 'ScrollBoxInputCategories' is not set as BindWidget"), *FString(__FUNCTION__));
+			ScrollBoxInputCategories->AddChild(InputCategoryWidget);
+		}
 	}
 }
