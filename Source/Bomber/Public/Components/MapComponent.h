@@ -34,13 +34,13 @@ public:
 	/** Called when this component wants to be reconstructed on the level map.
 	 * Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructOwnerActor(). */
 	UPROPERTY(BlueprintAssignable, Category = "C++")
-	FOnOwnerWantsReconstruct OnOwnerWantsReconstruct; //[DMD]
+	FOnOwnerWantsReconstruct OnOwnerWantsReconstruct;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDeactivatedMapComponent, UMapComponent*, MapComponent, UObject*, DestroyCauser);
 
 	/** Called when this component is destroyed on the level map, is called only on the server. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, BlueprintAuthorityOnly, Category = "C++")
-	FOnDeactivatedMapComponent OnDeactivatedMapComponent; //[DMD]
+	FOnDeactivatedMapComponent OnDeactivatedMapComponent;
 
 #if WITH_EDITORONLY_DATA  // bShouldShowRenders
 	/** Mark the editor updating visualization(text renders) */
@@ -135,31 +135,31 @@ protected:
 
 	/** Owner's cell location on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
-	FCell CellInternal = FCell::InvalidCell; //[G]
+	FCell CellInternal = FCell::InvalidCell;
 
 	/** Contains exposed for designers properties for the spawned owner. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))
-	TObjectPtr<const class ULevelActorDataAsset> ActorDataAssetInternal = nullptr; //[D]
+	TObjectPtr<const class ULevelActorDataAsset> ActorDataAssetInternal = nullptr;
 
 	/** Mesh of an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
-	TObjectPtr<class UMeshComponent> MeshComponentInternal = nullptr; //[C.DO]
+	TObjectPtr<class UMeshComponent> MeshComponentInternal = nullptr;
 
 	/** Current level row of the owner. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_LevelActorRow", Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Actor Row"))
-	TObjectPtr<const class ULevelActorRow> LevelActorRowInternal = nullptr; //[G]
+	TObjectPtr<const class ULevelActorRow> LevelActorRowInternal = nullptr;
 
 	/** If true the owner is undestroyable, is used by skills and cheat manager. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
-	bool bIsUndestroyableInternal = false; //[G]
+	bool bIsUndestroyableInternal = false;
 
 	/** The Collision Component, is attached to an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Collision Component"))
-	TObjectPtr<class UBoxComponent> BoxCollisionComponentInternal = nullptr; //[C.DO]
+	TObjectPtr<class UBoxComponent> BoxCollisionComponentInternal = nullptr;
 
 	/** Actual response type of the collision box of an actor. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response"))
-	FCollisionResponseContainer CollisionResponseInternal = ECR_MAX; //[G]
+	FCollisionResponseContainer CollisionResponseInternal = ECR_MAX;
 
 	/* ---------------------------------------------------
 	 *		Protected functions

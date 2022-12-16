@@ -57,17 +57,17 @@ public:
 protected:
 	/** Enhanced Input Mapping Contexts of gameplay actions for local players. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Gameplay Input Context Classes", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<UMyInputMappingContext>> GameplayInputContextsInternal; //[D]
+	TArray<TObjectPtr<UMyInputMappingContext>> GameplayInputContextsInternal;
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> MainMenuInputContextInternal = nullptr; //[D]
+	TObjectPtr<UMyInputMappingContext> MainMenuInputContextInternal = nullptr;
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> InGameMenuInputContextInternal = nullptr; //[D]
+	TObjectPtr<UMyInputMappingContext> InGameMenuInputContextInternal = nullptr;
 
 	/** Enhanced Input Mapping Context of actions on the Settings widget*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr; //[D]
+	TObjectPtr<UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr;
 };

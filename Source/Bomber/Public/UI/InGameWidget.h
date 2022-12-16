@@ -32,7 +32,7 @@ protected:
 		
 	/** Allows player to interact with UI during the match. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UInGameMenuWidget> InGameMenuWidget = nullptr; //[B]
+	TObjectPtr<class UInGameMenuWidget> InGameMenuWidget = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Protected functions

@@ -53,27 +53,27 @@ public:
 protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal = nullptr; //[D]
+	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal = nullptr;
 
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UMainMenuWidget> MainMenuWidgetClassInternal = nullptr; //[D]
+	TSubclassOf<class UMainMenuWidget> MainMenuWidgetClassInternal = nullptr;
 
 	/** The class of a Settings Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class USettingsWidget> SettingsWidgetClassInternal = nullptr; //[D]
+	TSubclassOf<class USettingsWidget> SettingsWidgetClassInternal = nullptr;
 
 	/** The class of a Nickname Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nickname Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> NicknameWidgetClassInternal = nullptr; //[D]
+	TSubclassOf<class UUserWidget> NicknameWidgetClassInternal = nullptr;
 
 	/** The class of a FPS counter widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "FPS Counter Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> FPSCounterWidgetClassInternal = nullptr; //[D]
+	TSubclassOf<class UUserWidget> FPSCounterWidgetClassInternal = nullptr;
 
 	/** Contains the localized texts about specified end game to display on UI. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game Texts", ShowOnlyInnerProperties))
-	TMap<EEndGameState, FText> EndGameTextsInternal; //[D]
+	TMap<EEndGameState, FText> EndGameTextsInternal;
 };
 
 /**
@@ -152,31 +152,31 @@ protected:
 
 	/** Is true if widgets are initialized. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Are Widget Initialized"))
-	bool bAreWidgetInitializedInternal = false; //[G]
+	bool bAreWidgetInitializedInternal = false;
 
 	/** The current in-game widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
-	TObjectPtr<class UInGameWidget> InGameWidgetInternal = nullptr; //[G]
+	TObjectPtr<class UInGameWidget> InGameWidgetInternal = nullptr;
 
 	/** The current Main Menu widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
-	TObjectPtr<class UMainMenuWidget> MainMenuWidgetInternal = nullptr; //[G]
+	TObjectPtr<class UMainMenuWidget> MainMenuWidgetInternal = nullptr;
 
 	/** The current settings widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))
-	TObjectPtr<class USettingsWidget> SettingsWidgetInternal = nullptr; //[G]
+	TObjectPtr<class USettingsWidget> SettingsWidgetInternal = nullptr;
 
 	/** The current FPS counter widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Counter Widget"))
-	TObjectPtr<class UUserWidget> FPSCounterWidgetInternal = nullptr; //[G]
+	TObjectPtr<class UUserWidget> FPSCounterWidgetInternal = nullptr;
 
 	/** All nickname widget objects for each player. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nickname Widgets"))
-	TArray<TObjectPtr<class UUserWidget>> NicknameWidgetsInternal; //[G]
+	TArray<TObjectPtr<class UUserWidget>> NicknameWidgetsInternal;
 
-	/** If true, shows FPS counter widget on the HUD. */
+	/** If true, shows FPS counter widget on the HUD, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is FPS Counter Enabled"))
-	bool bIsFPSCounterEnabledInternal; //[С]
+	bool bIsFPSCounterEnabledInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions

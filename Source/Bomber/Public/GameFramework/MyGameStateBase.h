@@ -39,19 +39,19 @@ public:
 protected:
 	/** General value how ofter update actors and states in the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))
-	float TickInternal = 0.2F; //[D]
+	float TickInternal = 0.2F;
 
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "Starting Countdown"))
-	int32 StartingCountdownInternal = 3; //[D]
+	int32 StartingCountdownInternal = 3;
 
 	/** Seconds to the end of the round. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Countdown"))
-	int32 InGameCountdownInternal = 120; //[D]
+	int32 InGameCountdownInternal = 120;
 
 	/** All game features need to be loaded and activated on starting the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Game Features To Enable", ShowOnlyInnerProperties))
-	TArray<FName> GameFeaturesToEnableInternal; //[D]
+	TArray<FName> GameFeaturesToEnableInternal;
 };
 
 /**
@@ -71,7 +71,7 @@ public:
 
 	/** Called when the current game state was changed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnGameStateChanged OnGameStateChanged; //[DMD]
+	FOnGameStateChanged OnGameStateChanged;
 
 	/* ---------------------------------------------------
 	*		Public functions
@@ -115,23 +115,23 @@ protected:
 
 	/** Store the game state for the current game. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CurrentGameState", meta = (BlueprintProtected, DisplayName = "Current Game State"))
-	ECurrentGameState CurrentGameStateInternal = ECurrentGameState::None; //[G]
+	ECurrentGameState CurrentGameStateInternal = ECurrentGameState::None;
 
 	/** Handles time counting in the game.*/
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Countdown Timer"))
-	FTimerHandle CountdownTimerInternal; //[G]
+	FTimerHandle CountdownTimerInternal;
 
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Replicated, meta = (BlueprintProtected, DisplayName = "Starting Timer Seconds Remain"))
-	float StartingTimerSecRemainInternal = 0.F; //[G]
+	float StartingTimerSecRemainInternal = 0.F;
 
 	/** Seconds to the end of the round. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Replicated, meta = (BlueprintProtected, DisplayName = "In-Game Timer Seconds Remain"))
-	float InGameTimerSecRemainInternal = 0.F; //[G]
+	float InGameTimerSecRemainInternal = 0.F;
 
 	/** Is true where there request to update the End-Game state for players */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Wants Update End State"))
-	bool bWantsUpdateEndStateInternal = false; //[G]
+	bool bWantsUpdateEndStateInternal = false;
 
 	/* ---------------------------------------------------
 	*		Protected functions

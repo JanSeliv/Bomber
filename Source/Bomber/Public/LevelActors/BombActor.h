@@ -46,15 +46,15 @@ public:
 protected:
 	/** The lifetime of a bomb. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Life Span", ShowOnlyInnerProperties))
-	float LifeSpanInternal = 2.f; //[D]
+	float LifeSpanInternal = 2.f;
 
 	/** All bomb materials. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Bomb Materials", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class UMaterialInterface>> BombMaterialsInternal; //[D]
+	TArray<TObjectPtr<class UMaterialInterface>> BombMaterialsInternal;
 
 	/** The emitter of the bomb explosion */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Particle", ShowOnlyInnerProperties))
-	TObjectPtr<class UNiagaraSystem> ExplosionVFXInternal = nullptr; //[D]
+	TObjectPtr<class UNiagaraSystem> ExplosionVFXInternal = nullptr;
 };
 
 /** Bombs are left by the character to destroy the level actors, trigger other bombs */
@@ -98,15 +98,15 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
 	/** The radius of the blast to each side, is set by player with InitBomb on spawning. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
-	int32 FireRadiusInternal = INDEX_NONE; //[N]
+	int32 FireRadiusInternal = INDEX_NONE;
 
 	/** Current material of this bomb, is different for each player. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
-	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr; //[G]
+	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr;
 
 	/* ---------------------------------------------------
  	 *		Protected functions

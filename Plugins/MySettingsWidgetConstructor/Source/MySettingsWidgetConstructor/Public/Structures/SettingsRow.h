@@ -123,23 +123,23 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsThemeData
 
 	/** The texture image of the setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<class UTexture> Texture = nullptr; //[B]
+	TObjectPtr<class UTexture> Texture = nullptr;
 
 	/** The size of the resource in Slate Units. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FVector2D Size = FVector2D(64.f, 64.f); //[B]
+	FVector2D Size = FVector2D(64.f, 64.f);
 
 	/** How to draw the image. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TEnumAsByte<enum ESlateBrushDrawType::Type> DrawAs = ESlateBrushDrawType::Box; //[B]
+	TEnumAsByte<enum ESlateBrushDrawType::Type> DrawAs = ESlateBrushDrawType::Box;
 
 	/** The margin to use in Box and Border modes. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FMargin Margin; //[B]
+	FMargin Margin;
 
 	/** Outside padding of the image. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FMargin Padding; //[B]
+	FMargin Padding;
 };
 
 /**
@@ -155,7 +155,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FButtonThemeData : public FSettingsThemeD
 
 	/** The padding to used when button is pressed. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FMargin PressedPadding; //[B]
+	FMargin PressedPadding;
 };
 
 /**
@@ -172,11 +172,11 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FCheckboxThemeData : public FSettingsThem
 
 	/** The texture image of the toggled checkbox. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<class UTexture> CheckedTexture = nullptr; //[B]
+	TObjectPtr<class UTexture> CheckedTexture = nullptr;
 
 	/** The texture image of the undetermined checkbox. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<class UTexture> UndeterminedTexture = nullptr; //[B]
+	TObjectPtr<class UTexture> UndeterminedTexture = nullptr;
 };
 
 /**
@@ -192,19 +192,19 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FComboboxThemeData : public FSettingsThem
 
 	/** The padding to used when combobox is pressed. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FMargin PressedPadding; //[B]
+	FMargin PressedPadding;
 
 	/** The combobox arrow theme data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSettingsThemeData Arrow; //[B]
+	FSettingsThemeData Arrow;
 
 	/** The combobox border theme data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSettingsThemeData Border; //[B]
+	FSettingsThemeData Border;
 
 	/** The combobox background color */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor ItemBackgroundColor = FColor::Transparent; //[B]
+	FSlateColor ItemBackgroundColor = FColor::Transparent;
 };
 
 /**
@@ -236,75 +236,75 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 
 	/** The common color of normal state for all setting types. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor ThemeColorNormal = FColor::White; //[B]
+	FSlateColor ThemeColorNormal = FColor::White;
 
 	/** The common color of hover state for all setting types. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor ThemeColorHover = FColor::White; //[B]
+	FSlateColor ThemeColorHover = FColor::White;
 
 	/** The misc colors for all setting types. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor ThemeColorExtra = FColor::White; //[B]
+	FSlateColor ThemeColorExtra = FColor::White;
 
 	/** The font of text and captions. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateFontInfo TextAndCaptionFont; //[B]
+	FSlateFontInfo TextAndCaptionFont;
 
 	/** The color of text and captions. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TextAndCaptionColor = FColor::White; //[B]
+	FSlateColor TextAndCaptionColor = FColor::White;
 
 	/** The font of the header. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateFontInfo TextHeaderFont; //[B]
+	FSlateFontInfo TextHeaderFont;
 
 	/** The color of the header. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TextHeaderColor = FColor::White; //[B]
+	FSlateColor TextHeaderColor = FColor::White;
 
 	/** The font of the footer. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateFontInfo TextFooterFont; //[B]
+	FSlateFontInfo TextFooterFont;
 
 	/** The color of the footer. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TextFooterColor = FColor::White; //[B]
+	FSlateColor TextFooterColor = FColor::White;
 
 	/** The font of all setting values. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateFontInfo TextElementFont; //[B]
+	FSlateFontInfo TextElementFont;
 
 	/** The color of all setting values. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TextElementColor = FColor::White; //[B]
+	FSlateColor TextElementColor = FColor::White;
 
 	/** The theme data of tooltips. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSettingsThemeData TooltipBackground; //[B]
+	FSettingsThemeData TooltipBackground;
 
 	/** The background color of tooltips. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor TooltipBackgroundTint = FColor::White; //[B]
+	FSlateColor TooltipBackgroundTint = FColor::White;
 
 	/** The theme data of the window background. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSettingsThemeData WindowBackground; //[B]
+	FSettingsThemeData WindowBackground;
 
 	/** The theme color of the window background. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor WindowBackgroundTint = FColor::White; //[B]
+	FSlateColor WindowBackgroundTint = FColor::White;
 
 	/** The theme data of the menu border. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSettingsThemeData MenuBorderData; //[B]
+	FSettingsThemeData MenuBorderData;
 
 	/** Color of the border. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	FSlateColor MenuBorderTint = FColor::White; //[B]
+	FSlateColor MenuBorderTint = FColor::White;
 
 	/** Visibility of the border. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++")
-	ESlateVisibility MenuBorderVisibility = ESlateVisibility::Visible; //[B]
+	ESlateVisibility MenuBorderVisibility = ESlateVisibility::Visible;
 };
 
 /* Structs dependencies:
@@ -344,46 +344,46 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsPrimary
 
 	/** The tag of the setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingTag Tag = FSettingTag::EmptySettingTag; //[D]
+	FSettingTag Tag = FSettingTag::EmptySettingTag;
 
 	/** The static function to obtain object to call Setters and Getters.
 	  * The FunctionContextTemplate meta will contain a name of one UFunctionPickerTemplate delegate. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionContextTemplate))
-	FFunctionPicker StaticContext = FFunctionPicker::Empty; //[D]
+	FFunctionPicker StaticContext = FFunctionPicker::Empty;
 
 	/** The Setter function to be called to set the setting value for the Static Context object.
 	  * The FunctionSetterTemplate meta will contain a name of one UFunctionPickerTemplate delegate. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionSetterTemplate))
-	FFunctionPicker Setter = FFunctionPicker::Empty; //[D]
+	FFunctionPicker Setter = FFunctionPicker::Empty;
 
 	/** The Getter function to be called to get the setting value from the Static Context object.
 	  * The FunctionGetterTemplate meta will contain a name of one UFunctionPickerTemplate delegate. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionGetterTemplate))
-	FFunctionPicker Getter = FFunctionPicker::Empty; //[D]
+	FFunctionPicker Getter = FFunctionPicker::Empty;
 
 	/** The setting name. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FText Caption = TEXT_NONE; //[D]
+	FText Caption = TEXT_NONE;
 
 	/** The description to be shown as tooltip. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FText Tooltip = TEXT_NONE; //[D]
+	FText Tooltip = TEXT_NONE;
 
 	/** The padding of this setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FMargin Padding = 0.f; //[D]
+	FMargin Padding = 0.f;
 
 	/** The custom line height for this setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	float LineHeight = 48.f; //[D]
+	float LineHeight = 48.f;
 
 	/** Set true to add new column starting from this setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	bool bStartOnNextColumn = false; //[D]
+	bool bStartOnNextColumn = false;
 
 	/** Contains tags of settings which are needed to update after change of this setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (Categories = "Settings"))
-	FGameplayTagContainer SettingsToUpdate = FGameplayTagContainer::EmptyContainer; //[D]
+	FGameplayTagContainer SettingsToUpdate = FGameplayTagContainer::EmptyContainer;
 
 	/** Created widget of the chosen setting (button, checkbox, combobox, slider, text line, user input). */
 	TWeakObjectPtr<class USettingSubWidget> SettingSubWidget = nullptr;
@@ -427,11 +427,11 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsButton : public FSettingsDataBas
 
 	/** Either Header, Content, or Footer. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	EMyVerticalAlignment VerticalAlignment = EMyVerticalAlignment::Content; //[D]
+	EMyVerticalAlignment VerticalAlignment = EMyVerticalAlignment::Content;
 
 	/** Either Left, Right, Center, or Fill. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill; //[D]
+	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill;
 
 	/** Cached bound delegate, is executed on pressing this button. */
 	UFunctionPickerTemplate::FOnButtonPressed OnButtonPressed;
@@ -469,19 +469,19 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCombobox : public FSettingsDataB
 
 	/** The Setter function to be called to set all combobox members. */
 	UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnSetMembers__DelegateSignature"))
-	FFunctionPicker SetMembers = FFunctionPicker::Empty; //[D]
+	FFunctionPicker SetMembers = FFunctionPicker::Empty;
 
 	/** The Setter function to be called to get all combobox members. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (FunctionGetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetMembers__DelegateSignature"))
-	FFunctionPicker GetMembers = FFunctionPicker::Empty; //[D]
+	FFunctionPicker GetMembers = FFunctionPicker::Empty;
 
 	/** Contains all combobox members. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	TArray<FText> Members; //[D]
+	TArray<FText> Members;
 
 	/** Text alignment either left, center, or right. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	TEnumAsByte<ETextJustify::Type> TextJustify = ETextJustify::Center; //[D]
+	TEnumAsByte<ETextJustify::Type> TextJustify = ETextJustify::Center;
 
 	/** The cached chosen member index. */
 	int32 ChosenMemberIndex = INDEX_NONE;
@@ -531,11 +531,11 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsTextLine : public FSettingsDataB
 
 	/** Either Header, Content, or Footer. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	EMyVerticalAlignment VerticalAlignment = EMyVerticalAlignment::Content; //[D]
+	EMyVerticalAlignment VerticalAlignment = EMyVerticalAlignment::Content;
 
 	/** Either Left, Right, Center, or Fill. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill; //[D]
+	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill;
 
 	/** The cached bound delegate, is executed to set the text caption. */
 	UFunctionPickerTemplate::FOnGetterText OnGetterText;
@@ -557,7 +557,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsUserInput : public FSettingsData
 	/** The maximal length of the player input that is allowed to type.
 	 * Set 0 to do not limit number of characters. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	int32 MaxCharactersNumber = 0; //[D]
+	int32 MaxCharactersNumber = 0;
 
 	/** The cached text shown left of the input box. */
 	FName UserInput = NAME_None;
@@ -581,7 +581,7 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsCustomWidget : public FSettingsD
 
 	/** Contains created custom widget of the setting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TSubclassOf<class USettingCustomWidget> CustomWidgetClass = nullptr; //[D]
+	TSubclassOf<class USettingCustomWidget> CustomWidgetClass = nullptr;
 
 	/** The cached bound delegate, is executed to set the custom widget. */
 	USettingTemplate::FOnGetterWidget OnGetterWidget;
@@ -606,39 +606,39 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsPicker
 
 	/** Contains a in-game settings type to be used - the name of one of these members. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FName SettingsType = NAME_None; //[D]
+	FName SettingsType = NAME_None;
 
 	/** The common setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsPrimary PrimaryData; //[D]
+	FSettingsPrimary PrimaryData;
 
 	/** The button setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsButton Button; //[D]
+	FSettingsButton Button;
 
 	/** The checkbox setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsCheckbox Checkbox; //[D]
+	FSettingsCheckbox Checkbox;
 
 	/** The combobox setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsCombobox Combobox; //[D]
+	FSettingsCombobox Combobox;
 
 	/** The slider setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsSlider Slider; //[D]
+	FSettingsSlider Slider;
 
 	/** The text line setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsTextLine TextLine; //[D]
+	FSettingsTextLine TextLine;
 
 	/** The user input setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsUserInput UserInput; //[D]
+	FSettingsUserInput UserInput;
 
 	/** The custom widget setting data. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsCustomWidget CustomWidget; //[D]
+	FSettingsCustomWidget CustomWidget;
 
 	/** Returns the pointer to one of the chosen in-game type.
 	  * It searches the member property of this struct by a value of SettingsType.
@@ -671,5 +671,5 @@ struct MYSETTINGSWIDGETCONSTRUCTOR_API FSettingsRow : public FMyTableRow
 
 	/** The setting row to be customised. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++")
-	FSettingsPicker SettingsPicker = FSettingsPicker::Empty; //[D]
+	FSettingsPicker SettingsPicker = FSettingsPicker::Empty;
 };

@@ -51,7 +51,7 @@ UWorld* UPoolManager::GetWorld() const
 }
 
 // Adds specified object as is to the pool by its class to be handled by the Pool Manager
-bool UPoolManager::AddToPool(UObject* Object)
+bool UPoolManager::AddToPool(UObject* Object, EPoolObjectState PoolObjectState/* = EPoolObjectState::Inactive*/)
 {
 	if (!Object)
 	{
@@ -81,8 +81,22 @@ bool UPoolManager::AddToPool(UObject* Object)
 
 	if (const AActor* Actor = Cast<AActor>(Object))
 	{
-		// Decide by its location should it be activated or not
-		PoolObject.bIsActive = !Actor->GetActorLocation().Equals(VECTOR_HALF_WORLD_MAX);
+		// Decide by its location should it be activated or not if only state is not specified
+		switch (PoolObjectState)
+		{
+			case EPoolObjectState::None:
+				PoolObject.bIsActive = !Actor->GetActorLocation().Equals(VECTOR_HALF_WORLD_MAX);
+				break;
+			case EPoolObjectState::Active:
+				PoolObject.bIsActive = true;
+				break;
+			case EPoolObjectState::Inactive:
+				PoolObject.bIsActive = false;
+				break;
+			default:
+				checkf(false, TEXT("%s: Invalid plugin enumeration type. Need to add a handle for that case here"), *FString(__FUNCTION__));
+				break;
+		}
 	}
 
 	Pool->PoolObjects.Emplace(PoolObject);
@@ -260,8 +274,7 @@ void UPoolManager::SetActive(bool bShouldActivate, UObject* Object)
 	FPoolContainer* Pool = FindPool(ClassInPool);
 	FPoolObject* PoolObject = Pool ? Pool->FindInPool(Object) : nullptr;
 	if (!PoolObject
-	    || !PoolObject->IsValid()
-	    || PoolObject->IsActive() == bShouldActivate)
+	    || !PoolObject->IsValid())
 	{
 		return;
 	}

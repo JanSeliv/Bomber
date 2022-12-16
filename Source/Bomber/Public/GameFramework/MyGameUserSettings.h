@@ -90,38 +90,38 @@ protected:
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
-	/** The overall quality level.
+	/** The overall quality level, is config property.
 	 * 0:custom, 1:low, 2:medium, 3:high, 4:very high, 5:ultra. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overall Quality"))
-	int32 OverallQualityInternal; //[C]
+	int32 OverallQualityInternal;
 
 	/** The min allowed resolution width.
 	 * Is set on starting from game (not settings) config.
 	 * By default is 1280. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size X"))
-	int32 MinResolutionSizeXInternal = 1280; //[G]
+	int32 MinResolutionSizeXInternal = 1280;
 
 	/** The min allowed resolution height.
 	 * Is set on starting from game (not settings) config.
 	 * By default is 720. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Min Resolution Size Y"))
-	int32 MinResolutionSizeYInternal = 720; //[G]
+	int32 MinResolutionSizeYInternal = 720;
 
 	/** Contains all resolutions. Is displayed on UI. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Text Resolutions"))
-	TArray<FText> TextResolutionsInternal; //[M.IO]
+	TArray<FText> TextResolutionsInternal;
 
 	/** Contains all resolutions in the int point format. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Int Resolutions"))
-	TArray<FIntPoint> IntResolutionsInternal; //[M.IO]
+	TArray<FIntPoint> IntResolutionsInternal;
 
 	/** The index of chosen resolution. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Resolution Index"))
-	int32 CurrentResolutionIndexInternal = 0; //[G]
+	int32 CurrentResolutionIndexInternal = 0;
 
-	/** The index of chosen fps lock in array. */
+	/** The index of chosen fps lock in array, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Lock Index"))
-	int32 FPSLockIndexInternal; //[C]
+	int32 FPSLockIndexInternal;
 
 	/* ---------------------------------------------------
 	 *		Protected functions

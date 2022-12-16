@@ -103,7 +103,7 @@ protected:
 	FMorphData MorphDataInternal;
 
 	/** Timeline to be played. */
-	FTimeline TimelineInternal; //[G]
+	FTimeline TimelineInternal;
 
 	/**
 	 * Is created once. Can not be set in the editor due to dynamic duration

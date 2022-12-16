@@ -26,13 +26,13 @@ public:
 
 	/** Called when the player state was changed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnEndGameStateChanged OnEndGameStateChanged; //[DMD]
+	FOnEndGameStateChanged OnEndGameStateChanged;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerNameChanged, FName, NewName);
 
 	/** Called when player name is changed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnPlayerNameChanged OnPlayerNameChanged; //[DMD]
+	FOnPlayerNameChanged OnPlayerNameChanged;
 
 	/** Default constructor. */
 	AMyPlayerState();
@@ -67,12 +67,12 @@ protected:
 
 	/** Contains result of the game for controlled player after ending the game. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
-	EEndGameState EndGameStateInternal = EEndGameState::None; //[G]
+	EEndGameState EndGameStateInternal = EEndGameState::None;
 
 	/** Config: custom name set by player.
-	 * Can contain different languages, uppercase, lowercase etc. */
+	 * Can contain different languages, uppercase, lowercase etc, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
-	FName CustomPlayerNameInternal; //[С]
+	FName CustomPlayerNameInternal;
 
 	/* ---------------------------------------------------
 	 *		Protected functions

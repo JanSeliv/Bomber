@@ -20,15 +20,15 @@ struct BOMBER_API FAttachedMesh
 
 	/** The attached static mesh or skeletal mesh.  */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn))
-	TObjectPtr<class UStreamableRenderAsset> AttachedMesh = nullptr; //[D]
+	TObjectPtr<class UStreamableRenderAsset> AttachedMesh = nullptr;
 
 	/** In the which socket should attach this prop. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	FName Socket = NAME_None; //[D]
+	FName Socket = NAME_None;
 
 	/** Prop animation is loop played all the time, starts playing on attaching to the owner. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UAnimSequence> MeshAnimation = nullptr; //[D]
+	TObjectPtr<class UAnimSequence> MeshAnimation = nullptr;
 };
 
 /**
@@ -42,15 +42,15 @@ class BOMBER_API UPlayerRow final : public ULevelActorRow
 public:
 	/** All meshes that will be attached to the player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TArray<FAttachedMesh> PlayerProps; //[D]
+	TArray<FAttachedMesh> PlayerProps;
 
 	/** The own movement animation for the each character. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UBlendSpace1D> IdleWalkRunBlendSpace = nullptr; //[D]
+	TObjectPtr<class UBlendSpace1D> IdleWalkRunBlendSpace = nullptr;
 
 	/** Dance animation that is used mostly in the menu instead of idle. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UAnimSequence> DanceAnimation = nullptr; //[D]
+	TObjectPtr<class UAnimSequence> DanceAnimation = nullptr;
 
 	/** Returns the num of skin textures in the array of diffuse maps specified a player material instance. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -67,7 +67,7 @@ protected:
 	 * @warning Is not BlueprintReadOnly and has not getter to prevent being used directly, we have dynamic materials instead.
 	 * @see UPlayerRow::MaterialInstancesDynamicInternal. */
 	UPROPERTY(EditDefaultsOnly, Category = "Row", meta = (BlueprintProtected, DisplayName = "Material Instance", ShowOnlyInnerProperties))
-	TObjectPtr<class UMaterialInstance> MaterialInstanceInternal = nullptr; //[D]
+	TObjectPtr<class UMaterialInstance> MaterialInstanceInternal = nullptr;
 
 	/**
 	 * Contains all created dynamic materials for each skin in the Material Instance.
@@ -76,7 +76,7 @@ protected:
 	 * @warning Is not EditDefaultsOnly because have to be created dynamically, in the same time is incompatible with VisibleInstanceOnly.
 	 * @see UPlayerRow::MaterialInstanceInternal. */
 	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Material Instances Dynamic"))
-	TArray<TObjectPtr<class UMaterialInstanceDynamic>> MaterialInstancesDynamicInternal; //[G]
+	TArray<TObjectPtr<class UMaterialInstanceDynamic>> MaterialInstancesDynamicInternal;
 
 #if WITH_EDITOR
 	/** Handle adding and changing material instance to prepare dynamic materials. */
@@ -133,19 +133,19 @@ public:
 protected:
 	/** All materials that are used by nameplate meshes. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nameplate Materials", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class UMaterialInterface>> NameplateMaterialsInternal; //[D]
+	TArray<TObjectPtr<class UMaterialInterface>> NameplateMaterialsInternal;
 
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
-	TSubclassOf<UAnimInstance> AnimInstanceClassInternal = nullptr; //[D]
+	TSubclassOf<UAnimInstance> AnimInstanceClassInternal = nullptr;
 
 	/** The name of a material parameter with a diffuse array. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))
-	FName SkinArrayParameterInternal = TEXT("DiffuseArray"); //[D]
+	FName SkinArrayParameterInternal = TEXT("DiffuseArray");
 
 	/** The name of a material parameter with a diffuse index. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Index Parameter", ShowOnlyInnerProperties))
-	FName SkinIndexParameterInternal = TEXT("DiffuseIndex"); //[D]
+	FName SkinIndexParameterInternal = TEXT("DiffuseIndex");
 };
 
 /**
@@ -231,27 +231,27 @@ protected:
 
 	/** The MapComponent manages this actor on the Level Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr; //[C.AW]
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
 	/** The static mesh nameplate */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Mesh Component"))
-	TObjectPtr<class UStaticMeshComponent> NameplateMeshInternal = nullptr; //[C.DO]
+	TObjectPtr<class UStaticMeshComponent> NameplateMeshInternal = nullptr;
 
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_Powerups", Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
-	FPowerUp PowerupsInternal = FPowerUp::DefaultData; //[AW]
+	FPowerUp PowerupsInternal = FPowerUp::DefaultData;
 
 	/** The ID identification of each character */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CharacterID", Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
-	int32 CharacterIDInternal = INDEX_NONE; //[G]
+	int32 CharacterIDInternal = INDEX_NONE;
 
 	/** The character's AI controller */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
-	TObjectPtr<class AMyAIController> MyAIControllerInternal = nullptr; //[G]
+	TObjectPtr<class AMyAIController> MyAIControllerInternal = nullptr;
 
 	/** Contains custom data about mesh tweaked by player. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_PlayerMeshData", Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
-	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty; //[G]
+	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty;
 
 	/** ---------------------------------------------------
 	 *		Protected functions

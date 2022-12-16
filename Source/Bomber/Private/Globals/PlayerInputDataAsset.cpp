@@ -6,11 +6,6 @@
 //---
 #include "Globals/DataAssetsContainer.h"
 #include "Globals/MyInputMappingContext.h"
-#include "UtilityLibraries/SingletonLibrary.h"
-//---
-#if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
-#endif
 
 // Returns the player input data asset
 const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
