@@ -12,7 +12,7 @@
 /**
  * Contains specific for this project data and is intended to with UMyInputAction
  */
-UCLASS(Blueprintable, Const, AutoExpandCategories=("C++"))
+UCLASS(PerObjectConfig, Blueprintable, Const, AutoExpandCategories=("C++"))
 class BOMBER_API UMyInputMappingContext final : public UInputMappingContext
 {
 	GENERATED_BODY()
