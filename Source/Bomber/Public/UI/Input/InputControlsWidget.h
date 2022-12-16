@@ -4,8 +4,6 @@
 
 #include "UI/SettingSubWidget.h"
 //---
-#include "InputCoreTypes.h"
-//---
 #include "InputControlsWidget.generated.h"
 
 /* Widgets hierarchy:

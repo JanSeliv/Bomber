@@ -16,13 +16,15 @@ void UInputControlsWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	CreateAllInputCategories();
+
+	SetPadding(SettingPrimaryRowInternal.Padding);
 }
 
 // Adds input categories for each mapping context
 void UInputControlsWidget::CreateAllInputCategories()
 {
 	if (!InputCategoriesInternal.IsEmpty()
-		|| !ensureMsgf(InputCategoryClassInternal, TEXT("ASSERT: 'Input Category Class' is null")))
+	    || !ensureMsgf(InputCategoryClassInternal, TEXT("ASSERT: 'Input Category Class' is null")))
 	{
 		return;
 	}

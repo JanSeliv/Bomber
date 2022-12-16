@@ -6,7 +6,6 @@
 //---
 #include "Bomber.h"
 #include "EnhancedActionKeyMapping.h"
-#include "InputCoreTypes.h"
 //---
 #include "InputCategoryWidget.generated.h"
 
@@ -81,6 +80,10 @@ protected:
 
 	/** Called after the underlying slate widget is constructed. */
 	virtual void NativeConstruct() override;
+
+	/** Sets the style for this input category. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void UpdateStyle();
 
 	/** Adds all input buttons to the root of this widget. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

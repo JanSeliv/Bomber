@@ -60,7 +60,7 @@ void UInputButtonWidget::NativeConstruct()
 	UpdateStyle();
 }
 
-// Sets the style for the Input Key Selector
+// Sets the style for this button
 void UInputButtonWidget::UpdateStyle()
 {
 	SInputKeySelector* SlateInputKeySelector = UWidgetUtilsLibrary::GetSlateWidget<SInputKeySelector>(InputKeySelector).Get();
@@ -96,6 +96,9 @@ void UInputButtonWidget::UpdateStyle()
 	CaptionWidget->SetText(MappableDataInternal.PlayerMappableOptions.DisplayName);
 	CaptionWidget->SetFont(MiscThemeData.TextAndCaptionFont);
 	CaptionWidget->SetColorAndOpacity(MiscThemeData.TextAndCaptionColor);
+
+	// Update padding specified in data table of this setting
+	SetPadding(SettingPrimaryRowInternal.Padding);
 }
 
 // Called whenever a new key is selected by the user

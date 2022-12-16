@@ -340,7 +340,7 @@ ASALocalRun/
 healthchecksdb
 
 # Annoying auto configs
-Config/HoloLens/
+**/HoloLensEngine.ini
 
 # Documentation
 docs/

@@ -61,7 +61,7 @@ protected:
 	/** Called after the underlying slate widget is constructed. */
 	virtual void NativeConstruct() override;
 
-	/** Sets the style for the Input Key Selector. */
+	/** Sets the style for this button. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateStyle();
 

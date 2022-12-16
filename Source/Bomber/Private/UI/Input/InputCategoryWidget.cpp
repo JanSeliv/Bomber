@@ -7,6 +7,7 @@
 #include "UI/SettingsWidget.h"
 #include "UI/Input/InputButtonWidget.h"
 //---
+#include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 
 // Returns all categories from the specified input mapping context
@@ -67,6 +68,29 @@ void UInputCategoryWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	AttachInputButtons();
+
+	UpdateStyle();
+}
+
+// Sets the style for this input category
+void UInputCategoryWidget::UpdateStyle()
+{
+	if (!ensureMsgf(CaptionWidget, TEXT("%s: 'CaptionWidget' is not set as BindWidget"), *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
+	// Update category text style
+	if (CaptionWidget->GetText().IsEmpty())
+	{
+		CaptionWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	else
+	{
+		const FMiscThemeData& MiscThemeData = USettingsDataAsset::Get().GetMiscThemeData();
+		CaptionWidget->SetFont(MiscThemeData.TextAndCaptionFont);
+		CaptionWidget->SetColorAndOpacity(MiscThemeData.ThemeColorHover);
+	}
 }
 
 // Adds all input buttons to the root of this widget
