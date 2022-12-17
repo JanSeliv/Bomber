@@ -120,14 +120,15 @@ protected:
 
 	/** Returns the blast SFX. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Sound", ShowOnlyInnerProperties))
+	TObjectPtr<USoundBase> ExplosionSFXInternal = nullptr;
+
 	/** The sound that is played on gathering any power-up. */
-  
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Item Pick-Up SFX", ShowOnlyInnerProperties))
 	TObjectPtr<USoundBase> ItemPickUpSFXInternal = nullptr;
 
 	/** The sound that is played right before the match ends. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "EndGame Countdown SFX ", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundBase> EndGameCountdownSFXInternal = nullptr; //[D]
+	TObjectPtr<USoundBase> EndGameCountdownSFXInternal = nullptr;
 
 	/** Contains all sounds of End-Game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game SFX", ShowOnlyInnerProperties))
