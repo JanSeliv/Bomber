@@ -182,7 +182,7 @@ void AMyGameStateBase::DecrementInGameCountdown()
 		// @todo JanSeliv baYkHels Adjust hardcoded value to match the duration of the EndGame SFX from meta sound
 		if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
 		{
-			const float Tolerance = UGameStateDataAsset::Get().GetTickInterval() - KINDA_SMALL_NUMBER;
+			const float Tolerance = UGameStateDataAsset::Get().GetTickInterval() - GetWorld()->GetDeltaSeconds();
 			constexpr float SoundDuration = 10.f;
 			if (FMath::IsNearlyEqual(InGameTimerSecRemainInternal, SoundDuration, Tolerance))
 			{
