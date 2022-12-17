@@ -4,60 +4,15 @@
 //---
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/DataAssetsContainer.h"
+#include "Globals/SoundsDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 
-// Returns the settings data asset
-const USoundsDataAsset& USoundsDataAsset::Get()
+// Returns the Sounds Manager checked
+USoundsManager& USoundsManager::Get()
 {
-	const USoundsDataAsset* SoundsDataAsset = UDataAssetsContainer::GetSoundsDataAsset();
-	checkf(SoundsDataAsset, TEXT("The Sounds Data Asset is not valid"));
+	USoundsManager* SoundsDataAsset = USoundsDataAsset::Get().GetSoundsManager();
+	checkf(SoundsDataAsset, TEXT("The Sounds Manager is not valid"));
 	return *SoundsDataAsset;
-}
-
-// Returns the sound manager
-USoundsManager* USoundsDataAsset::GetSoundsManager() const
-{
-	if (!SoundsManager)
-	{
-		UWorld* World = USingletonLibrary::Get().GetWorld();
-		SoundsManager = NewObject<USoundsManager>(World, SoundsManagerClass, NAME_None, RF_Public | RF_Transactional);
-	}
-
-	return SoundsManager;
-}
-
-// Returns the music of specified level
-USoundBase* USoundsDataAsset::GetLevelMusic(ELevelType LevelType) const
-{
-	if (const TObjectPtr<USoundBase>* FoundMusic = LevelsMusicInternal.Find(LevelType))
-	{
-		return *FoundMusic;
-	}
-
-	return nullptr;
-}
-
-// Return the background music by specified game state and level type
-USoundBase* USoundsDataAsset::GetBackgroundMusic(ECurrentGameState CurrentGameState, ELevelType LevelType) const
-{
-	if (CurrentGameState == ECGS::Menu)
-	{
-		return GetMainMenuMusic();
-	}
-
-	return GetLevelMusic(LevelType);
-}
-
-// Returns the End-Game sound by specified End-Game state
-USoundBase* USoundsDataAsset::GetEndGameSFX(EEndGameState EndGameState) const
-{
-	if (const TObjectPtr<USoundBase>* FoundSFX = EndGameSFXInternal.Find(EndGameState))
-	{
-		return *FoundSFX;
-	}
-
-	return nullptr;
 }
 
 // Returns a world of stored level map

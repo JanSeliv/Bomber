@@ -2,14 +2,15 @@
 
 #include "Components/MapComponent.h"
 //---
-#include "GameFramework/MyGameStateBase.h"
 #include "GeneratedMap.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Globals/LevelActorDataAsset.h"
-#include "Globals/DataAssetsContainer.h"
-#include "UtilityLibraries/SingletonLibrary.h"
-#include "LevelActors/PlayerCharacter.h"
 #include "PoolManager.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/MyGameStateBase.h"
+#include "Globals/DataAssetsContainer.h"
+#include "Globals/GameStateDataAsset.h"
+#include "Globals/LevelActorDataAsset.h"
+#include "LevelActors/PlayerCharacter.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Components/GameFrameworkComponentManager.h"

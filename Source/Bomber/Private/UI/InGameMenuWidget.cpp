@@ -7,6 +7,7 @@
 #include "UtilityLibraries/SingletonLibrary.h"
 #include "UI/SettingsWidget.h"
 #include "UI/MyHUD.h"
+#include "Globals/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 //---
@@ -137,11 +138,7 @@ void UInGameMenuWidget::BindOnEndGameStateChanged(AMyPlayerState* MyPlayerState)
 // Is called when player pressed the button to restart the game
 void UInGameMenuWidget::OnRestartButtonPressed()
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsManager::Get().PlayUIClickSFX();
 
 	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
@@ -152,11 +149,7 @@ void UInGameMenuWidget::OnRestartButtonPressed()
 // Is called when player pressed the button to go back to the Main Menu
 void UInGameMenuWidget::OnMenuButtonPressed()
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsManager::Get().PlayUIClickSFX();
 
 	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
@@ -251,10 +244,7 @@ void UInGameMenuWidget::OnToggleInGameMenu(bool bIsVisible)
 	SetVisibility(NewVisibility);
 
 	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsManager::Get().PlayUIClickSFX();
 
 	if (OnToggledInGameMenu.IsBound())
 	{

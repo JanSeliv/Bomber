@@ -6,25 +6,10 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/DataAssetsContainer.h"
+#include "Globals/BoxDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
-
-// Default constructor
-UBoxDataAsset::UBoxDataAsset()
-{
-	ActorTypeInternal = EAT::Box;
-}
-
-// Returns the box data asset
-const UBoxDataAsset& UBoxDataAsset::Get()
-{
-	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Box);
-	const auto BoxDataAsset = Cast<UBoxDataAsset>(FoundDataAsset);
-	checkf(BoxDataAsset, TEXT("The Box Data Asset is not valid"));
-	return *BoxDataAsset;
-}
 
 // Sets default values.
 ABoxActor::ABoxActor()

@@ -4,10 +4,11 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "UtilityLibraries/SingletonLibrary.h"
 #include "Controllers/MyPlayerController.h"
+#include "GameFramework/MyGameStateBase.h"
+#include "Globals/GameStateDataAsset.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Camera/CameraComponent.h"
 //---

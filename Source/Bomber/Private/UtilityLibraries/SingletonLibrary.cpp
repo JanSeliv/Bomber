@@ -5,7 +5,6 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "SoundsManager.h"
-#include "Components/MapComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
@@ -266,18 +265,13 @@ APlayerCharacter* USingletonLibrary::GetLocalPlayerCharacter()
 // Returns the Sound Manager
 USoundsManager* USingletonLibrary::GetSoundsManager()
 {
-	return USoundsDataAsset::Get().GetSoundsManager();
+	return &USoundsManager::Get();
 }
 
 // Returns the Pool Manager of the game that is used to reuse created objects
 UPoolManager* USingletonLibrary::GetPoolManager()
 {
 	return AGeneratedMap::Get().GetPoolManager();
-}
-
-const UDataAssetsContainer* USingletonLibrary::GetDataAssetsContainer()
-{
-	return Get().DataAssetsContainerInternal;
 }
 
 /* ---------------------------------------------------
@@ -406,7 +400,7 @@ void USingletonLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const 
 	}
 
 	// Remove invalid cell if passed
-	// @TODO Instead of removing, do not add such render component
+	// @TODO JanSeliv 3kKWq6XP Instead of removing, do not add such render component
 	FCells InCells = Cells;
 	if (InCells.Contains(FCell::InvalidCell))
 	{

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Globals//LevelActorDataAsset.h"
+#include "Engine/DataAsset.h"
 //---
 #include "PlayerInputDataAsset.generated.h"
 
@@ -12,7 +12,7 @@ class UMyInputMappingContext;
 * Contains all data that describe player input.
 */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UPlayerInputDataAsset final : public UBomberDataAsset
+class BOMBER_API UPlayerInputDataAsset final : public UDataAsset
 {
 	GENERATED_BODY()
 
