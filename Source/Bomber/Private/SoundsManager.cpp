@@ -160,6 +160,20 @@ void USoundsManager::PlayItemPickUpSFX()
 	}
 }
 
+/** Play the sound that is played right before the match ends. */
+void USoundsManager::PlayEndGameCountdownSFX()
+{
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	{
+		return;
+	}
+
+	if (USoundBase* EndGameCountdownTimerSFX = USoundsDataAsset::Get().GetEndGameCountdownSFX())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), EndGameCountdownTimerSFX);
+	}
+}
+
 // Play the sound of the clicked UI element
 void USoundsManager::PlayUIClickSFX()
 {

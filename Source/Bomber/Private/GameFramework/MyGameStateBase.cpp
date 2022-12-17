@@ -6,6 +6,7 @@
 #include "GeneratedMap.h"
 #include "Globals/DataAssetsContainer.h"
 #include "UtilityLibraries/SingletonLibrary.h"
+#include "SoundsManager.h"
 //---
 #include "GameFeaturesSubsystem.h"
 #include "Net/UnrealNetwork.h"
@@ -175,6 +176,19 @@ void AMyGameStateBase::DecrementInGameCountdown()
 	if (IsInGameTimerElapsed())
 	{
 		ServerSetGameState(ECurrentGameState::EndGame);
+	}
+	else
+	{
+		// @todo JanSeliv baYkHels Adjust hardcoded value to match the duration of the EndGame SFX from meta sound
+		if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+		{
+			const float Tolerance = UGameStateDataAsset::Get().GetTickInterval() - KINDA_SMALL_NUMBER;
+			constexpr float SoundDuration = 10.f;
+			if (FMath::IsNearlyEqual(InGameTimerSecRemainInternal, SoundDuration, Tolerance))
+			{
+				SoundsManager->PlayEndGameCountdownSFX();
+			}
+		}
 	}
 }
 
