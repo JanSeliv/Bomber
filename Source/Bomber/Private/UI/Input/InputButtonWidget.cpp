@@ -110,8 +110,5 @@ void UInputButtonWidget::OnKeySelected(FInputChord SelectedKey)
 // Called whenever the key selection mode starts or stops
 void UInputButtonWidget::OnIsSelectingKeyChanged()
 {
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsManager::Get().PlayUIClickSFX();
 }

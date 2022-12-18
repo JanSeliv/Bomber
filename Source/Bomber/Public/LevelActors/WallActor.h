@@ -2,31 +2,13 @@
 
 #pragma once
 
-#include "Globals/LevelActorDataAsset.h"
-//---
 #include "GameFramework/Actor.h"
 //---
 #include "WallActor.generated.h"
 
 /**
- * Describes common data for all walls.
- */
-UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UWallDataAsset final : public ULevelActorDataAsset
-{
-	GENERATED_BODY()
-
-public:
-	/** Default constructor. */
-	UWallDataAsset();
-
-	/** Returns the wall data asset. */
-	static const UWallDataAsset& Get();
-};
-
-
-/**
  * Walls are not destroyed by a bomb explosion and break the explosion.
+ * @see Access its data with UWallDataAsset (Content/Bomber/Globals/DA_Wall).
  */
 UCLASS()
 class BOMBER_API AWallActor final : public AActor

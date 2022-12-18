@@ -4,10 +4,9 @@
 //---
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Controllers/MyAIController.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 #include "LevelActors/BoxActor.h"
-#include "LevelActors/ItemActor.h"
+#include "Globals/ItemDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"

@@ -2,10 +2,10 @@
 
 #include "Controllers/MyAIController.h"
 //---
-#include "Bomber.h"
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/DataAssetsContainer.h"
+#include "Globals/AIDataAsset.h"
+#include "Globals/GameStateDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/SingletonLibrary.h"
@@ -22,14 +22,6 @@ static TAutoConsoleVariable<bool> CVarAISetEnabled(
 	true,
 	TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
 	ECVF_Default);
-
-// Returns the AI data asset
-const UAIDataAsset& UAIDataAsset::Get()
-{
-	const UAIDataAsset* AIDataAsset = UDataAssetsContainer::GetAIDataAsset();
-	checkf(AIDataAsset, TEXT("The AI Data Asset is not valid"));
-	return *AIDataAsset;
-}
 
 // Sets default values for this character's properties
 AMyAIController::AMyAIController()

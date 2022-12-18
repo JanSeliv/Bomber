@@ -3,19 +3,10 @@
 #include "UI/MyHUD.h"
 //---
 #include "UtilsLibrary.h"
-#include "Globals/DataAssetsContainer.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "Globals/UIDataAsset.h"
 #include "UI/InGameWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"
-
-// Returns the UI data asset
-const UUIDataAsset& UUIDataAsset::Get()
-{
-	const UUIDataAsset* UIDataAsset = UDataAssetsContainer::GetUIDataAsset();
-	checkf(UIDataAsset, TEXT("The UI Data Asset is not valid"));
-	return *UIDataAsset;
-}
 
 // Default constructor
 AMyHUD::AMyHUD()

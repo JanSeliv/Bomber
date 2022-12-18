@@ -4,36 +4,22 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "SoundsManager.h"
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Globals/BombDataAsset.h"
 #include "Globals/DataAssetsContainer.h"
-#include "UtilityLibraries/SingletonLibrary.h"
-#include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "SoundsManager.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
-#include "Components/BoxComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
 #endif
-
-// Default constructor
-UBombDataAsset::UBombDataAsset()
-{
-	ActorTypeInternal = EAT::Bomb;
-}
-
-// Returns the bomb data asset
-const UBombDataAsset& UBombDataAsset::Get()
-{
-	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Bomb);
-	const auto BombDataAsset = Cast<UBombDataAsset>(FoundDataAsset);
-	checkf(BombDataAsset, TEXT("The Bomb Data Asset is not valid"));
-	return *BombDataAsset;
-}
 
 // Sets default values
 ABombActor::ABombActor()
@@ -287,11 +273,7 @@ void ABombActor::MulticastDetonateBomb_Implementation()
 	// Destroy all actors from array of cells
 	AGeneratedMap::Get().DestroyLevelActorsOnCells(ExplosionCells, this);
 
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayExplosionSFX();
-	}
+	USoundsManager::Get().PlayExplosionSFX();
 
 	GetWorldTimerManager().ClearTimer(TimerHandle_LifeSpanExpired);
 }

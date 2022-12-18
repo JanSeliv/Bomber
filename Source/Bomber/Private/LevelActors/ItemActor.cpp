@@ -4,42 +4,13 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "SoundsManager.h"
 #include "Components/MapComponent.h"
 #include "Globals/DataAssetsContainer.h"
+#include "Globals/ItemDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
-#include "SoundsManager.h"
 //---
-#include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
-
-// Default constructor
-UItemDataAsset::UItemDataAsset()
-{
-	ActorTypeInternal = EAT::Item;
-	RowClassInternal = UItemRow::StaticClass();
-}
-
-// Returns the item data asset
-const UItemDataAsset& UItemDataAsset::Get()
-{
-	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Item);
-	const auto ItemDataAsset = Cast<UItemDataAsset>(FoundDataAsset);
-	checkf(ItemDataAsset, TEXT("The Item Data Asset is not valid"));
-	return *ItemDataAsset;
-}
-
-// Return row by specified item type
-const UItemRow* UItemDataAsset::GetRowByItemType(EItemType ItemType, ELevelType LevelType) const
-{
-	TArray<ULevelActorRow*> OutRows;
-	Get().GetRowsByLevelType(OutRows, TO_FLAG(LevelType));
-	const ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType](const ULevelActorRow* RowIt)
-	{
-		const auto ItemRow = Cast<UItemRow>(RowIt);
-		return ItemRow && ItemRow->ItemType == ItemType;
-	});
-	return FoundRowPtr ? Cast<UItemRow>(*FoundRowPtr) : nullptr;
-}
 
 // Sets default values
 AItemActor::AItemActor()
@@ -144,11 +115,7 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 		return;
 	}
 
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayItemPickUpSFX();
-	}
+	USoundsManager::Get().PlayItemPickUpSFX();
 
 	// Destroy itself on overlapping
 	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal, OtherActor);

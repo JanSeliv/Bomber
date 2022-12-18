@@ -2,16 +2,16 @@
 
 #include "GeneratedMap.h"
 //---
-#include "Bomber.h"
-#include "Structures/Cell.h"
+#include "PoolManager.h"
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "Globals/DataAssetsContainer.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "Globals/GeneratedMapDataAsset.h"
 #include "LevelActors/BombActor.h"
-#include "PoolManager.h"
+#include "Structures/Cell.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/LevelStreaming.h"
@@ -19,9 +19,9 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
 #include "EditorLevelUtils.h"
 #include "EditorUtilityLibrary.h"
+#include "EditorUtilsLibrary.h"
 #include "Engine/LevelStreamingAlwaysLoaded.h"
 #include "Engine/LevelStreamingDynamic.h"
 #endif
@@ -29,14 +29,6 @@
 /* ---------------------------------------------------
  *		Level map public functions
  * --------------------------------------------------- */
-
-// Returns the generated map data asset
-const UGeneratedMapDataAsset& UGeneratedMapDataAsset::Get()
-{
-	const UGeneratedMapDataAsset* GeneratedMapDataAsset = UDataAssetsContainer::GetLevelsDataAsset();
-	checkf(GeneratedMapDataAsset, TEXT("The Generated Map Data Asset is not valid"))
-	return *GeneratedMapDataAsset;
-}
 
 // Sets default values
 AGeneratedMap::AGeneratedMap()

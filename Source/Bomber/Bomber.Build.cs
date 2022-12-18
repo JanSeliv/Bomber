@@ -14,6 +14,7 @@ public class Bomber : ModuleRules
                 "Core" // Core
                 , "UMG" // UUserWidget creation
                 , "EnhancedInput" // Created UMyInputAction, UMyInputMappingContext
+                , "DeveloperSettings" // Created UDataAssetsContainer
                 //My modules
                 , "FunctionPicker" // Used by MyInputAction.h
 		    }

@@ -2,22 +2,14 @@
 
 #include "GameFramework/MyGameStateBase.h"
 //---
-#include "GameFramework/MyPlayerState.h"
 #include "GeneratedMap.h"
-#include "Globals/DataAssetsContainer.h"
-#include "UtilityLibraries/SingletonLibrary.h"
 #include "SoundsManager.h"
+#include "GameFramework/MyPlayerState.h"
+#include "Globals/GameStateDataAsset.h"
+#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "GameFeaturesSubsystem.h"
 #include "Net/UnrealNetwork.h"
-
-// Returns the Game State data asset
-const UGameStateDataAsset& UGameStateDataAsset::Get()
-{
-	const UGameStateDataAsset* GameStateDataAsset = Cast<UGameStateDataAsset>(UDataAssetsContainer::GetGameStateDataAsset());
-	checkf(GameStateDataAsset, TEXT("The Game State Data Asset is not valid"));
-	return *GameStateDataAsset;
-}
 
 // Default constructor
 AMyGameStateBase::AMyGameStateBase()
@@ -177,7 +169,8 @@ void AMyGameStateBase::DecrementStartingCountdown()
 // Is called during the In-Game state to handle time consuming for the current match
 void AMyGameStateBase::DecrementInGameCountdown()
 {
-	if (CurrentGameStateInternal != ECGS::InGame)
+	const UWorld* World = GetWorld();
+	if (!World || CurrentGameStateInternal != ECGS::InGame)
 	{
 		return;
 	}
@@ -191,14 +184,11 @@ void AMyGameStateBase::DecrementInGameCountdown()
 	else
 	{
 		// @todo JanSeliv baYkHels Adjust hardcoded value to match the duration of the EndGame SFX from meta sound
-		if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
+		const float Tolerance = UGameStateDataAsset::Get().GetTickInterval() - World->GetDeltaSeconds();
+		constexpr float SoundDuration = 10.f;
+		if (FMath::IsNearlyEqual(InGameTimerSecRemainInternal, SoundDuration, Tolerance))
 		{
-			const float Tolerance = UGameStateDataAsset::Get().GetTickInterval() - KINDA_SMALL_NUMBER;
-			constexpr float SoundDuration = 10.f;
-			if (FMath::IsNearlyEqual(InGameTimerSecRemainInternal, SoundDuration, Tolerance))
-			{
-				SoundsManager->PlayEndGameCountdownSFX();
-			}
+			USoundsManager::Get().PlayEndGameCountdownSFX();
 		}
 	}
 }

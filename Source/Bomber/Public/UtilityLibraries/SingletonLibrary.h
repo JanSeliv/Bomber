@@ -180,10 +180,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class UPoolManager* GetPoolManager();
 
-	/** Returns the Levels Data Asset*/
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static const class UDataAssetsContainer* GetDataAssetsContainer();
-
 	/* ---------------------------------------------------
 	*		EActorType functions
 	* --------------------------------------------------- */
@@ -228,10 +224,6 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pool Manager"))
 	TWeakObjectPtr<class UPoolManager> PoolManagerInternal = nullptr;
 
-	/** Contains core data of the game. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Data Assets Container"))
-	TObjectPtr<class UDataAssetsContainer> DataAssetsContainerInternal = nullptr;
-
 	/* ---------------------------------------------------
 	 *		Editor development
 	 * --------------------------------------------------- */
@@ -260,7 +252,7 @@ public:
 
 protected:
 	/** Debug visualization by text renders. Has blueprint implementation
-	 * @TODO Move blueprint implementation to code, get rif of this function and move DisplayCell functions to UCellsUtilsLibrary. */
+	 * @TODO JanSeliv 3kKWq6XP Move blueprint implementation to code, get rid of this function and move DisplayCell functions to UCellsUtilsLibrary. */
 	UFUNCTION(BlueprintNativeEvent, meta = (DevelopmentOnly, BlueprintProtected, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderString,CoordinatePosition", DefaultToSelf = "Owner"))
 	void AddDebugTextRenders(class AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<class UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const;
 };

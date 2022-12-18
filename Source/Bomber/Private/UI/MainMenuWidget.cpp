@@ -110,11 +110,7 @@ void UMainMenuWidget::NextSkin()
 		return;
 	}
 
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsManager::Get().PlayUIClickSFX();
 
 	// Switch the preview skin
 	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + 1;
@@ -127,11 +123,7 @@ void UMainMenuWidget::NextSkin()
 // Set the chosen on UI the level type
 void UMainMenuWidget::ChooseNewLevel(ELevelType LevelType)
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsManager::Get().PlayUIClickSFX();
 
 	AGeneratedMap::Get().SetLevelType(LevelType);
 }
@@ -139,11 +131,7 @@ void UMainMenuWidget::ChooseNewLevel(ELevelType LevelType)
 // Is executed when player pressed the button of starting the game
 void UMainMenuWidget::StartGame()
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsManager::Get().PlayUIClickSFX();
 
 	if (AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController())
 	{
@@ -227,10 +215,7 @@ void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	}
 
 	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsManager::Get().PlayUIClickSFX();
 
 	const bool bRotated = MainMenuActorInternal->RotateFloorBP(Incrementer);
 	if (!bRotated)
