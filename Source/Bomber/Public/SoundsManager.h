@@ -82,6 +82,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void StopEndGameCountdownSFX();
 
+	/** Play the sound that is played before the match starts. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayStartGameCountdownSFX();
+
 	/** Play the sound of the clicked UI element. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Play UI Click SFX"))
 	void PlayUIClickSFX();

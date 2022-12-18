@@ -79,7 +79,10 @@ bool UMyInputMappingContext::RemapKey(const UInputAction* InInputAction, const F
 
 	UEnhancedInputLibrary::RequestRebuildControlMappingsUsingContext(this);
 
-	SaveConfig();
+	if (CanSaveMappingsInConfig())
+	{
+		SaveConfig();
+	}
 
 	return true;
 }
@@ -97,16 +100,14 @@ bool UMyInputMappingContext::RemapKey(const UMyInputMappingContext* InContext, c
 	return ContextToRemap->RemapKey(InMapping.Action, NewKey, InMapping.Key);
 }
 
-#if WITH_EDITOR //[IsEditorNotPieWorld]
-/** Implemented to save input configs as well. */
-void UMyInputMappingContext::PreSave(FObjectPreSaveContext SaveContext)
+// Returns true if remapped key is allowed to be saved in config
+bool UMyInputMappingContext::CanSaveMappingsInConfig()
 {
-	Super::PreSave(SaveContext);
-
-	// Save only if [IsEditorNotPieWorld]
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
-	{
-		SaveConfig();
-	}
-}
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	// We don't want to save remaps in Editor, it gets serialised right into asset
+	return !UEditorUtilsLibrary::IsEditor();
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
+
+	// Always return true in cook since there remaps should be saved into config file and taken there.
+	return true;
+}
