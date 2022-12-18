@@ -126,6 +126,7 @@ void USoundsManager::PlayEndGameCountdownSFX()
 	if (USoundBase* EndGameCountdownTimerSFX = USoundsDataAsset::Get().GetEndGameCountdownSFX())
 	{
 		EndGameCountDownSFXAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), EndGameCountdownTimerSFX);
+		EndGameCountDownSFXAudioComponent->Play();
 	}
 }
 
