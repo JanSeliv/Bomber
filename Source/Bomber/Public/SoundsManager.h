@@ -28,6 +28,10 @@ public:
 	/** Returns a world of stored level map. */
 	virtual UWorld* GetWorld() const override;
 
+	/** The component that is used to store reference for EndGameCountdown SFX. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))
+	TObjectPtr<UAudioComponent> ActiveEndGameCountdownSFX = nullptr;
+
 	/** Set new sound volume.
 	 * @param InSoundClass The of the sounds.
 	 * @param InVolume New value to set. */
@@ -73,6 +77,10 @@ public:
 	/** Play the sound that is played right before the match ends. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void PlayEndGameCountdownSFX();
+
+	/** Stops the sound that is played right before the match ends. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void StopEndGameCountdownSFX();
 
 	/** Play the sound that is played before the match starts. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
