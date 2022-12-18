@@ -76,6 +76,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE USoundBase* GetEndGameCountdownSFX() const { return EndGameCountdownSFXInternal; }
 
+	/** Returns the sound that is played before the match starts.
+	 * @see USoundsDataAsset::StartGameCountdownInternal */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE USoundBase* GetStartGameCountdownSFX() const { return StartGameCountdownSFXInternal; }
+
 	/** Returns the End-Game sound by specified End-Game state.
 	 * @see USoundsDataAsset::EndGameSoundsInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -126,6 +131,10 @@ protected:
 	/** The sound that is played right before the match ends. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "EndGame Countdown SFX ", ShowOnlyInnerProperties))
 	TObjectPtr<USoundBase> EndGameCountdownSFXInternal = nullptr;
+
+	/** The sound that is played before the match starts. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Start Game Countdown SFX ", ShowOnlyInnerProperties))
+	TObjectPtr<USoundBase> StartGameCountdownSFXInternal = nullptr;
 
 	/** Contains all sounds of End-Game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game SFX", ShowOnlyInnerProperties))

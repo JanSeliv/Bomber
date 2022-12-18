@@ -129,6 +129,19 @@ void USoundsManager::PlayEndGameCountdownSFX()
 	}
 }
 
+void USoundsManager::PlayStartGameCountdownSFX()
+{
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::GameStarting)
+	{
+		return;
+	}
+
+	if (USoundBase* StarGameCountdownSFX = USoundsDataAsset::Get().GetStartGameCountdownSFX())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), StarGameCountdownSFX);
+	}
+}
+
 // Play the sound of the clicked UI element
 void USoundsManager::PlayUIClickSFX()
 {

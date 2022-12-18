@@ -81,6 +81,7 @@ void AMyGameStateBase::ApplyGameState()
 {
 	if (CurrentGameStateInternal == ECGS::GameStarting)
 	{
+		USoundsManager::Get().PlayStartGameCountdownSFX();
 		TriggerCountdowns();
 	}
 
