@@ -81,7 +81,6 @@ void AMyGameStateBase::ApplyGameState()
 {
 	if (CurrentGameStateInternal == ECGS::GameStarting)
 	{
-		USoundsManager::Get().PlayStartGameCountdownSFX();
 		TriggerCountdowns();
 	}
 
@@ -114,6 +113,8 @@ void AMyGameStateBase::TriggerCountdowns()
 	constexpr bool bInLoop = true;
 	const float InRate = UGameStateDataAsset::Get().GetTickInterval();
 	World->GetTimerManager().SetTimer(CountdownTimerInternal, this, &ThisClass::OnCountdownTimerTicked, InRate, bInLoop);
+
+	USoundsManager::Get().PlayStartGameCountdownSFX();
 }
 
 // Is called each UGameStateDataAsset::TickInternal to count different time in the game
