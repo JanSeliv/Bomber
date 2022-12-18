@@ -6,7 +6,6 @@
 //---
 #include "Bomber.h"
 #include "Structures/Cell.h"
-#include "Structures/SettingsRow.h"
 //---
 #include "SingletonLibrary.generated.h"
 
