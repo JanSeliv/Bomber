@@ -130,7 +130,7 @@ void USoundsManager::PlayEndGameCountdownSFX()
 	}
 }
 
-/** Stops the sound that is played right before the match ends. */
+// Stops the sound that is played right before the match ends.
 void USoundsManager::StopEndGameCountdownSFX()
 {
 	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)

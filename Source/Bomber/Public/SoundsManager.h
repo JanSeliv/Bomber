@@ -28,7 +28,7 @@ public:
 	/** Returns a world of stored level map. */
 	virtual UWorld* GetWorld() const override;
 
-	/** The component that is used to store reference for EndGameCountdown SFX.*/
+	/** The component that is used to store reference for EndGameCountdown SFX. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))
 	TObjectPtr<UAudioComponent> ActiveEndGameCountdownSFX = nullptr;
 
