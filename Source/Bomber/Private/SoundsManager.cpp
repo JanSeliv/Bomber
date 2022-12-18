@@ -125,8 +125,21 @@ void USoundsManager::PlayEndGameCountdownSFX()
 
 	if (USoundBase* EndGameCountdownTimerSFX = USoundsDataAsset::Get().GetEndGameCountdownSFX())
 	{
-		EndGameCountDownSFXAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), EndGameCountdownTimerSFX);
-		EndGameCountDownSFXAudioComponent->Play();
+		ActiveEndGameCountdownSFX = UGameplayStatics::CreateSound2D(GetWorld(), EndGameCountdownTimerSFX);
+		ActiveEndGameCountdownSFX->Play();
+	}
+}
+
+void USoundsManager::StopEndGameCountdownSFX()
+{
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	{
+		return;
+	}
+
+	if (ActiveEndGameCountdownSFX && ActiveEndGameCountdownSFX->IsPlaying())
+	{
+		ActiveEndGameCountdownSFX->Stop();
 	}
 }
 
@@ -201,5 +214,6 @@ void USoundsManager::OnEndGameStateChanged(EEndGameState EndGameState)
 // Listen game states to switch background music
 void USoundsManager::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
+	StopEndGameCountdownSFX();
 	PlayCurrentBackgroundMusic();
 }

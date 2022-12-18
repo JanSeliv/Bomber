@@ -88,9 +88,9 @@ void AMyGameStateBase::ApplyGameState()
 	{
 		if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
 		{
-			if (SoundsManager->EndGameCountDownSFXAudioComponent && SoundsManager->EndGameCountDownSFXAudioComponent->IsPlaying())
+			if (SoundsManager->ActiveEndGameCountdownSFX && SoundsManager->ActiveEndGameCountdownSFX->IsPlaying())
 			{
-				SoundsManager->EndGameCountDownSFXAudioComponent->Stop();
+				SoundsManager->ActiveEndGameCountdownSFX->Stop();
 			}
 		}
 	}
