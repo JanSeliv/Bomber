@@ -84,17 +84,6 @@ void AMyGameStateBase::ApplyGameState()
 		TriggerCountdowns();
 	}
 
-	if (CurrentGameStateInternal != ECGS::InGame)
-	{
-		if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-		{
-			if (SoundsManager->ActiveEndGameCountdownSFX && SoundsManager->ActiveEndGameCountdownSFX->IsPlaying())
-			{
-				SoundsManager->ActiveEndGameCountdownSFX->Stop();
-			}
-		}
-	}
-
 	// Notify listeners
 	if (OnGameStateChanged.IsBound())
 	{
