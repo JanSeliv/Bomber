@@ -2,10 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
+#include "Modules/ModuleInterface.h"
 
-class FNewAIRuntimeModule : public IModuleInterface
+/** Define Bomber log category. */
+NEWAIRUNTIME_API DECLARE_LOG_CATEGORY_EXTERN(LogNewAI, Log, All);
+
+class NEWAIRUNTIME_API FNewAIRuntimeModule final : public IModuleInterface
 {
 public:
 	//~IModuleInterface

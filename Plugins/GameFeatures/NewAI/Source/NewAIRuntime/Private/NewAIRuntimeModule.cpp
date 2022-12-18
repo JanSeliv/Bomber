@@ -4,6 +4,8 @@
 
 #define LOCTEXT_NAMESPACE "FNewAIRuntimeModule"
 
+DEFINE_LOG_CATEGORY(LogNewAI);
+
 void FNewAIRuntimeModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory;
