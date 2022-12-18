@@ -55,9 +55,12 @@ public:
 	bool IsMappedKey(const FKey& Key) const;
 
 protected:
-	/** Enhanced Input Mapping Contexts of gameplay actions for local players. */
+	/** Enhanced Input Mapping Contexts of gameplay input actions where any selected input can be remapped by player.
+	 *  Are selectable classes instead of objects directly to solve next UE issues:
+	 *  - to avoid changing data asset by MapKey, UnmapKey or RemapKey.
+	 *  - to have outer for gameplay contexts to let GC to garbage it after context is serialized from config that contains overriden changes by remapping. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Gameplay Input Context Classes", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<UMyInputMappingContext>> GameplayInputContextsInternal;
+	TArray<TSubclassOf<UMyInputMappingContext>> GameplayInputContextClassesInternal;
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Input Context", ShowOnlyInnerProperties))
@@ -67,7 +70,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))
 	TObjectPtr<UMyInputMappingContext> InGameMenuInputContextInternal = nullptr;
 
-	/** Enhanced Input Mapping Context of actions on the Settings widget*/
+	/** Enhanced Input Mapping Context of actions on the Settings widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Input Context", ShowOnlyInnerProperties))
 	TObjectPtr<UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr;
+
+	/** Creates new contexts if is needed, is implemented to solve UE issues with remappings, see details below.
+	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void TryCreateGameplayInputContexts() const;
+
+private:
+	/** Are created dynamically by specified input classes to solve UE issues with remappings, see details below.
+	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
+	UPROPERTY(Transient)
+	mutable TArray<TObjectPtr<class UMyInputMappingContext>> GameplayInputContextsInternal; //[G]
 };
