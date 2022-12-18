@@ -133,7 +133,7 @@ protected:
 	TObjectPtr<USoundBase> EndGameCountdownSFXInternal = nullptr;
 
 	/** The sound that is played before the match starts. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Start Game Countdown SFX ", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Start Game Countdown SFX", ShowOnlyInnerProperties))
 	TObjectPtr<USoundBase> StartGameCountdownSFXInternal = nullptr;
 
 	/** Contains all sounds of End-Game states. */

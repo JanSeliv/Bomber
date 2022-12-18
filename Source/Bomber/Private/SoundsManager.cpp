@@ -129,7 +129,7 @@ void USoundsManager::PlayEndGameCountdownSFX()
 	}
 }
 
-/** Play the sound that is played before the match starts. */
+// Play the sound that is played before the match starts. 
 void USoundsManager::PlayStartGameCountdownSFX()
 {
 	if (AMyGameStateBase::GetCurrentGameState() != ECGS::GameStarting)
