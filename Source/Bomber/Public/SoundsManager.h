@@ -161,6 +161,10 @@ public:
 	/** Returns a world of stored level map. */
 	virtual UWorld* GetWorld() const override;
 
+	/** The component that is used to store reference for EndGameCountdown SFX.*/
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))
+	TObjectPtr<UAudioComponent> EndGameCountDownSFXAudioComponent = nullptr;
+
 	/** Set new sound volume.
 	 * @param InSoundClass The of the sounds.
 	 * @param InVolume New value to set. */

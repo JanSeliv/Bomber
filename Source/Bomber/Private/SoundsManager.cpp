@@ -170,7 +170,7 @@ void USoundsManager::PlayEndGameCountdownSFX()
 
 	if (USoundBase* EndGameCountdownTimerSFX = USoundsDataAsset::Get().GetEndGameCountdownSFX())
 	{
-		UGameplayStatics::PlaySound2D(GetWorld(), EndGameCountdownTimerSFX);
+		EndGameCountDownSFXAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), EndGameCountdownTimerSFX);
 	}
 }
 
