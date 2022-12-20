@@ -83,22 +83,4 @@ protected:
 	/** Enable or disable the God mode to make a controllable player undestroyable. */
 	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Player.SetGodMode"))
 	void SetGodMode(bool bShouldEnable) const;
-
-	/* ---------------------------------------------------
-	*		UI
-	* --------------------------------------------------- */
-
-	/** Override the setting value.
-	 * Types:			Examples:
-	 * Button:			Bomber.UI.SetSetting Close
-	 * Checkbox:		Bomber.UI.SetSetting VSync?1
-	 * Combobox index:	Bomber.UI.SetSetting Shadows?2
-	 * Combobox list:	Bomber.UI.SetSetting Shadows?Low,Medium,High
-	 * Slider:			Bomber.UI.SetSetting Audio?0.5
-	 * Text Line:		Bomber.UI.SetSetting Title?Bomber
-	 * User Input:		Bomber.UI.SetSetting Player?JanSeliv
-	 * @param TagByValue Tag?Value
-	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.UI.SetSetting"))
-	void SetSetting(const FString& TagByValue) const;
 };

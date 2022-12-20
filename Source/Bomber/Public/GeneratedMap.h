@@ -242,7 +242,7 @@ protected:
 		const FCell& Cell,
 		EPathType Pathfinder,
 		int32 SideLength,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECellDirection")) int32 DirectionsBitmask,
+		int32 DirectionsBitmask,
 		bool bBreakInputCells = false) const;
 
 	/**

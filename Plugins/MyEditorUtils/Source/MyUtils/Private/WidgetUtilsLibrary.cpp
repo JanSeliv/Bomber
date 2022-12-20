@@ -2,10 +2,11 @@
 
 #include "WidgetUtilsLibrary.h"
 //---
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
 
 // Return the parent widget of a specific class in the widget tree hierarchy
-UWidget* UWidgetUtilsLibrary::GetParentWidgetOfClass(const UWidget* InWidget, TSubclassOf<UWidget> ParentWidgetClass)
+UUserWidget* UWidgetUtilsLibrary::GetParentWidgetOfClass(const UUserWidget* InWidget, TSubclassOf<UUserWidget> ParentWidgetClass)
 {
 	UObject* It = InWidget ? InWidget->GetParent() : nullptr;
 	if (!It)
@@ -13,18 +14,18 @@ UWidget* UWidgetUtilsLibrary::GetParentWidgetOfClass(const UWidget* InWidget, TS
 		return nullptr;
 	}
 
-	UWidget* FoundWidget = nullptr;
+	UUserWidget* FoundWidget = nullptr;
 	while ((It = It->GetOuter()) != nullptr)
 	{
 		// Check every outer until the desired one is found
 		if (It->IsA(ParentWidgetClass))
 		{
-			FoundWidget = Cast<UWidget>(It);
+			FoundWidget = Cast<UUserWidget>(It);
 			break;
 		}
 
 		if (!It->IsA<UWidgetTree>()
-			&& !It->IsA<UWidget>())
+			&& !It->IsA<UUserWidget>())
 		{
 			// No sense to iterate non-widget outers
 			break;
@@ -32,5 +33,13 @@ UWidget* UWidgetUtilsLibrary::GetParentWidgetOfClass(const UWidget* InWidget, TS
 	}
 
 	return FoundWidget;
+}
+
+// Returns first widget by specified class iterating all widget objects
+UUserWidget* UWidgetUtilsLibrary::FindWidgetOfClass(UObject* WorldContextObject, TSubclassOf<UUserWidget> ParentWidgetClass)
+{
+	TArray<UUserWidget*> FoundWidgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(WorldContextObject, /*out*/FoundWidgets, ParentWidgetClass);
+	return !FoundWidgets.IsEmpty()? FoundWidgets[0] : nullptr;
 }
 
