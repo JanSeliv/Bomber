@@ -2,23 +2,21 @@
 
 #pragma once
 
-#include "GameFramework/CheatManager.h"
+#include "MetaCheatManager.h"
+//---
 #include "Bomber.h"
 //---
 #include "MyCheatManager.generated.h"
 
 /**
- * Contains debugging code for non-shipping builds to check general game functionality.
+ * Contains debugging cheat command for non-shipping builds to test general game functionality.
  */
 UCLASS()
-class BOMBER_API UMyCheatManager : public UCheatManager
+class BOMBER_API UMyCheatManager final : public UMetaCheatManager
 {
 	GENERATED_BODY()
 
 protected:
-	/** Called when CheatManager is created to allow any needed initialization. */
-	virtual void InitCheatManager() override;
-
 	/**
 	 * Returns bitmask by string.
 	 * "1000"(OR "1 0 0 0" OR "1")	-> 1,
@@ -28,7 +26,7 @@ protected:
 	 * "0001"(OR "1 1 1 1") 		-> 15
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "String"))
-	int32 GetBitmask(const FString& String) const;
+	static int32 GetBitmask(const FString& String);
 
 	/* ---------------------------------------------------
 	*		Destroy
@@ -38,8 +36,8 @@ protected:
 	 * Destroy all specified level actors on the map.
 	 * @param ActorType Bomb, Box, Item, Player, Wall, All
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Destroy.AllByType"))
-	void DestroyAllByType(EActorType ActorType) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Destroy.AllByType"))
+	static void DestroyAllByType(EActorType ActorType);
 
 	/**
 	 * Destroy characters in specified slots.
@@ -55,8 +53,8 @@ protected:
 	 * Bomber.Destroy.PlayersBySlots 0111
 	 * @param Slot 1 if should destroy
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Destroy.PlayersBySlots"))
-	void DestroyPlayersBySlots(const FString& Slot) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Destroy.PlayersBySlots"))
+	static void DestroyPlayersBySlots(const FString& Slot);
 
 	/* ---------------------------------------------------
 	*		Box
@@ -66,8 +64,8 @@ protected:
 	 * Override the chance to spawn item after box destroying.
 	 * @param Chance Put 0 to stop spawning, 100 to spawn all time.
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Box.SetItemChance"))
-	void SetItemChance(int32 Chance) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Box.SetItemChance"))
+	static void SetItemChance(int32 Chance);
 
 	/* ---------------------------------------------------
 	*		Player
@@ -75,12 +73,12 @@ protected:
 
 	/**
 	 * Override the level of each powerup for a controlled player.
-	 * @param NewLevel 1 is minimum, 9 is maximum.
+	 * @param NewLevel 1 is minimum, 5 is maximum.
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Player.SetPowerups"))
-	void SetPowerups(int32 NewLevel) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Player.SetPowerups"))
+	static void SetPowerups(int32 NewLevel);
 
 	/** Enable or disable the God mode to make a controllable player undestroyable. */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Player.SetGodMode"))
-	void SetGodMode(bool bShouldEnable) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Player.SetGodMode"))
+	static void SetGodMode(bool bShouldEnable);
 };

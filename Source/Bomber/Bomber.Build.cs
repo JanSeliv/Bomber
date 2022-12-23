@@ -17,6 +17,7 @@ public class Bomber : ModuleRules
                 , "DeveloperSettings" // Created UDataAssetsContainer
                 //My modules
                 , "FunctionPicker" // Used by MyInputAction.h
+                , "MetaCheatManager" // Created UMyCheatManager
 		    }
 		);
 

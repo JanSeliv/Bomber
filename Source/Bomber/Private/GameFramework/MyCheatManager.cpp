@@ -4,22 +4,14 @@
 //---
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "UtilityLibraries/SingletonLibrary.h"
-#include "LevelActors/BoxActor.h"
 #include "Globals/ItemDataAsset.h"
+#include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "UI/MyHUD.h"
-#include "UI/SettingsWidget.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-
-// Called when CheatManager is created to allow any needed initialization
-void UMyCheatManager::InitCheatManager()
-{
-	Super::InitCheatManager();
-}
+#include "UtilityLibraries/SingletonLibrary.h"
 
 // Returns bitmask by string
-int32 UMyCheatManager::GetBitmask(const FString& String) const
+int32 UMyCheatManager::GetBitmask(const FString& String)
 {
 	int32 Bitmask = 0, Index = 0;
 	for (int32 It = 0; It < String.Len(); ++It)
@@ -36,14 +28,14 @@ int32 UMyCheatManager::GetBitmask(const FString& String) const
 }
 
 // Destroy all specified level actors on the map
-void UMyCheatManager::DestroyAllByType(EActorType ActorType) const
+void UMyCheatManager::DestroyAllByType(EActorType ActorType)
 {
 	const FCells Cells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorType));
 	AGeneratedMap::Get().DestroyLevelActorsOnCells(Cells);
 }
 
 // Destroy characters in specified slots
-void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
+void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 {
 	// Set bitmask
 	const int32 Bitmask = GetBitmask(Slot);
@@ -61,7 +53,7 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
 		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
-		const bool bDestroy = PlayerCharacter && ((1 << PlayerCharacter->GetCharacterID()) & Bitmask) != 0;
+		const bool bDestroy = PlayerCharacter && (1 << PlayerCharacter->GetCharacterID() & Bitmask) != 0;
 		if (bDestroy) // mark to destroy if specified in slot
 		{
 			CellsToDestroy.Emplace(MapComponentIt->GetCell());
@@ -73,7 +65,7 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 }
 
 // Override the chance to spawn item after box destroying
-void UMyCheatManager::SetItemChance(int32 Chance) const
+void UMyCheatManager::SetItemChance(int32 Chance)
 {
 	// Get all boxes
 	FCells CellsToDestroy;
@@ -91,7 +83,7 @@ void UMyCheatManager::SetItemChance(int32 Chance) const
 }
 
 // Override the level of each powerup for a controlled player
-void UMyCheatManager::SetPowerups(int32 NewLevel) const
+void UMyCheatManager::SetPowerups(int32 NewLevel)
 {
 	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetLocalPlayerCharacter())
 	{
@@ -106,7 +98,7 @@ void UMyCheatManager::SetPowerups(int32 NewLevel) const
 }
 
 // Enable or disable the God mode to make a controllable player undestroyable
-void UMyCheatManager::SetGodMode(bool bShouldEnable) const
+void UMyCheatManager::SetGodMode(bool bShouldEnable)
 {
 	const APlayerCharacter* ControllablePlayer = USingletonLibrary::GetLocalPlayerCharacter();
 	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(ControllablePlayer))
