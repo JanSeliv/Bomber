@@ -175,10 +175,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class USoundsManager* GetSoundsManager();
 
-	/** Returns the Pool Manager of the game that is used to reuse created objects. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UPoolManager* GetPoolManager();
-
 	/* ---------------------------------------------------
 	*		EActorType functions
 	* --------------------------------------------------- */

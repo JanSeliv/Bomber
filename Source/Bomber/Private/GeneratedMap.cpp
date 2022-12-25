@@ -59,9 +59,6 @@ AGeneratedMap::AGeneratedMap()
 	// Default camera class
 	CameraComponentInternal = CreateDefaultSubobject<UMyCameraComponent>(TEXT("Camera Component"));
 	CameraComponentInternal->SetupAttachment(RootComponent);
-
-	// Initialize the Pool Manager
-	PoolManagerInternal = CreateDefaultSubobject<UPoolManager>(TEXT("Pool Manger"));
 }
 
 // Returns the generated map
@@ -259,7 +256,6 @@ bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells
 AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 {
 	if (!HasAuthority()
-	    || !ensureMsgf(PoolManagerInternal, TEXT("ASSERT: 'PoolManagerInternal' is not valid"))
 	    || UCellsUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
 	    || Type == EAT::None)                                                         // nothing to spawn
 	{
@@ -267,7 +263,7 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 	}
 
 	const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
-	AActor* SpawnedActor = PoolManagerInternal->TakeFromPool<AActor>(FTransform(Cell), ClassToSpawn);
+	AActor* SpawnedActor = UPoolManager::Get().TakeFromPool<AActor>(FTransform(Cell), ClassToSpawn);
 	if (!ensureMsgf(SpawnedActor, TEXT("ASSERT: 'SpawnedActor' is not valid")))
 	{
 		return nullptr;
@@ -283,8 +279,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
 	    || !ComponentOwner
-	    || !ComponentOwner->HasAuthority()
-	    || !ensureMsgf(PoolManagerInternal, TEXT("ASSERT: 'PoolManagerInternal' is not valid")))
+	    || !ComponentOwner->HasAuthority())
 	{
 		return;
 	}
@@ -471,10 +466,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	MapComponent->OnDeactivated(DestroyCauser);
 
 	// Deactivate the iterated owner
-	if (PoolManagerInternal)
-	{
-		PoolManagerInternal->ReturnToPool(ComponentOwner);
-	}
+	UPoolManager::Get().ReturnToPool(ComponentOwner);
 
 	DestroyLevelActorDragged(MapComponent);
 }
@@ -639,8 +631,7 @@ void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
 	TransformLevelMap(Transform);
 
 #if WITH_EDITOR // [Editor-Standalone]
-	if (USingletonLibrary::HasWorldBegunPlay()
-	    && PoolManagerInternal)
+	if (USingletonLibrary::HasWorldBegunPlay())
 	{
 		// Level actors are spawned differently on client for unsaved level if run without RunInderOneProcess or Standalone
 		// so destroy from pool all unsaved level actors to avoid it being unsynced on clients
@@ -649,7 +640,7 @@ void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
 			return PoolObject && !PoolObject->HasAllFlags(RF_WasLoaded | RF_LoadCompleted);
 		};
 
-		PoolManagerInternal->EmptyAllByPredicate(IsDirtyPredicate);
+		UPoolManager::Get().EmptyAllByPredicate(IsDirtyPredicate);
 	}
 #endif // WITH_EDITOR // [Editor-Standalone]
 
@@ -707,10 +698,7 @@ void AGeneratedMap::Destroyed()
 	    && HasAuthority())
 	{
 		// Destroy level actors
-		if (PoolManagerInternal)
-		{
-			PoolManagerInternal->EmptyAllPools();
-		}
+		UPoolManager::Get().EmptyAllPools();
 
 		// Destroy level actors in internal arrays
 		const int32 MapComponentsNum = MapComponentsInternal.Num();
@@ -1164,8 +1152,7 @@ void AGeneratedMap::OnRep_LevelType()
 // Find and add all level actors to allow the Pool Manager to handle all of them
 void AGeneratedMap::InitPoolManager()
 {
-	if (!HasAuthority()
-	    || !PoolManagerInternal)
+	if (!HasAuthority())
 	{
 		return;
 	}
@@ -1194,7 +1181,7 @@ void AGeneratedMap::InitPoolManager()
 			continue;
 		}
 
-		PoolManagerInternal->AddToPool(OwnerIt, EPoolObjectState::Inactive);
+		UPoolManager::Get().AddToPool(OwnerIt, EPoolObjectState::Inactive);
 	}
 }
 
@@ -1287,10 +1274,7 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 		DraggedCellsInternal.Emplace(AddedComponent->GetCell(), AddedComponent->GetActorType());
 	}
 
-	if (PoolManagerInternal)
-	{
-		PoolManagerInternal->AddToPool(ComponentOwner, EPoolObjectState::Active);
-	}
+	UPoolManager::Get().AddToPool(ComponentOwner, EPoolObjectState::Active);
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 

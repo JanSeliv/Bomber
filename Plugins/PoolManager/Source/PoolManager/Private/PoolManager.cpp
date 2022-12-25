@@ -8,46 +8,31 @@
 // It's almost farthest possible location where deactivated actors are placed
 #define VECTOR_HALF_WORLD_MAX FVector(HALF_WORLD_MAX - HALF_WORLD_MAX * THRESH_VECTOR_NORMALIZED)
 
-// Empty pool object data
-const FPoolObject FPoolObject::EmptyObject = FPoolObject();
-
-// Empty pool data container
-const FPoolContainer FPoolContainer::EmptyPool = FPoolContainer();
-
-// Parameterized constructor that takes object to keep
-FPoolObject::FPoolObject(UObject* InObject)
-{
-	Object = InObject;
-}
-
-// Parameterized constructor that takes a class of the pool
-FPoolContainer::FPoolContainer(const UClass* InClass)
-{
-	ClassInPool = InClass;
-}
-
-// Returns the pointer to the Pool element by specified object
-FPoolObject* FPoolContainer::FindInPool(const UObject* Object)
-{
-	if (!Object)
-	{
-		return nullptr;
-	}
-
-	return PoolObjects.FindByPredicate([Object](const FPoolObject& It)
-	{
-		return It.Object == Object;
-	});
-}
-
 // Returns the world of an outer
 UWorld* UPoolManager::GetWorld() const
 {
-	if (const AActor* Owner = Cast<AActor>(GetOuter()))
+	const UEngine* Engine = CastChecked<UEngine>(GetOuter());
+	UWorld* FoundWorld = Engine->GetCurrentPlayWorld();
+
+#if WITH_EDITOR
+	if (!FoundWorld)
 	{
-		return Owner->GetWorld();
+		// Try to find world in editor
+		const TIndirectArray<FWorldContext>& WorldList = Engine->GetWorldContexts();
+		for (int32 i = 0; i < WorldList.Num(); ++i)
+		{
+			const FWorldContext& WorldContext = WorldList[i];
+			if (WorldContext.WorldType == EWorldType::Editor)
+			{
+				FoundWorld = WorldContext.World();
+				break;
+			}
+		}
 	}
-	return nullptr;
+#endif // WITH_EDITOR
+
+	ensureMsgf(FoundWorld, TEXT("%s: World is not found"), *FString(__FUNCTION__));
+	return FoundWorld;
 }
 
 // Adds specified object as is to the pool by its class to be handled by the Pool Manager
@@ -66,7 +51,7 @@ bool UPoolManager::AddToPool(UObject* Object, EPoolObjectState PoolObjectState/*
 		Pool = &PoolsInternal[PoolIndex];
 	}
 
-	if (!ensureMsgf(Pool, TEXT("ASSERT: AddToPool: 'Pool' is not valid")))
+	if (!ensureMsgf(Pool, TEXT("%s: 'Pool' is not valid"), *FString(__FUNCTION__)))
 	{
 		return false;
 	}
@@ -84,18 +69,18 @@ bool UPoolManager::AddToPool(UObject* Object, EPoolObjectState PoolObjectState/*
 		// Decide by its location should it be activated or not if only state is not specified
 		switch (PoolObjectState)
 		{
-			case EPoolObjectState::None:
-				PoolObject.bIsActive = !Actor->GetActorLocation().Equals(VECTOR_HALF_WORLD_MAX);
-				break;
-			case EPoolObjectState::Active:
-				PoolObject.bIsActive = true;
-				break;
-			case EPoolObjectState::Inactive:
-				PoolObject.bIsActive = false;
-				break;
-			default:
-				checkf(false, TEXT("%s: Invalid plugin enumeration type. Need to add a handle for that case here"), *FString(__FUNCTION__));
-				break;
+		case EPoolObjectState::None:
+			PoolObject.bIsActive = !Actor->GetActorLocation().Equals(VECTOR_HALF_WORLD_MAX);
+			break;
+		case EPoolObjectState::Active:
+			PoolObject.bIsActive = true;
+			break;
+		case EPoolObjectState::Inactive:
+			PoolObject.bIsActive = false;
+			break;
+		default:
+			checkf(false, TEXT("%s: Invalid plugin enumeration type. Need to add a handle for that case here"), *FString(__FUNCTION__));
+			break;
 		}
 	}
 
@@ -121,7 +106,7 @@ UObject* UPoolManager::TakeFromPool(const FTransform& Transform, const UClass* C
 		Pool = &PoolsInternal[PoolIndex];
 	}
 
-	if (!ensureMsgf(Pool, TEXT("ASSERT: TakeFromPool: 'Pool' is not valid")))
+	if (!ensureMsgf(Pool, TEXT("%s: 'Pool' is not valid"), *FString(__FUNCTION__)))
 	{
 		return nullptr;
 	}
@@ -163,7 +148,7 @@ UObject* UPoolManager::TakeFromPool(const FTransform& Transform, const UClass* C
 		CreatedObject = NewObject<UObject>(World, ClassInPool);
 	}
 
-	if (!ensureMsgf(CreatedObject, TEXT("ASSERT: 'CreatedObject' is not valid")))
+	if (!ensureMsgf(CreatedObject, TEXT("%s: 'CreatedObject' is not valid"), *FString(__FUNCTION__)))
 	{
 		return nullptr;
 	}
@@ -185,7 +170,7 @@ void UPoolManager::ReturnToPool(UObject* Object)
 void UPoolManager::EmptyPool(const UClass* ClassInPool)
 {
 	FPoolContainer* Pool = FindPool(ClassInPool);
-	if (!ensureMsgf(Pool, TEXT("ASSERT: 'Pool' is not valid")))
+	if (!ensureMsgf(Pool, TEXT("%s: 'Pool' is not valid"), *FString(__FUNCTION__)))
 	{
 		return;
 	}
@@ -242,7 +227,7 @@ void UPoolManager::EmptyAllByPredicate(TFunctionRef<bool(const UObject* Object)>
 		{
 			UObject* ObjectIt = PoolObjectsRef.IsValidIndex(ObjectIndex) ? PoolObjectsRef[ObjectIndex].Object : nullptr;
 			if (!IsValid(ObjectIt)
-			    || !Predicate(ObjectIt))
+				|| !Predicate(ObjectIt))
 			{
 				continue;
 			}
@@ -274,7 +259,7 @@ void UPoolManager::SetActive(bool bShouldActivate, UObject* Object)
 	FPoolContainer* Pool = FindPool(ClassInPool);
 	FPoolObject* PoolObject = Pool ? Pool->FindInPool(Object) : nullptr;
 	if (!PoolObject
-	    || !PoolObject->IsValid())
+		|| !PoolObject->IsValid())
 	{
 		return;
 	}

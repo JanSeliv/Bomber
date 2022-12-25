@@ -268,12 +268,6 @@ USoundsManager* USingletonLibrary::GetSoundsManager()
 	return &USoundsManager::Get();
 }
 
-// Returns the Pool Manager of the game that is used to reuse created objects
-UPoolManager* USingletonLibrary::GetPoolManager()
-{
-	return AGeneratedMap::Get().GetPoolManager();
-}
-
 /* ---------------------------------------------------
  *		EActorType functions
  * --------------------------------------------------- */

@@ -62,9 +62,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 
 	AGeneratedMap& LevelMap = AGeneratedMap::Get();
 
-	const UPoolManager* PoolManager = LevelMap.GetPoolManager();
-	if (PoolManager
-	    && PoolManager->IsFree(Owner))
+	if (UPoolManager::Get().IsFree(Owner))
 	{
 		// Do not reconstruct inactive object
 		return false;

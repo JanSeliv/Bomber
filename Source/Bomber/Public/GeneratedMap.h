@@ -80,10 +80,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMyCameraComponent* GetCameraComponent() const { return CameraComponentInternal; }
 
-	/** Returns the Pool Manager. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class UPoolManager* GetPoolManager() const { return PoolManagerInternal; }
-
 	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
 	 *
 	 * @param Type Which type of level actors
@@ -182,12 +178,6 @@ protected:
 	/** Contains the cached transform since the level actor does not move and is always static. */
 	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cached Transform"))
 	FTransform CachedTransformInternal = FTransform::Identity;
-
-	/** Is used to avoid spawning and destroying level actors on every regeneration,
-	 *  instead they are created once, are activated when are taken from a pool
-	 *  and deactivated when are returned to a pool. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pool Manager"))
-	TObjectPtr<class UPoolManager> PoolManagerInternal = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Protected functions
