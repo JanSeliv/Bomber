@@ -91,6 +91,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pools"))
 	TArray<FPoolContainer> PoolsInternal;
 
+	/** Is called on initialization of the Pool Manager instance. */
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
 	/** Returns the pointer to found pool by specified class. */
 	virtual FPoolContainer* FindPool(const UClass* ClassInPool);
 	const FORCEINLINE FPoolContainer* FindPool(const UClass* ClassInPool) const { return const_cast<UPoolManager*>(this)->FindPool(ClassInPool); }

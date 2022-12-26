@@ -320,6 +320,27 @@ bool UPoolManager::IsFree(const UObject* Object) const
 	return GetPoolObjectState(Object) == EPoolObjectState::Inactive;
 }
 
+// Is called on initialization of the Pool Manager instance
+void UPoolManager::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	// Reset the Pool Manager on switching levels
+	if (GEngine && !GEngine->OnWorldDestroyed().IsBoundToObject(this))
+	{
+		TWeakObjectPtr<UPoolManager> WeakPoolManager(this);
+		auto OnWorldDestroyed = [WeakPoolManager](UWorld* World)
+		{
+			if (UPoolManager* PoolManager = WeakPoolManager.Get())
+			{
+				PoolManager->EmptyAllPools();
+			}
+		};
+
+		GEngine->OnWorldDestroyed().AddWeakLambda(this, OnWorldDestroyed);
+	}
+}
+
 // Returns the pointer to found pool by specified class
 FPoolContainer* UPoolManager::FindPool(const UClass* ClassInPool)
 {
