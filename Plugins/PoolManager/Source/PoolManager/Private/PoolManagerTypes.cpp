@@ -3,15 +3,15 @@
 #include "PoolManagerTypes.h"
 
 // Empty pool object data
-const FPoolObject FPoolObject::EmptyObject = FPoolObject();
+const FPoolObjectData FPoolObjectData::EmptyObject = FPoolObjectData();
 
 // Empty pool data container
 const FPoolContainer FPoolContainer::EmptyPool = FPoolContainer();
 
 // Parameterized constructor that takes object to keep
-FPoolObject::FPoolObject(UObject* InObject)
+FPoolObjectData::FPoolObjectData(UObject* InPoolObject)
 {
-	Object = InObject;
+	PoolObject = InPoolObject;
 }
 
 // Parameterized constructor that takes a class of the pool
@@ -21,15 +21,15 @@ FPoolContainer::FPoolContainer(const UClass* InClass)
 }
 
 // Returns the pointer to the Pool element by specified object
-FPoolObject* FPoolContainer::FindInPool(const UObject* Object)
+FPoolObjectData* FPoolContainer::FindInPool(const UObject* Object)
 {
 	if (!Object)
 	{
 		return nullptr;
 	}
 
-	return PoolObjects.FindByPredicate([Object](const FPoolObject& It)
+	return PoolObjects.FindByPredicate([Object](const FPoolObjectData& It)
 	{
-		return It.Object == Object;
+		return It.PoolObject == Object;
 	});
 }

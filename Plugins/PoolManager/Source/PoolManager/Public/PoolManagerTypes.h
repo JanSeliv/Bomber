@@ -12,29 +12,30 @@
 UENUM(BlueprintType)
 enum class EPoolObjectState : uint8
 {
-	None,
 	///< Is not handled by Pool Manager
-	Inactive,
+	None,
 	///< Contains in pool, is free and ready to be taken
-	Active ///< Was taken from pool and can be returned back.
+	Inactive,
+	///< Was taken from pool and can be returned back.
+	Active
 };
 
 /**
  * Contains the data that describe specific object in a pool.
  */
 USTRUCT(BlueprintType)
-struct POOLMANAGER_API FPoolObject
+struct POOLMANAGER_API FPoolObjectData
 {
 	GENERATED_BODY()
 
 	/** Empty pool object data. */
-	static const FPoolObject EmptyObject;
+	static const FPoolObjectData EmptyObject;
 
 	/* Default constructor. */
-	FPoolObject() = default;
+	FPoolObjectData() = default;
 
 	/* Parameterized constructor that takes object to keep. */
-	explicit FPoolObject(UObject* InObject);
+	explicit FPoolObjectData(UObject* InPoolObject);
 
 	/** Is true whenever the object is taken from the pool. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
@@ -42,19 +43,26 @@ struct POOLMANAGER_API FPoolObject
 
 	/** The object that is handled by the pool. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<UObject> Object = nullptr;
+	TObjectPtr<UObject> PoolObject = nullptr;
 
 	/** Returns true if the object is taken from the pool. */
-	FORCEINLINE bool IsActive() const { return bIsActive && Object; }
+	FORCEINLINE bool IsActive() const { return bIsActive && IsValid(); }
+
+	/** Returns true if handled object is inactive and ready to be taken from pool. */
+	FORCEINLINE bool IsFree() const { return !bIsActive && IsValid(); }
 
 	/** Returns true if the object is created. */
-	FORCEINLINE bool IsValid() const { return Object != nullptr; }
+	FORCEINLINE bool IsValid() const { return PoolObject != nullptr; }
 
 	/** conversion to "bool" returning true if pool object is valid. */
 	FORCEINLINE operator bool() const { return IsValid(); }
 
 	/** Element access. */
-	FORCEINLINE UObject* operator->() const { return Object; }
+	template <typename T = UObject>
+	FORCEINLINE T* Get() const { return Cast<T>(PoolObject.Get()); }
+
+	/** Element access. */
+	FORCEINLINE UObject* operator->() const { return PoolObject.Get(); }
 };
 
 /**
@@ -79,12 +87,12 @@ struct POOLMANAGER_API FPoolContainer
 	TObjectPtr<const UClass> ClassInPool = nullptr;
 
 	/** All objects in this pool that are handled by the Pool Manager. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	TArray<FPoolObject> PoolObjects;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	TArray<FPoolObjectData> PoolObjects;
 
 	/** Returns the pointer to the Pool element by specified object. */
-	FPoolObject* FindInPool(const UObject* Object);
-	const FORCEINLINE FPoolObject* FindInPool(const UObject* Object) const { return const_cast<FPoolContainer*>(this)->FindInPool(Object); }
+	FPoolObjectData* FindInPool(const UObject* Object);
+	const FORCEINLINE FPoolObjectData* FindInPool(const UObject* Object) const { return const_cast<FPoolContainer*>(this)->FindInPool(Object); }
 
 	/** Returns true if the class is set for the Pool. */
 	FORCEINLINE bool IsValid() const { return ClassInPool != nullptr; }

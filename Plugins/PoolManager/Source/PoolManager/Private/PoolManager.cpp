@@ -8,7 +8,7 @@
 // It's almost farthest possible location where deactivated actors are placed
 #define VECTOR_HALF_WORLD_MAX FVector(HALF_WORLD_MAX - HALF_WORLD_MAX * THRESH_VECTOR_NORMALIZED)
 
-// Returns the world of an outer
+// Returns current world
 UWorld* UPoolManager::GetWorld() const
 {
 	const UEngine* Engine = CastChecked<UEngine>(GetOuter());
@@ -17,7 +17,7 @@ UWorld* UPoolManager::GetWorld() const
 #if WITH_EDITOR
 	if (!FoundWorld)
 	{
-		// Try to find world in editor
+		// If world is not found, most likely a game did not start yet and we are in editor
 		const TIndirectArray<FWorldContext>& WorldList = Engine->GetWorldContexts();
 		for (int32 i = 0; i < WorldList.Num(); ++i)
 		{
@@ -31,7 +31,7 @@ UWorld* UPoolManager::GetWorld() const
 	}
 #endif // WITH_EDITOR
 
-	ensureMsgf(FoundWorld, TEXT("%s: World is not found"), *FString(__FUNCTION__));
+	ensureMsgf(FoundWorld, TEXT("%s: Can not obtain current world"), *FString(__FUNCTION__));
 	return FoundWorld;
 }
 
@@ -62,7 +62,7 @@ bool UPoolManager::AddToPool(UObject* Object, EPoolObjectState PoolObjectState/*
 		return false;
 	}
 
-	FPoolObject PoolObject(Object);
+	FPoolObjectData PoolObject(Object);
 
 	if (const AActor* Actor = Cast<AActor>(Object))
 	{
@@ -94,7 +94,7 @@ bool UPoolManager::AddToPool(UObject* Object, EPoolObjectState PoolObjectState/*
 // Get the object from a pool by specified class
 UObject* UPoolManager::TakeFromPool(const FTransform& Transform, const UClass* ClassInPool)
 {
-	if (!ClassInPool)
+	if (!ensureMsgf(ClassInPool, TEXT("%s: 'ClassInPool' is not specified"), *FString(__FUNCTION__)))
 	{
 		return nullptr;
 	}
@@ -112,18 +112,20 @@ UObject* UPoolManager::TakeFromPool(const FTransform& Transform, const UClass* C
 	}
 
 	// Try to find ready object to return
-	for (FPoolObject& PoolObjectIt : Pool->PoolObjects)
+	for (FPoolObjectData& PoolObjectIt : Pool->PoolObjects)
 	{
-		if (!PoolObjectIt.IsActive())
+		if (PoolObjectIt.IsFree())
 		{
-			if (AActor* Actor = Cast<AActor>(PoolObjectIt.Object))
+			UObject* PoolObject = PoolObjectIt.Get();
+
+			if (AActor* Actor = Cast<AActor>(PoolObject))
 			{
 				Actor->SetActorTransform(Transform);
 			}
 
-			SetActive(true, PoolObjectIt.Object);
+			SetActive(true, PoolObject);
 
-			return PoolObjectIt.Object;
+			return PoolObject;
 		}
 	}
 
@@ -139,7 +141,7 @@ UObject* UPoolManager::TakeFromPool(const FTransform& Transform, const UClass* C
 	{
 		UClass* ClassToSpawn = const_cast<UClass*>(ClassInPool);
 		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.Owner = Cast<AActor>(GetOuter());
+		SpawnParameters.OverrideLevel = World->PersistentLevel; // Always keep new objects on Persistent level
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		CreatedObject = World->SpawnActor(ClassToSpawn, &Transform, SpawnParameters);
 	}
@@ -153,7 +155,7 @@ UObject* UPoolManager::TakeFromPool(const FTransform& Transform, const UClass* C
 		return nullptr;
 	}
 
-	Pool->PoolObjects.Emplace(FPoolObject(CreatedObject));
+	Pool->PoolObjects.Emplace(FPoolObjectData(CreatedObject));
 
 	SetActive(true, CreatedObject);
 
@@ -175,10 +177,10 @@ void UPoolManager::EmptyPool(const UClass* ClassInPool)
 		return;
 	}
 
-	TArray<FPoolObject>& PoolObjects = Pool->PoolObjects;
+	TArray<FPoolObjectData>& PoolObjects = Pool->PoolObjects;
 	for (int32 Index = PoolObjects.Num() - 1; Index >= 0; --Index)
 	{
-		UObject* ObjectIt = PoolObjects.IsValidIndex(Index) ? PoolObjects[Index].Object : nullptr;
+		UObject* ObjectIt = PoolObjects.IsValidIndex(Index) ? PoolObjects[Index].Get() : nullptr;
 		if (!IsValid(ObjectIt))
 		{
 			continue;
@@ -221,11 +223,11 @@ void UPoolManager::EmptyAllByPredicate(TFunctionRef<bool(const UObject* Object)>
 			continue;
 		}
 
-		TArray<FPoolObject>& PoolObjectsRef = PoolsInternal[PoolIndex].PoolObjects;
+		TArray<FPoolObjectData>& PoolObjectsRef = PoolsInternal[PoolIndex].PoolObjects;
 		const int32 ObjectsNum = PoolObjectsRef.Num();
 		for (int32 ObjectIndex = ObjectsNum - 1; ObjectIndex >= 0; --ObjectIndex)
 		{
-			UObject* ObjectIt = PoolObjectsRef.IsValidIndex(ObjectIndex) ? PoolObjectsRef[ObjectIndex].Object : nullptr;
+			UObject* ObjectIt = PoolObjectsRef.IsValidIndex(ObjectIndex) ? PoolObjectsRef[ObjectIndex].Get() : nullptr;
 			if (!IsValid(ObjectIt)
 				|| !Predicate(ObjectIt))
 			{
@@ -257,7 +259,7 @@ void UPoolManager::SetActive(bool bShouldActivate, UObject* Object)
 
 	const UClass* ClassInPool = Object ? Object->GetClass() : nullptr;
 	FPoolContainer* Pool = FindPool(ClassInPool);
-	FPoolObject* PoolObject = Pool ? Pool->FindInPool(Object) : nullptr;
+	FPoolObjectData* PoolObject = Pool ? Pool->FindInPool(Object) : nullptr;
 	if (!PoolObject
 		|| !PoolObject->IsValid())
 	{
@@ -266,7 +268,7 @@ void UPoolManager::SetActive(bool bShouldActivate, UObject* Object)
 
 	PoolObject->bIsActive = bShouldActivate;
 
-	AActor* Actor = Cast<AActor>(PoolObject->Object);
+	AActor* Actor = PoolObject->Get<AActor>();
 	if (!Actor)
 	{
 		return;
@@ -288,9 +290,10 @@ EPoolObjectState UPoolManager::GetPoolObjectState(const UObject* Object) const
 {
 	const UClass* ClassInPool = Object ? Object->GetClass() : nullptr;
 	const FPoolContainer* Pool = FindPool(ClassInPool);;
-	const FPoolObject* PoolObject = Pool ? Pool->FindInPool(Object) : nullptr;
+	const FPoolObjectData* PoolObject = Pool ? Pool->FindInPool(Object) : nullptr;
 
-	if (!PoolObject)
+	if (!PoolObject
+		|| !PoolObject->IsValid())
 	{
 		// Is not contained in any pool
 		return EPoolObjectState::None;

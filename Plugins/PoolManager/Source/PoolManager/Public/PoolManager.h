@@ -14,33 +14,40 @@
  * causing different hitches and lags. It's a very good idea for such objects to use the Pool Manager,
  * so instead of creating and destroying anything every time,
  * such objects will be taken from the Pool Manager and can be returned to be deactivated.
- * Deactivated actors are placed outside a level, are hidden, their collisions are disabled and tick is turned off. 
+ * Deactivated actors are placed outside a level, are hidden, their collisions are disabled and tick is turned off.
+ * Can be used in Editor before game starts.
  */
-UCLASS(DefaultToInstanced, BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable)
 class POOLMANAGER_API UPoolManager : public UEngineSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	/** Returns the world of an outer. */
-	virtual UWorld* GetWorld() const override;
-
+#pragma region GetPoolManager
+	/** Returns the Pool Manager, is checked and wil crash if can't be obtained.
+	* UPoolManager::Get(). with no parameters can be used in most cases if there is no specific set up.
+	* @tparam T is optional, put your child class if you implemented your own Pull Manager. */
 	template <typename T = ThisClass>
-	static FORCEINLINE T& Get() { return *CastChecked<UPoolManager>(GetPoolManager()); }
+	static FORCEINLINE T& Get() { return *CastChecked<T>(GetPoolManager(T::StaticClass())); }
 
-	/** Returns this Pool Manager. */
+	/** Returns the pointer to the Pool Manager.
+	 * @param OptionalClass is optional, specify the class if you implemented your own Pool Manager. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static FORCEINLINE UPoolManager* GetPoolManager() { return GEngine ? GEngine->GetEngineSubsystem<ThisClass>() : nullptr; }
+	static FORCEINLINE UPoolManager* GetPoolManager(TSubclassOf<UPoolManager> OptionalClass = nullptr) { return GEngine ? Cast<UPoolManager>(GEngine->GetEngineSubsystemBase(OptionalClass ? *OptionalClass : StaticClass())) : nullptr; }
+#pragma endregion GetPoolManager
+
+	/** Returns current world. */
+	virtual UWorld* GetWorld() const override;
 
 	/** Adds specified object as is to the pool by its class to be handled by the Pool Manager. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DefaultToSelf = "Object"))
-	bool AddToPool(UObject* Object = nullptr, EPoolObjectState PoolObjectState = EPoolObjectState::Inactive);
+	virtual bool AddToPool(UObject* Object = nullptr, EPoolObjectState PoolObjectState = EPoolObjectState::Inactive);
 
 	/** Get the object from a pool by specified class.
 	 *  It creates new object if there no free objects contained in pool or does not exist any.
 	 *  @return Activated object requested from the pool. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Transform"))
-	UObject* TakeFromPool(const FTransform& Transform, const UClass* ClassInPool);
+	virtual UObject* TakeFromPool(const FTransform& Transform, const UClass* ClassInPool);
 
 	/** The templated alternative to get the object from a pool by specified class.
 	 * @param Transform set the new transform for returned object, if specified class is inherited by AActor
@@ -50,45 +57,45 @@ public:
 
 	/** Returns the specified object to the pool and deactivates it if the object was taken from the pool before. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DefaultToSelf = "Object"))
-	void ReturnToPool(UObject* Object);
+	virtual void ReturnToPool(UObject* Object);
 
 	/** Destroy all object of a pool by a given class. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void EmptyPool(const UClass* ClassInPool);
+	virtual void EmptyPool(const UClass* ClassInPool);
 
 	/** Destroy all objects in all pools that are handled by the Pool Manager. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void EmptyAllPools();
+	virtual void EmptyAllPools();
 
 	/** Destroy all objects in Pool Manager based on a predicate functor. */
-	void EmptyAllByPredicate(TFunctionRef<bool(const UObject* PoolObject)> Predicate);
+	virtual void EmptyAllByPredicate(TFunctionRef<bool(const UObject* PoolObject)> Predicate);
 
 	/** Returns current state of specified object. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
-	EPoolObjectState GetPoolObjectState(const UObject* Object) const;
+	virtual EPoolObjectState GetPoolObjectState(const UObject* Object) const;
 
 	/** Returns true is specified object is handled by Pool Manager. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	bool Contains(const UObject* Object) const;
+	virtual bool Contains(const UObject* Object) const;
 
 	/** Returns true if specified object is handled by the Pool Manager and was taken from its pool. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
-	bool IsActive(const UObject* Object) const;
+	virtual bool IsActive(const UObject* Object) const;
 
 	/** Returns true if handled object is inactive and ready to be taken from pool. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
-	bool IsFree(const UObject* Object) const;
+	virtual bool IsFree(const UObject* Object) const;
 
 protected:
 	/** Contains all pools that are handled by the Pool Manger. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pools", TitleProperty = "ClassInPool"))
+	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pools"))
 	TArray<FPoolContainer> PoolsInternal;
 
 	/** Returns the pointer to found pool by specified class. */
-	FPoolContainer* FindPool(const UClass* ClassInPool);
+	virtual FPoolContainer* FindPool(const UClass* ClassInPool);
 	const FORCEINLINE FPoolContainer* FindPool(const UClass* ClassInPool) const { return const_cast<UPoolManager*>(this)->FindPool(ClassInPool); }
 
 	/** Activates or deactivates the object if such object is handled by the Pool Manager. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "Object"))
-	void SetActive(bool bShouldActivate, UObject* Object);
+	virtual void SetActive(bool bShouldActivate, UObject* Object);
 };
