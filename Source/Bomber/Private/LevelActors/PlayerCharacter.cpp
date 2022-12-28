@@ -640,13 +640,13 @@ void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 	const FVector2D MovementVector = ActionValue.Get<FVector2D>();
 
 	// Find out which way is forward
-	const FRotator YawRotation(0.f, UCellsUtilsLibrary::GetCellRotation(), 0.f);
+	const FRotator ForwardRotation = UCellsUtilsLibrary::GetCellRotator();
 
 	// Get forward vector
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
 
 	// Get right vector
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector RightDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::Y);
 
 	AddMovementInput(ForwardDirection, MovementVector.Y);
 	AddMovementInput(RightDirection, MovementVector.X);

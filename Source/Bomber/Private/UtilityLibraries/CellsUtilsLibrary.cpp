@@ -73,10 +73,22 @@ int32 UCellsUtilsLibrary::GetLastRowIndexOnLevel()
 	return GetCellRowsNumOnLevel() - 1;
 }
 
-// Returns any cell rotation on the Level Map
-float UCellsUtilsLibrary::GetCellRotation()
+// Returns cell yaw angle in degrees that is the same for any cell on the Level Map
+float UCellsUtilsLibrary::GetCellYawDegree()
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetRotation().Rotator().Yaw;
+	return GetCellRotator().Yaw;
+}
+
+// Returns cell rotator that is the same for any cell on the Level Map
+FRotator UCellsUtilsLibrary::GetCellRotator()
+{
+	return GetCellQuaternion().Rotator();
+}
+
+// Returns cell quaternion that is the same for any cell on the Level Map
+FQuat UCellsUtilsLibrary::GetCellQuaternion()
+{
+	return AGeneratedMap::Get().GetCachedTransform().GetRotation();
 }
 
 // Returns any cell Z-location on the Level Map

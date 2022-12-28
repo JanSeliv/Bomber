@@ -173,9 +173,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static int32 GetLastRowIndexOnLevel();
 
-	/** Returns any cell rotation on the Level Map. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static float GetCellRotation();
+	/** Returns cell yaw angle in degrees that is the same for any cell on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Rotation"))
+	static float GetCellYawDegree();
+
+	/** Returns cell rotator that is the same for any cell on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Rotation"))
+	static FRotator GetCellRotator();
+
+	/** Returns cell quaternion that is the same for any cell on the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Rotation,Quat"))
+	static FQuat GetCellQuaternion();
 
 	/** Returns any cell Z-location on the Level Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Z"))
