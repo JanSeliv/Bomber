@@ -10,6 +10,43 @@
 #include "CellsUtilsLibrary.generated.h"
 
 /**
+ * Utility structure to display cells
+ * @see UCellsUtilsLibrary::DisplayCells()
+ */
+USTRUCT(BlueprintType)
+struct BOMBER_API FDisplayCellsParams
+{
+	GENERATED_BODY()
+
+	/** Default params to display cells. */
+	static const FDisplayCellsParams EmptyParams;
+
+	/** Color of displayed text.  */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FLinearColor TextColor = FLinearColor::White;
+
+	/** Height offset for displayed text above the cell. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	float TextHeight = 261.f;
+
+	/** Size of displayed text. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	float TextSize = 124.f;
+
+	/** Addition text to mark the cell, keep it short like 1-2 symbols. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FName RenderString = NAME_None;
+
+	/** Offset for the Render String. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	FVector CoordinatePosition = FVector::ZeroVector;
+
+	/** Set true to remove all displays that were added on that owner before. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	bool bClearPreviousDisplays = false;
+};
+
+/**
  * 	The static functions library of Bomber cells (tiles on the grid).
  * 	@see trello.com/c/b2IzcOhg
  */
@@ -393,4 +430,20 @@ public:
 	/** Returns true if player is not able to reach specified cell by any any path. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Path"))
 	static bool IsIslandCell(const FCell& Cell);
+
+	/* ---------------------------------------------------
+	 *		Debug cells utilities
+	 * --------------------------------------------------- */
+
+	/** Remove all text renders of the Owner */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
+	static void ClearDisplayedCells(const UObject* Owner);
+
+	/** Display coordinates of specified cells on the level. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
+	static void DisplayCells(UObject* Owner, const TSet<FCell>& Cells, const FDisplayCellsParams& Params);
+
+	/** Display only specified cell. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
+	static void DisplayCell(UObject* Owner, const FCell& Cell, const FDisplayCellsParams& Params) { DisplayCells(Owner, {Cell}, Params); }
 };

@@ -17,9 +17,6 @@
 #include "UI/InGameWidget.h"
 #include "UI/InGameMenuWidget.h"
 //---
-#include "Engine.h"
-#include "PoolManager.h"
-#include "Components/TextRenderComponent.h"
 #include "Globals/DataAssetsContainer.h"
 #include "Kismet/GameplayStatics.h"
 //---
@@ -28,9 +25,6 @@
 #include "Editor.h"	 // GEditor
 #include "MyUnrealEdEngine.h" // GetClientSingleton
 #endif
-
-// Default params to display cells
-const FDisplayCellsParams FDisplayCellsParams::EmptyParams = FDisplayCellsParams();
 
 // Returns a world of stored level map
 UWorld* USingletonLibrary::GetWorld() const
@@ -304,106 +298,3 @@ USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChan
 // Binds to update movements of each AI controller.
 USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
 #endif //WITH_EDITOR
-
-// Remove all text renders of the Owner
-void USingletonLibrary::ClearDisplayedCells(const UObject* Owner)
-{
-#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
-	if (!UEditorUtilsLibrary::IsEditor())
-	{
-		return;
-	}
-
-	const AActor* OwnerActor = Cast<AActor>(Owner);
-	if (!OwnerActor)
-	{
-		const UActorComponent* Component = Cast<UActorComponent>(Owner);
-		OwnerActor = Component ? Component->GetOwner() : nullptr;
-		if (!ensureMsgf(OwnerActor, TEXT("ASSERT: 'OwnerActor' is null, can't Display Cells")))
-		{
-			return;
-		}
-	}
-
-	TArray<UActorComponent*> TextRendersArray;
-	OwnerActor->GetComponents(UTextRenderComponent::StaticClass(), TextRendersArray);
-	for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
-	{
-		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(i) ? Cast<UTextRenderComponent>(TextRendersArray[i]) : nullptr;
-		if (!TextRenderIt)
-		{
-			continue;
-		}
-
-		const FName NameIt = *TextRenderIt->Text.ToString();
-		static const FName DefaultPlayerName = "Player";
-		static const FName DefaultAIName = "AI";
-		if (NameIt != DefaultPlayerName
-		    && NameIt != DefaultAIName)
-		{
-			TextRenderIt->DestroyComponent();
-		}
-	}
-#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
-}
-
-// Debug visualization by text renders
-void USingletonLibrary::AddDebugTextRenders_Implementation(AActor* Owner, const FCells& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const
-{
-#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
-	if (!UEditorUtilsLibrary::IsEditor()
-	    || !Cells.Num()      // Null length
-	    || !Owner) // Owner is not valid
-	{
-		return;
-	}
-
-	bOutHasCoordinateRenders = (CoordinatePosition.IsZero() == false && RenderString.IsEmpty() == false);
-	OutTextRenderComponents.SetNum(bOutHasCoordinateRenders ? Cells.Num() * 2 : Cells.Num());
-	for (UTextRenderComponent*& TextRenderIt : OutTextRenderComponents)
-	{
-		TextRenderIt = NewObject<UTextRenderComponent>(Owner);
-		TextRenderIt->RegisterComponent();
-	}
-#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
-}
-
-// Display coordinates of specified cells on the level
-void USingletonLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const FDisplayCellsParams& Params)
-{
-#if WITH_EDITOR	 // [UEditorUtils::IsEditor]
-	if (!UEditorUtilsLibrary::IsEditor())
-	{
-		return;
-	}
-
-	AActor* OwnerActor = Cast<AActor>(Owner);
-	if (!OwnerActor)
-	{
-		const UActorComponent* Component = Cast<UActorComponent>(Owner);
-		OwnerActor = Component ? Component->GetOwner() : nullptr;
-		if (!ensureMsgf(OwnerActor, TEXT("ASSERT: 'OwnerActor' is null, can't Display Cells")))
-		{
-			return;
-		}
-	}
-
-	if (Params.bClearPreviousDisplays)
-	{
-		ClearDisplayedCells(Owner);
-	}
-
-	// Remove invalid cell if passed
-	// @TODO JanSeliv 3kKWq6XP Instead of removing, do not add such render component
-	FCells InCells = Cells;
-	if (InCells.Contains(FCell::InvalidCell))
-	{
-		InCells.Remove(FCell::InvalidCell);
-	}
-
-	bool bOutBool = false;
-	TArray<UTextRenderComponent*> OutArray;
-	const FString RenderString = !Params.RenderString.IsNone() ? Params.RenderString.ToString() : TEXT("");
-	Get().AddDebugTextRenders(OwnerActor, InCells, Params.TextColor, bOutBool, OutArray, Params.TextHeight, Params.TextSize, RenderString, Params.CoordinatePosition);
-#endif	// WITH_EDITOR [UEditorUtils::IsEditor]
-}

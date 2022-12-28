@@ -3,6 +3,10 @@
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "GeneratedMap.h"
+#include "Components/TextRenderComponent.h"
+
+// Default params to display cells
+const FDisplayCellsParams FDisplayCellsParams::EmptyParams = FDisplayCellsParams();
 
 // Creates 'Break Cell' node with X, Y, Z outputs
 void UCellsUtilsLibrary::BreakCell(const FCell& InCell, double& X, double& Y, double& Z)
@@ -269,4 +273,140 @@ FCells UCellsUtilsLibrary::GetEmptyCellsInDirectionsWithoutActors(const FCell& C
 bool UCellsUtilsLibrary::IsIslandCell(const FCell& Cell)
 {
 	return !AGeneratedMap::Get().DoesPathExistToCells({Cell});
+}
+
+// ---------------------------------------------------
+//		 Debug cells utilities
+// ---------------------------------------------------
+
+// Remove all text renders of the Owner
+void UCellsUtilsLibrary::ClearDisplayedCells(const UObject* Owner)
+{
+	const AActor* OwnerActor = Cast<AActor>(Owner);
+	if (!OwnerActor)
+	{
+		const UActorComponent* Component = Cast<UActorComponent>(Owner);
+		OwnerActor = Component ? Component->GetOwner() : nullptr;
+		if (!ensureMsgf(OwnerActor, TEXT("ASSERT: 'OwnerActor' is null, can't Display Cells")))
+		{
+			return;
+		}
+	}
+
+	TArray<UTextRenderComponent*> TextRendersArray;
+	OwnerActor->GetComponents<UTextRenderComponent>(TextRendersArray);
+	for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
+	{
+		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(i) ? Cast<UTextRenderComponent>(TextRendersArray[i]) : nullptr;
+		if (!TextRenderIt)
+		{
+			continue;
+		}
+
+		const FName NameIt = *TextRenderIt->Text.ToString();
+		static const FName DefaultPlayerName = "Player";
+		static const FName DefaultAIName = "AI";
+		if (NameIt != DefaultPlayerName
+		    && NameIt != DefaultAIName)
+		{
+			TextRenderIt->DestroyComponent();
+		}
+	}
+}
+
+// Display coordinates of specified cells on the level
+void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const FDisplayCellsParams& Params)
+{
+	if (!Cells.Num()
+	    || !Owner)
+	{
+		return;
+	}
+
+	AActor* OwnerActor = Cast<AActor>(Owner);
+	if (!OwnerActor)
+	{
+		const UActorComponent* Component = Cast<UActorComponent>(Owner);
+		OwnerActor = Component ? Component->GetOwner() : nullptr;
+		if (!ensureMsgf(OwnerActor, TEXT("ASSERT: 'OwnerActor' is null, can't Display Cells")))
+		{
+			return;
+		}
+	}
+
+	if (Params.bClearPreviousDisplays)
+	{
+		ClearDisplayedCells(Owner);
+	}
+
+	for (const FCell& CellIt : Cells)
+	{
+		if (CellIt.IsInvalidCell())
+		{
+			continue;
+		}
+
+		const bool bHasAdditionalRenderString = !Params.CoordinatePosition.IsZero() && !Params.RenderString.IsNone();
+		constexpr int32 MaxCoordinateRenders = 2;
+		for (int32 Index = 0; Index < MaxCoordinateRenders; ++Index)
+		{
+			const bool bIsCoordinateRender = Index == 0;
+			if (!bIsCoordinateRender
+			    && !bHasAdditionalRenderString)
+			{
+				continue;
+			}
+
+			UTextRenderComponent& RenderComp = *NewObject<UTextRenderComponent>(OwnerActor, NAME_None, RF_Transient);
+			RenderComp.RegisterComponent();
+
+			// Get text render location on each cell
+			FVector TextLocation = FVector::ZeroVector;
+			const FVector CellLocation(CellIt.X(), CellIt.Y(), Params.TextHeight);
+			if (bIsCoordinateRender)
+			{
+				TextLocation.X = CellLocation.X + Params.CoordinatePosition.X * -1.f;
+				TextLocation.Y = CellLocation.Y + Params.CoordinatePosition.Y * -1.f;
+				TextLocation.Z = CellLocation.Z + Params.CoordinatePosition.Z;
+			}
+			else
+			{
+				TextLocation = CellLocation + Params.CoordinatePosition;
+			}
+
+			// --- Init the text render
+
+			if (bIsCoordinateRender)
+			{
+				const FString XString = FString::FromInt(FMath::FloorToInt32(TextLocation.X));
+				const FString YString = FString::FromInt(FMath::FloorToInt32(TextLocation.Y));
+				constexpr float DelimiterTextSize = 48.f;
+				const FString DelimiterString = Params.TextSize > DelimiterTextSize ? TEXT("\n") : TEXT("");
+				const FString RenderString = XString + DelimiterString + YString;
+				RenderComp.SetText(FText::FromString(RenderString));
+			}
+			else
+			{
+				// Display RenderString as is
+				FText NameToStringToText = FText::FromString(Params.RenderString.ToString());
+				RenderComp.SetText(NameToStringToText);
+			}
+
+			RenderComp.SetAbsolute(true, true, true);
+
+			constexpr float CoordinateSizeMultiplier = 0.4f;
+			RenderComp.SetWorldSize(bIsCoordinateRender ? Params.TextSize * CoordinateSizeMultiplier : Params.TextSize);
+
+			RenderComp.SetHorizontalAlignment(EHTA_Center);
+			RenderComp.SetVerticalAlignment(EVRTA_TextCenter);
+
+			RenderComp.SetTextRenderColor(Params.TextColor.ToFColor(true));
+
+			FTransform RenderTransform = FTransform::Identity;
+			RenderTransform.SetLocation(TextLocation);
+			static const FQuat AdditiveQuat = FRotator(90.f, 0.f, -90.f).Quaternion();
+			RenderTransform.SetRotation(GetCellQuaternion() * AdditiveQuat);
+			RenderComp.SetWorldTransform(RenderTransform);
+		}
+	}
 }

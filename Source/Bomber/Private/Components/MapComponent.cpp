@@ -10,6 +10,7 @@
 #include "Globals/GameStateDataAsset.h"
 #include "Globals/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Components/BoxComponent.h"
@@ -104,7 +105,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 		{
 			FDisplayCellsParams Params;
 			Params.bClearPreviousDisplays = true;
-			USingletonLibrary::DisplayCell(Owner, CellInternal, Params);
+			UCellsUtilsLibrary::DisplayCell(Owner, CellInternal, Params);
 		}
 	}
 #endif	//WITH_EDITOR [IsEditor]
@@ -208,7 +209,7 @@ void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 	if (UEditorUtilsLibrary::IsEditor())
 	{
 		// Remove all text renders of the Owner
-		USingletonLibrary::ClearDisplayedCells(GetOwner());
+		UCellsUtilsLibrary::ClearDisplayedCells(GetOwner());
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }

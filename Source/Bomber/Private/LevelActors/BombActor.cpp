@@ -148,9 +148,10 @@ void ABombActor::OnConstructionBombActor()
 
 		if (MapComponentInternal->bShouldShowRenders)
 		{
-			USingletonLibrary::ClearDisplayedCells(this);
-			static const FDisplayCellsParams DisplayParams{FLinearColor::Red};
-			USingletonLibrary::DisplayCells(this, GetExplosionCells(), DisplayParams);
+			FDisplayCellsParams DisplayParams;
+			DisplayParams.TextColor = FLinearColor::Red;
+			DisplayParams.bClearPreviousDisplays = true;
+			UCellsUtilsLibrary::DisplayCells(this, GetExplosionCells(), DisplayParams);
 		}
 	}
 #endif //WITH_EDITOR [IsEditorNotPieWorld]

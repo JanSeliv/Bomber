@@ -10,43 +10,6 @@
 #include "SingletonLibrary.generated.h"
 
 /**
- * Utility structure to display cells
- * @see USingletonLibrary::DisplayCells()
- */
-USTRUCT(BlueprintType)
-struct BOMBER_API FDisplayCellsParams
-{
-	GENERATED_BODY()
-
-	/** Default params to display cells. */
-	static const FDisplayCellsParams EmptyParams;
-
-	/** Color of displayed text.  */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FLinearColor TextColor = FLinearColor::White;
-
-	/** Height offset for displayed text above the cell. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	float TextHeight = 261.f;
-
-	/** Size of displayed text. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	float TextSize = 124.f;
-
-	/** Addition text to mark the cell, keep it short like 1-2 symbols. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FName RenderString = NAME_None;
-
-	/** Offset for the Render String. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FVector CoordinatePosition = FVector::ZeroVector;
-
-	/** Set true to remove all displays that were added on that owner before. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	bool bClearPreviousDisplays = false;
-};
-
-/**
  * 	The static functions library
  */
 UCLASS(Blueprintable, BlueprintType)
@@ -215,10 +178,6 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
 	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal = nullptr;
 
-	/** Contains the Pool Manager of the game that is used to reuse created objects. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pool Manager"))
-	TWeakObjectPtr<class UPoolManager> PoolManagerInternal = nullptr;
-
 	/* ---------------------------------------------------
 	 *		Editor development
 	 * --------------------------------------------------- */
@@ -232,22 +191,4 @@ public:
 	/** Binds to update movements of each AI controller. */
 	static FUpdateAI GOnAIUpdatedDelegate;
 #endif //WITH_EDITOR
-
-	/** Remove all text renders of the Owner */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
-	static void ClearDisplayedCells(const UObject* Owner);
-
-	/** Display coordinates of specified cells on the level. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
-	static void DisplayCells(UObject* Owner, const TSet<FCell>& Cells, const FDisplayCellsParams& Params);
-
-	/** Display only specified cell. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
-	static void DisplayCell(UObject* Owner, const FCell& Cell, const FDisplayCellsParams& Params) { DisplayCells(Owner, {Cell}, Params); }
-
-protected:
-	/** Debug visualization by text renders. Has blueprint implementation
-	 * @TODO JanSeliv 3kKWq6XP Move blueprint implementation to code, get rid of this function and move DisplayCell functions to UCellsUtilsLibrary. */
-	UFUNCTION(BlueprintNativeEvent, meta = (DevelopmentOnly, BlueprintProtected, AdvancedDisplay = 2, AutoCreateRefTerm = "TextColor,RenderString,CoordinatePosition", DefaultToSelf = "Owner"))
-	void AddDebugTextRenders(class AActor* Owner, const TSet<FCell>& Cells, const FLinearColor& TextColor, bool& bOutHasCoordinateRenders, TArray<class UTextRenderComponent*>& OutTextRenderComponents, float TextHeight, float TextSize, const FString& RenderString, const FVector& CoordinatePosition) const;
 };

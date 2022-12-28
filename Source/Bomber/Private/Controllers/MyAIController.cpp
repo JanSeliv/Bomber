@@ -51,7 +51,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 		// Visualize and show destination cell
 		if (!UEditorUtilsLibrary::IsEditorNotPieWorld()) // [PIE]
 		{
-			USingletonLibrary::ClearDisplayedCells(OwnerInternal);
+			UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		} // [IsEditorNotPieWorld]
 
 		const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
@@ -59,7 +59,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 		    && MapComponent->bShouldShowRenders)
 		{
 			static const FDisplayCellsParams DisplayParams{FLinearColor::Gray, 255.f, 300.f, TEXT("x")};
-			USingletonLibrary::DisplayCells(OwnerInternal, {AIMoveToInternal}, DisplayParams);
+			UCellsUtilsLibrary::DisplayCell(OwnerInternal, AIMoveToInternal, DisplayParams);
 		}
 	}
 #endif
@@ -189,7 +189,7 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		USingletonLibrary::ClearDisplayedCells(OwnerInternal);
+		UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		AIMoveToInternal = FCell::InvalidCell;
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
@@ -349,7 +349,7 @@ void AMyAIController::UpdateAI()
 			if (MapComponent->bShouldShowRenders)
 			{
 				static const FDisplayCellsParams DisplayParams{FLinearColor::Red, 261.F, 95.F, TEXT("Attack")};
-				USingletonLibrary::DisplayCells(OwnerInternal, {F0}, DisplayParams);
+				UCellsUtilsLibrary::DisplayCell(OwnerInternal, F0, DisplayParams);
 			}
 #endif	// [Editor]
 		}
@@ -401,7 +401,7 @@ void AMyAIController::UpdateAI()
 					break;
 			}
 			static const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, Symbol, Position};
-			USingletonLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
+			UCellsUtilsLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
 		} // [Loopy visualization]
 	}
 #endif	// [Editor]
