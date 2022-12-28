@@ -102,7 +102,9 @@ bool UMapComponent::OnConstructionOwnerActor()
 		// Show current cell if type specified
 		if (TO_FLAG(GetActorType()) & LevelMap.RenderActorsTypes)
 		{
-			USingletonLibrary::DisplayCells(Owner, {CellInternal}, FDisplayCellsParams::EmptyParams);
+			FDisplayCellsParams Params;
+			Params.bClearPreviousDisplays = true;
+			USingletonLibrary::DisplayCell(Owner, CellInternal, Params);
 		}
 	}
 #endif	//WITH_EDITOR [IsEditor]
