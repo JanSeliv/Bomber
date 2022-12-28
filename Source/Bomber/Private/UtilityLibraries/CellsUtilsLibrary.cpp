@@ -4,6 +4,14 @@
 //---
 #include "GeneratedMap.h"
 
+// Creates 'Break Cell' node with X, Y, Z outputs
+void UCellsUtilsLibrary::BreakCell(const FCell& InCell, double& X, double& Y, double& Z)
+{
+	X = InCell.X();
+	Y = InCell.Y();
+	Z = InCell.Z();
+}
+
 // Returns the cell by specified row and column number if exists, invalid cell otherwise
 const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
 {

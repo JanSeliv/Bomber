@@ -10,7 +10,8 @@
 #include "CellsUtilsLibrary.generated.h"
 
 /**
- * 	The static functions library of cells
+ * 	The static functions library of Bomber cells (tiles on the grid).
+ * 	@see trello.com/c/b2IzcOhg
  */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API UCellsUtilsLibrary final : public UBlueprintFunctionLibrary
@@ -24,7 +25,7 @@ public:
 
 	/** Creates 'Make Cell' node with Cell  as an input parameter. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", NativeMakeFunc, Keywords = "construct build"))
-	static FORCEINLINE FCell MakeCell(const FVector& InVector) { return FCell(InVector); }
+	static FORCEINLINE FCell MakeCell(double X, double Y, double Z) { return FCell(X, Y, Z); }
 
 	/** Set the values of the cell directly. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "InVector", ScriptMethod = "SetFromVector"))
@@ -46,9 +47,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cell (Cells)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FORCEINLINE FCell Conv_CellsToCell(const TSet<FCell>& InCells) { return FCell::GetFirstCellInSet(InCells); }
 
-	/** Creates 'Break Cell' node with Vector as an output parameter. */
+	/** Creates 'Break Cell' node with X, Y, Z outputs. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", NativeBreakFunc))
-	static const FORCEINLINE FVector& BreakCell(const FCell& InCell) { return InCell.Location; }
+	static void BreakCell(const FCell& InCell, double& X, double& Y, double& Z);
 
 	/** Converts a Vector to a Cell. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cell (Vector)", CompactNodeTitle = "->", BlueprintAutocast))
@@ -133,7 +134,6 @@ public:
 
 	/* ---------------------------------------------------
 	*		Level Map related cell functions
-	*		@see trello.com/c/b2IzcOhg
 	* --------------------------------------------------- */
 
 	/** Returns the cell by specified row and column number if exists, invalid cell otherwise. */

@@ -50,16 +50,26 @@ struct BOMBER_API FCell
 	/** Default constructor. */
 	FCell() = default;
 
-	/**
-	* Initial constructor for cells filling into the array.
-	* Round another FVector into this cell.
-	*
-	* @param Vector The other vector.
-	*/
+	/** Vector to cell constructor. */
 	FCell(const FVector& Vector);
+
+	/** Floats to cell constructor. */
+	explicit FCell(float X, float Y, float Z);
+
+	/** Doubles to cell constructor. */
+	explicit FCell(double X, double Y, double Z);
 
 	/** Equal operator for vectors to directly copy its value to the cell. */
 	FCell& operator=(const FVector& Vector);
+
+	/** Returns Cell's X component. */
+	float X() const { return Location.X; }
+
+	/** Returns Cell's Y component. */
+	float Y() const { return Location.Y; }
+
+	/** Returns Cell's Z component. */
+	float Z() const { return Location.Z; }
 
 	/** Rotates around the center of the Level Map to the same yaw degree.
 	 *

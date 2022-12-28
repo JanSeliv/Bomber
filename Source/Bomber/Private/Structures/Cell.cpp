@@ -12,12 +12,28 @@ const FCell FCell::RightCell = FVector::RightVector;
 const FCell FCell::LeftCell = FVector::LeftVector;
 const FCells FCell::EmptyCells = FCells{};
 
-// Initial constructor for cells filling into the array. Round another FVector into this cell.
+// Vector to cell constructor
 FCell::FCell(const FVector& Vector)
 {
 	Location.X = FMath::RoundToFloat(Vector.X);
 	Location.Y = FMath::RoundToFloat(Vector.Y);
 	Location.Z = FMath::RoundToFloat(GEngine && GEngine->GameSingleton ? UCellsUtilsLibrary::GetCellHeightLocation() : Vector.Z);
+}
+
+// Floats to cell constructor
+FCell::FCell(float X, float Y, float Z)
+{
+	Location.X = FMath::RoundToFloat(X);
+	Location.Y = FMath::RoundToFloat(Y);
+	Location.Z = FMath::RoundToFloat(Z);
+}
+
+// Doubles to cell constructor
+FCell::FCell(double X, double Y, double Z)
+{
+	Location.X = FMath::RoundToDouble(X);
+	Location.Y = FMath::RoundToDouble(Y);
+	Location.Z = FMath::RoundToDouble(Z);
 }
 
 // Equal operator for vectors to directly copy its value to the cell
