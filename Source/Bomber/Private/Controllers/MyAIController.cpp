@@ -36,30 +36,32 @@ AMyAIController::AMyAIController()
 // Makes AI go toward specified destination cell
 void AMyAIController::MoveToCell(const FCell& DestinationCell)
 {
-	if (!OwnerInternal
-	    || IsMoveInputIgnored())
+	if (!OwnerInternal)
 	{
 		return;
 	}
 
-	AIMoveToInternal = DestinationCell;
-	MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
+	if (!IsMoveInputIgnored())
+	{
+		AIMoveToInternal = DestinationCell;
+		MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
+	}
 
 #if WITH_EDITOR	 // [IsEditor]
 	if (UEditorUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
-		if (!UEditorUtilsLibrary::IsEditorNotPieWorld()) // [PIE]
+		if (USingletonLibrary::HasWorldBegunPlay()) // PIE
 		{
 			UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
-		} // [IsEditorNotPieWorld]
+		}
 
 		const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
 		if (MapComponent // is valid  map component
 		    && MapComponent->bShouldShowRenders)
 		{
 			static const FDisplayCellsParams DisplayParams{FLinearColor::Gray, 255.f, 300.f, TEXT("x")};
-			UCellsUtilsLibrary::DisplayCell(OwnerInternal, AIMoveToInternal, DisplayParams);
+			UCellsUtilsLibrary::DisplayCell(OwnerInternal, DestinationCell, DisplayParams);
 		}
 	}
 #endif
@@ -400,7 +402,7 @@ void AMyAIController::UpdateAI()
 				default:
 					break;
 			}
-			static const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, Symbol, Position};
+			const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, Symbol, Position};
 			UCellsUtilsLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
 		} // [Loopy visualization]
 	}

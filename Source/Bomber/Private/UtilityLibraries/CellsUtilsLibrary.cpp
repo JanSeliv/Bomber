@@ -346,13 +346,17 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 			continue;
 		}
 
-		const bool bHasAdditionalRenderString = !Params.CoordinatePosition.IsZero() && !Params.RenderString.IsNone();
+		const bool bHasAdditionalRenderString = !Params.RenderString.IsNone();
+		const bool bHasCoordinatePosition = !Params.CoordinatePosition.IsZero();
 		constexpr int32 MaxCoordinateRenders = 2;
 		for (int32 Index = 0; Index < MaxCoordinateRenders; ++Index)
 		{
-			const bool bIsCoordinateRender = Index == 0;
-			if (!bIsCoordinateRender
-			    && !bHasAdditionalRenderString)
+			enum ERenderType { ERT_Coordinate, ERT_RenderString };
+			const ERenderType RenderType = Index == 0 ? ERT_Coordinate : ERT_RenderString;
+			const bool bShowRenderString = RenderType == ERT_RenderString && bHasAdditionalRenderString;
+			const bool bShowCoordinate = RenderType == ERT_Coordinate && (bHasCoordinatePosition || !bHasAdditionalRenderString);
+
+			if (!bShowCoordinate && !bShowRenderString)
 			{
 				continue;
 			}
@@ -362,30 +366,30 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 
 			// Get text render location on each cell
 			FVector TextLocation = FVector::ZeroVector;
-			const FVector CellLocation(CellIt.X(), CellIt.Y(), Params.TextHeight);
-			if (bIsCoordinateRender)
+			const FVector CellLocation(CellIt.X(), CellIt.Y(), GetCellHeightLocation() + Params.TextHeight);
+			if (bShowCoordinate)
 			{
 				TextLocation.X = CellLocation.X + Params.CoordinatePosition.X * -1.f;
 				TextLocation.Y = CellLocation.Y + Params.CoordinatePosition.Y * -1.f;
 				TextLocation.Z = CellLocation.Z + Params.CoordinatePosition.Z;
 			}
-			else
+			else if (bShowRenderString)
 			{
 				TextLocation = CellLocation + Params.CoordinatePosition;
 			}
 
 			// --- Init the text render
 
-			if (bIsCoordinateRender)
+			if (bShowCoordinate)
 			{
-				const FString XString = FString::FromInt(FMath::FloorToInt32(TextLocation.X));
-				const FString YString = FString::FromInt(FMath::FloorToInt32(TextLocation.Y));
+				const FString XString = FString::FromInt(FMath::FloorToInt32(CellLocation.X));
+				const FString YString = FString::FromInt(FMath::FloorToInt32(CellLocation.Y));
 				constexpr float DelimiterTextSize = 48.f;
 				const FString DelimiterString = Params.TextSize > DelimiterTextSize ? TEXT("\n") : TEXT("");
 				const FString RenderString = XString + DelimiterString + YString;
 				RenderComp.SetText(FText::FromString(RenderString));
 			}
-			else
+			else if (bShowRenderString)
 			{
 				// Display RenderString as is
 				FText NameToStringToText = FText::FromString(Params.RenderString.ToString());
@@ -394,8 +398,15 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 
 			RenderComp.SetAbsolute(true, true, true);
 
-			constexpr float CoordinateSizeMultiplier = 0.4f;
-			RenderComp.SetWorldSize(bIsCoordinateRender ? Params.TextSize * CoordinateSizeMultiplier : Params.TextSize);
+			if (bShowCoordinate)
+			{
+				constexpr float CoordinateSizeMultiplier = 0.4f;
+				RenderComp.SetWorldSize(Params.TextSize * CoordinateSizeMultiplier);
+			}
+			else if (bShowRenderString)
+			{
+				RenderComp.SetWorldSize(Params.TextSize);
+			}
 
 			RenderComp.SetHorizontalAlignment(EHTA_Center);
 			RenderComp.SetVerticalAlignment(EVRTA_TextCenter);
