@@ -299,16 +299,8 @@ void UCellsUtilsLibrary::ClearDisplayedCells(const UObject* Owner)
 	for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
 	{
 		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(i) ? Cast<UTextRenderComponent>(TextRendersArray[i]) : nullptr;
-		if (!TextRenderIt)
-		{
-			continue;
-		}
-
-		const FName NameIt = *TextRenderIt->Text.ToString();
-		static const FName DefaultPlayerName = "Player";
-		static const FName DefaultAIName = "AI";
-		if (NameIt != DefaultPlayerName
-		    && NameIt != DefaultAIName)
+		if (IsValid(TextRenderIt)                       // is not pending kill
+		    && TextRenderIt->HasAllFlags(RF_Transient)) // cell text renders have this flag
 		{
 			TextRenderIt->DestroyComponent();
 		}
