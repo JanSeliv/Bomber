@@ -303,7 +303,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 		}
 	}
 
-	// begin: find transform
+	// Find transform
 	FRotator ActorRotation{GetCachedTransform().GetRotation()};
 	if (!(TO_FLAG(ActorType) & TO_FLAG(EAT::Item | EAT::Player)))
 	{
@@ -314,8 +314,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 		ActorRotation.Yaw += FMath::RandRange(MinRange, MaxRange) * RotationMultiplier;
 	}
 	static constexpr float HeightAdditive = 100.f;
-	const FVector ActorLocation{Cell.Location.X, Cell.Location.Y, Cell.Location.Z + HeightAdditive};
-	// end
+	const FVector ActorLocation{Cell.X(), Cell.Y(), Cell.Z() + HeightAdditive};
 
 	// Attach to the Level Map actor
 	if (!ComponentOwner->IsAttachedTo(this)
