@@ -81,7 +81,7 @@ void UPlayerRow::TryCreateDynamicMaterials()
 
 	// Create dynamic materials
 	const int32 InstancesToCreateNum = SkinTexturesNum - MaterialInstancesDynamicNum;
-	for (int32 i = 0; i < InstancesToCreateNum; ++i)
+	for (int32 Index = 0; Index < InstancesToCreateNum; ++Index)
 	{
 		UMaterialInstanceDynamic* MaterialInstanceDynamic = UMaterialInstanceDynamic::Create(MaterialInstanceInternal, PlayerDataAsset);
 		if (!ensureMsgf(MaterialInstanceDynamic, TEXT("ASSERT: Could not create 'MaterialInstanceDynamic'")))

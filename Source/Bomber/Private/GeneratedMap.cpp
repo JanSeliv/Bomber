@@ -403,14 +403,14 @@ void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* Dest
 	}
 
 	// Iterate and destroy
-	for (int32 i = MapComponentsInternal.Num() - 1; i >= 0; --i)
+	for (int32 Index = MapComponentsInternal.Num() - 1; Index >= 0; --Index)
 	{
-		if (!MapComponentsInternal.IsValidIndex(i)) // the element already was removed
+		if (!MapComponentsInternal.IsValidIndex(Index)) // the element already was removed
 		{
 			continue;
 		}
 
-		UMapComponent* MapComponentIt = MapComponentsInternal[i];
+		UMapComponent* MapComponentIt = MapComponentsInternal[Index];
 		const AActor* OwnerIt = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		if (!OwnerIt                                                        // if is null, destroy that object from the array
 		    || MapComponentIt && Cells.Contains(MapComponentIt->GetCell())) // the cell is contained on the grid

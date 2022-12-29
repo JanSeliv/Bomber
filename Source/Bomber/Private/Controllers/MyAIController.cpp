@@ -296,10 +296,10 @@ void AMyAIController::UpdateAI()
 	FCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free; // selected cells
 	bool bIsFilteringFailed = false;
 	static constexpr int32 FilteringStepsNum = 4;
-	for (int32 i = 0; i < FilteringStepsNum; ++i)
+	for (int32 Index = 0; Index < FilteringStepsNum; ++Index)
 	{
 		FCells FilteringStep;
-		switch (i)
+		switch (Index)
 		{
 			case 0: // All crossways: Filtered ∪ AllCrossways
 				FilteringStep = Filtered.Intersect(AllCrossways);

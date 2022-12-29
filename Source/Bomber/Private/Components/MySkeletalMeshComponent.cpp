@@ -228,9 +228,9 @@ void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
 		}
 
 		const TArray<UMaterialInterface*>& AllMaterials = MeshComponent->GetMaterials();
-		for (int32 i = 0; i < AllMaterials.Num(); ++i)
+		for (int32 Index = 0; Index < AllMaterials.Num(); ++Index)
 		{
-			MeshComponent->SetMaterial(i, MaterialInstanceDynamic);
+			MeshComponent->SetMaterial(Index, MaterialInstanceDynamic);
 		}
 	};
 

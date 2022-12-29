@@ -296,9 +296,9 @@ void UCellsUtilsLibrary::ClearDisplayedCells(const UObject* Owner)
 
 	TArray<UTextRenderComponent*> TextRendersArray;
 	OwnerActor->GetComponents<UTextRenderComponent>(TextRendersArray);
-	for (int32 i = TextRendersArray.Num() - 1; i >= 0; --i)
+	for (int32 Index = TextRendersArray.Num() - 1; Index >= 0; --Index)
 	{
-		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(i) ? Cast<UTextRenderComponent>(TextRendersArray[i]) : nullptr;
+		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(Index) ? Cast<UTextRenderComponent>(TextRendersArray[Index]) : nullptr;
 		if (IsValid(TextRenderIt)                       // is not pending kill
 		    && TextRenderIt->HasAllFlags(RF_Transient)) // cell text renders have this flag
 		{
