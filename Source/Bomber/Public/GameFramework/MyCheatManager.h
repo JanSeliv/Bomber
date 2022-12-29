@@ -16,17 +16,26 @@ class BOMBER_API UMyCheatManager final : public UMetaCheatManager
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	/**
-	 * Returns bitmask by string.
+	 * Returns bitmask from reverse bitmask in string.
 	 * "1000"(OR "1 0 0 0" OR "1")	-> 1,
 	 * "1100"(OR "1 1 0 0" OR "11") -> 3,
 	 * "0011"(OR "0 0 1 1")			-> 12,
 	 * "0001"(OR "0 0 0 1") 		-> 8
 	 * "0001"(OR "1 1 1 1") 		-> 15
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "String"))
-	static int32 GetBitmask(const FString& String);
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ReverseBitmaskStr"))
+	static int32 GetBitmaskFromReverseString(const FString& ReverseBitmaskStr);
+
+	/**
+	 * Returns bitmask from actor types in string.
+	 * "Wall" (1<<4)						-> 16,
+	 * "Wall Bomb" (1<<4|1<<0)				-> 17,
+	 * "Wall Bomb Player" (1<<4|1<<0|1<<3)	-> 25,
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ReverseBitmask"))
+	static int32 GetBitmaskFromActorTypesString(const FString& ActorTypesBitmaskStr);
 
 	/* ---------------------------------------------------
 	*		Destroy
@@ -51,7 +60,6 @@ protected:
 	 * Bomber.Destroy.PlayersBySlots 1111
 	 * Bomber.Destroy.PlayersBySlots 1000
 	 * Bomber.Destroy.PlayersBySlots 0111
-	 * @param Slot 1 if should destroy
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Destroy.PlayersBySlots"))
 	static void DestroyPlayersBySlots(const FString& Slot);
@@ -81,4 +89,17 @@ protected:
 	/** Enable or disable the God mode to make a controllable player undestroyable. */
 	UFUNCTION(meta = (CheatName = "Bomber.Player.SetGodMode"))
 	static void SetGodMode(bool bShouldEnable);
+
+	/* ---------------------------------------------------
+	 *		Debug
+	 * --------------------------------------------------- */
+
+	/**
+	 * Shows coordinates of all level actors by specified types, ex: 'Box Item'.
+	 * Bomber.Debug.DisplayCells Wall - show walls.
+	 * Bomber.Debug.DisplayCells Wall Bomb - show walls and bombs.
+	 * Bomber.Debug.DisplayCells Wall Bomb Player - show walls, bombs and players.
+	 */
+	UFUNCTION(meta = (CheatName = "Bomber.Debug.DisplayCells"))
+	static void DisplayCells(const FString& ActorTypesString);
 };

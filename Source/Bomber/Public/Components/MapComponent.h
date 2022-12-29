@@ -70,6 +70,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	void SetCell(const FCell& Cell);
 
+	/** Show current cell if type if is allowed. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void DisplayOwnedCell();
+
 	/** Returns the owner's Level Actor Row. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class ULevelActorRow* GetLevelActorRow() const { return LevelActorRowInternal; }

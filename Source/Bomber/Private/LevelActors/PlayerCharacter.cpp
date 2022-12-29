@@ -256,8 +256,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Update a player location on the level map
-	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+	if (MapComponentInternal)
+	{
+		// Update a player location on the level map
+		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+
+		MapComponentInternal->DisplayOwnedCell();
+	}
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel

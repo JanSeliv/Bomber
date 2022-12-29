@@ -100,13 +100,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 		}
 
-		// Show current cell if type specified
-		if (TO_FLAG(GetActorType()) & LevelMap.RenderActorsTypes)
-		{
-			FDisplayCellsParams Params;
-			Params.bClearPreviousDisplays = true;
-			UCellsUtilsLibrary::DisplayCell(Owner, CellInternal, Params);
-		}
+		DisplayOwnedCell();
 	}
 #endif	//WITH_EDITOR [IsEditor]
 
@@ -117,6 +111,17 @@ bool UMapComponent::OnConstructionOwnerActor()
 void UMapComponent::SetCell(const FCell& Cell)
 {
 	CellInternal = Cell;
+}
+
+// Show current cell if type if is allowed
+void UMapComponent::DisplayOwnedCell()
+{
+	if (TO_FLAG(GetActorType()) & AGeneratedMap::Get().RenderActorsTypes)
+	{
+		FDisplayCellsParams Params;
+		Params.bClearPreviousDisplays = true;
+		UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
+	}
 }
 
 // Set specified mesh to the Owner
