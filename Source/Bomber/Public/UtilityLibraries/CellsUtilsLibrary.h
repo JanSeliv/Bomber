@@ -435,15 +435,15 @@ public:
 	 *		Debug cells utilities
 	 * --------------------------------------------------- */
 
-	/** Remove all text renders of the Owner */
+	/** Remove all text renders of the Owner, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
 	static void ClearDisplayedCells(const UObject* Owner);
 
-	/** Display coordinates of specified cells on the level. */
+	/** Display coordinates of specified cells on the level, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
 	static void DisplayCells(UObject* Owner, const TSet<FCell>& Cells, const FDisplayCellsParams& Params);
 
-	/** Display only specified cell. */
+	/** Display only specified cell, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
 	static void DisplayCell(UObject* Owner, const FCell& Cell, const FDisplayCellsParams& Params) { DisplayCells(Owner, {Cell}, Params); }
 };

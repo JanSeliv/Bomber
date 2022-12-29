@@ -23,11 +23,9 @@ public:
 	 *		Public properties
 	 * --------------------------------------------------- */
 
-#if WITH_EDITORONLY_DATA  // [Editor] Renders
-	/** Specify for which level actors should show debug renders. */
+	/** Specify for which level actors should show debug renders, is not available in shipping build. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
 	int32 RenderActorsTypes = TO_FLAG(EAT::None);
-#endif	//WITH_EDITORONLY_DATA [Editor] Renders
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelMapWantsReconstruct, const FTransform&, Transform);
 

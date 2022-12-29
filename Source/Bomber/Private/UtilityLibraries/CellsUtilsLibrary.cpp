@@ -279,9 +279,10 @@ bool UCellsUtilsLibrary::IsIslandCell(const FCell& Cell)
 //		 Debug cells utilities
 // ---------------------------------------------------
 
-// Remove all text renders of the Owner
+// Remove all text renders of the Owner, is not available in shipping build
 void UCellsUtilsLibrary::ClearDisplayedCells(const UObject* Owner)
 {
+#if !UE_BUILD_SHIPPING
 	const AActor* OwnerActor = Cast<AActor>(Owner);
 	if (!OwnerActor)
 	{
@@ -312,11 +313,13 @@ void UCellsUtilsLibrary::ClearDisplayedCells(const UObject* Owner)
 			TextRenderIt->DestroyComponent();
 		}
 	}
+#endif // !UE_BUILD_SHIPPING
 }
 
-// Display coordinates of specified cells on the level
+// Display coordinates of specified cells on the level, is not available in shipping build
 void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const FDisplayCellsParams& Params)
 {
+#if !UE_BUILD_SHIPPING
 	if (!Cells.Num()
 	    || !Owner)
 	{
@@ -420,4 +423,5 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 			RenderComp.SetWorldTransform(RenderTransform);
 		}
 	}
+#endif // !UE_BUILD_SHIPPING
 }

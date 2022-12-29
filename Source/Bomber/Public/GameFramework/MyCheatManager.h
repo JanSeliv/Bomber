@@ -99,6 +99,7 @@ public:
 	 * Bomber.Debug.DisplayCells Wall - show walls.
 	 * Bomber.Debug.DisplayCells Wall Bomb - show walls and bombs.
 	 * Bomber.Debug.DisplayCells Wall Bomb Player - show walls, bombs and players.
+	 * Bomber.Debug.DisplayCells All - show all actors (walls, bombs, players, items and boxes).
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Debug.DisplayCells"))
 	static void DisplayCells(const FString& ActorTypesString);

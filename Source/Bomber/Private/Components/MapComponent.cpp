@@ -91,18 +91,15 @@ bool UMapComponent::OnConstructionOwnerActor()
 	const ECollisionResponse CollisionResponse = GetActorDataAssetChecked().GetCollisionResponse();
 	SetCollisionResponses(CollisionResponse);
 
-#if WITH_EDITOR	 // [IsEditor]
-	if (UEditorUtilsLibrary::IsEditor())
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
-		{
-			// Update AI renders after adding obj to map
-			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
-		}
-
-		DisplayOwnedCell();
+		// Update AI renders after adding obj to map
+		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
-#endif	//WITH_EDITOR [IsEditor]
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+
+	DisplayOwnedCell();
 
 	return true;
 }
@@ -113,15 +110,17 @@ void UMapComponent::SetCell(const FCell& Cell)
 	CellInternal = Cell;
 }
 
-// Show current cell if type if is allowed
+// Show current cell if type if is allowed, is not available in shipping build
 void UMapComponent::DisplayOwnedCell()
 {
+#if !UE_BUILD_SHIPPING
 	if (TO_FLAG(GetActorType()) & AGeneratedMap::Get().RenderActorsTypes)
 	{
 		FDisplayCellsParams Params;
 		Params.bClearPreviousDisplays = true;
 		UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
 	}
+#endif // !UE_BUILD_SHIPPING
 }
 
 // Set specified mesh to the Owner
