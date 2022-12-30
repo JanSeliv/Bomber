@@ -84,6 +84,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cell (Cells)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FORCEINLINE FCell Conv_CellsToCell(const TSet<FCell>& InCells) { return FCell::GetFirstCellInSet(InCells); }
 
+	/** Converts array of cells to set of cells. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cells (array)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FORCEINLINE TSet<FCell> Conv_ArrayToCells(const TArray<FCell>& InCells) { return FCells(InCells); }
+
 	/** Creates 'Break Cell' node with X, Y, Z outputs. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", NativeBreakFunc))
 	static void BreakCell(const FCell& InCell, double& X, double& Y, double& Z);
