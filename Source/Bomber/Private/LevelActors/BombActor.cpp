@@ -66,7 +66,6 @@ FCells ABombActor::GetExplosionCells() const
 void ABombActor::InitBomb(int32 InFireRadius/* = MIN_FIRE_RADIUS*/, int32 CharacterID/* = INDEX_NONE*/)
 {
 	if (!HasAuthority()
-	    || !MapComponentInternal
 	    || !ensureMsgf(InFireRadius >= MIN_FIRE_RADIUS, TEXT("ASSERT: 'InFireRadius' is less than MIN_FIRE_RADIUS")))
 	{
 		return;
@@ -86,36 +85,7 @@ void ABombActor::InitBomb(int32 InFireRadius/* = MIN_FIRE_RADIUS*/, int32 Charac
 
 	FireRadiusInternal = InFireRadius;
 
-	FCollisionResponseContainer CollisionResponses = MapComponentInternal->GetCollisionResponses();
-
-	TArray<AActor*> OverlappingPlayers;
-	GetOverlappingPlayers(OverlappingPlayers);
-	if (!OverlappingPlayers.Num())
-	{
-		// There are no characters on the bomb, block all
-		GetCollisionResponseToAllPlayers(/*out*/CollisionResponses, ECR_Block);
-		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
-	}
-	else
-	{
-		// Add to bitmask overlapping players
-		int32 Bitmask = 0;
-		for (const AActor* OverlappingPlayerIt : OverlappingPlayers)
-		{
-			if (const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OverlappingPlayerIt))
-			{
-				Bitmask |= 1 << PlayerCharacter->GetCharacterID();
-			}
-		}
-
-		// Set overlap response for overlapping players, block others
-		CollisionResponses = MapComponentInternal->GetCollisionResponses();
-		constexpr ECollisionResponse BitOnResponse = ECR_Overlap;
-		constexpr ECollisionResponse BitOffResponse = ECR_Block;
-		GetCollisionResponseToPlayers(/*out*/CollisionResponses, Bitmask, BitOnResponse, BitOffResponse);
-	}
-
-	MapComponentInternal->SetCollisionResponses(CollisionResponses);
+	UpdateCollisionResponseToAllPlayers();
 }
 
 /* ---------------------------------------------------
@@ -282,31 +252,13 @@ void ABombActor::MulticastDetonateBomb_Implementation()
 // Triggers when character end to overlaps with this bomb.
 void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OtherActor);
-	if (!PlayerCharacter
-	    || !MapComponentInternal)
+	const bool bIsPlayerOverlap = Cast<APlayerCharacter>(OtherActor) != nullptr;
+	if (!bIsPlayerOverlap)
 	{
 		return;
 	}
 
-	FCollisionResponseContainer CollisionResponses = MapComponentInternal->GetCollisionResponses();
-
-	TArray<AActor*> OverlappingPlayers;
-	GetOverlappingPlayers(OverlappingPlayers);
-	if (!OverlappingPlayers.Num())
-	{
-		// There are no more characters on the bomb
-		GetCollisionResponseToAllPlayers(/*out*/CollisionResponses, ECR_Block);
-		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
-	}
-	else
-	{
-		// Start block only the player that left this bomb
-		const int32 CharacterID = PlayerCharacter->GetCharacterID();
-		GetCollisionResponseToPlayer(/*out*/CollisionResponses, CharacterID, ECR_Block);
-	}
-
-	MapComponentInternal->SetCollisionResponses(CollisionResponses);
+	UpdateCollisionResponseToAllPlayers();
 }
 
 // Listen by dragged bombs to handle game resetting
@@ -320,8 +272,44 @@ void ABombActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	}
 }
 
-// Changes the response for specified player
-void ABombActor::GetCollisionResponseToPlayer(FCollisionResponseContainer& OutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse) const
+// Sets actual collision responses to all players for this bomb
+void ABombActor::UpdateCollisionResponseToAllPlayers()
+{
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	FCollisionResponseContainer CollisionResponses = MapComponentInternal->GetCollisionResponses();
+
+	TArray<AActor*> OverlappingPlayers;
+	GetOverlappingPlayers(OverlappingPlayers);
+	if (!OverlappingPlayers.Num())
+	{
+		// There are no characters on the bomb, block all
+		MakeCollisionResponseToAllPlayers(/*out*/CollisionResponses, ECR_Block);
+		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
+	}
+	else
+	{
+		// Add to bitmask overlapping players
+		int32 Bitmask = 0;
+		for (const AActor* OverlappingPlayerIt : OverlappingPlayers)
+		{
+			if (const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OverlappingPlayerIt))
+			{
+				Bitmask |= 1 << PlayerCharacter->GetCharacterID();
+			}
+		}
+
+		// Set overlap response for overlapping players, block others
+		CollisionResponses = MapComponentInternal->GetCollisionResponses();
+		constexpr ECollisionResponse BitOnResponse = ECR_Overlap;
+		constexpr ECollisionResponse BitOffResponse = ECR_Block;
+		MakeCollisionResponseToPlayersInBitmask(/*out*/CollisionResponses, Bitmask, BitOnResponse, BitOffResponse);
+	}
+
+	MapComponentInternal->SetCollisionResponses(CollisionResponses);
+}
+
+// Takes your container and returns is with new specified response for player by its specified ID
+void ABombActor::MakeCollisionResponseToPlayerByID(FCollisionResponseContainer& InOutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse)
 {
 	if (CharacterID < 0)
 	{
@@ -347,26 +335,26 @@ void ABombActor::GetCollisionResponseToPlayer(FCollisionResponseContainer& OutCo
 			break;
 	}
 
-	OutCollisionResponses.SetResponse(CollisionChannel, NewResponse);
+	InOutCollisionResponses.SetResponse(CollisionChannel, NewResponse);
 }
 
-// Changes the response for all players
-void ABombActor::GetCollisionResponseToAllPlayers(FCollisionResponseContainer& OutCollisionResponses, ECollisionResponse NewResponse) const
+// Takes your container and returns new specified response for all players
+void ABombActor::MakeCollisionResponseToAllPlayers(FCollisionResponseContainer& InOutCollisionResponses, ECollisionResponse NewResponse)
 {
 	static constexpr int32 BitsOffOnly = 0;
 	constexpr ECollisionResponse BitOnResponse = ECR_MAX;
-	GetCollisionResponseToPlayers(OutCollisionResponses, BitsOffOnly, BitOnResponse, NewResponse);
+	MakeCollisionResponseToPlayersInBitmask(InOutCollisionResponses, BitsOffOnly, BitOnResponse, NewResponse);
 }
 
-// Changes the response for players by specified bitmask
-void ABombActor::GetCollisionResponseToPlayers(FCollisionResponseContainer& OutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse) const
+// Takes your container and returns new specified response for those players who match their ID in specified bitmask
+void ABombActor::MakeCollisionResponseToPlayersInBitmask(FCollisionResponseContainer& InOutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse)
 {
 	static constexpr int32 MaxPlayerID = 3;
 	for (int32 CharacterID = 0; CharacterID <= MaxPlayerID; ++CharacterID)
 	{
 		const bool bIsBitOn = ((1 << CharacterID) & Bitmask) != 0;
 		const ECollisionResponse Response = bIsBitOn ? BitOnResponse : BitOffResponse;
-		GetCollisionResponseToPlayer(OutCollisionResponses, CharacterID, Response);
+		MakeCollisionResponseToPlayerByID(InOutCollisionResponses, CharacterID, Response);
 	}
 }
 
