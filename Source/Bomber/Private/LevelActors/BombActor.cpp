@@ -81,11 +81,25 @@ void ABombActor::InitBomb(int32 InFireRadius/* = MIN_FIRE_RADIUS*/, int32 Charac
 		ApplyMaterial();
 	}
 
-	// Update explosion information
-
 	FireRadiusInternal = InFireRadius;
 
 	UpdateCollisionResponseToAllPlayers();
+
+	TryDisplayExplosionCells();
+}
+
+// Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build
+void ABombActor::TryDisplayExplosionCells()
+{
+#if !UE_BUILD_SHIPPING
+	if (UCellsUtilsLibrary::CanDisplayCellsForActorTypes(TO_FLAG(EAT::Bomb)))
+	{
+		FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
+		Params.TextColor = FLinearColor::Red;
+		Params.TextHeight += 1.f;
+		UCellsUtilsLibrary::DisplayCells(this, GetExplosionCells(), Params);
+	}
+#endif // !UE_BUILD_SHIPPING
 }
 
 /* ---------------------------------------------------

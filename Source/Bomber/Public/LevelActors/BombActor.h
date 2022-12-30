@@ -47,6 +47,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void InitBomb(int32 InFireRadius = 1, int32 CharacterID = -1);
 
+	/** Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+	void TryDisplayExplosionCells();
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
