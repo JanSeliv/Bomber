@@ -144,7 +144,7 @@ void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
 {
 	// Set on the level to visualize new level actors
 	const int32 ActorTypesBitmask = GetBitmaskFromActorTypesString(ActorTypesString);
-	AGeneratedMap::Get().RenderActorsTypes = ActorTypesBitmask;
+	AGeneratedMap::Get().DisplayCellsActorTypes = ActorTypesBitmask;
 
 	// Update existed level actors
 	FMapComponents MapComponents;
@@ -155,6 +155,6 @@ void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
 		UCellsUtilsLibrary::ClearDisplayedCells(MapComponentIt);
 
 		// Show new cell renders for specified level actors
-		MapComponentIt->DisplayOwnedCell();
+		MapComponentIt->TryDisplayOwnedCell();
 	}
 }

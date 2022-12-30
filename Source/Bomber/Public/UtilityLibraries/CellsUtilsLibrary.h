@@ -446,4 +446,9 @@ public:
 	/** Display only specified cell, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner", AdvancedDisplay = 2, AutoCreateRefTerm = "Params"))
 	static void DisplayCell(UObject* Owner, const FCell& Cell, const FDisplayCellsParams& Params) { DisplayCells(Owner, {Cell}, Params); }
+
+	/** Returns true if cells of specified actor type(s) can be displayed.
+	 * It takes into considerations the types that are set by 'Bomber.Debug.DisplayCells' cheat or directly in the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static bool CanDisplayCellsForActorTypes(UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorTypesBitmask);
 };

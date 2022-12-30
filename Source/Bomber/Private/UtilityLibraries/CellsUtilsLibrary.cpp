@@ -417,3 +417,12 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 	}
 #endif // !UE_BUILD_SHIPPING
 }
+
+// Returns true if cells of specified actor type(s) can be displayed
+bool UCellsUtilsLibrary::CanDisplayCellsForActorTypes(int32 ActorTypesBitmask)
+{
+#if !UE_BUILD_SHIPPING
+	return (ActorTypesBitmask & AGeneratedMap::Get().DisplayCellsActorTypes) != 0;
+#endif // !UE_BUILD_SHIPPING
+	return false;
+}

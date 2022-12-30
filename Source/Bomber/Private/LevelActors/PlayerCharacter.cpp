@@ -261,7 +261,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 		// Update a player location on the level map
 		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
 
-		MapComponentInternal->DisplayOwnedCell();
+		MapComponentInternal->TryDisplayOwnedCell();
 	}
 }
 

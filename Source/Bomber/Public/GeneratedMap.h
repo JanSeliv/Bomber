@@ -23,10 +23,6 @@ public:
 	 *		Public properties
 	 * --------------------------------------------------- */
 
-	/** Specify for which level actors should show debug renders, is not available in shipping build. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
-	int32 RenderActorsTypes = TO_FLAG(EAT::None);
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelMapWantsReconstruct, const FTransform&, Transform);
 
 	/** Called when this level map actor wants to be reconstructed.
@@ -176,6 +172,10 @@ protected:
 	/** Contains the cached transform since the level actor does not move and is always static. */
 	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cached Transform"))
 	FTransform CachedTransformInternal = FTransform::Identity;
+
+	/** Specify for which level actors should show debug renders, is not available in shipping build. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
+	int32 DisplayCellsActorTypes = TO_FLAG(EAT::None);
 
 	/* ---------------------------------------------------
 	 *		Protected functions

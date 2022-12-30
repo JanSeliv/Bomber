@@ -99,7 +99,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
-	DisplayOwnedCell();
+	TryDisplayOwnedCell();
 
 	return true;
 }
@@ -110,13 +110,13 @@ void UMapComponent::SetCell(const FCell& Cell)
 	CellInternal = Cell;
 }
 
-// Show current cell if type if is allowed, is not available in shipping build
-void UMapComponent::DisplayOwnedCell()
+// Show current cell if owned actor type is allowed, is not available in shipping build
+void UMapComponent::TryDisplayOwnedCell()
 {
 #if !UE_BUILD_SHIPPING
-	if (TO_FLAG(GetActorType()) & AGeneratedMap::Get().RenderActorsTypes)
+	if (UCellsUtilsLibrary::CanDisplayCellsForActorTypes(TO_FLAG(GetActorType())))
 	{
-		FDisplayCellsParams Params;
+		FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
 		Params.bClearPreviousDisplays = true;
 		UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
 	}

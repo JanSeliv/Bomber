@@ -70,9 +70,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	void SetCell(const FCell& Cell);
 
-	/** Show current cell if type if is allowed, is not available in shipping build. */
+	/** Show current cell if owned actor type is allowed, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	void DisplayOwnedCell();
+	void TryDisplayOwnedCell();
 
 	/** Returns the owner's Level Actor Row. */
 	UFUNCTION(BlueprintPure, Category = "C++")
