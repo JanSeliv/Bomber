@@ -11,7 +11,8 @@
 /**
  * Contains common logic to manage all AI agents at once.
  */
-UCLASS(Blueprintable, DisplayName = "NewAI Manager Component", ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS(Blueprintable, DisplayName = "NewAI Manager Component", ClassGroup = (Custom),
+	meta = (BlueprintSpawnableComponent))
 class NEWAIRUNTIME_API UNewAIManagerComponent final : public UActorComponent
 {
 	GENERATED_BODY()
@@ -19,6 +20,10 @@ class NEWAIRUNTIME_API UNewAIManagerComponent final : public UActorComponent
 public:
 	/** Sets default values for this component's properties. */
 	UNewAIManagerComponent();
+
+	/** Returns the NewAI data asset. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static const class UNewAIDataAsset* GetNewAIDataAsset();
 
 protected:
 	/** Called when the game starts. */
@@ -31,4 +36,9 @@ protected:
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** NewAI data asset */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly,
+		meta = (BlueprintProtected, DisplayName = "NewAI Data Asset", ShowOnlyInnerProperties))
+	TObjectPtr<UNewAIDataAsset> NewAIDataAssetInternal;
 };
