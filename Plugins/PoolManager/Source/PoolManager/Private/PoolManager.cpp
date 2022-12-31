@@ -4,35 +4,47 @@
 //---
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+//---
+#if WITH_EDITOR
+#include "Editor.h"
+#endif // WITH_EDITOR
 
 // It's almost farthest possible location where deactivated actors are placed
 #define VECTOR_HALF_WORLD_MAX FVector(HALF_WORLD_MAX - HALF_WORLD_MAX * THRESH_VECTOR_NORMALIZED)
 
-// Returns current world
-UWorld* UPoolManager::GetWorld() const
+// Returns the pointer to your Pool Manager
+UPoolManager* UPoolManager::GetPoolManager(TSubclassOf<UPoolManager> OptionalClass/* = nullptr*/, const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UEngine* Engine = CastChecked<UEngine>(GetOuter());
-	UWorld* FoundWorld = Engine->GetCurrentPlayWorld();
+	if (!OptionalClass)
+	{
+		OptionalClass = StaticClass();
+	}
+
+	const UWorld* FoundWorld = OptionalWorldContext
+		                           ? GEngine->GetWorldFromContextObject(OptionalWorldContext, EGetWorldErrorMode::Assert)
+		                           : GEngine->GetCurrentPlayWorld();
 
 #if WITH_EDITOR
-	if (!FoundWorld)
+	if (!FoundWorld && GEditor)
 	{
 		// If world is not found, most likely a game did not start yet and we are in editor
-		const TIndirectArray<FWorldContext>& WorldList = Engine->GetWorldContexts();
-		for (int32 i = 0; i < WorldList.Num(); ++i)
-		{
-			const FWorldContext& WorldContext = WorldList[i];
-			if (WorldContext.WorldType == EWorldType::Editor)
-			{
-				FoundWorld = WorldContext.World();
-				break;
-			}
-		}
+		const FWorldContext& WorldContext = GEditor->IsPlaySessionInProgress() ? *GEditor->GetPIEWorldContext() : GEditor->GetEditorWorldContext();
+		FoundWorld = WorldContext.World();
 	}
 #endif // WITH_EDITOR
 
-	ensureMsgf(FoundWorld, TEXT("%s: Can not obtain current world"), *FString(__FUNCTION__));
-	return FoundWorld;
+	if (!ensureMsgf(FoundWorld, TEXT("%s: Can not obtain current world"), *FString(__FUNCTION__)))
+	{
+		return nullptr;
+	}
+
+	UPoolManager* FoundPoolManager = Cast<UPoolManager>(FoundWorld->GetSubsystemBase(OptionalClass));
+	if (!ensureMsgf(FoundPoolManager, TEXT("%s: 'Can not find Pool Manager for %s class in %s world"), *FString(__FUNCTION__), *OptionalClass->GetName(), *FoundWorld->GetName()))
+	{
+		return nullptr;
+	}
+
+	return FoundPoolManager;
 }
 
 // Adds specified object as is to the pool by its class to be handled by the Pool Manager
@@ -136,13 +148,14 @@ UObject* UPoolManager::TakeFromPool(const FTransform& Transform, const UClass* C
 	}
 
 	// Create new object
-	UObject* CreatedObject = nullptr;
+	UObject* CreatedObject;
 	if (ClassInPool->IsChildOf<AActor>())
 	{
 		UClass* ClassToSpawn = const_cast<UClass*>(ClassInPool);
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.OverrideLevel = World->PersistentLevel; // Always keep new objects on Persistent level
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParameters.bDeferConstruction = true; // Delay construction to add it to the pool first
 		CreatedObject = World->SpawnActor(ClassToSpawn, &Transform, SpawnParameters);
 	}
 	else
@@ -150,14 +163,20 @@ UObject* UPoolManager::TakeFromPool(const FTransform& Transform, const UClass* C
 		CreatedObject = NewObject<UObject>(World, ClassInPool);
 	}
 
-	if (!ensureMsgf(CreatedObject, TEXT("%s: 'CreatedObject' is not valid"), *FString(__FUNCTION__)))
+	checkf(CreatedObject, TEXT("CRITICAL ERROR: %s: 'CreatedObject' is not valid"), *FString(__FUNCTION__))
+
+	FPoolObjectData PoolObjectData;
+	PoolObjectData.PoolObject = CreatedObject;
+	// Set activity here instead of calling UPoolManager::SetActive since new object never was inactivated before to switch the state
+	// Is true because it returns new active object to the game
+	PoolObjectData.bIsActive = true;
+	Pool->PoolObjects.Emplace(MoveTemp(PoolObjectData));
+
+	if (AActor* SpawnedActor = Cast<AActor>(CreatedObject))
 	{
-		return nullptr;
+		// Call construction script since it was delayed before to add it to the pool first
+		SpawnedActor->FinishSpawning(Transform);
 	}
-
-	Pool->PoolObjects.Emplace(FPoolObjectData(CreatedObject));
-
-	SetActive(true, CreatedObject);
 
 	return CreatedObject;
 }
@@ -289,7 +308,7 @@ void UPoolManager::SetActive(bool bShouldActivate, UObject* Object)
 EPoolObjectState UPoolManager::GetPoolObjectState(const UObject* Object) const
 {
 	const UClass* ClassInPool = Object ? Object->GetClass() : nullptr;
-	const FPoolContainer* Pool = FindPool(ClassInPool);;
+	const FPoolContainer* Pool = FindPool(ClassInPool);
 	const FPoolObjectData* PoolObject = Pool ? Pool->FindInPool(Object) : nullptr;
 
 	if (!PoolObject
@@ -320,25 +339,43 @@ bool UPoolManager::IsFree(const UObject* Object) const
 	return GetPoolObjectState(Object) == EPoolObjectState::Inactive;
 }
 
+// Returns true if object is known by Pool Manager
+bool UPoolManager::IsRegistered(const UObject* Object) const
+{
+	return GetPoolObjectState(Object) != EPoolObjectState::None;
+}
+
 // Is called on initialization of the Pool Manager instance
 void UPoolManager::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	// Reset the Pool Manager on switching levels
-	if (GEngine && !GEngine->OnWorldDestroyed().IsBoundToObject(this))
+#if WITH_EDITOR
+	if (GEditor
+		&& !GEditor->IsPlaySessionInProgress() // Is Editor and not in PIE
+		&& !GEditor->OnWorldDestroyed().IsBoundToObject(this))
 	{
+		// Editor pool manager instance has different lifetime than PIE pool manager instance,
+		// So, to prevent memory leaks, clear all pools on switching levels in Editor
 		TWeakObjectPtr<UPoolManager> WeakPoolManager(this);
 		auto OnWorldDestroyed = [WeakPoolManager](UWorld* World)
 		{
+			if (!World || !World->IsEditorWorld()
+				|| !GEditor || GEditor->IsPlaySessionInProgress())
+			{
+				// Not Editor world or in PIE
+				return;
+			}
+
 			if (UPoolManager* PoolManager = WeakPoolManager.Get())
 			{
 				PoolManager->EmptyAllPools();
 			}
 		};
 
-		GEngine->OnWorldDestroyed().AddWeakLambda(this, OnWorldDestroyed);
+		GEditor->OnWorldDestroyed().AddWeakLambda(this, OnWorldDestroyed);
 	}
+#endif // WITH_EDITOR
 }
 
 // Returns the pointer to found pool by specified class

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Subsystems/EngineSubsystem.h"
+#include "Subsystems/WorldSubsystem.h"
 //---
 #include "PoolManagerTypes.h"
 //---
@@ -18,7 +18,7 @@
  * Can be used in Editor before game starts.
  */
 UCLASS(BlueprintType, Blueprintable)
-class POOLMANAGER_API UPoolManager : public UEngineSubsystem
+class POOLMANAGER_API UPoolManager : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -26,18 +26,17 @@ public:
 #pragma region GetPoolManager
 	/** Returns the Pool Manager, is checked and wil crash if can't be obtained.
 	* UPoolManager::Get(). with no parameters can be used in most cases if there is no specific set up.
-	* @tparam T is optional, put your child class if you implemented your own Pull Manager. */
+	* @tparam T is optional, put your child class if you implemented your own Pull Manager.
+	* @param OptionalWorldContext is optional, can be null in most cases, could be useful to avoid obtaining the automatically. */
 	template <typename T = ThisClass>
-	static FORCEINLINE T& Get() { return *CastChecked<T>(GetPoolManager(T::StaticClass())); }
+	static FORCEINLINE T& Get(const UObject* OptionalWorldContext = nullptr) { return *CastChecked<T>(GetPoolManager(T::StaticClass(), OptionalWorldContext)); }
 
 	/** Returns the pointer to the Pool Manager.
-	 * @param OptionalClass is optional, specify the class if you implemented your own Pool Manager. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static FORCEINLINE UPoolManager* GetPoolManager(TSubclassOf<UPoolManager> OptionalClass = nullptr) { return GEngine ? Cast<UPoolManager>(GEngine->GetEngineSubsystemBase(OptionalClass ? *OptionalClass : StaticClass())) : nullptr; }
+	 * @param OptionalClass is optional, specify the class if you implemented your own Pool Manager.
+	 * @param OptionalWorldContext is optional parameter and hidden in blueprints, can be null in most cases, could be useful to avoid obtaining the world automatically. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static UPoolManager* GetPoolManager(TSubclassOf<UPoolManager> OptionalClass = nullptr, const UObject* OptionalWorldContext = nullptr);
 #pragma endregion GetPoolManager
-
-	/** Returns current world. */
-	virtual UWorld* GetWorld() const override;
 
 	/** Adds specified object as is to the pool by its class to be handled by the Pool Manager. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DefaultToSelf = "Object"))
@@ -85,6 +84,10 @@ public:
 	/** Returns true if handled object is inactive and ready to be taken from pool. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
 	virtual bool IsFree(const UObject* Object) const;
+
+	/** Returns true if object is known by Pool Manager. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	virtual bool IsRegistered(const UObject* Object) const;
 
 protected:
 	/** Contains all pools that are handled by the Pool Manger. */

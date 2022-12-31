@@ -20,5 +20,15 @@ public class PoolManager : ModuleRules
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
 			}
 		);
+
+		if (Target.bBuildEditor)
+		{
+			// Include Editor modules that are used in this Runtime module
+			PrivateDependencyModuleNames.AddRange(new[]
+				{
+					"UnrealEd" // FDataTableEditorUtils
+				}
+			);
+		}
 	}
 }
