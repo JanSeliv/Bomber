@@ -146,7 +146,7 @@ protected:
 	TArray<FCell> GridCellsInternal;
 
 	/** Map components of all level actors. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal;
 
 	/** Contains map components that were dragged to the scene. */
@@ -273,10 +273,6 @@ protected:
 	/** Is called on client to load new level. */
 	UFUNCTION()
 	void OnRep_LevelType();
-
-	/** Find and add all level actors to allow the Pool Manager to handle all of them. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
-	void InitPoolManager();
 
 	/* ---------------------------------------------------
 	 *					Editor development

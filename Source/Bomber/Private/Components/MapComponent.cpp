@@ -61,13 +61,23 @@ bool UMapComponent::OnConstructionOwnerActor()
 		return false;
 	}
 
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
-
-	if (UPoolManager::Get().IsFree(Owner))
+	// Check the object state in the Pool Manager
+	UPoolManager& PoolManager = UPoolManager::Get();
+	const EPoolObjectState PoolObjectState = PoolManager.GetPoolObjectState(Owner);
+	if (PoolObjectState == EPoolObjectState::None)
+	{
+		// The owner actor is not in the pool
+		// Most likely it is a dragged actor, since all generated actors are always taken from the pool
+		// Add this object to the pool and continue construction
+		PoolManager.AddToPool(Owner, EPoolObjectState::Active);
+	}
+	else if (PoolObjectState == EPoolObjectState::Inactive)
 	{
 		// Do not reconstruct inactive object
 		return false;
 	}
+
+	AGeneratedMap& LevelMap = AGeneratedMap::Get();
 
 	// Find new Location at dragging and update-delegate
 	LevelMap.SetNearestCell(this);

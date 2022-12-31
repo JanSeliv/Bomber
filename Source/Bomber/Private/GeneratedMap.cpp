@@ -269,6 +269,7 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 		return nullptr;
 	}
 
+	SpawnedActor->SetFlags(RF_Transient); // Do not save generated actors into the map
 	SpawnedActor->SetOwner(this);
 	return SpawnedActor;
 }
@@ -320,7 +321,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 	if (!ComponentOwner->IsAttachedTo(this)
 	    && ActorType != EAT::Player)
 	{
-		// Do not attach players to level since they have to move on level freely 
+		// Do not attach players to level since they have to move on level freely
 		ComponentOwner->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	}
 
@@ -475,7 +476,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 {
 	const AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
-		|| !ComponentOwner
+	    || !ComponentOwner
 	    || !ComponentOwner->HasAuthority())
 	{
 		return;
@@ -622,9 +623,6 @@ void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
 		CollisionComponentInternal->SetChildActorClass(CollisionsAssetClass);
 		CollisionComponentInternal->CreateChildActor();
 	}
-
-	// Add all level actors to the pool manager
-	InitPoolManager();
 
 	// Align transform and build cells
 	TransformLevelMap(Transform);
@@ -1146,42 +1144,6 @@ void AGeneratedMap::ApplyLevelType()
 void AGeneratedMap::OnRep_LevelType()
 {
 	ApplyLevelType();
-}
-
-// Find and add all level actors to allow the Pool Manager to handle all of them
-void AGeneratedMap::InitPoolManager()
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	TArray<AActor*> Owners;
-
-	// Get first all attached level actors 
-	GetAttachedActors(/*out*/Owners);
-
-	// Get players separately since they are not attached to the level 
-	FMapComponents PlayerMapComponents;
-	GetMapComponents(PlayerMapComponents, TO_FLAG(EAT::Player));
-	for (const UMapComponent* PlayerMapComponentIt : PlayerMapComponents)
-	{
-		if (PlayerMapComponentIt)
-		{
-			Owners.AddUnique(PlayerMapComponentIt->GetOwner());
-		}
-	}
-
-	// Add all found level actors to the pool manager
-	for (AActor* OwnerIt : Owners)
-	{
-		if (!USingletonLibrary::IsLevelActor(OwnerIt))
-		{
-			continue;
-		}
-
-		UPoolManager::Get().AddToPool(OwnerIt, EPoolObjectState::Inactive);
-	}
 }
 
 /* ---------------------------------------------------

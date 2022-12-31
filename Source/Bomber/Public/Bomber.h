@@ -11,9 +11,8 @@ static const FString TransientLevelName = TEXT("Transient");
 	( \
 		!IsValid(Obj) \
 		|| !(Obj)->IsValidLowLevelFast() \
-		|| (Obj)->HasAnyFlags(RF_Transient | RF_ClassDefaultObject) \
-		|| !(Obj)->GetWorld() \
-		|| UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == TransientLevelName \
+		|| (Obj)->HasAllFlags(RF_ClassDefaultObject) \
+		|| UGameplayStatics::GetCurrentLevelName(Obj) == TransientLevelName \
 	)
 
 /**
