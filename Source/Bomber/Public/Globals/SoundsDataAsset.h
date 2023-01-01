@@ -57,6 +57,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	USoundBase* GetLevelMusic(ELevelType LevelType) const;
 
+	/** Returns the main menu music of specified level.
+	 * @see USoundsDataAsset::LevelsMainMenuMusicInternal */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	USoundBase* GetLevelMainMenuMusic(ELevelType LevelType) const;
+
 	/** Return the background music by specified game state and level type. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	USoundBase* GetBackgroundMusic(ECurrentGameState CurrentGameState, ELevelType LevelType) const;
@@ -119,6 +124,10 @@ protected:
 	/** Contains all sounds of each level in the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Music", ShowOnlyInnerProperties))
 	TMap<ELevelType, TObjectPtr<USoundBase>> LevelsMusicInternal;
+
+	/** Contains all sounds of each level in the main menu. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Main Menu Music", ShowOnlyInnerProperties))
+	TMap<ELevelType, TObjectPtr<USoundBase>> LevelsMainMenuMusicInternal;
 
 	/** Returns the blast SFX. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Sound", ShowOnlyInnerProperties))

@@ -2,6 +2,7 @@
 
 #include "SoundsManager.h"
 //---
+#include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/SoundsDataAsset.h"
@@ -202,6 +203,7 @@ void USoundsManager::BeginPlay()
 	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+		AGeneratedMap::Get().OnSetNewLevelType.AddUniqueDynamic(this, &ThisClass::OnGameLevelChanged);
 	}
 
 	PlayCurrentBackgroundMusic();
@@ -225,5 +227,11 @@ void USoundsManager::OnEndGameStateChanged(EEndGameState EndGameState)
 void USoundsManager::OnGameStateChanged(ECurrentGameState CurrentGameState)
 {
 	StopEndGameCountdownSFX();
+	PlayCurrentBackgroundMusic();
+}
+
+// Listen game levels to switch main menu background music
+void USoundsManager::OnGameLevelChanged(ELevelType CurrentLevelType)
+{
 	PlayCurrentBackgroundMusic();
 }
