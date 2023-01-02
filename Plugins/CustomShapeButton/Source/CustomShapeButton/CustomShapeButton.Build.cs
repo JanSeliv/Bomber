@@ -13,6 +13,7 @@ public class CustomShapeButton : ModuleRules
 			{
 				"Core"
 				, "UMG" // Created UCustomShapeButton
+				, "Slate" // Created SCustomShapeButton
 			}
 		);
 
