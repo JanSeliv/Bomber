@@ -47,15 +47,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get SFX Sound Class"))
 	FORCEINLINE USoundClass* GetSFXSoundClass() const { return SFXSoundClassInternal; }
 
-	/** Returns the music of the Main-Menu theme.
-	 * @see USoundsDataAsset::MainMenuMusicInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE USoundBase* GetMainMenuMusic() const { return MainMenuMusicInternal; }
-
 	/** Returns the music of specified level.
 	 * @see USoundsDataAsset::LevelsMusicInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	USoundBase* GetLevelMusic(ELevelType LevelType) const;
+
+	/** Returns the main menu music of specified level.
+	 * @see USoundsDataAsset::LevelsMainMenuMusicInternal */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	USoundBase* GetLevelMainMenuMusic(ELevelType LevelType) const;
 
 	/** Return the background music by specified game state and level type. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -112,13 +112,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "SFX Sound Class", ShowOnlyInnerProperties))
 	TObjectPtr<USoundClass> SFXSoundClassInternal = nullptr;
 
-	/** The sound of the game background theme. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main-Menu Music", ShowOnlyInnerProperties))
-	TObjectPtr<USoundBase> MainMenuMusicInternal = nullptr;
-
 	/** Contains all sounds of each level in the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Music", ShowOnlyInnerProperties))
 	TMap<ELevelType, TObjectPtr<USoundBase>> LevelsMusicInternal;
+
+	/** Contains all sounds of each level in the main menu. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Levels Main Menu Music", ShowOnlyInnerProperties))
+	TMap<ELevelType, TObjectPtr<USoundBase>> LevelsMainMenuMusicInternal;
 
 	/** Returns the blast SFX. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Sound", ShowOnlyInnerProperties))

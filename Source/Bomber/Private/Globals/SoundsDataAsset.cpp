@@ -37,12 +37,23 @@ USoundBase* USoundsDataAsset::GetLevelMusic(ELevelType LevelType) const
 	return nullptr;
 }
 
+// Returns the main menu music of specified level
+USoundBase* USoundsDataAsset::GetLevelMainMenuMusic(ELevelType LevelType) const
+{
+	if (const TObjectPtr<USoundBase>* FoundMusic = LevelsMainMenuMusicInternal.Find(LevelType))
+	{
+		return *FoundMusic;
+	}
+
+	return nullptr;
+}
+
 // Return the background music by specified game state and level type
 USoundBase* USoundsDataAsset::GetBackgroundMusic(ECurrentGameState CurrentGameState, ELevelType LevelType) const
 {
 	if (CurrentGameState == ECGS::Menu)
 	{
-		return GetMainMenuMusic();
+		return GetLevelMainMenuMusic(LevelType);
 	}
 
 	return GetLevelMusic(LevelType);
