@@ -29,8 +29,7 @@ void UNewAIAgentComponent::BeginPlay()
 	}
 
 	AIControllerInternal = Cast<AAIController>(GetOwner());
-	checkf(AIControllerInternal, TEXT("CRITICAL ERROR: %s:'AIControllerInternal' is not valid"),
-	       *FString(__FUNCTION__));
+	checkf(AIControllerInternal, TEXT("CRITICAL ERROR: %s:'AIControllerInternal' is not valid"), *FString(__FUNCTION__));
 	// There you might want to Run BT AIControllerInternal->RunBehaviorTree(...) for this agent etc.
 }
 
@@ -38,12 +37,12 @@ void UNewAIAgentComponent::BeginPlay()
 void UNewAIAgentComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	// ...
-	if (CurrentGameState == ECurrentGameState::GameStarting)
+	if (CurrentGameState == ECurrentGameState::InGame)
 	{
 		UBehaviorTree* BehaviorTree = UNewAIManagerComponent::GetNewAIDataAsset()->GetBehaviorTree();
-		checkf(BehaviorTree, TEXT("CRITICAL ERROR: %s:'BehaviorTree' is not valid"), *FString(__FUNCTION__));
-		AIControllerInternal->RunBehaviorTree(BehaviorTree);
-		
-		
+		if (ensureMsgf(BehaviorTree, TEXT("%s:'BehaviorTree' is not valid"), *FString(__FUNCTION__)))
+		{
+			AIControllerInternal->RunBehaviorTree(BehaviorTree);
+		}
 	}
 }

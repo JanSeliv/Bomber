@@ -23,7 +23,6 @@ public:
 
 protected:
 	/** The Behaviour Tree that is used in AAIController for bots */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++",
-		meta = (BlueprintProtected, DisplayName = "Behaviour Tree asset"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Behavior Tree"))
 	TObjectPtr<UBehaviorTree> BehaviorTreeInternal;
 };

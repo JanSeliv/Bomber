@@ -17,6 +17,7 @@ UNewAIManagerComponent::UNewAIManagerComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
+// Returns the NewAI data asset
 const UNewAIDataAsset* UNewAIManagerComponent::GetNewAIDataAsset()
 {
 	const UNewAIManagerComponent* NewAIManager = AGeneratedMap::Get().FindComponentByClass<UNewAIManagerComponent>();
@@ -43,8 +44,7 @@ void UNewAIManagerComponent::DisableOriginalAI()
 {
 	static const FString AISetEnabledName = TEXT("Bomber.AI.SetEnabled");
 	static IConsoleVariable* CVarAISetEnabled = IConsoleManager::Get().FindConsoleVariable(*AISetEnabledName);
-	if (ensureMsgf(CVarAISetEnabled, TEXT("%s: 'CVarAISetEnabled' is not found, can not disable original AI"),
-	               *FString(__FUNCTION__)))
+	if (ensureMsgf(CVarAISetEnabled, TEXT("%s: 'CVarAISetEnabled' is not found, can not disable original AI"), *FString(__FUNCTION__)))
 	{
 		constexpr bool bSetEnabled = false;
 		CVarAISetEnabled->Set(bSetEnabled);
