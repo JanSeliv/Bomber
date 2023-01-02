@@ -18,7 +18,7 @@ public:
 	/** Returns the Behaviour Tree
 	 * @see UNewAIDataAsset::BehaviorTreeInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE UBehaviorTree* GetBehaviorTree() const { return BehaviorTreeInternal; }
+	FORCEINLINE class UBehaviorTree* GetBehaviorTree() const { return BehaviorTreeInternal; }
 
 protected:
 	/** The Behaviour Tree that is used in AAIController for bots */
