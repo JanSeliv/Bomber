@@ -2,13 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "BehaviorTree/BehaviorTree.h"
 #include "Engine/DataAsset.h"
+//---
 #include "NewAIDataAsset.generated.h"
 
 /**
- * 
+ * Contains all assets in NewAI plugin
  */
 UCLASS()
 class NEWAIRUNTIME_API UNewAIDataAsset : public UDataAsset
@@ -23,6 +22,6 @@ public:
 
 protected:
 	/** The Behaviour Tree that is used in AAIController for bots */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Behavior Tree"))
-	TObjectPtr<UBehaviorTree> BehaviorTreeInternal;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Behavior Tree"))
+	TObjectPtr<class UBehaviorTree> BehaviorTreeInternal = nullptr;
 };

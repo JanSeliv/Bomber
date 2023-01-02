@@ -38,6 +38,6 @@ protected:
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** NewAI data asset */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "NewAI Data Asset", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "NewAI Data Asset"))
 	TObjectPtr<UNewAIDataAsset> NewAIDataAssetInternal;
 };
