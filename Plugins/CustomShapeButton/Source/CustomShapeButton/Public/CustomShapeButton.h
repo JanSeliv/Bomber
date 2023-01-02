@@ -3,15 +3,16 @@
 #pragma once
 
 #include "Components/Button.h"
-#include "ShapeButton.generated.h"
+//---
+#include "CustomShapeButton.generated.h"
 
 /**
  * Implemented slate button to allow player interact with custom shape that is set by texture.
  */
-class SShapeButton final : public SButton
+class CUSTOMSHAPEBUTTON_API SCustomShapeButton : public SButton
 {
 public:
-	virtual ~SShapeButton() override;
+	virtual ~SCustomShapeButton() override;
 
 	/** Set texture to collide with specified texture. */
 	void SetAdvancedHitTexture(class UTexture2D* InTexture);
@@ -76,7 +77,7 @@ protected:
  * To define a shape, use a texture with an alpha channel.
  */
 UCLASS()
-class BOMBER_API UShapeButton final : public UButton
+class CUSTOMSHAPEBUTTON_API UCustomShapeButton : public UButton
 {
 	GENERATED_BODY()
 

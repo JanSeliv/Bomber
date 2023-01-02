@@ -27,8 +27,7 @@ public class Bomber : ModuleRules
 				, "RHI", "ApplicationCore" // Resolutions
 				, "AIModule" // AI
 				, "Niagara" // VFX
-				, "RenderCore" // Render threads
-                , "GameplayTags" // FGameplayTag
+				, "GameplayTags" // FGameplayTag
                 , "GameFeatures", "ModularGameplay" // Modular Game Features
 				//My modules
 				, "MyUtils" // UUtilsLibrary

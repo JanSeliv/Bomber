@@ -12,12 +12,15 @@ public class CustomShapeButton : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core"
+				, "UMG" // Created UCustomShapeButton
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
+				, "RHI" // FRHITexture2D
+				, "RenderCore" // Render threads
 			}
 		);
 	}

@@ -1,29 +1,29 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "UI/ShapeButton.h"
+#include "CustomShapeButton.h"
 //---
 #include "UMG.h"
 #include "RenderingThread.h"
 
-SShapeButton::~SShapeButton()
+SCustomShapeButton::~SCustomShapeButton()
 {
 	RawColorsPtr.Reset();
 }
 
 // Set texture to collide with specified texture
-void SShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
+void SCustomShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
 {
 	TextureWeakPtr = InTexture;
 }
 
 // Set new alpha
-void SShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
+void SCustomShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
 {
 	AdvancedHitAlpha = InAlpha;
 }
 
 /** Allows button to be hovered. */
-void SShapeButton::SetCanHover(bool bAllow)
+void SCustomShapeButton::SetCanHover(bool bAllow)
 {
 	if (bCanHover == bAllow)
 	{
@@ -35,7 +35,7 @@ void SShapeButton::SetCanHover(bool bAllow)
 	TAttribute<bool> bHovered = false;
 	if (bAllow)
 	{
-		bHovered.Bind(this, &SShapeButton::IsAlphaPixelHovered);
+		bHovered.Bind(this, &SCustomShapeButton::IsAlphaPixelHovered);
 	}
 
 	SetHover(bHovered);
@@ -43,14 +43,14 @@ void SShapeButton::SetCanHover(bool bAllow)
 	TryDetectOnHovered();
 }
 
-void SShapeButton::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+void SCustomShapeButton::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	SButton::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
 
 	TickDetectMouseLeave(InDeltaTime);
 }
 
-FReply SShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+FReply SCustomShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	UpdateMouseData(MyGeometry, MouseEvent);
 
@@ -63,7 +63,7 @@ FReply SShapeButton::OnMouseButtonDown(const FGeometry& MyGeometry, const FPoint
 	return SButton::OnMouseButtonDown(MyGeometry, MouseEvent);
 }
 
-FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+FReply SCustomShapeButton::OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	UpdateMouseData(MyGeometry, MouseEvent);
 
@@ -76,7 +76,7 @@ FReply SShapeButton::OnMouseButtonDoubleClick(const FGeometry& MyGeometry, const
 	return SButton::OnMouseButtonDoubleClick(MyGeometry, MouseEvent);
 }
 
-FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+FReply SCustomShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	UpdateMouseData(MyGeometry, MouseEvent);
 
@@ -91,7 +91,7 @@ FReply SShapeButton::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointer
 	return Reply;
 }
 
-FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+FReply SCustomShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	UpdateMouseData(MyGeometry, MouseEvent);
 
@@ -107,7 +107,7 @@ FReply SShapeButton::OnMouseMove(const FGeometry& MyGeometry, const FPointerEven
 	return SButton::OnMouseMove(MyGeometry, MouseEvent);
 }
 
-void SShapeButton::OnMouseLeave(const FPointerEvent& MouseEvent)
+void SCustomShapeButton::OnMouseLeave(const FPointerEvent& MouseEvent)
 {
 	SButton::OnMouseLeave(MouseEvent);
 
@@ -117,7 +117,7 @@ void SShapeButton::OnMouseLeave(const FPointerEvent& MouseEvent)
 	}
 }
 
-void SShapeButton::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+void SCustomShapeButton::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	SButton::OnMouseEnter(MyGeometry, MouseEvent);
 
@@ -127,7 +127,7 @@ void SShapeButton::OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent
 }
 
 // Returns true if cursor is hovered on a texture
-bool SShapeButton::IsAlphaPixelHovered() const
+bool SCustomShapeButton::IsAlphaPixelHovered() const
 {
 	const FVector2D CurrentGeometrySize = CurrentGeometry.GetLocalSize();
 	if (CurrentGeometrySize.IsZero()
@@ -163,7 +163,7 @@ bool SShapeButton::IsAlphaPixelHovered() const
 }
 
 // Set once on render thread the buffer data about all pixels of current texture if was not set before
-void SShapeButton::TryUpdateRawColorsOnce()
+void SCustomShapeButton::TryUpdateRawColorsOnce()
 {
 	if (RawColorsPtr)
 	{
@@ -210,7 +210,7 @@ void SShapeButton::TryUpdateRawColorsOnce()
 }
 
 // Try register leaving the button (e.g. another widget opens above)
-void SShapeButton::TickDetectMouseLeave(float DeltaTime)
+void SCustomShapeButton::TickDetectMouseLeave(float DeltaTime)
 {
 	if (bCanHover
 	    && CurrentGeometry.GetLocalSize().IsZero())
@@ -227,7 +227,7 @@ void SShapeButton::TickDetectMouseLeave(float DeltaTime)
 }
 
 // Try register On Hovered and On Unhovered events
-void SShapeButton::TryDetectOnHovered()
+void SCustomShapeButton::TryDetectOnHovered()
 {
 	const bool bIsHoveredNow = bCanHover && IsHovered();
 	if (bIsHovered != bIsHoveredNow)
@@ -240,14 +240,14 @@ void SShapeButton::TryDetectOnHovered()
 }
 
 // Caching current geometry and last mouse event
-void SShapeButton::UpdateMouseData(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+void SCustomShapeButton::UpdateMouseData(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	CurrentGeometry = MyGeometry;
 	CurrentMouseEvent = MouseEvent;
 }
 
 // Set texture to collide with specified texture
-void UShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
+void UCustomShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
 {
 	SButton* MyButtonPtr = MyButton.Get();
 	if (!MyButtonPtr
@@ -257,14 +257,14 @@ void UShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
 	}
 
 	AdvancedHitTexture = InTexture;
-	if (SShapeButton* ShapeButton = static_cast<SShapeButton*>(MyButtonPtr))
+	if (SCustomShapeButton* ShapeButton = static_cast<SCustomShapeButton*>(MyButtonPtr))
 	{
 		ShapeButton->SetAdvancedHitTexture(AdvancedHitTexture);
 	}
 }
 
 // Set new alpha
-void UShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
+void UCustomShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
 {
 	SButton* MyButtonPtr = MyButton.Get();
 	if (!MyButtonPtr)
@@ -273,14 +273,14 @@ void UShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
 	}
 
 	AdvancedHitAlpha = InAlpha;
-	if (SShapeButton* ShapeButton = static_cast<SShapeButton*>(MyButtonPtr))
+	if (SCustomShapeButton* ShapeButton = static_cast<SCustomShapeButton*>(MyButtonPtr))
 	{
 		ShapeButton->SetAdvancedHitAlpha(AdvancedHitAlpha);
 	}
 }
 
 // Applies all properties to the native widget if possible
-void UShapeButton::SynchronizeProperties()
+void UCustomShapeButton::SynchronizeProperties()
 {
 	Super::SynchronizeProperties();
 
@@ -290,9 +290,9 @@ void UShapeButton::SynchronizeProperties()
 }
 
 // Is called when the underlying SWidget needs to be constructed
-TSharedRef<SWidget> UShapeButton::RebuildWidget()
+TSharedRef<SWidget> UCustomShapeButton::RebuildWidget()
 {
-	const TSharedRef<SShapeButton> NewButtonRef = SNew(SShapeButton)
+	const TSharedRef<SCustomShapeButton> NewButtonRef = SNew(SCustomShapeButton)
 											 .OnClicked(BIND_UOBJECT_DELEGATE(FOnClicked, SlateHandleClicked))
 											 .OnPressed(BIND_UOBJECT_DELEGATE(FSimpleDelegate, SlateHandlePressed))
 											 .OnReleased(BIND_UOBJECT_DELEGATE(FSimpleDelegate, SlateHandleReleased))
