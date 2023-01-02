@@ -2,11 +2,11 @@
 
 using UnrealBuildTool;
 
-public class PoolManager : ModuleRules
+public class MorphsPlayer : ModuleRules
 {
-	public PoolManager(ReadOnlyTargetRules Target) : base(Target)
+	public MorphsPlayer(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Latest;
 
 		PublicDependencyModuleNames.AddRange(new[]

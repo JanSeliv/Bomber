@@ -3,57 +3,17 @@
 #pragma once
 
 #include "Animation/AnimNotifies/AnimNotifyState.h"
+//---
+#include "MorphsPlayerTypes.h"
 #include "Components/TimelineComponent.h"
 //---
 #include "AnimNotifyState_PlayMorph.generated.h"
 
 /**
- * A: start value
- * B: end value
- */
-UENUM(BlueprintType)
-enum class EPlaybackType : uint8
-{
-	/// Set a specified start value without playing
-	None UMETA(DisplayName = "A"),
-	/// Play from start to end
-	FromStart UMETA(DisplayName = "A to B"),
-	/// Play from end to start
-	FromEnd UMETA(DisplayName = "B to A"),
-	/// Play from start to end and back to start
-	Max UMETA(DisplayName = "A to B to A"),
-};
-
-/**
- * Data about morph target (shape key) to be played.
- */
-USTRUCT(BlueprintType)
-struct BOMBER_API FMorphData
-{
-	GENERATED_BODY()
-
-	/** The name of morph. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	FName Morph = NAME_None;
-
-	/** In which way the morph should be played. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	EPlaybackType PlaybackType = EPlaybackType::Max;
-
-	/** The initial value of a morph to be set. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Start (A)", ClampMin = "0", ClampMax = "1"))
-	float StartValue = 0.f;
-
-	/** The finish value of a morph to be set. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "End (B)", ClampMin = "0", ClampMax = "1"))
-	float EndValue = 1.f;
-};
-
-/**
  * Play the chosen morph for picked frames.
  */
 UCLASS(Blueprintable, meta = (DisplayName = "Play Morph"))
-class BOMBER_API UAnimNotifyState_PlayMorph final : public UAnimNotifyState
+class MORPHSPLAYER_API UAnimNotifyState_PlayMorph : public UAnimNotifyState
 {
 	GENERATED_BODY()
 
@@ -125,34 +85,35 @@ protected:
 
 	/** Create a new curve, is created once. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void InitCurveFloatOnce();
+	virtual void InitCurveFloatOnce();
 
 	/**
 	 * Set curve values.
 	 * Is set once during the game, but is overriden in the editor during changes on track.
 	 * @param TotalDuration The length of notify.
 	 */
-	void ApplyCurveLengthOnce(float TotalDuration);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	virtual void ApplyCurveLengthOnce(float TotalDuration);
 
 	/**
 	 * Is executed on every frame during playing the timeline.
 	 * @param PlaybackPosition Current timeline position.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnTimelineTick(float PlaybackPosition);
+	virtual void OnTimelineTick(float PlaybackPosition);
 
 	/** Is called on finished playing. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnTimelineFinished();
+	virtual void OnTimelineFinished();
 
 	/**  Will play the timeline with current playback type. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void StartTimeline();
+	virtual void StartTimeline();
 
 	/**
 	 * Set a specified value for chosen morph.
 	 * @param Value New morph value between [MorphDataInternal.StartValue, MorphDataInternal.EndValue].
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetMorphValue(float Value);
+	virtual void SetMorphValue(float Value);
 };

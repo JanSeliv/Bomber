@@ -2,12 +2,11 @@
 
 #include "AnimNotifyState_PlayMorph.h"
 //
-#include "Components/MySkeletalMeshComponent.h"
 #include "Curves/CurveFloat.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
-#endif
+#include "Editor.h"
+#endif // WITH_EDITOR
 
 // Overridden from UAnimNotifyState to provide custom notify name
 FString UAnimNotifyState_PlayMorph::GetNotifyName_Implementation() const
@@ -87,14 +86,14 @@ void UAnimNotifyState_PlayMorph::ApplyCurveLengthOnce(float TotalDuration)
 	const int32 KeysNum = Keys.Num();
 	if (KeysNum) // Is updated before
 	{
-#if WITH_EDITOR //[IsEditorNotPieWorld]
-		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+		if (GEditor && !GEditor->IsPlaySessionInProgress())
 		{
 			// Remove [1] in editor
 			Keys.RemoveAt(KeysNum - 1);
 		}
 		else // Is in game
-#endif // WITH_EDITOR
+#endif // WITH_EDITOR [IsEditorNotPieWorld]
 		{
 			// Do not change anything during the game
 			return;
