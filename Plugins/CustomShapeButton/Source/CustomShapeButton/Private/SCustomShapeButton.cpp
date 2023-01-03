@@ -11,20 +11,7 @@
 // Virtual destructor, unregister data
 SCustomShapeButton::~SCustomShapeButton()
 {
-	TextureWeakPtr.Reset();
 	RawColorsPtr.Reset();
-}
-
-// Set texture to collide with specified texture
-void SCustomShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
-{
-	TextureWeakPtr = InTexture;
-}
-
-// Set new alpha
-void SCustomShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
-{
-	AdvancedHitAlpha = InAlpha;
 }
 
 /** Allows button to be hovered. */
@@ -135,8 +122,7 @@ void SCustomShapeButton::OnMouseEnter(const FGeometry& MyGeometry, const FPointe
 bool SCustomShapeButton::IsAlphaPixelHovered() const
 {
 	const FVector2D CurrentGeometrySize = CurrentGeometry.GetLocalSize();
-	if (CurrentGeometrySize.IsZero()
-		|| !AdvancedHitAlpha)
+	if (CurrentGeometrySize.IsZero())
 	{
 		return false;
 	}
@@ -163,7 +149,8 @@ bool SCustomShapeButton::IsAlphaPixelHovered() const
 		return false;
 	}
 
-	const bool bIsAlphaPixelHovered = RawColorsArray[BufferPosition].A > AdvancedHitAlpha;
+	constexpr int32 Alpha = 1;
+	const bool bIsAlphaPixelHovered = RawColorsArray[BufferPosition].A > Alpha;
 	return bIsAlphaPixelHovered;
 }
 
@@ -176,26 +163,37 @@ void SCustomShapeButton::TryUpdateRawColorsOnce()
 		return;
 	}
 
-	const UTexture2D* HitTexture = TextureWeakPtr.Get();
-	if (!HitTexture)
+	const FSlateBrush* ImageBrush = GetBorderImage();
+	const UTexture2D* ButtonTexture = ImageBrush ? Cast<UTexture2D>(ImageBrush->GetResourceObject()) : nullptr;
+	if (!ensureMsgf(ButtonTexture, TEXT("%s: 'HitTexture' is null, most likely no texture is set in the Button Style"), *FString(__FUNCTION__)))
 	{
 		return;
 	}
 
-	TextureRes = FIntPoint(HitTexture->GetSizeX(), HitTexture->GetSizeY());
+	TextureRes = FIntPoint(ButtonTexture->GetSizeX(), ButtonTexture->GetSizeY());
 
 	// Create
 	RawColorsPtr = MakeShared<TArray<FColor>, ESPMode::ThreadSafe>();
 	RawColorsPtr->SetNum(TextureRes.X * TextureRes.Y);
 
 	// Get Raw Colors data on Render thread
-	const TWeakPtr<TArray<FColor>, ESPMode::ThreadSafe> RawColorsWeakPtr = RawColorsPtr;
-	ENQUEUE_RENDER_COMMAND(TryUpdateRawColorsOnce)([RawColorsWeakPtr, WeakTexture = TextureWeakPtr](FRHICommandListImmediate&)
+	const TWeakPtr<TArray<FColor>, ESPMode::ThreadSafe> InOutRawColorsWeakPtr = RawColorsPtr;
+	const TWeakObjectPtr<const UTexture2D> WeakTexture = ButtonTexture;
+	ENQUEUE_RENDER_COMMAND(TryUpdateRawColorsOnce)([InOutRawColorsWeakPtr, WeakTexture](FRHICommandListImmediate&)
 	{
+		TArray<FColor>* RawColors = InOutRawColorsWeakPtr.Pin().Get();
+		if (!ensureMsgf(RawColors, TEXT("%s: 'RawColors' is null, can not obtain its data"), *FString(__FUNCTION__)))
+		{
+			return;
+		}
+
 		const UTexture2D* Texture2D = WeakTexture.Get();
 		const FTextureResource* TextureResource = Texture2D ? Texture2D->GetResource() : nullptr;
 		FRHITexture2D* RHITexture2D = TextureResource ? TextureResource->GetTexture2DRHI() : nullptr;
-		check(RHITexture2D);
+		if (!ensureMsgf(RHITexture2D, TEXT("%s: 'RHITexture2D' is not valid"), *FString(__FUNCTION__)))
+		{
+			return;
+		}
 
 		// Lock
 		uint32 DestPitch = 0;
@@ -204,8 +202,6 @@ void SCustomShapeButton::TryUpdateRawColorsOnce()
 		const uint8* MappedTextureMemory = static_cast<const uint8*>(RHILockTexture2D(RHITexture2D, MipIndex, RLM_ReadOnly, DestPitch, bLockWithinMipTail));
 
 		// Copy data
-		TArray<FColor>* RawColors = RawColorsWeakPtr.Pin().Get();
-		check(RawColors);
 		const int32 Count = RawColors->Num() * sizeof(FColor);
 		FMemory::Memcpy(/*dest*/RawColors->GetData(), /*source*/MappedTextureMemory, Count);
 

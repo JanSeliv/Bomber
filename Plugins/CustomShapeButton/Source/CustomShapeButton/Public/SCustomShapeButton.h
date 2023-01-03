@@ -7,7 +7,8 @@
 class UTexture2D;
 
 /**
- * Implemented slate button to allow player interact with custom shape that is set by texture.
+ * Implements slate button with one difference:
+ * it proceed events (hover, press) if only the mouse is on the button's non-alpha pixel.
  */
 class CUSTOMSHAPEBUTTON_API SCustomShapeButton : public SButton
 {
@@ -15,22 +16,10 @@ public:
 	/** Virtual destructor, unregister data. */
 	virtual ~SCustomShapeButton() override;
 
-	/** Set texture to collide with specified texture. */
-	virtual void SetAdvancedHitTexture(UTexture2D* InTexture);
-
-	/** Set new alpha. */
-	virtual void SetAdvancedHitAlpha(int32 InAlpha);
-
 	/** Allows button to be hovered. */
 	virtual void SetCanHover(bool bAllow);
 
 protected:
-	/** Current texture to determine collision shape. */
-	TWeakObjectPtr<UTexture2D> TextureWeakPtr = nullptr;
-
-	/** Current alpha. */
-	int32 AdvancedHitAlpha = 1;
-
 	/** Cached buffer data about all pixels of current texture, is set once on render thread. */
 	TSharedPtr<TArray<FColor>, ESPMode::ThreadSafe> RawColorsPtr = nullptr;
 

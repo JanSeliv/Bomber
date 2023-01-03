@@ -5,50 +5,18 @@
 #include "SCustomShapeButton.h"
 //---
 #include "Components/ButtonSlot.h"
-#include "Engine/Texture2D.h"
 #include "Framework/SlateDelegates.h"
 
-// Set texture to collide with specified texture
-void UCustomShapeButton::SetAdvancedHitTexture(UTexture2D* InTexture)
+// Default constructor
+UCustomShapeButton::UCustomShapeButton()
 {
-	SButton* MyButtonPtr = MyButton.Get();
-	if (!MyButtonPtr
-		|| !InTexture)
-	{
-		return;
-	}
-
-	AdvancedHitTexture = InTexture;
-	if (SCustomShapeButton* ShapeButton = static_cast<SCustomShapeButton*>(MyButtonPtr))
-	{
-		ShapeButton->SetAdvancedHitTexture(AdvancedHitTexture);
-	}
+	ClickMethod = EButtonClickMethod::PreciseClick;
 }
 
-// Set new alpha
-void UCustomShapeButton::SetAdvancedHitAlpha(int32 InAlpha)
+// Returns the slate shape button
+TSharedPtr<SCustomShapeButton> UCustomShapeButton::GetSlateCustomShapeButton() const
 {
-	SButton* MyButtonPtr = MyButton.Get();
-	if (!MyButtonPtr)
-	{
-		return;
-	}
-
-	AdvancedHitAlpha = InAlpha;
-	if (SCustomShapeButton* ShapeButton = static_cast<SCustomShapeButton*>(MyButtonPtr))
-	{
-		ShapeButton->SetAdvancedHitAlpha(AdvancedHitAlpha);
-	}
-}
-
-// Applies all properties to the native widget if possible
-void UCustomShapeButton::SynchronizeProperties()
-{
-	Super::SynchronizeProperties();
-
-	SetAdvancedHitTexture(AdvancedHitTexture);
-	SetAdvancedHitAlpha(AdvancedHitAlpha);
-	SetClickMethod(EButtonClickMethod::PreciseClick);
+	return StaticCastSharedPtr<SCustomShapeButton>(MyButton);
 }
 
 // Is called when the underlying SWidget needs to be constructed
@@ -65,9 +33,6 @@ TSharedRef<SWidget> UCustomShapeButton::RebuildWidget()
 											 .TouchMethod(TouchMethod)
 											 .IsFocusable(IsFocusable);
 	MyButton = NewButtonRef;
-
-	NewButtonRef->SetAdvancedHitTexture(AdvancedHitTexture);
-	NewButtonRef->SetAdvancedHitAlpha(AdvancedHitAlpha);
 
 	if (GetChildrenCount())
 	{
