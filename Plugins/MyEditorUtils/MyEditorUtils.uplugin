@@ -4,7 +4,7 @@
 	"VersionName": "1.0",
 	"FriendlyName": "My Editor Utils",
 	"Description": "Plugin that contains useful editor utilities",
-	"Category": "My Plugins",
+	"Category": "Programming",
 	"CreatedBy": "Yevhenii Selivanov",
 	"CreatedByURL": "https://github.com/JanSeliv/Bomber",
 	"DocsURL": "",
@@ -13,7 +13,7 @@
 	"EngineVersion": "5.1.0",
 	"EnabledByDefault": true,
 	"CanContainContent": false,
-	"IsBetaVersion": true,
+	"IsBetaVersion": false,
 	"Installed": false,
 	"Modules": [
 		{

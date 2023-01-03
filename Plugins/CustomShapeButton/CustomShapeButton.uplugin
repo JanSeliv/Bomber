@@ -4,7 +4,7 @@
 	"VersionName": "1.0",
 	"FriendlyName": "Custom Shape Button",
 	"Description": "Plugin allows to have a widget button with any image you want with working hover and press behavior for its custom shapes.",
-	"Category": "My Plugins",
+	"Category": "UI",
 	"CreatedBy": "Yevhenii Selivanov",
 	"CreatedByURL": "https://github.com/JanSeliv/Bomber",
 	"DocsURL": "",
@@ -13,7 +13,7 @@
 	"EngineVersion": "5.1.0",
 	"EnabledByDefault": true,
 	"CanContainContent": false,
-	"IsBetaVersion": true,
+	"IsBetaVersion": false,
 	"Installed": false,
 	"Modules": [
 		{

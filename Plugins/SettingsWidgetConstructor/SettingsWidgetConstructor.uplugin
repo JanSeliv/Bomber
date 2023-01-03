@@ -4,7 +4,7 @@
   "VersionName": "1.0",
   "FriendlyName": "Settings Widget Constructor",
   "Description": "Plugin allows automatically generate settings on the UI from data table",
-  "Category": "My Plugins",
+  "Category": "UI",
   "CreatedBy": "Yevhenii Selivanov",
   "CreatedByURL": "https://github.com/JanSeliv/Bomber",
   "DocsURL": "",
@@ -13,7 +13,7 @@
   "EngineVersion": "5.1.0",
   "EnabledByDefault": true,
   "CanContainContent": true,
-  "IsBetaVersion": true,
+  "IsBetaVersion": false,
   "Installed": false,
   "Modules": [
     {
