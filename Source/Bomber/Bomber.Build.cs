@@ -31,7 +31,7 @@ public class Bomber : ModuleRules
                 , "GameFeatures", "ModularGameplay" // Modular Game Features
 				//My modules
 				, "MyUtils" // UUtilsLibrary
-				, "MySettingsWidgetConstructor" // Generates settings
+				, "SettingsWidgetConstructor" // Generates settings
 				, "PoolManager" // Used to spawn level actors
 			}
 		);

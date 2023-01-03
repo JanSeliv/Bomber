@@ -13,7 +13,7 @@
  * Provides additional in-editor functionality like automatic set the key name by specified setting tag.
  */
 UCLASS(BlueprintType)
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataTable : public UMyDataTable
+class SETTINGSWIDGETCONSTRUCTOR_API USettingsDataTable : public UMyDataTable
 {
 	GENERATED_BODY()
 

@@ -13,8 +13,8 @@
  * Contains common settings data of the Constructor Widget plugin.
  * Is set up in 'Project Settings' -> "Plugins" -> "Settings Widget Constructor".
  */
-UCLASS(Config = MySettingsWidgetConstructor, DefaultConfig, DisplayName = "Settings Widget Constructor")
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsDataAsset : public UDeveloperSettings
+UCLASS(Config = SettingsWidgetConstructor, DefaultConfig, DisplayName = "Settings Widget Constructor")
+class SETTINGSWIDGETCONSTRUCTOR_API USettingsDataAsset : public UDeveloperSettings
 {
 	GENERATED_BODY()
 

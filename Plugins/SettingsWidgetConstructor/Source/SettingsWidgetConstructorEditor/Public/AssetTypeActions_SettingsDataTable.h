@@ -10,7 +10,7 @@
  * Is responsible for creating new Settings Data Table asset in the 'Add' context menu.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsDataTableFactory : public UMyDataTableFactory
+class SETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsDataTableFactory : public UMyDataTableFactory
 {
 	GENERATED_BODY()
 
@@ -27,7 +27,7 @@ protected:
 /**
  * Shows additional actions in the Context Menu.
  */
-class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API FAssetTypeActions_SettingsDataTable : public FAssetTypeActions_MyDataTable
+class SETTINGSWIDGETCONSTRUCTOREDITOR_API FAssetTypeActions_SettingsDataTable : public FAssetTypeActions_MyDataTable
 {
 public:
 	virtual ~FAssetTypeActions_SettingsDataTable() override = default;

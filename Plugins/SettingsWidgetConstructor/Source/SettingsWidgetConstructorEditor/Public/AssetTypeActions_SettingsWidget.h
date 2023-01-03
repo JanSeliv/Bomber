@@ -9,8 +9,8 @@
 /**
  * Is responsible for creating new Settings Widget in the 'Add' context menu.
  */
-UCLASS(Config = MySettingsWidgetConstructor, DefaultConfig)
-class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsWidgetFactory : public UMyUserWidgetFactory
+UCLASS(Config = SettingsWidgetConstructor, DefaultConfig)
+class SETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsWidgetFactory : public UMyUserWidgetFactory
 {
 	GENERATED_BODY()
 
@@ -30,7 +30,7 @@ private:
 /**
  * Shows additional actions in the Context Menu.
  */
-class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API FAssetTypeActions_SettingsWidget : public FAssetTypeActions_MyUserWidget
+class SETTINGSWIDGETCONSTRUCTOREDITOR_API FAssetTypeActions_SettingsWidget : public FAssetTypeActions_MyUserWidget
 {
 public:
 	virtual ~FAssetTypeActions_SettingsWidget() override = default;

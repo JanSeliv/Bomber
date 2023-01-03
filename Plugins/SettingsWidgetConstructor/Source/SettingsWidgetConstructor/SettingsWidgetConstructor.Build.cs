@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class MySettingsWidgetConstructor : ModuleRules
+public class SettingsWidgetConstructor : ModuleRules
 {
-	public MySettingsWidgetConstructor(ReadOnlyTargetRules Target) : base(Target)
+	public SettingsWidgetConstructor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Latest;

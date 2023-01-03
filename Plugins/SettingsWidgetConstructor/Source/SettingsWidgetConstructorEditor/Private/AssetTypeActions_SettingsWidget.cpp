@@ -2,7 +2,7 @@
 
 #include "AssetTypeActions_SettingsWidget.h"
 //---
-#include "MySettingsWidgetConstructorEditorModule.h"
+#include "SettingsWidgetConstructorEditorModule.h"
 #include "UI/SettingsWidget.h"
 
 #define LOCTEXT_NAMESPACE "AssetTypeActions"
@@ -36,7 +36,7 @@ FColor FAssetTypeActions_SettingsWidget::GetTypeColor() const
 
 uint32 FAssetTypeActions_SettingsWidget::GetCategories()
 {
-	return FMySettingsWidgetConstructorEditorModule::SettingsCategory;
+	return FSettingsWidgetConstructorEditorModule::SettingsCategory;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -13,7 +13,7 @@
  * It generates and manages settings specified in rows of the Settings Data Table.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsWidget : public UUserWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingsWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -96,7 +96,7 @@ public:
 	/** Returns the size of specified sections on the screen. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FVector2D GetSubWidgetsSize(
-		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/MySettingsWidgetConstructor.EMyVerticalAlignment")) int32 SectionsBitmask) const;
+		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/SettingsWidgetConstructor.EMyVerticalAlignment")) int32 SectionsBitmask) const;
 
 	/** Returns the height of a setting scrollbox on the screen. */
 	UFUNCTION(BlueprintPure, Category = "C++")

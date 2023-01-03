@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "MySettingsWidgetConstructorEditorModule.h"
+#include "SettingsWidgetConstructorEditorModule.h"
 //---
 #include "SettingsPickerCustomization.h"
 #include "AssetTypeActions_SettingsDataTable.h"
@@ -10,24 +10,24 @@
 #include "EditorUtilsLibrary.h"
 #include "Modules/ModuleManager.h"
 
-#define LOCTEXT_NAMESPACE "FMySettingsWidgetConstructorEditorModule"
+#define LOCTEXT_NAMESPACE "FSettingsWidgetConstructorEditorModule"
 
 // Called right after the module DLL has been loaded and the module object has been created
-void FMySettingsWidgetConstructorEditorModule::StartupModule()
+void FSettingsWidgetConstructorEditorModule::StartupModule()
 {
 	RegisterPropertyCustomizations();
 	RegisterSettingAssets();
 }
 
 // Called before the module is unloaded, right before the module object is destroyed
-void FMySettingsWidgetConstructorEditorModule::ShutdownModule()
+void FSettingsWidgetConstructorEditorModule::ShutdownModule()
 {
 	UnregisterPropertyCustomizations();
 	UEditorUtilsLibrary::UnregisterAssets(RegisteredAssets);
 }
 
 // Creates all customizations for custom properties
-void FMySettingsWidgetConstructorEditorModule::RegisterPropertyCustomizations()
+void FSettingsWidgetConstructorEditorModule::RegisterPropertyCustomizations()
 {
 	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
 	{
@@ -52,7 +52,7 @@ void FMySettingsWidgetConstructorEditorModule::RegisterPropertyCustomizations()
 }
 
 // Removes all custom property customizations
-void FMySettingsWidgetConstructorEditorModule::UnregisterPropertyCustomizations()
+void FSettingsWidgetConstructorEditorModule::UnregisterPropertyCustomizations()
 {
 	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
 	{
@@ -66,7 +66,7 @@ void FMySettingsWidgetConstructorEditorModule::UnregisterPropertyCustomizations(
 }
 
 // Adds to context menu custom assets to be created
-void FMySettingsWidgetConstructorEditorModule::RegisterSettingAssets()
+void FSettingsWidgetConstructorEditorModule::RegisterSettingAssets()
 {
 	RegisterSettingsCategory();
 
@@ -75,13 +75,13 @@ void FMySettingsWidgetConstructorEditorModule::RegisterSettingAssets()
 }
 
 // Adds the category of this plugin to the 'Add' context menu
-void FMySettingsWidgetConstructorEditorModule::RegisterSettingsCategory()
+void FSettingsWidgetConstructorEditorModule::RegisterSettingsCategory()
 {
-	static const FName CategoryKey = TEXT("MySettingsWidgetConstructor");
-	static const FText CategoryDisplayName = LOCTEXT("MySettingsWidgetConstructorCategory", "Settings Widget Constructor");
+	static const FName CategoryKey = TEXT("SettingsWidgetConstructor");
+	static const FText CategoryDisplayName = LOCTEXT("SettingsWidgetConstructorCategory", "Settings Widget Constructor");
 	SettingsCategory = IAssetTools::Get().RegisterAdvancedAssetCategory(CategoryKey, CategoryDisplayName);
 }
 
 #undef LOCTEXT_NAMESPACE
 
-IMPLEMENT_MODULE(FMySettingsWidgetConstructorEditorModule, MySettingsWidgetConstructorEditor)
+IMPLEMENT_MODULE(FSettingsWidgetConstructorEditorModule, SettingsWidgetConstructorEditor)

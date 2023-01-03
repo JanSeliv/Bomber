@@ -13,7 +13,7 @@
  * The base class of specific setting like button, checkbox, combobox, slider, text line, user input etc.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingSubWidget : public UUserWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingSubWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -85,7 +85,7 @@ protected:
  * The sub-widget of Button settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingButton : public USettingSubWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingButton : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -119,7 +119,7 @@ protected:
  * The sub-widget of Checkbox settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCheckbox : public USettingSubWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingCheckbox : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -153,7 +153,7 @@ protected:
  * The sub-widget of Combobox settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCombobox : public USettingSubWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingCombobox : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -204,7 +204,7 @@ protected:
  * The sub-widget of Slider settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingSlider : public USettingSubWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingSlider : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -242,7 +242,7 @@ protected:
  * The sub-widget of Text Line settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingTextLine : public USettingSubWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingTextLine : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -253,7 +253,7 @@ public:
  * The sub-widget of User Input settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingUserInput : public USettingSubWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingUserInput : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -295,7 +295,7 @@ protected:
  * The sub-widget of the custom widget settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingCustomWidget : public USettingSubWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingCustomWidget : public USettingSubWidget
 {
 	GENERATED_BODY()
 
@@ -306,7 +306,7 @@ public:
 * The sub-widget of the Scrollbox widget settings.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingScrollBox : public USettingSubWidget
+class SETTINGSWIDGETCONSTRUCTOR_API USettingScrollBox : public USettingSubWidget
 {
 	GENERATED_BODY()
 

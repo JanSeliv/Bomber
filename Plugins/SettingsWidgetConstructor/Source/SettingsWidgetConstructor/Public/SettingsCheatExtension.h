@@ -10,7 +10,7 @@
  * Automatically extends any cheat manager with settings-related console commands.
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsCheatExtension : public UCheatManagerExtension
+class SETTINGSWIDGETCONSTRUCTOR_API USettingsCheatExtension : public UCheatManagerExtension
 {
 	GENERATED_BODY()
 

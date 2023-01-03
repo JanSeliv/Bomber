@@ -12,7 +12,7 @@
  * The settings widget constructor functions library
  */
 UCLASS()
-class MYSETTINGSWIDGETCONSTRUCTOR_API USettingsWidgetConstructorLibrary : public UBlueprintFunctionLibrary
+class SETTINGSWIDGETCONSTRUCTOR_API USettingsWidgetConstructorLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 

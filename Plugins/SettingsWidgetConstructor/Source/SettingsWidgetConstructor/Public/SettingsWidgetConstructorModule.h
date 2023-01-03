@@ -4,7 +4,7 @@
 
 #include "Modules/ModuleInterface.h"
 
-class MYSETTINGSWIDGETCONSTRUCTOR_API FMySettingsWidgetConstructorModule : public IModuleInterface
+class SETTINGSWIDGETCONSTRUCTOR_API FSettingsWidgetConstructorModule : public IModuleInterface
 {
 public:
 	/**

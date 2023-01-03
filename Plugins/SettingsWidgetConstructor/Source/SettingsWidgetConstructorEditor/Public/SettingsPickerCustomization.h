@@ -7,7 +7,7 @@
 /**
  * Is customized to show only selected in-game option.
  */
-class MYSETTINGSWIDGETCONSTRUCTOREDITOR_API FSettingsPickerCustomization : public FMyPropertyTypeCustomization
+class SETTINGSWIDGETCONSTRUCTOREDITOR_API FSettingsPickerCustomization : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------
@@ -18,10 +18,10 @@ public:
 	inline static const FName PropertyClassName = TEXT("SettingsPicker");
 
 	/** The name of the settings data base struct. */
-	inline static const FName SettingsDataBasePathName = TEXT("/Script/MySettingsWidgetConstructor.SettingsDataBase");
+	inline static const FName SettingsDataBasePathName = TEXT("/Script/SettingsWidgetConstructor.SettingsDataBase");
 
 	/** The name of the Settings Primary struct. */
-	inline static const FName SettingsPrimaryPathName = TEXT("/Script/MySettingsWidgetConstructor.SettingsPrimary");
+	inline static const FName SettingsPrimaryPathName = TEXT("/Script/SettingsWidgetConstructor.SettingsPrimary");
 
 	/** The name of the Function Picker struct. */
 	inline static const FName FunctionPickerPathName = TEXT("/Script/FunctionPicker.FunctionPicker");

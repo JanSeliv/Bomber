@@ -101,7 +101,7 @@
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/MySettingsWidgetConstructor.SettingsWidget'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/SettingsWidgetConstructor.SettingsWidget'",
 					"FunctionName": "CloseSettings"
 				},
 				"Getter":

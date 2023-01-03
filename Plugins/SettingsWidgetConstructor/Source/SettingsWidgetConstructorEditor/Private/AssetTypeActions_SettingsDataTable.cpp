@@ -3,7 +3,7 @@
 #include "AssetTypeActions_SettingsDataTable.h"
 //---
 #include "Data/SettingsDataTable.h"
-#include "MySettingsWidgetConstructorEditorModule.h"
+#include "SettingsWidgetConstructorEditorModule.h"
 //---
 #include "EditorFramework/AssetImportData.h"
 #include "Interfaces/IPluginManager.h"
@@ -40,7 +40,7 @@ void USettingsDataTableFactory::ImportDefaultSettingsDataTable(UObject* NewSetti
 	static FString DataTableGlobalDir = TEXT("");
 	if (DataTableGlobalDir.IsEmpty())
 	{
-		const FString ThisPluginName = TEXT("MySettingsWidgetConstructor");
+		const FString ThisPluginName = TEXT("SettingsWidgetConstructor");
 		const FString DataTableRelativeDir = TEXT("Config/BaseSettingsDataTable.json");
 		const TSharedPtr<IPlugin> ThisPlugin = IPluginManager::Get().FindPlugin(ThisPluginName);
 		checkf(ThisPlugin, TEXT("ASSERT: '%s' plugin is not found"), *ThisPluginName);
@@ -73,7 +73,7 @@ UClass* FAssetTypeActions_SettingsDataTable::GetSupportedClass() const
 
 uint32 FAssetTypeActions_SettingsDataTable::GetCategories()
 {
-	return FMySettingsWidgetConstructorEditorModule::SettingsCategory;
+	return FSettingsWidgetConstructorEditorModule::SettingsCategory;
 }
 
 #undef LOCTEXT_NAMESPACE

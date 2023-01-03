@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class MySettingsWidgetConstructorEditor : ModuleRules
+public class SettingsWidgetConstructorEditor : ModuleRules
 {
-	public MySettingsWidgetConstructorEditor(ReadOnlyTargetRules Target) : base(Target)
+	public SettingsWidgetConstructorEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Latest;
@@ -25,7 +25,7 @@ public class MySettingsWidgetConstructorEditor : ModuleRules
 				, "UnrealEd" // Editor globals like GEditor
 				, "Projects" // IPluginManager::Get()
 				// My modules
-				, "MySettingsWidgetConstructor" // USettingsDataTable
+				, "SettingsWidgetConstructor" // USettingsDataTable
 				, "FunctionPickerEditor" // FFunctionPickerCustomization
 			}
 		);
