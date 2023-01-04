@@ -50,7 +50,7 @@ public:
 
 	/** Returns the whole data about chosen morph.
 	 * @see UAnimNotify_PlayMorph::MorphData */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "Morphs Player")
 	const FORCEINLINE FMorphData& GetMorphData() const { return MorphDataInternal; }
 
 protected:
@@ -59,7 +59,7 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Contains information to set in details panel about morph and in which way play it. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Morph Data", ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Morphs Player", meta = (BlueprintProtected, DisplayName = "Morph Data", ShowOnlyInnerProperties))
 	FMorphData MorphDataInternal;
 
 	/** Timeline to be played. */
@@ -72,11 +72,11 @@ protected:
 	 * Values: [0, 1].
 	 * @see UAnimNotifyState_PlayMorph::InitCurveFloatOnce()
 	 */
-	UPROPERTY(Transient, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(Transient, BlueprintReadWrite, Category = "Morphs Player")
 	TObjectPtr<class UCurveFloat> CurveFloat = nullptr;
 
 	/** The current skeletal mesh. */
-	UPROPERTY(Transient, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(Transient, BlueprintReadWrite, Category = "Morphs Player")
 	TObjectPtr<class USkeletalMeshComponent> MeshCompInternal = nullptr;
 
 	/* ---------------------------------------------------
@@ -84,7 +84,7 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Create a new curve, is created once. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "Morphs Player", meta = (BlueprintProtected))
 	virtual void InitCurveFloatOnce();
 
 	/**
@@ -92,28 +92,28 @@ protected:
 	 * Is set once during the game, but is overriden in the editor during changes on track.
 	 * @param TotalDuration The length of notify.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "Morphs Player", meta = (BlueprintProtected))
 	virtual void ApplyCurveLengthOnce(float TotalDuration);
 
 	/**
 	 * Is executed on every frame during playing the timeline.
 	 * @param PlaybackPosition Current timeline position.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "Morphs Player", meta = (BlueprintProtected))
 	virtual void OnTimelineTick(float PlaybackPosition);
 
 	/** Is called on finished playing. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "Morphs Player", meta = (BlueprintProtected))
 	virtual void OnTimelineFinished();
 
 	/**  Will play the timeline with current playback type. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "Morphs Player", meta = (BlueprintProtected))
 	virtual void StartTimeline();
 
 	/**
 	 * Set a specified value for chosen morph.
 	 * @param Value New morph value between [MorphDataInternal.StartValue, MorphDataInternal.EndValue].
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "Morphs Player", meta = (BlueprintProtected))
 	virtual void SetMorphValue(float Value);
 };

@@ -19,15 +19,15 @@ struct METACHEATMANAGER_API FMetaCheatCommand
 	static const FMetaCheatCommand EmptyCommand;
 
 	/** The name of command that will be displayed in console. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CheatName = NAME_None;
 
 	/** The original name of function. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName FunctionName = NAME_None;
 
 	/** The description of the command. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CheatDescription = NAME_None;
 
 	/** Returns true if this command contains correct data */

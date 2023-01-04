@@ -38,11 +38,11 @@ struct POOLMANAGER_API FPoolObjectData
 	explicit FPoolObjectData(UObject* InPoolObject);
 
 	/** Is true whenever the object is taken from the pool. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsActive = false;
 
 	/** The object that is handled by the pool. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UObject> PoolObject = nullptr;
 
 	/** Returns true if the object is taken from the pool. */
@@ -83,11 +83,11 @@ struct POOLMANAGER_API FPoolContainer
 	explicit FPoolContainer(const UClass* InClass);
 
 	/** Class of all objects in this pool. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<const UClass> ClassInPool = nullptr;
 
 	/** All objects in this pool that are handled by the Pool Manager. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FPoolObjectData> PoolObjects;
 
 	/** Returns the pointer to the Pool element by specified object. */

@@ -30,17 +30,17 @@ class METACHEATMANAGER_API UMetaCheatManager : public UCheatManager
 
 	/** Returns all cheat commands exposed by this cheat manager.
 	 * @see UMetaCheatManager::AllCheatCommandsInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure)
 	const FORCEINLINE TArray<FMetaCheatCommand>& GetAllCheatCommands() const { return AllCheatCommands; }
 
 	/** Returns the cheat command associated with specified CheatName meta value. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure)
 	virtual const FMetaCheatCommand& GetCheatCommandByCheatName(const FName& CheatName) const;
 
 protected:
 	/** Contains all cheat commands exposed by this cheat manager.
 	 * Is automatically saved into config file while in editor to have these commands available in builds where is no access to meta data. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Cheat Commands"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Config, meta = (BlueprintProtected, DisplayName = "All Cheat Commands"))
 	TArray<FMetaCheatCommand> AllCheatCommands;
 
 	/** Is overridden to initialize all cheat commands on editor startup. */

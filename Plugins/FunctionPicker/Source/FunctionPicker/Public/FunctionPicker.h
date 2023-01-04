@@ -38,11 +38,11 @@ struct FUNCTIONPICKER_API FFunctionPicker
 	FFunctionPicker(UClass* InFunctionClass, FName InFunctionName);
 
 	/** The class where function can be found. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Class"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Class"))
 	TObjectPtr<UClass> FunctionClass = nullptr;
 
 	/** The function name to choose for specified class.*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Function"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (DisplayName = "Function"))
 	FName FunctionName = NAME_None;
 
 	/** Returns true if is valid. */

@@ -32,18 +32,18 @@ struct MORPHSPLAYER_API FMorphData
 	GENERATED_BODY()
 
 	/** The name of morph. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ShowOnlyInnerProperties))
 	FName Morph = NAME_None;
 
 	/** In which way the morph should be played. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ShowOnlyInnerProperties))
 	EPlaybackType PlaybackType = EPlaybackType::Max;
 
 	/** The initial value of a morph to be set. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "Start (A)", ClampMin = "0", ClampMax = "1"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ShowOnlyInnerProperties, DisplayName = "Start (A)", ClampMin = "0", ClampMax = "1"))
 	float StartValue = 0.f;
 
 	/** The finish value of a morph to be set. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, DisplayName = "End (B)", ClampMin = "0", ClampMax = "1"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ShowOnlyInnerProperties, DisplayName = "End (B)", ClampMin = "0", ClampMax = "1"))
 	float EndValue = 1.f;
 };

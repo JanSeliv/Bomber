@@ -23,7 +23,7 @@ public:
 
 	/** Returns the table rows.
 	 * @see USettingsDataAsset::SettingsDataTableInternal */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor")
 	void GetSettingRows(TMap<FName, FSettingsRow>& OutRows) const { GetRows(OutRows); }
 
 protected:

@@ -34,18 +34,18 @@ public:
 	/** Returns the pointer to the Pool Manager.
 	 * @param OptionalClass is optional, specify the class if you implemented your own Pool Manager.
 	 * @param OptionalWorldContext is optional parameter and hidden in blueprints, can be null in most cases, could be useful to avoid obtaining the world automatically. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, meta = (WorldContext = "OptionalWorldContext"))
 	static UPoolManager* GetPoolManager(TSubclassOf<UPoolManager> OptionalClass = nullptr, const UObject* OptionalWorldContext = nullptr);
 #pragma endregion GetPoolManager
 
 	/** Adds specified object as is to the pool by its class to be handled by the Pool Manager. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintCallable, meta = (DefaultToSelf = "Object"))
 	virtual bool AddToPool(UObject* Object = nullptr, EPoolObjectState PoolObjectState = EPoolObjectState::Inactive);
 
 	/** Get the object from a pool by specified class.
 	 *  It creates new object if there no free objects contained in pool or does not exist any.
 	 *  @return Activated object requested from the pool. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Transform"))
+	UFUNCTION(BlueprintCallable, meta = (AutoCreateRefTerm = "Transform"))
 	virtual UObject* TakeFromPool(const FTransform& Transform, const UClass* ClassInPool);
 
 	/** The templated alternative to get the object from a pool by specified class.
@@ -55,43 +55,43 @@ public:
 	FORCEINLINE T* TakeFromPool(const FTransform& Transform, const UClass* ClassInPool = nullptr) { return Cast<T>(TakeFromPool(Transform, ClassInPool ? ClassInPool : T::StaticClass())); }
 
 	/** Returns the specified object to the pool and deactivates it if the object was taken from the pool before. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintCallable, meta = (DefaultToSelf = "Object"))
 	virtual void ReturnToPool(UObject* Object);
 
 	/** Destroy all object of a pool by a given class. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable)
 	virtual void EmptyPool(const UClass* ClassInPool);
 
 	/** Destroy all objects in all pools that are handled by the Pool Manager. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable)
 	virtual void EmptyAllPools();
 
 	/** Destroy all objects in Pool Manager based on a predicate functor. */
 	virtual void EmptyAllByPredicate(TFunctionRef<bool(const UObject* PoolObject)> Predicate);
 
 	/** Returns current state of specified object. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintPure, meta = (DefaultToSelf = "Object"))
 	virtual EPoolObjectState GetPoolObjectState(const UObject* Object) const;
 
 	/** Returns true is specified object is handled by Pool Manager. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, meta = (DefaultToSelf = "Object"))
 	virtual bool Contains(const UObject* Object) const;
 
 	/** Returns true if specified object is handled by the Pool Manager and was taken from its pool. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintPure, meta = (DefaultToSelf = "Object"))
 	virtual bool IsActive(const UObject* Object) const;
 
 	/** Returns true if handled object is inactive and ready to be taken from pool. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintPure, meta = (DefaultToSelf = "Object"))
 	virtual bool IsFree(const UObject* Object) const;
 
 	/** Returns true if object is known by Pool Manager. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintPure, meta = (DefaultToSelf = "Object"))
 	virtual bool IsRegistered(const UObject* Object) const;
 
 protected:
 	/** Contains all pools that are handled by the Pool Manger. */
-	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pools"))
+	UPROPERTY(BlueprintReadWrite, Transient, meta = (BlueprintProtected, DisplayName = "Pools"))
 	TArray<FPoolContainer> PoolsInternal;
 
 	/** Is called on initialization of the Pool Manager instance. */
@@ -102,6 +102,6 @@ protected:
 	const FORCEINLINE FPoolContainer* FindPool(const UClass* ClassInPool) const { return const_cast<UPoolManager*>(this)->FindPool(ClassInPool); }
 
 	/** Activates or deactivates the object if such object is handled by the Pool Manager. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "Object"))
+	UFUNCTION(BlueprintCallable, meta = (BlueprintProtected, DefaultToSelf = "Object"))
 	virtual void SetActive(bool bShouldActivate, UObject* Object);
 };
