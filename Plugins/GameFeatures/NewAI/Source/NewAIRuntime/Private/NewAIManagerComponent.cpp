@@ -5,6 +5,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
+#include "GeneratedMap.h"
 #include "HAL/ConsoleManager.h"
 
 // Sets default values for this component's properties
@@ -14,6 +15,13 @@ UNewAIManagerComponent::UNewAIManagerComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
+}
+
+// Returns the NewAI data asset
+const UNewAIDataAsset* UNewAIManagerComponent::GetNewAIDataAsset()
+{
+	const UNewAIManagerComponent* NewAIManager = AGeneratedMap::Get().FindComponentByClass<UNewAIManagerComponent>();
+	return NewAIManager ? NewAIManager->NewAIDataAssetInternal : nullptr;
 }
 
 // Called when the game starts
@@ -48,4 +56,3 @@ void UNewAIManagerComponent::OnGameStateChanged_Implementation(ECurrentGameState
 {
 	// ...
 }
-
