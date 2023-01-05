@@ -4,7 +4,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
-#include "Structures/SettingsRow.h"
+#include "Data/SettingsRow.h"
 //---
 #include "SettingsWidgetConstructorLibrary.generated.h"
 

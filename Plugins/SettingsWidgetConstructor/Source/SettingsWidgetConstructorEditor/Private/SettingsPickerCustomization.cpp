@@ -3,7 +3,7 @@
 #include "SettingsPickerCustomization.h"
 //---
 #include "FunctionPickerType/FunctionPickerCustomization.h"
-#include "Structures/SettingsRow.h"
+#include "Data/SettingsRow.h"
 
 // The name of class to be customized: SettingsPicker
 const FName FSettingsPickerCustomization::PropertyClassName = FSettingsPicker::StaticStruct()->GetFName();

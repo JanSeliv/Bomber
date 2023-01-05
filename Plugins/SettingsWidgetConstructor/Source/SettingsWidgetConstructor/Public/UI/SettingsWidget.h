@@ -4,7 +4,7 @@
 
 #include "Blueprint/UserWidget.h"
 //---
-#include "Structures/SettingsRow.h"
+#include "Data/SettingsRow.h"
 //---
 #include "SettingsWidget.generated.h"
 

@@ -4,7 +4,7 @@
 
 #include "Engine/DeveloperSettings.h"
 //---
-#include "Structures/SettingsRow.h"
+#include "Data/SettingsRow.h"
 #include "SettingsDataTable.h"
 //---
 #include "SettingsDataAsset.generated.h"

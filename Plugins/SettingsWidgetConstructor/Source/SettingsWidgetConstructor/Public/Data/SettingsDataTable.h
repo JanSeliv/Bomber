@@ -4,7 +4,7 @@
 
 #include "MyDataTable/MyDataTable.h"
 //---
-#include "Structures/SettingsRow.h"
+#include "Data/SettingsRow.h"
 //---
 #include "SettingsDataTable.generated.h"
 

@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "Structures/SettingsRow.h"
+#include "Data/SettingsRow.h"
 //---
 #include "GameplayTags/Classes/GameplayTagsManager.h"
 
