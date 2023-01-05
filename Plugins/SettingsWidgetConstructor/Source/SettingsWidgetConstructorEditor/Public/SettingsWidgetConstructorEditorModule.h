@@ -5,16 +5,11 @@
 #include "Modules/ModuleInterface.h"
 //---
 #include "AssetTypeCategories.h"
+#include "AssetTypeActions_Base.h"
 
 class SETTINGSWIDGETCONSTRUCTOREDITOR_API FSettingsWidgetConstructorEditorModule : public IModuleInterface
 {
 public:
-	/** Is used to load and unload the Property Editor Module. */
-	inline static const FName PropertyEditorModule = TEXT("PropertyEditor");
-
-	/** Is used to customize FSettingTag structure. */
-	inline static const FName SettingTagStructureName = TEXT("SettingTag");
-
 	/** Category of this plugin in the 'Add' context menu. */
 	inline static EAssetTypeCategories::Type SettingsCategory = EAssetTypeCategories::None;
 
@@ -32,19 +27,38 @@ public:
 	*/
 	virtual void ShutdownModule() override;
 
+#pragma region EditorExtensions
+	/** Adds the asset to the context menu
+	 * @param InOutRegisteredAssets Input: the list of registered assets. Output: the list of registered assets + the new one. */
+	template <typename T>
+	static void RegisterAsset(TArray<TSharedPtr<FAssetTypeActions_Base>>& InOutRegisteredAssets);
+
+	/** Removes all custom assets from context menu. */
+	static void UnregisterAssets(TArray<TSharedPtr<FAssetTypeActions_Base>>& RegisteredAssets);
+#pragma endregion EditorExtensions
+
 protected:
 	/** Creates all customizations for custom properties. */
-	void RegisterPropertyCustomizations();
+	static void RegisterPropertyCustomizations();
 
 	/** Removes all custom property customizations. */
-	void UnregisterPropertyCustomizations();
+	static void UnregisterPropertyCustomizations();
 
 	/** Adds to context menu custom assets to be created. */
 	void RegisterSettingAssets();
 
 	/** Adds the category of this plugin to the 'Add' context menu. */
-	void RegisterSettingsCategory();
+	static void RegisterSettingAssetsCategory();
 
 	/** Asset type actions */
-	TArray<TSharedPtr<class FAssetTypeActions_Base>> RegisteredAssets;
+	TArray<TSharedPtr<FAssetTypeActions_Base>> RegisteredAssets;
 };
+
+// Adds the asset to the context menu
+template <typename T>
+void FSettingsWidgetConstructorEditorModule::RegisterAsset(TArray<TSharedPtr<FAssetTypeActions_Base>>& InOutRegisteredAssets)
+{
+	TSharedPtr<T> SettingsDataTableAction = MakeShared<T>();
+	IAssetTools::Get().RegisterAssetTypeActions(SettingsDataTableAction.ToSharedRef());
+	InOutRegisteredAssets.Emplace(MoveTemp(SettingsDataTableAction));
+}

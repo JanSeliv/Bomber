@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MyAssets/AssetTypeActions_MyUserWidget.h"
+#include "MyAssets/SWCAssetTypeActions_MyUserWidget.h"
 //---
 #include "AssetTypeActions_SettingsWidget.generated.h"
 
@@ -10,7 +10,7 @@
  * Is responsible for creating new Settings Widget in the 'Add' context menu.
  */
 UCLASS(Config = SettingsWidgetConstructor, DefaultConfig)
-class SETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsWidgetFactory : public UMyUserWidgetFactory
+class SETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsWidgetFactory : public USWCMyUserWidgetFactory
 {
 	GENERATED_BODY()
 

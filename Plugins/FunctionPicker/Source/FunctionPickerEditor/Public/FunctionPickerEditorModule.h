@@ -20,11 +20,4 @@ public:
     * can safely reference those dependencies in ShutdownModule() as well.
     */
     virtual void ShutdownModule() override;
-
-protected:
-	/** Created customization for the Function Picker. */
-	void RegisterFunctionPickerCustomization();
-
-	/** Removes customization customization for the Function Picker. */
-	void UnregisterPropertyCustomizations();
 };

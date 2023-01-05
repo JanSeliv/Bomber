@@ -2,12 +2,12 @@
 
 #include "SettingsWidgetConstructorEditorModule.h"
 //---
-#include "SettingsPickerCustomization.h"
 #include "AssetTypeActions_SettingsDataTable.h"
 #include "AssetTypeActions_SettingsWidget.h"
+#include "SettingsPickerCustomization.h"
+#include "SettingTagCustomization.h"
+#include "FunctionPickerType/FunctionPickerCustomization.h"
 //---
-#include "GameplayTagsEditorModule.h"
-#include "EditorUtilsLibrary.h"
 #include "Modules/ModuleManager.h"
 
 #define LOCTEXT_NAMESPACE "FSettingsWidgetConstructorEditorModule"
@@ -23,59 +23,56 @@ void FSettingsWidgetConstructorEditorModule::StartupModule()
 void FSettingsWidgetConstructorEditorModule::ShutdownModule()
 {
 	UnregisterPropertyCustomizations();
-	UEditorUtilsLibrary::UnregisterAssets(RegisteredAssets);
+	UnregisterAssets(RegisteredAssets);
+}
+
+// Removes all custom assets from context menu
+void FSettingsWidgetConstructorEditorModule::UnregisterAssets(TArray<TSharedPtr<FAssetTypeActions_Base>>& RegisteredAssets)
+{
+	static const FName AssetToolsModuleName = TEXT("AssetTools");
+	const FAssetToolsModule* AssetToolsPtr = FModuleManager::GetModulePtr<FAssetToolsModule>(AssetToolsModuleName);
+	if (!AssetToolsPtr)
+	{
+		return;
+	}
+
+	IAssetTools& AssetTools = AssetToolsPtr->Get();
+	for (TSharedPtr<FAssetTypeActions_Base>& AssetTypeActionIt : RegisteredAssets)
+	{
+		if (AssetTypeActionIt.IsValid())
+		{
+			AssetTools.UnregisterAssetTypeActions(AssetTypeActionIt.ToSharedRef());
+		}
+	}
 }
 
 // Creates all customizations for custom properties
 void FSettingsWidgetConstructorEditorModule::RegisterPropertyCustomizations()
 {
-	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
-	{
-		return;
-	}
-
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
-
-	// Is customized to show only selected in-game option
-	PropertyModule.RegisterCustomPropertyTypeLayout(
-		FSettingsPickerCustomization::PropertyClassName,
-		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSettingsPickerCustomization::MakeInstance)
-	);
-
-	// Use default GameplayTag customization for inherited SettingTag to show Tags list
-	PropertyModule.RegisterCustomPropertyTypeLayout(
-		SettingTagStructureName,
-		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FGameplayTagCustomizationPublic::MakeInstance)
-	);
-
-	PropertyModule.NotifyCustomizationModuleChanged();
+	FFunctionPickerCustomization::RegisterFunctionPickerCustomization();
+	FSettingsPickerCustomization::RegisterSettingsPickerCustomization();
+	FSettingTagCustomization::RegisterSettingsTagCustomization();
 }
 
 // Removes all custom property customizations
 void FSettingsWidgetConstructorEditorModule::UnregisterPropertyCustomizations()
 {
-	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
-	{
-		return;
-	}
-
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
-
-	PropertyModule.UnregisterCustomPropertyTypeLayout(FSettingsPickerCustomization::PropertyClassName);
-	PropertyModule.UnregisterCustomPropertyTypeLayout(SettingTagStructureName);
+	FFunctionPickerCustomization::UnregisterFunctionPickerCustomization();
+	FSettingsPickerCustomization::UnregisterSettingsPickerCustomization();
+	FSettingTagCustomization::UnregisterSettingsTagCustomization();
 }
 
 // Adds to context menu custom assets to be created
 void FSettingsWidgetConstructorEditorModule::RegisterSettingAssets()
 {
-	RegisterSettingsCategory();
+	RegisterSettingAssetsCategory();
 
-	UEditorUtilsLibrary::RegisterAsset<FAssetTypeActions_SettingsDataTable>(RegisteredAssets);
-	UEditorUtilsLibrary::RegisterAsset<FAssetTypeActions_SettingsWidget>(RegisteredAssets);
+	RegisterAsset<FAssetTypeActions_SettingsDataTable>(RegisteredAssets);
+	RegisterAsset<FAssetTypeActions_SettingsWidget>(RegisteredAssets);
 }
 
 // Adds the category of this plugin to the 'Add' context menu
-void FSettingsWidgetConstructorEditorModule::RegisterSettingsCategory()
+void FSettingsWidgetConstructorEditorModule::RegisterSettingAssetsCategory()
 {
 	static const FName CategoryKey = TEXT("SettingsWidgetConstructor");
 	static const FText CategoryDisplayName = LOCTEXT("SettingsWidgetConstructorCategory", "Settings Widget Constructor");

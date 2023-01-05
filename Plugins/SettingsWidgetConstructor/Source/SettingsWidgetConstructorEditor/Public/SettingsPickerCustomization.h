@@ -10,10 +10,6 @@
 class SETTINGSWIDGETCONSTRUCTOREDITOR_API FSettingsPickerCustomization : public FMyPropertyTypeCustomization
 {
 public:
-	/* ---------------------------------------------------
-	*		Public functions
-	* --------------------------------------------------- */
-
 	/** The name of class to be customized. */
 	inline static const FName PropertyClassName = TEXT("SettingsPicker");
 
@@ -25,6 +21,10 @@ public:
 
 	/** The name of the Function Picker struct. */
 	inline static const FName FunctionPickerPathName = TEXT("/Script/FunctionPicker.FunctionPicker");
+
+	/* ---------------------------------------------------
+	*		Public functions
+	* --------------------------------------------------- */
 
 	/** Default constructor. */
 	FSettingsPickerCustomization();
@@ -48,6 +48,12 @@ public:
 	* @param CustomizationUtils Utilities for customization
 	*/
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
+
+	/** Creates customization for the Settings Picker. */
+	static void RegisterSettingsPickerCustomization();
+
+	/** Removes customization for the Settings Picker. */
+	static void UnregisterSettingsPickerCustomization();
 
 protected:
 	/* ---------------------------------------------------

@@ -12,7 +12,7 @@ typedef class FMyPropertyTypeCustomization Super;
  * Overrides some property to make better experience avoiding any errors in properties by manual typing etc.
  * The FName Property is customised as button to select the value in a list.
  */
-class MYEDITORUTILS_API FMyPropertyTypeCustomization : public IPropertyTypeCustomization
+class FMyPropertyTypeCustomization : public IPropertyTypeCustomization
 {
 public:
 	/** Is used to load and unload the Property Editor Module. */

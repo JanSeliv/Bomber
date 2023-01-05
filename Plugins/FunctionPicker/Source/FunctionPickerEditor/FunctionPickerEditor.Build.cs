@@ -13,7 +13,6 @@ public class FunctionPickerEditor : ModuleRules
             new[]
             {
                 "Core"
-                , "MyEditorUtils" // Created FFunctionPickerCustomization
             }
         );
 
@@ -21,6 +20,7 @@ public class FunctionPickerEditor : ModuleRules
             new[]
             {
                 "CoreUObject", "Engine", "Slate", "SlateCore" // Core
+                , "ToolWidgets" // SSearchableComboBox
             }
         );
     }

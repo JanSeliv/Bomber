@@ -2,9 +2,7 @@
 
 #include "SettingsPickerCustomization.h"
 //---
-#include "FunctionPickerCustomization.h"
-
-typedef FSettingsPickerCustomization ThisClass;
+#include "FunctionPickerType/FunctionPickerCustomization.h"
 
 // Default constructor
 FSettingsPickerCustomization::FSettingsPickerCustomization()
@@ -21,7 +19,7 @@ FSettingsPickerCustomization::FSettingsPickerCustomization()
 // Makes a new instance of this detail layout class for a specific detail view requesting it
 TSharedRef<IPropertyTypeCustomization> FSettingsPickerCustomization::MakeInstance()
 {
-	return MakeShareable(new ThisClass());
+	return MakeShareable(new FSettingsPickerCustomization());
 }
 
 // Called when the header of the property (the row in the details panel where the property is shown)
@@ -38,6 +36,38 @@ void FSettingsPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 	// Display added values in the picker list
 	Super::RefreshCustomProperty();
 	ClearPrevChosenProperty();
+}
+
+// Creates customization for the Settings Picker
+void FSettingsPickerCustomization::RegisterSettingsPickerCustomization()
+{
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	// Is customized to show only selected in-game option
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		PropertyClassName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FSettingsPickerCustomization::MakeInstance)
+	);
+
+	PropertyModule.NotifyCustomizationModuleChanged();
+}
+
+// Removes customization for the Settings Picker
+void FSettingsPickerCustomization::UnregisterSettingsPickerCustomization()
+{
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	PropertyModule.UnregisterCustomPropertyTypeLayout(PropertyClassName);
 }
 
 // Is called for each property on building its row

@@ -12,8 +12,9 @@ public class SettingsWidgetConstructorEditor : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core"
-				//My modules
-				, "MyEditorUtils" // Created FSettingsPickerCustomization, FAssetTypeActions_SettingsDataTable, FAssetTypeActions_SettingsUserWidget
+				, "AssetTools" // Created FAssetTypeActions_MyDataTable
+				, "UnrealEd" // Created UMyDataTableFactory
+				, "UMGEditor" // Created UMyUserWidgetFactory
 			}
 		);
 
@@ -21,12 +22,12 @@ public class SettingsWidgetConstructorEditor : ModuleRules
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
 				, "GameplayTagsEditor" // FGameplayTagCustomizationPublic
-				, "AssetTools" // RegisterAdvancedAssetCategory
-				, "UnrealEd" // Editor globals like GEditor
 				, "Projects" // IPluginManager::Get()
+				, "ToolWidgets" // SSearchableComboBox
+				, "DataTableEditor", "DesktopPlatform", "EditorFramework", "ToolMenus" // Editor data table
+				, "UMG", "Kismet", "KismetCompiler" // Editor user widget
 				// My modules
 				, "SettingsWidgetConstructor" // USettingsDataTable
-				, "FunctionPickerEditor" // FFunctionPickerCustomization
 			}
 		);
 	}

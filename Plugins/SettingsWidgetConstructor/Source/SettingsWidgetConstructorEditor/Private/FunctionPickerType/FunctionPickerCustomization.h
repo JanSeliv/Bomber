@@ -7,7 +7,7 @@
 /**
  * Allow to choose the function in the list instead of manually typing a name.
  */
-class FUNCTIONPICKEREDITOR_API FFunctionPickerCustomization final : public FMyPropertyTypeCustomization
+class FFunctionPickerCustomization final : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------
@@ -46,6 +46,12 @@ public:
 	 * @param CustomizationUtils Utilities for customization
 	 */
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
+
+	/** Creates customization for the Function Picker. */
+	static void RegisterFunctionPickerCustomization();
+
+	/** Removes customization for the Function Picker. */
+	static void UnregisterFunctionPickerCustomization();
 
 protected:
 	/* ---------------------------------------------------

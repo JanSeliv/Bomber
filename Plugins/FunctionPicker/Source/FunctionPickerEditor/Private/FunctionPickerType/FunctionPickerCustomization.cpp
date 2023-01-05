@@ -1,8 +1,6 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "FunctionPickerCustomization.h"
-
-typedef FFunctionPickerCustomization ThisClass;
+#include "FunctionPickerType/FunctionPickerCustomization.h"
 
 // Default constructor
 FFunctionPickerCustomization::FFunctionPickerCustomization()
@@ -13,7 +11,7 @@ FFunctionPickerCustomization::FFunctionPickerCustomization()
 // Makes a new instance of this detail layout class for a specific detail view requesting it
 TSharedRef<IPropertyTypeCustomization> FFunctionPickerCustomization::MakeInstance()
 {
-	return MakeShareable(new ThisClass());
+	return MakeShareable(new FFunctionPickerCustomization());
 }
 
 // Called when the header of the property (the row in the details panel where the property is shown)
@@ -30,6 +28,38 @@ void FFunctionPickerCustomization::CustomizeChildren(TSharedRef<IPropertyHandle>
 	InitTemplateMetaKey();
 
 	RefreshCustomProperty();
+}
+
+// Creates customization for the Function Picker
+void FFunctionPickerCustomization::RegisterFunctionPickerCustomization()
+{
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	// Allows to choose ufunction
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		PropertyClassName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FFunctionPickerCustomization::MakeInstance)
+	);
+
+	PropertyModule.NotifyCustomizationModuleChanged();
+}
+
+// Removes customization for the Function Picker
+void FFunctionPickerCustomization::UnregisterFunctionPickerCustomization()
+{
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	PropertyModule.UnregisterCustomPropertyTypeLayout(PropertyClassName);
 }
 
 // Is called for each property on building its row

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MyAssets/AssetTypeActions_MyDataTable.h"
+#include "MyAssets/SWCAssetTypeActions_MyDataTable.h"
 //---
 #include "AssetTypeActions_SettingsDataTable.generated.h"
 
@@ -10,7 +10,7 @@
  * Is responsible for creating new Settings Data Table asset in the 'Add' context menu.
  */
 UCLASS()
-class SETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsDataTableFactory : public UMyDataTableFactory
+class SETTINGSWIDGETCONSTRUCTOREDITOR_API USettingsDataTableFactory : public USWCMyDataTableFactory
 {
 	GENERATED_BODY()
 
