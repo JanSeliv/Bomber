@@ -86,8 +86,8 @@ public:
 		UPARAM(meta = (Categories = "Settings")) const FGameplayTagContainer& SettingsToUpdate);
 
 	/** Returns the name of found tag by specified function. */
-	UFUNCTION(BlueprintPure, Category = "Settings Widget Constructor", meta = (AutoCreateRefTerm = "FunctionPicker"))
-	const FSettingTag& GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const;
+	UFUNCTION(BlueprintPure, Category = "Settings Widget Constructor", meta = (AutoCreateRefTerm = "SettingFunction"))
+	const FSettingTag& GetTagByFunction(const FSettingFunctionPicker& SettingFunction) const;
 
 	/* ---------------------------------------------------
 	 *		Style

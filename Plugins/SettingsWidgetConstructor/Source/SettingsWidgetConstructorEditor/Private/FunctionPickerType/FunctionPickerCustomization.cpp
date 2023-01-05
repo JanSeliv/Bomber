@@ -1,11 +1,16 @@
 // Copyright (c) Yevhenii Selivanov.
 
 #include "FunctionPickerType/FunctionPickerCustomization.h"
+//---
+#include "Structures/SettingsRow.h"
+
+// The name of class to be customized: SettingFunctionPicker
+const FName FFunctionPickerCustomization::PropertyClassName = FSettingFunctionPicker::StaticStruct()->GetFName();
 
 // Default constructor
 FFunctionPickerCustomization::FFunctionPickerCustomization()
 {
-	CustomPropertyInternal.PropertyName = TEXT("FunctionName");
+	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingFunctionPicker, FunctionName);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it

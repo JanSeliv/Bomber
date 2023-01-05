@@ -14,8 +14,8 @@ public:
 	*		Public functions
 	* --------------------------------------------------- */
 
-	/** The name of class to be customized. */
-	inline static const FName PropertyClassName = TEXT("FunctionPicker");
+	/** The name of class to be customized: FunctionPicker */
+	static const FName PropertyClassName;
 
 	/** Fixed-size TemplateMetaKeys which contains names of metas used by this property. */
 	inline static const TArray<FName, TFixedAllocator<3>> TemplateMetaKeys = {

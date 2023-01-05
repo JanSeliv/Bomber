@@ -1,17 +1,17 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "FunctionPicker.h"
+#include "FunctionPickerData/SWCFunctionPicker.h"
 
 // Empty settings function
-const FFunctionPicker FFunctionPicker::Empty = FFunctionPicker();
+const FSWCFunctionPicker FSWCFunctionPicker::Empty = FSWCFunctionPicker();
 
 // Custom constructor to set all members values
-FFunctionPicker::FFunctionPicker(UClass* InFunctionClass, FName InFunctionName)
+FSWCFunctionPicker::FSWCFunctionPicker(UClass* InFunctionClass, FName InFunctionName)
 	: FunctionClass(InFunctionClass)
 	, FunctionName(InFunctionName) {}
 
 // Returns the function pointer based on set data to this structure
-UFunction* FFunctionPicker::GetFunction() const
+UFunction* FSWCFunctionPicker::GetFunction() const
 {
 	if (CachedFunctionInternal.IsValid())
 	{
@@ -30,14 +30,14 @@ UFunction* FFunctionPicker::GetFunction() const
 }
 
 // Compares for equality
-bool FFunctionPicker::operator==(const FFunctionPicker& Other) const
+bool FSWCFunctionPicker::operator==(const FSWCFunctionPicker& Other) const
 {
 	return Other.FunctionClass->IsChildOf(this->FunctionClass)
 	       && Other.FunctionName == this->FunctionName;
 }
 
 // Creates a hash value
-uint32 GetTypeHash(const FFunctionPicker& Other)
+uint32 GetTypeHash(const FSWCFunctionPicker& Other)
 {
 	const uint32 FunctionClassHash = GetTypeHash(Other.FunctionClass);
 	const uint32 FunctionNameHash = GetTypeHash(Other.FunctionName);

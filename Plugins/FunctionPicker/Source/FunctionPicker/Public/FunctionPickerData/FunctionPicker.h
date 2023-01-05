@@ -28,7 +28,7 @@ struct FUNCTIONPICKER_API FFunctionPicker
 {
 	GENERATED_BODY()
 
-	/** Empty settings function. */
+	/** Empty function data. */
 	static const FFunctionPicker Empty;
 
 	/** Default constructor. */

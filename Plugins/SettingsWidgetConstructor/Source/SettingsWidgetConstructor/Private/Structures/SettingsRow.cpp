@@ -16,6 +16,9 @@ const FSettingsPicker FSettingsPicker::Empty = FSettingsPicker();
 // The global of Setting tag categories
 FGlobalSettingTags FGlobalSettingTags::GSettingTags;
 
+// Empty setting function data
+const FSettingFunctionPicker FSettingFunctionPicker::EmptySettingFunction = FSettingFunctionPicker();
+
 void FGlobalSettingTags::AddTags()
 {
 	UGameplayTagsManager& Manager = UGameplayTagsManager::Get();

@@ -6,10 +6,6 @@
 //---
 #include "Engine/DataTable.h"
 #include "UI/SettingsWidget.h"
-//---
-#if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
-#endif
 
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()
@@ -194,8 +190,8 @@ void UMyGameUserSettings::UpdateFullscreenEnabled()
 		return;
 	}
 
-	static const FFunctionPicker SetFullscreenFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFullscreenEnabled));
-	const FSettingTag& FullscreenTag = SettingsWidget->GetTagByFunctionPicker(SetFullscreenFunction);
+	static const FSettingFunctionPicker SetFullscreenFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFullscreenEnabled));
+	const FSettingTag& FullscreenTag = SettingsWidget->GetTagByFunction(SetFullscreenFunction);
 	if (!FullscreenTag.IsValid())
 	{
 		return;
@@ -215,8 +211,8 @@ void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 		return;
 	}
 
-	static const FFunctionPicker ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
-	const FSettingTag& FPSLockTag = SettingsWidget->GetTagByFunctionPicker(ThisFunction);
+	static const FSettingFunctionPicker ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
+	const FSettingTag& FPSLockTag = SettingsWidget->GetTagByFunction(ThisFunction);
 	if (!FPSLockTag.IsValid())
 	{
 		return;

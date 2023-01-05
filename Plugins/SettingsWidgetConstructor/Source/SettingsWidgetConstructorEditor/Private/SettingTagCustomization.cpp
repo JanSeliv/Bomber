@@ -1,6 +1,11 @@
 // Copyright (c) Yevhenii Selivanov
 
 #include "SettingTagCustomization.h"
+//---
+#include "Structures/SettingsRow.h"
+
+/** The name of class to be customized: SettingTag */
+const FName FSettingTagCustomization::PropertyClassName = FSettingTag::StaticStruct()->GetFName();
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
 TSharedRef<IPropertyTypeCustomization> FSettingTagCustomization::MakeInstance()

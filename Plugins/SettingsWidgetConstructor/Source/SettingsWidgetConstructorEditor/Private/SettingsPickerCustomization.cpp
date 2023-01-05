@@ -3,11 +3,24 @@
 #include "SettingsPickerCustomization.h"
 //---
 #include "FunctionPickerType/FunctionPickerCustomization.h"
+#include "Structures/SettingsRow.h"
+
+// The name of class to be customized: SettingsPicker
+const FName FSettingsPickerCustomization::PropertyClassName = FSettingsPicker::StaticStruct()->GetFName();
+
+/** The name of the settings data base struct: /Script/SettingsWidgetConstructor.SettingsDataBase. */
+const FName FSettingsPickerCustomization::SettingsDataBasePathName = *FSettingsDataBase::StaticStruct()->GetPathName();
+
+/** The name of the Settings Primary struct: /Script/SettingsWidgetConstructor.SettingsPrimary. */
+const FName FSettingsPickerCustomization::SettingsPrimaryPathName = *FSettingsPrimary::StaticStruct()->GetPathName();
+
+/** The name of the Function Picker struct: /Script/FunctionPicker.FSettingFunctionPicker. */
+const FName FSettingsPickerCustomization::FunctionPickerPathName = *FSettingFunctionPicker::StaticStruct()->GetPathName();
 
 // Default constructor
 FSettingsPickerCustomization::FSettingsPickerCustomization()
 {
-	CustomPropertyInternal.PropertyName = TEXT("SettingsType");
+	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FSettingsPicker, SettingsType);
 
 	SettingsFunctionProperties.Reserve(FFunctionPickerCustomization::TemplateMetaKeys.Num());
 	for (FName MetaNameIt : FFunctionPickerCustomization::TemplateMetaKeys)
@@ -75,7 +88,7 @@ void FSettingsPickerCustomization::OnCustomizeChildren(IDetailChildrenBuilder& C
 {
 	/* ╔FSettingsPicker
 	 * ╠════╦FSettingsPrimary (1)
-	 * ║	╚════FFunctionPicker (2)
+	 * ║	╚════FSettingFunctionPicker (2)
 	 * ╚═════FSettingsDataBase (3)
 	 */
 

@@ -133,7 +133,7 @@ void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpda
 }
 
 // Returns the name of found tag by specified function
-const FSettingTag& USettingsWidget::GetTagByFunctionPicker(const FFunctionPicker& FunctionPicker) const
+const FSettingTag& USettingsWidget::GetTagByFunction(const FSettingFunctionPicker& FunctionPicker) const
 {
 	for (const TTuple<FName, FSettingsPicker>& RowIt : SettingsTableRowsInternal)
 	{
@@ -467,7 +467,7 @@ bool USettingsWidget::GetCheckboxValue(const FSettingTag& CheckboxTag) const
 		const FSettingsCheckbox& Data = FoundRow.Checkbox;
 		Value = Data.bIsSet;
 
-		const UFunctionPickerTemplate::FOnGetterBool& Getter = Data.OnGetterBool;
+		const USettingFunctionTemplate::FOnGetterBool& Getter = Data.OnGetterBool;
 		if (Getter.IsBound())
 		{
 			Value = Getter.Execute();
@@ -486,7 +486,7 @@ int32 USettingsWidget::GetComboboxIndex(const FSettingTag& ComboboxTag) const
 		const FSettingsCombobox& Data = FoundRow.Combobox;
 		Value = Data.ChosenMemberIndex;
 
-		const UFunctionPickerTemplate::FOnGetterInt& Getter = Data.OnGetterInt;
+		const USettingFunctionTemplate::FOnGetterInt& Getter = Data.OnGetterInt;
 		if (Getter.IsBound())
 		{
 			Value = Getter.Execute();
@@ -504,7 +504,7 @@ void USettingsWidget::GetComboboxMembers(const FSettingTag& ComboboxTag, TArray<
 		const FSettingsCombobox& Data = FoundRow.Combobox;
 		OutMembers = Data.Members;
 
-		const UFunctionPickerTemplate::FOnGetMembers& Getter = Data.OnGetMembers;
+		const USettingFunctionTemplate::FOnGetMembers& Getter = Data.OnGetMembers;
 		if (Getter.IsBound())
 		{
 			Getter.Execute(OutMembers);
@@ -522,7 +522,7 @@ double USettingsWidget::GetSliderValue(const FSettingTag& SliderTag) const
 		const FSettingsSlider& Data = FoundRow.Slider;
 		Value = Data.ChosenValue;
 
-		const UFunctionPickerTemplate::FOnGetterFloat& Getter = Data.OnGetterFloat;
+		const USettingFunctionTemplate::FOnGetterFloat& Getter = Data.OnGetterFloat;
 		if (Getter.IsBound())
 		{
 			Value = Getter.Execute();
@@ -539,7 +539,7 @@ void USettingsWidget::GetTextLineValue(const FSettingTag& TextLineTag, FText& Ou
 	{
 		OutText = FoundRow.PrimaryData.Caption;
 
-		const UFunctionPickerTemplate::FOnGetterText& Getter = FoundRow.TextLine.OnGetterText;
+		const USettingFunctionTemplate::FOnGetterText& Getter = FoundRow.TextLine.OnGetterText;
 		if (Getter.IsBound())
 		{
 			Getter.Execute(OutText);
@@ -557,7 +557,7 @@ FName USettingsWidget::GetUserInputValue(const FSettingTag& UserInputTag) const
 		const FSettingsUserInput& Data = FoundRow.UserInput;
 		Value = Data.UserInput;
 
-		const UFunctionPickerTemplate::FOnGetterName& Getter = Data.OnGetterName;
+		const USettingFunctionTemplate::FOnGetterName& Getter = Data.OnGetterName;
 		if (Getter.IsBound())
 		{
 			Value = Getter.Execute();
@@ -575,7 +575,7 @@ USettingCustomWidget* USettingsWidget::GetCustomWidget(const FSettingTag& Custom
 	{
 		CustomWidget = Cast<USettingCustomWidget>(FoundRow.PrimaryData.SettingSubWidget.Get());
 
-		const USettingTemplate::FOnGetterWidget& Getter = FoundRow.CustomWidget.OnGetterWidget;
+		const USettingFunctionTemplate::FOnGetterWidget& Getter = FoundRow.CustomWidget.OnGetterWidget;
 		if (Getter.IsBound())
 		{
 			CustomWidget = Getter.Execute();

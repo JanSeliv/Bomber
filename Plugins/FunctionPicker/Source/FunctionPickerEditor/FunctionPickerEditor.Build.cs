@@ -21,6 +21,8 @@ public class FunctionPickerEditor : ModuleRules
             {
                 "CoreUObject", "Engine", "Slate", "SlateCore" // Core
                 , "ToolWidgets" // SSearchableComboBox
+                // My modules
+                , "FunctionPicker" // FFunctionPicker
             }
         );
     }

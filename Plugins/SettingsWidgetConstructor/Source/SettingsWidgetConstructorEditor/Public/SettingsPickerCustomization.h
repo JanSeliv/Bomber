@@ -10,17 +10,17 @@
 class SETTINGSWIDGETCONSTRUCTOREDITOR_API FSettingsPickerCustomization : public FMyPropertyTypeCustomization
 {
 public:
-	/** The name of class to be customized. */
-	inline static const FName PropertyClassName = TEXT("SettingsPicker");
+	/** The name of class to be customized: SettingsPicker */
+	static const FName PropertyClassName;
 
-	/** The name of the settings data base struct. */
-	inline static const FName SettingsDataBasePathName = TEXT("/Script/SettingsWidgetConstructor.SettingsDataBase");
+	/** The name of the settings data base struct: /Script/SettingsWidgetConstructor.SettingsDataBase */
+	static const FName SettingsDataBasePathName;
 
-	/** The name of the Settings Primary struct. */
-	inline static const FName SettingsPrimaryPathName = TEXT("/Script/SettingsWidgetConstructor.SettingsPrimary");
+	/** The name of the Settings Primary struct: /Script/SettingsWidgetConstructor.SettingsPrimary */
+	static const FName SettingsPrimaryPathName;
 
-	/** The name of the Function Picker struct. */
-	inline static const FName FunctionPickerPathName = TEXT("/Script/FunctionPicker.FunctionPicker");
+	/** The name of the Function Picker struct: /Script/FunctionPicker.SWCFunctionPicker */
+	static const FName FunctionPickerPathName;
 
 	/* ---------------------------------------------------
 	*		Public functions

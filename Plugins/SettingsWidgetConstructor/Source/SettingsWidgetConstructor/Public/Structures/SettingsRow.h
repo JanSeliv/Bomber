@@ -3,8 +3,8 @@
 #pragma once
 
 #include "MyDataTable/MyDataTable.h"
-#include "FunctionPicker.h"
-#include "FunctionPickerTemplate.h"
+#include "SettingsWidgetConstructor/Private/FunctionPickerData/SWCFunctionPicker.h"
+#include "SettingsWidgetConstructor/Private/FunctionPickerData/SWCFunctionPickerTemplate.h"
 //---
 #include "GameplayTagContainer.h"
 #include "Components/SlateWrapperTypes.h"
@@ -12,6 +12,28 @@
 #include "SettingsRow.generated.h"
 
 #define TEXT_NONE FCoreTexts::Get().None
+
+/* --- Settings Data Table dependencies ---
+ *
+ *	╔USettingsDataTable
+ *	╚═══╦FSettingsRow
+ *		╚═══╦FSettingsPicker
+ *			╠═══╦FSettingsPrimary
+ *			║	╠════FSettingTag
+ *			║	╚════FSettingFunctionPicker (StaticContext and Setter and Getter)
+ *			╚════FSettingsDataBase (FSettingsButton or FSettingsCheckbox or
+ *									FSettingsCombobox or FSettingsCustomWidget or
+ *									FSettingsSlider or FSettingsTextLine, FSettingsUserInput)
+ *
+ *	--- Settings Theme Data dependencies ---
+ *
+ *	╔USettingsDataAsset
+ *	╠════FButtonThemeData
+ *	╠════FCheckboxThemeData
+ *	╠════FComboboxThemeData
+ *	╠════FSliderThemeData
+ *	╚════FMiscThemeData
+ */
 
 /**
  * Used to require all such tags start with 'Settings.X' as it specified in USTRUCT meta.
@@ -307,20 +329,31 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FMiscThemeData
 	ESlateVisibility MenuBorderVisibility = ESlateVisibility::Visible;
 };
 
-/* Structs dependencies:
- *
- * ╔FSettingsRow
- * ╚════╦FSettingsPicker
- *		╠════FSettingsPrimary
- *		╚════FSettingsDataBase
+/**
+ * Is used to select setting function to be called
  */
+USTRUCT(BlueprintType)
+struct SETTINGSWIDGETCONSTRUCTOR_API FSettingFunctionPicker : public FSWCFunctionPicker
+{
+	GENERATED_BODY()
+
+	/** Empty setting function data. */
+	static const FSettingFunctionPicker EmptySettingFunction;
+
+	/** Default constructor. */
+	FSettingFunctionPicker() = default;
+
+	/** Custom constructor to set all members values. */
+	FSettingFunctionPicker(UClass* InFunctionClass, FName InFunctionName)
+		: FSWCFunctionPicker(InFunctionClass, std::move(InFunctionName)) {}
+};
 
 /**
-  * Delegates wrapper that are used as templates for FFunctionPicker properties.
+  * Delegates wrapper that are used as templates for FSettingFunctionPicker properties.
   * see UFunctionPickerTemplate
   */
 UCLASS(Abstract, Const, Transient)
-class SETTINGSWIDGETCONSTRUCTOR_API USettingTemplate : public UFunctionPickerTemplate
+class SETTINGSWIDGETCONSTRUCTOR_API USettingFunctionTemplate : public USWCFunctionPickerTemplate
 {
 	GENERATED_BODY()
 
@@ -349,17 +382,17 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsPrimary
 	/** The static function to obtain object to call Setters and Getters.
 	  * The FunctionContextTemplate meta will contain a name of one UFunctionPickerTemplate delegate. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (FunctionContextTemplate))
-	FFunctionPicker StaticContext = FFunctionPicker::Empty;
+	FSettingFunctionPicker StaticContext = FSettingFunctionPicker::EmptySettingFunction;
 
 	/** The Setter function to be called to set the setting value for the Static Context object.
 	  * The FunctionSetterTemplate meta will contain a name of one UFunctionPickerTemplate delegate. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (FunctionSetterTemplate))
-	FFunctionPicker Setter = FFunctionPicker::Empty;
+	FSettingFunctionPicker Setter = FSettingFunctionPicker::EmptySettingFunction;
 
 	/** The Getter function to be called to get the setting value from the Static Context object.
 	  * The FunctionGetterTemplate meta will contain a name of one UFunctionPickerTemplate delegate. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (FunctionGetterTemplate))
-	FFunctionPicker Getter = FFunctionPicker::Empty;
+	FSettingFunctionPicker Getter = FSettingFunctionPicker::EmptySettingFunction;
 
 	/** The setting name. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -410,7 +443,7 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsPrimary
   * The base archetype of some setting.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnStaticContext__DelegateSignature"))
+	FunctionContextTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnStaticContext__DelegateSignature"))
 struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -420,7 +453,7 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsDataBase
   * The setting button data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnButtonPressed__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnButtonPressed__DelegateSignature"))
 struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsButton : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -434,15 +467,15 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsButton : public FSettingsDataBase
 	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill;
 
 	/** Cached bound delegate, is executed on pressing this button. */
-	UFunctionPickerTemplate::FOnButtonPressed OnButtonPressed;
+	USettingFunctionTemplate::FOnButtonPressed OnButtonPressed;
 };
 
 /**
   * The setting checkbox data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnSetterBool__DelegateSignature",
-	FunctionGetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterBool__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnSetterBool__DelegateSignature",
+	FunctionGetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnGetterBool__DelegateSignature"))
 struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsCheckbox : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -451,29 +484,29 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsCheckbox : public FSettingsDataBas
 	bool bIsSet = false;
 
 	/** The cached bound delegate, is executed to get the current checkbox state. */
-	UFunctionPickerTemplate::FOnGetterBool OnGetterBool;
+	USettingFunctionTemplate::FOnGetterBool OnGetterBool;
 
 	/** The cached bound delegate, is executed to set the current checkbox state. */
-	UFunctionPickerTemplate::FOnSetterBool OnSetterBool;
+	USettingFunctionTemplate::FOnSetterBool OnSetterBool;
 };
 
 /**
   * The setting combobox data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnSetterInt__DelegateSignature",
-	FunctionGetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterInt__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnSetterInt__DelegateSignature",
+	FunctionGetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnGetterInt__DelegateSignature"))
 struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsCombobox : public FSettingsDataBase
 {
 	GENERATED_BODY()
 
 	/** The Setter function to be called to set all combobox members. */
-	UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnSetMembers__DelegateSignature"))
-	FFunctionPicker SetMembers = FFunctionPicker::Empty;
+	UPROPERTY(EditDefaultsOnly, meta = (FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnSetMembers__DelegateSignature"))
+	FSettingFunctionPicker SetMembers = FSettingFunctionPicker::EmptySettingFunction;
 
 	/** The Setter function to be called to get all combobox members. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (FunctionGetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetMembers__DelegateSignature"))
-	FFunctionPicker GetMembers = FFunctionPicker::Empty;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (FunctionGetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnGetMembers__DelegateSignature"))
+	FSettingFunctionPicker GetMembers = FSettingFunctionPicker::EmptySettingFunction;
 
 	/** Contains all combobox members. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -487,24 +520,24 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsCombobox : public FSettingsDataBas
 	int32 ChosenMemberIndex = INDEX_NONE;
 
 	/** The cached bound delegate, is executed to get the chosen member index. */
-	UFunctionPickerTemplate::FOnGetterInt OnGetterInt;
+	USettingFunctionTemplate::FOnGetterInt OnGetterInt;
 
 	/** The cached bound delegate, is executed to set the chosen member index. */
-	UFunctionPickerTemplate::FOnSetterInt OnSetterInt;
+	USettingFunctionTemplate::FOnSetterInt OnSetterInt;
 
 	/** The cached bound delegate, is executed to get all combobox members. */
-	UFunctionPickerTemplate::FOnGetMembers OnGetMembers;
+	USettingFunctionTemplate::FOnGetMembers OnGetMembers;
 
 	/** The cached bound delegate, is executed to set all combobox members. */
-	UFunctionPickerTemplate::FOnSetMembers OnSetMembers;
+	USettingFunctionTemplate::FOnSetMembers OnSetMembers;
 };
 
 /**
   * The setting slider data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnSetterFloat__DelegateSignature",
-	FunctionGetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterFloat__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnSetterFloat__DelegateSignature",
+	FunctionGetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnGetterFloat__DelegateSignature"))
 struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsSlider : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -513,18 +546,18 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsSlider : public FSettingsDataBase
 	double ChosenValue = INDEX_NONE;
 
 	/** The cached bound delegate, is executed to get the current slider value. */
-	UFunctionPickerTemplate::FOnGetterFloat OnGetterFloat;
+	USettingFunctionTemplate::FOnGetterFloat OnGetterFloat;
 
 	/** The cached bound delegate, is executed to set the current slider value. */
-	UFunctionPickerTemplate::FOnSetterFloat OnSetterFloat;
+	USettingFunctionTemplate::FOnSetterFloat OnSetterFloat;
 };
 
 /**
   * The setting text line data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnSetterText__DelegateSignature",
-	FunctionGetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterText__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnSetterText__DelegateSignature",
+	FunctionGetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnGetterText__DelegateSignature"))
 struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsTextLine : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -538,18 +571,18 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsTextLine : public FSettingsDataBas
 	TEnumAsByte<EHorizontalAlignment> HorizontalAlignment = HAlign_Fill;
 
 	/** The cached bound delegate, is executed to set the text caption. */
-	UFunctionPickerTemplate::FOnGetterText OnGetterText;
+	USettingFunctionTemplate::FOnGetterText OnGetterText;
 
 	/** The cached bound delegate, is executed to get the text caption. */
-	UFunctionPickerTemplate::FOnSetterText OnSetterText;
+	USettingFunctionTemplate::FOnSetterText OnSetterText;
 };
 
 /**
   * The setting user input data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnSetterName__DelegateSignature",
-	FunctionGetterTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterName__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnSetterName__DelegateSignature",
+	FunctionGetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnGetterName__DelegateSignature"))
 struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsUserInput : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -563,18 +596,18 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsUserInput : public FSettingsDataBa
 	FName UserInput = NAME_None;
 
 	/** The cached bound delegate, is executed to set the input text. */
-	UFunctionPickerTemplate::FOnGetterName OnGetterName;
+	USettingFunctionTemplate::FOnGetterName OnGetterName;
 
 	/** The cached bound delegate, is executed to get the input text. */
-	UFunctionPickerTemplate::FOnSetterName OnSetterName;
+	USettingFunctionTemplate::FOnSetterName OnSetterName;
 };
 
 /**
   * The setting user input data.
   */
 USTRUCT(BlueprintType, meta = (
-	FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingTemplate::OnSetterWidget__DelegateSignature",
-	FunctionGetterTemplate = "/Script/SettingsWidgetConstructor.SettingTemplate::OnGetterWidget__DelegateSignature"))
+	FunctionSetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnSetterWidget__DelegateSignature",
+	FunctionGetterTemplate = "/Script/SettingsWidgetConstructor.SettingFunctionTemplate::OnGetterWidget__DelegateSignature"))
 struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsCustomWidget : public FSettingsDataBase
 {
 	GENERATED_BODY()
@@ -584,10 +617,10 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsCustomWidget : public FSettingsDat
 	TSubclassOf<class USettingCustomWidget> CustomWidgetClass = nullptr;
 
 	/** The cached bound delegate, is executed to set the custom widget. */
-	USettingTemplate::FOnGetterWidget OnGetterWidget;
+	USettingFunctionTemplate::FOnGetterWidget OnGetterWidget;
 
 	/** The cached bound delegate, is executed to get the custom widget. */
-	USettingTemplate::FOnSetterWidget OnSetterWidget;
+	USettingFunctionTemplate::FOnSetterWidget OnSetterWidget;
 };
 
 /**
