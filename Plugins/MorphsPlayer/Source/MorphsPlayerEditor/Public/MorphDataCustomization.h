@@ -40,6 +40,12 @@ public:
 	 */
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
+	/** Creates customization for the Morph Data. */
+	static void RegisterMorphDataCustomization();
+
+	/** Removes customization for the Morph Data. */
+	static void UnregisterMorphDataCustomization();
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties

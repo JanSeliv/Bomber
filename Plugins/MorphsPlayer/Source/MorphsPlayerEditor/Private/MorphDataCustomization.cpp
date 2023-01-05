@@ -2,17 +2,19 @@
 
 #include "MorphDataCustomization.h"
 //---
+#include "MorphsPlayerTypes.h"
+//---
 #include "Animation/AnimNotifies/AnimNotifyState.h"
 
 typedef FMorphDataCustomization ThisClass;
 
 // The name of class to be customized
-const FName ThisClass::PropertyClassName = TEXT("MorphData");
+const FName FMorphDataCustomization::PropertyClassName = FMorphData::StaticStruct()->GetFName();
 
 // Default constructor
 FMorphDataCustomization::FMorphDataCustomization()
 {
-	CustomPropertyInternal.PropertyName = TEXT("Morph");
+	CustomPropertyInternal.PropertyName = GET_MEMBER_NAME_CHECKED(FMorphData, Morph);
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
@@ -31,6 +33,38 @@ void FMorphDataCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Proper
 void FMorphDataCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
+}
+
+// Creates customization for the Morph Data
+void FMorphDataCustomization::RegisterMorphDataCustomization()
+{
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	// Allows to choose a morph
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		PropertyClassName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FMorphDataCustomization::MakeInstance)
+		);
+
+	PropertyModule.NotifyCustomizationModuleChanged();
+}
+
+// Removes customization for the Morph Data
+void FMorphDataCustomization::UnregisterMorphDataCustomization()
+{
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	PropertyModule.UnregisterCustomPropertyTypeLayout(PropertyClassName);
 }
 
 // Is called for each property on building its row

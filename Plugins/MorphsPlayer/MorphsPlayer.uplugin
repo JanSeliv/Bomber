@@ -20,6 +20,11 @@
 			"Name": "MorphsPlayer",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "MorphsPlayerEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
 		}
 	]
 }
