@@ -2,7 +2,7 @@
 
 #include "SettingTagCustomization.h"
 //---
-#include "Data/SettingsRow.h"
+#include "Data/SettingTag.h"
 
 /** The name of class to be customized: SettingTag */
 const FName FSettingTagCustomization::PropertyClassName = FSettingTag::StaticStruct()->GetFName();
