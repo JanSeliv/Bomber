@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "WidgetUtilsLibrary.h"
+#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 //---
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"

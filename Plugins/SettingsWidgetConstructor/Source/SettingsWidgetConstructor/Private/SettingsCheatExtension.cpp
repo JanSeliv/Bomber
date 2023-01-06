@@ -2,7 +2,7 @@
 
 #include "SettingsCheatExtension.h"
 //---
-#include "WidgetUtilsLibrary.h"
+#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "UI/SettingsWidget.h"
 
 // Default constructor
