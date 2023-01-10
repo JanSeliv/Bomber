@@ -80,6 +80,20 @@ void AGeneratedMap::ConstructLevelMap(const FTransform& Transform)
 	OnConstructionLevelMap(Transform);
 }
 
+// Sets the size for generated map, it will automatically regenerate the level for given size
+void AGeneratedMap::SetLevelSize(FIntPoint LevelSize)
+{
+	if (!HasAuthority()
+		|| !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%s: 'LevelSize' is invalid: %s"), *FString(__FUNCTION__), *LevelSize.ToString()))
+	{
+		return;
+	}
+
+	const FVector NewScale(LevelSize.X, LevelSize.Y, 1.f);
+	CachedTransformInternal.SetScale3D(NewScale);
+	ConstructLevelMap(CachedTransformInternal);
+}
+
 // Getting an array of cells by four sides of an input center cell and type of breaks
 void AGeneratedMap::GetSidesCells(
 	FCells& OutCells,

@@ -158,3 +158,17 @@ void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
 		MapComponentIt->TryDisplayOwnedCell();
 	}
 }
+
+// Sets the size for generated map, it will automatically regenerate the level for given size
+void UMyCheatManager::SetLevelSize(const FString& LevelSize)
+{
+	static const FString Delimiter = TEXT("x");
+	FString Width = TEXT("");
+	FString Height = TEXT("");
+
+	if (LevelSize.Split(Delimiter, &Width, &Height, ESearchCase::IgnoreCase))
+	{
+		const FIntPoint NewLevelSize(FCString::Atoi(*Width), FCString::Atoi(*Height));
+		AGeneratedMap::Get().SetLevelSize(NewLevelSize);
+	}
+}

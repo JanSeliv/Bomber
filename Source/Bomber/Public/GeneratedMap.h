@@ -62,6 +62,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ConstructLevelMap(const FTransform& Transform);
 
+	/** Sets the size for generated map, it will automatically regenerate the level for given size.
+	 * Is authority-only function.
+	 * @param LevelSize The new size where length and width have to be unpaired (odd).
+	 * E.g: X:9, Y:7 - set the size of the level to 9 columns (width) and 7 rows (length). */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetLevelSize(FIntPoint LevelSize);
+
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetAlivePlayersNum() const { return PlayersNumInternal; };

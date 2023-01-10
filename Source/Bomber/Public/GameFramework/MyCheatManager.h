@@ -103,4 +103,15 @@ public:
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Debug.DisplayCells"))
 	static void DisplayCells(const FString& ActorTypesString);
+
+	/* ---------------------------------------------------
+	 *		Level
+	 * --------------------------------------------------- */
+
+	/** Sets the size for generated map, it will automatically regenerate the level for given size.
+	 * @see LevelSize The new size where length and width have to be unpaired (odd).
+	 * Bomber.Level.SetSize 9x7 - set the size of the level to 9 columns (width) and 7 rows (length).
+	 */
+	UFUNCTION(Exec, meta = (CheatName = "Bomber.Level.SetSize"))
+	static void SetLevelSize(const FString& LevelSize);
 };
