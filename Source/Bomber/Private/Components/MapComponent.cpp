@@ -308,7 +308,7 @@ void UMapComponent::OnRegister()
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	AActor* ComponentOwner = GetOwner();
-	if (!IS_TRANSIENT(ComponentOwner)) // Is not transient owner
+	if (ComponentOwner && IsValid(this)) // Could be called multiple times, make sure it is called once for valid object
 	{
 		ensureAlwaysMsgf(AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame, TEXT("ASSERT: '%s' became explicity destroyed during the game, use the Pool Manager instead"), *ComponentOwner->GetName());
 
