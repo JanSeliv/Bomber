@@ -69,8 +69,8 @@ public:
 	static void Cell_SetFromVector(UPARAM(ref) FCell& InCell, const FVector& InVector) { InCell.Location = InVector; }
 
 	/** Converts a Cell to a Vector. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", DisplayName = "To Vector (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
-	static FORCEINLINE FCell Conv_CellToVector(const FVector& InVector) { return FCell(InVector); }
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", DisplayName = "To Cell (Vector)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FORCEINLINE FCell Conv_VectorToCell(const FVector& InVector) { return FCell(InVector); }
 
 	/** Converts a cell value to a string, in the form 'X= Y=' */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To String (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
@@ -93,8 +93,8 @@ public:
 	static void BreakCell(const FCell& InCell, double& X, double& Y, double& Z);
 
 	/** Converts a Vector to a Cell. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cell (Vector)", CompactNodeTitle = "->", BlueprintAutocast))
-	static const FORCEINLINE FVector& Conv_VectorToCell(const FCell& InCell) { return InCell.Location; }
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Vector (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
+	static const FORCEINLINE FVector& Conv_CellToVector(const FCell& InCell) { return InCell.Location; }
 
 	/** Returns true if cell A is equal to cell B (A == B) */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "A,B", DisplayName = "Equal Exactly (Cell)", CompactNodeTitle = "==", ScriptMethod = "IsNearEqual", ScriptOperator = "==", Keywords = "== equal"))
@@ -146,6 +146,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", ScriptMethod = "IsValidCell", Keywords = "Is Not Zero Cell"))
 	static FORCEINLINE bool Cell_IsValid(const FCell& Cell) { return Cell.IsValid(); }
 
+	/* ---------------------------------------------------
+	 *		Math library
+	 * --------------------------------------------------- */
+
 	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
 	 *
 	 * @param Cell The cell, that will be rotated
@@ -173,6 +177,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FCell GetCellArrayAverage(const TSet<FCell>& Cells) { return FCell::GetCellArrayAverage(Cells); }
 
+	/** Finds the closest cell to the given cell within array of cells.
+	 * @param Cells The array of cells to search in.
+	 * @param CellToCheck The start position of the cell to check. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE FCell GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck) { return FCell::GetCellArrayNearest(Cells, CellToCheck); }
+
+	/** Returns the width and width in specified cells, where each 1 unit means 1 cell. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE float GetCellArrayWidth(const TSet<FCell>& InCells) { return FCell::GetCellsArrayWidth(InCells); }
+
+	/** Returns the length in specified cells, where each 1 unit means 1 cell. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE float GetCellArrayLength(const TSet<FCell>& InCells) { return FCell::GetCellsArrayLength(InCells); }
+
 	/* ---------------------------------------------------
 	*		Level Map related cell functions
 	* --------------------------------------------------- */
@@ -197,6 +215,10 @@ public:
 	 * Could be useful to get always center cell regardless of the location of the Level Map in the world. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FCell GetCenterCellOnLevel();
+
+	/** Returns the center row and column positions on the level. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell"))
+	static void GetCenterCellPositionOnLevel(int32& OutRow, int32& OutColumn);
 
 	/** Returns the number of columns on the Level Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Length"))
@@ -229,6 +251,19 @@ public:
 	/** Returns any cell Z-location on the Level Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Z"))
 	static float GetCellHeightLocation();
+
+	/** Returns 4 corner cells of the Level Map respecting its current size. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static TSet<FCell> GetCornerCellsOnLevel();
+
+	/** Returns true if given cell is corner cell of current level. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static bool IsCornerCell(const FCell& Cell);
+
+	/** Return closest corner cell to the given cell.
+	 * @param CellToCheck The start position of the cell to check. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CellToCheck"))
+	static FCell GetNearestCornerCell(const FCell& CellToCheck);
 
 	/** Returns all empty grid cell locations on the Level Map where non of actors are present. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Free"))

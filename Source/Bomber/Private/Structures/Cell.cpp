@@ -54,6 +54,45 @@ FCell FCell::RotateAngleAxis(float AxisZ) const
 	return FCell(Location + RotatedVector - Dimensions);
 }
 
+// Finds the closest cell to the given cell within array of cells
+FCell FCell::GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck)
+{
+	if (!Cells.Num())
+	{
+		return InvalidCell;
+	}
+
+	FCell NearestCell = InvalidCell;
+	static constexpr float MaxFloat = TNumericLimits<float>::Max();
+	float NearestDistance = MaxFloat;
+
+	for (const FCell& CellIt : Cells)
+	{
+		const float DistanceIt = Distance<float>(CellIt, CellToCheck);
+		if (DistanceIt < NearestDistance)
+		{
+			NearestCell = CellIt;
+			NearestDistance = DistanceIt;
+		}
+	}
+
+	return NearestCell;
+}
+
+// Returns the width and width in specified cells, where each 1 unit means 1 cell
+float FCell::GetCellsArrayWidth(const TSet<FCell>& InCells)
+{
+	const FBox CellsBox(CellsToVectors(InCells));
+	return CellsBox.GetSize().X / CellSize + 1.f;
+}
+
+// Returns the length in specified cells, where each 1 unit means 1 cell
+float FCell::GetCellsArrayLength(const FCells& InCells)
+{
+	const FBox CellsBox(CellsToVectors(InCells));
+	return CellsBox.GetSize().Y / CellSize + 1.f;
+}
+
 // Sums cells
 FCell& FCell::operator+=(const FCell& Other)
 {
@@ -124,4 +163,28 @@ ECellDirection FCell::GetCellDirection(const FCell& CellDirection)
 		return ECellDirection::Left;
 	}
 	return ECellDirection::None;
+}
+
+// Converts set of cells to array of vectors
+TArray<FVector> FCell::CellsToVectors(const FCells& Cells)
+{
+	TArray<FVector> Vectors;
+	Vectors.Reserve(Cells.Num());
+	for (const FCell& Cell : Cells)
+	{
+		Vectors.Add(Cell.Location);
+	}
+	return Vectors;
+}
+
+// Converts array of vectors to to set of cells
+FCells FCell::VectorsToCells(const TArray<FVector>& Vectors)
+{
+	FCells Cells;
+	Cells.Reserve(Vectors.Num());
+	for (const FVector& Vector : Vectors)
+	{
+		Cells.Add(FCell(Vector));
+	}
+	return Cells;
 }

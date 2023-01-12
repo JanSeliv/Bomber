@@ -50,7 +50,17 @@ const TArray<FCell>& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
 // Returns the cell location of the Level Map
 FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
 {
-	return FCell(AGeneratedMap::Get().GetActorLocation());
+	int32 CenterColumn = INDEX_NONE;
+	int32 CenterRow = INDEX_NONE;
+	GetCenterCellPositionOnLevel(/*out*/CenterRow, /*out*/CenterColumn);
+	return GetCellOnLevel(CenterRow, CenterColumn);
+}
+
+// Returns the center row and column positions on the level
+void UCellsUtilsLibrary::GetCenterCellPositionOnLevel(int32& OutRow, int32& OutColumn)
+{
+	OutRow = GetLastRowIndexOnLevel() / 2;
+	OutColumn = GetLastColumnIndexOnLevel() / 2;
 }
 
 // Returns the number of columns on the Level Map
@@ -99,6 +109,40 @@ FQuat UCellsUtilsLibrary::GetCellQuaternion()
 float UCellsUtilsLibrary::GetCellHeightLocation()
 {
 	return AGeneratedMap::Get().GetActorLocation().Z;
+}
+
+// Returns 4 corner cells of the Level Map respecting its current size
+FCells UCellsUtilsLibrary::GetCornerCellsOnLevel()
+{
+	// +---+---+---+
+	// | X |   | X |
+	// +---+---+---+
+	// |   |   |   |
+	// +---+---+---+
+	// | X |   | X |
+	// +---+---+---+
+	constexpr int32 FirstCellIndex = 0;
+	const int32 LastColumnIndex = GetLastColumnIndexOnLevel();
+	const int32 LastRowIndex = GetLastRowIndexOnLevel();
+	return {
+		GetCellOnLevel(FirstCellIndex, FirstCellIndex),
+		GetCellOnLevel(FirstCellIndex, LastColumnIndex),
+		GetCellOnLevel(LastRowIndex, FirstCellIndex),
+		GetCellOnLevel(LastRowIndex, LastColumnIndex)
+	};
+}
+
+// Returns true if given cell is corner cell of current level
+bool UCellsUtilsLibrary::IsCornerCell(const FCell& Cell)
+{
+	return GetCornerCellsOnLevel().Contains(Cell);
+}
+
+// Return closest corner cell to the given cell
+FCell UCellsUtilsLibrary::GetNearestCornerCell(const FCell& CellToCheck)
+{
+	const TSet<FCell> AllCornerCells = GetCornerCellsOnLevel();
+	return GetCellArrayNearest(AllCornerCells, CellToCheck);
 }
 
 // Returns all empty grid cell locations on the Level Map where non of actors are present

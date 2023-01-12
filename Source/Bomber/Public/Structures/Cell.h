@@ -84,13 +84,23 @@ struct BOMBER_API FCell
 	/** Check is valid this cell. */
 	FORCEINLINE bool IsValid() const { return *this != InvalidCell; }
 
+	/** Finds the closest cell to the given cell within array of cells.
+	 * @param Cells The array of cells to search in.
+	 * @param CellToCheck The start position of the cell to check. */
+	static FCell GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck);
+
+	/** Returns the length and width in specified cells, where each 1 unit means 1 cell.
+	 * E.g: if given cells are corner cells on level with the size 7 rows x 9 columns , it returns 7 width and 9 length respectively. */
+	static float GetCellsArrayWidth(const FCells& InCells);
+	static float GetCellsArrayLength(const FCells& InCells);
+
 	/** Returns how many cells are between two cells, where each 1 unit means one cell. */
 	template <typename T>
 	static FORCEINLINE T Distance(const FCell& C1, const FCell& C2) { return FMath::Abs<T>((C1.Location - C2.Location).Size()) / CellSize; }
 
 	/** Find the max distance between cells within specified set, where each 1 unit means one cell. */
 	template <typename T>
-	static float GetCellArrayMaxDistance(const FCells& Cells);
+	static T GetCellArrayMaxDistance(const FCells& Cells);
 
 	/**
 	 * Compares cells for equality.
@@ -123,6 +133,10 @@ struct BOMBER_API FCell
 	static FORCEINLINE FCells CellToCells(const FCell& InCell) { return FCells{InCell}; }
 	FCells ToCells() const { return CellToCells(*this); }
 
+	/** Converts set of cells to array of vectors and vice versa. */
+	static TArray<FVector> CellsToVectors(const FCells& Cells);
+	static FCells VectorsToCells(const TArray<FVector>& Vectors);
+
 	/** Extracts first cell from specified cells set.*/
 	static FORCEINLINE FCell GetFirstCellInSet(const FCells& InCells) { return !InCells.IsEmpty() ? InCells.Array()[0] : InvalidCell; }
 
@@ -137,7 +151,7 @@ struct BOMBER_API FCell
 
 // Find the max distance between cells within specified set, where each 1 unit means one cell
 template <typename T>
-float FCell::GetCellArrayMaxDistance(const FCells& Cells)
+T FCell::GetCellArrayMaxDistance(const FCells& Cells)
 {
 	T MaxDistance{};
 	for (const FCell& C1 : Cells)
