@@ -47,7 +47,7 @@ UMyCameraComponent::UMyCameraComponent()
 void UMyCameraComponent::UpdateMaxHeight()
 {
 	static constexpr float Multiplier = 1.5f;
-	const float MaxLevelScale = AGeneratedMap::Get().GetCachedTransform().GetScale3D().GetMax();
+	const float MaxLevelScale = AGeneratedMap::Get().GetActorScale3D().GetMax();
 	MaxHeightInternal = FCell::CellSize * MaxLevelScale * Multiplier;
 }
 

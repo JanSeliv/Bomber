@@ -46,7 +46,7 @@ FCell& FCell::operator=(const FVector& Vector)
 // Rotates around the center of the Level Map to the same yaw degree
 FCell FCell::RotateAngleAxis(float AxisZ) const
 {
-	const FTransform& LevelTransform = AGeneratedMap::Get().GetCachedTransform();
+	const FTransform& LevelTransform = AGeneratedMap::Get().GetActorTransform();
 	const FVector Dimensions = Location - LevelTransform.GetLocation();
 	const float AngleDeg = LevelTransform.GetRotation().Rotator().Yaw;
 	const FVector Axis(FVector2D::ZeroVector, AxisZ);

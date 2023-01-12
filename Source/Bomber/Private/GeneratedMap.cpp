@@ -89,9 +89,9 @@ void AGeneratedMap::SetLevelSize(FIntPoint LevelSize)
 		return;
 	}
 
-	const FVector NewScale(LevelSize.X, LevelSize.Y, 1.f);
-	CachedTransformInternal.SetScale3D(NewScale);
-	ConstructLevelMap(CachedTransformInternal);
+	FTransform CurrentTransform = GetTransform();
+	CurrentTransform.SetScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
+	ConstructLevelMap(CurrentTransform);
 }
 
 // Getting an array of cells by four sides of an input center cell and type of breaks
@@ -319,7 +319,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 	}
 
 	// Find transform
-	FRotator ActorRotation{GetCachedTransform().GetRotation()};
+	FRotator ActorRotation = GetActorRotation();
 	if (!(TO_FLAG(ActorType) & TO_FLAG(EAT::Item | EAT::Player)))
 	{
 		// Random rotate if is not item and not player
@@ -804,7 +804,7 @@ void AGeneratedMap::GenerateLevelActors()
 		TMap<FCell, EActorType> LActorsToSpawn;
 
 		// Locals
-		const FIntVector MapScale(GetCachedTransform().GetScale3D());
+		const FIntVector MapScale(GetActorScale3D());
 		const FIntVector MapHalfScale(MapScale / 2);
 		FCells WallsToSpawn;
 
@@ -972,16 +972,16 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Align transform and build cells
 void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 {
-	CachedTransformInternal = FTransform::Identity;
+	FTransform NewTransform = FTransform::Identity;
 
 	// Align the Transform
 	const FVector NewLocation = UGeneratedMapDataAsset::Get().IsLockedOnZero()
 		                            ? FVector::ZeroVector
 		                            : Transform.GetLocation().GridSnap(FCell::CellSize);
-	CachedTransformInternal.SetLocation(NewLocation);
+	NewTransform.SetLocation(NewLocation);
 
 	const FRotator NewRotation(0.f, Transform.GetRotation().Rotator().Yaw, 0.f);
-	CachedTransformInternal.SetRotation(NewRotation.Quaternion());
+	NewTransform.SetRotation(NewRotation.Quaternion());
 
 	FIntVector MapScale(Transform.GetScale3D());
 	MapScale.Z = 1;          //Height must be 1
@@ -994,9 +994,9 @@ void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 		MapScale.Y += 1;
 	}
 	const FVector NewScale3D(MapScale);
-	CachedTransformInternal.SetScale3D(NewScale3D);
+	NewTransform.SetScale3D(NewScale3D);
 
-	SetActorTransform(CachedTransformInternal);
+	SetActorTransform(NewTransform);
 
 	GridCellsInternal.Empty();
 	GridCellsInternal.Reserve(MapScale.X * MapScale.Y);

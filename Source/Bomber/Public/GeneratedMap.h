@@ -129,10 +129,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsDraggedMapComponent(const class UMapComponent* MapComponent) const;
 
-	/** Returns the cached transform. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FTransform& GetCachedTransform() const { return CachedTransformInternal; }
-
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -175,10 +171,6 @@ protected:
 	/** Is true when current state is Game Starting. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
 	bool bIsGameRunningInternal = false;
-
-	/** Contains the cached transform since the level actor does not move and is always static. */
-	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cached Transform"))
-	FTransform CachedTransformInternal = FTransform::Identity;
 
 	/** Specify for which level actors should show debug renders, is not available in shipping build. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))

@@ -28,7 +28,7 @@ const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
 // Takes the cell and returns its row and column position on the level if exists, -1 otherwise
 void UCellsUtilsLibrary::GetCellPositionOnLevel(const FCell& InCell, int32& OutRow, int32& OutColumn)
 {
-	const int32 MaxWidth = AGeneratedMap::Get().GetCachedTransform().GetScale3D().X;
+	const int32 MaxWidth = FMath::FloorToInt32(AGeneratedMap::Get().GetActorScale3D().X);
 	const int32 CellIdx = GetAllCellsOnLevelAsArray().IndexOfByPredicate([&InCell](const FCell& CellIt) { return CellIt == InCell; });
 	const bool bFound = CellIdx != INDEX_NONE && MaxWidth;
 	OutRow = bFound ? CellIdx / MaxWidth : INDEX_NONE;
@@ -50,19 +50,19 @@ const TArray<FCell>& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
 // Returns the cell location of the Level Map
 FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
 {
-	return FCell(AGeneratedMap::Get().GetCachedTransform().GetLocation());
+	return FCell(AGeneratedMap::Get().GetActorLocation());
 }
 
 // Returns the number of columns on the Level Map
 int32 UCellsUtilsLibrary::GetCellColumnsNumOnLevel()
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetScale3D().X;
+	return FMath::FloorToInt32(AGeneratedMap::Get().GetActorScale3D().X);
 }
 
 // Returns the number of rows on the Level Map
 int32 UCellsUtilsLibrary::GetCellRowsNumOnLevel()
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetScale3D().Y;
+	return FMath::FloorToInt32(AGeneratedMap::Get().GetActorScale3D().Y);
 }
 
 // Returns GetCellColumnsNumOnLevel - 1
@@ -92,13 +92,13 @@ FRotator UCellsUtilsLibrary::GetCellRotator()
 // Returns cell quaternion that is the same for any cell on the Level Map
 FQuat UCellsUtilsLibrary::GetCellQuaternion()
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetRotation();
+	return AGeneratedMap::Get().GetActorQuat();
 }
 
 // Returns any cell Z-location on the Level Map
 float UCellsUtilsLibrary::GetCellHeightLocation()
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetLocation().Z;
+	return AGeneratedMap::Get().GetActorLocation().Z;
 }
 
 // Returns all empty grid cell locations on the Level Map where non of actors are present
