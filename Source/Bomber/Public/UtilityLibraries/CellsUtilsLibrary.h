@@ -150,15 +150,6 @@ public:
 	 *		Math library
 	 * --------------------------------------------------- */
 
-	/** Rotation of the input vector around the center of the Level Map to the same yaw degree
-	 *
-	 * @param Cell The cell, that will be rotated
-	 * @param AxisZ The Z param of the axis to rotate around
-	 * @return Rotated to the Level Map cell
-	 */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static FORCEINLINE FCell RotateCellAngleAxis(const FCell& Cell, float AxisZ) { return Cell.RotateAngleAxis(AxisZ); }
-
 	/** Calculate the length between two cells.
 	 * Could be useful to check how far two cells are far between themselves.
 	 *
@@ -183,13 +174,32 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FCell GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck) { return FCell::GetCellArrayNearest(Cells, CellToCheck); }
 
-	/** Returns the width and width in specified cells, where each 1 unit means 1 cell. */
+	/** Returns number of columns (X) in specified cells array, where each 1 unit means 1 cell.
+	* E.g: if given cells are corner cells on 7x9 level, it will return 7 width that represent columns (X). */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static FORCEINLINE float GetCellArrayWidth(const TSet<FCell>& InCells) { return FCell::GetCellsArrayWidth(InCells); }
+	static FORCEINLINE float GetCellArrayWidth(const TSet<FCell>& InCells) { return FCell::GetCellArrayWidth(InCells); }
 
-	/** Returns the length in specified cells, where each 1 unit means 1 cell. */
+	/** Returns number of rows (Y) in specified cells array, where each 1 unit means 1 cell.
+	* E.g: if given cells are corner cells on 7x9 level, it will return 9 length that represent rows (Y). */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static FORCEINLINE float GetCellArrayLength(const TSet<FCell>& InCells) { return FCell::GetCellsArrayLength(InCells); }
+	static FORCEINLINE float GetCellArrayLength(const TSet<FCell>& InCells) { return FCell::GetCellArrayLength(InCells); }
+
+	/** Constructs and returns new grid from given transform.
+	 * @param OriginTransform its location and rotation is the center of new grid, its scale-X is number of columns, scale-Y is number of rows. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE TSet<FCell> MakeCellGridByTransform(const FTransform& OriginTransform) { return FCell::MakeCellGridByTransform(OriginTransform); }
+
+	/** Allows rotate or unrotated given grid around its origin. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static TSet<FCell> RotateCellArray(float AxisZ, const TSet<FCell>& InCells) { return FCell::RotateCellArray(AxisZ, InCells); }
+
+	/** Makes origin transform for given grid. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE FTransform GetCellArrayTransform(const TSet<FCell>& InCells) { return FCell::GetCellArrayTransform(InCells); }
+
+	/** Makes rotator for given grid its origin. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE FRotator GetCellArrayRotator(const TSet<FCell>& InCells) { return FCell::GetCellArrayRotator(InCells); }
 
 	/* ---------------------------------------------------
 	*		Level Map related cell functions
@@ -216,16 +226,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FCell GetCenterCellOnLevel();
 
-	/** Returns the center row and column positions on the level. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell"))
+	/** Returns the center row and column positions on the level.
+	 * E.g: for level with 5 rows and 5 columns, the center cell will be (2,2). */
+	UFUNCTION(BlueprintPure, Category = "C++")
 	static void GetCenterCellPositionOnLevel(int32& OutRow, int32& OutColumn);
 
-	/** Returns the number of columns on the Level Map. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Length"))
+	/** Returns the width (number of columns X) of the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Width,X,size"))
 	static int32 GetCellColumnsNumOnLevel();
 
-	/** Returns the number of rows on the Level Map. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Length"))
+	/** Returns the length (number of rows Y) of the Level Map. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Length,Y,size"))
 	static int32 GetCellRowsNumOnLevel();
 
 	/** Returns GetCellColumnsNumOnLevel - 1. */
@@ -469,6 +480,16 @@ public:
 	/** Returns true if player is not able to reach specified cell by any any path. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Path"))
 	static bool IsIslandCell(const FCell& Cell);
+
+	/** Gets a copy of given cell rotated around the given transform to the same yaw degree.
+	 * @param InCell - The cell to rotate.
+	 * @param AxisZ The Z param of the axis to rotate around. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell"))
+	static FCell RotateCellAroundLevelOrigin(const FCell& InCell, float AxisZ);
+
+	/** Gets a copy of given cell snapped to current level grid even if it is rotated. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", Keywords = "Grid Snap"))
+	static FCell SnapCellOnLevel(const FCell& InCell);
 
 	/* ---------------------------------------------------
 	 *		Debug cells utilities

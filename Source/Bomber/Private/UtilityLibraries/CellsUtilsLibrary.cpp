@@ -28,7 +28,7 @@ const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
 // Takes the cell and returns its row and column position on the level if exists, -1 otherwise
 void UCellsUtilsLibrary::GetCellPositionOnLevel(const FCell& InCell, int32& OutRow, int32& OutColumn)
 {
-	const int32 MaxWidth = FMath::FloorToInt32(AGeneratedMap::Get().GetActorScale3D().X);
+	const int32 MaxWidth = GetCellColumnsNumOnLevel();
 	const int32 CellIdx = GetAllCellsOnLevelAsArray().IndexOfByPredicate([&InCell](const FCell& CellIt) { return CellIt == InCell; });
 	const bool bFound = CellIdx != INDEX_NONE && MaxWidth;
 	OutRow = bFound ? CellIdx / MaxWidth : INDEX_NONE;
@@ -63,16 +63,18 @@ void UCellsUtilsLibrary::GetCenterCellPositionOnLevel(int32& OutRow, int32& OutC
 	OutColumn = GetLastColumnIndexOnLevel() / 2;
 }
 
-// Returns the number of columns on the Level Map
+// Returns the width (number of columns X) of the Level Map
 int32 UCellsUtilsLibrary::GetCellColumnsNumOnLevel()
 {
-	return FMath::FloorToInt32(AGeneratedMap::Get().GetActorScale3D().X);
+	// As alternative, LevelMap's X-scale could be taken, but array width is more reliable
+	return FMath::FloorToInt32(GetCellArrayWidth(GetAllCellsOnLevel()));
 }
 
-// Returns the number of rows on the Level Map
+// Returns the length (number of rows Y) of the Level Map
 int32 UCellsUtilsLibrary::GetCellRowsNumOnLevel()
 {
-	return FMath::FloorToInt32(AGeneratedMap::Get().GetActorScale3D().Y);
+	// As alternative, LevelMap's Y-scale could be taken, but array length is more reliable
+	return FMath::FloorToInt32(GetCellArrayLength(GetAllCellsOnLevel()));
 }
 
 // Returns GetCellColumnsNumOnLevel - 1
@@ -319,6 +321,18 @@ bool UCellsUtilsLibrary::IsIslandCell(const FCell& Cell)
 	return !AGeneratedMap::Get().DoesPathExistToCells({Cell});
 }
 
+// Rotates the given cell around the center of the Level Map to the same yaw degree
+FCell UCellsUtilsLibrary::RotateCellAroundLevelOrigin(const FCell& InCell, float AxisZ)
+{
+	return FCell::RotateCellAroundOrigin(InCell, AxisZ, AGeneratedMap::Get().GetActorTransform());
+}
+
+/** Gets a copy of given cell snapped to level grid respecting its rotation. */
+FCell UCellsUtilsLibrary::SnapCellOnLevel(const FCell& InCell)
+{
+	return FCell::SnapRotatedCell(InCell, AGeneratedMap::Get().GetActorTransform());
+}
+
 // ---------------------------------------------------
 //		 Debug cells utilities
 // ---------------------------------------------------
@@ -377,6 +391,11 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 	{
 		ClearDisplayedCells(Owner);
 	}
+
+	// Have the render text rotated
+	const FQuat CellGridQuaternion = Cells.Num() > 1
+		                                 ? GetCellArrayRotator(Cells).Quaternion() // Get rotator from array
+		                                 : GetCellQuaternion();                    // Get current level rotator
 
 	for (const FCell& CellIt : Cells)
 	{
@@ -455,7 +474,7 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 			FTransform RenderTransform = FTransform::Identity;
 			RenderTransform.SetLocation(TextLocation);
 			static const FQuat AdditiveQuat = FRotator(90.f, 0.f, -90.f).Quaternion();
-			RenderTransform.SetRotation(GetCellQuaternion() * AdditiveQuat);
+			RenderTransform.SetRotation(CellGridQuaternion * AdditiveQuat);
 			RenderComp.SetWorldTransform(RenderTransform);
 		}
 	}

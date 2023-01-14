@@ -2,7 +2,6 @@
 
 #include "Structures/Cell.h"
 //---
-#include "GeneratedMap.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 
 const FCell FCell::InvalidCell = FVector::DownVector;
@@ -43,20 +42,29 @@ FCell& FCell::operator=(const FVector& Vector)
 	return *this;
 }
 
-// Rotates around the center of the Level Map to the same yaw degree
-FCell FCell::RotateAngleAxis(float AxisZ) const
+// Gets a copy of given cell rotated around given transform to the same yaw degree
+FCell FCell::RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTransform& OriginTransform)
 {
-	const FTransform& LevelTransform = AGeneratedMap::Get().GetActorTransform();
-	const FVector Dimensions = Location - LevelTransform.GetLocation();
-	const float AngleDeg = LevelTransform.GetRotation().Rotator().Yaw;
+	const FVector Dimensions = InCell.Location - OriginTransform.GetLocation();
+	const float AngleDeg = OriginTransform.GetRotation().Rotator().Yaw;
 	const FVector Axis(FVector2D::ZeroVector, AxisZ);
 	const FVector RotatedVector = Dimensions.RotateAngleAxis(AngleDeg, Axis);
-	return FCell(Location + RotatedVector - Dimensions);
+	FCell RotatedCell(InCell.Location + RotatedVector - Dimensions);
+	return MoveTemp(RotatedCell);
 }
 
 // Finds the closest cell to the given cell within array of cells
-FCell FCell::GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck)
+FCell FCell::GetCellArrayNearest(const FCells& Cells, const FCell& CellToCheck)
 {
+	//-----------------
+	// +-----+-----+   |
+	// |  1  |  2  |   | 1-4: are given values in 'Cells' array
+	// +-----+-----+   |
+	// | [3] |  4  |   | [3]: is the found nearest cell.
+	// +-----+-----+   |
+	//    X            | X: is given 'CellToCheck'
+	//-----------------
+
 	if (!Cells.Num())
 	{
 		return InvalidCell;
@@ -79,18 +87,106 @@ FCell FCell::GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCh
 	return NearestCell;
 }
 
-// Returns the width and width in specified cells, where each 1 unit means 1 cell
-float FCell::GetCellsArrayWidth(const TSet<FCell>& InCells)
+// Returns number of columns (X) in specified cells array, where each 1 unit means 1 cell
+float FCell::GetCellArrayWidth(const FCells& InCells)
 {
-	const FBox CellsBox(CellsToVectors(InCells));
+	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
+	const FBox CellsBox(CellsToVectors(UnrotatedCells));
 	return CellsBox.GetSize().X / CellSize + 1.f;
 }
 
-// Returns the length in specified cells, where each 1 unit means 1 cell
-float FCell::GetCellsArrayLength(const FCells& InCells)
+// Returns number of rows (Y) in specified cells array, where each 1 unit means 1 cell
+float FCell::GetCellArrayLength(const FCells& InCells)
 {
-	const FBox CellsBox(CellsToVectors(InCells));
+	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
+	const FBox CellsBox(CellsToVectors(UnrotatedCells));
 	return CellsBox.GetSize().Y / CellSize + 1.f;
+}
+
+// Allows rotate or unrotated given grid around its origin
+FCells FCell::RotateCellArray(float AxisZ, const FCells& InCells)
+{
+	// In:rotated cells		Out:unrotated cells
+	//     /\     				 __ __ __ __
+	//    /   \   				|			|
+	//   /      \ 				|			|
+	//  /        /				|			|
+	// /        / 				|			|
+	// \       /  				|			|
+	//   \    /   				|__ __ __ __|
+	//     \ /
+
+	if (InCells.IsEmpty())
+	{
+		return EmptyCells;
+	}
+
+	const FTransform CellGridTransform = GetCellArrayTransform(InCells);
+
+	FCells RotatedCells = EmptyCells;
+	for (const FCell& CellIt : InCells)
+	{
+		const FCell RotatedCell = RotateCellAroundOrigin(CellIt, AxisZ, CellGridTransform);
+		FCell SnappedCell = SnapCell(RotatedCell);
+		RotatedCells.Emplace(MoveTemp(SnappedCell));
+	}
+
+	return MoveTemp(RotatedCells);
+}
+
+// Constructs and returns new grid from given transform
+FCells FCell::MakeCellGridByTransform(const FTransform& OriginTransform)
+{
+	const FVector LevelLocation = OriginTransform.GetLocation();
+	const FVector LevelScale = OriginTransform.GetScale3D();
+	const FIntPoint LevelSize(LevelScale.X, LevelScale.Y);
+
+	FCells GridCells;
+	GridCells.Reserve(LevelSize.X * LevelSize.Y);
+	for (int32 Y = 0; Y < LevelSize.Y; ++Y)
+	{
+		for (int32 X = 0; X < LevelSize.X; ++X)
+		{
+			FVector FoundVector(X, Y, 0.f);
+			// Calculate a length of iteration cell
+			FoundVector *= CellSize;
+			// Locate the cell relative to the Level Map
+			FoundVector += LevelLocation;
+			// Subtract the deviation from the center
+			FoundVector -= (LevelScale / 2.f) * CellSize;
+			// Snap to the cell
+			const FCell SnappedCell = SnapCell(FoundVector);
+			// Cell was found, add rotated cell to the array
+			FCell RotatedCell = RotateCellAroundOrigin(SnappedCell, 1.f, OriginTransform);
+
+			GridCells.Emplace(MoveTemp(RotatedCell));
+		}
+	}
+
+	return MoveTemp(GridCells);
+}
+
+// Makes origin transform for given grid
+FTransform FCell::GetCellArrayTransform(const FCells& InCells)
+{
+	FTransform OriginTransform = FTransform::Identity;
+	OriginTransform.SetLocation(GetCellArrayAverage(InCells));
+	OriginTransform.SetRotation(GetCellArrayRotator(InCells).Quaternion());
+	return MoveTemp(OriginTransform);
+}
+
+// Makes rotator for given grid its origin
+FRotator FCell::GetCellArrayRotator(const FCells& InCells)
+{
+	if (InCells.Num() < 2)
+	{
+		return FRotator::ZeroRotator;
+	}
+
+	const FCell& FirstCell = *InCells.CreateConstIterator();
+	const FCell& SecondCell = *++InCells.CreateConstIterator();
+	const FVector Direction = SecondCell - FirstCell;
+	return Direction.Rotation();
 }
 
 // Sums cells
@@ -186,5 +282,14 @@ FCells FCell::VectorsToCells(const TArray<FVector>& Vectors)
 	{
 		Cells.Add(FCell(Vector));
 	}
-	return Cells;
+	return MoveTemp(Cells);
+}
+
+// Gets a copy of given cell snapped to a grid
+FCell FCell::SnapRotatedCell(const FCell& InCell, const FTransform& GridOriginTransform)
+{
+	const FCell UnrotatedCell = RotateCellAroundOrigin(InCell, -1.f, GridOriginTransform);
+	const FCell SnappedCell = SnapCell(UnrotatedCell);
+	FCell RotatedCell = RotateCellAroundOrigin(SnappedCell, 1.f, GridOriginTransform);
+	return MoveTemp(RotatedCell);
 }

@@ -81,15 +81,15 @@ void AGeneratedMap::ConstructLevelMap(const FTransform& Transform)
 }
 
 // Sets the size for generated map, it will automatically regenerate the level for given size
-void AGeneratedMap::SetLevelSize(FIntPoint LevelSize)
+void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 {
 	if (!HasAuthority()
-		|| !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%s: 'LevelSize' is invalid: %s"), *FString(__FUNCTION__), *LevelSize.ToString()))
+	    || !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%s: 'LevelSize' is invalid: %s"), *FString(__FUNCTION__), *LevelSize.ToString()))
 	{
 		return;
 	}
 
-	FTransform CurrentTransform = GetTransform();
+	FTransform CurrentTransform = GetActorTransform();
 	CurrentTransform.SetScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
 	ConstructLevelMap(CurrentTransform);
 }
@@ -499,9 +499,9 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 	// ----- Part 0: Locals -----
 	FCell FoundCell = FCell::InvalidCell;
 	const FCell OwnerCell(ComponentOwner->GetActorLocation()); // The owner location
+
 	// Check if the owner already standing on:
-	FCells InitialCells({OwnerCell,                                                                                        // 0: exactly the current his cell
-	                     FCell(OwnerCell.RotateAngleAxis(-1.F).Location.GridSnap(FCell::CellSize)).RotateAngleAxis(1.F)}); // 1: within the radius of one cell
+	FCells InitialCells = {OwnerCell, UCellsUtilsLibrary::SnapCellOnLevel(OwnerCell)};
 
 	FCells CellsToIterate(GridCellsInternal.FilterByPredicate([InitialCells](FCell Cell)
 	{
@@ -516,8 +516,6 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 
 	// Pre gameplay locals to find a nearest cell
 	const bool bHasNotBegunPlay = !HasActorBegunPlay(); // the game was not started
-	static constexpr float MaxFloat = TNumericLimits<float>::Max();
-	float LastFoundEditorLen = MaxFloat;
 	if (bHasNotBegunPlay)
 	{
 		CellsToIterate.Append(GridCellsInternal); // union of two sets(initials+all) for finding a nearest cell
@@ -525,6 +523,9 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 
 	// ----- Part 1:  Cells iteration
 
+	// Try to find the cell withing initial cells meanwhile make all free cells
+	FCells AllFreeCells;
+	bool bFoundAsInitialCell = false;
 	int32 Counter = INDEX_NONE;
 	for (const FCell& CellIt : CellsToIterate)
 	{
@@ -540,6 +541,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 		    && GridCellsInternal.Contains(CellIt)) // is contained on the grid
 		{
 			FoundCell = CellIt;
+			bFoundAsInitialCell = true;
 			break;
 		}
 
@@ -547,14 +549,14 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 		if (bHasNotBegunPlay               // the game was not started
 		    && Counter >= InitialCellsNum) // if iterated cell is not initial
 		{
-			const float EditorLenIt = FCell::Distance<float>(OwnerCell, CellIt);
-			if (EditorLenIt < LastFoundEditorLen) // Distance closer
-			{
-				LastFoundEditorLen = EditorLenIt;
-				FoundCell = CellIt;
-			}
+			AllFreeCells.Emplace(CellIt);
 		}
 	} //[Cells  Iteration]
+
+	if (!bFoundAsInitialCell)
+	{
+		FoundCell = FCell::GetCellArrayNearest(AllFreeCells, OwnerCell);
+	}
 
 	// Checks the cell is contained in the grid and free from other level actors.
 	if (FoundCell.IsInvalidCell()) // can be invalid if nothing was found, check to avoid such rewriting
@@ -597,6 +599,37 @@ bool AGeneratedMap::IsDraggedMapComponent(const UMapComponent* MapComponent) con
 
 	const EActorType* FoundCell = DraggedCellsInternal.Find(Cell);
 	return FoundCell && *FoundCell == ActorType;
+}
+
+// Takes transform and returns aligned copy allowed to be used as actor transform for this map
+FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorTransform)
+{
+	FTransform NewTransform = FTransform::Identity;
+
+	// Align location snapping to the grid size
+	const FVector NewLocation = UGeneratedMapDataAsset::Get().IsLockedOnZero()
+		                            ? FVector::ZeroVector
+		                            : FCell::SnapCell(ActorTransform.GetLocation());
+	NewTransform.SetLocation(NewLocation);
+
+	// Align rotation allowing only yaw axis
+	const FRotator NewRotation(0.f, ActorTransform.GetRotation().Rotator().Yaw, 0.f);
+	NewTransform.SetRotation(NewRotation.Quaternion());
+
+	// Align scale to have only unpaired integers for XY and always 1 for Z
+	FIntPoint NewLevelSize(ActorTransform.GetScale3D().X, ActorTransform.GetScale3D().Y);
+	if (NewLevelSize.X % 2 != 1) // Width (columns) must be unpaired
+	{
+		NewLevelSize.X += 1;
+	}
+	if (NewLevelSize.Y % 2 != 1) // Length (rows) must be unpaired-
+	{
+		NewLevelSize.Y += 1;
+	}
+	constexpr int32 MapScaleZ = 1;
+	NewTransform.SetScale3D(FVector(NewLevelSize, MapScaleZ));
+
+	return MoveTemp(NewTransform);
 }
 
 /* ---------------------------------------------------
@@ -972,54 +1005,11 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Align transform and build cells
 void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 {
-	FTransform NewTransform = FTransform::Identity;
+	const FTransform GridTransform = ActorTransformToGridTransform(Transform);
 
-	// Align the Transform
-	const FVector NewLocation = UGeneratedMapDataAsset::Get().IsLockedOnZero()
-		                            ? FVector::ZeroVector
-		                            : Transform.GetLocation().GridSnap(FCell::CellSize);
-	NewTransform.SetLocation(NewLocation);
+	SetActorTransform(GridTransform);
 
-	const FRotator NewRotation(0.f, Transform.GetRotation().Rotator().Yaw, 0.f);
-	NewTransform.SetRotation(NewRotation.Quaternion());
-
-	FIntVector MapScale(Transform.GetScale3D());
-	MapScale.Z = 1;          //Height must be 1
-	if (MapScale.X % 2 != 1) // Length must be unpaired
-	{
-		MapScale.X += 1;
-	}
-	if (MapScale.Y % 2 != 1) // Weight must be unpaired
-	{
-		MapScale.Y += 1;
-	}
-	const FVector NewScale3D(MapScale);
-	NewTransform.SetScale3D(NewScale3D);
-
-	SetActorTransform(NewTransform);
-
-	GridCellsInternal.Empty();
-	GridCellsInternal.Reserve(MapScale.X * MapScale.Y);
-
-	// Loopy cell-filling of the grid array
-	for (int32 Y = 0; Y < MapScale.Y; ++Y)
-	{
-		for (int32 X = 0; X < MapScale.X; ++X)
-		{
-			FVector FoundVector(X, Y, 0.f);
-			// Calculate a length of iteration cell
-			FoundVector *= FCell::CellSize;
-			// Locate the cell relative to the Level Map
-			FoundVector += NewLocation;
-			// Subtract the deviation from the center
-			FoundVector -= (NewScale3D / 2) * FCell::CellSize;
-			// Snap to the cell
-			FoundVector = FoundVector.GridSnap(FCell::CellSize);
-			// Cell was found, add rotated cell to the array
-			const FCell FoundCell(FCell(FoundVector).RotateAngleAxis(1.f));
-			GridCellsInternal.AddUnique(FoundCell);
-		}
-	}
+	GridCellsInternal = FCell::MakeCellGridByTransform(GridTransform).Array();
 }
 
 // Updates current level type

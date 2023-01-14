@@ -67,7 +67,7 @@ public:
 	 * @param LevelSize The new size where length and width have to be unpaired (odd).
 	 * E.g: X:9, Y:7 - set the size of the level to 9 columns (width) and 7 rows (length). */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void SetLevelSize(FIntPoint LevelSize);
+	void SetLevelSize(const FIntPoint& LevelSize);
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -128,6 +128,15 @@ public:
 	/** Returns true if specified map component has non-generated owner that is manually dragged to the scene. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsDraggedMapComponent(const class UMapComponent* MapComponent) const;
+
+	/** Takes transform and returns aligned copy allowed to be used as actor transform for this map.
+	 * @param ActorTransform The transform to align.
+	 * @return Aligned transform, where:
+	 * Transform location and rotation is the center of new grid
+	 * Transform scale-X is number of columns.
+	 * Transform scale-Y is number of rows. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FTransform ActorTransformToGridTransform(const FTransform& ActorTransform);
 
 protected:
 	/* ---------------------------------------------------

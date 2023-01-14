@@ -25,7 +25,8 @@ ENUM_CLASS_FLAGS(ECellDirection);
 using ECD = ECellDirection;
 
 /**
- * The structure that contains a location of an one cell on a grid of the Level Map.
+ * The structure that contains a location of an one cell (tile) on a grid of the Level Map.
+ * X is the column index, Y is the row index on the grid.
  */
 USTRUCT(BlueprintType, meta = (HasNativeMake = "/Script/Bomber.CellsUtilsLibrary.MakeCell", HasNativeBreak = "/Script/Bomber.CellsUtilsLibrary.BreakCell"))
 struct BOMBER_API FCell
@@ -71,12 +72,11 @@ struct BOMBER_API FCell
 	/** Returns Cell's Z component. */
 	float Z() const { return Location.Z; }
 
-	/** Rotates around the center of the Level Map to the same yaw degree.
-	 *
-	 * @param AxisZ The Z param of the axis to rotate around
-	 * @return Rotated to the Level Map cell, the same cell otherwise
-	 */
-	FCell RotateAngleAxis(float AxisZ) const;
+	/** Gets a copy of given cell rotated around given transform to the same yaw degree.
+	 * @param InCell - The cell to rotate.
+	 * @param AxisZ The Z param of the axis to rotate around.
+	 * @param OriginTransform The transform of the origin of the rotation. */
+	static FCell RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTransform& OriginTransform);
 
 	/** Comparing with uninitialized Invalid Cell. */
 	FORCEINLINE bool IsInvalidCell() const { return *this == InvalidCell; }
@@ -89,10 +89,23 @@ struct BOMBER_API FCell
 	 * @param CellToCheck The start position of the cell to check. */
 	static FCell GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck);
 
-	/** Returns the length and width in specified cells, where each 1 unit means 1 cell.
-	 * E.g: if given cells are corner cells on level with the size 7 rows x 9 columns , it returns 7 width and 9 length respectively. */
-	static float GetCellsArrayWidth(const FCells& InCells);
-	static float GetCellsArrayLength(const FCells& InCells);
+	/** Returns the width (columns X) and the length (rows Y) in specified cells, where each 1 unit means 1 cell.
+	 * E.g: if given cells are corner cells on 7x9 level, it will return 7 columns (X) and 9 rows (Y) columns respectively. */
+	static float GetCellArrayWidth(const FCells& InCells);
+	static float GetCellArrayLength(const FCells& InCells);
+
+	/** Constructs and returns new grid from given transform.
+	 * @param OriginTransform its location and rotation is the center of new grid, its scale-X is number of columns, scale-Y is number of rows. */
+	static TSet<FCell> MakeCellGridByTransform(const FTransform& OriginTransform);
+
+	/** Allows rotate or unrotated given grid around its origin. */
+	static FCells RotateCellArray(float AxisZ, const FCells& InCells);
+
+	/** Makes origin transform for given grid. */
+	static FTransform GetCellArrayTransform(const FCells& InCells);
+
+	/** Makes rotator for given grid its origin. */
+	static FRotator GetCellArrayRotator(const FCells& InCells);
 
 	/** Returns how many cells are between two cells, where each 1 unit means one cell. */
 	template <typename T>
@@ -139,6 +152,12 @@ struct BOMBER_API FCell
 
 	/** Extracts first cell from specified cells set.*/
 	static FORCEINLINE FCell GetFirstCellInSet(const FCells& InCells) { return !InCells.IsEmpty() ? InCells.Array()[0] : InvalidCell; }
+
+	/** Gets a copy of given cell snapped its location to a grid while it does not respect rotated grids. */
+	static FORCEINLINE FCell SnapCell(const FCell& InCell) { return InCell.Location.GridSnap(CellSize); }
+
+	/** Gets a copy of given cell snapped to the grid by its origin transform, so it makes possible to snap to the rotated grid. */
+	static FCell SnapRotatedCell(const FCell& InCell, const FTransform& GridOriginTransform);
 
 	/**
 	* Creates a hash value from a FCell.
