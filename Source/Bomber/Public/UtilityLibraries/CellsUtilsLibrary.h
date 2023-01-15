@@ -487,9 +487,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell"))
 	static FCell RotateCellAroundLevelOrigin(const FCell& InCell, float AxisZ);
 
-	/** Gets a copy of given cell snapped to current level grid even if it is rotated. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", Keywords = "Grid Snap"))
-	static FCell SnapCellOnLevel(const FCell& InCell);
+	/** Gets a copy of given cell snapped to nearest cell on the level grid. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", Keywords = "Grid Snap,near"))
+	static FCell SnapCellOnLevel(const FCell& Cell);
+
+	/** Returns nearest free cell to given cell, where free means cell with no other level actors except players. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static FCell GetNearestFreeCell(const FCell& Cell);
 
 	/* ---------------------------------------------------
 	 *		Debug cells utilities

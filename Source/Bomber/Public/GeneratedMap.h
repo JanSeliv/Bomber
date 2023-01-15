@@ -220,7 +220,7 @@ protected:
 	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
 	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
 	 */
-	void IntersectCellsByTypes(FCells& InOutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty = true) const;
+	void IntersectCellsByTypes(FCells& InOutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty) const;
 
 	/** Getting an array of cells by any sides from an input center cell and type of breaks.
 	 *	Is not public blueprintable since all needed ufunctions are already use this method.

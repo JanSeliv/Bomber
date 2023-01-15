@@ -327,10 +327,18 @@ FCell UCellsUtilsLibrary::RotateCellAroundLevelOrigin(const FCell& InCell, float
 	return FCell::RotateCellAroundOrigin(InCell, AxisZ, AGeneratedMap::Get().GetActorTransform());
 }
 
-/** Gets a copy of given cell snapped to level grid respecting its rotation. */
-FCell UCellsUtilsLibrary::SnapCellOnLevel(const FCell& InCell)
+// Gets a copy of given cell snapped to level grid respecting its rotation
+FCell UCellsUtilsLibrary::SnapCellOnLevel(const FCell& Cell)
 {
-	return FCell::SnapRotatedCell(InCell, AGeneratedMap::Get().GetActorTransform());
+	return GetCellArrayNearest(GetAllCellsOnLevel(), Cell);
+}
+
+// Returns nearest free cell to given cell, where free means cell with no other level actors except players
+FCell UCellsUtilsLibrary::GetNearestFreeCell(const FCell& Cell)
+{
+	FCells FreeCells = GetAllEmptyCellsWithoutActors();
+	FreeCells.Append(GetAllCellsWithActors(TO_FLAG(EAT::Player))); // Players are also considered as free cells
+	return GetCellArrayNearest(FreeCells, Cell);
 }
 
 // ---------------------------------------------------

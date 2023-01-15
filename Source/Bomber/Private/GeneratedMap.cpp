@@ -119,7 +119,7 @@ void AGeneratedMap::GetSidesCells(
 	bool bBreakOnWalls = !bIsAnyPath && !OutCells.Num();
 	if (bBreakOnWalls)
 	{
-		IntersectCellsByTypes(Walls, TO_FLAG(EAT::Wall)); // just finding the walls on the map
+		Walls = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Wall));
 	}
 	else if (bBreakInputCells) // specified OutCells is not empty, these cells break lines as the Wall behavior
 	{
@@ -143,7 +143,7 @@ void AGeneratedMap::GetSidesCells(
 	const bool bBreakOnObstacles = !bIsAnyPath && Pathfinder != EPathType::Explosion;
 	if (bBreakOnObstacles) // if is the request to find the path without Bombs/Boxes
 	{
-		IntersectCellsByTypes(Obstacles, TO_FLAG(EAT::Bomb | EAT::Box));
+		Obstacles = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Bomb | EAT::Box));
 	}
 
 	// ----- Secure: a path without players -----
@@ -151,7 +151,7 @@ void AGeneratedMap::GetSidesCells(
 	const bool bBreakOnPlayers = Pathfinder == EPathType::Secure;
 	if (bBreakOnPlayers) // if is the request to find the path without players cells.
 	{
-		IntersectCellsByTypes(PlayersCells, TO_FLAG(EAT::Player));
+		PlayersCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
 	}
 
 	// ----- A path without explosions -----
@@ -496,77 +496,21 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 		return;
 	}
 
-	// ----- Part 0: Locals -----
-	FCell FoundCell = FCell::InvalidCell;
-	const FCell OwnerCell(ComponentOwner->GetActorLocation()); // The owner location
+	const FCell CurrentCellByLocation = ComponentOwner->GetActorLocation();
 
-	// Check if the owner already standing on:
-	FCells InitialCells = {OwnerCell, UCellsUtilsLibrary::SnapCellOnLevel(OwnerCell)};
-
-	FCells CellsToIterate(GridCellsInternal.FilterByPredicate([InitialCells](FCell Cell)
+	const FCell LastCell = MapComponent->GetCell();
+	if (LastCell.IsValid()
+	    && UCellsUtilsLibrary::SnapCellOnLevel(CurrentCellByLocation) == LastCell)
 	{
-		return InitialCells.Contains(Cell);
-	}));
-
-	const int32 InitialCellsNum = CellsToIterate.Num(); // The number of initial cells
-
-	FCells NonEmptyCells;
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(~EAT::Player)); //AT::Bomb | AT::Item | AT::Wall | AT::Box
-	NonEmptyCells.Remove(MapComponent->GetCell());
-
-	// Pre gameplay locals to find a nearest cell
-	const bool bHasNotBegunPlay = !HasActorBegunPlay(); // the game was not started
-	if (bHasNotBegunPlay)
-	{
-		CellsToIterate.Append(GridCellsInternal); // union of two sets(initials+all) for finding a nearest cell
-	}
-
-	// ----- Part 1:  Cells iteration
-
-	// Try to find the cell withing initial cells meanwhile make all free cells
-	FCells AllFreeCells;
-	bool bFoundAsInitialCell = false;
-	int32 Counter = INDEX_NONE;
-	for (const FCell& CellIt : CellsToIterate)
-	{
-		Counter++;
-
-		if (NonEmptyCells.Contains(CellIt)) // the cell is not free from other level actors
-		{
-			continue;
-		}
-
-		// if the cell was found among initial cells without searching a nearest
-		if (Counter < InitialCellsNum              // is the initial cell
-		    && GridCellsInternal.Contains(CellIt)) // is contained on the grid
-		{
-			FoundCell = CellIt;
-			bFoundAsInitialCell = true;
-			break;
-		}
-
-		//	Finding the nearest cell before starts the game
-		if (bHasNotBegunPlay               // the game was not started
-		    && Counter >= InitialCellsNum) // if iterated cell is not initial
-		{
-			AllFreeCells.Emplace(CellIt);
-		}
-	} //[Cells  Iteration]
-
-	if (!bFoundAsInitialCell)
-	{
-		FoundCell = FCell::GetCellArrayNearest(AllFreeCells, OwnerCell);
-	}
-
-	// Checks the cell is contained in the grid and free from other level actors.
-	if (FoundCell.IsInvalidCell()) // can be invalid if nothing was found, check to avoid such rewriting
-	{
+		// The actor is already aligned on the level
 		return;
 	}
 
-	SetNearestCellDragged(MapComponent, FoundCell);
+	const FCell FoundFreeCell = UCellsUtilsLibrary::GetNearestFreeCell(CurrentCellByLocation);
 
-	MapComponent->SetCell(FoundCell);
+	SetNearestCellDragged(MapComponent, FoundFreeCell);
+
+	MapComponent->SetCell(FoundFreeCell);
 }
 
 // Change level by type
@@ -786,8 +730,7 @@ void AGeneratedMap::GenerateLevelActors()
 	}
 
 	// Destroy all editor-only non-PIE actors
-	FCells NonEmptyCells;
-	IntersectCellsByTypes(NonEmptyCells, TO_FLAG(EAT::All));
+	const FCells NonEmptyCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::All));
 	DestroyLevelActorsOnCells(NonEmptyCells);
 	PlayersNumInternal = 0;
 
