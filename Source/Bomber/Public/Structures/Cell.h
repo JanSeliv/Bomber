@@ -75,8 +75,8 @@ struct BOMBER_API FCell
 	/** Gets a copy of given cell rotated around given transform to the same yaw degree.
 	 * @param InCell - The cell to rotate.
 	 * @param AxisZ The Z param of the axis to rotate around.
-	 * @param OriginTransform The transform of the origin of the rotation. */
-	static FCell RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTransform& OriginTransform);
+	 * @param OriginTransformNoScale The transform of the origin of the rotation. */
+	static FCell RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTransform& OriginTransformNoScale);
 
 	/** Comparing with uninitialized Invalid Cell. */
 	FORCEINLINE bool IsInvalidCell() const { return *this == InvalidCell; }
@@ -91,6 +91,7 @@ struct BOMBER_API FCell
 
 	/** Returns the width (columns X) and the length (rows Y) in specified cells, where each 1 unit means 1 cell.
 	 * E.g: if given cells are corner cells on 7x9 level, it will return 7 columns (X) and 9 rows (Y) columns respectively. */
+	static FVector2D GetCellArraySize(const FCells& InCells);
 	static float GetCellArrayWidth(const FCells& InCells);
 	static float GetCellArrayLength(const FCells& InCells);
 
@@ -103,9 +104,10 @@ struct BOMBER_API FCell
 
 	/** Makes origin transform for given grid. */
 	static FTransform GetCellArrayTransform(const FCells& InCells);
+	static FTransform GetCellArrayTransformNoScale(const FCells& InCells);
 
 	/** Makes rotator for given grid its origin. */
-	static FRotator GetCellArrayRotator(const FCells& InCells);
+	static FRotator GetCellArrayRotation(const FCells& InCells);
 
 	/** Returns how many cells are between two cells, where each 1 unit means one cell. */
 	template <typename T>
@@ -136,7 +138,7 @@ struct BOMBER_API FCell
 	FORCEINLINE operator FVector() const { return this->Location; }
 
 	/** Find the average of an set of cells. */
-	static FCell GetCellArrayAverage(const FCells& Cells);
+	static FCell GetCellArrayCenter(const FCells& Cells);
 
 	/** Returns the cell direction by its enum. */
 	static const FCell& GetCellDirection(ECellDirection CellDirection);
@@ -155,9 +157,6 @@ struct BOMBER_API FCell
 
 	/** Gets a copy of given cell snapped its location to a grid while it does not respect rotated grids. */
 	static FORCEINLINE FCell SnapCell(const FCell& InCell) { return InCell.Location.GridSnap(CellSize); }
-
-	/** Gets a copy of given cell snapped to the grid by its origin transform, so it makes possible to snap to the rotated grid. */
-	static FCell SnapRotatedCell(const FCell& InCell, const FTransform& GridOriginTransform);
 
 	/**
 	* Creates a hash value from a FCell.

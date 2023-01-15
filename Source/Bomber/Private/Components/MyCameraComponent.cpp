@@ -109,7 +109,7 @@ FVector UMyCameraComponent::GetCameraLocationBetweenCells(const FCells& Cells) c
 	Distance *= FCell::CellSize;
 	Distance = FMath::Min(Distance, MaxHeightInternal);
 
-	FVector NewLocation = FCell::GetCellArrayAverage(Cells).Location;
+	FVector NewLocation = FCell::GetCellArrayCenter(Cells).Location;
 	NewLocation.Z = FMath::Max(MinHeightInternal, NewLocation.Z + Distance);
 	return NewLocation;
 }

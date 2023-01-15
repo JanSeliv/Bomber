@@ -645,7 +645,7 @@ void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 	const FVector2D MovementVector = ActionValue.Get<FVector2D>();
 
 	// Find out which way is forward
-	const FRotator ForwardRotation = UCellsUtilsLibrary::GetCellRotator();
+	const FRotator ForwardRotation = UCellsUtilsLibrary::GetLevelGridRotation();
 
 	// Get forward vector
 	const FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
