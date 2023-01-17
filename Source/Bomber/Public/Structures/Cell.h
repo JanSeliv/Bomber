@@ -25,6 +25,18 @@ ENUM_CLASS_FLAGS(ECellDirection);
 using ECD = ECellDirection;
 
 /**
+ * Represents corners on the grid
+ */
+UENUM(BlueprintType)
+enum class EGridCorner : uint8
+{
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight
+};
+
+/**
  * The structure that contains a location of an one cell (tile) on a grid of the Level Map.
  * X is the column index, Y is the row index on the grid.
  */
@@ -89,25 +101,49 @@ struct BOMBER_API FCell
 	 * @param CellToCheck The start position of the cell to check. */
 	static FCell GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck);
 
+	/** Allows rotate or unrotated given grid around its origin. */
+	static FCells RotateCellArray(float AxisZ, const FCells& InCells);
+
+#pragma region Grid
+	/** Constructs and returns new grid from given transform.
+	 * @param OriginTransform its location and rotation is the center of new grid, its scale-X is number of columns, scale-Y is number of rows. */
+	static TSet<FCell> MakeCellGridByTransform(const FTransform& OriginTransform);
+
+	/** Returns the cell by specified column (X) and row (Y) on given grid if exists, invalid cell otherwise. */
+	static FCell GetCellByPositionOnGrid(const FIntPoint& CellPosition, const FCells& InGrid);
+
+	/** Takes the cell and returns its column (X) and row (Y) position on given grid if exists, -1 otherwise. */
+	static FIntPoint GetPositionByCellOnGrid(const FCell& InCell, const FCells& InGrid);
+
+	/** Returns the center column (X) and row (Y) position on given grid.
+	 * E.g: for grid with 5 rows and 5 columns, the center cell will be (2,2). */
+	static FIntPoint GetCenterCellPositionOnGrid(const FCells& InGrid);
+
+	/** Returns 4 corner cells on given cells grid. */
+	static FCells GetCornerCellsOnGrid(const FCells& InGrid);
+
+	/** Returns specified corner cell in given grid. */
+	static FCell GetCellByCornerOnGrid(EGridCorner CornerType, const FCells& InGrid);
+
+#pragma endregion Grid
+
+#pragma region Transform
+	/** Makes origin transform for given grid. */
+	static FTransform GetCellArrayTransform(const FCells& InCells);
+	static FTransform GetCellArrayTransformNoScale(const FCells& InCells);
+
+	/** Find the average of an set of cells. */
+	static FCell GetCellArrayCenter(const FCells& Cells);
+
+	/** Makes rotator for given grid its origin. */
+	static FRotator GetCellArrayRotation(const FCells& InCells);
+
 	/** Returns the width (columns X) and the length (rows Y) in specified cells, where each 1 unit means 1 cell.
 	 * E.g: if given cells are corner cells on 7x9 level, it will return 7 columns (X) and 9 rows (Y) columns respectively. */
 	static FVector2D GetCellArraySize(const FCells& InCells);
 	static float GetCellArrayWidth(const FCells& InCells);
 	static float GetCellArrayLength(const FCells& InCells);
-
-	/** Constructs and returns new grid from given transform.
-	 * @param OriginTransform its location and rotation is the center of new grid, its scale-X is number of columns, scale-Y is number of rows. */
-	static TSet<FCell> MakeCellGridByTransform(const FTransform& OriginTransform);
-
-	/** Allows rotate or unrotated given grid around its origin. */
-	static FCells RotateCellArray(float AxisZ, const FCells& InCells);
-
-	/** Makes origin transform for given grid. */
-	static FTransform GetCellArrayTransform(const FCells& InCells);
-	static FTransform GetCellArrayTransformNoScale(const FCells& InCells);
-
-	/** Makes rotator for given grid its origin. */
-	static FRotator GetCellArrayRotation(const FCells& InCells);
+#pragma endregion Transform
 
 	/** Returns how many cells are between two cells, where each 1 unit means one cell. */
 	template <typename T>
@@ -134,11 +170,12 @@ struct BOMBER_API FCell
 	FCell& operator-=(const FCell& Other);
 	friend FORCEINLINE FCell operator-(const FCell& Lhs, const FCell& Rhs) { return FCell(Lhs.Location - Rhs.Location); }
 
+	/** Scales the cell. */
+	template <typename FArg, TEMPLATE_REQUIRES(std::is_arithmetic<FArg>::value)>
+	FORCEINLINE FCell operator*(FArg Scale) const { return FCell(Location * Scale); }
+
 	/** Vector operator to return cell location. */
 	FORCEINLINE operator FVector() const { return this->Location; }
-
-	/** Find the average of an set of cells. */
-	static FCell GetCellArrayCenter(const FCells& Cells);
 
 	/** Returns the cell direction by its enum. */
 	static const FCell& GetCellDirection(ECellDirection CellDirection);

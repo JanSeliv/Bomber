@@ -90,29 +90,12 @@ int32 UCellsUtilsLibrary::GetLastRowIndexOnLevel()
 //		Level Map related cell functions
 // ---------------------------------------------------
 
-// Returns the cell by specified row and column number if exists, invalid cell otherwise
-const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
-{
-	const int32 MaxWidth = GetCellColumnsNumOnLevel();
-	const int32 CellIndex = Row * MaxWidth + Column;
-	const TArray<FCell>& AllCells = GetAllCellsOnLevelAsArray();
-	return AllCells.IsValidIndex(CellIndex) ? AllCells[CellIndex] : FCell::InvalidCell;
-}
-
 // Takes the cell and returns its row and column position on the level if exists, -1 otherwise
-void UCellsUtilsLibrary::GetCellPositionOnLevel(const FCell& InCell, int32& OutRow, int32& OutColumn)
+void UCellsUtilsLibrary::GetPositionByCellOnLevel(const FCell& InCell, int32& OutColumnX, int32& OutRowY)
 {
-	const int32 MaxWidth = GetCellColumnsNumOnLevel();
-	const int32 CellIdx = GetAllCellsOnLevelAsArray().IndexOfByPredicate([&InCell](const FCell& CellIt) { return CellIt == InCell; });
-	const bool bFound = CellIdx != INDEX_NONE && MaxWidth;
-	OutRow = bFound ? CellIdx / MaxWidth : INDEX_NONE;
-	OutColumn = bFound ? CellIdx % MaxWidth : INDEX_NONE;
-}
-
-// Returns all grid cell location on the Level Map
-FCells UCellsUtilsLibrary::GetAllCellsOnLevel()
-{
-	return FCells{GetAllCellsOnLevelAsArray()};
+	const FIntPoint CellPosition = GetPositionByCellOnGrid(InCell, GetAllCellsOnLevel());
+	OutColumnX = CellPosition.X;
+	OutRowY = CellPosition.Y;
 }
 
 // Returns all grid cell location on the Level Map
@@ -127,45 +110,19 @@ FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
 	int32 CenterColumn = INDEX_NONE;
 	int32 CenterRow = INDEX_NONE;
 	GetCenterCellPositionOnLevel(/*out*/CenterRow, /*out*/CenterColumn);
-	return GetCellOnLevel(CenterRow, CenterColumn);
+	return GetCellByPositionOnLevel(CenterColumn, CenterRow);
 }
 
 // Returns the center row and column positions on the level
-void UCellsUtilsLibrary::GetCenterCellPositionOnLevel(int32& OutRow, int32& OutColumn)
+void UCellsUtilsLibrary::GetCenterCellPositionOnLevel(int32& OutColumnX, int32& OutRowY)
 {
-	OutRow = GetLastRowIndexOnLevel() / 2;
-	OutColumn = GetLastColumnIndexOnLevel() / 2;
-}
-
-// Returns 4 corner cells of the Level Map respecting its current size
-FCells UCellsUtilsLibrary::GetCornerCellsOnLevel()
-{
-	// +---+---+---+
-	// | X |   | X |
-	// +---+---+---+
-	// |   |   |   |
-	// +---+---+---+
-	// | X |   | X |
-	// +---+---+---+
-	constexpr int32 FirstCellIndex = 0;
-	const int32 LastColumnIndex = GetLastColumnIndexOnLevel();
-	const int32 LastRowIndex = GetLastRowIndexOnLevel();
-	return {
-		GetCellOnLevel(FirstCellIndex, FirstCellIndex),
-		GetCellOnLevel(FirstCellIndex, LastColumnIndex),
-		GetCellOnLevel(LastRowIndex, FirstCellIndex),
-		GetCellOnLevel(LastRowIndex, LastColumnIndex)
-	};
-}
-
-// Returns true if given cell is corner cell of current level
-bool UCellsUtilsLibrary::IsCornerCell(const FCell& Cell)
-{
-	return GetCornerCellsOnLevel().Contains(Cell);
+	const FIntPoint CenterCellPosition = GetCenterCellPositionOnGrid(GetAllCellsOnLevel());
+	OutColumnX = CenterCellPosition.X;
+	OutRowY = CenterCellPosition.Y;
 }
 
 // Return closest corner cell to the given cell
-FCell UCellsUtilsLibrary::GetNearestCornerCell(const FCell& CellToCheck)
+FCell UCellsUtilsLibrary::GetNearestCornerCellOnLevel(const FCell& CellToCheck)
 {
 	const TSet<FCell> AllCornerCells = GetCornerCellsOnLevel();
 	return GetCellArrayNearest(AllCornerCells, CellToCheck);
@@ -251,30 +208,6 @@ bool UCellsUtilsLibrary::AreCellsHaveAllMatchingActors(const FCells& Cells, int3
 	return NonEmptyCells.Num() == Cells.Num();
 }
 
-// Returns true if specified cell is present on the Level Map.
-bool UCellsUtilsLibrary::IsCellExistsOnLevel(const FCell& Cell)
-{
-	return Cell.IsValid() && GetAllCellsOnLevel().Contains(Cell);
-}
-
-// Returns true if the cell is present on the Level Map with such row and column indexes
-bool UCellsUtilsLibrary::IsCellPositionExistsOnLevel(int32 Row, int32 Column)
-{
-	return GetCellOnLevel(Row, Column).IsValid();
-}
-
-// Returns true if at least one cell is present on the Level Map
-bool UCellsUtilsLibrary::IsAnyCellExistsOnLevel(const FCells& Cells)
-{
-	return GetAllCellsOnLevel().Intersect(Cells).Num() > 0;
-}
-
-// Returns true if all specified cells are present on the Level Map
-bool UCellsUtilsLibrary::AreAllCellsExistOnLevel(const FCells& Cells)
-{
-	return GetAllCellsOnLevel().Includes(Cells);
-}
-
 // Returns cells around the center in specified radius and according desired type of breaks
 FCells UCellsUtilsLibrary::GetCellsAround(const FCell& CenterCell, EPathType Pathfinder, int32 Radius)
 {
@@ -350,12 +283,6 @@ FCell UCellsUtilsLibrary::RotateCellAroundLevelOrigin(const FCell& Cell, float A
 {
 	const FTransform GridTransformNoScale = FCell::GetCellArrayTransformNoScale(GetAllCellsOnLevel());
 	return FCell::RotateCellAroundOrigin(Cell, AxisZ, GridTransformNoScale);
-}
-
-// Gets a copy of given cell snapped to level grid respecting its rotation
-FCell UCellsUtilsLibrary::SnapCellOnLevel(const FCell& Cell)
-{
-	return GetCellArrayNearest(GetAllCellsOnLevel(), Cell);
 }
 
 // Returns nearest free cell to given cell, where free means cell with no other level actors except players

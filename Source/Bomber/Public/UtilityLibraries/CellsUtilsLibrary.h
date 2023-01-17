@@ -170,14 +170,37 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FCell GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck) { return FCell::GetCellArrayNearest(Cells, CellToCheck); }
 
+	/** Allows rotate or unrotated given grid around its origin. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE TSet<FCell> RotateCellArray(float AxisZ, const TSet<FCell>& InCells) { return FCell::RotateCellArray(AxisZ, InCells); }
+
+#pragma region Grid
 	/** Constructs and returns new grid from given transform.
 	 * @param OriginTransform its location and rotation is the center of new grid, its scale-X is number of columns, scale-Y is number of rows. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE TSet<FCell> MakeCellGridByTransform(const FTransform& OriginTransform) { return FCell::MakeCellGridByTransform(OriginTransform); }
 
-	/** Allows rotate or unrotated given grid around its origin. */
+	/**Returns the cell by specified row and column number on current level if exists, invalid cell otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static TSet<FCell> RotateCellArray(float AxisZ, const TSet<FCell>& InCells) { return FCell::RotateCellArray(AxisZ, InCells); }
+	static FORCEINLINE FCell GetCellByPositionOnGrid(const FIntPoint& CellPosition, const TSet<FCell>& InGrid) { return FCell::GetCellByPositionOnGrid(CellPosition, InGrid); }
+
+	/** Takes the cell and returns its column (X) and row (Y) position on given grid if exists, -1 otherwise. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE FIntPoint GetPositionByCellOnGrid(const FCell& InCell, const TSet<FCell>& InGrid) { return FCell::GetPositionByCellOnGrid(InCell, InGrid); }
+
+	/** Returns the center column (X) and row (Y) position on given grid.
+	  * E.g: for grid with 5 rows and 5 columns, the center cell will be (2,2). */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE FIntPoint GetCenterCellPositionOnGrid(const TSet<FCell>& InGrid) { return FCell::GetCenterCellPositionOnGrid(InGrid); }
+
+	/** Returns 4 corner cells on given cells grid. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE TSet<FCell> GetCornerCellsOnGrid(const TSet<FCell>& InGrid) { return FCell::GetCornerCellsOnGrid(InGrid); }
+
+	/** Returns specified corner cell in given grid. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FCell GetCellByCornerOnGrid(EGridCorner CornerType, const TSet<FCell>& InGrid) { return FCell::GetCellByCornerOnGrid(CornerType, InGrid); }
+#pragma endregion Grid
 
 #pragma region Transform
 	/** Makes origin transform for given grid. */
@@ -267,17 +290,17 @@ public:
 	 *		Level Map related cell functions
 	 * --------------------------------------------------- */
 
-	/** Returns the cell by specified row and column number if exists, invalid cell otherwise. */
+	/** Returns the cell by specified column (X) and row (Y) on current level if exists, invalid cell otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static const FCell& GetCellOnLevel(int32 Row, int32 Column);
+	static FORCEINLINE FCell GetCellByPositionOnLevel(int32 ColumnX, int32 RowY) { return GetCellByPositionOnGrid(FIntPoint(ColumnX, RowY), GetAllCellsOnLevel()); }
 
-	/** Takes the cell and returns its row and column position on the level if exists, -1 otherwise. */
+	/** Takes the cell and returns its column (X) and row (Y) position on current level if exists, -1 otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell"))
-	static void GetCellPositionOnLevel(const FCell& InCell, int32& OutRow, int32& OutColumn);
+	static void GetPositionByCellOnLevel(const FCell& InCell, int32& OutColumnX, int32& OutRowY);
 
 	/** Returns all grid cell locations on the Level Map as Set. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static TSet<FCell> GetAllCellsOnLevel();
+	static FORCEINLINE TSet<FCell> GetAllCellsOnLevel() { return FCells{GetAllCellsOnLevelAsArray()}; }
 
 	/** Returns all grid cell locations on the Level Map as Array. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -291,21 +314,25 @@ public:
 	/** Returns the center row and column positions on the level.
 	 * E.g: for level with 5 rows and 5 columns, the center cell will be (2,2). */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static void GetCenterCellPositionOnLevel(int32& OutRow, int32& OutColumn);
+	static void GetCenterCellPositionOnLevel(int32& OutColumnX, int32& OutRowY);
 
 #pragma region CornerCell
 	/** Returns 4 corner cells of the Level Map respecting its current size. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static TSet<FCell> GetCornerCellsOnLevel();
+	static FORCEINLINE TSet<FCell> GetCornerCellsOnLevel() { return GetCornerCellsOnGrid(GetAllCellsOnLevel()); }
+
+	/** Returns specified corner cell in given grid. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE FCell GetCellByCornerOnLevel(EGridCorner CornerType) { return GetCellByCornerOnGrid(CornerType, GetAllCellsOnLevel()); }
 
 	/** Returns true if given cell is corner cell of current level. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static bool IsCornerCell(const FCell& Cell);
+	static FORCEINLINE bool IsCornerCellOnLevel(const FCell& Cell) { return GetCornerCellsOnLevel().Contains(Cell); }
 
 	/** Return closest corner cell to the given cell.
 	 * @param CellToCheck The start position of the cell to check. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CellToCheck"))
-	static FCell GetNearestCornerCell(const FCell& CellToCheck);
+	static FCell GetNearestCornerCellOnLevel(const FCell& CellToCheck);
 #pragma endregion CornerCell
 
 	/** Returns all empty grid cell locations on the Level Map where non of actors are present. */
@@ -377,21 +404,21 @@ public:
 	/** Returns true if specified cell is present on the Level Map.
 	 * Could be useful to check is input cell valid. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Valid"))
-	static bool IsCellExistsOnLevel(const FCell& Cell);
+	static FORCEINLINE bool IsCellExistsOnLevel(const FCell& Cell) { return Cell.IsValid() && GetAllCellsOnLevel().Contains(Cell); }
 
 	/** Returns true if the cell is present on the Level Map with such row and column indexes.
 	 * Could be useful to check row and and column. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Valid"))
-	static bool IsCellPositionExistsOnLevel(int32 Row, int32 Column);
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Valid"))
+	static FORCEINLINE bool IsCellPositionExistsOnLevel(int32 ColumnX, int32 RowY) { return GetCellByPositionOnLevel(ColumnX, RowY).IsValid(); }
 
 	/** Returns true if at least one cell is present on the Level Map.*/
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Valid"))
-	static bool IsAnyCellExistsOnLevel(const TSet<FCell>& Cells);
+	static FORCEINLINE bool IsAnyCellExistsOnLevel(const TSet<FCell>& Cells) { return GetAllCellsOnLevel().Intersect(Cells).Num() > 0; }
 
 	/** Returns true if all specified cells are present on the Level Map.
 	 * Could be useful to determine are all input cells valid. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "valid"))
-	static bool AreAllCellsExistOnLevel(const TSet<FCell>& Cells);
+	static FORCEINLINE bool AreAllCellsExistOnLevel(const TSet<FCell>& Cells) { return GetAllCellsOnLevel().Includes(Cells); }
 
 	/** Returns cells around the center in specified radius and according desired type of breaks.
 	 * Could be useful to find all possible ways around.
@@ -521,7 +548,7 @@ public:
 
 	/** Gets a copy of given cell snapped to nearest cell on the level grid. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", Keywords = "Grid Snap,near"))
-	static FCell SnapCellOnLevel(const FCell& Cell);
+	static FORCEINLINE FCell SnapCellOnLevel(const FCell& Cell) { return GetCellArrayNearest(GetAllCellsOnLevel(), Cell); }
 
 	/** Returns nearest free cell to given cell, where free means cell with no other level actors except players. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))

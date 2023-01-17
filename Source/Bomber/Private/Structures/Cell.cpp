@@ -85,30 +85,6 @@ FCell FCell::GetCellArrayNearest(const FCells& Cells, const FCell& CellToCheck)
 	return NearestCell;
 }
 
-// Returns the width (columns X) and the length (rows Y) in specified cells, where each 1 unit means 1 cell
-FVector2D FCell::GetCellArraySize(const FCells& InCells)
-{
-	const float WidthX = GetCellArrayWidth(InCells);
-	const float LengthY = GetCellArrayLength(InCells);
-	return FVector2D(WidthX, LengthY);
-}
-
-// Returns number of columns (X) in specified cells array, where each 1 unit means 1 cell
-float FCell::GetCellArrayWidth(const FCells& InCells)
-{
-	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
-	const FBox CellsBox(CellsToVectors(UnrotatedCells));
-	return CellsBox.GetSize().X / CellSize + 1.f;
-}
-
-// Returns number of rows (Y) in specified cells array, where each 1 unit means 1 cell
-float FCell::GetCellArrayLength(const FCells& InCells)
-{
-	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
-	const FBox CellsBox(CellsToVectors(UnrotatedCells));
-	return CellsBox.GetSize().Y / CellSize + 1.f;
-}
-
 // Allows rotate or unrotated given grid around its origin
 FCells FCell::RotateCellArray(float AxisZ, const FCells& InCells)
 {
@@ -172,6 +148,76 @@ FCells FCell::MakeCellGridByTransform(const FTransform& OriginTransform)
 	return MoveTemp(GridCells);
 }
 
+// Returns the cell by specified column (X) and row (Y) on given grid if exists, invalid cell otherwise
+FCell FCell::GetCellByPositionOnGrid(const FIntPoint& CellPosition, const FCells& InGrid)
+{
+	const int32 MaxWidth = FMath::FloorToInt32(GetCellArrayWidth(InGrid));
+	const int32 CellIndex = CellPosition.Y/*Row*/ * MaxWidth/*ColumnsNum*/ + CellPosition.X/*Column*/;
+	const TArray<FCell>& GridArray = InGrid.Array();
+	return GridArray.IsValidIndex(CellIndex) ? GridArray[CellIndex] : InvalidCell;
+}
+
+// Takes the cell and returns its column (X) and row (Y) position on given grid if exists, -1 otherwise
+FIntPoint FCell::GetPositionByCellOnGrid(const FCell& InCell, const FCells& InGrid)
+{
+	const int32 MaxWidth = GetCellArrayWidth(InGrid);
+	const int32 CellIdx = InGrid.Array().IndexOfByPredicate([&InCell](const FCell& CellIt) { return CellIt == InCell; });
+	const bool bFound = CellIdx != INDEX_NONE && MaxWidth > 0;
+	return FIntPoint(
+		bFound ? CellIdx % MaxWidth : INDEX_NONE,  // Column
+		bFound ? CellIdx / MaxWidth : INDEX_NONE); // Row
+}
+
+// Returns the center column (X) and row (Y) position on given grid
+FIntPoint FCell::GetCenterCellPositionOnGrid(const FCells& InGrid)
+{
+	return FIntPoint(
+		FMath::FloorToInt32(GetCellArrayWidth(InGrid) / 2.f),
+		FMath::FloorToInt32(GetCellArrayLength(InGrid) / 2.f));
+}
+
+// Returns 4 corner cells on given cells grid
+FCells FCell::GetCornerCellsOnGrid(const FCells& InGrid)
+{
+	return FCells
+	{
+		GetCellByCornerOnGrid(EGridCorner::TopLeft, InGrid),
+		GetCellByCornerOnGrid(EGridCorner::TopRight, InGrid),
+		GetCellByCornerOnGrid(EGridCorner::BottomLeft, InGrid),
+		GetCellByCornerOnGrid(EGridCorner::BottomRight, InGrid)
+	};
+}
+
+// Returns specified corner cell in given grid
+FCell FCell::GetCellByCornerOnGrid(EGridCorner CornerType, const FCells& InGrid)
+{
+	// +---+---+---+
+	// | X |   | X |
+	// +---+---+---+
+	// |   |   |   |
+	// +---+---+---+
+	// | X |   | X |
+	// +---+---+---+
+
+	constexpr int32 FirstCellIndex = 0;
+	const int32 LastColumnIndex = GetCellArrayWidth(InGrid) - 1;
+	const int32 LastRowIndex = GetCellArrayLength(InGrid) - 1;
+
+	switch (CornerType)
+	{
+		case EGridCorner::TopLeft:
+			return GetCellByPositionOnGrid(FIntPoint(FirstCellIndex, FirstCellIndex), InGrid);
+		case EGridCorner::TopRight:
+			return GetCellByPositionOnGrid(FIntPoint(LastColumnIndex, FirstCellIndex), InGrid);
+		case EGridCorner::BottomLeft:
+			return GetCellByPositionOnGrid(FIntPoint(FirstCellIndex, LastRowIndex), InGrid);
+		case EGridCorner::BottomRight:
+			return GetCellByPositionOnGrid(FIntPoint(LastColumnIndex, LastRowIndex), InGrid);
+		default:
+			return InvalidCell;
+	}
+}
+
 // Makes origin transform for given grid
 FTransform FCell::GetCellArrayTransform(const FCells& InCells)
 {
@@ -187,35 +233,6 @@ FTransform FCell::GetCellArrayTransformNoScale(const FCells& InCells)
 	OriginTransform.SetLocation(GetCellArrayCenter(InCells));
 	OriginTransform.SetRotation(GetCellArrayRotation(InCells).Quaternion());
 	return MoveTemp(OriginTransform);
-}
-
-// Makes rotator for given grid its origin
-FRotator FCell::GetCellArrayRotation(const FCells& InCells)
-{
-	if (InCells.Num() < 2)
-	{
-		return FRotator::ZeroRotator;
-	}
-
-	const FCell& FirstCell = *InCells.CreateConstIterator();
-	const FCell& SecondCell = *++InCells.CreateConstIterator();
-	const FVector Direction = SecondCell - FirstCell;
-	FRotator Rotator = Direction.Rotation();
-	return MoveTemp(Rotator);
-}
-
-// Sums cells
-FCell& FCell::operator+=(const FCell& Other)
-{
-	Location += Other.Location;
-	return *this;
-}
-
-// Subtracts a cell from another cell
-FCell& FCell::operator-=(const FCell& Other)
-{
-	Location -= Other.Location;
-	return *this;
 }
 
 // Find the average of an array of vectors
@@ -234,6 +251,59 @@ FCell FCell::GetCellArrayCenter(const FCells& Cells)
 		Average = Sum / CellsNum;
 	}
 	return FCell(Average);
+}
+
+// Makes rotator for given grid its origin
+FRotator FCell::GetCellArrayRotation(const FCells& InCells)
+{
+	if (InCells.Num() < 2)
+	{
+		return FRotator::ZeroRotator;
+	}
+
+	const FCell& FirstCell = *InCells.CreateConstIterator();
+	const FCell& SecondCell = *++InCells.CreateConstIterator();
+	const FVector Direction = SecondCell - FirstCell;
+	FRotator Rotator = Direction.Rotation();
+	return MoveTemp(Rotator);
+}
+
+// Returns the width (columns X) and the length (rows Y) in specified cells, where each 1 unit means 1 cell
+FVector2D FCell::GetCellArraySize(const FCells& InCells)
+{
+	const float WidthX = GetCellArrayWidth(InCells);
+	const float LengthY = GetCellArrayLength(InCells);
+	return FVector2D(WidthX, LengthY);
+}
+
+// Returns number of columns (X) in specified cells array, where each 1 unit means 1 cell
+float FCell::GetCellArrayWidth(const FCells& InCells)
+{
+	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
+	const FBox CellsBox(CellsToVectors(UnrotatedCells));
+	return CellsBox.GetSize().X / CellSize + 1.f;
+}
+
+// Returns number of rows (Y) in specified cells array, where each 1 unit means 1 cell
+float FCell::GetCellArrayLength(const FCells& InCells)
+{
+	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
+	const FBox CellsBox(CellsToVectors(UnrotatedCells));
+	return CellsBox.GetSize().Y / CellSize + 1.f;
+}
+
+// Sums cells
+FCell& FCell::operator+=(const FCell& Other)
+{
+	Location += Other.Location;
+	return *this;
+}
+
+// Subtracts a cell from another cell
+FCell& FCell::operator-=(const FCell& Other)
+{
+	Location -= Other.Location;
+	return *this;
 }
 
 // Returns the cell direction by its enum.

@@ -124,18 +124,7 @@ FVector UMyCameraComponent::GetCameraLocationBetweenPlayers() const
 // Returns the default location between all players and bots
 FVector UMyCameraComponent::GetCameraLockedLocation() const
 {
-	constexpr int32 FirstCellIndex = 0;
-	const int32 LastColumnIndex = UCellsUtilsLibrary::GetLastColumnIndexOnLevel();
-	const int32 LastRowIndex = UCellsUtilsLibrary::GetLastRowIndexOnLevel();
-
-	const FCells CornerCells = {
-		UCellsUtilsLibrary::GetCellOnLevel(FirstCellIndex, FirstCellIndex),
-		UCellsUtilsLibrary::GetCellOnLevel(FirstCellIndex, LastColumnIndex),
-		UCellsUtilsLibrary::GetCellOnLevel(LastRowIndex, FirstCellIndex),
-		UCellsUtilsLibrary::GetCellOnLevel(LastRowIndex, LastColumnIndex)
-	};
-
-	return GetCameraLocationBetweenCells(CornerCells);
+	return GetCameraLocationBetweenCells(UCellsUtilsLibrary::GetCornerCellsOnLevel());
 }
 
 // Called every frame
