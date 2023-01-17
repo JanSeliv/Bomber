@@ -310,8 +310,6 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	AActor* ComponentOwner = GetOwner();
 	if (ComponentOwner && IsValid(this)) // Could be called multiple times, make sure it is called once for valid object
 	{
-		ensureAlwaysMsgf(AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame, TEXT("ASSERT: '%s' became explicity destroyed during the game, use the Pool Manager instead"), *ComponentOwner->GetName());
-
 		// Disable collision for safety
 		ComponentOwner->SetActorEnableCollision(false);
 

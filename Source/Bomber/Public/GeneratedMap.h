@@ -154,14 +154,15 @@ protected:
 	TObjectPtr<class UChildActorComponent> CollisionComponentInternal = nullptr;
 
 	/** Cells storage. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
 	TArray<FCell> GridCellsInternal;
 
 	/** Map components of all level actors. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal;
 
-	/** Contains map components that were dragged to the scene. */
+	/** Contains map components that were dragged to the scene
+	 * Is set in editor by adding and dragging actors, but can be changed during the game. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
 	TMap<FCell, EActorType> DraggedCellsInternal;
 
@@ -182,7 +183,7 @@ protected:
 	bool bIsGameRunningInternal = false;
 
 	/** Specify for which level actors should show debug renders, is not available in shipping build. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
 	int32 DisplayCellsActorTypes = TO_FLAG(EAT::None);
 
 	/* ---------------------------------------------------
@@ -281,6 +282,10 @@ protected:
 	/** Is called on client to load new level. */
 	UFUNCTION()
 	void OnRep_LevelType();
+
+	/** Internal multicast function to set new size for generated map for all instances. */
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void MulticastSetLevelSize(const FIntPoint& LevelSize);
 
 	/* ---------------------------------------------------
 	 *					Editor development

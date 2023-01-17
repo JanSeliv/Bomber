@@ -89,9 +89,13 @@ void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 		return;
 	}
 
-	FTransform CurrentTransform = GetActorTransform();
-	CurrentTransform.SetScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
-	ConstructLevelMap(CurrentTransform);
+	AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
+	if (MyGameState && MyGameState->GetCurrentGameState() == ECGS::InGame)
+	{
+		MyGameState->ServerSetGameState(ECurrentGameState::GameStarting);
+	}
+
+	MulticastSetLevelSize(LevelSize);
 }
 
 // Getting an array of cells by four sides of an input center cell and type of breaks
@@ -714,6 +718,7 @@ void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(ThisClass, GridCellsInternal);
 	DOREPLIFETIME(ThisClass, MapComponentsInternal);
 	DOREPLIFETIME(ThisClass, PlayersNumInternal);
 	DOREPLIFETIME(ThisClass, LevelTypeInternal);
@@ -1091,6 +1096,14 @@ void AGeneratedMap::ApplyLevelType()
 void AGeneratedMap::OnRep_LevelType()
 {
 	ApplyLevelType();
+}
+
+// Internal multicast function to set new size for generated map for all instances
+void AGeneratedMap::MulticastSetLevelSize_Implementation(const FIntPoint& LevelSize)
+{
+	FTransform CurrentTransform = GetActorTransform();
+	CurrentTransform.SetScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
+	ConstructLevelMap(CurrentTransform);
 }
 
 /* ---------------------------------------------------
