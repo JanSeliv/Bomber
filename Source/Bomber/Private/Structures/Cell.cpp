@@ -218,6 +218,33 @@ FCell FCell::GetCellByCornerOnGrid(EGridCorner CornerType, const FCells& InGrid)
 	}
 }
 
+// Scales specified cell maintaining relative distance from the corners of the new grid
+FCell FCell::ScaleCellToNewGrid(const FCell& OriginalCell, const FCells& NewCornerCells)
+{
+	constexpr int32 CornerNums = 4;
+	if (!ensureMsgf(NewCornerCells.Num() == CornerNums, TEXT("%s: 'NewCornerCells' has different number than 4"), *FString(__FUNCTION__)))
+	{
+		return InvalidCell;
+	}
+
+	// Use bilinear interpolation to find the new cell
+	TArray<float> Weights = {
+		(1 - OriginalCell.X()) * (1 - OriginalCell.Y()),
+		OriginalCell.X() * (1 - OriginalCell.Y()),
+		(1 - OriginalCell.X()) * OriginalCell.Y(),
+		OriginalCell.X() * OriginalCell.Y(),
+	};
+
+	const TArray<FCell> Corners = NewCornerCells.Array();
+	FCell ScaledCell = InvalidCell;
+	for (int32 i = 0; i < NewCornerCells.Num(); ++i)
+	{
+		ScaledCell += Corners[i] * Weights[i];
+	}
+
+	return MoveTemp(ScaledCell);
+}
+
 // Makes origin transform for given grid
 FTransform FCell::GetCellArrayTransform(const FCells& InCells)
 {

@@ -125,6 +125,11 @@ struct BOMBER_API FCell
 	/** Returns specified corner cell in given grid. */
 	static FCell GetCellByCornerOnGrid(EGridCorner CornerType, const FCells& InGrid);
 
+	/** Scales specified cell maintaining relative distance from the corners of the new grid.
+	 * @param OriginalCell The cell to scale.
+	 * @param NewCornerCells The new corner cells to scale to.
+	 * @return scaled cell, is not aligned to any existed cell, make sure to snap it to the grid. */
+	static FCell ScaleCellToNewGrid(const FCell& OriginalCell, const FCells& NewCornerCells);
 #pragma endregion Grid
 
 #pragma region Transform

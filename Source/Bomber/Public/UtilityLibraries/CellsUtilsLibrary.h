@@ -199,7 +199,14 @@ public:
 
 	/** Returns specified corner cell in given grid. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static FCell GetCellByCornerOnGrid(EGridCorner CornerType, const TSet<FCell>& InGrid) { return FCell::GetCellByCornerOnGrid(CornerType, InGrid); }
+	static FORCEINLINE FCell GetCellByCornerOnGrid(EGridCorner CornerType, const TSet<FCell>& InGrid) { return FCell::GetCellByCornerOnGrid(CornerType, InGrid); }
+
+	/** Scales specified cell maintaining relative distance from the corners of the new grid.
+	 * @param OriginalCell The cell to scale.
+	 * @param NewCornerCells The new corner cells to scale to.
+	 * @return scaled cell, is not aligned to any existed cell, make sure to snap it to the grid. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE FCell ScaleCellToNewGrid(const FCell& OriginalCell, const TSet<FCell>& NewCornerCells) { return FCell::ScaleCellToNewGrid(OriginalCell, NewCornerCells); }
 #pragma endregion Grid
 
 #pragma region Transform

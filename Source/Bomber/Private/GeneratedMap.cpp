@@ -953,11 +953,35 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Align transform and build cells
 void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
 {
-	const FTransform GridTransform = ActorTransformToGridTransform(Transform);
+	const FTransform NewGridTransform = ActorTransformToGridTransform(Transform);
+	const FCells NewGridCells = FCell::MakeCellGridByTransform(NewGridTransform);
 
-	SetActorTransform(GridTransform);
+	ScaleDraggedCellsOnGrid(FCells{GridCellsInternal}, NewGridCells);
 
-	GridCellsInternal = FCell::MakeCellGridByTransform(GridTransform).Array();
+	SetActorTransform(NewGridTransform);
+
+	GridCellsInternal = NewGridCells.Array();
+}
+
+// Scales dragged cells according new grid if sizes are different
+void AGeneratedMap::ScaleDraggedCellsOnGrid(const FCells& OriginalGrid, const FCells& NewGrid)
+{
+	if (OriginalGrid.IsEmpty()
+	    || OriginalGrid.Num() == NewGrid.Num())
+	{
+		// Do not scale if the sizes are the same
+		return;
+	}
+
+	const FCells CornerCells = FCell::GetCornerCellsOnGrid(NewGrid);
+	const FCells NewGridWithoutCorners = NewGrid.Difference(CornerCells);
+
+	for (TTuple<FCell, EActorType>& DraggedCellRefIt : DraggedCellsInternal)
+	{
+		FCell& CurrentCellRef = DraggedCellRefIt.Key;
+		const FCell ScaledCell = FCell::ScaleCellToNewGrid(CurrentCellRef, CornerCells);
+		CurrentCellRef = FCell::GetCellArrayNearest(NewGridWithoutCorners, ScaledCell);
+	}
 }
 
 // Updates current level type
