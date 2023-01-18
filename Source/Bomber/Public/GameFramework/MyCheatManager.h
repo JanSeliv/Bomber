@@ -34,7 +34,7 @@ public:
 	 * "Wall Bomb" (1<<4|1<<0)				-> 17,
 	 * "Wall Bomb Player" (1<<4|1<<0|1<<3)	-> 25,
 	 */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ReverseBitmask"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorTypesBitmaskStr"))
 	static int32 GetBitmaskFromActorTypesString(const FString& ActorTypesBitmaskStr);
 
 	/* ---------------------------------------------------
@@ -114,4 +114,16 @@ public:
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Level.SetSize"))
 	static void SetLevelSize(const FString& LevelSize);
+
+	/* ---------------------------------------------------
+	 *		Camera
+	 * --------------------------------------------------- */
+
+	/** Tweak the custom additive angle to affect the fit distance calculation from camera to the level. */
+	UFUNCTION(meta = (CheatName = "Bomber.Camera.FitViewAdditiveAngle"))
+	static void FitViewAdditiveAngle(float InFitViewAdditiveAngle);
+
+	/** Tweak the minimal distance in UU from camera to the level. */
+	UFUNCTION(meta = (CheatName = "Bomber.Camera.MinDistance"))
+	static void MinDistance(float InMinDistance);
 };

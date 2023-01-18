@@ -645,7 +645,6 @@ void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
 	// Update camera position
 	if (CameraComponentInternal)
 	{
-		CameraComponentInternal->UpdateMaxHeight();
 		CameraComponentInternal->UpdateLocation();
 	}
 }

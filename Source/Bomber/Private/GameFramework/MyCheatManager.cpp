@@ -4,6 +4,7 @@
 //---
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
+#include "Components/MyCameraComponent.h"
 #include "Globals/ItemDataAsset.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -170,5 +171,27 @@ void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 	{
 		const FIntPoint NewLevelSize(FCString::Atoi(*Width), FCString::Atoi(*Height));
 		AGeneratedMap::Get().SetLevelSize(NewLevelSize);
+	}
+}
+
+// Tweak the custom additive angle to affect the fit distance calculation from camera to the level
+void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
+{
+	if (UMyCameraComponent* LevelCamera = USingletonLibrary::GetLevelCamera())
+	{
+		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
+		DistanceParams.FitViewAdditiveAngle = InFitViewAdditiveAngle;
+		LevelCamera->SetCameraDistanceParams(MoveTemp(DistanceParams));
+	}
+}
+
+// Tweak the minimal distance in UU from camera to the level
+void UMyCheatManager::MinDistance(float InMinDistance)
+{
+	if (UMyCameraComponent* LevelCamera = USingletonLibrary::GetLevelCamera())
+	{
+		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
+		DistanceParams.MinDistance = InMinDistance;
+		LevelCamera->SetCameraDistanceParams(MoveTemp(DistanceParams));
 	}
 }
