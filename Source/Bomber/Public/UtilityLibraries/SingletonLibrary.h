@@ -138,6 +138,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class USoundsManager* GetSoundsManager();
 
+	/** Returns implemented Game Viewport Client on the project side. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static class UMyGameViewportClient* GetGameViewportClient();
+
 	/* ---------------------------------------------------
 	*		EActorType functions
 	* --------------------------------------------------- */

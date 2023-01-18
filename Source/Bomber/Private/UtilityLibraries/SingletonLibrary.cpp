@@ -13,16 +13,17 @@
 #include "Globals/LevelActorDataAsset.h"
 #include "Globals/MyGameInstance.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "UI/MyHUD.h"
-#include "UI/InGameWidget.h"
 #include "UI/InGameMenuWidget.h"
+#include "UI/InGameWidget.h"
+#include "UI/MyHUD.h"
 //---
+#include "Engine/MyGameViewportClient.h"
 #include "Globals/DataAssetsContainer.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
 #include "Editor.h"	 // GEditor
+#include "EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h" // GetClientSingleton
 #endif
 
@@ -260,6 +261,12 @@ APlayerCharacter* USingletonLibrary::GetLocalPlayerCharacter()
 USoundsManager* USingletonLibrary::GetSoundsManager()
 {
 	return &USoundsManager::Get();
+}
+
+// Returns implemented Game Viewport Client on the project side
+UMyGameViewportClient* USingletonLibrary::GetGameViewportClient()
+{
+	return GEngine ? Cast<UMyGameViewportClient>(GEngine->GameViewport) : nullptr;
 }
 
 /* ---------------------------------------------------
