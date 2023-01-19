@@ -48,8 +48,8 @@ float FCameraDistanceParams::CalculateDistanceToFitViewToFOV(const FVector2D& Vi
 	// Find horizontal and vertical distance for levels and screens with any aspect ratios
 	// So the camera will be able to align vertical grid to the wide screen as well as horizontal grid to the vertical screen
 	const bool bIsWideScreen = UUtilsLibrary::GetViewportAspectRatioAxisConstraint() == AspectRatio_MaintainYFOV;
-	const float HorizontalDistance = bIsWideScreen ? ViewSizeUU.X / NewFOV : (ViewSizeUU.Y / 2.f) * NewFOV; // view is wider than higher on wide or vertical screen
-	const float VerticalDistance = bIsWideScreen ? ViewSizeUU.X / (2.f * NewFOV) : ViewSizeUU.Y / NewFOV;   // view is longer than wider on wide or vertical screen
+	const float HorizontalDistance = bIsWideScreen ? ViewSizeUU.Y / NewFOV : (ViewSizeUU.Y / 2.f) * NewFOV; // view is wider than higher on wide or vertical screen
+	const float VerticalDistance = bIsWideScreen ? ViewSizeUU.X / (2.f * NewFOV) : ViewSizeUU.X / NewFOV;   // view is longer than wider on wide or vertical screen
 
 	return FMath::Max(HorizontalDistance, VerticalDistance);
 }
