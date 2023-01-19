@@ -3,6 +3,12 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 //---
 #include "Engine/GameViewportClient.h"
+#include "Engine/LocalPlayer.h"
+#include "GameFramework/PlayerController.h"
+//---
+#if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#endif // WITH_EDITOR
 
 // Returns true if viewport is initialized, is always true in PIE, but takes a while in builds
 bool UUtilsLibrary::IsViewportInitialized()
@@ -24,6 +30,22 @@ bool UUtilsLibrary::IsViewportInitialized()
 	}
 
 	return true;
+}
+
+// Returns the actual screen resolution
+FIntPoint UUtilsLibrary::GetViewportResolution()
+{
+	const FViewport* Viewport = IsViewportInitialized() ? GEngine->GameViewport->Viewport : nullptr;
+
+#if WITH_EDITOR
+	if (UEditorUtilsLibrary::IsEditor()
+		&& !Viewport)
+	{
+		Viewport = UEditorUtilsLibrary::GetEditorViewport();
+	}
+#endif
+
+	return Viewport ? Viewport->GetSizeXY() : FIntPoint::ZeroValue;
 }
 
 // Returns 'MaintainYFOV' if Horizontal FOV is currently used while 'MaintainXFOV' for the Vertical one

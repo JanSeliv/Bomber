@@ -44,6 +44,9 @@ public:
 	static int32 GetEditorPlayerIndex();
 #pragma endregion PIE
 
+	/** Returns current editor viewport. */
+	static class FViewport* GetEditorViewport();
+
 	/** Exports specified data table to already its .json. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	static void ReExportTableAsJSON(const class UDataTable* DataTable);

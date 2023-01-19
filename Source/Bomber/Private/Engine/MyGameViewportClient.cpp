@@ -2,6 +2,8 @@
 
 #include "Engine/MyGameViewportClient.h"
 //---
+#include "MyUtilsLibraries/UtilsLibrary.h"
+//---
 #include "Engine/LocalPlayer.h"
 
 // Is called on applying different video settings like changing resolution and enabling fullscreen mode
@@ -16,7 +18,7 @@ void UMyGameViewportClient::RedrawRequested(FViewport* InViewport)
 void UMyGameViewportClient::UpdateAspectRatioAxisConstraint()
 {
 	const TArray<ULocalPlayer*>& LocalPlayers = GetOuterUEngine()->GetGamePlayers(this);
-	const FIntPoint ViewportResolution = Viewport ? Viewport->GetSizeXY() : FIntPoint::ZeroValue;
+	const FIntPoint ViewportResolution = UUtilsLibrary::GetViewportResolution();
 	if (LocalPlayers.IsEmpty()
 	    || ViewportResolution == FIntPoint::ZeroValue)
 	{
