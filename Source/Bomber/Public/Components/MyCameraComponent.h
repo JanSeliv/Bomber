@@ -91,10 +91,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	float GetCameraDistanceToCells(const TSet<FCell>& Cells) const;
 
-	/** Returns the center camera location between all specified cells. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FVector GetCameraLocationBetweenCells(const TSet<FCell>& Cells) const;
-
 	/** Returns the center camera location between all players and bots. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FVector GetCameraLocationBetweenPlayers() const;

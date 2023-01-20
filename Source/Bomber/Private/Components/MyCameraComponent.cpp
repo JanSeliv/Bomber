@@ -167,26 +167,22 @@ float UMyCameraComponent::GetCameraDistanceToCells(const FCells& Cells) const
 	return CameraDistance;
 }
 
-// Returns the center camera location between all specified cells
-FVector UMyCameraComponent::GetCameraLocationBetweenCells(const FCells& Cells) const
-{
-	FVector NewLocation = FCell::GetCellArrayCenter(Cells).Location;
-	NewLocation.Z += GetCameraDistanceToCells(Cells);
-	return NewLocation;
-}
-
 // Returns the center location between all players and bots
 FVector UMyCameraComponent::GetCameraLocationBetweenPlayers() const
 {
 	const FCells PlayersCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
-	return GetCameraLocationBetweenCells(PlayersCells);
+	FVector NewLocation = FCell::GetCellArrayCenter(PlayersCells).Location;
+	NewLocation.Z = GetCameraLockedLocation().Z; // Z = CameraLock.Z: keep Z axis unchanged to avoid zooming in/out
+	return NewLocation;
 }
 
 // Returns the default location between all players and bots
 FVector UMyCameraComponent::GetCameraLockedLocation() const
 {
 	const FCells CornerCells = UCellsUtilsLibrary::GetCornerCellsOnLevel();
-	return GetCameraLocationBetweenCells(CornerCells);
+	FVector NewLocation = FCell::GetCellArrayCenter(CornerCells).Location;
+	NewLocation.Z += GetCameraDistanceToCells(CornerCells); // Z = Corners.Z + FitDistance: find the distance to fit the view
+	return NewLocation;
 }
 
 // Called every frame
