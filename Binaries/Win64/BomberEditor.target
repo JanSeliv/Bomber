@@ -8446,6 +8446,26 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/ComboGraph/Binaries/Win64/UnrealEditor-ComboGraph.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/ComboGraph/Binaries/Win64/UnrealEditor-ComboGraph.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/ComboGraph/Binaries/Win64/UnrealEditor-ComboGraphEditor.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/ComboGraph/Binaries/Win64/UnrealEditor-ComboGraphEditor.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/ComboGraph/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
 			"Path": "$(EngineDir)/Plugins/Media/AjaMedia/Binaries/Win64/UnrealEditor-AjaMedia.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -13190,6 +13210,14 @@
 			"Type": "SymbolFile"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/MorphsPlayer/Binaries/Win64/UnrealEditor-MorphsPlayerEditor.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/MorphsPlayer/Binaries/Win64/UnrealEditor-MorphsPlayerEditor.pdb",
+			"Type": "SymbolFile"
+		},
+		{
 			"Path": "$(ProjectDir)/Plugins/MorphsPlayer/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
@@ -13214,26 +13242,6 @@
 			"Type": "RequiredResource"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/MySettingsWidgetConstructor/Binaries/Win64/UnrealEditor-MySettingsWidgetConstructor.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/MySettingsWidgetConstructor/Binaries/Win64/UnrealEditor-MySettingsWidgetConstructor.pdb",
-			"Type": "SymbolFile"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/MySettingsWidgetConstructor/Binaries/Win64/UnrealEditor-MySettingsWidgetConstructorEditor.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/MySettingsWidgetConstructor/Binaries/Win64/UnrealEditor-MySettingsWidgetConstructorEditor.pdb",
-			"Type": "SymbolFile"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/MySettingsWidgetConstructor/Binaries/Win64/UnrealEditor.modules",
-			"Type": "RequiredResource"
-		},
-		{
 			"Path": "$(ProjectDir)/Plugins/PoolManager/Binaries/Win64/UnrealEditor-PoolManager.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -13243,6 +13251,26 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/PoolManager/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/SettingsWidgetConstructor/Binaries/Win64/UnrealEditor-SettingsWidgetConstructor.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/SettingsWidgetConstructor/Binaries/Win64/UnrealEditor-SettingsWidgetConstructor.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/SettingsWidgetConstructor/Binaries/Win64/UnrealEditor-SettingsWidgetConstructorEditor.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/SettingsWidgetConstructor/Binaries/Win64/UnrealEditor-SettingsWidgetConstructorEditor.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/SettingsWidgetConstructor/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		}
 	],
@@ -36776,11 +36804,11 @@
 			"Type": "UFS"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/MySettingsWidgetConstructor/MySettingsWidgetConstructor.uplugin",
+			"Path": "$(ProjectDir)/Plugins/PoolManager/PoolManager.uplugin",
 			"Type": "UFS"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/PoolManager/PoolManager.uplugin",
+			"Path": "$(ProjectDir)/Plugins/SettingsWidgetConstructor/SettingsWidgetConstructor.uplugin",
 			"Type": "UFS"
 		}
 	],

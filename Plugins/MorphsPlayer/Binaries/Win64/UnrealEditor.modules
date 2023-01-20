@@ -2,6 +2,7 @@
 	"BuildId": "23058290",
 	"Modules": 
 	{
-		"MorphsPlayer": "UnrealEditor-MorphsPlayer.dll"
+		"MorphsPlayer": "UnrealEditor-MorphsPlayer.dll",
+		"MorphsPlayerEditor": "UnrealEditor-MorphsPlayerEditor.dll"
 	}
 }
