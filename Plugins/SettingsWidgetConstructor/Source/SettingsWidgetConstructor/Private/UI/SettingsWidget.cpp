@@ -78,7 +78,8 @@ void USettingsWidget::ApplySettings()
 // Update settings on UI
 void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpdate)
 {
-	if (SettingsToUpdate.IsEmpty())
+	if (SettingsToUpdate.IsEmpty()
+		|| !SettingsToUpdate.IsValidIndex(0))
 	{
 		return;
 	}
@@ -286,15 +287,16 @@ void USettingsWidget::SetSettingComboboxIndex(const FSettingTag& ComboboxTag, in
 		return;
 	}
 
-	int32& ChosenMemberIndexRef = SettingsRowPtr->Combobox.ChosenMemberIndex;
+	FSettingsPicker& SettingsRowRef = *SettingsRowPtr;
+	int32& ChosenMemberIndexRef = SettingsRowRef.Combobox.ChosenMemberIndex;
 	if (ChosenMemberIndexRef == InValue)
 	{
 		return;
 	}
 
 	ChosenMemberIndexRef = InValue;
-	SettingsRowPtr->Combobox.OnSetterInt.ExecuteIfBound(InValue);
-	UpdateSettings(SettingsRowPtr->PrimaryData.SettingsToUpdate);
+	SettingsRowRef.Combobox.OnSetterInt.ExecuteIfBound(InValue);
+	UpdateSettings(SettingsRowRef.PrimaryData.SettingsToUpdate);
 
 	// BP implementation
 	SetComboboxIndex(ComboboxTag, InValue);
