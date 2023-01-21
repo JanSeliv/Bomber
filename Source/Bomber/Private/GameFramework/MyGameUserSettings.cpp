@@ -2,10 +2,10 @@
 
 #include "GameFramework/MyGameUserSettings.h"
 //---
+#include "UI/SettingsWidget.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Engine/DataTable.h"
-#include "UI/SettingsWidget.h"
 
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()
@@ -89,7 +89,10 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 	{
 		if (MonitorIt.bIsPrimary)
 		{
-			MaxDisplayResolution = FIntPoint(MonitorIt.NativeWidth, MonitorIt.NativeHeight);
+			const FIntPoint NativeRes(MonitorIt.NativeWidth, MonitorIt.NativeHeight);
+			const FIntPoint WorkAreaRes(MonitorIt.WorkArea.Right - MonitorIt.WorkArea.Left, MonitorIt.WorkArea.Bottom - MonitorIt.WorkArea.Top);
+			const FIntPoint DisplayRectRes(MonitorIt.DisplayRect.Right - MonitorIt.DisplayRect.Left, MonitorIt.DisplayRect.Bottom - MonitorIt.DisplayRect.Top);
+			MaxDisplayResolution = NativeRes.ComponentMax(WorkAreaRes).ComponentMax(DisplayRectRes).ComponentMax(MonitorIt.MaxResolution);
 			break;
 		}
 	}
@@ -99,9 +102,16 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		return;
 	}
 
-	const int32 MaxDisplayWidth = MaxDisplayResolution.X;
-	const int32 MaxDisplayHeight = MaxDisplayResolution.Y;
+	const float MaxDisplayWidth = static_cast<float>(MaxDisplayResolution.X);
+	const float MaxDisplayHeight = static_cast<float>(MaxDisplayResolution.Y);
 	const float AspectRatio = FMath::DivideAndRoundDown<float>(MaxDisplayWidth, MaxDisplayHeight);
+
+	bool bIsUltraWide = false;
+	constexpr float UltraWideAspectRatio = 21.f / 9.f;
+	if (AspectRatio >= UltraWideAspectRatio)
+	{
+		bIsUltraWide = true;
+	}
 
 	TextResolutionsInternal.Empty();
 	IntResolutionsInternal.Empty();
@@ -118,7 +128,8 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		const int32 HeightIt = ResolutionIt.Height;
 		const float AspectRatioIt = FMath::DivideAndRoundDown<float>(WidthIt, HeightIt);
 
-		const bool bIsSameAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio);
+		const bool bIsSameAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio)
+		                                || (bIsUltraWide && AspectRatioIt >= UltraWideAspectRatio);
 		const bool bIsGreaterThanMin = WidthIt >= MinResolutionSizeXInternal
 		                               && HeightIt >= MinResolutionSizeYInternal;
 		const bool bIsLessThanMax = WidthIt <= MaxDisplayWidth
