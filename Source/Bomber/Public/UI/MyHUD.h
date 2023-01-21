@@ -136,4 +136,7 @@ protected:
 	/** Listen to update widgets on changing the aspect ratio of viewport. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnAspectRatioChanged(float NewAspectRatio);
+
+	/** @TODO JanSeliv Ho6Xyn5N Make settings widget to be scalable to avoid its recreation on aspect ratio change. */
+	void UpdateSettingsWidget();
 };

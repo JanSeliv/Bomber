@@ -64,7 +64,7 @@ void AMyHUD::PostInitializeComponents()
 UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/)
 {
 	if (!ensureMsgf(PlayerController, TEXT("%s: 'PlayerController' is null"), *FString(__FUNCTION__))
-		|| !ensureMsgf(WidgetClass, TEXT("%s: 'WidgetClass' is null"), *FString(__FUNCTION__)))
+	    || !ensureMsgf(WidgetClass, TEXT("%s: 'WidgetClass' is null"), *FString(__FUNCTION__)))
 	{
 		return nullptr;
 	}
@@ -138,10 +138,28 @@ void AMyHUD::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
 // Listen to update widgets on changing the aspect ratio of viewport
 void AMyHUD::OnAspectRatioChanged(float NewAspectRatio)
 {
-	// @TODO JanSeliv Ho6Xyn5N Make settings widget to be scalable to avoid its recreation on aspect ratio change
+	UpdateSettingsWidget();
+}
+
+// Temporary solution to update settings widget on changing the aspect ratio of viewport
+void AMyHUD::UpdateSettingsWidget()
+{
+	bool bIsVisible = false;
+
 	if (SettingsWidgetInternal)
 	{
+		bIsVisible = SettingsWidgetInternal->IsVisible();
+
+		// Destroy current widget if already exists
 		SettingsWidgetInternal->RemoveFromParent();
 	}
+
+	// Recreate new one to reconstruct it
 	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UUIDataAsset::Get().GetSettingsWidgetClass());
+
+	if (bIsVisible)
+	{
+		// Reopen if was opened before
+		SettingsWidgetInternal->OpenSettings();
+	}
 }
