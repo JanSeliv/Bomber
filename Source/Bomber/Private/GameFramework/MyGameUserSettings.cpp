@@ -126,18 +126,21 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		const FScreenResolutionRHI& ResolutionIt = ResolutionsArray[Index];
 		const int32 WidthIt = ResolutionIt.Width;
 		const int32 HeightIt = ResolutionIt.Height;
+
 		const float AspectRatioIt = FMath::DivideAndRoundDown<float>(WidthIt, HeightIt);
 
-		const bool bIsSameAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio)
+		const bool bIsCorrectAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio)
 		                                || (bIsUltraWide && AspectRatioIt >= UltraWideAspectRatio);
 		const bool bIsGreaterThanMin = WidthIt >= MinResolutionSizeXInternal
 		                               && HeightIt >= MinResolutionSizeYInternal;
 		const bool bIsLessThanMax = WidthIt <= MaxDisplayWidth
 		                            && HeightIt <= MaxDisplayHeight;
+		const bool bIsEightDivisible = WidthIt % 8 == 0 && HeightIt % 8 == 0;
 
-		if (!bIsSameAspectRatio
+		if (!bIsCorrectAspectRatio
 		    || !bIsGreaterThanMin
-		    || !bIsLessThanMax)
+		    || !bIsLessThanMax
+		    || !bIsEightDivisible)
 		{
 			continue;
 		}
