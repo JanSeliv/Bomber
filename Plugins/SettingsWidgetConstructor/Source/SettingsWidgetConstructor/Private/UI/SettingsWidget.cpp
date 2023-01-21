@@ -93,7 +93,8 @@ void USettingsWidget::UpdateSettings(const FGameplayTagContainer& SettingsToUpda
 	{
 		const FSettingsPicker& Setting = RowIt.Value;
 		const FSettingTag& SettingTag = Setting.PrimaryData.Tag;
-		if (!SettingTag.MatchesAny(SettingsToUpdate))
+		if (!SettingTag.IsValid()
+			|| !SettingTag.MatchesAny(SettingsToUpdate))
 		{
 			continue;
 		}
