@@ -116,8 +116,11 @@ protected:
 	/** Init all widgets on gameplay starting before begin play. */
 	virtual void PostInitializeComponents() override;
 
-	/** Called when the game starts. Created widget. */
-	virtual void BeginPlay() override;
+	/** Internal UUserWidget::CreateWidget wrapper. */
+	static UUserWidget* CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true);
+
+	template <typename T = UUserWidget>
+	FORCEINLINE T* CreateWidgetByClass(TSubclassOf<T> WidgetClass, bool bAddToViewport = true) const { return Cast<T>(CreateWidgetByClass(PlayerOwner.Get(), WidgetClass, bAddToViewport)); }
 
 	/** Will try to start the process of initializing all widgets used in game. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -129,4 +132,8 @@ protected:
 
 	/** Is called right after the game was started and windows size is set. */
 	void OnViewportResizedWhenInit(class FViewport* Viewport, uint32 Index);
+
+	/** Listen to update widgets on changing the aspect ratio of viewport. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnAspectRatioChanged(float NewAspectRatio);
 };

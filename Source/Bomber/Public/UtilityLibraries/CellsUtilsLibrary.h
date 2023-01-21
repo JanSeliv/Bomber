@@ -272,7 +272,7 @@ public:
 #pragma region Scale
 	/** Returns the current grid size, where:
 	 * scale-X is number of columns (width),
-	 * that is the same for any cell on the Level Map. */
+	 * scale-Y is number of rows (length). */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "size"))
 	static FIntPoint GetLevelGridScale();
 

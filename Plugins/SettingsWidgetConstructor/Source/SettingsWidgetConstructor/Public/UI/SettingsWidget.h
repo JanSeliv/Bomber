@@ -328,22 +328,22 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** Internal blueprint function to toggle checkbox. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor", meta = (BlueprintProtected, AutoCreateRefTerm = "CheckboxTag"))
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor|Setters", meta = (BlueprintProtected, AutoCreateRefTerm = "CheckboxTag"))
 	void SetCheckbox(const FSettingTag& CheckboxTag, bool InValue);
 
 	/** Internal blueprint function to set chosen member index for a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor", meta = (BlueprintProtected, AutoCreateRefTerm = "ComboboxTag"))
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor|Setters", meta = (BlueprintProtected, AutoCreateRefTerm = "ComboboxTag"))
 	void SetComboboxIndex(const FSettingTag& ComboboxTag, int32 InValue);
 
 	/** Internal blueprint function to set new members for a combobox. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor", meta = (BlueprintProtected, AutoCreateRefTerm = "ComboboxTag,InValue"))
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor|Setters", meta = (BlueprintProtected, AutoCreateRefTerm = "ComboboxTag,InValue"))
 	void SetComboboxMembers(const FSettingTag& ComboboxTag, const TArray<FText>& InValue);
 
 	/** Internal blueprint function to set current value for a slider [0...1]. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor", meta = (BlueprintProtected, AutoCreateRefTerm = "SliderTag"))
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor|Setters", meta = (BlueprintProtected, AutoCreateRefTerm = "SliderTag"))
 	void SetSlider(const FSettingTag& SliderTag, float InValue);
 
 	/** Internal blueprint function to set new text for an input box. */
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor", meta = (BlueprintProtected, AutoCreateRefTerm = "UserInputTag"))
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Settings Widget Constructor|Setters", meta = (BlueprintProtected, AutoCreateRefTerm = "UserInputTag"))
 	void SetUserInput(const FSettingTag& UserInputTag, FName InValue);
 };
