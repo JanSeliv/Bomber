@@ -52,6 +52,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor")
 	void ToggleSettings();
 
+	/** Returns true when this widget is fully constructed and ready to be used. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsSettingsWidgetConstructed() const { return SettingsTableRowsInternal.Num() > 0; }
+
 	/** Is called to player sound effect on any setting click. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Settings Widget Constructor")
 	void PlayUIClickSFX();
@@ -107,7 +111,7 @@ public:
 	float GetScrollBoxHeight() const;
 
 	/** Is blueprint-event called that returns the style brush by specified button state. */
-	UFUNCTION(BlueprintPure, Category = "Settings Widget Constructor|Style", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintPure, Category = "Settings Widget Constructor|Style")
 	FSlateBrush GetButtonBrush(ESettingsButtonState State) const;
 
 	/* ---------------------------------------------------
@@ -159,7 +163,7 @@ public:
 	/** Creates setting sub-widget (like button, checkbox etc.) based on specified setting class and sets it to specified primary data.
 	 * @param InOutPrimary The Data that should contain created setting class.
 	 * @param SettingSubWidgetClass The setting widget class to create. */
-	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor", meta = (BlueprintProtected, AutoCreateRefTerm = "InOutPrimary"))
+	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor", meta = (AutoCreateRefTerm = "InOutPrimary"))
 	USettingSubWidget* CreateSettingSubWidget(UPARAM(ref) FSettingsPrimary& InOutPrimary, const TSubclassOf<USettingSubWidget> SettingSubWidgetClass);
 
 	/** Creates setting sub-widget (like button, checkbox etc.) based on specified setting class and sets it to specified primary data. */

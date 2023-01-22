@@ -715,9 +715,10 @@ void USettingsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	UpdateSettingsTableRows();
-
-	TryConstructSettings();
+	if (USettingsDataAsset::Get().IsAutoConstruct())
+	{
+		TryConstructSettings();
+	}
 }
 
 // Constructs settings if viewport is ready otherwise Wait until viewport become initialized
@@ -747,6 +748,14 @@ void USettingsWidget::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Inde
 // Construct all settings from the settings data table
 void USettingsWidget::ConstructSettings()
 {
+	if (IsSettingsWidgetConstructed())
+	{
+		// Settings are already constructed
+		return;
+	}
+
+	UpdateSettingsTableRows();
+
 	// BP implementation to cache some data before creating subwidgets
 	OnConstructSettings();
 
@@ -887,6 +896,8 @@ void USettingsWidget::OpenSettings()
 		// Is already shown
 		return;
 	}
+
+	TryConstructSettings();
 
 	SetVisibility(ESlateVisibility::Visible);
 

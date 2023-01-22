@@ -60,6 +60,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Settings Widget Constructor")
 	FORCEINLINE TSubclassOf<class USettingUserInput> GetUserInputClass() const { return UserInputClassInternal; }
 
+	/** Returns true, when USettingsWidget::TryConstructSettings is automatically called whenever the Settings Widget becomes constructed (e.g: on UUserWidget::AddToViewport call). */
+	UFUNCTION(BlueprintPure, Category = "Settings Widget Constructor")
+	FORCEINLINE bool IsAutoConstruct() const { return bAutoConstructInternal; }
+
 	/** Returns the width and height of the settings widget in percentages of an entire screen. */
 	UFUNCTION(BlueprintPure, Category = "Settings Widget Constructor")
 	const FORCEINLINE FVector2D& GetSettingsPercentSize() const { return SettingsPercentSizeInternal; }
@@ -132,6 +136,10 @@ protected:
 	/** The sub-widget class of User Input settings, is config property. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Settings Widget Constructor", meta = (BlueprintProtected, DisplayName = "User Input Class", ShowOnlyInnerProperties))
 	TSubclassOf<class USettingUserInput> UserInputClassInternal;
+
+	/** If true, it will automatically call USettingsWidget::TryConstructSettings whenever the Settings Widget becomes constructed (e.g: on UUserWidget::AddToViewport call). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Settings Widget Constructor", meta = (BlueprintProtected, DisplayName = "Auto Construct", ShowOnlyInnerProperties))
+	bool bAutoConstructInternal;
 
 	/** The width and height of the settings widget in percentages of an entire screen. Is clamped between 0 and 1, is config property. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, Category = "Settings Widget Constructor", meta = (BlueprintProtected, DisplayName = "Settings Percent Size", ClampMin = "0", ClampMax = "1", ShowOnlyInnerProperties))
