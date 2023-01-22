@@ -18,7 +18,7 @@ class BOMBER_API UMyGameViewportClient final : public UGameViewportClient
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChanged, float, NewAspectRatio);
 
-	/** Called when new aspect. */
+	/** Called when the aspect ratio has been changed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnAspectRatioChanged OnAspectRatioChanged;
 
@@ -35,5 +35,10 @@ public:
 	 * Use Y-constrain (vertical FOV) for wide screens (16:9, ultra-wide 21:9 etc).
 	 * Use X-constrain (horizontal FOV) for vertical screens (9:16 etc) and square screens (1:1). */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void UpdateAspectRatioAxisConstraint();
+	void UpdateAspectRatio();
+
+protected:
+	/** Cached data about last broadcasted aspect ratio. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last c Aspect Ratio"))
+	float LastUpdatedAspectRatioInternal = 0.f;
 };
