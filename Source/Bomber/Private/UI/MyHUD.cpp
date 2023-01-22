@@ -2,13 +2,11 @@
 
 #include "UI/MyHUD.h"
 //---
-#include "Engine/MyGameViewportClient.h"
 #include "Globals/UIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UI/InGameWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"
-#include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Blueprint/UserWidget.h"
 
@@ -49,12 +47,6 @@ void AMyHUD::PostInitializeComponents()
 	    && !PlayerOwner->MyHUD)
 	{
 		PlayerOwner->MyHUD = this;
-	}
-
-	// Listen to update widgets on changing the aspect ratio of viewport
-	if (UMyGameViewportClient* GameViewportClient = USingletonLibrary::GetGameViewportClient())
-	{
-		GameViewportClient->OnAspectRatioChanged.AddUniqueDynamic(this, &ThisClass::OnAspectRatioChanged);
 	}
 
 	TryInitWidgets();
@@ -133,33 +125,4 @@ void AMyHUD::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
 	}
 
 	InitWidgets();
-}
-
-// Listen to update widgets on changing the aspect ratio of viewport
-void AMyHUD::OnAspectRatioChanged(float NewAspectRatio)
-{
-	UpdateSettingsWidget();
-}
-
-// Temporary solution to update settings widget on changing the aspect ratio of viewport
-void AMyHUD::UpdateSettingsWidget()
-{
-	bool bIsVisible = false;
-
-	if (SettingsWidgetInternal)
-	{
-		bIsVisible = SettingsWidgetInternal->IsVisible();
-
-		// Destroy current widget if already exists
-		SettingsWidgetInternal->RemoveFromParent();
-	}
-
-	// Recreate new one to reconstruct it
-	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UUIDataAsset::Get().GetSettingsWidgetClass());
-
-	if (bIsVisible)
-	{
-		// Reopen if was opened before
-		SettingsWidgetInternal->OpenSettings();
-	}
 }
