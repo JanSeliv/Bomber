@@ -70,10 +70,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Generated"))
 	static class AGeneratedMap* GetLevelMap();
 
-	/** Return rhe Bomber Game Instance, nullptr otherwise */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UMyGameInstance* GetMyGameInstance();
-
 	/** Returns the Bomber Game Mode, nullptr otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class AMyGameModeBase* GetMyGameMode();

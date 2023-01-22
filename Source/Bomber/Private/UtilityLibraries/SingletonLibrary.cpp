@@ -11,7 +11,6 @@
 #include "GameFramework/MyGameUserSettings.h"
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/LevelActorDataAsset.h"
-#include "Globals/MyGameInstance.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/InGameWidget.h"
@@ -140,13 +139,6 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 #endif	// WITH_EDITOR [UEditorUtils::IsEditorNotPieWorld]
 
 	return Get().LevelMapInternal.Get();
-}
-
-// Contains a data of standalone and PIE games, nullptr otherwise
-UMyGameInstance* USingletonLibrary::GetMyGameInstance()
-{
-	const UWorld* World = Get().GetWorld();
-	return World ? World->GetGameInstance<UMyGameInstance>() : nullptr;
 }
 
 // Contains a data of Bomber Level, nullptr otherwise
