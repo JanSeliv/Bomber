@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/PlayerInputDataAsset.h"
+#include "DataAssets/PlayerInputDataAsset.h"
 //---
 #include "EnhancedActionKeyMapping.h"
 //---
-#include "Globals/DataAssetsContainer.h"
-#include "Globals/MyInputMappingContext.h"
+#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/MyInputMappingContext.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
 #if WITH_EDITOR

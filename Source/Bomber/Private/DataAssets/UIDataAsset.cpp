@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/UIDataAsset.h"
+#include "DataAssets/UIDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 
 // Returns the UI data asset
 const UUIDataAsset& UUIDataAsset::Get()

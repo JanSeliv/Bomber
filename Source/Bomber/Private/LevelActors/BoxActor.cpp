@@ -6,7 +6,7 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/BoxDataAsset.h"
+#include "DataAssets/BoxDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"

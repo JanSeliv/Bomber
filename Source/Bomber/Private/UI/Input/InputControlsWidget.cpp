@@ -3,8 +3,8 @@
 #include "UI/Input/InputControlsWidget.h"
 //---
 #include "Data/SettingsDataAsset.h"
-#include "Globals/MyInputMappingContext.h"
-#include "Globals/PlayerInputDataAsset.h"
+#include "DataAssets/MyInputMappingContext.h"
+#include "DataAssets/PlayerInputDataAsset.h"
 #include "UI/SettingsWidget.h"
 #include "UI/Input/InputCategoryWidget.h"
 //---

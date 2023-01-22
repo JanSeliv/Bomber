@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/AIDataAsset.h"
+#include "DataAssets/AIDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 
 // Returns the AI data asset
 const UAIDataAsset& UAIDataAsset::Get()

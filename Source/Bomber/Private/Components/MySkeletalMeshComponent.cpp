@@ -2,7 +2,7 @@
 
 #include "Components/MySkeletalMeshComponent.h"
 //---
-#include "Globals/PlayerDataAsset.h"
+#include "DataAssets/PlayerDataAsset.h"
 //---
 #include "Materials/MaterialInstanceDynamic.h"
 

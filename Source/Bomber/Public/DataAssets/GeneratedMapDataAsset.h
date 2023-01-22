@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Globals/LevelActorDataAsset.h"
+#include "DataAssets/LevelActorDataAsset.h"
 //---
 #include "GeneratedMapDataAsset.generated.h"
 

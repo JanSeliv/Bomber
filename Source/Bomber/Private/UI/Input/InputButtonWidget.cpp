@@ -5,7 +5,7 @@
 #include "Subsystems/SoundsManager.h"
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "Data/SettingsDataAsset.h"
-#include "Globals/MyInputMappingContext.h"
+#include "DataAssets/MyInputMappingContext.h"
 #include "UI/SettingsWidget.h"
 //---
 #include "Components/InputKeySelector.h"

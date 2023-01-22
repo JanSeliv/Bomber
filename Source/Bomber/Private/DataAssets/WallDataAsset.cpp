@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/WallDataAsset.h"
+#include "DataAssets/WallDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 
 // Default constructor
 UWallDataAsset::UWallDataAsset()

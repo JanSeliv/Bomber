@@ -7,7 +7,7 @@
 #include "UtilityLibraries/SingletonLibrary.h"
 #include "UI/SettingsWidget.h"
 #include "UI/MyHUD.h"
-#include "Globals/UIDataAsset.h"
+#include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 //---

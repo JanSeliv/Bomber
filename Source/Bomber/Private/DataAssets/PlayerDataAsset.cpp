@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/PlayerDataAsset.h"
+#include "DataAssets/PlayerDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 //---
 #include "Engine/Texture2DArray.h"
 #include "Materials/MaterialInstance.h"

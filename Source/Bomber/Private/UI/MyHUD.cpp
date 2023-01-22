@@ -2,7 +2,7 @@
 
 #include "UI/MyHUD.h"
 //---
-#include "Globals/UIDataAsset.h"
+#include "DataAssets/UIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UI/InGameWidget.h"
 #include "UI/MainMenuWidget.h"

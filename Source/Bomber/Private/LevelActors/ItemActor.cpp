@@ -6,8 +6,8 @@
 #include "GeneratedMap.h"
 #include "Subsystems/SoundsManager.h"
 #include "Components/MapComponent.h"
-#include "Globals/DataAssetsContainer.h"
-#include "Globals/ItemDataAsset.h"
+#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/ItemDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "Net/UnrealNetwork.h"

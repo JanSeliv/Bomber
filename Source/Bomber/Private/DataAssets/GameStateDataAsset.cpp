@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/GameStateDataAsset.h"
+#include "DataAssets/GameStateDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 
 // Returns the Game State data asset
 const UGameStateDataAsset& UGameStateDataAsset::Get()

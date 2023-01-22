@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/BoxDataAsset.h"
+#include "DataAssets/BoxDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 
 // Default constructor
 UBoxDataAsset::UBoxDataAsset()

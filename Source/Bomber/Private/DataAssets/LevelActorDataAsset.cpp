@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "Globals/LevelActorDataAsset.h"
+#include "DataAssets/LevelActorDataAsset.h"
 //---
 #include "UtilityLibraries/SingletonLibrary.h"
 //---

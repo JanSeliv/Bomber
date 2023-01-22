@@ -1,12 +1,12 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "Globals/MyInputMappingContext.h"
+#include "DataAssets/MyInputMappingContext.h"
 //---
 #include "EnhancedInputModule.h"
 #include "UObject/ObjectSaveContext.h"
 //---
-#include "Globals/MyInputAction.h"
-#include "Globals/PlayerInputDataAsset.h"
+#include "DataAssets/MyInputAction.h"
+#include "DataAssets/PlayerInputDataAsset.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"

@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/SoundsDataAsset.h"
+#include "DataAssets/SoundsDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 
 // Returns the settings data asset
 const USoundsDataAsset& USoundsDataAsset::Get()

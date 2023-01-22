@@ -5,7 +5,7 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
-#include "Globals/ItemDataAsset.h"
+#include "DataAssets/ItemDataAsset.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"

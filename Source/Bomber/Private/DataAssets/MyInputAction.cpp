@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "Globals/MyInputAction.h"
+#include "DataAssets/MyInputAction.h"
 //---
 #include "EnhancedInputSubsystems.h"
 //---

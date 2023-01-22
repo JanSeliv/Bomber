@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/GeneratedMapDataAsset.h"
+#include "DataAssets/GeneratedMapDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 
 // Returns the generated map data asset
 const UGeneratedMapDataAsset& UGeneratedMapDataAsset::Get()

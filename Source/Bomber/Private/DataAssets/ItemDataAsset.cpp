@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/ItemDataAsset.h"
+#include "DataAssets/ItemDataAsset.h"
 //---
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 
 // Default constructor
 UItemDataAsset::UItemDataAsset()

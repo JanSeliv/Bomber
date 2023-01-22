@@ -4,8 +4,8 @@
 //---
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/AIDataAsset.h"
-#include "Globals/GameStateDataAsset.h"
+#include "DataAssets/AIDataAsset.h"
+#include "DataAssets/GameStateDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/SingletonLibrary.h"

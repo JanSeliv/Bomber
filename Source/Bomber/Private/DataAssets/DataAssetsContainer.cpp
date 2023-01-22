@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 //---
-#include "Globals/AIDataAsset.h"
-#include "Globals/GameStateDataAsset.h"
-#include "Globals/GeneratedMapDataAsset.h"
-#include "Globals/LevelActorDataAsset.h"
-#include "Globals/PlayerInputDataAsset.h"
-#include "Globals/SoundsDataAsset.h"
-#include "Globals/UIDataAsset.h"
+#include "DataAssets/AIDataAsset.h"
+#include "DataAssets/GameStateDataAsset.h"
+#include "DataAssets/GeneratedMapDataAsset.h"
+#include "DataAssets/LevelActorDataAsset.h"
+#include "DataAssets/PlayerInputDataAsset.h"
+#include "DataAssets/SoundsDataAsset.h"
+#include "DataAssets/UIDataAsset.h"
 
 // Returns the Levels Data Asset
 const UGeneratedMapDataAsset* UDataAssetsContainer::GetLevelsDataAsset()

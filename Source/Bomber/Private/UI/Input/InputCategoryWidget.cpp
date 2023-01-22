@@ -3,7 +3,7 @@
 #include "UI/Input/InputCategoryWidget.h"
 //---
 #include "Data/SettingsDataAsset.h"
-#include "Globals/MyInputMappingContext.h"
+#include "DataAssets/MyInputMappingContext.h"
 #include "UI/SettingsWidget.h"
 #include "UI/Input/InputButtonWidget.h"
 //---

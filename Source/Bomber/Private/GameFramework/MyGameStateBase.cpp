@@ -5,7 +5,7 @@
 #include "GeneratedMap.h"
 #include "Subsystems/SoundsManager.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/GameStateDataAsset.h"
+#include "DataAssets/GameStateDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 //---
 #include "GameFeaturesSubsystem.h"

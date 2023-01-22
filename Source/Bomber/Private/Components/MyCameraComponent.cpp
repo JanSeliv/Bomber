@@ -5,7 +5,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "Engine/MyGameViewportClient.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/GameStateDataAsset.h"
+#include "DataAssets/GameStateDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/SingletonLibrary.h"

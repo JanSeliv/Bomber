@@ -10,14 +10,14 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyGameUserSettings.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/LevelActorDataAsset.h"
+#include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/InGameWidget.h"
 #include "UI/MyHUD.h"
 //---
 #include "Engine/MyGameViewportClient.h"
-#include "Globals/DataAssetsContainer.h"
+#include "DataAssets/DataAssetsContainer.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR
