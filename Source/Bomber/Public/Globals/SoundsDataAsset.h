@@ -22,10 +22,10 @@ public:
 	/** Returns the settings data asset. */
 	static const USoundsDataAsset& Get();
 
-	/** Returns the sound manager.
-	 * @see USoundsDataAsset::AudioComponentClassInternal */
+	/** Returns the Sound Manager class that is responsible for audio in game.
+	 * @see USoundsDataAsset::SoundsManagerClassInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	USoundsManager* GetSoundsManager() const;
+	FORCEINLINE TSubclassOf<USoundsManager> GetSoundsManagerClass() const { return SoundsManagerClassInternal; }
 
 	/** Returns the base Sound Mix used in game.
 	 * @see USoundsDataAsset::SoundMixInternal */
@@ -92,9 +92,9 @@ public:
 	FORCEINLINE USoundBase* GetUIClickSFX() const { return UIClickSFXInternal; }
 
 protected:
-	/** The Sound Manager that controls player the audio in game. */
+	/** The Sound Manager that is responsible for audio in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sounds Manager Class", ShowOnlyInnerProperties))
-	TSubclassOf<USoundsManager> SoundsManagerClass = nullptr;
+	TSubclassOf<USoundsManager> SoundsManagerClassInternal = nullptr;
 
 	/** The base Sound Mix used in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sound Mix", ShowOnlyInnerProperties))
@@ -143,10 +143,4 @@ protected:
 	/** The sound that is played on clicking any UI element. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "UI Click SFX", ShowOnlyInnerProperties))
 	TObjectPtr<USoundBase> UIClickSFXInternal = nullptr;
-
-private:
-	/** Is created dynamically by specified Sound Manager class.
-	 * @see USoundsDataAsset::SoundsManagerClass */
-	UPROPERTY(Transient)
-	mutable TObjectPtr<USoundsManager> SoundsManager = nullptr;
 };

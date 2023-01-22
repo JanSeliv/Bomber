@@ -7,29 +7,28 @@
 #include "GameFramework/MyPlayerState.h"
 #include "Globals/SoundsDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
+//---
+#include "Components/AudioComponent.h"
 
 // Returns the Sounds Manager checked
 USoundsManager& USoundsManager::Get()
 {
-	USoundsManager* SoundsDataAsset = USoundsDataAsset::Get().GetSoundsManager();
-	checkf(SoundsDataAsset, TEXT("The Sounds Manager is not valid"));
-	return *SoundsDataAsset;
-}
-
-// Returns a world of stored level map
-UWorld* USoundsManager::GetWorld() const
-{
-	return USingletonLibrary::Get().GetWorld();
+	const UWorld* World = USingletonLibrary::Get().GetWorld();
+	checkf(World, TEXT("%s: 'World' is null"), *FString(__FUNCTION__));
+	const TSubclassOf<USoundsManager> SoundsManagerClass = USoundsDataAsset::Get().GetSoundsManagerClass();
+	checkf(SoundsManagerClass, TEXT("%s: 'SoundsManagerClass' is null"), *FString(__FUNCTION__));
+	USoundsManager* SoundsManager = Cast<USoundsManager>(World->GetSubsystemBase(SoundsManagerClass));
+	checkf(SoundsManager, TEXT("%s: 'SoundsManager' is null"), *FString(__FUNCTION__));
+	return *SoundsManager;
 }
 
 // Set new sound volume
 void USoundsManager::SetSoundVolumeByClass(USoundClass* InSoundClass, float InVolume)
 {
-	const UWorld* World = USingletonLibrary::Get().GetWorld();
 	USoundMix* MainSoundMix = USoundsDataAsset::Get().GetMainSoundMix();
 	static constexpr float Pitch = 1.f;
 	static constexpr float FadeInTime = 0.f;
-	UGameplayStatics::SetSoundMixClassOverride(World, MainSoundMix, InSoundClass, InVolume, Pitch, FadeInTime);
+	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, InSoundClass, InVolume, Pitch, FadeInTime);
 }
 
 // Set the general sound volume for all sound classes in game
@@ -163,35 +162,20 @@ void USoundsManager::PlayUIClickSFX()
 	}
 }
 
-// Called after the C++ constructor and after the properties have been initialized, including those loaded from config
-void USoundsManager::PostInitProperties()
+// Called when world is ready to start gameplay before the game mode transitions to the correct state and call BeginPlay on all actors
+void USoundsManager::OnWorldBeginPlay(UWorld& InWorld)
 {
-	UObject::PostInitProperties();
+	Super::OnWorldBeginPlay(InWorld);
 
 	if (IS_TRANSIENT(this))
 	{
 		return;
 	}
 
-	if (USingletonLibrary::HasWorldBegunPlay())
-	{
-		BeginPlay();
-	}
-	else if (UWorld* World = GetWorld())
-	{
-		World->OnWorldMatchStarting.AddUObject(this, &ThisClass::BeginPlay);
-	}
-}
-
-// Called when the game starts
-void USoundsManager::BeginPlay()
-{
 	OnBeginPlay();
 
-	const UWorld* World = GetWorld();
-
 	USoundMix* MainSoundMix = USoundsDataAsset::Get().GetMainSoundMix();
-	UGameplayStatics::SetBaseSoundMix(World, MainSoundMix);
+	UGameplayStatics::SetBaseSoundMix(&InWorld, MainSoundMix);
 
 	// Listed the ending the current game to play the End-Game sound on
 	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetLocalPlayerState())

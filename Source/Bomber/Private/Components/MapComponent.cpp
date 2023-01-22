@@ -5,7 +5,6 @@
 #include "GeneratedMap.h"
 #include "PoolManager.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "GameFramework/MyGameStateBase.h"
 #include "Globals/DataAssetsContainer.h"
 #include "Globals/GameStateDataAsset.h"
 #include "Globals/LevelActorDataAsset.h"

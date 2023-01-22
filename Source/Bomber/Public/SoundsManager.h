@@ -2,18 +2,20 @@
 
 #pragma once
 
-#include "Components/AudioComponent.h"
+#include "Subsystems/WorldSubsystem.h"
 //---
 #include "Bomber.h"
 //---
 #include "SoundsManager.generated.h"
+
+class UAudioComponent;
 
 /**
  * Is used to manage the game sounds.
  * @see Access its data with USoundsDataAsset (Content/Bomber/Globals/DA_Sounds).
  */
 UCLASS(Config = "GameUserSettings", Blueprintable, BlueprintType)
-class BOMBER_API USoundsManager final : public UObject
+class BOMBER_API USoundsManager final : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -24,9 +26,6 @@ public:
 
 	/** Returns the Sounds Manager checked. */
 	static USoundsManager& Get();
-
-	/** Returns a world of stored level map. */
-	virtual UWorld* GetWorld() const override;
 
 	/** The component that is used to store reference for EndGameCountdown SFX. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))
@@ -115,11 +114,8 @@ protected:
 	 *		Protected functions
 	 * --------------------------------------------------- */
 
-	/** Called after the C++ constructor and after the properties have been initialized, including those loaded from config.*/
-	virtual void PostInitProperties() override;
-
-	/** Called when the game starts. */
-	void BeginPlay();
+	/** Called when world is ready to start gameplay before the game mode transitions to the correct state and call BeginPlay on all actors */
+	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 	/** Blueprint even called when the game starts. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DisplayName = "Begin Play"))

@@ -2,9 +2,7 @@
 
 #include "Globals/SoundsDataAsset.h"
 //---
-#include "SoundsManager.h"
 #include "Globals/DataAssetsContainer.h"
-#include "UtilityLibraries/SingletonLibrary.h"
 
 // Returns the settings data asset
 const USoundsDataAsset& USoundsDataAsset::Get()
@@ -12,18 +10,6 @@ const USoundsDataAsset& USoundsDataAsset::Get()
 	const USoundsDataAsset* SoundsDataAsset = UDataAssetsContainer::GetSoundsDataAsset();
 	checkf(SoundsDataAsset, TEXT("The Sounds Data Asset is not valid"));
 	return *SoundsDataAsset;
-}
-
-// Returns the sound manager
-USoundsManager* USoundsDataAsset::GetSoundsManager() const
-{
-	if (!SoundsManager)
-	{
-		UWorld* World = USingletonLibrary::Get().GetWorld();
-		SoundsManager = NewObject<USoundsManager>(World, SoundsManagerClass, NAME_None, RF_Public | RF_Transactional);
-	}
-
-	return SoundsManager;
 }
 
 // Returns the music of specified level
