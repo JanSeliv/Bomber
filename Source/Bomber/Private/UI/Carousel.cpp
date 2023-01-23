@@ -7,6 +7,7 @@
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
 #endif
 
 // Sets default values
@@ -30,9 +31,9 @@ void ACarousel::OnConstruction(const FTransform& Transform)
 #if WITH_EDITOR // [GEditor]
 	if (GEditor
 	    && !IS_TRANSIENT(this)
-	    && !UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
+	    && !UMyUnrealEdEngine::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
-		UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
+		UMyUnrealEdEngine::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
 	}
 #endif //WITH_EDITOR [GEditor]
 }
@@ -51,7 +52,7 @@ void ACarousel::Destroyed()
 	    && !IS_TRANSIENT(this))
 	{
 		// Remove bound delegate
-		UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
+		UMyUnrealEdEngine::GOnAnyDataAssetChanged.RemoveAll(this);
 	}
 
 	Super::Destroyed();

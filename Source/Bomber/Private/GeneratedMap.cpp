@@ -5,9 +5,9 @@
 #include "PoolManager.h"
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
-#include "GameFramework/MyGameStateBase.h"
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/GeneratedMapDataAsset.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/BombActor.h"
 #include "Structures/Cell.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
@@ -19,9 +19,11 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
+#include "EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
+//---
 #include "EditorLevelUtils.h"
 #include "EditorUtilityLibrary.h"
-#include "EditorUtilsLibrary.h"
 #include "Engine/LevelStreamingAlwaysLoaded.h"
 #include "Engine/LevelStreamingDynamic.h"
 #endif
@@ -603,10 +605,10 @@ void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
 #if WITH_EDITOR // [GEditor]
 	UMyBlueprintFunctionLibrary::SetLevelMap(this);
 	if (GEditor // Can be bound before editor is loaded
-	    && !UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
+	    && !UMyUnrealEdEngine::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
 		// Should be bind in construction in a case of object reconstructing after blueprint compile
-		UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
+		UMyUnrealEdEngine::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
 	}
 #endif //WITH_EDITOR [GEditor]
 
@@ -703,7 +705,7 @@ void AGeneratedMap::Destroyed()
 		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// Remove editor bound delegates
-			UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
+			UMyUnrealEdEngine::GOnAnyDataAssetChanged.RemoveAll(this);
 			FEditorDelegates::OnMapOpened.RemoveAll(this);
 		}
 #endif //WITH_EDITOR [IsEditorNotPieWorld]

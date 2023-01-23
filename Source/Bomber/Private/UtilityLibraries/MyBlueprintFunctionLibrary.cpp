@@ -21,9 +21,10 @@
 #include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR
-#include "Editor.h"	 // GEditor
 #include "EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h" // GetClientSingleton
+//---
+#include "Editor.h"	 // GEditor
 #endif
 
 // Returns a world of stored level map
@@ -285,15 +286,3 @@ bool UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(const AActor* Actor,
 	const EActorType ActorType = GetActorType(Actor);
 	return BitwiseActorTypes(TO_FLAG(ActorType), ActorsTypesBitmask);
 }
-
-/* ---------------------------------------------------
- *		Editor development
- * --------------------------------------------------- */
-
-#if WITH_EDITOR
-// Will notify on any data asset changes
-UMyBlueprintFunctionLibrary::FOnAnyDataAssetChanged UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged;
-
-// Binds to update movements of each AI controller.
-UMyBlueprintFunctionLibrary::FUpdateAI UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate;
-#endif //WITH_EDITOR

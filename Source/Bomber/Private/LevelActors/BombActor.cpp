@@ -19,6 +19,7 @@
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
 #endif
 
 // Sets default values
@@ -128,7 +129,7 @@ void ABombActor::OnConstructionBombActor()
 	{
 		InitBomb();
 
-		UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.Broadcast();
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 
 		if (MapComponentInternal->bShouldShowRenders)
 		{

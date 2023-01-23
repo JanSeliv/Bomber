@@ -6,6 +6,7 @@
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
 #endif
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
@@ -22,7 +23,7 @@ void UBomberDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.Broadcast();
+		UMyUnrealEdEngine::GOnAnyDataAssetChanged.Broadcast();
 	}
 }
 

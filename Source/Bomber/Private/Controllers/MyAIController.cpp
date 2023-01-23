@@ -14,6 +14,7 @@
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
 #endif
 
 // Enable or disable all bots
@@ -119,9 +120,9 @@ void AMyAIController::OnPossess(APawn* InPawn)
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld()
-	    && !UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this))
+	    && !UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
 	{
-		UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -145,7 +146,7 @@ void AMyAIController::OnUnPossess()
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.RemoveAll(this);
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.RemoveAll(this);
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 

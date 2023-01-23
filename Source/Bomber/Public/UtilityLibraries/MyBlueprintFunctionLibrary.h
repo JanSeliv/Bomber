@@ -176,18 +176,4 @@ protected:
 	 * Is stored in singleton, so has weak reference field to be garbage collected on loading another maps where that actor does not exist. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
 	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal = nullptr;
-
-	/* ---------------------------------------------------
-	 *		Editor development
-	 * --------------------------------------------------- */
-public:
-#if WITH_EDITORONLY_DATA
-	DECLARE_MULTICAST_DELEGATE(FOnAnyDataAssetChanged);
-	/** Will notify on any data asset changes. */
-	static FOnAnyDataAssetChanged GOnAnyDataAssetChanged;
-
-	DECLARE_MULTICAST_DELEGATE(FUpdateAI);
-	/** Binds to update movements of each AI controller. */
-	static FUpdateAI GOnAIUpdatedDelegate;
-#endif //WITH_EDITOR
 };

@@ -18,6 +18,7 @@
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
 #endif
 
 // Sets default values for this component's properties
@@ -104,7 +105,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Update AI renders after adding obj to map
-		UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.Broadcast();
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -325,7 +326,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 			}
 
 			// Editor delegates
-			UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.Broadcast();
+			UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 		}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 	}
