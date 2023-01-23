@@ -33,7 +33,7 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Constructs settings if viewport is ready otherwise wait until viewport become initialized. */
-	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor")
 	void TryConstructSettings();
 
 	/** Display settings on UI. */

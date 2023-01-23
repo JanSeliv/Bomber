@@ -156,6 +156,11 @@ void USoundsManager::PlayStartGameCountdownSFX()
 // Play the sound of the clicked UI element
 void USoundsManager::PlayUIClickSFX()
 {
+	if (AMyGameStateBase::GetCurrentGameState() == ECGS::None)
+	{
+		return;
+	}
+
 	if (USoundBase* UIClickSFX = USoundsDataAsset::Get().GetUIClickSFX())
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), UIClickSFX);
