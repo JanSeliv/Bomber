@@ -32,6 +32,10 @@ public:
 	 *		Public functions
 	 * --------------------------------------------------- */
 
+	/** Constructs settings if viewport is ready otherwise wait until viewport become initialized. */
+	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor", meta = (BlueprintProtected))
+	void TryConstructSettings();
+
 	/** Display settings on UI. */
 	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor")
 	void OpenSettings();
@@ -250,10 +254,6 @@ protected:
 	/** Called after the underlying slate widget is constructed.
 	* May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
-
-	/** Constructs settings if viewport is ready otherwise Wait until viewport become initialized. */
-	UFUNCTION(BlueprintCallable, Category = "Settings Widget Constructor", meta = (BlueprintProtected))
-	void TryConstructSettings();
 
 	/** Is called right after the game was started and windows size is set to construct settings. */
 	void OnViewportResizedWhenInit(class FViewport* Viewport, uint32 Index);

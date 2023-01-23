@@ -721,19 +721,6 @@ void USettingsWidget::NativeConstruct()
 	}
 }
 
-// Constructs settings if viewport is ready otherwise Wait until viewport become initialized
-void USettingsWidget::TryConstructSettings()
-{
-	if (UUtilsLibrary::IsViewportInitialized())
-	{
-		ConstructSettings();
-	}
-	else if (!FViewport::ViewportResizedEvent.IsBoundToObject(this))
-	{
-		FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
-	}
-}
-
 // Is called right after the game was started and windows size is set to construct settings
 void USettingsWidget::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
 {
@@ -885,6 +872,19 @@ void USettingsWidget::UpdateScrollBoxesHeight()
 		{
 			SizeBoxWidget->SetMaxDesiredHeight(ScrollBoxHeight);
 		}
+	}
+}
+
+// Constructs settings if viewport is ready otherwise Wait until viewport become initialized
+void USettingsWidget::TryConstructSettings()
+{
+	if (UUtilsLibrary::IsViewportInitialized())
+	{
+		ConstructSettings();
+	}
+	else if (!FViewport::ViewportResizedEvent.IsBoundToObject(this))
+	{
+		FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
 	}
 }
 

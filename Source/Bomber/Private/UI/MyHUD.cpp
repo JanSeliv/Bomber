@@ -96,9 +96,13 @@ void AMyHUD::InitWidgets()
 	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
 
 	MainMenuWidgetInternal = CreateWidgetByClass<UMainMenuWidget>(UIDataAsset.GetMainMenuWidgetClass(), /*bAddToViewport*/false); // Is drawn by 3D user widget component, no need add it to viewport
+
 	InGameWidgetInternal = CreateWidgetByClass<UInGameWidget>(UIDataAsset.GetInGameWidgetClass());
-	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass());
+
 	FPSCounterWidgetInternal = CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
+
+	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass());
+	SettingsWidgetInternal->TryConstructSettings();
 
 	static constexpr int32 MaxPlayersNum = 4;
 	NicknameWidgetsInternal.Reserve(MaxPlayersNum);
