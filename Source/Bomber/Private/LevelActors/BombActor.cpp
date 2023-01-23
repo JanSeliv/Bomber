@@ -11,7 +11,7 @@
 #include "DataAssets/DataAssetsContainer.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "NiagaraFunctionLibrary.h"
 #include "Components/BoxComponent.h"
@@ -128,7 +128,7 @@ void ABombActor::OnConstructionBombActor()
 	{
 		InitBomb();
 
-		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+		UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.Broadcast();
 
 		if (MapComponentInternal->bShouldShowRenders)
 		{
@@ -151,7 +151,7 @@ void ABombActor::BeginPlay()
 	{
 		SetLifeSpan();
 	}
-	else if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	else if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		// This dragged bomb should start listening in-game state to set lifespan
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);

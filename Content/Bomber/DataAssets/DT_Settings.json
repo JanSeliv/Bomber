@@ -96,7 +96,7 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetSettingsWidget"
 				},
 				"Setter":
@@ -516,7 +516,7 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
@@ -608,7 +608,7 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetMyHUD"
 				},
 				"Setter":
@@ -776,7 +776,7 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
@@ -860,7 +860,7 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
@@ -944,7 +944,7 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
@@ -1112,7 +1112,7 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetLocalPlayerState"
 				},
 				"Setter":
@@ -1196,7 +1196,7 @@
 				},
 				"StaticContext":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetLevelCamera"
 				},
 				"Setter":

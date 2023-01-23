@@ -9,7 +9,7 @@
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 
 // Returns bitmask from reverse bitmask in string
 int32 UMyCheatManager::GetBitmaskFromReverseString(const FString& ReverseBitmaskStr)
@@ -118,7 +118,7 @@ void UMyCheatManager::SetItemChance(int32 Chance)
 // Override the level of each powerup for a controlled player
 void UMyCheatManager::SetPowerups(int32 NewLevel)
 {
-	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetLocalPlayerCharacter())
+	if (APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter())
 	{
 		static constexpr int32 MinItemsNum = 1;
 		const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
@@ -133,7 +133,7 @@ void UMyCheatManager::SetPowerups(int32 NewLevel)
 // Enable or disable the God mode to make a controllable player undestroyable
 void UMyCheatManager::SetGodMode(bool bShouldEnable)
 {
-	const APlayerCharacter* ControllablePlayer = USingletonLibrary::GetLocalPlayerCharacter();
+	const APlayerCharacter* ControllablePlayer = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
 	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(ControllablePlayer))
 	{
 		MapComponent->SetUndestroyable(bShouldEnable);
@@ -177,7 +177,7 @@ void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 // Tweak the custom additive angle to affect the fit distance calculation from camera to the level
 void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
 {
-	if (UMyCameraComponent* LevelCamera = USingletonLibrary::GetLevelCamera())
+	if (UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera())
 	{
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.FitViewAdditiveAngle = InFitViewAdditiveAngle;
@@ -188,7 +188,7 @@ void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
 // Tweak the minimal distance in UU from camera to the level
 void UMyCheatManager::MinDistance(float InMinDistance)
 {
-	if (UMyCameraComponent* LevelCamera = USingletonLibrary::GetLevelCamera())
+	if (UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera())
 	{
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.MinDistance = InMinDistance;

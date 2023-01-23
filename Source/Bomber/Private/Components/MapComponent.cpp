@@ -10,7 +10,7 @@
 #include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
@@ -94,7 +94,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 	}
 
 	// Update default mesh asset
-	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(USingletonLibrary::GetLevelType());
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
 	SetLevelActorRow(FoundRow);
 
 	const ECollisionResponse CollisionResponse = GetActorDataAssetChecked().GetCollisionResponse();
@@ -104,7 +104,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Update AI renders after adding obj to map
-		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+		UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -287,7 +287,7 @@ void UMapComponent::OnRegister()
 		MeshComponentInternal->RegisterComponent();
 
 		// Set default mesh asset
-		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
+		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
 		SetLevelActorRow(FoundRow);
 	}
 
@@ -319,13 +319,13 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
-			if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap()) // Can be invalid if remove the level map
+			if (AGeneratedMap* LevelMap = UMyBlueprintFunctionLibrary::GetLevelMap()) // Can be invalid if remove the level map
 			{
 				LevelMap->DestroyLevelActor(this);
 			}
 
 			// Editor delegates
-			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+			UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.Broadcast();
 		}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 	}

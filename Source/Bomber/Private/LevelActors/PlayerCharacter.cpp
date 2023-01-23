@@ -15,7 +15,7 @@
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -183,7 +183,7 @@ void APlayerCharacter::BeginPlay()
 	{
 		OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 		}
@@ -509,7 +509,7 @@ void APlayerCharacter::TryPossessController()
 
 	AController* ControllerToPossess = nullptr;
 
-	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController(CharacterIDInternal))
+	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(CharacterIDInternal))
 	{
 		if (MyPC->bCinematicMode)
 		{
@@ -583,7 +583,7 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	}
 
 	const bool bIsPlayer = IsLocallyControlled() || !CharacterIDInternal;
-	const ELevelType PlayerFlag = USingletonLibrary::GetLevelType();
+	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
 	constexpr ELevelType AIFlag = ELT::None;
 	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
 	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));

@@ -5,12 +5,12 @@
 #include "EnhancedInputSubsystems.h"
 //---
 #include "Controllers/MyPlayerController.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 
 // Returns the keys mapped to this action in the active input mapping contexts
 void UMyInputAction::GetKeys(TArray<FKey>& OutKeys) const
 {
-	const AMyPlayerController* PC = USingletonLibrary::GetLocalPlayerController();
+	const AMyPlayerController* PC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	const UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem = PC ? PC->GetEnhancedInputSubsystem() : nullptr;
 	if (!EnhancedInputSubsystem)
 	{

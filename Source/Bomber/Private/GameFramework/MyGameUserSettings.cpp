@@ -3,14 +3,14 @@
 #include "GameFramework/MyGameUserSettings.h"
 //---
 #include "UI/SettingsWidget.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Engine/DataTable.h"
 
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()
 {
-	UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings();
+	UMyGameUserSettings* MyGameUserSettings = UMyBlueprintFunctionLibrary::GetMyGameUserSettings();
 	checkf(MyGameUserSettings, TEXT("My Game User Settings is not valid"));
 	return *MyGameUserSettings;
 }
@@ -198,7 +198,7 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 // Update fullscreen mode on UI for cases when it's changed outside (e.g. by Alt+Enter)
 void UMyGameUserSettings::UpdateFullscreenEnabled()
 {
-	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
 	if (!SettingsWidget)
 	{
 		return;
@@ -218,7 +218,7 @@ void UMyGameUserSettings::UpdateFullscreenEnabled()
 // Set the FPS cap by specified member index
 void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 {
-	const USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	const USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
 	if (!SettingsWidget
 	    || GetFPSLockIndex() == Index)
 	{

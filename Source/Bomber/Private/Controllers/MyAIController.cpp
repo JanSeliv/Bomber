@@ -8,7 +8,7 @@
 #include "DataAssets/GameStateDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/GameFrameworkComponentManager.h"
 //---
@@ -51,7 +51,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	if (UEditorUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
-		if (USingletonLibrary::HasWorldBegunPlay()) // PIE
+		if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay()) // PIE
 		{
 			UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		}
@@ -119,14 +119,14 @@ void AMyAIController::OnPossess(APawn* InPawn)
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld()
-	    && !USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this))
+	    && !UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this))
 	{
-		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -145,11 +145,11 @@ void AMyAIController::OnUnPossess()
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		USingletonLibrary::GOnAIUpdatedDelegate.RemoveAll(this);
+		UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate.RemoveAll(this);
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.RemoveAll(this);
 	}

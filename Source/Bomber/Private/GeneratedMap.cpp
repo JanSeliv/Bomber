@@ -11,7 +11,7 @@
 #include "LevelActors/BombActor.h"
 #include "Structures/Cell.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/LevelStreaming.h"
@@ -64,7 +64,7 @@ AGeneratedMap::AGeneratedMap()
 // Returns the generated map
 AGeneratedMap& AGeneratedMap::Get()
 {
-	AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap();
+	AGeneratedMap* LevelMap = UMyBlueprintFunctionLibrary::GetLevelMap();
 	checkf(LevelMap, TEXT("The Level Map is not valid"));
 	return *LevelMap;
 }
@@ -89,7 +89,7 @@ void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 		return;
 	}
 
-	AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
+	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
 	if (MyGameState && MyGameState->GetCurrentGameState() == ECGS::InGame)
 	{
 		MyGameState->ServerSetGameState(ECurrentGameState::GameStarting);
@@ -601,12 +601,12 @@ void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
 	}
 
 #if WITH_EDITOR // [GEditor]
-	USingletonLibrary::SetLevelMap(this);
+	UMyBlueprintFunctionLibrary::SetLevelMap(this);
 	if (GEditor // Can be bound before editor is loaded
-	    && !USingletonLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
+	    && !UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
 		// Should be bind in construction in a case of object reconstructing after blueprint compile
-		USingletonLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
+		UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
 	}
 #endif //WITH_EDITOR [GEditor]
 
@@ -623,7 +623,7 @@ void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
 	TransformLevelMap(Transform);
 
 #if WITH_EDITOR // [Editor-Standalone]
-	if (USingletonLibrary::HasWorldBegunPlay())
+	if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay())
 	{
 		// Level actors are spawned differently on client for unsaved level if run without RunInderOneProcess or Standalone
 		// so destroy from pool all unsaved level actors to avoid it being unsynced on clients
@@ -668,14 +668,14 @@ void AGeneratedMap::PostInitializeComponents()
 	}
 
 	// Update the gameplay LevelMap reference in the singleton library
-	USingletonLibrary::SetLevelMap(this);
+	UMyBlueprintFunctionLibrary::SetLevelMap(this);
 
 	ConstructLevelMap(GetActorTransform());
 
 	if (HasAuthority())
 	{
 		// Listen states
-		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 		}
@@ -703,7 +703,7 @@ void AGeneratedMap::Destroyed()
 		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// Remove editor bound delegates
-			USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
+			UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
 			FEditorDelegates::OnMapOpened.RemoveAll(this);
 		}
 #endif //WITH_EDITOR [IsEditorNotPieWorld]

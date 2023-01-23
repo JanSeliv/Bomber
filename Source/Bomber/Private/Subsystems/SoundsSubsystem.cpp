@@ -6,14 +6,14 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "DataAssets/SoundsDataAsset.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/AudioComponent.h"
 
 // Returns the Sounds Manager checked
 USoundsSubsystem& USoundsSubsystem::Get()
 {
-	const UWorld* World = USingletonLibrary::Get().GetWorld();
+	const UWorld* World = UMyBlueprintFunctionLibrary::Get().GetWorld();
 	checkf(World, TEXT("%s: 'World' is null"), *FString(__FUNCTION__));
 	const TSubclassOf<USoundsSubsystem> SoundsSubsystemClass = USoundsDataAsset::Get().GetSoundsSubsystemClass();
 	checkf(SoundsSubsystemClass, TEXT("%s: 'SoundsSubsystemClass' is null"), *FString(__FUNCTION__));
@@ -62,7 +62,7 @@ void USoundsSubsystem::SetSFXVolume(double InVolume)
 void USoundsSubsystem::PlayCurrentBackgroundMusic()
 {
 	const ECurrentGameState GameState = AMyGameStateBase::GetCurrentGameState();
-	const ELevelType LevelType = USingletonLibrary::GetLevelType();
+	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
 	USoundBase* BackgroundMusic = USoundsDataAsset::Get().GetBackgroundMusic(GameState, LevelType);
 	if (!BackgroundMusic)
 	{
@@ -183,13 +183,13 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	UGameplayStatics::SetBaseSoundMix(&InWorld, MainSoundMix);
 
 	// Listed the ending the current game to play the End-Game sound on
-	if (AMyPlayerState* CurrentPlayerState = USingletonLibrary::GetLocalPlayerState())
+	if (AMyPlayerState* CurrentPlayerState = UMyBlueprintFunctionLibrary::GetLocalPlayerState())
 	{
 		CurrentPlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 	}
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 		AGeneratedMap::Get().OnSetNewLevelType.AddUniqueDynamic(this, &ThisClass::OnGameLevelChanged);

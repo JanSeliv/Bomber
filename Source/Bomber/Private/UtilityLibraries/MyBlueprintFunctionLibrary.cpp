@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
@@ -27,7 +27,7 @@
 #endif
 
 // Returns a world of stored level map
-UWorld* USingletonLibrary::GetWorld() const
+UWorld* UMyBlueprintFunctionLibrary::GetWorld() const
 {
 #if WITH_EDITOR	 // [UEditorUtils::IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditor()
@@ -52,26 +52,26 @@ UWorld* USingletonLibrary::GetWorld() const
  * --------------------------------------------------- */
 
 //  Returns the singleton, nullptr otherwise
-USingletonLibrary* USingletonLibrary::GetSingleton()
+UMyBlueprintFunctionLibrary* UMyBlueprintFunctionLibrary::GetSingleton()
 {
 #if WITH_EDITOR // [UEditorUtils::IsEditorMultiplayer]
 	const int32 EditorPlayerIndex = UEditorUtilsLibrary::GetEditorPlayerIndex();
 	if (EditorPlayerIndex > 0)
 	{
 		const int32 ClientSingletonIndex = EditorPlayerIndex - 1;
-		USingletonLibrary* ClientSingleton = UMyUnrealEdEngine::GetClientSingleton<USingletonLibrary>(ClientSingletonIndex);
+		UMyBlueprintFunctionLibrary* ClientSingleton = UMyUnrealEdEngine::GetClientSingleton<UMyBlueprintFunctionLibrary>(ClientSingletonIndex);
 		checkf(ClientSingleton, TEXT("The client Singleton is null"));
 		return ClientSingleton;
 	}
 #endif // [UEditorUtils::IsEditorMultiplayer]
 
-	USingletonLibrary* Singleton = GEngine ? Cast<USingletonLibrary>(GEngine->GameSingleton) : nullptr;
+	UMyBlueprintFunctionLibrary* Singleton = GEngine ? Cast<UMyBlueprintFunctionLibrary>(GEngine->GameSingleton) : nullptr;
 	checkf(Singleton, TEXT("The Singleton is null"));
 	return Singleton;
 }
 
 // Iterates the current world to find an actor by specified class
-AActor* USingletonLibrary::GetActorOfClass(TSubclassOf<AActor> ActorClass)
+AActor* UMyBlueprintFunctionLibrary::GetActorOfClass(TSubclassOf<AActor> ActorClass)
 {
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(&Get(), ActorClass, FoundActors);
@@ -81,7 +81,7 @@ AActor* USingletonLibrary::GetActorOfClass(TSubclassOf<AActor> ActorClass)
 }
 
 // Returns true if game was started
-bool USingletonLibrary::HasWorldBegunPlay()
+bool UMyBlueprintFunctionLibrary::HasWorldBegunPlay()
 {
 #if WITH_EDITOR	// [UEditorUtils::IsEditor]
 	if (UEditorUtilsLibrary::IsPIE())
@@ -94,16 +94,16 @@ bool USingletonLibrary::HasWorldBegunPlay()
 }
 
 // Returns true if this instance is server
-bool USingletonLibrary::IsServer()
+bool UMyBlueprintFunctionLibrary::IsServer()
 {
 	const UWorld* World = Get().GetWorld();
 	return World && !World->IsNetMode(ENetMode::NM_Client);
 }
 
 // The Level Map setter
-void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
+void UMyBlueprintFunctionLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 {
-	USingletonLibrary* Singleton = GetSingleton();
+	UMyBlueprintFunctionLibrary* Singleton = GetSingleton();
 	if (Singleton && LevelMap)
 	{
 		Singleton->LevelMapInternal = LevelMap;
@@ -111,13 +111,13 @@ void USingletonLibrary::SetLevelMap(AGeneratedMap* LevelMap)
 }
 
 // Returns number of alive players
-int32 USingletonLibrary::GetAlivePlayersNum()
+int32 UMyBlueprintFunctionLibrary::GetAlivePlayersNum()
 {
 	return AGeneratedMap::Get().GetAlivePlayersNum();
 }
 
 // Returns the type of the current level
-ELevelType USingletonLibrary::GetLevelType()
+ELevelType UMyBlueprintFunctionLibrary::GetLevelType()
 {
 	return AGeneratedMap::Get().GetLevelType();
 }
@@ -127,7 +127,7 @@ ELevelType USingletonLibrary::GetLevelType()
  * --------------------------------------------------- */
 
 // The Level Map getter, nullptr otherwise
-AGeneratedMap* USingletonLibrary::GetLevelMap()
+AGeneratedMap* UMyBlueprintFunctionLibrary::GetLevelMap()
 {
 #if WITH_EDITOR	 // [UEditorUtils::IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditor()
@@ -142,21 +142,21 @@ AGeneratedMap* USingletonLibrary::GetLevelMap()
 }
 
 // Contains a data of Bomber Level, nullptr otherwise
-AMyGameModeBase* USingletonLibrary::GetMyGameMode()
+AMyGameModeBase* UMyBlueprintFunctionLibrary::GetMyGameMode()
 {
 	const UWorld* World = Get().GetWorld();
 	return World ? World->GetAuthGameMode<AMyGameModeBase>() : nullptr;
 }
 
 // Returns the Bomber Game state, nullptr otherwise.
-AMyGameStateBase* USingletonLibrary::GetMyGameState()
+AMyGameStateBase* UMyBlueprintFunctionLibrary::GetMyGameState()
 {
 	const UWorld* World = Get().GetWorld();
 	return World ? World->GetGameState<AMyGameStateBase>() : nullptr;
 }
 
 // Returns the Bomber Player Controller, nullptr otherwise
-AMyPlayerController* USingletonLibrary::GetMyPlayerController(int32 PlayerIndex)
+AMyPlayerController* UMyBlueprintFunctionLibrary::GetMyPlayerController(int32 PlayerIndex)
 {
 	const AMyGameModeBase* MyGameMode = GetMyGameMode();
 	AMyPlayerController* MyPC = MyGameMode ? MyGameMode->GetPlayerController(PlayerIndex) : nullptr;
@@ -169,94 +169,94 @@ AMyPlayerController* USingletonLibrary::GetMyPlayerController(int32 PlayerIndex)
 }
 
 // Returns the local Player Controller, nullptr otherwise
-AMyPlayerController* USingletonLibrary::GetLocalPlayerController()
+AMyPlayerController* UMyBlueprintFunctionLibrary::GetLocalPlayerController()
 {
 	static constexpr int32 LocalPlayerIndex = 0;
 	return GetMyPlayerController(LocalPlayerIndex);
 }
 
 // Returns the Bomber Player State for specified player, nullptr otherwise
-AMyPlayerState* USingletonLibrary::GetMyPlayerState(const APawn* Pawn)
+AMyPlayerState* UMyBlueprintFunctionLibrary::GetMyPlayerState(const APawn* Pawn)
 {
 	return Pawn ? Pawn->GetPlayerState<AMyPlayerState>() : nullptr;
 }
 
 // Returns the player state of current controller
-AMyPlayerState* USingletonLibrary::GetLocalPlayerState()
+AMyPlayerState* UMyBlueprintFunctionLibrary::GetLocalPlayerState()
 {
 	const AMyPlayerController* MyPlayerController = GetLocalPlayerController();
 	return MyPlayerController ? MyPlayerController->GetPlayerState<AMyPlayerState>() : nullptr;
 }
 
 // Returns the Bomber settings
-UMyGameUserSettings* USingletonLibrary::GetMyGameUserSettings()
+UMyGameUserSettings* UMyBlueprintFunctionLibrary::GetMyGameUserSettings()
 {
 	return GEngine ? Cast<UMyGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;
 }
 
 // Returns the settings widget
-USettingsWidget* USingletonLibrary::GetSettingsWidget()
+USettingsWidget* UMyBlueprintFunctionLibrary::GetSettingsWidget()
 {
 	const AMyHUD* MyHUD = GetMyHUD();
 	return MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
 }
 
 // Returns the Camera Component used on level
-UMyCameraComponent* USingletonLibrary::GetLevelCamera()
+UMyCameraComponent* UMyBlueprintFunctionLibrary::GetLevelCamera()
 {
 	return AGeneratedMap::Get().GetCameraComponent();
 }
 
 // Returns the HUD actor
-AMyHUD* USingletonLibrary::GetMyHUD()
+AMyHUD* UMyBlueprintFunctionLibrary::GetMyHUD()
 {
 	const AMyPlayerController* MyPlayerController = GetLocalPlayerController();
 	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
 }
 
 // Returns the Main Menu widget
-UMainMenuWidget* USingletonLibrary::GetMainMenuWidget()
+UMainMenuWidget* UMyBlueprintFunctionLibrary::GetMainMenuWidget()
 {
 	const AMyHUD* MyHUD = GetMyHUD();
 	return MyHUD ? MyHUD->GetMainMenuWidget() : nullptr;
 }
 
 // Returns the In-Game widget
-UInGameWidget* USingletonLibrary::GetInGameWidget()
+UInGameWidget* UMyBlueprintFunctionLibrary::GetInGameWidget()
 {
 	const AMyHUD* MyHUD = GetMyHUD();
 	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
 }
 
 // Returns the In-Game Menu widget
-UInGameMenuWidget* USingletonLibrary::GetInGameMenuWidget()
+UInGameMenuWidget* UMyBlueprintFunctionLibrary::GetInGameMenuWidget()
 {
 	const UInGameWidget* InGameWidget = GetInGameWidget();
 	return InGameWidget ? InGameWidget->GetInGameMenuWidget() : nullptr;
 }
 
 // Returns specified player character, by default returns local player
-APlayerCharacter* USingletonLibrary::GetPlayerCharacter(int32 PlayerIndex)
+APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 PlayerIndex)
 {
 	const AMyPlayerController* MyPC = GetMyPlayerController(PlayerIndex);
 	return MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
 }
 
 // Returns controlled player character
-APlayerCharacter* USingletonLibrary::GetLocalPlayerCharacter()
+APlayerCharacter* UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter()
 {
 	static constexpr int32 LocalPlayerIndex = 0;
 	return GetPlayerCharacter(LocalPlayerIndex);
 }
 
 // Returns the Sound Manager
-USoundsSubsystem* USingletonLibrary::GetSoundsSubsystem()
+USoundsSubsystem* UMyBlueprintFunctionLibrary::GetSoundsSubsystem()
 {
 	return &USoundsSubsystem::Get();
 }
 
 // Returns implemented Game Viewport Client on the project side
-UMyGameViewportClient* USingletonLibrary::GetGameViewportClient()
+UMyGameViewportClient* UMyBlueprintFunctionLibrary::GetGameViewportClient()
 {
 	return GEngine ? Cast<UMyGameViewportClient>(GEngine->GameViewport) : nullptr;
 }
@@ -266,7 +266,7 @@ UMyGameViewportClient* USingletonLibrary::GetGameViewportClient()
  * --------------------------------------------------- */
 
 // Returns Actor Type of specified actor, None is not level actor
-EActorType USingletonLibrary::GetActorType(const AActor* Actor)
+EActorType UMyBlueprintFunctionLibrary::GetActorType(const AActor* Actor)
 {
 	const TSubclassOf<AActor> ActorClass = Actor ? Actor->GetClass() : nullptr;
 	const ULevelActorDataAsset* LevelActorDataAsset = ActorClass ? UDataAssetsContainer::GetDataAssetByActorClass(ActorClass) : nullptr;
@@ -274,13 +274,13 @@ EActorType USingletonLibrary::GetActorType(const AActor* Actor)
 }
 
 // Returns true if specified actor is the Bomber Level Actor (player, box, wall or item)
-bool USingletonLibrary::IsLevelActor(const AActor* Actor)
+bool UMyBlueprintFunctionLibrary::IsLevelActor(const AActor* Actor)
 {
 	return GetActorType(Actor) != EAT::None;
 }
 
 // Returns true if specified level actor has at least one specified type
-bool USingletonLibrary::IsActorHasAnyMatchingType(const AActor* Actor, int32 ActorsTypesBitmask)
+bool UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(const AActor* Actor, int32 ActorsTypesBitmask)
 {
 	const EActorType ActorType = GetActorType(Actor);
 	return BitwiseActorTypes(TO_FLAG(ActorType), ActorsTypesBitmask);
@@ -292,8 +292,8 @@ bool USingletonLibrary::IsActorHasAnyMatchingType(const AActor* Actor, int32 Act
 
 #if WITH_EDITOR
 // Will notify on any data asset changes
-USingletonLibrary::FOnAnyDataAssetChanged USingletonLibrary::GOnAnyDataAssetChanged;
+UMyBlueprintFunctionLibrary::FOnAnyDataAssetChanged UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged;
 
 // Binds to update movements of each AI controller.
-USingletonLibrary::FUpdateAI USingletonLibrary::GOnAIUpdatedDelegate;
+UMyBlueprintFunctionLibrary::FUpdateAI UMyBlueprintFunctionLibrary::GOnAIUpdatedDelegate;
 #endif //WITH_EDITOR

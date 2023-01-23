@@ -5,21 +5,20 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
 #include "Bomber.h"
-#include "Structures/Cell.h"
 //---
-#include "SingletonLibrary.generated.h"
+#include "MyBlueprintFunctionLibrary.generated.h"
 
 /**
  * 	The static functions library
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API USingletonLibrary final : public UBlueprintFunctionLibrary
+class BOMBER_API UMyBlueprintFunctionLibrary final : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
 	/** Sets default values for this actor's properties */
-	USingletonLibrary() = default;
+	UMyBlueprintFunctionLibrary() = default;
 
 	/** Returns a world of stored level map. */
 	virtual class UWorld* GetWorld() const override;
@@ -30,8 +29,8 @@ public:
 
 	/** Returns the singleton, nullptr otherwise */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static USingletonLibrary* GetSingleton();
-	static const FORCEINLINE USingletonLibrary& Get() { return *GetSingleton(); }
+	static UMyBlueprintFunctionLibrary* GetSingleton();
+	static const FORCEINLINE UMyBlueprintFunctionLibrary& Get() { return *GetSingleton(); }
 
 	/** Iterates the current world to find an actor by specified class.
 	 * @warning use this functions carefully, try always avoid it and get cached actor instead. */

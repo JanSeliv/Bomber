@@ -6,7 +6,7 @@
 #include "Subsystems/SoundsSubsystem.h"
 #include "GameFramework/MyPlayerState.h"
 #include "DataAssets/GameStateDataAsset.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "GameFeaturesSubsystem.h"
 #include "Net/UnrealNetwork.h"
@@ -22,7 +22,7 @@ AMyGameStateBase::AMyGameStateBase()
 // Returns the AMyGameStateBase::CurrentGameState property
 ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 {
-	if (const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		return MyGameState->CurrentGameStateInternal;
 	}
@@ -206,7 +206,7 @@ void AMyGameStateBase::UpdateEndGameStates()
 		MyPlayerState->UpdateEndGameState();
 	}
 
-	if (USingletonLibrary::GetAlivePlayersNum() <= 1)
+	if (UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
 	{
 		ServerSetGameState(ECGS::EndGame);
 	}

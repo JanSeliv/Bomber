@@ -6,7 +6,7 @@
 //---
 #include "GameFramework/MyGameStateBase.h"
 #include "Controllers/MyPlayerController.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
 //---
@@ -62,7 +62,7 @@ void UMenuWidgetInteractionComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -145,7 +145,7 @@ void UMenuWidgetInteractionComponent::EnableInput()
 {
 	if (AActor* Owner = GetOwner())
 	{
-		AMyPlayerController* PC = USingletonLibrary::GetLocalPlayerController();
+		AMyPlayerController* PC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 		Owner->EnableInput(PC);
 	}
 }
@@ -153,14 +153,14 @@ void UMenuWidgetInteractionComponent::EnableInput()
 // Binds to toggle Settings to be able enable or disable this component
 void UMenuWidgetInteractionComponent::BindOnToggledSettings()
 {
-	if (USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget())
+	if (USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget())
 	{
 		SettingsWidget->OnToggledSettings.AddUniqueDynamic(this, &ThisClass::OnToggledSettings);
 		return;
 	}
 
 	// Settings widget is not valid yet, so wait until it becomes initialized
-	AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
+	AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD();
 	if (MyHUD && !MyHUD->AreWidgetInitialized())
 	{
 		MyHUD->OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
@@ -170,7 +170,7 @@ void UMenuWidgetInteractionComponent::BindOnToggledSettings()
 // Is called when all widgets are initialized to bind on settings toggle
 void UMenuWidgetInteractionComponent::OnWidgetsInitialized()
 {
-	AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
+	AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD();
 	if (MyHUD
 	    && MyHUD->OnWidgetsInitialized.IsAlreadyBound(this, &ThisClass::OnWidgetsInitialized))
 	{

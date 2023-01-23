@@ -6,7 +6,7 @@
 //---
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/MyInputMappingContext.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
@@ -96,7 +96,7 @@ void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 		}
 
 		// Initialize new gameplay contexts
-		UWorld* World = USingletonLibrary::Get().GetWorld();
+		UWorld* World = UMyBlueprintFunctionLibrary::Get().GetWorld();
 		const TSubclassOf<UMyInputMappingContext>& ContextClassIt = GameplayInputContextClassesInternal[Index];
 		if (!World
 		    || !ContextClassIt)

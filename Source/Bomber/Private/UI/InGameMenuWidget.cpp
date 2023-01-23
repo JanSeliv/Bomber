@@ -4,7 +4,7 @@
 //---
 #include "Subsystems/SoundsSubsystem.h"
 #include "Controllers/MyPlayerController.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 #include "UI/SettingsWidget.h"
 #include "UI/MyHUD.h"
 #include "DataAssets/UIDataAsset.h"
@@ -36,7 +36,7 @@ void UInGameMenuWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	// Listen changing the game states to handle In-Game Menu visibility
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		BindOnGameStateChanged(MyGameState);
 	}
@@ -56,7 +56,7 @@ void UInGameMenuWidget::NativeConstruct()
 	}
 
 	// Listen to toggle the game state widget when is requested
-	if (AMyHUD* MyHUD = USingletonLibrary::GetMyHUD())
+	if (AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD())
 	{
 		MyHUD->OnClose.AddUniqueDynamic(this, &ThisClass::ToggleInGameMenu);
 	}
@@ -160,7 +160,7 @@ void UInGameMenuWidget::OnMenuButtonPressed()
 // Is called when player pressed the button to open in-game Settings
 void UInGameMenuWidget::OnSettingsButtonPressed()
 {
-	if (USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget())
+	if (USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget())
 	{
 		SettingsWidget->OpenSettings();
 	}

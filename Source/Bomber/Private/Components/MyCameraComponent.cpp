@@ -8,7 +8,7 @@
 #include "DataAssets/GameStateDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
@@ -84,7 +84,7 @@ UMyCameraComponent::UMyCameraComponent()
 /** Returns current FOV of camera manager that is more reliable than own FOV. */
 float UMyCameraComponent::GetCameraManagerFOV() const
 {
-	const AMyPlayerController* PC = USingletonLibrary::GetLocalPlayerController();
+	const AMyPlayerController* PC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	const APlayerCameraManager* PlayerCameraManager = PC ? PC->PlayerCameraManager : nullptr;
 	return PlayerCameraManager ? PlayerCameraManager->GetFOVAngle() : FieldOfView;
 }
@@ -103,7 +103,7 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime/* = 0.f*/)
 
 	// If true, the camera will be forced moving to the start position
 	if (bIsCameraLockedOnCenterInternal
-	    || !USingletonLibrary::GetAlivePlayersNum()
+	    || !UMyBlueprintFunctionLibrary::GetAlivePlayersNum()
 	    || bForceStartInternal)
 	{
 		static constexpr float Tolerance = 10.f;
@@ -202,13 +202,13 @@ void UMyCameraComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
 	// Listen to recalculate camera location
-	if (UMyGameViewportClient* GameViewportClient = USingletonLibrary::GetGameViewportClient())
+	if (UMyGameViewportClient* GameViewportClient = UMyBlueprintFunctionLibrary::GetGameViewportClient())
 	{
 		GameViewportClient->OnAspectRatioChanged.AddUniqueDynamic(this, &ThisClass::OnAspectRatioChanged);
 	}
@@ -256,7 +256,7 @@ void UMyCameraComponent::OnAspectRatioChanged(float NewAspectRatio)
 void UMyCameraComponent::PossessCamera()
 {
 	AActor* Owner = GetOwner();
-	AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController();
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!ensureMsgf(Owner, TEXT("ASSERT: 'Owner' is not valid"))
 	    || !ensureMsgf(MyPC, TEXT("ASSERT: 'MyPC' is not valid")))
 	{

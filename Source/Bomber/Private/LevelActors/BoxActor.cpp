@@ -7,7 +7,7 @@
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "DataAssets/BoxDataAsset.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
 
@@ -71,7 +71,7 @@ void ABoxActor::BeginPlay()
 	}
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -91,7 +91,7 @@ void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
 // Called when owned map component is destroyed on the level map
 void ABoxActor::OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
-	const bool bIsCauserAllowedForItems = USingletonLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
+	const bool bIsCauserAllowedForItems = UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
 	if (bIsCauserAllowedForItems)
 	{
 		TrySpawnItem();

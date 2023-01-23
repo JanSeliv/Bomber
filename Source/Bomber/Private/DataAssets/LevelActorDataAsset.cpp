@@ -2,7 +2,7 @@
 
 #include "DataAssets/LevelActorDataAsset.h"
 //---
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
@@ -22,7 +22,7 @@ void UBomberDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		USingletonLibrary::GOnAnyDataAssetChanged.Broadcast();
+		UMyBlueprintFunctionLibrary::GOnAnyDataAssetChanged.Broadcast();
 	}
 }
 
