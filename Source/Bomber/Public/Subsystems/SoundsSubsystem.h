@@ -6,16 +6,16 @@
 //---
 #include "Bomber.h"
 //---
-#include "SoundsManager.generated.h"
+#include "SoundsSubsystem.generated.h"
 
 class UAudioComponent;
 
 /**
  * Is used to manage the game sounds.
- * @see Access its data with USoundsDataAsset (Content/Bomber/Globals/DA_Sounds).
+ * @see Access its data with USoundsDataAsset (Content/Bomber/DataAssets/DA_Sounds).
  */
 UCLASS(Config = "GameUserSettings", Blueprintable, BlueprintType)
-class BOMBER_API USoundsManager final : public UWorldSubsystem
+class BOMBER_API USoundsSubsystem final : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -25,7 +25,7 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Returns the Sounds Manager checked. */
-	static USoundsManager& Get();
+	static USoundsSubsystem& Get();
 
 	/** The component that is used to store reference for EndGameCountdown SFX. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))

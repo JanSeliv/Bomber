@@ -4,7 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "Components/MapComponent.h"
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/ItemDataAsset.h"
@@ -115,7 +115,7 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 		return;
 	}
 
-	USoundsManager::Get().PlayItemPickUpSFX();
+	USoundsSubsystem::Get().PlayItemPickUpSFX();
 
 	// Destroy itself on overlapping
 	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal, OtherActor);

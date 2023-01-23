@@ -11,7 +11,7 @@
 
 /**
  * Characters controlled by bots.
-* @see Access its data with UAIDataAsset (Content/Bomber/Globals/DA_AI).
+* @see Access its data with UAIDataAsset (Content/Bomber/DataAssets/DA_AI).
  */
 UCLASS()
 class BOMBER_API AMyAIController final : public AAIController

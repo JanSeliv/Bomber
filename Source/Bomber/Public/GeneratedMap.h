@@ -11,7 +11,7 @@
 
 /**
  * Procedurally generated grid of cells and actors on the scene.
- * @see Access its data with UGeneratedMapDataAsset (Content/Bomber/Globals/DA_Levels).
+ * @see Access its data with UGeneratedMapDataAsset (Content/Bomber/DataAssets/DA_Levels).
  */
 UCLASS()
 class BOMBER_API AGeneratedMap final : public AActor

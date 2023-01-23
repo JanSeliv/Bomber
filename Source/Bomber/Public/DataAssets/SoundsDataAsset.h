@@ -6,7 +6,7 @@
 //---
 #include "SoundsDataAsset.generated.h"
 
-class USoundsManager;
+class USoundsSubsystem;
 class USoundBase;
 class USoundClass;
 
@@ -23,9 +23,9 @@ public:
 	static const USoundsDataAsset& Get();
 
 	/** Returns the Sound Manager class that is responsible for audio in game.
-	 * @see USoundsDataAsset::SoundsManagerClassInternal */
+	 * @see USoundsDataAsset::SoundsSubsystemClassInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<USoundsManager> GetSoundsManagerClass() const { return SoundsManagerClassInternal; }
+	FORCEINLINE TSubclassOf<USoundsSubsystem> GetSoundsSubsystemClass() const { return SoundsSubsystemClassInternal; }
 
 	/** Returns the base Sound Mix used in game.
 	 * @see USoundsDataAsset::SoundMixInternal */
@@ -94,7 +94,7 @@ public:
 protected:
 	/** The Sound Manager that is responsible for audio in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sounds Manager Class", ShowOnlyInnerProperties))
-	TSubclassOf<USoundsManager> SoundsManagerClassInternal = nullptr;
+	TSubclassOf<USoundsSubsystem> SoundsSubsystemClassInternal = nullptr;
 
 	/** The base Sound Mix used in game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Sound Mix", ShowOnlyInnerProperties))

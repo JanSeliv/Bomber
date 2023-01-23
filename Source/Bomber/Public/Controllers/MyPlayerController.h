@@ -10,7 +10,7 @@
 
 /**
  * The player controller class.
- * @see Access its data with UPlayerInputDataAsset (Content/Bomber/Globals/DA_PlayerInput).
+ * @see Access its data with UPlayerInputDataAsset (Content/Bomber/DataAssets/DA_PlayerInput).
  */
 UCLASS()
 class BOMBER_API AMyPlayerController final : public APlayerController

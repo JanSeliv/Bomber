@@ -8,7 +8,7 @@
 
 /**
  * The custom HUD class. Also manages other widgets.
- * @see Access its data with UUIDataAsset (Content/Bomber/Globals/DA_UI).
+ * @see Access its data with UUIDataAsset (Content/Bomber/DataAssets/DA_UI).
  */
 UCLASS(Config = "GameUserSettings")
 class BOMBER_API AMyHUD final : public AHUD

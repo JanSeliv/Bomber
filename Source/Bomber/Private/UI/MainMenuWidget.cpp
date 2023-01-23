@@ -3,7 +3,7 @@
 #include "UI/MainMenuWidget.h"
 //---
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "Components/MySkeletalMeshComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
@@ -110,7 +110,7 @@ void UMainMenuWidget::NextSkin()
 		return;
 	}
 
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the preview skin
 	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + 1;
@@ -123,7 +123,7 @@ void UMainMenuWidget::NextSkin()
 // Set the chosen on UI the level type
 void UMainMenuWidget::ChooseNewLevel(ELevelType LevelType)
 {
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	AGeneratedMap::Get().SetLevelType(LevelType);
 }
@@ -131,7 +131,7 @@ void UMainMenuWidget::ChooseNewLevel(ELevelType LevelType)
 // Is executed when player pressed the button of starting the game
 void UMainMenuWidget::StartGame()
 {
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	if (AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController())
 	{
@@ -215,7 +215,7 @@ void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	}
 
 	// Play the sound
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	const bool bRotated = MainMenuActorInternal->RotateFloorBP(Incrementer);
 	if (!bRotated)

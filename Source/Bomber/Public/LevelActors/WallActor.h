@@ -8,7 +8,7 @@
 
 /**
  * Walls are not destroyed by a bomb explosion and break the explosion.
- * @see Access its data with UWallDataAsset (Content/Bomber/Globals/DA_Wall).
+ * @see Access its data with UWallDataAsset (Content/Bomber/DataAssets/DA_Wall).
  */
 UCLASS()
 class BOMBER_API AWallActor final : public AActor

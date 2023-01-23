@@ -10,7 +10,7 @@
 
 /**
  * Own implementation of managing the game's global state.
- * @see Access its data with UGameStateDataAsset (Content/Bomber/Globals/DA_GameState).
+ * @see Access its data with UGameStateDataAsset (Content/Bomber/DataAssets/DA_GameState).
  */
 UCLASS()
 class BOMBER_API AMyGameStateBase final : public AGameStateBase

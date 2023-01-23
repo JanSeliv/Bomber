@@ -36,8 +36,8 @@ struct BOMBER_API FPowerUp
 
 /**
  * Players and AI, whose goal is to remain the last survivor for the win.
- * @see Access Player's data with UPlayerDataAsset (Content/Bomber/Globals/DA_Player).
- * @see Access AI's data with UAIDataAsset (Content/Bomber/Globals/DA_AI).
+ * @see Access Player's data with UPlayerDataAsset (Content/Bomber/DataAssets/DA_Player).
+ * @see Access AI's data with UAIDataAsset (Content/Bomber/DataAssets/DA_AI).
  */
 UCLASS()
 class BOMBER_API APlayerCharacter final : public ACharacter

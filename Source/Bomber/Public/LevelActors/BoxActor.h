@@ -8,7 +8,7 @@
 
 /**
  * Boxes on destruction with some chances spawns an item.
- * @see Access its data with UBoxDataAsset (Content/Bomber/Globals/DA_Box).
+ * @see Access its data with UBoxDataAsset (Content/Bomber/DataAssets/DA_Box).
  */
 UCLASS()
 class BOMBER_API ABoxActor final : public AActor

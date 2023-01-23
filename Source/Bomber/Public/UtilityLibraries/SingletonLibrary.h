@@ -132,7 +132,7 @@ public:
 
 	/** Returns the Sounds Manager. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static class USoundsManager* GetSoundsManager();
+	static class USoundsSubsystem* GetSoundsSubsystem();
 
 	/** Returns implemented Game Viewport Client on the project side. */
 	UFUNCTION(BlueprintPure, Category = "C++")

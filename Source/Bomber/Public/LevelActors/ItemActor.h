@@ -10,7 +10,7 @@
 
 /**
  * Affects the abilities of a player during gameplay.
- * @see Access its data with UItemDataAsset (Content/Bomber/Globals/DA_Item).
+ * @see Access its data with UItemDataAsset (Content/Bomber/DataAssets/DA_Item).
  */
 UCLASS()
 class BOMBER_API AItemActor final : public AActor

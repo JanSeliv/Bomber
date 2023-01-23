@@ -2,7 +2,7 @@
 
 #include "UI/InGameMenuWidget.h"
 //---
-#include "Subsystems/SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "Controllers/MyPlayerController.h"
 #include "UtilityLibraries/SingletonLibrary.h"
 #include "UI/SettingsWidget.h"
@@ -138,7 +138,7 @@ void UInGameMenuWidget::BindOnEndGameStateChanged(AMyPlayerState* MyPlayerState)
 // Is called when player pressed the button to restart the game
 void UInGameMenuWidget::OnRestartButtonPressed()
 {
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
@@ -149,7 +149,7 @@ void UInGameMenuWidget::OnRestartButtonPressed()
 // Is called when player pressed the button to go back to the Main Menu
 void UInGameMenuWidget::OnMenuButtonPressed()
 {
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
@@ -244,7 +244,7 @@ void UInGameMenuWidget::OnToggleInGameMenu(bool bIsVisible)
 	SetVisibility(NewVisibility);
 
 	// Play the sound
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	if (OnToggledInGameMenu.IsBound())
 	{

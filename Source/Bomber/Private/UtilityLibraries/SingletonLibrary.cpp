@@ -4,7 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
@@ -250,9 +250,9 @@ APlayerCharacter* USingletonLibrary::GetLocalPlayerCharacter()
 }
 
 // Returns the Sound Manager
-USoundsManager* USingletonLibrary::GetSoundsManager()
+USoundsSubsystem* USingletonLibrary::GetSoundsSubsystem()
 {
-	return &USoundsManager::Get();
+	return &USoundsSubsystem::Get();
 }
 
 // Returns implemented Game Viewport Client on the project side

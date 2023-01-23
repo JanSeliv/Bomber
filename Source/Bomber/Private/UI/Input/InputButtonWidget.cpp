@@ -2,7 +2,7 @@
 
 #include "UI/Input/InputButtonWidget.h"
 //---
-#include "Subsystems/SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "Data/SettingsDataAsset.h"
 #include "DataAssets/MyInputMappingContext.h"
@@ -109,5 +109,5 @@ void UInputButtonWidget::OnKeySelected(FInputChord SelectedKey)
 // Called whenever the key selection mode starts or stops
 void UInputButtonWidget::OnIsSelectingKeyChanged()
 {
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 }

@@ -777,16 +777,16 @@
 				"StaticContext":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
-					"FunctionName": "GetSoundsManager"
+					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "SetMasterVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "GetMasterVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"3FC144E945D22BA8DB903BB7FBD1AE1E\", \"Master Volume\")",
@@ -861,16 +861,16 @@
 				"StaticContext":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
-					"FunctionName": "GetSoundsManager"
+					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "SetMusicVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "GetMusicVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"FDDC03E84D349EAC5743FEB1C9E6B87D\", \"Music Volume\")",
@@ -945,16 +945,16 @@
 				"StaticContext":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SingletonLibrary'",
-					"FunctionName": "GetSoundsManager"
+					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "SetSFXVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsManager'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "GetSFXVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"DC1E69F1449E9C4CD8B1D58CFCBB7676\", \"Sound Effects Volume\")",

@@ -4,7 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "DataAssets/BombDataAsset.h"
@@ -258,7 +258,7 @@ void ABombActor::MulticastDetonateBomb_Implementation()
 	// Destroy all actors from array of cells
 	AGeneratedMap::Get().DestroyLevelActorsOnCells(ExplosionCells, this);
 
-	USoundsManager::Get().PlayExplosionSFX();
+	USoundsSubsystem::Get().PlayExplosionSFX();
 
 	GetWorldTimerManager().ClearTimer(TimerHandle_LifeSpanExpired);
 }

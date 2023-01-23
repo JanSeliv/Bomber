@@ -12,7 +12,7 @@
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.
- * @see Access its data with UBombDataAsset (Content/Bomber/Globals/DA_Bomb).
+ * @see Access its data with UBombDataAsset (Content/Bomber/DataAssets/DA_Bomb).
  */
 UCLASS()
 class BOMBER_API ABombActor final : public AActor

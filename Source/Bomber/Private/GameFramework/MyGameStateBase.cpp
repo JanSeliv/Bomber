@@ -3,7 +3,7 @@
 #include "GameFramework/MyGameStateBase.h"
 //---
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "GameFramework/MyPlayerState.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "UtilityLibraries/SingletonLibrary.h"
@@ -114,7 +114,7 @@ void AMyGameStateBase::TriggerCountdowns()
 	const float InRate = UGameStateDataAsset::Get().GetTickInterval();
 	World->GetTimerManager().SetTimer(CountdownTimerInternal, this, &ThisClass::OnCountdownTimerTicked, InRate, bInLoop);
 
-	USoundsManager::Get().PlayStartGameCountdownSFX();
+	USoundsSubsystem::Get().PlayStartGameCountdownSFX();
 }
 
 // Is called each UGameStateDataAsset::TickInternal to count different time in the game
@@ -179,7 +179,7 @@ void AMyGameStateBase::DecrementInGameCountdown()
 		constexpr float SoundDuration = 10.f;
 		if (FMath::IsNearlyEqual(InGameTimerSecRemainInternal, SoundDuration, Tolerance))
 		{
-			USoundsManager::Get().PlayEndGameCountdownSFX();
+			USoundsSubsystem::Get().PlayEndGameCountdownSFX();
 		}
 	}
 }
