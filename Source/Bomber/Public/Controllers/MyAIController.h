@@ -77,7 +77,7 @@ protected:
 	void UpdateAI();
 
 	/** Enable or disable AI for this bot. */
-	UFUNCTION(BlueprintCallable, meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, meta = (BlueprintProtected))
 	void SetAI(bool bShouldEnable);
 
 	/** Listen game states to enable or disable AI. */

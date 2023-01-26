@@ -132,7 +132,7 @@ FCells FCell::MakeCellGridByTransform(const FTransform& OriginTransform)
 			FVector FoundVector(X, Y, 0.f);
 			// Calculate a length of iteration cell
 			FoundVector *= CellSize;
-			// Locate the cell relative to the Level Map
+			// Locate the cell relative to the Generated Map
 			FoundVector += LevelLocation;
 			// Subtract the deviation from the center
 			FoundVector -= (LevelScale / 2.f) * CellSize;

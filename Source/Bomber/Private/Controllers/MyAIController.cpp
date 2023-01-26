@@ -150,11 +150,6 @@ void AMyAIController::OnUnPossess()
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.RemoveAll(this);
-	}
-
 	SetAI(false);
 }
 
@@ -413,8 +408,9 @@ void AMyAIController::UpdateAI()
 // Enable or disable AI for this bot
 void AMyAIController::SetAI(bool bShouldEnable)
 {
-	const UWorld* World = GetWorld();
-	if (!World)
+	const bool bWantsEnableDeadAI = !OwnerInternal && bShouldEnable;
+	if (bWantsEnableDeadAI
+		|| !HasAuthority())
 	{
 		return;
 	}
@@ -424,7 +420,7 @@ void AMyAIController::SetAI(bool bShouldEnable)
 	SetIgnoreMoveInput(!bShouldEnable);
 
 	// Handle the Ai updating timer
-	FTimerManager& TimerManager = World->GetTimerManager();
+	FTimerManager& TimerManager = GetWorldTimerManager();
 	if (bShouldEnable)
 	{
 		TimerManager.UnPauseTimer(AIUpdateHandleInternal);

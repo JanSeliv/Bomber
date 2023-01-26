@@ -196,6 +196,14 @@ void UMyCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	}
 }
 
+// Activates the SceneComponent, should be overridden by native child classes
+void UMyCameraComponent::Activate(bool bReset)
+{
+	Super::Activate(bReset);
+
+	SetComponentTickEnabled(false);
+}
+
 // Called when the game starts or when spawned
 void UMyCameraComponent::BeginPlay()
 {

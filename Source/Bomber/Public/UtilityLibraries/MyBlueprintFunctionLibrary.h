@@ -17,29 +17,12 @@ class BOMBER_API UMyBlueprintFunctionLibrary final : public UBlueprintFunctionLi
 	GENERATED_BODY()
 
 public:
-	/** Sets default values for this actor's properties */
-	UMyBlueprintFunctionLibrary() = default;
-
-	/** Returns a world of stored level map. */
-	virtual class UWorld* GetWorld() const override;
-
 	/* ---------------------------------------------------
 	 *		Static library functions
 	 * --------------------------------------------------- */
 
-	/** Returns the singleton, nullptr otherwise */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static UMyBlueprintFunctionLibrary* GetSingleton();
-	static const FORCEINLINE UMyBlueprintFunctionLibrary& Get() { return *GetSingleton(); }
-
-	/** Iterates the current world to find an actor by specified class.
-	 * @warning use this functions carefully, try always avoid it and get cached actor instead. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static AActor* GetActorOfClass(TSubclassOf<AActor> ActorClass);
-
-	/** Iterates the current world to find an actor by specified class. */
-	template <typename T>
-	static FORCEINLINE T* GetActorOfClass(TSubclassOf<AActor> ActorClass) { return Cast<T>(GetActorOfClass(ActorClass)); }
+	/** Returns current play world. */
+	static UWorld* GetStaticWorld();
 
 	/** Returns true if game was started. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -48,10 +31,6 @@ public:
 	/** Returns true if this instance is server. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool IsServer();
-
-	/** The Level Map setter. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static void SetLevelMap(class AGeneratedMap* LevelMap);
 
 	/** Returns number of alive players. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -64,10 +43,6 @@ public:
 	/* ---------------------------------------------------
 	 *		Framework pointer getters
 	 * --------------------------------------------------- */
-
-	/** The Level Map getter, nullptr otherwise */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Generated"))
-	static class AGeneratedMap* GetLevelMap();
 
 	/** Returns the Bomber Game Mode, nullptr otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -164,16 +139,4 @@ public:
 	static bool IsActorHasAnyMatchingType(
 		const AActor* Actor,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
-
-protected:
-	/* ---------------------------------------------------
-	*		Protected properties
-	* --------------------------------------------------- */
-
-	/** Is actor on persistent level.
-	 * Is uproperty to be accessible in blueprints.
-	 * Is transient to not serialize it since will be set by AGeneratedMap::OnConstruction().
-	 * Is stored in singleton, so has weak reference field to be garbage collected on loading another maps where that actor does not exist. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Map"))
-	TWeakObjectPtr<class AGeneratedMap> LevelMapInternal = nullptr;
 };

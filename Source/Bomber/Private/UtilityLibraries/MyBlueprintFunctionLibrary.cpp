@@ -4,81 +4,37 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsSubsystem.h"
 #include "Controllers/MyPlayerController.h"
+#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/LevelActorDataAsset.h"
+#include "Engine/MyGameViewportClient.h"
 #include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyGameUserSettings.h"
 #include "GameFramework/MyPlayerState.h"
-#include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/GeneratedMapSubsystem.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/InGameWidget.h"
 #include "UI/MyHUD.h"
 //---
-#include "Engine/MyGameViewportClient.h"
-#include "DataAssets/DataAssetsContainer.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
-#include "MyUnrealEdEngine.h" // GetClientSingleton
-//---
-#include "Editor.h"	 // GEditor
 #endif
-
-// Returns a world of stored level map
-UWorld* UMyBlueprintFunctionLibrary::GetWorld() const
-{
-#if WITH_EDITOR	 // [UEditorUtils::IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditor()
-	    && !Get().LevelMapInternal.IsValid())
-	{
-		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
-		{
-			return GEditor->GetEditorWorldContext().World();
-		}
-		if (UEditorUtilsLibrary::IsPIE())
-		{
-			return GEditor->GetCurrentPlayWorld();
-		}
-	}
-#endif	// WITH_EDITOR [UEditorUtils::IsEditorNotPieWorld]
-	const AGeneratedMap* LevelMap = GetLevelMap();
-	return LevelMap ? LevelMap->GetWorld() : nullptr;
-}
 
 /* ---------------------------------------------------
  *		Static library functions
  * --------------------------------------------------- */
 
-//  Returns the singleton, nullptr otherwise
-UMyBlueprintFunctionLibrary* UMyBlueprintFunctionLibrary::GetSingleton()
+// Returns current play world
+UWorld* UMyBlueprintFunctionLibrary::GetStaticWorld()
 {
-#if WITH_EDITOR // [UEditorUtils::IsEditorMultiplayer]
-	const int32 EditorPlayerIndex = UEditorUtilsLibrary::GetEditorPlayerIndex();
-	if (EditorPlayerIndex > 0)
-	{
-		const int32 ClientSingletonIndex = EditorPlayerIndex - 1;
-		UMyBlueprintFunctionLibrary* ClientSingleton = UMyUnrealEdEngine::GetClientSingleton<UMyBlueprintFunctionLibrary>(ClientSingletonIndex);
-		checkf(ClientSingleton, TEXT("The client Singleton is null"));
-		return ClientSingleton;
-	}
-#endif // [UEditorUtils::IsEditorMultiplayer]
-
-	UMyBlueprintFunctionLibrary* Singleton = GEngine ? Cast<UMyBlueprintFunctionLibrary>(GEngine->GameSingleton) : nullptr;
-	checkf(Singleton, TEXT("The Singleton is null"));
-	return Singleton;
-}
-
-// Iterates the current world to find an actor by specified class
-AActor* UMyBlueprintFunctionLibrary::GetActorOfClass(TSubclassOf<AActor> ActorClass)
-{
-	TArray<AActor*> FoundActors;
-	UGameplayStatics::GetAllActorsOfClass(&Get(), ActorClass, FoundActors);
-
-	static constexpr int32 Index = 0;
-	return FoundActors.IsValidIndex(Index) ? FoundActors[Index] : nullptr;
+	// Get the world from Generated Map
+	const UGeneratedMapSubsystem* GeneratedMapSubsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem();
+	return GeneratedMapSubsystem ? GeneratedMapSubsystem->GetWorld() : nullptr;
 }
 
 // Returns true if game was started
@@ -90,69 +46,46 @@ bool UMyBlueprintFunctionLibrary::HasWorldBegunPlay()
 		return true;
 	}
 #endif	// [UEditorUtils::IsEditor]
-	const UWorld* World = Get().GetWorld();
+	const UWorld* World = GetStaticWorld();
 	return World && World->HasBegunPlay();
 }
 
 // Returns true if this instance is server
 bool UMyBlueprintFunctionLibrary::IsServer()
 {
-	const UWorld* World = Get().GetWorld();
-	return World && !World->IsNetMode(ENetMode::NM_Client);
-}
-
-// The Level Map setter
-void UMyBlueprintFunctionLibrary::SetLevelMap(AGeneratedMap* LevelMap)
-{
-	UMyBlueprintFunctionLibrary* Singleton = GetSingleton();
-	if (Singleton && LevelMap)
-	{
-		Singleton->LevelMapInternal = LevelMap;
-	}
+	const UWorld* World = GetStaticWorld();
+	return World && !World->IsNetMode(NM_Client);
 }
 
 // Returns number of alive players
 int32 UMyBlueprintFunctionLibrary::GetAlivePlayersNum()
 {
-	return AGeneratedMap::Get().GetAlivePlayersNum();
+	const AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap();
+	return GeneratedMap ? GeneratedMap->GetAlivePlayersNum() : INDEX_NONE;
 }
 
 // Returns the type of the current level
 ELevelType UMyBlueprintFunctionLibrary::GetLevelType()
 {
-	return AGeneratedMap::Get().GetLevelType();
+	const AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap();
+	return GeneratedMap ? GeneratedMap->GetLevelType() : ELevelType::None;
 }
 
 /* ---------------------------------------------------
  *		Framework pointer getters
  * --------------------------------------------------- */
 
-// The Level Map getter, nullptr otherwise
-AGeneratedMap* UMyBlueprintFunctionLibrary::GetLevelMap()
-{
-#if WITH_EDITOR	 // [UEditorUtils::IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditor()
-	    && !Get().LevelMapInternal.IsValid())
-	{
-		AGeneratedMap* LevelMap = GetActorOfClass<AGeneratedMap>(AGeneratedMap::StaticClass());
-		SetLevelMap(LevelMap);
-	}
-#endif	// WITH_EDITOR [UEditorUtils::IsEditorNotPieWorld]
-
-	return Get().LevelMapInternal.Get();
-}
-
 // Contains a data of Bomber Level, nullptr otherwise
 AMyGameModeBase* UMyBlueprintFunctionLibrary::GetMyGameMode()
 {
-	const UWorld* World = Get().GetWorld();
+	const UWorld* World = GetStaticWorld();
 	return World ? World->GetAuthGameMode<AMyGameModeBase>() : nullptr;
 }
 
 // Returns the Bomber Game state, nullptr otherwise.
 AMyGameStateBase* UMyBlueprintFunctionLibrary::GetMyGameState()
 {
-	const UWorld* World = Get().GetWorld();
+	const UWorld* World = GetStaticWorld();
 	return World ? World->GetGameState<AMyGameStateBase>() : nullptr;
 }
 
@@ -166,7 +99,7 @@ AMyPlayerController* UMyBlueprintFunctionLibrary::GetMyPlayerController(int32 Pl
 		return MyPC;
 	}
 
-	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(&Get(), PlayerIndex));
+	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(GetStaticWorld(), PlayerIndex));
 }
 
 // Returns the local Player Controller, nullptr otherwise
@@ -205,7 +138,8 @@ USettingsWidget* UMyBlueprintFunctionLibrary::GetSettingsWidget()
 // Returns the Camera Component used on level
 UMyCameraComponent* UMyBlueprintFunctionLibrary::GetLevelCamera()
 {
-	return AGeneratedMap::Get().GetCameraComponent();
+	const AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap();
+	return GeneratedMap ? GeneratedMap->GetCameraComponent() : nullptr;
 }
 
 // Returns the HUD actor

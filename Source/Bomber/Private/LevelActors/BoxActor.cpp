@@ -83,12 +83,12 @@ void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
 		ConstructBoxActor();
 	}
 }
 
-// Called when owned map component is destroyed on the level map
+// Called when owned map component is destroyed on the Generated Map
 void ABoxActor::OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
 	const bool bIsCauserAllowedForItems = UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));

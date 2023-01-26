@@ -10,6 +10,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/BombActor.h"
 #include "Structures/Cell.h"
+#include "Subsystems/GeneratedMapSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -29,7 +30,7 @@
 #endif
 
 /* ---------------------------------------------------
- *		Level map public functions
+ *		Generated Map public functions
  * --------------------------------------------------- */
 
 // Sets default values
@@ -66,20 +67,20 @@ AGeneratedMap::AGeneratedMap()
 // Returns the generated map
 AGeneratedMap& AGeneratedMap::Get()
 {
-	AGeneratedMap* LevelMap = UMyBlueprintFunctionLibrary::GetLevelMap();
-	checkf(LevelMap, TEXT("The Level Map is not valid"));
-	return *LevelMap;
+	AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap();
+	checkf(GeneratedMap, TEXT("%s: ERROR: 'GeneratedMap' is null"), *FString(__FUNCTION__));
+	return *GeneratedMap;
 }
 
-// Initialize this Level Map actor, could be called multiple times
-void AGeneratedMap::ConstructLevelMap(const FTransform& Transform)
+// Initialize this Generated Map actor, could be called multiple times
+void AGeneratedMap::ConstructGeneratedMap(const FTransform& Transform)
 {
-	if (OnLevelMapWantsReconstruct.IsBound())
+	if (OnGeneratedMapWantsReconstruct.IsBound())
 	{
-		OnLevelMapWantsReconstruct.Broadcast(Transform);
+		OnGeneratedMapWantsReconstruct.Broadcast(Transform);
 	}
 
-	OnConstructionLevelMap(Transform);
+	OnConstructionGeneratedMap(Transform);
 }
 
 // Sets the size for generated map, it will automatically regenerate the level for given size
@@ -272,7 +273,7 @@ bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells
 	return false;
 }
 
-// Spawns level actor on the Level Map by the specified type
+// Spawns level actor on the Generated Map by the specified type
 AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 {
 	if (!HasAuthority()
@@ -294,7 +295,7 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 	return SpawnedActor;
 }
 
-// The function that places the actor on the Level Map, attaches it and writes this actor to the GridArray_
+// The function that places the actor on the Generated Map, attaches it and writes this actor to the GridArray_
 void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 {
 	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
@@ -337,7 +338,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 	static constexpr float HeightAdditive = 100.f;
 	const FVector ActorLocation{Cell.X(), Cell.Y(), Cell.Z() + HeightAdditive};
 
-	// Attach to the Level Map actor
+	// Attach to the Generated Map actor
 	if (!ComponentOwner->IsAttachedTo(this)
 	    && ActorType != EAT::Player)
 	{
@@ -583,7 +584,7 @@ FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorT
 }
 
 /* ---------------------------------------------------
- *		Level map protected functions
+ *		Generated Map protected functions
  * --------------------------------------------------- */
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -591,19 +592,19 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	ConstructLevelMap(Transform);
+	ConstructGeneratedMap(Transform);
 }
 
-// Initialize this Level Map actor, could be called multiple times
-void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
+// Initialize this Generated Map actor, could be called multiple times
+void AGeneratedMap::OnConstructionGeneratedMap(const FTransform& Transform)
 {
-	if (IS_TRANSIENT(this)) // the level map is transient
+	if (IS_TRANSIENT(this)) // the Generated Map is transient
 	{
 		return;
 	}
 
 #if WITH_EDITOR // [GEditor]
-	UMyBlueprintFunctionLibrary::SetLevelMap(this);
+	UGeneratedMapSubsystem::Get().SetGeneratedMap(this);
 	if (GEditor // Can be bound before editor is loaded
 	    && !UMyUnrealEdEngine::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
@@ -622,7 +623,7 @@ void AGeneratedMap::OnConstructionLevelMap(const FTransform& Transform)
 	}
 
 	// Align transform and build cells
-	TransformLevelMap(Transform);
+	TransformGeneratedMap(Transform);
 
 #if WITH_EDITOR // [Editor-Standalone]
 	if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay())
@@ -656,7 +657,7 @@ void AGeneratedMap::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 
-	// Register level map to let to be implemented by game features
+	// Register Generated Map to let to be implemented by game features
 	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
@@ -664,15 +665,15 @@ void AGeneratedMap::PreInitializeComponents()
 void AGeneratedMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	if (IS_TRANSIENT(this)) // the level map is transient
+	if (IS_TRANSIENT(this)) // the Generated Map is transient
 	{
 		return;
 	}
 
-	// Update the gameplay LevelMap reference in the singleton library
-	UMyBlueprintFunctionLibrary::SetLevelMap(this);
+	// Update the gameplay GeneratedMap reference in the singleton library
+	UGeneratedMapSubsystem::Get().SetGeneratedMap(this);
 
-	ConstructLevelMap(GetActorTransform());
+	ConstructGeneratedMap(GetActorTransform());
 
 	if (HasAuthority())
 	{
@@ -740,7 +741,7 @@ void AGeneratedMap::GenerateLevelActors()
 	DestroyLevelActorsOnCells(NonEmptyCells);
 	PlayersNumInternal = 0;
 
-	// Calls before generation preview actors to updating of all dragged to the Level Map actors
+	// Calls before generation preview actors to updating of all dragged to the Generated Map actors
 	FCells DraggedCells, DraggedWalls, DraggedItems;
 	for (const TTuple<FCell, EActorType>& It : DraggedCellsInternal)
 	{
@@ -952,7 +953,7 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 }
 
 // Align transform and build cells
-void AGeneratedMap::TransformLevelMap(const FTransform& Transform)
+void AGeneratedMap::TransformGeneratedMap(const FTransform& Transform)
 {
 	const FTransform NewGridTransform = ActorTransformToGridTransform(Transform);
 	const FCells NewGridCells = FCell::MakeCellGridByTransform(NewGridTransform);
@@ -1128,7 +1129,7 @@ void AGeneratedMap::MulticastSetLevelSize_Implementation(const FIntPoint& LevelS
 {
 	FTransform CurrentTransform = GetActorTransform();
 	CurrentTransform.SetScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
-	ConstructLevelMap(CurrentTransform);
+	ConstructGeneratedMap(CurrentTransform);
 }
 
 /* ---------------------------------------------------
@@ -1147,13 +1148,13 @@ void AGeneratedMap::PostLoad()
 	}
 
 	// Update streaming level on editor opening
-	TWeakObjectPtr<AGeneratedMap> WeakLevelMap(this);
-	auto UpdateLevelType = [WeakLevelMap](const FString&, bool)
+	TWeakObjectPtr<AGeneratedMap> WeakGeneratedMap(this);
+	auto UpdateLevelType = [WeakGeneratedMap](const FString&, bool)
 	{
-		if (AGeneratedMap* LevelMap = WeakLevelMap.Get())
+		if (AGeneratedMap* GeneratedMap = WeakGeneratedMap.Get())
 		{
-			FEditorDelegates::OnMapOpened.RemoveAll(LevelMap);
-			LevelMap->SetLevelType(LevelMap->LevelTypeInternal);
+			FEditorDelegates::OnMapOpened.RemoveAll(GeneratedMap);
+			GeneratedMap->SetLevelType(GeneratedMap->LevelTypeInternal);
 		}
 	};
 
@@ -1190,7 +1191,7 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 
 	// Is dragged actor
 	// The game that is not started yet and owner locates in the editor.
-	// Each similar not dragged actor that is generated by Level Map is preview actor, so is not dragged.
+	// Each similar not dragged actor that is generated by Generated Map is preview actor, so is not dragged.
 
 	// Move dragged actor from a sublevel to the Main level
 	ULevel* MainLevel = GetLevel();

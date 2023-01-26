@@ -9,6 +9,7 @@
 #include "BombActor.generated.h"
 
 #define MIN_FIRE_RADIUS 1
+#define DEFAULT_LIFESPAN INDEX_NONE
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.
@@ -56,7 +57,7 @@ protected:
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
-	/** The MapComponent manages this actor on the Level Map */
+	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
@@ -91,7 +92,7 @@ protected:
 
 	/** Set the lifespan of this actor. When it expires the object will be destroyed.
 	 * @param InLifespan overriden with a default value, time will be got from the data asset. */
-	virtual void SetLifeSpan(float InLifespan = INDEX_NONE) override;
+	virtual void SetLifeSpan(float InLifespan = DEFAULT_LIFESPAN) override;
 
 	/** Called when the lifespan of an actor expires (if he has one). */
 	virtual void LifeSpanExpired() override;

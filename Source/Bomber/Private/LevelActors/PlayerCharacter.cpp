@@ -258,7 +258,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	if (MapComponentInternal)
 	{
-		// Update a player location on the level map
+		// Update a player location on the Generated Map
 		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
 
 		MapComponentInternal->TryDisplayOwnedCell();
@@ -298,7 +298,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
 
 		ConstructPlayerCharacter();
 
@@ -307,7 +307,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		return;
 	}
 
-	// Is removed from level map
+	// Is removed from Generated Map
 	if (Controller)
 	{
 		Controller->UnPossess();

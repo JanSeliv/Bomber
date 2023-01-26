@@ -10,6 +10,51 @@
 #include "EditorUtilsLibrary.h"
 #endif // WITH_EDITOR
 
+// Checks, is the current world placed in the editor
+bool UUtilsLibrary::IsEditor()
+{
+#if WITH_EDITOR
+return UEditorUtilsLibrary::IsEditor();
+#endif
+	return false;
+}
+
+// Checks is the current world placed in the editor and the game not started yet
+bool UUtilsLibrary::IsEditorNotPieWorld()
+{
+#if WITH_EDITOR
+	return UEditorUtilsLibrary::IsEditorNotPieWorld();
+#endif
+	return false;
+}
+
+// Returns true if game is started in the Editor
+bool UUtilsLibrary::IsPIE()
+{
+#if WITH_EDITOR
+	return UEditorUtilsLibrary::IsPIE();
+#endif
+	return false;
+}
+
+// Returns true if is started multiplayer game (server + client(s)) right in the Editor
+bool UUtilsLibrary::IsEditorMultiplayer()
+{
+#if WITH_EDITOR
+	return UEditorUtilsLibrary::IsEditorMultiplayer();
+#endif
+	return false;
+}
+
+// Returns the index of current player during editor multiplayer
+int32 UUtilsLibrary::GetEditorPlayerIndex()
+{
+#if WITH_EDITOR
+	return UEditorUtilsLibrary::IsEditorMultiplayer();
+#endif
+	return INDEX_NONE;
+}
+
 // Returns true if viewport is initialized, is always true in PIE, but takes a while in builds
 bool UUtilsLibrary::IsViewportInitialized()
 {

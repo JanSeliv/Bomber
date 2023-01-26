@@ -47,7 +47,7 @@ void AWallActor::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
 		ConstructWallActor();
 	}
 }

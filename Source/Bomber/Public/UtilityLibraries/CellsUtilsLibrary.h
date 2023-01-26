@@ -254,17 +254,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FVector GetLevelGridLocation();
 
-	/** Returns any cell Z-location on the Level Map. */
+	/** Returns any cell Z-location on the Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Z,grid"))
 	static float GetCellHeightLocation();
 #pragma endregion Location
 
 #pragma region Rotation
-	/** Returns cell rotator that is the same for any cell on the Level Map. */
+	/** Returns cell rotator that is the same for any cell on the Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FRotator GetLevelGridRotation();
 
-	/** Returns cell yaw angle in degrees that is the same for any cell on the Level Map. */
+	/** Returns cell yaw angle in degrees that is the same for any cell on the Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "rotation,grid"))
 	static float GetCellYawDegree();
 #pragma endregion Rotation
@@ -276,11 +276,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "size"))
 	static FIntPoint GetLevelGridScale();
 
-	/** Returns the width (number of columns X) of the Level Map. */
+	/** Returns the width (number of columns X) of the Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "width,X,size,scale,grid"))
 	static int32 GetCellColumnsNumOnLevel();
 
-	/** Returns the length (number of rows Y) of the Level Map. */
+	/** Returns the length (number of rows Y) of the Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "length,Y,size,scale,grid"))
 	static int32 GetCellRowsNumOnLevel();
 
@@ -294,7 +294,7 @@ public:
 #pragma endregion Scale
 
 	/* ---------------------------------------------------
-	 *		Level Map related cell functions
+	 *		Generated Map related cell functions
 	 * --------------------------------------------------- */
 
 	/** Returns the cell by specified column (X) and row (Y) on current level if exists, invalid cell otherwise. */
@@ -305,16 +305,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell"))
 	static void GetPositionByCellOnLevel(const FCell& InCell, int32& OutColumnX, int32& OutRowY);
 
-	/** Returns all grid cell locations on the Level Map as Set. */
+	/** Returns all grid cell locations on the Generated Map as Set. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE TSet<FCell> GetAllCellsOnLevel() { return FCells{GetAllCellsOnLevelAsArray()}; }
 
-	/** Returns all grid cell locations on the Level Map as Array. */
+	/** Returns all grid cell locations on the Generated Map as Array. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static const TArray<FCell>& GetAllCellsOnLevelAsArray();
 
-	/** Returns the cell location of the Level Map.
-	 * Could be useful to get always center cell regardless of the location of the Level Map in the world. */
+	/** Returns the cell location of the Generated Map.
+	 * Could be useful to get always center cell regardless of the location of the Generated Map in the world. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FCell GetCenterCellOnLevel();
 
@@ -324,7 +324,7 @@ public:
 	static void GetCenterCellPositionOnLevel(int32& OutColumnX, int32& OutRowY);
 
 #pragma region CornerCell
-	/** Returns 4 corner cells of the Level Map respecting its current size. */
+	/** Returns 4 corner cells of the Generated Map respecting its current size. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE TSet<FCell> GetCornerCellsOnLevel() { return GetCornerCellsOnGrid(GetAllCellsOnLevel()); }
 
@@ -342,11 +342,11 @@ public:
 	static FCell GetNearestCornerCellOnLevel(const FCell& CellToCheck);
 #pragma endregion CornerCell
 
-	/** Returns all empty grid cell locations on the Level Map where non of actors are present. */
+	/** Returns all empty grid cell locations on the Generated Map where non of actors are present. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Free"))
 	static TSet<FCell> GetAllEmptyCellsWithoutActors();
 
-	/** Returns all grid cell locations on the Level Map by specified actor types.
+	/** Returns all grid cell locations on the Generated Map by specified actor types.
 	 * If non of actors are chosen, returns all empty cells without actors. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Cell By Actor"))
 	static TSet<FCell> GetAllCellsWithActors(
@@ -408,21 +408,21 @@ public:
 		const TSet<FCell>& Cells,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
-	/** Returns true if specified cell is present on the Level Map.
+	/** Returns true if specified cell is present on the Generated Map.
 	 * Could be useful to check is input cell valid. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Valid"))
 	static FORCEINLINE bool IsCellExistsOnLevel(const FCell& Cell) { return Cell.IsValid() && GetAllCellsOnLevel().Contains(Cell); }
 
-	/** Returns true if the cell is present on the Level Map with such row and column indexes.
+	/** Returns true if the cell is present on the Generated Map with such row and column indexes.
 	 * Could be useful to check row and and column. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Valid"))
 	static FORCEINLINE bool IsCellPositionExistsOnLevel(int32 ColumnX, int32 RowY) { return GetCellByPositionOnLevel(ColumnX, RowY).IsValid(); }
 
-	/** Returns true if at least one cell is present on the Level Map.*/
+	/** Returns true if at least one cell is present on the Generated Map.*/
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Valid"))
 	static FORCEINLINE bool IsAnyCellExistsOnLevel(const TSet<FCell>& Cells) { return GetAllCellsOnLevel().Intersect(Cells).Num() > 0; }
 
-	/** Returns true if all specified cells are present on the Level Map.
+	/** Returns true if all specified cells are present on the Generated Map.
 	 * Could be useful to determine are all input cells valid. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "valid"))
 	static FORCEINLINE bool AreAllCellsExistOnLevel(const TSet<FCell>& Cells) { return GetAllCellsOnLevel().Includes(Cells); }
@@ -578,7 +578,7 @@ public:
 	static void DisplayCell(UObject* Owner, const FCell& Cell, const FDisplayCellsParams& Params) { DisplayCells(Owner, {Cell}, Params); }
 
 	/** Returns true if cells of specified actor type(s) can be displayed.
-	 * It takes into considerations the types that are set by 'Bomber.Debug.DisplayCells' cheat or directly in the Level Map. */
+	 * It takes into considerations the types that are set by 'Bomber.Debug.DisplayCells' cheat or directly in the Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool CanDisplayCellsForActorTypes(UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorTypesBitmask);
 };

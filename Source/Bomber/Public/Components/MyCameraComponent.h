@@ -126,6 +126,9 @@ protected:
 	/** Called every frame. */
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	/** Activates the SceneComponent, should be overridden by native child classes. */
+	virtual void Activate(bool bReset) override;
+
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
 

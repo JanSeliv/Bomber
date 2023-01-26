@@ -23,12 +23,12 @@ public:
 	 *		Public properties
 	 * --------------------------------------------------- */
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelMapWantsReconstruct, const FTransform&, Transform);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGeneratedMapWantsReconstruct, const FTransform&, Transform);
 
-	/** Called when this level map actor wants to be reconstructed.
-	* Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructLevelMap(). */
+	/** Called when this Generated Map actor wants to be reconstructed.
+	* Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructGeneratedMap(). */
 	UPROPERTY(BlueprintAssignable, Category = "C++")
-	FOnLevelMapWantsReconstruct OnLevelMapWantsReconstruct;
+	FOnGeneratedMapWantsReconstruct OnGeneratedMapWantsReconstruct;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetNewLevelType, ELevelType, NewLevelType);
 
@@ -58,9 +58,9 @@ public:
 	 * Is created only once, can not be destroyed and always exist in persistent level. */
 	static AGeneratedMap& Get();
 
-	/** Initialize this Level Map actor, could be called multiple times. */
+	/** Initialize this Generated Map actor, could be called multiple times. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ConstructLevelMap(const FTransform& Transform);
+	void ConstructGeneratedMap(const FTransform& Transform);
 
 	/** Sets the size for generated map, it will automatically regenerate the level for given size.
 	 * Is authority-only function.
@@ -81,16 +81,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMyCameraComponent* GetCameraComponent() const { return CameraComponentInternal; }
 
-	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
+	/** Spawns a level actor on the Generated Map by the specified type. Then calls AddToGrid().
 	 *
 	 * @param Type Which type of level actors
 	 * @param Cell Actors location
-	 * @return Spawned actor on the Level Map, nullptr otherwise.
+	 * @return Spawned actor on the Generated Map, nullptr otherwise.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	AActor* SpawnActorByType(EActorType Type, const FCell& Cell);
 
-	/** Spawns a level actor on the Level Map by the specified type. */
+	/** Spawns a level actor on the Generated Map by the specified type. */
 	template <typename T>
 	static FORCEINLINE T* SpawnActorByType(EActorType Type, const FCell& Cell) { return Cast<T>(Get().SpawnActorByType(Type, Cell)); }
 
@@ -146,7 +146,7 @@ protected:
 	/** Gives access for the Cheat Manager to 'cheat'. */
 	friend class UMyCheatManager;
 
-	/** Gives access for helper utilities to expand cells operations on the Level Map. */
+	/** Gives access for helper utilities to expand cells operations on the Generated Map. */
 	friend class UCellsUtilsLibrary;
 
 	/** The blueprint background actor  */
@@ -166,7 +166,7 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
 	TMap<FCell, EActorType> DraggedCellsInternal;
 
-	/** Number of characters on the Level Map. */
+	/** Number of characters on the Generated Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
 	int32 PlayersNumInternal = 0;
 
@@ -193,13 +193,13 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Is called on a this level map actor construction, could be called multiple times.
-	 * Could be listened by binding to ThisClass::OnLevelMapWantsReconstruct delegate.
+	/** Is called on a this Generated Map actor construction, could be called multiple times.
+	 * Could be listened by binding to ThisClass::OnGeneratedMapWantsReconstruct delegate.
 	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructLevelMap() -> ThisClass::OnConstructionLevelMap().
-	 * @warning Do not call directly, use ThisClass::ConstructLevelMap() instead. */
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructGeneratedMap() -> ThisClass::OnConstructionGeneratedMap().
+	 * @warning Do not call directly, use ThisClass::ConstructGeneratedMap() instead. */
 	UFUNCTION()
-	void OnConstructionLevelMap(const FTransform& Transform);
+	void OnConstructionGeneratedMap(const FTransform& Transform);
 
 	/** Called right before components are initialized, only called during gameplay. */
 	virtual void PreInitializeComponents() override;
@@ -271,9 +271,9 @@ protected:
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Align transform and build cells.
-	* @param Transform New transform of the level map. */
+	* @param Transform New transform of the Generated Map. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TransformLevelMap(const FTransform& Transform);
+	void TransformGeneratedMap(const FTransform& Transform);
 
 	/** Scales dragged cells according new grid if sizes are different. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

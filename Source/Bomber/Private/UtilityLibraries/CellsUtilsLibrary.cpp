@@ -23,32 +23,32 @@ void UCellsUtilsLibrary::BreakCell(const FCell& InCell, double& X, double& Y, do
 // Returns transform of cells grid on current level
 FTransform UCellsUtilsLibrary::GetLevelGridTransform()
 {
-	// As alternative, LevelMap's transform could be taken, but array transform is more reliable
+	// As alternative, GeneratedMap's transform could be taken, but array transform is more reliable
 	return GetCellArrayTransform(GetAllCellsOnLevel());
 }
 
 // Returns location of grid pivot on current level
 FVector UCellsUtilsLibrary::GetLevelGridLocation()
 {
-	// As alternative #1, LevelMap's location could be taken, but cell array location is more reliable
+	// As alternative #1, GeneratedMap's location could be taken, but cell array location is more reliable
 	// As alternative #2, GetCellArrayCenter could be used, but it's more expensive
 	return GetCenterCellOnLevel().Location;
 }
 
-// Returns any cell Z-location on the Level Map
+// Returns any cell Z-location on the Generated Map
 float UCellsUtilsLibrary::GetCellHeightLocation()
 {
 	return GetLevelGridLocation().Z;
 }
 
-// Returns cell rotator that is the same for any cell on the Level Map
+// Returns cell rotator that is the same for any cell on the Generated Map
 FRotator UCellsUtilsLibrary::GetLevelGridRotation()
 {
-	// As alternative, LevelMap's rotation could be taken, but cell array rotation is more reliable
+	// As alternative, GeneratedMap's rotation could be taken, but cell array rotation is more reliable
 	return GetCellArrayRotation(GetAllCellsOnLevel());
 }
 
-// Returns cell yaw angle in degrees that is the same for any cell on the Level Map
+// Returns cell yaw angle in degrees that is the same for any cell on the Generated Map
 float UCellsUtilsLibrary::GetCellYawDegree()
 {
 	return GetLevelGridRotation().Yaw;
@@ -57,18 +57,18 @@ float UCellsUtilsLibrary::GetCellYawDegree()
 // Returns the current grid size
 FIntPoint UCellsUtilsLibrary::GetLevelGridScale()
 {
-	// As alternative, LevelMap's scale could be taken, but cell array size is more reliable
+	// As alternative, GeneratedMap's scale could be taken, but cell array size is more reliable
 	const FVector2D GridSize = GetCellArraySize(GetAllCellsOnLevel());
 	return FIntPoint(GridSize.X, GridSize.Y);
 }
 
-// Returns the width (number of columns X) of the Level Map
+// Returns the width (number of columns X) of the Generated Map
 int32 UCellsUtilsLibrary::GetCellColumnsNumOnLevel()
 {
 	return FMath::FloorToInt32(GetCellArrayWidth(GetAllCellsOnLevel()));
 }
 
-// Returns the length (number of rows Y) of the Level Map
+// Returns the length (number of rows Y) of the Generated Map
 int32 UCellsUtilsLibrary::GetCellRowsNumOnLevel()
 {
 	return FMath::FloorToInt32(GetCellArrayLength(GetAllCellsOnLevel()));
@@ -87,7 +87,7 @@ int32 UCellsUtilsLibrary::GetLastRowIndexOnLevel()
 }
 
 // ---------------------------------------------------
-//		Level Map related cell functions
+//		Generated Map related cell functions
 // ---------------------------------------------------
 
 // Takes the cell and returns its row and column position on the level if exists, -1 otherwise
@@ -98,13 +98,13 @@ void UCellsUtilsLibrary::GetPositionByCellOnLevel(const FCell& InCell, int32& Ou
 	OutRowY = CellPosition.Y;
 }
 
-// Returns all grid cell location on the Level Map
+// Returns all grid cell location on the Generated Map
 const TArray<FCell>& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
 {
 	return AGeneratedMap::Get().GridCellsInternal;
 }
 
-// Returns the cell location of the Level Map
+// Returns the cell location of the Generated Map
 FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
 {
 	int32 CenterColumn = INDEX_NONE;
@@ -128,14 +128,14 @@ FCell UCellsUtilsLibrary::GetNearestCornerCellOnLevel(const FCell& CellToCheck)
 	return GetCellArrayNearest(AllCornerCells, CellToCheck);
 }
 
-// Returns all empty grid cell locations on the Level Map where non of actors are present
+// Returns all empty grid cell locations on the Generated Map where non of actors are present
 FCells UCellsUtilsLibrary::GetAllEmptyCellsWithoutActors()
 {
 	constexpr int32 NoneActorType = TO_FLAG(ELevelType::None);
 	return GetAllCellsWithActors(NoneActorType);
 }
 
-// Returns all grid cell location on the Level Map by specified actor types
+// Returns all grid cell location on the Generated Map by specified actor types
 FCells UCellsUtilsLibrary::GetAllCellsWithActors(int32 ActorsTypesBitmask)
 {
 	constexpr bool bIntersectAllIfEmpty = true;
@@ -278,7 +278,7 @@ bool UCellsUtilsLibrary::IsIslandCell(const FCell& Cell)
 	return !AGeneratedMap::Get().DoesPathExistToCells({Cell});
 }
 
-// Rotates the given cell around the center of the Level Map to the same yaw degree
+// Rotates the given cell around the center of the Generated Map to the same yaw degree
 FCell UCellsUtilsLibrary::RotateCellAroundLevelOrigin(const FCell& Cell, float AxisZ)
 {
 	const FTransform GridTransformNoScale = FCell::GetCellArrayTransformNoScale(GetAllCellsOnLevel());

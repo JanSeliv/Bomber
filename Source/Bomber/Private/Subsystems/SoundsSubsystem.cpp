@@ -13,7 +13,7 @@
 // Returns the Sounds Manager checked
 USoundsSubsystem& USoundsSubsystem::Get()
 {
-	const UWorld* World = UMyBlueprintFunctionLibrary::Get().GetWorld();
+	const UWorld* World = UMyBlueprintFunctionLibrary::GetStaticWorld();
 	checkf(World, TEXT("%s: 'World' is null"), *FString(__FUNCTION__));
 	const TSubclassOf<USoundsSubsystem> SoundsSubsystemClass = USoundsDataAsset::Get().GetSoundsSubsystemClass();
 	checkf(SoundsSubsystemClass, TEXT("%s: 'SoundsSubsystemClass' is null"), *FString(__FUNCTION__));

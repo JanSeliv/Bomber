@@ -5,7 +5,10 @@
 #include "Editor.h"
 #include "LevelEditor.h"
 #include "SLevelViewport.h"
+#include "UnrealEdGlobals.h"
+#include "CookOnTheSide/CookOnTheFlyServer.h"
 #include "Editor/EditorEngine.h"
+#include "Editor/UnrealEdEngine.h"
 #include "EditorFramework/AssetImportData.h"
 #include "Misc/FileHelper.h"
 
@@ -71,6 +74,17 @@ int32 UEditorUtilsLibrary::GetEditorPlayerIndex()
 		}
 	}
 	return INDEX_NONE;
+}
+
+// Returns true if currently is cooking the package
+bool UEditorUtilsLibrary::IsCooking()
+{
+	if (IsEditorNotPieWorld())
+	{
+		const UCookOnTheFlyServer* CookServer = GUnrealEd ? GUnrealEd->CookServer : nullptr;
+		return CookServer ? CookServer->IsCookByTheBookMode() : true;
+	}
+	return false;
 }
 
 // Returns current editor viewport

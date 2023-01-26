@@ -89,12 +89,12 @@ void AItemActor::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
 		ConstructItemActor();
 		return;
 	}
 
-	// Is removed from level map
+	// Is removed from Generated Map
 	ResetItemType();
 }
 

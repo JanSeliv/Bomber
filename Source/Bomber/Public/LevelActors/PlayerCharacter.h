@@ -92,7 +92,7 @@ protected:
 
 	friend class UMyCheatManager;
 
-	/** The MapComponent manages this actor on the Level Map */
+	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 

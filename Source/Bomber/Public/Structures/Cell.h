@@ -37,7 +37,7 @@ enum class EGridCorner : uint8
 };
 
 /**
- * The structure that contains a location of an one cell (tile) on a grid of the Level Map.
+ * The structure that contains a location of an one cell (tile) on a grid of the Generated Map.
  * X is the column index, Y is the row index on the grid.
  */
 USTRUCT(BlueprintType, meta = (HasNativeMake = "/Script/Bomber.CellsUtilsLibrary.MakeCell", HasNativeBreak = "/Script/Bomber.CellsUtilsLibrary.BreakCell"))

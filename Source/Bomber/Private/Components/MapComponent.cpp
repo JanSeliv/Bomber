@@ -9,6 +9,7 @@
 #include "DataAssets/GameStateDataAsset.h"
 #include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/GeneratedMapSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -77,10 +78,10 @@ bool UMapComponent::OnConstructionOwnerActor()
 		return false;
 	}
 
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
+	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
 
 	// Find new Location at dragging and update-delegate
-	LevelMap.SetNearestCell(this);
+	GeneratedMap.SetNearestCell(this);
 
 	if (CellInternal.IsInvalidCell())
 	{
@@ -88,7 +89,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 	}
 
 	// Owner updating
-	LevelMap.AddToGrid(this);
+	GeneratedMap.AddToGrid(this);
 	if (IS_TRANSIENT(Owner)) // Check again, dragged owner can be moved to the persistent
 	{
 		return false;
@@ -114,7 +115,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 	return true;
 }
 
-// Override current cell data, where owner is located on the Level Map
+// Override current cell data, where owner is located on the Generated Map
 void UMapComponent::SetCell(const FCell& Cell)
 {
 	CellInternal = Cell;
@@ -204,7 +205,7 @@ void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& New
 	ApplyCollisionResponse();
 }
 
-// Is called when an owner was destroyed on the Level Map
+// Is called when an owner was destroyed on the Generated Map
 void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 {
 	if (OnDeactivatedMapComponent.IsBound())
@@ -304,11 +305,12 @@ void UMapComponent::OnRegister()
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
-// Called when a component is destroyed for removing the owner from the Level Map.
+// Called when a component is destroyed for removing the owner from the Generated Map.
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	AActor* ComponentOwner = GetOwner();
-	if (ComponentOwner && IsValid(this)) // Could be called multiple times, make sure it is called once for valid object
+	if (ComponentOwner && IsValid(this) // Could be called multiple times, make sure it is called once for valid object
+	    && !GExitPurge)                 // Do not call on exit
 	{
 		// Disable collision for safety
 		ComponentOwner->SetActorEnableCollision(false);
@@ -316,19 +318,19 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		// Delete spawned collision component
 		BoxCollisionComponentInternal->DestroyComponent();
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+#if WITH_EDITOR	// [IsEditorNotPieWorld]
 		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
-			if (AGeneratedMap* LevelMap = UMyBlueprintFunctionLibrary::GetLevelMap()) // Can be invalid if remove the level map
+			if (AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap()) // Can be invalid if remove the Generated Map
 			{
-				LevelMap->DestroyLevelActor(this);
+				GeneratedMap->DestroyLevelActor(this);
 			}
 
 			// Editor delegates
 			UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 		}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);

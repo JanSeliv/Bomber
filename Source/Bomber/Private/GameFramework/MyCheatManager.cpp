@@ -78,12 +78,12 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 		return;
 	}
 
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
+	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
 
 	// Get all players
 	FCells CellsToDestroy;
 	FMapComponents MapComponents;
-	LevelMap.GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
+	GeneratedMap.GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
 		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
@@ -95,7 +95,7 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 	}
 
 	// Destroy all specified
-	LevelMap.DestroyLevelActorsOnCells(CellsToDestroy);
+	GeneratedMap.DestroyLevelActorsOnCells(CellsToDestroy);
 }
 
 // Override the chance to spawn item after box destroying

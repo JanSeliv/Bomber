@@ -169,16 +169,10 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 }
 
 // Set the lifespan of this actor. When it expires the object will be destroyed
-void ABombActor::SetLifeSpan(float InLifespan/* = INDEX_NONE*/)
+void ABombActor::SetLifeSpan(float InLifespan/* = DEFAULT_LIFESPAN*/)
 {
-	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
-	{
-		// Do not allow trigger life span when match is not started
-		return;
-	}
-
-	if (MapComponentInternal
-	    && InLifespan == INDEX_NONE)
+	if (InLifespan == DEFAULT_LIFESPAN
+		&& AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
 	{
 		InLifespan = UBombDataAsset::Get().GetLifeSpan();
 	}
@@ -201,7 +195,7 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 	{
 		if (!bNewHidden)
 		{
-			// Is added on level map
+			// Is added on Generated Map
 
 			ConstructBombActor();
 
@@ -212,7 +206,7 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 		}
 		else
 		{
-			// Bomb is removed from level map, detonate it
+			// Bomb is removed from Generated Map, detonate it
 			DetonateBomb();
 
 			OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
@@ -283,7 +277,7 @@ void ABombActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		// Reinit bomb and restart lifespan
 		InitBomb();
-		SetLifeSpan(UBombDataAsset::Get().GetLifeSpan());
+		SetLifeSpan();
 	}
 }
 

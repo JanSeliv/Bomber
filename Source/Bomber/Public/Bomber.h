@@ -37,7 +37,7 @@ static const FString TransientLevelName = TEXT("Transient");
 BOMBER_API DECLARE_LOG_CATEGORY_EXTERN(LogBomber, Log, All);
 
 /**
-* Types of all actors on the Level Map
+* Types of all actors on the Generated Map
 * Where Walls, Boxes and Bombs are the physical barriers for players
 * It is possible to make a bitmask of actors types
 */

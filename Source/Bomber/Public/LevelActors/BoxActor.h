@@ -30,7 +30,7 @@ protected:
 
 	friend class UMyCheatManager;
 
-	/** The MapComponent manages this actor on the Level Map */
+	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
@@ -59,7 +59,7 @@ protected:
 	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 
-	/** Called when owned map component is destroyed on the level map. */
+	/** Called when owned map component is destroyed on the Generated Map. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser);
 
