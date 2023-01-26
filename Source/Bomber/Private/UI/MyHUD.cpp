@@ -61,7 +61,7 @@ UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TS
 		return nullptr;
 	}
 
-	UUserWidget* CreatedWidget = CreateWidget(PlayerController, WidgetClass, WidgetClass->GetFName());
+	UUserWidget* CreatedWidget = CreateWidget(PlayerController, WidgetClass);
 	checkf(CreatedWidget, TEXT("%s: ERROR: %s failed to create"), *FString(__FUNCTION__), *WidgetClass->GetName());
 
 	if (bAddToViewport)
