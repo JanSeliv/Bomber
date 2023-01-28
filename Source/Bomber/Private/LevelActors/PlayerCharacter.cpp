@@ -10,12 +10,12 @@
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/ItemDataAsset.h"
-#include "Globals/PlayerDataAsset.h"
+#include "DataAssets/ItemDataAsset.h"
+#include "DataAssets/PlayerDataAsset.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -183,7 +183,7 @@ void APlayerCharacter::BeginPlay()
 	{
 		OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 		}
@@ -256,8 +256,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Update a player location on the level map
-	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+	if (MapComponentInternal)
+	{
+		// Update a player location on the Generated Map
+		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+
+		MapComponentInternal->TryDisplayOwnedCell();
+	}
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -293,7 +298,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
 
 		ConstructPlayerCharacter();
 
@@ -302,7 +307,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		return;
 	}
 
-	// Is removed from level map
+	// Is removed from Generated Map
 	if (Controller)
 	{
 		Controller->UnPossess();
@@ -504,7 +509,7 @@ void APlayerCharacter::TryPossessController()
 
 	AController* ControllerToPossess = nullptr;
 
-	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController(CharacterIDInternal))
+	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(CharacterIDInternal))
 	{
 		if (MyPC->bCinematicMode)
 		{
@@ -578,7 +583,7 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	}
 
 	const bool bIsPlayer = IsLocallyControlled() || !CharacterIDInternal;
-	const ELevelType PlayerFlag = USingletonLibrary::GetLevelType();
+	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
 	constexpr ELevelType AIFlag = ELT::None;
 	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
 	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
@@ -640,13 +645,13 @@ void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 	const FVector2D MovementVector = ActionValue.Get<FVector2D>();
 
 	// Find out which way is forward
-	const FRotator YawRotation(0.f, UCellsUtilsLibrary::GetCellRotation(), 0.f);
+	const FRotator ForwardRotation = UCellsUtilsLibrary::GetLevelGridRotation();
 
 	// Get forward vector
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
 
 	// Get right vector
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	const FVector RightDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::Y);
 
 	AddMovementInput(ForwardDirection, MovementVector.Y);
 	AddMovementInput(RightDirection, MovementVector.X);

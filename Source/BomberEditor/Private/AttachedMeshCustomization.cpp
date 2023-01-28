@@ -13,6 +13,7 @@
 typedef FAttachedMeshCustomization ThisClass;
 
 // The name of class to be customized
+// @TODO JanSeliv 2dUuTjyT use 'FAttachedMesh::StaticStruct()->GetFName()' as soon as the editor module starts referencing the runtime module
 const FName ThisClass::PropertyClassName = TEXT("AttachedMesh");
 
 // Default constructor
@@ -37,6 +38,38 @@ void FAttachedMeshCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> Pro
 void FAttachedMeshCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
+}
+
+// Creates customization for the Attached Mesh data
+void FAttachedMeshCustomization::RegisterAttachedMeshCustomization()
+{
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	// FAttachedMesh property realizes the functionally of the SSocketChooser
+	PropertyModule.RegisterCustomPropertyTypeLayout(
+		PropertyClassName,
+		FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FAttachedMeshCustomization::MakeInstance)
+		);
+
+	PropertyModule.NotifyCustomizationModuleChanged();
+}
+
+// Removes customization for the Attached Mesh data
+void FAttachedMeshCustomization::UnregisterAttachedMeshCustomization()
+{
+	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
+	{
+		return;
+	}
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
+
+	PropertyModule.UnregisterCustomPropertyTypeLayout(PropertyClassName);
 }
 
 // Is called for each property on building its row

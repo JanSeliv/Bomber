@@ -14,10 +14,10 @@
 typedef TSet<class UMapComponent*> FMapComponents;
 
 /**
- * These components manage their level actors updates on the level map in case of any changes that allow to:
- * -  Free location and rotation of the level map in the editor time:
+ * These components manage their level actors updates on the Generated Map in case of any changes that allow to:
+ * -  Free location and rotation of the Generated Map in the editor time:
  * - Prepare in advance the level actors in the editor time:
- * Same calls and initializations for each of the level map actors
+ * Same calls and initializations for each of the Generated Map actors
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BOMBER_API UMapComponent final : public UActorComponent
@@ -31,14 +31,14 @@ public:
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOwnerWantsReconstruct);
 
-	/** Called when this component wants to be reconstructed on the level map.
+	/** Called when this component wants to be reconstructed on the Generated Map.
 	 * Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructOwnerActor(). */
 	UPROPERTY(BlueprintAssignable, Category = "C++")
 	FOnOwnerWantsReconstruct OnOwnerWantsReconstruct;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDeactivatedMapComponent, UMapComponent*, MapComponent, UObject*, DestroyCauser);
 
-	/** Called when this component is destroyed on the level map, is called only on the server. */
+	/** Called when this component is destroyed on the Generated Map, is called only on the server. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, BlueprintAuthorityOnly, Category = "C++")
 	FOnDeactivatedMapComponent OnDeactivatedMapComponent;
 
@@ -61,14 +61,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ConstructOwnerActor();
 
-	/** Returns the current cell, where owner is located on the Level Map. */
+	/** Returns the current cell, where owner is located on the Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FCell& GetCell() const { return CellInternal; }
 
-	/** Override current cell data, where owner is located on the Level Map.
+	/** Override current cell data, where owner is located on the Generated Map.
 	 * It does not move an owner on the level, to move it call AGeneratedMap::SetNearestCell function as well. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	void SetCell(const FCell& Cell);
+
+	/** Show current cell if owned actor type is allowed, is not available in shipping build. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+	void TryDisplayOwnedCell();
 
 	/** Returns the owner's Level Actor Row. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -120,7 +124,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "NewResponses"))
 	void SetCollisionResponses(const FCollisionResponseContainer& NewResponses);
 
-	/** Is called when an owner was destroyed on the Level Map. */
+	/** Is called when an owner was destroyed on the Generated Map. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnDeactivated(UObject* DestroyCauser = nullptr);
 
@@ -133,7 +137,7 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** Owner's cell location on the Level Map */
+	/** Owner's cell location on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
 	FCell CellInternal = FCell::InvalidCell;
 
@@ -168,7 +172,7 @@ protected:
 	/** Called when a component is registered (not loaded) */
 	virtual void OnRegister() override;
 
-	/** Called when a component is destroyed for removing the owner from the Level Map. */
+	/** Called when a component is destroyed for removing the owner from the Generated Map. */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
 
 	/** Returns properties that are replicated for the lifetime of the actor channel. */

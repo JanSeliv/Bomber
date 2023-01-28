@@ -3,54 +3,75 @@
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "GeneratedMap.h"
+#include "Components/TextRenderComponent.h"
 
-// Returns the cell by specified row and column number if exists, invalid cell otherwise
-const FCell& UCellsUtilsLibrary::GetCellOnLevel(int32 Row, int32 Column)
+// Default params to display cells
+const FDisplayCellsParams FDisplayCellsParams::EmptyParams = FDisplayCellsParams();
+
+// Creates 'Break Cell' node with X, Y, Z outputs
+void UCellsUtilsLibrary::BreakCell(const FCell& InCell, double& X, double& Y, double& Z)
 {
-	const int32 MaxWidth = GetCellColumnsNumOnLevel();
-	const int32 CellIndex = Row * MaxWidth + Column;
-	const TArray<FCell>& AllCells = GetAllCellsOnLevelAsArray();
-	return AllCells.IsValidIndex(CellIndex) ? AllCells[CellIndex] : FCell::InvalidCell;
+	X = InCell.X();
+	Y = InCell.Y();
+	Z = InCell.Z();
 }
 
-// Takes the cell and returns its row and column position on the level if exists, -1 otherwise
-void UCellsUtilsLibrary::GetCellPositionOnLevel(const FCell& InCell, int32& OutRow, int32& OutColumn)
+// ---------------------------------------------------
+//		Grid transform library
+// ---------------------------------------------------
+
+// Returns transform of cells grid on current level
+FTransform UCellsUtilsLibrary::GetLevelGridTransform()
 {
-	const int32 MaxWidth = AGeneratedMap::Get().GetCachedTransform().GetScale3D().X;
-	const int32 CellIdx = GetAllCellsOnLevelAsArray().IndexOfByPredicate([&InCell](const FCell& CellIt) { return CellIt == InCell; });
-	const bool bFound = CellIdx != INDEX_NONE && MaxWidth;
-	OutRow = bFound ? CellIdx / MaxWidth : INDEX_NONE;
-	OutColumn = bFound ? CellIdx % MaxWidth : INDEX_NONE;
+	// As alternative, GeneratedMap's transform could be taken, but array transform is more reliable
+	return GetCellArrayTransform(GetAllCellsOnLevel());
 }
 
-// Returns all grid cell location on the Level Map
-FCells UCellsUtilsLibrary::GetAllCellsOnLevel()
+// Returns location of grid pivot on current level
+FVector UCellsUtilsLibrary::GetLevelGridLocation()
 {
-	return FCells{AGeneratedMap::Get().GridCellsInternal};
+	// As alternative #1, GeneratedMap's location could be taken, but cell array location is more reliable
+	// As alternative #2, GetCellArrayCenter could be used, but it's more expensive
+	return GetCenterCellOnLevel().Location;
 }
 
-// Returns all grid cell location on the Level Map
-const TArray<FCell>& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
+// Returns any cell Z-location on the Generated Map
+float UCellsUtilsLibrary::GetCellHeightLocation()
 {
-	return AGeneratedMap::Get().GridCellsInternal;
+	return GetLevelGridLocation().Z;
 }
 
-// Returns the cell location of the Level Map
-FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
+// Returns cell rotator that is the same for any cell on the Generated Map
+FRotator UCellsUtilsLibrary::GetLevelGridRotation()
 {
-	return FCell(AGeneratedMap::Get().GetCachedTransform().GetLocation());
+	// As alternative, GeneratedMap's rotation could be taken, but cell array rotation is more reliable
+	return GetCellArrayRotation(GetAllCellsOnLevel());
 }
 
-// Returns the number of columns on the Level Map
+// Returns cell yaw angle in degrees that is the same for any cell on the Generated Map
+float UCellsUtilsLibrary::GetCellYawDegree()
+{
+	return GetLevelGridRotation().Yaw;
+}
+
+// Returns the current grid size
+FIntPoint UCellsUtilsLibrary::GetLevelGridScale()
+{
+	// As alternative, GeneratedMap's scale could be taken, but cell array size is more reliable
+	const FVector2D GridSize = GetCellArraySize(GetAllCellsOnLevel());
+	return FIntPoint(GridSize.X, GridSize.Y);
+}
+
+// Returns the width (number of columns X) of the Generated Map
 int32 UCellsUtilsLibrary::GetCellColumnsNumOnLevel()
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetScale3D().X;
+	return FMath::FloorToInt32(GetCellArrayWidth(GetAllCellsOnLevel()));
 }
 
-// Returns the number of rows on the Level Map
+// Returns the length (number of rows Y) of the Generated Map
 int32 UCellsUtilsLibrary::GetCellRowsNumOnLevel()
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetScale3D().Y;
+	return FMath::FloorToInt32(GetCellArrayLength(GetAllCellsOnLevel()));
 }
 
 // Returns GetCellColumnsNumOnLevel - 1
@@ -65,26 +86,56 @@ int32 UCellsUtilsLibrary::GetLastRowIndexOnLevel()
 	return GetCellRowsNumOnLevel() - 1;
 }
 
-// Returns any cell rotation on the Level Map
-float UCellsUtilsLibrary::GetCellRotation()
+// ---------------------------------------------------
+//		Generated Map related cell functions
+// ---------------------------------------------------
+
+// Takes the cell and returns its row and column position on the level if exists, -1 otherwise
+void UCellsUtilsLibrary::GetPositionByCellOnLevel(const FCell& InCell, int32& OutColumnX, int32& OutRowY)
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetRotation().Rotator().Yaw;
+	const FIntPoint CellPosition = GetPositionByCellOnGrid(InCell, GetAllCellsOnLevel());
+	OutColumnX = CellPosition.X;
+	OutRowY = CellPosition.Y;
 }
 
-// Returns any cell Z-location on the Level Map
-float UCellsUtilsLibrary::GetCellHeightLocation()
+// Returns all grid cell location on the Generated Map
+const TArray<FCell>& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
 {
-	return AGeneratedMap::Get().GetCachedTransform().GetLocation().Z;
+	return AGeneratedMap::Get().GridCellsInternal;
 }
 
-// Returns all empty grid cell locations on the Level Map where non of actors are present
+// Returns the cell location of the Generated Map
+FCell UCellsUtilsLibrary::GetCenterCellOnLevel()
+{
+	int32 CenterColumn = INDEX_NONE;
+	int32 CenterRow = INDEX_NONE;
+	GetCenterCellPositionOnLevel(/*out*/CenterRow, /*out*/CenterColumn);
+	return GetCellByPositionOnLevel(CenterColumn, CenterRow);
+}
+
+// Returns the center row and column positions on the level
+void UCellsUtilsLibrary::GetCenterCellPositionOnLevel(int32& OutColumnX, int32& OutRowY)
+{
+	const FIntPoint CenterCellPosition = GetCenterCellPositionOnGrid(GetAllCellsOnLevel());
+	OutColumnX = CenterCellPosition.X;
+	OutRowY = CenterCellPosition.Y;
+}
+
+// Return closest corner cell to the given cell
+FCell UCellsUtilsLibrary::GetNearestCornerCellOnLevel(const FCell& CellToCheck)
+{
+	const TSet<FCell> AllCornerCells = GetCornerCellsOnLevel();
+	return GetCellArrayNearest(AllCornerCells, CellToCheck);
+}
+
+// Returns all empty grid cell locations on the Generated Map where non of actors are present
 FCells UCellsUtilsLibrary::GetAllEmptyCellsWithoutActors()
 {
 	constexpr int32 NoneActorType = TO_FLAG(ELevelType::None);
 	return GetAllCellsWithActors(NoneActorType);
 }
 
-// Returns all grid cell location on the Level Map by specified actor types
+// Returns all grid cell location on the Generated Map by specified actor types
 FCells UCellsUtilsLibrary::GetAllCellsWithActors(int32 ActorsTypesBitmask)
 {
 	constexpr bool bIntersectAllIfEmpty = true;
@@ -157,30 +208,6 @@ bool UCellsUtilsLibrary::AreCellsHaveAllMatchingActors(const FCells& Cells, int3
 	return NonEmptyCells.Num() == Cells.Num();
 }
 
-// Returns true if specified cell is present on the Level Map.
-bool UCellsUtilsLibrary::IsCellExistsOnLevel(const FCell& Cell)
-{
-	return Cell.IsValid() && AGeneratedMap::Get().GridCellsInternal.Contains(Cell);
-}
-
-// Returns true if the cell is present on the Level Map with such row and column indexes
-bool UCellsUtilsLibrary::IsCellPositionExistsOnLevel(int32 Row, int32 Column)
-{
-	return GetCellOnLevel(Row, Column).IsValid();
-}
-
-// Returns true if at least one cell is present on the Level Map
-bool UCellsUtilsLibrary::IsAnyCellExistsOnLevel(const FCells& Cells)
-{
-	return FCells{AGeneratedMap::Get().GridCellsInternal}.Intersect(Cells).Num() > 0;
-}
-
-// Returns true if all specified cells are present on the Level Map
-bool UCellsUtilsLibrary::AreAllCellsExistOnLevel(const FCells& Cells)
-{
-	return FCells{AGeneratedMap::Get().GridCellsInternal}.Includes(Cells);
-}
-
 // Returns cells around the center in specified radius and according desired type of breaks
 FCells UCellsUtilsLibrary::GetCellsAround(const FCell& CenterCell, EPathType Pathfinder, int32 Radius)
 {
@@ -249,4 +276,176 @@ FCells UCellsUtilsLibrary::GetEmptyCellsInDirectionsWithoutActors(const FCell& C
 bool UCellsUtilsLibrary::IsIslandCell(const FCell& Cell)
 {
 	return !AGeneratedMap::Get().DoesPathExistToCells({Cell});
+}
+
+// Rotates the given cell around the center of the Generated Map to the same yaw degree
+FCell UCellsUtilsLibrary::RotateCellAroundLevelOrigin(const FCell& Cell, float AxisZ)
+{
+	const FTransform GridTransformNoScale = FCell::GetCellArrayTransformNoScale(GetAllCellsOnLevel());
+	return FCell::RotateCellAroundOrigin(Cell, AxisZ, GridTransformNoScale);
+}
+
+// Returns nearest free cell to given cell, where free means cell with no other level actors except players
+FCell UCellsUtilsLibrary::GetNearestFreeCell(const FCell& Cell)
+{
+	FCells FreeCells = GetAllEmptyCellsWithoutActors();
+	FreeCells.Append(GetAllCellsWithActors(TO_FLAG(EAT::Player))); // Players are also considered as free cells
+	return GetCellArrayNearest(FreeCells, Cell);
+}
+
+// ---------------------------------------------------
+//		 Debug cells utilities
+// ---------------------------------------------------
+
+// Remove all text renders of the Owner, is not available in shipping build
+void UCellsUtilsLibrary::ClearDisplayedCells(const UObject* Owner)
+{
+#if !UE_BUILD_SHIPPING
+	const AActor* OwnerActor = Cast<AActor>(Owner);
+	if (!OwnerActor)
+	{
+		const UActorComponent* Component = Cast<UActorComponent>(Owner);
+		OwnerActor = Component ? Component->GetOwner() : nullptr;
+		if (!ensureMsgf(OwnerActor, TEXT("ASSERT: 'OwnerActor' is null, can't Display Cells")))
+		{
+			return;
+		}
+	}
+
+	TArray<UTextRenderComponent*> TextRendersArray;
+	OwnerActor->GetComponents<UTextRenderComponent>(TextRendersArray);
+	for (int32 Index = TextRendersArray.Num() - 1; Index >= 0; --Index)
+	{
+		UTextRenderComponent* TextRenderIt = TextRendersArray.IsValidIndex(Index) ? Cast<UTextRenderComponent>(TextRendersArray[Index]) : nullptr;
+		if (IsValid(TextRenderIt)                       // is not pending kill
+		    && TextRenderIt->HasAllFlags(RF_Transient)) // cell text renders have this flag
+		{
+			TextRenderIt->DestroyComponent();
+		}
+	}
+#endif // !UE_BUILD_SHIPPING
+}
+
+// Display coordinates of specified cells on the level, is not available in shipping build
+void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const FDisplayCellsParams& Params)
+{
+#if !UE_BUILD_SHIPPING
+	if (!Cells.Num()
+	    || !Owner)
+	{
+		return;
+	}
+
+	AActor* OwnerActor = Cast<AActor>(Owner);
+	if (!OwnerActor)
+	{
+		const UActorComponent* Component = Cast<UActorComponent>(Owner);
+		OwnerActor = Component ? Component->GetOwner() : nullptr;
+		if (!ensureMsgf(OwnerActor, TEXT("ASSERT: 'OwnerActor' is null, can't Display Cells")))
+		{
+			return;
+		}
+	}
+
+	if (Params.bClearPreviousDisplays)
+	{
+		ClearDisplayedCells(Owner);
+	}
+
+	// Have the render text rotated
+	const FQuat CellGridQuaternion = Cells.Num() > 1
+		                                 ? GetCellArrayRotation(Cells).Quaternion() // Get rotator from array
+		                                 : GetLevelGridRotation().Quaternion();     // Get current level rotator
+
+	for (const FCell& CellIt : Cells)
+	{
+		if (CellIt.IsInvalidCell())
+		{
+			continue;
+		}
+
+		const bool bHasAdditionalRenderString = !Params.RenderString.IsNone();
+		const bool bHasCoordinatePosition = !Params.CoordinatePosition.IsZero();
+		constexpr int32 MaxCoordinateRenders = 2;
+		for (int32 Index = 0; Index < MaxCoordinateRenders; ++Index)
+		{
+			enum ERenderType { ERT_Coordinate, ERT_RenderString };
+			const ERenderType RenderType = Index == 0 ? ERT_Coordinate : ERT_RenderString;
+			const bool bShowRenderString = RenderType == ERT_RenderString && bHasAdditionalRenderString;
+			const bool bShowCoordinate = RenderType == ERT_Coordinate && (bHasCoordinatePosition || !bHasAdditionalRenderString);
+
+			if (!bShowCoordinate && !bShowRenderString)
+			{
+				continue;
+			}
+
+			UTextRenderComponent& RenderComp = *NewObject<UTextRenderComponent>(OwnerActor, NAME_None, RF_Transient);
+			RenderComp.RegisterComponent();
+
+			// Get text render location on each cell
+			FVector TextLocation = FVector::ZeroVector;
+			const FVector CellLocation(CellIt.X(), CellIt.Y(), GetCellHeightLocation() + Params.TextHeight);
+			if (bShowCoordinate)
+			{
+				TextLocation.X = CellLocation.X + Params.CoordinatePosition.X * -1.f;
+				TextLocation.Y = CellLocation.Y + Params.CoordinatePosition.Y * -1.f;
+				TextLocation.Z = CellLocation.Z + Params.CoordinatePosition.Z;
+			}
+			else if (bShowRenderString)
+			{
+				TextLocation = CellLocation + Params.CoordinatePosition;
+			}
+
+			// --- Init the text render
+
+			if (bShowCoordinate)
+			{
+				const FString XString = FString::FromInt(FMath::FloorToInt32(CellLocation.X));
+				const FString YString = FString::FromInt(FMath::FloorToInt32(CellLocation.Y));
+				constexpr float DelimiterTextSize = 48.f;
+				const FString DelimiterString = Params.TextSize > DelimiterTextSize ? TEXT("\n") : TEXT("");
+				const FString RenderString = XString + DelimiterString + YString;
+				RenderComp.SetText(FText::FromString(RenderString));
+			}
+			else if (bShowRenderString)
+			{
+				// Display RenderString as is
+				FText NameToStringToText = FText::FromString(Params.RenderString.ToString());
+				RenderComp.SetText(NameToStringToText);
+			}
+
+			RenderComp.SetAbsolute(true, true, true);
+
+			if (bShowCoordinate)
+			{
+				constexpr float CoordinateSizeMultiplier = 0.4f;
+				RenderComp.SetWorldSize(Params.TextSize * CoordinateSizeMultiplier);
+			}
+			else if (bShowRenderString)
+			{
+				RenderComp.SetWorldSize(Params.TextSize);
+			}
+
+			RenderComp.SetHorizontalAlignment(EHTA_Center);
+			RenderComp.SetVerticalAlignment(EVRTA_TextCenter);
+
+			RenderComp.SetTextRenderColor(Params.TextColor.ToFColor(true));
+
+			FTransform RenderTransform = FTransform::Identity;
+			RenderTransform.SetLocation(TextLocation);
+			static const FQuat AdditiveQuat = FRotator(90.f, 0.f, -90.f).Quaternion();
+			RenderTransform.SetRotation(CellGridQuaternion * AdditiveQuat);
+			RenderComp.SetWorldTransform(RenderTransform);
+		}
+	}
+#endif // !UE_BUILD_SHIPPING
+}
+
+// Returns true if cells of specified actor type(s) can be displayed
+bool UCellsUtilsLibrary::CanDisplayCellsForActorTypes(int32 ActorTypesBitmask)
+{
+#if !UE_BUILD_SHIPPING
+	return (ActorTypesBitmask & AGeneratedMap::Get().DisplayCellsActorTypes) != 0;
+#endif // !UE_BUILD_SHIPPING
+	return false;
 }

@@ -4,11 +4,11 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "Components/MapComponent.h"
-#include "Globals/DataAssetsContainer.h"
-#include "Globals/ItemDataAsset.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/ItemDataAsset.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Net/UnrealNetwork.h"
 
@@ -68,7 +68,7 @@ void AItemActor::OnConstructionItemActor()
 	}
 
 	// Override mesh
-	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, USingletonLibrary::GetLevelType()))
+	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, UMyBlueprintFunctionLibrary::GetLevelType()))
 	{
 		MapComponentInternal->SetLevelActorRow(FoundItemRow);
 	}
@@ -89,12 +89,12 @@ void AItemActor::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
 		ConstructItemActor();
 		return;
 	}
 
-	// Is removed from level map
+	// Is removed from Generated Map
 	ResetItemType();
 }
 
@@ -115,7 +115,7 @@ void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 		return;
 	}
 
-	USoundsManager::Get().PlayItemPickUpSFX();
+	USoundsSubsystem::Get().PlayItemPickUpSFX();
 
 	// Destroy itself on overlapping
 	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal, OtherActor);

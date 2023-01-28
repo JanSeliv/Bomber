@@ -12,14 +12,14 @@
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/MyInputAction.h"
-#include "Globals/MyInputMappingContext.h"
-#include "Globals/PlayerInputDataAsset.h"
+#include "DataAssets/MyInputAction.h"
+#include "DataAssets/MyInputMappingContext.h"
+#include "DataAssets/PlayerInputDataAsset.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
@@ -42,7 +42,7 @@ AMyPlayerController::AMyPlayerController()
 void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
 {
 	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->ServerSetGameState(NewGameState);
 	}
@@ -171,7 +171,7 @@ void AMyPlayerController::BeginPlay()
 	SetUIInputIgnored();
 
 	// Listen to handle input for each game state
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -449,7 +449,7 @@ void AMyPlayerController::OnWidgetsInitialized()
 		HUD->OnWidgetsInitialized.RemoveDynamic(this, &ThisClass::OnWidgetsInitialized);
 	}
 
-	UMainMenuWidget* MainMenuWidget = USingletonLibrary::GetMainMenuWidget();
+	UMainMenuWidget* MainMenuWidget = UMyBlueprintFunctionLibrary::GetMainMenuWidget();
 	if (ensureMsgf(MainMenuWidget, TEXT("ASSERT: 'MainMenuWidget' is not valid")))
 	{
 		// Update the Menu State
@@ -465,14 +465,14 @@ void AMyPlayerController::OnWidgetsInitialized()
 	}
 
 	// Listens to handle input on opening and closing the InGame Menu widget
-	UInGameMenuWidget* InGameMenuWidget = USingletonLibrary::GetInGameMenuWidget();
+	UInGameMenuWidget* InGameMenuWidget = UMyBlueprintFunctionLibrary::GetInGameMenuWidget();
 	if (ensureMsgf(InGameMenuWidget, TEXT("ASSERT: 'InGameMenuWidget' is not valid")))
 	{
 		InGameMenuWidget->OnToggledInGameMenu.AddUniqueDynamic(this, &ThisClass::OnToggledInGameMenu);
 	}
 
 	// Listens to handle input on opening and closing the Settings widget
-	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
 	if (ensureMsgf(SettingsWidget, TEXT("ASSERT: 'SettingsWidget' is not valid")))
 	{
 		SettingsWidget->OnToggledSettings.AddUniqueDynamic(this, &ThisClass::OnToggledSettings);

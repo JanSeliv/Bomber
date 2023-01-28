@@ -9,10 +9,11 @@
 #include "BombActor.generated.h"
 
 #define MIN_FIRE_RADIUS 1
+#define DEFAULT_LIFESPAN INDEX_NONE
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.
- * @see Access its data with UBombDataAsset (Content/Bomber/Globals/DA_Bomb).
+ * @see Access its data with UBombDataAsset (Content/Bomber/DataAssets/DA_Bomb).
  */
 UCLASS()
 class BOMBER_API ABombActor final : public AActor
@@ -47,12 +48,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void InitBomb(int32 InFireRadius = 1, int32 CharacterID = -1);
 
+	/** Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+	void TryDisplayExplosionCells();
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
-	/** The MapComponent manages this actor on the Level Map */
+	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
@@ -87,7 +92,7 @@ protected:
 
 	/** Set the lifespan of this actor. When it expires the object will be destroyed.
 	 * @param InLifespan overriden with a default value, time will be got from the data asset. */
-	virtual void SetLifeSpan(float InLifespan = INDEX_NONE) override;
+	virtual void SetLifeSpan(float InLifespan = DEFAULT_LIFESPAN) override;
 
 	/** Called when the lifespan of an actor expires (if he has one). */
 	virtual void LifeSpanExpired() override;
@@ -115,21 +120,26 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-	/** Gets the response for specified player.
-	 * @param OutCollisionResponses Returns requested response. 
+#pragma region CustomCollisionResponse
+	/** Sets actual collision response to all players for this bomb. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void UpdateCollisionResponseToAllPlayers();
+
+	/** Takes your container and returns is with new specified response for player by its specified ID.
+	 * @param InOutCollisionResponses Will contain requested response.
 	 * @param CharacterID Player to set response.
 	 * @param NewResponse New response to set. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	void GetCollisionResponseToPlayer(FCollisionResponseContainer& OutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse) const;
+	static void MakeCollisionResponseToPlayerByID(FCollisionResponseContainer& InOutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse);
 
-	/** Gets the response for all players.
-	  * @param OutCollisionResponses Returns requested responses. 
+	/** Takes your container and returns new specified response for all players.
+	  * @param InOutCollisionResponses Will contain requested responses.
 	  * @param NewResponse New response to set. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	void GetCollisionResponseToAllPlayers(FCollisionResponseContainer& OutCollisionResponses, ECollisionResponse NewResponse) const;
+	static void MakeCollisionResponseToAllPlayers(FCollisionResponseContainer& InOutCollisionResponses, ECollisionResponse NewResponse);
 
-	/** Gets the response for players by specified bitmask.
-	  * @param OutCollisionResponses Returns requested responses. 
+	/** Takes your container and returns new specified response for those players who match their ID in specified bitmask.
+	  * @param InOutCollisionResponses Will contain requested responses.
 	  * @param Bitmask Each bit represents the character ID.
 	  * @param BitOnResponse Applies response for toggles bits.
 	  * @param BitOffResponse Applies response for clear bits.
@@ -139,11 +149,12 @@ protected:
 	  * so characters with IDs '0', '1' and '3' will apply 'ECR_Block' response,
 	  * player with Character ID '2' won't change its response since it's specified as 'ECR_MAX'. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	void GetCollisionResponseToPlayers(FCollisionResponseContainer& OutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse) const;
+	static void MakeCollisionResponseToPlayersInBitmask(FCollisionResponseContainer& InOutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse);
 
 	/** Returns all players overlapping with this bomb. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const;
+#pragma endregion CustomCollisionResponse
 
 	/** Updates current material for this bomb actor. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

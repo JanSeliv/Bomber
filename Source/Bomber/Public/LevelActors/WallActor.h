@@ -8,7 +8,7 @@
 
 /**
  * Walls are not destroyed by a bomb explosion and break the explosion.
- * @see Access its data with UWallDataAsset (Content/Bomber/Globals/DA_Wall).
+ * @see Access its data with UWallDataAsset (Content/Bomber/DataAssets/DA_Wall).
  */
 UCLASS()
 class BOMBER_API AWallActor final : public AActor
@@ -28,7 +28,7 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** The MapComponent manages this actor on the Level Map */
+	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 

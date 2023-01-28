@@ -3,10 +3,10 @@
 #include "GameFramework/MyGameStateBase.h"
 //---
 #include "GeneratedMap.h"
-#include "SoundsManager.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/GameStateDataAsset.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "DataAssets/GameStateDataAsset.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "GameFeaturesSubsystem.h"
 #include "Net/UnrealNetwork.h"
@@ -22,7 +22,7 @@ AMyGameStateBase::AMyGameStateBase()
 // Returns the AMyGameStateBase::CurrentGameState property
 ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 {
-	if (const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		return MyGameState->CurrentGameStateInternal;
 	}
@@ -114,7 +114,7 @@ void AMyGameStateBase::TriggerCountdowns()
 	const float InRate = UGameStateDataAsset::Get().GetTickInterval();
 	World->GetTimerManager().SetTimer(CountdownTimerInternal, this, &ThisClass::OnCountdownTimerTicked, InRate, bInLoop);
 
-	USoundsManager::Get().PlayStartGameCountdownSFX();
+	USoundsSubsystem::Get().PlayStartGameCountdownSFX();
 }
 
 // Is called each UGameStateDataAsset::TickInternal to count different time in the game
@@ -179,7 +179,7 @@ void AMyGameStateBase::DecrementInGameCountdown()
 		constexpr float SoundDuration = 10.f;
 		if (FMath::IsNearlyEqual(InGameTimerSecRemainInternal, SoundDuration, Tolerance))
 		{
-			USoundsManager::Get().PlayEndGameCountdownSFX();
+			USoundsSubsystem::Get().PlayEndGameCountdownSFX();
 		}
 	}
 }
@@ -206,7 +206,7 @@ void AMyGameStateBase::UpdateEndGameStates()
 		MyPlayerState->UpdateEndGameState();
 	}
 
-	if (USingletonLibrary::GetAlivePlayersNum() <= 1)
+	if (UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
 	{
 		ServerSetGameState(ECGS::EndGame);
 	}

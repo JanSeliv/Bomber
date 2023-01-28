@@ -421,4 +421,7 @@ Saved/*
 **/Intermediate/*
 
 # Cache files for the editor to use
-DerivedDataCache/*
+DerivedDataCache
+
+# Bomber specific
+Config/DefaultMetaCheatManager.ini

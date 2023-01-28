@@ -11,7 +11,7 @@
 
 /**
  * Procedurally generated grid of cells and actors on the scene.
- * @see Access its data with UGeneratedMapDataAsset (Content/Bomber/Globals/DA_Levels).
+ * @see Access its data with UGeneratedMapDataAsset (Content/Bomber/DataAssets/DA_Levels).
  */
 UCLASS()
 class BOMBER_API AGeneratedMap final : public AActor
@@ -23,18 +23,12 @@ public:
 	 *		Public properties
 	 * --------------------------------------------------- */
 
-#if WITH_EDITORONLY_DATA  // [Editor] Renders
-	/** Specify for which level actors should show debug renders. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
-	int32 RenderActorsTypes = TO_FLAG(EAT::None);
-#endif	//WITH_EDITORONLY_DATA [Editor] Renders
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGeneratedMapWantsReconstruct, const FTransform&, Transform);
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelMapWantsReconstruct, const FTransform&, Transform);
-
-	/** Called when this level map actor wants to be reconstructed.
-	* Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructLevelMap(). */
+	/** Called when this Generated Map actor wants to be reconstructed.
+	* Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructGeneratedMap(). */
 	UPROPERTY(BlueprintAssignable, Category = "C++")
-	FOnLevelMapWantsReconstruct OnLevelMapWantsReconstruct;
+	FOnGeneratedMapWantsReconstruct OnGeneratedMapWantsReconstruct;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetNewLevelType, ELevelType, NewLevelType);
 
@@ -64,9 +58,16 @@ public:
 	 * Is created only once, can not be destroyed and always exist in persistent level. */
 	static AGeneratedMap& Get();
 
-	/** Initialize this Level Map actor, could be called multiple times. */
+	/** Initialize this Generated Map actor, could be called multiple times. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ConstructLevelMap(const FTransform& Transform);
+	void ConstructGeneratedMap(const FTransform& Transform);
+
+	/** Sets the size for generated map, it will automatically regenerate the level for given size.
+	 * Is authority-only function.
+	 * @param LevelSize The new size where length and width have to be unpaired (odd).
+	 * E.g: X:9, Y:7 - set the size of the level to 9 columns (width) and 7 rows (length). */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetLevelSize(const FIntPoint& LevelSize);
 
 	/** Returns number of characters in the array. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -80,20 +81,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMyCameraComponent* GetCameraComponent() const { return CameraComponentInternal; }
 
-	/** Returns the Pool Manager. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class UPoolManager* GetPoolManager() const { return PoolManagerInternal; }
-
-	/** Spawns a level actor on the Level Map by the specified type. Then calls AddToGrid().
+	/** Spawns a level actor on the Generated Map by the specified type. Then calls AddToGrid().
 	 *
 	 * @param Type Which type of level actors
 	 * @param Cell Actors location
-	 * @return Spawned actor on the Level Map, nullptr otherwise.
+	 * @return Spawned actor on the Generated Map, nullptr otherwise.
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	AActor* SpawnActorByType(EActorType Type, const FCell& Cell);
 
-	/** Spawns a level actor on the Level Map by the specified type. */
+	/** Spawns a level actor on the Generated Map by the specified type. */
 	template <typename T>
 	static FORCEINLINE T* SpawnActorByType(EActorType Type, const FCell& Cell) { return Cast<T>(Get().SpawnActorByType(Type, Cell)); }
 
@@ -132,9 +129,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsDraggedMapComponent(const class UMapComponent* MapComponent) const;
 
-	/** Returns the cached transform. */
+	/** Takes transform and returns aligned copy allowed to be used as actor transform for this map.
+	 * @param ActorTransform The transform to align.
+	 * @return Aligned transform, where:
+	 * Transform location and rotation is the center of new grid
+	 * Transform scale-X is number of columns.
+	 * Transform scale-Y is number of rows. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FTransform& GetCachedTransform() const { return CachedTransformInternal; }
+	static FTransform ActorTransformToGridTransform(const FTransform& ActorTransform);
 
 protected:
 	/* ---------------------------------------------------
@@ -144,7 +146,7 @@ protected:
 	/** Gives access for the Cheat Manager to 'cheat'. */
 	friend class UMyCheatManager;
 
-	/** Gives access for helper utilities to expand cells operations on the Level Map. */
+	/** Gives access for helper utilities to expand cells operations on the Generated Map. */
 	friend class UCellsUtilsLibrary;
 
 	/** The blueprint background actor  */
@@ -152,18 +154,19 @@ protected:
 	TObjectPtr<class UChildActorComponent> CollisionComponentInternal = nullptr;
 
 	/** Cells storage. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
 	TArray<FCell> GridCellsInternal;
 
 	/** Map components of all level actors. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal;
 
-	/** Contains map components that were dragged to the scene. */
+	/** Contains map components that were dragged to the scene
+	 * Is set in editor by adding and dragging actors, but can be changed during the game. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
 	TMap<FCell, EActorType> DraggedCellsInternal;
 
-	/** Number of characters on the Level Map. */
+	/** Number of characters on the Generated Map. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
 	int32 PlayersNumInternal = 0;
 
@@ -179,15 +182,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
 	bool bIsGameRunningInternal = false;
 
-	/** Contains the cached transform since the level actor does not move and is always static. */
-	UPROPERTY(BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cached Transform"))
-	FTransform CachedTransformInternal = FTransform::Identity;
-
-	/** Is used to avoid spawning and destroying level actors on every regeneration,
-	 *  instead they are created once, are activated when are taken from a pool
-	 *  and deactivated when are returned to a pool. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Pool Manager"))
-	TObjectPtr<class UPoolManager> PoolManagerInternal = nullptr;
+	/** Specify for which level actors should show debug renders, is not available in shipping build. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
+	int32 DisplayCellsActorTypes = TO_FLAG(EAT::None);
 
 	/* ---------------------------------------------------
 	 *		Protected functions
@@ -196,13 +193,13 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Is called on a this level map actor construction, could be called multiple times.
-	 * Could be listened by binding to ThisClass::OnLevelMapWantsReconstruct delegate.
+	/** Is called on a this Generated Map actor construction, could be called multiple times.
+	 * Could be listened by binding to ThisClass::OnGeneratedMapWantsReconstruct delegate.
 	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructLevelMap() -> ThisClass::OnConstructionLevelMap().
-	 * @warning Do not call directly, use ThisClass::ConstructLevelMap() instead. */
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructGeneratedMap() -> ThisClass::OnConstructionGeneratedMap().
+	 * @warning Do not call directly, use ThisClass::ConstructGeneratedMap() instead. */
 	UFUNCTION()
-	void OnConstructionLevelMap(const FTransform& Transform);
+	void OnConstructionGeneratedMap(const FTransform& Transform);
 
 	/** Called right before components are initialized, only called during gameplay. */
 	virtual void PreInitializeComponents() override;
@@ -224,7 +221,7 @@ protected:
 	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
 	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
 	 */
-	void IntersectCellsByTypes(FCells& InOutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty = true) const;
+	void IntersectCellsByTypes(FCells& InOutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty) const;
 
 	/** Getting an array of cells by any sides from an input center cell and type of breaks.
 	 *	Is not public blueprintable since all needed ufunctions are already use this method.
@@ -242,7 +239,7 @@ protected:
 		const FCell& Cell,
 		EPathType Pathfinder,
 		int32 SideLength,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECellDirection")) int32 DirectionsBitmask,
+		int32 DirectionsBitmask,
 		bool bBreakInputCells = false) const;
 
 	/**
@@ -274,9 +271,13 @@ protected:
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Align transform and build cells.
-	* @param Transform New transform of the level map. */
+	* @param Transform New transform of the Generated Map. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TransformLevelMap(const FTransform& Transform);
+	void TransformGeneratedMap(const FTransform& Transform);
+
+	/** Scales dragged cells according new grid if sizes are different. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ScaleDraggedCellsOnGrid(const TSet<FCell>& OriginalGrid, const TSet<FCell>& NewGrid);
 
 	/** Updates current level type. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -286,9 +287,9 @@ protected:
 	UFUNCTION()
 	void OnRep_LevelType();
 
-	/** Find and add all level actors to allow the Pool Manager to handle all of them. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
-	void InitPoolManager();
+	/** Internal multicast function to set new size for generated map for all instances. */
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void MulticastSetLevelSize(const FIntPoint& LevelSize);
 
 	/* ---------------------------------------------------
 	 *					Editor development

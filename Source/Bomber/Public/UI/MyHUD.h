@@ -8,7 +8,7 @@
 
 /**
  * The custom HUD class. Also manages other widgets.
- * @see Access its data with UUIDataAsset (Content/Bomber/Globals/DA_UI).
+ * @see Access its data with UUIDataAsset (Content/Bomber/DataAssets/DA_UI).
  */
 UCLASS(Config = "GameUserSettings")
 class BOMBER_API AMyHUD final : public AHUD
@@ -116,8 +116,11 @@ protected:
 	/** Init all widgets on gameplay starting before begin play. */
 	virtual void PostInitializeComponents() override;
 
-	/** Called when the game starts. Created widget. */
-	virtual void BeginPlay() override;
+	/** Internal UUserWidget::CreateWidget wrapper. */
+	static UUserWidget* CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true);
+
+	template <typename T = UUserWidget>
+	FORCEINLINE T* CreateWidgetByClass(TSubclassOf<T> WidgetClass, bool bAddToViewport = true) const { return Cast<T>(CreateWidgetByClass(PlayerOwner.Get(), WidgetClass, bAddToViewport)); }
 
 	/** Will try to start the process of initializing all widgets used in game. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

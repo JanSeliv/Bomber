@@ -4,16 +4,17 @@
 //---
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/AIDataAsset.h"
-#include "Globals/GameStateDataAsset.h"
+#include "DataAssets/AIDataAsset.h"
+#include "DataAssets/GameStateDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/GameFrameworkComponentManager.h"
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
 #endif
 
 // Enable or disable all bots
@@ -36,30 +37,32 @@ AMyAIController::AMyAIController()
 // Makes AI go toward specified destination cell
 void AMyAIController::MoveToCell(const FCell& DestinationCell)
 {
-	if (!OwnerInternal
-	    || IsMoveInputIgnored())
+	if (!OwnerInternal)
 	{
 		return;
 	}
 
-	AIMoveToInternal = DestinationCell;
-	MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
+	if (!IsMoveInputIgnored())
+	{
+		AIMoveToInternal = DestinationCell;
+		MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
+	}
 
 #if WITH_EDITOR	 // [IsEditor]
 	if (UEditorUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
-		if (!UEditorUtilsLibrary::IsEditorNotPieWorld()) // [PIE]
+		if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay()) // PIE
 		{
-			USingletonLibrary::ClearDisplayedCells(OwnerInternal);
-		} // [IsEditorNotPieWorld]
+			UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
+		}
 
 		const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
 		if (MapComponent // is valid  map component
 		    && MapComponent->bShouldShowRenders)
 		{
 			static const FDisplayCellsParams DisplayParams{FLinearColor::Gray, 255.f, 300.f, TEXT("x")};
-			USingletonLibrary::DisplayCells(OwnerInternal, {AIMoveToInternal}, DisplayParams);
+			UCellsUtilsLibrary::DisplayCell(OwnerInternal, DestinationCell, DisplayParams);
 		}
 	}
 #endif
@@ -117,14 +120,14 @@ void AMyAIController::OnPossess(APawn* InPawn)
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld()
-	    && !USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this))
+	    && !UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
 	{
-		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -143,14 +146,9 @@ void AMyAIController::OnUnPossess()
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		USingletonLibrary::GOnAIUpdatedDelegate.RemoveAll(this);
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.RemoveAll(this);
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
-
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.RemoveAll(this);
-	}
 
 	SetAI(false);
 }
@@ -189,7 +187,7 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR
 	if (UEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		USingletonLibrary::ClearDisplayedCells(OwnerInternal);
+		UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		AIMoveToInternal = FCell::InvalidCell;
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
@@ -294,10 +292,10 @@ void AMyAIController::UpdateAI()
 	FCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free; // selected cells
 	bool bIsFilteringFailed = false;
 	static constexpr int32 FilteringStepsNum = 4;
-	for (int32 i = 0; i < FilteringStepsNum; ++i)
+	for (int32 Index = 0; Index < FilteringStepsNum; ++Index)
 	{
 		FCells FilteringStep;
-		switch (i)
+		switch (Index)
 		{
 			case 0: // All crossways: Filtered ∪ AllCrossways
 				FilteringStep = Filtered.Intersect(AllCrossways);
@@ -349,7 +347,7 @@ void AMyAIController::UpdateAI()
 			if (MapComponent->bShouldShowRenders)
 			{
 				static const FDisplayCellsParams DisplayParams{FLinearColor::Red, 261.F, 95.F, TEXT("Attack")};
-				USingletonLibrary::DisplayCells(OwnerInternal, {F0}, DisplayParams);
+				UCellsUtilsLibrary::DisplayCell(OwnerInternal, F0, DisplayParams);
 			}
 #endif	// [Editor]
 		}
@@ -400,8 +398,8 @@ void AMyAIController::UpdateAI()
 				default:
 					break;
 			}
-			static const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, Symbol, Position};
-			USingletonLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
+			const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, Symbol, Position};
+			UCellsUtilsLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
 		} // [Loopy visualization]
 	}
 #endif	// [Editor]
@@ -410,8 +408,9 @@ void AMyAIController::UpdateAI()
 // Enable or disable AI for this bot
 void AMyAIController::SetAI(bool bShouldEnable)
 {
-	const UWorld* World = GetWorld();
-	if (!World)
+	const bool bWantsEnableDeadAI = !OwnerInternal && bShouldEnable;
+	if (bWantsEnableDeadAI
+		|| !HasAuthority())
 	{
 		return;
 	}
@@ -421,7 +420,7 @@ void AMyAIController::SetAI(bool bShouldEnable)
 	SetIgnoreMoveInput(!bShouldEnable);
 
 	// Handle the Ai updating timer
-	FTimerManager& TimerManager = World->GetTimerManager();
+	FTimerManager& TimerManager = GetWorldTimerManager();
 	if (bShouldEnable)
 	{
 		TimerManager.UnPauseTimer(AIUpdateHandleInternal);

@@ -2,15 +2,14 @@
 
 #include "UI/Input/InputButtonWidget.h"
 //---
-#include "SoundsManager.h"
-#include "WidgetUtilsLibrary.h"
+#include "Subsystems/SoundsSubsystem.h"
+#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "Data/SettingsDataAsset.h"
-#include "Globals/MyInputMappingContext.h"
+#include "DataAssets/MyInputMappingContext.h"
 #include "UI/SettingsWidget.h"
 //---
 #include "Components/InputKeySelector.h"
 #include "Components/TextBlock.h"
-#include "UtilityLibraries/SingletonLibrary.h"
 #include "Widgets/Input/SInputKeySelector.h"
 
 // Sets this button to let player remap input specified in mappable data
@@ -110,5 +109,5 @@ void UInputButtonWidget::OnKeySelected(FInputChord SelectedKey)
 // Called whenever the key selection mode starts or stops
 void UInputButtonWidget::OnIsSelectingKeyChanged()
 {
-	USoundsManager::Get().PlayUIClickSFX();
+	USoundsSubsystem::Get().PlayUIClickSFX();
 }

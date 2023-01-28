@@ -2,33 +2,40 @@
 
 #pragma once
 
-#include "GameFramework/CheatManager.h"
+#include "MetaCheatManager.h"
+//---
 #include "Bomber.h"
 //---
 #include "MyCheatManager.generated.h"
 
 /**
- * Contains debugging code for non-shipping builds to check general game functionality.
+ * Contains debugging cheat command for non-shipping builds to test general game functionality.
  */
 UCLASS()
-class BOMBER_API UMyCheatManager : public UCheatManager
+class BOMBER_API UMyCheatManager final : public UMetaCheatManager
 {
 	GENERATED_BODY()
 
-protected:
-	/** Called when CheatManager is created to allow any needed initialization. */
-	virtual void InitCheatManager() override;
-
+public:
 	/**
-	 * Returns bitmask by string.
+	 * Returns bitmask from reverse bitmask in string.
 	 * "1000"(OR "1 0 0 0" OR "1")	-> 1,
 	 * "1100"(OR "1 1 0 0" OR "11") -> 3,
 	 * "0011"(OR "0 0 1 1")			-> 12,
 	 * "0001"(OR "0 0 0 1") 		-> 8
 	 * "0001"(OR "1 1 1 1") 		-> 15
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "String"))
-	int32 GetBitmask(const FString& String) const;
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ReverseBitmaskStr"))
+	static int32 GetBitmaskFromReverseString(const FString& ReverseBitmaskStr);
+
+	/**
+	 * Returns bitmask from actor types in string.
+	 * "Wall" (1<<4)						-> 16,
+	 * "Wall Bomb" (1<<4|1<<0)				-> 17,
+	 * "Wall Bomb Player" (1<<4|1<<0|1<<3)	-> 25,
+	 */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorTypesBitmaskStr"))
+	static int32 GetBitmaskFromActorTypesString(const FString& ActorTypesBitmaskStr);
 
 	/* ---------------------------------------------------
 	*		Destroy
@@ -38,8 +45,8 @@ protected:
 	 * Destroy all specified level actors on the map.
 	 * @param ActorType Bomb, Box, Item, Player, Wall, All
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Destroy.AllByType"))
-	void DestroyAllByType(EActorType ActorType) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Destroy.AllByType"))
+	static void DestroyAllByType(EActorType ActorType);
 
 	/**
 	 * Destroy characters in specified slots.
@@ -53,10 +60,9 @@ protected:
 	 * Bomber.Destroy.PlayersBySlots 1111
 	 * Bomber.Destroy.PlayersBySlots 1000
 	 * Bomber.Destroy.PlayersBySlots 0111
-	 * @param Slot 1 if should destroy
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Destroy.PlayersBySlots"))
-	void DestroyPlayersBySlots(const FString& Slot) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Destroy.PlayersBySlots"))
+	static void DestroyPlayersBySlots(const FString& Slot);
 
 	/* ---------------------------------------------------
 	*		Box
@@ -66,8 +72,8 @@ protected:
 	 * Override the chance to spawn item after box destroying.
 	 * @param Chance Put 0 to stop spawning, 100 to spawn all time.
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Box.SetItemChance"))
-	void SetItemChance(int32 Chance) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Box.SetItemChance"))
+	static void SetItemChance(int32 Chance);
 
 	/* ---------------------------------------------------
 	*		Player
@@ -75,30 +81,49 @@ protected:
 
 	/**
 	 * Override the level of each powerup for a controlled player.
-	 * @param NewLevel 1 is minimum, 9 is maximum.
+	 * @param NewLevel 1 is minimum, 5 is maximum.
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Player.SetPowerups"))
-	void SetPowerups(int32 NewLevel) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Player.SetPowerups"))
+	static void SetPowerups(int32 NewLevel);
 
 	/** Enable or disable the God mode to make a controllable player undestroyable. */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.Player.SetGodMode"))
-	void SetGodMode(bool bShouldEnable) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Player.SetGodMode"))
+	static void SetGodMode(bool bShouldEnable);
 
 	/* ---------------------------------------------------
-	*		UI
-	* --------------------------------------------------- */
+	 *		Debug
+	 * --------------------------------------------------- */
 
-	/** Override the setting value.
-	 * Types:			Examples:
-	 * Button:			Bomber.UI.SetSetting Close
-	 * Checkbox:		Bomber.UI.SetSetting VSync?1
-	 * Combobox index:	Bomber.UI.SetSetting Shadows?2
-	 * Combobox list:	Bomber.UI.SetSetting Shadows?Low,Medium,High
-	 * Slider:			Bomber.UI.SetSetting Audio?0.5
-	 * Text Line:		Bomber.UI.SetSetting Title?Bomber
-	 * User Input:		Bomber.UI.SetSetting Player?JanSeliv
-	 * @param TagByValue Tag?Value
+	/**
+	 * Shows coordinates of all level actors by specified types, ex: 'Box Item'.
+	 * Bomber.Debug.DisplayCells Wall - show walls.
+	 * Bomber.Debug.DisplayCells Wall Bomb - show walls and bombs.
+	 * Bomber.Debug.DisplayCells Wall Bomb Player - show walls, bombs and players.
+	 * Bomber.Debug.DisplayCells All - show all actors (walls, bombs, players, items and boxes).
 	 */
-	UFUNCTION(Exec, meta = (OverrideNativeName = "Bomber.UI.SetSetting"))
-	void SetSetting(const FString& TagByValue) const;
+	UFUNCTION(meta = (CheatName = "Bomber.Debug.DisplayCells"))
+	static void DisplayCells(const FString& ActorTypesString);
+
+	/* ---------------------------------------------------
+	 *		Level
+	 * --------------------------------------------------- */
+
+	/** Sets the size for generated map, it will automatically regenerate the level for given size.
+	 * @see LevelSize The new size where length and width have to be unpaired (odd).
+	 * Bomber.Level.SetSize 9x7 - set the size of the level to 9 columns (width) and 7 rows (length).
+	 */
+	UFUNCTION(meta = (CheatName = "Bomber.Level.SetSize"))
+	static void SetLevelSize(const FString& LevelSize);
+
+	/* ---------------------------------------------------
+	 *		Camera
+	 * --------------------------------------------------- */
+
+	/** Tweak the custom additive angle to affect the fit distance calculation from camera to the level. */
+	UFUNCTION(meta = (CheatName = "Bomber.Camera.FitViewAdditiveAngle"))
+	static void FitViewAdditiveAngle(float InFitViewAdditiveAngle);
+
+	/** Tweak the minimal distance in UU from camera to the level. */
+	UFUNCTION(meta = (CheatName = "Bomber.Camera.MinDistance"))
+	static void MinDistance(float InMinDistance);
 };

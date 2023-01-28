@@ -4,7 +4,7 @@
 //---
 #include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
 //---
 #include "Net/UnrealNetwork.h"
@@ -70,7 +70,7 @@ void AMyPlayerState::BeginPlay()
 	if (HasAuthority())
 	{
 		// Listen states
-		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 		}
@@ -105,7 +105,7 @@ void AMyPlayerState::UpdateEndGameState()
 		return;
 	}
 
-	const AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState();
+	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
 	const ECurrentGameState CurrentGameState = MyGameState ? MyGameState->GetCurrentGameState() : ECGS::None;
 	if (CurrentGameState == ECGS::None                  // is not valid game state, nullptr or not fully initialized
 	    || EndGameStateInternal != EEndGameState::None) // end state was set already for current game
@@ -123,7 +123,7 @@ void AMyPlayerState::UpdateEndGameState()
 	// Game is running
 
 	// locals
-	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
+	const int32 PlayerNum = UMyBlueprintFunctionLibrary::GetAlivePlayersNum();
 
 	if (!IsPlayerAlive())
 	{

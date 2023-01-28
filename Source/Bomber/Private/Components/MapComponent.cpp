@@ -5,12 +5,13 @@
 #include "GeneratedMap.h"
 #include "PoolManager.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "Globals/DataAssetsContainer.h"
-#include "Globals/GameStateDataAsset.h"
-#include "Globals/LevelActorDataAsset.h"
+#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/GameStateDataAsset.h"
+#include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "Subsystems/GeneratedMapSubsystem.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
@@ -18,6 +19,7 @@
 //---
 #if WITH_EDITOR
 #include "EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
 #endif
 
 // Sets default values for this component's properties
@@ -60,18 +62,26 @@ bool UMapComponent::OnConstructionOwnerActor()
 		return false;
 	}
 
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
-
-	const UPoolManager* PoolManager = LevelMap.GetPoolManager();
-	if (PoolManager
-	    && PoolManager->IsFree(Owner))
+	// Check the object state in the Pool Manager
+	UPoolManager& PoolManager = UPoolManager::Get();
+	const EPoolObjectState PoolObjectState = PoolManager.GetPoolObjectState(Owner);
+	if (PoolObjectState == EPoolObjectState::None)
+	{
+		// The owner actor is not in the pool
+		// Most likely it is a dragged actor, since all generated actors are always taken from the pool
+		// Add this object to the pool and continue construction
+		PoolManager.AddToPool(Owner, EPoolObjectState::Active);
+	}
+	else if (PoolObjectState == EPoolObjectState::Inactive)
 	{
 		// Do not reconstruct inactive object
 		return false;
 	}
 
+	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
+
 	// Find new Location at dragging and update-delegate
-	LevelMap.SetNearestCell(this);
+	GeneratedMap.SetNearestCell(this);
 
 	if (CellInternal.IsInvalidCell())
 	{
@@ -79,43 +89,49 @@ bool UMapComponent::OnConstructionOwnerActor()
 	}
 
 	// Owner updating
-	LevelMap.AddToGrid(this);
+	GeneratedMap.AddToGrid(this);
 	if (IS_TRANSIENT(Owner)) // Check again, dragged owner can be moved to the persistent
 	{
 		return false;
 	}
 
 	// Update default mesh asset
-	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(USingletonLibrary::GetLevelType());
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
 	SetLevelActorRow(FoundRow);
 
 	const ECollisionResponse CollisionResponse = GetActorDataAssetChecked().GetCollisionResponse();
 	SetCollisionResponses(CollisionResponse);
 
-#if WITH_EDITOR	 // [IsEditor]
-	if (UEditorUtilsLibrary::IsEditor())
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
-		{
-			// Update AI renders after adding obj to map
-			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
-		}
-
-		// Show current cell if type specified
-		if (TO_FLAG(GetActorType()) & LevelMap.RenderActorsTypes)
-		{
-			USingletonLibrary::DisplayCells(Owner, {CellInternal}, FDisplayCellsParams::EmptyParams);
-		}
+		// Update AI renders after adding obj to map
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 	}
-#endif	//WITH_EDITOR [IsEditor]
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+
+	TryDisplayOwnedCell();
 
 	return true;
 }
 
-// Override current cell data, where owner is located on the Level Map
+// Override current cell data, where owner is located on the Generated Map
 void UMapComponent::SetCell(const FCell& Cell)
 {
 	CellInternal = Cell;
+}
+
+// Show current cell if owned actor type is allowed, is not available in shipping build
+void UMapComponent::TryDisplayOwnedCell()
+{
+#if !UE_BUILD_SHIPPING
+	if (UCellsUtilsLibrary::CanDisplayCellsForActorTypes(TO_FLAG(GetActorType())))
+	{
+		FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
+		Params.bClearPreviousDisplays = true;
+		UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
+	}
+#endif // !UE_BUILD_SHIPPING
 }
 
 // Set specified mesh to the Owner
@@ -189,7 +205,7 @@ void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& New
 	ApplyCollisionResponse();
 }
 
-// Is called when an owner was destroyed on the Level Map
+// Is called when an owner was destroyed on the Generated Map
 void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 {
 	if (OnDeactivatedMapComponent.IsBound())
@@ -208,7 +224,7 @@ void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 	if (UEditorUtilsLibrary::IsEditor())
 	{
 		// Remove all text renders of the Owner
-		USingletonLibrary::ClearDisplayedCells(GetOwner());
+		UCellsUtilsLibrary::ClearDisplayedCells(GetOwner());
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
@@ -273,7 +289,7 @@ void UMapComponent::OnRegister()
 		MeshComponentInternal->RegisterComponent();
 
 		// Set default mesh asset
-		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
+		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
 		SetLevelActorRow(FoundRow);
 	}
 
@@ -289,33 +305,32 @@ void UMapComponent::OnRegister()
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
-// Called when a component is destroyed for removing the owner from the Level Map.
+// Called when a component is destroyed for removing the owner from the Generated Map.
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	AActor* ComponentOwner = GetOwner();
-	if (!IS_TRANSIENT(ComponentOwner)) // Is not transient owner
+	if (ComponentOwner && IsValid(this) // Could be called multiple times, make sure it is called once for valid object
+	    && !GExitPurge)                 // Do not call on exit
 	{
-		ensureAlwaysMsgf(AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame, TEXT("ASSERT: '%s' became explicity destroyed during the game, use the Pool Manager instead"), *ComponentOwner->GetName());
-
 		// Disable collision for safety
 		ComponentOwner->SetActorEnableCollision(false);
 
 		// Delete spawned collision component
 		BoxCollisionComponentInternal->DestroyComponent();
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+#if WITH_EDITOR	// [IsEditorNotPieWorld]
 		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
-			if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap()) // Can be invalid if remove the level map
+			if (AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap()) // Can be invalid if remove the Generated Map
 			{
-				LevelMap->DestroyLevelActor(this);
+				GeneratedMap->DestroyLevelActor(this);
 			}
 
 			// Editor delegates
-			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+			UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 		}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);

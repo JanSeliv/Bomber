@@ -40,6 +40,12 @@ public:
 	 */
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
 
+	/** Creates customization for the Attached Mesh data. */
+	static void RegisterAttachedMeshCustomization();
+
+	/** Removes customization for the Attached Mesh data. */
+	static void UnregisterAttachedMeshCustomization();
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties

@@ -17,6 +17,7 @@ public class Bomber : ModuleRules
                 , "DeveloperSettings" // Created UDataAssetsContainer
                 //My modules
                 , "FunctionPicker" // Used by MyInputAction.h
+                , "MetaCheatManager" // Created UMyCheatManager
 		    }
 		);
 
@@ -26,12 +27,12 @@ public class Bomber : ModuleRules
 				, "RHI", "ApplicationCore" // Resolutions
 				, "AIModule" // AI
 				, "Niagara" // VFX
-				, "RenderCore" // Render threads
-                , "GameplayTags" // FGameplayTag
+				, "GameplayTags" // FGameplayTag
                 , "GameFeatures", "ModularGameplay" // Modular Game Features
 				//My modules
-				, "MyUtils" // UUtilsLibrary.
-				, "MySettingsWidgetConstructor" // Generates settings
+				, "MyUtils" // UUtilsLibrary
+				, "SettingsWidgetConstructor" // Generates settings
+				, "PoolManager" // Used to spawn level actors
 			}
 		);
 

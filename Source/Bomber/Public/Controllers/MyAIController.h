@@ -11,7 +11,7 @@
 
 /**
  * Characters controlled by bots.
-* @see Access its data with UAIDataAsset (Content/Bomber/Globals/DA_AI).
+* @see Access its data with UAIDataAsset (Content/Bomber/DataAssets/DA_AI).
  */
 UCLASS()
 class BOMBER_API AMyAIController final : public AAIController
@@ -77,7 +77,7 @@ protected:
 	void UpdateAI();
 
 	/** Enable or disable AI for this bot. */
-	UFUNCTION(BlueprintCallable, meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, meta = (BlueprintProtected))
 	void SetAI(bool bShouldEnable);
 
 	/** Listen game states to enable or disable AI. */

@@ -15,6 +15,9 @@ typedef class FMyPropertyTypeCustomization Super;
 class MYEDITORUTILS_API FMyPropertyTypeCustomization : public IPropertyTypeCustomization
 {
 public:
+	/** Is used to load and unload the Property Editor Module. */
+	inline static const FName PropertyEditorModule = TEXT("PropertyEditor");
+
 	/* ---------------------------------------------------
 	*		Public functions
 	* --------------------------------------------------- */

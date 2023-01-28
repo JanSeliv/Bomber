@@ -3,7 +3,12 @@
 #include "EditorUtilsLibrary.h"
 //---
 #include "Editor.h"
+#include "LevelEditor.h"
+#include "SLevelViewport.h"
+#include "UnrealEdGlobals.h"
+#include "CookOnTheSide/CookOnTheFlyServer.h"
 #include "Editor/EditorEngine.h"
+#include "Editor/UnrealEdEngine.h"
 #include "EditorFramework/AssetImportData.h"
 #include "Misc/FileHelper.h"
 
@@ -69,6 +74,40 @@ int32 UEditorUtilsLibrary::GetEditorPlayerIndex()
 		}
 	}
 	return INDEX_NONE;
+}
+
+// Returns true if currently is cooking the package
+bool UEditorUtilsLibrary::IsCooking()
+{
+	if (IsEditorNotPieWorld())
+	{
+		const UCookOnTheFlyServer* CookServer = GUnrealEd ? GUnrealEd->CookServer : nullptr;
+		return CookServer ? CookServer->IsCookByTheBookMode() : true;
+	}
+	return false;
+}
+
+// Returns current editor viewport
+FViewport* UEditorUtilsLibrary::GetEditorViewport()
+{
+	const FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
+	const TSharedPtr<ILevelEditor> LevelEditor = LevelEditorModule.GetFirstLevelEditor();
+	if (!LevelEditor)
+	{
+		return nullptr;
+	}
+
+	for (const TSharedPtr<SLevelViewport>& LevelViewportIt : LevelEditor->GetViewports())
+	{
+		const FEditorViewportClient* EditorViewport = LevelViewportIt ? LevelViewportIt->GetViewportClient().Get() : nullptr;
+		FViewport* Viewport = EditorViewport ? EditorViewport->Viewport : nullptr;
+		if (Viewport && Viewport->GetSizeXY() != FIntPoint::ZeroValue)
+		{
+			return Viewport;
+		}
+	}
+
+	return nullptr;
 }
 
 // Exports specified data table to already its .json

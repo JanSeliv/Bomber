@@ -6,8 +6,8 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/BoxDataAsset.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "DataAssets/BoxDataAsset.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
 
@@ -71,7 +71,7 @@ void ABoxActor::BeginPlay()
 	}
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -83,15 +83,15 @@ void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
 		ConstructBoxActor();
 	}
 }
 
-// Called when owned map component is destroyed on the level map
+// Called when owned map component is destroyed on the Generated Map
 void ABoxActor::OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
-	const bool bIsCauserAllowedForItems = USingletonLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
+	const bool bIsCauserAllowedForItems = UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
 	if (bIsCauserAllowedForItems)
 	{
 		TrySpawnItem();
