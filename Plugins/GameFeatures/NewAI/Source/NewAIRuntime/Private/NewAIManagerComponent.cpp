@@ -3,10 +3,9 @@
 #include "NewAIManagerComponent.h"
 //---
 #include "GameFramework/MyGameStateBase.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "GeneratedMap.h"
-#include "HAL/ConsoleManager.h"
 
 // Sets default values for this component's properties
 UNewAIManagerComponent::UNewAIManagerComponent()
@@ -29,7 +28,7 @@ void UNewAIManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}

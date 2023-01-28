@@ -3,7 +3,7 @@
 #include "NewAIAgentComponent.h"
 //---
 #include "GameFramework/MyGameStateBase.h"
-#include "UtilityLibraries/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "AIController.h"
 #include "NewAIDataAsset.h"
@@ -23,7 +23,7 @@ void UNewAIAgentComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
