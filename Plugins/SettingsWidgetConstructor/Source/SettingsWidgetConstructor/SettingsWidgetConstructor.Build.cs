@@ -32,8 +32,6 @@ public class SettingsWidgetConstructor : ModuleRules
 			PrivateDependencyModuleNames.AddRange(new[]
 				{
 					"UnrealEd" // FDataTableEditorUtils
-					// My plugins
-					, "MyEditorUtils" // UEditorUtilsLibrary
 				}
 			);
 		}
