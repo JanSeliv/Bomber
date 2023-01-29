@@ -45,10 +45,7 @@ UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem()
 		return nullptr;
 	}
 
-	UGeneratedMapSubsystem* GeneratedMapSubsystem = FoundWorld->GetSubsystem<UGeneratedMapSubsystem>();
-	ensureMsgf(GeneratedMapSubsystem, TEXT("%s: 'GeneratedMapSubsystem' is not valid"), *FString(__FUNCTION__));
-
-	return GeneratedMapSubsystem;
+	return FoundWorld->GetSubsystem<UGeneratedMapSubsystem>();
 }
 
 // The Generated Map getter, nullptr otherwise

@@ -322,7 +322,9 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
-			if (AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap()) // Can be invalid if remove the Generated Map
+			const UGeneratedMapSubsystem* GeneratedMapSubsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem();
+			AGeneratedMap* GeneratedMap = GeneratedMapSubsystem ? GeneratedMapSubsystem->GetGeneratedMap() : nullptr;
+			if (GeneratedMap) // Can be invalid if remove the Generated Map or opening another map
 			{
 				GeneratedMap->DestroyLevelActor(this);
 			}
