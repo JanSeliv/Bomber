@@ -5,7 +5,7 @@
 #include "Data/SettingArchetypesData.h"
 #include "Data/SettingFunction.h"
 #include "Data/SettingTag.h"
-#include "MyDataTable/MyDataTable.h"
+#include "SettingsWidgetConstructor/Private/MyDataTable/SWCMyDataTable.h"
 //---
 #include "SettingsRow.generated.h"
 
@@ -174,7 +174,7 @@ struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsPicker
   * Executing UI getters/setters will call automatically bounded chosen functions.
   */
 USTRUCT(BlueprintType)
-struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsRow : public FMyTableRow
+struct SETTINGSWIDGETCONSTRUCTOR_API FSettingsRow : public FSWCMyTableRow
 {
 	GENERATED_BODY()
 

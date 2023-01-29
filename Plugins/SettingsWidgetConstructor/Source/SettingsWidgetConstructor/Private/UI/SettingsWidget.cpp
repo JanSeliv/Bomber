@@ -6,7 +6,6 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/SizeBox.h"
 //---
-#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Data/SettingsDataAsset.h"
 #include "Data/SettingsDataTable.h"
 #include "UI/SettingSubWidget.h"
@@ -878,7 +877,28 @@ void USettingsWidget::UpdateScrollBoxesHeight()
 // Constructs settings if viewport is ready otherwise Wait until viewport become initialized
 void USettingsWidget::TryConstructSettings()
 {
-	if (UUtilsLibrary::IsViewportInitialized())
+	auto IsViewportInitialized = []()-> bool
+	{
+		UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
+		FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
+		if (!Viewport)
+		{
+			return false;
+		}
+
+		auto IsZeroViewportSize = [Viewport] { return Viewport->GetSizeXY() == FIntPoint::ZeroValue; };
+
+		if (IsZeroViewportSize())
+		{
+			// Try update its value by mouse enter event
+			GameViewport->MouseEnter(Viewport, FIntPoint::ZeroValue.X, FIntPoint::ZeroValue.Y);
+			return !IsZeroViewportSize();
+		}
+
+		return true;
+	};
+
+	if (IsViewportInitialized())
 	{
 		ConstructSettings();
 	}

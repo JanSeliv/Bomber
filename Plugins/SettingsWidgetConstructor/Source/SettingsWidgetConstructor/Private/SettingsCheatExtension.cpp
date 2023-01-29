@@ -2,7 +2,7 @@
 
 #include "SettingsCheatExtension.h"
 //---
-#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
+#include "MyUtilsLibraries/SWCWidgetUtilsLibrary.h"
 #include "UI/SettingsWidget.h"
 
 // Default constructor
@@ -28,7 +28,7 @@ void USettingsCheatExtension::OnCheatManagerCreated(UCheatManager* CheatManager)
 // Override the setting value with the cheat
 void USettingsCheatExtension::CheatSetting(const FString& TagByValue) const
 {
-	USettingsWidget* SettingsWidget = FWidgetUtilsLibrary::FindWidgetOfClass<USettingsWidget>(GetWorld());
+	USettingsWidget* SettingsWidget = FSWCWidgetUtilsLibrary::FindWidgetOfClass<USettingsWidget>(GetWorld());
 	if (!SettingsWidget)
 	{
 		return;

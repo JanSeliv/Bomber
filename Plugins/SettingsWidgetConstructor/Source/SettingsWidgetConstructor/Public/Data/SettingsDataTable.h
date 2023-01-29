@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MyDataTable/MyDataTable.h"
+#include "SettingsWidgetConstructor/Private/MyDataTable/SWCMyDataTable.h"
 //---
 #include "Data/SettingsRow.h"
 //---
@@ -13,7 +13,7 @@
  * Provides additional in-editor functionality like automatic set the key name by specified setting tag.
  */
 UCLASS(BlueprintType)
-class SETTINGSWIDGETCONSTRUCTOR_API USettingsDataTable : public UMyDataTable
+class SETTINGSWIDGETCONSTRUCTOR_API USettingsDataTable : public USWCMyDataTable
 {
 	GENERATED_BODY()
 

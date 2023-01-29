@@ -3,7 +3,7 @@
 #include "UI/SettingSubWidget.h"
 //---
 #include "UI/SettingsWidget.h"
-#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
+#include "MyUtilsLibraries/SWCWidgetUtilsLibrary.h"
 //---
 #include "Components/Button.h"
 #include "Components/CheckBox.h"
@@ -29,7 +29,7 @@ USettingsWidget* USettingSubWidget::GetSettingsWidget() const
 	if (!SettingsWidgetInternal)
 	{
 		// Try to find the parent widget
-		return FWidgetUtilsLibrary::GetParentWidgetOfClass<USettingsWidget>(this);
+		return FSWCWidgetUtilsLibrary::GetParentWidgetOfClass<USettingsWidget>(this);
 	}
 	return SettingsWidgetInternal;
 }
@@ -91,7 +91,7 @@ void USettingButton::NativeConstruct()
 		ButtonWidget->SetClickMethod(EButtonClickMethod::PreciseClick);
 		ButtonWidget->OnClicked.AddUniqueDynamic(this, &ThisClass::USettingButton::OnButtonPressed);
 
-		SlateButtonInternal = FWidgetUtilsLibrary::GetSlateWidget<SButton>(ButtonWidget);
+		SlateButtonInternal = FSWCWidgetUtilsLibrary::GetSlateWidget<SButton>(ButtonWidget);
 		check(SlateButtonInternal.IsValid());
 	}
 }
@@ -116,7 +116,7 @@ void USettingCheckbox::NativeConstruct()
 	{
 		CheckboxWidget->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::OnCheckStateChanged);
 
-		SlateCheckboxInternal = FWidgetUtilsLibrary::GetSlateWidget<SCheckBox>(CheckboxWidget);
+		SlateCheckboxInternal = FSWCWidgetUtilsLibrary::GetSlateWidget<SCheckBox>(CheckboxWidget);
 		check(SlateCheckboxInternal.IsValid());
 	}
 }
@@ -141,7 +141,7 @@ void USettingCombobox::NativeConstruct()
 	{
 		ComboboxWidget->OnSelectionChanged.AddUniqueDynamic(this, &ThisClass::OnSelectionChanged);
 
-		SlateComboboxInternal = FWidgetUtilsLibrary::GetSlateWidget<SComboboxString>(ComboboxWidget);
+		SlateComboboxInternal = FSWCWidgetUtilsLibrary::GetSlateWidget<SComboboxString>(ComboboxWidget);
 		check(SlateComboboxInternal.IsValid());
 	}
 }
@@ -198,7 +198,7 @@ void USettingSlider::NativeConstruct()
 		SliderWidget->OnValueChanged.AddUniqueDynamic(this, &ThisClass::OnValueChanged);
 		SliderWidget->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::OnMouseCaptureEnd);
 
-		SlateSliderInternal = FWidgetUtilsLibrary::GetSlateWidget<SSlider>(SliderWidget);
+		SlateSliderInternal = FSWCWidgetUtilsLibrary::GetSlateWidget<SSlider>(SliderWidget);
 		check(SlateSliderInternal.IsValid());
 	}
 }
@@ -254,7 +254,7 @@ void USettingUserInput::NativeConstruct()
 	{
 		EditableTextBox->OnTextChanged.AddUniqueDynamic(this, &ThisClass::OnTextChanged);
 
-		SlateEditableTextBoxInternal = FWidgetUtilsLibrary::GetSlateWidget<SEditableTextBox>(EditableTextBox);
+		SlateEditableTextBoxInternal = FSWCWidgetUtilsLibrary::GetSlateWidget<SEditableTextBox>(EditableTextBox);
 		check(SlateEditableTextBoxInternal.IsValid());
 	}
 }
@@ -278,7 +278,7 @@ void USettingScrollBox::NativeConstruct()
 	
 	if (ScrollBoxWidget)
 	{
-		SlateScrollBoxInternal = FWidgetUtilsLibrary::GetSlateWidget<SScrollBox>(ScrollBoxWidget);
+		SlateScrollBoxInternal = FSWCWidgetUtilsLibrary::GetSlateWidget<SScrollBox>(ScrollBoxWidget);
 		check(SlateScrollBoxInternal.IsValid());
 	}
 }
