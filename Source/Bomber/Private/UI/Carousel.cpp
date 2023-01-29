@@ -6,7 +6,7 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
 
@@ -48,7 +48,7 @@ void ACarousel::BeginPlay()
 //  Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending.
 void ACarousel::Destroyed()
 {
-	if (UEditorUtilsLibrary::IsEditor()
+	if (FEditorUtilsLibrary::IsEditor()
 	    && !IS_TRANSIENT(this))
 	{
 		// Remove bound delegate

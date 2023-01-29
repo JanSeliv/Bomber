@@ -11,7 +11,7 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
 // If set, returns additional FOV modifier scaled by level size and current screen aspect ratio
@@ -71,7 +71,7 @@ UMyCameraComponent::UMyCameraComponent()
 	// Camera defaults
 	SetConstraintAspectRatio(false); // viewport without black borders
 #if WITH_EDITOR // [Editor]
-	bCameraMeshHiddenInGame = !UEditorUtilsLibrary::IsEditor();
+	bCameraMeshHiddenInGame = !FEditorUtilsLibrary::IsEditor();
 #endif
 
 	// Disable Eye Adaptation

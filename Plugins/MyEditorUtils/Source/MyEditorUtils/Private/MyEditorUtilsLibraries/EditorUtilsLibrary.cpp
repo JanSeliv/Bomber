@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 //---
 #include "Editor.h"
 #include "LevelEditor.h"
@@ -13,25 +13,25 @@
 #include "Misc/FileHelper.h"
 
 // Checks, is the current world placed in the editor
-bool UEditorUtilsLibrary::IsEditor()
+bool FEditorUtilsLibrary::IsEditor()
 {
 	return GIsEditor && GEditor && GWorld && GWorld->IsEditorWorld();
 }
 
 // Checks, that this actor placed in the editor world and the game is not started yet
-bool UEditorUtilsLibrary::IsEditorNotPieWorld()
+bool FEditorUtilsLibrary::IsEditorNotPieWorld()
 {
 	return IsEditor() && !GEditor->IsPlaySessionInProgress();
 }
 
 // Returns true if game is started in the Editor
-bool UEditorUtilsLibrary::IsPIE()
+bool FEditorUtilsLibrary::IsPIE()
 {
 	return IsEditor() && GEditor->IsPlaySessionInProgress();
 }
 
 // Returns true if is started multiplayer game (server + client(s)) right in the Editor
-bool UEditorUtilsLibrary::IsEditorMultiplayer()
+bool FEditorUtilsLibrary::IsEditorMultiplayer()
 {
 	if (IsPIE())
 	{
@@ -42,7 +42,7 @@ bool UEditorUtilsLibrary::IsEditorMultiplayer()
 }
 
 // Returns the index of current player during editor multiplayer
-int32 UEditorUtilsLibrary::GetEditorPlayerIndex()
+int32 FEditorUtilsLibrary::GetEditorPlayerIndex()
 {
 	if (!IsEditorMultiplayer())
 	{
@@ -77,7 +77,7 @@ int32 UEditorUtilsLibrary::GetEditorPlayerIndex()
 }
 
 // Returns true if currently is cooking the package
-bool UEditorUtilsLibrary::IsCooking()
+bool FEditorUtilsLibrary::IsCooking()
 {
 	if (IsEditorNotPieWorld())
 	{
@@ -88,7 +88,7 @@ bool UEditorUtilsLibrary::IsCooking()
 }
 
 // Returns current editor viewport
-FViewport* UEditorUtilsLibrary::GetEditorViewport()
+FViewport* FEditorUtilsLibrary::GetEditorViewport()
 {
 	const FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
 	const TSharedPtr<ILevelEditor> LevelEditor = LevelEditorModule.GetFirstLevelEditor();
@@ -111,7 +111,7 @@ FViewport* UEditorUtilsLibrary::GetEditorViewport()
 }
 
 // Exports specified data table to already its .json
-void UEditorUtilsLibrary::ReExportTableAsJSON(const UDataTable* DataTable)
+void FEditorUtilsLibrary::ReExportTableAsJSON(const UDataTable* DataTable)
 {
 	const UAssetImportData* AssetImportData = DataTable ? DataTable->AssetImportData : nullptr;
 	if (!AssetImportData)
@@ -128,7 +128,7 @@ void UEditorUtilsLibrary::ReExportTableAsJSON(const UDataTable* DataTable)
 }
 
 // Removes all custom assets from context menu
-void UEditorUtilsLibrary::UnregisterAssets(TArray<TSharedPtr<FAssetTypeActions_Base>>& RegisteredAssets)
+void FEditorUtilsLibrary::UnregisterAssets(TArray<TSharedPtr<FAssetTypeActions_Base>>& RegisteredAssets)
 {
 	static const FName AssetToolsModuleName = TEXT("AssetTools");
 	const FAssetToolsModule* AssetToolsPtr = FModuleManager::GetModulePtr<FAssetToolsModule>(AssetToolsModuleName);

@@ -62,7 +62,7 @@ void UInputButtonWidget::NativeConstruct()
 // Sets the style for this button
 void UInputButtonWidget::UpdateStyle()
 {
-	SInputKeySelector* SlateInputKeySelector = UWidgetUtilsLibrary::GetSlateWidget<SInputKeySelector>(InputKeySelector).Get();
+	SInputKeySelector* SlateInputKeySelector = FWidgetUtilsLibrary::GetSlateWidget<SInputKeySelector>(InputKeySelector).Get();
 	if (!ensureMsgf(SlateInputKeySelector, TEXT("%s: 'SlateInputKeySelector' is not valid"), *FString(__FUNCTION__))
 	    || !ensureMsgf(InputKeySelector, TEXT("%s: 'InputKeySelector' is not set as BindWidget"), *FString(__FUNCTION__))
 	    || !ensureMsgf(CaptionWidget, TEXT("%s: 'CaptionWidget' is not set as BindWidget"), *FString(__FUNCTION__))

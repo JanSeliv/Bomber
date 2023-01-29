@@ -2,21 +2,14 @@
 
 #pragma once
 
-#include "Kismet/BlueprintFunctionLibrary.h"
-//---
 #include "AssetTypeActions_Base.h"
 #include "IAssetTools.h"
-//---
-#include "EditorUtilsLibrary.generated.h"
 
 /**
  * The editor functions library
  */
-UCLASS()
-class MYEDITORUTILS_API UEditorUtilsLibrary final : public UBlueprintFunctionLibrary
+class MYEDITORUTILS_API FEditorUtilsLibrary
 {
-	GENERATED_BODY()
-
 public:
 
 #pragma region PIE
@@ -46,7 +39,6 @@ public:
 	static class FViewport* GetEditorViewport();
 
 	/** Exports specified data table to already its .json. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	static void ReExportTableAsJSON(const class UDataTable* DataTable);
 
 #pragma region EditorExtensions
@@ -62,7 +54,7 @@ public:
 
 // Adds the asset to the context menu
 template <typename T>
-void UEditorUtilsLibrary::RegisterAsset(TArray<TSharedPtr<FAssetTypeActions_Base>>& InOutRegisteredAssets)
+void FEditorUtilsLibrary::RegisterAsset(TArray<TSharedPtr<FAssetTypeActions_Base>>& InOutRegisteredAssets)
 {
 	TSharedPtr<T> SettingsDataTableAction = MakeShared<T>();
 	IAssetTools::Get().RegisterAssetTypeActions(SettingsDataTableAction.ToSharedRef());

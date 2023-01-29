@@ -9,7 +9,7 @@ class UUserWidget;
 /**
  * The common functions library for widgets.
  */
-class MYUTILS_API UWidgetUtilsLibrary
+class MYUTILS_API FWidgetUtilsLibrary
 {
 public:
 	/** Return the parent widget of a specific class in the widget tree hierarchy. */

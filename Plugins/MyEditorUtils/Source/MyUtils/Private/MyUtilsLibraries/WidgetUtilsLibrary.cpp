@@ -6,7 +6,7 @@
 #include "Blueprint/WidgetTree.h"
 
 // Return the parent widget of a specific class in the widget tree hierarchy
-UUserWidget* UWidgetUtilsLibrary::GetParentWidgetOfClass(const UUserWidget* InWidget, TSubclassOf<UUserWidget> ParentWidgetClass)
+UUserWidget* FWidgetUtilsLibrary::GetParentWidgetOfClass(const UUserWidget* InWidget, TSubclassOf<UUserWidget> ParentWidgetClass)
 {
 	UObject* It = InWidget ? InWidget->GetParent() : nullptr;
 	if (!It)
@@ -36,7 +36,7 @@ UUserWidget* UWidgetUtilsLibrary::GetParentWidgetOfClass(const UUserWidget* InWi
 }
 
 // Returns first widget by specified class iterating all widget objects
-UUserWidget* UWidgetUtilsLibrary::FindWidgetOfClass(UObject* WorldContextObject, TSubclassOf<UUserWidget> ParentWidgetClass)
+UUserWidget* FWidgetUtilsLibrary::FindWidgetOfClass(UObject* WorldContextObject, TSubclassOf<UUserWidget> ParentWidgetClass)
 {
 	TArray<UUserWidget*> FoundWidgets;
 	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(WorldContextObject, /*out*/FoundWidgets, ParentWidgetClass);

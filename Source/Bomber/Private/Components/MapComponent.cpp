@@ -18,7 +18,7 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
 
@@ -103,7 +103,7 @@ bool UMapComponent::OnConstructionOwnerActor()
 	SetCollisionResponses(CollisionResponse);
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Update AI renders after adding obj to map
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
@@ -221,7 +221,7 @@ void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 	}
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditor())
+	if (FEditorUtilsLibrary::IsEditor())
 	{
 		// Remove all text renders of the Owner
 		UCellsUtilsLibrary::ClearDisplayedCells(GetOwner());
@@ -297,7 +297,7 @@ void UMapComponent::OnRegister()
 	MeshComponentInternal->SetReceivesDecals(false);
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not call OnConstruction on drag events
 		Owner->bRunConstructionScriptOnDrag = false;
@@ -319,7 +319,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		BoxCollisionComponentInternal->DestroyComponent();
 
 #if WITH_EDITOR	// [IsEditorNotPieWorld]
-		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+		if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
 			const UGeneratedMapSubsystem* GeneratedMapSubsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem();
@@ -390,7 +390,7 @@ bool UMapComponent::Modify(bool bAlwaysMarkDirty/* = true*/)
 {
 	AActor* Owner = GetOwner();
 	if (Owner
-	    && !UEditorUtilsLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
+	    && !FEditorUtilsLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
 	    && IsEditorOnly())                  // was generated in the editor
 	{
 		Owner->Destroy();

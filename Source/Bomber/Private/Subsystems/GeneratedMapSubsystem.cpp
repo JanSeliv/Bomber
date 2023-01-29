@@ -5,7 +5,7 @@
 #include "GeneratedMap.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 //---
 #include "Editor.h"
 #endif // WITH_EDITOR
@@ -23,20 +23,20 @@ UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem()
 {
 	const UWorld* FoundWorld = GEngine ? GEngine->GetCurrentPlayWorld() : nullptr;
 
-#if WITH_EDITOR	 // [UEditorUtilsLibrary::IsEditor]
-	if (UEditorUtilsLibrary::IsEditor()
+#if WITH_EDITOR	 // [FEditorUtilsLibrary::IsEditor]
+	if (FEditorUtilsLibrary::IsEditor()
 		&& !FoundWorld)
 	{
-		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+		if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			FoundWorld = GEditor->GetEditorWorldContext().World();
 		}
-		if (UEditorUtilsLibrary::IsPIE())
+		if (FEditorUtilsLibrary::IsPIE())
 		{
 			FoundWorld = GEditor->GetCurrentPlayWorld();
 		}
 	}
-#endif // WITH_EDITOR [UEditorUtilsLibrary::IsEditor]
+#endif // WITH_EDITOR [FEditorUtilsLibrary::IsEditor]
 
 	if (!ensureMsgf(FoundWorld, TEXT("%s: Can not obtain current world"), *FString(__FUNCTION__)))
 	{
@@ -50,7 +50,7 @@ UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem()
 AGeneratedMap* UGeneratedMapSubsystem::GetGeneratedMap() const
 {
 #if WITH_EDITOR
-	ensureMsgf(UEditorUtilsLibrary::IsCooking() || GeneratedMapInternal, TEXT("%s: [Editor] 'GeneratedMapInternal' is not valid"), *FString(__FUNCTION__));
+	ensureMsgf(FEditorUtilsLibrary::IsCooking() || GeneratedMapInternal, TEXT("%s: [Editor] 'GeneratedMapInternal' is not valid"), *FString(__FUNCTION__));
 #endif // WITH_EDITOR
 	return GeneratedMapInternal;
 }

@@ -13,7 +13,7 @@
 #include "Components/GameFrameworkComponentManager.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
 
@@ -49,7 +49,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	}
 
 #if WITH_EDITOR	 // [IsEditor]
-	if (UEditorUtilsLibrary::IsEditor())
+	if (FEditorUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
 		if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay()) // PIE
@@ -119,7 +119,7 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	OwnerInternal = Cast<APlayerCharacter>(InPawn);
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld()
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld()
 	    && !UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
 	{
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
@@ -144,7 +144,7 @@ void AMyAIController::OnUnPossess()
 	OwnerInternal = nullptr;
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.RemoveAll(this);
 	}
@@ -185,7 +185,7 @@ void AMyAIController::UpdateAI()
 	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
 
 #if WITH_EDITOR
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		AIMoveToInternal = FCell::InvalidCell;

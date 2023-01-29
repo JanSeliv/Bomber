@@ -22,7 +22,7 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
 // Sets default values for this controller's properties
@@ -93,7 +93,7 @@ void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
 void AMyPlayerController::SetMouseFocusOnUI(bool bFocusOnUI)
 {
 #if WITH_EDITOR // [IsEditorMultiplayer]
-	if (UEditorUtilsLibrary::IsEditorMultiplayer())
+	if (FEditorUtilsLibrary::IsEditorMultiplayer())
 	{
 		const ULocalPlayer* LocalPlayer = GetLocalPlayer();
 		UGameViewportClient* GameViewport = LocalPlayer ? LocalPlayer->ViewportClient : nullptr;

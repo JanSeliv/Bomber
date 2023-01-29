@@ -45,7 +45,7 @@ public class Bomber : ModuleRules
 					, "Blutility" // UEditorUtilityLibrary::GetSelectionSet()
 					//My modules
 					, "BomberEditor" // UMyUnrealEdEngine
-					, "MyEditorUtils" // UEditorUtilsLibrary
+					, "MyEditorUtils" // FEditorUtilsLibrary
 				}
 			);
 		}

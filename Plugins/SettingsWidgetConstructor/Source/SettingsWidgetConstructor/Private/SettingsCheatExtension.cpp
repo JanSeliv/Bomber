@@ -28,7 +28,7 @@ void USettingsCheatExtension::OnCheatManagerCreated(UCheatManager* CheatManager)
 // Override the setting value with the cheat
 void USettingsCheatExtension::CheatSetting(const FString& TagByValue) const
 {
-	USettingsWidget* SettingsWidget = UWidgetUtilsLibrary::FindWidgetOfClass<USettingsWidget>(GetWorld());
+	USettingsWidget* SettingsWidget = FWidgetUtilsLibrary::FindWidgetOfClass<USettingsWidget>(GetWorld());
 	if (!SettingsWidget)
 	{
 		return;

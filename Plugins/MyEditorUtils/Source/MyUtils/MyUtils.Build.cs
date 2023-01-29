@@ -27,7 +27,7 @@ public class MyUtils : ModuleRules
 			// Include Editor modules that are used in this Runtime module
 			PrivateDependencyModuleNames.AddRange(new[]
 				{
-					"MyEditorUtils" // UEditorUtilsLibrary
+					"MyEditorUtils" // FEditorUtilsLibrary
 				}
 			);
 		}

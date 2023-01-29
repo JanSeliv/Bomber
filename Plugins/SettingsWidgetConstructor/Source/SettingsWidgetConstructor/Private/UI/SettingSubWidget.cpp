@@ -29,7 +29,7 @@ USettingsWidget* USettingSubWidget::GetSettingsWidget() const
 	if (!SettingsWidgetInternal)
 	{
 		// Try to find the parent widget
-		return UWidgetUtilsLibrary::GetParentWidgetOfClass<USettingsWidget>(this);
+		return FWidgetUtilsLibrary::GetParentWidgetOfClass<USettingsWidget>(this);
 	}
 	return SettingsWidgetInternal;
 }
@@ -91,7 +91,7 @@ void USettingButton::NativeConstruct()
 		ButtonWidget->SetClickMethod(EButtonClickMethod::PreciseClick);
 		ButtonWidget->OnClicked.AddUniqueDynamic(this, &ThisClass::USettingButton::OnButtonPressed);
 
-		SlateButtonInternal = UWidgetUtilsLibrary::GetSlateWidget<SButton>(ButtonWidget);
+		SlateButtonInternal = FWidgetUtilsLibrary::GetSlateWidget<SButton>(ButtonWidget);
 		check(SlateButtonInternal.IsValid());
 	}
 }
@@ -116,7 +116,7 @@ void USettingCheckbox::NativeConstruct()
 	{
 		CheckboxWidget->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::OnCheckStateChanged);
 
-		SlateCheckboxInternal = UWidgetUtilsLibrary::GetSlateWidget<SCheckBox>(CheckboxWidget);
+		SlateCheckboxInternal = FWidgetUtilsLibrary::GetSlateWidget<SCheckBox>(CheckboxWidget);
 		check(SlateCheckboxInternal.IsValid());
 	}
 }
@@ -141,7 +141,7 @@ void USettingCombobox::NativeConstruct()
 	{
 		ComboboxWidget->OnSelectionChanged.AddUniqueDynamic(this, &ThisClass::OnSelectionChanged);
 
-		SlateComboboxInternal = UWidgetUtilsLibrary::GetSlateWidget<SComboboxString>(ComboboxWidget);
+		SlateComboboxInternal = FWidgetUtilsLibrary::GetSlateWidget<SComboboxString>(ComboboxWidget);
 		check(SlateComboboxInternal.IsValid());
 	}
 }
@@ -198,7 +198,7 @@ void USettingSlider::NativeConstruct()
 		SliderWidget->OnValueChanged.AddUniqueDynamic(this, &ThisClass::OnValueChanged);
 		SliderWidget->OnMouseCaptureEnd.AddUniqueDynamic(this, &ThisClass::OnMouseCaptureEnd);
 
-		SlateSliderInternal = UWidgetUtilsLibrary::GetSlateWidget<SSlider>(SliderWidget);
+		SlateSliderInternal = FWidgetUtilsLibrary::GetSlateWidget<SSlider>(SliderWidget);
 		check(SlateSliderInternal.IsValid());
 	}
 }
@@ -254,7 +254,7 @@ void USettingUserInput::NativeConstruct()
 	{
 		EditableTextBox->OnTextChanged.AddUniqueDynamic(this, &ThisClass::OnTextChanged);
 
-		SlateEditableTextBoxInternal = UWidgetUtilsLibrary::GetSlateWidget<SEditableTextBox>(EditableTextBox);
+		SlateEditableTextBoxInternal = FWidgetUtilsLibrary::GetSlateWidget<SEditableTextBox>(EditableTextBox);
 		check(SlateEditableTextBoxInternal.IsValid());
 	}
 }
@@ -278,7 +278,7 @@ void USettingScrollBox::NativeConstruct()
 	
 	if (ScrollBoxWidget)
 	{
-		SlateScrollBoxInternal = UWidgetUtilsLibrary::GetSlateWidget<SScrollBox>(ScrollBoxWidget);
+		SlateScrollBoxInternal = FWidgetUtilsLibrary::GetSlateWidget<SScrollBox>(ScrollBoxWidget);
 		check(SlateScrollBoxInternal.IsValid());
 	}
 }

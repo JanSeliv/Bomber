@@ -22,7 +22,7 @@
 #include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
 /* ---------------------------------------------------
@@ -41,7 +41,7 @@ UWorld* UMyBlueprintFunctionLibrary::GetStaticWorld()
 bool UMyBlueprintFunctionLibrary::HasWorldBegunPlay()
 {
 #if WITH_EDITOR	// [UEditorUtils::IsEditor]
-	if (UEditorUtilsLibrary::IsPIE())
+	if (FEditorUtilsLibrary::IsPIE())
 	{
 		return true;
 	}

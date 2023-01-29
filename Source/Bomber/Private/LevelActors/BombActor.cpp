@@ -18,7 +18,7 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
 
@@ -125,7 +125,7 @@ void ABombActor::OnConstructionBombActor()
 	}
 
 #if WITH_EDITOR //[IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		InitBomb();
 

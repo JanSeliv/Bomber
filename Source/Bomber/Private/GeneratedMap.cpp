@@ -20,7 +20,7 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 //---
 #include "EditorLevelUtils.h"
@@ -703,7 +703,7 @@ void AGeneratedMap::Destroyed()
 		}
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-		if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+		if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// Remove editor bound delegates
 			UMyUnrealEdEngine::GOnAnyDataAssetChanged.RemoveAll(this);
@@ -1014,7 +1014,7 @@ void AGeneratedMap::ApplyLevelType()
 	// ---- Changing streaming levels in the preview world ----
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		if (LevelTypeInternal == ELT::None)
 		{
@@ -1169,7 +1169,7 @@ void AGeneratedMap::PostLoad()
 void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (!FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}
@@ -1229,7 +1229,7 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 void AGeneratedMap::SetNearestCellDragged(const UMapComponent* MapComponent, const FCell& NewCell)
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
+	if (!FEditorUtilsLibrary::IsEditorNotPieWorld()
 	    || !MapComponent
 	    || !IsDraggedMapComponent(MapComponent)
 	    || NewCell.IsInvalidCell())
@@ -1252,7 +1252,7 @@ void AGeneratedMap::SetNearestCellDragged(const UMapComponent* MapComponent, con
 void AGeneratedMap::DestroyLevelActorDragged(const UMapComponent* MapComponent)
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld()
+	if (!FEditorUtilsLibrary::IsEditorNotPieWorld()
 	    || !MapComponent
 	    || !IS_TRANSIENT(MapComponent->GetOwner())) // Never destroy valid actors, hide them instead
 	{

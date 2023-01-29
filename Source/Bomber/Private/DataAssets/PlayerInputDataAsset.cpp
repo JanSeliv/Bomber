@@ -9,7 +9,7 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
 // Returns the player input data asset
@@ -76,7 +76,7 @@ bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
 void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Do not create input contexts since the game is not started yet
 		return;

@@ -9,7 +9,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
 // Returns the dynamic material instance of a player with specified skin.
@@ -30,7 +30,7 @@ void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	// Continue only if [IsEditorNotPieWorld]
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (!FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}

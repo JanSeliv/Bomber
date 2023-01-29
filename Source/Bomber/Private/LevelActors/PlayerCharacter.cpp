@@ -24,7 +24,7 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
 // Default amount on picked up items
@@ -96,7 +96,7 @@ void APlayerCharacter::ConstructPlayerCharacter()
 void APlayerCharacter::ServerSpawnBomb_Implementation()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not spawn bomb in PIE
 		return;
@@ -228,7 +228,7 @@ void APlayerCharacter::OnConstructionPlayerCharacter()
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
 	    && CharacterIDInternal > 0)                // Is a bot
 	{
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
@@ -488,7 +488,7 @@ void APlayerCharacter::UpdateCollisionObjectType()
 void APlayerCharacter::TryPossessController()
 {
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not spawn posses in PIE
 		return;

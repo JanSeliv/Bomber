@@ -5,7 +5,7 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
 
@@ -21,7 +21,7 @@ void UBomberDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		UMyUnrealEdEngine::GOnAnyDataAssetChanged.Broadcast();
 	}
@@ -38,7 +38,7 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	}
 
 	// Continue only if [IsEditorNotPieWorld]
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (!FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}

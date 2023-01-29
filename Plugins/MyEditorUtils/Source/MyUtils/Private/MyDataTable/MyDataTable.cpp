@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "MyDataTable//MyDataTable.h"
+#include "MyDataTable/MyDataTable.h"
 //---
 #if WITH_EDITOR
-#include "EditorUtilsLibrary.h" // ReExportTableAsJSON()
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h" // ReExportTableAsJSON()
 #endif //WITH_EDITOR
 
 #if WITH_EDITOR
 // Called on every change in this this row
 void FMyTableRow::OnDataTableChanged(const UDataTable* InDataTable, const FName InRowName)
 {
-	if (!UEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (!FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}
@@ -34,6 +34,6 @@ UMyDataTable::UMyDataTable()
 // Called on every change in this data table to reexport .json
 void UMyDataTable::OnThisDataTableChanged(FName RowName, const uint8& RowData)
 {
-	UEditorUtilsLibrary::ReExportTableAsJSON(this);
+	FEditorUtilsLibrary::ReExportTableAsJSON(this);
 }
 #endif // WITH_EDITOR
