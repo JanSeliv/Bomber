@@ -1,0 +1,24 @@
+[submodule "Plugins/SettingsWidgetConstructor"]
+	path = Plugins/SettingsWidgetConstructor
+	url = git@github.com:JanSeliv/SettingsWidgetConstructor.git
+	branch = develop
+[submodule "Plugins/PoolManager"]
+	path = Plugins/PoolManager
+	url = git@github.com:JanSeliv/PoolManager.git
+	branch = develop
+[submodule "Plugins/MorphsPlayer"]
+	path = Plugins/MorphsPlayer
+	url = git@github.com:JanSeliv/MorphsPlayer.git
+	branch = develop
+[submodule "Plugins/MetaCheatManager"]
+	path = Plugins/MetaCheatManager
+	url = git@github.com:JanSeliv/MetaCheatManager.git
+	branch = develop
+[submodule "Plugins/FunctionPicker"]
+	path = Plugins/FunctionPicker
+	url = git@github.com:JanSeliv/FunctionPicker.git
+	branch = develop
+[submodule "Plugins/CustomShapeButton"]
+	path = Plugins/CustomShapeButton
+	url = git@github.com:JanSeliv/CustomShapeButton.git
+	branch = develop
