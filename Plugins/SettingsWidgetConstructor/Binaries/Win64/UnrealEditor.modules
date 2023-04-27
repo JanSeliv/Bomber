@@ -1,8 +1,0 @@
-{
-	"BuildId": "23058290",
-	"Modules": 
-	{
-		"SettingsWidgetConstructor": "UnrealEditor-SettingsWidgetConstructor.dll",
-		"SettingsWidgetConstructorEditor": "UnrealEditor-SettingsWidgetConstructorEditor.dll"
-	}
-}

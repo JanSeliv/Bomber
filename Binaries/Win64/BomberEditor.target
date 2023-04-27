@@ -8466,6 +8466,34 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/GASCompanion/Binaries/Win64/UnrealEditor-GASCompanion.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/GASCompanion/Binaries/Win64/UnrealEditor-GASCompanion.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/GASCompanion/Binaries/Win64/UnrealEditor-GASCompanionDeveloper.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/GASCompanion/Binaries/Win64/UnrealEditor-GASCompanionDeveloper.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/GASCompanion/Binaries/Win64/UnrealEditor-GASCompanionEditor.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/GASCompanion/Binaries/Win64/UnrealEditor-GASCompanionEditor.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/GASCompanion/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
 			"Path": "$(EngineDir)/Plugins/Media/AjaMedia/Binaries/Win64/UnrealEditor-AjaMedia.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -13118,6 +13146,14 @@
 			"Type": "SymbolFile"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderLC.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderLC.pdb",
+			"Type": "SymbolFile"
+		},
+		{
 			"Path": "$(ProjectDir)/Plugins/Developer/RiderLink/Binaries/Win64/UnrealEditor-RiderLink.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -13187,6 +13223,18 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/GameFeatures/PlayAreaSurrounder/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/ProgressionSystem/Binaries/Win64/UnrealEditor-ProgressionSystemRuntime.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/ProgressionSystem/Binaries/Win64/UnrealEditor-ProgressionSystemRuntime.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/ProgressionSystem/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -36789,6 +36837,10 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/GameFeatures/PlayAreaSurrounder/PlayAreaSurrounder.uplugin",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/ProgressionSystem/ProgressionSystem.uplugin",
 			"Type": "UFS"
 		},
 		{
