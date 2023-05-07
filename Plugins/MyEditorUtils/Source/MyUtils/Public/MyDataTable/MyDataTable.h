@@ -36,7 +36,10 @@ public:
 
 	/** Returns the table rows. */
 	template <typename T>
-	void GetRows(TMap<FName, T>& OutRows) const;
+	void GetRows(TMap<FName, T>& OutRows) const { GetRows(*this, OutRows); }
+
+	template <typename T>
+	static void GetRows(const UDataTable& DataTable, TMap<FName, T>& OutRows);
 
 protected:
 #pragma region OnDataTableChange
@@ -54,11 +57,11 @@ protected:
 
 /** Returns the table rows. */
 template <typename T>
-void UMyDataTable::GetRows(TMap<FName, T>& OutRows) const
+void UMyDataTable::GetRows(const UDataTable& DataTable, TMap<FName, T>& OutRows)
 {
-	static_assert(TIsDerivedFrom<T, FMyTableRow>::Value, "Type is not derived from FMyTableRow.");
-	if (ensureAlwaysMsgf(RowStruct && RowStruct->IsChildOf(T::StaticStruct()), TEXT("ASSERT: 'RowStruct' is not child of specified struct")))
+	if (ensureAlwaysMsgf(DataTable.RowStruct && DataTable.RowStruct->IsChildOf(T::StaticStruct()), TEXT("ASSERT: 'RowStruct' is not child of specified struct")))
 	{
+		const TMap<FName, uint8*>& RowMap = DataTable.GetRowMap();
 		OutRows.Empty();
 		OutRows.Reserve(RowMap.Num());
 		for (const TTuple<FName, uint8*>& RowIt : RowMap)
