@@ -3,7 +3,7 @@
 #include "Components/MapComponent.h"
 //---
 #include "GeneratedMap.h"
-#include "PoolManager.h"
+#include "PoolManagerSubsystem.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/GameStateDataAsset.h"
@@ -63,14 +63,14 @@ bool UMapComponent::OnConstructionOwnerActor()
 	}
 
 	// Check the object state in the Pool Manager
-	UPoolManager& PoolManager = UPoolManager::Get();
+	UPoolManagerSubsystem& PoolManager = UPoolManagerSubsystem::Get();
 	const EPoolObjectState PoolObjectState = PoolManager.GetPoolObjectState(Owner);
 	if (PoolObjectState == EPoolObjectState::None)
 	{
 		// The owner actor is not in the pool
 		// Most likely it is a dragged actor, since all generated actors are always taken from the pool
 		// Add this object to the pool and continue construction
-		PoolManager.AddToPool(Owner, EPoolObjectState::Active);
+		PoolManager.RegisterObjectInPool(Owner, EPoolObjectState::Active);
 	}
 	else if (PoolObjectState == EPoolObjectState::Inactive)
 	{

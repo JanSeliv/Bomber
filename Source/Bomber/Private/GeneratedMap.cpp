@@ -2,7 +2,7 @@
 
 #include "GeneratedMap.h"
 //---
-#include "PoolManager.h"
+#include "PoolManagerSubsystem.h"
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
 #include "DataAssets/DataAssetsContainer.h"
@@ -284,7 +284,7 @@ AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
 	}
 
 	const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
-	AActor* SpawnedActor = UPoolManager::Get().TakeFromPool<AActor>(FTransform(Cell), ClassToSpawn);
+	AActor* SpawnedActor = UPoolManagerSubsystem::Get().TakeFromPool<AActor>(ClassToSpawn, FTransform(Cell));
 	if (!ensureMsgf(SpawnedActor, TEXT("ASSERT: 'SpawnedActor' is not valid")))
 	{
 		return nullptr;
@@ -487,7 +487,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	MapComponent->OnDeactivated(DestroyCauser);
 
 	// Deactivate the iterated owner
-	UPoolManager::Get().ReturnToPool(ComponentOwner);
+	UPoolManagerSubsystem::Get().ReturnToPool(ComponentOwner);
 
 	DestroyLevelActorDragged(MapComponent);
 }
@@ -635,7 +635,7 @@ void AGeneratedMap::OnConstructionGeneratedMap(const FTransform& Transform)
 			return PoolObject && !PoolObject->HasAllFlags(RF_WasLoaded | RF_LoadCompleted);
 		};
 
-		UPoolManager::Get().EmptyAllByPredicate(IsDirtyPredicate);
+		UPoolManagerSubsystem::Get().EmptyAllByPredicate(IsDirtyPredicate);
 	}
 #endif // WITH_EDITOR // [Editor-Standalone]
 
@@ -692,7 +692,7 @@ void AGeneratedMap::Destroyed()
 	    && HasAuthority())
 	{
 		// Destroy level actors
-		UPoolManager::Get().EmptyAllPools();
+		UPoolManagerSubsystem::Get().EmptyAllPools();
 
 		// Destroy level actors in internal arrays
 		const int32 MapComponentsNum = MapComponentsInternal.Num();
@@ -1221,7 +1221,7 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 		DraggedCellsInternal.Emplace(AddedComponent->GetCell(), AddedComponent->GetActorType());
 	}
 
-	UPoolManager::Get().AddToPool(ComponentOwner, EPoolObjectState::Active);
+	UPoolManagerSubsystem::Get().RegisterObjectInPool(ComponentOwner, EPoolObjectState::Active);
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
