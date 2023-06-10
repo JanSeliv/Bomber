@@ -2,8 +2,7 @@
 
 #include "DataAssets/MyInputMappingContext.h"
 //---
-#include "EnhancedInputModule.h"
-#include "UObject/ObjectSaveContext.h"
+#include "EnhancedInputLibrary.h"
 //---
 #include "DataAssets/MyInputAction.h"
 #include "DataAssets/PlayerInputDataAsset.h"
@@ -43,7 +42,7 @@ void UMyInputMappingContext::GetAllMappings(TArray<FEnhancedActionKeyMapping>& O
 {
 	for (const FEnhancedActionKeyMapping& MappingIt : Mappings)
 	{
-		if (MappingIt.bIsPlayerMappable)
+		if (MappingIt.IsPlayerMappable())
 		{
 			OutMappableData.Emplace(MappingIt);
 		}

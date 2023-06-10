@@ -114,6 +114,9 @@ enum class EItemType : uint8
 	///< increases the amount of bombs
 	Fire ///< Increases the range of explosion
 };
+using EIT = EItemType;
+#define EIT_FIRST_FLAG TO_FLAG(EIT::Skate)
+#define EIT_LAST_FLAG TO_FLAG(EIT::Fire)
 
 /**
  * The replicated states of the game.

@@ -2,6 +2,7 @@
 
 #include "Components/MenuWidgetInteractionComponent.h"
 //---
+#include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/SlateUser.h"
 //---
 #include "GameFramework/MyGameStateBase.h"
@@ -80,8 +81,8 @@ void UMenuWidgetInteractionComponent::PressPointerKey(FKey Key)
 	// Do not call super, override behavior instead
 
 	if (!VirtualUser.IsValid()
-		|| !CanSendInput()
-		|| PressedKeys.Contains(Key))
+	    || !CanSendInput()
+	    || PressedKeys.Contains(Key))
 	{
 		return;
 	}

@@ -3,18 +3,19 @@
 #include "Controllers/MyAIController.h"
 //---
 #include "Components/MapComponent.h"
-#include "GameFramework/MyGameStateBase.h"
 #include "DataAssets/AIDataAsset.h"
 #include "DataAssets/GameStateDataAsset.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "TimerManager.h"
 #include "Components/GameFrameworkComponentManager.h"
 //---
 #if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
 // Enable or disable all bots
@@ -360,7 +361,7 @@ void AMyAIController::UpdateAI()
 		return;
 	}
 
-	MoveToCell(Filtered.Array()[FMath::RandRange(NULL, Filtered.Num() - 1)]);
+	MoveToCell(Filtered.Array()[FMath::RandRange(0, Filtered.Num() - 1)]);
 
 #if WITH_EDITOR	 // [Editor]
 	if (MapComponent->bShouldShowRenders)

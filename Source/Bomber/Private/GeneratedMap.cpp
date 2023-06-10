@@ -16,6 +16,7 @@
 //---
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/LevelStreaming.h"
+#include "Engine/World.h"
 #include "Math/UnrealMathUtility.h"
 #include "Net/UnrealNetwork.h"
 //---
@@ -253,7 +254,7 @@ bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells
 
 		for (const FCell& CellIt : CellsToIterate)
 		{
-			constexpr float MaxInteger = TNumericLimits<int32>::Max();
+			constexpr int32 MaxInteger = TNumericLimits<int32>::Max();
 			constexpr bool bBreakInputCells = true;
 			// InOutAllFoundCells include as wall cells as well all previous iterated cells
 			GetSidesCells(/*InOut*/InOutSideCells, CellIt, EPathType::Explosion, MaxInteger, TO_FLAG(ECellDirection::All), bBreakInputCells);
@@ -558,9 +559,11 @@ FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorT
 	FTransform NewTransform = FTransform::Identity;
 
 	// Align location snapping to the grid size
-	const FVector NewLocation = UGeneratedMapDataAsset::Get().IsLockedOnZero()
-		                            ? FVector::ZeroVector
-		                            : FCell::SnapCell(ActorTransform.GetLocation());
+	FVector NewLocation = FVector::ZeroVector;
+	if (!UGeneratedMapDataAsset::Get().IsLockedOnZero())
+	{
+		NewLocation = FCell::SnapCell(ActorTransform.GetLocation());
+	}
 	NewTransform.SetLocation(NewLocation);
 
 	// Align rotation allowing only yaw axis

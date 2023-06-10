@@ -60,11 +60,8 @@ void AItemActor::OnConstructionItemActor()
 	// Rand the item type if not set yet
 	if (ItemTypeInternal == EItemType::None)
 	{
-		const static FString ItemTypeEnumPathName = TEXT("/Script/Bomber.EItemType");
-		if (static const UEnum* Enum = UClass::TryFindTypeSlow<UEnum>(ItemTypeEnumPathName, EFindFirstObjectOptions::ExactClass))
-		{
-			ItemTypeInternal = TO_ENUM(EItemType, Enum->GetValueByIndex(FMath::RandRange(1, TO_FLAG(Enum->GetMaxEnumValue() - 1))));
-		}
+		const int32 RandomIndex = FMath::RandRange(EIT_FIRST_FLAG, EIT_LAST_FLAG);
+		ItemTypeInternal = static_cast<EItemType>(RandomIndex);
 	}
 
 	// Override mesh
