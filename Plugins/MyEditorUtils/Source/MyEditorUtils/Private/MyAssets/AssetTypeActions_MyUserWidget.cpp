@@ -8,6 +8,9 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/CanvasPanel.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#include "Misc/MessageDialog.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AssetTypeActions_MyUserWidget)
 
 #define LOCTEXT_NAMESPACE "AssetTypeActions"
 

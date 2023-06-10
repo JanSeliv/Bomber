@@ -13,6 +13,8 @@
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyCameraComponent)
 
 // If set, returns additional FOV modifier scaled by level size and current screen aspect ratio
 void FCameraDistanceParams::CalculateFitViewAdditiveAngle(float& InOutFOV) const

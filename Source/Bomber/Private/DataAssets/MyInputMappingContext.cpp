@@ -10,6 +10,8 @@
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyInputMappingContext)
 
 // Returns all input actions set in mappings
 void UMyInputMappingContext::GetInputActions(TArray<UMyInputAction*>& OutInputActions) const

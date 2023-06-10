@@ -6,6 +6,8 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Engine/DataTable.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameUserSettings)
 
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()

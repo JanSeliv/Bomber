@@ -5,9 +5,10 @@
 #include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
-#include "LevelActors/PlayerCharacter.h"
 //---
 #include "Net/UnrealNetwork.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyPlayerState)
 
 /* ---------------------------------------------------
  *		Protected

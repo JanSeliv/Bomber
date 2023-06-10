@@ -5,10 +5,11 @@
 #include "GeneratedMap.h"
 //---
 #if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-//---
 #include "Editor.h"
-#endif // WITH_EDITOR
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
+#endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GeneratedMapSubsystem)
 
 // Returns the Generated Map Subsystem, is checked and wil crash if can't be obtained
 UGeneratedMapSubsystem& UGeneratedMapSubsystem::Get()

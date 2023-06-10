@@ -2,6 +2,7 @@
 
 #include "MyUtilsLibraries/UtilsLibrary.h"
 //---
+#include "UnrealClient.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
@@ -9,6 +10,8 @@
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif // WITH_EDITOR
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(UtilsLibrary)
 
 // Checks, is the current world placed in the editor
 bool UUtilsLibrary::IsEditor()

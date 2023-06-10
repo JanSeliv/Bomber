@@ -8,6 +8,8 @@
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(LevelActorDataAsset)
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 // Called to handle row changes

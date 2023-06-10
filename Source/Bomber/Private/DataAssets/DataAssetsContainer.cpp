@@ -9,6 +9,8 @@
 #include "DataAssets/PlayerInputDataAsset.h"
 #include "DataAssets/SoundsDataAsset.h"
 #include "DataAssets/UIDataAsset.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(DataAssetsContainer)
 
 // Returns the Levels Data Asset
 const UGeneratedMapDataAsset* UDataAssetsContainer::GetLevelsDataAsset()

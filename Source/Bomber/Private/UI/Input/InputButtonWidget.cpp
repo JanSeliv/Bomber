@@ -2,15 +2,17 @@
 
 #include "UI/Input/InputButtonWidget.h"
 //---
-#include "Subsystems/SoundsSubsystem.h"
-#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "Data/SettingsDataAsset.h"
 #include "DataAssets/MyInputMappingContext.h"
+#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 //---
 #include "Components/InputKeySelector.h"
 #include "Components/TextBlock.h"
 #include "Widgets/Input/SInputKeySelector.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(InputButtonWidget)
 
 // Sets this button to let player remap input specified in mappable data
 void UInputButtonWidget::InitButton(const FEnhancedActionKeyMapping& InMappableData, const UMyInputMappingContext* InInputMappingContext)

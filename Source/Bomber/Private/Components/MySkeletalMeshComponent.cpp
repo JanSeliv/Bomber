@@ -5,6 +5,8 @@
 #include "DataAssets/PlayerDataAsset.h"
 //---
 #include "Materials/MaterialInstanceDynamic.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MySkeletalMeshComponent)
 
 // The empty data
 const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData();

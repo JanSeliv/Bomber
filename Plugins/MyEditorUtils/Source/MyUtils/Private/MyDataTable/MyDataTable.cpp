@@ -5,6 +5,8 @@
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h" // ReExportTableAsJSON()
 #endif //WITH_EDITOR
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyDataTable)
 
 #if WITH_EDITOR
 // Called on every change in this this row

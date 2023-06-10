@@ -3,14 +3,15 @@
 #include "UI/MainMenuWidget.h"
 //---
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsSubsystem.h"
 #include "Components/MySkeletalMeshComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "UI/Carousel.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MainMenuWidget)
 
 // Initializes the main menu widget
 void UMainMenuWidget::InitMainMenuWidget(ACarousel* InMainMenuActor)

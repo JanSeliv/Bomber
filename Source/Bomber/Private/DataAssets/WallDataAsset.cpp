@@ -3,6 +3,8 @@
 #include "DataAssets/WallDataAsset.h"
 //---
 #include "DataAssets/DataAssetsContainer.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(WallDataAsset)
 
 // Default constructor
 UWallDataAsset::UWallDataAsset()

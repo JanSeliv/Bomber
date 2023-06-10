@@ -5,6 +5,8 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 //---
 #include "Engine/LocalPlayer.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameViewportClient)
 
 // Is called on applying different video settings like changing resolution and enabling fullscreen mode
 void UMyGameViewportClient::RedrawRequested(FViewport* InViewport)

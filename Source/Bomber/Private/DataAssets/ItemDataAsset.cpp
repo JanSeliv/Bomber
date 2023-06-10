@@ -3,6 +3,8 @@
 #include "DataAssets/ItemDataAsset.h"
 //---
 #include "DataAssets/DataAssetsContainer.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ItemDataAsset)
 
 // Default constructor
 UItemDataAsset::UItemDataAsset()

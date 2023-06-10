@@ -3,6 +3,8 @@
 #include "DataAssets/GeneratedMapDataAsset.h"
 //---
 #include "DataAssets/DataAssetsContainer.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GeneratedMapDataAsset)
 
 // Returns the generated map data asset
 const UGeneratedMapDataAsset& UGeneratedMapDataAsset::Get()

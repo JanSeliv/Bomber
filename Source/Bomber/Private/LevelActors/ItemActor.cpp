@@ -4,13 +4,15 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsSubsystem.h"
 #include "Components/MapComponent.h"
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/ItemDataAsset.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Net/UnrealNetwork.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ItemActor)
 
 // Sets default values
 AItemActor::AItemActor()

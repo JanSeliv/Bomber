@@ -17,6 +17,8 @@
 #include "MyUnrealEdEngine.h"
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyAIController)
 
 // Enable or disable all bots
 static TAutoConsoleVariable<bool> CVarAISetEnabled(

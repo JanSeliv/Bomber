@@ -2,13 +2,14 @@
 
 #include "UI/Input/InputControlsWidget.h"
 //---
-#include "Data/SettingsDataAsset.h"
 #include "DataAssets/MyInputMappingContext.h"
 #include "DataAssets/PlayerInputDataAsset.h"
 #include "UI/SettingsWidget.h"
 #include "UI/Input/InputCategoryWidget.h"
 //---
 #include "Components/ScrollBox.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(InputControlsWidget)
 
 // Called after the underlying slate widget is constructed
 void UInputControlsWidget::NativeConstruct()

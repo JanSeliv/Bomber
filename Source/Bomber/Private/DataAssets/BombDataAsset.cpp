@@ -3,6 +3,8 @@
 #include "DataAssets/BombDataAsset.h"
 //---
 #include "DataAssets/DataAssetsContainer.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BombDataAsset)
 
 // Default constructor
 UBombDataAsset::UBombDataAsset()

@@ -3,6 +3,8 @@
 #include "LevelActors/WallActor.h"
 //---
 #include "Components/MapComponent.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(WallActor)
 
 // Sets default values
 AWallActor::AWallActor()

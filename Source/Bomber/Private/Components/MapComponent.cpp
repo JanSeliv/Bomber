@@ -21,6 +21,8 @@
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MapComponent)
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()

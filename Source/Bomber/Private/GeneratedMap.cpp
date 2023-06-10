@@ -21,14 +21,16 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 //---
 #include "EditorLevelUtils.h"
 #include "EditorUtilityLibrary.h"
 #include "Engine/LevelStreamingAlwaysLoaded.h"
 #include "Engine/LevelStreamingDynamic.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GeneratedMap)
 
 /* ---------------------------------------------------
  *		Generated Map public functions

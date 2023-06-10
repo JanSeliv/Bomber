@@ -3,6 +3,8 @@
 #include "DataAssets/GameStateDataAsset.h"
 //---
 #include "DataAssets/DataAssetsContainer.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GameStateDataAsset)
 
 // Returns the Game State data asset
 const UGameStateDataAsset& UGameStateDataAsset::Get()

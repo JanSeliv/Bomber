@@ -6,6 +6,8 @@
 //---
 #include "Controllers/MyPlayerController.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyInputAction)
 
 // Returns the keys mapped to this action in the active input mapping contexts
 void UMyInputAction::GetKeys(TArray<FKey>& OutKeys) const

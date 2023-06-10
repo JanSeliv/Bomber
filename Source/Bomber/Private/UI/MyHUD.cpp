@@ -9,6 +9,8 @@
 #include "UI/SettingsWidget.h"
 //---
 #include "Blueprint/UserWidget.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyHUD)
 
 // Default constructor
 AMyHUD::AMyHUD()

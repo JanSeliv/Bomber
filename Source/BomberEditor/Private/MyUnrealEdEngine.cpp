@@ -3,6 +3,8 @@
 #include "MyUnrealEdEngine.h"
 //---
 #include "UnrealEdGlobals.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyUnrealEdEngine)
 
 // Will notify on any data asset changes
 UMyUnrealEdEngine::FOnAnyDataAssetChanged UMyUnrealEdEngine::GOnAnyDataAssetChanged;

@@ -4,12 +4,12 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsSubsystem.h"
 #include "Components/MapComponent.h"
-#include "GameFramework/MyGameStateBase.h"
 #include "DataAssets/BombDataAsset.h"
 #include "DataAssets/DataAssetsContainer.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -18,9 +18,11 @@
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BombActor)
 
 // Sets default values
 ABombActor::ABombActor()

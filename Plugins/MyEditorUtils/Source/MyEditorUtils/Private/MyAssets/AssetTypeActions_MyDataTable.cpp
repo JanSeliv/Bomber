@@ -6,8 +6,12 @@
 #include "DesktopPlatformModule.h"
 #include "ToolMenus.h"
 #include "EditorFramework/AssetImportData.h"
+#include "Engine/DataTable.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Misc/FileHelper.h"
 #include "Misc/MessageDialog.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AssetTypeActions_MyDataTable)
 
 #define LOCTEXT_NAMESPACE "AssetTypeActions"
 

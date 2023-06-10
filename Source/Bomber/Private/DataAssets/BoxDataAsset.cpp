@@ -3,6 +3,8 @@
 #include "DataAssets/BoxDataAsset.h"
 //---
 #include "DataAssets/DataAssetsContainer.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BoxDataAsset)
 
 // Default constructor
 UBoxDataAsset::UBoxDataAsset()

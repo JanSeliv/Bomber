@@ -10,6 +10,8 @@
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyCheatManager)
 
 // Returns bitmask from reverse bitmask in string
 int32 UMyCheatManager::GetBitmaskFromReverseString(const FString& ReverseBitmaskStr)

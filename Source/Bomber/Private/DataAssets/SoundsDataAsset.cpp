@@ -3,6 +3,8 @@
 #include "DataAssets/SoundsDataAsset.h"
 //---
 #include "DataAssets/DataAssetsContainer.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SoundsDataAsset)
 
 // Returns the settings data asset
 const USoundsDataAsset& USoundsDataAsset::Get()

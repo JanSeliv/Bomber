@@ -11,6 +11,8 @@
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerInputDataAsset)
 
 // Returns the player input data asset
 const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()

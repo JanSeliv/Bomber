@@ -8,10 +8,10 @@
 #include "Components/MySkeletalMeshComponent.h"
 #include "Controllers/MyAIController.h"
 #include "Controllers/MyPlayerController.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
 #include "DataAssets/ItemDataAsset.h"
 #include "DataAssets/PlayerDataAsset.h"
+#include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
@@ -26,6 +26,8 @@
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerCharacter)
 
 // Default amount on picked up items
 const FPowerUp FPowerUp::DefaultData = FPowerUp();

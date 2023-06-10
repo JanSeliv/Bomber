@@ -3,12 +3,14 @@
 #include "Subsystems/SoundsSubsystem.h"
 //---
 #include "GeneratedMap.h"
+#include "DataAssets/SoundsDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "DataAssets/SoundsDataAsset.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/AudioComponent.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(SoundsSubsystem)
 
 // Returns the Sounds Manager checked
 USoundsSubsystem& USoundsSubsystem::Get()

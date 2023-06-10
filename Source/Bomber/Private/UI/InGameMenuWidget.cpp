@@ -2,17 +2,19 @@
 
 #include "UI/InGameMenuWidget.h"
 //---
-#include "Subsystems/SoundsSubsystem.h"
 #include "Controllers/MyPlayerController.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
-#include "UI/SettingsWidget.h"
-#include "UI/MyHUD.h"
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Subsystems/SoundsSubsystem.h"
+#include "UI/MyHUD.h"
+#include "UI/SettingsWidget.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(InGameMenuWidget)
 
 // Returns true if the In-Game widget is shown on user screen
 bool UInGameMenuWidget::IsVisibleInGameMenu() const

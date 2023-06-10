@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
 #include "Structures/Cell.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(Cell)
 
 const FCell FCell::InvalidCell = FVector::DownVector;
 const FCell FCell::ForwardCell = FVector::ForwardVector;

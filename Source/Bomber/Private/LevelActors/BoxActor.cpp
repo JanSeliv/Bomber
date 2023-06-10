@@ -5,11 +5,13 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "GameFramework/MyGameStateBase.h"
 #include "DataAssets/BoxDataAsset.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BoxActor)
 
 // Sets default values.
 ABoxActor::ABoxActor()

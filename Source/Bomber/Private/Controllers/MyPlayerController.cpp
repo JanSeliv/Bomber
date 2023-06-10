@@ -24,6 +24,8 @@
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyPlayerController)
 
 // Sets default values for this controller's properties
 AMyPlayerController::AMyPlayerController()

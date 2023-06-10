@@ -3,12 +3,13 @@
 #include "UI/Carousel.h"
 //---
 #include "Bomber.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(Carousel)
 
 // Sets default values
 ACarousel::ACarousel()

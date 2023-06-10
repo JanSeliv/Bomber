@@ -9,6 +9,8 @@
 //---
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(InputCategoryWidget)
 
 // Returns all categories from the specified input mapping context
 void FInputCategoryData::GetCategoriesDataFromMappings(const UMyInputMappingContext& InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData)
