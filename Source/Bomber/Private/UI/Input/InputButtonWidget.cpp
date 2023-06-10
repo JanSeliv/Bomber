@@ -64,9 +64,7 @@ void UInputButtonWidget::NativeConstruct()
 // Sets the style for this button
 void UInputButtonWidget::UpdateStyle()
 {
-	SInputKeySelector* SlateInputKeySelector = FWidgetUtilsLibrary::GetSlateWidget<SInputKeySelector>(InputKeySelector).Get();
-	if (!ensureMsgf(SlateInputKeySelector, TEXT("%s: 'SlateInputKeySelector' is not valid"), *FString(__FUNCTION__))
-	    || !ensureMsgf(InputKeySelector, TEXT("%s: 'InputKeySelector' is not set as BindWidget"), *FString(__FUNCTION__))
+	if (!ensureMsgf(InputKeySelector, TEXT("%s: 'InputKeySelector' is not set as BindWidget"), *FString(__FUNCTION__))
 	    || !ensureMsgf(CaptionWidget, TEXT("%s: 'CaptionWidget' is not set as BindWidget"), *FString(__FUNCTION__))
 	    || !ensureMsgf(SettingsWidgetInternal, TEXT("%s: 'SettingsWidgetInternal' is null"), *FString(__FUNCTION__)))
 	{
@@ -78,20 +76,22 @@ void UInputButtonWidget::UpdateStyle()
 	const FButtonThemeData& ButtonThemeData = SettingsDataAsset.GetButtonThemeData();
 
 	// Update the text style of the button
-	FTextBlockStyle& TextStyleRef = InputKeySelector->TextStyle;
+	// Note: const_cast is used since SetTextStyle() accepts reference inside for its slate widget, so new button style can't be copy constructed
+	FTextBlockStyle& TextStyleRef = const_cast<FTextBlockStyle&>(InputKeySelector->GetTextStyle());
 	TextStyleRef.SetFont(MiscThemeData.TextAndCaptionFont);
 	TextStyleRef.SetColorAndOpacity(MiscThemeData.TextAndCaptionColor);
-	SlateInputKeySelector->SetTextStyle(&TextStyleRef);
+	InputKeySelector->SetTextStyle(TextStyleRef);
 
 	// Update the widget style of the button
-	FButtonStyle& WidgetStyleRef = InputKeySelector->WidgetStyle;
-	WidgetStyleRef.Normal = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Normal);
-	WidgetStyleRef.Hovered = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Hovered);
-	WidgetStyleRef.Pressed = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Pressed);
-	WidgetStyleRef.Disabled = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Disabled);
-	WidgetStyleRef.NormalPadding = ButtonThemeData.Padding;
-	WidgetStyleRef.PressedPadding = ButtonThemeData.PressedPadding;
-	SlateInputKeySelector->SetButtonStyle(&WidgetStyleRef);
+	// Note: const_cast is used since SetButtonStyle() accepts reference inside  for its slate widget, so new text style can't be copy constructed
+	FButtonStyle& ButtonStyleRef = const_cast<FButtonStyle&>(InputKeySelector->GetButtonStyle());
+	ButtonStyleRef.Normal = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Normal);
+	ButtonStyleRef.Hovered = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Hovered);
+	ButtonStyleRef.Pressed = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Pressed);
+	ButtonStyleRef.Disabled = SettingsWidgetInternal->GetButtonBrush(ESettingsButtonState::Disabled);
+	ButtonStyleRef.NormalPadding = ButtonThemeData.Padding;
+	ButtonStyleRef.PressedPadding = ButtonThemeData.PressedPadding;
+	InputKeySelector->SetButtonStyle(ButtonStyleRef);
 
 	// Update text
 	CaptionWidget->SetText(MappableDataInternal.PlayerMappableOptions.DisplayName);
