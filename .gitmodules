@@ -22,3 +22,6 @@
 	path = Plugins/CustomShapeButton
 	url = git@github.com:JanSeliv/CustomShapeButton.git
 	branch = develop
+[submodule "Plugins/InstancedStaticMeshConverter"]
+	path = Plugins/InstancedStaticMeshConverter
+	url = git@github.com:JanSeliv/InstancedStaticMeshConverter.git
