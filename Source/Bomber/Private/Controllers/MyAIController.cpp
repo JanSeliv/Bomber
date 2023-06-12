@@ -201,7 +201,7 @@ void AMyAIController::UpdateAI()
 	const FCell& F0 = MapComponent->GetCell();
 
 	// Searching 'SAFE NEIGHBORS'
-	static constexpr float MaxInteger = TNumericLimits<int32>::Max();
+	static constexpr int32 MaxInteger = TNumericLimits<int32>::Max();
 	FCells Free;
 	uint8 bIsDangerous;
 	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous) // two searches (safe and free)
