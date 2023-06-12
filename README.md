@@ -5,7 +5,7 @@ Bomber is an open-source indie game with multiplayer support, available for Wind
 ## Table of Contents
 - [💣 About the Bomber Project](#-about-the-bomber-project)
 - [🚀 Getting Started](#-getting-started)
-- [💾 Download](#-play-the-build)
+- [💾 Play the Build](#-play-the-build)
 - [📋 Kanban Board](#-kanban-board)
 - [📅 Changelog](#-changelog)
 - [🎮 Features](#-features)
@@ -24,7 +24,7 @@ If already cloned without submodules, run:
 git submodule update --init --recursive
 ```
 
-## 💾 Play the build
+## 💾 Play the Build
 
 To download and play the build, visit [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi)
 
