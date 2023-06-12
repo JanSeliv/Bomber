@@ -5,25 +5,13 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
+#include "DataAssets/BoxDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
-
-// Default constructor
-UBoxDataAsset::UBoxDataAsset()
-{
-	ActorTypeInternal = EAT::Box;
-}
-
-// Returns the box data asset
-const UBoxDataAsset& UBoxDataAsset::Get()
-{
-	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Box);
-	const auto BoxDataAsset = Cast<UBoxDataAsset>(FoundDataAsset);
-	checkf(BoxDataAsset, TEXT("The Box Data Asset is not valid"));
-	return *BoxDataAsset;
-}
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BoxActor)
 
 // Sets default values.
 ABoxActor::ABoxActor()
@@ -45,20 +33,27 @@ ABoxActor::ABoxActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
+// Initialize a box actor, could be called multiple times
+void ABoxActor::ConstructBoxActor()
+{
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionBoxActor);
+	MapComponentInternal->ConstructOwnerActor();
+}
+
 // Called when an instance of this class is placed (in editor) or spawned.
 void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ConstructBoxActor();
+}
+
+// Is called on a box actor construction, could be called multiple times
+void ABoxActor::OnConstructionBoxActor()
+{
 	if (IS_TRANSIENT(this)                 // This actor is transient
 	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Construct the actor's map component.
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
 	{
 		return;
 	}
@@ -71,35 +66,45 @@ void ABoxActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Binding to the event, that triggered when the actor has been explicitly destroyed
-	OnDestroyed.AddDynamic(this, &ABoxActor::TrySpawnItem);
+	if (HasAuthority())
+	{
+		check(MapComponentInternal);
+		MapComponentInternal->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnDeactivatedMapComponent);
+	}
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 }
 
-// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
 void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
 {
 	Super::SetActorHiddenInGame(bNewHidden);
 
 	if (!bNewHidden)
 	{
-		return;
+		// Is added on Generated Map
+		ConstructBoxActor();
 	}
+}
 
-	// Is removed from level map
-	TrySpawnItem();
+// Called when owned map component is destroyed on the Generated Map
+void ABoxActor::OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser)
+{
+	const bool bIsCauserAllowedForItems = UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
+	if (bIsCauserAllowedForItems)
+	{
+		TrySpawnItem();
+	}
 }
 
 // Spawn item with a chance
-void ABoxActor::TrySpawnItem(AActor* DestroyedActor/* = nullptr*/)
+void ABoxActor::TrySpawnItem()
 {
 	if (!IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
-	    || AMyGameStateBase::GetCurrentGameState(this) != ECurrentGameState::InGame)
+	    || AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
 	{
 		return;
 	}

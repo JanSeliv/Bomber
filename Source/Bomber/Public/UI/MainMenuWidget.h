@@ -13,7 +13,7 @@
  * Main menu user widget.
  */
 UCLASS()
-class UMainMenuWidget final : public UUserWidget
+class BOMBER_API UMainMenuWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -30,11 +30,11 @@ public:
 	void InitMainMenuWidget(class ACarousel* InMainMenuActor);
 
 	/** Returns true if the Main Menu is ready. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsReadyMainMenu() const { return MainMenuActorInternal != nullptr; }
 
 	/** Returns the Main Menu actor on the scene. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class ACarousel* GetMainMenuActor() const { return MainMenuActorInternal; }
 
 	/** Sets the next player in the Menu. */
@@ -89,7 +89,7 @@ protected:
 
 	/** The Main Menu actor on the scene.  */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Actor"))
-	TObjectPtr<class ACarousel> MainMenuActorInternal; //[G]
+	TObjectPtr<class ACarousel> MainMenuActorInternal = nullptr;
 
 	/** Sets the level depending on specified incrementer.
 	 * @param Incrementer 1 set the next level, -1 set previous. */

@@ -3,14 +3,26 @@
 #include "Components/MapComponent.h"
 //---
 #include "GeneratedMap.h"
+#include "PoolManagerSubsystem.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Globals/LevelActorDataAsset.h"
-#include "Globals/SingletonLibrary.h"
+#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/GameStateDataAsset.h"
+#include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "PoolManager.h"
+#include "Subsystems/GeneratedMapSubsystem.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/BoxComponent.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Net/UnrealNetwork.h"
+//---
+#if WITH_EDITOR
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
+#endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MapComponent)
 
 // Sets default values for this component's properties
 UMapComponent::UMapComponent()
@@ -27,8 +39,24 @@ UMapComponent::UMapComponent()
 	BoxCollisionComponentInternal = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
 }
 
-// Updates a owner's state. Should be called in the owner's OnConstruction event.
-bool UMapComponent::OnConstruction()
+// Rerun owner's construction scripts. The temporary only editor owner will not be updated
+void UMapComponent::ConstructOwnerActor()
+{
+	// Construct the actor's map component
+	const bool bIsConstructed = OnConstructionOwnerActor();
+	if (!bIsConstructed)
+	{
+		return;
+	}
+
+	if (OnOwnerWantsReconstruct.IsBound())
+	{
+		OnOwnerWantsReconstruct.Broadcast();
+	}
+}
+
+// Is called on an owner actor construction, could be called multiple times
+bool UMapComponent::OnConstructionOwnerActor()
 {
 	AActor* Owner = GetOwner();
 	if (IS_TRANSIENT(Owner))
@@ -36,65 +64,76 @@ bool UMapComponent::OnConstruction()
 		return false;
 	}
 
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
-
-	const UPoolManager* PoolManager = LevelMap.GetPoolManager();
-	if (PoolManager
-	    && PoolManager->IsFree(Owner))
+	// Check the object state in the Pool Manager
+	UPoolManagerSubsystem& PoolManager = UPoolManagerSubsystem::Get();
+	const EPoolObjectState PoolObjectState = PoolManager.GetPoolObjectState(Owner);
+	if (PoolObjectState == EPoolObjectState::None)
+	{
+		// The owner actor is not in the pool
+		// Most likely it is a dragged actor, since all generated actors are always taken from the pool
+		// Add this object to the pool and continue construction
+		PoolManager.RegisterObjectInPool(Owner, EPoolObjectState::Active);
+	}
+	else if (PoolObjectState == EPoolObjectState::Inactive)
 	{
 		// Do not reconstruct inactive object
 		return false;
 	}
 
-	// Find new Location at dragging and update-delegate
-	LevelMap.SetNearestCell(this);
+	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
 
-	if (CellInternal.IsZeroCell())
+	// Find new Location at dragging and update-delegate
+	GeneratedMap.SetNearestCell(this);
+
+	if (CellInternal.IsInvalidCell())
 	{
 		return false;
 	}
 
 	// Owner updating
-	LevelMap.AddToGrid(this);
-	if (!IS_VALID(Owner)) // Dragged owner can be moved to the persistent
+	GeneratedMap.AddToGrid(this);
+	if (IS_TRANSIENT(Owner)) // Check again, dragged owner can be moved to the persistent
 	{
 		return false;
 	}
 
 	// Update default mesh asset
-	if (ActorDataAssetInternal)
-	{
-		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
-		SetLevelActorRow(FoundRow);
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
+	SetLevelActorRow(FoundRow);
 
-		const ECollisionResponse CollisionResponse = ActorDataAssetInternal->GetCollisionResponse();
-		SetCollisionResponses(CollisionResponse);
-	}
+	const ECollisionResponse CollisionResponse = GetActorDataAssetChecked().GetCollisionResponse();
+	SetCollisionResponses(CollisionResponse);
 
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		// Remove all text renders of the Owner
-		USingletonLibrary::ClearOwnerTextRenders(Owner);
-
 		// Update AI renders after adding obj to map
-		USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
-
-		// Show current cell if type specified
-		if (TO_FLAG(GetActorType()) & LevelMap.RenderActorsTypes)
-		{
-			USingletonLibrary::AddDebugTextRenders(Owner, {CellInternal}, FColor::White);
-		}
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
+
+	TryDisplayOwnedCell();
 
 	return true;
 }
 
-// Override current cell data, where owner is located on the Level Map
+// Override current cell data, where owner is located on the Generated Map
 void UMapComponent::SetCell(const FCell& Cell)
 {
 	CellInternal = Cell;
+}
+
+// Show current cell if owned actor type is allowed, is not available in shipping build
+void UMapComponent::TryDisplayOwnedCell()
+{
+#if !UE_BUILD_SHIPPING
+	if (UCellsUtilsLibrary::CanDisplayCellsForActorTypes(TO_FLAG(GetActorType())))
+	{
+		FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
+		Params.bClearPreviousDisplays = true;
+		UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
+	}
+#endif // !UE_BUILD_SHIPPING
 }
 
 // Set specified mesh to the Owner
@@ -110,7 +149,7 @@ void UMapComponent::SetLevelActorRow(const ULevelActorRow* Row)
 	// Update mesh
 	UStreamableRenderAsset* Mesh = Row->Mesh;
 	if (Mesh
-	    && MeshComponentInternal) // is invalid for characters since it's controller by themselves
+	    && GetActorDataAssetChecked().GetActorType() != EActorType::Player) // characters are managing their mesh by themselves
 	{
 		if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
 		{
@@ -133,19 +172,17 @@ void UMapComponent::SetMaterial(UMaterialInterface* Material)
 	}
 }
 
-// Rerun owner's construction scripts. The temporary only editor owner will not be updated
-void UMapComponent::RerunOwnerConstruction() const
-{
-	if (AActor* Owner = GetOwner())
-	{
-		Owner->RerunConstructionScripts();
-	}
-}
-
 // Get the owner's data asset
 EActorType UMapComponent::GetActorType() const
 {
-	return ActorDataAssetInternal ? ActorDataAssetInternal->GetActorType() : EAT::None;
+	return GetActorDataAssetChecked().GetActorType();
+}
+
+// Get the owner's data asset
+const ULevelActorDataAsset& UMapComponent::GetActorDataAssetChecked() const
+{
+	checkf(ActorDataAssetInternal, TEXT("EROR: 'ActorDataAssetInternal' is null"));
+	return *ActorDataAssetInternal;
 }
 
 // Set true to make an owner to be undestroyable on this level
@@ -158,7 +195,7 @@ void UMapComponent::SetUndestroyable(bool bIsUndestroyable)
 void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& NewResponses)
 {
 	const AActor* Owner = GetOwner();
-	if (!IS_VALID(Owner)
+	if (!Owner
 	    || !Owner->HasAuthority()
 	    || NewResponses == ECR_MAX
 	    || NewResponses == CollisionResponseInternal)
@@ -170,12 +207,12 @@ void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& New
 	ApplyCollisionResponse();
 }
 
-// Is called when an owner was destroyed on the Level Map
-void UMapComponent::OnDeactivated()
+// Is called when an owner was destroyed on the Generated Map
+void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 {
 	if (OnDeactivatedMapComponent.IsBound())
 	{
-		OnDeactivatedMapComponent.Broadcast(this);
+		OnDeactivatedMapComponent.Broadcast(this, DestroyCauser);
 	}
 
 	SetCollisionResponses(ECR_Ignore);
@@ -184,21 +221,36 @@ void UMapComponent::OnDeactivated()
 	{
 		SetUndestroyable(false);
 	}
+
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditor())
+	{
+		// Remove all text renders of the Owner
+		UCellsUtilsLibrary::ClearDisplayedCells(GetOwner());
+	}
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
-//  Called when a component is registered (not loaded
+//  Called when a component is registered (not loaded)
 void UMapComponent::OnRegister()
 {
 	Super::OnRegister();
+
 	AActor* Owner = GetOwner();
-	if (!Owner
-	    || ActorDataAssetInternal) // is already registered
+	check(Owner);
+
+	// Register level actors for game features only if the game was started
+	constexpr bool bAddOnlyInGameWorlds = true;
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(Owner, bAddOnlyInGameWorlds);
+
+	if (ActorDataAssetInternal)
 	{
+		// Its data asset is valid, so initialization was already performed before
 		return;
 	}
 
 	// Set the tick disabled by default and decrease the interval
-	Owner->SetActorTickInterval(UGeneratedMapDataAsset::Get().GetTickInterval());
+	Owner->SetActorTickInterval(UGameStateDataAsset::Get().GetTickInterval());
 	Owner->SetActorTickEnabled(false);
 
 	// Set the movable mobility for in-game attaching
@@ -208,7 +260,7 @@ void UMapComponent::OnRegister()
 	}
 
 	// Finding the actor data asset
-	ActorDataAssetInternal = USingletonLibrary::GetDataAssetByActorClass(Owner->GetClass());
+	ActorDataAssetInternal = UDataAssetsContainer::GetDataAssetByActorClass(Owner->GetClass());
 	if (!ensureMsgf(ActorDataAssetInternal, TEXT("ASSERT: 'The Actor Data Asset' was not found")))
 	{
 		return;
@@ -225,23 +277,29 @@ void UMapComponent::OnRegister()
 	}
 
 	// Initialize mesh component
-	if (ActorDataAssetInternal->GetActorType() != EAT::Player) // the character class already has own initialized skeletal component
+	if (ActorDataAssetInternal->GetActorType() == EAT::Player)
+	{
+		// The character class already has own initialized skeletal component
+		const ACharacter* Player = CastChecked<ACharacter>(GetOwner());
+		MeshComponentInternal = Player->GetMesh();
+		check(MeshComponentInternal);
+	}
+	else
 	{
 		MeshComponentInternal = NewObject<UMeshComponent>(GetOwner(), UStaticMeshComponent::StaticClass(), TEXT("MeshComponent"));
-		if (!ensureMsgf(MeshComponentInternal, TEXT("ASSERT: 'MeshComponentInternal' was not initialized")))
-		{
-			return;
-		}
 		MeshComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		MeshComponentInternal->RegisterComponent();
 
 		// Set default mesh asset
-		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(USingletonLibrary::GetLevelType());
+		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
 		SetLevelActorRow(FoundRow);
 	}
 
+	// Do not receive decals for level actors by default
+	MeshComponentInternal->SetReceivesDecals(false);
+
 #if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (USingletonLibrary::IsEditorNotPieWorld())
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not call OnConstruction on drag events
 		Owner->bRunConstructionScriptOnDrag = false;
@@ -249,11 +307,12 @@ void UMapComponent::OnRegister()
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
-// Called when a component is destroyed for removing the owner from the Level Map.
+// Called when a component is destroyed for removing the owner from the Generated Map.
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	AActor* ComponentOwner = GetOwner();
-	if (!IS_TRANSIENT(ComponentOwner)) // Is not transient owner
+	if (ComponentOwner && IsValid(this) // Could be called multiple times, make sure it is called once for valid object
+	    && !GExitPurge)                 // Do not call on exit
 	{
 		// Disable collision for safety
 		ComponentOwner->SetActorEnableCollision(false);
@@ -261,19 +320,21 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		// Delete spawned collision component
 		BoxCollisionComponentInternal->DestroyComponent();
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-		if (USingletonLibrary::IsEditorNotPieWorld())
+#if WITH_EDITOR	// [IsEditorNotPieWorld]
+		if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
-			if (AGeneratedMap* LevelMap = USingletonLibrary::GetLevelMap()) // Can be invalid if remove the level map
+			const UGeneratedMapSubsystem* GeneratedMapSubsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem();
+			AGeneratedMap* GeneratedMap = GeneratedMapSubsystem ? GeneratedMapSubsystem->GetGeneratedMap() : nullptr;
+			if (GeneratedMap) // Can be invalid if remove the Generated Map or opening another map
 			{
-				LevelMap->DestroyLevelActor(this);
+				GeneratedMap->DestroyLevelActor(this);
 			}
 
 			// Editor delegates
-			USingletonLibrary::GOnAIUpdatedDelegate.Broadcast();
+			UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 		}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
@@ -331,8 +392,8 @@ bool UMapComponent::Modify(bool bAlwaysMarkDirty/* = true*/)
 {
 	AActor* Owner = GetOwner();
 	if (Owner
-	    && !USingletonLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
-	    && IsEditorOnly())                // was generated in the editor
+	    && !FEditorUtilsLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
+	    && IsEditorOnly())                  // was generated in the editor
 	{
 		Owner->Destroy();
 		return false;

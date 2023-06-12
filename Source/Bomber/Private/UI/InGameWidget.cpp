@@ -4,7 +4,9 @@
 //---
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/SingletonLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(InGameWidget)
 
 // Called after the underlying slate widget is constructed. May be called multiple times due to adding and removing from the hierarchy.
 void UInGameWidget::NativeConstruct()
@@ -16,7 +18,7 @@ void UInGameWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		BindOnGameStateChanged(MyGameState);
 	}

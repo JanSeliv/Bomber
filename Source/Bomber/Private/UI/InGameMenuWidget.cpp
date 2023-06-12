@@ -2,16 +2,19 @@
 
 #include "UI/InGameMenuWidget.h"
 //---
-#include "SoundsManager.h"
 #include "Controllers/MyPlayerController.h"
-#include "Globals/SingletonLibrary.h"
-#include "UI/SettingsWidget.h"
-#include "UI/MyHUD.h"
+#include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Subsystems/SoundsSubsystem.h"
+#include "UI/MyHUD.h"
+#include "UI/SettingsWidget.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(InGameMenuWidget)
 
 // Returns true if the In-Game widget is shown on user screen
 bool UInGameMenuWidget::IsVisibleInGameMenu() const
@@ -35,7 +38,7 @@ void UInGameMenuWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	// Listen changing the game states to handle In-Game Menu visibility
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		BindOnGameStateChanged(MyGameState);
 	}
@@ -55,7 +58,7 @@ void UInGameMenuWidget::NativeConstruct()
 	}
 
 	// Listen to toggle the game state widget when is requested
-	if (AMyHUD* MyHUD = USingletonLibrary::GetMyHUD())
+	if (AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD())
 	{
 		MyHUD->OnClose.AddUniqueDynamic(this, &ThisClass::ToggleInGameMenu);
 	}
@@ -137,11 +140,7 @@ void UInGameMenuWidget::BindOnEndGameStateChanged(AMyPlayerState* MyPlayerState)
 // Is called when player pressed the button to restart the game
 void UInGameMenuWidget::OnRestartButtonPressed()
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
@@ -152,11 +151,7 @@ void UInGameMenuWidget::OnRestartButtonPressed()
 // Is called when player pressed the button to go back to the Main Menu
 void UInGameMenuWidget::OnMenuButtonPressed()
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
@@ -167,7 +162,7 @@ void UInGameMenuWidget::OnMenuButtonPressed()
 // Is called when player pressed the button to open in-game Settings
 void UInGameMenuWidget::OnSettingsButtonPressed()
 {
-	if (USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget())
+	if (USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget())
 	{
 		SettingsWidget->OpenSettings();
 	}
@@ -227,7 +222,7 @@ void UInGameMenuWidget::HideInGameMenu()
 // Flip-floppy show and hide the end game state window
 void UInGameMenuWidget::ToggleInGameMenu()
 {
-	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState(this);
+	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
 	if (CurrentGameState != ECurrentGameState::InGame
 	    && CurrentGameState != ECurrentGameState::EndGame)
 	{
@@ -251,10 +246,7 @@ void UInGameMenuWidget::OnToggleInGameMenu(bool bIsVisible)
 	SetVisibility(NewVisibility);
 
 	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	if (OnToggledInGameMenu.IsBound())
 	{

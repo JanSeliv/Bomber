@@ -1,0 +1,20 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "LevelActorsMovement",
+	"Description": "Game feature that implements visual movement for level actors",
+	"Category": "Game Features",
+	"CreatedBy": "Yevhenii Selivanov",
+	"CreatedByURL": "https://github.com/JanSeliv/Bomber",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "mailto:janseliw@gmail.com",
+	"EnabledByDefault": true,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"ExplicitlyLoaded": true,
+	"BuiltInInitialFeatureState": "Registered"
+}

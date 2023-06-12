@@ -2,24 +2,9 @@
 
 #include "LevelActors/WallActor.h"
 //---
-#include "Bomber.h"
 #include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
-
-// Default constructor
-UWallDataAsset::UWallDataAsset()
-{
-	ActorTypeInternal = EAT::Wall;
-}
-
-// Returns the wall data asset
-const UWallDataAsset& UWallDataAsset::Get()
-{
-	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Wall);
-	const auto WallDataAsset = Cast<UWallDataAsset>(FoundDataAsset);
-	checkf(WallDataAsset, TEXT("The Wall Data Asset is not valid"));
-	return *WallDataAsset;
-}
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(WallActor)
 
 // Sets default values
 AWallActor::AWallActor()
@@ -33,7 +18,7 @@ AWallActor::AWallActor()
 	NetUpdateFrequency = 10.f;
 	bAlwaysRelevant = true;
 	SetReplicatingMovement(true);
-	
+
 	// Initialize Root Component
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
@@ -41,29 +26,20 @@ AWallActor::AWallActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
+// Initialize a wall actor, could be called multiple times
+void AWallActor::ConstructWallActor()
+{
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionWallActor);
+	MapComponentInternal->ConstructOwnerActor();
+}
+
 // Called when an instance of this class is placed (in editor) or spawned
 void AWallActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (IS_TRANSIENT(this)                 // This actor is transient
-	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Update this actor on the Level Map
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
-	{
-		return;
-	}
-}
-
-// Called when the game starts or when spawned
-void AWallActor::BeginPlay()
-{
-	Super::BeginPlay();
+	ConstructWallActor();
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -73,9 +49,7 @@ void AWallActor::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
-		return;
+		// Is added on Generated Map
+		ConstructWallActor();
 	}
-
-	// Is removed from level map
 }

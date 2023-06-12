@@ -1,0 +1,37 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Foot Trails Generator",
+	"Description": "Game Feature to generate paths on generated map",
+	"Category": "Game Features",
+	"CreatedBy": "Yevhenii Selivanov",
+	"CreatedByURL": "https://github.com/JanSeliv/Bomber",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "mailto:janseliw@gmail.com",
+	"EnabledByDefault": true,
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "FootTrailsGeneratorRuntime",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"ExplicitlyLoaded": true,
+	"BuiltInInitialFeatureState": "Registered",
+	"Plugins": [
+		{
+			"Name": "InstancedStaticMeshConverter",
+			"Enabled": true
+		},
+		{
+			"Name": "MyEditorUtils",
+			"Enabled": true
+		}
+	]
+}

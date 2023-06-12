@@ -12,7 +12,7 @@
  * Contains additional data.
  */
 USTRUCT(BlueprintType)
-struct FCustomPlayerMeshData
+struct BOMBER_API FCustomPlayerMeshData
 {
 	GENERATED_BODY()
 
@@ -21,11 +21,11 @@ struct FCustomPlayerMeshData
 
 	/** The row that is used to visualize the bomber character. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<const class UPlayerRow> PlayerRow = nullptr; //[G]
+	TObjectPtr<const class UPlayerRow> PlayerRow = nullptr;
 
 	/** The index of the texture to set. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	int32 SkinIndex = 0; //[N]
+	int32 SkinIndex = 0;
 
 	/** Returns true is data is valid. */
 	FORCEINLINE bool IsValid() const { return PlayerRow != nullptr; }
@@ -37,7 +37,7 @@ struct FCustomPlayerMeshData
  * but in different UI actors and widgets to visualize the player's mannequin.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class UMySkeletalMeshComponent final : public USkeletalMeshComponent
+class BOMBER_API UMySkeletalMeshComponent final : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
 
@@ -56,7 +56,7 @@ public:
 
 	/** Returns how this mesh looks like for now.
 	 * @see UMySkeletalMeshComponent::PlayerMeshDataInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
 
 	/**
@@ -70,7 +70,7 @@ public:
 	 * @param OutMeshComponents Contains returned components.
 	 * @param FilterClass By this class components will be filtered.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "FilterClass"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "FilterClass"))
 	void GetAttachedPropsByClass(TArray<class UMeshComponent*>& OutMeshComponents, const TSubclassOf<class UMeshComponent>& FilterClass) const;
 
 	/**
@@ -81,7 +81,7 @@ public:
 	void AttachProps();
 
 	/** Returns true when is needed to attach or detach props. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	bool ArePropsWantToUpdate() const;
 	
 	/**
@@ -101,16 +101,16 @@ protected:
 	/** Determines how this mesh looks like for now.
 	 * Is not transient, can be set in editor-time. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
-	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty; //[G]
+	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty;
 
 	/** Current level type of attached meshes.
 	 * Is not transient, can be set in editor-time. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes Type"))
-	ELevelType AttachedMeshesTypeInternal = ELT::None; //[G]
+	ELevelType AttachedMeshesTypeInternal = ELT::None;
 
 	/** Current attached mesh components. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))
-	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal; //[M.IO]
+	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions

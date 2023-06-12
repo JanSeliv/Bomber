@@ -1,0 +1,8 @@
+{
+	"BuildId": "25360045",
+	"Modules": 
+	{
+		"MyEditorUtils": "UnrealEditor-MyEditorUtils.dll",
+		"MyUtils": "UnrealEditor-MyUtils.dll"
+	}
+}

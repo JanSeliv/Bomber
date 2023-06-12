@@ -3,14 +3,15 @@
 #include "UI/MainMenuWidget.h"
 //---
 #include "GeneratedMap.h"
-#include "SoundsManager.h"
 #include "Components/MySkeletalMeshComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
-#include "Globals/SingletonLibrary.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "UI/Carousel.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MainMenuWidget)
 
 // Initializes the main menu widget
 void UMainMenuWidget::InitMainMenuWidget(ACarousel* InMainMenuActor)
@@ -51,7 +52,7 @@ void UMainMenuWidget::ChooseRightLeft(const FInputActionValue& ActionValue)
 		return;
 	}
 
-	if (FMath::IsNegative(ScaleValue))
+	if (ScaleValue < 0.f)
 	{
 		ChooseLeft();
 	}
@@ -84,7 +85,7 @@ void UMainMenuWidget::ChooseBackForward(const FInputActionValue& ActionValue)
 		return;
 	}
 
-	if (FMath::IsNegative(ScaleValue))
+	if (ScaleValue < 0.f)
 	{
 		ChooseBack();
 	}
@@ -110,11 +111,7 @@ void UMainMenuWidget::NextSkin()
 		return;
 	}
 
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the preview skin
 	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + 1;
@@ -127,11 +124,7 @@ void UMainMenuWidget::NextSkin()
 // Set the chosen on UI the level type
 void UMainMenuWidget::ChooseNewLevel(ELevelType LevelType)
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	AGeneratedMap::Get().SetLevelType(LevelType);
 }
@@ -139,13 +132,9 @@ void UMainMenuWidget::ChooseNewLevel(ELevelType LevelType)
 // Is executed when player pressed the button of starting the game
 void UMainMenuWidget::StartGame()
 {
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
-	if (AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController())
+	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController())
 	{
 		MyPC->SetGameStartingState();
 	}
@@ -154,7 +143,7 @@ void UMainMenuWidget::StartGame()
 // Is executed when player decided to close the game
 void UMainMenuWidget::QuitGame()
 {
-	AMyPlayerController* MyPC = USingletonLibrary::GetLocalPlayerController();
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
 }
 
@@ -168,7 +157,7 @@ void UMainMenuWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 	}
@@ -183,7 +172,7 @@ void UMainMenuWidget::SynchronizeProperties()
 // Sets the level depending on specified incrementer
 void UMainMenuWidget::SwitchCurrentLevel(int32 Incrementer)
 {
-	const ELevelType CurrentLevelType = USingletonLibrary::GetLevelType();
+	const ELevelType CurrentLevelType = UMyBlueprintFunctionLibrary::GetLevelType();
 	if (CurrentLevelType == ELT::None
 	    || !Incrementer)
 	{
@@ -227,10 +216,7 @@ void UMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	}
 
 	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayUIClickSFX();
-	}
+	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	const bool bRotated = MainMenuActorInternal->RotateFloorBP(Incrementer);
 	if (!bRotated)

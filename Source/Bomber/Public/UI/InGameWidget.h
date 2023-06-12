@@ -12,7 +12,7 @@
  * In game user widget.
  */
 UCLASS()
-class UInGameWidget final : public UUserWidget
+class BOMBER_API UInGameWidget final : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -22,7 +22,7 @@ public:
 	 * --------------------------------------------------- */
 	
 	/** Returns the In-Game Menu widget. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UInGameMenuWidget* GetInGameMenuWidget() const { return InGameMenuWidget; }
 
 protected:
@@ -32,7 +32,7 @@ protected:
 		
 	/** Allows player to interact with UI during the match. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UInGameMenuWidget> InGameMenuWidget = nullptr; //[B]
+	TObjectPtr<class UInGameMenuWidget> InGameMenuWidget = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Protected functions

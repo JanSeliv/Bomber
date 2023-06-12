@@ -5,40 +5,14 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
-#include "SoundsManager.h"
+#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/ItemDataAsset.h"
+#include "Subsystems/SoundsSubsystem.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
-
-// Default constructor
-UItemDataAsset::UItemDataAsset()
-{
-	ActorTypeInternal = EAT::Item;
-	RowClassInternal = UItemRow::StaticClass();
-}
-
-// Returns the item data asset
-const UItemDataAsset& UItemDataAsset::Get()
-{
-	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Item);
-	const auto ItemDataAsset = Cast<UItemDataAsset>(FoundDataAsset);
-	checkf(ItemDataAsset, TEXT("The Item Data Asset is not valid"));
-	return *ItemDataAsset;
-}
-
-// Return row by specified item type
-const UItemRow* UItemDataAsset::GetRowByItemType(EItemType ItemType, ELevelType LevelType) const
-{
-	TArray<ULevelActorRow*> OutRows;
-	Get().GetRowsByLevelType(OutRows, TO_FLAG(LevelType));
-	const ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType](const ULevelActorRow* RowIt)
-	{
-		const auto ItemRow = Cast<UItemRow>(RowIt);
-		return ItemRow && ItemRow->ItemType == ItemType;
-	});
-	return FoundRowPtr ? Cast<UItemRow>(*FoundRowPtr) : nullptr;
-}
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ItemActor)
 
 // Sets default values
 AItemActor::AItemActor()
@@ -60,20 +34,27 @@ AItemActor::AItemActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
+// Initialize an item actor, could be called multiple times
+void AItemActor::ConstructItemActor()
+{
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionItemActor);
+	MapComponentInternal->ConstructOwnerActor();
+}
+
 // Called when an instance of this class is placed (in editor) or spawned
 void AItemActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ConstructItemActor();
+}
+
+// Is called on an item actor construction, could be called multiple times
+void AItemActor::OnConstructionItemActor()
+{
 	if (IS_TRANSIENT(this)                 // This actor is transient
 	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Construct the map component
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
 	{
 		return;
 	}
@@ -81,14 +62,12 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 	// Rand the item type if not set yet
 	if (ItemTypeInternal == EItemType::None)
 	{
-		if (static const UEnum* Enum = FindObject<UEnum>(ANY_PACKAGE, TEXT("EItemType"), true))
-		{
-			ItemTypeInternal = TO_ENUM(EItemType, Enum->GetValueByIndex(FMath::RandRange(1, TO_FLAG(Enum->GetMaxEnumValue() - 1))));
-		}
+		const int32 RandomIndex = FMath::RandRange(EIT_FIRST_FLAG, EIT_LAST_FLAG);
+		ItemTypeInternal = static_cast<EItemType>(RandomIndex);
 	}
 
 	// Override mesh
-	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, USingletonLibrary::GetLevelType()))
+	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, UMyBlueprintFunctionLibrary::GetLevelType()))
 	{
 		MapComponentInternal->SetLevelActorRow(FoundItemRow);
 	}
@@ -109,11 +88,12 @@ void AItemActor::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
+		ConstructItemActor();
 		return;
 	}
 
-	// Is removed from level map
+	// Is removed from Generated Map
 	ResetItemType();
 }
 
@@ -128,19 +108,14 @@ void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 // Triggers when this item starts overlap a player character to destroy itself
 void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
-	if (!IS_VALID(this)
-	    || !OtherActor
-	    || !OtherActor->IsA(USingletonLibrary::GetActorClassByType(EAT::Player)))
+	if (!OtherActor
+	    || !OtherActor->IsA(UDataAssetsContainer::GetActorClassByType(EAT::Player)))
 	{
 		return;
 	}
 
-	// Play the sound
-	if (USoundsManager* SoundsManager = USingletonLibrary::GetSoundsManager())
-	{
-		SoundsManager->PlayItemPickUpSFX();
-	}
+	USoundsSubsystem::Get().PlayItemPickUpSFX();
 
 	// Destroy itself on overlapping
-	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal);
+	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal, OtherActor);
 }

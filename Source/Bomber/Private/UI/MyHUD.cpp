@@ -2,19 +2,15 @@
 
 #include "UI/MyHUD.h"
 //---
-#include "Globals/SingletonLibrary.h"
+#include "DataAssets/UIDataAsset.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UI/InGameWidget.h"
-#include "UI/InputControlsWidget.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"
-
-// Returns the UI data asset
-const UUIDataAsset& UUIDataAsset::Get()
-{
-	const UUIDataAsset* UIDataAsset = USingletonLibrary::GetUIDataAsset();
-	checkf(UIDataAsset, TEXT("The UI Data Asset is not valid"));
-	return *UIDataAsset;
-}
+//---
+#include "Blueprint/UserWidget.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyHUD)
 
 // Default constructor
 AMyHUD::AMyHUD()
@@ -58,29 +54,37 @@ void AMyHUD::PostInitializeComponents()
 	TryInitWidgets();
 }
 
-// Called when the game starts. Created widget.
-void AMyHUD::BeginPlay()
+// Internal UUserWidget::CreateWidget wrapper
+UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/)
 {
-	Super::BeginPlay();
+	if (!ensureMsgf(PlayerController, TEXT("%s: 'PlayerController' is null"), *FString(__FUNCTION__))
+	    || !ensureMsgf(WidgetClass, TEXT("%s: 'WidgetClass' is null"), *FString(__FUNCTION__)))
+	{
+		return nullptr;
+	}
+
+	UUserWidget* CreatedWidget = CreateWidget(PlayerController, WidgetClass);
+	checkf(CreatedWidget, TEXT("%s: ERROR: %s failed to create"), *FString(__FUNCTION__), *WidgetClass->GetName());
+
+	if (bAddToViewport)
+	{
+		CreatedWidget->AddToViewport();
+	}
+
+	return CreatedWidget;
 }
 
 // Will try to start the process of initializing all widgets used in game
 void AMyHUD::TryInitWidgets()
 {
-	UGameViewportClient* GameViewport = GEngine ? GEngine->GameViewport : nullptr;
-	FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
-	if (Viewport)
+	if (UUtilsLibrary::IsViewportInitialized())
 	{
-		GameViewport->MouseEnter(Viewport, 0, 0);
-		if (Viewport->GetSizeXY() != FIntPoint::ZeroValue)
-		{
-			OnViewportResizedWhenInit(Viewport, 0);
-			return;
-		}
+		InitWidgets();
 	}
-
-	// Fallback on bounding to viewport resized event
-	FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
+	else if (!FViewport::ViewportResizedEvent.IsBoundToObject(this))
+	{
+		FViewport::ViewportResizedEvent.AddUObject(this, &ThisClass::OnViewportResizedWhenInit);
+	}
 }
 
 // Create and set widget objects once
@@ -91,57 +95,23 @@ void AMyHUD::InitWidgets()
 		return;
 	}
 
-	APlayerController* PlayerController = PlayerOwner.Get();
-	if (!ensureMsgf(PlayerController, TEXT("ASSERT: 'PlayerController' is not valid")))
-	{
-		return;
-	}
-
 	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
 
-	const TSubclassOf<UMainMenuWidget>& MainMenuWidgetClass = UIDataAsset.GetMainMenuWidgetClass();
-	if (ensureMsgf(MainMenuWidgetClass, TEXT("ASSERT: 'InGameWidgetClass' is not set in the UI data table")))
-	{
-		MainMenuWidgetInternal = CreateWidget<UMainMenuWidget>(PlayerController, MainMenuWidgetClass);
-		checkf(MainMenuWidgetInternal, TEXT("ERROR: MainMenuWidgetInternal failed to create"));
-		// Main Menu widget is drawn by 3D user widget component, no need add it to viewport
-	}
+	MainMenuWidgetInternal = CreateWidgetByClass<UMainMenuWidget>(UIDataAsset.GetMainMenuWidgetClass(), /*bAddToViewport*/false); // Is drawn by 3D user widget component, no need add it to viewport
 
-	const TSubclassOf<UInGameWidget>& InGameWidgetClass = UIDataAsset.GetInGameWidgetClass();
-	if (ensureMsgf(InGameWidgetClass, TEXT("ASSERT: 'InGameWidgetClass' is not set in the UI data table")))
-	{
-		InGameWidgetInternal = CreateWidget<UInGameWidget>(PlayerController, InGameWidgetClass);
-		checkf(InGameWidgetInternal, TEXT("ERROR: InGameWidgetInternal failed to create"));
-		InGameWidgetInternal->AddToViewport();
-	}
+	InGameWidgetInternal = CreateWidgetByClass<UInGameWidget>(UIDataAsset.GetInGameWidgetClass());
 
-	const TSubclassOf<USettingsWidget>& SettingsWidgetClass = UIDataAsset.GetSettingsWidgetClass();
-	if (ensureMsgf(SettingsWidgetClass, TEXT("ASSERT: 'SettingsWidgetClass' is not set in the UI data table")))
-	{
-		SettingsWidgetInternal = CreateWidget<USettingsWidget>(PlayerController, SettingsWidgetClass);
-		checkf(SettingsWidgetInternal, TEXT("ERROR: SettingsWidgetInternal failed to create"));
-		SettingsWidgetInternal->AddToViewport();
-	}
+	FPSCounterWidgetInternal = CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
 
-	const TSubclassOf<UUserWidget>& FPSCounterWidgetClass = UIDataAsset.GetFPSCounterWidgetClass();
-	if (ensureMsgf(FPSCounterWidgetClass, TEXT("ASSERT: 'FPSCounterWidgetClass' is not set in the UI data table")))
-	{
-		FPSCounterWidgetInternal = CreateWidget<UUserWidget>(PlayerController, FPSCounterWidgetClass);
-		checkf(FPSCounterWidgetInternal, TEXT("ERROR: FPSCounterWidgetInternal failed to create"));
-		FPSCounterWidgetInternal->AddToViewport();
-	}
+	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass());
+	SettingsWidgetInternal->TryConstructSettings();
 
-	const TSubclassOf<UUserWidget>& NicknameWidgetClass = UIDataAsset.GetNicknameWidgetClass();
-	if (ensureMsgf(NicknameWidgetClass, TEXT("ASSERT: 'NicknameWidgetClass' is not set in the UI data table")))
+	static constexpr int32 MaxPlayersNum = 4;
+	NicknameWidgetsInternal.Reserve(MaxPlayersNum);
+	for (int32 Index = 0; Index < MaxPlayersNum; ++Index)
 	{
-		static constexpr int32 MaxPlayersNum = 4;
-		NicknameWidgetsInternal.Reserve(MaxPlayersNum);
-		for (int32 Index = 0; Index < MaxPlayersNum; ++Index)
-		{
-			UUserWidget* NicknameWidget = CreateWidget(PlayerController, NicknameWidgetClass);
-			checkf(NicknameWidget, TEXT("ERROR: NicknameWidget failed to create"));
-			NicknameWidgetsInternal.Emplace(NicknameWidget);
-		}
+		UUserWidget* NicknameWidget = CreateWidgetByClass(UIDataAsset.GetNicknameWidgetClass(), /*bAddToViewport*/false); // Is drawn by 3D user widget component, no need add it to viewport
+		NicknameWidgetsInternal.Emplace(NicknameWidget);
 	}
 
 	bAreWidgetInitializedInternal = true;
@@ -152,13 +122,9 @@ void AMyHUD::InitWidgets()
 	}
 }
 
+// Is called right after the game was started and windows size is set
 void AMyHUD::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
 {
-	if (!Viewport)
-	{
-		return;
-	}
-
 	if (FViewport::ViewportResizedEvent.IsBoundToObject(this))
 	{
 		FViewport::ViewportResizedEvent.RemoveAll(this);

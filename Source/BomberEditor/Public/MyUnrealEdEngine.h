@@ -16,30 +16,14 @@ class BOMBEREDITOR_API UMyUnrealEdEngine : public UUnrealEdEngine
 	GENERATED_BODY()
 
 public:
+	DECLARE_MULTICAST_DELEGATE(FOnAnyDataAssetChanged);
+	/** Will notify on any data asset changes. */
+	static FOnAnyDataAssetChanged GOnAnyDataAssetChanged;
+
+	DECLARE_MULTICAST_DELEGATE(FUpdateAI);
+	/** Binds to update movements of each AI controller. */
+	static FUpdateAI GOnAIUpdatedDelegate;
+
 	/** Returns this Unreal Editor Engine object. */
 	static const UMyUnrealEdEngine& Get();
-
-	/** Returns overall number of all such singletons of editor clients. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetClientSingletonsNum() const { return ClientSingletonsInternal.Num(); }
-
-	/** Returns singleton of the editor client by specified player index.
-	 * @see UMyUnrealEdEngine::ClientSingletonsInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	UObject* GetClientSingleton(int32 Index) const;
-
-	/** Returns singleton of the editor client by specified player index. */
-	template <typename T>
-	static FORCEINLINE T* GetClientSingleton(int32 Index) { return Cast<T>(Get().GetClientSingleton(Index)); }
-
-protected:
-	/** Contains singletons for editor clients.  */
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<UObject>> ClientSingletonsInternal; //[D]
-
-	/** Creates a new Play in Editor instance (which may be in a new process if not running under one process. */
-	virtual void CreateNewPlayInEditorInstance(FRequestPlaySessionParams& InRequestParams, const bool bInDedicatedInstance, const EPlayNetMode InNetMode) override;
-
-	/** Create new singleton for the editor client if is needed. */
-	void AddClientSingleton();
 };

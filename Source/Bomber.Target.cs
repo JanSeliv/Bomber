@@ -7,7 +7,8 @@ public class BomberTarget : TargetRules
     public BomberTarget(TargetInfo Target) : base(Target)
     {
         Type = TargetType.Game;
-        DefaultBuildSettings = BuildSettingsVersion.V2;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+        DefaultBuildSettings = BuildSettingsVersion.Latest;
         ExtraModuleNames.AddRange(new[] {"Bomber"});
     }
 }

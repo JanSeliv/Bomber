@@ -10,7 +10,7 @@
  * The custom game mode class
  */
 UCLASS()
-class AMyGameModeBase final : public AGameModeBase
+class BOMBER_API AMyGameModeBase final : public AGameModeBase
 {
 	GENERATED_BODY()
 
@@ -19,18 +19,18 @@ public:
 	AMyGameModeBase();
 
 	/** Get overall number of all player controllers. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetPlayerControllersNum() const { return PlayerControllersInternal.Num(); }
 
 	/** Returns player controller by specified index.
 	 * @see AMyGameModeBase::PlayerControllersInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	class AMyPlayerController* GetPlayerController(int32 Index) const;
 
 protected:
 	/** Contains all player controllers.  */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Controllers"))
-	TArray<TObjectPtr<class AMyPlayerController>> PlayerControllersInternal; //[G]
+	TArray<TObjectPtr<class AMyPlayerController>> PlayerControllersInternal;
 
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;

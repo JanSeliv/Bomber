@@ -5,138 +5,32 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
+#include "Components/MySkeletalMeshComponent.h"
 #include "Controllers/MyAIController.h"
+#include "Controllers/MyPlayerController.h"
+#include "DataAssets/ItemDataAsset.h"
+#include "DataAssets/PlayerDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "Globals/SingletonLibrary.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
-#include "Components/MySkeletalMeshComponent.h"
-#include "Controllers/MyPlayerController.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Engine/Texture2DArray.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Materials/MaterialInstance.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "Net/UnrealNetwork.h"
+//---
+#if WITH_EDITOR
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
+#endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerCharacter)
 
 // Default amount on picked up items
 const FPowerUp FPowerUp::DefaultData = FPowerUp();
-
-// Returns the dynamic material instance of a player with specified skin.
-UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const
-{
-	if (MaterialInstancesDynamicInternal.IsValidIndex(SkinIndex))
-	{
-		return MaterialInstancesDynamicInternal[SkinIndex];
-	}
-
-	return nullptr;
-}
-
-#if WITH_EDITOR
-// Handle adding and changing material instance to prepare dynamic materials
-void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	// Continue only if [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld())
-	{
-		return;
-	}
-
-	// If material instance was changed
-	static const FName PropertyName = GET_MEMBER_NAME_CHECKED(ThisClass, MaterialInstanceInternal);
-	const FProperty* Property = PropertyChangedEvent.Property;
-	if (Property
-	    && Property->IsA<FObjectProperty>()
-	    && PropertyChangedEvent.ChangeType == EPropertyChangeType::ValueSet
-	    && Property->GetFName() == PropertyName)
-	{
-		// Force recreation of dynamic material instances
-		MaterialInstancesDynamicInternal.Empty();
-		TryCreateDynamicMaterials();
-	}
-}
-
-// Create dynamic material instance for each ski if is not done before.
-void UPlayerRow::TryCreateDynamicMaterials()
-{
-	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(GetOuter());
-	if (!PlayerDataAsset
-	    || !MaterialInstanceInternal)
-	{
-		return;
-	}
-
-	static const FName SkinArrayParameterName = PlayerDataAsset->GetSkinArrayParameter();
-	static const FName SkinIndexParameterName = PlayerDataAsset->GetSkinIndexParameter();
-	static const bool bSkinParamNamesAreValid = !(SkinArrayParameterName.IsNone() && SkinIndexParameterName.IsNone());
-	if (!ensureMsgf(bSkinParamNamesAreValid, TEXT("ASSERT: TryCreateDynamicMaterials: 'bSkinParamNamesAreValid' is false")))
-	{
-		return;
-	}
-
-	// Find the number of skins in the texture 2D array of player material instance.
-	UTexture* FoundTexture = nullptr;
-	MaterialInstanceInternal->GetTextureParameterValue(SkinArrayParameterName, FoundTexture);
-	const auto Texture2DArray = Cast<UTexture2DArray>(FoundTexture);
-	const int32 SkinTexturesNum = Texture2DArray ? Texture2DArray->GetArraySize() : 0;
-	const int32 MaterialInstancesDynamicNum = MaterialInstancesDynamicInternal.Num();
-	if (SkinTexturesNum == MaterialInstancesDynamicNum)
-	{
-		// The same amount, so all dynamic materials are already created
-		return;
-	}
-
-	// Create dynamic materials
-	const int32 InstancesToCreateNum = SkinTexturesNum - MaterialInstancesDynamicNum;
-	for (int32 i = 0; i < InstancesToCreateNum; ++i)
-	{
-		UMaterialInstanceDynamic* MaterialInstanceDynamic = UMaterialInstanceDynamic::Create(MaterialInstanceInternal, PlayerDataAsset);
-		if (!ensureMsgf(MaterialInstanceDynamic, TEXT("ASSERT: Could not create 'MaterialInstanceDynamic'")))
-		{
-			continue;
-		}
-
-		MaterialInstanceDynamic->SetFlags(RF_Public | RF_Transactional);
-		const int32 SkinPosition = MaterialInstancesDynamicInternal.Emplace(MaterialInstanceDynamic);
-		MaterialInstanceDynamic->SetScalarParameterValue(SkinIndexParameterName, SkinPosition);
-	}
-}
-#endif	//WITH_EDITOR
-
-// Default constructor
-UPlayerDataAsset::UPlayerDataAsset()
-{
-	ActorTypeInternal = EAT::Player;
-	RowClassInternal = UPlayerRow::StaticClass();
-}
-
-// Returns the player data asset
-const UPlayerDataAsset& UPlayerDataAsset::Get()
-{
-	const ULevelActorDataAsset* FoundDataAsset = USingletonLibrary::GetDataAssetByActorType(EActorType::Player);
-	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(FoundDataAsset);
-	checkf(PlayerDataAsset, TEXT("The Player Data Asset is not valid"));
-	return *PlayerDataAsset;
-}
-
-// Get nameplate material by index, is used by nameplate meshes
-UMaterialInterface* UPlayerDataAsset::GetNameplateMaterial(int32 Index) const
-{
-	if (NameplateMaterialsInternal.IsValidIndex(Index))
-	{
-		return NameplateMaterialsInternal[Index];
-	}
-
-	return nullptr;
-}
 
 // Sets default values
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
@@ -182,9 +76,6 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
-		// Disable gravity
-		MovementComponent->GravityScale = 0.f;
-
 		// Rotate player by movement
 		MovementComponent->bOrientRotationToMovement = true;
 		static const FRotator RotationRate(0.f, 540.f, 0.f);
@@ -195,16 +86,31 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	}
 }
 
+// Initialize a player actor, could be called multiple times
+void APlayerCharacter::ConstructPlayerCharacter()
+{
+	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionPlayerCharacter);
+	MapComponentInternal->ConstructOwnerActor();
+}
+
 // Spawns bomb on character position
 void APlayerCharacter::ServerSpawnBomb_Implementation()
 {
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// Should not spawn bomb in PIE
+		return;
+	}
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+
 	const AController* OwnedController = GetController();
-	if (!MapComponentInternal                       // The Map Component is not valid or transient
-	    || PowerupsInternal.FireN <= 0              // Null length of explosion
-	    || PowerupsInternal.BombN <= 0              // No more bombs
-	    || USingletonLibrary::IsEditorNotPieWorld() // Should not spawn bomb in PIE
-	    || !OwnedController                         // controller is not valid
-	    || OwnedController->IsMoveInputIgnored())   // controller is blocked
+	if (!MapComponentInternal                     // The Map Component is not valid or transient
+	    || PowerupsInternal.FireN <= 0            // Null length of explosion
+	    || PowerupsInternal.BombN <= 0            // No more bombs
+	    || !OwnedController                       // controller is not valid
+	    || OwnedController->IsMoveInputIgnored()) // controller is blocked
 	{
 		return;
 	}
@@ -279,7 +185,7 @@ void APlayerCharacter::BeginPlay()
 	{
 		OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-		if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 		}
@@ -299,15 +205,14 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ConstructPlayerCharacter();
+}
+
+// Is called on a player character construction, could be called multiple times
+void APlayerCharacter::OnConstructionPlayerCharacter()
+{
 	if (IS_TRANSIENT(this)        // This actor is transient
 	    || !MapComponentInternal) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Construct the actor's map component
-	const bool bIsConstructed = MapComponentInternal->OnConstruction();
-	if (!bIsConstructed)
 	{
 		return;
 	}
@@ -316,8 +221,7 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	if (HasAuthority()
 	    && CharacterIDInternal == INDEX_NONE)
 	{
-		FCells PlayerCells;
-		AGeneratedMap::Get().IntersectCellsByTypes(PlayerCells, TO_FLAG(EAT::Player), true);
+		const FCells PlayerCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
 		CharacterIDInternal = PlayerCells.Num() - 1;
 		ApplyCharacterID();
 	}
@@ -326,8 +230,8 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
-	    && CharacterIDInternal > 0)              // Is a bot
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
+	    && CharacterIDInternal > 0)                // Is a bot
 	{
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
 		if (!MapComponentInternal->bShouldShowRenders)
@@ -354,8 +258,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Update a player location on the level map
-	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+	if (MapComponentInternal)
+	{
+		// Update a player location on the Generated Map
+		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+
+		MapComponentInternal->TryDisplayOwnedCell();
+	}
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -391,12 +300,16 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 
 	if (!bNewHidden)
 	{
-		// Is added on level map
+		// Is added on Generated Map
+
+		ConstructPlayerCharacter();
+
 		TryPossessController();
+
 		return;
 	}
 
-	// Is removed from level map
+	// Is removed from Generated Map
 	if (Controller)
 	{
 		Controller->UnPossess();
@@ -459,7 +372,7 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 }
 
 // Event triggered when the bomb has been explicitly destroyed.
-void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent)
+void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent, UObject* DestroyCauser/* = nullptr*/)
 {
 	if (!MapComponent
 	    || MapComponent->GetActorType() != EAT::Bomb)
@@ -576,9 +489,16 @@ void APlayerCharacter::UpdateCollisionObjectType()
 // Possess a player or AI controller in dependence of current Character ID
 void APlayerCharacter::TryPossessController()
 {
+#if WITH_EDITOR	 // [IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// Should not spawn posses in PIE
+		return;
+	}
+#endif	//WITH_EDITOR [IsEditorNotPieWorld]
+
 	if (!HasAuthority()
-	    || CharacterIDInternal < 0
-	    || USingletonLibrary::IsEditorNotPieWorld())
+	    || CharacterIDInternal < 0)
 	{
 		return;
 	}
@@ -591,7 +511,7 @@ void APlayerCharacter::TryPossessController()
 
 	AController* ControllerToPossess = nullptr;
 
-	if (AMyPlayerController* MyPC = USingletonLibrary::GetMyPlayerController(CharacterIDInternal))
+	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(CharacterIDInternal))
 	{
 		if (MyPC->bCinematicMode)
 		{
@@ -605,7 +525,7 @@ void APlayerCharacter::TryPossessController()
 	else // Possess the AI
 	{
 		// Spawn AI if is needed
-		if (!IS_VALID(MyAIControllerInternal))
+		if (!MyAIControllerInternal)
 		{
 			MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		}
@@ -665,7 +585,7 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	}
 
 	const bool bIsPlayer = IsLocallyControlled() || !CharacterIDInternal;
-	const ELevelType PlayerFlag = USingletonLibrary::GetLevelType();
+	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
 	constexpr ELevelType AIFlag = ELT::None;
 	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
 	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
@@ -720,32 +640,21 @@ void APlayerCharacter::OnRep_CharacterID()
 	ApplyCharacterID();
 }
 
-// Move the player character by the forward vector
-void APlayerCharacter::MoveBackForward(const FInputActionValue& ActionValue)
+// Move the player character
+void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 {
-	const float ScaleValue = ActionValue.GetMagnitude();
+	// input is a Vector2D
+	const FVector2D MovementVector = ActionValue.Get<FVector2D>();
 
 	// Find out which way is forward
-	const FRotator Rotation = GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+	const FRotator ForwardRotation = UCellsUtilsLibrary::GetLevelGridRotation();
 
 	// Get forward vector
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-
-	AddMovementInput(Direction, ScaleValue);
-}
-
-// Move the player character by the right vector.
-void APlayerCharacter::MoveRightLeft(const FInputActionValue& ActionValue)
-{
-	const float ScaleValue = ActionValue.GetMagnitude();
-
-	// Find out which way is right
-	const FRotator Rotation = GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+	const FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
 
 	// Get right vector
-	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::Y);
 
-	AddMovementInput(Direction, ScaleValue);
+	AddMovementInput(ForwardDirection, MovementVector.Y);
+	AddMovementInput(RightDirection, MovementVector.X);
 }

@@ -13,7 +13,7 @@
  * The player state of a bomber player.
  */
 UCLASS(Config = "GameUserSettings")
-class AMyPlayerState final : public APlayerState
+class BOMBER_API AMyPlayerState final : public APlayerState
 {
 	GENERATED_BODY()
 
@@ -26,19 +26,19 @@ public:
 
 	/** Called when the player state was changed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnEndGameStateChanged OnEndGameStateChanged; //[DMD]
+	FOnEndGameStateChanged OnEndGameStateChanged;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerNameChanged, FName, NewName);
 
 	/** Called when player name is changed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnPlayerNameChanged OnPlayerNameChanged; //[DMD]
+	FOnPlayerNameChanged OnPlayerNameChanged;
 
 	/** Default constructor. */
 	AMyPlayerState();
 
 	/** Returns result of the game for controlled player after ending the game. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EEndGameState GetEndGameState() const { return EndGameStateInternal; }
 
 	/** Is created to expose APlayerState::SetPlayerName(NewName) to blueprints. */
@@ -46,11 +46,19 @@ public:
 	void SetPlayerNameCustom(FName NewName);
 
 	/** Returns custom player name. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Get Player Name Custom"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get Player Name Custom"))
 	FName GetPlayerFNameCustom() const;
 
 	/** Is overriden to return own player name that is saved to config. */
 	virtual FString GetPlayerNameCustom() const override { return GetPlayerFNameCustom().ToString(); }
+
+	/** Updates result of the game for controlled player. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void UpdateEndGameState();
+
+	/** Returns true if current player is alive.*/
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsPlayerAlive() const;
 
 protected:
 	/* ---------------------------------------------------
@@ -58,13 +66,13 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** Contains result of the game for controlled player after ending the game. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_EndGameState", Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
-	EEndGameState EndGameStateInternal = EEndGameState::None; //[G]
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
+	EEndGameState EndGameStateInternal = EEndGameState::None;
 
 	/** Config: custom name set by player.
-	 * Can contain different languages, uppercase, lowercase etc. */
+	 * Can contain different languages, uppercase, lowercase etc, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
-	FName CustomPlayerNameInternal; //[С]
+	FName CustomPlayerNameInternal;
 
 	/* ---------------------------------------------------
 	 *		Protected functions
@@ -73,18 +81,14 @@ protected:
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	/** Called when the game starts. Created widget. */
+	/** Called when the game starts. */
 	virtual void BeginPlay() override;
 
 	/** Listen game states to notify server about ending game for controlled player. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-	/** Updated result of the game for controlled player after ending the game. Called when one of players is destroying. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void ServerUpdateEndState();
-
-	/** Is called on clients to apply current End-Game state. */
-	UFUNCTION()
-	void OnRep_EndGameState();
+	/** Set new End-Game state, is made as multicast to notify own client asap. */
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void MulticastSetEndGameState(EEndGameState NewEndGameState);
 };

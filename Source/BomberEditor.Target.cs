@@ -7,7 +7,9 @@ public class BomberEditorTarget : TargetRules
     public BomberEditorTarget(TargetInfo Target) : base(Target)
     {
         Type = TargetType.Editor;
-        DefaultBuildSettings = BuildSettingsVersion.V2;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+        DefaultBuildSettings = BuildSettingsVersion.Latest;
+        bBuildAllModules = true;
         ExtraModuleNames.AddRange(new[] {"Bomber", "BomberEditor"});
     }
 }

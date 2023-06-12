@@ -6,6 +6,8 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "UI/MyHUD.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameModeBase)
 
 // Sets default values for this actor's properties
 AMyGameModeBase::AMyGameModeBase()

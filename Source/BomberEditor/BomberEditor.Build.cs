@@ -7,29 +7,24 @@ public class BomberEditor : ModuleRules
 	public BomberEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		CppStandard = CppStandardVersion.Latest;
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "InputCore", // Default
-			"EditorFramework", // FEditorDelegates::FToolkitManager
-			"Slate", "SlateCore", "PropertyEditor", "EditorStyle", // Property types customizations
-			"ToolWidgets", // SSearchableComboBox
-			"UnrealEd" // UMyUnrealEdEngine
+			"Core"
+			, "UnrealEd" // Created UMyUnrealEdEngine
+			// My modules
+			, "MyEditorUtils" // Created Created FMorphDataCustomization, FAttachedMeshCustomization
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
-
-		//Include Public and Private folder paths
-		PublicIncludePaths.AddRange(
-			new[]
+		PrivateDependencyModuleNames.AddRange(new[]
 			{
-				"BomberEditor/Public"
-			});
-
-		PrivateIncludePaths.AddRange(
-			new[]
-			{
-				"BomberEditor/Private"
-			});
+				"CoreUObject", "Engine", "InputCore", "Slate", "SlateCore" // Core
+				, "EditorFramework" // FEditorDelegates::FToolkitManager
+				, "EditorStyle" // SSocketChooserPopup
+				, "ToolWidgets" // SSearchableComboBox
+				, "PropertyEditor" // IPropertyTypeCustomization
+			}
+		);
 	}
 }

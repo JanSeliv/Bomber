@@ -2,36 +2,62 @@
 
 #pragma once
 
-#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Bomber.generated.h"
 
-#define IS_TRANSIENT(Obj) (!(Obj) || !(Obj)->IsValidLowLevelFast() || (Obj)->HasAnyFlags(RF_Transient | RF_ClassDefaultObject) || (Obj)->GetWorld() == nullptr || UGameplayStatics::GetCurrentLevelName((Obj)->GetWorld()) == "Transient")
-#define IS_VALID(Obj) (IsValid(Obj) && !(Obj)->IsPendingKillPending() && !IS_TRANSIENT(Obj))
+/** IS_TRANSIENT returns true is specified object is pending kill, CDO or exists on the Transient level. */
+static const FString TransientLevelName = TEXT("Transient");
+#define IS_TRANSIENT(Obj) \
+	( \
+		!IsValid(Obj) \
+		|| !(Obj)->IsValidLowLevelFast() \
+		|| (Obj)->HasAllFlags(RF_ClassDefaultObject) \
+		|| UGameplayStatics::GetCurrentLevelName(Obj) == TransientLevelName \
+	)
 
+/**
+ * Is useful for work with bit flags.
+ */
 #define TO_FLAG(Enum) static_cast<int32>(Enum)
 #define TO_ENUM(Enum, Bitmask) static_cast<Enum>(Bitmask)
 
 /**
-* Types of all actors on the Level Map
+ * Custom collision channels.
+ */
+#define ECC_Player0 ECollisionChannel::ECC_GameTraceChannel1
+#define ECC_Player1 ECollisionChannel::ECC_GameTraceChannel2
+#define ECC_Player2 ECollisionChannel::ECC_GameTraceChannel3
+#define ECC_Player3 ECollisionChannel::ECC_GameTraceChannel4
+#define ECC_UI ECollisionChannel::ECC_GameTraceChannel5
+
+/** Is init version of TEXT("None"). */
+#define TEXT_NONE FCoreTexts::Get().None
+
+/** Define Bomber log category. */
+BOMBER_API DECLARE_LOG_CATEGORY_EXTERN(LogBomber, Log, All);
+
+/**
+* Types of all actors on the Generated Map
 * Where Walls, Boxes and Bombs are the physical barriers for players
 * It is possible to make a bitmask of actors types
 */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EActorType : uint8
 {
-	None = 0,
 	///< None of the types for comparisons
-	Bomb = 1 << 0,
+	None = 0,
 	///< A destroyable exploding Obstacle
-	Box = 1 << 1,
+	Bomb = 1 << 0,
 	///< A destroyable Obstacle
-	Item = 1 << 2,
+	Box = 1 << 1,
 	///< A picked element giving power-up (FPowerUp struct)
-	Player = 1 << 3,
+	Item = 1 << 2,
 	///< A character that is controlled by a person or bot
-	Wall = 1 << 4,
+	Player = 1 << 3,
 	///< An absolute static and unchangeable block throughout the game
-	All = Bomb | Item | Player | Wall | Box ///< All actor types
+	Wall = 1 << 4,
+	///< All actor types
+	All = Bomb | Item | Player | Wall | Box
 };
 
 ENUM_CLASS_FLAGS(EActorType);
@@ -43,7 +69,7 @@ using EAT = EActorType;
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ELevelType : uint8
 {
-	None = 0 UMETA(DisplayName = "None"),
+	None = 0,
 	First = 1 << 0 UMETA(DisplayName = "Maya"),
 	Second = 1 << 1 UMETA(DisplayName = "City"),
 	Third = 1 << 2 UMETA(DisplayName = "Forest"),
@@ -57,18 +83,21 @@ using ELT = ELevelType;
 #define ELT_LAST_FLAG TO_FLAG(ELT::Fourth)
 
 /**
- * Pathfinding types by danger extents.
+ * Pathfinding types by which cells could be found.
  */
 UENUM(BlueprintType)
 enum class EPathType : uint8
 {
+	///< Break by the first AT::Wall without obstacles
 	Explosion,
-	///< Break to the first AT::Wall without obstacles
+	///< Break by the first AT::Wall + EAT::Bomb + EAT::Box
 	Free,
-	///< Break to the first AT::Wall + obstacles
+	///< Break by the first AT::Wall + EAT::Bomb + EAT::Box + explosions
 	Safe,
-	///< Break to the first AT::Wall + obstacles + explosions
-	Secure ///< Break to the first AT::Wall + obstacles + explosions + AT::Player
+	///< Break by the first AT::Wall + EAT::Bomb + EAT::Box + explosions + AT::Player
+	Secure,
+	///< Do not break the path
+	Any
 };
 
 /**
@@ -85,6 +114,9 @@ enum class EItemType : uint8
 	///< increases the amount of bombs
 	Fire ///< Increases the range of explosion
 };
+using EIT = EItemType;
+#define EIT_FIRST_FLAG TO_FLAG(EIT::Skate)
+#define EIT_LAST_FLAG TO_FLAG(EIT::Fire)
 
 /**
  * The replicated states of the game.

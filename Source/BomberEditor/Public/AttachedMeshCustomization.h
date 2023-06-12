@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "MyPropertyTypeCustomization.h"
+#include "MyPropertyType/MyPropertyTypeCustomization.h"
 
 /**
  * Reuse the socket chooser widget to allow choose the FAttachedMesh::Bone within UPlayerRow::Mesh.
@@ -39,6 +39,12 @@ public:
 	 * @param CustomizationUtils Utilities for customization
 	 */
 	virtual void CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils) override;
+
+	/** Creates customization for the Attached Mesh data. */
+	static void RegisterAttachedMeshCustomization();
+
+	/** Removes customization for the Attached Mesh data. */
+	static void UnregisterAttachedMeshCustomization();
 
 protected:
 	/* ---------------------------------------------------

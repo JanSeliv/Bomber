@@ -2,20 +2,30 @@
 
 #include "Controllers/MyAIController.h"
 //---
-#include "Bomber.h"
-#include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Globals/SingletonLibrary.h"
+#include "DataAssets/AIDataAsset.h"
+#include "DataAssets/GameStateDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include "TimerManager.h"
+#include "Components/GameFrameworkComponentManager.h"
+//---
+#if WITH_EDITOR
+#include "MyUnrealEdEngine.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
+#endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyAIController)
 
-// Returns the AI data asset
-const UAIDataAsset& UAIDataAsset::Get()
-{
-	const UAIDataAsset* AIDataAsset = USingletonLibrary::GetAIDataAsset();
-	checkf(AIDataAsset, TEXT("The AI Data Asset is not valid"));
-	return *AIDataAsset;
-}
+// Enable or disable all bots
+static TAutoConsoleVariable<bool> CVarAISetEnabled(
+	TEXT("Bomber.AI.SetEnabled"),
+	true,
+	TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
+	ECVF_Default);
 
 // Sets default values for this character's properties
 AMyAIController::AMyAIController()
@@ -30,28 +40,32 @@ AMyAIController::AMyAIController()
 // Makes AI go toward specified destination cell
 void AMyAIController::MoveToCell(const FCell& DestinationCell)
 {
-	if (!IS_VALID(OwnerInternal)) // The controlled character is not valid or is transient
+	if (!OwnerInternal)
 	{
 		return;
 	}
 
-	AIMoveToInternal = DestinationCell;
-	MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
+	if (!IsMoveInputIgnored())
+	{
+		AIMoveToInternal = DestinationCell;
+		MoveToLocation(AIMoveToInternal.Location, INDEX_NONE, false, false);
+	}
 
 #if WITH_EDITOR	 // [IsEditor]
-	if (USingletonLibrary::IsEditor())
+	if (FEditorUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
-		if (!USingletonLibrary::IsEditorNotPieWorld()) // [PIE]
+		if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay()) // PIE
 		{
-			USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
-		} // [IsEditorNotPieWorld]
+			UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
+		}
 
 		const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
 		if (MapComponent // is valid  map component
 		    && MapComponent->bShouldShowRenders)
 		{
-			USingletonLibrary::AddDebugTextRenders(OwnerInternal, {AIMoveToInternal}, FLinearColor::Gray, 255.f, 300.f, TEXT("x"));
+			static const FDisplayCellsParams DisplayParams{FLinearColor::Gray, 255.f, 300.f, TEXT("x")};
+			UCellsUtilsLibrary::DisplayCell(OwnerInternal, DestinationCell, DisplayParams);
 		}
 	}
 #endif
@@ -73,21 +87,25 @@ void AMyAIController::OnConstruction(const FTransform& Transform)
 	Possess(OwnerInternal);
 }
 
+// This is called only in the gameplay before calling begin play
+void AMyAIController::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// Register controller to let to be implemented by game features
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+}
+
 //  Called when the game starts or when spawned
 void AMyAIController::BeginPlay()
 {
 	// Call to super
 	Super::BeginPlay();
 
-	const UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
 	// Setup timer handle to update AI brain (initialized being paused)
-	FTimerManager& TimerManager = World->GetTimerManager();
-	TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, UGeneratedMapDataAsset::Get().GetTickInterval(), true, KINDA_SMALL_NUMBER);
+	constexpr bool bInLoop = true;
+	FTimerManager& TimerManager = GetWorldTimerManager();
+	TimerManager.SetTimer(AIUpdateHandleInternal, this, &ThisClass::UpdateAI, UGameStateDataAsset::Get().GetTickInterval(), bInLoop, KINDA_SMALL_NUMBER);
 	TimerManager.PauseTimer(AIUpdateHandleInternal);
 }
 
@@ -96,25 +114,28 @@ void AMyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	if (IS_VALID(InPawn) == false)
+	if (!InPawn)
 	{
 		return;
 	}
 
 	OwnerInternal = Cast<APlayerCharacter>(InPawn);
 
-	if (!USingletonLibrary::GOnAIUpdatedDelegate.IsBoundToObject(this))
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld()
+	    && !UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
 	{
-		USingletonLibrary::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
 	}
+#endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState(this) == ECGS::InGame;
+	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
 	SetAI(bMatchStarted);
 }
 
@@ -125,12 +146,12 @@ void AMyAIController::OnUnPossess()
 
 	OwnerInternal = nullptr;
 
-	USingletonLibrary::GOnAIUpdatedDelegate.RemoveAll(this);
-
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 	{
-		MyGameState->OnGameStateChanged.RemoveAll(this);
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.RemoveAll(this);
 	}
+#endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	SetAI(false);
 }
@@ -141,27 +162,36 @@ void AMyAIController::SetIgnoreMoveInput(bool bShouldIgnore)
 	// Do not call super to avoid stacking, override it
 
 	IgnoreMoveInput = bShouldIgnore;
-	SetAI(!bShouldIgnore);
+}
+
+// Stops running to target
+void AMyAIController::Reset()
+{
+	// Abort current movement task
+	Super::Reset();
+
+	// Reset target location
+	AIMoveToInternal = FCell::InvalidCell;
 }
 
 // The main AI logic
 void AMyAIController::UpdateAI()
 {
 	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
-	if (!IS_VALID(OwnerInternal)   // The controller character is not valid or is transient
-	    || !IsValid(MapComponent)) // The Map Component is not valid
+	if (!OwnerInternal
+	    || !IsValid(MapComponent)
+	    || !CVarAISetEnabled.GetValueOnAnyThread()) // AI is disabled
 	{
 		return;
 	}
 
-	const AGeneratedMap& LevelMap = AGeneratedMap::Get();
 	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
 
 #if WITH_EDITOR
-	if (USingletonLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		USingletonLibrary::ClearOwnerTextRenders(OwnerInternal);
-		AIMoveToInternal = FCell::ZeroCell;
+		UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
+		AIMoveToInternal = FCell::InvalidCell;
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -171,12 +201,12 @@ void AMyAIController::UpdateAI()
 	const FCell& F0 = MapComponent->GetCell();
 
 	// Searching 'SAFE NEIGHBORS'
-	static constexpr float MaxInteger = TNumericLimits<int32>::Max();
+	static constexpr int32 MaxInteger = TNumericLimits<int32>::Max();
 	FCells Free;
 	uint8 bIsDangerous;
 	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous) // two searches (safe and free)
 	{
-		LevelMap.GetSidesCells(Free, F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MaxInteger);
+		Free = UCellsUtilsLibrary::GetCellsAround(F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MaxInteger);
 		if (!bIsDangerous && Free.Num() > 0)
 		{
 			// Remove this cell from array
@@ -188,12 +218,10 @@ void AMyAIController::UpdateAI()
 	// Is there an item nearby?
 	if (bIsDangerous == false)
 	{
-		FCells ItemsFromF0;
-		LevelMap.GetSidesCells(ItemsFromF0, F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius());
-		LevelMap.IntersectCellsByTypes(ItemsFromF0, TO_FLAG(EAT::Item), false);
-		if (ItemsFromF0.Num() > 0)
+		const FCells ItemsFromF0 = UCellsUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius(), TO_FLAG(EAT::Item));
+		if (!ItemsFromF0.IsEmpty())
 		{
-			MoveToCell(ItemsFromF0.Array()[0]);
+			MoveToCell(FCell::GetFirstCellInSet(ItemsFromF0));
 			return;
 		}
 	}
@@ -207,14 +235,13 @@ void AMyAIController::UpdateAI()
 	for (auto F = Free.CreateIterator(); F; ++F)
 	{
 		if (bIsDangerous // is not dangerous situation
-		    && USingletonLibrary::CalculateCellsLength(F0, *F) > AIDataAsset.GetNearDangerousRadius())
+		    && FCell::Distance<float>(F0, *F) > AIDataAsset.GetNearDangerousRadius())
 		{
 			F.RemoveCurrent(); // removing distant cells
 			continue;
 		}
 
-		FCells ThisCrossway;
-		LevelMap.GetSidesCells(ThisCrossway, *F, EPathType::Safe, AIDataAsset.GetCrosswaySearchRadius());
+		const FCells ThisCrossway = UCellsUtilsLibrary::GetCellsAround(*F, EPathType::Safe, AIDataAsset.GetCrosswaySearchRadius());
 		FCells Way = Free;                  // Way = Safe / (Free + F0)
 		Way.Emplace(F0);                    // Way = Free + F0
 		Way = ThisCrossway.Difference(Way); // Way = Safe / Way
@@ -223,27 +250,28 @@ void AMyAIController::UpdateAI()
 		{
 			// Finding crossways
 			AllCrossways.Emplace(*F); // is the crossway
-			LevelMap.IntersectCellsByTypes(Way = ThisCrossway, TO_FLAG(EAT::Player), false, MapComponent);
+			Way = UCellsUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Player));
+			Way.Remove(MapComponent->GetCell());
 			if (Way.Num() == 0)
 			{
 				SecureCrossways.Emplace(*F);
 			}
 
 			// Finding items
-			LevelMap.IntersectCellsByTypes(ThisCrossway, TO_FLAG(EAT::Item), false);
-			if (ThisCrossway.Num() > 0) // Is there items in this crossway?
+			FCells ItemsAround = UCellsUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Item));
+			if (ItemsAround.Num() > 0) // Is there items in this crossway?
 			{
-				ThisCrossway = ThisCrossway.Intersect(Free); // ThisCrossway = ThisCrossway ∪ Free
-				if (ThisCrossway.Num() > 0)                  // Is there direct items in this crossway?
+				ItemsAround = ItemsAround.Intersect(Free); // ItemsAround = ItemsAround ∪ Free
+				if (ItemsAround.Num() > 0)                 // Is there direct items in this crossway?
 				{
 					if (bIsItemInDirect == false) // is the first found direct item
 					{
 						bIsItemInDirect = true;
 						FoundItems.Empty(); // clear all previously found corner items
 					}
-					FoundItems = FoundItems.Union(ThisCrossway); // Add found direct items
-				}                                                // item around the corner
-				else if (bIsItemInDirect == false)               // Need corner item?
+					FoundItems = FoundItems.Union(ItemsAround); // Add found direct items
+				}                                               // item around the corner
+				else if (bIsItemInDirect == false)              // Need corner item?
 				{
 					FoundItems.Emplace(*F); // Add found corner item
 				}
@@ -267,16 +295,16 @@ void AMyAIController::UpdateAI()
 	FCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free; // selected cells
 	bool bIsFilteringFailed = false;
 	static constexpr int32 FilteringStepsNum = 4;
-	for (int32 i = 0; i < FilteringStepsNum; ++i)
+	for (int32 Index = 0; Index < FilteringStepsNum; ++Index)
 	{
 		FCells FilteringStep;
-		switch (i)
+		switch (Index)
 		{
 			case 0: // All crossways: Filtered ∪ AllCrossways
 				FilteringStep = Filtered.Intersect(AllCrossways);
 				break;
 			case 1: // Without players
-				LevelMap.GetSidesCells(FilteringStep, F0, EPathType::Secure, MaxInteger);
+				FilteringStep = UCellsUtilsLibrary::GetCellsAround(F0, EPathType::Secure, MaxInteger);
 				FilteringStep = Filtered.Intersect(FilteringStep);
 				break;
 			case 2: // Without crossways with another players
@@ -285,7 +313,7 @@ void AMyAIController::UpdateAI()
 			case 3: // Only nearest cells (length <= near radius)
 				for (const FCell& It : Filtered)
 				{
-					if (USingletonLibrary::CalculateCellsLength(F0, It) <= AIDataAsset.GetNearFilterRadius())
+					if (FCell::Distance<float>(F0, It) <= AIDataAsset.GetNearFilterRadius())
 					{
 						FilteringStep.Emplace(It);
 					}
@@ -311,9 +339,8 @@ void AMyAIController::UpdateAI()
 	    && bIsFilteringFailed == false // filtering was not failed
 	    && bIsItemInDirect == false)   // was not found direct items
 	{
-		FCells BoxesAndPlayers;
-		LevelMap.GetSidesCells(BoxesAndPlayers, F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN);
-		LevelMap.IntersectCellsByTypes(BoxesAndPlayers, TO_FLAG(EAT::Box | EAT::Player), false, MapComponent);
+		FCells BoxesAndPlayers = UCellsUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Explosion, OwnerInternal->GetPowerups().FireN, TO_FLAG(EAT::Box | EAT::Player));
+		BoxesAndPlayers.Remove(MapComponent->GetCell());
 		if (BoxesAndPlayers.Num() > 0) // Are bombs or players in own bomb radius
 		{
 			OwnerInternal->ServerSpawnBomb();
@@ -322,7 +349,8 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR	 // [Editor]
 			if (MapComponent->bShouldShowRenders)
 			{
-				USingletonLibrary::AddDebugTextRenders(OwnerInternal, {F0}, FLinearColor::Red, 261.F, 95.F, TEXT("Attack"));
+				static const FDisplayCellsParams DisplayParams{FLinearColor::Red, 261.F, 95.F, TEXT("Attack")};
+				UCellsUtilsLibrary::DisplayCell(OwnerInternal, F0, DisplayParams);
 			}
 #endif	// [Editor]
 		}
@@ -335,7 +363,7 @@ void AMyAIController::UpdateAI()
 		return;
 	}
 
-	MoveToCell(Filtered.Array()[FMath::RandRange(NULL, Filtered.Num() - 1)]);
+	MoveToCell(Filtered.Array()[FMath::RandRange(0, Filtered.Num() - 1)]);
 
 #if WITH_EDITOR	 // [Editor]
 	if (MapComponent->bShouldShowRenders)
@@ -345,7 +373,7 @@ void AMyAIController::UpdateAI()
 		{
 			FCells VisualizingStep;
 			FLinearColor Color;
-			FString String = "+";
+			FName Symbol = TEXT("+");
 			FVector Position = FVector::ZeroVector;
 			switch (Index)
 			{
@@ -365,7 +393,7 @@ void AMyAIController::UpdateAI()
 				{
 					VisualizingStep = Filtered;
 					Color = FLinearColor::Yellow;
-					String = TEXT("F");
+					Symbol = TEXT("F");
 					static const FVector DefaultPosition(-50.0F, -50.0F, 0.0F);
 					Position = DefaultPosition;
 					break;
@@ -373,7 +401,8 @@ void AMyAIController::UpdateAI()
 				default:
 					break;
 			}
-			USingletonLibrary::AddDebugTextRenders(OwnerInternal, VisualizingStep, Color, 263.f, 124.f, String, Position);
+			const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, Symbol, Position};
+			UCellsUtilsLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
 		} // [Loopy visualization]
 	}
 #endif	// [Editor]
@@ -382,17 +411,19 @@ void AMyAIController::UpdateAI()
 // Enable or disable AI for this bot
 void AMyAIController::SetAI(bool bShouldEnable)
 {
-	const UWorld* World = GetWorld();
-	if (!World)
+	const bool bWantsEnableDeadAI = !OwnerInternal && bShouldEnable;
+	if (bWantsEnableDeadAI
+		|| !HasAuthority())
 	{
 		return;
 	}
 
-	// Reset target location
-	AIMoveToInternal = FCell::ZeroCell;
+	Reset();
+
+	SetIgnoreMoveInput(!bShouldEnable);
 
 	// Handle the Ai updating timer
-	FTimerManager& TimerManager = World->GetTimerManager();
+	FTimerManager& TimerManager = GetWorldTimerManager();
 	if (bShouldEnable)
 	{
 		TimerManager.UnPauseTimer(AIUpdateHandleInternal);
@@ -412,12 +443,12 @@ void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		case ECurrentGameState::GameStarting:
 		case ECurrentGameState::EndGame:
 		{
-			SetIgnoreMoveInput(true);
+			SetAI(false);
 			break;
 		}
 		case ECurrentGameState::InGame:
 		{
-			SetIgnoreMoveInput(false);
+			SetAI(true);
 			break;
 		}
 		default:

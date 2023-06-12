@@ -2,10 +2,11 @@
 
 #include "Components/MySkeletalMeshComponent.h"
 //---
-#include "Globals/SingletonLibrary.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "DataAssets/PlayerDataAsset.h"
 //---
 #include "Materials/MaterialInstanceDynamic.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MySkeletalMeshComponent)
 
 // The empty data
 const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData();
@@ -186,7 +187,7 @@ bool UMySkeletalMeshComponent::ArePropsWantToUpdate() const
 			UMeshComponent* MeshComponent = nullptr;
 			if (const auto SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshCompIt))
 			{
-				return SkeletalMeshComp->SkeletalMesh == AttachedMeshIt.AttachedMesh;
+				return SkeletalMeshComp->GetSkinnedAsset() == AttachedMeshIt.AttachedMesh;
 			}
 			else if (const auto StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
 			{
@@ -229,9 +230,9 @@ void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
 		}
 
 		const TArray<UMaterialInterface*>& AllMaterials = MeshComponent->GetMaterials();
-		for (int32 i = 0; i < AllMaterials.Num(); ++i)
+		for (int32 Index = 0; Index < AllMaterials.Num(); ++Index)
 		{
-			MeshComponent->SetMaterial(i, MaterialInstanceDynamic);
+			MeshComponent->SetMaterial(Index, MaterialInstanceDynamic);
 		}
 	};
 

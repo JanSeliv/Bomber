@@ -4,27 +4,23 @@
 //---
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Controllers/MyAIController.h"
-#include "Globals/SingletonLibrary.h"
+#include "Components/MyCameraComponent.h"
+#include "DataAssets/ItemDataAsset.h"
 #include "LevelActors/BoxActor.h"
-#include "LevelActors/ItemActor.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "UI/MyHUD.h"
-#include "UI/SettingsWidget.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyCheatManager)
 
-// Called when CheatManager is created to allow any needed initialization
-void UMyCheatManager::InitCheatManager()
+// Returns bitmask from reverse bitmask in string
+int32 UMyCheatManager::GetBitmaskFromReverseString(const FString& ReverseBitmaskStr)
 {
-	Super::InitCheatManager();
-}
-
-// Returns bitmask by string
-int32 UMyCheatManager::GetBitmask(const FString& String) const
-{
-	int32 Bitmask = 0, Index = 0;
-	for (int32 It = 0; It < String.Len(); ++It)
+	int32 Bitmask = 0;
+	int32 Index = 0;
+	for (int32 It = 0; It < ReverseBitmaskStr.Len(); ++It)
 	{
-		FString Char = String.Mid(It, 1);
+		FString Char = ReverseBitmaskStr.Mid(It, 1);
 		if (Char.IsNumeric())
 		{
 			const int32 Bit = !FCString::Atoi(*Char) ? 0 : 1;
@@ -35,51 +31,65 @@ int32 UMyCheatManager::GetBitmask(const FString& String) const
 	return Bitmask;
 }
 
-// Enable or disable all bots
-void UMyCheatManager::SetAI(bool bShouldEnable) const
+// Returns bitmask by actor types in string
+int32 UMyCheatManager::GetBitmaskFromActorTypesString(const FString& ActorTypesBitmaskStr)
 {
-	FMapComponents PlayerComponents;
-	AGeneratedMap::Get().GetMapComponents(PlayerComponents, TO_FLAG(EActorType::Player));
-	for (const UActorComponent* MapComponentIt : PlayerComponents)
+	if (ActorTypesBitmaskStr.IsEmpty())
 	{
-		const APawn* Pawn = MapComponentIt ? Cast<APawn>(MapComponentIt->GetOwner()) : nullptr;
-		const auto MyAIController = Pawn->GetController<AMyAIController>();
-		if (MyAIController)
+		return 0;
+	}
+
+	static const FString Delimiter = TEXT(" ");
+	TArray<FString> ActorTypesStrings;
+	ActorTypesBitmaskStr.ParseIntoArray(ActorTypesStrings, *Delimiter);
+
+	const static FString ActorTypeEnumPathName = TEXT("/Script/Bomber.EActorType");
+	static const UEnum* ActorTypeEnumClass = UClass::TryFindTypeSlow<UEnum>(ActorTypeEnumPathName, EFindFirstObjectOptions::ExactClass);
+	if (!ensureMsgf(ActorTypeEnumClass, TEXT("%s: 'ActorTypeEnumClass' is not found by next path: %s"), *FString(__FUNCTION__), *ActorTypeEnumPathName))
+	{
+		return 0;
+	}
+
+	int32 Bitmask = 0;
+	for (const FString& ActorTypeStrIt : ActorTypesStrings)
+	{
+		const int32 EnumFlag = ActorTypeEnumClass->GetValueByNameString(ActorTypeStrIt);
+		if (EnumFlag != INDEX_NONE)
 		{
-			MyAIController->SetAI(bShouldEnable);
+			Bitmask |= EnumFlag;
 		}
 	}
+
+	return Bitmask;
 }
 
 // Destroy all specified level actors on the map
-void UMyCheatManager::DestroyAllByType(EActorType ActorType) const
+void UMyCheatManager::DestroyAllByType(EActorType ActorType)
 {
-	FCells Cells;
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
-	LevelMap.IntersectCellsByTypes(Cells, TO_FLAG(ActorType), true);
-	LevelMap.DestroyActorsFromMap(Cells);
+	const FCells Cells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorType));
+	AGeneratedMap::Get().DestroyLevelActorsOnCells(Cells);
 }
 
 // Destroy characters in specified slots
-void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
+void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 {
 	// Set bitmask
-	const int32 Bitmask = GetBitmask(Slot);
+	const int32 Bitmask = GetBitmaskFromReverseString(Slot);
 	if (!Bitmask)
 	{
 		return;
 	}
 
-	AGeneratedMap& LevelMap = AGeneratedMap::Get();
+	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
 
 	// Get all players
 	FCells CellsToDestroy;
 	FMapComponents MapComponents;
-	LevelMap.GetMapComponents(MapComponents, TO_FLAG(EActorType::Player));
+	GeneratedMap.GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
-		const APlayerCharacter* PlayerCharacter = MapComponentIt ? Cast<APlayerCharacter>(MapComponentIt->GetOwner()) : nullptr;
-		const bool bDestroy = PlayerCharacter && ((1 << PlayerCharacter->GetCharacterID()) & Bitmask) != 0;
+		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
+		const bool bDestroy = PlayerCharacter && (1 << PlayerCharacter->GetCharacterID() & Bitmask) != 0;
 		if (bDestroy) // mark to destroy if specified in slot
 		{
 			CellsToDestroy.Emplace(MapComponentIt->GetCell());
@@ -87,19 +97,18 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot) const
 	}
 
 	// Destroy all specified
-	LevelMap.DestroyActorsFromMap(CellsToDestroy);
+	GeneratedMap.DestroyLevelActorsOnCells(CellsToDestroy);
 }
 
 // Override the chance to spawn item after box destroying
-void UMyCheatManager::SetItemChance(int32 Chance) const
+void UMyCheatManager::SetItemChance(int32 Chance)
 {
 	// Get all boxes
-	FCells CellsToDestroy;
 	FMapComponents MapComponents;
-	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EActorType::Box));
+	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::Box));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
-		ABoxActor* BoxActor = MapComponentIt ? Cast<ABoxActor>(MapComponentIt->GetOwner()) : nullptr;
+		ABoxActor* BoxActor = MapComponentIt ? MapComponentIt->GetOwner<ABoxActor>() : nullptr;
 		if (BoxActor)
 		{
 			// Override new chance
@@ -109,9 +118,9 @@ void UMyCheatManager::SetItemChance(int32 Chance) const
 }
 
 // Override the level of each powerup for a controlled player
-void UMyCheatManager::SetPowerups(int32 NewLevel) const
+void UMyCheatManager::SetPowerups(int32 NewLevel)
 {
-	if (APlayerCharacter* PlayerCharacter = USingletonLibrary::GetLocalPlayerCharacter())
+	if (APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter())
 	{
 		static constexpr int32 MinItemsNum = 1;
 		const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
@@ -124,52 +133,67 @@ void UMyCheatManager::SetPowerups(int32 NewLevel) const
 }
 
 // Enable or disable the God mode to make a controllable player undestroyable
-void UMyCheatManager::SetGodMode(bool bShouldEnable) const
+void UMyCheatManager::SetGodMode(bool bShouldEnable)
 {
-	const APlayerCharacter* ControllablePlayer = USingletonLibrary::GetLocalPlayerCharacter();
+	const APlayerCharacter* ControllablePlayer = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
 	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(ControllablePlayer))
 	{
 		MapComponent->SetUndestroyable(bShouldEnable);
 	}
 }
 
-// Set new setting value
-void UMyCheatManager::SetSetting(const FString& TagByValue) const
+// Shows coordinates of all level actors by specified types
+void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
 {
-	if (TagByValue.IsEmpty())
+	// Set on the level to visualize new level actors
+	const int32 ActorTypesBitmask = GetBitmaskFromActorTypesString(ActorTypesString);
+	AGeneratedMap::Get().DisplayCellsActorTypes = ActorTypesBitmask;
+
+	// Update existed level actors
+	FMapComponents MapComponents;
+	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::All));
+	for (UMapComponent* MapComponentIt : MapComponents)
 	{
-		return;
+		// Clear previous cell renders for all level actors in game
+		UCellsUtilsLibrary::ClearDisplayedCells(MapComponentIt);
+
+		// Show new cell renders for specified level actors
+		MapComponentIt->TryDisplayOwnedCell();
 	}
+}
 
-	static const FString Delimiter = TEXT("?");
-	TArray<FString> SeparatedStrings;
-	TagByValue.ParseIntoArray(SeparatedStrings, *Delimiter);
+// Sets the size for generated map, it will automatically regenerate the level for given size
+void UMyCheatManager::SetLevelSize(const FString& LevelSize)
+{
+	static const FString Delimiter = TEXT("x");
+	FString Width = TEXT("");
+	FString Height = TEXT("");
 
-	static constexpr int32 TagIndex = 0;
-	FName TagName = NAME_None;
-	if (SeparatedStrings.IsValidIndex(TagIndex))
+	if (LevelSize.Split(Delimiter, &Width, &Height, ESearchCase::IgnoreCase))
 	{
-		TagName = *SeparatedStrings[TagIndex];
+		const FIntPoint NewLevelSize(FCString::Atoi(*Width), FCString::Atoi(*Height));
+		AGeneratedMap::Get().SetLevelSize(NewLevelSize);
 	}
+}
 
-	if (TagName.IsNone())
+// Tweak the custom additive angle to affect the fit distance calculation from camera to the level
+void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
+{
+	if (UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera())
 	{
-		return;
+		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
+		DistanceParams.FitViewAdditiveAngle = InFitViewAdditiveAngle;
+		LevelCamera->SetCameraDistanceParams(MoveTemp(DistanceParams));
 	}
+}
 
-	// Extract value
-	static constexpr int32 ValueIndex = 1;
-	FString TagValue = TEXT("");
-	if (SeparatedStrings.IsValidIndex(ValueIndex))
+// Tweak the minimal distance in UU from camera to the level
+void UMyCheatManager::MinDistance(float InMinDistance)
+{
+	if (UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera())
 	{
-		TagValue = SeparatedStrings[ValueIndex];
-	}
-
-	const AMyHUD* MyHUD = USingletonLibrary::GetMyHUD();
-	USettingsWidget* SettingsWidget = MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
-	if (SettingsWidget)
-	{
-		SettingsWidget->SetSettingValue(TagName, TagValue);
-		SettingsWidget->SaveSettings();
+		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
+		DistanceParams.MinDistance = InMinDistance;
+		LevelCamera->SetCameraDistanceParams(MoveTemp(DistanceParams));
 	}
 }

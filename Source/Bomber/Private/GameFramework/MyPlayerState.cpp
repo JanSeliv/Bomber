@@ -4,10 +4,11 @@
 //---
 #include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Globals/SingletonLibrary.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Net/UnrealNetwork.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyPlayerState)
 
 /* ---------------------------------------------------
  *		Protected
@@ -62,16 +63,18 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ThisClass, CustomPlayerNameInternal);
 }
 
-// Called when the game starts. Created widget
+// Called when the game starts
 void AMyPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Listen states
-	if (AMyGameStateBase* MyGameState = USingletonLibrary::GetMyGameState())
+	if (HasAuthority())
 	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-		MyGameState->OnAnyPlayerDestroyed.AddDynamic(this, &ThisClass::ServerUpdateEndState);
+		// Listen states
+		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+		{
+			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+		}
 	}
 }
 
@@ -82,13 +85,12 @@ void AMyPlayerState::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	{
 		case ECurrentGameState::GameStarting:
 		{
-			EndGameStateInternal = EEndGameState::None;
-			OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+			MulticastSetEndGameState(EEndGameState::None);
 			break;
 		}
 		case ECurrentGameState::EndGame:
 		{
-			ServerUpdateEndState();
+			UpdateEndGameState();
 			break;
 		}
 		default:
@@ -96,77 +98,70 @@ void AMyPlayerState::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	}
 }
 
-// Updated result of the game for controlled player after ending the game. Called when one of players is destroying
-void AMyPlayerState::ServerUpdateEndState_Implementation()
+// Updates result of the game for controlled player
+void AMyPlayerState::UpdateEndGameState()
 {
-	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState(this);
-	if (CurrentGameState == ECurrentGameState::None     // is not valid game state, nullptr or not fully initialized
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	const ECurrentGameState CurrentGameState = MyGameState ? MyGameState->GetCurrentGameState() : ECGS::None;
+	if (CurrentGameState == ECGS::None                  // is not valid game state, nullptr or not fully initialized
 	    || EndGameStateInternal != EEndGameState::None) // end state was set already for current game
 	{
 		return;
 	}
 
 	// handle timer is 0
-	if (CurrentGameState == ECurrentGameState::EndGame) // game was finished
+	if (MyGameState->IsInGameTimerElapsed())
 	{
-		EndGameStateInternal = EEndGameState::Draw;
-		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
-		return;
-	}
-
-	if (CurrentGameState != ECurrentGameState::InGame)
-	{
+		MulticastSetEndGameState(EEndGameState::Draw);
 		return;
 	}
 
 	// Game is running
 
 	// locals
-	bool bUpdateGameState = false;
-	bool bUpdateEndGameState = false;
-	const int32 PlayerNum = USingletonLibrary::GetAlivePlayersNum();
-	const APawn* PawnOwner = GetPawn();
-	if (!PawnOwner
-	    || !PawnOwner->GetController()) // is dead owner
+	const int32 PlayerNum = UMyBlueprintFunctionLibrary::GetAlivePlayersNum();
+
+	if (!IsPlayerAlive())
 	{
 		if (PlayerNum <= 0) // last players were blasted together
 		{
-			EndGameStateInternal = EEndGameState::Draw;
-			bUpdateGameState = true; // no players to play, game ended
-			bUpdateEndGameState = true;
+			MulticastSetEndGameState(EEndGameState::Draw);
 		}
 		else
 		{
-			EndGameStateInternal = EEndGameState::Lose;
-			bUpdateGameState = PlayerNum == 1;
-			bUpdateEndGameState = true;
+			MulticastSetEndGameState(EEndGameState::Lose);
 		}
 	}
 	else if (PlayerNum == 1) // is alive owner and is the last player
 	{
-		if (PawnOwner->IsPlayerControlled())
-		{
-			EndGameStateInternal = EEndGameState::Win;
-		}
-		bUpdateGameState = true; // we have winner, game ended
-		bUpdateEndGameState = true;
-	}
-
-	// Need to notify that the game was ended
-	if (bUpdateGameState)
-	{
-		USingletonLibrary::GetMyGameState()->ServerSetGameState(ECurrentGameState::EndGame);
-	}
-
-	if (bUpdateEndGameState
-	    && OnEndGameStateChanged.IsBound())
-	{
-		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+		MulticastSetEndGameState(EEndGameState::Win);
 	}
 }
 
-// Is called on clients to apply current End-Game state
-void AMyPlayerState::OnRep_EndGameState()
+// Returns true if current player is alive
+bool AMyPlayerState::IsPlayerAlive() const
 {
-	OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+	const APawn* PawnOwner = GetPawn();
+	return PawnOwner && PawnOwner->GetController() != nullptr;
+}
+
+// Set new End-Game state, is made as multicast to notify own client asap
+void AMyPlayerState::MulticastSetEndGameState_Implementation(EEndGameState NewEndGameState)
+{
+	if (NewEndGameState == EndGameStateInternal)
+	{
+		return;
+	}
+
+	EndGameStateInternal = NewEndGameState;
+
+	if (OnEndGameStateChanged.IsBound())
+	{
+		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+	}
 }

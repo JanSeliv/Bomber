@@ -2,21 +2,17 @@
 
 #include "GameFramework/MyGameUserSettings.h"
 //---
-#include "Globals/SingletonLibrary.h"
+#include "UI/SettingsWidget.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Engine/DataTable.h"
-#include "UI/SettingsWidget.h"
-
-#if WITH_EDITOR //[OnDataTableChanged]
-#include "DataTableEditorUtils.h"
-#include "EditorFramework/AssetImportData.h"
-#include "Misc/FileHelper.h"
-#endif // WITH_EDITOR [OnDataTableChanged]
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameUserSettings)
 
 // Returns the game user settings
 UMyGameUserSettings& UMyGameUserSettings::Get()
 {
-	UMyGameUserSettings* MyGameUserSettings = USingletonLibrary::GetMyGameUserSettings();
+	UMyGameUserSettings* MyGameUserSettings = UMyBlueprintFunctionLibrary::GetMyGameUserSettings();
 	checkf(MyGameUserSettings, TEXT("My Game User Settings is not valid"));
 	return *MyGameUserSettings;
 }
@@ -95,7 +91,10 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 	{
 		if (MonitorIt.bIsPrimary)
 		{
-			MaxDisplayResolution = FIntPoint(MonitorIt.NativeWidth, MonitorIt.NativeHeight);
+			const FIntPoint NativeRes(MonitorIt.NativeWidth, MonitorIt.NativeHeight);
+			const FIntPoint WorkAreaRes(MonitorIt.WorkArea.Right - MonitorIt.WorkArea.Left, MonitorIt.WorkArea.Bottom - MonitorIt.WorkArea.Top);
+			const FIntPoint DisplayRectRes(MonitorIt.DisplayRect.Right - MonitorIt.DisplayRect.Left, MonitorIt.DisplayRect.Bottom - MonitorIt.DisplayRect.Top);
+			MaxDisplayResolution = NativeRes.ComponentMax(WorkAreaRes).ComponentMax(DisplayRectRes).ComponentMax(MonitorIt.MaxResolution);
 			break;
 		}
 	}
@@ -105,9 +104,16 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		return;
 	}
 
-	const int32 MaxDisplayWidth = MaxDisplayResolution.X;
-	const int32 MaxDisplayHeight = MaxDisplayResolution.Y;
+	const float MaxDisplayWidth = static_cast<float>(MaxDisplayResolution.X);
+	const float MaxDisplayHeight = static_cast<float>(MaxDisplayResolution.Y);
 	const float AspectRatio = FMath::DivideAndRoundDown<float>(MaxDisplayWidth, MaxDisplayHeight);
+
+	bool bIsUltraWide = false;
+	constexpr float UltraWideAspectRatio = 21.f / 9.f;
+	if (AspectRatio >= UltraWideAspectRatio)
+	{
+		bIsUltraWide = true;
+	}
 
 	TextResolutionsInternal.Empty();
 	IntResolutionsInternal.Empty();
@@ -122,17 +128,21 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		const FScreenResolutionRHI& ResolutionIt = ResolutionsArray[Index];
 		const int32 WidthIt = ResolutionIt.Width;
 		const int32 HeightIt = ResolutionIt.Height;
+
 		const float AspectRatioIt = FMath::DivideAndRoundDown<float>(WidthIt, HeightIt);
 
-		const bool bIsSameAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio);
+		const bool bIsCorrectAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio)
+		                                || (bIsUltraWide && AspectRatioIt >= UltraWideAspectRatio);
 		const bool bIsGreaterThanMin = WidthIt >= MinResolutionSizeXInternal
 		                               && HeightIt >= MinResolutionSizeYInternal;
 		const bool bIsLessThanMax = WidthIt <= MaxDisplayWidth
 		                            && HeightIt <= MaxDisplayHeight;
+		const bool bIsEightDivisible = WidthIt % 8 == 0 && HeightIt % 8 == 0;
 
-		if (!bIsSameAspectRatio
+		if (!bIsCorrectAspectRatio
 		    || !bIsGreaterThanMin
-		    || !bIsLessThanMax)
+		    || !bIsLessThanMax
+		    || !bIsEightDivisible)
 		{
 			continue;
 		}
@@ -190,14 +200,14 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 // Update fullscreen mode on UI for cases when it's changed outside (e.g. by Alt+Enter)
 void UMyGameUserSettings::UpdateFullscreenEnabled()
 {
-	USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
 	if (!SettingsWidget)
 	{
 		return;
 	}
 
-	static const FFunctionPicker SetFullscreenFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFullscreenEnabled));
-	const FGameplayTag& FullscreenTag = SettingsWidget->GetTagByFunctionPicker(SetFullscreenFunction);
+	static const FSettingFunctionPicker SetFullscreenFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFullscreenEnabled));
+	const FSettingTag& FullscreenTag = SettingsWidget->GetTagByFunction(SetFullscreenFunction);
 	if (!FullscreenTag.IsValid())
 	{
 		return;
@@ -210,15 +220,15 @@ void UMyGameUserSettings::UpdateFullscreenEnabled()
 // Set the FPS cap by specified member index
 void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 {
-	const USettingsWidget* SettingsWidget = USingletonLibrary::GetSettingsWidget();
+	const USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
 	if (!SettingsWidget
 	    || GetFPSLockIndex() == Index)
 	{
 		return;
 	}
 
-	static const FFunctionPicker ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
-	const FGameplayTag& FPSLockTag = SettingsWidget->GetTagByFunctionPicker(ThisFunction);
+	static const FSettingFunctionPicker ThisFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFPSLockByIndex));
+	const FSettingTag& FPSLockTag = SettingsWidget->GetTagByFunction(ThisFunction);
 	if (!FPSLockTag.IsValid())
 	{
 		return;
@@ -291,61 +301,4 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 		RunHardwareBenchmark();
 		ApplyHardwareBenchmarkResults();
 	}
-
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	// Notify settings for any change in the settings data table
-	if (USingletonLibrary::IsEditorNotPieWorld())
-	{
-		// Bind only once
-		static USettingsDataAsset::FOnDataTableChanged OnDataTableChanged;
-		if (!OnDataTableChanged.IsBound())
-		{
-			OnDataTableChanged.BindDynamic(this, &ThisClass::OnDataTableChanged);
-			USettingsDataAsset::Get().BindOnDataTableChanged(OnDataTableChanged);
-		}
-	}
-#endif // WITH_EDITOR [IsEditorNotPieWorld]
-}
-
-// Called whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks
-void UMyGameUserSettings::OnDataTableChanged()
-{
-#if WITH_EDITOR  // [IsEditorNotPieWorld]
-	if (!USingletonLibrary::IsEditorNotPieWorld())
-	{
-		return;
-	}
-
-	UDataTable* SettingsDataTable = USettingsDataAsset::Get().GetSettingsDataTable();
-	if (!ensureMsgf(SettingsDataTable, TEXT("ASSERT: 'SettingsDataTable' is not valid")))
-	{
-		return;
-	}
-
-	// Set row name by specified tag
-	TMap<FName, FSettingsPicker> SettingsArray;
-	USettingsDataAsset::Get().GenerateSettingsArray(SettingsArray);
-	for (const TTuple<FName, FSettingsPicker>& SettingsTableRowIt : SettingsArray)
-	{
-		const FName RowKey = SettingsTableRowIt.Key;
-		const FName RowValueTag = SettingsTableRowIt.Value.PrimaryData.Tag.GetTagName();
-		if (!RowValueTag.IsNone()                    // Tag is not empty
-		    && RowKey != RowValueTag                 // New tag name
-		    && !SettingsArray.Contains(RowValueTag)) // Unique tag
-		{
-			FDataTableEditorUtils::RenameRow(SettingsDataTable, RowKey, RowValueTag);
-		}
-	}
-
-	// Export to json
-	if (const UAssetImportData* AssetImportData = SettingsDataTable->AssetImportData)
-	{
-		const FString CurrentFilename = AssetImportData->GetFirstFilename();
-		if (!CurrentFilename.IsEmpty())
-		{
-			const FString TableAsJSON = SettingsDataTable->GetTableAsJSON(EDataTableExportFlags::UseJsonObjectsForStructs);
-			FFileHelper::SaveStringToFile(TableAsJSON, *CurrentFilename);
-		}
-	}
-#endif // WITH_EDITOR [IsEditorNotPieWorld]
 }

@@ -3,7 +3,13 @@
 #include "UI/Carousel.h"
 //---
 #include "Bomber.h"
-#include "Globals/SingletonLibrary.h"
+//---
+#if WITH_EDITOR
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
+#include "MyUnrealEdEngine.h"
+#endif
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(Carousel)
 
 // Sets default values
 ACarousel::ACarousel()
@@ -26,9 +32,9 @@ void ACarousel::OnConstruction(const FTransform& Transform)
 #if WITH_EDITOR // [GEditor]
 	if (GEditor
 	    && !IS_TRANSIENT(this)
-	    && !USingletonLibrary::GOnAnyDataAssetChanged.IsBoundToObject(this))
+	    && !UMyUnrealEdEngine::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
-		USingletonLibrary::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
+		UMyUnrealEdEngine::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
 	}
 #endif //WITH_EDITOR [GEditor]
 }
@@ -43,11 +49,11 @@ void ACarousel::BeginPlay()
 //  Called when this actor is explicitly being destroyed during gameplay or in the editor, not called during level streaming or gameplay ending.
 void ACarousel::Destroyed()
 {
-	if (USingletonLibrary::IsEditor()
+	if (FEditorUtilsLibrary::IsEditor()
 	    && !IS_TRANSIENT(this))
 	{
 		// Remove bound delegate
-		USingletonLibrary::GOnAnyDataAssetChanged.RemoveAll(this);
+		UMyUnrealEdEngine::GOnAnyDataAssetChanged.RemoveAll(this);
 	}
 
 	Super::Destroyed();

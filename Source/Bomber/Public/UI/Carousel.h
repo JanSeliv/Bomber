@@ -9,20 +9,20 @@
  * Data about spawned meshes for that floor.
  */
 USTRUCT(BlueprintType)
-struct FFloor
+struct BOMBER_API FFloor
 {
 	GENERATED_BODY()
 
 	/** Names and relative locations of spawned floors. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	TMap<FString, FTransform> Meshes; //[M.AW]
+	TMap<FString, FTransform> Meshes;
 };
 
 /**
  * Spawn meshes of specified level type to preview and switch between them.
  */
 UCLASS(Blueprintable, BlueprintType)
-class ACarousel final : public AActor
+class BOMBER_API ACarousel final : public AActor
 {
 	GENERATED_BODY()
 
@@ -36,7 +36,7 @@ public:
 
 	/** Returns the chosen mesh component.
 	 * @see ACarousel::CurrentMeshComponentInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMeshComponent* GetCurrentMeshComponent() const { return CurrentMeshComponentInternal; }
 
 	/** Returns the chosen mesh component. */
@@ -45,7 +45,7 @@ public:
 
 	/** Returns the current Level Actor Row of chosen mesh component.
 	 * @see ACarousel::CurrentMeshRowInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class ULevelActorRow* GetCurrentMeshRow() const { return CurrentMeshRowInternal; }
 
 	/** Returns the current Level Actor Row of chosen mesh component. */
@@ -69,15 +69,15 @@ protected:
 
 	/** Contains level actors data of spawned meshes for each floor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Floors", ShowOnlyInnerProperties))
-	TArray<FFloor> FloorsInternal; //[M.AW]
+	TArray<FFloor> FloorsInternal;
 
 	/** The chosen mesh component. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Mesh Component"))
-	TObjectPtr<class UMeshComponent> CurrentMeshComponentInternal; //[G]
+	TObjectPtr<class UMeshComponent> CurrentMeshComponentInternal = nullptr;
 
 	/** The current Level Actor Row of chosen mesh component. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Mesh Row"))
-	TObjectPtr<const class ULevelActorRow> CurrentMeshRowInternal; //[G]
+	TObjectPtr<const class ULevelActorRow> CurrentMeshRowInternal = nullptr;
 
 	/** Called every frame. */
 	virtual void Tick(float DeltaTime) override;
