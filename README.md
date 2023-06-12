@@ -1,68 +1,95 @@
-# About the Bomber Project
+# 💣 About the Bomber Project
 
-I would like to introduce my indie-game "Bomber". This game is lasting in fast speed rhythm. The mechanic of it is quite
-easy but anyway, the game is worth to try. The last alive character is the winner. The gameplay includes strategically
-placing down bombs to explode enemies and obstacles, power-ups gathering that help player to set multiple bombs at a
-time, or explode bombs larger or become faster with speed item. The player dies if get caught up by enemies' bombs'
-explosion including their own. The procedural generation of a level map with a given size makes the game a little more
-diverse. Player competes with bots that will do everything but not let them win. The first rule is just to be the best
-bomber and do not let bots to bomb player!
+Bomber is an open-source indie game with multiplayer support, available for Windows and MacOS, developed using Unreal Engine 5.2. Engage in fast-paced strategic combat with friends or against AI, by placing bombs to eliminate enemies and navigate through obstacles. The objective is to be the last character standing. Players can collect power-ups to set multiple bombs, enlarge explosions, or boost speed. It is crucial to exercise caution to avoid being caught in bomb blasts, including one’s own. The game boasts procedurally generated levels, ensuring a diverse and unpredictable experience in each play-through. Battle against cunning bots or challenge your friends, and strategize to become the ultimate bomber!
 
-## Download
+## Table of Contents
+- [💣 About the Bomber Project](#-about-the-bomber-project)
+- [🚀 Getting Started](#-getting-started)
+- [💾 Download](#-play-the-build)
+- [📋 Kanban Board](#-kanban-board)
+- [📅 Changelog](#-changelog)
+- [🎮 Features](#-features)
+- [🧑‍🤝‍🧑 Content Creation Team](#-content-creation-team)
+- [📫 Feedback & Contribution](#-feedback--contribution)
+- [📜 License](#-license)
 
-> To download and play the game go to the [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi)
+## 🚀 Getting Started
 
-## Kanban Board
+This repository contains submodules, to clone the project properly, run:
+```sh
+git clone --recurse-submodules git@github.com:JanSeliv/Bomber.git
+```
+If already cloned without submodules, run:
+```sh
+git submodule update --init --recursive
+```
 
-> Check current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban)
+## 💾 Play the build
 
-## Content Team
+To download and play the build, visit [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi)
 
-> Levels created by Maksim Shashkov: [artstation.com/maksimshashkov](https://www.artstation.com/maksimshashkov)
->
-> Characters created by Kateryna Selivanova: [artstation.com/kateseliv](https://www.artstation.com/kateseliv)
+## 📋 Kanban Board
 
-## Changelog
+Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
-> `31.05.2022:`
->   - Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
->   - Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
->   - Added new **SteelMan** character for AI players with 3 different skins.
-> > ![SteelMan_31-05-22](https://user-images.githubusercontent.com/20540872/171299202-3422db3c-7061-4b75-b51c-a08a67d65ab5.gif)
->   ---
-> `31.12.2021:`
->   - The game migrated to the **Unreal Engine 5**.
->   - Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
->   - Added Controls tab in Settings to allow player remap input keys.
-> > ![Settings_31-12-21](https://user-images.githubusercontent.com/20540872/147825296-ce7d33da-dfda-4757-b070-bfd08f700134.jpg)
->   ---
-> `03.06.2021:`
->   - Completely updated the Maya level.
->   - Added the Water level of the Pirate character.
->   - Added settings.
-> > ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
-> > ![](https://user-images.githubusercontent.com/20540872/120249541-8e5a9880-c27b-11eb-82cd-660878d33e6f.jpg)
-> > ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
->   ---
-> `31.01.2021:`
->   - Added the Maya (Sphynx cat) character with two skins.
->   - Added the Pirate character with one skin.
->   - Fori and Hugo characters got additional second skins.
->   > ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
->   ---
->   - `31.10.2020:` Added the third Level Map.
->   > ![](https://user-images.githubusercontent.com/20540872/97792191-2d7ebb00-1bdb-11eb-9a27-c50d64394caa.jpg)
->   ---
->   `25.10.2020:`, developed the new UI prototype.
->   - Added the second City Map.
->   - Added the Hugo character.
->   - Added the Fori character.
->   > ![](https://user-images.githubusercontent.com/20540872/97118032-125a0a00-1708-11eb-8256-4bec419b1d48.gif)
->   ---
->   - `15.10.2019:` Uploaded the game-ready build.
->
+## 📅 Changelog
 
-# Features
+#### `12.06.2023`
+- Updated to **Unreal Engine 5.2**.
+- Added **MacOS** support.
+- Added **Ultra-wide** resolutions support.
+- Extracted logic into plugins, so other developers can benefit from it in their projects:
+-  [⚙️ Settings Widget Constructor](https://github.com/JanSeliv/SettingsWidgetConstructor)
+-  [🔘️ Custom Shape Button](https://github.com/JanSeliv/CustomShapeButton)
+-  [🔄 Pool Manager](https://github.com/JanSeliv/PoolManager)
+-  [🎭 Morphs Player](https://github.com/JanSeliv/MorphsPlayer)
+-  [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
+-  [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
+- Added Foot Trails for the Maya level as `Modular Game Feature`:
+>  <img width="560" alt="image" src="https://github.com/JanSeliv/Bomber/assets/20540872/a77c2e38-4fd6-4a04-988e-05d9613bd97e">
+- New power-ups meshes for the Maya level (shown from left to right: move speed, bomb length, bomb quantity):
+>  <img width="360" alt="image" src="https://github.com/JanSeliv/Bomber/assets/20540872/1e526fda-e51a-479c-b541-acccc8457725">
+- Added new cheats such as: `Bomber.Level.SetSize 9x7` (find more on the [Bomber cheats page](https://trello.com/c/5PiHt7Ah/308-bomber-cheats))
+- Updated Main-Menu background music for all levels.
+--- 
+#### `31.05.2022:`
+ - Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
+ - Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
+ - Added new **SteelMan** character for AI players with 3 different skins.
+>  ![SteelMan_31-05-22](https://user-images.githubusercontent.com/20540872/171299202-3422db3c-7061-4b75-b51c-a08a67d65ab5.gif)
+ ---
+#### `31.12.2021:`
+ - The game migrated to the **Unreal Engine 5**.
+ - Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
+ - Added Controls tab in Settings to allow player remap input keys.
+>  ![Settings_31-12-21](https://user-images.githubusercontent.com/20540872/147825296-ce7d33da-dfda-4757-b070-bfd08f700134.jpg)
+ ---
+#### `03.06.2021:`
+ - Completely updated the Maya level.
+ - Added the Water level of the Pirate character.
+ - Added settings.
+>  ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
+>  ![](https://user-images.githubusercontent.com/20540872/120249541-8e5a9880-c27b-11eb-82cd-660878d33e6f.jpg)
+>  ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
+ ---
+#### `31.01.2021:`
+ - Added the Maya (Sphynx cat) character with two skins.
+ - Added the Pirate character with one skin.
+ - Fori and Hugo characters got additional second skins.
+ > ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
+ ---
+#### `31.10.2020:` Added the third Level Map.
+ > ![](https://user-images.githubusercontent.com/20540872/97792191-2d7ebb00-1bdb-11eb-9a27-c50d64394caa.jpg)
+ ---
+#### `25.10.2020:`, developed the new UI prototype.
+ - Added the second City Map.
+ - Added the Hugo character.
+ - Added the Fori character.
+ > ![](https://user-images.githubusercontent.com/20540872/97118032-125a0a00-1708-11eb-8256-4bec419b1d48.gif)
+ ---
+#### `15.10.2019:` Uploaded first game-ready build.
+
+## 🎮 Features
 
 **The level camera** that moves and zooms lens depending on the distance between players:
 
@@ -179,3 +206,18 @@ _Grey Х: the selected cell on which the bot moves to._
 
 ![GIF15](https://user-images.githubusercontent.com/20540872/63063848-aa524600-befe-11e9-93fb-ece39892ace5.gif)
 
+## 🧑‍🤝‍🧑 Content Creation Team
+
+- **Level Design and Level Art** by Maksim Shashkov: [Visit Artstation Profile](https://www.artstation.com/maksimshashkov)
+- **Characters and Animations (Gameplay and Cinematics)** by Kateryna Shchetinina: [Visit Artstation Profile](https://www.artstation.com/kateseliv)
+- **Game Design (including Audio, UI, and Cinematics)** by Yevhenii Oksenchuk: [Contact in Telegram](https://t.me/ComeThird)
+
+## 📫 Feedback & Contribution
+
+This is an open-source project and we encourage you to contribute. If you encounter any bugs, or if you have any feature requests, please file an issue in the GitHub repository.
+
+## 📜 License
+
+This project is licensed under the terms of the MIT license. See [LICENSE](LICENSE) for more details.
+
+We hope you find this plugin useful and we look forward to your feedback and contributions.
