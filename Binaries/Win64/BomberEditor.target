@@ -13958,6 +13958,30 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/Binaries/Win64/UnrealEditor-FootTrailsGeneratorRuntime.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/Binaries/Win64/UnrealEditor-FootTrailsGeneratorRuntime.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/InstancedStaticMeshConverter/Binaries/Win64/UnrealEditor-InstancedStaticMeshConverter.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/InstancedStaticMeshConverter/Binaries/Win64/UnrealEditor-InstancedStaticMeshConverter.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/InstancedStaticMeshConverter/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
 			"Path": "$(ProjectDir)/Plugins/MetaCheatManager/Binaries/Win64/UnrealEditor-MetaCheatManager.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -37665,6 +37689,18 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/FunctionPicker/FunctionPicker.uplugin",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/FootTrailsGenerator.uplugin",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/LevelActorsMovement/LevelActorsMovement.uplugin",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/InstancedStaticMeshConverter/InstancedStaticMeshConverter.uplugin",
 			"Type": "UFS"
 		},
 		{

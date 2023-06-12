@@ -4,11 +4,11 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Cell)
 
-const FCell FCell::InvalidCell = FVector::DownVector;
-const FCell FCell::ForwardCell = FVector::ForwardVector;
-const FCell FCell::BackwardCell = FVector::BackwardVector;
-const FCell FCell::RightCell = FVector::RightVector;
-const FCell FCell::LeftCell = FVector::LeftVector;
+const FCell FCell::InvalidCell = FCell(0.f, 0.f, -1.f);
+const FCell FCell::ForwardCell = FCell(1.f, 0.f, 0.f);
+const FCell FCell::BackwardCell = FCell(-1.f, 0.f, 0.f);
+const FCell FCell::RightCell = FCell(0.f, 1.f, 0.f);
+const FCell FCell::LeftCell = FCell(0.f, -1.f, 0.f);
 const FCells FCell::EmptyCells = FCells{};
 
 // Vector to cell constructor
