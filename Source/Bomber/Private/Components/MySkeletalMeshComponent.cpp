@@ -4,12 +4,33 @@
 //---
 #include "DataAssets/PlayerDataAsset.h"
 //---
+#include "Animation/AnimSequence.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MySkeletalMeshComponent)
 
 // The empty data
 const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData();
+
+AMySkeletalMeshActor::AMySkeletalMeshActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UMySkeletalMeshComponent>(TEXT("SkeletalMeshComponent0"))) // override default mesh class
+{
+	PrimaryActorTick.bCanEverTick = false;
+}
+
+// Returns the Skeletal Mesh of bombers
+UMySkeletalMeshComponent* AMySkeletalMeshActor::GetMySkeletalMeshComponent() const
+{
+	return Cast<UMySkeletalMeshComponent>(GetSkeletalMeshComponent());
+}
+
+UMySkeletalMeshComponent& AMySkeletalMeshActor::GetMeshChecked() const
+{
+	return *CastChecked<UMySkeletalMeshComponent>(GetSkeletalMeshComponent());
+}
 
 // Sets default values for this component's properties
 UMySkeletalMeshComponent::UMySkeletalMeshComponent()

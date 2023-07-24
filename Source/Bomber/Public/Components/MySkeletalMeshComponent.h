@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Bomber.h"
+#include "Animation/SkeletalMeshActor.h"
 #include "Components/SkeletalMeshComponent.h"
 //---
 #include "MySkeletalMeshComponent.generated.h"
@@ -29,6 +30,26 @@ struct BOMBER_API FCustomPlayerMeshData
 
 	/** Returns true is data is valid. */
 	FORCEINLINE bool IsValid() const { return PlayerRow != nullptr; }
+};
+
+class UMySkeletalMeshComponent;
+
+/**
+ * The actor that contains the player mesh component by default. Is used to be spawned in the world.
+ */
+UCLASS(Blueprintable, BlueprintType)
+class AMySkeletalMeshActor final : public ASkeletalMeshActor
+{
+	GENERATED_BODY()
+
+public:
+	/** Default constructor. */
+	AMySkeletalMeshActor(const FObjectInitializer& ObjectInitializer);
+
+	/** Returns the Skeletal Mesh of the Bomber character. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
+	UMySkeletalMeshComponent& GetMeshChecked() const;
 };
 
 /**
@@ -83,7 +104,7 @@ public:
 	/** Returns true when is needed to attach or detach props. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool ArePropsWantToUpdate() const;
-	
+
 	/**
 	 * Set the skin, specified by index, to this mesh and its attached props
 	 * Some bomber characters have more than 1 diffuse, it will change a player skin if possible.
