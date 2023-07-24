@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "UI/MainMenuWidget.h"
+#include "UI/MainMenu/MainMenuWidget.h"
 //---
 #include "GeneratedMap.h"
 #include "Components/MySkeletalMeshComponent.h"

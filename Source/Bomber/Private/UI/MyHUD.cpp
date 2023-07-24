@@ -5,9 +5,10 @@
 #include "DataAssets/UIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UI/InGameWidget.h"
-#include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"
+#include "UI/MainMenu/MainMenuWidget.h"
 //---
+#include "UnrealClient.h"
 #include "Blueprint/UserWidget.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyHUD)
