@@ -18,8 +18,8 @@ public:
 	ACharacterSelectionSpot();
 
 	/*********************************************************************************************
-     * Protected properties
-     ********************************************************************************************* */
+	 * Protected properties
+	 ********************************************************************************************* */
 protected:
 	/** Linked actor that contains representing mesh to be change the skin and so on. Points to actor on the level that is used by cinematic. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Actor"))
@@ -28,4 +28,11 @@ protected:
 	/** Is current value of last chosen skin index. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skin Index"))
 	int32 SkinIndexInternal = 0;
+
+	/*********************************************************************************************
+	 * Protected functions
+	 ********************************************************************************************* */
+protected:
+	/** Overridable native event for when play begins for this actor. */
+	virtual void BeginPlay() override;
 };
