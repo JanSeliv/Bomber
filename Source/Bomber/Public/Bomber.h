@@ -64,17 +64,25 @@ ENUM_CLASS_FLAGS(EActorType);
 using EAT = EActorType;
 
 /**
- * Levels in the game. In some cases bitmask are used to filter meshes.
+ * Levels in the game.
+ * Is often used as player types because of strong association each level to specific character.
+ * In many cases is used to get the specific mesh of an level actor by the level type.
+ * @see ULevelActorRow::LevelType
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ELevelType : uint8
 {
 	None = 0,
+	///< Represents Maya level, is associated with Bastet character
 	First = 1 << 0 UMETA(DisplayName = "Maya"),
+	///< Represents City level, is associated with Hugo character
 	Second = 1 << 1 UMETA(DisplayName = "City"),
+	///< Represents Forest level, is associated with Fori character
 	Third = 1 << 2 UMETA(DisplayName = "Forest"),
+	///< Represents Water level, is associated with Roger character
 	Fourth = 1 << 3 UMETA(DisplayName = "Water"),
-	Max = First | Second | Third | Fourth UMETA(DisplayName = "Any") ///< Can be used for such levels as menu, sandbox, etc.
+	///< All the types, also can be used for such levels as menu, sandbox, etc.
+	Max = First | Second | Third | Fourth UMETA(DisplayName = "Any")
 };
 
 ENUM_CLASS_FLAGS(ELevelType);
@@ -106,14 +114,16 @@ enum class EPathType : uint8
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	None,
 	///< The type was not selected
-	Skate,
+	None,
 	///< Increases speed
-	Bomb,
+	Skate,
 	///< increases the amount of bombs
-	Fire ///< Increases the range of explosion
+	Bomb,
+	///< Increases the range of explosion
+	Fire
 };
+
 using EIT = EItemType;
 #define EIT_FIRST_FLAG TO_FLAG(EIT::Skate)
 #define EIT_LAST_FLAG TO_FLAG(EIT::Fire)

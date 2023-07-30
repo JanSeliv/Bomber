@@ -15,10 +15,24 @@
 // The empty data
 const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData();
 
+// Constructor that initializes the player data by specified level type
+FCustomPlayerMeshData::FCustomPlayerMeshData(const ELevelType PlayerByLevelType, int32 InSkinIndex)
+{
+	PlayerRow = UPlayerDataAsset::Get().GetRowByLevelType<UPlayerRow>(PlayerByLevelType);
+	SkinIndex = InSkinIndex;
+}
+
+// Constructor that initializes the data directly
+FCustomPlayerMeshData::FCustomPlayerMeshData(const UPlayerRow& InPlayerRow, int32 InSkinIndex)
+	: PlayerRow(&InPlayerRow)
+	, SkinIndex(InSkinIndex) {}
+
+// Default constructor, overrides in object initializer default mesh by bomber mesh
 AMySkeletalMeshActor::AMySkeletalMeshActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UMySkeletalMeshComponent>(TEXT("SkeletalMeshComponent0"))) // override default mesh class
 {
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 }
 
 // Returns the Skeletal Mesh of bombers
@@ -30,6 +44,29 @@ UMySkeletalMeshComponent* AMySkeletalMeshActor::GetMySkeletalMeshComponent() con
 UMySkeletalMeshComponent& AMySkeletalMeshActor::GetMeshChecked() const
 {
 	return *CastChecked<UMySkeletalMeshComponent>(GetSkeletalMeshComponent());
+}
+
+// Applies the specified player data by given type to the mesh
+void AMySkeletalMeshActor::InitMySkeletalMesh(ELevelType PlayerByLevelType, int32 InSkinIndex)
+{
+	PlayerByLevelTypeInternal = PlayerByLevelType;
+	SkinIndexInternal = InSkinIndex;
+
+	const FCustomPlayerMeshData PlayerMeshData(PlayerByLevelType, InSkinIndex);
+	GetMeshChecked().InitMySkeletalMesh(PlayerMeshData);
+}
+
+// Called when an instance of this class is placed (in editor) or spawned
+void AMySkeletalMeshActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (IS_TRANSIENT(this))
+	{
+		return;
+	}
+
+	InitMySkeletalMesh(PlayerByLevelTypeInternal, SkinIndexInternal);
 }
 
 // Sets default values for this component's properties
@@ -103,6 +140,13 @@ void UMySkeletalMeshComponent::InitMySkeletalMesh(const FCustomPlayerMeshData& C
 	AttachProps();
 
 	SetSkin(CustomPlayerMeshData.SkinIndex);
+}
+
+// Returns level type to which this mesh is associated with
+ELevelType UMySkeletalMeshComponent::GetAssociatedLevelType() const
+{
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	return PlayerRow ? PlayerRow->LevelType : ELevelType::None;
 }
 
 // Gets all attached mesh components by specified filter class
