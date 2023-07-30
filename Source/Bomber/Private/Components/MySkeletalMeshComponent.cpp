@@ -2,8 +2,6 @@
 
 #include "Components/MySkeletalMeshComponent.h"
 //---
-#include "DataAssets/PlayerDataAsset.h"
-//---
 #include "Animation/AnimSequence.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
@@ -15,10 +13,10 @@
 // The empty data
 const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData();
 
-// Constructor that initializes the player data by specified level type
-FCustomPlayerMeshData::FCustomPlayerMeshData(const ELevelType PlayerByLevelType, int32 InSkinIndex)
+// Constructor that initializes the player data by specified tag
+FCustomPlayerMeshData::FCustomPlayerMeshData(const FPlayerTag& PlayerTag, int32 InSkinIndex)
 {
-	PlayerRow = UPlayerDataAsset::Get().GetRowByLevelType<UPlayerRow>(PlayerByLevelType);
+	PlayerRow = UPlayerDataAsset::Get().GetRowByPlayerTag(PlayerTag);
 	SkinIndex = InSkinIndex;
 }
 
@@ -47,12 +45,12 @@ UMySkeletalMeshComponent& AMySkeletalMeshActor::GetMeshChecked() const
 }
 
 // Applies the specified player data by given type to the mesh
-void AMySkeletalMeshActor::InitMySkeletalMesh(ELevelType PlayerByLevelType, int32 InSkinIndex)
+void AMySkeletalMeshActor::InitMySkeletalMesh(const FPlayerTag& InPlayerTag, int32 InSkinIndex)
 {
-	PlayerByLevelTypeInternal = PlayerByLevelType;
+	PlayerTagInternal = InPlayerTag;
 	SkinIndexInternal = InSkinIndex;
 
-	const FCustomPlayerMeshData PlayerMeshData(PlayerByLevelType, InSkinIndex);
+	const FCustomPlayerMeshData PlayerMeshData(InPlayerTag, InSkinIndex);
 	GetMeshChecked().InitMySkeletalMesh(PlayerMeshData);
 }
 
@@ -66,7 +64,7 @@ void AMySkeletalMeshActor::OnConstruction(const FTransform& Transform)
 		return;
 	}
 
-	InitMySkeletalMesh(PlayerByLevelTypeInternal, SkinIndexInternal);
+	InitMySkeletalMesh(PlayerTagInternal, SkinIndexInternal);
 }
 
 // Sets default values for this component's properties

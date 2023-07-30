@@ -24,6 +24,7 @@ public class BomberEditor : ModuleRules
 				, "EditorStyle" // SSocketChooserPopup
 				, "ToolWidgets" // SSearchableComboBox
 				, "PropertyEditor" // IPropertyTypeCustomization
+				, "GameplayTagsEditor" // FGameplayTagCustomizationPublic
 			}
 		);
 	}

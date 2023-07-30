@@ -14,6 +14,9 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerDataAsset)
 
+// The Player Character tag that contains nothing chosen by default
+const FPlayerTag FPlayerTag::None = EmptyTag;
+
 // Returns the dynamic material instance of a player with specified skin.
 UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const
 {
@@ -122,5 +125,19 @@ UMaterialInterface* UPlayerDataAsset::GetNameplateMaterial(int32 Index) const
 		return NameplateMaterialsInternal[Index];
 	}
 
+	return nullptr;
+}
+
+// Return first found row by specified player tag
+const UPlayerRow* UPlayerDataAsset::GetRowByPlayerTag(const FPlayerTag& PlayerTag) const
+{
+	for (const TObjectPtr<ULevelActorRow> RowIt : RowsInternal)
+	{
+		const UPlayerRow* PlayerRow = Cast<UPlayerRow>(RowIt);
+		if (PlayerRow && PlayerRow->PlayerTag == PlayerTag)
+		{
+			return PlayerRow;
+		}
+	}
 	return nullptr;
 }

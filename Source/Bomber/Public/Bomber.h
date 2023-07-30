@@ -65,7 +65,6 @@ using EAT = EActorType;
 
 /**
  * Levels in the game.
- * Is often used as player types because of strong association each level to specific character.
  * In many cases is used to get the specific mesh of an level actor by the level type.
  * @see ULevelActorRow::LevelType
  */
@@ -73,13 +72,13 @@ UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true
 enum class ELevelType : uint8
 {
 	None = 0,
-	///< Represents Maya level, is associated with Bastet character
+	///< Represents Maya level
 	First = 1 << 0 UMETA(DisplayName = "Maya"),
-	///< Represents City level, is associated with Hugo character
+	///< Represents City level
 	Second = 1 << 1 UMETA(DisplayName = "City"),
-	///< Represents Forest level, is associated with Fori character
+	///< Represents Forest level
 	Third = 1 << 2 UMETA(DisplayName = "Forest"),
-	///< Represents Water level, is associated with Roger character
+	///< Represents Water level
 	Fourth = 1 << 3 UMETA(DisplayName = "Water"),
 	///< All the types, also can be used for such levels as menu, sandbox, etc.
 	Max = First | Second | Third | Fourth UMETA(DisplayName = "Any")

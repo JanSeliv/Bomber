@@ -6,7 +6,7 @@
 #include "Components/SkeletalMeshComponent.h" // UMySkeletalMeshComponent
 #include "Kismet/BlueprintFunctionLibrary.h" // UPlayerMeshDataUtils
 //---
-#include "Bomber.h"
+#include "DataAssets/PlayerDataAsset.h" // FPlayerTag
 //---
 #include "MySkeletalMeshComponent.generated.h"
 
@@ -25,9 +25,8 @@ struct BOMBER_API FCustomPlayerMeshData
 	/** Default constructor. */
 	FCustomPlayerMeshData() = default;
 
-	/** Constructor that initializes the player data by specified level type.
-	 * It can be done since each player is unique for each level type. */
-	FCustomPlayerMeshData(ELevelType PlayerByLevelType, int32 InSkinIndex);
+	/** Constructor that initializes the player data by specified tag. */
+	FCustomPlayerMeshData(const FPlayerTag& PlayerTag, int32 InSkinIndex);
 
 	/** Constructor that initializes the data directly. */
 	FCustomPlayerMeshData(const class UPlayerRow& InPlayerRow, int32 InSkinIndex);
@@ -54,8 +53,8 @@ class BOMBER_API UPlayerMeshDataUtils final : public UBlueprintFunctionLibrary
 
 public:
 	/** Creates 'Make Cell' node with Cell  as an input parameter. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", NativeMakeFunc, Keywords = "construct build"))
-	static FORCEINLINE FCustomPlayerMeshData MakeCustomPlayerMeshData(ELevelType PlayerByLevelType, int32 InSkinIndex) { return {PlayerByLevelType, InSkinIndex}; }
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InPlayerTag", NativeMakeFunc, Keywords = "construct build"))
+	static FORCEINLINE FCustomPlayerMeshData MakeCustomPlayerMeshData(const FPlayerTag& InPlayerTag, int32 InSkinIndex) { return {InPlayerTag, InSkinIndex}; }
 };
 
 class UMySkeletalMeshComponent;
@@ -82,17 +81,17 @@ public:
 	UMySkeletalMeshComponent& GetMeshChecked() const;
 
 	/** Applies the specified player data by given type to the mesh. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void InitMySkeletalMesh(ELevelType PlayerByLevelType, int32 InSkinIndex);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "InPlayerTag"))
+	void InitMySkeletalMesh(const FPlayerTag& InPlayerTag, int32 InSkinIndex);
 
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
-	/** Represents with which level current spot associated with. E.g: for Hugo character the City type has to be chosen.
+	/** Represents with which player current spot associated with
 	 * Can be changed in editor for an instance on the level. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player by Level Type"))
-	ELevelType PlayerByLevelTypeInternal = ELevelType::None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Character Tag"))
+	FPlayerTag PlayerTagInternal = FPlayerTag::None;
 
 	/** Is current value of last chosen skin index.
 	 * Can be changed in editor for an instance on the level. */

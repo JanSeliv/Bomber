@@ -4,7 +4,30 @@
 
 #include "DataAssets/LevelActorDataAsset.h"
 //---
+#include "GameplayTagContainer.h"
+//---
 #include "PlayerDataAsset.generated.h"
+
+/**
+ * The tag that represents all available player characters in game.
+ */
+USTRUCT(BlueprintType, meta = (Categories = "Player"))
+struct BOMBER_API FPlayerTag : public FGameplayTag
+{
+	GENERATED_BODY()
+
+	/** Default constructor. */
+	FPlayerTag() = default;
+
+	/** Custom constructor to set all members values. */
+	FPlayerTag(const FGameplayTag& Tag)
+		: FGameplayTag(Tag)
+	{
+	}
+
+	/** The Player Character tag that contains nothing chosen by default. */
+	static const FPlayerTag None;
+};
 
 /**
  * Determines each mesh to attach.
@@ -16,7 +39,7 @@ struct BOMBER_API FAttachedMesh
 
 	/** The attached static mesh or skeletal mesh.  */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn))
-	TObjectPtr<class UStreamableRenderAsset> AttachedMesh = nullptr;
+	TObjectPtr<const class UStreamableRenderAsset> AttachedMesh = nullptr;
 
 	/** In the which socket should attach this prop. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
@@ -36,6 +59,10 @@ class BOMBER_API UPlayerRow final : public ULevelActorRow
 	GENERATED_BODY()
 
 public:
+	/** The tag of this player character to be used for association of this player with other data. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Row", meta = (ShowOnlyInnerProperties))
+	FPlayerTag PlayerTag = FPlayerTag::None;
+
 	/** All meshes that will be attached to the player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	TArray<FAttachedMesh> PlayerProps;
@@ -125,6 +152,10 @@ public:
 	* @see UPlayerDataAsset::SkinSlotNameInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE FName GetSkinIndexParameter() const { return SkinIndexParameterInternal; }
+
+	/** Return first found row by specified player tag. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const UPlayerRow* GetRowByPlayerTag(const FPlayerTag& PlayerTag) const;
 
 protected:
 	/** All materials that are used by nameplate meshes. */
