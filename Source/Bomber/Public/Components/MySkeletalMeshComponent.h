@@ -65,7 +65,7 @@ class UMySkeletalMeshComponent;
  * Is used as mesh representation in the world, mostly in cinematics.
  */
 UCLASS(Blueprintable, BlueprintType)
-class AMySkeletalMeshActor final : public ASkeletalMeshActor
+class AMySkeletalMeshActor : public ASkeletalMeshActor
 {
 	GENERATED_BODY()
 

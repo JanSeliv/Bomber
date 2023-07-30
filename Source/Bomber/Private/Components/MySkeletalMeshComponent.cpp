@@ -73,6 +73,8 @@ void AMySkeletalMeshActor::OnConstruction(const FTransform& Transform)
 UMySkeletalMeshComponent::UMySkeletalMeshComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	CastShadow = false;
 }
 
 // Controls what kind of collision is enabled for this body and all attached props
