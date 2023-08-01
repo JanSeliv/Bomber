@@ -76,10 +76,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsFPSCounterEnabled() const { return bIsFPSCounterEnabledInternal; }
 
-	/** Add new Character Selection Spot, so it will be reflected in Main Menu. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void AddCharacterSelectionSpot(class ACharacterSelectionSpot* CharacterSelectionSpot);
-
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -112,10 +108,6 @@ protected:
 	/** If true, shows FPS counter widget on the HUD, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is FPS Counter Enabled"))
 	bool bIsFPSCounterEnabledInternal;
-
-	/** All Main Menu spots with characters placed on the level. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Character Selection Spots"))
-	TArray<TObjectPtr<class ACharacterSelectionSpot>> CharacterSelectionSpotsInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions

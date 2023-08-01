@@ -21,6 +21,14 @@ UFootTrailsGeneratorComponent::UFootTrailsGeneratorComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+// Guarantees that the data asset is loaded, otherwise, it will crash
+const UFootTrailsDataAsset& UFootTrailsGeneratorComponent::GetFootTrailsDataAssetChecked() const
+{
+	const UFootTrailsDataAsset* FootTrailsDataAsset = GetFootTrailsDataAsset();
+	checkf(FootTrailsDataAsset, TEXT("%s: 'FootTrailsDataAssetInternal' is not set"), *FString(__FUNCTION__));
+	return *FootTrailsDataAsset;
+}
+
 // Returns the random foot trail instance for given types
 const UStaticMesh* UFootTrailsGeneratorComponent::GetRandomMesh(EFootTrailType FootTrailType) const
 {
@@ -63,8 +71,8 @@ void UFootTrailsGeneratorComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 // Loads all foot trails archetypes
 void UFootTrailsGeneratorComponent::Init()
 {
-	const UDataTable* FootTrailsDT = FootTrailsDataAssetInternal ? FootTrailsDataAssetInternal->GetFootTrailsDataTable() : nullptr;
-	if (!ensureMsgf(FootTrailsDT, TEXT("%s: 'FootTrailsDataAssetInternal' is not set"), *FString(__FUNCTION__))
+	const UDataTable* FootTrailsDT = GetFootTrailsDataAssetChecked().GetFootTrailsDataTable();
+	if (!ensureMsgf(FootTrailsDT, TEXT("%s: 'FootTrailsDT' is not set"), *FString(__FUNCTION__))
 		|| !FootTrailInstancesInternal.IsEmpty())
 	{
 		// is already initialized

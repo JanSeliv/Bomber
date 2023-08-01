@@ -41,15 +41,6 @@ void AMyHUD::SetFPSCounterEnabled(bool bEnable)
 	}
 }
 
-// Add new Character Selection Spot, so it will be reflected in Main Menu
-void AMyHUD::AddCharacterSelectionSpot(ACharacterSelectionSpot* CharacterSelectionSpot)
-{
-	if (ensureMsgf(CharacterSelectionSpot, TEXT("%s: 'CharacterSelectionSpot' is null"), *FString(__FUNCTION__)))
-	{
-		CharacterSelectionSpotsInternal.AddUnique(CharacterSelectionSpot);
-	}
-}
-
 // Init all widgets on gameplay starting before begin play
 void AMyHUD::PostInitializeComponents()
 {

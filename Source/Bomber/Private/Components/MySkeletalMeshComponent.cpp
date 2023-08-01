@@ -3,6 +3,7 @@
 #include "Components/MySkeletalMeshComponent.h"
 //---
 #include "Animation/AnimSequence.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
@@ -65,6 +66,15 @@ void AMySkeletalMeshActor::OnConstruction(const FTransform& Transform)
 	}
 
 	InitMySkeletalMesh(PlayerTagInternal, SkinIndexInternal);
+}
+
+// Called right before components are initialized, only called during gameplay
+void AMySkeletalMeshActor::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+
+	// Register actor to let it to be implemented by game features
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 }
 
 // Sets default values for this component's properties
@@ -147,6 +157,13 @@ ELevelType UMySkeletalMeshComponent::GetAssociatedLevelType() const
 {
 	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
 	return PlayerRow ? PlayerRow->LevelType : ELevelType::None;
+}
+
+// Returns the Player Tag to which this mesh is associated with
+const FPlayerTag& UMySkeletalMeshComponent::GetPlayerTag() const
+{
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	return PlayerRow ? PlayerRow->PlayerTag : FPlayerTag::None;
 }
 
 // Gets all attached mesh components by specified filter class

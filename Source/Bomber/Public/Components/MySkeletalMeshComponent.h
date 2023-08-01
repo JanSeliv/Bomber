@@ -104,6 +104,9 @@ protected:
 protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Called right before components are initialized, only called during gameplay. */
+	virtual void PreInitializeComponents() override;
 };
 
 /**
@@ -148,6 +151,10 @@ public:
 	/** Returns level type to which this mesh is associated with. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ELevelType GetAssociatedLevelType() const;
+
+	/** Returns the Player Tag to which this mesh is associated with. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FPlayerTag& GetPlayerTag() const;
 
 	/** Gets all attached mesh components by specified filter class.
 	 * @param OutMeshComponents Contains returned components.
