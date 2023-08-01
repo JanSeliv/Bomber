@@ -24,20 +24,12 @@ UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem()
 {
 	const UWorld* FoundWorld = GEngine ? GEngine->GetCurrentPlayWorld() : nullptr;
 
-#if WITH_EDITOR	 // [FEditorUtilsLibrary::IsEditor]
-	if (FEditorUtilsLibrary::IsEditor()
-		&& !FoundWorld)
+#if WITH_EDITOR
+	if (!FoundWorld)
 	{
-		if (FEditorUtilsLibrary::IsEditorNotPieWorld())
-		{
-			FoundWorld = GEditor->GetEditorWorldContext().World();
-		}
-		if (FEditorUtilsLibrary::IsPIE())
-		{
-			FoundWorld = GEditor->GetCurrentPlayWorld();
-		}
+		FoundWorld = FEditorUtilsLibrary::GetEditorWorld();
 	}
-#endif // WITH_EDITOR [FEditorUtilsLibrary::IsEditor]
+#endif
 
 	if (!ensureMsgf(FoundWorld, TEXT("%s: Can not obtain current world"), *FString(__FUNCTION__)))
 	{

@@ -11,8 +11,6 @@
 class MYEDITORUTILS_API FEditorUtilsLibrary
 {
 public:
-
-#pragma region PIE
 	/** Checks, is the current world placed in the editor. */
 	static bool IsEditor();
 
@@ -30,7 +28,9 @@ public:
 	 * 1 (or higher) is client.
 	 * -1 in the standalone game. */
 	static int32 GetEditorPlayerIndex();
-#pragma endregion PIE
+
+	/** Obtains the current world from the editor. */
+	static UWorld* GetEditorWorld();
 
 	/** Returns true if currently is cooking the package. */
 	static bool IsCooking();
