@@ -10,8 +10,6 @@
 //---
 #include "LevelSequence.h"
 #include "LevelSequencePlayer.h"
-#include "Engine/AssetManager.h"
-#include "Engine/StreamableManager.h"
 #include "Sections/MovieSceneSubSection.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuSpotComponent)
@@ -114,19 +112,30 @@ void UNewMainMenuSpotComponent::BeginPlay()
 
 	UNewMainMenuSubsystem::Get().AddNewMainMenuSpot(this);
 
-	LoadMasterSequence();
+	CreateMasterSequencePlayer();
+
+	if (IsActiveSpot())
+	{
+		PlayLoopIdle();
+	}
 }
 
 // Loads cinematic of this spot
-void UNewMainMenuSpotComponent::LoadMasterSequence()
+void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
 {
+	if (MasterPlayerInternal)
+	{
+		// Is already created
+		return;
+	}
+
 	const UDataTable* CinematicsDataTable = GetNewMainMenuDataAssetChecked().GetCinematicsDataTable();
 	if (!ensureMsgf(CinematicsDataTable, TEXT("'CinematicsDataTable' is nullptr, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
 	{
 		return;
 	}
 
-	TSoftObjectPtr<ULevelSequence> LevelSequenceToLoad = nullptr;
+	TSoftObjectPtr<ULevelSequence> FoundMasterSequence = nullptr;
 
 	const FPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
 	TMap<FName, FCinematicRow> CinematicsRows;
@@ -135,38 +144,19 @@ void UNewMainMenuSpotComponent::LoadMasterSequence()
 	{
 		if (RowIt.Value.PlayerTag == PlayerTag)
 		{
-			LevelSequenceToLoad = RowIt.Value.LevelSequence;
+			FoundMasterSequence = RowIt.Value.LevelSequence;
 			break;
 		}
 	}
 
-	if (!ensureMsgf(!LevelSequenceToLoad.IsNull(), TEXT("'LevelSequenceToLoad' is not found, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
+	if (!ensureMsgf(!FoundMasterSequence.IsNull(), TEXT("'LevelSequenceToLoad' is not found, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
 	{
 		return;
 	}
 
-	if (LevelSequenceToLoad.IsValid())
-	{
-		OnMasterSequenceLoaded(LevelSequenceToLoad);
-	}
-	else
-	{
-		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
-		StreamableManager.RequestAsyncLoad(LevelSequenceToLoad.ToSoftObjectPath(),
-		                                   FStreamableDelegate::CreateUObject(this, &UNewMainMenuSpotComponent::OnMasterSequenceLoaded, LevelSequenceToLoad));
-	}
-}
-
-void UNewMainMenuSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence)
-{
 	// Create and cache the master sequence
 	ALevelSequenceActor* OutActor = nullptr;
-	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
-
-	if (IsActiveSpot())
-	{
-		PlayLoopIdle();
-	}
+	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, FoundMasterSequence.LoadSynchronous(), {}, OutActor);
 }
 
 // Plays idle in loop of this spot

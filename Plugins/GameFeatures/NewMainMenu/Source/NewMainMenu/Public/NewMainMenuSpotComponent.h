@@ -74,8 +74,7 @@ protected:
 	/** Loads cinematic of this spot.
 	 * @see UNewMainMenuSpotComponent::CinematicInternal*/
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void LoadMasterSequence();
-	void OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence);
+	void CreateMasterSequencePlayer();
 
 	/** Plays idle in loop of this spot. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
