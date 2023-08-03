@@ -2,7 +2,6 @@
 
 #include "NewMainMenuSpotComponent.h"
 //---
-#include "Controllers/MyPlayerController.h"
 #include "Data/NewMainMenuDataAsset.h"
 #include "Data/NewMainMenuSubsystem.h"
 #include "Data/NewMainMenuTypes.h"
@@ -11,8 +10,6 @@
 //---
 #include "LevelSequence.h"
 #include "LevelSequencePlayer.h"
-#include "MovieSceneSequencePlaybackSettings.h"
-#include "Camera/CameraActor.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Sections/MovieSceneSubSection.h"
@@ -25,6 +22,16 @@ const UNewMainMenuDataAsset& UNewMainMenuSpotComponent::GetNewMainMenuDataAssetC
 	const UNewMainMenuDataAsset* NewMainMenuDataAsset = GetNewMainMenuDataAsset();
 	checkf(NewMainMenuDataAsset, TEXT("%s: 'NewMainMenuDataAssetInternal' is not set"), *FString(__FUNCTION__));
 	return *NewMainMenuDataAsset;
+}
+
+// Returns true if this spot is currently active and possessed by player
+bool UNewMainMenuSpotComponent::IsActiveSpot() const
+{
+	const ELevelType CurrentLevelType = UMyBlueprintFunctionLibrary::GetLevelType();
+	const ELevelType PlayerByLevelType = GetMeshChecked().GetAssociatedLevelType();
+	const bool bCanReadLevelType = CurrentLevelType != ELT::None && PlayerByLevelType != ELT::None;
+	return ensureMsgf(bCanReadLevelType, TEXT("'bCanReadLevelType' condition is FALSE, can not determine the level type for '%s' spot."), *GetNameSafe(this))
+		&& CurrentLevelType == PlayerByLevelType;
 }
 
 // Returns the Skeletal Mesh of the Bomber character
@@ -40,16 +47,64 @@ UMySkeletalMeshComponent& UNewMainMenuSpotComponent::GetMeshChecked() const
 	return *Mesh;
 }
 
-void UNewMainMenuSpotComponent::SetCameraViewOnSpot(bool bBlend)
+// Returns main cinematic of this spot
+const ULevelSequence* UNewMainMenuSpotComponent::GetMasterSequence() const
 {
-	AMyPlayerController* PC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
-	if (!PC || !CameraActorInternal)
+	return MasterPlayerInternal ? Cast<ULevelSequence>(MasterPlayerInternal->GetSequence()) : nullptr;
+}
+
+// Finds subsequence of this spot by given index
+const ULevelSequence* UNewMainMenuSpotComponent::FindSubsequence(int32 SubsequenceIndex) const
+{
+	const ULevelSequence* MasterSequence = GetMasterSequence();
+	const UMovieScene* InMovieScene = MasterSequence ? MasterSequence->GetMovieScene() : nullptr;
+	if (!ensureMsgf(InMovieScene, TEXT("'InMovieScene' is nullptr, can not find subsequence for '%s' spot."), *GetNameSafe(this)))
 	{
-		return;
+		return nullptr;
 	}
 
-	const float BlendTime = bBlend ? 0.5f : 0.0f;
-	PC->SetViewTargetWithBlend(CameraActorInternal, BlendTime);
+	int32 CurrentSubsequenceIdx = 0;
+	const TArray<UMovieSceneSection*>& AllSections = InMovieScene->GetAllSections();
+	for (int32 Idx = AllSections.Num() - 1; Idx >= 0; --Idx)
+	{
+		const UMovieSceneSubSection* SubSection = Cast<UMovieSceneSubSection>(AllSections[Idx]);
+		const ULevelSequence* SubSequence = SubSection ? Cast<ULevelSequence>(SubSection->GetSequence()) : nullptr;
+		if (!SubSection)
+		{
+			continue;
+		}
+
+		if (CurrentSubsequenceIdx == SubsequenceIndex)
+		{
+			return SubSequence;
+		}
+
+		CurrentSubsequenceIdx++;
+	}
+
+	return nullptr;
+}
+
+// Returns the length of by given subsequence index
+int32 UNewMainMenuSpotComponent::GetSubsequenceTotalFrames(int32 SubsequenceIndex) const
+{
+	const ULevelSequence* IdleSubsequence = FindSubsequence(SubsequenceIndex);
+	if (!ensureMsgf(IdleSubsequence, TEXT("'IdleSequence' is nullptr, can not play idle for '%s' spot."), *GetNameSafe(this)))
+	{
+		return INDEX_NONE;
+	}
+
+	const UMovieScene* MovieScene = IdleSubsequence ? IdleSubsequence->GetMovieScene() : nullptr;
+	const FFrameRate TickResolution = MovieScene->GetTickResolution();
+	const FFrameRate DisplayRate = MovieScene->GetDisplayRate();
+
+	const TRange<FFrameNumber> SubSectionRange = MovieScene->GetPlaybackRange();
+	const FFrameNumber SrcStartFrame = UE::MovieScene::DiscreteInclusiveLower(SubSectionRange);
+	const FFrameNumber SrcEndFrame = UE::MovieScene::DiscreteExclusiveUpper(SubSectionRange);
+
+	const FFrameTime StartFrameTime = ConvertFrameTime(SrcStartFrame, TickResolution, DisplayRate);
+	const FFrameTime EndFrameTime = ConvertFrameTime(SrcEndFrame, TickResolution, DisplayRate);
+	return (EndFrameTime.FloorToFrame() - StartFrameTime.FloorToFrame()).Value;
 }
 
 // Overridable native event for when play begins for this actor.
@@ -60,21 +115,6 @@ void UNewMainMenuSpotComponent::BeginPlay()
 	UNewMainMenuSubsystem::Get().AddNewMainMenuSpot(this);
 
 	LoadMasterSequence();
-	TrySetCameraViewByDefault();
-}
-
-// Sets camera view to this spot if current level type is equal to the spot's player
-void UNewMainMenuSpotComponent::TrySetCameraViewByDefault()
-{
-	const ELevelType CurrentLevelType = UMyBlueprintFunctionLibrary::GetLevelType();
-	const ELevelType PlayerByLevelType = GetMeshChecked().GetAssociatedLevelType();
-	const bool bCanReadLevelType = CurrentLevelType != ELT::None && PlayerByLevelType != ELT::None;
-	if (ensureMsgf(bCanReadLevelType, TEXT("'bCanReadLevelType' condition is FALSE, can not determine the level type for '%s' spot."), *GetNameSafe(this))
-		&& CurrentLevelType == PlayerByLevelType)
-	{
-		constexpr bool bBlend = false;
-		SetCameraViewOnSpot(bBlend);
-	}
 }
 
 // Loads cinematic of this spot
@@ -119,38 +159,25 @@ void UNewMainMenuSpotComponent::LoadMasterSequence()
 
 void UNewMainMenuSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence)
 {
-	MasterSequenceInternal = LoadedMasterSequence.Get();
-	PlayLoopIdle();
+	// Create and cache the master sequence
+	ALevelSequenceActor* OutActor = nullptr;
+	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
+
+	if (IsActiveSpot())
+	{
+		PlayLoopIdle();
+	}
 }
 
+// Plays idle in loop of this spot
 void UNewMainMenuSpotComponent::PlayLoopIdle()
 {
-	if (!ensureMsgf(MasterSequenceInternal, TEXT("'MasterSequenceInternal' is nullptr, can not play idle for '%s' spot."), *GetNameSafe(this)))
-	{
-		return;
-	}
+	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' is null!"));
 
-	// Find Idle Sequence: is a first sub sequence of the master sequence
-	ULevelSequence* IdleSequence = nullptr;
-	const UMovieScene* InMovieScene = MasterSequenceInternal->GetMovieScene();
-	checkf(InMovieScene, TEXT("'InMovieScene' is nullptr, can not play idle for '%s' spot."), *GetNameSafe(this));
-	for (const UMovieSceneSection* SectionIt : InMovieScene->GetAllSections())
-	{
-		if (const UMovieSceneSubSection* SubSection = Cast<UMovieSceneSubSection>(SectionIt))
-		{
-			IdleSequence = CastChecked<ULevelSequence>(SubSection->GetSequence());
-			UE_LOG(LogTemp, Log, TEXT("IdleSequence: %s"), *GetNameSafe(IdleSequence));
-			break;
-		}
-	}
+	constexpr int32 IdleSectionIdx = 0;
+	const int32 TotalFrames = GetSubsequenceTotalFrames(IdleSectionIdx);
 
-	if (!ensureMsgf(IdleSequence, TEXT("'IdleSequence' is nullptr, can not play idle for '%s' spot."), *GetNameSafe(this)))
-	{
-		return;
-	}
-
-	// Create and cache the idle sequence
-	ALevelSequenceActor* OutActor = nullptr;
-	IdlePlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, IdleSequence, {}, OutActor);
-	IdlePlayerInternal->PlayLooping();
+	constexpr int32 FirstFrame = 0;
+	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
+	MasterPlayerInternal->PlayLooping();
 }

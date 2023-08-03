@@ -85,17 +85,8 @@ UWorld* FEditorUtilsLibrary::GetEditorWorld()
 		return nullptr;
 	}
 
-	if (IsEditorNotPieWorld())
-	{
-		return GEditor->GetEditorWorldContext().World();
-	}
-
-	if (IsPIE())
-	{
-		return GEditor->GetCurrentPlayWorld();
-	}
-
-	return nullptr;
+	UWorld* FoundWorld = IsPIE() ? GEditor->GetCurrentPlayWorld() : GEditor->GetEditorWorldContext().World();
+	return !FoundWorld ? GWorld : FoundWorld;
 }
 
 // Returns true if currently is cooking the package

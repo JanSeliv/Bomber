@@ -27,18 +27,30 @@ public:
 	/** Guarantees that the data asset is loaded, otherwise, it will crash. */
 	const class UNewMainMenuDataAsset& GetNewMainMenuDataAssetChecked() const;
 
+	/** Returns true if this spot is currently active and possessed by player. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsActiveSpot() const;
+
 	/** Returns the Skeletal Mesh of the Bomber character. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
 	class UMySkeletalMeshComponent& GetMeshChecked() const;
 
+	/*********************************************************************************************
+	 * Cinematics
+	 ********************************************************************************************* */
+public:
 	/** Returns main cinematic of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class ULevelSequence* GetMasterSequence() const { return MasterSequenceInternal; }
+	const class ULevelSequence* GetMasterSequence() const;
 
-	/** Blends camera to this spot. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetCameraViewOnSpot(bool bBlend);
+	/** Finds subsequence of this spot by given index. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const ULevelSequence* FindSubsequence(int32 SubsequenceIndex) const;
+
+	/** Returns the length of by given subsequence index. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	int32 GetSubsequenceTotalFrames(int32 SubsequenceIndex) const;
 
 	/*********************************************************************************************
 	 * Protected properties
@@ -48,17 +60,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "New Main Menu Data Asset"))
 	TSoftObjectPtr<const class UNewMainMenuDataAsset> NewMainMenuDataAssetInternal = nullptr;
 
-	/** Linked camera actor to set the view that is also used by cinematics. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Actor"))
-	TObjectPtr<class ACameraActor> CameraActorInternal = nullptr;
-
-	/** Cached Master Sequence of this spot. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Sequence"))
-	TObjectPtr<class ULevelSequence> MasterSequenceInternal = nullptr;
-
-	/** Cached cinematic of this spot. */
+	/** Cached cinematic player of this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Idle Player"))
-	TObjectPtr<class ULevelSequencePlayer> IdlePlayerInternal = nullptr;
+	TObjectPtr<class ULevelSequencePlayer> MasterPlayerInternal = nullptr;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -67,18 +71,13 @@ protected:
 	/** Overridable native event for when play begins for this actor. */
 	virtual void BeginPlay() override;
 
-	/** Sets camera view to this spot if current level type is equal to the spot's player. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TrySetCameraViewByDefault();
-
 	/** Loads cinematic of this spot.
 	 * @see UNewMainMenuSpotComponent::CinematicInternal*/
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void LoadMasterSequence();
 	void OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence);
 
-	/** Plays idle in loop of this spot.
-	 * @see UNewMainMenuSpotComponent::CinematicInternal*/
+	/** Plays idle in loop of this spot. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void PlayLoopIdle();
 };
