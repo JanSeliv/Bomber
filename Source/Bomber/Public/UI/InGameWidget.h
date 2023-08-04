@@ -4,9 +4,9 @@
 
 #include "Blueprint/UserWidget.h"
 //---
-#include "Bomber.h"
-//---
 #include "InGameWidget.generated.h"
+
+enum class ECurrentGameState : uint8;
 
 /**
  * In game user widget.
@@ -20,7 +20,7 @@ public:
 	/* ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
-	
+
 	/** Returns the In-Game Menu widget. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UInGameMenuWidget* GetInGameMenuWidget() const { return InGameMenuWidget; }
@@ -29,7 +29,7 @@ protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
-		
+
 	/** Allows player to interact with UI during the match. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UInGameMenuWidget> InGameMenuWidget = nullptr;

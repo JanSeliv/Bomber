@@ -4,10 +4,11 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
-#include "Bomber.h"
 #include "Structures/Cell.h"
 //---
 #include "CellsUtilsLibrary.generated.h"
+
+enum class EPathType : uint8;
 
 /**
  * Utility structure to display cells

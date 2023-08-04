@@ -4,9 +4,6 @@
 
 #include "Camera/CameraComponent.h"
 //---
-#include "Bomber.h"
-#include "Structures/Cell.h"
-//---
 #include "MyCameraComponent.generated.h"
 
 /**
@@ -89,7 +86,7 @@ public:
 
 	/** Calculates how faw away the camera should be placed from specified cells. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	float GetCameraDistanceToCells(const TSet<FCell>& Cells) const;
+	float GetCameraDistanceToCells(const TSet<struct FCell>& Cells) const;
 
 	/** Returns the center camera location between all players and bots. */
 	UFUNCTION(BlueprintPure, Category = "C++")

@@ -9,7 +9,6 @@
 #include "DataAssets/GeneratedMapDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/BombActor.h"
-#include "Structures/Cell.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -17,6 +16,7 @@
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 #include "Math/UnrealMathUtility.h"
 #include "Net/UnrealNetwork.h"
 //---

@@ -17,9 +17,11 @@
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "InputActionValue.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 //---
@@ -139,6 +141,12 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 	{
 		MapComponent->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnBombDestroyed);
 	}
+}
+
+// Returns the Skeletal Mesh of bombers
+UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
+{
+	return Cast<UMySkeletalMeshComponent>(GetMesh());
 }
 
 // Actualize the player name for this character

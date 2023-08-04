@@ -7,6 +7,8 @@
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 //---
+#include "Engine/Engine.h"
+//---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif // WITH_EDITOR
@@ -17,7 +19,7 @@
 bool UUtilsLibrary::IsEditor()
 {
 #if WITH_EDITOR
-return FEditorUtilsLibrary::IsEditor();
+	return FEditorUtilsLibrary::IsEditor();
 #endif
 	return false;
 }

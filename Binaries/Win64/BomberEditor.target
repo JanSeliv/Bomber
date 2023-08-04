@@ -12,9 +12,9 @@
 	{
 		"MajorVersion": 5,
 		"MinorVersion": 2,
-		"PatchVersion": 0,
-		"Changelist": 25360045,
-		"CompatibleChangelist": 0,
+		"PatchVersion": 1,
+		"Changelist": 26001984,
+		"CompatibleChangelist": 25360045,
 		"IsLicenseeVersion": 0,
 		"IsPromotedBuild": 0,
 		"BranchName": "++UE5+Release-5.2",
@@ -9126,6 +9126,18 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/AssetsCleaner/Binaries/Win64/UnrealEditor-AssetsCleaner.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/AssetsCleaner/Binaries/Win64/UnrealEditor-AssetsCleaner.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/AssetsCleaner/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
 			"Path": "$(EngineDir)/Plugins/Marketplace/Developer/RiderLink/Binaries/Win64/UnrealEditor-RD.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -9183,6 +9195,18 @@
 		},
 		{
 			"Path": "$(EngineDir)/Plugins/Marketplace/Developer/RiderLink/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/PathFollow/Binaries/Win64/UnrealEditor-PathFollow.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/PathFollow/Binaries/Win64/UnrealEditor-PathFollow.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Plugins/Marketplace/PathFollow/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -13967,6 +13991,18 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewMainMenu/Binaries/Win64/UnrealEditor-NewMainMenu.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewMainMenu/Binaries/Win64/UnrealEditor-NewMainMenu.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewMainMenu/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -37256,6 +37292,10 @@
 			"Type": "UFS"
 		},
 		{
+			"Path": "$(EngineDir)/Plugins/Experimental/Text3D/Text3D.uplugin",
+			"Type": "UFS"
+		},
+		{
 			"Path": "$(EngineDir)/Plugins/Experimental/ToolPresets/ToolPresets.uplugin",
 			"Type": "UFS"
 		},
@@ -37697,6 +37737,10 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/GameFeatures/LevelActorsMovement/LevelActorsMovement.uplugin",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewMainMenu/NewMainMenu.uplugin",
 			"Type": "UFS"
 		},
 		{

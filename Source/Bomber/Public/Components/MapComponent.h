@@ -4,11 +4,11 @@
 
 #include "Components/ActorComponent.h"
 //---
-#include "Bomber.h"
 #include "Structures/Cell.h"
-#include "Engine/EngineTypes.h"
 //---
 #include "MapComponent.generated.h"
+
+enum class EActorType : uint8;
 
 /** Typedef to allow for some nicer looking sets of map components */
 typedef TSet<class UMapComponent*> FMapComponents;
@@ -92,7 +92,7 @@ public:
 
 	/** Returns the map component of the specified owner. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (DefaultToSelf = "Owner"))
-	static FORCEINLINE UMapComponent* GetMapComponent(const AActor* Owner) { return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr; }
+	static UMapComponent* GetMapComponent(const AActor* Owner);
 
 	/** Get the owner's data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")

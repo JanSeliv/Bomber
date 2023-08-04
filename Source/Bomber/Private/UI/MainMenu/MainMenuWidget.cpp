@@ -2,6 +2,7 @@
 
 #include "UI/MainMenu/MainMenuWidget.h"
 //---
+#include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MySkeletalMeshComponent.h"
 #include "Controllers/MyPlayerController.h"
@@ -10,6 +11,9 @@
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/Carousel.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include "InputActionValue.h"
+#include "Kismet/KismetSystemLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MainMenuWidget)
 

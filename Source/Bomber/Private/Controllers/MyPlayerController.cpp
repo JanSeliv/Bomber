@@ -2,15 +2,7 @@
 
 #include "Controllers/MyPlayerController.h"
 //---
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "EnhancedPlayerInput.h"
-#include "Components/GameFrameworkComponentManager.h"
-#include "Engine/GameViewportClient.h"
-#include "Engine/LocalPlayer.h"
-#include "Framework/Application/NavigationConfig.h"
-#include "Framework/Application/SlateApplication.h"
-//---
+#include "Bomber.h"
 #include "DataAssets/MyInputAction.h"
 #include "DataAssets/MyInputMappingContext.h"
 #include "DataAssets/PlayerInputDataAsset.h"
@@ -22,6 +14,15 @@
 #include "UI/SettingsWidget.h"
 #include "UI/MainMenu/MainMenuWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+///---
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "EnhancedPlayerInput.h"
+#include "Components/GameFrameworkComponentManager.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/LocalPlayer.h"
+#include "Framework/Application/NavigationConfig.h"
+#include "Framework/Application/SlateApplication.h"
 //---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"

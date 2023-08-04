@@ -4,9 +4,9 @@
 
 #include "Engine/DataAsset.h"
 //---
-#include "Bomber.h"
-//---
 #include "UIDataAsset.generated.h"
+
+enum class EEndGameState : uint8;
 
 /**
  * Contains in-game UI data.

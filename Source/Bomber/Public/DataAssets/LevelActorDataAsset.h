@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "Bomber.h"
-//---
 #include "Engine/DataAsset.h"
+//---
+#include "Bomber.h"
+#include "Engine/EngineTypes.h"
 //---
 #include "LevelActorDataAsset.generated.h"
 

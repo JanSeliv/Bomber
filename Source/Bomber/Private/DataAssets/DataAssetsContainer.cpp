@@ -2,6 +2,7 @@
 
 #include "DataAssets/DataAssetsContainer.h"
 //---
+#include "Bomber.h"
 #include "DataAssets/AIDataAsset.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "DataAssets/GeneratedMapDataAsset.h"
@@ -9,6 +10,8 @@
 #include "DataAssets/PlayerInputDataAsset.h"
 #include "DataAssets/SoundsDataAsset.h"
 #include "DataAssets/UIDataAsset.h"
+//---
+#include "GameFramework/Actor.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(DataAssetsContainer)
 

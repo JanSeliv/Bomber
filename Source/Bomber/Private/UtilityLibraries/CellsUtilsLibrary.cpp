@@ -2,6 +2,7 @@
 
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
+#include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/TextRenderComponent.h"
 //---

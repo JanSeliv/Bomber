@@ -5,7 +5,6 @@
 #include "Components/ActorComponent.h"
 //---
 #include "FootTrailsTypes.h"
-#include "Structures/Cell.h"
 //---
 #include "FootTrailsGeneratorComponent.generated.h"
 
@@ -71,5 +70,5 @@ protected:
 
 	/** Spawns given Foot Trail by its type on the specified cell. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SpawnFootTrail(EFootTrailType FootTrailType, const FCell& Cell, float CellRotation);
+	void SpawnFootTrail(EFootTrailType FootTrailType, const struct FCell& Cell, float CellRotation);
 };

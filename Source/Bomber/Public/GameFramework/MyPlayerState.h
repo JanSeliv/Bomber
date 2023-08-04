@@ -5,7 +5,6 @@
 #include "GameFramework/PlayerState.h"
 //---
 #include "Bomber.h"
-#include "Components/MySkeletalMeshComponent.h"
 //---
 #include "MyPlayerState.generated.h"
 

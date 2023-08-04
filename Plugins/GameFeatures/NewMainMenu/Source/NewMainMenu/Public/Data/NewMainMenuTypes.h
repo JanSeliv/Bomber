@@ -5,7 +5,7 @@
 #include "Engine/DataTable.h"
 //---
 #include "Bomber.h" // ELevelType
-#include "DataAssets/PlayerDataAsset.h" // FPlayerTag
+#include "Structures/PlayerTag.h"
 //---
 #include "NewMainMenuTypes.generated.h"
 

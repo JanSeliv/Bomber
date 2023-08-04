@@ -2,6 +2,7 @@
 
 #include "Controllers/MyAIController.h"
 //---
+#include "Bomber.h"
 #include "Components/MapComponent.h"
 #include "DataAssets/AIDataAsset.h"
 #include "DataAssets/GameStateDataAsset.h"

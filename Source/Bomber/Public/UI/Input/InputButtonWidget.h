@@ -5,7 +5,6 @@
 #include "UI/SettingSubWidget.h"
 //---
 #include "EnhancedActionKeyMapping.h"
-#include "InputCoreTypes.h"
 //---
 #include "InputButtonWidget.generated.h"
 

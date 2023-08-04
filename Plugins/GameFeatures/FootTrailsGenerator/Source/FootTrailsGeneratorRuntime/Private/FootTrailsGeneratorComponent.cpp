@@ -5,11 +5,13 @@
 #include "FootTrailsDataAsset.h"
 #include "InstancedStaticMeshActor.h"
 #include "MyDataTable/MyDataTable.h"
+#include "Structures/Cell.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "GameFramework/Actor.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FootTrailsGeneratorComponent)
 

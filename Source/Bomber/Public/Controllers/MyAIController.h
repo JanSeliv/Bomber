@@ -4,10 +4,11 @@
 
 #include "AIController.h"
 //---
-#include "Bomber.h"
 #include "Structures/Cell.h"
 //---
 #include "MyAIController.generated.h"
+
+enum class ECurrentGameState : uint8;
 
 /**
  * Characters controlled by bots.

@@ -4,11 +4,13 @@
 
 #include "Subsystems/WorldSubsystem.h"
 //---
-#include "Bomber.h"
-//---
 #include "SoundsSubsystem.generated.h"
 
 class UAudioComponent;
+
+enum class ELevelType : uint8;
+enum class ECurrentGameState : uint8;
+enum class EEndGameState : uint8;
 
 /**
  * Is used to manage the game sounds.

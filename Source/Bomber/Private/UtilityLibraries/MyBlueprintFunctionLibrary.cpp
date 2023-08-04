@@ -19,6 +19,7 @@
 #include "UI/InGameWidget.h"
 #include "UI/MyHUD.h"
 //---
+#include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #if WITH_EDITOR

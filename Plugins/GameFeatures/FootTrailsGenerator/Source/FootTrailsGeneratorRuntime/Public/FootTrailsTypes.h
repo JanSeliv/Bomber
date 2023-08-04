@@ -2,8 +2,10 @@
 
 #pragma once
 
-#include "Bomber.h"
 #include "Engine/DataTable.h"
+//---
+#include "Bomber.h" // ELevelType
+#include "Misc/EnumRange.h"
 //---
 #include "FootTrailsTypes.generated.h"
 
@@ -41,7 +43,7 @@ struct FOOTTRAILSGENERATORRUNTIME_API FFootTrailArchetype : public FTableRowBase
 
 	/** The foot trail mesh. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	TSoftObjectPtr<UStaticMesh> Mesh = nullptr;
+	TSoftObjectPtr<class UStaticMesh> Mesh = nullptr;
 
 	/** Compares for equality.
 	* @param Other The other object being compared. */

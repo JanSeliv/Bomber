@@ -2,9 +2,9 @@
 
 #include "Components/MapComponent.h"
 //---
+#include "Bomber.h"
 #include "GeneratedMap.h"
 #include "PoolManagerSubsystem.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "DataAssets/LevelActorDataAsset.h"
@@ -15,11 +15,16 @@
 //---
 #include "Components/BoxComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/SkeletalMesh.h"
+#include "Engine/StaticMesh.h"
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
+#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MapComponent)
@@ -170,6 +175,12 @@ void UMapComponent::SetMaterial(UMaterialInterface* Material)
 	{
 		MeshComponentInternal->SetMaterial(0, Material);
 	}
+}
+
+// Returns the map component of the specified owner
+UMapComponent* UMapComponent::GetMapComponent(const AActor* Owner)
+{
+	return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr;
 }
 
 // Get the owner's data asset

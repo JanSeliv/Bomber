@@ -4,30 +4,9 @@
 
 #include "DataAssets/LevelActorDataAsset.h"
 //---
-#include "GameplayTagContainer.h"
+#include "Structures/PlayerTag.h"
 //---
 #include "PlayerDataAsset.generated.h"
-
-/**
- * The tag that represents all available player characters in game.
- */
-USTRUCT(BlueprintType, meta = (Categories = "Player"))
-struct BOMBER_API FPlayerTag : public FGameplayTag
-{
-	GENERATED_BODY()
-
-	/** Default constructor. */
-	FPlayerTag() = default;
-
-	/** Custom constructor to set all members values. */
-	FPlayerTag(const FGameplayTag& Tag)
-		: FGameplayTag(Tag)
-	{
-	}
-
-	/** The Player Character tag that contains nothing chosen by default. */
-	static const FPlayerTag None;
-};
 
 /**
  * Determines each mesh to attach.
@@ -141,7 +120,7 @@ public:
 	/** Returns the Anim Blueprint class to use.
 	 * @see UPlayerDataAsset::AnimInstanceClassInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClassInternal; }
+	FORCEINLINE TSubclassOf<class UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClassInternal; }
 
 	/** Returns the name of a material parameter with a diffuse array.
 	 * @see UPlayerDataAsset::SkinSlotNameInternal. */
@@ -164,7 +143,7 @@ protected:
 
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
-	TSubclassOf<UAnimInstance> AnimInstanceClassInternal = nullptr;
+	TSubclassOf<class UAnimInstance> AnimInstanceClassInternal = nullptr;
 
 	/** The name of a material parameter with a diffuse array. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))

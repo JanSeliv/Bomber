@@ -4,8 +4,6 @@
 
 #include "GameFramework/Actor.h"
 //---
-#include "Structures/Cell.h"
-//---
 #include "BombActor.generated.h"
 
 #define MIN_FIRE_RADIUS 1
@@ -34,7 +32,7 @@ public:
 
 	/** Returns cells that bombs is going to destroy. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	TSet<FCell> GetExplosionCells() const;
+	TSet<struct FCell> GetExplosionCells() const;
 
 	/** Returns radius of the blast to each side. */
 	UFUNCTION(BlueprintPure, Category = "C++")

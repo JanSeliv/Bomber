@@ -4,9 +4,6 @@
 
 #include "InputMappingContext.h"
 //---
-#include "Bomber.h"
-#include "InputCoreTypes.h"
-//---
 #include "MyInputMappingContext.generated.h"
 
 /**
@@ -65,5 +62,5 @@ protected:
 
 	/** Set the game states for which this input context should be active. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Active For States", Bitmask, BitmaskEnum = "/Script/Bomber.ECurrentGameState"))
-	int32 ActiveForStatesInternal = TO_FLAG(ECGS::None);
+	int32 ActiveForStatesInternal = 0;
 };

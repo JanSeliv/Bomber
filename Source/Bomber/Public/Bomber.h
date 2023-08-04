@@ -2,18 +2,15 @@
 
 #pragma once
 
-#include "Kismet/GameplayStatics.h"
 #include "Bomber.generated.h"
 
-/** IS_TRANSIENT returns true is specified object is pending kill, CDO or exists on the Transient level. */
-static const FString TransientLevelName = TEXT("Transient");
-#define IS_TRANSIENT(Obj) \
-	( \
-		!IsValid(Obj) \
-		|| !(Obj)->IsValidLowLevelFast() \
-		|| (Obj)->HasAllFlags(RF_ClassDefaultObject) \
-		|| UGameplayStatics::GetCurrentLevelName(Obj) == TransientLevelName \
-	)
+#define IS_TRANSIENT(Obj) ( FTransientChecker::IsTransient(Obj) )
+
+namespace FTransientChecker
+{
+/** Returns true is specified object is pending kill, CDO or exists on the Transient level. */
+BOMBER_API bool IsTransient(const UObject* Obj);
+}
 
 /**
  * Is useful for work with bit flags.

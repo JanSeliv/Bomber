@@ -2,6 +2,8 @@
 
 #include "Components/MySkeletalMeshComponent.h"
 //---
+#include "DataAssets/PlayerDataAsset.h"
+//---
 #include "Animation/AnimSequence.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Components/StaticMeshComponent.h"
@@ -10,9 +12,6 @@
 #include "Materials/MaterialInstanceDynamic.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MySkeletalMeshComponent)
-
-// The empty data
-const FCustomPlayerMeshData FCustomPlayerMeshData::Empty = FCustomPlayerMeshData();
 
 // Constructor that initializes the player data by specified tag
 FCustomPlayerMeshData::FCustomPlayerMeshData(const FPlayerTag& PlayerTag, int32 InSkinIndex)

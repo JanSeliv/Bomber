@@ -4,6 +4,7 @@
 //---
 #include "DataAssets/DataAssetsContainer.h"
 //---
+#include "GameFramework/Actor.h"
 #include "Engine/Texture2DArray.h"
 #include "Materials/MaterialInstance.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -13,9 +14,6 @@
 #endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerDataAsset)
-
-// The Player Character tag that contains nothing chosen by default
-const FPlayerTag FPlayerTag::None = EmptyTag;
 
 // Returns the dynamic material instance of a player with specified skin.
 UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const

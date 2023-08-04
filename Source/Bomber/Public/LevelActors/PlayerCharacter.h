@@ -4,8 +4,7 @@
 
 #include "GameFramework/Character.h"
 //---
-#include "InputActionValue.h"
-#include "Components/MySkeletalMeshComponent.h"
+#include "Structures/CustomPlayerMeshData.h"
 //---
 #include "PlayerCharacter.generated.h"
 
@@ -70,7 +69,7 @@ public:
 
 	/** Returns the Skeletal Mesh of bombers. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const { return Cast<UMySkeletalMeshComponent>(GetMesh()); }
+	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
 
 	/** Actualize the player name for this character. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -215,5 +214,5 @@ protected:
 
 	/** Move the player character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
-	void MovePlayer(const FInputActionValue& ActionValue);
+	void MovePlayer(const struct FInputActionValue& ActionValue);
 };

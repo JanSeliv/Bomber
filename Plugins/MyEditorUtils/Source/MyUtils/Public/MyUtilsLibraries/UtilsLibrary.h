@@ -4,11 +4,9 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
-#include "Engine/EngineTypes.h"
-//---
 #include "UtilsLibrary.generated.h"
 
-class UWidget;
+enum EAspectRatioAxisConstraint : int;
 
 /**
  * The common functions library

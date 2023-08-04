@@ -4,9 +4,10 @@
 
 #include "Engine/DeveloperSettings.h"
 //---
-#include "Bomber.h"
-//---
 #include "DataAssetsContainer.generated.h"
+
+enum class EActorType : uint8;
+enum class ELevelType : uint8;
 
 /**
  * Contains all core data of the game.

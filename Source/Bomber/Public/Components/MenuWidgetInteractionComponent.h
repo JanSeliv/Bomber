@@ -4,9 +4,9 @@
 
 #include "Components/WidgetInteractionComponent.h"
 //---
-#include "Bomber.h"
-//---
 #include "MenuWidgetInteractionComponent.generated.h"
+
+enum class ECurrentGameState : uint8;
 
 /**
  * Custom Widget Interaction Component.

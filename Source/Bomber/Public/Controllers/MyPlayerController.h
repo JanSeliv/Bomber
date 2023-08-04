@@ -4,9 +4,9 @@
 
 #include "GameFramework/PlayerController.h"
 //---
-#include "Bomber.h"
-//---
 #include "MyPlayerController.generated.h"
+
+enum class ECurrentGameState : uint8;
 
 /**
  * The player controller class.

@@ -4,9 +4,10 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
-#include "Bomber.h"
-//---
 #include "MyBlueprintFunctionLibrary.generated.h"
+
+enum class ELevelType : uint8;
+enum class EActorType : uint8;
 
 /**
  * 	The static functions library

@@ -2,6 +2,7 @@
 
 #include "UI/InGameMenuWidget.h"
 //---
+#include "Bomber.h"
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"

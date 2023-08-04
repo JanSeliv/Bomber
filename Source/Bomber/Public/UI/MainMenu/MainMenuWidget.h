@@ -4,10 +4,12 @@
 
 #include "Blueprint/UserWidget.h"
 //---
-#include "Bomber.h"
-#include "InputActionValue.h"
-//---
 #include "MainMenuWidget.generated.h"
+
+enum class ELevelType : uint8;
+enum class ECurrentGameState : uint8;
+
+struct FInputActionValue;
 
 /**
  * Main menu user widget.
@@ -48,7 +50,7 @@ public:
 	/** Sets the previous or next player in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ChooseRightLeft(const FInputActionValue& ActionValue);
-	
+
 	/** Sets the next level in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ChooseForward();
@@ -60,7 +62,7 @@ public:
 	/** Sets the previous or next level in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ChooseBackForward(const FInputActionValue& ActionValue);
-	
+
 	/** Sets the next skin in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void NextSkin();

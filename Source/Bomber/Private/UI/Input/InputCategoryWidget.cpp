@@ -7,6 +7,7 @@
 #include "UI/SettingsWidget.h"
 #include "UI/Input/InputButtonWidget.h"
 //---
+#include "EnhancedActionKeyMapping.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 //---

@@ -2,6 +2,7 @@
 
 #include "UI/InGameWidget.h"
 //---
+#include "Bomber.h"
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"

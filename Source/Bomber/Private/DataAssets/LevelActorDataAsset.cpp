@@ -2,7 +2,7 @@
 
 #include "DataAssets/LevelActorDataAsset.h"
 //---
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "GameFramework/Actor.h"
 //---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -91,7 +91,7 @@ const ULevelActorRow* ULevelActorDataAsset::GetRowByLevelType(ELevelType LevelTy
 		if (RowIt
 		    && RowIt->Mesh //is not empty
 		    && (RowIt->LevelType == LevelType
-		    	|| RowIt->LevelType == ELevelType::Max))
+		        || RowIt->LevelType == ELevelType::Max))
 		{
 			return RowIt;
 		}
