@@ -10,6 +10,7 @@
 //---
 #include "UnrealClient.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/GameFrameworkComponentManager.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyHUD)
 
@@ -45,6 +46,9 @@ void AMyHUD::SetFPSCounterEnabled(bool bEnable)
 void AMyHUD::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	// Register HUD to let modular widgets to be dynamically added there
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 
 	if (PlayerOwner
 	    && !PlayerOwner->MyHUD)

@@ -128,17 +128,23 @@ using EIT = EItemType;
 #define EIT_LAST_FLAG TO_FLAG(EIT::Fire)
 
 /**
- * The replicated states of the game.
+ * The replicated states of the game. It shares the state between all the players at the same time.
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ECurrentGameState : uint8
 {
 	None = 0,
+	///< Is active while players are in Main-Menu.
 	Menu = 1 << 0,
+	///< Is active while players see count-down time (3-2-1).
 	GameStarting = 1 << 1,
+	///< Is active when the match is finished and players see their results of the game.
 	EndGame = 1 << 2,
+	///< Is active during the active match.
 	InGame = 1 << 3,
-	Max = Menu | GameStarting | EndGame | InGame
+	///< Is active while player is watching cutscene of chosen character, is happening in single-player only since cinematics are automatically skipped in multiplayer.
+	Cinematic = 1 << 4,
+	Max = Menu | GameStarting | EndGame | InGame | Cinematic UMETA(DisplayName = "Any")
 };
 
 ENUM_CLASS_FLAGS(ECurrentGameState);

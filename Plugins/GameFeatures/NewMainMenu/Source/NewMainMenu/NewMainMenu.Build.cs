@@ -12,6 +12,7 @@ public class NewMainMenu : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core", "Engine"
+				, "UMG" // UUserWidget creation
 			}
 		);
 

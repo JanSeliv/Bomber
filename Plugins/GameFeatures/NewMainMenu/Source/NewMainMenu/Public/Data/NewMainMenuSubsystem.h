@@ -9,7 +9,7 @@
 /**
  * Provides access to the common runtime data about new Main Menu like current cinematic spots.
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class NEWMAINMENU_API UNewMainMenuSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
@@ -21,6 +21,10 @@ public:
 	/** Add new Main-Menu spot, so it can be obtained by other objects. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AddNewMainMenuSpot(class UNewMainMenuSpotComponent* NewMainMenuSpotComponent);
+
+	/** Returns currently selected Main-Menu spot. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	class UNewMainMenuSpotComponent* GetActiveMainMenuSpotComponent() const;
 
 protected:
 	/** All Main Menu spots with characters placed on the level. */

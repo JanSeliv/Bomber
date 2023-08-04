@@ -6,11 +6,13 @@
 //---
 #include "NewMainMenuSpotComponent.generated.h"
 
+enum class ECurrentGameState : uint8;
+
 /**
  * Represents a spot where a character can be selected in the Main Menu.
  * Is added dynamically to the My Skeletal Mesh actors on the level.
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class NEWMAINMENU_API UNewMainMenuSpotComponent final : public UActorComponent
 {
 	GENERATED_BODY()
@@ -19,13 +21,8 @@ class NEWMAINMENU_API UNewMainMenuSpotComponent final : public UActorComponent
 	 * Public function
 	 ********************************************************************************************* */
 public:
-	/** Returns the data asset that contains all the assets and tweaks of New Main Menu game feature.
-	 * @see UNewMainMenuSpotComponent::NewMainMenuDataAssetInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE class UNewMainMenuDataAsset* GetNewMainMenuDataAsset() const { return NewMainMenuDataAssetInternal.LoadSynchronous(); }
-
-	/** Guarantees that the data asset is loaded, otherwise, it will crash. */
-	const class UNewMainMenuDataAsset& GetNewMainMenuDataAssetChecked() const;
+	/** Default constructor. */
+	UNewMainMenuSpotComponent();
 
 	/** Returns true if this spot is currently active and possessed by player. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -56,10 +53,6 @@ public:
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
-	/** Contains all the assets and tweaks of New Main Menu game feature. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "New Main Menu Data Asset"))
-	TSoftObjectPtr<const class UNewMainMenuDataAsset> NewMainMenuDataAssetInternal = nullptr;
-
 	/** Cached cinematic player of this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Idle Player"))
 	TObjectPtr<class ULevelSequencePlayer> MasterPlayerInternal = nullptr;
@@ -71,12 +64,20 @@ protected:
 	/** Overridable native event for when play begins for this actor. */
 	virtual void BeginPlay() override;
 
+	/** Called when the current game state was changed. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
 	/** Loads cinematic of this spot.
 	 * @see UNewMainMenuSpotComponent::CinematicInternal*/
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void CreateMasterSequencePlayer();
 
-	/** Plays idle in loop of this spot. */
+	/** Plays idle part in loop of current Master Sequence. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void PlayLoopIdle();
+	void PlayIdlePart();
+
+	/** Plays main part of current Master Sequence. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void PlayMainPart();
 };

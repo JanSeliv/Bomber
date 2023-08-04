@@ -2,7 +2,10 @@
 
 #include "Data/NewMainMenuSubsystem.h"
 //---
+#include "Components/NewMainMenuSpotComponent.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include "Engine/World.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuSubsystem)
 
@@ -23,4 +26,18 @@ void UNewMainMenuSubsystem::AddNewMainMenuSpot(UNewMainMenuSpotComponent* NewMai
 	{
 		MainMenuSpotsInternal.AddUnique(NewMainMenuSpotComponent);
 	}
+}
+
+// Returns currently selected Main-Menu spot
+UNewMainMenuSpotComponent* UNewMainMenuSubsystem::GetActiveMainMenuSpotComponent() const
+{
+	for (UNewMainMenuSpotComponent* MainMenuSpotComponent : MainMenuSpotsInternal)
+	{
+		if (MainMenuSpotComponent && MainMenuSpotComponent->IsActive())
+		{
+			return MainMenuSpotComponent;
+		}
+	}
+
+	return nullptr;
 }

@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "NewMainMenuSpotComponent.h"
+#include "Components/NewMainMenuSpotComponent.h"
 //---
+#include "Bomber.h"
 #include "Data/NewMainMenuDataAsset.h"
 #include "Data/NewMainMenuSubsystem.h"
 #include "Data/NewMainMenuTypes.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "MyDataTable/MyDataTable.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -14,12 +16,11 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuSpotComponent)
 
-// Guarantees that the data asset is loaded, otherwise, it will crash
-const UNewMainMenuDataAsset& UNewMainMenuSpotComponent::GetNewMainMenuDataAssetChecked() const
+// Default constructor
+UNewMainMenuSpotComponent::UNewMainMenuSpotComponent()
 {
-	const UNewMainMenuDataAsset* NewMainMenuDataAsset = GetNewMainMenuDataAsset();
-	checkf(NewMainMenuDataAsset, TEXT("%s: 'NewMainMenuDataAssetInternal' is not set"), *FString(__FUNCTION__));
-	return *NewMainMenuDataAsset;
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 // Returns true if this spot is currently active and possessed by player
@@ -114,9 +115,35 @@ void UNewMainMenuSpotComponent::BeginPlay()
 
 	CreateMasterSequencePlayer();
 
-	if (IsActiveSpot())
+	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	checkf(MyGameState, TEXT("%s: 'MyGameState' is null"), *FString(__FUNCTION__));
+
+	// Handle current game state if initialized with delay
+	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
 	{
-		PlayLoopIdle();
+		OnGameStateChanged(ECurrentGameState::Menu);
+	}
+
+	// Listen states to handle this widget behavior
+	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+}
+
+// Called when the current game state was changed
+void UNewMainMenuSpotComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	switch (CurrentGameState)
+	{
+	case ECurrentGameState::Menu:
+		{
+			PlayIdlePart();
+			break;
+		}
+	case ECurrentGameState::Cinematic:
+		{
+			PlayMainPart();
+			break;
+		}
+	default: break;
 	}
 }
 
@@ -129,7 +156,7 @@ void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
 		return;
 	}
 
-	const UDataTable* CinematicsDataTable = GetNewMainMenuDataAssetChecked().GetCinematicsDataTable();
+	const UDataTable* CinematicsDataTable = UNewMainMenuDataAsset::Get().GetCinematicsDataTable();
 	if (!ensureMsgf(CinematicsDataTable, TEXT("'CinematicsDataTable' is nullptr, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
 	{
 		return;
@@ -159,9 +186,15 @@ void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
 	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, FoundMasterSequence.LoadSynchronous(), {}, OutActor);
 }
 
-// Plays idle in loop of this spot
-void UNewMainMenuSpotComponent::PlayLoopIdle()
+// Plays idle part in loop of current Master Sequence
+void UNewMainMenuSpotComponent::PlayIdlePart()
 {
+	if (!IsActiveSpot())
+	{
+		// Don't play for inactive spot
+		return;
+	}
+
 	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' is null!"));
 
 	constexpr int32 IdleSectionIdx = 0;
@@ -170,4 +203,17 @@ void UNewMainMenuSpotComponent::PlayLoopIdle()
 	constexpr int32 FirstFrame = 0;
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
 	MasterPlayerInternal->PlayLooping();
+}
+
+// Plays main part of current Master Sequence
+void UNewMainMenuSpotComponent::PlayMainPart()
+{
+	if (!IsActiveSpot())
+	{
+		// Don't play for inactive spot
+		return;
+	}
+
+	// @TODO
+	UE_LOG(LogTemp, Warning, TEXT("--- PLAYING MAIN PART ---"));
 }

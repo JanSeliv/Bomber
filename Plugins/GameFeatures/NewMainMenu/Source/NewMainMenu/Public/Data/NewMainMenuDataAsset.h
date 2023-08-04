@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "DataAssets/LevelActorDataAsset.h"
+#include "Engine/DataAsset.h"
 //---
 #include "NewMainMenuDataAsset.generated.h"
 
@@ -15,12 +15,25 @@ class NEWMAINMENU_API UNewMainMenuDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	/** Returns this Data Asset, is checked and wil crash if can't be obtained, e.g: when is not set. */
+	static const UNewMainMenuDataAsset& Get();
+
 	/** Returns the data table with the cinematics to be played.
-	 * @see UUIDataAsset::CinematicsDataTableInternal. */
+	 * @see UNewMainMenuDataAsset::CinematicsDataTableInternal.*/
+	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class UDataTable* GetCinematicsDataTable() const { return CinematicsDataTableInternal; }
+
+	/** Returns a class of the Main Menu widget.
+	 * @see UNewMainMenuDataAsset::MainMenuWidgetClassInternal.*/
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class UNewMainMenuWidget> GetMainMenuWidgetClass() const { return MainMenuWidgetClassInternal; }
 
 protected:
 	/** The data table with the cinematics to be played. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Cinematics Data Table", ShowOnlyInnerProperties))
 	TObjectPtr<const class UDataTable> CinematicsDataTableInternal = nullptr;
+
+	/** The class of the Main Menu widget blueprint. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Widget Class", ShowOnlyInnerProperties))
+	TSubclassOf<class UNewMainMenuWidget> MainMenuWidgetClassInternal = nullptr;
 };
