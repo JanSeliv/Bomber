@@ -47,7 +47,7 @@ public:
 
 	/** Returns the length of by given subsequence index. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	int32 GetSubsequenceTotalFrames(int32 SubsequenceIndex) const;
+	static int32 GetSequenceTotalFrames(const ULevelSequence* LevelSequence);
 
 	/*********************************************************************************************
 	 * Protected properties

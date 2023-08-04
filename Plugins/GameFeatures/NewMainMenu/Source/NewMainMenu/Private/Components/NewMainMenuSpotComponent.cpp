@@ -85,15 +85,14 @@ const ULevelSequence* UNewMainMenuSpotComponent::FindSubsequence(int32 Subsequen
 }
 
 // Returns the length of by given subsequence index
-int32 UNewMainMenuSpotComponent::GetSubsequenceTotalFrames(int32 SubsequenceIndex) const
+int32 UNewMainMenuSpotComponent::GetSequenceTotalFrames(const ULevelSequence* LevelSequence)
 {
-	const ULevelSequence* IdleSubsequence = FindSubsequence(SubsequenceIndex);
-	if (!ensureMsgf(IdleSubsequence, TEXT("'IdleSequence' is nullptr, can not play idle for '%s' spot."), *GetNameSafe(this)))
+	if (!ensureMsgf(LevelSequence, TEXT("'LevelSequence' is not valid")))
 	{
 		return INDEX_NONE;
 	}
 
-	const UMovieScene* MovieScene = IdleSubsequence ? IdleSubsequence->GetMovieScene() : nullptr;
+	const UMovieScene* MovieScene = LevelSequence->GetMovieScene();
 	const FFrameRate TickResolution = MovieScene->GetTickResolution();
 	const FFrameRate DisplayRate = MovieScene->GetDisplayRate();
 
@@ -198,7 +197,7 @@ void UNewMainMenuSpotComponent::PlayIdlePart()
 	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' is null!"));
 
 	constexpr int32 IdleSectionIdx = 0;
-	const int32 TotalFrames = GetSubsequenceTotalFrames(IdleSectionIdx);
+	const int32 TotalFrames = GetSequenceTotalFrames(FindSubsequence(IdleSectionIdx));
 
 	constexpr int32 FirstFrame = 0;
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
@@ -214,6 +213,8 @@ void UNewMainMenuSpotComponent::PlayMainPart()
 		return;
 	}
 
-	// @TODO
-	UE_LOG(LogTemp, Warning, TEXT("--- PLAYING MAIN PART ---"));
+	// Change the range back to normal, so the idle will transit to main part
+	constexpr int32 FirstFrame = 0;
+	const int32 TotalFrames = GetSequenceTotalFrames(GetMasterSequence());
+	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
 }
