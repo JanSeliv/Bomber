@@ -14,6 +14,7 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/Button.h"
+#include "Kismet/KismetSystemLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuWidget)
 
@@ -60,6 +61,12 @@ void UNewMainMenuWidget::NativeConstruct()
 	{
 		NextSkinButton->SetClickMethod(EButtonClickMethod::PreciseClick);
 		SettingsButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnSettingsButtonPressed);
+	}
+
+	if (QuitGameButton)
+	{
+		QuitGameButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		QuitGameButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnQuitGameButtonPressed);
 	}
 }
 
@@ -168,4 +175,11 @@ void UNewMainMenuWidget::OnSettingsButtonPressed()
 	{
 		SettingsWidget->OpenSettings();
 	}
+}
+
+// Is called when player pressed the button to quit the game
+void UNewMainMenuWidget::OnQuitGameButtonPressed()
+{
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
 }

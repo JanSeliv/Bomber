@@ -42,6 +42,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> SettingsButton = nullptr;
 
+	/** The button to quit the game. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<UButton> QuitGameButton = nullptr;
+
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
@@ -82,4 +86,8 @@ protected:
 	/** Is called when player pressed the button to open the Settings. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnSettingsButtonPressed();
+
+	/** Is called when player pressed the button to quit the game. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnQuitGameButtonPressed();
 };
