@@ -37,16 +37,22 @@ void UNewMainMenuWidget::NativeConstruct()
 		PlayButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnPlayButtonPressed);
 	}
 
-	if (RightButton)
+	if (NextPlayerButton)
 	{
-		RightButton->SetClickMethod(EButtonClickMethod::PreciseClick);
-		RightButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnRightButtonPressed);
+		NextPlayerButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		NextPlayerButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnNextPlayerButtonPressed);
 	}
 
-	if (LeftButton)
+	if (PrevPlayerButton)
 	{
-		LeftButton->SetClickMethod(EButtonClickMethod::PreciseClick);
-		LeftButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnLeftButtonPressed);
+		PrevPlayerButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		PrevPlayerButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnPrevPlayerButtonPressed);
+	}
+
+	if (NextSkinButton)
+	{
+		NextSkinButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		NextSkinButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnNextSkinButtonPressed);
 	}
 }
 
@@ -82,14 +88,14 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 }
 
 // Is called when player pressed the button to choose next player
-void UNewMainMenuWidget::OnRightButtonPressed()
+void UNewMainMenuWidget::OnNextPlayerButtonPressed()
 {
 	static constexpr int32 NextPlayer = 1;
 	SwitchCurrentPlayer(NextPlayer);
 }
 
 // Is called when player pressed the button to choose previous player
-void UNewMainMenuWidget::OnLeftButtonPressed()
+void UNewMainMenuWidget::OnPrevPlayerButtonPressed()
 {
 	static constexpr int32 PrevPlayer = -1;
 	SwitchCurrentPlayer(PrevPlayer);
@@ -117,4 +123,32 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	{
 		LocalPlayerCharacter->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
 	}
+}
+
+// Sets the next skin in the Menu
+void UNewMainMenuWidget::OnNextSkinButtonPressed()
+{
+	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
+	const UNewMainMenuSpotComponent* MainMenuSpot = UNewMainMenuSubsystem::Get().GetActiveMainMenuSpotComponent();
+	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
+		|| !ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid")))
+	{
+		return;
+	}
+
+	UMySkeletalMeshComponent& MainMenuMeshComp = MainMenuSpot->GetMeshChecked();
+	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp.GetCustomPlayerMeshData();
+	if (!CustomPlayerMeshData.IsValid())
+	{
+		return;
+	}
+
+	USoundsSubsystem::Get().PlayUIClickSFX();
+
+	// Switch the preview skin
+	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + 1;
+	MainMenuMeshComp.SetSkin(NewSkinIndex);
+
+	// Update the player data
+	LocalPlayerCharacter->ServerSetCustomPlayerMeshData(MainMenuMeshComp.GetCustomPlayerMeshData());
 }

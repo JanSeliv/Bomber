@@ -75,9 +75,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Idle Player"))
 	TObjectPtr<class ULevelSequencePlayer> MasterPlayerInternal = nullptr;
 
-	/** Cached Cinematic Row of this spot that contains data about this spot. */
+	/** Cached Cinematic Row that contains data about this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic Row"))
-	FCinematicRow CinematicRowInternal;
+	FCinematicRow CinematicRowInternal = FCinematicRow::Empty;
 
 	/*********************************************************************************************
 	 * Protected functions

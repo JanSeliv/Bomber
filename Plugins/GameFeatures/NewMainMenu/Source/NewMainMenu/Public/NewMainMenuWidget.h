@@ -26,11 +26,15 @@ protected:
 
 	/** The button to choose next player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> RightButton = nullptr;
+	TObjectPtr<class UButton> NextPlayerButton = nullptr;
 
 	/** The button to choose previous player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> LeftButton = nullptr;
+	TObjectPtr<class UButton> PrevPlayerButton = nullptr;
+
+	/** The button to switch the skin of chosen player. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UButton> NextSkinButton = nullptr;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -54,14 +58,18 @@ protected:
 
 	/** Is called when player pressed the button to choose next player. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnRightButtonPressed();
+	void OnNextPlayerButtonPressed();
 
 	/** Is called when player pressed the button to choose previous player. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnLeftButtonPressed();
+	void OnPrevPlayerButtonPressed();
 
 	/** Sets the preview mesh of a player depending on specified incrementer.
 	* @param Incrementer 1 set the next player, -1 set previous. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SwitchCurrentPlayer(int32 Incrementer);
+
+	/** Sets the next skin in the Menu. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnNextSkinButtonPressed();
 };
