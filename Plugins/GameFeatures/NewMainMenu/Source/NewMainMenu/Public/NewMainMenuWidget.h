@@ -8,6 +8,8 @@
 
 enum class ECurrentGameState : uint8;
 
+class UButton;
+
 /**
  * Displays the Main Menu.
  */
@@ -22,19 +24,23 @@ class NEWMAINMENU_API UNewMainMenuWidget : public UUserWidget
 protected:
 	/** The button to allow player go back to the Main Menu. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> PlayButton = nullptr;
+	TObjectPtr<UButton> PlayButton = nullptr;
 
 	/** The button to choose next player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> NextPlayerButton = nullptr;
+	TObjectPtr<UButton> NextPlayerButton = nullptr;
 
 	/** The button to choose previous player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> PrevPlayerButton = nullptr;
+	TObjectPtr<UButton> PrevPlayerButton = nullptr;
 
 	/** The button to switch the skin of chosen player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
-	TObjectPtr<class UButton> NextSkinButton = nullptr;
+	TObjectPtr<UButton> NextSkinButton = nullptr;
+
+	/** The button to open the Settings Menu. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<UButton> SettingsButton = nullptr;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -72,4 +78,8 @@ protected:
 	/** Sets the next skin in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnNextSkinButtonPressed();
+
+	/** Is called when player pressed the button to open the Settings. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void OnSettingsButtonPressed();
 };

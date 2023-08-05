@@ -23,6 +23,7 @@ public class NewMainMenu : ModuleRules
 				// My modules
 				, "Bomber"
 				, "MyUtils"
+				, "SettingsWidgetConstructor"
 			}
 		);
 	}

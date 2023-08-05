@@ -77,10 +77,10 @@ public:
 	FORCEINLINE bool IsFPSCounterEnabled() const { return bIsFPSCounterEnabledInternal; }
 
 	/** Internal UUserWidget::CreateWidget wrapper. */
-	static UUserWidget* CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true);
+	static UUserWidget* CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0);
 
 	template <typename T = UUserWidget>
-	FORCEINLINE T* CreateWidgetByClass(TSubclassOf<T> WidgetClass, bool bAddToViewport = true) const { return Cast<T>(CreateWidgetByClass(PlayerOwner.Get(), WidgetClass, bAddToViewport)); }
+	FORCEINLINE T* CreateWidgetByClass(TSubclassOf<T> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0) const { return Cast<T>(CreateWidgetByClass(PlayerOwner.Get(), WidgetClass, bAddToViewport, ZOrder)); }
 
 protected:
 	/* ---------------------------------------------------

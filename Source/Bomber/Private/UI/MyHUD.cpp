@@ -60,7 +60,7 @@ void AMyHUD::PostInitializeComponents()
 }
 
 // Internal UUserWidget::CreateWidget wrapper
-UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/)
+UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/, int32 ZOrder/* = 0*/)
 {
 	if (!ensureMsgf(PlayerController, TEXT("%s: 'PlayerController' is null"), *FString(__FUNCTION__))
 	    || !ensureMsgf(WidgetClass, TEXT("%s: 'WidgetClass' is null"), *FString(__FUNCTION__)))
@@ -73,7 +73,7 @@ UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TS
 
 	if (bAddToViewport)
 	{
-		CreatedWidget->AddToViewport();
+		CreatedWidget->AddToViewport(ZOrder);
 	}
 
 	return CreatedWidget;
@@ -108,7 +108,7 @@ void AMyHUD::InitWidgets()
 
 	FPSCounterWidgetInternal = CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
 
-	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass());
+	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/1);
 	SettingsWidgetInternal->TryConstructSettings();
 
 	static constexpr int32 MaxPlayersNum = 4;

@@ -10,6 +10,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/SoundsSubsystem.h"
+#include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/Button.h"
@@ -53,6 +54,12 @@ void UNewMainMenuWidget::NativeConstruct()
 	{
 		NextSkinButton->SetClickMethod(EButtonClickMethod::PreciseClick);
 		NextSkinButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnNextSkinButtonPressed);
+	}
+
+	if (SettingsButton)
+	{
+		NextSkinButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		SettingsButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnSettingsButtonPressed);
 	}
 }
 
@@ -130,7 +137,7 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 {
 	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
 	const UNewMainMenuSpotComponent* MainMenuSpot = UNewMainMenuSubsystem::Get().GetActiveMainMenuSpotComponent();
-	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
+	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerCharacter' is not valid"))
 		|| !ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid")))
 	{
 		return;
@@ -146,9 +153,19 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the preview skin
-	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + 1;
+	static constexpr int32 NextSkin = 1;
+	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + NextSkin;
 	MainMenuMeshComp.SetSkin(NewSkinIndex);
 
 	// Update the player data
 	LocalPlayerCharacter->ServerSetCustomPlayerMeshData(MainMenuMeshComp.GetCustomPlayerMeshData());
+}
+
+// Is called when player pressed the button to open the Settings
+void UNewMainMenuWidget::OnSettingsButtonPressed()
+{
+	if (USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget())
+	{
+		SettingsWidget->OpenSettings();
+	}
 }
