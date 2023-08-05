@@ -48,6 +48,10 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
 	TObjectPtr<class UNewMainMenuWidget> MainMenuWidgetInternal = nullptr;
 
+	/** Created In Cinematic State widget. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
+	TObjectPtr<class UInCinematicStateWidget> InCinematicStateWidgetInternal = nullptr;
+
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */

@@ -2,9 +2,10 @@
 
 #include "Components/NewMainMenuHUDComponent.h"
 //---
-#include "NewMainMenuWidget.h"
 #include "Data/NewMainMenuDataAsset.h"
 #include "UI/MyHUD.h"
+#include "Widgets/InCinematicStateWidget.h"
+#include "Widgets/NewMainMenuWidget.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuHUDComponent)
 
@@ -40,5 +41,8 @@ void UNewMainMenuHUDComponent::OnRegister()
 	Super::OnRegister();
 
 	checkf(!NewMainMenuDataAssetInternal.IsNull(), TEXT("ERROR: 'NewMainMenuDataAssetInternal' is null!"));
-	MainMenuWidgetInternal = GetHUDChecked().CreateWidgetByClass<UNewMainMenuWidget>(GetNewMainMenuDataAsset()->GetMainMenuWidgetClass());
+	const AMyHUD& HUD = GetHUDChecked();
+
+	MainMenuWidgetInternal = HUD.CreateWidgetByClass<UNewMainMenuWidget>(GetNewMainMenuDataAsset()->GetMainMenuWidgetClass());
+	InCinematicStateWidgetInternal = HUD.CreateWidgetByClass<UInCinematicStateWidget>(GetNewMainMenuDataAsset()->GetInCinematicStateWidgetClass());
 }

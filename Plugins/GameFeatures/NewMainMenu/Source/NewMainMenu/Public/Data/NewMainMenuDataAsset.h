@@ -28,6 +28,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UNewMainMenuWidget> GetMainMenuWidgetClass() const { return MainMenuWidgetClassInternal; }
 
+	/** Returns a class of the In Cinematic State widget.
+	 * @see UNewMainMenuDataAsset::InCinematicStateWidgetClassInternal.*/
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE TSubclassOf<class UInCinematicStateWidget> GetInCinematicStateWidgetClass() const { return InCinematicStateWidgetClassInternal; }
+
 protected:
 	/** The data table with the cinematics to be played. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Cinematics Data Table", ShowOnlyInnerProperties))
@@ -36,4 +41,8 @@ protected:
 	/** The class of the Main Menu widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Widget Class", ShowOnlyInnerProperties))
 	TSubclassOf<class UNewMainMenuWidget> MainMenuWidgetClassInternal = nullptr;
+
+	/** The class of the In Cinematic State widget blueprint. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget Class", ShowOnlyInnerProperties))
+	TSubclassOf<class UInCinematicStateWidget> InCinematicStateWidgetClassInternal = nullptr;
 };

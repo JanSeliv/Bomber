@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "NewMainMenuWidget.h"
+#include "Widgets/NewMainMenuWidget.h"
 //---
 #include "Bomber.h"
 #include "Components/MySkeletalMeshComponent.h"
