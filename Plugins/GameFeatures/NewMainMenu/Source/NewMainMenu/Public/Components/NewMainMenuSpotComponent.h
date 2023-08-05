@@ -4,6 +4,8 @@
 
 #include "Components/MySkeletalMeshComponent.h"
 //---
+#include "Data/NewMainMenuTypes.h"
+//---
 #include "NewMainMenuSpotComponent.generated.h"
 
 enum class ECurrentGameState : uint8;
@@ -37,6 +39,10 @@ public:
 	 * Cinematics
 	 ********************************************************************************************* */
 public:
+	/** Returns cinematic row of this spot. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FCinematicRow& GetCinematicRow() const { return CinematicRowInternal; }
+
 	/** Returns main cinematic of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const class ULevelSequence* GetMasterSequence() const;
@@ -49,6 +55,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static int32 GetSequenceTotalFrames(const ULevelSequence* LevelSequence);
 
+	/** Prevents the spot from playing any cinematic. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void StopMasterSequence();
+
+	/** Plays idle part in loop of current Master Sequence. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayIdlePart();
+
+	/** Plays main part of current Master Sequence. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayMainPart();
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
@@ -56,6 +74,10 @@ protected:
 	/** Cached cinematic player of this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Idle Player"))
 	TObjectPtr<class ULevelSequencePlayer> MasterPlayerInternal = nullptr;
+
+	/** Cached Cinematic Row of this spot that contains data about this spot. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic Row"))
+	FCinematicRow CinematicRowInternal;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -68,16 +90,17 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
+	/** Is called to start listening game state changes. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
+
+	/** Obtains and caches cinematic data from the table to this spot.
+	 * @see UNewMainMenuSpotComponent::CinematicRowInternal */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void UpdateCinematicData();
+
 	/** Loads cinematic of this spot.
-	 * @see UNewMainMenuSpotComponent::CinematicInternal*/
+	 * @see UNewMainMenuSpotComponent::CinematicInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void CreateMasterSequencePlayer();
-
-	/** Plays idle part in loop of current Master Sequence. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void PlayIdlePart();
-
-	/** Plays main part of current Master Sequence. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void PlayMainPart();
 };

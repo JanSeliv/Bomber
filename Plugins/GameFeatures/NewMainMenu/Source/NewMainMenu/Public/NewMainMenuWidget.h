@@ -24,6 +24,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UButton> PlayButton = nullptr;
 
+	/** The button to choose next player. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UButton> RightButton = nullptr;
+
+	/** The button to choose previous player. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<class UButton> LeftButton = nullptr;
+
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
@@ -36,7 +44,24 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
+	/** Is called to start listening game state changes. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
+
 	/** Is called when player pressed the button to start the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPlayButtonPressed();
+
+	/** Is called when player pressed the button to choose next player. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnRightButtonPressed();
+
+	/** Is called when player pressed the button to choose previous player. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnLeftButtonPressed();
+
+	/** Sets the preview mesh of a player depending on specified incrementer.
+	* @param Incrementer 1 set the next player, -1 set previous. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SwitchCurrentPlayer(int32 Incrementer);
 };

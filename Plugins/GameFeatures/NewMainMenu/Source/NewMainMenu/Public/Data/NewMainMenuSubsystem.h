@@ -6,6 +6,10 @@
 //---
 #include "NewMainMenuSubsystem.generated.h"
 
+enum class ELevelType : uint8;
+
+class UNewMainMenuSpotComponent;
+
 /**
  * Provides access to the common runtime data about new Main Menu like current cinematic spots.
  */
@@ -24,10 +28,25 @@ public:
 
 	/** Returns currently selected Main-Menu spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	class UNewMainMenuSpotComponent* GetActiveMainMenuSpotComponent() const;
+	UNewMainMenuSpotComponent* GetActiveMainMenuSpotComponent() const;
+
+	/** Returns Main-Menu spots by given level type. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	void GetMainMenuSpotsByLevelType(TArray<UNewMainMenuSpotComponent*>& OutSpots, ELevelType LevelType) const;
+
+	/** Goes to another Spot to show another player character on current level.
+	 * @param Incrementer 1 to move right, -1 to move left.
+	 * @return New active Main-Menu spot component. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	UNewMainMenuSpotComponent* MoveMainMenuSpot(int32 Incrementer);
 
 protected:
 	/** All Main Menu spots with characters placed on the level. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main-Menu Spots"))
 	TArray<TObjectPtr<class UNewMainMenuSpotComponent>> MainMenuSpotsInternal;
+
+	/** Index of the currently selected Main-Menu spot, is according row index in Cinematics table.
+	 * @see FCinematicRow::RowIndex. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active Main-Menu Spot Index"))
+	int32 ActiveMainMenuSpotIdx = 0;
 };

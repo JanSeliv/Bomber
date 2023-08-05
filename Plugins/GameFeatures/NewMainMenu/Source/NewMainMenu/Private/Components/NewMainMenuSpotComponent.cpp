@@ -3,6 +3,7 @@
 #include "Components/NewMainMenuSpotComponent.h"
 //---
 #include "Bomber.h"
+#include "Controllers/MyPlayerController.h"
 #include "Data/NewMainMenuDataAsset.h"
 #include "Data/NewMainMenuSubsystem.h"
 #include "Data/NewMainMenuTypes.h"
@@ -26,11 +27,7 @@ UNewMainMenuSpotComponent::UNewMainMenuSpotComponent()
 // Returns true if this spot is currently active and possessed by player
 bool UNewMainMenuSpotComponent::IsActiveSpot() const
 {
-	const ELevelType CurrentLevelType = UMyBlueprintFunctionLibrary::GetLevelType();
-	const ELevelType PlayerByLevelType = GetMeshChecked().GetAssociatedLevelType();
-	const bool bCanReadLevelType = CurrentLevelType != ELT::None && PlayerByLevelType != ELT::None;
-	return ensureMsgf(bCanReadLevelType, TEXT("'bCanReadLevelType' condition is FALSE, can not determine the level type for '%s' spot."), *GetNameSafe(this))
-		&& CurrentLevelType == PlayerByLevelType;
+	return UNewMainMenuSubsystem::Get().GetActiveMainMenuSpotComponent() == this;
 }
 
 // Returns the Skeletal Mesh of the Bomber character
@@ -105,6 +102,15 @@ int32 UNewMainMenuSpotComponent::GetSequenceTotalFrames(const ULevelSequence* Le
 	return (EndFrameTime.FloorToFrame() - StartFrameTime.FloorToFrame()).Value;
 }
 
+// Prevents the spot from playing any cinematic
+void UNewMainMenuSpotComponent::StopMasterSequence()
+{
+	if (MasterPlayerInternal)
+	{
+		MasterPlayerInternal->Stop();
+	}
+}
+
 // Overridable native event for when play begins for this actor.
 void UNewMainMenuSpotComponent::BeginPlay()
 {
@@ -112,19 +118,18 @@ void UNewMainMenuSpotComponent::BeginPlay()
 
 	UNewMainMenuSubsystem::Get().AddNewMainMenuSpot(this);
 
+	UpdateCinematicData();
 	CreateMasterSequencePlayer();
 
-	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
-	checkf(MyGameState, TEXT("%s: 'MyGameState' is null"), *FString(__FUNCTION__));
-
-	// Handle current game state if initialized with delay
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+	// Listen states to spawn widgets
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
-		OnGameStateChanged(ECurrentGameState::Menu);
+		BindOnGameStateChanged(MyGameState);
 	}
-
-	// Listen states to handle this widget behavior
-	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+	else if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController())
+	{
+		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
+	}
 }
 
 // Called when the current game state was changed
@@ -146,6 +151,49 @@ void UNewMainMenuSpotComponent::OnGameStateChanged(ECurrentGameState CurrentGame
 	}
 }
 
+// Is called to start listening game state changes
+void UNewMainMenuSpotComponent::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
+{
+	// Handle current game state if initialized with delay
+	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+	{
+		OnGameStateChanged(ECurrentGameState::Menu);
+	}
+
+	// Listen states to handle this widget behavior
+	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+}
+
+// Obtains and caches cinematic data from the table to this spot
+void UNewMainMenuSpotComponent::UpdateCinematicData()
+{
+	const UDataTable* CinematicsDataTable = UNewMainMenuDataAsset::Get().GetCinematicsDataTable();
+	if (!ensureMsgf(CinematicsDataTable, TEXT("'CinematicsDataTable' is nullptr, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
+	{
+		return;
+	}
+
+	const FPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
+
+	int32 RowIndex = 0;
+	TMap<FName, FCinematicRow> CinematicsRows;
+	UMyDataTable::GetRows(*CinematicsDataTable, CinematicsRows);
+	for (const TTuple<FName, FCinematicRow>& RowIt : CinematicsRows)
+	{
+		if (RowIt.Value.PlayerTag == PlayerTag)
+		{
+			CinematicRowInternal = RowIt.Value;
+			break;
+		}
+		++RowIndex;
+	}
+
+	if (ensureMsgf(!CinematicRowInternal.IsEmpty(), TEXT("%s: 'CinematicRowInternal' is not found for '%s' spot."), *FString(__FUNCTION__), *GetNameSafe(this)))
+	{
+		CinematicRowInternal.RowIndex = RowIndex;
+	}
+}
+
 // Loads cinematic of this spot
 void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
 {
@@ -155,26 +203,7 @@ void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
 		return;
 	}
 
-	const UDataTable* CinematicsDataTable = UNewMainMenuDataAsset::Get().GetCinematicsDataTable();
-	if (!ensureMsgf(CinematicsDataTable, TEXT("'CinematicsDataTable' is nullptr, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
-	{
-		return;
-	}
-
-	TSoftObjectPtr<ULevelSequence> FoundMasterSequence = nullptr;
-
-	const FPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
-	TMap<FName, FCinematicRow> CinematicsRows;
-	UMyDataTable::GetRows(*CinematicsDataTable, CinematicsRows);
-	for (const TTuple<FName, FCinematicRow>& RowIt : CinematicsRows)
-	{
-		if (RowIt.Value.PlayerTag == PlayerTag)
-		{
-			FoundMasterSequence = RowIt.Value.LevelSequence;
-			break;
-		}
-	}
-
+	const TSoftObjectPtr<ULevelSequence> FoundMasterSequence = CinematicRowInternal.LevelSequence;
 	if (!ensureMsgf(!FoundMasterSequence.IsNull(), TEXT("'LevelSequenceToLoad' is not found, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
 	{
 		return;

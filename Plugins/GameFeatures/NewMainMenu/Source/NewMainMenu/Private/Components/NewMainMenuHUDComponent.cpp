@@ -39,5 +39,6 @@ void UNewMainMenuHUDComponent::OnRegister()
 {
 	Super::OnRegister();
 
-	MainMenuWidgetInternal = GetHUDChecked().CreateWidgetByClass<UNewMainMenuWidget>(UNewMainMenuDataAsset::Get().GetMainMenuWidgetClass());
+	checkf(!NewMainMenuDataAssetInternal.IsNull(), TEXT("ERROR: 'NewMainMenuDataAssetInternal' is null!"));
+	MainMenuWidgetInternal = GetHUDChecked().CreateWidgetByClass<UNewMainMenuWidget>(GetNewMainMenuDataAsset()->GetMainMenuWidgetClass());
 }
