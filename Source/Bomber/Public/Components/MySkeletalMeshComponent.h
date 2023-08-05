@@ -170,11 +170,4 @@ protected:
 	/** Current attached mesh components. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))
 	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal;
-
-	/* ---------------------------------------------------
-	*		Protected functions
-	* --------------------------------------------------- */
-
-	/** Called when a component is registered (not loaded). */
-	virtual void OnRegister() override;
 };

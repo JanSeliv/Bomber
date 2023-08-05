@@ -141,6 +141,12 @@ void UMySkeletalMeshComponent::InitMySkeletalMesh(const FCustomPlayerMeshData& C
 		return;
 	}
 
+	if (!IsRegistered())
+	{
+		// If component is not registered, then register it to be able to attach props
+		RegisterComponent();
+	}
+
 	PlayerMeshDataInternal = CustomPlayerMeshData;
 
 	USkeletalMesh* NewSkeletalMesh = Cast<USkeletalMesh>(CustomPlayerMeshData.PlayerRow->Mesh);
@@ -226,20 +232,26 @@ void UMySkeletalMeshComponent::AttachProps()
 			MeshComponent = StaticMeshComponent;
 		}
 
-		if (MeshComponent)
+		if (!ensureMsgf(MeshComponent, TEXT("'MeshComponent' can not be attached with mesh '%s'"), *GetNameSafe(AttachedMeshIt.AttachedMesh)))
 		{
-			AttachedMeshesInternal.Emplace(MeshComponent);
-			const FTransform Transform(GetRelativeRotation(), FVector::ZeroVector, GetRelativeScale3D());
-			MeshComponent->SetupAttachment(GetAttachmentRoot());
-			MeshComponent->SetRelativeTransform(Transform);
-			const FAttachmentTransformRules AttachRules(
-				EAttachmentRule::SnapToTarget,
-				EAttachmentRule::KeepWorld,
-				EAttachmentRule::SnapToTarget,
-				true);
-			MeshComponent->AttachToComponent(this, AttachRules, AttachedMeshIt.Socket);
-			MeshComponent->RegisterComponent();
+			continue;
 		}
+
+		// Repeat the tweaks
+		MeshComponent->SetCastShadow(CastShadow);
+		MeshComponent->LightingChannels = LightingChannels;
+
+		// Attach the prop: location is 0, rotation is parent's world, scale is 1
+		AttachedMeshesInternal.Emplace(MeshComponent);
+		MeshComponent->SetupAttachment(GetAttachmentRoot());
+		MeshComponent->SetWorldTransform(GetComponentTransform());
+		const FAttachmentTransformRules AttachRules(
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::KeepWorld,
+			EAttachmentRule::SnapToTarget,
+			true);
+		MeshComponent->AttachToComponent(this, AttachRules, AttachedMeshIt.Socket);
+		MeshComponent->RegisterComponent();
 	}
 }
 
@@ -325,10 +337,4 @@ void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
 	}
 
 	PlayerMeshDataInternal.SkinIndex = SkinIndex;
-}
-
-// Called when a component is registered (not loaded)
-void UMySkeletalMeshComponent::OnRegister()
-{
-	Super::OnRegister();
 }
