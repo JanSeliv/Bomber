@@ -246,4 +246,9 @@ void UNewMainMenuSpotComponent::PlayMainPart()
 	constexpr int32 FirstFrame = 0;
 	const int32 TotalFrames = GetSequenceTotalFrames(GetMasterSequence());
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
+
+	// Disable looping to play the main part once
+	FMovieSceneSequencePlaybackSettings Settings;
+	Settings.LoopCount.Value = 0;
+	MasterPlayerInternal->SetPlaybackSettings(Settings);
 }
