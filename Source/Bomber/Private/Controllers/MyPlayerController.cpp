@@ -144,6 +144,58 @@ UEnhancedPlayerInput* AMyPlayerController::GetEnhancedPlayerInput() const
 	return Cast<UEnhancedPlayerInput>(PlayerInput);
 }
 
+// Set up input bindings in given contexts
+void AMyPlayerController::BindInputActionsInContexts(const TArray<const UMyInputMappingContext*>& InputContexts, bool bClearPreviousBindings/* = false*/)
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent();
+	if (!ensureMsgf(EnhancedInputComponent, TEXT("ASSERT: 'EnhancedInputComponent' is not valid")))
+	{
+		return;
+	}
+
+	if (bClearPreviousBindings
+	    && EnhancedInputComponent->HasBindings())
+	{
+		// Remove all previous bindings to do not have duplicates
+		EnhancedInputComponent->ClearActionEventBindings();
+	}
+
+	TArray<UMyInputAction*> InputActions;
+	for (const UMyInputMappingContext* InputContextIt : InputContexts)
+	{
+		InputContextIt->GetInputActions(InputActions);
+	}
+
+	// --- Bind input actions
+	for (const UMyInputAction* ActionIt : InputActions)
+	{
+		const FName FunctionName = ActionIt ? ActionIt->GetFunctionToBind().FunctionName : NAME_None;
+		if (FunctionName.IsNone())
+		{
+			continue;
+		}
+
+		UObject* FoundContextObj = nullptr;
+		if (UFunction* FunctionPtr = ActionIt->GetStaticContext().GetFunction())
+		{
+			FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
+		}
+
+		if (!FoundContextObj)
+		{
+			continue;
+		}
+
+		const ETriggerEvent TriggerEvent = ActionIt->GetTriggerEvent();
+		EnhancedInputComponent->BindAction(ActionIt, TriggerEvent, FoundContextObj, FunctionName);
+	}
+}
+
 // Called when an instance of this class is placed (in editor) or spawned
 void AMyPlayerController::OnConstruction(const FTransform& Transform)
 {
@@ -244,55 +296,11 @@ void AMyPlayerController::OnRep_PlayerState()
 // Allows the PlayerController to set up custom input bindings
 void AMyPlayerController::BindInputActions()
 {
-	if (!IsLocalController())
-	{
-		return;
-	}
-
-	UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent();
-	if (!ensureMsgf(EnhancedInputComponent, TEXT("ASSERT: 'EnhancedInputComponent' is not valid")))
-	{
-		return;
-	}
-
-	if (EnhancedInputComponent->HasBindings())
-	{
-		// Remove all previous bindings to do not have duplicates
-		EnhancedInputComponent->ClearActionEventBindings();
-	}
-
 	TArray<const UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
 
-	TArray<UMyInputAction*> InputActions;
-	for (const UMyInputMappingContext* InputContextIt : InputContexts)
-	{
-		InputContextIt->GetInputActions(InputActions);
-	}
-
-	// --- Bind input actions
-	for (const UMyInputAction* ActionIt : InputActions)
-	{
-		const FName FunctionName = ActionIt ? ActionIt->GetFunctionToBind().FunctionName : NAME_None;
-		if (FunctionName.IsNone())
-		{
-			continue;
-		}
-
-		UObject* FoundContextObj = nullptr;
-		if (UFunction* FunctionPtr = ActionIt->GetStaticContext().GetFunction())
-		{
-			FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
-		}
-
-		if (!FoundContextObj)
-		{
-			continue;
-		}
-
-		const ETriggerEvent TriggerEvent = ActionIt->GetTriggerEvent();
-		EnhancedInputComponent->BindAction(ActionIt, TriggerEvent, FoundContextObj, FunctionName);
-	}
+	constexpr bool bClearPreviousBindings = true;
+	BindInputActionsInContexts(InputContexts, bClearPreviousBindings);
 }
 
 // Prevents built-in slate input on UMG

@@ -76,6 +76,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UEnhancedPlayerInput* GetEnhancedPlayerInput() const;
 
+	/** Set up input bindings in given contexts.
+	 * @param InputContexts Contexts to bind input actions.
+	 * @param bClearPreviousBindings If true, all previous bindings will be removed. */
+	void BindInputActionsInContexts(const TArray<const class UMyInputMappingContext*>& InputContexts, bool bClearPreviousBindings = false);
+
 protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
