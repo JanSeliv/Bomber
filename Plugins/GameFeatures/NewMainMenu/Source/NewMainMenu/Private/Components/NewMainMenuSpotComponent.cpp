@@ -15,6 +15,8 @@
 #include "LevelSequencePlayer.h"
 #include "Sections/MovieSceneSubSection.h"
 //---
+#include "MyUtilsLibraries/UtilsLibrary.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuSpotComponent)
 
 // Default constructor
@@ -44,7 +46,7 @@ UMySkeletalMeshComponent& UNewMainMenuSpotComponent::GetMeshChecked() const
 }
 
 // Returns main cinematic of this spot
-const ULevelSequence* UNewMainMenuSpotComponent::GetMasterSequence() const
+ULevelSequence* UNewMainMenuSpotComponent::GetMasterSequence() const
 {
 	return MasterPlayerInternal ? Cast<ULevelSequence>(MasterPlayerInternal->GetSequence()) : nullptr;
 }
@@ -214,6 +216,13 @@ void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
 	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, FoundMasterSequence.LoadSynchronous(), {}, OutActor);
 	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' was not created, something went wrong!"));
 
+	// Override the aspect ratio of the cinematic to the aspect ratio of the screen
+	FLevelSequenceCameraSettings Settings;
+	Settings.bOverrideAspectRatioAxisConstraint = true;
+	Settings.AspectRatioAxisConstraint = UUtilsLibrary::GetViewportAspectRatioAxisConstraint();
+	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, Settings);
+
+	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
 	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
 }
 

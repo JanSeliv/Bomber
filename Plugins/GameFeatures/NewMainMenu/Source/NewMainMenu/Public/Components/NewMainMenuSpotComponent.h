@@ -45,7 +45,7 @@ public:
 
 	/** Returns main cinematic of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const class ULevelSequence* GetMasterSequence() const;
+	class ULevelSequence* GetMasterSequence() const;
 
 	/** Finds subsequence of this spot by given index. */
 	UFUNCTION(BlueprintPure, Category = "C++")
