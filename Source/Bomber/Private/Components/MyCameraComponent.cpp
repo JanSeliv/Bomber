@@ -227,7 +227,7 @@ void UMyCameraComponent::BeginPlay()
 }
 
 // Listen game states to manage the tick
-void UMyCameraComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void UMyCameraComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	bool bShouldTick = false;
 
@@ -259,7 +259,7 @@ void UMyCameraComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
 }
 
 // Listen to recalculate camera location when screen aspect ratio was changed
-void UMyCameraComponent::OnAspectRatioChanged(float NewAspectRatio)
+void UMyCameraComponent::OnAspectRatioChanged_Implementation(float NewAspectRatio, EAspectRatioAxisConstraint NewAxisConstraint)
 {
 	UpdateLocation();
 }

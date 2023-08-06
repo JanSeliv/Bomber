@@ -6,6 +6,8 @@
 //---
 #include "MyGameViewportClient.generated.h"
 
+enum EAspectRatioAxisConstraint : int;
+
 /**
  * Is the engine's interface to a game viewport.
  * Implements parent to have more control on input events.
@@ -16,11 +18,20 @@ class BOMBER_API UMyGameViewportClient final : public UGameViewportClient
 	GENERATED_BODY()
 
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAspectRatioChanged, float, NewAspectRatio);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAspectRatioChanged, float, NewAspectRatio, EAspectRatioAxisConstraint, NewAxisConstraint);
 
 	/** Called when the aspect ratio has been changed. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnAspectRatioChanged OnAspectRatioChanged;
+
+	/** Returns the Axis Constraint of the viewport based on current aspect ratio.
+	 * Alternative, UUtilsLibrary::GetViewportAspectRatioAxisConstraint() can be used. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	TEnumAsByte<EAspectRatioAxisConstraint> GetAxisConstraint() const;
+
+	/** Returns the last updated aspect ratio. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	int32 GetAspectRatio() const { return LastUpdatedAspectRatioInternal; }
 
 	/** Gets whether or not the cursor should always be locked to the viewport. */
 	virtual bool ShouldAlwaysLockMouse() override { return true; }

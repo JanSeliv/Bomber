@@ -6,6 +6,9 @@
 //---
 #include "MyCameraComponent.generated.h"
 
+enum class ECurrentGameState : uint8;
+enum EAspectRatioAxisConstraint : int;
+
 /**
  * Contains parameters to tweak how calculate the distance from camera to the level during the game
  */
@@ -130,12 +133,12 @@ protected:
 	virtual void BeginPlay() override;
 
 	/** Listen game states to manage the tick. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Listen to recalculate camera location when screen aspect ratio was changed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnAspectRatioChanged(float NewAspectRatio);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnAspectRatioChanged(float NewAspectRatio, EAspectRatioAxisConstraint NewAxisConstraint);
 
 	/** Starts viewing through this camera. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
