@@ -133,7 +133,7 @@ void UNewMainMenuSpotComponent::BeginPlay()
 }
 
 // Called when the current game state was changed
-void UNewMainMenuSpotComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void UNewMainMenuSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
@@ -212,18 +212,34 @@ void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
 	// Create and cache the master sequence
 	ALevelSequenceActor* OutActor = nullptr;
 	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, FoundMasterSequence.LoadSynchronous(), {}, OutActor);
+	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' was not created, something went wrong!"));
+
+	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
+}
+
+// Called when the sequence is paused or when cinematic was ended
+void UNewMainMenuSpotComponent::OnMasterSequencePaused_Implementation()
+{
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	if (!MyPC
+		|| AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::Cinematic)
+	{
+		// Don't handle if not cinematic state or is not local player
+		return;
+	}
+
+	// Start the countdown
+	MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
 }
 
 // Plays idle part in loop of current Master Sequence
 void UNewMainMenuSpotComponent::PlayIdlePart()
 {
-	if (!IsActiveSpot())
+	if (!IsActiveSpot() // Don't play for inactive spot
+		|| !ensureMsgf(MasterPlayerInternal, TEXT("'MasterPlayerInternal' is not valid, player has to be created first!")))
 	{
-		// Don't play for inactive spot
 		return;
 	}
-
-	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' is null!"));
 
 	constexpr int32 IdleSectionIdx = 0;
 	const int32 TotalFrames = GetSequenceTotalFrames(FindSubsequence(IdleSectionIdx));
@@ -236,9 +252,10 @@ void UNewMainMenuSpotComponent::PlayIdlePart()
 // Plays main part of current Master Sequence
 void UNewMainMenuSpotComponent::PlayMainPart()
 {
-	if (!IsActiveSpot())
+	if (!IsActiveSpot() // Don't play for inactive spot
+		|| !ensureMsgf(MasterPlayerInternal, TEXT("'MasterPlayerInternal' is not valid, player has to be created first!"))
+		|| !ensureMsgf(MasterPlayerInternal->IsPlaying(), TEXT("'MasterPlayerInternal' is not playing, idle has to be played first!")))
 	{
-		// Don't play for inactive spot
 		return;
 	}
 
@@ -247,8 +264,8 @@ void UNewMainMenuSpotComponent::PlayMainPart()
 	const int32 TotalFrames = GetSequenceTotalFrames(GetMasterSequence());
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
 
-	// Disable looping to play the main part once
 	FMovieSceneSequencePlaybackSettings Settings;
-	Settings.LoopCount.Value = 0;
+	Settings.LoopCount.Value = 0; // Disable looping to play the main part once
+	Settings.bPauseAtEnd = true; // Pause at the end to stay at the end position
 	MasterPlayerInternal->SetPlaybackSettings(Settings);
 }
