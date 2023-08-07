@@ -1,6 +1,8 @@
 // Copyright (c) Yevhenii Selivanov
 
 #include "PlayerTagCustomization.h"
+//---
+#include "PropertyEditorModule.h"
 
 /** The name of class to be customized: PlayerTag */
 // @TODO JanSeliv 2dUuTjyT use 'FPlayerTag::StaticStruct()->GetFName()' as soon as the editor module starts referencing the runtime module

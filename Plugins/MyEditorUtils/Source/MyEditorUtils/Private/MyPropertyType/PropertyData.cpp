@@ -1,6 +1,8 @@
 // Copyright (c) Yevhenii Selivanov.
 
 #include "MyPropertyType/PropertyData.h"
+//---
+#include "PropertyHandle.h"
 
 // Empty property data
 const FPropertyData FPropertyData::Empty = FPropertyData();

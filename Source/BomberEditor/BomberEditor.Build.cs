@@ -13,6 +13,7 @@ public class BomberEditor : ModuleRules
 		{
 			"Core"
 			, "UnrealEd" // Created UMyUnrealEdEngine
+			, "GameplayTagsEditor" // FGameplayTagCustomizationPublic
 			// My modules
 			, "MyEditorUtils" // Created Created FMorphDataCustomization, FAttachedMeshCustomization
 		});
@@ -24,7 +25,6 @@ public class BomberEditor : ModuleRules
 				, "EditorStyle" // SSocketChooserPopup
 				, "ToolWidgets" // SSearchableComboBox
 				, "PropertyEditor" // IPropertyTypeCustomization
-				, "GameplayTagsEditor" // FGameplayTagCustomizationPublic
 			}
 		);
 	}
