@@ -2,11 +2,12 @@
 
 #include "DataAssets/PlayerInputDataAsset.h"
 //---
-#include "EnhancedActionKeyMapping.h"
-//---
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/MyInputMappingContext.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include "EnhancedActionKeyMapping.h"
+#include "Engine/World.h"
 //---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -26,11 +27,6 @@ const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
 void UPlayerInputDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& OutInputContexts) const
 {
 	GetAllGameplayInputContexts(OutInputContexts);
-
-	if (const UMyInputMappingContext* MainMenuInputContext = GetMainMenuInputContext())
-	{
-		OutInputContexts.Emplace(MainMenuInputContext);
-	}
 
 	if (const UMyInputMappingContext* InGameMenuInputContext = GetInGameMenuInputContext())
 	{

@@ -25,11 +25,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UInGameWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
 
-	/** Returns a class of the main menu widget.
-	 * @see UUIDataAsset::MainMenuWidgetClassInternal.*/
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UMainMenuWidget> GetMainMenuWidgetClass() const { return MainMenuWidgetClassInternal; }
-
 	/** Returns a class of the settings widget.
 	 * @see UUIDataAsset::SettingsWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -54,10 +49,6 @@ protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
 	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal = nullptr;
-
-	/** The class of a In-Game Widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UMainMenuWidget> MainMenuWidgetClassInternal = nullptr;
 
 	/** The class of a Settings Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))

@@ -152,13 +152,6 @@ AMyHUD* UMyBlueprintFunctionLibrary::GetMyHUD()
 	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
 }
 
-// Returns the Main Menu widget
-UMainMenuWidget* UMyBlueprintFunctionLibrary::GetMainMenuWidget()
-{
-	const AMyHUD* MyHUD = GetMyHUD();
-	return MyHUD ? MyHUD->GetMainMenuWidget() : nullptr;
-}
-
 // Returns the In-Game widget
 UInGameWidget* UMyBlueprintFunctionLibrary::GetInGameWidget()
 {

@@ -2,6 +2,8 @@
 
 #include "DataAssets/SoundsDataAsset.h"
 //---
+#include "Bomber.h"
+//---
 #include "DataAssets/DataAssetsContainer.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SoundsDataAsset)

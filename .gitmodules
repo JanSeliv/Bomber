@@ -18,10 +18,6 @@
 	path = Plugins/FunctionPicker
 	url = git@github.com:JanSeliv/FunctionPicker.git
 	branch = develop
-[submodule "Plugins/CustomShapeButton"]
-	path = Plugins/CustomShapeButton
-	url = git@github.com:JanSeliv/CustomShapeButton.git
-	branch = develop
 [submodule "Plugins/InstancedStaticMeshConverter"]
 	path = Plugins/InstancedStaticMeshConverter
 	url = git@github.com:JanSeliv/InstancedStaticMeshConverter.git

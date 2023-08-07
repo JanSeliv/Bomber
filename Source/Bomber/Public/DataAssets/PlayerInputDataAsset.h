@@ -35,11 +35,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const UMyInputMappingContext* GetGameplayInputContext(int32 LocalPlayerIndex) const;
 
-	/** Returns the Enhanced Input Mapping Context of actions on the Main Menu widget.
-	* @see UPlayerInputDataAsset::MainMenuInputContextInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE UMyInputMappingContext* GetMainMenuInputContext() const { return MainMenuInputContextInternal; }
-
 	/** Returns the Enhanced Input Mapping Context of actions on the In-Game Menu widget.
 	  * @see UPlayerInputDataAsset:: */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -61,10 +56,6 @@ protected:
 	 *  - to have outer for gameplay contexts to let GC to garbage it after context is serialized from config that contains overriden changes by remapping. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Gameplay Input Context Classes", ShowOnlyInnerProperties))
 	TArray<TSubclassOf<UMyInputMappingContext>> GameplayInputContextClassesInternal;
-
-	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> MainMenuInputContextInternal = nullptr;
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))

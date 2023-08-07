@@ -85,10 +85,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class AMyHUD* GetMyHUD();
 
-	/** Returns the Main Menu widget. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UMainMenuWidget* GetMainMenuWidget();
-
 	/** Returns the In-Game widget. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class UInGameWidget* GetInGameWidget();

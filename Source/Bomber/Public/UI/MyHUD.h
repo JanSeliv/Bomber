@@ -47,10 +47,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UInGameWidget* GetInGameWidget() const { return InGameWidgetInternal; }
 
-	/** Returns the current Main Menu widget object. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class UMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidgetInternal; }
-
 	/** Returns the current settings widget object. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class USettingsWidget* GetSettingsWidget() const { return SettingsWidgetInternal; }
@@ -94,10 +90,6 @@ protected:
 	/** The current in-game widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
 	TObjectPtr<class UInGameWidget> InGameWidgetInternal = nullptr;
-
-	/** The current Main Menu widget object. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
-	TObjectPtr<class UMainMenuWidget> MainMenuWidgetInternal = nullptr;
 
 	/** The current settings widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))

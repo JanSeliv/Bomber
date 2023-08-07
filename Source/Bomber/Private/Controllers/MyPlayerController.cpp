@@ -12,7 +12,6 @@
 #include "UI/InGameMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
-#include "UI/MainMenu/MainMenuWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 ///---
 #include "EnhancedInputComponent.h"
@@ -486,21 +485,6 @@ void AMyPlayerController::OnWidgetsInitialized()
 	    && HUD->OnWidgetsInitialized.IsAlreadyBound(this, &ThisClass::OnWidgetsInitialized))
 	{
 		HUD->OnWidgetsInitialized.RemoveDynamic(this, &ThisClass::OnWidgetsInitialized);
-	}
-
-	UMainMenuWidget* MainMenuWidget = UMyBlueprintFunctionLibrary::GetMainMenuWidget();
-	if (ensureMsgf(MainMenuWidget, TEXT("ASSERT: 'MainMenuWidget' is not valid")))
-	{
-		// Update the Menu State
-		if (MainMenuWidget->IsReadyMainMenu())
-		{
-			SetMenuState();
-		}
-		else
-		{
-			// Listens to set menu state when menu is ready
-			MainMenuWidget->OnMainMenuReady.AddUniqueDynamic(this, &ThisClass::SetMenuState);
-		}
 	}
 
 	// Listens to handle input on opening and closing the InGame Menu widget
