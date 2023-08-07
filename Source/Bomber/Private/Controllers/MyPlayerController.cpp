@@ -271,7 +271,7 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 
 	BroadcastOnSetPlayerState();
 
-	BindInputActions();
+	SetupPlayerInputs();
 }
 
 // Is overriden to notify the client when this controller possesses new player character
@@ -282,7 +282,7 @@ void AMyPlayerController::OnRep_Pawn()
 	// Notify client about pawn change
 	GetOnNewPawnNotifier().Broadcast(GetPawn());
 
-	BindInputActions();
+	SetupPlayerInputs();
 }
 
 // Is overriden to notify the client when is set new player state
@@ -294,13 +294,16 @@ void AMyPlayerController::OnRep_PlayerState()
 }
 
 // Allows the PlayerController to set up custom input bindings
-void AMyPlayerController::BindInputActions()
+void AMyPlayerController::SetupPlayerInputs()
 {
 	TArray<const UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
 
 	constexpr bool bClearPreviousBindings = true;
 	BindInputActionsInContexts(InputContexts, bClearPreviousBindings);
+
+	// Notify other systems that player controller is ready to bind their own input actions
+	OnSetupPlayerInputs.Broadcast();
 }
 
 // Prevents built-in slate input on UMG

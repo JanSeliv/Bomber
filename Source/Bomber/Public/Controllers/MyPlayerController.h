@@ -21,6 +21,10 @@ public:
 	/** Sets default values for this controller's properties. */
 	AMyPlayerController();
 
+	/*********************************************************************************************
+	 * Delegates
+	 ********************************************************************************************* */
+public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPossessed, class APlayerCharacter*, PlayerCharacter);
 
 	/** Notifies the server and clients when this controller possesses new player character. */
@@ -39,6 +43,16 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnGameStateCreated OnGameStateCreated;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSetupPlayerInputs);
+
+	/** Called when controller binds player inputs to notify other systems that player controller is ready to bind their own input actions. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnSetupPlayerInputs OnSetupPlayerInputs;
+
+	/*********************************************************************************************
+	 * Public functions
+	 ********************************************************************************************* */
+public:
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
 	void ServerSetGameState(ECurrentGameState NewGameState);
@@ -81,6 +95,9 @@ public:
 	 * @param bClearPreviousBindings If true, all previous bindings will be removed. */
 	void BindInputActionsInContexts(const TArray<const class UMyInputMappingContext*>& InputContexts, bool bClearPreviousBindings = false);
 
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
 protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -105,9 +122,13 @@ protected:
 	/** Is overriden to notify the client when is set new player state. */
 	virtual void OnRep_PlayerState() override;
 
+	/*********************************************************************************************
+	 * Protected functions
+	 ********************************************************************************************* */
+protected:
 	/** Set up custom input bindings. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindInputActions();
+	void SetupPlayerInputs();
 
 	/** Prevents built-in slate input on UMG. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DisplayName = "Set UI Input Ignored"))
