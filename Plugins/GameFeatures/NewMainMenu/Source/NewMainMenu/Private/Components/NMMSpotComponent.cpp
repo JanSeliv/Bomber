@@ -156,6 +156,8 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState Curr
 // Is called to start listening game state changes
 void UNMMSpotComponent::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
 {
+	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
+
 	// Handle current game state if initialized with delay
 	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
 	{

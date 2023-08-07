@@ -37,6 +37,9 @@ void UNMMCinematicStateWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	// Hide this widget by default
+	SetVisibility(ESlateVisibility::Collapsed);
+
 	// Listen states to spawn widgets
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
@@ -58,6 +61,13 @@ void UNMMCinematicStateWidget::OnGameStateChanged(ECurrentGameState CurrentGameS
 // Is called to start listening game state changes
 void UNMMCinematicStateWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
 {
+	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
+
 	// Listen states to handle this widget behavior
 	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+
+	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+	{
+		OnGameStateChanged(ECurrentGameState::Menu);
+	}
 }

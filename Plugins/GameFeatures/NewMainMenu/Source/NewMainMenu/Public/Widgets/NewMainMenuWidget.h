@@ -58,9 +58,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-	/** Is called to start listening game state changes. */
+	/** Is called to prepare the Main Menu widget for Menu game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
+	void HandleGameState(class AMyGameStateBase* MyGameState);
 
 	/** Is called when player pressed the button to start the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

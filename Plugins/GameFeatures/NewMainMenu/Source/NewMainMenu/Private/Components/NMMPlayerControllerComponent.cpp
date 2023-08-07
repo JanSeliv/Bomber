@@ -34,5 +34,8 @@ void UNMMPlayerControllerComponent::OnRegister()
 
 	TArray<const UMyInputMappingContext*> OutInputContexts;
 	UNMMDataAsset::Get().GetAllInputContexts(OutInputContexts);
-	GetPlayerControllerChecked().AddInputContexts(OutInputContexts);
+
+	AMyPlayerController& PC = GetPlayerControllerChecked();
+	PC.AddInputContexts(OutInputContexts);
+	PC.BindInputActionsInContexts(OutInputContexts);
 }

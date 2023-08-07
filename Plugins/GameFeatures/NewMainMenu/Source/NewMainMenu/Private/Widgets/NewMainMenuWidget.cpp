@@ -23,14 +23,17 @@ void UNewMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	// Hide this widget by default
+	SetVisibility(ESlateVisibility::Collapsed);
+
 	// Listen states to spawn widgets
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
-		BindOnGameStateChanged(MyGameState);
+		HandleGameState(MyGameState);
 	}
 	else if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
-		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
+		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::HandleGameState);
 	}
 
 	if (PlayButton)
@@ -77,17 +80,24 @@ void UNewMainMenuWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	SetVisibility(CurrentGameState == ECurrentGameState::Menu ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 }
 
-// Is called to start listening game state changes
-void UNewMainMenuWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
+// Is called to prepare the Main Menu widget for Menu game state
+void UNewMainMenuWidget::HandleGameState(AMyGameStateBase* MyGameState)
 {
-	// Handle current game state if initialized with delay
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-	{
-		OnGameStateChanged(ECurrentGameState::Menu);
-	}
+	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
 
 	// Listen states to handle this widget behavior
 	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+
+	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+	{
+		// Handle current game state if initialized with delay
+		OnGameStateChanged(ECurrentGameState::Menu);
+	}
+	else
+	{
+		// Enter the game in Menu game state
+		MyGameState->ServerSetGameState(ECurrentGameState::Menu);
+	}
 }
 
 // Is called when player pressed the button to start the game
