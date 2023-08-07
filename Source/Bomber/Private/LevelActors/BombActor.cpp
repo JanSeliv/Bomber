@@ -160,6 +160,12 @@ void ABombActor::BeginPlay()
 	{
 		// This dragged bomb should start listening in-game state to set lifespan
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+
+		// Handle current game state if initialized with delay
+		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+		{
+			OnGameStateChanged(ECurrentGameState::Menu);
+		}
 	}
 }
 
@@ -176,7 +182,7 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 void ABombActor::SetLifeSpan(float InLifespan/* = DEFAULT_LIFESPAN*/)
 {
 	if (InLifespan == DEFAULT_LIFESPAN
-		&& AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
+	    && AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
 	{
 		InLifespan = UBombDataAsset::Get().GetLifeSpan();
 	}

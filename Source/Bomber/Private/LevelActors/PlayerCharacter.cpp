@@ -196,6 +196,12 @@ void APlayerCharacter::BeginPlay()
 		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+
+			// Handle current game state if initialized with delay
+			if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+			{
+				OnGameStateChanged(ECurrentGameState::Menu);
+			}
 		}
 
 		// Listen to handle possessing logic

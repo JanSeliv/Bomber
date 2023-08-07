@@ -134,6 +134,12 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+
+		// Handle current game state if initialized with delay
+		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+		{
+			OnGameStateChanged(ECurrentGameState::Menu);
+		}
 	}
 
 	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
@@ -414,7 +420,7 @@ void AMyAIController::SetAI(bool bShouldEnable)
 {
 	const bool bWantsEnableDeadAI = !OwnerInternal && bShouldEnable;
 	if (bWantsEnableDeadAI
-		|| !HasAuthority())
+	    || !HasAuthority())
 	{
 		return;
 	}

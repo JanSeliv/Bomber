@@ -119,12 +119,15 @@ void UInGameMenuWidget::OnEndGameStateChanged(EEndGameState EndGameState)
 // Is called to start listening game state changes
 void UInGameMenuWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
 {
-	if (!ensureMsgf(MyGameState, TEXT("ASSERT: 'MyGameState' is not valid")))
-	{
-		return;
-	}
+	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
 
 	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+
+	// Handle current game state if initialized with delay
+	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+	{
+		OnGameStateChanged(ECurrentGameState::Menu);
+	}
 }
 
 // Is called to start listening End-Game state changes
