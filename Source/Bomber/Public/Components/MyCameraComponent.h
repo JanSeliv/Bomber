@@ -101,6 +101,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FVector GetCameraLockedLocation() const;
 
+	/** Starts viewing through this camera. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PossessCamera(bool bBlendCamera = true);
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -139,8 +143,4 @@ protected:
 	/** Listen to recalculate camera location when screen aspect ratio was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnAspectRatioChanged(float NewAspectRatio, EAspectRatioAxisConstraint NewAxisConstraint);
-
-	/** Starts viewing through this camera. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void PossessCamera();
 };

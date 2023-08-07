@@ -3,7 +3,10 @@
 #include "Widgets/NMMCinematicStateWidget.h"
 //---
 #include "Bomber.h"
+#include "Components/MyCameraComponent.h"
+#include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
+#include "Data/NMMSubsystem.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -12,7 +15,21 @@
 // Is called to skip cinematic
 void UNMMCinematicStateWidget::SkipCinematic()
 {
-	UE_LOG(LogTemp, Warning, TEXT("--- Skip cinematic ---"));
+	if (UNMMSpotComponent* ActiveSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent())
+	{
+		ActiveSpot->StopMasterSequence();
+	}
+
+	if (UMyCameraComponent* CameraComponent = UMyBlueprintFunctionLibrary::GetLevelCamera())
+	{
+		constexpr bool bBlend = false;
+		CameraComponent->PossessCamera(bBlend);
+	}
+
+	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
+	{
+		MyPC->SetGameStartingState();
+	}
 }
 
 // // Called after the underlying slate widget is constructed

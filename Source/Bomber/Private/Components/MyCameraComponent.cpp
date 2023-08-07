@@ -265,7 +265,7 @@ void UMyCameraComponent::OnAspectRatioChanged_Implementation(float NewAspectRati
 }
 
 // Starts viewing through this camera
-void UMyCameraComponent::PossessCamera()
+void UMyCameraComponent::PossessCamera(bool bBlendCamera/* = true*/)
 {
 	AActor* Owner = GetOwner();
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
@@ -275,6 +275,6 @@ void UMyCameraComponent::PossessCamera()
 		return;
 	}
 
-	const float BlendTime = UGameStateDataAsset::Get().GetStartingCountdown();
+	const float BlendTime = bBlendCamera ? UGameStateDataAsset::Get().GetStartingCountdown() : 0.f;
 	MyPC->SetViewTargetWithBlend(Owner, BlendTime);
 }
