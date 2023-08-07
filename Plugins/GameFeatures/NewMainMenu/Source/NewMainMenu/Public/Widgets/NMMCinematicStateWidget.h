@@ -17,6 +17,14 @@ class NEWMAINMENU_API UNMMCinematicStateWidget : public UUserWidget
 	GENERATED_BODY()
 
 	/*********************************************************************************************
+	 * Public functions
+	 ********************************************************************************************* */
+public:
+	/** Is called to skip cinematic. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SkipCinematic();
+
+	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
 protected:

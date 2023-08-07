@@ -9,6 +9,12 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMCinematicStateWidget)
 
+// Is called to skip cinematic
+void UNMMCinematicStateWidget::SkipCinematic()
+{
+	UE_LOG(LogTemp, Warning, TEXT("--- Skip cinematic ---"));
+}
+
 // // Called after the underlying slate widget is constructed
 void UNMMCinematicStateWidget::NativeConstruct()
 {

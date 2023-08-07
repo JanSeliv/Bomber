@@ -36,6 +36,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UNewMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidgetInternal; }
 
+	/** Returns created In Cinematic State widget. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE class UNMMCinematicStateWidget* GetInCinematicStateWidget() const { return InCinematicStateWidgetInternal; }
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */

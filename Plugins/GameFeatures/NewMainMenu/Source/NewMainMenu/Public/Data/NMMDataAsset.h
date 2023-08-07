@@ -6,6 +6,8 @@
 //---
 #include "NMMDataAsset.generated.h"
 
+enum class ECurrentGameState : uint8;
+
 /**
  * Contains common data of the New Main Menu plugin to be tweaked.
  */
@@ -33,6 +35,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UNMMCinematicStateWidget> GetInCinematicStateWidgetClass() const { return InCinematicStateWidgetClassInternal; }
 
+	/** Returns first input context by given game state.
+	 * @see UNMMDataAsset::InputContextsInternal.*/
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE class UMyInputMappingContext* GetInputContext(ECurrentGameState CurrentGameState) const;
+
+	/** Returns all input contexts.
+	 * @see UNMMDataAsset::InputContextsInternal.*/
+	void GetAllInputContexts(TArray<const class UMyInputMappingContext*>& OutInputContexts) const;
+
 protected:
 	/** The data table with the cinematics to be played. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Cinematics Data Table", ShowOnlyInnerProperties))
@@ -45,4 +56,8 @@ protected:
 	/** The class of the In Cinematic State widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget Class", ShowOnlyInnerProperties))
 	TSubclassOf<class UNMMCinematicStateWidget> InCinematicStateWidgetClassInternal = nullptr;
+
+	/** List of input contexts to manage according their game states. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Input Contexts"))
+	TArray<TObjectPtr<const class UMyInputMappingContext>> InputContextsInternal;
 };

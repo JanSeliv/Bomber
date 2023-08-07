@@ -319,9 +319,9 @@ void AMyPlayerController::SetupPlayerInputs()
 	// Add input contexts to the list to be auto turned of or on according current game state
 	AddInputContexts(InputContexts);
 
-	// Bind input actions in given contexts
+	// Bind input actions in all managed contexts
 	constexpr bool bClearPreviousBindings = true;
-	BindInputActionsInContexts(InputContexts, bClearPreviousBindings);
+	BindInputActionsInContexts(AllInputContextsInternal, bClearPreviousBindings);
 
 	// Notify other systems that player controller is ready to bind their own input actions
 	OnSetupPlayerInputs.Broadcast();

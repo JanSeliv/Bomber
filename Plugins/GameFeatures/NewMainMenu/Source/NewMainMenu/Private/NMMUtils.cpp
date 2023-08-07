@@ -21,3 +21,10 @@ UNewMainMenuWidget* UNMMUtils::GetMainMenuWidget()
 	const UNMMHUDComponent* HUDComponent = GetHUDComponent();
 	return HUDComponent ? HUDComponent->GetMainMenuWidget() : nullptr;
 }
+
+// Returns the widget of the In Cinematic State
+UNMMCinematicStateWidget* UNMMUtils::GetInCinematicStateWidget()
+{
+	const UNMMHUDComponent* HUDComponent = GetHUDComponent();
+	return HUDComponent ? HUDComponent->GetInCinematicStateWidget() : nullptr;
+}
