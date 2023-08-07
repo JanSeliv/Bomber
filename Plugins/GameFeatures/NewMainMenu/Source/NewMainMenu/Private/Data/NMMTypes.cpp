@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Data/NewMainMenuTypes.h"
+#include "Data/NMMTypes.h"
 //---
-#include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuTypes)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(NMMTypes)
 
 // The row that does not contain any data
-const FCinematicRow FCinematicRow::Empty = FCinematicRow();
+const FNMMCinematicRow FNMMCinematicRow::Empty = FNMMCinematicRow();
 
 // Returns true if this row is valid
-bool FCinematicRow::IsValid() const
+bool FNMMCinematicRow::IsValid() const
 {
 	return LevelType != ELT::None
 		&& PlayerTag != FPlayerTag::None
@@ -16,7 +16,7 @@ bool FCinematicRow::IsValid() const
 }
 
 // Equal operator
-bool FCinematicRow::operator==(const FCinematicRow& Other) const
+bool FNMMCinematicRow::operator==(const FNMMCinematicRow& Other) const
 {
 	return LevelType == Other.LevelType
 		&& PlayerTag == Other.PlayerTag

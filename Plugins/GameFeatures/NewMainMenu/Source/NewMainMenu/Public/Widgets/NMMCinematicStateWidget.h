@@ -4,7 +4,7 @@
 
 #include "Blueprint/UserWidget.h"
 //---
-#include "InCinematicStateWidget.generated.h"
+#include "NMMCinematicStateWidget.generated.h"
 
 enum class ECurrentGameState : uint8;
 
@@ -12,7 +12,7 @@ enum class ECurrentGameState : uint8;
  * Is active while game is in cinematic state, is responsible for skipping cinematic.
  */
 UCLASS()
-class NEWMAINMENU_API UInCinematicStateWidget : public UUserWidget
+class NEWMAINMENU_API UNMMCinematicStateWidget : public UUserWidget
 {
 	GENERATED_BODY()
 

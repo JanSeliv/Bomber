@@ -7,18 +7,18 @@
 #include "Bomber.h" // ELevelType
 #include "Structures/PlayerTag.h"
 //---
-#include "NewMainMenuTypes.generated.h"
+#include "NMMTypes.generated.h"
 
 /**
  * Represents a row in the Cinematics Data Table.
  */
 USTRUCT(BlueprintType)
-struct NEWMAINMENU_API FCinematicRow : public FTableRowBase
+struct NEWMAINMENU_API FNMMCinematicRow : public FTableRowBase
 {
 	GENERATED_BODY()
 
 	/** The row that does not contain any data. */
-	static const FCinematicRow Empty;
+	static const FNMMCinematicRow Empty;
 
 	/** The level where this cinematic should be played. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -40,7 +40,7 @@ struct NEWMAINMENU_API FCinematicRow : public FTableRowBase
 	bool IsValid() const;
 
 	/** Equal operator. */
-	bool operator==(const FCinematicRow& Other) const;
+	bool operator==(const FNMMCinematicRow& Other) const;
 
 	/** Returns true is this does not contain any data. */
 	bool FORCEINLINE IsEmpty() const { return *this == Empty; }

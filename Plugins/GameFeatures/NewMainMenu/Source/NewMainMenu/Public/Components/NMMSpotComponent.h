@@ -4,9 +4,9 @@
 
 #include "Components/MySkeletalMeshComponent.h"
 //---
-#include "Data/NewMainMenuTypes.h"
+#include "Data/NMMTypes.h"
 //---
-#include "NewMainMenuSpotComponent.generated.h"
+#include "NMMSpotComponent.generated.h"
 
 enum class ECurrentGameState : uint8;
 
@@ -15,7 +15,7 @@ enum class ECurrentGameState : uint8;
  * Is added dynamically to the My Skeletal Mesh actors on the level.
  */
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class NEWMAINMENU_API UNewMainMenuSpotComponent final : public UActorComponent
+class NEWMAINMENU_API UNMMSpotComponent final : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -24,7 +24,7 @@ class NEWMAINMENU_API UNewMainMenuSpotComponent final : public UActorComponent
 	 ********************************************************************************************* */
 public:
 	/** Default constructor. */
-	UNewMainMenuSpotComponent();
+	UNMMSpotComponent();
 
 	/** Returns true if this spot is currently active and possessed by player. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -41,7 +41,7 @@ public:
 public:
 	/** Returns cinematic row of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FCinematicRow& GetCinematicRow() const { return CinematicRowInternal; }
+	const FNMMCinematicRow& GetCinematicRow() const { return CinematicRowInternal; }
 
 	/** Returns main cinematic of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -77,7 +77,7 @@ protected:
 
 	/** Cached Cinematic Row that contains data about this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic Row"))
-	FCinematicRow CinematicRowInternal = FCinematicRow::Empty;
+	FNMMCinematicRow CinematicRowInternal = FNMMCinematicRow::Empty;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -91,12 +91,12 @@ protected:
 	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
 
 	/** Obtains and caches cinematic data from the table to this spot.
-	 * @see UNewMainMenuSpotComponent::CinematicRowInternal */
+	 * @see UNMMSpotComponent::CinematicRowInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateCinematicData();
 
 	/** Loads cinematic of this spot.
-	 * @see UNewMainMenuSpotComponent::CinematicInternal */
+	 * @see UNMMSpotComponent::CinematicInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void CreateMasterSequencePlayer();
 

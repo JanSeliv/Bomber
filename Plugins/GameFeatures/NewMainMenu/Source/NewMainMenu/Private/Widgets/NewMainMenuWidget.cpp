@@ -4,9 +4,9 @@
 //---
 #include "Bomber.h"
 #include "Components/MySkeletalMeshComponent.h"
-#include "Components/NewMainMenuSpotComponent.h"
+#include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
-#include "Data/NewMainMenuSubsystem.h"
+#include "Data/NMMSubsystem.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/SoundsSubsystem.h"
@@ -129,7 +129,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
-	const UNewMainMenuSpotComponent* MainMenuSpot = UNewMainMenuSubsystem::Get().MoveMainMenuSpot(Incrementer);
+	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().MoveMainMenuSpot(Incrementer);
 
 	// Update the chosen player mesh on the level
 	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpot ? MainMenuSpot->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
@@ -143,7 +143,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 void UNewMainMenuWidget::OnNextSkinButtonPressed()
 {
 	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	const UNewMainMenuSpotComponent* MainMenuSpot = UNewMainMenuSubsystem::Get().GetActiveMainMenuSpotComponent();
+	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
 	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerCharacter' is not valid"))
 		|| !ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid")))
 	{

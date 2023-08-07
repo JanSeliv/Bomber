@@ -4,14 +4,14 @@
 
 #include "Components/ActorComponent.h"
 //---
-#include "NewMainMenuHUDComponent.generated.h"
+#include "NMMHUDComponent.generated.h"
 
 /**
  * Represents the HUD in the NewMain Menu module, where the Owner is HUD actor.
  * Is responsible for managing Main Menu widgets.
  */
-UCLASS(BlueprintType, Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class NEWMAINMENU_API UNewMainMenuHUDComponent : public UActorComponent
+UCLASS(BlueprintType, Blueprintable, DisplayName = "NNM HUD Component", ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+class NEWMAINMENU_API UNMMHUDComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -20,7 +20,7 @@ class NEWMAINMENU_API UNewMainMenuHUDComponent : public UActorComponent
 	 ********************************************************************************************* */
 public:
 	/** Default constructor. */
-	UNewMainMenuHUDComponent();
+	UNMMHUDComponent();
 
 	/** Returns HUD actor of this component. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -28,9 +28,9 @@ public:
 	class AMyHUD& GetHUDChecked() const;
 
 	/** Returns the data asset that contains all the assets and tweaks of New Main Menu game feature.
-	 * @see UNewMainMenuSubsystem::NewMainMenuDataAssetInternal. */
+	 * @see UNMMSubsystem::NewMainMenuDataAssetInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const class UNewMainMenuDataAsset* GetNewMainMenuDataAsset() const;
+	const class UNMMDataAsset* GetNewMainMenuDataAsset() const;
 
 	/** Returns created Main Menu widget. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -42,7 +42,7 @@ public:
 protected:
 	/** Contains all the assets and tweaks of New Main Menu game feature. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "New Main Menu Data Asset"))
-	TSoftObjectPtr<const class UNewMainMenuDataAsset> NewMainMenuDataAssetInternal = nullptr;
+	TSoftObjectPtr<const class UNMMDataAsset> NewMainMenuDataAssetInternal = nullptr;
 
 	/** Created Main Menu widget. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
@@ -50,7 +50,7 @@ protected:
 
 	/** Created In Cinematic State widget. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
-	TObjectPtr<class UInCinematicStateWidget> InCinematicStateWidgetInternal = nullptr;
+	TObjectPtr<class UNMMCinematicStateWidget> InCinematicStateWidgetInternal = nullptr;
 
 	/*********************************************************************************************
 	 * Protected functions

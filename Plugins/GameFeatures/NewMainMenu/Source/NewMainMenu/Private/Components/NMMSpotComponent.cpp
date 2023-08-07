@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Components/NewMainMenuSpotComponent.h"
+#include "Components/NMMSpotComponent.h"
 //---
 #include "Bomber.h"
 #include "Controllers/MyPlayerController.h"
-#include "Data/NewMainMenuDataAsset.h"
-#include "Data/NewMainMenuSubsystem.h"
-#include "Data/NewMainMenuTypes.h"
+#include "Data/NMMDataAsset.h"
+#include "Data/NMMSubsystem.h"
+#include "Data/NMMTypes.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyDataTable/MyDataTable.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -17,28 +17,28 @@
 //---
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuSpotComponent)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotComponent)
 
 // Default constructor
-UNewMainMenuSpotComponent::UNewMainMenuSpotComponent()
+UNMMSpotComponent::UNMMSpotComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 // Returns true if this spot is currently active and possessed by player
-bool UNewMainMenuSpotComponent::IsActiveSpot() const
+bool UNMMSpotComponent::IsActiveSpot() const
 {
-	return UNewMainMenuSubsystem::Get().GetActiveMainMenuSpotComponent() == this;
+	return UNMMSubsystem::Get().GetActiveMainMenuSpotComponent() == this;
 }
 
 // Returns the Skeletal Mesh of the Bomber character
-UMySkeletalMeshComponent* UNewMainMenuSpotComponent::GetMySkeletalMeshComponent() const
+UMySkeletalMeshComponent* UNMMSpotComponent::GetMySkeletalMeshComponent() const
 {
 	return GetOwner()->FindComponentByClass<UMySkeletalMeshComponent>();
 }
 
-UMySkeletalMeshComponent& UNewMainMenuSpotComponent::GetMeshChecked() const
+UMySkeletalMeshComponent& UNMMSpotComponent::GetMeshChecked() const
 {
 	UMySkeletalMeshComponent* Mesh = GetMySkeletalMeshComponent();
 	checkf(Mesh, TEXT("'Mesh' is nullptr, can not get mesh for '%s' spot."), *GetNameSafe(this));
@@ -46,13 +46,13 @@ UMySkeletalMeshComponent& UNewMainMenuSpotComponent::GetMeshChecked() const
 }
 
 // Returns main cinematic of this spot
-ULevelSequence* UNewMainMenuSpotComponent::GetMasterSequence() const
+ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
 {
 	return MasterPlayerInternal ? Cast<ULevelSequence>(MasterPlayerInternal->GetSequence()) : nullptr;
 }
 
 // Finds subsequence of this spot by given index
-const ULevelSequence* UNewMainMenuSpotComponent::FindSubsequence(int32 SubsequenceIndex) const
+const ULevelSequence* UNMMSpotComponent::FindSubsequence(int32 SubsequenceIndex) const
 {
 	const ULevelSequence* MasterSequence = GetMasterSequence();
 	const UMovieScene* InMovieScene = MasterSequence ? MasterSequence->GetMovieScene() : nullptr;
@@ -84,7 +84,7 @@ const ULevelSequence* UNewMainMenuSpotComponent::FindSubsequence(int32 Subsequen
 }
 
 // Returns the length of by given subsequence index
-int32 UNewMainMenuSpotComponent::GetSequenceTotalFrames(const ULevelSequence* LevelSequence)
+int32 UNMMSpotComponent::GetSequenceTotalFrames(const ULevelSequence* LevelSequence)
 {
 	if (!ensureMsgf(LevelSequence, TEXT("'LevelSequence' is not valid")))
 	{
@@ -105,7 +105,7 @@ int32 UNewMainMenuSpotComponent::GetSequenceTotalFrames(const ULevelSequence* Le
 }
 
 // Prevents the spot from playing any cinematic
-void UNewMainMenuSpotComponent::StopMasterSequence()
+void UNMMSpotComponent::StopMasterSequence()
 {
 	if (MasterPlayerInternal)
 	{
@@ -114,11 +114,11 @@ void UNewMainMenuSpotComponent::StopMasterSequence()
 }
 
 // Overridable native event for when play begins for this actor.
-void UNewMainMenuSpotComponent::BeginPlay()
+void UNMMSpotComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UNewMainMenuSubsystem::Get().AddNewMainMenuSpot(this);
+	UNMMSubsystem::Get().AddNewMainMenuSpot(this);
 
 	UpdateCinematicData();
 	CreateMasterSequencePlayer();
@@ -135,7 +135,7 @@ void UNewMainMenuSpotComponent::BeginPlay()
 }
 
 // Called when the current game state was changed
-void UNewMainMenuSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
@@ -154,7 +154,7 @@ void UNewMainMenuSpotComponent::OnGameStateChanged_Implementation(ECurrentGameSt
 }
 
 // Is called to start listening game state changes
-void UNewMainMenuSpotComponent::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
+void UNMMSpotComponent::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
 {
 	// Handle current game state if initialized with delay
 	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
@@ -167,9 +167,9 @@ void UNewMainMenuSpotComponent::BindOnGameStateChanged(AMyGameStateBase* MyGameS
 }
 
 // Obtains and caches cinematic data from the table to this spot
-void UNewMainMenuSpotComponent::UpdateCinematicData()
+void UNMMSpotComponent::UpdateCinematicData()
 {
-	const UDataTable* CinematicsDataTable = UNewMainMenuDataAsset::Get().GetCinematicsDataTable();
+	const UDataTable* CinematicsDataTable = UNMMDataAsset::Get().GetCinematicsDataTable();
 	if (!ensureMsgf(CinematicsDataTable, TEXT("'CinematicsDataTable' is nullptr, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
 	{
 		return;
@@ -178,9 +178,9 @@ void UNewMainMenuSpotComponent::UpdateCinematicData()
 	const FPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
 
 	int32 RowIndex = 0;
-	TMap<FName, FCinematicRow> CinematicsRows;
+	TMap<FName, FNMMCinematicRow> CinematicsRows;
 	UMyDataTable::GetRows(*CinematicsDataTable, CinematicsRows);
-	for (const TTuple<FName, FCinematicRow>& RowIt : CinematicsRows)
+	for (const TTuple<FName, FNMMCinematicRow>& RowIt : CinematicsRows)
 	{
 		if (RowIt.Value.PlayerTag == PlayerTag)
 		{
@@ -197,7 +197,7 @@ void UNewMainMenuSpotComponent::UpdateCinematicData()
 }
 
 // Loads cinematic of this spot
-void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
+void UNMMSpotComponent::CreateMasterSequencePlayer()
 {
 	if (MasterPlayerInternal)
 	{
@@ -227,7 +227,7 @@ void UNewMainMenuSpotComponent::CreateMasterSequencePlayer()
 }
 
 // Called when the sequence is paused or when cinematic was ended
-void UNewMainMenuSpotComponent::OnMasterSequencePaused_Implementation()
+void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 {
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!MyPC
@@ -242,7 +242,7 @@ void UNewMainMenuSpotComponent::OnMasterSequencePaused_Implementation()
 }
 
 // Plays idle part in loop of current Master Sequence
-void UNewMainMenuSpotComponent::PlayIdlePart()
+void UNMMSpotComponent::PlayIdlePart()
 {
 	if (!IsActiveSpot() // Don't play for inactive spot
 		|| !ensureMsgf(MasterPlayerInternal, TEXT("'MasterPlayerInternal' is not valid, player has to be created first!")))
@@ -259,7 +259,7 @@ void UNewMainMenuSpotComponent::PlayIdlePart()
 }
 
 // Plays main part of current Master Sequence
-void UNewMainMenuSpotComponent::PlayMainPart()
+void UNMMSpotComponent::PlayMainPart()
 {
 	if (!IsActiveSpot() // Don't play for inactive spot
 		|| !ensureMsgf(MasterPlayerInternal, TEXT("'MasterPlayerInternal' is not valid, player has to be created first!"))

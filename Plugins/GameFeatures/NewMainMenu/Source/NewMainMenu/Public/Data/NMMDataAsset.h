@@ -4,34 +4,34 @@
 
 #include "Engine/DataAsset.h"
 //---
-#include "NewMainMenuDataAsset.generated.h"
+#include "NMMDataAsset.generated.h"
 
 /**
  * Contains common data of the New Main Menu plugin to be tweaked.
  */
 UCLASS(Blueprintable, BlueprintType)
-class NEWMAINMENU_API UNewMainMenuDataAsset : public UDataAsset
+class NEWMAINMENU_API UNMMDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	/** Returns this Data Asset, is checked and wil crash if can't be obtained, e.g: when is not set. */
-	static const UNewMainMenuDataAsset& Get();
+	static const UNMMDataAsset& Get();
 
 	/** Returns the data table with the cinematics to be played.
-	 * @see UNewMainMenuDataAsset::CinematicsDataTableInternal.*/
+	 * @see UNMMDataAsset::CinematicsDataTableInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class UDataTable* GetCinematicsDataTable() const { return CinematicsDataTableInternal; }
 
 	/** Returns a class of the Main Menu widget.
-	 * @see UNewMainMenuDataAsset::MainMenuWidgetClassInternal.*/
+	 * @see UNMMDataAsset::MainMenuWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UNewMainMenuWidget> GetMainMenuWidgetClass() const { return MainMenuWidgetClassInternal; }
 
 	/** Returns a class of the In Cinematic State widget.
-	 * @see UNewMainMenuDataAsset::InCinematicStateWidgetClassInternal.*/
+	 * @see UNMMDataAsset::InCinematicStateWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UInCinematicStateWidget> GetInCinematicStateWidgetClass() const { return InCinematicStateWidgetClassInternal; }
+	FORCEINLINE TSubclassOf<class UNMMCinematicStateWidget> GetInCinematicStateWidgetClass() const { return InCinematicStateWidgetClassInternal; }
 
 protected:
 	/** The data table with the cinematics to be played. */
@@ -44,5 +44,5 @@ protected:
 
 	/** The class of the In Cinematic State widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UInCinematicStateWidget> InCinematicStateWidgetClassInternal = nullptr;
+	TSubclassOf<class UNMMCinematicStateWidget> InCinematicStateWidgetClassInternal = nullptr;
 };

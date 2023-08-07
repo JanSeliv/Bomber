@@ -1,23 +1,23 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "NewMainMenuUtils.h"
+#include "NMMUtils.h"
 //---
 #include "UI/MyHUD.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
-#include "Components/NewMainMenuHUDComponent.h"
+#include "Components/NMMHUDComponent.h"
 //---
-#include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuUtils)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(NMMUtils)
 
 // Returns the HUD component of the Main Menu
-UNewMainMenuHUDComponent* UNewMainMenuUtils::GetHUDComponent()
+UNMMHUDComponent* UNMMUtils::GetHUDComponent()
 {
 	const AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD();
-	return MyHUD ? MyHUD->FindComponentByClass<UNewMainMenuHUDComponent>() : nullptr;
+	return MyHUD ? MyHUD->FindComponentByClass<UNMMHUDComponent>() : nullptr;
 }
 
 // Returns the widget of the Main Menu.
-UNewMainMenuWidget* UNewMainMenuUtils::GetMainMenuWidget()
+UNewMainMenuWidget* UNMMUtils::GetMainMenuWidget()
 {
-	const UNewMainMenuHUDComponent* HUDComponent = GetHUDComponent();
+	const UNMMHUDComponent* HUDComponent = GetHUDComponent();
 	return HUDComponent ? HUDComponent->GetMainMenuWidget() : nullptr;
 }
