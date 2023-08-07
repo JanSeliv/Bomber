@@ -196,6 +196,23 @@ void AMyPlayerController::BindInputActionsInContexts(const TArray<const UMyInput
 	}
 }
 
+// Adds input contexts to the list to be auto turned of or on according current game state
+void AMyPlayerController::AddInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts)
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	for (const UMyInputMappingContext* InputContextIt : InputContexts)
+	{
+		if (InputContextIt)
+		{
+			AllInputContextsInternal.AddUnique(InputContextIt);
+		}
+	}
+}
+
 // Called when an instance of this class is placed (in editor) or spawned
 void AMyPlayerController::OnConstruction(const FTransform& Transform)
 {
@@ -299,6 +316,10 @@ void AMyPlayerController::SetupPlayerInputs()
 	TArray<const UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
 
+	// Add input contexts to the list to be auto turned of or on according current game state
+	AddInputContexts(InputContexts);
+
+	// Bind input actions in given contexts
 	constexpr bool bClearPreviousBindings = true;
 	BindInputActionsInContexts(InputContexts, bClearPreviousBindings);
 
@@ -354,18 +375,8 @@ void AMyPlayerController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 			break;
 	}
 
-	// Enable or disable input contexts by specified game states
-	TArray<const UMyInputMappingContext*> InputContexts;
-	UPlayerInputDataAsset::Get().GetAllInputContexts(InputContexts);
-	for (const UMyInputMappingContext* InputContextIt : InputContexts)
-	{
-		if (InputContextIt)
-		{
-			const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
-			const bool bEnableContext = GameStatesBitmask & TO_FLAG(CurrentGameState);
-			SetInputContextEnabled(bEnableContext, InputContextIt);
-		}
-	}
+	constexpr bool bInvertRest = true;
+	SetInputContextsEnabled(true, CurrentGameState, bInvertRest);
 }
 
 // Listens to handle input on opening and closing the InGame Menu widget
@@ -376,7 +387,10 @@ void AMyPlayerController::OnToggledInGameMenu(bool bIsVisible)
 		return;
 	}
 
-	SetGameplayInputContextEnabled(!bIsVisible);
+	// Invert gameplay input contexts
+	SetInputContextsEnabled(!bIsVisible, ECurrentGameState::InGame);
+
+	// Turn on or off specific In-Game menu input context (it does not contain any game state)
 	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
 
 	SetMouseVisibility(bIsVisible);
@@ -385,35 +399,14 @@ void AMyPlayerController::OnToggledInGameMenu(bool bIsVisible)
 // Listens to handle input on opening and closing the Settings widget
 void AMyPlayerController::OnToggledSettings(bool bIsVisible)
 {
-	// Toggle Settings Input Context
+	// Turn on or off specific Settings input context (it does not contain any game state)
 	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetSettingsInputContext());
 
 	// Toggle previous Input Context
 	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
-	const UMyInputMappingContext* PreviousInputContext = nullptr;
-	if (CurrentGameState == ECGS::Menu)
+	if (CurrentGameState == ECGS::Menu || CurrentGameState == ECGS::InGame)
 	{
-		PreviousInputContext = UPlayerInputDataAsset::Get().GetMainMenuInputContext();
-	}
-	else if (CurrentGameState == ECGS::InGame)
-	{
-		PreviousInputContext = UPlayerInputDataAsset::Get().GetInGameMenuInputContext();
-	}
-
-	if (PreviousInputContext)
-	{
-		SetInputContextEnabled(!bIsVisible, PreviousInputContext);
-	}
-}
-
-// Enables or disables input contexts of gameplay input actions
-void AMyPlayerController::SetGameplayInputContextEnabled(bool bEnable)
-{
-	TArray<const UMyInputMappingContext*> OutGameplayInputContexts;
-	UPlayerInputDataAsset::Get().GetAllGameplayInputContexts(OutGameplayInputContexts);
-	for (const UMyInputMappingContext* InputContextIt : OutGameplayInputContexts)
-	{
-		SetInputContextEnabled(bEnable, InputContextIt);
+		SetInputContextsEnabled(!bIsVisible, CurrentGameState);
 	}
 }
 
@@ -452,6 +445,30 @@ void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMap
 	else
 	{
 		InputSubsystem->RemoveMappingContext(InputContext);
+	}
+}
+
+// Takes all cached inputs contexts and turns them on or off according given game state
+void AMyPlayerController::SetInputContextsEnabled(bool bEnable, ECurrentGameState CurrentGameState, bool bInvertRest/* = false*/)
+{
+	for (const UMyInputMappingContext* InputContextIt : AllInputContextsInternal)
+	{
+		if (!InputContextIt)
+		{
+			continue;
+		}
+
+		const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
+		const bool bIsMatching = GameStatesBitmask & TO_FLAG(CurrentGameState);
+
+		if (bIsMatching)
+		{
+			SetInputContextEnabled(bEnable, InputContextIt);
+		}
+		else if (bInvertRest)
+		{
+			SetInputContextEnabled(!bEnable, InputContextIt);
+		}
 	}
 }
 
