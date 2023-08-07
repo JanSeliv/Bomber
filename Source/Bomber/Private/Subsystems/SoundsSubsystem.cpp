@@ -69,9 +69,16 @@ void USoundsSubsystem::PlayCurrentBackgroundMusic()
 	const ECurrentGameState GameState = AMyGameStateBase::GetCurrentGameState();
 	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
 	USoundBase* BackgroundMusic = USoundsDataAsset::Get().GetBackgroundMusic(GameState, LevelType);
+
 	if (!BackgroundMusic)
 	{
-		// Background music is not found for current state or level
+		if (BackgroundMusicComponentInternal
+		    && BackgroundMusicComponentInternal->IsPlaying())
+		{
+			// Background music is not found for current state or level, disable current
+			BackgroundMusicComponentInternal->Stop();
+		}
+
 		return;
 	}
 

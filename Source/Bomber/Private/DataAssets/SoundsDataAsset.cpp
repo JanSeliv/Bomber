@@ -41,12 +41,17 @@ USoundBase* USoundsDataAsset::GetLevelMainMenuMusic(ELevelType LevelType) const
 // Return the background music by specified game state and level type
 USoundBase* USoundsDataAsset::GetBackgroundMusic(ECurrentGameState CurrentGameState, ELevelType LevelType) const
 {
-	if (CurrentGameState == ECGS::Menu)
+	switch (CurrentGameState)
 	{
-		return GetLevelMainMenuMusic(LevelType);
+		case ECGS::Menu:
+			return GetLevelMainMenuMusic(LevelType);
+		case ECGS::GameStarting: // fall through
+		case ECGS::InGame:       // fall through
+		case ECGS::EndGame:
+			return GetLevelMusic(LevelType);
+		default:
+			return nullptr;
 	}
-
-	return GetLevelMusic(LevelType);
 }
 
 // Returns the End-Game sound by specified End-Game state
