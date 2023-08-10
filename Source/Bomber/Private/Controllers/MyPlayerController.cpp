@@ -174,18 +174,21 @@ void AMyPlayerController::BindInputActionsInContexts(const TArray<const UMyInput
 	for (const UMyInputAction* ActionIt : InputActions)
 	{
 		const FName FunctionName = ActionIt ? ActionIt->GetFunctionToBind().FunctionName : NAME_None;
-		if (FunctionName.IsNone())
+		if (!ensureAlwaysMsgf(!FunctionName.IsNone(), TEXT("ASSERT: %s: 'FunctionName' is none, can not bind the action '%s'!"), *FString(__FUNCTION__), *GetNameSafe(ActionIt)))
+		{
+			continue;
+		}
+
+		const FFunctionPicker& StaticContext = ActionIt->GetStaticContext();
+		UFunction* FunctionPtr = StaticContext.GetFunction();
+		if (!ensureAlwaysMsgf(FunctionPtr, TEXT("ASSERT: [%i] %s:\n'FunctionPtr' is not found in static context: %s, can not bind the action '%s'!"), __LINE__, *FString(__FUNCTION__), *StaticContext.ToDisplayString(), *GetNameSafe(ActionIt)))
 		{
 			continue;
 		}
 
 		UObject* FoundContextObj = nullptr;
-		if (UFunction* FunctionPtr = ActionIt->GetStaticContext().GetFunction())
-		{
-			FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
-		}
-
-		if (!FoundContextObj)
+		FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
+		if (!ensureAlwaysMsgf(FoundContextObj, TEXT("ASSERT: [%i] %s:\n'FoundContextObj' is not found, next function return nullptr: %s, can not bind the action '%s'!"), __LINE__, *FString(__FUNCTION__), *StaticContext.ToDisplayString(), *GetNameSafe(ActionIt)))
 		{
 			continue;
 		}
