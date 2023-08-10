@@ -6,6 +6,8 @@
 //---
 #include "NMMPlayerControllerComponent.generated.h"
 
+class AMyPlayerController;
+
 /**
  * Represents the Player Controller in the NewMain Menu module, where the Owner is Player Controller actor.
  * Is responsible for managing Main Menu inputs.
@@ -24,13 +26,13 @@ public:
 
 	/** Returns HUD actor of this component. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	class AMyPlayerController* GetPlayerController() const;
-	class AMyPlayerController& GetPlayerControllerChecked() const;
+	AMyPlayerController* GetPlayerController() const;
+	AMyPlayerController& GetPlayerControllerChecked() const;
 
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
 protected:
-	/** Called when a component is registered, after Scene is set, but before CreateRenderState_Concurrent or OnCreatePhysicsState are called. */
-	virtual void OnRegister() override;
+	/** Called when the owning Actor begins play or when the component is created if the Actor has already begun play. */
+	virtual void BeginPlay() override;
 };

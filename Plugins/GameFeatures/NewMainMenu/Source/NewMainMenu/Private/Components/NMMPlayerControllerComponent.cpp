@@ -27,10 +27,10 @@ AMyPlayerController& UNMMPlayerControllerComponent::GetPlayerControllerChecked()
 	return *MyPlayerController;
 }
 
-// Called when a component is registered, after Scene is set, but before CreateRenderState_Concurrent or OnCreatePhysicsState are called
-void UNMMPlayerControllerComponent::OnRegister()
+// Called when the owning Actor begins play or when the component is created if the Actor has already begun play
+void UNMMPlayerControllerComponent::BeginPlay()
 {
-	Super::OnRegister();
+	Super::BeginPlay();
 
 	TArray<const UMyInputMappingContext*> MenuInputContexts;
 	UNMMDataAsset::Get().GetAllInputContexts(/*out*/MenuInputContexts);
