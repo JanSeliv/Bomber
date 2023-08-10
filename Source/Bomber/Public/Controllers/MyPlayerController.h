@@ -45,12 +45,6 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnGameStateCreated OnGameStateCreated;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSetupPlayerInputs);
-
-	/** Called when controller binds player inputs to notify other systems that player controller is ready to bind their own input actions. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnSetupPlayerInputs OnSetupPlayerInputs;
-
 	/*********************************************************************************************
 	 * Public functions
 	 ********************************************************************************************* */
@@ -81,7 +75,7 @@ public:
 	void SetMouseFocusOnUI(bool bFocusOnUI);
 
 	/*********************************************************************************************
-	 * Enhanced Input
+	 * Inputs
 	 ********************************************************************************************* */
 public:
 	/** Returns the Enhanced Input Local Player Subsystem. */
@@ -96,16 +90,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UEnhancedPlayerInput* GetEnhancedPlayerInput() const;
 
-	/** Set up input bindings in given contexts.
-	 * @param InputContexts Contexts to bind input actions.
-	 * @param bClearPreviousBindings If true, all previous bindings will be removed. */
-	void BindInputActionsInContexts(const TArray<const UMyInputMappingContext*>& InputContexts, bool bClearPreviousBindings = false);
+	/** Returns true if Player Controller is ready to setup all the inputs. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool CanBindInputActions() const;
 
-	/** Adds input contexts to the list to be auto turned of or on according current game state.
-	 * Make sure UMyInputMappingContext::ActiveForStatesInternal is set.
-	 * @param InputContexts Contexts to manage.
-	 * @see AMyPlayerController::AllInputContextsInternal */
-	void AddInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+	/** Returns true if specified input context is enabled.
+	 * @param InputContext Context to verify. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsInputContextEnabled(const UMyInputMappingContext* InputContext) const;
+
+	/** Adds given contexts to the list of auto managed and binds their input actions . */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetupInputContexts(const TArray<UMyInputMappingContext*>& InputContexts);
+	void SetupInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
 
 	/*********************************************************************************************
 	 * Protected properties
@@ -143,37 +140,32 @@ protected:
 	virtual void OnRep_PlayerState() override;
 
 	/*********************************************************************************************
-	 * Protected functions
+	 * On Events
 	 ********************************************************************************************* */
 protected:
-	/** Set up custom input bindings. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetupPlayerInputs();
-
-	/** Prevents built-in slate input on UMG. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DisplayName = "Set UI Input Ignored"))
-	void SetUIInputIgnored();
+	/** Is called when all game widgets are initialized. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnWidgetsInitialized();
 
 	/** Listen to toggle movement input and mouse cursor. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Listens to handle input on opening and closing the InGame Menu widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggledInGameMenu(bool bIsVisible);
 
 	/** Listens to handle input on opening and closing the Settings widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggledSettings(bool bIsVisible);
 
 	/*********************************************************************************************
-	 * Input Contexts management
+	 * Inputs management
 	 ********************************************************************************************* */
 public:
-	/** Returns true if specified input context is enabled.
-	 * @param InputContext Context to verify. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	bool IsInputContextEnabled(const UMyInputMappingContext* InputContext) const;
+	/** Prevents built-in slate input on UMG. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DisplayName = "Set UI Input Ignored"))
+	void SetUIInputIgnored();
 
 	/** Enables or disables specified input context.
 	 * @param bEnable set true to add specified input context, otherwise it will be removed from local player.
@@ -189,14 +181,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SetInputContextsEnabled(bool bEnable, ECurrentGameState CurrentGameState, bool bInvertRest = false);
 
+	/** Set up input bindings in given contexts. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void RebindAllInputActions();
+
+	/** Adds input contexts to the list to be auto turned of or on according current game state.
+	 * Make sure UMyInputMappingContext::ActiveForStatesInternal is set.
+	 * @param InputContexts Contexts to manage.
+	 * @see AMyPlayerController::AllInputContextsInternal */
+	void AddNewInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+
 	/*********************************************************************************************
-	 * Events
+	 * Listening Events
 	 ********************************************************************************************* */
 public:
-	/** Is called when all game widgets are initialized. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnWidgetsInitialized();
-
 	/** Is called on server and on client when the player state is set. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BroadcastOnSetPlayerState();

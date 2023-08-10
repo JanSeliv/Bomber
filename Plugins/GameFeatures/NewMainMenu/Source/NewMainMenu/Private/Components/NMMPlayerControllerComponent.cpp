@@ -32,10 +32,7 @@ void UNMMPlayerControllerComponent::OnRegister()
 {
 	Super::OnRegister();
 
-	TArray<const UMyInputMappingContext*> OutInputContexts;
-	UNMMDataAsset::Get().GetAllInputContexts(OutInputContexts);
-
-	AMyPlayerController& PC = GetPlayerControllerChecked();
-	PC.AddInputContexts(OutInputContexts);
-	PC.BindInputActionsInContexts(OutInputContexts);
+	TArray<const UMyInputMappingContext*> MenuInputContexts;
+	UNMMDataAsset::Get().GetAllInputContexts(/*out*/MenuInputContexts);
+	GetPlayerControllerChecked().SetupInputContexts(MenuInputContexts);
 }
