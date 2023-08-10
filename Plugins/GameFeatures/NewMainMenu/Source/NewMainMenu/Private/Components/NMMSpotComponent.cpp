@@ -118,6 +118,13 @@ void UNMMSpotComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (GetWorld()->bIsTearingDown)
+	{
+		// Don't process modular if world is restarting
+		// It could happen since module could be loaded very late, right after request of restarting a level
+		return;
+	}
+
 	UNMMSubsystem::Get().AddNewMainMenuSpot(this);
 
 	UpdateCinematicData();
