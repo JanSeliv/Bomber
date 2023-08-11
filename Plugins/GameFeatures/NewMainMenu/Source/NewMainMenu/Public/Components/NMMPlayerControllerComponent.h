@@ -35,4 +35,8 @@ public:
 protected:
 	/** Called when the owning Actor begins play or when the component is created if the Actor has already begun play. */
 	virtual void BeginPlay() override;
+
+	/** Is listen to set Menu game state once first spot is ready. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++")
+	void OnMainMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
 };

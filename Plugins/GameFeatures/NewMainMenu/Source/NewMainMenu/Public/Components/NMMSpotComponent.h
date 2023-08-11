@@ -98,7 +98,10 @@ protected:
 	/** Loads cinematic of this spot.
 	 * @see UNMMSpotComponent::CinematicInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void CreateMasterSequencePlayer();
+	void LoadMasterSequencePlayer();
+
+	/** Is called when the cinematic was loaded to finish creation. */
+	void OnMasterSequenceLoaded(TSoftObjectPtr<class ULevelSequence> LoadedMasterSequence);
 
 	/*********************************************************************************************
 	 * Events

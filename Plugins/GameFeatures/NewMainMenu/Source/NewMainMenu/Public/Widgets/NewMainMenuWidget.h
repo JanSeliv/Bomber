@@ -60,7 +60,7 @@ protected:
 
 	/** Is called to prepare the Main Menu widget for Menu game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void HandleGameState(class AMyGameStateBase* MyGameState);
+	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
 
 	/** Is called when player pressed the button to start the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

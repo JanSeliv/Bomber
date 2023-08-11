@@ -21,10 +21,17 @@ class NEWMAINMENU_API UNMMSubsystem : public UWorldSubsystem
 public:
 	/** Returns this Subsystem, is checked and wil crash if can't be obtained.*/
 	static UNMMSubsystem& Get();
+	static UNMMSubsystem& Get(const UObject& WorldContextObject);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMainMenuSpotReady, UNMMSpotComponent*, MainMenuSpotComponent);
+
+	/** Called when the spot was spawned on new level and it finished loading its Master Sequence. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnMainMenuSpotReady OnMainMenuSpotReady;
 
 	/** Add new Main-Menu spot, so it can be obtained by other objects. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void AddNewMainMenuSpot(class UNMMSpotComponent* NewMainMenuSpotComponent);
+	void AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotComponent);
 
 	/** Returns currently selected Main-Menu spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -43,7 +50,7 @@ public:
 protected:
 	/** All Main Menu spots with characters placed on the level. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main-Menu Spots"))
-	TArray<TObjectPtr<class UNMMSpotComponent>> MainMenuSpotsInternal;
+	TArray<TObjectPtr<UNMMSpotComponent>> MainMenuSpotsInternal;
 
 	/** Index of the currently selected Main-Menu spot, is according row index in Cinematics table.
 	 * @see FCinematicRow::RowIndex. */

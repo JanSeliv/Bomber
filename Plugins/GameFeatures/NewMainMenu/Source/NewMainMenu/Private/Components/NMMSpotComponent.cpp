@@ -13,6 +13,8 @@
 //---
 #include "LevelSequence.h"
 #include "LevelSequencePlayer.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Sections/MovieSceneSubSection.h"
 //---
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -128,7 +130,7 @@ void UNMMSpotComponent::BeginPlay()
 	UNMMSubsystem::Get().AddNewMainMenuSpot(this);
 
 	UpdateCinematicData();
-	CreateMasterSequencePlayer();
+	LoadMasterSequencePlayer();
 
 	// Listen states to spawn widgets
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
@@ -206,7 +208,7 @@ void UNMMSpotComponent::UpdateCinematicData()
 }
 
 // Loads cinematic of this spot
-void UNMMSpotComponent::CreateMasterSequencePlayer()
+void UNMMSpotComponent::LoadMasterSequencePlayer()
 {
 	if (MasterPlayerInternal)
 	{
@@ -220,9 +222,24 @@ void UNMMSpotComponent::CreateMasterSequencePlayer()
 		return;
 	}
 
+	if (FoundMasterSequence.IsValid())
+	{
+		OnMasterSequenceLoaded(FoundMasterSequence);
+	}
+	else
+	{
+		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
+		StreamableManager.RequestAsyncLoad(FoundMasterSequence.ToSoftObjectPath(),
+		                                   FStreamableDelegate::CreateUObject(this, &ThisClass::OnMasterSequenceLoaded, FoundMasterSequence));
+	}
+}
+
+// Is called when the cinematic was loaded to finish creation
+void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence)
+{
 	// Create and cache the master sequence
 	ALevelSequenceActor* OutActor = nullptr;
-	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, FoundMasterSequence.LoadSynchronous(), {}, OutActor);
+	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
 	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' was not created, something went wrong!"));
 
 	// Override the aspect ratio of the cinematic to the aspect ratio of the screen
@@ -230,6 +247,9 @@ void UNMMSpotComponent::CreateMasterSequencePlayer()
 	Settings.bOverrideAspectRatioAxisConstraint = true;
 	Settings.AspectRatioAxisConstraint = UUtilsLibrary::GetViewportAspectRatioAxisConstraint();
 	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, Settings);
+
+	// Notify that the spot is ready and finished loading
+	UNMMSubsystem::Get(*this).OnMainMenuSpotReady.Broadcast(this);
 
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
 	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
@@ -258,6 +278,9 @@ void UNMMSpotComponent::PlayIdlePart()
 	{
 		return;
 	}
+
+	// Stop the current cinematic if playing to start from the beginning
+	MasterPlayerInternal->Stop();
 
 	constexpr int32 IdleSectionIdx = 0;
 	const int32 TotalFrames = GetSequenceTotalFrames(FindSubsequence(IdleSectionIdx));

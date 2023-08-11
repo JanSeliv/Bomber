@@ -85,7 +85,18 @@ UWorld* FEditorUtilsLibrary::GetEditorWorld()
 		return nullptr;
 	}
 
-	UWorld* FoundWorld = IsPIE() ? GEditor->GetCurrentPlayWorld() : GEditor->GetEditorWorldContext().World();
+	UWorld* FoundWorld = nullptr;
+	if (IsPIE())
+	{
+		FoundWorld = GEditor->GetCurrentPlayWorld();
+	}
+
+	if (!FoundWorld)
+	{
+		// PIE is not started of the PIE's world is not found
+		FoundWorld = GEditor->GetEditorWorldContext().World();
+	}
+
 	return !FoundWorld ? GWorld : FoundWorld;
 }
 

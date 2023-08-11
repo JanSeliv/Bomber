@@ -4,6 +4,8 @@
 //---
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
+#include "Data/NMMSubsystem.h"
+#include "Components/NMMSpotComponent.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMPlayerControllerComponent)
 
@@ -32,7 +34,21 @@ void UNMMPlayerControllerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Setup Main menu inputs
 	TArray<const UMyInputMappingContext*> MenuInputContexts;
 	UNMMDataAsset::Get().GetAllInputContexts(/*out*/MenuInputContexts);
 	GetPlayerControllerChecked().SetupInputContexts(MenuInputContexts);
+
+	// Listen to set Menu game state once first spot is ready
+	UNMMSubsystem::Get().OnMainMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnMainMenuSpotReady);
+}
+
+// Is listen to set Menu game state once first spot is ready
+void UNMMPlayerControllerComponent::OnMainMenuSpotReady_Implementation(UNMMSpotComponent* MainMenuSpotComponent)
+{
+	checkf(MainMenuSpotComponent, TEXT("ERROR: [%i] %s:\n'MainMenuSpotComponent' is null!"), __LINE__, *FString(__FUNCTION__));
+	if (MainMenuSpotComponent->IsActiveSpot())
+	{
+		GetPlayerControllerChecked().SetMenuState();
+	}
 }
