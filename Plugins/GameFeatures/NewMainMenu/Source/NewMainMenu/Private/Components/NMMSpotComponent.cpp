@@ -228,9 +228,11 @@ void UNMMSpotComponent::LoadMasterSequencePlayer()
 	}
 	else
 	{
+		const TAsyncLoadPriority Priority = IsActiveSpot() ? FStreamableManager::AsyncLoadHighPriority : FStreamableManager::DefaultAsyncLoadPriority;
 		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
 		StreamableManager.RequestAsyncLoad(FoundMasterSequence.ToSoftObjectPath(),
-		                                   FStreamableDelegate::CreateUObject(this, &ThisClass::OnMasterSequenceLoaded, FoundMasterSequence));
+		                                   FStreamableDelegate::CreateUObject(this, &ThisClass::OnMasterSequenceLoaded, FoundMasterSequence),
+		                                   Priority);
 	}
 }
 
@@ -273,11 +275,19 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 // Plays idle part in loop of current Master Sequence
 void UNMMSpotComponent::PlayIdlePart()
 {
-	if (!IsActiveSpot() // Don't play for inactive spot
-		|| !ensureMsgf(MasterPlayerInternal, TEXT("'MasterPlayerInternal' is not valid, player has to be created first!")))
+	if (!IsActiveSpot()) // Don't play for inactive spot
 	{
 		return;
 	}
+
+	const bool bIsCinematicLoading = !MasterPlayerInternal || CinematicRowInternal.LevelSequence.IsPending();
+	if (bIsCinematicLoading)
+	{
+		// Load cinematic synchronously if not loaded yet
+		OnMasterSequenceLoaded(CinematicRowInternal.LevelSequence.LoadSynchronous());
+	}
+
+	checkf(MasterPlayerInternal, TEXT("ERROR: [%i] %s:\n'MasterPlayerInternal' is null!"), __LINE__, *FString(__FUNCTION__));
 
 	// Stop the current cinematic if playing to start from the beginning
 	MasterPlayerInternal->Stop();
