@@ -10,10 +10,12 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "Components/Button.h"
+//---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMCinematicStateWidget)
 
 // Is called to skip cinematic
-void UNMMCinematicStateWidget::SkipCinematic()
+void UNMMCinematicStateWidget::OnSkipCinematicButtonPressed()
 {
 	if (UNMMSpotComponent* ActiveSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent())
 	{
@@ -48,6 +50,12 @@ void UNMMCinematicStateWidget::NativeConstruct()
 	else if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
 		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
+	}
+
+	if (SkipCinematicButton)
+	{
+		SkipCinematicButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		SkipCinematicButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnSkipCinematicButtonPressed);
 	}
 }
 

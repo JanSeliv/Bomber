@@ -8,6 +8,8 @@
 
 enum class ECurrentGameState : uint8;
 
+class UButton;
+
 /**
  * Is active while game is in cinematic state, is responsible for skipping cinematic.
  */
@@ -17,12 +19,12 @@ class NEWMAINMENU_API UNMMCinematicStateWidget : public UUserWidget
 	GENERATED_BODY()
 
 	/*********************************************************************************************
-	 * Public functions
+	 * Protected properties
 	 ********************************************************************************************* */
-public:
-	/** Is called to skip cinematic. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SkipCinematic();
+protected:
+	/** The button to skip current cinematic. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	TObjectPtr<UButton> SkipCinematicButton = nullptr;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -39,4 +41,8 @@ protected:
 	/** Is called to start listening game state changes. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
+
+	/** Is called to skip cinematic. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnSkipCinematicButtonPressed();
 };
