@@ -111,7 +111,7 @@ void UNMMSpotComponent::StopMasterSequence()
 {
 	if (MasterPlayerInternal)
 	{
-		MasterPlayerInternal->Stop();
+		MasterPlayerInternal->GoToEndAndStop();
 	}
 }
 
@@ -241,14 +241,16 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 {
 	// Create and cache the master sequence
 	ALevelSequenceActor* OutActor = nullptr;
-	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
+	FMovieSceneSequencePlaybackSettings PlaybackSettings;
+	PlaybackSettings.bRestoreState = true; // All 'Keep state' tracks will be reverted
+	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), PlaybackSettings, OutActor);
 	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' was not created, something went wrong!"));
 
 	// Override the aspect ratio of the cinematic to the aspect ratio of the screen
-	FLevelSequenceCameraSettings Settings;
-	Settings.bOverrideAspectRatioAxisConstraint = true;
-	Settings.AspectRatioAxisConstraint = UUtilsLibrary::GetViewportAspectRatioAxisConstraint();
-	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, Settings);
+	FLevelSequenceCameraSettings CameraSettings;
+	CameraSettings.bOverrideAspectRatioAxisConstraint = true;
+	CameraSettings.AspectRatioAxisConstraint = UUtilsLibrary::GetViewportAspectRatioAxisConstraint();
+	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
 
 	// Notify that the spot is ready and finished loading
 	UNMMSubsystem::Get(*this).OnMainMenuSpotReady.Broadcast(this);
@@ -290,7 +292,7 @@ void UNMMSpotComponent::PlayIdlePart()
 	checkf(MasterPlayerInternal, TEXT("ERROR: [%i] %s:\n'MasterPlayerInternal' is null!"), __LINE__, *FString(__FUNCTION__));
 
 	// Stop the current cinematic if playing to start from the beginning
-	MasterPlayerInternal->Stop();
+	StopMasterSequence();
 
 	constexpr int32 IdleSectionIdx = 0;
 	const int32 TotalFrames = GetSequenceTotalFrames(FindSubsequence(IdleSectionIdx));
