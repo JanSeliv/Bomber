@@ -102,7 +102,11 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 
 	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController())
 	{
-		MyPC->ServerSetGameState(ECurrentGameState::Cinematic);
+		// Start cinematic
+		// Note: according design, the cinematic state is available only in single player game
+		// If not, then start the game instead
+		const ECGS NewState = !AMyGameStateBase::Get().IsMultiplayerGame() ? ECGS::Cinematic : ECGS::GameStarting;
+		MyPC->ServerSetGameState(NewState);
 	}
 }
 

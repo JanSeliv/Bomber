@@ -35,6 +35,9 @@ public:
 	/** Default constructor. */
 	AMyGameStateBase();
 
+	/** Returns the current game state, it will crash if can't be obtained, should be used only when the game is running. */
+	static AMyGameStateBase& Get();
+	
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++")
 	void ServerSetGameState(ECurrentGameState NewGameState);
@@ -42,6 +45,14 @@ public:
 	/** Returns the AMyGameStateBase::CurrentGameState property. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static ECurrentGameState GetCurrentGameState();
+
+	/** Returns true if any client is connected to the game. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsMultiplayerGame() const { return GetPlayersInMultiplayerNum() > 1; }
+
+	/** Returns true if any client is connected to the game. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	int32 GetPlayersInMultiplayerNum() const { return PlayerArray.Num(); }
 
 	/** Returns the left second of the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintPure, Category = "C++")

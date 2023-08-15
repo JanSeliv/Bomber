@@ -3,6 +3,7 @@
 #include "Components/NMMSpotComponent.h"
 //---
 #include "Bomber.h"
+#include "Components/MyCameraComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSubsystem.h"
@@ -156,6 +157,20 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState Curr
 	case ECurrentGameState::Cinematic:
 		{
 			PlayMainPart();
+			break;
+		}
+	case ECurrentGameState::GameStarting:
+		{
+			StopMasterSequence();
+
+			UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
+			if (LevelCamera
+				&& IsActiveSpot())
+			{
+				// Automatic blend-out the camera from this active Spot
+				constexpr bool bBlend = false;
+				LevelCamera->PossessCamera(bBlend);
+			}
 			break;
 		}
 	default: break;

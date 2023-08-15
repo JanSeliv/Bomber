@@ -3,12 +3,13 @@
 #include "GameFramework/MyGameStateBase.h"
 //---
 #include "GeneratedMap.h"
-#include "Subsystems/SoundsSubsystem.h"
-#include "GameFramework/MyPlayerState.h"
 #include "DataAssets/GameStateDataAsset.h"
+#include "GameFramework/MyPlayerState.h"
+#include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "GameFeaturesSubsystem.h"
+#include "TimerManager.h"
 #include "Net/UnrealNetwork.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameStateBase)
@@ -19,6 +20,14 @@ AMyGameStateBase::AMyGameStateBase()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+}
+
+// Returns the current game state, it will crash if can't be obtained, should be used only when the game is running
+AMyGameStateBase& AMyGameStateBase::Get()
+{
+	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	checkf(MyGameState, TEXT("ERROR: [%i] %s:\n'MyGameState' is null!"), __LINE__, *FString(__FUNCTION__));
+	return *MyGameState;
 }
 
 // Returns the AMyGameStateBase::CurrentGameState property
