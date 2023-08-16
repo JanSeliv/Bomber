@@ -47,14 +47,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class ULevelSequence* GetMasterSequence() const;
 
-	/** Finds subsequence of this spot by given index. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const ULevelSequence* FindSubsequence(int32 SubsequenceIndex) const;
-
-	/** Returns the length of by given subsequence index. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static int32 GetSequenceTotalFrames(const ULevelSequence* LevelSequence);
-
 	/** Prevents the spot from playing any cinematic. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void StopMasterSequence();

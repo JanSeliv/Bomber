@@ -10,14 +10,13 @@
 #include "Data/NMMSubsystem.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyDataTable/MyDataTable.h"
+#include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "LevelSequence.h"
 #include "LevelSequencePlayer.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
-#include "Sections/MovieSceneSubSection.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotComponent)
 
@@ -51,59 +50,6 @@ UMySkeletalMeshComponent& UNMMSpotComponent::GetMeshChecked() const
 ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
 {
 	return MasterPlayerInternal ? Cast<ULevelSequence>(MasterPlayerInternal->GetSequence()) : nullptr;
-}
-
-// Finds subsequence of this spot by given index
-const ULevelSequence* UNMMSpotComponent::FindSubsequence(int32 SubsequenceIndex) const
-{
-	const ULevelSequence* MasterSequence = GetMasterSequence();
-	const UMovieScene* InMovieScene = MasterSequence ? MasterSequence->GetMovieScene() : nullptr;
-	if (!ensureMsgf(InMovieScene, TEXT("'InMovieScene' is nullptr, can not find subsequence for '%s' spot."), *GetNameSafe(this)))
-	{
-		return nullptr;
-	}
-
-	int32 CurrentSubsequenceIdx = 0;
-	const TArray<UMovieSceneSection*>& AllSections = InMovieScene->GetAllSections();
-	for (int32 Idx = AllSections.Num() - 1; Idx >= 0; --Idx)
-	{
-		const UMovieSceneSubSection* SubSection = Cast<UMovieSceneSubSection>(AllSections[Idx]);
-		const ULevelSequence* SubSequence = SubSection ? Cast<ULevelSequence>(SubSection->GetSequence()) : nullptr;
-		if (!SubSection)
-		{
-			continue;
-		}
-
-		if (CurrentSubsequenceIdx == SubsequenceIndex)
-		{
-			return SubSequence;
-		}
-
-		CurrentSubsequenceIdx++;
-	}
-
-	return nullptr;
-}
-
-// Returns the length of by given subsequence index
-int32 UNMMSpotComponent::GetSequenceTotalFrames(const ULevelSequence* LevelSequence)
-{
-	if (!ensureMsgf(LevelSequence, TEXT("'LevelSequence' is not valid")))
-	{
-		return INDEX_NONE;
-	}
-
-	const UMovieScene* MovieScene = LevelSequence->GetMovieScene();
-	const FFrameRate TickResolution = MovieScene->GetTickResolution();
-	const FFrameRate DisplayRate = MovieScene->GetDisplayRate();
-
-	const TRange<FFrameNumber> SubSectionRange = MovieScene->GetPlaybackRange();
-	const FFrameNumber SrcStartFrame = UE::MovieScene::DiscreteInclusiveLower(SubSectionRange);
-	const FFrameNumber SrcEndFrame = UE::MovieScene::DiscreteExclusiveUpper(SubSectionRange);
-
-	const FFrameTime StartFrameTime = ConvertFrameTime(SrcStartFrame, TickResolution, DisplayRate);
-	const FFrameTime EndFrameTime = ConvertFrameTime(SrcEndFrame, TickResolution, DisplayRate);
-	return (EndFrameTime.FloorToFrame() - StartFrameTime.FloorToFrame()).Value;
 }
 
 // Prevents the spot from playing any cinematic
@@ -311,7 +257,8 @@ void UNMMSpotComponent::PlayIdlePart()
 	StopMasterSequence();
 
 	constexpr int32 IdleSectionIdx = 0;
-	const int32 TotalFrames = GetSequenceTotalFrames(FindSubsequence(IdleSectionIdx));
+	const ULevelSequence* IdleSequence = UCinematicUtils::FindSubsequence(IdleSectionIdx, GetMasterSequence());
+	const int32 TotalFrames = UCinematicUtils::GetSequenceTotalFrames(IdleSequence);
 
 	constexpr int32 FirstFrame = 0;
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
@@ -333,7 +280,7 @@ void UNMMSpotComponent::PlayMainPart()
 
 	// Change the range back to normal, so the idle will transit to main part
 	constexpr int32 FirstFrame = 0;
-	const int32 TotalFrames = GetSequenceTotalFrames(GetMasterSequence());
+	const int32 TotalFrames = UCinematicUtils::GetSequenceTotalFrames(GetMasterSequence());
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
 	MasterPlayerInternal->SetPlaybackSettings(UNMMUtils::GetCinematicSettings(ENMMCinematicState::MainPart));
 
