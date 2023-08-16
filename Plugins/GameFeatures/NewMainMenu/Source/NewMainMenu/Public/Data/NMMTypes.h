@@ -45,3 +45,17 @@ struct NEWMAINMENU_API FNMMCinematicRow : public FTableRowBase
 	/** Returns true is this does not contain any data. */
 	bool FORCEINLINE IsEmpty() const { return *this == Empty; }
 };
+
+/**
+ * Represents the state of the Main Menu cinematics.
+ */
+UENUM(BlueprintType, DisplayName = "Cinematic State")
+enum class ENMMCinematicState : uint8
+{
+	///< Is not playing cinematic
+	None,
+	///< Is playing the idle in loop
+	IdlePart,
+	///< Is playing the main parts of cinematic after player pressed the button
+	MainPart
+};

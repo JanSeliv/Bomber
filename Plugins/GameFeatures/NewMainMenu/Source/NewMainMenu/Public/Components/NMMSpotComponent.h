@@ -59,6 +59,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void StopMasterSequence();
 
+	/** Returns in which state the cinematic is currently playing
+	 * @see CinematicStateInternal */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE ENMMCinematicState GetCurrentCinematicState() const { return CinematicStateInternal; }
+
 	/** Plays idle part in loop of current Master Sequence. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void PlayIdlePart();
@@ -78,6 +83,10 @@ protected:
 	/** Cached Cinematic Row that contains data about this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic Row"))
 	FNMMCinematicRow CinematicRowInternal = FNMMCinematicRow::Empty;
+
+	/** Current cinematic state of this spot. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic State"))
+	ENMMCinematicState CinematicStateInternal = ENMMCinematicState::None;
 
 	/*********************************************************************************************
 	 * Protected functions

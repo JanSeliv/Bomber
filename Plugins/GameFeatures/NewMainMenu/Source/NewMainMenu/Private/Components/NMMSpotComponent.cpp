@@ -3,13 +3,14 @@
 #include "Components/NMMSpotComponent.h"
 //---
 #include "Bomber.h"
+#include "NMMUtils.h"
 #include "Components/MyCameraComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSubsystem.h"
-#include "Data/NMMTypes.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyDataTable/MyDataTable.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "LevelSequence.h"
@@ -18,8 +19,6 @@
 #include "Engine/StreamableManager.h"
 #include "Sections/MovieSceneSubSection.h"
 //---
-#include "MyUtilsLibraries/UtilsLibrary.h"
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotComponent)
 
 // Default constructor
@@ -114,6 +113,8 @@ void UNMMSpotComponent::StopMasterSequence()
 	{
 		MasterPlayerInternal->GoToEndAndStop();
 	}
+
+	CinematicStateInternal = ENMMCinematicState::None;
 }
 
 // Overridable native event for when play begins for this actor.
@@ -256,9 +257,7 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 {
 	// Create and cache the master sequence
 	ALevelSequenceActor* OutActor = nullptr;
-	FMovieSceneSequencePlaybackSettings PlaybackSettings;
-	PlaybackSettings.bRestoreState = true; // All 'Keep state' tracks will be reverted
-	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), PlaybackSettings, OutActor);
+	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
 	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' was not created, something went wrong!"));
 
 	// Override the aspect ratio of the cinematic to the aspect ratio of the screen
@@ -284,6 +283,8 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 		// Don't handle if not cinematic state or is not local player
 		return;
 	}
+
+	CinematicStateInternal = ENMMCinematicState::None;
 
 	// Start the countdown
 	MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
@@ -314,7 +315,10 @@ void UNMMSpotComponent::PlayIdlePart()
 
 	constexpr int32 FirstFrame = 0;
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
-	MasterPlayerInternal->PlayLooping();
+	MasterPlayerInternal->SetPlaybackSettings(UNMMUtils::GetCinematicSettings(ENMMCinematicState::IdlePart));
+	MasterPlayerInternal->Play();
+
+	CinematicStateInternal = ENMMCinematicState::IdlePart;
 }
 
 // Plays main part of current Master Sequence
@@ -331,9 +335,7 @@ void UNMMSpotComponent::PlayMainPart()
 	constexpr int32 FirstFrame = 0;
 	const int32 TotalFrames = GetSequenceTotalFrames(GetMasterSequence());
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
+	MasterPlayerInternal->SetPlaybackSettings(UNMMUtils::GetCinematicSettings(ENMMCinematicState::MainPart));
 
-	FMovieSceneSequencePlaybackSettings Settings;
-	Settings.LoopCount.Value = 0; // Disable looping to play the main part once
-	Settings.bPauseAtEnd = true; // Pause at the end to stay at the end position
-	MasterPlayerInternal->SetPlaybackSettings(Settings);
+	CinematicStateInternal = ENMMCinematicState::MainPart;
 }
