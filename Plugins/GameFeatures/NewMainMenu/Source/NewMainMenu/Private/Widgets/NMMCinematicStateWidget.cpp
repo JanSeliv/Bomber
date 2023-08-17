@@ -3,10 +3,7 @@
 #include "Widgets/NMMCinematicStateWidget.h"
 //---
 #include "Bomber.h"
-#include "Components/MyCameraComponent.h"
-#include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
-#include "Data/NMMSubsystem.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -17,17 +14,6 @@
 // Is called to skip cinematic
 void UNMMCinematicStateWidget::OnSkipCinematicButtonPressed()
 {
-	if (UNMMSpotComponent* ActiveSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent())
-	{
-		ActiveSpot->StopMasterSequence();
-	}
-
-	if (UMyCameraComponent* CameraComponent = UMyBlueprintFunctionLibrary::GetLevelCamera())
-	{
-		constexpr bool bBlend = false;
-		CameraComponent->PossessCamera(bBlend);
-	}
-
 	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
 		MyPC->SetGameStartingState();
