@@ -105,6 +105,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void PossessCamera(bool bBlendCamera = true);
 
+	/** Disable to prevent automatic possessing on Game Starting state, could be disabled by external systems like to show cinematic etc.
+	 * @see UMyCameraComponent::bAutoPossessCameraInternal */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetAutoPossessCameraEnabled(bool bInAutoPossessCamera);
+	
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -118,6 +123,10 @@ protected:
 	 * @see UMyCameraComponent::GetCameraDistanceToCells */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Distance Params"))
 	FCameraDistanceParams DistanceParamsInternal;
+
+	/** When true, camera will be automatically possessed on Game Starting state. Could be disabled by extern system could be disabled by external systems like to show cinematic etc. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Possess Camera"))
+	bool bAutoPossessCameraInternal = true;
 
 	/** When true, force the moving to the start position. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))

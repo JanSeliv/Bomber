@@ -241,7 +241,10 @@ void UMyCameraComponent::OnGameStateChanged_Implementation(ECurrentGameState Cur
 	{
 		case ECurrentGameState::GameStarting:
 		{
-			PossessCamera();
+			if (bAutoPossessCameraInternal)
+			{
+				PossessCamera();
+			}
 			bShouldTick = true;
 			break;
 		}
@@ -282,4 +285,10 @@ void UMyCameraComponent::PossessCamera(bool bBlendCamera/* = true*/)
 
 	const float BlendTime = bBlendCamera ? UGameStateDataAsset::Get().GetStartingCountdown() : 0.f;
 	MyPC->SetViewTargetWithBlend(GetOwner(), BlendTime);
+}
+
+// Disable to prevent automatic possessing on Game Starting state, could be disabled by external systems like to show cinematic etc
+void UMyCameraComponent::SetAutoPossessCameraEnabled(bool bInAutoPossessCamera)
+{
+	bAutoPossessCameraInternal = bInAutoPossessCamera;
 }
