@@ -52,15 +52,82 @@ ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
 	return MasterPlayerInternal ? Cast<ULevelSequence>(MasterPlayerInternal->GetSequence()) : nullptr;
 }
 
+// Returns the end frame of current Master Sequence or -1 if not found
+FFrameNumber UNMMSpotComponent::GetMasterSequenceEndFrame() const
+{
+	const int32 TotalFrames = UCinematicUtils::GetSequenceTotalFrames(GetMasterSequence());
+	return FFrameNumber(TotalFrames - 1);
+}
+
 // Prevents the spot from playing any cinematic
 void UNMMSpotComponent::StopMasterSequence()
 {
-	if (MasterPlayerInternal)
+	SetCinematicState(ENMMCinematicState::None);
+}
+
+// Activate given cinematic state on this spot
+void UNMMSpotComponent::SetCinematicState(ENMMCinematicState CinematicState)
+{
+	if (!IsActiveSpot()) // Don't play for inactive spot
 	{
-		MasterPlayerInternal->GoToEndAndStop();
+		return;
 	}
 
-	CinematicStateInternal = ENMMCinematicState::None;
+	// --- Load cinematic synchronously if not loaded yet
+	const bool bIsCinematicLoading = !MasterPlayerInternal || CinematicRowInternal.LevelSequence.IsPending();
+	if (bIsCinematicLoading)
+	{
+		OnMasterSequenceLoaded(CinematicRowInternal.LevelSequence.LoadSynchronous());
+	}
+	checkf(MasterPlayerInternal, TEXT("ERROR: [%i] %s:\n'MasterPlayerInternal' is null!"), __LINE__, *FString(__FUNCTION__));
+
+	// --- Set the length of the cinematic
+	constexpr int32 FirstFrame = 0;
+	const ULevelSequence* LevelSequenceTemplate = [this, CinematicState]
+	{
+		const ULevelSequence* MasterSequence = GetMasterSequence();
+		switch (CinematicState)
+		{
+		case ENMMCinematicState::IdlePart:
+			return UCinematicUtils::FindSubsequence(/*Index*/0, MasterSequence);
+		default: return MasterSequence;
+		}
+	}();
+	const int32 TotalFrames = UCinematicUtils::GetSequenceTotalFrames(LevelSequenceTemplate);
+	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
+
+	// --- Set the playback settings
+	MasterPlayerInternal->SetPlaybackSettings(UNMMUtils::GetCinematicSettings(CinematicState));
+
+	// --- Set the playback position
+	FMovieSceneSequencePlaybackParams InPlaybackParams;
+	InPlaybackParams.Frame = [this, CinematicState]
+	{
+		switch (CinematicState)
+		{
+		case ENMMCinematicState::None:
+			return GetMasterSequenceEndFrame(); // Moving to the last frame will stop the cinematic while regular 'Stop' does not work for clients
+		case ENMMCinematicState::IdlePart:
+			return FFrameNumber(FirstFrame); // Start from the beginning
+		case ENMMCinematicState::MainPart:
+			return MasterPlayerInternal->GetCurrentTime().Time.FrameNumber; // Continue from the current frame
+		default: return FFrameNumber(-1);
+		}
+	}();
+	InPlaybackParams.UpdateMethod = EUpdatePositionMethod::Jump;
+	MasterPlayerInternal->SetPlaybackPosition(InPlaybackParams);
+
+	// --- Play the cinematic (in case of stop it will be paused automatically)
+	if (CinematicState != ENMMCinematicState::None)
+	{
+		MasterPlayerInternal->Play();
+	}
+
+	// --- Change the camera according to the cinematic state
+	PossessCamera(CinematicState);
+
+	// --- Update cinematic state, so we could track it
+	CinematicStateInternal = CinematicState;
 }
 
 // Overridable native event for when play begins for this actor.
@@ -98,26 +165,17 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState Curr
 	{
 	case ECurrentGameState::Menu:
 		{
-			PlayIdlePart();
+			SetCinematicState(ENMMCinematicState::IdlePart);
 			break;
 		}
 	case ECurrentGameState::Cinematic:
 		{
-			PlayMainPart();
+			SetCinematicState(ENMMCinematicState::MainPart);
 			break;
 		}
 	case ECurrentGameState::GameStarting:
 		{
-			StopMasterSequence();
-
-			UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
-			if (LevelCamera
-				&& IsActiveSpot())
-			{
-				// Automatic blend-out the camera from this active Spot
-				constexpr bool bBlend = false;
-				LevelCamera->PossessCamera(bBlend);
-			}
+			SetCinematicState(ENMMCinematicState::None);
 			break;
 		}
 	default: break;
@@ -198,6 +256,35 @@ void UNMMSpotComponent::LoadMasterSequencePlayer()
 	}
 }
 
+// Starts viewing through camera of current cinematic
+void UNMMSpotComponent::PossessCamera(ENMMCinematicState CinematicState)
+{
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	if (!MyPC
+		|| !IsActiveSpot()
+		|| !ensureMsgf(MasterPlayerInternal, TEXT("ASSERT: [%i] %s:\n'MasterPlayerInternal' is null!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
+	const UCameraComponent* ActiveCamera = nullptr;
+	switch (CinematicState)
+	{
+	case ENMMCinematicState::None:
+		ActiveCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
+		break;
+	case ENMMCinematicState::IdlePart:
+		ActiveCamera = MasterPlayerInternal->GetActiveCameraComponent();
+		break;
+	default: break;
+	}
+
+	if (ActiveCamera)
+	{
+		MyPC->SetViewTarget(ActiveCamera->GetOwner());
+	}
+}
+
 // Is called when the cinematic was loaded to finish creation
 void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence)
 {
@@ -224,65 +311,19 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 {
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!MyPC
-		|| AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::Cinematic)
+		|| CinematicStateInternal != ENMMCinematicState::MainPart)
 	{
-		// Don't handle if not cinematic state or is not local player
+		// Don't handle if not playing Main Part or is not local player
 		return;
 	}
 
-	CinematicStateInternal = ENMMCinematicState::None;
-
-	// Start the countdown
-	MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
-}
-
-// Plays idle part in loop of current Master Sequence
-void UNMMSpotComponent::PlayIdlePart()
-{
-	if (!IsActiveSpot()) // Don't play for inactive spot
+	const FFrameNumber CurrentFrame = MasterPlayerInternal->GetCurrentTime().Time.FrameNumber;
+	const FFrameNumber EndFrame = GetMasterSequenceEndFrame();
+	if (CurrentFrame >= EndFrame)
 	{
-		return;
+		// Cinematic is finished, start the countdown
+		MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
+
+		CinematicStateInternal = ENMMCinematicState::None;
 	}
-
-	const bool bIsCinematicLoading = !MasterPlayerInternal || CinematicRowInternal.LevelSequence.IsPending();
-	if (bIsCinematicLoading)
-	{
-		// Load cinematic synchronously if not loaded yet
-		OnMasterSequenceLoaded(CinematicRowInternal.LevelSequence.LoadSynchronous());
-	}
-
-	checkf(MasterPlayerInternal, TEXT("ERROR: [%i] %s:\n'MasterPlayerInternal' is null!"), __LINE__, *FString(__FUNCTION__));
-
-	// Stop the current cinematic if playing to start from the beginning
-	StopMasterSequence();
-
-	constexpr int32 IdleSectionIdx = 0;
-	const ULevelSequence* IdleSequence = UCinematicUtils::FindSubsequence(IdleSectionIdx, GetMasterSequence());
-	const int32 TotalFrames = UCinematicUtils::GetSequenceTotalFrames(IdleSequence);
-
-	constexpr int32 FirstFrame = 0;
-	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
-	MasterPlayerInternal->SetPlaybackSettings(UNMMUtils::GetCinematicSettings(ENMMCinematicState::IdlePart));
-	MasterPlayerInternal->Play();
-
-	CinematicStateInternal = ENMMCinematicState::IdlePart;
-}
-
-// Plays main part of current Master Sequence
-void UNMMSpotComponent::PlayMainPart()
-{
-	if (!IsActiveSpot() // Don't play for inactive spot
-		|| !ensureMsgf(MasterPlayerInternal, TEXT("'MasterPlayerInternal' is not valid, player has to be created first!"))
-		|| !ensureMsgf(MasterPlayerInternal->IsPlaying(), TEXT("'MasterPlayerInternal' is not playing, idle has to be played first!")))
-	{
-		return;
-	}
-
-	// Change the range back to normal, so the idle will transit to main part
-	constexpr int32 FirstFrame = 0;
-	const int32 TotalFrames = UCinematicUtils::GetSequenceTotalFrames(GetMasterSequence());
-	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
-	MasterPlayerInternal->SetPlaybackSettings(UNMMUtils::GetCinematicSettings(ENMMCinematicState::MainPart));
-
-	CinematicStateInternal = ENMMCinematicState::MainPart;
 }

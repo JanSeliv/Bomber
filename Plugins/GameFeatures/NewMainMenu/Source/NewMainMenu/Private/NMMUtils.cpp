@@ -36,16 +36,14 @@ namespace NMMPlaybackSettings
 {
 	FMovieSceneSequencePlaybackSettings InitPlaybackSettings(ENMMCinematicState CinematicState)
 	{
-		const bool bIsMenu = CinematicState == ENMMCinematicState::MainPart;
-
 		FMovieSceneSequencePlaybackSettings Settings;
-		Settings.LoopCount.Value = bIsMenu ? 0 : INDEX_NONE; // Loop infinitely if idle, otherwise play once
-		Settings.bPauseAtEnd = bIsMenu; // Pause at the end the Main Part to stay at the end position
-		Settings.bRestoreState = bIsMenu; // Reset all 'Keep States' tracks to default at the end the Main Part
+		Settings.LoopCount.Value = CinematicState == ENMMCinematicState::IdlePart ? INDEX_NONE : 0; // Loop infinitely if idle, otherwise play once
+		Settings.bPauseAtEnd = true; // Pause at the end, so gameplay camera can blend-out from correct position
+		Settings.bDisableCameraCuts = true; // Let the Spot to control the camera possessing instead of auto-possessed one that prevents blend-out while active
 		return Settings;
 	}
 
-	const FMovieSceneSequencePlaybackSettings EmptySettings = FMovieSceneSequencePlaybackSettings();
+	const FMovieSceneSequencePlaybackSettings EmptySettings = InitPlaybackSettings(ENMMCinematicState::None);
 	const FMovieSceneSequencePlaybackSettings IdlePartSettings = InitPlaybackSettings(ENMMCinematicState::IdlePart);
 	const FMovieSceneSequencePlaybackSettings MainPartSettings = InitPlaybackSettings(ENMMCinematicState::MainPart);
 }

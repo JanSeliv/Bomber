@@ -10,6 +10,8 @@
 
 enum class ECurrentGameState : uint8;
 
+class ULevelSequence;
+
 /**
  * Represents a spot where a character can be selected in the Main Menu.
  * Is added dynamically to the My Skeletal Mesh actors on the level.
@@ -45,7 +47,11 @@ public:
 
 	/** Returns main cinematic of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	class ULevelSequence* GetMasterSequence() const;
+	ULevelSequence* GetMasterSequence() const;
+
+	/** Returns the end frame of current Master Sequence or -1 if not found. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FFrameNumber GetMasterSequenceEndFrame() const;
 
 	/** Prevents the spot from playing any cinematic. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -56,13 +62,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE ENMMCinematicState GetCurrentCinematicState() const { return CinematicStateInternal; }
 
-	/** Plays idle part in loop of current Master Sequence. */
+	/** Activate given cinematic state on this spot. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void PlayIdlePart();
-
-	/** Plays main part of current Master Sequence. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void PlayMainPart();
+	void SetCinematicState(ENMMCinematicState CinematicState);
 
 	/*********************************************************************************************
 	 * Protected properties
@@ -102,7 +104,11 @@ protected:
 	void LoadMasterSequencePlayer();
 
 	/** Is called when the cinematic was loaded to finish creation. */
-	void OnMasterSequenceLoaded(TSoftObjectPtr<class ULevelSequence> LoadedMasterSequence);
+	void OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence);
+
+	/** Starts viewing through camera of current cinematic or gameplay one depending on given state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void PossessCamera(ENMMCinematicState CinematicState);
 
 	/*********************************************************************************************
 	 * Events
