@@ -96,8 +96,9 @@ UNMMSpotComponent* UNMMSubsystem::MoveMainMenuSpot(int32 Incrementer)
 
 	// Stop the current spot
 	const int32 ActiveSpotPosition = SpotRowIndices.IndexOfByKey(ActiveMainMenuSpotIdx);
+	checkf(CurrentLevelTypeSpots.IsValidIndex(ActiveSpotPosition), TEXT("ERROR: [%i] %s:\n'CurrentLevelTypeSpots array has to have ActiveSpotPosition index since it's the same size as SpotRowIndices array!"), __LINE__, *FString(__FUNCTION__))
 	UNMMSpotComponent* CurrentSpot = CurrentLevelTypeSpots[ActiveSpotPosition];
-	check(CurrentSpot);
+	checkf(CurrentSpot, TEXT("ERROR: [%i] %s:\n'CurrentSpot' can't be null since CurrentLevelTypeSpots array does not contain nulls!"), __LINE__, *FString(__FUNCTION__))
 	CurrentSpot->StopMasterSequence();
 
 	// Find the new index based on the incrementer
@@ -106,8 +107,10 @@ UNMMSpotComponent* UNMMSubsystem::MoveMainMenuSpot(int32 Incrementer)
 	ActiveMainMenuSpotIdx = SpotRowIndices[NewSpotIndex];
 
 	// Play the new spot
+	checkf(CurrentLevelTypeSpots.IsValidIndex(NewSpotIndex), TEXT("ERROR: [%i] %s:\n'CurrentLevelTypeSpots array has to have NewSpotIndex since it's the same size as SpotRowIndices array!"), __LINE__, *FString(__FUNCTION__));
 	UNMMSpotComponent* NewSpot = CurrentLevelTypeSpots[NewSpotIndex];
-	NewSpot->PlayIdlePart();
+	checkf(NewSpot, TEXT("ERROR: [%i] %s:\n'NewSpot' can't be null since CurrentLevelTypeSpots array does not contain nulls!"), __LINE__, *FString(__FUNCTION__));
+	NewSpot->SetCinematicState(ENMMCinematicState::IdlePart);
 
 	return NewSpot;
 }
