@@ -274,7 +274,7 @@ void UNMMSpotComponent::PossessCamera(ENMMCinematicState CinematicState)
 		ActiveCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
 		break;
 	case ENMMCinematicState::IdlePart:
-		ActiveCamera = MasterPlayerInternal->GetActiveCameraComponent();
+		ActiveCamera = UCinematicUtils::FindSequenceCameraComponent(MasterPlayerInternal);
 		break;
 	default: break;
 	}

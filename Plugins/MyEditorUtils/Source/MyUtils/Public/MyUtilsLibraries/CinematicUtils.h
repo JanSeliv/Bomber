@@ -29,4 +29,8 @@ public:
 	 * @param LevelSequence The sequence to get length of. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static int32 GetSequenceTotalFrames(const ULevelSequence* LevelSequence);
+
+	/** Finds the first Camera Component inside the specified Level sequence player. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static class UCameraComponent* FindSequenceCameraComponent(class ULevelSequencePlayer* LevelSequencePlayer);
 };
