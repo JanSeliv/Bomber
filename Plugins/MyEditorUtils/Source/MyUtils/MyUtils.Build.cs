@@ -19,7 +19,7 @@ public class MyUtils : ModuleRules
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
 				, "UMG" // UUserWidget
-				, "MovieScene", "LevelSequence", "MovieSceneTracks" // UCinematicUtils
+				, "MovieScene", "MovieSceneTracks" // UCinematicUtils
 			}
 		);
 

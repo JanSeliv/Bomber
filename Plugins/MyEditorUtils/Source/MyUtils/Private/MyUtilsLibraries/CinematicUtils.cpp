@@ -2,9 +2,9 @@
 
 #include "MyUtilsLibraries/CinematicUtils.h"
 //---
-#include "LevelSequence.h"
-#include "LevelSequencePlayer.h"
 #include "MovieScene.h"
+#include "MovieSceneSequence.h"
+#include "MovieSceneSequencePlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Sections/MovieSceneCameraCutSection.h"
 #include "Sections/MovieSceneSubSection.h"
@@ -12,7 +12,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CinematicUtils)
 
 // Finds subsequence by given index inside specified Master sequence
-const ULevelSequence* UCinematicUtils::FindSubsequence(int32 SubsequenceIndex, const ULevelSequence* MasterSequence)
+const UMovieSceneSequence* UCinematicUtils::FindSubsequence(int32 SubsequenceIndex, const UMovieSceneSequence* MasterSequence)
 {
 	const UMovieScene* InMovieScene = MasterSequence ? MasterSequence->GetMovieScene() : nullptr;
 	if (!InMovieScene)
@@ -25,7 +25,7 @@ const ULevelSequence* UCinematicUtils::FindSubsequence(int32 SubsequenceIndex, c
 	for (int32 Idx = AllSections.Num() - 1; Idx >= 0; --Idx)
 	{
 		const UMovieSceneSubSection* SubSection = Cast<UMovieSceneSubSection>(AllSections[Idx]);
-		const ULevelSequence* SubSequence = SubSection ? Cast<ULevelSequence>(SubSection->GetSequence()) : nullptr;
+		const UMovieSceneSequence* SubSequence = SubSection ? Cast<UMovieSceneSequence>(SubSection->GetSequence()) : nullptr;
 		if (!SubSection)
 		{
 			continue;
@@ -43,7 +43,7 @@ const ULevelSequence* UCinematicUtils::FindSubsequence(int32 SubsequenceIndex, c
 }
 
 // Returns the length of by given subsequence index
-int32 UCinematicUtils::GetSequenceTotalFrames(const ULevelSequence* LevelSequence)
+int32 UCinematicUtils::GetSequenceTotalFrames(const UMovieSceneSequence* LevelSequence)
 {
 	if (!ensureMsgf(LevelSequence, TEXT("'LevelSequence' is not valid")))
 	{
@@ -64,7 +64,7 @@ int32 UCinematicUtils::GetSequenceTotalFrames(const ULevelSequence* LevelSequenc
 }
 
 // Finds the first Camera Component inside the specified Level sequence
-UCameraComponent* UCinematicUtils::FindSequenceCameraComponent(ULevelSequencePlayer* LevelSequencePlayer)
+UCameraComponent* UCinematicUtils::FindSequenceCameraComponent(UMovieSceneSequencePlayer* LevelSequencePlayer)
 {
 	const UMovieSceneSequence* LevelSequence = LevelSequencePlayer ? LevelSequencePlayer->GetSequence() : nullptr;
 	const UMovieScene* InMovieScene = LevelSequence ? LevelSequence->GetMovieScene() : nullptr;

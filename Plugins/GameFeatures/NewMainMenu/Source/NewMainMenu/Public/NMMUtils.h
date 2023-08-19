@@ -8,6 +8,8 @@
 
 enum class ENMMCinematicState : uint8;
 
+class UMovieSceneSequencePlayer;
+
 /**
  * Static helper functions about New Main Menu.
  */
@@ -16,6 +18,9 @@ class NEWMAINMENU_API UNMMUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
+	/*********************************************************************************************
+	 * Object getters
+	 ********************************************************************************************* */
 public:
 	/** Returns the HUD component of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM HUD Component")
@@ -29,7 +34,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM In Cinematic State Widget")
 	static class UNMMCinematicStateWidget* GetInCinematicStateWidget();
 
+	/*********************************************************************************************
+	 * Cinematic helpers
+	 ********************************************************************************************* */
+public:
 	/** Returns the Playback Settings by given cinematic state. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Cinematic Settings")
 	static const struct FMovieSceneSequencePlaybackSettings& GetCinematicSettings(ENMMCinematicState CinematicState);
+
+	/** Returns the total frames of the cinematic by given cinematic state. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Cinematic Total Frames")
+	static int32 GetCinematicTotalFrames(ENMMCinematicState CinematicState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
+
+	/** Return the playback position params by given cinematic state. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Playback Position Params")
+	static struct FMovieSceneSequencePlaybackParams GetPlaybackPositionParams(ENMMCinematicState CinematicState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
 };

@@ -6,7 +6,7 @@
 //---
 #include "CinematicUtils.generated.h"
 
-class ULevelSequence;
+class UMovieSceneSequence;
 
 /**
  * The cinematic functions library.
@@ -23,14 +23,14 @@ public:
 	 * @param MasterSequence The sequence holder to find subsequence in.
 	 * @return The found subsequence or nullptr if not found. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static const ULevelSequence* FindSubsequence(int32 SubsequenceIndex, const ULevelSequence* MasterSequence);
+	static const UMovieSceneSequence* FindSubsequence(int32 SubsequenceIndex, const UMovieSceneSequence* MasterSequence);
 
 	/** Returns the length of by given subsequence index or -1 if not found.
 	 * @param LevelSequence The sequence to get length of. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static int32 GetSequenceTotalFrames(const ULevelSequence* LevelSequence);
+	static int32 GetSequenceTotalFrames(const UMovieSceneSequence* LevelSequence);
 
 	/** Finds the first Camera Component inside the specified Level sequence player. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UCameraComponent* FindSequenceCameraComponent(class ULevelSequencePlayer* LevelSequencePlayer);
+	static class UCameraComponent* FindSequenceCameraComponent(class UMovieSceneSequencePlayer* LevelSequencePlayer);
 };

@@ -52,13 +52,6 @@ ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
 	return MasterPlayerInternal ? Cast<ULevelSequence>(MasterPlayerInternal->GetSequence()) : nullptr;
 }
 
-// Returns the end frame of current Master Sequence or -1 if not found
-FFrameNumber UNMMSpotComponent::GetMasterSequenceEndFrame() const
-{
-	const int32 TotalFrames = UCinematicUtils::GetSequenceTotalFrames(GetMasterSequence());
-	return FFrameNumber(TotalFrames - 1);
-}
-
 // Prevents the spot from playing any cinematic
 void UNMMSpotComponent::StopMasterSequence()
 {
@@ -83,17 +76,7 @@ void UNMMSpotComponent::SetCinematicState(ENMMCinematicState CinematicState)
 
 	// --- Set the length of the cinematic
 	constexpr int32 FirstFrame = 0;
-	const ULevelSequence* LevelSequenceTemplate = [this, CinematicState]
-	{
-		const ULevelSequence* MasterSequence = GetMasterSequence();
-		switch (CinematicState)
-		{
-		case ENMMCinematicState::IdlePart:
-			return UCinematicUtils::FindSubsequence(/*Index*/0, MasterSequence);
-		default: return MasterSequence;
-		}
-	}();
-	const int32 TotalFrames = UCinematicUtils::GetSequenceTotalFrames(LevelSequenceTemplate);
+	const int32 TotalFrames = UNMMUtils::GetCinematicTotalFrames(CinematicState, MasterPlayerInternal);
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
 
 	// --- Set the playback settings
@@ -107,22 +90,8 @@ void UNMMSpotComponent::SetCinematicState(ENMMCinematicState CinematicState)
 	}
 
 	// --- Set the playback position
-	FMovieSceneSequencePlaybackParams InPlaybackParams;
-	InPlaybackParams.Frame = [this, CinematicState]
-	{
-		switch (CinematicState)
-		{
-		case ENMMCinematicState::None:
-			return GetMasterSequenceEndFrame(); // Moving to the last frame will stop the cinematic while regular 'Stop' does not work for clients
-		case ENMMCinematicState::IdlePart:
-			return FFrameNumber(FirstFrame); // Start from the beginning
-		case ENMMCinematicState::MainPart:
-			return MasterPlayerInternal->GetCurrentTime().Time.FrameNumber; // Continue from the current frame
-		default: return FFrameNumber(-1);
-		}
-	}();
-	InPlaybackParams.UpdateMethod = EUpdatePositionMethod::Play;
-	MasterPlayerInternal->SetPlaybackPosition(InPlaybackParams);
+	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(CinematicState, MasterPlayerInternal);
+	MasterPlayerInternal->SetPlaybackPosition(PlaybackPositionParams);
 
 	// --- Play the cinematic (in case of stop it will be paused automatically)
 	if (CinematicState != ENMMCinematicState::None)
@@ -325,7 +294,7 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 	}
 
 	const FFrameNumber CurrentFrame = MasterPlayerInternal->GetCurrentTime().Time.FrameNumber;
-	const FFrameNumber EndFrame = GetMasterSequenceEndFrame();
+	const FFrameNumber EndFrame(UCinematicUtils::GetSequenceTotalFrames(GetMasterSequence()) - 1);
 	if (CurrentFrame >= EndFrame)
 	{
 		// Cinematic is finished, start the countdown

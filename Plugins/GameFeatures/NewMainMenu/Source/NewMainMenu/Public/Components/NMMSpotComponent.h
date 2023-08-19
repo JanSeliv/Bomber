@@ -49,10 +49,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ULevelSequence* GetMasterSequence() const;
 
-	/** Returns the end frame of current Master Sequence or -1 if not found. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FFrameNumber GetMasterSequenceEndFrame() const;
-
 	/** Prevents the spot from playing any cinematic. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void StopMasterSequence();
