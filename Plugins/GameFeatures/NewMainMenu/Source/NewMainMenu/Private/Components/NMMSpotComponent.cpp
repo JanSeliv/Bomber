@@ -97,7 +97,14 @@ void UNMMSpotComponent::SetCinematicState(ENMMCinematicState CinematicState)
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
 
 	// --- Set the playback settings
-	MasterPlayerInternal->SetPlaybackSettings(UNMMUtils::GetCinematicSettings(CinematicState));
+	const FMovieSceneSequencePlaybackSettings& PlaybackSettings = UNMMUtils::GetCinematicSettings(CinematicState);
+	MasterPlayerInternal->SetPlaybackSettings(PlaybackSettings);
+	if (PlaybackSettings.bRestoreState)
+	{
+		// Reset all 'Keep States' tracks to default
+		MasterPlayerInternal->RestorePreAnimatedState();
+		MasterPlayerInternal->PreAnimatedState.EnableGlobalPreAnimatedStateCapture();
+	}
 
 	// --- Set the playback position
 	FMovieSceneSequencePlaybackParams InPlaybackParams;
@@ -114,7 +121,7 @@ void UNMMSpotComponent::SetCinematicState(ENMMCinematicState CinematicState)
 		default: return FFrameNumber(-1);
 		}
 	}();
-	InPlaybackParams.UpdateMethod = EUpdatePositionMethod::Jump;
+	InPlaybackParams.UpdateMethod = EUpdatePositionMethod::Play;
 	MasterPlayerInternal->SetPlaybackPosition(InPlaybackParams);
 
 	// --- Play the cinematic (in case of stop it will be paused automatically)
