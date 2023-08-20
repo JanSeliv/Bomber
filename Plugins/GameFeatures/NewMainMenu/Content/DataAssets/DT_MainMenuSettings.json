@@ -1,0 +1,90 @@
+[
+	{
+		"Name": "Settings.Checkbox.AutoSkipCinematics",
+		"SettingsPicker":
+		{
+			"SettingsType": "Checkbox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Checkbox.AutoSkipCinematics"
+				},
+				"StaticContext":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Setter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Getter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"E76D8412443F242779726C9825623BB0\", \"Auto Skip Cinematics\")",
+				"Tooltip": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"1835102C4C50DBD336D89F9D389D006F\", \"Skips previously seen cinematics automatically.\\r\\nWith other players, cinematics are always skipped.\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "Settings.Checkbox.CameraLock"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
+	}
+]
