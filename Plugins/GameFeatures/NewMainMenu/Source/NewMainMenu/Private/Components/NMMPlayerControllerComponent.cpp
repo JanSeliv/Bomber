@@ -31,6 +31,12 @@ AMyPlayerController& UNMMPlayerControllerComponent::GetPlayerControllerChecked()
 	return *MyPlayerController;
 }
 
+// Set to skips previously seen cinematics automatically
+void UNMMPlayerControllerComponent::SetAutoSkipCinematicsSetting(bool bEnable)
+{
+	bAutoSkipCinematicsSettingInternal = bEnable;
+}
+
 // Called when the owning Actor begins play or when the component is created if the Actor has already begun play
 void UNMMPlayerControllerComponent::BeginPlay()
 {

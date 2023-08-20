@@ -12,7 +12,7 @@ class AMyPlayerController;
  * Represents the Player Controller in the NewMain Menu module, where the Owner is Player Controller actor.
  * Is responsible for managing Main Menu inputs.
  */
-UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS(Config = "GameUserSettings", DefaultConfig, Blueprintable, BlueprintType, DisplayName = "New Main Menu Player Controller Component", ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class NEWMAINMENU_API UNMMPlayerControllerComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -28,6 +28,26 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	AMyPlayerController* GetPlayerController() const;
 	AMyPlayerController& GetPlayerControllerChecked() const;
+
+	/** Returns true is setting enabled to skips previously seen cinematics automatically.
+	 * @see UNMMPlayerControllerComponent::bAutoSkipCinematicsInternal */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsAutoSkipCinematicsSetting() const { return bAutoSkipCinematicsSettingInternal; }
+
+	/** Set true to skip previously seen cinematics automatically.
+	 * Is called from Settings menu once its checkbox is changed. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetAutoSkipCinematicsSetting(bool bEnable);
+
+	/*********************************************************************************************
+	 * Protected properties
+	 ********************************************************************************************* */
+protected:
+	/** When setting enabled, skips previously seen cinematics automatically.
+	 * Is config property, can be set in Settings menu.
+	 * Note: with other players this setting is ignored and cinematics are always skipped. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Skip Cinematics"))
+	bool bAutoSkipCinematicsSettingInternal = true;
 
 	/*********************************************************************************************
 	 * Protected functions

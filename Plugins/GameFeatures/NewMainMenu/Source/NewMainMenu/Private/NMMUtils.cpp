@@ -3,7 +3,10 @@
 #include "NMMUtils.h"
 //---
 #include "Components/NMMHUDComponent.h"
+#include "Components/NMMPlayerControllerComponent.h"
+#include "Controllers/MyPlayerController.h"
 #include "Data/NMMTypes.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "UI/MyHUD.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -20,6 +23,13 @@ UNMMHUDComponent* UNMMUtils::GetHUDComponent()
 	return MyHUD ? MyHUD->FindComponentByClass<UNMMHUDComponent>() : nullptr;
 }
 
+// Returns the Player Controller component of the Main Menu
+UNMMPlayerControllerComponent* UNMMUtils::GetPlayerControllerComponent()
+{
+	const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	return MyPC ? MyPC->FindComponentByClass<UNMMPlayerControllerComponent>() : nullptr;
+}
+
 // Returns the widget of the Main Menu.
 UNewMainMenuWidget* UNMMUtils::GetMainMenuWidget()
 {
@@ -32,6 +42,21 @@ UNMMCinematicStateWidget* UNMMUtils::GetInCinematicStateWidget()
 {
 	const UNMMHUDComponent* HUDComponent = GetHUDComponent();
 	return HUDComponent ? HUDComponent->GetInCinematicStateWidget() : nullptr;
+}
+
+// Returns true if given cinematic wants to skip
+bool UNMMUtils::ShouldSkipCinematic(const FNMMCinematicRow& CinematicRow)
+{
+	// According design, all the cinematics are available only in single player game
+	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	const bool bIsMultiplayerGame = MyGameState && MyGameState->IsMultiplayerGame();
+
+	// If 'Auto Skip Cinematics' setting is enabled, then skip all the cinematics 
+	const UNMMPlayerControllerComponent* MenuControllerComp = GetPlayerControllerComponent();
+	const bool AutoSkipCinematicsSetting = MenuControllerComp ? MenuControllerComp->IsAutoSkipCinematicsSetting() : false;
+
+	// --- Put here any other conditions to skip cinematic
+	return bIsMultiplayerGame || AutoSkipCinematicsSetting;
 }
 
 // Helper namespace to initialize playback settings once

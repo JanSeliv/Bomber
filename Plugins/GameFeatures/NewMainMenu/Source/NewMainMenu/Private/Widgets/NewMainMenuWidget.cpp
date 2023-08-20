@@ -3,6 +3,7 @@
 #include "Widgets/NewMainMenuWidget.h"
 //---
 #include "Bomber.h"
+#include "NMMUtils.h"
 #include "Components/MySkeletalMeshComponent.h"
 #include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
@@ -100,12 +101,13 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 {
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
-	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController())
+	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
 		// Start cinematic
-		// Note: according design, the cinematic state is available only in single player game
-		// If not, then start the game instead
-		const ECGS NewState = !AMyGameStateBase::Get().IsMultiplayerGame() ? ECGS::Cinematic : ECGS::GameStarting;
+		// If should skip, then start the game instead
+		const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
+		const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
+		const ECGS NewState = !UNMMUtils::ShouldSkipCinematic(CinematicRow) ? ECGS::Cinematic : ECGS::GameStarting;
 		MyPC->ServerSetGameState(NewState);
 	}
 }
@@ -189,6 +191,6 @@ void UNewMainMenuWidget::OnSettingsButtonPressed()
 // Is called when player pressed the button to quit the game
 void UNewMainMenuWidget::OnQuitGameButtonPressed()
 {
-	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
 	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
 }

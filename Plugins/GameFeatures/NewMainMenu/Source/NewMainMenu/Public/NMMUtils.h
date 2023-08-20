@@ -13,7 +13,7 @@ class UMovieSceneSequencePlayer;
 /**
  * Static helper functions about New Main Menu.
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, DisplayName = "New Main Menu Utils")
 class NEWMAINMENU_API UNMMUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -26,6 +26,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM HUD Component")
 	static class UNMMHUDComponent* GetHUDComponent();
 
+	/** Returns the Player Controller component of the Main Menu. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Player Controller Component")
+	static class UNMMPlayerControllerComponent* GetPlayerControllerComponent();
+	
 	/** Returns the widget of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class UNewMainMenuWidget* GetMainMenuWidget();
@@ -38,6 +42,10 @@ public:
 	 * Cinematic helpers
 	 ********************************************************************************************* */
 public:
+	/** Returns true if given cinematic wants to skip. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static bool ShouldSkipCinematic(const struct FNMMCinematicRow& CinematicRow);
+
 	/** Returns the Playback Settings by given cinematic state. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Cinematic Settings")
 	static const struct FMovieSceneSequencePlaybackSettings& GetCinematicSettings(ENMMCinematicState CinematicState);
