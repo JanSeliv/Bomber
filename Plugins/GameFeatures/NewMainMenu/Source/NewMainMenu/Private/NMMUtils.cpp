@@ -5,6 +5,7 @@
 #include "Components/NMMHUDComponent.h"
 #include "Components/NMMPlayerControllerComponent.h"
 #include "Controllers/MyPlayerController.h"
+#include "Data/NMMSaveGameData.h"
 #include "Data/NMMTypes.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
@@ -44,19 +45,39 @@ UNMMCinematicStateWidget* UNMMUtils::GetInCinematicStateWidget()
 	return HUDComponent ? HUDComponent->GetInCinematicStateWidget() : nullptr;
 }
 
+// Returns the Save Game data of the Main Menu
+UNMMSaveGameData* UNMMUtils::GetSaveGameData()
+{
+	const UNMMPlayerControllerComponent* MenuControllerComp = GetPlayerControllerComponent();
+	return MenuControllerComp ? MenuControllerComp->GetSaveGameData() : nullptr;
+}
+
 // Returns true if given cinematic wants to skip
 bool UNMMUtils::ShouldSkipCinematic(const FNMMCinematicRow& CinematicRow)
 {
-	// According design, all the cinematics are available only in single player game
-	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
-	const bool bIsMultiplayerGame = MyGameState && MyGameState->IsMultiplayerGame();
+	if (AMyGameStateBase::Get().IsMultiplayerGame())
+	{
+		// According design, all the cinematics are available only in single player game
+		// while in multiplayer have to skip all of them for all players
+		return true;
+	}
 
-	// If 'Auto Skip Cinematics' setting is enabled, then skip all the cinematics 
+	// If 'Auto Skip Cinematics' setting is enabled
 	const UNMMPlayerControllerComponent* MenuControllerComp = GetPlayerControllerComponent();
-	const bool AutoSkipCinematicsSetting = MenuControllerComp ? MenuControllerComp->IsAutoSkipCinematicsSetting() : false;
+	const bool bAutoSkipCinematicsSetting = MenuControllerComp ? MenuControllerComp->IsAutoSkipCinematicsSetting() : false;
+
+	// If given cinematic has been seen already
+	const UNMMSaveGameData* SaveGameData = GetSaveGameData();
+	const bool bHasCinematicBeenPlayed = SaveGameData ? SaveGameData->HasCinematicBeenSeen(CinematicRow.RowIndex) : false;
+
+	// Respect enabled Skip setting if only cinematic has been seen already
+	if (bAutoSkipCinematicsSetting && bHasCinematicBeenPlayed)
+	{
+		return true;
+	}
 
 	// --- Put here any other conditions to skip cinematic
-	return bIsMultiplayerGame || AutoSkipCinematicsSetting;
+	return false;
 }
 
 // Helper namespace to initialize playback settings once

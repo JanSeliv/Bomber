@@ -8,6 +8,9 @@
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Data/NMMSaveGameData.h"
+//---
+#include "Kismet/GameplayStatics.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMPlayerControllerComponent)
 
@@ -42,6 +45,11 @@ void UNMMPlayerControllerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Load save game data of the Main Menu
+	FAsyncLoadGameFromSlotDelegate AsyncLoadGameFromSlotDelegate;
+	AsyncLoadGameFromSlotDelegate.BindUObject(this, &ThisClass::OnAsyncLoadGameFromSlotCompleted);
+	UGameplayStatics::AsyncLoadGameFromSlot(UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex(), AsyncLoadGameFromSlotDelegate);
+
 	// Setup Main menu inputs
 	TArray<const UMyInputMappingContext*> MenuInputContexts;
 	UNMMDataAsset::Get().GetAllInputContexts(/*out*/MenuInputContexts);
@@ -66,4 +74,18 @@ void UNMMPlayerControllerComponent::OnMainMenuSpotReady_Implementation(UNMMSpotC
 	{
 		GetPlayerControllerChecked().SetMenuState();
 	}
+}
+
+// Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load
+void UNMMPlayerControllerComponent::OnAsyncLoadGameFromSlotCompleted_Implementation(const FString& SlotName, int32 UserIndex, USaveGame* SaveGame)
+{
+	if (SaveGame)
+	{
+		SaveGameDataInternal = CastChecked<UNMMSaveGameData>(SaveGame);
+		return;
+	}
+
+	// There is no save game, create a new one
+	SaveGameDataInternal = CastChecked<UNMMSaveGameData>(UGameplayStatics::CreateSaveGameObject(UNMMSaveGameData::StaticClass()));
+	SaveGameDataInternal->SaveDataAsync();
 }

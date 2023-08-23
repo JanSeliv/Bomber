@@ -29,7 +29,7 @@ public:
 	/** Returns the Player Controller component of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Player Controller Component")
 	static class UNMMPlayerControllerComponent* GetPlayerControllerComponent();
-	
+
 	/** Returns the widget of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class UNewMainMenuWidget* GetMainMenuWidget();
@@ -37,6 +37,10 @@ public:
 	/** Returns the widget of the In Cinematic State. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM In Cinematic State Widget")
 	static class UNMMCinematicStateWidget* GetInCinematicStateWidget();
+
+	/** Returns the Save Game data of the Main Menu. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Save Game Data")
+	static class UNMMSaveGameData* GetSaveGameData();
 
 	/*********************************************************************************************
 	 * Cinematic helpers

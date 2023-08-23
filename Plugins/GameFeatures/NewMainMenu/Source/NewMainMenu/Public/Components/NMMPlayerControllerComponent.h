@@ -39,6 +39,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetAutoSkipCinematicsSetting(bool bEnable);
 
+	/** Returns loaded and cached Save Game Data of the Main Menu. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE class UNMMSaveGameData* GetSaveGameData() const { return SaveGameDataInternal; }
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
@@ -49,6 +53,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Skip Cinematics"))
 	bool bAutoSkipCinematicsSettingInternal = true;
 
+	/** Contains loaded and cached Save Game Data of the Main Menu. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Save Game Data"))
+	TObjectPtr<class UNMMSaveGameData> SaveGameDataInternal = nullptr;
+
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
@@ -57,6 +65,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	/** Is listen to set Menu game state once first spot is ready. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnMainMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
+
+	/** Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnAsyncLoadGameFromSlotCompleted(const FString& SlotName, int32 UserIndex, class USaveGame* SaveGame);
 };

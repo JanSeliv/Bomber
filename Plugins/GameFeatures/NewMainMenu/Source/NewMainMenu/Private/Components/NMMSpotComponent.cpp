@@ -7,6 +7,7 @@
 #include "Components/MyCameraComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
+#include "Data/NMMSaveGameData.h"
 #include "Data/NMMSubsystem.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyDataTable/MyDataTable.h"
@@ -147,6 +148,7 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState Curr
 	case ECurrentGameState::Cinematic:
 		{
 			SetCinematicState(ENMMCinematicState::MainPart);
+			TryMarkCinematicAsSeen();
 			break;
 		}
 	case ECurrentGameState::GameStarting:
@@ -258,6 +260,21 @@ void UNMMSpotComponent::PossessCamera(ENMMCinematicState CinematicState)
 	if (ActiveCamera)
 	{
 		MyPC->SetViewTarget(ActiveCamera->GetOwner());
+	}
+}
+
+// Marks own cinematic as seen by player
+void UNMMSpotComponent::TryMarkCinematicAsSeen()
+{
+	if (!IsActiveSpot())
+	{
+		// Since there are multiple spots, only current one should mark cinematic as seen
+		return;
+	}
+
+	if (UNMMSaveGameData* SaveGameData = UNMMUtils::GetSaveGameData())
+	{
+		SaveGameData->MarkCinematicAsSeen(CinematicRowInternal.RowIndex);
 	}
 }
 
