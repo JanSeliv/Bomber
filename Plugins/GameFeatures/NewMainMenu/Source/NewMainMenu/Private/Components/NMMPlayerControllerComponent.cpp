@@ -40,6 +40,29 @@ void UNMMPlayerControllerComponent::SetAutoSkipCinematicsSetting(bool bEnable)
 	bAutoSkipCinematicsSettingInternal = bEnable;
 }
 
+// Removes all saved data of the Main Menu
+void UNMMPlayerControllerComponent::ResetSaveGameData()
+{
+	const FString& SlotName = UNMMSaveGameData::GetSaveSlotName();
+	const int32 UserIndex = UNMMSaveGameData::GetSaveSlotIndex();
+
+	// Remove the data from the disk
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, UserIndex))
+	{
+		UGameplayStatics::DeleteGameInSlot(SlotName, UserIndex);
+	}
+
+	// Kill current save game object
+	if (IsValid(SaveGameDataInternal))
+	{
+		SaveGameDataInternal->ConditionalBeginDestroy();
+	}
+
+	// Create new save game object
+	SaveGameDataInternal = CastChecked<UNMMSaveGameData>(UGameplayStatics::CreateSaveGameObject(UNMMSaveGameData::StaticClass()));
+	SaveGameDataInternal->SaveDataAsync();
+}
+
 // Called when the owning Actor begins play or when the component is created if the Actor has already begun play
 void UNMMPlayerControllerComponent::BeginPlay()
 {
@@ -85,7 +108,6 @@ void UNMMPlayerControllerComponent::OnAsyncLoadGameFromSlotCompleted_Implementat
 		return;
 	}
 
-	// There is no save game, create a new one
-	SaveGameDataInternal = CastChecked<UNMMSaveGameData>(UGameplayStatics::CreateSaveGameObject(UNMMSaveGameData::StaticClass()));
-	SaveGameDataInternal->SaveDataAsync();
+	// There is no save game or it is corrupted, create a new one
+	ResetSaveGameData();
 }

@@ -43,6 +43,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UNMMSaveGameData* GetSaveGameData() const { return SaveGameDataInternal; }
 
+	/** Removes all saved data of the Main Menu and creates new empty data. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ResetSaveGameData();
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
