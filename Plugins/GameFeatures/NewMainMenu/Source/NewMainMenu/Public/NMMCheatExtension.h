@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "GameFramework/CheatManager.h"
+#include "MetaCheatManagerExtension.h"
 //---
 #include "NMMCheatExtension.generated.h"
 
@@ -10,7 +10,7 @@
  * Extends cheat manager with New Main Menu-related console commands.
  */
 UCLASS()
-class NEWMAINMENU_API UNMMCheatExtension : public UCheatManagerExtension
+class NEWMAINMENU_API UNMMCheatExtension : public UMetaCheatManagerExtension
 {
 	GENERATED_BODY()
 

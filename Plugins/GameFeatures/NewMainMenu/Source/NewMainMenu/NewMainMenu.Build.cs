@@ -14,6 +14,8 @@ public class NewMainMenu : ModuleRules
 			{
 				"Core", "Engine"
 				, "UMG" // UUserWidget creation
+				// My modules
+				, "MetaCheatManager" // UNMMCheatExtension
 			}
 		);
 
