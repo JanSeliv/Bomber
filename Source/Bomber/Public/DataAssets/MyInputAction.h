@@ -32,14 +32,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FFunctionPicker& GetFunctionToBind() const { return FunctionToBindInternal; }
 
-	/** Returns keys mapped to this action in the active input mapping contexts sorted by its priorities. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	void GetKeys(TArray<FKey>& OutKeys) const;
-
-	/** Returns the first mapped key to this action in most priority active input context. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FKey GetKey() const;
-
 protected:
 	/** Choose for which state the bound function has to be called. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Trigger Event", ShowOnlyInnerProperties))

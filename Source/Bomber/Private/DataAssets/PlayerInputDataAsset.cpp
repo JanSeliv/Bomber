@@ -4,14 +4,11 @@
 //---
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/MyInputMappingContext.h"
+#include "MyUtilsLibraries/InputUtilsLibrary.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "EnhancedActionKeyMapping.h"
 #include "Engine/World.h"
-//---
-#if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerInputDataAsset)
 
@@ -63,23 +60,18 @@ bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
 {
 	return GameplayInputContextsInternal.ContainsByPredicate([&Key](const UMyInputMappingContext* ContextIt)
 	{
-		return ContextIt && ContextIt->GetMappings().ContainsByPredicate([&Key](const FEnhancedActionKeyMapping& MappingIt)
-		{
-			return MappingIt.Key == Key;
-		});
+		return ContextIt && UInputUtilsLibrary::IsMappedKeyInContext(Key, ContextIt);
 	});
 }
 
 // Creates new contexts if is needed
 void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 {
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Do not create input contexts since the game is not started yet
 		return;
 	}
-#endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Create new context if any is null
 	const int32 ClassesNum = GameplayInputContextClassesInternal.Num();

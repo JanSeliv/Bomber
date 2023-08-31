@@ -4,6 +4,7 @@
 //---
 #include "Data/SettingsDataAsset.h"
 #include "DataAssets/MyInputMappingContext.h"
+#include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "UI/SettingsWidget.h"
 #include "UI/Input/InputButtonWidget.h"
 //---
@@ -17,7 +18,7 @@
 void FInputCategoryData::GetCategoriesDataFromMappings(const UMyInputMappingContext& InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData)
 {
 	TArray<FEnhancedActionKeyMapping> AllMappings;
-	InInputMappingContext.GetAllMappings(/*Out*/AllMappings);
+	UInputUtilsLibrary::GetAllMappingsInContext(&InInputMappingContext, /*out*/AllMappings);
 
 	// Find all categories in every mapping
 	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)

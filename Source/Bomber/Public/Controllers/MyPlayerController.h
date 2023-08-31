@@ -78,26 +78,9 @@ public:
 	 * Inputs
 	 ********************************************************************************************* */
 public:
-	/** Returns the Enhanced Input Local Player Subsystem. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputSubsystem() const;
-
-	/** Returns the Enhanced Input Component. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UEnhancedInputComponent* GetEnhancedInputComponent() const;
-
-	/** Returns the Enhanced Player Input. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UEnhancedPlayerInput* GetEnhancedPlayerInput() const;
-
 	/** Returns true if Player Controller is ready to setup all the inputs. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool CanBindInputActions() const;
-
-	/** Returns true if specified input context is enabled.
-	 * @param InputContext Context to verify. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	bool IsInputContextEnabled(const UMyInputMappingContext* InputContext) const;
 
 	/** Adds given contexts to the list of auto managed and binds their input actions . */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -166,12 +149,6 @@ public:
 	/** Prevents built-in slate input on UMG. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DisplayName = "Set UI Input Ignored"))
 	void SetUIInputIgnored();
-
-	/** Enables or disables specified input context.
-	 * @param bEnable set true to add specified input context, otherwise it will be removed from local player.
-	 * @param InputContext Context to set. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InputContext);
 
 	/** Takes all cached inputs contexts and turns them on or off according given game state.
 	 * @param bEnable If true, all matching contexts will be enabled. If false, all matching contexts will be disabled.

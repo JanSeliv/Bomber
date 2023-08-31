@@ -4,13 +4,13 @@
 //---
 #include "Data/SettingsDataAsset.h"
 #include "DataAssets/MyInputMappingContext.h"
-#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
+#include "DataAssets/PlayerInputDataAsset.h"
+#include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 //---
 #include "Components/InputKeySelector.h"
 #include "Components/TextBlock.h"
-#include "Widgets/Input/SInputKeySelector.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InputButtonWidget)
 
@@ -30,15 +30,20 @@ void UInputButtonWidget::InitButton(const FEnhancedActionKeyMapping& InMappableD
 // Sets specified key for the current input key selector
 void UInputButtonWidget::SetCurrentKey(const FKey& NewKey)
 {
-	const FKey LastKey = GetCurrentKey();
+	const FKey& LastKey = GetCurrentKey();
 
-	const bool bMapped = UMyInputMappingContext::RemapKey(InputContextInternal, MappableDataInternal, NewKey);
+	bool bMapped = false;
+	if (!UPlayerInputDataAsset::Get().IsMappedKey(NewKey))
+	{
+		bMapped = UInputUtilsLibrary::RemapKeyInContext(InputContextInternal, MappableDataInternal, NewKey);
+	}
 
 	if (!bMapped)
 	{
 		// Remapping is failed, reset the key back
 		checkf(InputKeySelector, TEXT("%s: 'InputKeySelector' is null"), *FString(__FUNCTION__));
 		InputKeySelector->SetSelectedKey(LastKey);
+		return;
 	}
 
 	MappableDataInternal.Key = NewKey;

@@ -9,14 +9,13 @@
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 ///---
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
-#include "EnhancedPlayerInput.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
@@ -125,24 +124,6 @@ void AMyPlayerController::SetMouseFocusOnUI(bool bFocusOnUI)
 	}
 }
 
-// Returns the Enhanced Input Local Player Subsystem
-UEnhancedInputLocalPlayerSubsystem* AMyPlayerController::GetEnhancedInputSubsystem() const
-{
-	return ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-}
-
-// Returns the Enhanced Input Component
-UEnhancedInputComponent* AMyPlayerController::GetEnhancedInputComponent() const
-{
-	return Cast<UEnhancedInputComponent>(InputComponent);
-}
-
-// Returns the Enhanced Player Input
-UEnhancedPlayerInput* AMyPlayerController::GetEnhancedPlayerInput() const
-{
-	return Cast<UEnhancedPlayerInput>(PlayerInput);
-}
-
 // Set up input bindings in given contexts
 void AMyPlayerController::RebindAllInputActions()
 {
@@ -153,7 +134,7 @@ void AMyPlayerController::RebindAllInputActions()
 		return;
 	}
 
-	UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent();
+	UEnhancedInputComponent* EnhancedInputComponent = UInputUtilsLibrary::GetEnhancedInputComponent(this);
 	if (!ensureMsgf(EnhancedInputComponent, TEXT("ASSERT: 'EnhancedInputComponent' is not valid")))
 	{
 		return;
@@ -165,15 +146,18 @@ void AMyPlayerController::RebindAllInputActions()
 		EnhancedInputComponent->ClearActionEventBindings();
 	}
 
-	TArray<UMyInputAction*> InputActions;
+	TArray<UInputAction*> InputActions;
 	for (const UMyInputMappingContext* InputContextIt : AllInputContextsInternal)
 	{
-		InputContextIt->GetInputActions(InputActions);
+		TArray<UInputAction*> FoundInputActions;
+		UInputUtilsLibrary::GetAllActionsInContext(InputContextIt, /*out*/FoundInputActions);
+		InputActions.Append(MoveTemp(FoundInputActions));
 	}
 
 	// --- Bind input actions
-	for (const UMyInputAction* ActionIt : InputActions)
+	for (const UInputAction* InputActionIt : InputActions)
 	{
+		const UMyInputAction* ActionIt = Cast<UMyInputAction>(InputActionIt);
 		const FName FunctionName = ActionIt ? ActionIt->GetFunctionToBind().FunctionName : NAME_None;
 		if (!ensureAlwaysMsgf(!FunctionName.IsNone(), TEXT("ASSERT: %s: 'FunctionName' is none, can not bind the action '%s'!"), *FString(__FUNCTION__), *GetNameSafe(ActionIt)))
 		{
@@ -282,6 +266,7 @@ void AMyPlayerController::BeginPlay()
 	}
 
 	// Add default input contexts to the list to be auto managed
+	// It's not binding at this point, only gathering contexts to be bound later
 	TArray<const UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(/*out*/InputContexts);
 	AddNewInputContexts(InputContexts);
@@ -423,7 +408,8 @@ void AMyPlayerController::OnToggledInGameMenu_Implementation(bool bIsVisible)
 	SetInputContextsEnabled(!bIsVisible, ECurrentGameState::InGame);
 
 	// Turn on or off specific In-Game menu input context (it does not contain any game state)
-	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
+	const UMyInputMappingContext* InputContext = UPlayerInputDataAsset::Get().GetInGameMenuInputContext();
+	UInputUtilsLibrary::SetInputContextEnabled(this, bIsVisible, InputContext, InputContext->GetContextPriority());
 
 	SetMouseVisibility(bIsVisible);
 }
@@ -432,51 +418,14 @@ void AMyPlayerController::OnToggledInGameMenu_Implementation(bool bIsVisible)
 void AMyPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
 {
 	// Turn on or off specific Settings input context (it does not contain any game state)
-	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetSettingsInputContext());
+	const UMyInputMappingContext* InputContext = UPlayerInputDataAsset::Get().GetSettingsInputContext();
+	UInputUtilsLibrary::SetInputContextEnabled(this, bIsVisible, InputContext, InputContext->GetContextPriority());
 
 	// Toggle previous Input Context
 	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
 	if (CurrentGameState == ECGS::Menu || CurrentGameState == ECGS::InGame)
 	{
 		SetInputContextsEnabled(!bIsVisible, CurrentGameState);
-	}
-}
-
-// Returns true if specified input context is enabled
-bool AMyPlayerController::IsInputContextEnabled(const UMyInputMappingContext* InputContext) const
-{
-	const UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem();
-	if (!ensureMsgf(InputSubsystem, TEXT("ASSERT: 'InputSubsystem' is not valid"))
-	    || !ensureMsgf(InputContext, TEXT("ASSERT: 'InputContext' is not valid")))
-	{
-		return false;
-	}
-
-	return InputSubsystem->HasMappingContext(InputContext);
-}
-
-// Enables or disables specified input context
-void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InputContext)
-{
-	if (!IsLocalController())
-	{
-		return;
-	}
-
-	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem();
-	if (!ensureMsgf(InputSubsystem, TEXT("ASSERT: 'InputSubsystem' is not valid"))
-	    || !ensureMsgf(InputContext, TEXT("ASSERT: 'InputContext' is not valid")))
-	{
-		return;
-	}
-
-	if (bEnable)
-	{
-		InputSubsystem->AddMappingContext(InputContext, InputContext->GetContextPriority());
-	}
-	else
-	{
-		InputSubsystem->RemoveMappingContext(InputContext);
 	}
 }
 
@@ -490,16 +439,17 @@ void AMyPlayerController::SetInputContextsEnabled(bool bEnable, ECurrentGameStat
 			continue;
 		}
 
+		const int32 ContextPriority = InputContextIt->GetContextPriority();
 		const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
 		const bool bIsMatching = GameStatesBitmask & TO_FLAG(CurrentGameState);
 
 		if (bIsMatching)
 		{
-			SetInputContextEnabled(bEnable, InputContextIt);
+			UInputUtilsLibrary::SetInputContextEnabled(this, bEnable, InputContextIt, ContextPriority);
 		}
 		else if (bInvertRest)
 		{
-			SetInputContextEnabled(!bEnable, InputContextIt);
+			UInputUtilsLibrary::SetInputContextEnabled(this, !bEnable, InputContextIt, ContextPriority);
 		}
 	}
 }

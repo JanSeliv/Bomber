@@ -59,11 +59,11 @@ protected:
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> InGameMenuInputContextInternal = nullptr;
+	TObjectPtr<const UMyInputMappingContext> InGameMenuInputContextInternal = nullptr;
 
 	/** Enhanced Input Mapping Context of actions on the Settings widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr;
+	TObjectPtr<const UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr;
 
 	/** Creates new contexts if is needed, is implemented to solve UE issues with remappings, see details below.
 	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
