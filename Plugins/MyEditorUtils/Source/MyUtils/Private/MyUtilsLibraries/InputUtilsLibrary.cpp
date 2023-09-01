@@ -170,7 +170,7 @@ void UInputUtilsLibrary::GetAllMappingsInAction(const UObject* WorldContext, con
 }
 
 // Returns the first mapped key to this action in most priority active input context
-const FKey& UInputUtilsLibrary::GetFirstMappingInAction(const UObject* WorldContext, const UInputAction* InInputAction)
+FKey UInputUtilsLibrary::GetFirstMappingInAction(const UObject* WorldContext, const UInputAction* InInputAction)
 {
 	TArray<FKey> OutKeys;
 	GetAllMappingsInAction(WorldContext, InInputAction, OutKeys);

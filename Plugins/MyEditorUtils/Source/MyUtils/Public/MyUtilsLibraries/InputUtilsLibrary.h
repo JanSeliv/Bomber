@@ -91,7 +91,7 @@ public:
 
 	/** Returns the first mapped key to this action in most priority active input context. */
 	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
-	static const FKey& GetFirstMappingInAction(const UObject* WorldContext, const UInputAction* InInputAction);
+	static FKey GetFirstMappingInAction(const UObject* WorldContext, const UInputAction* InInputAction);
 
 	/** Returns all mappings where bIsPlayerMappable is true. */
 	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "C++")
