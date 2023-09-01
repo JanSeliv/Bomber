@@ -417,16 +417,22 @@ void AMyPlayerController::OnToggledInGameMenu_Implementation(bool bIsVisible)
 // Listens to handle input on opening and closing the Settings widget
 void AMyPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
 {
+	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
+	if (CurrentGameState == ECGS::Menu)
+	{
+		// Toggle all previous Input Contexts
+		SetInputContextsEnabled(!bIsVisible, CurrentGameState);
+	}
+	else if (CurrentGameState == ECGS::InGame)
+	{
+		// Toggle In-Game Menu Input Context
+		const UMyInputMappingContext* InputContext = UPlayerInputDataAsset::Get().GetInGameMenuInputContext();
+		UInputUtilsLibrary::SetInputContextEnabled(this, !bIsVisible, InputContext, InputContext->GetContextPriority());
+	}
+
 	// Turn on or off specific Settings input context (it does not contain any game state)
 	const UMyInputMappingContext* InputContext = UPlayerInputDataAsset::Get().GetSettingsInputContext();
 	UInputUtilsLibrary::SetInputContextEnabled(this, bIsVisible, InputContext, InputContext->GetContextPriority());
-
-	// Toggle previous Input Context
-	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
-	if (CurrentGameState == ECGS::Menu || CurrentGameState == ECGS::InGame)
-	{
-		SetInputContextsEnabled(!bIsVisible, CurrentGameState);
-	}
 }
 
 // Takes all cached inputs contexts and turns them on or off according given game state
@@ -441,16 +447,15 @@ void AMyPlayerController::SetInputContextsEnabled(bool bEnable, ECurrentGameStat
 
 		const int32 ContextPriority = InputContextIt->GetContextPriority();
 		const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
-		const bool bIsMatching = GameStatesBitmask & TO_FLAG(CurrentGameState);
+		const bool bIsForCurrentState = GameStatesBitmask & TO_FLAG(CurrentGameState);
 
-		if (bIsMatching)
+		if (!bIsForCurrentState && !bInvertRest)
 		{
-			UInputUtilsLibrary::SetInputContextEnabled(this, bEnable, InputContextIt, ContextPriority);
+			continue;
 		}
-		else if (bInvertRest)
-		{
-			UInputUtilsLibrary::SetInputContextEnabled(this, !bEnable, InputContextIt, ContextPriority);
-		}
+
+		const bool bFinalEnable = bIsForCurrentState ? bEnable : !bEnable;
+		UInputUtilsLibrary::SetInputContextEnabled(this, bFinalEnable, InputContextIt, ContextPriority);
 	}
 }
 
