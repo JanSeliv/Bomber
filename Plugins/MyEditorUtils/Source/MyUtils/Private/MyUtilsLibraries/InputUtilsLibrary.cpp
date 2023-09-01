@@ -78,7 +78,7 @@ void UInputUtilsLibrary::SetInputContextEnabled(const UObject* WorldContext, boo
 }
 
 // Returns all input actions set in mappings
-void UInputUtilsLibrary::GetAllActionsInContext(const UInputMappingContext* InInputContext, TArray<UInputAction*>& OutInputActions)
+void UInputUtilsLibrary::GetAllActionsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext, EInputActionInContextState State, TArray<UInputAction*>& OutInputActions)
 {
 	if (!ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %s:\n'InInputContext' is null!"), __LINE__, *FString(__FUNCTION__)))
 	{
@@ -93,12 +93,54 @@ void UInputUtilsLibrary::GetAllActionsInContext(const UInputMappingContext* InIn
 	const TArray<FEnhancedActionKeyMapping>& AllMappings = InInputContext->GetMappings();
 	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
 	{
-		const UInputAction* MyInputAction = Cast<UInputAction>(MappingIt.Action);
-		if (MyInputAction)
+		UInputAction* MyInputAction = Cast<UInputAction>(MappingIt.Action);
+		if (!MyInputAction
+			|| OutInputActions.Contains(MyInputAction))
 		{
-			OutInputActions.AddUnique(const_cast<UInputAction*>(MyInputAction));
+			continue;
+		}
+
+		bool bIsMatchingState = false;
+		switch (State)
+		{
+		case EInputActionInContextState::NotBound:
+			bIsMatchingState = !IsInputActionBound(WorldContext, MyInputAction);
+			break;
+		case EInputActionInContextState::Bound:
+			bIsMatchingState = IsInputActionBound(WorldContext, MyInputAction);
+			break;
+		case EInputActionInContextState::Any:
+			bIsMatchingState = true;
+			break;
+		default: break;
+		}
+
+		if (bIsMatchingState)
+		{
+			OutInputActions.Emplace(MyInputAction);
 		}
 	}
+}
+
+/*********************************************************************************************
+ * Input Actions
+ ********************************************************************************************* */
+
+// Returns true if specified input action is bound to the Input Component
+bool UInputUtilsLibrary::IsInputActionBound(const UObject* WorldContext, const UInputAction* InInputAction)
+{
+	const UEnhancedInputComponent* InputComponent = GetEnhancedInputComponent(WorldContext);
+	if (!ensureMsgf(InputComponent, TEXT("ASSERT: [%i] %s:\n'InputComponent' is not valid!"), __LINE__, *FString(__FUNCTION__))
+		|| !ensureMsgf(InInputAction, TEXT("ASSERT: [%i] %s:\n'InInputAction' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return false;
+	}
+
+	const TArray<TUniquePtr<FEnhancedInputActionEventBinding>>& AllBoundInputs = InputComponent->GetActionEventBindings();
+	return AllBoundInputs.ContainsByPredicate([&InInputAction](const TUniquePtr<FEnhancedInputActionEventBinding>& BindingIt)
+	{
+		return BindingIt && BindingIt->GetAction() == InInputAction;
+	});
 }
 
 /*********************************************************************************************

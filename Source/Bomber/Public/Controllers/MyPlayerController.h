@@ -156,11 +156,17 @@ public:
 	 * @param bInvertRest If true, all other not matching contexts will be toggled to the opposite of given state (!bEnable).
 	 * @see AMyPlayerController::AddInputContexts */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetInputContextsEnabled(bool bEnable, ECurrentGameState CurrentGameState, bool bInvertRest = false);
+	void SetAllInputContextsEnabled(bool bEnable, ECurrentGameState CurrentGameState, bool bInvertRest = false);
 
+	/** Enables or disables specified input context.
+	 * @param bEnable If true, the context will be enabled. If false, the context will be disabled.
+	 * @param InInputContext The input context to enable or disable. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InInputContext);
+	
 	/** Set up input bindings in given contexts. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void RebindAllInputActions();
+	void BindInputActionsInContext(const UMyInputMappingContext* InInputContext);
 
 	/** Adds input contexts to the list to be auto turned of or on according current game state.
 	 * Make sure UMyInputMappingContext::ActiveForStatesInternal is set.

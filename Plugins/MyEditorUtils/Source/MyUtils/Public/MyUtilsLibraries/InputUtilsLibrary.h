@@ -17,6 +17,21 @@ class UInputMappingContext;
 class UInputAction;
 
 /**
+ * Determines the state of the input action in the context.
+ */
+UENUM(BlueprintType)
+enum class EInputActionInContextState : uint8
+{
+	///< The input action exists in Input Context, but is not bound to the Player Input 
+	NotBound,
+	///< The input action exists in Input Context and is bound to the Player Input
+	Bound,
+	///< The input action exists in Input Context
+	Any
+};
+
+//ENUM_RANGE_BY_FIRST_AND_LAST($ENUM$, $ENUM$::First, $ENUM$::Last);
+/**
  * The Enhanced Input functions library.
  * Extends Epic's API with some useful functions and tricks.
  * All the functions are 'BlueprintCosmetic' since they are not intended to be used in on dedicated servers.
@@ -55,8 +70,16 @@ public:
 	static void SetInputContextEnabled(const UObject* WorldContext, bool bEnable, const UInputMappingContext* InInputContext, int32 Priority = 0);
 
 	/** Returns all input actions set in mappings. */
-	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "C++")
-	static void GetAllActionsInContext(const UInputMappingContext* InInputContext, TArray<UInputAction*>& OutInputActions);
+	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+	static void GetAllActionsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext, EInputActionInContextState State, TArray<UInputAction*>& OutInputActions);
+
+	/*********************************************************************************************
+	 * Input Actions
+	 ********************************************************************************************* */
+public:
+	/** Returns true if specified input action is bound to the Input Component. */
+	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContextObject", DefaultToSelf = "WorldContextObject"))
+	static bool IsInputActionBound(const UObject* WorldContext, const UInputAction* InInputAction);
 
 	/*********************************************************************************************
 	 * Mappings
@@ -84,7 +107,7 @@ public:
 	/** Returns true if specified key is mapped to given input context.
 	 * @param Key The key to check.
 	 * @param InInputContext The input context to search in. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Key"))
+	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "C++", meta = (AutoCreateRefTerm = "Key"))
 	static bool IsMappedKeyInContext(const FKey& Key, const UInputMappingContext* InInputContext);
 
 	/** Unmap previous key and map new one.
@@ -108,6 +131,5 @@ private:
 	 * Is created to let safe config if only it is packaged build,
 	 * so we don't want to save remaps in Editor, it gets serialised right into asset
 	 * while in packaged build it should be saved into config file and taken there. */
-	UFUNCTION(BlueprintPure, BlueprintCosmetic, Category = "C++")
 	static bool CanSaveMappingsInConfig();
 };
