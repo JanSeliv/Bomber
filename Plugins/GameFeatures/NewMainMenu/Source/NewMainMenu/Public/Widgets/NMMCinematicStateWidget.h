@@ -45,4 +45,8 @@ protected:
 	/** Is called to skip cinematic. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnSkipCinematicButtonPressed();
+
+	/** Is bound to toggle 'SkipCinematicButton' visibility when mouse became shown or hidden. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnMouseVisibilityChanged(bool bIsShown);
 };
