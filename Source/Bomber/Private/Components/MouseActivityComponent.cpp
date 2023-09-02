@@ -2,7 +2,6 @@
 
 #include "Components/MouseActivityComponent.h"
 //---
-#include "DataAssets/PlayerInputDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -41,19 +40,17 @@ APlayerController& UMouseActivityComponent::GetPlayerControllerChecked() const
 	return *MyPlayerController;
 }
 
-// Returns true if the mouse cursor can be visible according current game state, otherwise hidden
-bool UMouseActivityComponent::ShouldBeVisible()
+// Returns the mouse visibility settings according current game state
+const FMouseVisibilitySettings& UMouseActivityComponent::GetCurrentVisibilitySettings() const
 {
-	return UPlayerInputDataAsset::Get().GetMouseVisibilitySettings(AMyGameStateBase::GetCurrentGameState()).bIsVisible;
+	return VisibilitySettingsInternal.FindChecked(AMyGameStateBase::GetCurrentGameState());
 }
 
 // Called to to set mouse cursor visibility
 void UMouseActivityComponent::SetMouseVisibility(bool bShouldShow)
 {
 	APlayerController& PC = GetPlayerControllerChecked();
-	const bool bFailedToHide = !bShouldShow && ShouldBeVisible();
-	if (bFailedToHide
-	    || !PC.IsLocalController())
+	if (!PC.IsLocalController())
 	{
 		return;
 	}
@@ -65,6 +62,13 @@ void UMouseActivityComponent::SetMouseVisibility(bool bShouldShow)
 	SetMouseFocusOnUI(bShouldShow);
 
 	SetComponentTickEnabled(bShouldShow);
+
+	CurrentlyInactiveSecInternal = 0.f;
+
+	if (OnMouseVisibilityChanged.IsBound())
+	{
+		OnMouseVisibilityChanged.Broadcast(bShouldShow);
+	}
 }
 
 // If true, set the mouse focus on game and UI, otherwise only focusing on game inputs
@@ -112,6 +116,9 @@ void UMouseActivityComponent::BeginPlay()
 
 	SetMouseFocusOnUI(true);
 
+	// Cache settings once for mouse visibility
+	VisibilitySettingsInternal = UPlayerInputDataAsset::Get().GetMouseVisibilitySettings();
+
 	// Listen to handle input for each game state
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
@@ -130,11 +137,34 @@ void UMouseActivityComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	const FMouseVisibilitySettings& VisibilitySettings = GetCurrentVisibilitySettings();
+	if (VisibilitySettings.IsInactivityEnabled())
+	{
+		CurrentlyInactiveSecInternal += DeltaTime;
+
+		if (CurrentlyInactiveSecInternal >= VisibilitySettings.SecToAutoHide)
+		{
+			SetMouseVisibility(false);
+		}
+	}
+}
+
+// Is called from input mouse event to reset inactivity time
+void UMouseActivityComponent::OnMouseMove_Implementation()
+{
+	CurrentlyInactiveSecInternal = 0.f;
+
+	const APlayerController& PC = GetPlayerControllerChecked();
+	if (!PC.ShouldShowMouseCursor()
+	    && GetCurrentVisibilitySettings().bIsVisible)
+	{
+		// Show inactive mouse
+		SetMouseVisibility(true);
+	}
 }
 
 // Listen to toggle mouse visibility
 void UMouseActivityComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
-	SetMouseVisibility(ShouldBeVisible());
+	SetMouseVisibility(GetCurrentVisibilitySettings().bIsVisible);
 }

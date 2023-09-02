@@ -4,6 +4,8 @@
 
 #include "Components/ActorComponent.h"
 //---
+#include "DataAssets/PlayerInputDataAsset.h" // FMouseVisibilitySettings
+//---
 #include "MouseActivityComponent.generated.h"
 
 enum class ECurrentGameState : uint8;
@@ -14,7 +16,7 @@ class APlayerController;
  * Component that responsible for mouse-related logic like showing and hiding itself.
  * Owner is Player Controller.
  */
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BOMBER_API UMouseActivityComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -22,6 +24,16 @@ class BOMBER_API UMouseActivityComponent : public UActorComponent
 public:
 	/** Sets default values for this component's properties. */
 	UMouseActivityComponent();
+
+	/*********************************************************************************************
+	 * Delegates
+	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMouseVisibilityChanged, bool, bIsShown);
+
+	/** Called when mouse became shown or hidden. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnMouseVisibilityChanged OnMouseVisibilityChanged;
 
 	/*********************************************************************************************
 	 * Public functions
@@ -32,9 +44,9 @@ public:
 	APlayerController* GetPlayerController() const;
 	APlayerController& GetPlayerControllerChecked() const;
 
-	/** Returns true if the mouse cursor can be visible according current game state, otherwise hidden. */
+	/** Returns the mouse visibility settings according current game state. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static bool ShouldBeVisible();
+	const FMouseVisibilitySettings& GetCurrentVisibilitySettings() const;
 
 	/** Called to to set the mouse cursor visibility.
 	 * @param bShouldShow true to show mouse cursor, otherwise hide it. */
@@ -46,7 +58,21 @@ public:
 	void SetMouseFocusOnUI(bool bFocusOnUI);
 
 	/*********************************************************************************************
-	 * Protected functions
+	 * Protected properties
+	 ********************************************************************************************* */
+protected:
+	/** How long the mouse is inactive at this moment. Is calculated in Tick if only inactivity is enabled.
+	 * @see FMouseVisibilitySettings::bHideOnInactivity */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Inactive Time"))
+	float CurrentlyInactiveSecInternal = 0.f;
+
+	/** Cached settings for mouse visibility.
+	 * @see UPlayerInputDataAsset::GetMouseVisibilitySettings() */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Visibility Settings"))
+	TMap<ECurrentGameState, FMouseVisibilitySettings> VisibilitySettingsInternal;
+
+	/*********************************************************************************************
+	 * Overrides
 	 ********************************************************************************************* */
 protected:
 	/** Called when the game starts. */
@@ -54,6 +80,14 @@ protected:
 
 	/** Called every frame to calculate Delta Time. */
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
+	/** Is called from 'Mouse Move' input action to show inactive mouse. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnMouseMove();
 
 	/** Listen to toggle mouse visibility. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
