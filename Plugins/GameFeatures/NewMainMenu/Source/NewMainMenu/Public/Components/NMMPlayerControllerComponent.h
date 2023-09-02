@@ -47,6 +47,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ResetSaveGameData();
 
+	/** Set new sound volume for Cinematics sound class.
+	 * Is called from Settings menu once Cinematics slider is changed.*/
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetCinematicsVolume(double InVolume);
+
+	/** Returns the sound volume for Cinematics sound class. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE double GetCinematicsVolume() const { return CinematicsVolumeInternal; }
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
@@ -60,6 +69,11 @@ protected:
 	/** Contains loaded and cached Save Game Data of the Main Menu. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Save Game Data"))
 	TObjectPtr<class UNMMSaveGameData> SaveGameDataInternal = nullptr;
+
+	/** The sound volume for Cinematics sound class.
+	 * Is config property, can be set in Settings menu. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
+	double CinematicsVolumeInternal = 1.0;
 
 	/*********************************************************************************************
 	 * Protected functions

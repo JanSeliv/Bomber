@@ -100,11 +100,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Volume"))
 	double MasterVolumeInternal;
 
-	/** The sound volume for music sound class, is config property, is config property. */
+	/** The sound volume for music sound class, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
 	double MusicVolumeInternal;
 
-	/** The sound volume for SFX sound class, is config property, is config property. */
+	/** The sound volume for SFX sound class, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
 	double SFXVolumeInternal;
 

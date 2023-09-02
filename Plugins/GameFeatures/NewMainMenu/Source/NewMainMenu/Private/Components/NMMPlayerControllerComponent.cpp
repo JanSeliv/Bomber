@@ -6,9 +6,10 @@
 #include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
-#include "Data/NMMSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 #include "Data/NMMSaveGameData.h"
+#include "Data/NMMSubsystem.h"
+#include "Subsystems/SoundsSubsystem.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Kismet/GameplayStatics.h"
 //---
@@ -61,6 +62,15 @@ void UNMMPlayerControllerComponent::ResetSaveGameData()
 	// Create new save game object
 	SaveGameDataInternal = CastChecked<UNMMSaveGameData>(UGameplayStatics::CreateSaveGameObject(UNMMSaveGameData::StaticClass()));
 	SaveGameDataInternal->SaveDataAsync();
+}
+
+// Set new sound volume for Cinematics sound class
+void UNMMPlayerControllerComponent::SetCinematicsVolume(double InVolume)
+{
+	CinematicsVolumeInternal = InVolume;
+
+	USoundClass* CinematicsSoundClass = UNMMDataAsset::Get().GetCinematicsSoundClass();
+	USoundsSubsystem::Get().SetSoundVolumeByClass(CinematicsSoundClass, InVolume);
 }
 
 // Called when the owning Actor begins play or when the component is created if the Actor has already begun play

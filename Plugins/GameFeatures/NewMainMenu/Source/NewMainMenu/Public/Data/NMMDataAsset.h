@@ -44,6 +44,11 @@ public:
 	 * @see UNMMDataAsset::InputContextsInternal.*/
 	void GetAllInputContexts(TArray<const class UMyInputMappingContext*>& OutInputContexts) const;
 
+	/** Returns the sound of cinematics music.
+	 * @see UNMMDataAsset::CinematicsSoundClassInternal */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClassInternal; }
+
 protected:
 	/** The data table with the cinematics to be played. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Cinematics Data Table", ShowOnlyInnerProperties))
@@ -60,4 +65,8 @@ protected:
 	/** List of input contexts to manage according their game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Input Contexts"))
 	TArray<TObjectPtr<const class UMyInputMappingContext>> InputContextsInternal;
+
+	/** The sound of cinematics music. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
+	TObjectPtr<class USoundClass> CinematicsSoundClassInternal = nullptr;
 };
