@@ -109,6 +109,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class UMyGameViewportClient* GetGameViewportClient();
 
+	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static class UMouseActivityComponent* GetMouseActivityComponent();
+	
 	/* ---------------------------------------------------
 	*		EActorType functions
 	* --------------------------------------------------- */

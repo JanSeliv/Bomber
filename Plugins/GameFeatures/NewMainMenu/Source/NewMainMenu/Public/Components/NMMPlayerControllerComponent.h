@@ -24,7 +24,7 @@ public:
 	/** Default constructor. */
 	UNMMPlayerControllerComponent();
 
-	/** Returns HUD actor of this component. */
+	/** Returns Player Controller of this component. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	AMyPlayerController* GetPlayerController() const;
 	AMyPlayerController& GetPlayerControllerChecked() const;

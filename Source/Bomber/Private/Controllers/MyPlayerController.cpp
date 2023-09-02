@@ -3,6 +3,7 @@
 #include "Controllers/MyPlayerController.h"
 //---
 #include "Bomber.h"
+#include "Components/MouseActivityComponent.h"
 #include "DataAssets/MyInputAction.h"
 #include "DataAssets/MyInputMappingContext.h"
 #include "DataAssets/PlayerInputDataAsset.h"
@@ -17,14 +18,8 @@
 ///---
 #include "EnhancedInputComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "Engine/GameViewportClient.h"
-#include "Engine/LocalPlayer.h"
 #include "Framework/Application/NavigationConfig.h"
 #include "Framework/Application/SlateApplication.h"
-//---
-#if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyPlayerController)
 
@@ -39,6 +34,9 @@ AMyPlayerController::AMyPlayerController()
 
 	// Set cheat class
 	CheatClass = UMyCheatManager::StaticClass();
+
+	// Create the mouse activity component, so it will be responsible for mouse visibility
+	MouseComponentInternal = CreateDefaultSubobject<UMouseActivityComponent>(TEXT("MouseActivityComponent"));
 }
 
 // Set the new game state for the current game
@@ -61,67 +59,6 @@ void AMyPlayerController::SetGameStartingState()
 void AMyPlayerController::SetMenuState()
 {
 	ServerSetGameState(ECurrentGameState::Menu);
-}
-
-// Returns true if the mouse cursor can be hidden
-bool AMyPlayerController::CanHideMouse() const
-{
-	switch (AMyGameStateBase::GetCurrentGameState())
-	{
-		case ECurrentGameState::GameStarting:
-		case ECurrentGameState::InGame:
-			return true;
-		default:
-			return false;
-	}
-}
-
-// Called to to set mouse cursor visibility
-void AMyPlayerController::SetMouseVisibility(bool bShouldShow)
-{
-	const bool bFailedToHide = !bShouldShow && !CanHideMouse();
-	if (bFailedToHide
-	    || !IsLocalController())
-	{
-		return;
-	}
-
-	SetShowMouseCursor(bShouldShow);
-	bEnableClickEvents = bShouldShow;
-	bEnableMouseOverEvents = bShouldShow;
-	SetMouseFocusOnUI(bShouldShow);
-}
-
-// If true, set the mouse focus on game and UI, otherwise only focusing on game inputs
-void AMyPlayerController::SetMouseFocusOnUI(bool bFocusOnUI)
-{
-#if WITH_EDITOR // [IsEditorMultiplayer]
-	if (FEditorUtilsLibrary::IsEditorMultiplayer())
-	{
-		const ULocalPlayer* LocalPlayer = GetLocalPlayer();
-		UGameViewportClient* GameViewport = LocalPlayer ? LocalPlayer->ViewportClient : nullptr;
-		FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
-		if (!Viewport
-		    || !GameViewport->IsFocused(Viewport))
-		{
-			// Do not change the focus for inactive viewports in editor-multiplayer
-			// to avoid misleading focus on another game window
-			return;
-		}
-	}
-#endif // WITH_EDITOR [IsEditorMultiplayer]
-
-	if (bFocusOnUI)
-	{
-		FInputModeGameAndUI GameAndUI;
-		GameAndUI.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
-		SetInputMode(GameAndUI);
-	}
-	else
-	{
-		static const FInputModeGameOnly GameOnly{};
-		SetInputMode(GameOnly);
-	}
 }
 
 // Set up input bindings in given contexts
@@ -240,9 +177,6 @@ void AMyPlayerController::BeginPlay()
 	// Set input focus on the game window
 	FSlateApplication::Get().SetAllUserFocusToGameViewport(EFocusCause::WindowActivate);
 
-	// Set mouse focus
-	SetMouseFocusOnUI(true);
-
 	// Prevents built-in slate input on UMG
 	SetUIInputIgnored();
 
@@ -281,14 +215,6 @@ void AMyPlayerController::BeginPlay()
 void AMyPlayerController::SetIgnoreMoveInput(bool bShouldIgnore)
 {
 	// Do not call super to avoid stacking, override it
-
-	if (!bShouldIgnore
-	    && !CanHideMouse())
-	{
-		return;
-	}
-
-	SetMouseVisibility(bShouldIgnore);
 	IgnoreMoveInput = bShouldIgnore;
 }
 
@@ -366,7 +292,7 @@ void AMyPlayerController::SetUIInputIgnored()
 	}
 }
 
-// Listen to toggle movement input and mouse cursor
+// Listen to toggle movement input
 void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
@@ -374,10 +300,14 @@ void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState Cu
 		case ECurrentGameState::GameStarting:
 		{
 			SetIgnoreMoveInput(true);
-			SetMouseVisibility(false);
 			break;
 		}
 		case ECurrentGameState::Menu:
+		{
+			SetIgnoreMoveInput(true);
+			break;
+		}
+		case ECurrentGameState::Cinematic:
 		{
 			SetIgnoreMoveInput(true);
 			break;
@@ -414,7 +344,8 @@ void AMyPlayerController::OnToggledInGameMenu_Implementation(bool bIsVisible)
 	// Turn on or off specific In-Game menu input context (it does not contain any game state)
 	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
 
-	SetMouseVisibility(bIsVisible);
+	checkf(MouseComponentInternal, TEXT("ERROR: [%i] %s:\n'MouseComponentInternal' is null!"), __LINE__, *FString(__FUNCTION__));
+	MouseComponentInternal->SetMouseVisibility(bIsVisible);
 }
 
 // Listens to handle input on opening and closing the Settings widget

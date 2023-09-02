@@ -61,18 +61,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMenuState();
 
-	/** Returns true if the mouse cursor can be hidden. */
+	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	bool CanHideMouse() const;
-
-	/** Called to to set the mouse cursor visibility.
-	 * @param bShouldShow true to show mouse cursor, otherwise hide it. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMouseVisibility(bool bShouldShow);
-
-	/** If true, set the mouse focus on game and UI, otherwise only focusing on game inputs. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMouseFocusOnUI(bool bFocusOnUI);
+	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
 
 	/*********************************************************************************************
 	 * Inputs
@@ -94,6 +85,10 @@ protected:
 	/** List of all input contexts to be auto turned of or on according current game state. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Input Contexts"))
 	TArray<TObjectPtr<const UMyInputMappingContext>> AllInputContextsInternal;
+
+	/** Component that responsible for mouse-related logic like showing and hiding itself. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = ""))
+	TObjectPtr<class UMouseActivityComponent> MouseComponentInternal = nullptr;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -130,7 +125,7 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnWidgetsInitialized();
 
-	/** Listen to toggle movement input and mouse cursor. */
+	/** Listen to toggle movement input. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
@@ -163,7 +158,7 @@ public:
 	 * @param InInputContext The input context to enable or disable. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InInputContext);
-	
+
 	/** Set up input bindings in given contexts. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BindInputActionsInContext(const UMyInputMappingContext* InInputContext);

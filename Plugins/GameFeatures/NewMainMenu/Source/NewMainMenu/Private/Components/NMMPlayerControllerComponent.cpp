@@ -21,7 +21,7 @@ UNMMPlayerControllerComponent::UNMMPlayerControllerComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
-// Returns HUD actor of this component
+// Returns Player Controller of this component
 AMyPlayerController* UNMMPlayerControllerComponent::GetPlayerController() const
 {
 	return Cast<AMyPlayerController>(GetOwner());

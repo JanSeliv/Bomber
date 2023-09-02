@@ -4,6 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "Components/MouseActivityComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/LevelActorDataAsset.h"
@@ -190,6 +191,13 @@ USoundsSubsystem* UMyBlueprintFunctionLibrary::GetSoundsSubsystem()
 UMyGameViewportClient* UMyBlueprintFunctionLibrary::GetGameViewportClient()
 {
 	return GEngine ? Cast<UMyGameViewportClient>(GEngine->GameViewport) : nullptr;
+}
+
+// Returns the component that responsible for mouse-related logic like showing and hiding itself
+UMouseActivityComponent* UMyBlueprintFunctionLibrary::GetMouseActivityComponent()
+{
+	const AMyPlayerController* MyPC = GetLocalPlayerController();
+	return MyPC ? MyPC->GetMouseActivityComponent() : nullptr;
 }
 
 /* ---------------------------------------------------
