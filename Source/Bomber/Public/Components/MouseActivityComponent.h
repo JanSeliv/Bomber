@@ -32,9 +32,9 @@ public:
 	APlayerController* GetPlayerController() const;
 	APlayerController& GetPlayerControllerChecked() const;
 
-	/** Returns true if the mouse cursor can be hidden. */
+	/** Returns true if the mouse cursor can be visible according current game state, otherwise hidden. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static bool CanHideMouse();
+	static bool ShouldBeVisible();
 
 	/** Called to to set the mouse cursor visibility.
 	 * @param bShouldShow true to show mouse cursor, otherwise hide it. */

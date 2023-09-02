@@ -6,7 +6,22 @@
 //---
 #include "PlayerInputDataAsset.generated.h"
 
+enum class ECurrentGameState : uint8;
+
 class UMyInputMappingContext;
+
+/**
+ * Contains the settings for mouse visibility.
+ */
+USTRUCT(BlueprintType)
+struct FMouseVisibilitySettings
+{
+	GENERATED_BODY()
+
+	/** Determines visibility by default. If set, mouse will be shown, otherwise hidden. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	bool bIsVisible = false;
+};
 
 /**
 * Contains all data that describe player input.
@@ -36,14 +51,19 @@ public:
 	const UMyInputMappingContext* GetGameplayInputContext(int32 LocalPlayerIndex) const;
 
 	/** Returns the Enhanced Input Mapping Context of actions on the In-Game Menu widget.
-	  * @see UPlayerInputDataAsset:: */
+	  * @see UPlayerInputDataAsset::InGameMenuInputContextInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE UMyInputMappingContext* GetInGameMenuInputContext() const { return InGameMenuInputContextInternal; }
 
 	/** Returns the Enhanced Input Mapping Context of actions on the Settings widget.
-	  * @see ::SettingsInputContextInternalInternal */
+	  * @see UPlayerInputDataAsset::SettingsInputContextInternalInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE UMyInputMappingContext* GetSettingsInputContext() const { return SettingsInputContextInternalInternal; }
+
+	/** Returns the mouse visibility settings for specified game state.
+	 * @see UPlayerInputDataAsset::MouseVisibilitySettingsInternal. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE FMouseVisibilitySettings& GetMouseVisibilitySettings(ECurrentGameState GameState) const { return MouseVisibilitySettingsInternal.FindChecked(GameState); }
 
 	/** Returns true if specified key is mapped to any gameplay input context. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Key"))
@@ -65,6 +85,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Input Context", ShowOnlyInnerProperties))
 	TObjectPtr<const UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr;
 
+	/** Determines mouse visibility behaviour per game states. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Mouse Visibility Settings"))
+	TMap<ECurrentGameState, FMouseVisibilitySettings> MouseVisibilitySettingsInternal;
+
 	/** Creates new contexts if is needed, is implemented to solve UE issues with remappings, see details below.
 	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -74,5 +98,5 @@ private:
 	/** Are created dynamically by specified input classes to solve UE issues with remappings, see details below.
 	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
 	UPROPERTY(Transient)
-	mutable TArray<TObjectPtr<class UMyInputMappingContext>> GameplayInputContextsInternal; //[G]
+	mutable TArray<TObjectPtr<class UMyInputMappingContext>> GameplayInputContextsInternal;
 };

@@ -2,6 +2,7 @@
 
 #include "Components/MouseActivityComponent.h"
 //---
+#include "DataAssets/PlayerInputDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -40,25 +41,17 @@ APlayerController& UMouseActivityComponent::GetPlayerControllerChecked() const
 	return *MyPlayerController;
 }
 
-// Returns true if the mouse cursor can be hidden
-bool UMouseActivityComponent::CanHideMouse()
+// Returns true if the mouse cursor can be visible according current game state, otherwise hidden
+bool UMouseActivityComponent::ShouldBeVisible()
 {
-	switch (AMyGameStateBase::GetCurrentGameState())
-	{
-		case ECurrentGameState::GameStarting:
-		case ECurrentGameState::InGame:
-		case ECurrentGameState::Cinematic:
-			return true;
-		default:
-			return false;
-	}
+	return UPlayerInputDataAsset::Get().GetMouseVisibilitySettings(AMyGameStateBase::GetCurrentGameState()).bIsVisible;
 }
 
 // Called to to set mouse cursor visibility
 void UMouseActivityComponent::SetMouseVisibility(bool bShouldShow)
 {
 	APlayerController& PC = GetPlayerControllerChecked();
-	const bool bFailedToHide = !bShouldShow && !CanHideMouse();
+	const bool bFailedToHide = !bShouldShow && ShouldBeVisible();
 	if (bFailedToHide
 	    || !PC.IsLocalController())
 	{
@@ -143,24 +136,5 @@ void UMouseActivityComponent::TickComponent(float DeltaTime, ELevelTick TickType
 // Listen to toggle mouse visibility
 void UMouseActivityComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
-	switch (CurrentGameState)
-	{
-		case ECurrentGameState::Menu:
-			SetMouseVisibility(true);
-			break;
-		case ECurrentGameState::Cinematic:
-			SetMouseVisibility(false);
-			break;
-		case ECurrentGameState::GameStarting:
-			SetMouseVisibility(false);
-			break;
-		case ECurrentGameState::InGame:
-			SetMouseVisibility(false);
-			break;
-		case ECurrentGameState::EndGame:
-			SetMouseVisibility(true);
-			break;
-		default:
-			break;
-	}
+	SetMouseVisibility(ShouldBeVisible());
 }
