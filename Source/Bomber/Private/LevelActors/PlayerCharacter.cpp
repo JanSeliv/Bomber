@@ -134,7 +134,7 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 	PowerupsInternal.BombN--;
 
 	// Init Bomb
-	BombActor->InitBomb(PowerupsInternal.FireN, CharacterIDInternal);
+	BombActor->InitBomb(this);
 
 	// Start listening this bomb
 	if (!MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(this, &ThisClass::OnBombDestroyed))
@@ -161,6 +161,13 @@ void APlayerCharacter::UpdateNicknameOnNameplate()
 	}
 
 	SetNicknameOnNameplate(NewNickname);
+}
+
+// Returns level type associated with player, e.g: Water level type for Roger character
+ELevelType APlayerCharacter::GetPlayerType() const
+{
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	return PlayerRow ? PlayerRow->LevelType : ELT::None;
 }
 
 // Set and apply how a player has to look lik

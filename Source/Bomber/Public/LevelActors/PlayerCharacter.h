@@ -8,6 +8,8 @@
 //---
 #include "PlayerCharacter.generated.h"
 
+enum class ELevelType : uint8;
+
 /**
  * Numbers of power-ups that affect the abilities of a player during gameplay.
  * @todo JanSeliv UGi56jhn Use GAS attributes for picked up items
@@ -83,6 +85,10 @@ public:
 	/** Returns current player mesh data of  the local player applied to skeletal mesh. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
+
+	/** Returns level type associated with player, e.g: Water level type for Roger character. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	ELevelType GetPlayerType() const;
 
 protected:
 	/** ---------------------------------------------------

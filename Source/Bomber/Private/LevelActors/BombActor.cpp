@@ -68,23 +68,49 @@ FCells ABombActor::GetExplosionCells() const
 }
 
 // Sets the defaults of the bomb
-void ABombActor::InitBomb(int32 InFireRadius/* = MIN_FIRE_RADIUS*/, int32 CharacterID/* = INDEX_NONE*/)
+void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 {
-	if (!HasAuthority()
-	    || !ensureMsgf(InFireRadius >= MIN_FIRE_RADIUS, TEXT("ASSERT: 'InFireRadius' is less than MIN_FIRE_RADIUS")))
+	if (!HasAuthority())
 	{
 		return;
 	}
 
-	// Set material
-	const int32 BombMaterialsNum = UBombDataAsset::Get().GetBombMaterialsNum();
-	if (CharacterID != INDEX_NONE // Is not debug character
-	    && BombMaterialsNum)      // As least one bomb material
+	int32 InFireRadius = MIN_FIRE_RADIUS;
+	int32 CharacterID = INDEX_NONE;
+	ELevelType PlayerType = ELevelType::None;
+	if (Causer)
 	{
-		const int32 MaterialIndex = FMath::Abs(CharacterID) % BombMaterialsNum;
-		BombMaterialInternal = UBombDataAsset::Get().GetBombMaterial(MaterialIndex);
-		ApplyMaterial();
+		CharacterID = Causer->GetCharacterID();
+		InFireRadius = Causer->GetPowerups().FireN;
+		PlayerType = Causer->GetPlayerType();
 	}
+
+	const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
+
+	const ULevelActorRow* BombRow = BombDataAsset.GetRowByLevelType(PlayerType);
+	const UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
+	if (ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %s:\n'BombMesh' is not found"), __LINE__, *FString(__FUNCTION__)))
+	{
+		// Override mesh and material
+		checkf(MapComponentInternal, TEXT("ERROR: [%i] %s:\n'MapComponentInternal' is null!"), __LINE__, *FString(__FUNCTION__));
+		MapComponentInternal->SetLevelActorRow(BombRow);
+		BombMaterialInternal = BombMesh->GetMaterial(0);
+	}
+
+	MapComponentInternal->SetLevelActorRow(BombRow);
+	if (PlayerType == ELevelType::None)
+	{
+		// Is bot character, set material for its default bomb with the same mesh
+		const int32 BombMaterialsNum = BombDataAsset.GetBombMaterialsNum();
+		if (CharacterID != INDEX_NONE // Is not debug character
+		    && BombMaterialsNum)      // As least one bomb material
+		{
+			const int32 MaterialIndex = FMath::Abs(CharacterID) % BombMaterialsNum;
+			BombMaterialInternal = BombDataAsset.GetBombMaterial(MaterialIndex);
+		}
+	}
+
+	ApplyMaterial();
 
 	FireRadiusInternal = InFireRadius;
 

@@ -38,13 +38,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetExplosionRadius() const { return FireRadiusInternal; }
 
-	/**
-	 * Sets the defaults of the bomb
-	 * @param InFireRadius Setting explosion length of this bomb
-	 * @param CharacterID Setting a mesh material of bomb by the character ID
-	 */
+	/** Sets the defaults of the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void InitBomb(int32 InFireRadius = 1, int32 CharacterID = -1);
+	void InitBomb(const class APlayerCharacter* Causer = nullptr);
 
 	/** Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
