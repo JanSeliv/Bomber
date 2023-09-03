@@ -33,7 +33,7 @@ public:
 
 	/** Returns the Levels Data Asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static const class UGeneratedMapDataAsset* GetLevelsDataAsset();
+	static const class UGeneratedMapDataAsset* GetGeneratedMapDataAsset();
 
 	/** Returns the UI Data Asset. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get UI Data Asset"))
@@ -60,7 +60,7 @@ public:
 	 ********************************************************************************************* */
 public:
 	/** Best suits for blueprints to get the data asset by its class since converts the result to the specified class. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DeterminesOutputType = "DataAssetClass", BlueprintAutocast))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (DeterminesOutputType = "DataAssetClass", BlueprintAutocast, Keywords = "Bomb,Box,Item,Player,Character,Wall"))
 	static const ULevelActorDataAsset* GetLevelActorDataAsset(
 		UPARAM(meta=(AllowAbstract="false")) TSubclassOf<ULevelActorDataAsset> DataAssetClass);
 
@@ -96,7 +96,7 @@ public:
 protected:
 	/** Contains properties to setup the generated level, is config property. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Levels Data Asset", ShowOnlyInnerProperties))
-	TSoftObjectPtr<class UGeneratedMapDataAsset> LevelsDataAssetInternal;
+	TSoftObjectPtr<class UGeneratedMapDataAsset> GeneratedMapDataAssetInternal;
 
 	/** Contains properties to setup UI, is config property. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "UI Data Asset", ShowOnlyInnerProperties))

@@ -9,7 +9,7 @@
 // Returns the generated map data asset
 const UGeneratedMapDataAsset& UGeneratedMapDataAsset::Get()
 {
-	const UGeneratedMapDataAsset* GeneratedMapDataAsset = UDataAssetsContainer::GetLevelsDataAsset();
+	const UGeneratedMapDataAsset* GeneratedMapDataAsset = UDataAssetsContainer::GetGeneratedMapDataAsset();
 	checkf(GeneratedMapDataAsset, TEXT("The Generated Map Data Asset is not valid"))
 	return *GeneratedMapDataAsset;
 }

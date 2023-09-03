@@ -16,9 +16,9 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(DataAssetsContainer)
 
 // Returns the Levels Data Asset
-const UGeneratedMapDataAsset* UDataAssetsContainer::GetLevelsDataAsset()
+const UGeneratedMapDataAsset* UDataAssetsContainer::GetGeneratedMapDataAsset()
 {
-	const UGeneratedMapDataAsset* LevelsDataAsset = Get().LevelsDataAssetInternal.LoadSynchronous();
+	const UGeneratedMapDataAsset* LevelsDataAsset = Get().GeneratedMapDataAssetInternal.LoadSynchronous();
 	checkf(LevelsDataAsset, TEXT("%s: 'LevelsDataAsset' is not loaded"), *FString(__FUNCTION__));
 	return LevelsDataAsset;
 }
