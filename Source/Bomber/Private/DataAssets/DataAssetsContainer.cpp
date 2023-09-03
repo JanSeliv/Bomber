@@ -63,6 +63,28 @@ const UGameStateDataAsset* UDataAssetsContainer::GetGameStateDataAsset()
 	return GameStateDataAsset;
 }
 
+// Best suits for blueprints to get the data asset by its class since converts the result to the specified class
+const ULevelActorDataAsset* UDataAssetsContainer::GetLevelActorDataAsset(TSubclassOf<ULevelActorDataAsset> DataAssetClass)
+{
+	if (!DataAssetClass)
+	{
+		return nullptr;
+	}
+
+	const TArray<TSoftObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
+	for (const TSoftObjectPtr<ULevelActorDataAsset>& DataAssetSoftIt : ActorsDataAssets)
+	{
+		const ULevelActorDataAsset* DataAssetIt = DataAssetSoftIt.LoadSynchronous();
+		checkf(DataAssetIt, TEXT("%s: 'DataAssetIt' is not loaded"), *FString(__FUNCTION__));
+		if (DataAssetIt->IsA(DataAssetClass))
+		{
+			return DataAssetIt;
+		}
+	}
+
+	return nullptr;
+}
+
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
 const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorClass(const TSubclassOf<AActor> ActorClass)
 {

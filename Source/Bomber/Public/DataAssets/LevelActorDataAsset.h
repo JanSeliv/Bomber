@@ -5,7 +5,7 @@
 #include "Engine/DataAsset.h"
 //---
 #include "Bomber.h"
-#include "Engine/EngineTypes.h"
+#include "Engine/EngineTypes.h" // ECollisionResponse
 //---
 #include "LevelActorDataAsset.generated.h"
 
@@ -36,7 +36,7 @@ protected:
 /**
  * The base data asset for the Bomber's data.
  */
-UCLASS(Blueprintable, BlueprintType, Abstract, Const, AutoExpandCategories=("C++"))
+UCLASS(Abstract, Blueprintable, BlueprintType, Const, AutoExpandCategories=("C++"))
 class BOMBER_API UBomberDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
@@ -51,7 +51,7 @@ protected:
 /**
  * The base data asset for any level actor that contains the main data about them.
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Abstract, Blueprintable, BlueprintType)
 class BOMBER_API ULevelActorDataAsset : public UBomberDataAsset
 {
 	GENERATED_BODY()
@@ -85,7 +85,7 @@ public:
 
 	/** Returns the class of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE UClass* GetActorClass() const { return ActorClassInternal; }
+	UClass* GetActorClass() const;
 
 	/** Returns the actor type of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -110,7 +110,7 @@ protected:
 
 	/** Class of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))
-	TSubclassOf<class AActor> ActorClassInternal = nullptr;
+	TSoftClassPtr<class AActor> ActorClassInternal = nullptr;
 
 	/** Actor type of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))

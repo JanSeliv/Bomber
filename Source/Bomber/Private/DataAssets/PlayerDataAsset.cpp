@@ -109,10 +109,7 @@ UPlayerDataAsset::UPlayerDataAsset()
 // Returns the player data asset
 const UPlayerDataAsset& UPlayerDataAsset::Get()
 {
-	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Player);
-	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(FoundDataAsset);
-	checkf(PlayerDataAsset, TEXT("The Player Data Asset is not valid"));
-	return *PlayerDataAsset;
+	return UDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }
 
 // Get nameplate material by index, is used by nameplate meshes
