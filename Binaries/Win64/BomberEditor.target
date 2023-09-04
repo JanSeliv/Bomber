@@ -13950,18 +13950,6 @@
 			"Type": "RequiredResource"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/CustomShapeButton/Binaries/Win64/UnrealEditor-CustomShapeButton.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/CustomShapeButton/Binaries/Win64/UnrealEditor-CustomShapeButton.pdb",
-			"Type": "SymbolFile"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/CustomShapeButton/Binaries/Win64/UnrealEditor.modules",
-			"Type": "RequiredResource"
-		},
-		{
 			"Path": "$(ProjectDir)/Plugins/FunctionPicker/Binaries/Win64/UnrealEditor-FunctionPicker.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -37721,10 +37709,6 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Content/Slate/Pointer@8x.png",
-			"Type": "UFS"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/CustomShapeButton/CustomShapeButton.uplugin",
 			"Type": "UFS"
 		},
 		{
