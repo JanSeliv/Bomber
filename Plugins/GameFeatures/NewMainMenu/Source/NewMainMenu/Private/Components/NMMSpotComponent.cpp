@@ -281,6 +281,12 @@ void UNMMSpotComponent::TryMarkCinematicAsSeen()
 // Is called when the cinematic was loaded to finish creation
 void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence)
 {
+	if (MasterPlayerInternal)
+	{
+		// Is already initialized
+		return;
+	}
+
 	// Create and cache the master sequence
 	ALevelSequenceActor* OutActor = nullptr;
 	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
