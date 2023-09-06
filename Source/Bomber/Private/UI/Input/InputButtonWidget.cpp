@@ -9,6 +9,7 @@
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 //---
+#include "PlayerMappableKeySettings.h"
 #include "Components/InputKeySelector.h"
 #include "Components/TextBlock.h"
 //---
@@ -99,7 +100,7 @@ void UInputButtonWidget::UpdateStyle()
 	InputKeySelector->SetButtonStyle(ButtonStyleRef);
 
 	// Update text
-	CaptionWidget->SetText(MappableDataInternal.PlayerMappableOptions.DisplayName);
+	CaptionWidget->SetText(MappableDataInternal.GetDisplayName());
 	CaptionWidget->SetFont(MiscThemeData.TextAndCaptionFont);
 	CaptionWidget->SetColorAndOpacity(MiscThemeData.TextAndCaptionColor);
 

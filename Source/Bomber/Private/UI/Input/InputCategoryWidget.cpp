@@ -23,7 +23,7 @@ void FInputCategoryData::GetCategoriesDataFromMappings(const UMyInputMappingCont
 	// Find all categories in every mapping
 	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
 	{
-		const FText& DisplayCategory = MappingIt.PlayerMappableOptions.DisplayCategory;
+		const FText& DisplayCategory = MappingIt.GetDisplayCategory();
 		FInputCategoryData* CategoryData = OutInputCategoriesData.FindByPredicate([&DisplayCategory](const FInputCategoryData& CategoryDataIt)
 		{
 			return CategoryDataIt.CategoryName.EqualTo(DisplayCategory);

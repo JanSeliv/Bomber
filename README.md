@@ -1,21 +1,25 @@
 # 💣 About the Bomber Project
 
-Bomber is an open-source indie game with multiplayer support, available for Windows and MacOS, developed using Unreal Engine 5.2. Engage in fast-paced strategic combat with friends or against AI, by placing bombs to eliminate enemies and navigate through obstacles. The objective is to be the last character standing. Players can collect power-ups to set multiple bombs, enlarge explosions, or boost speed. It is crucial to exercise caution to avoid being caught in bomb blasts, including one’s own. The game boasts procedurally generated levels, ensuring a diverse and unpredictable experience in each play-through. Battle against cunning bots or challenge your friends, and strategize to become the ultimate bomber!
+Bomber is an open-source indie game developed on Unreal Engine 5 for Windows and MacOS, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
 
 ## Table of Contents
+
 - [💣 About the Bomber Project](#-about-the-bomber-project)
 - [🚀 Getting Started](#-getting-started)
+- [🛠 Key Features](#-key-features)
 - [💾 Play the Build](#-play-the-build)
 - [📋 Kanban Board](#-kanban-board)
 - [📅 Changelog](#-changelog)
-- [🎮 Features](#-features)
+- [🎮 Overview](#-overview)
 - [🧑‍🤝‍🧑 Content Creation Team](#-content-creation-team)
 - [📫 Feedback & Contribution](#-feedback--contribution)
 - [📜 License](#-license)
 
 ## 🚀 Getting Started
 
-This repository contains submodules, to clone the project properly, run:
+This project uses **submodules**, downloaded via SSH. If you haven't set up SSH or skip submodules, you'll find empty folders in `Bomber\Plugins` and encounter [issues](https://github.com/JanSeliv/Bomber/issues/64) when running the project.
+
+To clone the project properly, run:
 ```sh
 git clone --recurse-submodules git@github.com:JanSeliv/Bomber.git
 ```
@@ -24,16 +28,39 @@ If already cloned without submodules, run:
 git submodule update --init --recursive
 ```
 
+## 🛠 Key Features
+
+This project could be useful for learners, demonstrating next features:
+
+- Multiplayer support
+- Enhanced Input support
+- Modular Game Features support
+- Complex cinematics
+- Procedurally generated level
+- Challenging AI
+
+Despite this project is fully written in C++, it's extremely **blueprint-friendly**:
+
+- **Data-Driven Design**: No hardcoded values. All data can be tweaked via Data Assets in editor as well as accessed in blueprints [[doc](https://trello.com/c/HGscMUdK)].
+- **Fully Exposed**: Every class, property, and function is exposed to Blueprints allowing for heavy changes the logic with no code.
+- **Well-Commented**: Every class, property and function is well-commented for easy understanding.
+- **Utility Libraries**: Core static functions are accessible globally like Cell Utils [[doc](https://trello.com/c/b2IzcOhg)]. See more in the `Source\UtilityLibraries` [folder](https://github.com/JanSeliv/Bomber/tree/master/Source/Bomber/Public/UtilityLibraries).
+
 ## 💾 Play the Build
 
-To download and play the build, visit [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi)
+To download and play the build, visit [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi).
+
+Want to test develop branch? [Message me](https://t.me/JanSeliv) for a Steam key.
 
 ## 📋 Kanban Board
 
 Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
 ## 📅 Changelog
-
+####
+- Updated to **Unreal Engine 5.3**.
+- **New Main Menu** with completely different UI and complex cinematics on starting the game (only Hugo and Fori):
+> ![NewMainMenu](https://github.com/JanSeliv/Bomber/assets/20540872/9c960fa4-6760-4298-a55b-54d0cb8a0b13)
 #### `12.06.2023`
 - Updated to **Unreal Engine 5.2**.
 - Added **MacOS** support.
@@ -89,7 +116,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
  ---
 #### `15.10.2019:` Uploaded first game-ready build.
 
-## 🎮 Features
+## 🎮 Overview
 
 **The level camera** that moves and zooms lens depending on the distance between players:
 
@@ -214,7 +241,11 @@ _Grey Х: the selected cell on which the bot moves to._
 
 ## 📫 Feedback & Contribution
 
-This is an open-source project and we encourage you to contribute. If you encounter any bugs, or if you have any feature requests, please file an issue in the GitHub repository.
+Feedback and contributions from the community are highly appreciated!
+
+If you'd like to contribute, please fork the project and create a pull request targeting the `develop` branch.
+
+If you've found a bug or have an idea for a new feature, please open a new issue on GitHub. Thank you!
 
 ## 📜 License
 

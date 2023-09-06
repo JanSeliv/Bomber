@@ -7,7 +7,7 @@
 #include "BombActor.generated.h"
 
 #define MIN_FIRE_RADIUS 1
-#define DEFAULT_LIFESPAN INDEX_NONE
+#define DEFAULT_LIFESPAN -1.f
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.

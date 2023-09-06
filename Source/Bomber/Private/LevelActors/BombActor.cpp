@@ -17,6 +17,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR

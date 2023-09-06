@@ -7,7 +7,12 @@
 #include "DetailLayoutBuilder.h"
 #include "IDetailChildrenBuilder.h"
 #include "PropertyCustomizationHelpers.h"
-#include "SceneOutliner/Private/SSocketChooser.h"
+#include "SSocketChooser.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Modules/ModuleManager.h"
+#include "Toolkits/IToolkit.h"
+#include "Toolkits/IToolkitHost.h"
 #include "Toolkits/ToolkitManager.h"
 
 typedef FAttachedMeshCustomization ThisClass;
