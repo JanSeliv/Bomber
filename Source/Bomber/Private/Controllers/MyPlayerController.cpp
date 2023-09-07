@@ -106,6 +106,7 @@ void AMyPlayerController::BindInputActionsInContext(const UMyInputMappingContext
 
 		const ETriggerEvent TriggerEvent = ActionIt->GetTriggerEvent();
 		EnhancedInputComponent->BindAction(ActionIt, TriggerEvent, FoundContextObj, FunctionName);
+		UE_LOG(LogBomber, Log, TEXT("Input bound: [%s][%s] %s()->%s()"), *GetNameSafe(InInputContext), *GetNameSafe(InputActionIt), *StaticContext.ToDisplayString(), *FunctionName.ToString());
 	}
 }
 
@@ -141,9 +142,10 @@ bool AMyPlayerController::CanBindInputActions() const
 		return false;
 	}
 
-	if (!GetPawn())
+	const bool bIsStartingState = AMyGameStateBase::GetCurrentGameState() == ECGS::Menu;
+	if (!GetPawn() && bIsStartingState)
 	{
-		// Player has to be possessed to handle its inputs
+		// While in menu (or initializing), player has to be possessed to bind inputs
 		return false;
 	}
 
@@ -335,6 +337,8 @@ void AMyPlayerController::OnToggledInGameMenu_Implementation(bool bIsVisible)
 {
 	if (ECurrentGameState::InGame != AMyGameStateBase::GetCurrentGameState())
 	{
+		// Do not handle input if not in game
+		// Note: End-Game state is handled automatically by switching states
 		return;
 	}
 
