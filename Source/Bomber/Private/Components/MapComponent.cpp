@@ -117,8 +117,6 @@ bool UMapComponent::OnConstructionOwnerActor()
 	}
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
-	TryDisplayOwnedCell();
-
 	return true;
 }
 
@@ -126,6 +124,8 @@ bool UMapComponent::OnConstructionOwnerActor()
 void UMapComponent::SetCell(const FCell& Cell)
 {
 	CellInternal = Cell;
+
+	TryDisplayOwnedCell();
 }
 
 // Show current cell if owned actor type is allowed, is not available in shipping build

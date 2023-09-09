@@ -16,6 +16,7 @@ public class Bomber : ModuleRules
                 , "UMG" // UUserWidget creation
                 , "EnhancedInput" // Created UMyInputAction, UMyInputMappingContext
                 , "DeveloperSettings" // Created UDataAssetsContainer
+                , "NetCore" // Created FMapComponentsContainer
                 //My modules
                 , "FunctionPicker" // Created properties in UMyInputAction
                 , "MetaCheatManager" // Created UMyCheatManager

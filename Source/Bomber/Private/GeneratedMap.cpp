@@ -371,10 +371,7 @@ void AGeneratedMap::IntersectCellsByTypes(
 		const FCells AllEmptyCells = FCells(
 			GridCellsInternal.FilterByPredicate([&MapComponents = MapComponentsInternal](const FCell& CellIt)
 			{
-				return !MapComponents.ContainsByPredicate([&CellIt](const UMapComponent* MapComponentIt)
-				{
-					return MapComponentIt && MapComponentIt->GetCell() == CellIt;
-				});
+				return !MapComponents.Contains(CellIt);
 			}));
 
 		if (InOutCells.Num())
@@ -445,7 +442,7 @@ void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* Dest
 			DestroyLevelActor(MapComponentIt, DestroyCauser);
 		}
 	}
-	MapComponentsInternal.Shrink();
+	MapComponentsInternal.Items.Shrink();
 }
 
 // Destroy level actor by specified Map Component from the level
@@ -709,8 +706,7 @@ void AGeneratedMap::Destroyed()
 		const int32 MapComponentsNum = MapComponentsInternal.Num();
 		for (int32 Index = MapComponentsNum - 1; Index >= 0; --Index)
 		{
-			UMapComponent* MapComponentIt = MapComponentsInternal.IsValidIndex(Index) ? MapComponentsInternal[Index] : nullptr;
-			DestroyLevelActor(MapComponentIt);
+			DestroyLevelActor(MapComponentsInternal[Index]);
 		}
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
@@ -907,6 +903,10 @@ void AGeneratedMap::GenerateLevelActors()
 	{
 		SpawnActorByType(It.Value, It.Key);
 	}
+
+	MapComponentsInternal.MarkArrayDirty();
+
+	OnGeneratedLevelActors.Broadcast();
 }
 
 //  Map components getter.
@@ -1133,6 +1133,17 @@ void AGeneratedMap::ApplyLevelType()
 void AGeneratedMap::OnRep_LevelType()
 {
 	ApplyLevelType();
+}
+
+// Is called on client to broadcast On Generated Level Actors delegate
+void AGeneratedMap::OnRep_MapComponents()
+{
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame
+	    && OnGeneratedLevelActors.IsBound())
+	{
+		// Any replication in array means the level regeneration since game is currently starting (3-2-1)
+		OnGeneratedLevelActors.Broadcast();
+	}
 }
 
 // Internal multicast function to set new size for generated map for all instances

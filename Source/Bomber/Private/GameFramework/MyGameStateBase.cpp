@@ -50,6 +50,10 @@ void AMyGameStateBase::ServerSetGameState_Implementation(ECurrentGameState NewGa
 
 	CurrentGameStateInternal = NewGameState;
 	ApplyGameState();
+
+	// Update replicated state now, not waiting for the next tick
+	// So, the client will receive replicated state in first order in comparing with other replicates
+	ForceNetUpdate();
 }
 
 /* ---------------------------------------------------
