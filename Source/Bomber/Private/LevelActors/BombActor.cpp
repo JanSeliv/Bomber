@@ -214,7 +214,19 @@ void ABombActor::SetLifeSpan(float InLifespan/* = DEFAULT_LIFESPAN*/)
 		InLifespan = UBombDataAsset::Get().GetLifeSpan();
 	}
 
-	Super::SetLifeSpan(InLifespan);
+	// Don't call Super to allow its execution on clients
+
+	InitialLifeSpan = InLifespan;
+
+	// Initialize a timer for the actors lifespan if there is one. Otherwise clear any existing timer
+	if (InLifespan > 0.0f)
+	{
+		GetWorldTimerManager().SetTimer(TimerHandle_LifeSpanExpired, this, &AActor::LifeSpanExpired, InLifespan);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle_LifeSpanExpired);
+	}
 }
 
 // Called when the lifespan of an actor expires (if he has one)
@@ -228,26 +240,23 @@ void ABombActor::LifeSpanExpired()
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
 void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 {
-	if (HasAuthority())
+	if (!bNewHidden)
 	{
-		if (!bNewHidden)
-		{
-			// Is added on Generated Map
+		// Is added on Generated Map
 
-			ConstructBombActor();
+		ConstructBombActor();
 
-			SetLifeSpan();
+		SetLifeSpan();
 
-			// Binding to the event, that triggered when character end to overlaps the collision component
-			OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
-		}
-		else
-		{
-			// Bomb is removed from Generated Map, detonate it
-			DetonateBomb();
+		// Binding to the event, that triggered when character end to overlaps the collision component
+		OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
+	}
+	else
+	{
+		// Bomb is removed from Generated Map, detonate it
+		DetonateBomb();
 
-			OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
-		}
+		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
 	}
 
 	// Apply hidden flag
