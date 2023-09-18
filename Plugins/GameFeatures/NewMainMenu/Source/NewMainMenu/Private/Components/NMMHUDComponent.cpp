@@ -43,6 +43,9 @@ void UNMMHUDComponent::OnRegister()
 	checkf(!NewMainMenuDataAssetInternal.IsNull(), TEXT("ERROR: 'NewMainMenuDataAssetInternal' is null!"));
 	const AMyHUD& HUD = GetHUDChecked();
 
-	MainMenuWidgetInternal = HUD.CreateWidgetByClass<UNewMainMenuWidget>(GetNewMainMenuDataAsset()->GetMainMenuWidgetClass());
+	constexpr int32 HighZOrder = 3;
+	constexpr bool bAddToViewport = true;
+	MainMenuWidgetInternal = HUD.CreateWidgetByClass<UNewMainMenuWidget>(GetNewMainMenuDataAsset()->GetMainMenuWidgetClass(), bAddToViewport, HighZOrder);
+
 	InCinematicStateWidgetInternal = HUD.CreateWidgetByClass<UNMMCinematicStateWidget>(GetNewMainMenuDataAsset()->GetInCinematicStateWidgetClass());
 }
