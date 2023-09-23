@@ -105,7 +105,7 @@ void AMyHUD::InitWidgets()
 
 	FPSCounterWidgetInternal = CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
 
-	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/1);
+	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/4);
 	SettingsWidgetInternal->TryConstructSettings();
 
 	static constexpr int32 MaxPlayersNum = 4;
