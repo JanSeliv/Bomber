@@ -25,7 +25,7 @@ class UMapComponent;
  * PreReplicatedRemove and PostReplicatedAdd can be added to handle custom logic.
  */
 USTRUCT(BlueprintType)
-struct FMapComponentSpec : public FFastArraySerializerItem
+struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
 
@@ -56,16 +56,16 @@ struct FMapComponentSpec : public FFastArraySerializerItem
 	 * Convenience operators to treat FMapComponentSpec as a UMapComponent*
 	 ********************************************************************************************* */
 
-	friend bool operator==(const FMapComponentSpec& A, const FMapComponentSpec& B) { return A.MapComponent == B.MapComponent; }
-	friend bool operator==(const FMapComponentSpec& A, const UMapComponent* B) { return A.MapComponent == B; }
-	friend bool operator==(const FMapComponentSpec& A, const FCell& B);
+	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FMapComponentSpec& B) { return A.MapComponent == B.MapComponent; }
+	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const UMapComponent* B) { return A.MapComponent == B; }
+	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FCell& B);
 };
 
 /**
  * Iterator structure for FMapComponentsContainer, designed to simplify the traversal of the container's items.
  * Facilitates cleaner and safer access to elements.
  */
-struct FMapComponentsIterator
+struct BOMBER_API FMapComponentsIterator
 {
 private:
 	const TArray<FMapComponentSpec>& Items;
@@ -89,7 +89,7 @@ public:
  * PostReplicatedChange can be added to handle custom logic after the array has been replicated.
  */
 USTRUCT(BlueprintType)
-struct FMapComponentsContainer : public FFastArraySerializer
+struct BOMBER_API FMapComponentsContainer : public FFastArraySerializer
 {
 	GENERATED_BODY()
 
@@ -131,7 +131,7 @@ public:
  * Enables network delta serialization for efficient and reliable replication.
  */
 template <>
-struct TStructOpsTypeTraits<FMapComponentsContainer> : public TStructOpsTypeTraitsBase2<FMapComponentsContainer>
+struct BOMBER_API TStructOpsTypeTraits<FMapComponentsContainer> : public TStructOpsTypeTraitsBase2<FMapComponentsContainer>
 {
 	enum { WithNetDeltaSerializer = true };
 };

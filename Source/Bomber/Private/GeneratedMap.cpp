@@ -330,9 +330,9 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 
 	// Find transform
 	FRotator ActorRotation = GetActorRotation();
-	if (!(TO_FLAG(ActorType) & TO_FLAG(EAT::Item | EAT::Player)))
+	if (TO_FLAG(ActorType) & TO_FLAG(EAT::Box | EAT::Wall))
 	{
-		// Random rotate if is not item and not player
+		// Random rotate if is Box or Wall
 		static constexpr float RotationMultiplier = 90.f;
 		static constexpr int32 MinRange = 1;
 		static constexpr int32 MaxRange = 4;
