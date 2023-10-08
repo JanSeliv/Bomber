@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 //---
 #include "Structures/CustomPlayerMeshData.h"
+#include "Structures/PlayerTag.h"
 //---
 #include "PlayerCharacter.generated.h"
 
@@ -46,6 +47,12 @@ class BOMBER_API APlayerCharacter final : public ACharacter
 	GENERATED_BODY()
 
 public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerTypeChanged, FPlayerTag, PlayerTag);
+
+	/** Called when chosen player's mesh changed for this pawn. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnPlayerTypeChanged OnPlayerTypeChanged;
+
 	/** ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */

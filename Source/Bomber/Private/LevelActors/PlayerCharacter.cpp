@@ -593,6 +593,8 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
 
 	MapComponentInternal->SetLevelActorRow(PlayerMeshDataInternal.PlayerRow);
+
+	OnPlayerTypeChanged.Broadcast(PlayerMeshDataInternal.PlayerRow->PlayerTag);
 }
 
 // Set and apply default skeletal mesh for this player
