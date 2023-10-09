@@ -170,6 +170,13 @@ ELevelType APlayerCharacter::GetPlayerType() const
 	return PlayerRow ? PlayerRow->LevelType : ELT::None;
 }
 
+// Returns the Player Tag associated with player
+const FGameplayTag& APlayerCharacter::GetPlayerTag() const
+{
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	return PlayerRow ? PlayerRow->PlayerTag : FGameplayTag::EmptyTag;
+}
+
 // Set and apply how a player has to look lik
 void APlayerCharacter::ServerSetCustomPlayerMeshData_Implementation(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {

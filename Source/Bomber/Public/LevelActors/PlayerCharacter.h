@@ -97,6 +97,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ELevelType GetPlayerType() const;
 
+	/** Returns the Player Tag associated with player. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FGameplayTag& GetPlayerTag() const;
+
 protected:
 	/** ---------------------------------------------------
 	 *		Protected properties
