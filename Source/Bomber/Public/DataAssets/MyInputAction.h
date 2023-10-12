@@ -32,6 +32,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FFunctionPicker& GetFunctionToBind() const { return FunctionToBindInternal; }
 
+#if WITH_EDITOR
+	/** Validates bound functions to this input action. */
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif // WITH_EDITOR
+	
 protected:
 	/** Choose for which state the bound function has to be called. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Trigger Event", ShowOnlyInnerProperties))
