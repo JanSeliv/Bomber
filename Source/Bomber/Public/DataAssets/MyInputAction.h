@@ -38,7 +38,7 @@ protected:
 	ETriggerEvent TriggerEventInternal = ETriggerEvent::Triggered;
 
 	/** Contains data about static function object getter of a function to bind. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Static Context", ShowOnlyInnerProperties, FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnStaticContext__DelegateSignature"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Static Context", ShowOnlyInnerProperties, FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterObject__DelegateSignature"))
 	FFunctionPicker StaticContextInternal = FFunctionPicker::Empty;
 
 	/** Allows to set function that is used to be called when input will be triggered. */

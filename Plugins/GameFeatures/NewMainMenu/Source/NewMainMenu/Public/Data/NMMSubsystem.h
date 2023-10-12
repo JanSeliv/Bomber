@@ -20,8 +20,7 @@ class NEWMAINMENU_API UNMMSubsystem : public UWorldSubsystem
 
 public:
 	/** Returns this Subsystem, is checked and wil crash if can't be obtained.*/
-	static UNMMSubsystem& Get();
-	static UNMMSubsystem& Get(const UObject& WorldContextObject);
+	static UNMMSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMainMenuSpotReady, UNMMSpotComponent*, MainMenuSpotComponent);
 

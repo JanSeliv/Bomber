@@ -7,6 +7,7 @@
 #include "DataAssets/MyInputAction.h"
 #include "DataAssets/MyInputMappingContext.h"
 #include "DataAssets/PlayerInputDataAsset.h"
+#include "FunctionPickerData/FunctionPickerTemplate.h"
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
@@ -91,15 +92,15 @@ void AMyPlayerController::BindInputActionsInContext(const UMyInputMappingContext
 		}
 
 		const FFunctionPicker& StaticContext = ActionIt->GetStaticContext();
-		UFunction* FunctionPtr = StaticContext.GetFunction();
-		if (!ensureAlwaysMsgf(FunctionPtr, TEXT("ASSERT: [%i] %s:\n'FunctionPtr' is not found in static context: %s, can not bind the action '%s'!"), __LINE__, *FString(__FUNCTION__), *StaticContext.ToDisplayString(), *GetNameSafe(ActionIt)))
+		if (!ensureAlwaysMsgf(StaticContext.IsValid(), TEXT("ASSERT: [%i] %s:\n'StaticContext' is not valid: %s, can not bind the action '%s'!"), __LINE__, *FString(__FUNCTION__), *StaticContext.ToDisplayString(), *GetNameSafe(ActionIt)))
 		{
 			continue;
 		}
 
-		UObject* FoundContextObj = nullptr;
-		FunctionPtr->ProcessEvent(FunctionPtr, /*Out*/&FoundContextObj);
-		if (!ensureAlwaysMsgf(FoundContextObj, TEXT("ASSERT: [%i] %s:\n'FoundContextObj' is not found, next function return nullptr: %s, can not bind the action '%s'!"), __LINE__, *FString(__FUNCTION__), *StaticContext.ToDisplayString(), *GetNameSafe(ActionIt)))
+		UFunctionPickerTemplate::FOnGetterObject GetOwnerFunc;
+		GetOwnerFunc.BindUFunction(StaticContext.FunctionClass->GetDefaultObject(), StaticContext.FunctionName);
+		UObject* FoundContextObj = GetOwnerFunc.Execute(GetWorld());
+		if (!ensureAlwaysMsgf(FoundContextObj, TEXT("ASSERT: [%i] %s:\n'FoundContextObj' is not found, next function returns nullptr: %s, can not bind the action '%s'!"), __LINE__, *FString(__FUNCTION__), *StaticContext.ToDisplayString(), *GetNameSafe(ActionIt)))
 		{
 			continue;
 		}

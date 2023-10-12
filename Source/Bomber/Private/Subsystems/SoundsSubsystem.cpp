@@ -7,6 +7,7 @@
 #include "DataAssets/SoundsDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/AudioComponent.h"
@@ -15,16 +16,20 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SoundsSubsystem)
 
-// Returns the Sounds Manager checked
+// Returns the Sounds Manager, is checked and wil crash if can't be obtained
 USoundsSubsystem& USoundsSubsystem::Get()
 {
-	const UWorld* World = UMyBlueprintFunctionLibrary::GetStaticWorld();
-	checkf(World, TEXT("%s: 'World' is null"), *FString(__FUNCTION__));
-	const TSubclassOf<USoundsSubsystem> SoundsSubsystemClass = USoundsDataAsset::Get().GetSoundsSubsystemClass();
-	checkf(SoundsSubsystemClass, TEXT("%s: 'SoundsSubsystemClass' is null"), *FString(__FUNCTION__));
-	USoundsSubsystem* SoundsSubsystem = Cast<USoundsSubsystem>(World->GetSubsystemBase(SoundsSubsystemClass));
+	USoundsSubsystem* SoundsSubsystem = GetSoundsSubsystem();
 	checkf(SoundsSubsystem, TEXT("%s: 'SoundsSubsystem' is null"), *FString(__FUNCTION__));
 	return *SoundsSubsystem;
+}
+
+// Returns the pointer to the Sounds Manager
+USoundsSubsystem* USoundsSubsystem::GetSoundsSubsystem(const UObject* WorldContextObject)
+{
+	const UWorld* World = UUtilsLibrary::GetPlayWorld(WorldContextObject);
+	const TSubclassOf<USoundsSubsystem> SoundsSubsystemClass = USoundsDataAsset::Get().GetSoundsSubsystemClass();
+	return World ? Cast<USoundsSubsystem>(World->GetSubsystemBase(SoundsSubsystemClass)) : nullptr;
 }
 
 // Set new sound volume

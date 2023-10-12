@@ -3,27 +3,17 @@
 #include "Data/NMMSubsystem.h"
 //---
 #include "Components/NMMSpotComponent.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "Engine/Engine.h"
 #include "Engine/World.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSubsystem)
 
 // Returns this Subsystem, is checked and wil crash if can't be obtained
-UNMMSubsystem& UNMMSubsystem::Get()
+UNMMSubsystem& UNMMSubsystem::Get(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UWorld* World = UMyBlueprintFunctionLibrary::GetStaticWorld();
-	checkf(World, TEXT("%s: 'World' is null"), *FString(__FUNCTION__));
-	UNMMSubsystem* ThisSubsystem = World->GetSubsystem<ThisClass>();
-	checkf(ThisSubsystem, TEXT("%s: 'SoundsSubsystem' is null"), *FString(__FUNCTION__));
-	return *ThisSubsystem;
-}
-
-// Returns this Subsystem, is checked and wil crash if can't be obtained
-UNMMSubsystem& UNMMSubsystem::Get(const UObject& WorldContextObject)
-{
-	const UWorld* World = GEngine->GetWorldFromContextObjectChecked(&WorldContextObject);
+	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
 	checkf(World, TEXT("%s: 'World' is null"), *FString(__FUNCTION__));
 	UNMMSubsystem* ThisSubsystem = World->GetSubsystem<ThisClass>();
 	checkf(ThisSubsystem, TEXT("%s: 'SoundsSubsystem' is null"), *FString(__FUNCTION__));

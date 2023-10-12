@@ -26,9 +26,13 @@ public:
 	 *		Public functions
 	 * --------------------------------------------------- */
 
-	/** Returns the Sounds Manager checked. */
+	/** Returns the Sounds Manager, is checked and wil crash if can't be obtained. */
 	static USoundsSubsystem& Get();
 
+	/** Returns the pointer to the Sounds Manager. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static USoundsSubsystem* GetSoundsSubsystem(const UObject* WorldContextObject = nullptr);
+	
 	/** The component that is used to store reference for EndGameCountdown SFX. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))
 	TObjectPtr<UAudioComponent> ActiveEndGameCountdownSFX = nullptr;

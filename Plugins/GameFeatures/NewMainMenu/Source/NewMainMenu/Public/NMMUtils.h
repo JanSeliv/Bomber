@@ -23,24 +23,24 @@ class NEWMAINMENU_API UNMMUtils : public UBlueprintFunctionLibrary
 	 ********************************************************************************************* */
 public:
 	/** Returns the HUD component of the Main Menu. */
-	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM HUD Component")
-	static class UNMMHUDComponent* GetHUDComponent();
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM HUD Component", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNMMHUDComponent* GetHUDComponent(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Player Controller component of the Main Menu. */
-	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Player Controller Component")
-	static class UNMMPlayerControllerComponent* GetPlayerControllerComponent();
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Player Controller Component", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNMMPlayerControllerComponent* GetPlayerControllerComponent(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the widget of the Main Menu. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UNewMainMenuWidget* GetMainMenuWidget();
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Main Menu Widget", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNewMainMenuWidget* GetMainMenuWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the widget of the In Cinematic State. */
-	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM In Cinematic State Widget")
-	static class UNMMCinematicStateWidget* GetInCinematicStateWidget();
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM In Cinematic State Widget", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNMMCinematicStateWidget* GetInCinematicStateWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Save Game data of the Main Menu. */
-	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Save Game Data")
-	static class UNMMSaveGameData* GetSaveGameData();
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Save Game Data", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNMMSaveGameData* GetSaveGameData(const UObject* OptionalWorldContext = nullptr);
 
 	/*********************************************************************************************
 	 * Cinematic helpers

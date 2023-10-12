@@ -18,37 +18,37 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMUtils)
 
 // Returns the HUD component of the Main Menu
-UNMMHUDComponent* UNMMUtils::GetHUDComponent()
+UNMMHUDComponent* UNMMUtils::GetHUDComponent(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD();
+	const AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD(OptionalWorldContext);
 	return MyHUD ? MyHUD->FindComponentByClass<UNMMHUDComponent>() : nullptr;
 }
 
 // Returns the Player Controller component of the Main Menu
-UNMMPlayerControllerComponent* UNMMUtils::GetPlayerControllerComponent()
+UNMMPlayerControllerComponent* UNMMUtils::GetPlayerControllerComponent(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController(OptionalWorldContext);
 	return MyPC ? MyPC->FindComponentByClass<UNMMPlayerControllerComponent>() : nullptr;
 }
 
 // Returns the widget of the Main Menu.
-UNewMainMenuWidget* UNMMUtils::GetMainMenuWidget()
+UNewMainMenuWidget* UNMMUtils::GetMainMenuWidget(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UNMMHUDComponent* HUDComponent = GetHUDComponent();
+	const UNMMHUDComponent* HUDComponent = GetHUDComponent(OptionalWorldContext);
 	return HUDComponent ? HUDComponent->GetMainMenuWidget() : nullptr;
 }
 
 // Returns the widget of the In Cinematic State
-UNMMCinematicStateWidget* UNMMUtils::GetInCinematicStateWidget()
+UNMMCinematicStateWidget* UNMMUtils::GetInCinematicStateWidget(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UNMMHUDComponent* HUDComponent = GetHUDComponent();
+	const UNMMHUDComponent* HUDComponent = GetHUDComponent(OptionalWorldContext);
 	return HUDComponent ? HUDComponent->GetInCinematicStateWidget() : nullptr;
 }
 
 // Returns the Save Game data of the Main Menu
-UNMMSaveGameData* UNMMUtils::GetSaveGameData()
+UNMMSaveGameData* UNMMUtils::GetSaveGameData(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UNMMPlayerControllerComponent* MenuControllerComp = GetPlayerControllerComponent();
+	const UNMMPlayerControllerComponent* MenuControllerComp = GetPlayerControllerComponent(OptionalWorldContext);
 	return MenuControllerComp ? MenuControllerComp->GetSaveGameData() : nullptr;
 }
 

@@ -86,7 +86,7 @@ void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 		}
 
 		// Initialize new gameplay contexts
-		UWorld* World = UMyBlueprintFunctionLibrary::GetStaticWorld();
+		UWorld* World = UUtilsLibrary::GetPlayWorld();
 		const TSubclassOf<UMyInputMappingContext>& ContextClassIt = GameplayInputContextClassesInternal[Index];
 		if (!World
 		    || !ContextClassIt)

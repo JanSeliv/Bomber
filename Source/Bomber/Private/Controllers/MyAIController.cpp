@@ -8,6 +8,7 @@
 #include "DataAssets/GameStateDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -56,7 +57,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	if (FEditorUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
-		if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay()) // PIE
+		if (UUtilsLibrary::HasWorldBegunPlay()) // PIE
 		{
 			UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		}

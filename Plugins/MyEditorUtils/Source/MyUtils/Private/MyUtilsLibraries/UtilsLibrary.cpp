@@ -15,6 +15,34 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(UtilsLibrary)
 
+// Returns the current play world
+UWorld* UUtilsLibrary::GetPlayWorld(const UObject* OptionalWorldContext)
+{
+	UWorld* FoundWorld = nullptr;
+	if (GEngine)
+	{
+		FoundWorld = GEngine->GetWorldFromContextObject(OptionalWorldContext, EGetWorldErrorMode::ReturnNull);
+		if (!FoundWorld)
+		{
+			FoundWorld = GEngine->GetCurrentPlayWorld();
+		}
+	}
+
+#if WITH_EDITOR
+	if (!FoundWorld)
+	{
+		FoundWorld = FEditorUtilsLibrary::GetEditorWorld();
+	}
+#endif
+
+	if (!ensureMsgf(FoundWorld, TEXT("%s: Can not obtain current world"), *FString(__FUNCTION__)))
+	{
+		return nullptr;
+	}
+
+	return FoundWorld;
+}
+
 // Checks, is the current world placed in the editor
 bool UUtilsLibrary::IsEditor()
 {
@@ -58,6 +86,25 @@ int32 UUtilsLibrary::GetEditorPlayerIndex()
 	return FEditorUtilsLibrary::IsEditorMultiplayer();
 #endif
 	return INDEX_NONE;
+}
+
+// Returns true if game was started
+bool UUtilsLibrary::HasWorldBegunPlay()
+{
+	if (IsPIE())
+	{
+		return true;
+	}
+
+	const UWorld* World = GetPlayWorld();
+	return World && World->HasBegunPlay();
+}
+
+// Returns true if this instance is server
+bool UUtilsLibrary::IsServer()
+{
+	const UWorld* World = GetPlayWorld();
+	return World && !World->IsNetMode(NM_Client);
 }
 
 // Returns true if viewport is initialized, is always true in PIE, but takes a while in builds

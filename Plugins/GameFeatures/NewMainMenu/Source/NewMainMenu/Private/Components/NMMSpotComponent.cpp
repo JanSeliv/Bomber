@@ -299,7 +299,7 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
 
 	// Notify that the spot is ready and finished loading
-	UNMMSubsystem::Get(*this).OnMainMenuSpotReady.Broadcast(this);
+	UNMMSubsystem::Get(this).OnMainMenuSpotReady.Broadcast(this);
 
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
 	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);

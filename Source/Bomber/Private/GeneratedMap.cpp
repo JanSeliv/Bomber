@@ -9,6 +9,7 @@
 #include "DataAssets/GeneratedMapDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/BombActor.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -628,7 +629,7 @@ void AGeneratedMap::OnConstructionGeneratedMap(const FTransform& Transform)
 	TransformGeneratedMap(Transform);
 
 #if WITH_EDITOR // [Editor-Standalone]
-	if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay())
+	if (UUtilsLibrary::HasWorldBegunPlay())
 	{
 		// Level actors are spawned differently on client for unsaved level if run without RunInderOneProcess or Standalone
 		// so destroy from pool all unsaved level actors to avoid it being unsynced on clients
