@@ -56,7 +56,7 @@ public:
 template <typename T>
 void FEditorUtilsLibrary::RegisterAsset(TArray<TSharedPtr<FAssetTypeActions_Base>>& InOutRegisteredAssets)
 {
-	TSharedPtr<T> SettingsDataTableAction = MakeShared<T>();
-	IAssetTools::Get().RegisterAssetTypeActions(SettingsDataTableAction.ToSharedRef());
-	InOutRegisteredAssets.Emplace(MoveTemp(SettingsDataTableAction));
+	TSharedPtr<T> SharedPtr = MakeShared<T>();
+	IAssetTools::Get().RegisterAssetTypeActions(SharedPtr.ToSharedRef());
+	InOutRegisteredAssets.Emplace(MoveTemp(SharedPtr));
 }

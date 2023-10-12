@@ -25,7 +25,7 @@ struct MYUTILS_API FMyTableRow : public FTableRowBase
  * Provides additional in-editor functionality like reexporting .json on data table change.
  * Its RowStruct structure must inherit from FMyTableRow.
  */
-UCLASS()
+UCLASS(Abstract)
 class MYUTILS_API UMyDataTable : public UDataTable
 {
 	GENERATED_BODY()
@@ -42,7 +42,6 @@ public:
 	static void GetRows(const UDataTable& DataTable, TMap<FName, T>& OutRows);
 
 protected:
-#pragma region OnDataTableChange
 #if WITH_EDITOR
 	friend FMyTableRow;
 
@@ -50,26 +49,37 @@ protected:
 	 * Is created to let child data tables reacts on changes without binding to its delegate,
 	 * can't use UDataTable::HandleDataTableChanged() since it is not virtual.
 	 * Is in runtime module since FDataTableEditor is private. */
-	virtual void OnThisDataTableChanged(FName RowName, const uint8& RowData);
+	virtual void OnThisDataTableChanged(FName RowName, const uint8& RowData) {}
+
+	/** Is called on saving the data table. */
+	virtual void PostSaveRoot(FObjectPostSaveRootContext ObjectSaveContext) override;
+
+	/** Reexports this table to .json. */
+	virtual void ReexportToJson();
 #endif // WITH_EDITOR
-#pragma endregion OnDataTableChange
 };
 
 /** Returns the table rows. */
 template <typename T>
 void UMyDataTable::GetRows(const UDataTable& DataTable, TMap<FName, T>& OutRows)
 {
-	if (ensureAlwaysMsgf(DataTable.RowStruct && DataTable.RowStruct->IsChildOf(T::StaticStruct()), TEXT("ASSERT: 'RowStruct' is not child of specified struct")))
+	if (!ensureAlwaysMsgf(DataTable.RowStruct && DataTable.RowStruct->IsChildOf(T::StaticStruct()), TEXT("ASSERT: 'RowStruct' is not child of specified struct")))
 	{
-		const TMap<FName, uint8*>& RowMap = DataTable.GetRowMap();
+		return;
+	}
+
+	if (!OutRows.IsEmpty())
+	{
 		OutRows.Empty();
-		OutRows.Reserve(RowMap.Num());
-		for (const TTuple<FName, uint8*>& RowIt : RowMap)
+	}
+
+	const TMap<FName, uint8*>& RowMap = DataTable.GetRowMap();
+	OutRows.Reserve(RowMap.Num());
+	for (const TTuple<FName, uint8*>& RowIt : RowMap)
+	{
+		if (const T* FoundRowPtr = reinterpret_cast<const T*>(RowIt.Value))
 		{
-			if (const T* FoundRowPtr = reinterpret_cast<const T*>(RowIt.Value))
-			{
-				OutRows.Emplace(RowIt.Key, *FoundRowPtr);
-			}
+			OutRows.Emplace(RowIt.Key, *FoundRowPtr);
 		}
 	}
 }
