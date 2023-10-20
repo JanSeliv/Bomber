@@ -61,8 +61,13 @@ bool UInputUtilsLibrary::IsInputContextEnabled(const UObject* WorldContext, cons
 void UInputUtilsLibrary::SetInputContextEnabled(const UObject* WorldContext, bool bEnable, const UInputMappingContext* InInputContext, int32 Priority/* = 0*/)
 {
 	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem(WorldContext);
-	if (!ensureMsgf(InputSubsystem, TEXT("ASSERT: 'InputSubsystem' is not valid"))
-		|| !ensureMsgf(InInputContext, TEXT("ASSERT: 'InInputContext' is not valid")))
+	if (!InputSubsystem)
+	{
+		// Can be null on remote clients, do nothing
+		return;
+	}
+
+	if (!ensureMsgf(InInputContext, TEXT("ASSERT: 'InInputContext' is not valid")))
 	{
 		return;
 	}

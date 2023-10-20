@@ -280,6 +280,11 @@ void AMyPlayerController::SetupInputContexts(const TArray<const UMyInputMappingC
 // Removes input contexts from managed list
 void AMyPlayerController::RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts)
 {
+	if (!IsLocalController())
+	{
+		return;
+	}
+	
 	for (const UMyInputMappingContext* InputContextIt : InputContexts)
 	{
 		if (InputContextIt)

@@ -17,12 +17,6 @@ UNMMSubsystem& UNMMSubsystem::Get(const UObject* OptionalWorldContext/* = nullpt
 	return *ThisSubsystem;
 }
 
-// Deinitialize this subsystem. Is called when controller is killed
-void UNMMSubsystem::Deactivate()
-{
-	FSubsystemCollectionBase::DeactivateExternalSubsystem(StaticClass());
-}
-
 // Returns the data asset that contains all the assets and tweaks of New Main Menu game feature
 const UNMMDataAsset* UNMMSubsystem::GetNewMainMenuDataAsset() const
 {

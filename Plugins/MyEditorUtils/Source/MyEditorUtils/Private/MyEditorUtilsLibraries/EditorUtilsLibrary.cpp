@@ -89,6 +89,11 @@ UWorld* FEditorUtilsLibrary::GetEditorWorld()
 	if (IsPIE())
 	{
 		FoundWorld = GEditor->GetCurrentPlayWorld();
+		if (!FoundWorld)
+		{
+			const FWorldContext* PIEWorldContext = GEditor->GetPIEWorldContext();
+			FoundWorld = PIEWorldContext ? PIEWorldContext->World() : nullptr;
+		}
 	}
 
 	if (!FoundWorld)

@@ -36,7 +36,7 @@ void UNMMHUDComponent::OnRegister()
 {
 	Super::OnRegister();
 
-	const UNMMDataAsset* NewMainMenuDataAsset = UNMMSubsystem::Get(this).GetNewMainMenuDataAsset();
+	const UNMMDataAsset* NewMainMenuDataAsset = UNMMSubsystem::Get().GetNewMainMenuDataAsset();
 	checkf(NewMainMenuDataAsset, TEXT("ERROR: 'NewMainMenuDataAssetInternal' is null!"));
 	const AMyHUD& HUD = GetHUDChecked();
 

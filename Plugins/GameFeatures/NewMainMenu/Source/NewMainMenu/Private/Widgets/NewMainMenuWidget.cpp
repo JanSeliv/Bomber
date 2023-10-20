@@ -105,7 +105,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 	{
 		// Start cinematic
 		// If should skip, then start the game instead
-		const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get(this).GetActiveMainMenuSpotComponent();
+		const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
 		const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
 		const ECGS NewState = !UNMMUtils::ShouldSkipCinematic(CinematicRow) ? ECGS::Cinematic : ECGS::GameStarting;
 		MyPC->ServerSetGameState(NewState);
@@ -140,7 +140,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
-	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get(this).MoveMainMenuSpot(Incrementer);
+	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().MoveMainMenuSpot(Incrementer);
 
 	// Update the chosen player mesh on the level
 	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpot ? MainMenuSpot->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
@@ -154,7 +154,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 void UNewMainMenuWidget::OnNextSkinButtonPressed()
 {
 	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get(this).GetActiveMainMenuSpotComponent();
+	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
 	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerCharacter' is not valid"))
 		|| !ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid")))
 	{

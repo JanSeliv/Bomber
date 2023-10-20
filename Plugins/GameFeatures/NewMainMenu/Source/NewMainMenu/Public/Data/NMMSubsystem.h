@@ -22,9 +22,6 @@ public:
 	/** Returns this Subsystem, is checked and wil crash if can't be obtained.*/
 	static UNMMSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
 
-	/** Deinitialize this subsystem. Is called when controller is killed. */
-	static void Deactivate();
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMainMenuSpotReady, UNMMSpotComponent*, MainMenuSpotComponent);
 
 	/** Called when the spot was spawned on new level and it finished loading its Master Sequence. */

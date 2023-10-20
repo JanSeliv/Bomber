@@ -31,7 +31,7 @@ UNMMSpotComponent::UNMMSpotComponent()
 // Returns true if this spot is currently active and possessed by player
 bool UNMMSpotComponent::IsActiveSpot() const
 {
-	return UNMMSubsystem::Get(this).GetActiveMainMenuSpotComponent() == this;
+	return UNMMSubsystem::Get().GetActiveMainMenuSpotComponent() == this;
 }
 
 // Returns the Skeletal Mesh of the Bomber character
@@ -119,7 +119,7 @@ void UNMMSpotComponent::BeginPlay()
 		return;
 	}
 
-	UNMMSubsystem::Get(this).AddNewMainMenuSpot(this);
+	UNMMSubsystem::Get().AddNewMainMenuSpot(this);
 
 	UpdateCinematicData();
 	LoadMasterSequencePlayer();
@@ -146,6 +146,11 @@ void UNMMSpotComponent::OnUnregister()
 		MasterPlayerInternal->Stop();
 		MasterPlayerInternal->ConditionalBeginDestroy();
 		MasterPlayerInternal = nullptr;
+	}
+
+	if (UNMMSubsystem* Subsystem = UNMMUtils::GetNewMainMenuSubsystem(this))
+	{
+		Subsystem->RemoveMainMenuSpot(this);
 	}
 
 	Super::OnUnregister();
@@ -315,7 +320,7 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
 
 	// Notify that the spot is ready and finished loading
-	UNMMSubsystem::Get(this).OnMainMenuSpotReady.Broadcast(this);
+	UNMMSubsystem::Get().OnMainMenuSpotReady.Broadcast(this);
 
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
 	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
