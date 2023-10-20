@@ -4,6 +4,7 @@
 //---
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSubsystem.h"
+#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "UI/MyHUD.h"
 #include "Widgets/NewMainMenuWidget.h"
 #include "Widgets/NMMCinematicStateWidget.h"
@@ -44,4 +45,24 @@ void UNMMHUDComponent::OnRegister()
 	MainMenuWidgetInternal = HUD.CreateWidgetByClass<UNewMainMenuWidget>(NewMainMenuDataAsset->GetMainMenuWidgetClass(), bAddToViewport, HighZOrder);
 
 	InCinematicStateWidgetInternal = HUD.CreateWidgetByClass<UNMMCinematicStateWidget>(NewMainMenuDataAsset->GetInCinematicStateWidgetClass());
+}
+
+// Clears all transient data created by this component
+void UNMMHUDComponent::OnUnregister()
+{
+	// --- Destroy Main Menu widgets
+
+	if (MainMenuWidgetInternal)
+	{
+		FWidgetUtilsLibrary::DestroyWidget(*MainMenuWidgetInternal);
+		MainMenuWidgetInternal = nullptr;
+	}
+
+	if (InCinematicStateWidgetInternal)
+	{
+		FWidgetUtilsLibrary::DestroyWidget(*InCinematicStateWidgetInternal);
+		InCinematicStateWidgetInternal = nullptr;
+	}
+
+	Super::OnUnregister();
 }

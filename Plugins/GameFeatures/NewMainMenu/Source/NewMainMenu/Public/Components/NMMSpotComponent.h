@@ -85,6 +85,9 @@ protected:
 	/** Overridable native event for when play begins for this actor. */
 	virtual void BeginPlay() override;
 
+	/** Clears all transient data created by this component. */
+	virtual void OnUnregister() override;
+
 	/** Is called to start listening game state changes. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
@@ -109,7 +112,7 @@ protected:
 	/** Marks own cinematic as seen by player. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryMarkCinematicAsSeen();
-	
+
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */

@@ -2,6 +2,7 @@
 
 #include "Components/NMMPlayerControllerComponent.h"
 //---
+#include "NMMUtils.h"
 #include "Components/MyCameraComponent.h"
 #include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
@@ -97,6 +98,30 @@ void UNMMPlayerControllerComponent::BeginPlay()
 	{
 		LevelCamera->SetAutoPossessCameraEnabled(false);
 	}
+}
+
+// Clears all transient data created by this component
+void UNMMPlayerControllerComponent::OnUnregister()
+{
+	// Remove all input contexts managed by Controller
+	if (const UNMMDataAsset* DataAsset = UNMMUtils::GetNewMainMenuDataAsset(this))
+	{
+		TArray<const UMyInputMappingContext*> MenuInputContexts;
+		DataAsset->GetAllInputContexts(/*out*/MenuInputContexts);
+		GetPlayerControllerChecked().RemoveInputContexts(MenuInputContexts);
+	}
+
+	// Kill current save game object
+	if (SaveGameDataInternal)
+	{
+		SaveGameDataInternal->ConditionalBeginDestroy();
+		SaveGameDataInternal = nullptr;
+	}
+
+	// Kill subsystem
+	UNMMSubsystem::Deactivate();
+
+	Super::OnUnregister();
 }
 
 // Is listen to set Menu game state once first spot is ready

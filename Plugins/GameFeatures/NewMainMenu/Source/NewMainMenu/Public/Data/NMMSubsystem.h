@@ -22,6 +22,9 @@ public:
 	/** Returns this Subsystem, is checked and wil crash if can't be obtained.*/
 	static UNMMSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
 
+	/** Deinitialize this subsystem. Is called when controller is killed. */
+	static void Deactivate();
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMainMenuSpotReady, UNMMSpotComponent*, MainMenuSpotComponent);
 
 	/** Called when the spot was spawned on new level and it finished loading its Master Sequence. */
@@ -36,6 +39,10 @@ public:
 	/** Add new Main-Menu spot, so it can be obtained by other objects. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotComponent);
+
+	/** Removes Main-Menu spot if should not be available by other objects anymore. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void RemoveMainMenuSpot(UNMMSpotComponent* MainMenuSpotComponent);
 
 	/** Returns currently selected Main-Menu spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -67,4 +74,8 @@ protected:
 	 * @see FCinematicRow::RowIndex. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active Main-Menu Spot Index"))
 	int32 ActiveMainMenuSpotIdx = 0;
+
+protected:
+	/** Clears all transient data contained in this subsystem. */
+	virtual void Deinitialize() override;
 };

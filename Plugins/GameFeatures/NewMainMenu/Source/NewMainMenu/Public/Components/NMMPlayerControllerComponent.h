@@ -82,6 +82,9 @@ protected:
 	/** Called when the owning Actor begins play or when the component is created if the Actor has already begun play. */
 	virtual void BeginPlay() override;
 
+	/** Clears all transient data created by this component */
+	virtual void OnUnregister() override;
+	
 	/** Is listen to set Menu game state once first spot is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnMainMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);

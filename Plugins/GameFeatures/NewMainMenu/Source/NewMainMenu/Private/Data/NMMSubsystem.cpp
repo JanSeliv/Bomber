@@ -2,23 +2,25 @@
 
 #include "Data/NMMSubsystem.h"
 //---
+#include "NMMUtils.h"
 #include "Components/NMMSpotComponent.h"
 #include "Data/NMMDataAsset.h"
-#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
-//---
-#include "Engine/World.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSubsystem)
 
 // Returns this Subsystem, is checked and wil crash if can't be obtained
 UNMMSubsystem& UNMMSubsystem::Get(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
-	checkf(World, TEXT("%s: 'World' is null"), *FString(__FUNCTION__));
-	UNMMSubsystem* ThisSubsystem = World->GetSubsystem<ThisClass>();
+	UNMMSubsystem* ThisSubsystem = UNMMUtils::GetNewMainMenuSubsystem(OptionalWorldContext);
 	checkf(ThisSubsystem, TEXT("%s: 'SoundsSubsystem' is null"), *FString(__FUNCTION__));
 	return *ThisSubsystem;
+}
+
+// Deinitialize this subsystem. Is called when controller is killed
+void UNMMSubsystem::Deactivate()
+{
+	FSubsystemCollectionBase::DeactivateExternalSubsystem(StaticClass());
 }
 
 // Returns the data asset that contains all the assets and tweaks of New Main Menu game feature
@@ -33,6 +35,15 @@ void UNMMSubsystem::AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotCompone
 	if (ensureMsgf(NewMainMenuSpotComponent, TEXT("%s: 'NewMainMenuSpotComponent' is null"), *FString(__FUNCTION__)))
 	{
 		MainMenuSpotsInternal.AddUnique(NewMainMenuSpotComponent);
+	}
+}
+
+// Removes Main-Menu spot if should not be available by other objects anymore
+void UNMMSubsystem::RemoveMainMenuSpot(UNMMSpotComponent* MainMenuSpotComponent)
+{
+	if (ensureMsgf(MainMenuSpotComponent, TEXT("%s: 'MainMenuSpotComponent' is null"), *FString(__FUNCTION__)))
+	{
+		MainMenuSpotsInternal.RemoveSwap(MainMenuSpotComponent);
 	}
 }
 
@@ -110,4 +121,13 @@ UNMMSpotComponent* UNMMSubsystem::MoveMainMenuSpot(int32 Incrementer)
 	NewSpot->SetCinematicState(ENMMCinematicState::IdlePart);
 
 	return NewSpot;
+}
+
+// Clears all transient data contained in this subsystem
+void UNMMSubsystem::Deinitialize()
+{
+	NewMainMenuDataAssetInternal.Reset();
+	MainMenuSpotsInternal.Empty();
+
+	Super::Deinitialize();
 }

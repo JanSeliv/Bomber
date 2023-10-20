@@ -5,17 +5,35 @@
 #include "Components/NMMHUDComponent.h"
 #include "Components/NMMPlayerControllerComponent.h"
 #include "Controllers/MyPlayerController.h"
+#include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
+#include "Data/NMMSubsystem.h"
 #include "Data/NMMTypes.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UI/MyHUD.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "MovieSceneSequencePlaybackSettings.h"
 #include "MovieSceneSequencePlayer.h"
+#include "Engine/World.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMUtils)
+
+// Returns New Main Menu Subsystem
+UNMMSubsystem* UNMMUtils::GetNewMainMenuSubsystem(const UObject* OptionalWorldContext)
+{
+	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
+	return World ? World->GetSubsystem<UNMMSubsystem>() : nullptr;
+}
+
+// Returns the Data Asset of the Main Menu
+const UNMMDataAsset* UNMMUtils::GetNewMainMenuDataAsset(const UObject* OptionalWorldContext)
+{
+	const UNMMSubsystem* Subsystem = GetNewMainMenuSubsystem(OptionalWorldContext);
+	return Subsystem ? Subsystem->GetNewMainMenuDataAsset() : nullptr;
+}
 
 // Returns the HUD component of the Main Menu
 UNMMHUDComponent* UNMMUtils::GetHUDComponent(const UObject* OptionalWorldContext/* = nullptr*/)

@@ -135,6 +135,22 @@ void UNMMSpotComponent::BeginPlay()
 	}
 }
 
+// Clears all transient data created by this component
+void UNMMSpotComponent::OnUnregister()
+{
+	CinematicRowInternal = FNMMCinematicRow::Empty;
+
+	// Kill current cinematic player
+	if (MasterPlayerInternal)
+	{
+		MasterPlayerInternal->Stop();
+		MasterPlayerInternal->ConditionalBeginDestroy();
+		MasterPlayerInternal = nullptr;
+	}
+
+	Super::OnUnregister();
+}
+
 // Called when the current game state was changed
 void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {

@@ -55,4 +55,7 @@ protected:
 protected:
 	/** Called when a component is registered, after Scene is set, but before CreateRenderState_Concurrent or OnCreatePhysicsState are called. */
 	virtual void OnRegister() override;
+
+	/** Clears all transient data created by this component. */
+	virtual void OnUnregister() override;
 };

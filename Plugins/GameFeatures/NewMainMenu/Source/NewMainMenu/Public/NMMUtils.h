@@ -22,6 +22,14 @@ class NEWMAINMENU_API UNMMUtils : public UBlueprintFunctionLibrary
 	 * Object getters
 	 ********************************************************************************************* */
 public:
+	/** Returns New Main Menu Subsystem. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static class UNMMSubsystem* GetNewMainMenuSubsystem(const UObject* OptionalWorldContext = nullptr);
+	
+	/** Returns the Data Asset of the Main Menu. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Data Asset", meta = (WorldContext = "OptionalWorldContext"))
+	static const class UNMMDataAsset* GetNewMainMenuDataAsset(const UObject* OptionalWorldContext = nullptr);
+
 	/** Returns the HUD component of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM HUD Component", meta = (WorldContext = "OptionalWorldContext"))
 	static class UNMMHUDComponent* GetHUDComponent(const UObject* OptionalWorldContext = nullptr);
