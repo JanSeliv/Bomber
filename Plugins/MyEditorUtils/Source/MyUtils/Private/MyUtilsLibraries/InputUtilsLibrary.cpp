@@ -73,7 +73,11 @@ void UInputUtilsLibrary::SetInputContextEnabled(const UObject* WorldContext, boo
 	}
 	else
 	{
-		InputSubsystem->RemoveMappingContext(InInputContext);
+		FModifyContextOptions RemoveContextOptions;
+		RemoveContextOptions.bIgnoreAllPressedKeysUntilRelease = false;
+		RemoveContextOptions.bForceImmediately = true;
+		RemoveContextOptions.bNotifyUserSettings = true;
+		InputSubsystem->RemoveMappingContext(InInputContext, RemoveContextOptions);
 	}
 }
 

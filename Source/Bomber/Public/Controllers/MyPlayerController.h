@@ -77,6 +77,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetupInputContexts(const TArray<UMyInputMappingContext*>& InputContexts);
 	void SetupInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+	void RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
 
 	/*********************************************************************************************
 	 * Protected properties

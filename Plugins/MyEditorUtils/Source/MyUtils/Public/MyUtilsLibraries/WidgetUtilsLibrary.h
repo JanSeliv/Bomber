@@ -8,6 +8,7 @@ class UUserWidget;
 
 /**
  * The common functions library for widgets.
+ * Is not blueprint accessible since is expensive.
  */
 class MYUTILS_API FWidgetUtilsLibrary
 {
@@ -26,4 +27,9 @@ public:
 	* As an example, it returns SCheckbox slate widget from UCheckBox widget. */
 	template <typename T>
 	static FORCEINLINE TSharedPtr<T> GetSlateWidget(const UWidget* ForWidget) { return ForWidget ? StaticCastSharedPtr<T>(ForWidget->GetCachedWidget()) : nullptr; }
+
+	/** Completely destroys specified widget.
+	 * Is useful for MGF-modules unloading in runtime.
+	 * In most gameplay cases it should not be used, since it's expensive: prefer collapse widget instead. */
+	static void DestroyWidget(UUserWidget& ParentWidget);
 };

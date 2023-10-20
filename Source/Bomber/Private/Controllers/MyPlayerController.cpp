@@ -277,6 +277,19 @@ void AMyPlayerController::SetupInputContexts(const TArray<const UMyInputMappingC
 	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
 }
 
+// Removes input contexts from managed list
+void AMyPlayerController::RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts)
+{
+	for (const UMyInputMappingContext* InputContextIt : InputContexts)
+	{
+		if (InputContextIt)
+		{
+			AllInputContextsInternal.RemoveSwap(InputContextIt);
+			SetInputContextEnabled(false, InputContextIt);
+		}
+	}
+}
+
 // Prevents built-in slate input on UMG
 void AMyPlayerController::SetUIInputIgnored()
 {

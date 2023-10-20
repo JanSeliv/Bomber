@@ -40,6 +40,37 @@ UUserWidget* FWidgetUtilsLibrary::FindWidgetOfClass(UObject* WorldContextObject,
 {
 	TArray<UUserWidget*> FoundWidgets;
 	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(WorldContextObject, /*out*/FoundWidgets, ParentWidgetClass);
-	return !FoundWidgets.IsEmpty()? FoundWidgets[0] : nullptr;
+	return !FoundWidgets.IsEmpty() ? FoundWidgets[0] : nullptr;
 }
 
+// Completely destroys specified widget
+void FWidgetUtilsLibrary::DestroyWidget(UUserWidget& ParentWidget)
+{
+	// Get an array of all child widgets
+	TArray<UWidget*> ChildWidgets;
+	const UWidgetTree* WidgetTree = ParentWidget.WidgetTree;
+	WidgetTree->GetAllWidgets(ChildWidgets);
+
+	// Iterate through the child widgets
+	for (UWidget* ChildWidgetIt : ChildWidgets)
+	{
+		UUserWidget* ChildUserWidget = Cast<UUserWidget>(ChildWidgetIt);
+		const UWidgetTree* WidgetTreeIt = ChildUserWidget ? ChildUserWidget->WidgetTree : nullptr;
+		const bool bHasChildWidgets = WidgetTreeIt && WidgetTreeIt->RootWidget;
+
+		if (bHasChildWidgets)
+		{
+			// If the child widget has its own child widgets, recursively remove and destroy them
+			DestroyWidget(*ChildUserWidget);
+		}
+	}
+
+	// Hide widget to let last chance react on visibility change
+	ParentWidget.SetVisibility(ESlateVisibility::Collapsed);
+
+	// Remove the child widget from the viewport
+	ParentWidget.RemoveFromParent();
+
+	// RemoveFromParent() does not completely destroy widget, so schedule the child widget for destruction
+	ParentWidget.ConditionalBeginDestroy();
+}
