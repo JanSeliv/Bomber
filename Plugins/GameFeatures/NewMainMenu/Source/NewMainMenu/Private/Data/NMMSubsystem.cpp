@@ -3,6 +3,7 @@
 #include "Data/NMMSubsystem.h"
 //---
 #include "Components/NMMSpotComponent.h"
+#include "Data/NMMDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -18,6 +19,12 @@ UNMMSubsystem& UNMMSubsystem::Get(const UObject* OptionalWorldContext/* = nullpt
 	UNMMSubsystem* ThisSubsystem = World->GetSubsystem<ThisClass>();
 	checkf(ThisSubsystem, TEXT("%s: 'SoundsSubsystem' is null"), *FString(__FUNCTION__));
 	return *ThisSubsystem;
+}
+
+// Returns the data asset that contains all the assets and tweaks of New Main Menu game feature
+const UNMMDataAsset* UNMMSubsystem::GetNewMainMenuDataAsset() const
+{
+	return NewMainMenuDataAssetInternal.LoadSynchronous();
 }
 
 // Add new Main-Menu spot, so it can be obtained by other objects

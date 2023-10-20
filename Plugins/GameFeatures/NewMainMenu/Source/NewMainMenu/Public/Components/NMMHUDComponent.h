@@ -29,11 +29,6 @@ public:
 	AMyHUD* GetHUD() const;
 	AMyHUD& GetHUDChecked() const;
 
-	/** Returns the data asset that contains all the assets and tweaks of New Main Menu game feature.
-	 * @see UNMMSubsystem::NewMainMenuDataAssetInternal. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const class UNMMDataAsset* GetNewMainMenuDataAsset() const;
-
 	/** Returns created Main Menu widget. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UNewMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidgetInternal; }
@@ -46,10 +41,6 @@ public:
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
-	/** Contains all the assets and tweaks of New Main Menu game feature. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "New Main Menu Data Asset"))
-	TSoftObjectPtr<const class UNMMDataAsset> NewMainMenuDataAssetInternal = nullptr;
-
 	/** Created Main Menu widget. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
 	TObjectPtr<class UNewMainMenuWidget> MainMenuWidgetInternal = nullptr;

@@ -13,7 +13,7 @@ class UNMMSpotComponent;
 /**
  * Provides access to the common runtime data about new Main Menu like current cinematic spots.
  */
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(BlueprintType, Blueprintable, Config = "NewMainMenu", DefaultConfig)
 class NEWMAINMENU_API UNMMSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
@@ -27,6 +27,11 @@ public:
 	/** Called when the spot was spawned on new level and it finished loading its Master Sequence. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnMainMenuSpotReady OnMainMenuSpotReady;
+
+	/** Returns the data asset that contains all the assets and tweaks of New Main Menu game feature.
+	 * @see UNMMSubsystem::NewMainMenuDataAssetInternal. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const class UNMMDataAsset* GetNewMainMenuDataAsset() const;
 
 	/** Add new Main-Menu spot, so it can be obtained by other objects. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -47,6 +52,13 @@ public:
 	UNMMSpotComponent* MoveMainMenuSpot(int32 Incrementer);
 
 protected:
+	/** Contains all the assets and tweaks of New Main Menu game feature.
+	 * Note: Since Subsystem is code-only, is is config property set in NewMainMenu.ini.
+	 * Property is put to subsystem because its instance is created before any other object.
+	 * It can't be put to DevelopSettings class because it does work properly for MGF-modules. */
+	UPROPERTY(Config, VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "New Main Menu Data Asset"))
+	TSoftObjectPtr<const class UNMMDataAsset> NewMainMenuDataAssetInternal;
+
 	/** All Main Menu spots with characters placed on the level. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main-Menu Spots"))
 	TArray<TObjectPtr<UNMMSpotComponent>> MainMenuSpotsInternal;

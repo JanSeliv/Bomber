@@ -31,7 +31,7 @@ UNMMSpotComponent::UNMMSpotComponent()
 // Returns true if this spot is currently active and possessed by player
 bool UNMMSpotComponent::IsActiveSpot() const
 {
-	return UNMMSubsystem::Get().GetActiveMainMenuSpotComponent() == this;
+	return UNMMSubsystem::Get(this).GetActiveMainMenuSpotComponent() == this;
 }
 
 // Returns the Skeletal Mesh of the Bomber character
@@ -119,7 +119,7 @@ void UNMMSpotComponent::BeginPlay()
 		return;
 	}
 
-	UNMMSubsystem::Get().AddNewMainMenuSpot(this);
+	UNMMSubsystem::Get(this).AddNewMainMenuSpot(this);
 
 	UpdateCinematicData();
 	LoadMasterSequencePlayer();
