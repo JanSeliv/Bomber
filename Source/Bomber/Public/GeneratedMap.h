@@ -91,17 +91,14 @@ public:
 	FORCEINLINE class UMyCameraComponent* GetCameraComponent() const { return CameraComponentInternal; }
 
 	/** Spawns a level actor on the Generated Map by the specified type. Then calls AddToGrid().
-	 *
 	 * @param Type Which type of level actors
 	 * @param Cell Actors location
-	 * @return Spawned actor on the Generated Map, nullptr otherwise.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	AActor* SpawnActorByType(EActorType Type, const FCell& Cell);
+	 * @return Spawned actor on the Generated Map, nullptr otherwise. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DisplayName = "Spawn Actor by Type", AutoCreateRefTerm = "Cell"))
+	void BPSpawnActorByType(EActorType Type, const FCell& Cell) { SpawnActorByType(Type, Cell, nullptr); }
 
-	/** Spawns a level actor on the Generated Map by the specified type. */
-	template <typename T>
-	static FORCEINLINE T* SpawnActorByType(EActorType Type, const FCell& Cell) { return Cast<T>(Get().SpawnActorByType(Type, Cell)); }
+	/** Code alternative function with OnSpawn callback. */
+	void SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(AActor*)>& OnSpawned = nullptr);
 
 	/** Adding and attaching the specified Map Component to the Level
 	 * @param AddedComponent The Map Component of the generated or dragged level actor. */

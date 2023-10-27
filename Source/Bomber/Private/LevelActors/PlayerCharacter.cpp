@@ -117,30 +117,34 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 		return;
 	}
 
+	const TWeakObjectPtr<ThisClass> WeakThis = this;
+	const TFunction<void(AActor*)> OnBombSpawned = [WeakThis](AActor* SpawnedActor)
+	{
+		APlayerCharacter* PlayerCharacter = WeakThis.Get();
+		if (!PlayerCharacter)
+		{
+			return;
+		}
+
+		ABombActor* BombActor = CastChecked<ABombActor>(SpawnedActor);
+		UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
+		checkf(MapComponent, TEXT("ERROR: [%i] %s:\n'MapComponent' is null!"), __LINE__, *FString(__FUNCTION__));
+
+		// Updating explosion cells
+		PlayerCharacter->PowerupsInternal.BombN--;
+
+		// Init Bomb
+		BombActor->InitBomb(PlayerCharacter);
+
+		// Start listening this bomb
+		if (!MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(PlayerCharacter, &ThisClass::OnBombDestroyed))
+		{
+			MapComponent->OnDeactivatedMapComponent.AddDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
+		}
+	};
+
 	// Spawn bomb
-	ABombActor* BombActor = AGeneratedMap::SpawnActorByType<ABombActor>(EAT::Bomb, MapComponentInternal->GetCell());
-	if (!BombActor) // can return nullptr if the cell is not free
-	{
-		return;
-	}
-
-	UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
-	if (!MapComponent)
-	{
-		return;
-	}
-
-	// Updating explosion cells
-	PowerupsInternal.BombN--;
-
-	// Init Bomb
-	BombActor->InitBomb(this);
-
-	// Start listening this bomb
-	if (!MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(this, &ThisClass::OnBombDestroyed))
-	{
-		MapComponent->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnBombDestroyed);
-	}
+	AGeneratedMap::Get().SpawnActorByType(EAT::Bomb, MapComponentInternal->GetCell(), OnBombSpawned);
 }
 
 // Returns the Skeletal Mesh of bombers

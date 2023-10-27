@@ -278,25 +278,36 @@ bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells
 }
 
 // Spawns level actor on the Generated Map by the specified type
-AActor* AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell)
+void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(AActor*)>& OnSpawned/* = nullptr*/)
 {
 	if (!HasAuthority()
 	    || UCellsUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
 	    || Type == EAT::None)                                                         // nothing to spawn
 	{
-		return nullptr;
+		return;
 	}
+
+	const TWeakObjectPtr<ThisClass> WeakThis = this;
+	const TFunction<void(UObject*)> OnCompleted = [WeakThis, OnSpawned](UObject* CreatedObject)
+	{
+		AGeneratedMap* GeneratedMap = WeakThis.Get();
+		if (!GeneratedMap)
+		{
+			return;
+		}
+
+		AActor* SpawnedActor = CastChecked<AActor>(CreatedObject);
+		SpawnedActor->SetFlags(RF_Transient); // Do not save generated actors into the map
+		SpawnedActor->SetOwner(GeneratedMap);
+
+		if (OnSpawned != nullptr)
+		{
+			OnSpawned(SpawnedActor);
+		}
+	};
 
 	const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
-	AActor* SpawnedActor = UPoolManagerSubsystem::Get().TakeFromPool<AActor>(ClassToSpawn, FTransform(Cell));
-	if (!ensureMsgf(SpawnedActor, TEXT("ASSERT: 'SpawnedActor' is not valid")))
-	{
-		return nullptr;
-	}
-
-	SpawnedActor->SetFlags(RF_Transient); // Do not save generated actors into the map
-	SpawnedActor->SetOwner(this);
-	return SpawnedActor;
+	UPoolManagerSubsystem::Get().TakeFromPool(ClassToSpawn, FTransform(Cell), OnCompleted);
 }
 
 // The function that places the actor on the Generated Map, attaches it and writes this actor to the GridArray_
