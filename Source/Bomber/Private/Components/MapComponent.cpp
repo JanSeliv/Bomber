@@ -77,7 +77,9 @@ bool UMapComponent::OnConstructionOwnerActor()
 		// The owner actor is not in the pool
 		// Most likely it is a dragged actor, since all generated actors are always taken from the pool
 		// Add this object to the pool and continue construction
-		PoolManager.RegisterObjectInPool(Owner, EPoolObjectState::Active);
+		FPoolObjectData ObjectData(Owner);
+		ObjectData.bIsActive = true;
+		PoolManager.RegisterObjectInPool(ObjectData);
 	}
 	else if (PoolObjectState == EPoolObjectState::Inactive)
 	{

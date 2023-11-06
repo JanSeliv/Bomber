@@ -78,10 +78,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetLevelSize(const FIntPoint& LevelSize);
 
-	/** Returns number of characters in the array. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetAlivePlayersNum() const { return PlayersNumInternal; };
-
 	/** Get the current level type. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE ELevelType GetLevelType() const { return LevelTypeInternal; }
@@ -116,6 +112,12 @@ public:
 	 * @param DestroyCauser The actor that caused the destruction of the level actor. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
 	void DestroyLevelActor(UMapComponent* MapComponent, UObject* DestroyCauser = nullptr);
+
+	/** Destroys level actor by specified handle.
+	 * Handle version allows to destroy actor even if it is not spawned yet, but in processing queue.
+	 * @param Handle Unique ID from the Pool Manager to identify the level actor to destroy.*/
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
+	void DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, UObject* DestroyCauser = nullptr);
 
 	/** Finds the nearest cell pointer to the specified Map Component
 	 *
@@ -176,10 +178,6 @@ protected:
 	 * Is set in editor by adding and dragging actors, but can be changed during the game. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
 	TMap<FCell, EActorType> DraggedCellsInternal;
-
-	/** Number of characters on the Generated Map. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
-	int32 PlayersNumInternal = 0;
 
 	/** The current level type. Affects on the meshes of each level actor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = "OnRep_LevelType", Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))

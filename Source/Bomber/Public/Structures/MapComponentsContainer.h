@@ -5,6 +5,7 @@
 #include "Net/Serialization/FastArraySerializer.h"
 //---
 #include "Cell.h"
+#include "PoolManagerTypes.h" // FPoolObjectHandle
 //---
 #include "MapComponentsContainer.generated.h"
 
@@ -30,15 +31,22 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 	GENERATED_BODY()
 
 	FMapComponentSpec() = default;
-	FMapComponentSpec(UMapComponent* InMapComponent);
+	FMapComponentSpec(UMapComponent& InMapComponent);
+	FMapComponentSpec(FPoolObjectHandle InPoolObjectHandle);
 
 	/** The map component to be replicated. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	TObjectPtr<UMapComponent> MapComponent = nullptr;
 
-	/** The position of the map component on the level. */
+	/** The position of the map component on the level. Is replicated. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	FCell Cell = FCell::InvalidCell;
+
+	/** Unique ID of Map Component's owner actor in the Pool Manager.
+	 * Is useful to track the owner actor lifecycle even it is not spawned yet, but its Spawn Request is in queue.
+	 * Is NOT replicated and exists only on the server side. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++")
+	FPoolObjectHandle PoolObjectHandle;
 
 	/** Updates the cell of the map component according current data.
 	 * Allows to set the cell much faster than waiting for its replication. */
@@ -56,9 +64,10 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 	 * Convenience operators to treat FMapComponentSpec as a UMapComponent*
 	 ********************************************************************************************* */
 
-	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FMapComponentSpec& B) { return A.MapComponent == B.MapComponent; }
+	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FMapComponentSpec& B) { return A.MapComponent == B.MapComponent && A.Cell == B.Cell && A.PoolObjectHandle == B.PoolObjectHandle; }
 	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const UMapComponent* B) { return A.MapComponent == B; }
 	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FCell& B);
+	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FPoolObjectHandle& B) { return A.PoolObjectHandle == B; }
 };
 
 /**
@@ -116,12 +125,24 @@ public:
 	FMapComponentsIterator begin() const { return FMapComponentsIterator(Items); }
 	FMapComponentsIterator end() const { return FMapComponentsIterator(Items, Items.Num()); }
 
-	int32 Num() const { return Items.Num(); }
-	bool Contains(const UMapComponent* Item) const { return Items.Contains(Item); }
-	bool Contains(const FCell& Cell) const { return Items.Contains(Cell); }
-	bool IsValidIndex(int32 Index) const { return Items.IsValidIndex(Index); }
-	FMapComponentSpec& Emplace(UMapComponent* MapComponent);
-	void Remove(UMapComponent* MapComponent);
+	FORCEINLINE int32 Num() const { return Items.Num(); }
+
+	FORCEINLINE bool Contains(const UMapComponent* Item) const { return Items.Contains(Item); }
+	FORCEINLINE bool Contains(const FCell& Cell) const { return Items.Contains(Cell); }
+	FORCEINLINE bool Contains(const FPoolObjectHandle& PoolObjectHandle) const { return Items.Contains(PoolObjectHandle); }
+
+	FMapComponentSpec* Find(const UMapComponent* Item) { return Items.FindByKey(Item); }
+	FMapComponentSpec* Find(const FCell& Cell) { return Items.FindByKey(Cell); }
+	FMapComponentSpec* Find(const FPoolObjectHandle& PoolObjectHandle) { return Items.FindByKey(PoolObjectHandle); }
+
+	FMapComponentSpec& FindOrAdd(UMapComponent& MapComponent);
+	FMapComponentSpec& FindOrAdd(const FPoolObjectHandle& PoolObjectHandle);
+
+	void Remove(const UMapComponent* MapComponent);
+	void Remove(const FCell& Cell);
+	void Remove(const FPoolObjectHandle& PoolObjectHandle);
+
+	FORCEINLINE bool IsValidIndex(int32 Index) const { return Items.IsValidIndex(Index); }
 
 	UMapComponent* operator[](const int32 Index) const { return IsValidIndex(Index) ? Items[Index].MapComponent : nullptr; }
 };

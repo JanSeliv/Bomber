@@ -198,7 +198,8 @@ void AGeneratedMap::GetSidesCells(
 		const int32 PositionC0 = bIsY ? /*Y-column*/ C0 % MaxWidth : C0 / MaxWidth /*raw*/;
 		for (int8 SideMultiplier = -1; SideMultiplier <= 1; SideMultiplier += 2) // -1(Left|Down) and 1(Right|Up)
 		{
-			const FCell CellDirection = SideMultiplier * (bIsY ? FVector::BackwardVector : FVector::RightVector);
+			const FVector& VectorDirection = bIsY ? FVector::BackwardVector : FVector::RightVector;
+			const FCell CellDirection = VectorDirection * FVector(SideMultiplier);
 			const ECellDirection EnumDirection = FCell::GetCellDirection(CellDirection);
 			if (!EnumHasAnyFlags(EnumDirection, TO_ENUM(ECellDirection, DirectionsBitmask)))
 			{
@@ -287,8 +288,8 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 		return;
 	}
 
-	const TWeakObjectPtr<ThisClass> WeakThis = this;
-	const TFunction<void(UObject*)> OnCompleted = [WeakThis, OnSpawned](UObject* CreatedObject)
+	const TWeakObjectPtr<ThisClass> WeakThis(this);
+	const FOnSpawnCallback OnCompleted = [WeakThis, OnSpawned](const FPoolObjectData& CreatedObject)
 	{
 		AGeneratedMap* GeneratedMap = WeakThis.Get();
 		if (!GeneratedMap)
@@ -296,18 +297,22 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 			return;
 		}
 
-		AActor* SpawnedActor = CastChecked<AActor>(CreatedObject);
-		SpawnedActor->SetFlags(RF_Transient); // Do not save generated actors into the map
-		SpawnedActor->SetOwner(GeneratedMap);
+		// Setup spawned actor
+		AActor& SpawnedActor = CreatedObject.GetChecked<AActor>();
+		SpawnedActor.SetFlags(RF_Transient); // Do not save generated actors into the map
+		SpawnedActor.SetOwner(GeneratedMap);
 
 		if (OnSpawned != nullptr)
 		{
-			OnSpawned(SpawnedActor);
+			OnSpawned(&SpawnedActor);
 		}
 	};
 
 	const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
-	UPoolManagerSubsystem::Get().TakeFromPool(ClassToSpawn, FTransform(Cell), OnCompleted);
+	const FPoolObjectHandle Handle = UPoolManagerSubsystem::Get().TakeFromPool(ClassToSpawn, FTransform(Cell), OnCompleted);
+
+	// Add Handle if requested spawning, so it can be canceled if regenerate before spawning finished 
+	MapComponentsInternal.FindOrAdd(Handle);
 }
 
 // The function that places the actor on the Generated Map, attaches it and writes this actor to the GridArray_
@@ -321,6 +326,12 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 		return;
 	}
 
+	const FPoolObjectHandle& Handle = UPoolManagerSubsystem::Get().FindPoolHandleByObject(ComponentOwner);
+	if (!ensureMsgf(Handle.IsValid(), TEXT("ASSERT: [%i] %s:\n'Handle' is not valid, this object has to be known by Pool Manager!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
 	const FCell& Cell = AddedComponent->GetCell();
 	if (!ensureMsgf(Cell.IsValid(), TEXT("ASSERT: 'Cell' is zero")))
 	{
@@ -329,19 +340,13 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 
 	AddToGridDragged(AddedComponent);
 
-	const EActorType ActorType = AddedComponent->GetActorType();
-
-	if (!MapComponentsInternal.Contains(AddedComponent)) // is not contains in the array
-	{
-		MapComponentsInternal.Emplace(AddedComponent);
-		if (ActorType == EAT::Player) // Is a player
-		{
-			PlayersNumInternal++;
-		}
-	}
+	// If found, means was spawned before, otherwise is taken from pool
+	FMapComponentSpec& NewSpec = MapComponentsInternal.FindOrAdd(Handle);
+	NewSpec.MapComponent = AddedComponent;
 
 	// Find transform
 	FRotator ActorRotation = GetActorRotation();
+	const EActorType ActorType = AddedComponent->GetActorType();
 	if (TO_FLAG(ActorType) & TO_FLAG(EAT::Box | EAT::Wall))
 	{
 		// Random rotate if is Box or Wall
@@ -487,8 +492,6 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 
 	if (bIsPlayer)
 	{
-		--PlayersNumInternal;
-
 		if (bIsInGame
 		    && OnAnyCharacterDestroyed.IsBound())
 		{
@@ -502,6 +505,33 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	UPoolManagerSubsystem::Get().ReturnToPool(ComponentOwner);
 
 	DestroyLevelActorDragged(MapComponent);
+}
+
+// Destroys level actor by specified handle
+void AGeneratedMap::DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, UObject* DestroyCauser)
+{
+	if (!HasAuthority()
+	    || !ensureMsgf(Handle.IsValid(), TEXT("ASSERT: [%i] %s:\n'Handle' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
+	const FMapComponentSpec* MapComponentData = MapComponentsInternal.Find(Handle);
+	if (!ensureMsgf(MapComponentData, TEXT("ASSERT: [%i] %s:\n'MapComponentData' is not found by given handle!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
+	if (UMapComponent* MapComponent = MapComponentData->MapComponent)
+	{
+		DestroyLevelActor(MapComponent, DestroyCauser);
+		return;
+	}
+
+	// Map component was not found, it could be not spawned, but in spawn request in queue
+	UPoolManagerSubsystem::Get().ReturnToPool(Handle);
+
+	MapComponentsInternal.Remove(Handle);
 }
 
 // Finds the nearest cell pointer to the specified Map Component
@@ -741,7 +771,6 @@ void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 	DOREPLIFETIME(ThisClass, GridCellsInternal);
 	DOREPLIFETIME(ThisClass, MapComponentsInternal);
-	DOREPLIFETIME(ThisClass, PlayersNumInternal);
 	DOREPLIFETIME(ThisClass, LevelTypeInternal);
 	DOREPLIFETIME(ThisClass, bIsGameRunningInternal);
 }
@@ -755,10 +784,14 @@ void AGeneratedMap::GenerateLevelActors()
 		return;
 	}
 
-	// Destroy all editor-only non-PIE actors
-	const FCells NonEmptyCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::All));
-	DestroyLevelActorsOnCells(NonEmptyCells);
-	PlayersNumInternal = 0;
+	// Destroy all actors first
+	// Iterate it by handles to cancel spawning even if the actor is not spawned yet
+	TArray<FMapComponentSpec>& MapComponentsToDestroy = MapComponentsInternal.Items;
+	for (int32 Idx = MapComponentsToDestroy.Num() - 1; Idx >= 0; Idx--)
+	{
+		DestroyLevelActorByHandle(MapComponentsToDestroy[Idx].PoolObjectHandle);
+	}
+	checkf(MapComponentsToDestroy.IsEmpty(), TEXT("ERROR: [%i] %s:\n'MapComponentsToDestroy' is not empty after removing all!"), __LINE__, *FString(__FUNCTION__));
 
 	// Calls before generation preview actors to updating of all dragged to the Generated Map actors
 	FCells DraggedCells, DraggedWalls, DraggedItems;
@@ -1182,10 +1215,10 @@ void AGeneratedMap::PostLoad()
 	}
 
 	// Update streaming level on editor opening
-	TWeakObjectPtr<AGeneratedMap> WeakGeneratedMap(this);
-	auto UpdateLevelType = [WeakGeneratedMap](const FString&, bool)
+	TWeakObjectPtr<ThisClass> WeakThis(this);
+	auto UpdateLevelType = [WeakThis](const FString&, bool)
 	{
-		if (AGeneratedMap* GeneratedMap = WeakGeneratedMap.Get())
+		if (AGeneratedMap* GeneratedMap = WeakThis.Get())
 		{
 			FEditorDelegates::OnMapOpened.RemoveAll(GeneratedMap);
 			GeneratedMap->SetLevelType(GeneratedMap->LevelTypeInternal);
@@ -1255,7 +1288,9 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 		DraggedCellsInternal.Emplace(AddedComponent->GetCell(), AddedComponent->GetActorType());
 	}
 
-	UPoolManagerSubsystem::Get().RegisterObjectInPool(ComponentOwner, EPoolObjectState::Active);
+	FPoolObjectData ObjectData(ComponentOwner);
+	ObjectData.bIsActive = true;
+	UPoolManagerSubsystem::Get().RegisterObjectInPool(ObjectData);
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 

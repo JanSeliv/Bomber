@@ -19,13 +19,10 @@
 #include "UI/InGameMenuWidget.h"
 #include "UI/InGameWidget.h"
 #include "UI/MyHUD.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
-//---
-#if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyBlueprintFunctionLibrary)
 
@@ -36,8 +33,7 @@
 // Returns number of alive players
 int32 UMyBlueprintFunctionLibrary::GetAlivePlayersNum()
 {
-	const AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap();
-	return GeneratedMap ? GeneratedMap->GetAlivePlayersNum() : INDEX_NONE;
+	return UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player)).Num();
 }
 
 // Returns the type of the current level
