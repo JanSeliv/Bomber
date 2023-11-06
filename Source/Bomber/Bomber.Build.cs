@@ -20,6 +20,7 @@ public class Bomber : ModuleRules
                 //My modules
                 , "FunctionPicker" // Created properties in UMyInputAction
                 , "MetaCheatManager" // Created UMyCheatManager
+                , "PoolManager" // Created property in FMapComponentSpec
 		    }
 		);
 
@@ -35,7 +36,6 @@ public class Bomber : ModuleRules
 				//My modules
 				, "MyUtils" // UUtilsLibrary
 				, "SettingsWidgetConstructor" // Generates settings
-				, "PoolManager" // Used to spawn level actors
 			}
 		);
 
