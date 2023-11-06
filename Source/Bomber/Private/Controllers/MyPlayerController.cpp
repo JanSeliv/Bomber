@@ -229,6 +229,10 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 	SetControlRotation(FRotator::ZeroRotator);
 
 	BroadcastOnSetPlayerState();
+
+	// Try to rebind inputs for possessed pawn on server
+	constexpr bool bInvertRest = true;
+	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
 }
 
 // Is overriden to notify the client when this controller possesses new player character
@@ -238,6 +242,10 @@ void AMyPlayerController::OnRep_Pawn()
 
 	// Notify client about pawn change
 	GetOnNewPawnNotifier().Broadcast(GetPawn());
+
+	// Try to rebind inputs for possessed pawn on client
+	constexpr bool bInvertRest = true;
+	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
 }
 
 // Is overriden to notify the client when is set new player state
