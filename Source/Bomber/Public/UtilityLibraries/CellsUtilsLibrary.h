@@ -75,7 +75,7 @@ public:
 
 	/** Converts a cell value to a string, in the form 'X= Y=' */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To String (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
-	static FORCEINLINE FString Conv_CellToString(const FCell& InCell) { return FVector2D(InCell.Location).ToString(); }
+	static FORCEINLINE FString Conv_CellToString(const FCell& InCell) { return InCell.ToString(); }
 
 	/** Puts specified cell in the cells set.*/
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Cells (Cell)", CompactNodeTitle = "->", BlueprintAutocast))

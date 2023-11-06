@@ -104,7 +104,10 @@ struct BOMBER_API FCell
 	/** Allows rotate or unrotated given grid around its origin. */
 	static FCells RotateCellArray(float AxisZ, const FCells& InCells);
 
-#pragma region Grid
+	/*********************************************************************************************
+	 * Grid
+	 ********************************************************************************************* */
+public:
 	/** Constructs and returns new grid from given transform.
 	 * @param OriginTransform its location and rotation is the center of new grid, its scale-X is number of columns, scale-Y is number of rows. */
 	static TSet<FCell> MakeCellGridByTransform(const FTransform& OriginTransform);
@@ -130,9 +133,17 @@ struct BOMBER_API FCell
 	 * @param NewCornerCells The new corner cells to scale to.
 	 * @return scaled cell, is not aligned to any existed cell, make sure to snap it to the grid. */
 	static FCell ScaleCellToNewGrid(const FCell& OriginalCell, const FCells& NewCornerCells);
-#pragma endregion Grid
 
-#pragma region Transform
+	/** Extracts first cell from specified cells set.*/
+	static FORCEINLINE FCell GetFirstCellInSet(const FCells& InCells) { return !InCells.IsEmpty() ? InCells.Array()[0] : InvalidCell; }
+
+	/** Gets a copy of given cell snapped its location to a grid while it does not respect rotated grids. */
+	static FORCEINLINE FCell SnapCell(const FCell& InCell) { return InCell.Location.GridSnap(CellSize); }
+
+	/*********************************************************************************************
+	 * Transform
+	 ********************************************************************************************* */
+public:
 	/** Makes origin transform for given grid. */
 	static FTransform GetCellArrayTransform(const FCells& InCells);
 	static FTransform GetCellArrayTransformNoScale(const FCells& InCells);
@@ -148,8 +159,11 @@ struct BOMBER_API FCell
 	static FVector2D GetCellArraySize(const FCells& InCells);
 	static float GetCellArrayWidth(const FCells& InCells);
 	static float GetCellArrayLength(const FCells& InCells);
-#pragma endregion Transform
 
+	/*********************************************************************************************
+	 * Distance
+	 ********************************************************************************************* */
+public:
 	/** Returns how many cells are between two cells, where each 1 unit means one cell. */
 	template <typename T>
 	static FORCEINLINE T Distance(const FCell& C1, const FCell& C2) { return FMath::Abs<T>((C1.Location - C2.Location).Size()) / CellSize; }
@@ -158,6 +172,10 @@ struct BOMBER_API FCell
 	template <typename T>
 	static T GetCellArrayMaxDistance(const FCells& Cells);
 
+	/*********************************************************************************************
+	 * Math operators
+	 ********************************************************************************************* */
+public:
 	/**
 	 * Compares cells for equality.
 	 *
@@ -179,8 +197,20 @@ struct BOMBER_API FCell
 	template <typename FArg, TEMPLATE_REQUIRES(std::is_arithmetic<FArg>::value)>
 	FORCEINLINE FCell operator*(FArg Scale) const { return FCell(Location * Scale); }
 
+	/** Creates a hash value from a FCell.
+	 * @param Vector the cell to create a hash value for
+	 * @return The hash value from the components. */
+	friend FORCEINLINE uint32 GetTypeHash(const FCell& Vector) { return GetTypeHash(Vector.Location); }
+
+	/*********************************************************************************************
+	 * Conversion
+	 ********************************************************************************************* */
+public:
 	/** Vector operator to return cell location. */
 	FORCEINLINE operator FVector() const { return this->Location; }
+
+	/** Returns the cell as a string. */
+	FString ToString() const { return FVector2D(Location).ToString(); }
 
 	/** Returns the cell direction by its enum. */
 	static const FCell& GetCellDirection(ECellDirection CellDirection);
@@ -193,20 +223,6 @@ struct BOMBER_API FCell
 	/** Converts set of cells to array of vectors and vice versa. */
 	static TArray<FVector> CellsToVectors(const FCells& Cells);
 	static FCells VectorsToCells(const TArray<FVector>& Vectors);
-
-	/** Extracts first cell from specified cells set.*/
-	static FORCEINLINE FCell GetFirstCellInSet(const FCells& InCells) { return !InCells.IsEmpty() ? InCells.Array()[0] : InvalidCell; }
-
-	/** Gets a copy of given cell snapped its location to a grid while it does not respect rotated grids. */
-	static FORCEINLINE FCell SnapCell(const FCell& InCell) { return InCell.Location.GridSnap(CellSize); }
-
-	/**
-	* Creates a hash value from a FCell.
-	*
-	* @param Vector the cell to create a hash value for
-	* @return The hash value from the components
-	*/
-	friend FORCEINLINE uint32 GetTypeHash(const FCell& Vector) { return GetTypeHash(Vector.Location); }
 };
 
 // Find the max distance between cells within specified set, where each 1 unit means one cell
