@@ -105,7 +105,7 @@ void UInputButtonWidget::UpdateStyle()
 	CaptionWidget->SetColorAndOpacity(MiscThemeData.TextAndCaptionColor);
 
 	// Update padding specified in data table of this setting
-	SetPadding(SettingPrimaryRowInternal.Padding);
+	SetPadding(PrimaryDataInternal.Padding);
 }
 
 // Called whenever a new key is selected by the user

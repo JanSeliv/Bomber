@@ -18,7 +18,7 @@ void UInputControlsWidget::NativeConstruct()
 
 	CreateAllInputCategories();
 
-	SetPadding(SettingPrimaryRowInternal.Padding);
+	SetPadding(PrimaryDataInternal.Padding);
 }
 
 // Adds input categories for each mapping context
@@ -41,7 +41,7 @@ void UInputControlsWidget::CreateAllInputCategories()
 
 		for (const FInputCategoryData& InputCategoryDataIt : InputCategoriesData)
 		{
-			FSettingsPrimary NewPrimaryRow = SettingPrimaryRowInternal;
+			FSettingsPrimary NewPrimaryRow = PrimaryDataInternal;
 			NewPrimaryRow.Caption = InputCategoryDataIt.CategoryName;
 			UInputCategoryWidget* InputCategoryWidget = GetSettingsWidgetChecked().CreateSettingSubWidget<UInputCategoryWidget>(NewPrimaryRow, InputCategoryClassInternal);
 

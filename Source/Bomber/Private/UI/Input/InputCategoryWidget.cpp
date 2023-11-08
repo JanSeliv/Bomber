@@ -58,7 +58,7 @@ void UInputCategoryWidget::CreateInputButtons(const FInputCategoryData& InInputC
 
 	for (const FEnhancedActionKeyMapping& MappableDataIt : InInputCategoryData.Mappings)
 	{
-		FSettingsPrimary NewPrimaryRow = SettingPrimaryRowInternal;
+		FSettingsPrimary NewPrimaryRow = PrimaryDataInternal;
 		UInputButtonWidget* InputButtonWidget = GetSettingsWidgetChecked().CreateSettingSubWidget<UInputButtonWidget>(NewPrimaryRow, InputButtonClassInternal);
 
 		InputButtonsInternal.Emplace(InputButtonWidget);
