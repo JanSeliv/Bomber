@@ -103,7 +103,7 @@ protected:
 	/** Destroy bomb and burst explosion cells.
 	  * Calls destroying request of all actors by cells in explosion cells array.*/
 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void MulticastDetonateBomb();
+	void MulticastDetonateBomb(const TArray<FCell>& ExplosionCells);
 
 	/**
 	 * Triggers when character end to overlaps with this bomb.

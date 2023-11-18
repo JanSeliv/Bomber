@@ -273,12 +273,6 @@ void ABombActor::DetonateBomb()
 		return;
 	}
 
-	MulticastDetonateBomb();
-}
-
-// Destroy bomb and burst explosion cells
-void ABombActor::MulticastDetonateBomb_Implementation()
-{
 	const FCells ExplosionCells = GetExplosionCells();
 	if (ExplosionCells.IsEmpty())
 	{
@@ -286,6 +280,12 @@ void ABombActor::MulticastDetonateBomb_Implementation()
 		return;
 	}
 
+	MulticastDetonateBomb(ExplosionCells.Array());
+}
+
+// Destroy bomb and burst explosion cells
+void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& ExplosionCells)
+{
 	// Reset Fire Radius to avoid destroying the bomb again
 	FireRadiusInternal = INDEX_NONE;
 
@@ -297,7 +297,7 @@ void ABombActor::MulticastDetonateBomb_Implementation()
 	}
 
 	// Destroy all actors from array of cells
-	AGeneratedMap::Get().DestroyLevelActorsOnCells(ExplosionCells, this);
+	AGeneratedMap::Get().DestroyLevelActorsOnCells(FCells{ExplosionCells}, this);
 
 	USoundsSubsystem::Get().PlayExplosionSFX();
 
