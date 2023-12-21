@@ -27,12 +27,6 @@ public:
 	 * Delegates
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPossessed, class APlayerCharacter*, PlayerCharacter);
-
-	/** Notifies the server and clients when this controller possesses new player character. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnPossessed OnPossessed;
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetPlayerState, class AMyPlayerState*, MyPlayerState);
 
 	/** Notifies the server and clients when the player state is set. */

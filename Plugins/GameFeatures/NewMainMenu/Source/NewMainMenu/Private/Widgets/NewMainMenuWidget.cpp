@@ -99,17 +99,27 @@ void UNewMainMenuWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
 // Is called when player pressed the button to start the game
 void UNewMainMenuWidget::OnPlayButtonPressed()
 {
+	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
+	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %s:\n'MyPc' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
+	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
+	const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
+	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %s:\n'CinematicRow' is not valid!"), __LINE__, *FString(__FUNCTION__))
+		|| !MainMenuSpot->GetMeshChecked().IsVisible())
+	{
+		// The spot is locked
+		return;
+	}
+
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
-	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
-	{
-		// Start cinematic
-		// If should skip, then start the game instead
-		const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
-		const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
-		const ECGS NewState = !UNMMUtils::ShouldSkipCinematic(CinematicRow) ? ECGS::Cinematic : ECGS::GameStarting;
-		MyPC->ServerSetGameState(NewState);
-	}
+	// Start cinematic
+	// If should skip, then start the game instead
+	const ECGS NewState = !UNMMUtils::ShouldSkipCinematic(CinematicRow) ? ECGS::Cinematic : ECGS::GameStarting;
+	MyPC->ServerSetGameState(NewState);
 }
 
 // Is called when player pressed the button to choose next player
@@ -163,8 +173,10 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 
 	UMySkeletalMeshComponent& MainMenuMeshComp = MainMenuSpot->GetMeshChecked();
 	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp.GetCustomPlayerMeshData();
-	if (!CustomPlayerMeshData.IsValid())
+	if (!ensureMsgf(CustomPlayerMeshData.IsValid(), TEXT("ASSERT: 'CustomPlayerMeshData' is not valid"))
+		|| !MainMenuMeshComp.IsVisible())
 	{
+		// The spot is locked
 		return;
 	}
 

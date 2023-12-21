@@ -598,14 +598,20 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 
 	if (!PlayerMeshDataInternal.IsValid())
 	{
+		// PlayerRow is not valid or mesh data is not set
 		return;
 	}
+
+	const UPlayerRow* PrevPlayerRow = MySkeletalMeshComp->GetCustomPlayerMeshData().PlayerRow;
 
 	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
 
 	MapComponentInternal->SetLevelActorRow(PlayerMeshDataInternal.PlayerRow);
 
-	OnPlayerTypeChanged.Broadcast(PlayerMeshDataInternal.PlayerRow->PlayerTag);
+	if (PrevPlayerRow != PlayerMeshDataInternal.PlayerRow)
+	{
+		OnPlayerTypeChanged.Broadcast(PlayerMeshDataInternal.PlayerRow->PlayerTag);
+	}
 }
 
 // Set and apply default skeletal mesh for this player

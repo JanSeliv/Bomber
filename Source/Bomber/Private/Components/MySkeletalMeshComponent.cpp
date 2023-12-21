@@ -133,6 +133,14 @@ void UMySkeletalMeshComponent::OnVisibilityChanged()
 	}
 }
 
+// Disables tick and visibility if inactive and vice versa
+void UMySkeletalMeshComponent::SetActive(bool bNewActive, bool bReset/*= false*/)
+{
+	Super::SetActive(bNewActive, bReset);
+
+	SetHiddenInGame(!bNewActive, true);
+}
+
 // Init this component by specified player data
 void UMySkeletalMeshComponent::InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {

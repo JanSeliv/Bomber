@@ -101,6 +101,9 @@ public:
 	/** Overridable internal function to respond to changes in the visibility of the component. */
 	virtual void OnVisibilityChanged() override;
 
+	/** Disables tick and visibility if inactive and vice versa. */
+	virtual void SetActive(bool bNewActive, bool bReset = false) override;
+	
 	/** Returns how this mesh looks like for now.
 	 * @see UMySkeletalMeshComponent::PlayerMeshDataInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
