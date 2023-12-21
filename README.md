@@ -61,6 +61,8 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 - Updated to **Unreal Engine 5.3**.
 - **New Main Menu** with completely different UI and complex cinematics on starting the game (only Hugo and Fori):
 > ![NewMainMenu](https://github.com/JanSeliv/Bomber/assets/20540872/9c960fa4-6760-4298-a55b-54d0cb8a0b13)
+- **New Bomb meshes** for each character (shown from left to right: Bastet, Hugo, Fori, Roger):
+> ![NewBombMeshes](https://github.com/JanSeliv/Bomber/assets/20540872/ce787e8c-d95c-4844-9282-e7aaff3dc243)
 #### `12.06.2023`
 - Updated to **Unreal Engine 5.2**.
 - Added **MacOS** support.
@@ -93,15 +95,15 @@ Stay updated with the current progress and plans on the [Trello board](https://t
  ---
 #### `03.06.2021:`
  - Completely updated the Maya level.
- - Added the Water level of the Pirate character.
+ - Added the Water level of the Roger character.
  - Added settings.
 >  ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
 >  ![](https://user-images.githubusercontent.com/20540872/120249541-8e5a9880-c27b-11eb-82cd-660878d33e6f.jpg)
 >  ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
  ---
 #### `31.01.2021:`
- - Added the Maya (Sphynx cat) character with two skins.
- - Added the Pirate character with one skin.
+ - Added the Bastet (Sphynx cat) character with two skins.
+ - Added the Roger character with one skin.
  - Fori and Hugo characters got additional second skins.
  > ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
  ---
