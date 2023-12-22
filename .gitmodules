@@ -1,27 +1,27 @@
 [submodule "Plugins/SettingsWidgetConstructor"]
 	path = Plugins/SettingsWidgetConstructor
-	url = git@github.com:JanSeliv/SettingsWidgetConstructor.git
+	url = https://github.com/JanSeliv/SettingsWidgetConstructor.git
 	branch = develop
 [submodule "Plugins/PoolManager"]
 	path = Plugins/PoolManager
-	url = git@github.com:JanSeliv/PoolManager.git
+	url = https://github.com/JanSeliv/PoolManager.git
 	branch = develop
 [submodule "Plugins/MorphsPlayer"]
 	path = Plugins/MorphsPlayer
-	url = git@github.com:JanSeliv/MorphsPlayer.git
+	url = https://github.com/JanSeliv/MorphsPlayer.git
 	branch = develop
 [submodule "Plugins/MetaCheatManager"]
 	path = Plugins/MetaCheatManager
-	url = git@github.com:JanSeliv/MetaCheatManager.git
+	url = https://github.com/JanSeliv/MetaCheatManager.git
 	branch = develop
 [submodule "Plugins/FunctionPicker"]
 	path = Plugins/FunctionPicker
-	url = git@github.com:JanSeliv/FunctionPicker.git
+	url = https://github.com/JanSeliv/FunctionPicker.git
 	branch = develop
 [submodule "Plugins/InstancedStaticMeshConverter"]
 	path = Plugins/InstancedStaticMeshConverter
-	url = git@github.com:JanSeliv/InstancedStaticMeshConverter.git
+	url = https://github.com/JanSeliv/InstancedStaticMeshConverter.git
 [submodule "Plugins/GameFeatures/ProgressionSystem"]
 	path = Plugins/GameFeatures/ProgressionSystem
-	url = git@github.com:h4rdmol/ProgressionSystem.git
+	url = https://github.com/h4rdmol/ProgressionSystem.git
 	branch = develop

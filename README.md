@@ -11,19 +11,17 @@ Bomber is an open-source indie game developed on Unreal Engine 5 for Windows and
 - [📋 Kanban Board](#-kanban-board)
 - [📅 Changelog](#-changelog)
 - [🎮 Overview](#-overview)
-- [🧑‍🤝‍🧑 Content Creation Team](#-content-creation-team)
+- [🧑‍🤝‍🧑 Credits](#-credits)
 - [📫 Feedback & Contribution](#-feedback--contribution)
 - [📜 License](#-license)
 
 ## 🚀 Getting Started
 
-This project uses **submodules**, downloaded via SSH. If you haven't set up SSH or skip submodules, you'll find empty folders in `Bomber\Plugins` and encounter [issues](https://github.com/JanSeliv/Bomber/issues/64) when running the project.
-
-To clone the project properly, run:
+This project contains **submodules** and requires `--recurse-submodules` when cloning:
 ```sh
-git clone --recurse-submodules git@github.com:JanSeliv/Bomber.git
+git clone --recurse-submodules https://github.com/JanSeliv/Bomber.git
 ```
-If already cloned without submodules, run:
+If already cloned without submodules, you'll find empty folders in `Bomber\Plugins` and error on project startup. To download submodules, run:
 ```sh
 git submodule update --init --recursive
 ```
@@ -32,12 +30,13 @@ git submodule update --init --recursive
 
 This project could be useful for learners, demonstrating next features:
 
-- Multiplayer support
-- Enhanced Input support
-- Modular Game Features support
-- Complex cinematics
-- Procedurally generated level
+- Multiplayer
+- Procedurally generated playfield
 - Challenging AI
+- Enhanced Input
+- Modular Game Features
+- Complex cinematics (Level Sequences)
+- Data-Driven Design (Data Assets, Data Tables, Data Registries, _see below_)
 
 Despite this project is fully written in C++, it's extremely **blueprint-friendly**:
 
@@ -46,11 +45,20 @@ Despite this project is fully written in C++, it's extremely **blueprint-friendl
 - **Well-Commented**: Every class, property and function is well-commented for easy understanding.
 - **Utility Libraries**: Core static functions are accessible globally like Cell Utils [[doc](https://trello.com/c/b2IzcOhg)]. See more in the `Source\UtilityLibraries` [folder](https://github.com/JanSeliv/Bomber/tree/master/Source/Bomber/Public/UtilityLibraries).
 
+Next plugins were developed for this project, but could be useful for other developers:
+
+- [⚙️ Settings Widget Constructor](https://github.com/JanSeliv/SettingsWidgetConstructor)
+- [🔄 Pool Manager](https://github.com/JanSeliv/PoolManager)
+- [🎭 Morphs Player](https://github.com/JanSeliv/MorphsPlayer)
+- [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
+- [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
+- [Progression System](https://github.com/h4rdmol/ProgressionSystem)
+
 ## 💾 Play the Build
 
 To download and play the build, visit [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi).
 
-Want to test develop branch? [Message me](https://t.me/JanSeliv) for a Steam key.
+Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a key.
 
 ## 📋 Kanban Board
 
@@ -63,17 +71,12 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![NewMainMenu](https://github.com/JanSeliv/Bomber/assets/20540872/9c960fa4-6760-4298-a55b-54d0cb8a0b13)
 - **New Bomb meshes** for each character (shown from left to right: Bastet, Hugo, Fori, Roger):
 > ![NewBombMeshes](https://github.com/JanSeliv/Bomber/assets/20540872/ce787e8c-d95c-4844-9282-e7aaff3dc243)
+- **[Progression System](https://github.com/h4rdmol/ProgressionSystem)** that allows to unlock new characters by playing the game
 #### `12.06.2023`
 - Updated to **Unreal Engine 5.2**.
 - Added **MacOS** support.
 - Added **Ultra-wide** resolutions support.
-- Extracted logic into plugins, so other developers can benefit from it in their projects:
--  [⚙️ Settings Widget Constructor](https://github.com/JanSeliv/SettingsWidgetConstructor)
--  [🔘️ Custom Shape Button](https://github.com/JanSeliv/CustomShapeButton)
--  [🔄 Pool Manager](https://github.com/JanSeliv/PoolManager)
--  [🎭 Morphs Player](https://github.com/JanSeliv/MorphsPlayer)
--  [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
--  [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
+- Extracted logic into plugins, so other developers can benefit from it in their projects
 - Added Foot Trails for the Maya level as `Modular Game Feature`:
 >  <img width="560" alt="image" src="https://github.com/JanSeliv/Bomber/assets/20540872/a77c2e38-4fd6-4a04-988e-05d9613bd97e">
 - New power-ups meshes for the Maya level (shown from left to right: move speed, bomb length, bomb quantity):
@@ -235,11 +238,18 @@ _Grey Х: the selected cell on which the bot moves to._
 
 ![GIF15](https://user-images.githubusercontent.com/20540872/63063848-aa524600-befe-11e9-93fb-ece39892ace5.gif)
 
-## 🧑‍🤝‍🧑 Content Creation Team
+## 🧑‍🤝‍🧑 Credits
 
-- **Level Design and Level Art** by Maksim Shashkov: [Visit Artstation Profile](https://www.artstation.com/maksimshashkov)
-- **Characters and Animations (Gameplay and Cinematics)** by Kateryna Shchetinina: [Visit Artstation Profile](https://www.artstation.com/kateseliv)
-- **Game Design (including Audio, UI, and Cinematics)** by Yevhenii Oksenchuk: [Contact in Telegram](https://t.me/ComeThird)
+- **Yevhenii Selivanov** - Programming - [GitHub](https://www.github.com/janseliv), [Telegram](https://t.me/JanSeliv)
+- **Maksim Shashkov** - Level Design & Level Art - [Artstation](https://www.artstation.com/maksimshashkov)
+- **Kateryna Shchetinina** - Characters & Animations - [Artstation](https://www.artstation.com/kateseliv)
+- **Yevhenii Oksenchuk** - Game Design (Audio, UI, and Cinematics) - [Telegram](https://t.me/ComeThird)
+- **Valeriy Rotermel** - [Progression System](https://github.com/h4rdmol/ProgressionSystem) - [GitHub](https://github.com/h4rdmol)
+
+Special thanks to the following companies for providing their licenses to support our open source development:
+
+- [JetBrains Rider](https://www.jetbrains.com/community/opensource/#support) - cross-platform .NET IDE.
+- [PVS-Studio](https://pvs-studio.com/pvs-studio/?utm_source=website&utm_medium=github&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
 
 ## 📫 Feedback & Contribution
 
