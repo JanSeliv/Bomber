@@ -222,7 +222,7 @@ void UMySkeletalMeshComponent::AttachProps()
 		UMeshComponent* MeshComponent = nullptr;
 		if (const auto SkeletalMeshProp = Cast<USkeletalMesh>(AttachedMeshIt.AttachedMesh))
 		{
-			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this);
+			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this, NAME_None, RF_Transient);
 			SkeletalComponent->SetSkeletalMesh(SkeletalMeshProp);
 			SkeletalComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 			if (AttachedMeshIt.MeshAnimation)
@@ -233,7 +233,7 @@ void UMySkeletalMeshComponent::AttachProps()
 		}
 		else if (const auto StaticMeshProp = Cast<UStaticMesh>(AttachedMeshIt.AttachedMesh))
 		{
-			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
+			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this, NAME_None, RF_Transient);
 			StaticMeshComponent->SetStaticMesh(StaticMeshProp);
 			StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);

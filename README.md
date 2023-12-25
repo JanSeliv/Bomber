@@ -263,4 +263,4 @@ If you've found a bug or have an idea for a new feature, please open a new issue
 
 This project is licensed under the terms of the MIT license. See [LICENSE](LICENSE) for more details.
 
-We hope you find this plugin useful and we look forward to your feedback and contributions.
+We hope you find this project useful and we look forward to your feedback and contributions.
