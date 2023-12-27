@@ -606,8 +606,6 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 
 	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
 
-	MapComponentInternal->SetLevelActorRow(PlayerMeshDataInternal.PlayerRow);
-
 	if (PrevPlayerRow != PlayerMeshDataInternal.PlayerRow)
 	{
 		OnPlayerTypeChanged.Broadcast(PlayerMeshDataInternal.PlayerRow->PlayerTag);

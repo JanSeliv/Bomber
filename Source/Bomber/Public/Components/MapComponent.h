@@ -14,10 +14,10 @@ enum class EActorType : uint8;
 typedef TSet<class UMapComponent*> FMapComponents;
 
 /**
- * These components manage their level actors updates on the Generated Map in case of any changes that allow to:
- * -  Free location and rotation of the Generated Map in the editor time:
- * - Prepare in advance the level actors in the editor time:
- * Same calls and initializations for each of the Generated Map actors
+ * It is designed to standardize the handling of Level Actors on a Generated Map.
+ * It encapsulates the common functionality needed by different Level Actors, including:
+ * - Positioning the owning actor within the grid, so GeneratedMap manages each Level Actor in abstract way through the MapComponent.
+ * - Visual representation management through mesh and material settings.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BOMBER_API UMapComponent final : public UActorComponent
@@ -74,17 +74,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void TryDisplayOwnedCell();
 
-	/** Returns the owner's Level Actor Row. */
+	/** Updates current mesh to default by current level type. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void SetDefaultMesh();
+
+	/** Returns mesh asset if changed or null if default. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE class ULevelActorRow* GetLevelActorRow() const { return LevelActorRowInternal; }
+	class UStreamableRenderAsset* GetCustomMeshAsset() const { return CustomMeshAssetInternal; }
 
-	/** Returns the owner's Level Actor Row. */
-	template <typename T>
-	const FORCEINLINE T* GetLevelActorRow() const { return Cast<T>(GetLevelActorRow()); }
-
-	/** Set specified mesh to the Owner. */
+	/** Changes mesh from default to given one.
+	 * Is useful for rows that have more than one mesh per row, like items.
+	 * Is reset to null by SetDefaultMesh(). */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetLevelActorRow(const class ULevelActorRow* Row);
+	void SetCustomMeshAsset(class UStreamableRenderAsset* CustomMeshAsset);
 
 	/** Set material to the mesh. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -149,9 +151,11 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
 	TObjectPtr<class UMeshComponent> MeshComponentInternal = nullptr;
 
-	/** Current level row of the owner. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_LevelActorRow", Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Actor Row"))
-	TObjectPtr<const class ULevelActorRow> LevelActorRowInternal = nullptr;
+	/** Hold custom mesh asset if changed.
+	 * Is null by default or when SetDefaultMesh() is called.
+	 * Is set in SetCustomMeshAsset(). */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CustomMeshAsset", Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
+	TObjectPtr<UStreamableRenderAsset> CustomMeshAssetInternal = nullptr;
 
 	/** If true the owner is undestroyable, is used by skills and cheat manager. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
@@ -186,9 +190,9 @@ protected:
 	UFUNCTION()
 	bool OnConstructionOwnerActor();
 
-	/** Is called on client to update current level actor row. */
+	/** Is called on client to update custom mesh if changed. */
 	UFUNCTION()
-	void OnRep_LevelActorRow();
+	void OnRep_CustomMeshAsset();
 
 	/** Updates current collisions for the Box Collision Component. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

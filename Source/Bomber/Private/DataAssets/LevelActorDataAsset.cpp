@@ -2,10 +2,11 @@
 
 #include "DataAssets/LevelActorDataAsset.h"
 //---
+#include "MyUtilsLibraries/UtilsLibrary.h"
+//---
 #include "GameFramework/Actor.h"
 //---
 #if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
 //---
@@ -23,7 +24,7 @@ void UBomberDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		UMyUnrealEdEngine::GOnAnyDataAssetChanged.Broadcast();
 	}
@@ -40,7 +41,7 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	}
 
 	// Continue only if [IsEditorNotPieWorld]
-	if (!FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (!UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}
@@ -83,34 +84,14 @@ void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, 
 	}
 }
 
-// Return rows by specified level types in the bitmask
-const ULevelActorRow* ULevelActorDataAsset::GetRowByLevelType(ELevelType LevelType) const
+// Returns first found row by given predicate function
+const ULevelActorRow* ULevelActorDataAsset::GetRowByPredicate(const TFunctionRef<bool(const ULevelActorRow&)>& Predicate) const
 {
 	for (const ULevelActorRow* RowIt : RowsInternal)
 	{
 		if (RowIt
-		    && RowIt->Mesh //is not empty
-		    && (RowIt->LevelType == LevelType
-		        || RowIt->LevelType == ELevelType::Max))
-		{
-			return RowIt;
-		}
-	}
-	return nullptr;
-}
-
-// Return first found row by specified mesh
-const ULevelActorRow* ULevelActorDataAsset::GetRowByMesh(const UStreamableRenderAsset* Mesh) const
-{
-	if (!Mesh)
-	{
-		return nullptr;
-	}
-
-	for (const ULevelActorRow* RowIt : RowsInternal)
-	{
-		if (RowIt
-		    && RowIt->Mesh == Mesh)
+		    && RowIt->IsValid()
+		    && Predicate(*RowIt))
 		{
 			return RowIt;
 		}

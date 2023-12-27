@@ -26,6 +26,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties, ExposeOnSpawn = "true"))
 	TObjectPtr<class UStreamableRenderAsset> Mesh = nullptr;
 
+	/** Returns true if this row contains valid data. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	virtual bool IsValid() const { return Mesh != nullptr; }
+
 protected:
 #if WITH_EDITOR
 	/** Called to handle row changes. */
@@ -63,21 +67,22 @@ public:
 		TArray<ULevelActorRow*>& OutRows,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ELevelType")) int32 LevelsTypesBitmask) const;
 
-	/** Return first found row by specified level types. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const class ULevelActorRow* GetRowByLevelType(ELevelType LevelType) const;
+	/** Returns first found row by given predicate function. */
+	const ULevelActorRow* GetRowByPredicate(const TFunctionRef<bool(const ULevelActorRow&)>& Predicate) const;
+
+	template <typename T>
+	const FORCEINLINE T* GetRowByPredicate(const TFunctionRef<bool(const ULevelActorRow&)>& Predicate) const { return Cast<T>(GetRowByPredicate(Predicate)); }
 
 	/** Return first found row by specified level types. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE ULevelActorRow* GetRowByLevelType(ELevelType LevelType) const { return GetRowByPredicate([LevelType](const ULevelActorRow& RowIt) { return RowIt.LevelType == LevelType || RowIt.LevelType == ELT::Max; }); }
+
 	template <typename T>
 	const FORCEINLINE T* GetRowByLevelType(ELevelType LevelType) const { return Cast<T>(GetRowByLevelType(LevelType)); }
 
 	/** Return first found row by specified mesh. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const class ULevelActorRow* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const;
-
-	/** Return first found row by specified mesh. */
-	template <typename T>
-	const FORCEINLINE T* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const { return Cast<T>(GetRowByMesh(Mesh)); }
+	const FORCEINLINE ULevelActorRow* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const { return GetRowByPredicate([Mesh](const ULevelActorRow& RowIt) { return RowIt.Mesh == Mesh; }); }
 
 	/** Returns overall number of contained rows. */
 	UFUNCTION(BlueprintPure, Category = "C++")

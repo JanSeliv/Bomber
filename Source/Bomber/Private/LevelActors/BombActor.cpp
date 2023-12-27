@@ -89,16 +89,17 @@ void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 	const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
 
 	const ULevelActorRow* BombRow = BombDataAsset.GetRowByLevelType(PlayerType);
-	const UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
+	UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
 	if (ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %s:\n'BombMesh' is not found"), __LINE__, *FString(__FUNCTION__)))
 	{
-		// Override mesh and material
+		// Override mesh
 		checkf(MapComponentInternal, TEXT("ERROR: [%i] %s:\n'MapComponentInternal' is null!"), __LINE__, *FString(__FUNCTION__));
-		MapComponentInternal->SetLevelActorRow(BombRow);
+		MapComponentInternal->SetCustomMeshAsset(BombMesh);
+
+		// Override material
 		BombMaterialInternal = BombMesh->GetMaterial(0);
 	}
 
-	MapComponentInternal->SetLevelActorRow(BombRow);
 	if (PlayerType == ELevelType::None)
 	{
 		// Is bot character, set material for its default bomb with the same mesh
