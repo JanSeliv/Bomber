@@ -288,6 +288,7 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 		return;
 	}
 
+	// --- Prepare spawn request
 	const TWeakObjectPtr<ThisClass> WeakThis(this);
 	const FOnSpawnCallback OnCompleted = [WeakThis, OnSpawned](const FPoolObjectData& CreatedObject)
 	{
@@ -308,11 +309,72 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 		}
 	};
 
+	// --- Spawn actor
 	const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
 	const FPoolObjectHandle Handle = UPoolManagerSubsystem::Get().TakeFromPool(ClassToSpawn, FTransform(Cell), OnCompleted);
 
-	// Add Handle if requested spawning, so it can be canceled if regenerate before spawning finished 
+	// --- Add Handle if requested spawning, so it can be canceled if regenerate before spawning finished
+	checkf(Handle.IsValid(), TEXT("ERROR: [%i] %s:\n'Handle' is not valid!"), __LINE__, *FString(__FUNCTION__));
 	MapComponentsInternal.FindOrAdd(Handle);
+}
+
+// Spawns many level actors at once, used for level generation
+void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// --- Prepare spawn requests
+	TArray<FSpawnRequest> InOutRequests;
+	for (const TTuple<FCell, EActorType>& It : ActorsToSpawn)
+	{
+		const FCell& Cell = It.Key;
+		const EActorType& Type = It.Value;
+
+		if (UCellsUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
+		    || Type == EAT::None)                                                      // nothing to spawn
+		{
+			continue;
+		}
+
+		const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
+		InOutRequests.Emplace(ClassToSpawn, FTransform(Cell));
+	}
+
+	// --- Prepare On Spawn All callback
+	TWeakObjectPtr<ThisClass> WeakThis(this);
+	const FOnSpawnAllCallback OnCompleted = [WeakThis](const TArray<FPoolObjectData>& CreatedObjects)
+	{
+		AGeneratedMap* This = WeakThis.Get();
+		if (!This)
+		{
+			return;
+		}
+
+		// Setup spawned actors
+		for (const FPoolObjectData& CreatedObject : CreatedObjects)
+		{
+			AActor& SpawnedActor = CreatedObject.GetChecked<AActor>();
+			SpawnedActor.SetFlags(RF_Transient); // Do not save generated actors into the map
+			SpawnedActor.SetOwner(This);
+		}
+
+		This->MapComponentsInternal.MarkArrayDirty();
+
+		This->OnGeneratedLevelActors.Broadcast();
+	};
+
+	// --- Spawn all actors
+	UPoolManagerSubsystem::Get().TakeFromPool(InOutRequests, OnCompleted);
+
+	// --- Add handles if requested spawning, so they can be canceled if regenerate before spawning finished
+	for (const FSpawnRequest& It : InOutRequests)
+	{
+		checkf(It.Handle.IsValid(), TEXT("ERROR: [%i] %s:\n'Handle' is not valid!"), __LINE__, *FString(__FUNCTION__));
+		MapComponentsInternal.FindOrAdd(It.Handle);
+	}
 }
 
 // The function that places the actor on the Generated Map, attaches it and writes this actor to the GridArray_
@@ -944,14 +1006,7 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// --- Part 2: Spawning ---
 
-	for (const TTuple<FCell, EActorType>& It : ActorsToSpawn)
-	{
-		SpawnActorByType(It.Value, It.Key);
-	}
-
-	MapComponentsInternal.MarkArrayDirty();
-
-	OnGeneratedLevelActors.Broadcast();
+	SpawnActorsByTypes(ActorsToSpawn);
 }
 
 //  Map components getter.

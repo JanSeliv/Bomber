@@ -96,6 +96,10 @@ public:
 	/** Code alternative function with OnSpawn callback. */
 	void SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(AActor*)>& OnSpawned = nullptr);
 
+	/** Spawns many level actors at once, used for level generation. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn);
+
 	/** Adding and attaching the specified Map Component to the Level
 	 * @param AddedComponent The Map Component of the generated or dragged level actor. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
