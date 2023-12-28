@@ -1238,10 +1238,13 @@ void AGeneratedMap::OnRep_LevelType()
 // Is called on client to broadcast On Generated Level Actors delegate
 void AGeneratedMap::OnRep_MapComponents()
 {
-	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame
-	    && OnGeneratedLevelActors.IsBound())
+	// Array of level actors is just replicated, try to broadcast On Generated Level Actors delegate
+	if (OnGeneratedLevelActors.IsBound()
+	    && AMyGameStateBase::GetCurrentGameState() != ECGS::InGame
+	    && !MapComponentsInternal.ContainsByPredicate([](const FMapComponentSpec& It) { return !It.IsValid(); }))
 	{
-		// Any replication in array means the level regeneration since game is currently starting (3-2-1)
+		// It is not regular match, probably is Menu state or game is currently starting (3-2-1)
+		// and array contains only valid specs (all actors are spawned and replicated)
 		OnGeneratedLevelActors.Broadcast();
 	}
 }

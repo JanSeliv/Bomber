@@ -13,20 +13,10 @@ bool operator==(const FMapComponentSpec& A, const FCell& B)
 }
 
 FMapComponentSpec::FMapComponentSpec(UMapComponent& InMapComponent)
-	: MapComponent(&InMapComponent)
-	, Cell(InMapComponent.GetCell()) {}
+	: MapComponent(&InMapComponent) {}
 
 FMapComponentSpec::FMapComponentSpec(FPoolObjectHandle InPoolObjectHandle)
 	: PoolObjectHandle(MoveTemp(InPoolObjectHandle)) {}
-
-// Updates the cell of the map component according current data
-void FMapComponentSpec::UpdateCellInComponent()
-{
-	if (MapComponent)
-	{
-		MapComponent->SetCell(Cell);
-	}
-}
 
 FMapComponentsIterator::FMapComponentsIterator(const TArray<FMapComponentSpec>& InItems)
 	: Items(InItems)
@@ -64,7 +54,6 @@ FMapComponentSpec& FMapComponentsContainer::FindOrAdd(UMapComponent& MapComponen
 	}
 
 	FMapComponentSpec& AddedSpecRef = Items.Emplace_GetRef(MapComponent);
-	AddedSpecRef.Cell = MapComponent.GetCell();
 	MarkItemDirty(AddedSpecRef);
 	return AddedSpecRef;
 }
