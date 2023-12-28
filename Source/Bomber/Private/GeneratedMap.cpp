@@ -339,8 +339,9 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 			continue;
 		}
 
-		const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
-		InOutRequests.Emplace(ClassToSpawn, FTransform(Cell));
+		FSpawnRequest& NewRequestRef = InOutRequests.AddDefaulted_GetRef();
+		NewRequestRef.Class = UDataAssetsContainer::GetActorClassByType(Type);
+		NewRequestRef.Transform = FTransform(Cell);
 	}
 
 	// --- Prepare On Spawn All callback
