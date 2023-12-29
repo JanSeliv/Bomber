@@ -13,10 +13,20 @@ bool operator==(const FMapComponentSpec& A, const FCell& B)
 }
 
 FMapComponentSpec::FMapComponentSpec(UMapComponent& InMapComponent)
-	: MapComponent(&InMapComponent) {}
+	: MapComponent(&InMapComponent)
+	, Cell(InMapComponent.GetCell()) {}
 
 FMapComponentSpec::FMapComponentSpec(FPoolObjectHandle InPoolObjectHandle)
 	: PoolObjectHandle(MoveTemp(InPoolObjectHandle)) {}
+
+// Updates the cell of the map component according current data
+void FMapComponentSpec::UpdateCellInComponent()
+{
+	if (MapComponent)
+	{
+		MapComponent->SetCell(Cell);
+	}
+}
 
 FMapComponentsIterator::FMapComponentsIterator(const TArray<FMapComponentSpec>& InItems)
 	: Items(InItems)
@@ -54,6 +64,7 @@ FMapComponentSpec& FMapComponentsContainer::FindOrAdd(UMapComponent& MapComponen
 	}
 
 	FMapComponentSpec& AddedSpecRef = Items.Emplace_GetRef(MapComponent);
+	AddedSpecRef.Cell = MapComponent.GetCell();
 	MarkItemDirty(AddedSpecRef);
 	return AddedSpecRef;
 }
@@ -67,8 +78,9 @@ FMapComponentSpec& FMapComponentsContainer::FindOrAdd(const FPoolObjectHandle& P
 		return *FoundSpec;
 	}
 
-	// No need to set Cell or replicate it since there is no Map Component yet 
-	return Items.Emplace_GetRef(PoolObjectHandle);
+	FMapComponentSpec& AddedSpecRef = Items.Emplace_GetRef(PoolObjectHandle);
+	MarkItemDirty(AddedSpecRef);
+	return AddedSpecRef;
 }
 
 void FMapComponentsContainer::Remove(const UMapComponent* MapComponent)
@@ -99,6 +111,6 @@ void FMapComponentsContainer::Remove(const FPoolObjectHandle& PoolObjectHandle)
 		// Remove first occurrence since there is only one Handle
 		const int8 bRemoved = Items.RemoveSingleSwap(*FoundSpec);
 		checkf(bRemoved, TEXT("ERROR: [%i] %s:\nFailed to remove next Handle: %s"), __LINE__, *FString(__FUNCTION__), *PoolObjectHandle.GetHash().ToString());
-		// MarkArrayDirty() is skipped since there is no spawned Map Component yet
+		MarkArrayDirty();
 	}
 }

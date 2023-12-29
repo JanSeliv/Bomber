@@ -406,6 +406,8 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 	// If found, means was spawned before, otherwise is taken from pool
 	FMapComponentSpec& NewSpec = MapComponentsInternal.FindOrAdd(Handle);
 	NewSpec.MapComponent = AddedComponent;
+	NewSpec.Cell = Cell;
+	MapComponentsInternal.MarkItemDirty(NewSpec);
 
 	// Find transform
 	FRotator ActorRotation = GetActorRotation();
@@ -523,6 +525,7 @@ void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* Dest
 		}
 	}
 	MapComponentsInternal.Items.Shrink();
+	MapComponentsInternal.MarkArrayDirty();
 }
 
 // Destroy level actor by specified Map Component from the level
