@@ -73,8 +73,7 @@ FMapComponentSpec& FMapComponentsContainer::FindOrAdd(const FPoolObjectHandle& P
 
 void FMapComponentsContainer::Remove(const UMapComponent* MapComponent)
 {
-	const FMapComponentSpec* FoundSpec = Find(MapComponent);
-	if (ensureMsgf(FoundSpec, TEXT("ASSERT: [%i] %s:\n'FoundSpec' condition is FALSE"), __LINE__, *FString(__FUNCTION__)))
+	if (const FMapComponentSpec* FoundSpec = Find(MapComponent))
 	{
 		// Remove first occurrence since there is only one Map Component
 		const int8 bRemoved = Items.RemoveSingleSwap(*FoundSpec);
@@ -85,8 +84,7 @@ void FMapComponentsContainer::Remove(const UMapComponent* MapComponent)
 
 void FMapComponentsContainer::Remove(const FCell& Cell)
 {
-	const FMapComponentSpec* FoundSpec = Find(Cell);
-	if (ensureMsgf(FoundSpec, TEXT("ASSERT: [%i] %s:\n'FoundSpec' condition is FALSE"), __LINE__, *FString(__FUNCTION__)))
+	if (const FMapComponentSpec* FoundSpec = Find(Cell))
 	{
 		const int8 bRemoved = Items.RemoveSwap(*FoundSpec);
 		checkf(bRemoved, TEXT("ERROR: [%i] %s:\nFailed to remove next Cell: %s"), __LINE__, *FString(__FUNCTION__), *Cell.ToString());
@@ -96,8 +94,7 @@ void FMapComponentsContainer::Remove(const FCell& Cell)
 
 void FMapComponentsContainer::Remove(const FPoolObjectHandle& PoolObjectHandle)
 {
-	const FMapComponentSpec* FoundSpec = Find(PoolObjectHandle);
-	if (ensureMsgf(FoundSpec, TEXT("ASSERT: [%i] %s:\n'FoundSpec' condition is FALSE"), __LINE__, *FString(__FUNCTION__)))
+	if (const FMapComponentSpec* FoundSpec = Find(PoolObjectHandle))
 	{
 		// Remove first occurrence since there is only one Handle
 		const int8 bRemoved = Items.RemoveSingleSwap(*FoundSpec);

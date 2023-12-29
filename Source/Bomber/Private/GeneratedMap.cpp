@@ -565,7 +565,15 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	MapComponent->OnDeactivated(DestroyCauser);
 
 	// Deactivate the iterated owner
-	UPoolManagerSubsystem::Get().ReturnToPool(ComponentOwner);
+	UPoolManagerSubsystem& PoolManager = UPoolManagerSubsystem::Get();
+	if (PoolManager.ContainsObjectInPool(ComponentOwner))
+	{
+		PoolManager.ReturnToPool(ComponentOwner);
+	}
+	else
+	{
+		ComponentOwner->Destroy();
+	}
 
 	DestroyLevelActorDragged(MapComponent);
 }
