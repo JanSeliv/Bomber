@@ -4,9 +4,6 @@
 
 #include "UI/SettingSubWidget.h"
 //---
-#include "Bomber.h"
-#include "EnhancedActionKeyMapping.h"
-//---
 #include "InputCategoryWidget.generated.h"
 
 /* Widgets hierarchy:
@@ -34,7 +31,7 @@ struct FInputCategoryData
 
 	/** All mappings with this input category name. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	TArray<FEnhancedActionKeyMapping> Mappings;
+	TArray<struct FEnhancedActionKeyMapping> Mappings;
 
 	/** Returns all categories from the specified input mapping context. */
 	static void GetCategoriesDataFromMappings(const UMyInputMappingContext& InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData);

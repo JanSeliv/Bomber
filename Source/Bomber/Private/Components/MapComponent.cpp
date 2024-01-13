@@ -2,23 +2,27 @@
 
 #include "Components/MapComponent.h"
 //---
+#include "Bomber.h"
 #include "GeneratedMap.h"
 #include "PoolManagerSubsystem.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/BoxComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/StreamableRenderAsset.h"
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "MyUnrealEdEngine.h"
 #endif
 //---
@@ -72,7 +76,9 @@ bool UMapComponent::OnConstructionOwnerActor()
 		// The owner actor is not in the pool
 		// Most likely it is a dragged actor, since all generated actors are always taken from the pool
 		// Add this object to the pool and continue construction
-		PoolManager.RegisterObjectInPool(Owner, EPoolObjectState::Active);
+		FPoolObjectData ObjectData(Owner);
+		ObjectData.bIsActive = true;
+		PoolManager.RegisterObjectInPool(ObjectData);
 	}
 	else if (PoolObjectState == EPoolObjectState::Inactive)
 	{
@@ -97,22 +103,18 @@ bool UMapComponent::OnConstructionOwnerActor()
 		return false;
 	}
 
-	// Update default mesh asset
-	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
-	SetLevelActorRow(FoundRow);
+	SetDefaultMesh();
 
 	const ECollisionResponse CollisionResponse = GetActorDataAssetChecked().GetCollisionResponse();
 	SetCollisionResponses(CollisionResponse);
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
+#if WITH_EDITOR
 		// Update AI renders after adding obj to map
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
+#endif
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
-
-	TryDisplayOwnedCell();
 
 	return true;
 }
@@ -121,6 +123,8 @@ bool UMapComponent::OnConstructionOwnerActor()
 void UMapComponent::SetCell(const FCell& Cell)
 {
 	CellInternal = Cell;
+
+	TryDisplayOwnedCell();
 }
 
 // Show current cell if owned actor type is allowed, is not available in shipping build
@@ -136,29 +140,43 @@ void UMapComponent::TryDisplayOwnedCell()
 #endif // !UE_BUILD_SHIPPING
 }
 
-// Set specified mesh to the Owner
-void UMapComponent::SetLevelActorRow(const ULevelActorRow* Row)
+// Updates current mesh to default according current level type
+void UMapComponent::SetDefaultMesh()
 {
-	if (!Row)
+	if (GetActorDataAssetChecked().GetActorType() == EActorType::Player)
+	{
+		// ACharacter has own mesh component, no need to manage it
+		return;
+	}
+
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
+	UUtilsLibrary::SetMesh(MeshComponentInternal, FoundRow->Mesh);
+
+	// Reset custom mesh name for replication
+	const AActor* Owner = GetOwner();
+	checkf(Owner, TEXT("ERROR: [%i] %s:\n'Owner' is null!"), __LINE__, *FString(__FUNCTION__));
+	if (Owner->HasAuthority())
+	{
+		CustomMeshAssetInternal = nullptr;
+	}
+}
+
+// Overrides mesh to the Owner ignoring current level type and Level Row
+void UMapComponent::SetCustomMeshAsset(UStreamableRenderAsset* CustomMeshAsset)
+{
+	if (!ensureMsgf(CustomMeshAsset, TEXT("ASSERT: [%i] %s:\n'CustomMeshAsset' is null, attempted to set null mesh!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		return;
 	}
 
-	LevelActorRowInternal = Row;
+	UUtilsLibrary::SetMesh(MeshComponentInternal, CustomMeshAsset);
 
-	// Update mesh
-	UStreamableRenderAsset* Mesh = Row->Mesh;
-	if (Mesh
-	    && GetActorDataAssetChecked().GetActorType() != EActorType::Player) // characters are managing their mesh by themselves
+	// Update the mesh name for replication
+	const AActor* Owner = GetOwner();
+	checkf(Owner, TEXT("ERROR: [%i] %s:\n'Owner' is null!"), __LINE__, *FString(__FUNCTION__));
+	if (Owner->HasAuthority())
 	{
-		if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponentInternal))
-		{
-			SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(Mesh));
-		}
-		else if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponentInternal))
-		{
-			StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(Mesh));
-		}
+		CustomMeshAssetInternal = CustomMeshAsset;
 	}
 }
 
@@ -170,6 +188,12 @@ void UMapComponent::SetMaterial(UMaterialInterface* Material)
 	{
 		MeshComponentInternal->SetMaterial(0, Material);
 	}
+}
+
+// Returns the map component of the specified owner
+UMapComponent* UMapComponent::GetMapComponent(const AActor* Owner)
+{
+	return Owner ? Owner->FindComponentByClass<UMapComponent>() : nullptr;
 }
 
 // Get the owner's data asset
@@ -215,20 +239,25 @@ void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 		OnDeactivatedMapComponent.Broadcast(this, DestroyCauser);
 	}
 
+	// -- Clear and discard all runtime changes
+
 	SetCollisionResponses(ECR_Ignore);
+
+	if (CustomMeshAssetInternal != nullptr)
+	{
+		SetDefaultMesh();
+	}
 
 	if (IsUndestroyable())
 	{
 		SetUndestroyable(false);
 	}
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditor())
+	if (UUtilsLibrary::IsEditor())
 	{
 		// Remove all text renders of the Owner
 		UCellsUtilsLibrary::ClearDisplayedCells(GetOwner());
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 //  Called when a component is registered (not loaded)
@@ -280,31 +309,29 @@ void UMapComponent::OnRegister()
 	if (ActorDataAssetInternal->GetActorType() == EAT::Player)
 	{
 		// The character class already has own initialized skeletal component
-		const ACharacter* Player = CastChecked<ACharacter>(GetOwner());
+		const ACharacter* Player = CastChecked<ACharacter>(Owner);
 		MeshComponentInternal = Player->GetMesh();
 		check(MeshComponentInternal);
 	}
 	else
 	{
-		MeshComponentInternal = NewObject<UMeshComponent>(GetOwner(), UStaticMeshComponent::StaticClass(), TEXT("MeshComponent"));
+		MeshComponentInternal = NewObject<UStaticMeshComponent>(Owner);
 		MeshComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		MeshComponentInternal->RegisterComponent();
 
-		// Set default mesh asset
-		const ULevelActorRow* FoundRow = ActorDataAssetInternal->GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
-		SetLevelActorRow(FoundRow);
+		SetDefaultMesh();
 	}
 
 	// Do not receive decals for level actors by default
 	MeshComponentInternal->SetReceivesDecals(false);
 
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
+#if WITH_EDITORONLY_DATA
 		// Should not call OnConstruction on drag events
 		Owner->bRunConstructionScriptOnDrag = false;
+#endif
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 // Called when a component is destroyed for removing the owner from the Generated Map.
@@ -320,8 +347,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		// Delete spawned collision component
 		BoxCollisionComponentInternal->DestroyComponent();
 
-#if WITH_EDITOR	// [IsEditorNotPieWorld]
-		if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+		if (UUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
 			const UGeneratedMapSubsystem* GeneratedMapSubsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem();
@@ -331,10 +357,10 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 				GeneratedMap->DestroyLevelActor(this);
 			}
 
-			// Editor delegates
+#if WITH_EDITOR
 			UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
+#endif
 		}
-#endif //WITH_EDITOR [IsEditorNotPieWorld]
 	}
 
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
@@ -346,14 +372,22 @@ void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, CellInternal);
-	DOREPLIFETIME(ThisClass, LevelActorRowInternal);
+	DOREPLIFETIME(ThisClass, CustomMeshAssetInternal);
 	DOREPLIFETIME(ThisClass, CollisionResponseInternal);
 }
 
 // Is called on client to update current level actor row
-void UMapComponent::OnRep_LevelActorRow()
+void UMapComponent::OnRep_CustomMeshAsset()
 {
-	SetLevelActorRow(LevelActorRowInternal);
+	if (!CustomMeshAssetInternal)
+	{
+		// It was reset to default mesh on server
+		SetDefaultMesh();
+		return;
+	}
+
+	// Apply replicated mesh on client
+	SetCustomMeshAsset(CustomMeshAssetInternal);
 }
 
 // Updates current collisions for the Box Collision Component
@@ -392,8 +426,8 @@ bool UMapComponent::Modify(bool bAlwaysMarkDirty/* = true*/)
 {
 	AActor* Owner = GetOwner();
 	if (Owner
-	    && !FEditorUtilsLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
-	    && IsEditorOnly())                  // was generated in the editor
+	    && !UUtilsLibrary::IsEditor() // is editor macro but not is GEditor, so [-game]
+	    && IsEditorOnly())            // was generated in the editor
 	{
 		Owner->Destroy();
 		return false;

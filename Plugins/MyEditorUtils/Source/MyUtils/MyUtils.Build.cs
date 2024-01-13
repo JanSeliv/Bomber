@@ -8,6 +8,7 @@ public class MyUtils : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Latest;
+		bEnableNonInlinedGenCppWarnings = true;
 
 		PublicDependencyModuleNames.AddRange(new[]
 			{
@@ -19,6 +20,8 @@ public class MyUtils : ModuleRules
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
 				, "UMG" // UUserWidget
+				, "MovieScene", "MovieSceneTracks" // UCinematicUtils
+				, "EnhancedInput", "InputCore" // UInputUtilsLibrary
 			}
 		);
 

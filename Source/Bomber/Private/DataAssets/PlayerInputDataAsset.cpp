@@ -2,15 +2,13 @@
 
 #include "DataAssets/PlayerInputDataAsset.h"
 //---
-#include "EnhancedActionKeyMapping.h"
-//---
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/MyInputMappingContext.h"
+#include "MyUtilsLibraries/InputUtilsLibrary.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#endif
+#include "Engine/World.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerInputDataAsset)
 
@@ -26,11 +24,6 @@ const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
 void UPlayerInputDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& OutInputContexts) const
 {
 	GetAllGameplayInputContexts(OutInputContexts);
-
-	if (const UMyInputMappingContext* MainMenuInputContext = GetMainMenuInputContext())
-	{
-		OutInputContexts.Emplace(MainMenuInputContext);
-	}
 
 	if (const UMyInputMappingContext* InGameMenuInputContext = GetInGameMenuInputContext())
 	{
@@ -67,23 +60,18 @@ bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
 {
 	return GameplayInputContextsInternal.ContainsByPredicate([&Key](const UMyInputMappingContext* ContextIt)
 	{
-		return ContextIt && ContextIt->GetMappings().ContainsByPredicate([&Key](const FEnhancedActionKeyMapping& MappingIt)
-		{
-			return MappingIt.Key == Key;
-		});
+		return ContextIt && UInputUtilsLibrary::IsMappedKeyInContext(Key, ContextIt);
 	});
 }
 
 // Creates new contexts if is needed
 void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 {
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Do not create input contexts since the game is not started yet
 		return;
 	}
-#endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	// Create new context if any is null
 	const int32 ClassesNum = GameplayInputContextClassesInternal.Num();
@@ -98,7 +86,7 @@ void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 		}
 
 		// Initialize new gameplay contexts
-		UWorld* World = UMyBlueprintFunctionLibrary::GetStaticWorld();
+		UWorld* World = UUtilsLibrary::GetPlayWorld();
 		const TSubclassOf<UMyInputMappingContext>& ContextClassIt = GameplayInputContextClassesInternal[Index];
 		if (!World
 		    || !ContextClassIt)

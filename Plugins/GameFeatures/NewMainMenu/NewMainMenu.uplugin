@@ -1,0 +1,41 @@
+﻿{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "New Main Menu",
+	"Description": "Game Feature to prototype a new Main Menu.",
+	"Category": "Game Features",
+	"CreatedBy": "Yevhenii Selivanov",
+	"CreatedByURL": "https://github.com/JanSeliv/Bomber",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "mailto:janseliw@gmail.com",
+	"EnabledByDefault": true,
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NewMainMenu",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"ExplicitlyLoaded": true,
+	"BuiltInInitialFeatureState": "Registered",
+	"Plugins": [
+		{
+			"Name": "MyEditorUtils",
+			"Enabled": true
+		},
+		{
+			"Name": "SettingsWidgetConstructor",
+			"Enabled": true
+		},
+		{
+			"Name": "MetaCheatManager",
+			"Enabled": true
+		}
+	]
+}

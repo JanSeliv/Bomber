@@ -8,11 +8,13 @@ public class BomberEditor : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Latest;
+		bEnableNonInlinedGenCppWarnings = true;
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
 			"Core"
 			, "UnrealEd" // Created UMyUnrealEdEngine
+			, "GameplayTagsEditor" // FGameplayTagCustomizationPublic
 			// My modules
 			, "MyEditorUtils" // Created Created FMorphDataCustomization, FAttachedMeshCustomization
 		});

@@ -107,17 +107,16 @@ void FAssetTypeActions_MyDataTable::OpenAssetEditor(const TArray<UObject*>& InOb
 	{
 		FTextBuilder DataTablesListText;
 		DataTablesListText.Indent();
-		for (UDataTable* Table : InvalidDataTables)
+		for (const UDataTable* Table : InvalidDataTables)
 		{
 			const FTopLevelAssetPath ResolvedRowStructName = Table->GetRowStructPathName();
 			DataTablesListText.AppendLineFormat(LOCTEXT("DataTable_MissingRowStructListEntry", "* {0} (Row Structure: {1})"), FText::FromString(Table->GetName()), FText::FromString(ResolvedRowStructName.ToString()));
 		}
 
-		FText Title = LOCTEXT("DataTable_MissingRowStructTitle", "Continue?");
 		const EAppReturnType::Type DlgResult = FMessageDialog::Open(
 			EAppMsgType::YesNoCancel,
 			FText::Format(LOCTEXT("DataTable_MissingRowStructMsg", "The following Data Tables are missing their row structure and will not be editable.\n\n{0}\n\nDo you want to open these data tables?"), DataTablesListText.ToText()),
-			&Title
+			LOCTEXT("DataTable_MissingRowStructTitle", "Continue?")
 		);
 
 		switch (DlgResult)

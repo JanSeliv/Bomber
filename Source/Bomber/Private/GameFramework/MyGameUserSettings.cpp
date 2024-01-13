@@ -5,7 +5,9 @@
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "DynamicRHI.h"
 #include "Engine/DataTable.h"
+#include "Misc/ConfigCacheIni.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameUserSettings)
 
@@ -296,7 +298,8 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 		UpdateSupportedResolutions();
 	}
 
-	if (GetLastGPUBenchmarkResult() == INDEX_NONE)
+	constexpr float NoBenchmarkRun = -1.f;
+	if (GetLastGPUBenchmarkResult() == NoBenchmarkRun)
 	{
 		RunHardwareBenchmark();
 		ApplyHardwareBenchmarkResults();

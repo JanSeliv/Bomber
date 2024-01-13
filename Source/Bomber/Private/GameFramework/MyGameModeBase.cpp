@@ -37,6 +37,19 @@ void AMyGameModeBase::BeginPlay()
 	Super::BeginPlay();
 }
 
+// Initializes the game
+void AMyGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	// Override network version check, so cross-platform builds can connect to each other
+	FNetworkVersion::IsNetworkCompatibleOverride.BindLambda([](uint32 LocalNetworkVersion, uint32 RemoteNetworkVersion)
+	{
+		// @TODO JanSeliv 0moajxBA: Generate game version on UI for builds, use it for builds compatibility check
+		return true;
+	});
+}
+
 // Called after a successful login
 void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 {

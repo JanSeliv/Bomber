@@ -9,6 +9,11 @@
 class USoundsSubsystem;
 class USoundBase;
 class USoundClass;
+class USoundMix;
+
+enum class EEndGameState : uint8;
+enum class ELevelType : uint8;
+enum class ECurrentGameState : uint8;
 
 /**
  * Contains all sound assets used in game.

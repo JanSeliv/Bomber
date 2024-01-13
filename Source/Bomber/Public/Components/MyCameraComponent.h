@@ -4,10 +4,10 @@
 
 #include "Camera/CameraComponent.h"
 //---
-#include "Bomber.h"
-#include "Structures/Cell.h"
-//---
 #include "MyCameraComponent.generated.h"
+
+enum class ECurrentGameState : uint8;
+enum EAspectRatioAxisConstraint : int;
 
 /**
  * Contains parameters to tweak how calculate the distance from camera to the level during the game
@@ -89,7 +89,7 @@ public:
 
 	/** Calculates how faw away the camera should be placed from specified cells. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	float GetCameraDistanceToCells(const TSet<FCell>& Cells) const;
+	float GetCameraDistanceToCells(const TSet<struct FCell>& Cells) const;
 
 	/** Returns the center camera location between all players and bots. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -101,6 +101,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FVector GetCameraLockedLocation() const;
 
+	/** Starts viewing through this camera. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PossessCamera(bool bBlendCamera = true);
+
+	/** Disable to prevent automatic possessing on Game Starting state, could be disabled by external systems like to show cinematic etc.
+	 * @see UMyCameraComponent::bAutoPossessCameraInternal */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetAutoPossessCameraEnabled(bool bInAutoPossessCamera);
+	
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -114,6 +123,10 @@ protected:
 	 * @see UMyCameraComponent::GetCameraDistanceToCells */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Distance Params"))
 	FCameraDistanceParams DistanceParamsInternal;
+
+	/** When true, camera will be automatically possessed on Game Starting state. Could be disabled by extern system could be disabled by external systems like to show cinematic etc. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Possess Camera"))
+	bool bAutoPossessCameraInternal = true;
 
 	/** When true, force the moving to the start position. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))
@@ -133,14 +146,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	/** Listen game states to manage the tick. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Listen to recalculate camera location when screen aspect ratio was changed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnAspectRatioChanged(float NewAspectRatio);
-
-	/** Starts viewing through this camera. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void PossessCamera();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnAspectRatioChanged(float NewAspectRatio, EAspectRatioAxisConstraint NewAxisConstraint);
 };

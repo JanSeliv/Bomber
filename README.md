@@ -1,50 +1,84 @@
 # 💣 About the Bomber Project
 
-Bomber is an open-source indie game with multiplayer support, available for Windows and MacOS, developed using Unreal Engine 5.2. Engage in fast-paced strategic combat with friends or against AI, by placing bombs to eliminate enemies and navigate through obstacles. The objective is to be the last character standing. Players can collect power-ups to set multiple bombs, enlarge explosions, or boost speed. It is crucial to exercise caution to avoid being caught in bomb blasts, including one’s own. The game boasts procedurally generated levels, ensuring a diverse and unpredictable experience in each play-through. Battle against cunning bots or challenge your friends, and strategize to become the ultimate bomber!
+Bomber is an open-source indie game developed on Unreal Engine 5 for Windows and MacOS, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
+
+![Bomber](https://github.com/JanSeliv/Bomber/assets/20540872/2898eace-7a57-44d1-9530-4a5abc235b2d)
 
 ## Table of Contents
+
 - [💣 About the Bomber Project](#-about-the-bomber-project)
 - [🚀 Getting Started](#-getting-started)
+- [🛠 Key Features](#-key-features)
 - [💾 Play the Build](#-play-the-build)
 - [📋 Kanban Board](#-kanban-board)
 - [📅 Changelog](#-changelog)
-- [🎮 Features](#-features)
-- [🧑‍🤝‍🧑 Content Creation Team](#-content-creation-team)
+- [🎮 Overview](#-overview)
+- [🧑‍🤝‍🧑 Credits](#-credits)
 - [📫 Feedback & Contribution](#-feedback--contribution)
 - [📜 License](#-license)
 
 ## 🚀 Getting Started
 
-This repository contains submodules, to clone the project properly, run:
+This project contains **submodules** and requires `--recurse-submodules` when cloning:
 ```sh
-git clone --recurse-submodules git@github.com:JanSeliv/Bomber.git
+git clone --recurse-submodules https://github.com/JanSeliv/Bomber.git
 ```
-If already cloned without submodules, run:
+If already cloned without submodules, you'll find empty folders in `Bomber\Plugins` and error on project startup. To download submodules separately, run:
 ```sh
 git submodule update --init --recursive
 ```
 
+## 🛠 Key Features
+
+This project could be useful for learners, demonstrating next features:
+
+- Multiplayer
+- Procedurally generated playfield
+- Challenging AI
+- Enhanced Input
+- Modular Game Features
+- Complex cinematics (Level Sequences)
+- Data-Driven Design (Data Assets, Data Tables, Data Registries, _see below_)
+
+Despite this project is fully written in C++, it's extremely **blueprint-friendly**:
+
+- **Data-Driven Design**: No hardcoded values. All data can be tweaked via Data Assets in editor as well as accessed in blueprints [[doc](https://trello.com/c/HGscMUdK)].
+- **Fully Exposed**: Every class, property, and function is exposed to Blueprints allowing for heavy changes the logic with no code.
+- **Well-Commented**: Every class, property and function is well-commented for easy understanding.
+- **Utility Libraries**: Core static functions are accessible globally like Cell Utils [[doc](https://trello.com/c/b2IzcOhg)]. See more in the `Source\UtilityLibraries` [folder](https://github.com/JanSeliv/Bomber/tree/master/Source/Bomber/Public/UtilityLibraries).
+
+Next [plugins](https://github.com/JanSeliv/Bomber/tree/master/Plugins) were developed for this project, but could be useful for other developers:
+
+- [⚙️ Settings Widget Constructor](https://github.com/JanSeliv/SettingsWidgetConstructor)
+- [🔄 Pool Manager](https://github.com/JanSeliv/PoolManager)
+- [🎭 Morphs Player](https://github.com/JanSeliv/MorphsPlayer)
+- [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
+- [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
+
 ## 💾 Play the Build
 
-To download and play the build, visit [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi)
+To download and play the build, visit [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi).
+
+Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a key.
 
 ## 📋 Kanban Board
 
 Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
 ## 📅 Changelog
-
+#### `13.01.2024`
+- Updated to **Unreal Engine 5.3**.
+- **New Main Menu** with completely different UI and complex cinematics for Hugo and Fori characters on starting the game:
+> ![NewMainMenu](https://github.com/JanSeliv/Bomber/assets/20540872/9c960fa4-6760-4298-a55b-54d0cb8a0b13)
+- **New Bomb meshes** for each character (shown from left to right: Bastet, Hugo, Fori, Roger):
+> ![NewBombMeshes](https://github.com/JanSeliv/Bomber/assets/20540872/ce787e8c-d95c-4844-9282-e7aaff3dc243)
+- **New game icon**: ![GameIcon](https://github.com/JanSeliv/Bomber/assets/20540872/ca239a66-b550-4a45-ba4f-182d85e3c460)
+- **New Wall mesh** for the Maya level.
 #### `12.06.2023`
 - Updated to **Unreal Engine 5.2**.
 - Added **MacOS** support.
 - Added **Ultra-wide** resolutions support.
-- Extracted logic into plugins, so other developers can benefit from it in their projects:
--  [⚙️ Settings Widget Constructor](https://github.com/JanSeliv/SettingsWidgetConstructor)
--  [🔘️ Custom Shape Button](https://github.com/JanSeliv/CustomShapeButton)
--  [🔄 Pool Manager](https://github.com/JanSeliv/PoolManager)
--  [🎭 Morphs Player](https://github.com/JanSeliv/MorphsPlayer)
--  [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
--  [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
+- Extracted logic into plugins, so other developers can benefit from it in their projects
 - Added Foot Trails for the Maya level as `Modular Game Feature`:
 >  <img width="560" alt="image" src="https://github.com/JanSeliv/Bomber/assets/20540872/a77c2e38-4fd6-4a04-988e-05d9613bd97e">
 - New power-ups meshes for the Maya level (shown from left to right: move speed, bomb length, bomb quantity):
@@ -66,15 +100,15 @@ Stay updated with the current progress and plans on the [Trello board](https://t
  ---
 #### `03.06.2021:`
  - Completely updated the Maya level.
- - Added the Water level of the Pirate character.
+ - Added the Water level of the Roger character.
  - Added settings.
 >  ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
 >  ![](https://user-images.githubusercontent.com/20540872/120249541-8e5a9880-c27b-11eb-82cd-660878d33e6f.jpg)
 >  ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
  ---
 #### `31.01.2021:`
- - Added the Maya (Sphynx cat) character with two skins.
- - Added the Pirate character with one skin.
+ - Added the Bastet (Sphynx cat) character with two skins.
+ - Added the Roger character with one skin.
  - Fori and Hugo characters got additional second skins.
  > ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
  ---
@@ -89,7 +123,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
  ---
 #### `15.10.2019:` Uploaded first game-ready build.
 
-## 🎮 Features
+## 🎮 Overview
 
 **The level camera** that moves and zooms lens depending on the distance between players:
 
@@ -206,18 +240,29 @@ _Grey Х: the selected cell on which the bot moves to._
 
 ![GIF15](https://user-images.githubusercontent.com/20540872/63063848-aa524600-befe-11e9-93fb-ece39892ace5.gif)
 
-## 🧑‍🤝‍🧑 Content Creation Team
+## 🧑‍🤝‍🧑 Credits
 
-- **Level Design and Level Art** by Maksim Shashkov: [Visit Artstation Profile](https://www.artstation.com/maksimshashkov)
-- **Characters and Animations (Gameplay and Cinematics)** by Kateryna Shchetinina: [Visit Artstation Profile](https://www.artstation.com/kateseliv)
-- **Game Design (including Audio, UI, and Cinematics)** by Yevhenii Oksenchuk: [Contact in Telegram](https://t.me/ComeThird)
+- **Yevhenii Selivanov** - Programming - [GitHub](https://www.github.com/janseliv), [Telegram](https://t.me/JanSeliv)
+- **Maksim Shashkov** - Level Design & Level Art - [Artstation](https://www.artstation.com/maksimshashkov)
+- **Kateryna Shchetinina** - Characters & Animations - [Artstation](https://www.artstation.com/kateseliv)
+- **Yevhenii Oksenchuk** - Game Design (Audio, UI, and Cinematics) - [Telegram](https://t.me/ComeThird)
+- **Valeriy Rotermel** - [Progression System](https://github.com/h4rdmol/ProgressionSystem) - [GitHub](https://github.com/h4rdmol)
+
+Special thanks to the following companies for providing their licenses to support our open source development:
+
+- [JetBrains Rider](https://www.jetbrains.com/community/opensource/#support) - cross-platform .NET IDE.
+- [PVS-Studio](https://pvs-studio.com/pvs-studio/?utm_source=website&utm_medium=github&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
 
 ## 📫 Feedback & Contribution
 
-This is an open-source project and we encourage you to contribute. If you encounter any bugs, or if you have any feature requests, please file an issue in the GitHub repository.
+Feedback and contributions from the community are highly appreciated!
+
+If you'd like to contribute, please fork the project and create a pull request targeting the `develop` branch.
+
+If you've found a bug or have an idea for a new feature, please open a new issue on GitHub. Thank you!
 
 ## 📜 License
 
 This project is licensed under the terms of the MIT license. See [LICENSE](LICENSE) for more details.
 
-We hope you find this plugin useful and we look forward to your feedback and contributions.
+We hope you find this project useful and we look forward to your feedback and contributions.

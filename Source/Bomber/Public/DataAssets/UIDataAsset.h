@@ -4,9 +4,9 @@
 
 #include "Engine/DataAsset.h"
 //---
-#include "Bomber.h"
-//---
 #include "UIDataAsset.generated.h"
+
+enum class EEndGameState : uint8;
 
 /**
  * Contains in-game UI data.
@@ -24,11 +24,6 @@ public:
 	 * @see UUIDataAsset::InGameWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE TSubclassOf<class UInGameWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
-
-	/** Returns a class of the main menu widget.
-	 * @see UUIDataAsset::MainMenuWidgetClassInternal.*/
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UMainMenuWidget> GetMainMenuWidgetClass() const { return MainMenuWidgetClassInternal; }
 
 	/** Returns a class of the settings widget.
 	 * @see UUIDataAsset::SettingsWidgetClassInternal.*/
@@ -54,10 +49,6 @@ protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
 	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal = nullptr;
-
-	/** The class of a In-Game Widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UMainMenuWidget> MainMenuWidgetClassInternal = nullptr;
 
 	/** The class of a Settings Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))

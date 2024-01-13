@@ -6,7 +6,34 @@
 //---
 #include "PlayerInputDataAsset.generated.h"
 
+enum class ECurrentGameState : uint8;
+
 class UMyInputMappingContext;
+
+/**
+ * Contains the settings for mouse visibility.
+ */
+USTRUCT(BlueprintType)
+struct FMouseVisibilitySettings
+{
+	GENERATED_BODY()
+
+	/** Determines visibility by default. If set, mouse will be shown, otherwise hidden. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	bool bIsVisible = false;
+
+	/** Set true to hide the mouse if inactive for a while.
+	 * To work properly, 'Mouse Move' input action has to be assigned to any input context.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, EditCondition = "bIsVisible", EditConditionHides))
+	bool bHideOnInactivity = false;
+
+	/** Set duration to automatically hide the mouse if inactive for a while. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, EditCondition = "bIsVisible && bHideOnInactivity", EditConditionHides, ClampMin = "0.0", Units = "s"))
+	float SecToAutoHide = 1.f;
+
+	/** Returns true if according settings, the mouse can be automatically hidden if inactive for a while. */
+	bool FORCEINLINE IsInactivityEnabled() const { return bIsVisible && bHideOnInactivity && SecToAutoHide > 0.f; }
+};
 
 /**
 * Contains all data that describe player input.
@@ -35,20 +62,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const UMyInputMappingContext* GetGameplayInputContext(int32 LocalPlayerIndex) const;
 
-	/** Returns the Enhanced Input Mapping Context of actions on the Main Menu widget.
-	* @see UPlayerInputDataAsset::MainMenuInputContextInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE UMyInputMappingContext* GetMainMenuInputContext() const { return MainMenuInputContextInternal; }
-
 	/** Returns the Enhanced Input Mapping Context of actions on the In-Game Menu widget.
-	  * @see UPlayerInputDataAsset:: */
+	  * @see UPlayerInputDataAsset::InGameMenuInputContextInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE UMyInputMappingContext* GetInGameMenuInputContext() const { return InGameMenuInputContextInternal; }
 
 	/** Returns the Enhanced Input Mapping Context of actions on the Settings widget.
-	  * @see ::SettingsInputContextInternalInternal */
+	  * @see UPlayerInputDataAsset::SettingsInputContextInternalInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE UMyInputMappingContext* GetSettingsInputContext() const { return SettingsInputContextInternalInternal; }
+
+	/** Returns the mouse visibility settings for specified game state.
+	 * @see UPlayerInputDataAsset::MouseVisibilitySettingsInternal. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE TMap<ECurrentGameState, FMouseVisibilitySettings>& GetMouseVisibilitySettings() const { return MouseVisibilitySettingsInternal; }
 
 	/** Returns true if specified key is mapped to any gameplay input context. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Key"))
@@ -63,16 +90,16 @@ protected:
 	TArray<TSubclassOf<UMyInputMappingContext>> GameplayInputContextClassesInternal;
 
 	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> MainMenuInputContextInternal = nullptr;
-
-	/** Enhanced Input Mapping Context of actions on the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Menu Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> InGameMenuInputContextInternal = nullptr;
+	TObjectPtr<const UMyInputMappingContext> InGameMenuInputContextInternal = nullptr;
 
 	/** Enhanced Input Mapping Context of actions on the Settings widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Input Context", ShowOnlyInnerProperties))
-	TObjectPtr<UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr;
+	TObjectPtr<const UMyInputMappingContext> SettingsInputContextInternalInternal = nullptr;
+
+	/** Determines mouse visibility behaviour per game states. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Mouse Visibility Settings"))
+	TMap<ECurrentGameState, FMouseVisibilitySettings> MouseVisibilitySettingsInternal;
 
 	/** Creates new contexts if is needed, is implemented to solve UE issues with remappings, see details below.
 	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
@@ -83,5 +110,5 @@ private:
 	/** Are created dynamically by specified input classes to solve UE issues with remappings, see details below.
 	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */
 	UPROPERTY(Transient)
-	mutable TArray<TObjectPtr<class UMyInputMappingContext>> GameplayInputContextsInternal; //[G]
+	mutable TArray<TObjectPtr<class UMyInputMappingContext>> GameplayInputContextsInternal;
 };

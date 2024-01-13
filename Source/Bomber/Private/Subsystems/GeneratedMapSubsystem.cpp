@@ -3,9 +3,9 @@
 #include "Subsystems/GeneratedMapSubsystem.h"
 //---
 #include "GeneratedMap.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 //---
 #if WITH_EDITOR
-#include "Editor.h"
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 //---
@@ -20,31 +20,10 @@ UGeneratedMapSubsystem& UGeneratedMapSubsystem::Get()
 }
 
 // Returns the pointer to the Generated Map Subsystem
-UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem()
+UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem(const UObject* WorldContextObject/* = nullptr*/)
 {
-	const UWorld* FoundWorld = GEngine ? GEngine->GetCurrentPlayWorld() : nullptr;
-
-#if WITH_EDITOR	 // [FEditorUtilsLibrary::IsEditor]
-	if (FEditorUtilsLibrary::IsEditor()
-		&& !FoundWorld)
-	{
-		if (FEditorUtilsLibrary::IsEditorNotPieWorld())
-		{
-			FoundWorld = GEditor->GetEditorWorldContext().World();
-		}
-		if (FEditorUtilsLibrary::IsPIE())
-		{
-			FoundWorld = GEditor->GetCurrentPlayWorld();
-		}
-	}
-#endif // WITH_EDITOR [FEditorUtilsLibrary::IsEditor]
-
-	if (!ensureMsgf(FoundWorld, TEXT("%s: Can not obtain current world"), *FString(__FUNCTION__)))
-	{
-		return nullptr;
-	}
-
-	return FoundWorld->GetSubsystem<UGeneratedMapSubsystem>();
+	const UWorld* FoundWorld = UUtilsLibrary::GetPlayWorld(WorldContextObject);
+	return FoundWorld ? FoundWorld->GetSubsystem<UGeneratedMapSubsystem>() : nullptr;
 }
 
 // The Generated Map getter, nullptr otherwise

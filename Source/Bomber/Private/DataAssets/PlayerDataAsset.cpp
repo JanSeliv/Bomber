@@ -4,6 +4,7 @@
 //---
 #include "DataAssets/DataAssetsContainer.h"
 //---
+#include "GameFramework/Actor.h"
 #include "Engine/Texture2DArray.h"
 #include "Materials/MaterialInstance.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -108,10 +109,7 @@ UPlayerDataAsset::UPlayerDataAsset()
 // Returns the player data asset
 const UPlayerDataAsset& UPlayerDataAsset::Get()
 {
-	const ULevelActorDataAsset* FoundDataAsset = UDataAssetsContainer::GetDataAssetByActorType(EActorType::Player);
-	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(FoundDataAsset);
-	checkf(PlayerDataAsset, TEXT("The Player Data Asset is not valid"));
-	return *PlayerDataAsset;
+	return UDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }
 
 // Get nameplate material by index, is used by nameplate meshes
@@ -122,5 +120,19 @@ UMaterialInterface* UPlayerDataAsset::GetNameplateMaterial(int32 Index) const
 		return NameplateMaterialsInternal[Index];
 	}
 
+	return nullptr;
+}
+
+// Return first found row by specified player tag
+const UPlayerRow* UPlayerDataAsset::GetRowByPlayerTag(const FPlayerTag& PlayerTag) const
+{
+	for (const TObjectPtr<ULevelActorRow> RowIt : RowsInternal)
+	{
+		const UPlayerRow* PlayerRow = Cast<UPlayerRow>(RowIt);
+		if (PlayerRow && PlayerRow->PlayerTag == PlayerTag)
+		{
+			return PlayerRow;
+		}
+	}
 	return nullptr;
 }

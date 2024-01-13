@@ -4,11 +4,13 @@
 
 #include "Subsystems/WorldSubsystem.h"
 //---
-#include "Bomber.h"
-//---
 #include "SoundsSubsystem.generated.h"
 
 class UAudioComponent;
+
+enum class ELevelType : uint8;
+enum class ECurrentGameState : uint8;
+enum class EEndGameState : uint8;
 
 /**
  * Is used to manage the game sounds.
@@ -24,9 +26,13 @@ public:
 	 *		Public functions
 	 * --------------------------------------------------- */
 
-	/** Returns the Sounds Manager checked. */
+	/** Returns the Sounds Manager, is checked and wil crash if can't be obtained. */
 	static USoundsSubsystem& Get();
 
+	/** Returns the pointer to the Sounds Manager. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static USoundsSubsystem* GetSoundsSubsystem(const UObject* WorldContextObject = nullptr);
+	
 	/** The component that is used to store reference for EndGameCountdown SFX. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))
 	TObjectPtr<UAudioComponent> ActiveEndGameCountdownSFX = nullptr;
@@ -98,11 +104,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Volume"))
 	double MasterVolumeInternal;
 
-	/** The sound volume for music sound class, is config property, is config property. */
+	/** The sound volume for music sound class, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
 	double MusicVolumeInternal;
 
-	/** The sound volume for SFX sound class, is config property, is config property. */
+	/** The sound volume for SFX sound class, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
 	double SFXVolumeInternal;
 

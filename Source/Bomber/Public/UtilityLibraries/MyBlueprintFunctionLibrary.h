@@ -4,9 +4,10 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 //---
-#include "Bomber.h"
-//---
 #include "MyBlueprintFunctionLibrary.generated.h"
+
+enum class ELevelType : uint8;
+enum class EActorType : uint8;
 
 /**
  * 	The static functions library
@@ -21,17 +22,6 @@ public:
 	 *		Static library functions
 	 * --------------------------------------------------- */
 
-	/** Returns current play world. */
-	static UWorld* GetStaticWorld();
-
-	/** Returns true if game was started. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static bool HasWorldBegunPlay();
-
-	/** Returns true if this instance is server. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static bool IsServer();
-
 	/** Returns number of alive players. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static int32 GetAlivePlayersNum();
@@ -45,72 +35,68 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Returns the Bomber Game Mode, nullptr otherwise. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class AMyGameModeBase* GetMyGameMode();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class AMyGameModeBase* GetMyGameMode(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Bomber Game state, nullptr otherwise. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class AMyGameStateBase* GetMyGameState();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class AMyGameStateBase* GetMyGameState(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the specified Player Controller, nullptr otherwise. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class AMyPlayerController* GetMyPlayerController(int32 PlayerIndex);
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class AMyPlayerController* GetMyPlayerController(int32 PlayerIndex, const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the local Player Controller, nullptr otherwise. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class AMyPlayerController* GetLocalPlayerController();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class AMyPlayerController* GetLocalPlayerController(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Bomber Player State for specified player, nullptr otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class AMyPlayerState* GetMyPlayerState(const class APawn* Pawn);
 
 	/** Returns the player state of current controller. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class AMyPlayerState* GetLocalPlayerState();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class AMyPlayerState* GetLocalPlayerState(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Bomber settings. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UMyGameUserSettings* GetMyGameUserSettings();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class UMyGameUserSettings* GetMyGameUserSettings(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Settings widget. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class USettingsWidget* GetSettingsWidget();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class USettingsWidget* GetSettingsWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Camera Component used on level. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UMyCameraComponent* GetLevelCamera();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class UMyCameraComponent* GetLevelCamera(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the HUD actor. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class AMyHUD* GetMyHUD();
-
-	/** Returns the Main Menu widget. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UMainMenuWidget* GetMainMenuWidget();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class AMyHUD* GetMyHUD(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the In-Game widget. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UInGameWidget* GetInGameWidget();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class UInGameWidget* GetInGameWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the In-Game Menu widget. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class UInGameMenuWidget* GetInGameMenuWidget();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class UInGameMenuWidget* GetInGameMenuWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns specified player character. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class APlayerCharacter* GetPlayerCharacter(int32 PlayerIndex);
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class APlayerCharacter* GetPlayerCharacter(int32 PlayerIndex, const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns controlled player character. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class APlayerCharacter* GetLocalPlayerCharacter();
-
-	/** Returns the Sounds Manager. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static class USoundsSubsystem* GetSoundsSubsystem();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class APlayerCharacter* GetLocalPlayerCharacter(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns implemented Game Viewport Client on the project side. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class UMyGameViewportClient* GetGameViewportClient();
+
+	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static class UMouseActivityComponent* GetMouseActivityComponent(const UObject* OptionalWorldContext = nullptr);
 
 	/* ---------------------------------------------------
 	*		EActorType functions

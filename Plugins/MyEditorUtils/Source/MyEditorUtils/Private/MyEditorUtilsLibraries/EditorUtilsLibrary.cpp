@@ -10,6 +10,7 @@
 #include "Editor/EditorEngine.h"
 #include "Editor/UnrealEdEngine.h"
 #include "EditorFramework/AssetImportData.h"
+#include "Engine/DataTable.h"
 #include "Misc/FileHelper.h"
 
 // Checks, is the current world placed in the editor
@@ -74,6 +75,34 @@ int32 FEditorUtilsLibrary::GetEditorPlayerIndex()
 		}
 	}
 	return INDEX_NONE;
+}
+
+// Obtains the current world from the editor
+UWorld* FEditorUtilsLibrary::GetEditorWorld()
+{
+	if (!IsEditor())
+	{
+		return nullptr;
+	}
+
+	UWorld* FoundWorld = nullptr;
+	if (IsPIE())
+	{
+		FoundWorld = GEditor->GetCurrentPlayWorld();
+		if (!FoundWorld)
+		{
+			const FWorldContext* PIEWorldContext = GEditor->GetPIEWorldContext();
+			FoundWorld = PIEWorldContext ? PIEWorldContext->World() : nullptr;
+		}
+	}
+
+	if (!FoundWorld)
+	{
+		// PIE is not started of the PIE's world is not found
+		FoundWorld = GEditor->GetEditorWorldContext().World();
+	}
+
+	return !FoundWorld ? GWorld : FoundWorld;
 }
 
 // Returns true if currently is cooking the package

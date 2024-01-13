@@ -2,6 +2,7 @@
 
 #include "DataAssets/DataAssetsContainer.h"
 //---
+#include "Bomber.h"
 #include "DataAssets/AIDataAsset.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "DataAssets/GeneratedMapDataAsset.h"
@@ -10,12 +11,14 @@
 #include "DataAssets/SoundsDataAsset.h"
 #include "DataAssets/UIDataAsset.h"
 //---
+#include "GameFramework/Actor.h"
+//---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(DataAssetsContainer)
 
 // Returns the Levels Data Asset
-const UGeneratedMapDataAsset* UDataAssetsContainer::GetLevelsDataAsset()
+const UGeneratedMapDataAsset* UDataAssetsContainer::GetGeneratedMapDataAsset()
 {
-	const UGeneratedMapDataAsset* LevelsDataAsset = Get().LevelsDataAssetInternal.LoadSynchronous();
+	const UGeneratedMapDataAsset* LevelsDataAsset = Get().GeneratedMapDataAssetInternal.LoadSynchronous();
 	checkf(LevelsDataAsset, TEXT("%s: 'LevelsDataAsset' is not loaded"), *FString(__FUNCTION__));
 	return LevelsDataAsset;
 }
@@ -58,6 +61,28 @@ const UGameStateDataAsset* UDataAssetsContainer::GetGameStateDataAsset()
 	const UGameStateDataAsset* GameStateDataAsset = Get().GameStateDataAssetInternal.LoadSynchronous();
 	checkf(GameStateDataAsset, TEXT("%s: 'GameStateDataAsset' is not loaded"), *FString(__FUNCTION__));
 	return GameStateDataAsset;
+}
+
+// Best suits for blueprints to get the data asset by its class since converts the result to the specified class
+const ULevelActorDataAsset* UDataAssetsContainer::GetLevelActorDataAsset(TSubclassOf<ULevelActorDataAsset> DataAssetClass)
+{
+	if (!DataAssetClass)
+	{
+		return nullptr;
+	}
+
+	const TArray<TSoftObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
+	for (const TSoftObjectPtr<ULevelActorDataAsset>& DataAssetSoftIt : ActorsDataAssets)
+	{
+		const ULevelActorDataAsset* DataAssetIt = DataAssetSoftIt.LoadSynchronous();
+		checkf(DataAssetIt, TEXT("%s: 'DataAssetIt' is not loaded"), *FString(__FUNCTION__));
+		if (DataAssetIt->IsA(DataAssetClass))
+		{
+			return DataAssetIt;
+		}
+	}
+
+	return nullptr;
 }
 
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset

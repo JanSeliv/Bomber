@@ -4,6 +4,8 @@
 
 #include "DataAssets/LevelActorDataAsset.h"
 //---
+#include "Structures/PlayerTag.h"
+//---
 #include "PlayerDataAsset.generated.h"
 
 /**
@@ -16,7 +18,7 @@ struct BOMBER_API FAttachedMesh
 
 	/** The attached static mesh or skeletal mesh.  */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn))
-	TObjectPtr<class UStreamableRenderAsset> AttachedMesh = nullptr;
+	TObjectPtr<const class UStreamableRenderAsset> AttachedMesh = nullptr;
 
 	/** In the which socket should attach this prop. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
@@ -36,6 +38,10 @@ class BOMBER_API UPlayerRow final : public ULevelActorRow
 	GENERATED_BODY()
 
 public:
+	/** The tag of this player character to be used for association of this player with other data. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Row", meta = (ShowOnlyInnerProperties))
+	FPlayerTag PlayerTag = FPlayerTag::None;
+
 	/** All meshes that will be attached to the player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	TArray<FAttachedMesh> PlayerProps;
@@ -114,7 +120,7 @@ public:
 	/** Returns the Anim Blueprint class to use.
 	 * @see UPlayerDataAsset::AnimInstanceClassInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClassInternal; }
+	FORCEINLINE TSubclassOf<class UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClassInternal; }
 
 	/** Returns the name of a material parameter with a diffuse array.
 	 * @see UPlayerDataAsset::SkinSlotNameInternal. */
@@ -126,6 +132,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE FName GetSkinIndexParameter() const { return SkinIndexParameterInternal; }
 
+	/** Return first found row by specified player tag. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const UPlayerRow* GetRowByPlayerTag(const FPlayerTag& PlayerTag) const;
+
 protected:
 	/** All materials that are used by nameplate meshes. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nameplate Materials", ShowOnlyInnerProperties))
@@ -133,7 +143,7 @@ protected:
 
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
-	TSubclassOf<UAnimInstance> AnimInstanceClassInternal = nullptr;
+	TSubclassOf<class UAnimInstance> AnimInstanceClassInternal = nullptr;
 
 	/** The name of a material parameter with a diffuse array. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))

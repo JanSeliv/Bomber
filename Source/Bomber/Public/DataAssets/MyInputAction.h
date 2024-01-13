@@ -32,21 +32,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FFunctionPicker& GetFunctionToBind() const { return FunctionToBindInternal; }
 
-	/** Returns keys mapped to this action in the active input mapping contexts sorted by its priorities. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	void GetKeys(TArray<FKey>& OutKeys) const;
-
-	/** Returns the first mapped key to this action in most priority active input context. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FKey GetKey() const;
-
+#if WITH_EDITOR
+	/** Validates bound functions to this input action. */
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif // WITH_EDITOR
+	
 protected:
 	/** Choose for which state the bound function has to be called. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Trigger Event", ShowOnlyInnerProperties))
 	ETriggerEvent TriggerEventInternal = ETriggerEvent::Triggered;
 
 	/** Contains data about static function object getter of a function to bind. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Static Context", ShowOnlyInnerProperties, FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnStaticContext__DelegateSignature"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Static Context", ShowOnlyInnerProperties, FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterObject__DelegateSignature"))
 	FFunctionPicker StaticContextInternal = FFunctionPicker::Empty;
 
 	/** Allows to set function that is used to be called when input will be triggered. */

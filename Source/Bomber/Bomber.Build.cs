@@ -7,7 +7,8 @@ public class Bomber : ModuleRules
 	public Bomber(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		CppStandard = CppStandardVersion.Cpp17; // Fails on CppStandardVersion.Latest by Niagara
+		CppStandard = CppStandardVersion.Latest;
+		bEnableNonInlinedGenCppWarnings = true;
 
 		PublicDependencyModuleNames.AddRange(new[]
 		    {
@@ -15,15 +16,18 @@ public class Bomber : ModuleRules
                 , "UMG" // UUserWidget creation
                 , "EnhancedInput" // Created UMyInputAction, UMyInputMappingContext
                 , "DeveloperSettings" // Created UDataAssetsContainer
+                , "NetCore" // Created FMapComponentsContainer
                 //My modules
-                , "FunctionPicker" // Used by MyInputAction.h
+                , "FunctionPicker" // Created properties in UMyInputAction
                 , "MetaCheatManager" // Created UMyCheatManager
+                , "PoolManager" // Created property in FMapComponentSpec
 		    }
 		);
 
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
-				"CoreUObject", "Engine", "InputCore", "Slate", "SlateCore" // Core
+				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
+				, "InputCore" // FKey
 				, "RHI", "ApplicationCore" // Resolutions
 				, "AIModule" // AI
 				, "Niagara" // VFX
@@ -32,7 +36,6 @@ public class Bomber : ModuleRules
 				//My modules
 				, "MyUtils" // UUtilsLibrary
 				, "SettingsWidgetConstructor" // Generates settings
-				, "PoolManager" // Used to spawn level actors
 			}
 		);
 

@@ -4,9 +4,9 @@
 
 #include "MetaCheatManager.h"
 //---
-#include "Bomber.h"
-//---
 #include "MyCheatManager.generated.h"
+
+enum class EActorType : uint8;
 
 /**
  * Contains debugging cheat command for non-shipping builds to test general game functionality.

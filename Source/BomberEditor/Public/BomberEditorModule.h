@@ -3,6 +3,8 @@
 #pragma once
 
 #include "Modules/ModuleInterface.h"
+//---
+#include "Logging/LogMacros.h"
 
 /** Define Bomber Editor log category. */
 BOMBEREDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogBomberEditor, Log, All);

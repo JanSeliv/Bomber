@@ -2,6 +2,7 @@
 
 #include "GameFramework/MyCheatManager.h"
 //---
+#include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"

@@ -22,8 +22,8 @@ public:
 	static UGeneratedMapSubsystem& Get();
 
 	/** Returns the pointer to the Generated Map Subsystem. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static UGeneratedMapSubsystem* GetGeneratedMapSubsystem();
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
+	static UGeneratedMapSubsystem* GetGeneratedMapSubsystem(const UObject* WorldContextObject = nullptr);
 #pragma endregion GetGeneratedMapSubsystem
 
 	/** The Generated Map getter, nullptr otherwise */

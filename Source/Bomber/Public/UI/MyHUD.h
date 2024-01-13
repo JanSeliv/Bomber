@@ -47,10 +47,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UInGameWidget* GetInGameWidget() const { return InGameWidgetInternal; }
 
-	/** Returns the current Main Menu widget object. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class UMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidgetInternal; }
-
 	/** Returns the current settings widget object. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class USettingsWidget* GetSettingsWidget() const { return SettingsWidgetInternal; }
@@ -76,6 +72,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsFPSCounterEnabled() const { return bIsFPSCounterEnabledInternal; }
 
+	/** Internal UUserWidget::CreateWidget wrapper. */
+	static UUserWidget* CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0);
+
+	template <typename T = UUserWidget>
+	FORCEINLINE T* CreateWidgetByClass(TSubclassOf<T> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0) const { return Cast<T>(CreateWidgetByClass(PlayerOwner.Get(), WidgetClass, bAddToViewport, ZOrder)); }
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -88,10 +90,6 @@ protected:
 	/** The current in-game widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
 	TObjectPtr<class UInGameWidget> InGameWidgetInternal = nullptr;
-
-	/** The current Main Menu widget object. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
-	TObjectPtr<class UMainMenuWidget> MainMenuWidgetInternal = nullptr;
 
 	/** The current settings widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))
@@ -115,12 +113,6 @@ protected:
 
 	/** Init all widgets on gameplay starting before begin play. */
 	virtual void PostInitializeComponents() override;
-
-	/** Internal UUserWidget::CreateWidget wrapper. */
-	static UUserWidget* CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true);
-
-	template <typename T = UUserWidget>
-	FORCEINLINE T* CreateWidgetByClass(TSubclassOf<T> WidgetClass, bool bAddToViewport = true) const { return Cast<T>(CreateWidgetByClass(PlayerOwner.Get(), WidgetClass, bAddToViewport)); }
 
 	/** Will try to start the process of initializing all widgets used in game. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

@@ -6,8 +6,11 @@
 //---
 #include "Bomber.h"
 #include "Structures/Cell.h"
+#include "Structures/MapComponentsContainer.h"
 //---
 #include "GeneratedMap.generated.h"
+
+class UMapComponent;
 
 /**
  * Procedurally generated grid of cells and actors on the scene.
@@ -35,6 +38,12 @@ public:
 	/** Called when new level type is set. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnSetNewLevelType OnSetNewLevelType;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratedLevelActors);
+
+	/** Is useful to react on regenerating level. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnGeneratedLevelActors OnGeneratedLevelActors;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
 
@@ -69,10 +78,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetLevelSize(const FIntPoint& LevelSize);
 
-	/** Returns number of characters in the array. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetAlivePlayersNum() const { return PlayersNumInternal; };
-
 	/** Get the current level type. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE ELevelType GetLevelType() const { return LevelTypeInternal; }
@@ -82,22 +87,23 @@ public:
 	FORCEINLINE class UMyCameraComponent* GetCameraComponent() const { return CameraComponentInternal; }
 
 	/** Spawns a level actor on the Generated Map by the specified type. Then calls AddToGrid().
-	 *
 	 * @param Type Which type of level actors
 	 * @param Cell Actors location
-	 * @return Spawned actor on the Generated Map, nullptr otherwise.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	AActor* SpawnActorByType(EActorType Type, const FCell& Cell);
+	 * @return Spawned actor on the Generated Map, nullptr otherwise. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DisplayName = "Spawn Actor by Type", AutoCreateRefTerm = "Cell"))
+	void BPSpawnActorByType(EActorType Type, const FCell& Cell) { SpawnActorByType(Type, Cell, nullptr); }
 
-	/** Spawns a level actor on the Generated Map by the specified type. */
-	template <typename T>
-	static FORCEINLINE T* SpawnActorByType(EActorType Type, const FCell& Cell) { return Cast<T>(Get().SpawnActorByType(Type, Cell)); }
+	/** Code alternative function with OnSpawn callback. */
+	void SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(AActor*)>& OnSpawned = nullptr);
+
+	/** Spawns many level actors at once, used for level generation. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn);
 
 	/** Adding and attaching the specified Map Component to the Level
 	 * @param AddedComponent The Map Component of the generated or dragged level actor. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void AddToGrid(class UMapComponent* AddedComponent);
+	void AddToGrid(UMapComponent* AddedComponent);
 
 	/** Destroy all actors from the level on specified cells.
 	 * @param Cells The set of cells for destroying the found actors.
@@ -111,12 +117,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
 	void DestroyLevelActor(UMapComponent* MapComponent, UObject* DestroyCauser = nullptr);
 
+	/** Destroys level actor by specified handle.
+	 * Handle version allows to destroy actor even if it is not spawned yet, but in processing queue.
+	 * @param Handle Unique ID from the Pool Manager to identify the level actor to destroy.*/
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
+	void DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, UObject* DestroyCauser = nullptr);
+
 	/** Finds the nearest cell pointer to the specified Map Component
 	 *
 	 * @param MapComponent The component whose owner is being searched
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void SetNearestCell(class UMapComponent* MapComponent);
+	void SetNearestCell(UMapComponent* MapComponent);
 
 	/**
 	* Change level by type. Specified level will be shown, other levels will be hidden.
@@ -127,7 +139,7 @@ public:
 
 	/** Returns true if specified map component has non-generated owner that is manually dragged to the scene. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	bool IsDraggedMapComponent(const class UMapComponent* MapComponent) const;
+	bool IsDraggedMapComponent(const UMapComponent* MapComponent) const;
 
 	/** Takes transform and returns aligned copy allowed to be used as actor transform for this map.
 	 * @param ActorTransform The transform to align.
@@ -153,22 +165,23 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
 	TObjectPtr<class UChildActorComponent> CollisionComponentInternal = nullptr;
 
-	/** Cells storage. */
+	/** Cells storage. Is separated from MapComponents array,
+	 * since GridCells is changing rarely (only when the level size is changed).
+	 * It means, each cell represents a tile on the level, even if there is no Map Component on it. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
 	TArray<FCell> GridCellsInternal;
 
-	/** Map components of all level actors. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
-	TArray<TObjectPtr<class UMapComponent>> MapComponentsInternal;
+	/** Map components of all level actors currently spawned on the Generated Map.
+	 * Is changing during the game on explosions and on the level regeneration.
+	 * Array of components is wrapped by FMapComponentsContainer.
+	 * It allows to replicate array faster, as the whole and even if the number of elements remains the same. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_MapComponents", Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
+	FMapComponentsContainer MapComponentsInternal;
 
 	/** Contains map components that were dragged to the scene
 	 * Is set in editor by adding and dragging actors, but can be changed during the game. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
 	TMap<FCell, EActorType> DraggedCellsInternal;
-
-	/** Number of characters on the Generated Map. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Players Num"))
-	int32 PlayersNumInternal = 0;
 
 	/** The current level type. Affects on the meshes of each level actor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = "OnRep_LevelType", Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
@@ -263,7 +276,7 @@ protected:
 	 */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetMapComponents(
-		TSet<class UMapComponent*>& OutBitmaskedComponents,
+		TSet<UMapComponent*>& OutBitmaskedComponents,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask) const;
 
 	/** Listen game states to generate level actors. */
@@ -287,6 +300,10 @@ protected:
 	UFUNCTION()
 	void OnRep_LevelType();
 
+	/** Is called on client to broadcast On Generated Level Actors delegate. */
+	UFUNCTION()
+	void OnRep_MapComponents();
+
 	/** Internal multicast function to set new size for generated map for all instances. */
 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void MulticastSetLevelSize(const FIntPoint& LevelSize);
@@ -302,13 +319,13 @@ protected:
 
 	/** The dragged version of the Add To Grid function to add the dragged actor on the level. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))
-	void AddToGridDragged(class UMapComponent* AddedComponent);
+	void AddToGridDragged(UMapComponent* AddedComponent);
 
 	/** The dragged version of the Set Nearest Cell function to find closest cell for the dragged level actor. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly, AutoCreateRefTerm = "NewCell"))
-	void SetNearestCellDragged(const class UMapComponent* MapComponent, const FCell& NewCell);
+	void SetNearestCellDragged(const UMapComponent* MapComponent, const FCell& NewCell);
 
 	/** The dragged version of the Destroy Level Actor function to hide the dragged actor from the level. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))
-	void DestroyLevelActorDragged(const class UMapComponent* MapComponent);
+	void DestroyLevelActorDragged(const UMapComponent* MapComponent);
 };

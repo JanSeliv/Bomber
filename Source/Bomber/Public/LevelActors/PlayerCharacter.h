@@ -4,10 +4,12 @@
 
 #include "GameFramework/Character.h"
 //---
-#include "InputActionValue.h"
-#include "Components/MySkeletalMeshComponent.h"
+#include "Structures/CustomPlayerMeshData.h"
+#include "Structures/PlayerTag.h"
 //---
 #include "PlayerCharacter.generated.h"
+
+enum class ELevelType : uint8;
 
 /**
  * Numbers of power-ups that affect the abilities of a player during gameplay.
@@ -45,6 +47,12 @@ class BOMBER_API APlayerCharacter final : public ACharacter
 	GENERATED_BODY()
 
 public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerTypeChanged, FPlayerTag, PlayerTag);
+
+	/** Called when chosen player's mesh changed for this pawn. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	FOnPlayerTypeChanged OnPlayerTypeChanged;
+
 	/** ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
@@ -70,7 +78,7 @@ public:
 
 	/** Returns the Skeletal Mesh of bombers. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const { return Cast<UMySkeletalMeshComponent>(GetMesh()); }
+	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
 
 	/** Actualize the player name for this character. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -84,6 +92,14 @@ public:
 	/** Returns current player mesh data of  the local player applied to skeletal mesh. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
+
+	/** Returns level type associated with player, e.g: Water level type for Roger character. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	ELevelType GetPlayerType() const;
+
+	/** Returns the Player Tag associated with player. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FGameplayTag& GetPlayerTag() const;
 
 protected:
 	/** ---------------------------------------------------
@@ -215,5 +231,5 @@ protected:
 
 	/** Move the player character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
-	void MovePlayer(const FInputActionValue& ActionValue);
+	void MovePlayer(const struct FInputActionValue& ActionValue);
 };

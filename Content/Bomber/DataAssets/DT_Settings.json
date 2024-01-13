@@ -10,7 +10,7 @@
 				{
 					"TagName": "Settings.TextLine.Title"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "None",
 					"FunctionName": "None"
@@ -40,6 +40,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -94,7 +98,7 @@
 				{
 					"TagName": "Settings.Button.CloseSettings"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetSettingsWidget"
@@ -124,6 +128,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -178,7 +186,7 @@
 				{
 					"TagName": "Settings.TextLine.VideoTab"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "None",
 					"FunctionName": "None"
@@ -208,6 +216,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -262,10 +274,10 @@
 				{
 					"TagName": "Settings.Checkbox.VSync"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -292,6 +304,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -346,10 +362,10 @@
 				{
 					"TagName": "Settings.Checkbox.FullscreenMode"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -376,6 +392,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -430,10 +450,10 @@
 				{
 					"TagName": "Settings.Combobox.Resolution"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -460,6 +480,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -514,7 +538,7 @@
 				{
 					"TagName": "Settings.Combobox.FramerateLock"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetMyGameUserSettings"
@@ -544,6 +568,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -606,7 +634,7 @@
 				{
 					"TagName": "Settings.Checkbox.FPSCounter"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetMyHUD"
@@ -636,6 +664,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -690,7 +722,7 @@
 				{
 					"TagName": "Settings.TextLine.AudioTab"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "None",
 					"FunctionName": "None"
@@ -720,6 +752,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -774,9 +810,9 @@
 				{
 					"TagName": "Settings.Slider.MasterVolume"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
@@ -804,6 +840,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -858,9 +898,9 @@
 				{
 					"TagName": "Settings.Slider.MusicVolume"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
@@ -888,6 +928,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -942,9 +986,9 @@
 				{
 					"TagName": "Settings.Slider.SFXVolume"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
@@ -972,6 +1016,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1026,7 +1074,7 @@
 				{
 					"TagName": "Settings.TextLine.GameplayTab"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "None",
 					"FunctionName": "None"
@@ -1056,6 +1104,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1110,7 +1162,7 @@
 				{
 					"TagName": "Settings.UserInput.PlayerName"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetLocalPlayerState"
@@ -1140,6 +1192,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1194,7 +1250,7 @@
 				{
 					"TagName": "Settings.Checkbox.CameraLock"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
 					"FunctionName": "GetLevelCamera"
@@ -1224,6 +1280,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1278,7 +1338,7 @@
 				{
 					"TagName": "Settings.TextLine.GraphicsTab"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "None",
 					"FunctionName": "None"
@@ -1308,6 +1368,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1362,10 +1426,10 @@
 				{
 					"TagName": "Settings.Combobox.OverallQuality"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -1424,6 +1488,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1485,10 +1553,10 @@
 				{
 					"TagName": "Settings.Combobox.ViewDistance"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -1526,6 +1594,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1586,10 +1658,10 @@
 				{
 					"TagName": "Settings.Combobox.AntiAliasing"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -1627,6 +1699,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1687,10 +1763,10 @@
 				{
 					"TagName": "Settings.Combobox.PostProcessing"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -1728,6 +1804,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1788,10 +1868,10 @@
 				{
 					"TagName": "Settings.Combobox.Shadows"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -1829,6 +1909,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1889,10 +1973,10 @@
 				{
 					"TagName": "Settings.Combobox.Textures"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -1930,6 +2014,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -1990,10 +2078,10 @@
 				{
 					"TagName": "Settings.Combobox.Effects"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -2031,6 +2119,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -2091,10 +2183,10 @@
 				{
 					"TagName": "Settings.Combobox.Foliage"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -2132,6 +2224,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -2192,10 +2288,10 @@
 				{
 					"TagName": "Settings.Combobox.Shading"
 				},
-				"StaticContext":
+				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "GetGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
@@ -2233,6 +2329,10 @@
 							"TagName": "Settings"
 						}
 					]
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":
@@ -2293,7 +2393,7 @@
 				{
 					"TagName": "Settings.CustomWidget.InputControls"
 				},
-				"StaticContext":
+				"Owner":
 				{
 					"FunctionClass": "None",
 					"FunctionName": "None"
@@ -2323,6 +2423,10 @@
 				{
 					"GameplayTags": [],
 					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
 				}
 			},
 			"Button":

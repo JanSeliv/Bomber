@@ -2,18 +2,15 @@
 
 #pragma once
 
-#include "Kismet/GameplayStatics.h"
 #include "Bomber.generated.h"
 
-/** IS_TRANSIENT returns true is specified object is pending kill, CDO or exists on the Transient level. */
-static const FString TransientLevelName = TEXT("Transient");
-#define IS_TRANSIENT(Obj) \
-	( \
-		!IsValid(Obj) \
-		|| !(Obj)->IsValidLowLevelFast() \
-		|| (Obj)->HasAllFlags(RF_ClassDefaultObject) \
-		|| UGameplayStatics::GetCurrentLevelName(Obj) == TransientLevelName \
-	)
+#define IS_TRANSIENT(Obj) ( FTransientChecker::IsTransient(Obj) )
+
+namespace FTransientChecker
+{
+/** Returns true is specified object is pending kill, CDO or exists on the Transient level. */
+BOMBER_API bool IsTransient(const UObject* Obj);
+}
 
 /**
  * Is useful for work with bit flags.
@@ -64,17 +61,24 @@ ENUM_CLASS_FLAGS(EActorType);
 using EAT = EActorType;
 
 /**
- * Levels in the game. In some cases bitmask are used to filter meshes.
+ * Levels in the game.
+ * In many cases is used to get the specific mesh of an level actor by the level type.
+ * @see ULevelActorRow::LevelType
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ELevelType : uint8
 {
 	None = 0,
+	///< Represents Maya level
 	First = 1 << 0 UMETA(DisplayName = "Maya"),
+	///< Represents City level
 	Second = 1 << 1 UMETA(DisplayName = "City"),
+	///< Represents Forest level
 	Third = 1 << 2 UMETA(DisplayName = "Forest"),
+	///< Represents Water level
 	Fourth = 1 << 3 UMETA(DisplayName = "Water"),
-	Max = First | Second | Third | Fourth UMETA(DisplayName = "Any") ///< Can be used for such levels as menu, sandbox, etc.
+	///< All the types, also can be used for such levels as menu, sandbox, etc.
+	Max = First | Second | Third | Fourth UMETA(DisplayName = "Any")
 };
 
 ENUM_CLASS_FLAGS(ELevelType);
@@ -106,30 +110,38 @@ enum class EPathType : uint8
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	None,
 	///< The type was not selected
-	Skate,
+	None,
 	///< Increases speed
-	Bomb,
+	Skate,
 	///< increases the amount of bombs
-	Fire ///< Increases the range of explosion
+	Bomb,
+	///< Increases the range of explosion
+	Fire
 };
+
 using EIT = EItemType;
 #define EIT_FIRST_FLAG TO_FLAG(EIT::Skate)
 #define EIT_LAST_FLAG TO_FLAG(EIT::Fire)
 
 /**
- * The replicated states of the game.
+ * The replicated states of the game. It shares the state between all the players at the same time.
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ECurrentGameState : uint8
 {
 	None = 0,
+	///< Is active while players are in Main-Menu.
 	Menu = 1 << 0,
+	///< Is active while players see count-down time (3-2-1).
 	GameStarting = 1 << 1,
+	///< Is active when the match is finished and players see their results of the game.
 	EndGame = 1 << 2,
+	///< Is active during the active match.
 	InGame = 1 << 3,
-	Max = Menu | GameStarting | EndGame | InGame
+	///< Is active while player is watching cutscene of chosen character, is happening in single-player only since cinematics are automatically skipped in multiplayer.
+	Cinematic = 1 << 4,
+	Max = Menu | GameStarting | EndGame | InGame | Cinematic UMETA(DisplayName = "Any")
 };
 
 ENUM_CLASS_FLAGS(ECurrentGameState);

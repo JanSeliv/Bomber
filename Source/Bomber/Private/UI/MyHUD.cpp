@@ -5,10 +5,11 @@
 #include "DataAssets/UIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UI/InGameWidget.h"
-#include "UI/MainMenuWidget.h"
 #include "UI/SettingsWidget.h"
 //---
+#include "UnrealClient.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/GameFrameworkComponentManager.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyHUD)
 
@@ -45,6 +46,9 @@ void AMyHUD::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	// Register HUD to let modular widgets to be dynamically added there
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+
 	if (PlayerOwner
 	    && !PlayerOwner->MyHUD)
 	{
@@ -55,7 +59,7 @@ void AMyHUD::PostInitializeComponents()
 }
 
 // Internal UUserWidget::CreateWidget wrapper
-UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/)
+UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/, int32 ZOrder/* = 0*/)
 {
 	if (!ensureMsgf(PlayerController, TEXT("%s: 'PlayerController' is null"), *FString(__FUNCTION__))
 	    || !ensureMsgf(WidgetClass, TEXT("%s: 'WidgetClass' is null"), *FString(__FUNCTION__)))
@@ -68,7 +72,7 @@ UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TS
 
 	if (bAddToViewport)
 	{
-		CreatedWidget->AddToViewport();
+		CreatedWidget->AddToViewport(ZOrder);
 	}
 
 	return CreatedWidget;
@@ -97,13 +101,11 @@ void AMyHUD::InitWidgets()
 
 	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
 
-	MainMenuWidgetInternal = CreateWidgetByClass<UMainMenuWidget>(UIDataAsset.GetMainMenuWidgetClass(), /*bAddToViewport*/false); // Is drawn by 3D user widget component, no need add it to viewport
-
 	InGameWidgetInternal = CreateWidgetByClass<UInGameWidget>(UIDataAsset.GetInGameWidgetClass());
 
 	FPSCounterWidgetInternal = CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
 
-	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass());
+	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/4);
 	SettingsWidgetInternal->TryConstructSettings();
 
 	static constexpr int32 MaxPlayersNum = 4;

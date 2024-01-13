@@ -4,8 +4,6 @@
 
 #include "Blueprint/UserWidget.h"
 //---
-#include "Bomber.h"
-//---
 #include "InGameMenuWidget.generated.h"
 
 /**

@@ -5,11 +5,13 @@
 #include "FootTrailsDataAsset.h"
 #include "InstancedStaticMeshActor.h"
 #include "MyDataTable/MyDataTable.h"
+#include "Structures/Cell.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "GameFramework/Actor.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FootTrailsGeneratorComponent)
 
@@ -19,6 +21,14 @@ UFootTrailsGeneratorComponent::UFootTrailsGeneratorComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+// Guarantees that the data asset is loaded, otherwise, it will crash
+const UFootTrailsDataAsset& UFootTrailsGeneratorComponent::GetFootTrailsDataAssetChecked() const
+{
+	const UFootTrailsDataAsset* FootTrailsDataAsset = GetFootTrailsDataAsset();
+	checkf(FootTrailsDataAsset, TEXT("%s: 'FootTrailsDataAssetInternal' is not set"), *FString(__FUNCTION__));
+	return *FootTrailsDataAsset;
 }
 
 // Returns the random foot trail instance for given types
@@ -63,8 +73,8 @@ void UFootTrailsGeneratorComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 // Loads all foot trails archetypes
 void UFootTrailsGeneratorComponent::Init()
 {
-	const UDataTable* FootTrailsDT = FootTrailsDataAssetInternal ? FootTrailsDataAssetInternal->GetFootTrailsDataTable() : nullptr;
-	if (!ensureMsgf(FootTrailsDT, TEXT("%s: 'FootTrailsDataAssetInternal' is not set"), *FString(__FUNCTION__))
+	const UDataTable* FootTrailsDT = GetFootTrailsDataAssetChecked().GetFootTrailsDataTable();
+	if (!ensureMsgf(FootTrailsDT, TEXT("%s: 'FootTrailsDT' is not set"), *FString(__FUNCTION__))
 		|| !FootTrailInstancesInternal.IsEmpty())
 	{
 		// is already initialized

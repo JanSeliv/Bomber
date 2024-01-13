@@ -4,12 +4,12 @@
 
 #include "GameFramework/Actor.h"
 //---
-#include "Structures/Cell.h"
-//---
 #include "BombActor.generated.h"
 
 #define MIN_FIRE_RADIUS 1
-#define DEFAULT_LIFESPAN INDEX_NONE
+#define DEFAULT_LIFESPAN -1.f
+
+enum class ECurrentGameState : uint8;
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.
@@ -34,19 +34,15 @@ public:
 
 	/** Returns cells that bombs is going to destroy. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	TSet<FCell> GetExplosionCells() const;
+	TSet<struct FCell> GetExplosionCells() const;
 
 	/** Returns radius of the blast to each side. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetExplosionRadius() const { return FireRadiusInternal; }
 
-	/**
-	 * Sets the defaults of the bomb
-	 * @param InFireRadius Setting explosion length of this bomb
-	 * @param CharacterID Setting a mesh material of bomb by the character ID
-	 */
+	/** Sets the defaults of the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void InitBomb(int32 InFireRadius = 1, int32 CharacterID = -1);
+	void InitBomb(const class APlayerCharacter* Causer = nullptr);
 
 	/** Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
@@ -107,7 +103,7 @@ protected:
 	/** Destroy bomb and burst explosion cells.
 	  * Calls destroying request of all actors by cells in explosion cells array.*/
 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void MulticastDetonateBomb();
+	void MulticastDetonateBomb(const TArray<FCell>& ExplosionCells);
 
 	/**
 	 * Triggers when character end to overlaps with this bomb.

@@ -17,9 +17,11 @@
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "InputActionValue.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 //---
@@ -115,30 +117,40 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 		return;
 	}
 
+	const TWeakObjectPtr<ThisClass> WeakThis = this;
+	const TFunction<void(AActor*)> OnBombSpawned = [WeakThis](AActor* SpawnedActor)
+	{
+		APlayerCharacter* PlayerCharacter = WeakThis.Get();
+		if (!PlayerCharacter)
+		{
+			return;
+		}
+
+		ABombActor* BombActor = CastChecked<ABombActor>(SpawnedActor);
+		UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
+		checkf(MapComponent, TEXT("ERROR: [%i] %s:\n'MapComponent' is null!"), __LINE__, *FString(__FUNCTION__));
+
+		// Updating explosion cells
+		PlayerCharacter->PowerupsInternal.BombN--;
+
+		// Init Bomb
+		BombActor->InitBomb(PlayerCharacter);
+
+		// Start listening this bomb
+		if (!MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(PlayerCharacter, &ThisClass::OnBombDestroyed))
+		{
+			MapComponent->OnDeactivatedMapComponent.AddDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
+		}
+	};
+
 	// Spawn bomb
-	ABombActor* BombActor = AGeneratedMap::SpawnActorByType<ABombActor>(EAT::Bomb, MapComponentInternal->GetCell());
-	if (!BombActor) // can return nullptr if the cell is not free
-	{
-		return;
-	}
+	AGeneratedMap::Get().SpawnActorByType(EAT::Bomb, MapComponentInternal->GetCell(), OnBombSpawned);
+}
 
-	UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
-	if (!MapComponent)
-	{
-		return;
-	}
-
-	// Updating explosion cells
-	PowerupsInternal.BombN--;
-
-	// Init Bomb
-	BombActor->InitBomb(PowerupsInternal.FireN, CharacterIDInternal);
-
-	// Start listening this bomb
-	if (!MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(this, &ThisClass::OnBombDestroyed))
-	{
-		MapComponent->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnBombDestroyed);
-	}
+// Returns the Skeletal Mesh of bombers
+UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
+{
+	return Cast<UMySkeletalMeshComponent>(GetMesh());
 }
 
 // Actualize the player name for this character
@@ -153,6 +165,20 @@ void APlayerCharacter::UpdateNicknameOnNameplate()
 	}
 
 	SetNicknameOnNameplate(NewNickname);
+}
+
+// Returns level type associated with player, e.g: Water level type for Roger character
+ELevelType APlayerCharacter::GetPlayerType() const
+{
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	return PlayerRow ? PlayerRow->LevelType : ELT::None;
+}
+
+// Returns the Player Tag associated with player
+const FGameplayTag& APlayerCharacter::GetPlayerTag() const
+{
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	return PlayerRow ? PlayerRow->PlayerTag : FGameplayTag::EmptyTag;
 }
 
 // Set and apply how a player has to look lik
@@ -188,6 +214,12 @@ void APlayerCharacter::BeginPlay()
 		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 		{
 			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+
+			// Handle current game state if initialized with delay
+			if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+			{
+				OnGameStateChanged(ECurrentGameState::Menu);
+			}
 		}
 
 		// Listen to handle possessing logic
@@ -566,12 +598,18 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 
 	if (!PlayerMeshDataInternal.IsValid())
 	{
+		// PlayerRow is not valid or mesh data is not set
 		return;
 	}
 
+	const UPlayerRow* PrevPlayerRow = MySkeletalMeshComp->GetCustomPlayerMeshData().PlayerRow;
+
 	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
 
-	MapComponentInternal->SetLevelActorRow(PlayerMeshDataInternal.PlayerRow);
+	if (PrevPlayerRow != PlayerMeshDataInternal.PlayerRow)
+	{
+		OnPlayerTypeChanged.Broadcast(PlayerMeshDataInternal.PlayerRow->PlayerTag);
+	}
 }
 
 // Set and apply default skeletal mesh for this player

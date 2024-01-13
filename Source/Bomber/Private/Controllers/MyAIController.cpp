@@ -2,11 +2,13 @@
 
 #include "Controllers/MyAIController.h"
 //---
+#include "Bomber.h"
 #include "Components/MapComponent.h"
 #include "DataAssets/AIDataAsset.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -55,7 +57,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	if (FEditorUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
-		if (UMyBlueprintFunctionLibrary::HasWorldBegunPlay()) // PIE
+		if (UUtilsLibrary::HasWorldBegunPlay()) // PIE
 		{
 			UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		}
@@ -133,6 +135,12 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
+
+		// Handle current game state if initialized with delay
+		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+		{
+			OnGameStateChanged(ECurrentGameState::Menu);
+		}
 	}
 
 	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
@@ -413,7 +421,7 @@ void AMyAIController::SetAI(bool bShouldEnable)
 {
 	const bool bWantsEnableDeadAI = !OwnerInternal && bShouldEnable;
 	if (bWantsEnableDeadAI
-		|| !HasAuthority())
+	    || !HasAuthority())
 	{
 		return;
 	}

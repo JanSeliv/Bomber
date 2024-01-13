@@ -4,9 +4,11 @@
 
 #include "GameFramework/PlayerController.h"
 //---
-#include "Bomber.h"
-//---
 #include "MyPlayerController.generated.h"
+
+enum class ECurrentGameState : uint8;
+
+class UMyInputMappingContext;
 
 /**
  * The player controller class.
@@ -21,12 +23,10 @@ public:
 	/** Sets default values for this controller's properties. */
 	AMyPlayerController();
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPossessed, class APlayerCharacter*, PlayerCharacter);
-
-	/** Notifies the server and clients when this controller possesses new player character. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
-	FOnPossessed OnPossessed;
-
+	/*********************************************************************************************
+	 * Delegates
+	 ********************************************************************************************* */
+public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetPlayerState, class AMyPlayerState*, MyPlayerState);
 
 	/** Notifies the server and clients when the player state is set. */
@@ -39,6 +39,10 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FOnGameStateCreated OnGameStateCreated;
 
+	/*********************************************************************************************
+	 * Public functions
+	 ********************************************************************************************* */
+public:
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
 	void ServerSetGameState(ECurrentGameState NewGameState);
@@ -51,31 +55,39 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMenuState();
 
-	/** Returns true if the mouse cursor can be hidden. */
+	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	bool CanHideMouse() const;
+	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
 
-	/** Called to to set the mouse cursor visibility.
-	 * @param bShouldShow true to show mouse cursor, otherwise hide it. */
+	/*********************************************************************************************
+	 * Inputs
+	 ********************************************************************************************* */
+public:
+	/** Returns true if Player Controller is ready to setup all the inputs. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool CanBindInputActions() const;
+
+	/** Adds given contexts to the list of auto managed and binds their input actions . */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMouseVisibility(bool bShouldShow);
+	void SetupInputContexts(const TArray<UMyInputMappingContext*>& InputContexts);
+	void SetupInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+	void RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
 
-	/** If true, set the mouse focus on game and UI, otherwise only focusing on game inputs. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMouseFocusOnUI(bool bFocusOnUI);
+	/*********************************************************************************************
+	 * Protected properties
+	 ********************************************************************************************* */
+protected:
+	/** List of all input contexts to be auto turned of or on according current game state. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Input Contexts"))
+	TArray<TObjectPtr<const UMyInputMappingContext>> AllInputContextsInternal;
 
-	/** Returns the Enhanced Input Local Player Subsystem. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputSubsystem() const;
+	/** Component that responsible for mouse-related logic like showing and hiding itself. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = ""))
+	TObjectPtr<class UMouseActivityComponent> MouseComponentInternal = nullptr;
 
-	/** Returns the Enhanced Input Component. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UEnhancedInputComponent* GetEnhancedInputComponent() const;
-
-	/** Returns the Enhanced Player Input. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UEnhancedPlayerInput* GetEnhancedPlayerInput() const;
-
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
 protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -100,46 +112,62 @@ protected:
 	/** Is overriden to notify the client when is set new player state. */
 	virtual void OnRep_PlayerState() override;
 
-	/** Set up custom input bindings. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindInputActions();
+	/*********************************************************************************************
+	 * On Events
+	 ********************************************************************************************* */
+protected:
+	/** Is called when all game widgets are initialized. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnWidgetsInitialized();
 
+	/** Listen to toggle movement input. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Listens to handle input on opening and closing the InGame Menu widget. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnToggledInGameMenu(bool bIsVisible);
+
+	/** Listens to handle input on opening and closing the Settings widget. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnToggledSettings(bool bIsVisible);
+
+	/*********************************************************************************************
+	 * Inputs management
+	 ********************************************************************************************* */
+public:
 	/** Prevents built-in slate input on UMG. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DisplayName = "Set UI Input Ignored"))
 	void SetUIInputIgnored();
 
-	/** Listen to toggle movement input and mouse cursor. */
+	/** Takes all cached inputs contexts and turns them on or off according given game state.
+	 * @param bEnable If true, all matching contexts will be enabled. If false, all matching contexts will be disabled.
+	 * @param CurrentGameState Game state to check matching.
+	 * @param bInvertRest If true, all other not matching contexts will be toggled to the opposite of given state (!bEnable).
+	 * @see AMyPlayerController::AddInputContexts */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Listens to handle input on opening and closing the InGame Menu widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnToggledInGameMenu(bool bIsVisible);
-
-	/** Listens to handle input on opening and closing the Settings widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnToggledSettings(bool bIsVisible);
-
-	/** Enables or disables input contexts of gameplay input actions.
-	 * @param bEnable set true to add gameplay input context, otherwise it will be removed from local player. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetGameplayInputContextEnabled(bool bEnable);
-
-	/** Returns true if specified input context is enabled.
-	 * @param InputContext Context to verify. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	bool IsInputContextEnabled(const class UMyInputMappingContext* InputContext) const;
+	void SetAllInputContextsEnabled(bool bEnable, ECurrentGameState CurrentGameState, bool bInvertRest = false);
 
 	/** Enables or disables specified input context.
-	 * @param bEnable set true to add specified input context, otherwise it will be removed from local player.
-	 * @param InputContext Context to set. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetInputContextEnabled(bool bEnable, const class UMyInputMappingContext* InputContext);
+	 * @param bEnable If true, the context will be enabled. If false, the context will be disabled.
+	 * @param InInputContext The input context to enable or disable. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InInputContext);
 
-	/** Is called when all game widgets are initialized. */
+	/** Set up input bindings in given contexts. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnWidgetsInitialized();
+	void BindInputActionsInContext(const UMyInputMappingContext* InInputContext);
 
+	/** Adds input contexts to the list to be auto turned of or on according current game state.
+	 * Make sure UMyInputMappingContext::ActiveForStatesInternal is set.
+	 * @param InputContexts Contexts to manage.
+	 * @see AMyPlayerController::AllInputContextsInternal */
+	void AddNewInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+
+	/*********************************************************************************************
+	 * Listening Events
+	 ********************************************************************************************* */
+public:
 	/** Is called on server and on client when the player state is set. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BroadcastOnSetPlayerState();

@@ -2,33 +2,80 @@
 
 #pragma once
 
+#include "Animation/SkeletalMeshActor.h" // AMySkeletalMeshActor
+#include "Components/SkeletalMeshComponent.h" // UMySkeletalMeshComponent
+#include "Kismet/BlueprintFunctionLibrary.h" // UPlayerMeshDataUtils
+//---
 #include "Bomber.h"
-#include "Components/SkeletalMeshComponent.h"
+#include "Structures/PlayerTag.h"
+#include "Structures/CustomPlayerMeshData.h"
 //---
 #include "MySkeletalMeshComponent.generated.h"
 
 /**
- * Determines how the character looks.
- * Contains additional data.
+ * 	The static functions library of Custom Player Mesh Data.
  */
-USTRUCT(BlueprintType)
-struct BOMBER_API FCustomPlayerMeshData
+UCLASS(Blueprintable, BlueprintType)
+class BOMBER_API UPlayerMeshDataUtils final : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-	/** Empty data. */
-	static const FCustomPlayerMeshData Empty;
+public:
+	/** Creates 'Make Cell' node with Cell  as an input parameter. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InPlayerTag", NativeMakeFunc, Keywords = "construct build"))
+	static FORCEINLINE FCustomPlayerMeshData MakeCustomPlayerMeshData(const FPlayerTag& InPlayerTag, int32 InSkinIndex) { return {InPlayerTag, InSkinIndex}; }
+};
 
-	/** The row that is used to visualize the bomber character. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<const class UPlayerRow> PlayerRow = nullptr;
+class UMySkeletalMeshComponent;
 
-	/** The index of the texture to set. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	int32 SkinIndex = 0;
+/**
+ * The actor that contains the player mesh component by default.
+ * Is used as mesh representation in the world, mostly in cinematics.
+ */
+UCLASS(Blueprintable, BlueprintType)
+class AMySkeletalMeshActor : public ASkeletalMeshActor
+{
+	GENERATED_BODY()
 
-	/** Returns true is data is valid. */
-	FORCEINLINE bool IsValid() const { return PlayerRow != nullptr; }
+	/*********************************************************************************************
+	 * Public functions
+	 ********************************************************************************************* */
+public:
+	/** Default constructor, overrides in object initializer default mesh by bomber mesh. */
+	AMySkeletalMeshActor(const FObjectInitializer& ObjectInitializer);
+
+	/** Returns the Skeletal Mesh of the Bomber character. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
+	UMySkeletalMeshComponent& GetMeshChecked() const;
+
+	/** Applies the specified player data by given type to the mesh. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "InPlayerTag"))
+	void InitMySkeletalMesh(const FPlayerTag& InPlayerTag, int32 InSkinIndex);
+
+	/*********************************************************************************************
+	 * Protected properties
+	 ********************************************************************************************* */
+protected:
+	/** Represents with which player current spot associated with
+	 * Can be changed in editor for an instance on the level. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Character Tag"))
+	FPlayerTag PlayerTagInternal = FPlayerTag::None;
+
+	/** Is current value of last chosen skin index.
+	 * Can be changed in editor for an instance on the level. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skin Index"))
+	int32 SkinIndexInternal = 0;
+
+	/*********************************************************************************************
+	 * Protected functions
+	 ********************************************************************************************* */
+protected:
+	/** Called when an instance of this class is placed (in editor) or spawned. */
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Called right before components are initialized, only called during gameplay. */
+	virtual void PreInitializeComponents() override;
 };
 
 /**
@@ -54,6 +101,9 @@ public:
 	/** Overridable internal function to respond to changes in the visibility of the component. */
 	virtual void OnVisibilityChanged() override;
 
+	/** Disables tick and visibility if inactive and vice versa. */
+	virtual void SetActive(bool bNewActive, bool bReset = false) override;
+	
 	/** Returns how this mesh looks like for now.
 	 * @see UMySkeletalMeshComponent::PlayerMeshDataInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -65,6 +115,18 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
+
+	/** Returns true if mesh data is set. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsInitialized() const { return PlayerMeshDataInternal.IsValid(); }
+
+	/** Returns level type to which this mesh is associated with. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	ELevelType GetAssociatedLevelType() const;
+
+	/** Returns the Player Tag to which this mesh is associated with. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FPlayerTag& GetPlayerTag() const;
 
 	/** Gets all attached mesh components by specified filter class.
 	 * @param OutMeshComponents Contains returned components.
@@ -83,7 +145,7 @@ public:
 	/** Returns true when is needed to attach or detach props. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool ArePropsWantToUpdate() const;
-	
+
 	/**
 	 * Set the skin, specified by index, to this mesh and its attached props
 	 * Some bomber characters have more than 1 diffuse, it will change a player skin if possible.
@@ -111,11 +173,4 @@ protected:
 	/** Current attached mesh components. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))
 	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal;
-
-	/* ---------------------------------------------------
-	*		Protected functions
-	* --------------------------------------------------- */
-
-	/** Called when a component is registered (not loaded). */
-	virtual void OnRegister() override;
 };

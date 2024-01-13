@@ -11,8 +11,6 @@
 class MYEDITORUTILS_API FEditorUtilsLibrary
 {
 public:
-
-#pragma region PIE
 	/** Checks, is the current world placed in the editor. */
 	static bool IsEditor();
 
@@ -30,7 +28,9 @@ public:
 	 * 1 (or higher) is client.
 	 * -1 in the standalone game. */
 	static int32 GetEditorPlayerIndex();
-#pragma endregion PIE
+
+	/** Obtains the current world from the editor. */
+	static UWorld* GetEditorWorld();
 
 	/** Returns true if currently is cooking the package. */
 	static bool IsCooking();
@@ -56,7 +56,7 @@ public:
 template <typename T>
 void FEditorUtilsLibrary::RegisterAsset(TArray<TSharedPtr<FAssetTypeActions_Base>>& InOutRegisteredAssets)
 {
-	TSharedPtr<T> SettingsDataTableAction = MakeShared<T>();
-	IAssetTools::Get().RegisterAssetTypeActions(SettingsDataTableAction.ToSharedRef());
-	InOutRegisteredAssets.Emplace(MoveTemp(SettingsDataTableAction));
+	TSharedPtr<T> SharedPtr = MakeShared<T>();
+	IAssetTools::Get().RegisterAssetTypeActions(SharedPtr.ToSharedRef());
+	InOutRegisteredAssets.Emplace(MoveTemp(SharedPtr));
 }

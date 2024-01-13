@@ -9,12 +9,15 @@
 #include "DataAssets/DataAssetsContainer.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Structures/Cell.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "NiagaraFunctionLibrary.h"
+#include "TimerManager.h"
 #include "Components/BoxComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
@@ -66,23 +69,50 @@ FCells ABombActor::GetExplosionCells() const
 }
 
 // Sets the defaults of the bomb
-void ABombActor::InitBomb(int32 InFireRadius/* = MIN_FIRE_RADIUS*/, int32 CharacterID/* = INDEX_NONE*/)
+void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 {
-	if (!HasAuthority()
-	    || !ensureMsgf(InFireRadius >= MIN_FIRE_RADIUS, TEXT("ASSERT: 'InFireRadius' is less than MIN_FIRE_RADIUS")))
+	if (!HasAuthority())
 	{
 		return;
 	}
 
-	// Set material
-	const int32 BombMaterialsNum = UBombDataAsset::Get().GetBombMaterialsNum();
-	if (CharacterID != INDEX_NONE // Is not debug character
-	    && BombMaterialsNum)      // As least one bomb material
+	int32 InFireRadius = MIN_FIRE_RADIUS;
+	int32 CharacterID = INDEX_NONE;
+	ELevelType PlayerType = ELevelType::None;
+	if (Causer)
 	{
-		const int32 MaterialIndex = FMath::Abs(CharacterID) % BombMaterialsNum;
-		BombMaterialInternal = UBombDataAsset::Get().GetBombMaterial(MaterialIndex);
-		ApplyMaterial();
+		CharacterID = Causer->GetCharacterID();
+		InFireRadius = Causer->GetPowerups().FireN;
+		PlayerType = Causer->GetPlayerType();
 	}
+
+	const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
+
+	const ULevelActorRow* BombRow = BombDataAsset.GetRowByLevelType(PlayerType);
+	UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
+	if (ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %s:\n'BombMesh' is not found"), __LINE__, *FString(__FUNCTION__)))
+	{
+		// Override mesh
+		checkf(MapComponentInternal, TEXT("ERROR: [%i] %s:\n'MapComponentInternal' is null!"), __LINE__, *FString(__FUNCTION__));
+		MapComponentInternal->SetCustomMeshAsset(BombMesh);
+
+		// Override material
+		BombMaterialInternal = BombMesh->GetMaterial(0);
+	}
+
+	if (PlayerType == ELevelType::None)
+	{
+		// Is bot character, set material for its default bomb with the same mesh
+		const int32 BombMaterialsNum = BombDataAsset.GetBombMaterialsNum();
+		if (CharacterID != INDEX_NONE // Is not debug character
+		    && BombMaterialsNum)      // As least one bomb material
+		{
+			const int32 MaterialIndex = FMath::Abs(CharacterID) % BombMaterialsNum;
+			BombMaterialInternal = BombDataAsset.GetBombMaterial(MaterialIndex);
+		}
+	}
+
+	ApplyMaterial();
 
 	FireRadiusInternal = InFireRadius;
 
@@ -158,6 +188,12 @@ void ABombActor::BeginPlay()
 	{
 		// This dragged bomb should start listening in-game state to set lifespan
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
+
+		// Handle current game state if initialized with delay
+		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
+		{
+			OnGameStateChanged(ECurrentGameState::Menu);
+		}
 	}
 }
 
@@ -174,12 +210,24 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 void ABombActor::SetLifeSpan(float InLifespan/* = DEFAULT_LIFESPAN*/)
 {
 	if (InLifespan == DEFAULT_LIFESPAN
-		&& AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
+	    && AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
 	{
 		InLifespan = UBombDataAsset::Get().GetLifeSpan();
 	}
 
-	Super::SetLifeSpan(InLifespan);
+	// Don't call Super to allow its execution on clients
+
+	InitialLifeSpan = InLifespan;
+
+	// Initialize a timer for the actors lifespan if there is one. Otherwise clear any existing timer
+	if (InLifespan > 0.0f)
+	{
+		GetWorldTimerManager().SetTimer(TimerHandle_LifeSpanExpired, this, &AActor::LifeSpanExpired, InLifespan);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle_LifeSpanExpired);
+	}
 }
 
 // Called when the lifespan of an actor expires (if he has one)
@@ -193,26 +241,23 @@ void ABombActor::LifeSpanExpired()
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
 void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 {
-	if (HasAuthority())
+	if (!bNewHidden)
 	{
-		if (!bNewHidden)
-		{
-			// Is added on Generated Map
+		// Is added on Generated Map
 
-			ConstructBombActor();
+		ConstructBombActor();
 
-			SetLifeSpan();
+		SetLifeSpan();
 
-			// Binding to the event, that triggered when character end to overlaps the collision component
-			OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
-		}
-		else
-		{
-			// Bomb is removed from Generated Map, detonate it
-			DetonateBomb();
+		// Binding to the event, that triggered when character end to overlaps the collision component
+		OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
+	}
+	else
+	{
+		// Bomb is removed from Generated Map, detonate it
+		DetonateBomb();
 
-			OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
-		}
+		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
 	}
 
 	// Apply hidden flag
@@ -229,12 +274,6 @@ void ABombActor::DetonateBomb()
 		return;
 	}
 
-	MulticastDetonateBomb();
-}
-
-// Destroy bomb and burst explosion cells
-void ABombActor::MulticastDetonateBomb_Implementation()
-{
 	const FCells ExplosionCells = GetExplosionCells();
 	if (ExplosionCells.IsEmpty())
 	{
@@ -242,6 +281,12 @@ void ABombActor::MulticastDetonateBomb_Implementation()
 		return;
 	}
 
+	MulticastDetonateBomb(ExplosionCells.Array());
+}
+
+// Destroy bomb and burst explosion cells
+void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& ExplosionCells)
+{
 	// Reset Fire Radius to avoid destroying the bomb again
 	FireRadiusInternal = INDEX_NONE;
 
@@ -253,7 +298,7 @@ void ABombActor::MulticastDetonateBomb_Implementation()
 	}
 
 	// Destroy all actors from array of cells
-	AGeneratedMap::Get().DestroyLevelActorsOnCells(ExplosionCells, this);
+	AGeneratedMap::Get().DestroyLevelActorsOnCells(FCells{ExplosionCells}, this);
 
 	USoundsSubsystem::Get().PlayExplosionSFX();
 
