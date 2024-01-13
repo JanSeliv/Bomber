@@ -21,7 +21,3 @@
 [submodule "Plugins/InstancedStaticMeshConverter"]
 	path = Plugins/InstancedStaticMeshConverter
 	url = https://github.com/JanSeliv/InstancedStaticMeshConverter.git
-[submodule "Plugins/GameFeatures/ProgressionSystem"]
-	path = Plugins/GameFeatures/ProgressionSystem
-	url = https://github.com/h4rdmol/ProgressionSystem.git
-	branch = develop
