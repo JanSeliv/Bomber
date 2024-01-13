@@ -2,6 +2,8 @@
 
 Bomber is an open-source indie game developed on Unreal Engine 5 for Windows and MacOS, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
 
+![Bomber](https://github.com/JanSeliv/Bomber/assets/20540872/2898eace-7a57-44d1-9530-4a5abc235b2d)
+
 ## Table of Contents
 
 - [💣 About the Bomber Project](#-about-the-bomber-project)
@@ -21,7 +23,7 @@ This project contains **submodules** and requires `--recurse-submodules` when cl
 ```sh
 git clone --recurse-submodules https://github.com/JanSeliv/Bomber.git
 ```
-If already cloned without submodules, you'll find empty folders in `Bomber\Plugins` and error on project startup. To download submodules, run:
+If already cloned without submodules, you'll find empty folders in `Bomber\Plugins` and error on project startup. To download submodules separately, run:
 ```sh
 git submodule update --init --recursive
 ```
@@ -45,14 +47,13 @@ Despite this project is fully written in C++, it's extremely **blueprint-friendl
 - **Well-Commented**: Every class, property and function is well-commented for easy understanding.
 - **Utility Libraries**: Core static functions are accessible globally like Cell Utils [[doc](https://trello.com/c/b2IzcOhg)]. See more in the `Source\UtilityLibraries` [folder](https://github.com/JanSeliv/Bomber/tree/master/Source/Bomber/Public/UtilityLibraries).
 
-Next plugins were developed for this project, but could be useful for other developers:
+Next [plugins](https://github.com/JanSeliv/Bomber/tree/master/Plugins) were developed for this project, but could be useful for other developers:
 
 - [⚙️ Settings Widget Constructor](https://github.com/JanSeliv/SettingsWidgetConstructor)
 - [🔄 Pool Manager](https://github.com/JanSeliv/PoolManager)
 - [🎭 Morphs Player](https://github.com/JanSeliv/MorphsPlayer)
 - [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
 - [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
-- [Progression System](https://github.com/h4rdmol/ProgressionSystem)
 
 ## 💾 Play the Build
 
@@ -65,13 +66,14 @@ Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a 
 Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
 ## 📅 Changelog
-####
+#### `13.01.2024`
 - Updated to **Unreal Engine 5.3**.
-- **New Main Menu** with completely different UI and complex cinematics on starting the game (only Hugo and Fori):
+- **New Main Menu** with completely different UI and complex cinematics for Hugo and Fori characters on starting the game:
 > ![NewMainMenu](https://github.com/JanSeliv/Bomber/assets/20540872/9c960fa4-6760-4298-a55b-54d0cb8a0b13)
 - **New Bomb meshes** for each character (shown from left to right: Bastet, Hugo, Fori, Roger):
 > ![NewBombMeshes](https://github.com/JanSeliv/Bomber/assets/20540872/ce787e8c-d95c-4844-9282-e7aaff3dc243)
-- **[Progression System](https://github.com/h4rdmol/ProgressionSystem)** that allows to unlock new characters by playing the game
+- **New game icon**: ![GameIcon](https://github.com/JanSeliv/Bomber/assets/20540872/ca239a66-b550-4a45-ba4f-182d85e3c460)
+- **New Wall mesh** for the Maya level.
 #### `12.06.2023`
 - Updated to **Unreal Engine 5.2**.
 - Added **MacOS** support.
