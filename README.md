@@ -66,6 +66,8 @@ Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a 
 Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
 ## 📅 Changelog
+#### 
+- Added cinematic for Roger character on the Maya level.
 #### `13.01.2024`
 - Updated to **Unreal Engine 5.3**.
 - **New Main Menu** with completely different UI and complex cinematics for Hugo and Fori characters on starting the game:
