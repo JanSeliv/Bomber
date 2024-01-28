@@ -49,6 +49,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	void GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutSpots, ELevelType LevelType) const;
 
+	/** Returns next or previous Main-Menu spot by given incrementer.
+	 * It never exits the bounds of the array by going to the last or first element.
+	 * @param Incrementer 1 to move right, -1 to move left.
+	 * @param LevelType Level type to search in.
+	 * @return New active Main-Menu spot component. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	UNMMSpotComponent* GetNextMainMenuSpotComponent(int32 Incrementer, ELevelType LevelType) const;
+
 	/** Goes to another Spot to show another player character on current level.
 	 * @param Incrementer 1 to move right, -1 to move left.
 	 * @return New active Main-Menu spot component. */

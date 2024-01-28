@@ -74,13 +74,11 @@ void UNMMSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutS
 	});
 }
 
-// Goes to another Spot to show another player character on current level
-UNMMSpotComponent* UNMMSubsystem::MoveMainMenuSpot(int32 Incrementer)
+// Returns next or previous Main-Menu spot by given incrementer
+UNMMSpotComponent* UNMMSubsystem::GetNextMainMenuSpotComponent(int32 Incrementer, ELevelType LevelType) const
 {
-	// Get all rows of current level type
-	const ELevelType CurrentLevelType = UMyBlueprintFunctionLibrary::GetLevelType();
 	TArray<UNMMSpotComponent*> CurrentLevelTypeSpots;
-	GetMainMenuSpotsByLevelType(/*out*/CurrentLevelTypeSpots, CurrentLevelType);
+	GetMainMenuSpotsByLevelType(/*out*/CurrentLevelTypeSpots, LevelType);
 
 	// Extract the row indices, so we can track the bounds
 	TArray<int32> SpotRowIndices;
@@ -96,25 +94,34 @@ UNMMSpotComponent* UNMMSubsystem::MoveMainMenuSpot(int32 Incrementer)
 		return nullptr;
 	}
 
-	// Stop the current spot
+	// Find the new index based on the incrementer
+	// If there is no next spot in array, it will take the first one with its index and vise versa for decrementing
 	const int32 ActiveSpotPosition = SpotRowIndices.IndexOfByKey(ActiveMainMenuSpotIdx);
-	checkf(CurrentLevelTypeSpots.IsValidIndex(ActiveSpotPosition), TEXT("ERROR: [%i] %s:\n'CurrentLevelTypeSpots array has to have ActiveSpotPosition index since it's the same size as SpotRowIndices array!"), __LINE__, *FString(__FUNCTION__))
-	UNMMSpotComponent* CurrentSpot = CurrentLevelTypeSpots[ActiveSpotPosition];
+	const int32 NewSpotIndex = (ActiveSpotPosition + Incrementer + SpotRowIndices.Num()) % SpotRowIndices.Num();
+	checkf(CurrentLevelTypeSpots.IsValidIndex(NewSpotIndex), TEXT("ERROR: [%i] %s:\n'CurrentLevelTypeSpots array has to have NewSpotIndex since it's the same size as SpotRowIndices array!"), __LINE__, *FString(__FUNCTION__));
+	return CurrentLevelTypeSpots[NewSpotIndex];
+}
+
+// Goes to another Spot to show another player character on current level
+UNMMSpotComponent* UNMMSubsystem::MoveMainMenuSpot(int32 Incrementer)
+{
+	UNMMSpotComponent* NextMainMenuSpot = GetNextMainMenuSpotComponent(Incrementer, UMyBlueprintFunctionLibrary::GetLevelType());
+	if (!ensureMsgf(NextMainMenuSpot, TEXT("ASSERT: [%i] %s:\n'NextMainMenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return nullptr;
+	}
+
+	// Stop the current spot
+	UNMMSpotComponent* CurrentSpot = GetActiveMainMenuSpotComponent();
 	checkf(CurrentSpot, TEXT("ERROR: [%i] %s:\n'CurrentSpot' can't be null since CurrentLevelTypeSpots array does not contain nulls!"), __LINE__, *FString(__FUNCTION__))
 	CurrentSpot->StopMasterSequence();
 
-	// Find the new index based on the incrementer
-	// If there is no next spot in array, it will take the first one with its index and vise versa for decrementing
-	const int32 NewSpotIndex = (ActiveSpotPosition + Incrementer + SpotRowIndices.Num()) % SpotRowIndices.Num();
-	ActiveMainMenuSpotIdx = SpotRowIndices[NewSpotIndex];
+	ActiveMainMenuSpotIdx = NextMainMenuSpot->GetCinematicRow().RowIndex;
 
-	// Play the new spot
-	checkf(CurrentLevelTypeSpots.IsValidIndex(NewSpotIndex), TEXT("ERROR: [%i] %s:\n'CurrentLevelTypeSpots array has to have NewSpotIndex since it's the same size as SpotRowIndices array!"), __LINE__, *FString(__FUNCTION__));
-	UNMMSpotComponent* NewSpot = CurrentLevelTypeSpots[NewSpotIndex];
-	checkf(NewSpot, TEXT("ERROR: [%i] %s:\n'NewSpot' can't be null since CurrentLevelTypeSpots array does not contain nulls!"), __LINE__, *FString(__FUNCTION__));
-	NewSpot->SetCinematicState(ENMMCinematicState::IdlePart);
+	// Play new spot
+	NextMainMenuSpot->SetCinematicState(ENMMCinematicState::IdlePart);
 
-	return NewSpot;
+	return NextMainMenuSpot;
 }
 
 // Clears all transient data contained in this subsystem
