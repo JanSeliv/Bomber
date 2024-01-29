@@ -82,4 +82,15 @@ public:
 	 * @param MeshAsset The mesh asset to set to the mesh component. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetMesh(class UMeshComponent* MeshComponent, class UStreamableRenderAsset* MeshAsset);
+
+	/** Returns the first child actor of the specified class.
+	  * @param ParentActor The parent actor to search in.
+	  * @param ChildActorClass The class of the attached actor to find.
+	  * @param bIncludeDescendants If true, also include all attached actors of each attached actor. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static AActor* GetAttachedActorByClass(const AActor* ParentActor, TSubclassOf<AActor> ChildActorClass, bool bIncludeDescendants = false);
+
+	/** Returns the first child actor of the specified class. */
+	template <typename T>
+	static T* GetAttachedActorByClass(const AActor* ParentActor, bool bIncludeDescendants = false) { return Cast<T>(GetAttachedActorByClass(ParentActor, T::StaticClass(), bIncludeDescendants)); }
 };

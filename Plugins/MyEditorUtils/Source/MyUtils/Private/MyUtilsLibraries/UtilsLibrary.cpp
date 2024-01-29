@@ -168,3 +168,37 @@ void UUtilsLibrary::SetMesh(UMeshComponent* MeshComponent, UStreamableRenderAsse
 		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(MeshAsset));
 	}
 }
+
+// Returns the first child actor of the specified class
+AActor* UUtilsLibrary::GetAttachedActorByClass(const AActor* ParentActor, TSubclassOf<AActor> ChildActorClass, bool bIncludeDescendants/* = false*/)
+{
+	if (!ensureMsgf(ParentActor, TEXT("ASSERT: [%i] %s:\n'!ParentActor' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return nullptr;
+	}
+
+	TArray<AActor*> AttachedActors;
+	ParentActor->GetAttachedActors(AttachedActors);
+	if (AttachedActors.IsEmpty())
+	{
+		return nullptr;
+	}
+
+	for (AActor* It : AttachedActors)
+	{
+		if (It && It->IsA(ChildActorClass))
+		{
+			return It;
+		}
+
+		if (bIncludeDescendants)
+		{
+			if (AActor* FoundActor = GetAttachedActorByClass(It, ChildActorClass, bIncludeDescendants))
+			{
+				return FoundActor;
+			}
+		}
+	}
+
+	return nullptr;
+}
