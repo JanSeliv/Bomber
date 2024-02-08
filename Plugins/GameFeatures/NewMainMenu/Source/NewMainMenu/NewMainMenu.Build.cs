@@ -23,6 +23,7 @@ public class NewMainMenu : ModuleRules
 			{
 				"CoreUObject", "Slate", "SlateCore" // Core
 				, "MovieScene", "LevelSequence" // Cinematics
+				, "AdvancedWidgets" // URadialSlider
 				// My modules
 				, "Bomber"
 				, "MyUtils"

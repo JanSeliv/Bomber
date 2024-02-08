@@ -44,10 +44,15 @@ public:
 	 * @see UNMMDataAsset::InputContextsInternal.*/
 	void GetAllInputContexts(TArray<const class UMyInputMappingContext*>& OutInputContexts) const;
 
+	/** Returns the time to hold the skip cinematic button to skip the cinematic.
+	 * @see UNMMDataAsset::SkipCinematicHoldTimeInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE float GetSkipCinematicHoldTime() const { return SkipCinematicHoldTimeInternal; }
+
 	/** Returns the sound of cinematics music.
 	 * @see UNMMDataAsset::CinematicsSoundClassInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClassInternal; }
+	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClassInternal; }
 
 protected:
 	/** The data table with the cinematics to be played. */
@@ -63,8 +68,12 @@ protected:
 	TSubclassOf<class UNMMCinematicStateWidget> InCinematicStateWidgetClassInternal = nullptr;
 
 	/** List of input contexts to manage according their game states. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Input Contexts"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Input Contexts", ShowOnlyInnerProperties))
 	TArray<TObjectPtr<const class UMyInputMappingContext>> InputContextsInternal;
+
+	/** The time to hold the skip cinematic button to skip the cinematic. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skip Cinematic Hold Time", ShowOnlyInnerProperties))
+	float SkipCinematicHoldTimeInternal = 1.f;
 
 	/** The sound of cinematics music. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
