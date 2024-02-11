@@ -6,7 +6,7 @@
 //---
 #include "NMMUtils.generated.h"
 
-enum class ENMMCinematicState : uint8;
+enum class ENMMState : uint8;
 
 class UMovieSceneSequencePlayer;
 
@@ -23,12 +23,16 @@ class NEWMAINMENU_API UNMMUtils : public UBlueprintFunctionLibrary
 	 ********************************************************************************************* */
 public:
 	/** Returns New Main Menu Subsystem. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static class UNMMSubsystem* GetNewMainMenuSubsystem(const UObject* OptionalWorldContext = nullptr);
-	
+	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NMM Base Subsystem", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNMMBaseSubsystem* GetBaseSubsystem(const UObject* OptionalWorldContext = nullptr);
+
+	/** Returns Spots Manager. */
+	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NMM Spots Subsystem", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNMMSpotsSubsystem* GetSpotsSubsystem(const UObject* OptionalWorldContext = nullptr);
+
 	/** Returns the Data Asset of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Data Asset", meta = (WorldContext = "OptionalWorldContext"))
-	static const class UNMMDataAsset* GetNewMainMenuDataAsset(const UObject* OptionalWorldContext = nullptr);
+	static const class UNMMDataAsset* GetDataAsset(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the HUD component of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM HUD Component", meta = (WorldContext = "OptionalWorldContext"))
@@ -60,13 +64,13 @@ public:
 
 	/** Returns the Playback Settings by given cinematic state. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Cinematic Settings")
-	static const struct FMovieSceneSequencePlaybackSettings& GetCinematicSettings(ENMMCinematicState CinematicState);
+	static const struct FMovieSceneSequencePlaybackSettings& GetCinematicSettings(ENMMState MainMenuState);
 
 	/** Returns the total frames of the cinematic by given cinematic state. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Cinematic Total Frames")
-	static int32 GetCinematicTotalFrames(ENMMCinematicState CinematicState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
+	static int32 GetCinematicTotalFrames(ENMMState MainMenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
 
 	/** Return the playback position params by given cinematic state. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Playback Position Params")
-	static struct FMovieSceneSequencePlaybackParams GetPlaybackPositionParams(ENMMCinematicState CinematicState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
+	static struct FMovieSceneSequencePlaybackParams GetPlaybackPositionParams(ENMMState MainMenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
 };

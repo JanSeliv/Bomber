@@ -60,20 +60,6 @@ public:
 	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
 
 	/*********************************************************************************************
-	 * Inputs
-	 ********************************************************************************************* */
-public:
-	/** Returns true if Player Controller is ready to setup all the inputs. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	bool CanBindInputActions() const;
-
-	/** Adds given contexts to the list of auto managed and binds their input actions . */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetupInputContexts(const TArray<UMyInputMappingContext*>& InputContexts);
-	void SetupInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
-	void RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
-
-	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
@@ -88,6 +74,11 @@ protected:
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
+public:
+	/** Locks or unlocks movement input, is declared in parent as UFUNCTION.
+	 * @param bShouldIgnore	If true, move input is ignored. If false, input is not ignored.*/
+	virtual void SetIgnoreMoveInput(bool bShouldIgnore) override;
+
 protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -97,10 +88,6 @@ protected:
 
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
-
-	/** Locks or unlocks movement input, is declared in parent as UFUNCTION.
-	* @param bShouldIgnore	If true, move input is ignored. If false, input is not ignored.*/
-	virtual void SetIgnoreMoveInput(bool bShouldIgnore) override;
 
 	/** Is overriden to notify when this controller possesses new player character.
 	 * @param InPawn The Pawn to be possessed. */
@@ -113,7 +100,7 @@ protected:
 	virtual void OnRep_PlayerState() override;
 
 	/*********************************************************************************************
-	 * On Events
+	 * Events
 	 ********************************************************************************************* */
 protected:
 	/** Is called when all game widgets are initialized. */
@@ -132,10 +119,32 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggledSettings(bool bIsVisible);
 
+	/** Is called on server and on client when the player state is set. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BroadcastOnSetPlayerState();
+
+	/** Start listening creating the game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BindOnGameStateCreated();
+
+	/** Is called on server and on client when the game state is initialized. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void BroadcastOnGameStateCreated(class AGameStateBase* GameState);
+
 	/*********************************************************************************************
 	 * Inputs management
 	 ********************************************************************************************* */
 public:
+	/** Returns true if Player Controller is ready to setup all the inputs. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool CanBindInputActions() const;
+
+	/** Adds given contexts to the list of auto managed and binds their input actions . */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetupInputContexts(const TArray<UMyInputMappingContext*>& InputContexts);
+	void SetupInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+	void RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+
 	/** Prevents built-in slate input on UMG. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DisplayName = "Set UI Input Ignored"))
 	void SetUIInputIgnored();
@@ -163,20 +172,4 @@ public:
 	 * @param InputContexts Contexts to manage.
 	 * @see AMyPlayerController::AllInputContextsInternal */
 	void AddNewInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
-
-	/*********************************************************************************************
-	 * Listening Events
-	 ********************************************************************************************* */
-public:
-	/** Is called on server and on client when the player state is set. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BroadcastOnSetPlayerState();
-
-	/** Start listening creating the game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateCreated();
-
-	/** Is called on server and on client when the game state is initialized. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BroadcastOnGameStateCreated(class AGameStateBase* GameState);
 };

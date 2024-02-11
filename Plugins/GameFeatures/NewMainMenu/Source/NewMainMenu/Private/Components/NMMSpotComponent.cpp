@@ -8,11 +8,11 @@
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
-#include "Data/NMMSubsystem.h"
-#include "GameFramework/MyGameStateBase.h"
 #include "MyDataTable/MyDataTable.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMSpotsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "LevelSequencePlayer.h"
@@ -31,7 +31,7 @@ UNMMSpotComponent::UNMMSpotComponent()
 // Returns true if this spot is currently active and possessed by player
 bool UNMMSpotComponent::IsActiveSpot() const
 {
-	return UNMMSubsystem::Get().GetActiveMainMenuSpotComponent() == this;
+	return UNMMSpotsSubsystem::Get().GetActiveMainMenuSpotComponent() == this;
 }
 
 // Returns the Skeletal Mesh of the Bomber character
@@ -56,11 +56,11 @@ ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
 // Prevents the spot from playing any cinematic
 void UNMMSpotComponent::StopMasterSequence()
 {
-	SetCinematicState(ENMMCinematicState::None);
+	SetCinematicByState(ENMMState::None);
 }
 
 // Activate given cinematic state on this spot
-void UNMMSpotComponent::SetCinematicState(ENMMCinematicState CinematicState)
+void UNMMSpotComponent::SetCinematicByState(ENMMState MainMenuState)
 {
 	if (!IsActiveSpot()) // Don't play for inactive spot
 	{
@@ -77,11 +77,11 @@ void UNMMSpotComponent::SetCinematicState(ENMMCinematicState CinematicState)
 
 	// --- Set the length of the cinematic
 	constexpr int32 FirstFrame = 0;
-	const int32 TotalFrames = UNMMUtils::GetCinematicTotalFrames(CinematicState, MasterPlayerInternal);
+	const int32 TotalFrames = UNMMUtils::GetCinematicTotalFrames(MainMenuState, MasterPlayerInternal);
 	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
 
 	// --- Set the playback settings
-	const FMovieSceneSequencePlaybackSettings& PlaybackSettings = UNMMUtils::GetCinematicSettings(CinematicState);
+	const FMovieSceneSequencePlaybackSettings& PlaybackSettings = UNMMUtils::GetCinematicSettings(MainMenuState);
 	MasterPlayerInternal->SetPlaybackSettings(PlaybackSettings);
 	if (PlaybackSettings.bRestoreState)
 	{
@@ -91,20 +91,20 @@ void UNMMSpotComponent::SetCinematicState(ENMMCinematicState CinematicState)
 	}
 
 	// --- Set the playback position
-	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(CinematicState, MasterPlayerInternal);
+	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(MainMenuState, MasterPlayerInternal);
 	MasterPlayerInternal->SetPlaybackPosition(PlaybackPositionParams);
 
 	// --- Play the cinematic (in case of stop it will be paused automatically)
-	if (CinematicState != ENMMCinematicState::None)
+	if (MainMenuState != ENMMState::None)
 	{
 		MasterPlayerInternal->Play();
 	}
 
 	// --- Change the camera according to the cinematic state
-	PossessCamera(CinematicState);
+	PossessCamera(MainMenuState);
 
 	// --- Update cinematic state, so we could track it
-	CinematicStateInternal = CinematicState;
+	CinematicStateInternal = MainMenuState;
 }
 
 // Overridable native event for when play begins for this actor.
@@ -119,19 +119,18 @@ void UNMMSpotComponent::BeginPlay()
 		return;
 	}
 
-	UNMMSubsystem::Get().AddNewMainMenuSpot(this);
+	UNMMSpotsSubsystem::Get().AddNewMainMenuSpot(this);
 
 	UpdateCinematicData();
 	LoadMasterSequencePlayer();
 
-	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	// Listen Main Menu states
+	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
+	BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(this, &ThisClass::OnNewMainMenuStateChanged);
+	if (BaseSubsystem.GetCurrentMenuState() != ENMMState::None)
 	{
-		BindOnGameStateChanged(MyGameState);
-	}
-	else if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController())
-	{
-		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
+		// State is already set, apply it
+		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
 }
 
@@ -148,52 +147,12 @@ void UNMMSpotComponent::OnUnregister()
 		MasterPlayerInternal = nullptr;
 	}
 
-	if (UNMMSubsystem* Subsystem = UNMMUtils::GetNewMainMenuSubsystem(this))
+	if (UNMMSpotsSubsystem* Subsystem = UNMMUtils::GetSpotsSubsystem(this))
 	{
 		Subsystem->RemoveMainMenuSpot(this);
 	}
 
 	Super::OnUnregister();
-}
-
-// Called when the current game state was changed
-void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
-{
-	switch (CurrentGameState)
-	{
-	case ECurrentGameState::Menu:
-		{
-			SetCinematicState(ENMMCinematicState::IdlePart);
-			break;
-		}
-	case ECurrentGameState::Cinematic:
-		{
-			SetCinematicState(ENMMCinematicState::MainPart);
-			TryMarkCinematicAsSeen();
-			break;
-		}
-	case ECurrentGameState::GameStarting:
-		{
-			SetCinematicState(ENMMCinematicState::None);
-			break;
-		}
-	default: break;
-	}
-}
-
-// Is called to start listening game state changes
-void UNMMSpotComponent::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
-{
-	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
-
-	// Handle current game state if initialized with delay
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-	{
-		OnGameStateChanged(ECurrentGameState::Menu);
-	}
-
-	// Listen states to handle this widget behavior
-	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
 }
 
 // Obtains and caches cinematic data from the table to this spot
@@ -256,7 +215,7 @@ void UNMMSpotComponent::LoadMasterSequencePlayer()
 }
 
 // Starts viewing through camera of current cinematic
-void UNMMSpotComponent::PossessCamera(ENMMCinematicState CinematicState)
+void UNMMSpotComponent::PossessCamera(ENMMState MainMenuState)
 {
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!MyPC
@@ -267,12 +226,12 @@ void UNMMSpotComponent::PossessCamera(ENMMCinematicState CinematicState)
 	}
 
 	const UCameraComponent* ActiveCamera = nullptr;
-	switch (CinematicState)
+	switch (MainMenuState)
 	{
-	case ENMMCinematicState::None:
+	case ENMMState::None:
 		ActiveCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
 		break;
-	case ENMMCinematicState::IdlePart:
+	case ENMMState::Idle:
 		ActiveCamera = UCinematicUtils::FindSequenceCameraComponent(MasterPlayerInternal);
 		break;
 	default: break;
@@ -284,7 +243,7 @@ void UNMMSpotComponent::PossessCamera(ENMMCinematicState CinematicState)
 	}
 }
 
-// Marks own cinematic as seen by player
+// Marks own cinematic as seen by player for the save system
 void UNMMSpotComponent::TryMarkCinematicAsSeen()
 {
 	if (!IsActiveSpot())
@@ -320,10 +279,26 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
 
 	// Notify that the spot is ready and finished loading
-	UNMMSubsystem::Get().OnMainMenuSpotReady.Broadcast(this);
+	UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.Broadcast(this);
 
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
 	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
+}
+
+// Called wen the Main Menu state was changed
+void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
+{
+	switch (NewState)
+	{
+	case ENMMState::Cinematic:
+		{
+			TryMarkCinematicAsSeen();
+			break;
+		}
+	default: break;
+	}
+
+	SetCinematicByState(NewState);
 }
 
 // Called when the sequence is paused or when cinematic was ended
@@ -331,7 +306,7 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 {
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!MyPC
-		|| CinematicStateInternal != ENMMCinematicState::MainPart)
+		|| CinematicStateInternal != ENMMState::Cinematic)
 	{
 		// Don't handle if not playing Main Part or is not local player
 		return;
@@ -344,6 +319,6 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 		// Cinematic is finished, start the countdown
 		MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
 
-		CinematicStateInternal = ENMMCinematicState::None;
+		CinematicStateInternal = ENMMState::None;
 	}
 }

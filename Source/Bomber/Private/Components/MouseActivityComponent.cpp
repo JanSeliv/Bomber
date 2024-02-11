@@ -2,6 +2,7 @@
 
 #include "Components/MouseActivityComponent.h"
 //---
+#include "DataAssets/PlayerInputDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -40,10 +41,20 @@ APlayerController& UMouseActivityComponent::GetPlayerControllerChecked() const
 	return *MyPlayerController;
 }
 
-// Returns the mouse visibility settings according current game state
+// Returns current mouse visibility settings
 const FMouseVisibilitySettings& UMouseActivityComponent::GetCurrentVisibilitySettings() const
 {
-	return VisibilitySettingsInternal.FindChecked(AMyGameStateBase::GetCurrentGameState());
+	return CurrentVisibilitySettingsInternal;
+}
+
+// Applies the new mouse visibility settings
+void UMouseActivityComponent::SetMouseVisibilitySettings(const FMouseVisibilitySettings& NewSettings)
+{
+	if (NewSettings.IsValid())
+	{
+		CurrentVisibilitySettingsInternal = NewSettings;
+		SetMouseVisibility(NewSettings.bIsVisible);
+	}
 }
 
 // Called to to set mouse cursor visibility
@@ -116,9 +127,6 @@ void UMouseActivityComponent::BeginPlay()
 
 	SetMouseFocusOnUI(true);
 
-	// Cache settings once for mouse visibility
-	VisibilitySettingsInternal = UPlayerInputDataAsset::Get().GetMouseVisibilitySettings();
-
 	// Listen to handle input for each game state
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
@@ -154,8 +162,7 @@ void UMouseActivityComponent::OnMouseMove_Implementation()
 {
 	CurrentlyInactiveSecInternal = 0.f;
 
-	const APlayerController& PC = GetPlayerControllerChecked();
-	if (!PC.ShouldShowMouseCursor()
+	if (!GetPlayerControllerChecked().ShouldShowMouseCursor()
 	    && GetCurrentVisibilitySettings().bIsVisible)
 	{
 		// Show inactive mouse
@@ -166,5 +173,6 @@ void UMouseActivityComponent::OnMouseMove_Implementation()
 // Listen to toggle mouse visibility
 void UMouseActivityComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
-	SetMouseVisibility(GetCurrentVisibilitySettings().bIsVisible);
+	const FMouseVisibilitySettings& NewSettings = UPlayerInputDataAsset::Get().GetMouseVisibilitySettings(CurrentGameState);
+	SetMouseVisibilitySettings(NewSettings);
 }

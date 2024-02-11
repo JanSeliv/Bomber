@@ -4,9 +4,11 @@
 
 #include "Engine/DataAsset.h"
 //---
+#include "Structures/MouseVisibilitySettings.h"
+//---
 #include "NMMDataAsset.generated.h"
 
-enum class ECurrentGameState : uint8;
+enum class ENMMState : uint8;
 
 /**
  * Contains common data of the New Main Menu plugin to be tweaked.
@@ -38,7 +40,7 @@ public:
 	/** Returns first input context by given game state.
 	 * @see UNMMDataAsset::InputContextsInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE class UMyInputMappingContext* GetInputContext(ECurrentGameState CurrentGameState) const;
+	const class UMyInputMappingContext* GetInputContext(ENMMState MenuState) const;
 
 	/** Returns all input contexts.
 	 * @see UNMMDataAsset::InputContextsInternal.*/
@@ -54,6 +56,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClassInternal; }
 
+	/** Returns the mouse visibility settings by specified Main Menu state.
+	 * @see UNMMDataAsset::MouseVisibilitySettingsInternal. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FMouseVisibilitySettings& GetMouseVisibilitySettings(ENMMState GameState) const;
+
 protected:
 	/** The data table with the cinematics to be played. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Cinematics Data Table", ShowOnlyInnerProperties))
@@ -67,15 +74,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget Class", ShowOnlyInnerProperties))
 	TSubclassOf<class UNMMCinematicStateWidget> InCinematicStateWidgetClassInternal = nullptr;
 
-	/** List of input contexts to manage according their game states. */
+	/** List of input contexts to manage according their Main Menu States. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Input Contexts", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<const class UMyInputMappingContext>> InputContextsInternal;
+	TMap<ENMMState, TObjectPtr<const class UMyInputMappingContext>> InputContextsInternal;
 
 	/** The time to hold the skip cinematic button to skip the cinematic. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Skip Cinematic Hold Time", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Skip Cinematic Hold Time", ShowOnlyInnerProperties))
 	float SkipCinematicHoldTimeInternal = 1.f;
 
 	/** The sound of cinematics music. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
 	TObjectPtr<class USoundClass> CinematicsSoundClassInternal = nullptr;
+
+	/** Determines mouse visibility behaviour per Main Menu states. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Mouse Visibility Settings"))
+	TMap<ENMMState, FMouseVisibilitySettings> MouseVisibilitySettingsInternal;
 };

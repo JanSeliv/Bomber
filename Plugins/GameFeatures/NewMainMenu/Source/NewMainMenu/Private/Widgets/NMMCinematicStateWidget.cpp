@@ -2,11 +2,10 @@
 
 #include "Widgets/NMMCinematicStateWidget.h"
 //---
-#include "Bomber.h"
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Data/NMMTypes.h"
+#include "Subsystems/NMMBaseSubsystem.h"
 //---
 #include "Components/Button.h"
 #include "Components/RadialSlider.h"
@@ -54,14 +53,13 @@ void UNMMCinematicStateWidget::NativeConstruct()
 	// Hide this widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
-	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	// Listen Main Menu states
+	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
+	BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(this, &ThisClass::OnNewMainMenuStateChanged);
+	if (BaseSubsystem.GetCurrentMenuState() != ENMMState::None)
 	{
-		BindOnGameStateChanged(MyGameState);
-	}
-	else if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
-	{
-		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
+		// State is already set, apply it
+		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
 
 	if (SkipCinematicButton)
@@ -71,27 +69,13 @@ void UNMMCinematicStateWidget::NativeConstruct()
 	}
 }
 
-// Called when the current game state was changed
-void UNMMCinematicStateWidget::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+// Called when the Main Menu state was changed
+void UNMMCinematicStateWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
 	// Show this widget in Cinematic state
-	SetVisibility(CurrentGameState == ECurrentGameState::Cinematic ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	SetVisibility(NewState == ENMMState::Cinematic ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 
 	ResetWidget();
-}
-
-// Is called to start listening game state changes
-void UNMMCinematicStateWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
-{
-	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
-
-	// Listen states to handle this widget behavior
-	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-	{
-		OnGameStateChanged(ECurrentGameState::Menu);
-	}
 }
 
 /*********************************************************************************************

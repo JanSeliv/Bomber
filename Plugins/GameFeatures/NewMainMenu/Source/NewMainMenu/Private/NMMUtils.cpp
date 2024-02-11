@@ -7,11 +7,12 @@
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
-#include "Data/NMMSubsystem.h"
 #include "Data/NMMTypes.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Subsystems/NMMSpotsSubsystem.h"
+#include "Subsystems/NMMBaseSubsystem.h"
 #include "UI/MyHUD.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -22,16 +23,23 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMUtils)
 
 // Returns New Main Menu Subsystem
-UNMMSubsystem* UNMMUtils::GetNewMainMenuSubsystem(const UObject* OptionalWorldContext)
+UNMMBaseSubsystem* UNMMUtils::GetBaseSubsystem(const UObject* OptionalWorldContext)
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
-	return World ? World->GetSubsystem<UNMMSubsystem>() : nullptr;
+	return World ? World->GetSubsystem<UNMMBaseSubsystem>() : nullptr;
+}
+
+// Returns Spots Manager
+UNMMSpotsSubsystem* UNMMUtils::GetSpotsSubsystem(const UObject* OptionalWorldContext)
+{
+	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
+	return World ? World->GetSubsystem<UNMMSpotsSubsystem>() : nullptr;
 }
 
 // Returns the Data Asset of the Main Menu
-const UNMMDataAsset* UNMMUtils::GetNewMainMenuDataAsset(const UObject* OptionalWorldContext)
+const UNMMDataAsset* UNMMUtils::GetDataAsset(const UObject* OptionalWorldContext)
 {
-	const UNMMSubsystem* Subsystem = GetNewMainMenuSubsystem(OptionalWorldContext);
+	const UNMMBaseSubsystem* Subsystem = GetBaseSubsystem(OptionalWorldContext);
 	return Subsystem ? Subsystem->GetNewMainMenuDataAsset() : nullptr;
 }
 
@@ -101,37 +109,37 @@ bool UNMMUtils::ShouldSkipCinematic(const FNMMCinematicRow& CinematicRow)
 // Helper namespace to initialize playback settings once
 namespace NMMPlaybackSettings
 {
-	FMovieSceneSequencePlaybackSettings InitPlaybackSettings(ENMMCinematicState CinematicState)
+	FMovieSceneSequencePlaybackSettings InitPlaybackSettings(ENMMState MainMenuState)
 	{
 		FMovieSceneSequencePlaybackSettings Settings;
-		Settings.LoopCount.Value = CinematicState == ENMMCinematicState::IdlePart ? INDEX_NONE : 0; // Loop infinitely if idle, otherwise play once
+		Settings.LoopCount.Value = MainMenuState == ENMMState::Idle ? INDEX_NONE : 0; // Loop infinitely if idle, otherwise play once
 		Settings.bPauseAtEnd = true; // Pause at the end, so gameplay camera can blend-out from correct position
 		Settings.bDisableCameraCuts = true; // Let the Spot to control the camera possessing instead of auto-possessed one that prevents blend-out while active
-		Settings.bRestoreState = CinematicState != ENMMCinematicState::MainPart; // Reset all 'Keep States' tracks when entered to None or IdlePart states
+		Settings.bRestoreState = MainMenuState != ENMMState::Cinematic; // Reset all 'Keep States' tracks when entered to None or Idle states
 		return Settings;
 	}
 
-	const FMovieSceneSequencePlaybackSettings EmptySettings = InitPlaybackSettings(ENMMCinematicState::None);
-	const FMovieSceneSequencePlaybackSettings IdlePartSettings = InitPlaybackSettings(ENMMCinematicState::IdlePart);
-	const FMovieSceneSequencePlaybackSettings MainPartSettings = InitPlaybackSettings(ENMMCinematicState::MainPart);
+	const FMovieSceneSequencePlaybackSettings EmptySettings = InitPlaybackSettings(ENMMState::None);
+	const FMovieSceneSequencePlaybackSettings IdlePartSettings = InitPlaybackSettings(ENMMState::Idle);
+	const FMovieSceneSequencePlaybackSettings MainPartSettings = InitPlaybackSettings(ENMMState::Cinematic);
 }
 
 // Returns the Playback Settings by given cinematic state
-const FMovieSceneSequencePlaybackSettings& UNMMUtils::GetCinematicSettings(ENMMCinematicState CinematicState)
+const FMovieSceneSequencePlaybackSettings& UNMMUtils::GetCinematicSettings(ENMMState MainMenuState)
 {
-	switch (CinematicState)
+	switch (MainMenuState)
 	{
-	case ENMMCinematicState::IdlePart: return NMMPlaybackSettings::IdlePartSettings;
-	case ENMMCinematicState::MainPart: return NMMPlaybackSettings::MainPartSettings;
+	case ENMMState::Idle: return NMMPlaybackSettings::IdlePartSettings;
+	case ENMMState::Cinematic: return NMMPlaybackSettings::MainPartSettings;
 	default: return NMMPlaybackSettings::EmptySettings;
 	}
 }
 
 // Returns the total frames of the cinematic by given cinematic state
-int32 UNMMUtils::GetCinematicTotalFrames(ENMMCinematicState CinematicState, const UMovieSceneSequencePlayer* LevelSequencePlayer)
+int32 UNMMUtils::GetCinematicTotalFrames(ENMMState MainMenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer)
 {
 	const UMovieSceneSequence* LevelSequenceTemplate = LevelSequencePlayer->GetSequence();
-	if (CinematicState == ENMMCinematicState::IdlePart)
+	if (MainMenuState == ENMMState::Idle)
 	{
 		// Obtain the first subsequence of the Master sequence or null if not found
 		LevelSequenceTemplate = UCinematicUtils::FindSubsequence(/*Index*/0, LevelSequenceTemplate);
@@ -141,20 +149,20 @@ int32 UNMMUtils::GetCinematicTotalFrames(ENMMCinematicState CinematicState, cons
 }
 
 // Return the playback position params by given cinematic state
-FMovieSceneSequencePlaybackParams UNMMUtils::GetPlaybackPositionParams(ENMMCinematicState CinematicState, const UMovieSceneSequencePlayer* LevelSequencePlayer)
+FMovieSceneSequencePlaybackParams UNMMUtils::GetPlaybackPositionParams(ENMMState MainMenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer)
 {
 	FMovieSceneSequencePlaybackParams InPlaybackParams;
-	InPlaybackParams.Frame.FrameNumber.Value = [CinematicState, LevelSequencePlayer]
+	InPlaybackParams.Frame.FrameNumber.Value = [MainMenuState, LevelSequencePlayer]
 	{
-		switch (CinematicState)
+		switch (MainMenuState)
 		{
-		case ENMMCinematicState::None:
+		case ENMMState::None:
 			// Moving to the last frame will stop the cinematic while regular 'Stop' does not work for clients
 			return UCinematicUtils::GetSequenceTotalFrames(LevelSequencePlayer->GetSequence()) - 1;
-		case ENMMCinematicState::IdlePart:
+		case ENMMState::Idle:
 			// Start from the beginning
 			return 0;
-		case ENMMCinematicState::MainPart:
+		case ENMMState::Cinematic:
 			// Continue from the current frame
 			return LevelSequencePlayer->GetCurrentTime().Time.FrameNumber.Value;
 		default: return -1;

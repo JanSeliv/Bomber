@@ -1,30 +1,25 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Data/NMMSubsystem.h"
+#include "Subsystems/NMMSpotsSubsystem.h"
 //---
 #include "NMMUtils.h"
 #include "Components/NMMSpotComponent.h"
-#include "Data/NMMDataAsset.h"
+#include "Subsystems/NMMBaseSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSubsystem)
+#include "Engine/World.h"
+//---
+#include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotsSubsystem)
 
-// Returns this Subsystem, is checked and wil crash if can't be obtained
-UNMMSubsystem& UNMMSubsystem::Get(const UObject* OptionalWorldContext/* = nullptr*/)
+UNMMSpotsSubsystem& UNMMSpotsSubsystem::Get(const UObject* OptionalWorldContext)
 {
-	UNMMSubsystem* ThisSubsystem = UNMMUtils::GetNewMainMenuSubsystem(OptionalWorldContext);
-	checkf(ThisSubsystem, TEXT("%s: 'SoundsSubsystem' is null"), *FString(__FUNCTION__));
+	UNMMSpotsSubsystem* ThisSubsystem = UNMMUtils::GetSpotsSubsystem(OptionalWorldContext);
+	checkf(ThisSubsystem, TEXT("%s: 'NMMSpotsSubsystem' is null"), *FString(__FUNCTION__));
 	return *ThisSubsystem;
 }
 
-// Returns the data asset that contains all the assets and tweaks of New Main Menu game feature
-const UNMMDataAsset* UNMMSubsystem::GetNewMainMenuDataAsset() const
-{
-	return NewMainMenuDataAssetInternal.LoadSynchronous();
-}
-
 // Add new Main-Menu spot, so it can be obtained by other objects
-void UNMMSubsystem::AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotComponent)
+void UNMMSpotsSubsystem::AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotComponent)
 {
 	if (ensureMsgf(NewMainMenuSpotComponent, TEXT("%s: 'NewMainMenuSpotComponent' is null"), *FString(__FUNCTION__)))
 	{
@@ -33,7 +28,7 @@ void UNMMSubsystem::AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotCompone
 }
 
 // Removes Main-Menu spot if should not be available by other objects anymore
-void UNMMSubsystem::RemoveMainMenuSpot(UNMMSpotComponent* MainMenuSpotComponent)
+void UNMMSpotsSubsystem::RemoveMainMenuSpot(UNMMSpotComponent* MainMenuSpotComponent)
 {
 	if (ensureMsgf(MainMenuSpotComponent, TEXT("%s: 'MainMenuSpotComponent' is null"), *FString(__FUNCTION__)))
 	{
@@ -42,7 +37,7 @@ void UNMMSubsystem::RemoveMainMenuSpot(UNMMSpotComponent* MainMenuSpotComponent)
 }
 
 // Returns currently selected Main-Menu spot
-UNMMSpotComponent* UNMMSubsystem::GetActiveMainMenuSpotComponent() const
+UNMMSpotComponent* UNMMSpotsSubsystem::GetActiveMainMenuSpotComponent() const
 {
 	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpotsInternal)
 	{
@@ -56,7 +51,7 @@ UNMMSpotComponent* UNMMSubsystem::GetActiveMainMenuSpotComponent() const
 }
 
 // Returns Main-Menu spots by given level type
-void UNMMSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutSpots, ELevelType LevelType) const
+void UNMMSpotsSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutSpots, ELevelType LevelType) const
 {
 	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpotsInternal)
 	{
@@ -75,7 +70,7 @@ void UNMMSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutS
 }
 
 // Returns next or previous Main-Menu spot by given incrementer
-UNMMSpotComponent* UNMMSubsystem::GetNextMainMenuSpotComponent(int32 Incrementer, ELevelType LevelType) const
+UNMMSpotComponent* UNMMSpotsSubsystem::GetNextMainMenuSpotComponent(int32 Incrementer, ELevelType LevelType) const
 {
 	TArray<UNMMSpotComponent*> CurrentLevelTypeSpots;
 	GetMainMenuSpotsByLevelType(/*out*/CurrentLevelTypeSpots, LevelType);
@@ -103,7 +98,7 @@ UNMMSpotComponent* UNMMSubsystem::GetNextMainMenuSpotComponent(int32 Incrementer
 }
 
 // Goes to another Spot to show another player character on current level
-UNMMSpotComponent* UNMMSubsystem::MoveMainMenuSpot(int32 Incrementer)
+UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 {
 	UNMMSpotComponent* NextMainMenuSpot = GetNextMainMenuSpotComponent(Incrementer, UMyBlueprintFunctionLibrary::GetLevelType());
 	if (!ensureMsgf(NextMainMenuSpot, TEXT("ASSERT: [%i] %s:\n'NextMainMenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__)))
@@ -119,15 +114,14 @@ UNMMSpotComponent* UNMMSubsystem::MoveMainMenuSpot(int32 Incrementer)
 	ActiveMainMenuSpotIdx = NextMainMenuSpot->GetCinematicRow().RowIndex;
 
 	// Play new spot
-	NextMainMenuSpot->SetCinematicState(ENMMCinematicState::IdlePart);
+	NextMainMenuSpot->SetCinematicByState(ENMMState::Idle);
 
 	return NextMainMenuSpot;
 }
 
 // Clears all transient data contained in this subsystem
-void UNMMSubsystem::Deinitialize()
+void UNMMSpotsSubsystem::Deinitialize()
 {
-	NewMainMenuDataAssetInternal.Reset();
 	MainMenuSpotsInternal.Empty();
 
 	Super::Deinitialize();

@@ -6,7 +6,7 @@
 //---
 #include "NewMainMenuWidget.generated.h"
 
-enum class ECurrentGameState : uint8;
+enum class ENMMState : uint8;
 
 class UButton;
 
@@ -54,13 +54,9 @@ protected:
 	 * May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
 
-	/** Called when the current game state was changed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Is called to prepare the Main Menu widget for Menu game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
+	/** Called when the Main Menu state was changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnNewMainMenuStateChanged(ENMMState NewState);
 
 	/** Is called when player pressed the button to start the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

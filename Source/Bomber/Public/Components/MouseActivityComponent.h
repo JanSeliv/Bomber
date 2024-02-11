@@ -4,7 +4,7 @@
 
 #include "Components/ActorComponent.h"
 //---
-#include "DataAssets/PlayerInputDataAsset.h" // FMouseVisibilitySettings
+#include "Structures/MouseVisibilitySettings.h"
 //---
 #include "MouseActivityComponent.generated.h"
 
@@ -44,9 +44,13 @@ public:
 	APlayerController* GetPlayerController() const;
 	APlayerController& GetPlayerControllerChecked() const;
 
-	/** Returns the mouse visibility settings according current game state. */
+	/** Returns current mouse visibility settings. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FMouseVisibilitySettings& GetCurrentVisibilitySettings() const;
+
+	/** Applies the new mouse visibility settings. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetMouseVisibilitySettings(const FMouseVisibilitySettings& NewSettings);
 
 	/** Called to to set the mouse cursor visibility.
 	 * @param bShouldShow true to show mouse cursor, otherwise hide it. */
@@ -66,10 +70,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Inactive Time"))
 	float CurrentlyInactiveSecInternal = 0.f;
 
-	/** Cached settings for mouse visibility.
-	 * @see UPlayerInputDataAsset::GetMouseVisibilitySettings() */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Visibility Settings"))
-	TMap<ECurrentGameState, FMouseVisibilitySettings> VisibilitySettingsInternal;
+	/** Currently used mouse visibility settings. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Visibility Settings"))
+	FMouseVisibilitySettings CurrentVisibilitySettingsInternal = FMouseVisibilitySettings::Invalid;
 
 	/*********************************************************************************************
 	 * Overrides

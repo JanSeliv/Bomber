@@ -6,7 +6,7 @@
 //---
 #include "NMMCinematicStateWidget.generated.h"
 
-enum class ECurrentGameState : uint8;
+enum class ENMMState : uint8;
 
 /**
  * Is active while game is in cinematic state, is responsible for skipping cinematic.
@@ -56,13 +56,9 @@ protected:
 	 * May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
 
-	/** Called when the current game state was changed. */
+	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Is called to start listening game state changes. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
+	void OnNewMainMenuStateChanged(ENMMState NewState);
 
 	/** Is called from input while the skip holding button is ongoing. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

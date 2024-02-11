@@ -139,9 +139,8 @@ enum class ECurrentGameState : uint8
 	EndGame = 1 << 2,
 	///< Is active during the active match.
 	InGame = 1 << 3,
-	///< Is active while player is watching cutscene of chosen character, is happening in single-player only since cinematics are automatically skipped in multiplayer.
-	Cinematic = 1 << 4,
-	Max = Menu | GameStarting | EndGame | InGame | Cinematic UMETA(DisplayName = "Any")
+	///< Any of the states
+	Max = Menu | GameStarting | EndGame | InGame UMETA(DisplayName = "Any")
 };
 
 ENUM_CLASS_FLAGS(ECurrentGameState);

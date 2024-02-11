@@ -8,6 +8,8 @@
 
 class AMyPlayerController;
 
+enum class ENMMState : uint8;
+
 /**
  * Represents the Player Controller in the NewMain Menu module, where the Owner is Player Controller actor.
  * Is responsible for managing Main Menu inputs.
@@ -56,6 +58,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE double GetCinematicsVolume() const { return CinematicsVolumeInternal; }
 
+	/** Enables or disables the input context during Cinematic Main Menu State. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetCinematicInputContextEnabled(bool bEnable);
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
@@ -76,7 +82,7 @@ protected:
 	double CinematicsVolumeInternal = 1.0;
 
 	/*********************************************************************************************
-	 * Protected functions
+	 * Overrides
 	 ********************************************************************************************* */
 protected:
 	/** Called when the owning Actor begins play or when the component is created if the Actor has already begun play. */
@@ -84,7 +90,15 @@ protected:
 
 	/** Clears all transient data created by this component */
 	virtual void OnUnregister() override;
-	
+
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
+	/** Called wen the Main Menu state was changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnNewMainMenuStateChanged(ENMMState NewState);
+
 	/** Is listen to set Menu game state once first spot is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnMainMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);

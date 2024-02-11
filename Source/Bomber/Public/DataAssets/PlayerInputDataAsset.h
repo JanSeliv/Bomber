@@ -4,36 +4,15 @@
 
 #include "Engine/DataAsset.h"
 //---
+#include "Structures/MouseVisibilitySettings.h"
+//---
 #include "PlayerInputDataAsset.generated.h"
-
-enum class ECurrentGameState : uint8;
 
 class UMyInputMappingContext;
 
-/**
- * Contains the settings for mouse visibility.
- */
-USTRUCT(BlueprintType)
-struct FMouseVisibilitySettings
-{
-	GENERATED_BODY()
+enum class ECurrentGameState : uint8;
 
-	/** Determines visibility by default. If set, mouse will be shown, otherwise hidden. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
-	bool bIsVisible = false;
-
-	/** Set true to hide the mouse if inactive for a while.
-	 * To work properly, 'Mouse Move' input action has to be assigned to any input context.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, EditCondition = "bIsVisible", EditConditionHides))
-	bool bHideOnInactivity = false;
-
-	/** Set duration to automatically hide the mouse if inactive for a while. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, EditCondition = "bIsVisible && bHideOnInactivity", EditConditionHides, ClampMin = "0.0", Units = "s"))
-	float SecToAutoHide = 1.f;
-
-	/** Returns true if according settings, the mouse can be automatically hidden if inactive for a while. */
-	bool FORCEINLINE IsInactivityEnabled() const { return bIsVisible && bHideOnInactivity && SecToAutoHide > 0.f; }
-};
+struct FKey;
 
 /**
 * Contains all data that describe player input.
@@ -72,10 +51,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE UMyInputMappingContext* GetSettingsInputContext() const { return SettingsInputContextInternalInternal; }
 
-	/** Returns the mouse visibility settings for specified game state.
+	/** Returns the mouse visibility settings by specified game state.
 	 * @see UPlayerInputDataAsset::MouseVisibilitySettingsInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE TMap<ECurrentGameState, FMouseVisibilitySettings>& GetMouseVisibilitySettings() const { return MouseVisibilitySettingsInternal; }
+	const FMouseVisibilitySettings& GetMouseVisibilitySettings(ECurrentGameState GameState) const;
 
 	/** Returns true if specified key is mapped to any gameplay input context. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Key"))

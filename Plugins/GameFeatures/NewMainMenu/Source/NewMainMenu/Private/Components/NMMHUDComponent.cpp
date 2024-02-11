@@ -3,7 +3,6 @@
 #include "Components/NMMHUDComponent.h"
 //---
 #include "Data/NMMDataAsset.h"
-#include "Data/NMMSubsystem.h"
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "UI/MyHUD.h"
 #include "Widgets/NewMainMenuWidget.h"
@@ -36,15 +35,14 @@ void UNMMHUDComponent::OnRegister()
 {
 	Super::OnRegister();
 
-	const UNMMDataAsset* NewMainMenuDataAsset = UNMMSubsystem::Get().GetNewMainMenuDataAsset();
-	checkf(NewMainMenuDataAsset, TEXT("ERROR: 'NewMainMenuDataAssetInternal' is null!"));
+	const UNMMDataAsset& NewMainMenuDataAsset = UNMMDataAsset::Get(this);
 	const AMyHUD& HUD = GetHUDChecked();
 
 	constexpr int32 HighZOrder = 3;
 	constexpr bool bAddToViewport = true;
-	MainMenuWidgetInternal = HUD.CreateWidgetByClass<UNewMainMenuWidget>(NewMainMenuDataAsset->GetMainMenuWidgetClass(), bAddToViewport, HighZOrder);
+	MainMenuWidgetInternal = HUD.CreateWidgetByClass<UNewMainMenuWidget>(NewMainMenuDataAsset.GetMainMenuWidgetClass(), bAddToViewport, HighZOrder);
 
-	InCinematicStateWidgetInternal = HUD.CreateWidgetByClass<UNMMCinematicStateWidget>(NewMainMenuDataAsset->GetInCinematicStateWidgetClass());
+	InCinematicStateWidgetInternal = HUD.CreateWidgetByClass<UNMMCinematicStateWidget>(NewMainMenuDataAsset.GetInCinematicStateWidgetClass());
 }
 
 // Clears all transient data created by this component

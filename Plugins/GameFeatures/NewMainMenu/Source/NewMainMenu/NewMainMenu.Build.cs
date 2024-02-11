@@ -15,6 +15,7 @@ public class NewMainMenu : ModuleRules
 				"Core", "Engine"
 				, "UMG" // UUserWidget creation
 				// My modules
+				, "Bomber"
 				, "MetaCheatManager" // UNMMCheatExtension
 			}
 		);
@@ -25,7 +26,6 @@ public class NewMainMenu : ModuleRules
 				, "MovieScene", "LevelSequence" // Cinematics
 				, "AdvancedWidgets" // URadialSlider
 				// My modules
-				, "Bomber"
 				, "MyUtils"
 				, "SettingsWidgetConstructor"
 			}

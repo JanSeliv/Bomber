@@ -7,9 +7,9 @@
 #include "Components/MySkeletalMeshComponent.h"
 #include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
-#include "Data/NMMSubsystem.h"
-#include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -27,14 +27,13 @@ void UNewMainMenuWidget::NativeConstruct()
 	// Hide this widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
-	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	// Listen Main Menu states
+	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
+	BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(this, &ThisClass::OnNewMainMenuStateChanged);
+	if (BaseSubsystem.GetCurrentMenuState() != ENMMState::None)
 	{
-		BindOnGameStateChanged(MyGameState);
-	}
-	else if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
-	{
-		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
+		// State is already set, apply it
+		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
 
 	if (PlayButton)
@@ -74,26 +73,10 @@ void UNewMainMenuWidget::NativeConstruct()
 	}
 }
 
-// Called when the current game state was changed
-void UNewMainMenuWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void UNewMainMenuWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
-	// Show this widget in Menu game state
-	SetVisibility(CurrentGameState == ECurrentGameState::Menu ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-}
-
-// Is called to prepare the Main Menu widget for Menu game state
-void UNewMainMenuWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
-{
-	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
-
-	// Listen states to handle this widget behavior
-	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-	{
-		// Handle current game state if initialized with delay
-		OnGameStateChanged(ECurrentGameState::Menu);
-	}
+	// Show this widget in Idle Menu state
+	SetVisibility(NewState == ENMMState::Idle ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 }
 
 // Is called when player pressed the button to start the game
@@ -105,7 +88,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 		return;
 	}
 
-	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
+	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetActiveMainMenuSpotComponent();
 	const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
 	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %s:\n'CinematicRow' is not valid!"), __LINE__, *FString(__FUNCTION__))
 		|| !MainMenuSpot->GetMeshChecked().IsVisible())
@@ -116,10 +99,14 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
-	// Start cinematic
-	// If should skip, then start the game instead
-	const ECGS NewState = !UNMMUtils::ShouldSkipCinematic(CinematicRow) ? ECGS::Cinematic : ECGS::GameStarting;
-	MyPC->ServerSetGameState(NewState);
+	if (UNMMUtils::ShouldSkipCinematic(CinematicRow))
+	{
+		MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
+	}
+	else
+	{
+		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Cinematic);
+	}
 }
 
 // Is called when player pressed the button to choose next player
@@ -150,7 +137,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
-	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().MoveMainMenuSpot(Incrementer);
+	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
 
 	// Update the chosen player mesh on the level
 	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpot ? MainMenuSpot->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
@@ -164,7 +151,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 void UNewMainMenuWidget::OnNextSkinButtonPressed()
 {
 	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
+	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetActiveMainMenuSpotComponent();
 	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerCharacter' is not valid"))
 		|| !ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid")))
 	{

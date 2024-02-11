@@ -55,6 +55,13 @@ const UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int
 	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
 }
 
+// Returns the mouse visibility settings by specified game state
+const FMouseVisibilitySettings& UPlayerInputDataAsset::GetMouseVisibilitySettings(ECurrentGameState GameState) const
+{
+	const FMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettingsInternal.Find(GameState);
+	return FoundSettingsPtr ? *FoundSettingsPtr : FMouseVisibilitySettings::Invalid;
+}
+
 // Returns true if specified key is mapped to any gameplay input context
 bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
 {
