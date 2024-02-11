@@ -77,13 +77,8 @@ void USoundsSubsystem::PlayCurrentBackgroundMusic()
 
 	if (!BackgroundMusic)
 	{
-		if (BackgroundMusicComponentInternal
-		    && BackgroundMusicComponentInternal->IsPlaying())
-		{
-			// Background music is not found for current state or level, disable current
-			BackgroundMusicComponentInternal->Stop();
-		}
-
+		// Background music is not found for current state or level, disable current
+		StopCurrentBackgroundMusic();
 		return;
 	}
 
@@ -102,6 +97,16 @@ void USoundsSubsystem::PlayCurrentBackgroundMusic()
 
 	BackgroundMusicComponentInternal->SetSound(BackgroundMusic);
 	BackgroundMusicComponentInternal->Play();
+}
+
+// Stops currently played background music
+void USoundsSubsystem::StopCurrentBackgroundMusic()
+{
+	if (BackgroundMusicComponentInternal
+	    && BackgroundMusicComponentInternal->IsPlaying())
+	{
+		BackgroundMusicComponentInternal->Stop();
+	}
 }
 
 // Play the blast sound of the bomb

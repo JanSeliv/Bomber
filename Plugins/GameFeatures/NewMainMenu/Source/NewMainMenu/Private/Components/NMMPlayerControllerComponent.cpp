@@ -11,7 +11,7 @@
 #include "Data/NMMSaveGameData.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
-
+#include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Kismet/GameplayStatics.h"
@@ -148,6 +148,7 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENM
 	case ENMMState::Cinematic:
 		{
 			MyPC.SetIgnoreMoveInput(true);
+			USoundsSubsystem::Get().StopCurrentBackgroundMusic();
 			break;
 		}
 	default: break;
