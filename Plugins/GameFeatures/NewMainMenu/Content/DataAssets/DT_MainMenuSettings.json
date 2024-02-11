@@ -13,16 +13,16 @@
 				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMUtils'",
-					"FunctionName": "GetPlayerControllerComponent"
+					"FunctionName": "GetInGameSettingsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMPlayerControllerComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMInGameSettingsSubsystem'",
 					"FunctionName": "SetCinematicsVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMPlayerControllerComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMInGameSettingsSubsystem'",
 					"FunctionName": "GetCinematicsVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"0C3773CA49BBEE805EAFB1B57ED9A4A4\", \"Cinematics Volume\")",
@@ -101,17 +101,17 @@
 				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMUtils'",
-					"FunctionName": "GetPlayerControllerComponent"
+					"FunctionName": "GetInGameSettingsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMPlayerControllerComponent'",
-					"FunctionName": "SetAutoSkipCinematicsSetting"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMInGameSettingsSubsystem'",
+					"FunctionName": "SetAutoSkipCinematics"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMPlayerControllerComponent'",
-					"FunctionName": "IsAutoSkipCinematicsSetting"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMInGameSettingsSubsystem'",
+					"FunctionName": "IsAutoSkipCinematicsEnabled"
 				},
 				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"E76D8412443F242779726C9825623BB0\", \"Auto Skip Cinematics\")",
 				"Tooltip": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"1835102C4C50DBD336D89F9D389D006F\", \"Skips previously seen cinematics automatically.\\r\\nWith other players, cinematics are always skipped.\")",

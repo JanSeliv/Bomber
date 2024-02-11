@@ -22,13 +22,17 @@ class NEWMAINMENU_API UNMMUtils : public UBlueprintFunctionLibrary
 	 * Object getters
 	 ********************************************************************************************* */
 public:
-	/** Returns New Main Menu Subsystem. */
+	/** Returns Main Menu subsystem that provides access to the most important data like Data Asset and current state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NMM Base Subsystem", meta = (WorldContext = "OptionalWorldContext"))
 	static class UNMMBaseSubsystem* GetBaseSubsystem(const UObject* OptionalWorldContext = nullptr);
 
-	/** Returns Spots Manager. */
+	/** Returns Main Menu subsystem that handles menu spots. */
 	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NMM Spots Subsystem", meta = (WorldContext = "OptionalWorldContext"))
 	static class UNMMSpotsSubsystem* GetSpotsSubsystem(const UObject* OptionalWorldContext = nullptr);
+
+	/** Returns Main Menu subsystem that handles In-Game Settings which are tweaked by player in Settings menu during the game. */
+	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NMM In-Game Settings Subsystem", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNMMInGameSettingsSubsystem* GetInGameSettingsSubsystem(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Data Asset of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Data Asset", meta = (WorldContext = "OptionalWorldContext"))
@@ -58,7 +62,8 @@ public:
 	 * Cinematic helpers
 	 ********************************************************************************************* */
 public:
-	/** Returns true if given cinematic wants to skip. */
+	/** Returns true if given cinematic wants to skip.
+	 * It checks game Settings and save game data. */  
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool ShouldSkipCinematic(const struct FNMMCinematicRow& CinematicRow);
 

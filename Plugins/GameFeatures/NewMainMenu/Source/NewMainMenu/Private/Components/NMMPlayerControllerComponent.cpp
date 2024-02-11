@@ -11,7 +11,7 @@
 #include "Data/NMMSaveGameData.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
-#include "Subsystems/SoundsSubsystem.h"
+
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Kismet/GameplayStatics.h"
@@ -38,12 +38,6 @@ AMyPlayerController& UNMMPlayerControllerComponent::GetPlayerControllerChecked()
 	return *MyPlayerController;
 }
 
-// Set to skips previously seen cinematics automatically
-void UNMMPlayerControllerComponent::SetAutoSkipCinematicsSetting(bool bEnable)
-{
-	bAutoSkipCinematicsSettingInternal = bEnable;
-}
-
 // Removes all saved data of the Main Menu
 void UNMMPlayerControllerComponent::ResetSaveGameData()
 {
@@ -65,15 +59,6 @@ void UNMMPlayerControllerComponent::ResetSaveGameData()
 	// Create new save game object
 	SaveGameDataInternal = CastChecked<UNMMSaveGameData>(UGameplayStatics::CreateSaveGameObject(UNMMSaveGameData::StaticClass()));
 	SaveGameDataInternal->SaveDataAsync();
-}
-
-// Set new sound volume for Cinematics sound class
-void UNMMPlayerControllerComponent::SetCinematicsVolume(double InVolume)
-{
-	CinematicsVolumeInternal = InVolume;
-
-	USoundClass* CinematicsSoundClass = UNMMDataAsset::Get().GetCinematicsSoundClass();
-	USoundsSubsystem::Get().SetSoundVolumeByClass(CinematicsSoundClass, InVolume);
 }
 
 // Enables or disables the input context during Cinematic Main Menu State

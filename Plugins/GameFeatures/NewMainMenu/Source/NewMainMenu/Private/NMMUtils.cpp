@@ -11,29 +11,37 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMInGameSettingsSubsystem.h"
+#include "Subsystems/NMMSpotsSubsystem.h"
 #include "UI/MyHUD.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "MovieSceneSequencePlaybackSettings.h"
 #include "MovieSceneSequencePlayer.h"
+#include "Engine/Engine.h"
 #include "Engine/World.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMUtils)
 
-// Returns New Main Menu Subsystem
-UNMMBaseSubsystem* UNMMUtils::GetBaseSubsystem(const UObject* OptionalWorldContext)
+// Returns Main Menu subsystem that provides access to the most important data like Data Asset and current state
+UNMMBaseSubsystem* UNMMUtils::GetBaseSubsystem(const UObject* OptionalWorldContext/* = nullptr*/)
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
 	return World ? World->GetSubsystem<UNMMBaseSubsystem>() : nullptr;
 }
 
-// Returns Spots Manager
-UNMMSpotsSubsystem* UNMMUtils::GetSpotsSubsystem(const UObject* OptionalWorldContext)
+// Returns Main Menu subsystem that handles menu spots
+UNMMSpotsSubsystem* UNMMUtils::GetSpotsSubsystem(const UObject* OptionalWorldContext/* = nullptr*/)
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
 	return World ? World->GetSubsystem<UNMMSpotsSubsystem>() : nullptr;
+}
+
+// Returns Main Menu subsystem that handles In-Game Settings which are tweaked by player in Settings menu during the game
+UNMMInGameSettingsSubsystem* UNMMUtils::GetInGameSettingsSubsystem(const UObject* OptionalWorldContext/* = nullptr*/)
+{
+	return GEngine ? GEngine->GetEngineSubsystem<UNMMInGameSettingsSubsystem>() : nullptr;
 }
 
 // Returns the Data Asset of the Main Menu
@@ -89,8 +97,7 @@ bool UNMMUtils::ShouldSkipCinematic(const FNMMCinematicRow& CinematicRow)
 	}
 
 	// If 'Auto Skip Cinematics' setting is enabled
-	const UNMMPlayerControllerComponent* MenuControllerComp = GetPlayerControllerComponent();
-	const bool bAutoSkipCinematicsSetting = MenuControllerComp ? MenuControllerComp->IsAutoSkipCinematicsSetting() : false;
+	const bool bAutoSkipCinematicsSetting = UNMMInGameSettingsSubsystem::Get().IsAutoSkipCinematicsEnabled();
 
 	// If given cinematic has been seen already
 	const UNMMSaveGameData* SaveGameData = GetSaveGameData();
