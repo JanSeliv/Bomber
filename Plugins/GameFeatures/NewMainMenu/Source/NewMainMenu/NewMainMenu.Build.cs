@@ -25,6 +25,7 @@ public class NewMainMenu : ModuleRules
 				"CoreUObject", "Slate", "SlateCore" // Core
 				, "MovieScene", "LevelSequence" // Cinematics
 				, "AdvancedWidgets" // URadialSlider
+				, "CineCameraRigs" // Camera rails
 				// My modules
 				, "MyUtils"
 				, "SettingsWidgetConstructor"

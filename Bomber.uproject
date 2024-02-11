@@ -51,6 +51,10 @@
 		{
 			"Name": "Text3D",
 			"Enabled": true
+		},
+		{
+			"Name": "CineCameraRigs",
+			"Enabled": true
 		}
 	]
 }

@@ -5,6 +5,7 @@
 #include "NMMUtils.h"
 #include "Components/NMMSpotComponent.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Engine/World.h"
@@ -106,15 +107,19 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 		return nullptr;
 	}
 
-	// Stop the current spot
-	UNMMSpotComponent* CurrentSpot = GetActiveMainMenuSpotComponent();
-	checkf(CurrentSpot, TEXT("ERROR: [%i] %s:\n'CurrentSpot' can't be null since CurrentLevelTypeSpots array does not contain nulls!"), __LINE__, *FString(__FUNCTION__))
-	CurrentSpot->StopMasterSequence();
-
+	// Set the new active spot index
 	ActiveMainMenuSpotIdx = NextMainMenuSpot->GetCinematicRow().RowIndex;
 
-	// Play new spot
-	NextMainMenuSpot->SetCinematicByState(ENMMState::Idle);
+	if (UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled())
+	{
+		// Instantly switch to the next spot, it will possess the camera and start playing its cinematic
+		NextMainMenuSpot->SetCinematicByState(ENMMState::Idle);
+	}
+	else
+	{
+		// Start transition to the next spot
+		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Transition);
+	}
 
 	return NextMainMenuSpot;
 }

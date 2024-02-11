@@ -30,3 +30,9 @@ void UNMMInGameSettingsSubsystem::SetCinematicsVolume(double InVolume)
 	USoundClass* CinematicsSoundClass = UNMMDataAsset::Get().GetCinematicsSoundClass();
 	USoundsSubsystem::Get().SetSoundVolumeByClass(CinematicsSoundClass, InVolume);
 }
+
+// Set true to enable instant transitions when switching characters in the Main Menu
+void UNMMInGameSettingsSubsystem::SetInstantCharacterSwitchEnabled(bool bEnable)
+{
+	bInstantCharacterSwitchInternal = bEnable;
+}

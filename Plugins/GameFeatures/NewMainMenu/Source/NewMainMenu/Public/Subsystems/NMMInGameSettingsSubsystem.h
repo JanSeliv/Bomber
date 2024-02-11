@@ -38,6 +38,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE double GetCinematicsVolume() const { return CinematicsVolumeInternal; }
 
+	/** Returns true if enabled instant transitions when switching characters in the Main Menu.
+	 * @see UNMMPlayerControllerComponent::bInstantCharacterSwitch */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsInstantCharacterSwitchEnabled() const { return bInstantCharacterSwitchInternal; }
+
+	/** Set true to enable instant transitions when switching characters in the main menu.
+	 * Is called from Settings menu once its checkbox is changed. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetInstantCharacterSwitchEnabled(bool bEnable);
+
 protected:
 	/** When setting enabled, skips previously seen cinematics automatically.
 	 * Is config property, can be set in Settings menu.
@@ -49,4 +59,9 @@ protected:
 	 * Is config property, can be set in Settings menu. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
 	double CinematicsVolumeInternal;
+
+	/** Enable/disable smooth transitions when switching characters in the main menu.
+	 * Is config property, can be set in Settings menu. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Instant Character Switch"))
+	bool bInstantCharacterSwitchInternal;
 };

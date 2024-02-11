@@ -38,6 +38,23 @@ public:
 	class UMySkeletalMeshComponent& GetMeshChecked() const;
 
 	/*********************************************************************************************
+	 * Camera Rail
+	 ********************************************************************************************* */
+public:
+	/** Returns attached Rail of this spot that follows the camera to the next spot. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	class ACineCameraRigRail* GetRailRig() const;
+	class ACineCameraRigRail& GetRailRigChecked() const;
+
+	/** Returns attached Rail Camera of this spot that follows the camera to the next spot. */
+	class ACameraActor* GetRailCamera() const;
+	class ACameraActor& GetRailCameraChecked() const;
+
+	/** Starts blending the camera towards this spot on the rail. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void BeginCameraRailTransition();
+
+	/*********************************************************************************************
 	 * Cinematics
 	 ********************************************************************************************* */
 public:
@@ -107,7 +124,7 @@ protected:
 
 	/** Marks own cinematic as seen by player for the save system. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TryMarkCinematicAsSeen();
+	void MarkCinematicAsSeen();
 
 	/*********************************************************************************************
 	 * Events

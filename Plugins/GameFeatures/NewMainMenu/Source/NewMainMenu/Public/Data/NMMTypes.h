@@ -54,6 +54,8 @@ enum class ENMMState : uint8
 {
 	///< Is not in the Menu
 	None,
+	///< Player has camera moving between Spots, both spots are playing idle in loop
+	Transition,
 	///< Player sees chosen character, only this spot is playing idle in loop
 	Idle,
 	///< Is playing the main parts of cinematic after play button is pressed

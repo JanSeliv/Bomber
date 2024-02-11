@@ -12,10 +12,14 @@
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "CineCameraRigRail.h"
 #include "LevelSequencePlayer.h"
+#include "TimerManager.h"
+#include "Camera/CameraActor.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 //---
@@ -46,6 +50,66 @@ UMySkeletalMeshComponent& UNMMSpotComponent::GetMeshChecked() const
 	checkf(Mesh, TEXT("'Mesh' is nullptr, can not get mesh for '%s' spot."), *GetNameSafe(this));
 	return *Mesh;
 }
+
+/*********************************************************************************************
+ * Camera Rail
+ ********************************************************************************************* */
+
+// Returns attached Rail of this spot that follows the camera to the next spot
+ACineCameraRigRail* UNMMSpotComponent::GetRailRig() const
+{
+	// The Rail Rig is attached right to the spot
+	constexpr bool bIncludeDescendants = false;
+	return UUtilsLibrary::GetAttachedActorByClass<ACineCameraRigRail>(GetOwner(), bIncludeDescendants);
+}
+
+ACineCameraRigRail& UNMMSpotComponent::GetRailRigChecked() const
+{
+	ACineCameraRigRail* RigRail = GetRailRig();
+	checkf(RigRail, TEXT("'RigRail' is nullptr, can not find attached Cameraail for '%s' spot."), *GetNameSafe(this));
+	return *RigRail;
+}
+
+// Returns attached Rail Camera of this spot that follows the camera to the next spot
+ACameraActor* UNMMSpotComponent::GetRailCamera() const
+{
+	// The Rail Camera is attached to the Rail Rig (not to the Spot directly)
+	constexpr bool bIncludeDescendants = true;
+	return UUtilsLibrary::GetAttachedActorByClass<ACameraActor>(GetOwner(), bIncludeDescendants);
+}
+
+ACameraActor& UNMMSpotComponent::GetRailCameraChecked() const
+{
+	ACameraActor* RailCamera = GetRailCamera();
+	checkf(RailCamera, TEXT("'RailCamera' is nullptr, can not find attached Rail Camera for '%s' spot."), *GetNameSafe(this));
+	return *RailCamera;
+}
+
+// Starts blending the camera towards this spot on the rail
+void UNMMSpotComponent::BeginCameraRailTransition()
+{
+	// Start the transition, so the camera will move to this spot
+	ACineCameraRigRail& RailRig = GetRailRigChecked();
+	RailRig.SetDriveMode(ECineCameraRigRailDriveMode::Duration);
+	RailRig.AbsolutePositionOnRail = 0.f;
+	RailRig.CurrentPositionOnRail = 0.f;
+	PossessCamera(ENMMState::Transition);
+
+	// Finish the transition once the camera reaches the spot
+	const USplineComponent* SplineComp = RailRig.GetRailSplineComponent();
+	checkf(SplineComp, TEXT("ERROR: [%i] %s:\n'SplineComp' is null!"), __LINE__, *FString(__FUNCTION__));
+	const float TransitionDuration = SplineComp->Duration;
+	auto OnTransitionFinished = []
+	{
+		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Idle);
+	};
+	FTimerHandle OnTransitionFinishedHandle;
+	GetOwner()->GetWorldTimerManager().SetTimer(OnTransitionFinishedHandle, OnTransitionFinished, TransitionDuration, false);
+}
+
+/*********************************************************************************************
+ * Cinematics
+ ********************************************************************************************* */
 
 // Returns main cinematic of this spot
 ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
@@ -106,6 +170,10 @@ void UNMMSpotComponent::SetCinematicByState(ENMMState MainMenuState)
 	// --- Update cinematic state, so we could track it
 	CinematicStateInternal = MainMenuState;
 }
+
+/*********************************************************************************************
+ * Protected functions
+ ********************************************************************************************* */
 
 // Overridable native event for when play begins for this actor.
 void UNMMSpotComponent::BeginPlay()
@@ -226,12 +294,19 @@ void UNMMSpotComponent::PossessCamera(ENMMState MainMenuState)
 	}
 
 	const UCameraComponent* ActiveCamera = nullptr;
+	FViewTargetTransitionParams BlendParams;
+
 	switch (MainMenuState)
 	{
 	case ENMMState::None:
 		ActiveCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
 		break;
+	case ENMMState::Transition:
+		BlendParams.BlendTime = 0.25f;
+		ActiveCamera = GetRailCameraChecked().GetCameraComponent();
+		break;
 	case ENMMState::Idle:
+		BlendParams.BlendTime = UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled() ? 0.f : 0.25f;
 		ActiveCamera = UCinematicUtils::FindSequenceCameraComponent(MasterPlayerInternal);
 		break;
 	default: break;
@@ -239,12 +314,12 @@ void UNMMSpotComponent::PossessCamera(ENMMState MainMenuState)
 
 	if (ActiveCamera)
 	{
-		MyPC->SetViewTarget(ActiveCamera->GetOwner());
+		MyPC->SetViewTarget(ActiveCamera->GetOwner(), BlendParams);
 	}
 }
 
 // Marks own cinematic as seen by player for the save system
-void UNMMSpotComponent::TryMarkCinematicAsSeen()
+void UNMMSpotComponent::MarkCinematicAsSeen()
 {
 	if (!IsActiveSpot())
 	{
@@ -285,20 +360,49 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
 }
 
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
+
 // Called wen the Main Menu state was changed
 void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
 	switch (NewState)
 	{
+	case ENMMState::Transition:
+		{
+			if (IsActiveSpot())
+			{
+				// Start blending the camera towards this spot on the rail
+				BeginCameraRailTransition();
+			}
+			break;
+		}
+	case ENMMState::Idle:
+		{
+			if (!IsActiveSpot())
+			{
+				// Stop other spots from playing their cinematic
+				StopMasterSequence();
+			}
+			break;
+		}
 	case ENMMState::Cinematic:
 		{
-			TryMarkCinematicAsSeen();
+			if (IsActiveSpot())
+			{
+				MarkCinematicAsSeen();
+			}
 			break;
 		}
 	default: break;
 	}
 
-	SetCinematicByState(NewState);
+	if (IsActiveSpot())
+	{
+		// Apply the state to this spot
+		SetCinematicByState(NewState);
+	}
 }
 
 // Called when the sequence is paused or when cinematic was ended
