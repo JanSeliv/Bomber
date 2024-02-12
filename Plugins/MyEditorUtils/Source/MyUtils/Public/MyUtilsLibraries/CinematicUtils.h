@@ -7,6 +7,7 @@
 #include "CinematicUtils.generated.h"
 
 class UMovieSceneSequence;
+class UMovieSceneSection;
 
 /**
  * The cinematic functions library.
@@ -33,4 +34,26 @@ public:
 	/** Finds the first Camera Component inside the specified Level sequence player. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static class UCameraComponent* FindSequenceCameraComponent(class UMovieSceneSequencePlayer* LevelSequencePlayer);
+
+	/** Returns all sections of specified class from the Master sequence in sorted order (from the beginning to the end).
+	 * @param MasterSequence The sequence to get sections from.
+	 * @param SectionClass The class of sections. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static void GetAllSectionsByClass(const UMovieSceneSequence* MasterSequence, TSubclassOf<UMovieSceneSection> SectionClass, TArray<UMovieSceneSection*>& OutSections);
+
+	/** Alternative version of GetAllSectionsByClass with auto cast array to the specified class. */
+	template <typename T = UMovieSceneSection>
+	static void GetAllSectionsByClass(const UMovieSceneSequence* MasterSequence, TArray<T*>& OutSections);
 };
+
+// Alternative version of GetAllSectionsByClass with auto cast array to the specified class
+template <typename T>
+void UCinematicUtils::GetAllSectionsByClass(const UMovieSceneSequence* MasterSequence, TArray<T*>& OutSections)
+{
+	TArray<UMovieSceneSection*> Sections;
+	GetAllSectionsByClass(MasterSequence, T::StaticClass(), /*out*/Sections);
+	for (UMovieSceneSection* It : Sections)
+	{
+		OutSections.Emplace(CastChecked<T>(It));
+	}
+}
