@@ -34,6 +34,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NMM In-Game Settings Subsystem", meta = (WorldContext = "OptionalWorldContext"))
 	static class UNMMInGameSettingsSubsystem* GetInGameSettingsSubsystem(const UObject* OptionalWorldContext = nullptr);
 
+	/** Returns Main Menu subsystem than manages camera possessing and transitions in the Main Menu. */
+	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NMM Camera Subsystem", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNMMCameraSubsystem* GetCameraSubsystem(const UObject* OptionalWorldContext = nullptr);
+
 	/** Returns the Data Asset of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Data Asset", meta = (WorldContext = "OptionalWorldContext"))
 	static const class UNMMDataAsset* GetDataAsset(const UObject* OptionalWorldContext = nullptr);

@@ -12,6 +12,7 @@
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "UI/MyHUD.h"
@@ -42,6 +43,13 @@ UNMMSpotsSubsystem* UNMMUtils::GetSpotsSubsystem(const UObject* OptionalWorldCon
 UNMMInGameSettingsSubsystem* UNMMUtils::GetInGameSettingsSubsystem(const UObject* OptionalWorldContext/* = nullptr*/)
 {
 	return GEngine ? GEngine->GetEngineSubsystem<UNMMInGameSettingsSubsystem>() : nullptr;
+}
+
+// Returns Main Menu subsystem than manages camera possessing and transitions in the Main Menu
+UNMMCameraSubsystem* UNMMUtils::GetCameraSubsystem(const UObject* OptionalWorldContext)
+{
+	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
+	return World ? World->GetSubsystem<UNMMCameraSubsystem>() : nullptr;
 }
 
 // Returns the Data Asset of the Main Menu

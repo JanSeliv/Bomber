@@ -38,7 +38,7 @@ void UNMMSpotsSubsystem::RemoveMainMenuSpot(UNMMSpotComponent* MainMenuSpotCompo
 }
 
 // Returns currently selected Main-Menu spot
-UNMMSpotComponent* UNMMSpotsSubsystem::GetActiveMainMenuSpotComponent() const
+UNMMSpotComponent* UNMMSpotsSubsystem::GetCurrentSpot() const
 {
 	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpotsInternal)
 	{
@@ -110,16 +110,10 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 	// Set the new active spot index
 	ActiveMainMenuSpotIdx = NextMainMenuSpot->GetCinematicRow().RowIndex;
 
-	if (UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled())
-	{
-		// Instantly switch to the next spot, it will possess the camera and start playing its cinematic
-		NextMainMenuSpot->SetCinematicByState(ENMMState::Idle);
-	}
-	else
-	{
-		// Start transition to the next spot
-		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Transition);
-	}
+	// If instant, then switch to the next spot, it will possess the camera and start playing its cinematic
+	// Otherwise start transition to the next spot
+	const bool bInstant = UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled();
+	UNMMBaseSubsystem::Get().SetNewMainMenuState(bInstant ? ENMMState::Idle : ENMMState::Transition);
 
 	return NextMainMenuSpot;
 }

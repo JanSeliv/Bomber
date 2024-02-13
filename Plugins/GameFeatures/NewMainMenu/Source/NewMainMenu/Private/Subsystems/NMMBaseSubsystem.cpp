@@ -26,11 +26,6 @@ UNMMBaseSubsystem& UNMMBaseSubsystem::Get(const UObject* OptionalWorldContext/* 
 // Applies the new state of New Main Menu game feature
 void UNMMBaseSubsystem::SetNewMainMenuState(ENMMState NewState)
 {
-	if (NewState == CurrentMenuStateInternal)
-	{
-		return;
-	}
-
 	CurrentMenuStateInternal = NewState;
 
 	OnMainMenuStateChanged.Broadcast(NewState);

@@ -38,7 +38,7 @@ public:
 
 	/** Returns currently selected Main-Menu spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	UNMMSpotComponent* GetActiveMainMenuSpotComponent() const;
+	UNMMSpotComponent* GetCurrentSpot() const;
 
 	/** Returns Main-Menu spots by given level type. */
 	UFUNCTION(BlueprintPure, Category = "C++")

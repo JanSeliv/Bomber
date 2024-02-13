@@ -88,7 +88,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 		return;
 	}
 
-	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetActiveMainMenuSpotComponent();
+	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
 	const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
 	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %s:\n'CinematicRow' is not valid!"), __LINE__, *FString(__FUNCTION__))
 		|| !MainMenuSpot->GetMeshChecked().IsVisible())
@@ -151,7 +151,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 void UNewMainMenuWidget::OnNextSkinButtonPressed()
 {
 	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetActiveMainMenuSpotComponent();
+	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
 	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerCharacter' is not valid"))
 		|| !ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid")))
 	{

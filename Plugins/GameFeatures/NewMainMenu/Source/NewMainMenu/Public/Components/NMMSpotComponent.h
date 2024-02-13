@@ -14,6 +14,7 @@ enum class ENMMState : uint8;
 
 /**
  * Represents a spot where a character can be selected in the Main Menu.
+ * Is responsible for playing cinematics (animation).
  * Is added dynamically to the My Skeletal Mesh actors on the level.
  */
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -38,29 +39,16 @@ public:
 	class UMySkeletalMeshComponent& GetMeshChecked() const;
 
 	/*********************************************************************************************
-	 * Camera Rail
-	 ********************************************************************************************* */
-public:
-	/** Returns attached Rail of this spot that follows the camera to the next spot. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class ACineCameraRigRail* GetRailRig() const;
-	class ACineCameraRigRail& GetRailRigChecked() const;
-
-	/** Returns attached Rail Camera of this spot that follows the camera to the next spot. */
-	class ACameraActor* GetRailCamera() const;
-	class ACameraActor& GetRailCameraChecked() const;
-
-	/** Starts blending the camera towards this spot on the rail. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void BeginCameraRailTransition();
-
-	/*********************************************************************************************
 	 * Cinematics
 	 ********************************************************************************************* */
 public:
 	/** Returns cinematic row of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FNMMCinematicRow& GetCinematicRow() const { return CinematicRowInternal; }
+
+	/** Returns cached cinematic player of this spot. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE class ULevelSequencePlayer* GetMasterPlayer() const { return MasterPlayerInternal; }
 
 	/** Returns main cinematic of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -69,11 +57,6 @@ public:
 	/** Prevents the spot from playing any cinematic. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void StopMasterSequence();
-
-	/** Returns in which state the cinematic is currently playing
-	 * @see CinematicStateInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE ENMMState GetCurrentCinematicState() const { return CinematicStateInternal; }
 
 	/** Activate given cinematic state on this spot. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -117,10 +100,6 @@ protected:
 
 	/** Is called when the cinematic was loaded to finish creation. */
 	void OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence);
-
-	/** Starts viewing through camera of current cinematic or gameplay one depending on given state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void PossessCamera(ENMMState MainMenuState);
 
 	/** Marks own cinematic as seen by player for the save system. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
