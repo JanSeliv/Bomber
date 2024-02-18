@@ -6,6 +6,7 @@
 #include "Components/MyCameraComponent.h"
 #include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
+#include "Data/NMMDataAsset.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/NMMBaseSubsystem.h"
@@ -84,13 +85,16 @@ void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 	}
 
 	FViewTargetTransitionParams BlendParams;
+	const float CameraBlendTime = UNMMDataAsset::Get().GetCameraBlendTime();
+	constexpr float InstantBlendTime = 0.f;
+
 	switch (MainMenuState)
 	{
 	case ENMMState::Transition:
-		BlendParams.BlendTime = 0.25f;
+		BlendParams.BlendTime = CameraBlendTime;
 		break;
 	case ENMMState::Idle:
-		BlendParams.BlendTime = UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled() ? 0.f : 0.25f;
+		BlendParams.BlendTime = UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled() ? InstantBlendTime : CameraBlendTime;
 		break;
 	default: break;
 	}
@@ -185,8 +189,9 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 {
 	ACineCameraRigRail* CurrentRailRig = GetCurrentRailRig();
 	const USplineComponent* CineSplineComponent = CurrentRailRig ? CurrentRailRig->GetRailSplineComponent() : nullptr;
+	const float CameraTransitionTime = UNMMDataAsset::Get().GetCameraTransitionTime();
 	if (!CineSplineComponent
-		|| !ensureMsgf(CineSplineComponent->Duration > 0.f, TEXT("ASSERT: [%i] %s:\n'Rail Rig's 'Duration' is not set!"), __LINE__, *FString(__FUNCTION__)))
+		|| !ensureMsgf(CameraTransitionTime > 0.f, TEXT("ASSERT: [%i] %s:\n''CameraTransitionTime' has to be greater than 0!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		return;
 	}
@@ -196,7 +201,7 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 	const float LastPositionValue = CineSplineComponent->GetFloatPropertyAtSplinePoint(CineSplineComponent->GetNumberOfSplinePoints() - 1, AbsolutePositionName);
 	const float PositionDuration = LastPositionValue - StartPositionValue;
 
-	float Progress = PositionDuration * (DeltaTime / CineSplineComponent->Duration);
+	float Progress = PositionDuration * (DeltaTime / CameraTransitionTime);
 	Progress += CurrentRailRig->AbsolutePositionOnRail;
 	Progress = FMath::Clamp(Progress, StartPositionValue, LastPositionValue);
 
