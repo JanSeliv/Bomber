@@ -28,6 +28,14 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
 	FNMMOnSpotReady OnMainMenuSpotReady;
 
+	/** Returns the index of the currently selected Main-Menu spot. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetActiveMenuSpotIndex() const { return ActiveMenuSpotIdxInternal; }
+
+	/** Returns an incrementer of the last Main-Menu spot direction, is used to determine the direction of the last move. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetLastMoveSpotDirection() const { return LastMoveSpotDirectionInternal; }
+
 	/** Add new Main-Menu spot, so it can be obtained by other objects. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotComponent);
@@ -50,7 +58,7 @@ public:
 	 * @param LevelType Level type to search in.
 	 * @return New active Main-Menu spot component. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	UNMMSpotComponent* GetNextMainMenuSpotComponent(int32 Incrementer, ELevelType LevelType) const;
+	UNMMSpotComponent* GetNextSpot(int32 Incrementer, ELevelType LevelType) const;
 
 	/** Goes to another Spot to show another player character on current level.
 	 * @param Incrementer 1 to move right, -1 to move left.
@@ -61,8 +69,12 @@ public:
 protected:
 	/** Index of the currently selected Main-Menu spot, is according row index in Cinematics table.
 	 * @see FCinematicRow::RowIndex. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active Main-Menu Spot Index"))
-	int32 ActiveMainMenuSpotIdx = 0;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active Menu Spot Index"))
+	int32 ActiveMenuSpotIdxInternal = 0;
+
+	/** Incrementer of the last Main-Menu spot direction, is used to determine the direction of the last move. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last Move Spot Direction"))
+	int32 LastMoveSpotDirectionInternal = 0;
 
 	/** All Main Menu spots with characters placed on the level. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main-Menu Spots"))

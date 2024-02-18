@@ -42,7 +42,7 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetCurrentSpot() const
 {
 	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpotsInternal)
 	{
-		if (MainMenuSpotComponent && MainMenuSpotComponent->GetCinematicRow().RowIndex == ActiveMainMenuSpotIdx)
+		if (MainMenuSpotComponent && MainMenuSpotComponent->GetCinematicRow().RowIndex == ActiveMenuSpotIdxInternal)
 		{
 			return MainMenuSpotComponent;
 		}
@@ -71,7 +71,7 @@ void UNMMSpotsSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>&
 }
 
 // Returns next or previous Main-Menu spot by given incrementer
-UNMMSpotComponent* UNMMSpotsSubsystem::GetNextMainMenuSpotComponent(int32 Incrementer, ELevelType LevelType) const
+UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer, ELevelType LevelType) const
 {
 	TArray<UNMMSpotComponent*> CurrentLevelTypeSpots;
 	GetMainMenuSpotsByLevelType(/*out*/CurrentLevelTypeSpots, LevelType);
@@ -83,8 +83,8 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetNextMainMenuSpotComponent(int32 Increm
 		SpotRowIndices.AddUnique(SpotIt->GetCinematicRow().RowIndex);
 	}
 
-	const bool bFoundActiveIdx = SpotRowIndices.Contains(ActiveMainMenuSpotIdx);
-	if (!ensureMsgf(bFoundActiveIdx, TEXT("%s: 'ActiveMainMenuSpotIdx' is not found in the 'SpotRowIndices'"), *FString(__FUNCTION__)))
+	const bool bFoundActiveIdx = SpotRowIndices.Contains(ActiveMenuSpotIdxInternal);
+	if (!ensureMsgf(bFoundActiveIdx, TEXT("%s: 'ActiveMenuSpotIdxInternal' is not found in the 'SpotRowIndices'"), *FString(__FUNCTION__)))
 	{
 		// Most likely the level is switched that could be not supported yet
 		return nullptr;
@@ -92,7 +92,7 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetNextMainMenuSpotComponent(int32 Increm
 
 	// Find the new index based on the incrementer
 	// If there is no next spot in array, it will take the first one with its index and vise versa for decrementing
-	const int32 ActiveSpotPosition = SpotRowIndices.IndexOfByKey(ActiveMainMenuSpotIdx);
+	const int32 ActiveSpotPosition = SpotRowIndices.IndexOfByKey(ActiveMenuSpotIdxInternal);
 	const int32 NewSpotIndex = (ActiveSpotPosition + Incrementer + SpotRowIndices.Num()) % SpotRowIndices.Num();
 	checkf(CurrentLevelTypeSpots.IsValidIndex(NewSpotIndex), TEXT("ERROR: [%i] %s:\n'CurrentLevelTypeSpots array has to have NewSpotIndex since it's the same size as SpotRowIndices array!"), __LINE__, *FString(__FUNCTION__));
 	return CurrentLevelTypeSpots[NewSpotIndex];
@@ -101,14 +101,15 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetNextMainMenuSpotComponent(int32 Increm
 // Goes to another Spot to show another player character on current level
 UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 {
-	UNMMSpotComponent* NextMainMenuSpot = GetNextMainMenuSpotComponent(Incrementer, UMyBlueprintFunctionLibrary::GetLevelType());
+	UNMMSpotComponent* NextMainMenuSpot = GetNextSpot(Incrementer, UMyBlueprintFunctionLibrary::GetLevelType());
 	if (!ensureMsgf(NextMainMenuSpot, TEXT("ASSERT: [%i] %s:\n'NextMainMenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		return nullptr;
 	}
 
 	// Set the new active spot index
-	ActiveMainMenuSpotIdx = NextMainMenuSpot->GetCinematicRow().RowIndex;
+	ActiveMenuSpotIdxInternal = NextMainMenuSpot->GetCinematicRow().RowIndex;
+	LastMoveSpotDirectionInternal = Incrementer;
 
 	// If instant, then switch to the next spot, it will possess the camera and start playing its cinematic
 	// Otherwise start transition to the next spot

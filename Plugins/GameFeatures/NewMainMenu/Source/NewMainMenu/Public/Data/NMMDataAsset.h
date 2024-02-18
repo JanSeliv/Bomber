@@ -84,7 +84,7 @@ protected:
 
 	/** Duration of blending on start and end Transition state: from Camera Spot to Rail and from Rail to Camera Spot.
 	 * @warning it is used only when player has enabled 'Instant Character Switch' setting. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (BlueprintProtected, DisplayName = "Camera Blend Time", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (BlueprintProtected, DisplayName = "Camera Blend Time", ShowOnlyInnerProperties, ClampMin = "0.0"))
 	float CameraBlendTimeInternal = 0.25f;
 
 	/*********************************************************************************************

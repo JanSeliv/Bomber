@@ -60,6 +60,19 @@ protected:
 	/*********************************************************************************************
 	 * Transitioning
 	 ********************************************************************************************* */
+public:
+	/** Returns true if the camera should transit to the next spot, otherwise in backward direction. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Is NNM Camera Forward Transition")
+	static bool IsCameraForwardTransition();
+
+	/** Returns begin value, where the camera should start moving on the rail. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Camera Start Transition Value")
+	static float GetCameraStartTransitionValue();
+
+	/** Returns end value, where the camera should stop moving on the rail. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NNM Camera Last Transition Value")
+	static float GetCameraLastTransitionValue();
+
 protected:
 	/** Is called on starts blending the camera towards current spot on the rail. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

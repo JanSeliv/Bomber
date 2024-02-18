@@ -59,18 +59,19 @@ UCameraComponent* UNMMCameraSubsystem::FindCameraComponent(ENMMState MainMenuSta
 ACameraActor* UNMMCameraSubsystem::GetCurrentRailCamera()
 {
 	// The Rail Camera is attached to the Rail Rig (not to the Spot directly)
-	constexpr bool bIncludeDescendants = true;
 	const UNMMSpotComponent* CurrentSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
-	return CurrentSpot ? UUtilsLibrary::GetAttachedActorByClass<ACameraActor>(CurrentSpot->GetOwner(), bIncludeDescendants) : nullptr;
+	return CurrentSpot ? UUtilsLibrary::GetAttachedActorByClass<ACameraActor>(GetCurrentRailRig()) : nullptr;
 }
 
 // Returns attached Rail of this spot that follows the camera to the next spot
 ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 {
 	// The Rail Rig is attached right to the spot
-	constexpr bool bIncludeDescendants = false;
-	const UNMMSpotComponent* CurrentSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
-	return CurrentSpot ? UUtilsLibrary::GetAttachedActorByClass<ACineCameraRigRail>(CurrentSpot->GetOwner(), bIncludeDescendants) : nullptr;
+	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	const UNMMSpotComponent* MenuSpot = IsCameraForwardTransition()
+		                                    ? SpotsSubsystem.GetCurrentSpot()
+		                                    : SpotsSubsystem.GetNextSpot(1, UMyBlueprintFunctionLibrary::GetLevelType());
+	return MenuSpot ? UUtilsLibrary::GetAttachedActorByClass<ACineCameraRigRail>(MenuSpot->GetOwner()) : nullptr;
 }
 
 // Starts viewing through camera of current cinematic
@@ -161,6 +162,24 @@ void UNMMCameraSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState New
  * Transitioning
  ********************************************************************************************* */
 
+// Returns true if the camera should transit to the next spot, otherwise in backward direction
+bool UNMMCameraSubsystem::IsCameraForwardTransition()
+{
+	return UNMMSpotsSubsystem::Get().GetLastMoveSpotDirection() > 0.f;
+}
+
+// Returns begin value, where the camera should start moving on the rail
+float UNMMCameraSubsystem::GetCameraStartTransitionValue()
+{
+	return IsCameraForwardTransition() ? 0.f : 1.f;
+}
+
+// Returns end value, where the camera should stop moving on the rail
+float UNMMCameraSubsystem::GetCameraLastTransitionValue()
+{
+	return IsCameraForwardTransition() ? 1.f : 0.f;
+}
+
 // Is called on starts blending the camera towards current spot on the rail
 void UNMMCameraSubsystem::OnBeginTransition()
 {
@@ -173,7 +192,7 @@ void UNMMCameraSubsystem::OnBeginTransition()
 	// Start the transition, so the camera will move to this spot
 	CurrentRailRig->SetDriveMode(ECineCameraRigRailDriveMode::Manual);
 	CurrentRailRig->bUseAbsolutePosition = true;
-	CurrentRailRig->AbsolutePositionOnRail = 0.f;
+	CurrentRailRig->AbsolutePositionOnRail = GetCameraStartTransitionValue();
 	PossessCamera(ENMMState::Transition);
 }
 
@@ -188,26 +207,20 @@ void UNMMCameraSubsystem::OnEndTransition()
 void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 {
 	ACineCameraRigRail* CurrentRailRig = GetCurrentRailRig();
-	const USplineComponent* CineSplineComponent = CurrentRailRig ? CurrentRailRig->GetRailSplineComponent() : nullptr;
 	const float CameraTransitionTime = UNMMDataAsset::Get().GetCameraTransitionTime();
-	if (!CineSplineComponent
+	if (!CurrentRailRig
 		|| !ensureMsgf(CameraTransitionTime > 0.f, TEXT("ASSERT: [%i] %s:\n''CameraTransitionTime' has to be greater than 0!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		return;
 	}
 
-	static const FName AbsolutePositionName = FName(TEXT("AbsolutePosition"));
-	const float StartPositionValue = CineSplineComponent->GetFloatPropertyAtSplinePoint(0, AbsolutePositionName);
-	const float LastPositionValue = CineSplineComponent->GetFloatPropertyAtSplinePoint(CineSplineComponent->GetNumberOfSplinePoints() - 1, AbsolutePositionName);
-	const float PositionDuration = LastPositionValue - StartPositionValue;
-
-	float Progress = PositionDuration * (DeltaTime / CameraTransitionTime);
-	Progress += CurrentRailRig->AbsolutePositionOnRail;
-	Progress = FMath::Clamp(Progress, StartPositionValue, LastPositionValue);
+	float Progress = DeltaTime / CameraTransitionTime;
+	Progress = IsCameraForwardTransition() ? CurrentRailRig->AbsolutePositionOnRail + Progress : CurrentRailRig->AbsolutePositionOnRail - Progress;
+	Progress = FMath::Clamp(Progress, 0.f, 1.f);
 
 	CurrentRailRig->AbsolutePositionOnRail = Progress;
 
-	if (Progress >= 1.f)
+	if (FMath::IsNearlyEqual(Progress, GetCameraLastTransitionValue(), KINDA_SMALL_NUMBER))
 	{
 		OnEndTransition();
 	}
