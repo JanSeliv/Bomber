@@ -63,11 +63,19 @@ public:
 	static class UNMMSaveGameData* GetSaveGameData(const UObject* OptionalWorldContext = nullptr);
 
 	/*********************************************************************************************
+	 * Public API
+	 ********************************************************************************************* */
+public:
+	/** Returns the current state of the Main Menu. */
+	UFUNCTION(BlueprintPure, Category = "C++", DisplayName = "Get NMM Main Menu State")
+	static ENMMState GetMainMenuState();
+
+	/*********************************************************************************************
 	 * Cinematic helpers
 	 ********************************************************************************************* */
 public:
 	/** Returns true if given cinematic wants to skip.
-	 * It checks game Settings and save game data. */  
+	 * It checks game Settings and save game data. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool ShouldSkipCinematic(const struct FNMMCinematicRow& CinematicRow);
 

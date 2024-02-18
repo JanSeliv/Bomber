@@ -15,7 +15,6 @@
 //---
 #include "CineCameraRigRail.h"
 #include "LevelSequencePlayer.h"
-#include "TimerManager.h"
 #include "Camera/CameraActor.h"
 #include "Engine/World.h"
 //---
@@ -73,33 +72,6 @@ ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 	return CurrentSpot ? UUtilsLibrary::GetAttachedActorByClass<ACineCameraRigRail>(CurrentSpot->GetOwner(), bIncludeDescendants) : nullptr;
 }
 
-// Starts blending the camera towards this spot on the rail
-void UNMMCameraSubsystem::BeginCameraRailTransition()
-{
-	ACineCameraRigRail* CurrentRailRig = GetCurrentRailRig();
-	if (!ensureMsgf(CurrentRailRig, TEXT("ASSERT: [%i] %s:\n'CurrentRailRig' is not valid!"), __LINE__, *FString(__FUNCTION__)))
-	{
-		return;
-	}
-
-	// Start the transition, so the camera will move to this spot
-	CurrentRailRig->SetDriveMode(ECineCameraRigRailDriveMode::Duration);
-	CurrentRailRig->AbsolutePositionOnRail = 0.f;
-	CurrentRailRig->CurrentPositionOnRail = 0.f;
-	PossessCamera(ENMMState::Transition);
-
-	// Finish the transition once the camera reaches the spot
-	const USplineComponent* SplineComp = CurrentRailRig->GetRailSplineComponent();
-	checkf(SplineComp, TEXT("ERROR: [%i] %s:\n'SplineComp' is null!"), __LINE__, *FString(__FUNCTION__));
-	const float TransitionDuration = SplineComp->Duration;
-	auto OnTransitionFinished = []
-	{
-		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Idle);
-	};
-	FTimerHandle OnTransitionFinishedHandle;
-	GetWorldRef().GetTimerManager().SetTimer(OnTransitionFinishedHandle, OnTransitionFinished, TransitionDuration, false);
-}
-
 // Starts viewing through camera of current cinematic
 void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 {
@@ -155,7 +127,10 @@ void UNMMCameraSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Move here the camera towards the next spot on the rail
+	if (UNMMUtils::GetMainMenuState() == ENMMState::Transition)
+	{
+		TickTransition(DeltaTime);
+	}
 }
 
 /*********************************************************************************************
@@ -169,11 +144,66 @@ void UNMMCameraSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState New
 	{
 	case ENMMState::Transition:
 		// Start blending the camera towards current spot on the rail
-		BeginCameraRailTransition();
+		OnBeginTransition();
 		break;
 	default: break;
 	}
 
 	// Change the camera according to the cinematic state
 	PossessCamera(NewState);
+}
+
+/*********************************************************************************************
+ * Transitioning
+ ********************************************************************************************* */
+
+// Is called on starts blending the camera towards current spot on the rail
+void UNMMCameraSubsystem::OnBeginTransition()
+{
+	ACineCameraRigRail* CurrentRailRig = GetCurrentRailRig();
+	if (!ensureMsgf(CurrentRailRig, TEXT("ASSERT: [%i] %s:\n'CurrentRailRig' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
+	// Start the transition, so the camera will move to this spot
+	CurrentRailRig->SetDriveMode(ECineCameraRigRailDriveMode::Manual);
+	CurrentRailRig->bUseAbsolutePosition = true;
+	CurrentRailRig->AbsolutePositionOnRail = 0.f;
+	PossessCamera(ENMMState::Transition);
+}
+
+// Is called on finishes blending the camera towards current spot on the rail
+void UNMMCameraSubsystem::OnEndTransition()
+{
+	// Finish the transition once the camera reaches the spot
+	UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Idle);
+}
+
+// Is called in tick to update the camera transition when transitioning
+void UNMMCameraSubsystem::TickTransition(float DeltaTime)
+{
+	ACineCameraRigRail* CurrentRailRig = GetCurrentRailRig();
+	const USplineComponent* CineSplineComponent = CurrentRailRig ? CurrentRailRig->GetRailSplineComponent() : nullptr;
+	if (!CineSplineComponent
+		|| !ensureMsgf(CineSplineComponent->Duration > 0.f, TEXT("ASSERT: [%i] %s:\n'Rail Rig's 'Duration' is not set!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
+	static const FName AbsolutePositionName = FName(TEXT("AbsolutePosition"));
+	const float StartPositionValue = CineSplineComponent->GetFloatPropertyAtSplinePoint(0, AbsolutePositionName);
+	const float LastPositionValue = CineSplineComponent->GetFloatPropertyAtSplinePoint(CineSplineComponent->GetNumberOfSplinePoints() - 1, AbsolutePositionName);
+	const float PositionDuration = LastPositionValue - StartPositionValue;
+
+	float Progress = PositionDuration * (DeltaTime / CineSplineComponent->Duration);
+	Progress += CurrentRailRig->AbsolutePositionOnRail;
+	Progress = FMath::Clamp(Progress, StartPositionValue, LastPositionValue);
+
+	CurrentRailRig->AbsolutePositionOnRail = Progress;
+
+	if (Progress >= 1.f)
+	{
+		OnEndTransition();
+	}
 }

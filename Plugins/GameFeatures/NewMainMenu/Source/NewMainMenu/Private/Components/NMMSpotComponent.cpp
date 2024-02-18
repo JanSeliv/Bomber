@@ -294,9 +294,8 @@ void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewSt
 void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 {
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
-	const ENMMState CurrentMenuState = UNMMBaseSubsystem::Get().GetCurrentMenuState();
 	if (!MyPC
-		|| CurrentMenuState != ENMMState::Cinematic)
+		|| UNMMUtils::GetMainMenuState() != ENMMState::Cinematic)
 	{
 		// Don't handle if not playing Main Part or is not local player
 		return;

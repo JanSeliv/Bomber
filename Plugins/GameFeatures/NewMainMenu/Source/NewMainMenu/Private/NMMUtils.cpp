@@ -94,6 +94,13 @@ UNMMSaveGameData* UNMMUtils::GetSaveGameData(const UObject* OptionalWorldContext
 	return MenuControllerComp ? MenuControllerComp->GetSaveGameData() : nullptr;
 }
 
+// Returns the current state of the Main Menu
+ENMMState UNMMUtils::GetMainMenuState()
+{
+	const UNMMBaseSubsystem* BaseSubsystem = GetBaseSubsystem();
+	return BaseSubsystem ? BaseSubsystem->GetCurrentMenuState() : ENMMState::None;
+}
+
 // Returns true if given cinematic wants to skip
 bool UNMMUtils::ShouldSkipCinematic(const FNMMCinematicRow& CinematicRow)
 {
