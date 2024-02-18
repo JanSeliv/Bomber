@@ -32,9 +32,21 @@ USoundsSubsystem* USoundsSubsystem::GetSoundsSubsystem(const UObject* WorldConte
 	return World ? Cast<USoundsSubsystem>(World->GetSubsystemBase(SoundsSubsystemClass)) : nullptr;
 }
 
+// Returns true if sounds can be played
+bool USoundsSubsystem::CanPlaySounds() const
+{
+	const UWorld* World = GetWorld();
+	return World && World->bAllowAudioPlayback && !World->IsNetMode(NM_DedicatedServer);
+}
+
 // Set new sound volume
 void USoundsSubsystem::SetSoundVolumeByClass(USoundClass* InSoundClass, float InVolume)
 {
+	if (!CanPlaySounds())
+	{
+		return;
+	}
+
 	USoundMix* MainSoundMix = USoundsDataAsset::Get().GetMainSoundMix();
 	static constexpr float Pitch = 1.f;
 	static constexpr float FadeInTime = 0.f;
@@ -71,6 +83,11 @@ void USoundsSubsystem::SetSFXVolume(double InVolume)
 // Play the background music for current game state and level
 void USoundsSubsystem::PlayCurrentBackgroundMusic()
 {
+	if (!CanPlaySounds())
+	{
+		return;
+	}
+
 	const ECurrentGameState GameState = AMyGameStateBase::GetCurrentGameState();
 	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
 	USoundBase* BackgroundMusic = USoundsDataAsset::Get().GetBackgroundMusic(GameState, LevelType);
@@ -112,7 +129,8 @@ void USoundsSubsystem::StopCurrentBackgroundMusic()
 // Play the blast sound of the bomb
 void USoundsSubsystem::PlayExplosionSFX()
 {
-	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	if (!CanPlaySounds()
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
@@ -126,7 +144,8 @@ void USoundsSubsystem::PlayExplosionSFX()
 // Play the sound of the picked power-up
 void USoundsSubsystem::PlayItemPickUpSFX()
 {
-	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	if (!CanPlaySounds()
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
@@ -140,7 +159,8 @@ void USoundsSubsystem::PlayItemPickUpSFX()
 /** Play the sound that is played right before the match ends. */
 void USoundsSubsystem::PlayEndGameCountdownSFX()
 {
-	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	if (!CanPlaySounds()
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
@@ -164,7 +184,8 @@ void USoundsSubsystem::StopEndGameCountdownSFX()
 // Play the sound that is played before the match starts. 
 void USoundsSubsystem::PlayStartGameCountdownSFX()
 {
-	if (AMyGameStateBase::GetCurrentGameState() != ECGS::GameStarting)
+	if (!CanPlaySounds()
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::GameStarting)
 	{
 		return;
 	}
@@ -178,7 +199,8 @@ void USoundsSubsystem::PlayStartGameCountdownSFX()
 // Play the sound of the clicked UI element
 void USoundsSubsystem::PlayUIClickSFX()
 {
-	if (AMyGameStateBase::GetCurrentGameState() == ECGS::None)
+	if (!CanPlaySounds()
+	    || AMyGameStateBase::GetCurrentGameState() == ECGS::None)
 	{
 		return;
 	}
@@ -194,7 +216,8 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	if (IS_TRANSIENT(this))
+	if (IS_TRANSIENT(this)
+	    || !CanPlaySounds())
 	{
 		return;
 	}

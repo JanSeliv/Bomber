@@ -33,6 +33,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static USoundsSubsystem* GetSoundsSubsystem(const UObject* WorldContextObject = nullptr);
 
+	/** Returns true if sounds can be played. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	virtual bool CanPlaySounds() const;
+
 	/** The component that is used to store reference for EndGameCountdown SFX. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))
 	TObjectPtr<UAudioComponent> ActiveEndGameCountdownSFX = nullptr;
