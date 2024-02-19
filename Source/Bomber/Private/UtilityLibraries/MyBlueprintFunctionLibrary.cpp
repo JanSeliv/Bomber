@@ -4,6 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "Components/MapComponent.h"
 #include "Components/MouseActivityComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/DataAssetsContainer.h"
@@ -141,7 +142,28 @@ UInGameMenuWidget* UMyBlueprintFunctionLibrary::GetInGameMenuWidget(const UObjec
 APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 PlayerIndex, const UObject* OptionalWorldContext/* = nullptr*/)
 {
 	const AMyPlayerController* MyPC = GetMyPlayerController(PlayerIndex, OptionalWorldContext);
-	return MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
+	APlayerCharacter* FoundChar = MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
+	if (FoundChar)
+	{
+		return FoundChar;
+	}
+
+	// Player character is not found in regular way, most likely PIE is not started, obtain it from Generated Map
+	int32 Idx = 0;
+	FMapComponents MapComponents;
+	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
+	for (const UMapComponent* It : MapComponents)
+	{
+		APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(It->GetOwner());
+		checkf(PlayerChar, TEXT("ERROR: [%i] %s:\n'PlayerChar' is null!"), __LINE__, *FString(__FUNCTION__));
+		if (Idx == PlayerIndex)
+		{
+			return PlayerChar;
+		}
+		++Idx;
+	}
+
+	return nullptr;
 }
 
 // Returns controlled player character

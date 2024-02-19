@@ -161,6 +161,9 @@ protected:
 	/** Gives access for helper utilities to expand cells operations on the Generated Map. */
 	friend class UCellsUtilsLibrary;
 
+	/** Gives access for helper utilities. */
+	friend class UMyBlueprintFunctionLibrary;
+
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
 	TObjectPtr<class UChildActorComponent> CollisionComponentInternal = nullptr;
