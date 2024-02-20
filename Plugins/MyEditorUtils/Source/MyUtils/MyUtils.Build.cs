@@ -22,6 +22,7 @@ public class MyUtils : ModuleRules
 				, "UMG" // UUserWidget
 				, "MovieScene", "MovieSceneTracks" // UCinematicUtils
 				, "EnhancedInput", "InputCore" // UInputUtilsLibrary
+				, "NavigationSystem" // UAIUtilsLibrary
 			}
 		);
 

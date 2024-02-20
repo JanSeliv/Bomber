@@ -2,9 +2,14 @@
 
 #include "Subsystems/NewAIBaseSubsystem.h"
 //---
-#include "GameFramework/MyGameStateBase.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 #include "NewAIUtils.h"
+#include "Data/NewAIDataAsset.h"
+#include "GameFramework/MyGameStateBase.h"
+#include "MyUtilsLibraries/AIUtilsLibrary.h"
+#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+//---
+#include "Engine/World.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewAIBaseSubsystem)
 
@@ -42,7 +47,7 @@ void UNewAIBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	DisableOriginalAI();
 
-	// There could be common logic for all AI agents line spawning NavMesh, EQS etc.
+	UAIUtilsLibrary::RebuildNavMesh(&InWorld, UCellsUtilsLibrary::GetLevelGridTransform());
 }
 
 // Disables all vanilla AI agents to override its behavior by the NewAI feature
