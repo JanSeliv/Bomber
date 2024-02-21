@@ -42,9 +42,9 @@ protected:
 	/** Called when the game starts. */
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
-	/** Disables all vanilla AI agents to override its behavior by the NewAI feature. */
+	/** Disables or enables all vanilla AI agents to override its behavior by the NewAI feature. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void DisableOriginalAI();
+	void HandleLegacyAI();
 
 	/*********************************************************************************************
 	 * Events
@@ -53,4 +53,8 @@ protected:
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Called when new difficulty level is set. */
+	UFUNCTION(BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void OnNewAIDifficultyChanged(int32 NewDifficultyLevel);
 };

@@ -23,4 +23,8 @@ public:
 	/** Returns true if the Navigation Mesh can be rebuilt. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static bool CanRebuildNavMesh(const class UNavigationSystemV1* NavSys);
+
+	/** Returns true if the AI Controller is running any behavior tree. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static bool IsRunningAnyBehaviorTree(const class AAIController* AIController);
 };

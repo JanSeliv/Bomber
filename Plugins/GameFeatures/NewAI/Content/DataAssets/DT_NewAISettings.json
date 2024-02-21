@@ -1,0 +1,95 @@
+[
+	{
+		"Name": "Settings.Combobox.Difficulty",
+		"SettingsPicker":
+		{
+			"SettingsType": "Combobox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Combobox.Difficulty"
+				},
+				"Owner":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewAI.NewAIUtils'",
+					"FunctionName": "GetInGameSettingsSubsystem"
+				},
+				"Setter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewAI.NewAIInGameSettingsSubsystem'",
+					"FunctionName": "SetDifficultyLevel"
+				},
+				"Getter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewAI.NewAIInGameSettingsSubsystem'",
+					"FunctionName": "GetDifficultyLevel"
+				},
+				"Caption": "NSLOCTEXT(\"[A7DE6B571DF60D4089E713C8FE7882D2]\", \"166BF5E242CEC13CF18351B908058D4A\", \"Difficulty\")",
+				"Tooltip": "NSLOCTEXT(\"[A7DE6B571DF60D4089E713C8FE7882D2]\", \"333C3EC24809BE2E2C599EB289D39F03\", \"Set new difficulty level that affects AI behavior\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "Settings.TextLine.GameplayTab"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [
+					"NSLOCTEXT(\"[A7DE6B571DF60D4089E713C8FE7882D2]\", \"44391B4140FB6B873075E8A4010B3595\", \"Low\")",
+					"NSLOCTEXT(\"[A7DE6B571DF60D4089E713C8FE7882D2]\", \"2595CA1A48CCC23D7C5A02A0E3AA1334\", \"Medium\")",
+					"NSLOCTEXT(\"[A7DE6B571DF60D4089E713C8FE7882D2]\", \"F1303DCD405A0EE658AE1ABDA8757443\", \"High\")",
+					"NSLOCTEXT(\"[A7DE6B571DF60D4089E713C8FE7882D2]\", \"0DA2DBB84D497FC65B2297BC2D49725D\", \"Legacy\")"
+				],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
+	}
+]

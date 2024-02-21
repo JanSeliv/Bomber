@@ -19,8 +19,7 @@ public:
 	static UNMMInGameSettingsSubsystem& Get();
 
 	/** Returns true is setting enabled to skips previously seen cinematics automatically.
-	 * @warning in multiplayer, this setting is ignored, so cinematics are always skipped
-	 * @see UNMMPlayerControllerComponent::bAutoSkipCinematicsInternal */
+	 * @warning in multiplayer, this setting is ignored, so cinematics are always skipped. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsAutoSkipCinematicsEnabled() const { return bAutoSkipCinematicsInternal; }
 
@@ -38,8 +37,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE double GetCinematicsVolume() const { return CinematicsVolumeInternal; }
 
-	/** Returns true if enabled instant transitions when switching characters in the Main Menu.
-	 * @see UNMMPlayerControllerComponent::bInstantCharacterSwitch */
+	/** Returns true if enabled instant transitions when switching characters in the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsInstantCharacterSwitchEnabled() const { return bInstantCharacterSwitchInternal; }
 

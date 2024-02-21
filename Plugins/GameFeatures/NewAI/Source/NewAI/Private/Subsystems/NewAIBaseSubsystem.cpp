@@ -6,6 +6,7 @@
 #include "Data/NewAIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/AIUtilsLibrary.h"
+#include "Subsystems/NewAIInGameSettingsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -45,21 +46,29 @@ void UNewAIBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	DisableOriginalAI();
+	HandleLegacyAI();
 
 	UAIUtilsLibrary::RebuildNavMesh(&InWorld, UCellsUtilsLibrary::GetLevelGridTransform());
+
+	UNewAIInGameSettingsSubsystem::Get().OnNewAIDifficultyChanged.AddDynamic(this, &ThisClass::OnNewAIDifficultyChanged);
 }
 
 // Disables all vanilla AI agents to override its behavior by the NewAI feature
-void UNewAIBaseSubsystem::DisableOriginalAI()
+void UNewAIBaseSubsystem::HandleLegacyAI()
 {
+	constexpr int32 LegacyLevel = 3;
+	const bool bWantsEnableLegacyAI = UNewAIInGameSettingsSubsystem::Get().GetDifficultyLevel() == LegacyLevel;
+
 	static const FString AISetEnabledName = TEXT("Bomber.AI.SetEnabled");
 	static IConsoleVariable* CVarAISetEnabled = IConsoleManager::Get().FindConsoleVariable(*AISetEnabledName);
-	if (ensureMsgf(CVarAISetEnabled, TEXT("%s: 'CVarAISetEnabled' is not found, can not disable original AI"), *FString(__FUNCTION__)))
+	if (!ensureMsgf(CVarAISetEnabled, TEXT("%s: 'CVarAISetEnabled' is not found, can not disable original AI"), *FString(__FUNCTION__))
+		|| CVarAISetEnabled->GetBool() == bWantsEnableLegacyAI)
 	{
-		constexpr bool bSetEnabled = false;
-		CVarAISetEnabled->Set(bSetEnabled);
+		// Is already in the desired state
+		return;
 	}
+
+	CVarAISetEnabled->Set(bWantsEnableLegacyAI);
 }
 
 /*********************************************************************************************
@@ -70,4 +79,10 @@ void UNewAIBaseSubsystem::DisableOriginalAI()
 void UNewAIBaseSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	// ...
+}
+
+// Called when new difficulty level is set
+void UNewAIBaseSubsystem::OnNewAIDifficultyChanged_Implementation(int32 NewDifficultyLevel)
+{
+	HandleLegacyAI();
 }

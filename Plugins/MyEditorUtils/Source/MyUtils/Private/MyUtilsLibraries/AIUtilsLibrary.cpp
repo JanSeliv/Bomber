@@ -2,6 +2,8 @@
 
 #include "MyUtilsLibraries/AIUtilsLibrary.h"
 //---
+#include "AIController.h"
+#include "BrainComponent.h"
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
@@ -42,4 +44,11 @@ bool UAIUtilsLibrary::CanRebuildNavMesh(const UNavigationSystemV1* NavSys)
 	return ensureMsgf(NavData, TEXT("ASSERT: [%i] %s:\n'NavData' is null!"), __LINE__, *FString(__FUNCTION__))
 		&& ensureMsgf(NavData->GetRuntimeGenerationMode() == ERuntimeGenerationType::Dynamic, TEXT("ASSERT: [%i] %s:\n'RuntimeGeneration' has to be 'Dynamic' in the Project Settings!"), __LINE__, *FString(__FUNCTION__))
 		&& ensureMsgf(NavData->IsRegistered(), TEXT("ASSERT: [%i] %s:\n'NavData' is not registered!"), __LINE__, *FString(__FUNCTION__));
+}
+
+// Returns true if the AI Controller is running any behavior tree
+bool UAIUtilsLibrary::IsRunningAnyBehaviorTree(const AAIController* AIController)
+{
+	const UBrainComponent* BrainComponent = AIController->GetBrainComponent();
+	return BrainComponent && BrainComponent->IsRunning();
 }

@@ -21,4 +21,8 @@ public:
 	/** Returns New AI subsystem that provides access to the most important data like Data Asset. */
 	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NewAI Base Subsystem", meta = (WorldContext = "OptionalWorldContext"))
 	static class UNewAIBaseSubsystem* GetBaseSubsystem(const UObject* OptionalWorldContext = nullptr);
+
+	/** Returns New AI subsystem that handles In-Game Settings which are tweaked by player in Settings menu during the game. */
+	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NewAI In-Game Settings Subsystem", meta = (WorldContext = "OptionalWorldContext"))
+	static class UNewAIInGameSettingsSubsystem* GetInGameSettingsSubsystem(const UObject* OptionalWorldContext = nullptr);
 };
