@@ -5,7 +5,7 @@
 #include "Data/NewAIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/AIUtilsLibrary.h"
-#include "Subsystems/NewAIInGameSettingsSubsystem.h"
+#include "Subsystems/GameDifficultySubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "AIController.h"
@@ -45,14 +45,13 @@ void UNewAIAgentComponent::BeginPlay()
 		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 	}
 
-	UNewAIInGameSettingsSubsystem::Get().OnNewAIDifficultyChanged.AddDynamic(this, &ThisClass::OnNewAIDifficultyChanged);
+	UGameDifficultySubsystem::Get().OnGameDifficultyChanged.AddDynamic(this, &ThisClass::OnGameDifficultyChanged);
 }
 
 // Starts or stops the behavior tree
 void UNewAIAgentComponent::HandleBehaviorTree()
 {
-	constexpr int32 LegacyLevel = 3;
-	const bool bWantsRunBT = UNewAIInGameSettingsSubsystem::Get().GetDifficultyLevel() != LegacyLevel
+	const bool bWantsRunBT = UGameDifficultySubsystem::Get().GetDifficultyType() != EGameDifficulty::Vanilla
 		&& AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame;
 
 	AAIController& AIController = GetAIControllerChecked();
@@ -88,7 +87,7 @@ void UNewAIAgentComponent::OnGameStateChanged_Implementation(ECurrentGameState C
 }
 
 // Called when new difficulty level is set
-void UNewAIAgentComponent::OnNewAIDifficultyChanged_Implementation(int32 NewDifficultyLevel)
+void UNewAIAgentComponent::OnGameDifficultyChanged_Implementation(int32 NewDifficultyLevel)
 {
 	HandleBehaviorTree();
 }

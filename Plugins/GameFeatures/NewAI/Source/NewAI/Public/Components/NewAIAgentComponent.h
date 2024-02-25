@@ -49,5 +49,5 @@ public:
 
 	/** Called when new difficulty level is set. */
 	UFUNCTION(BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void OnNewAIDifficultyChanged(int32 NewDifficultyLevel);
+	void OnGameDifficultyChanged(int32 NewDifficultyLevel);
 };

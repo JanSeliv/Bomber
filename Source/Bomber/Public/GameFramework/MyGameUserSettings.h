@@ -7,17 +7,19 @@
 #include "MyGameUserSettings.generated.h"
 
 /**
- * The Bomber settings.
+ * Player settings that can be changed in the game settings menu.
+ * It contains only video settings while all gameplay settings are stored right in owner classes (like GameDifficultySubsystem).
+ * @see DefaultGameUserSettings.ini
  */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API UMyGameUserSettings final : public UGameUserSettings
 {
 	GENERATED_BODY()
 
+	/*********************************************************************************************
+	 * Video settings
+	 ********************************************************************************************* */
 public:
-	/* ---------------------------------------------------
-	*		Public functions
-	* --------------------------------------------------- */
 
 	/** Returns the game user settings.
 	 * Is init once and can not be destroyed. */
@@ -86,10 +88,6 @@ public:
 	void SetFPSLockByIndex(int32 Index);
 
 protected:
-	/* ---------------------------------------------------
-	 *		Protected properties
-	 * --------------------------------------------------- */
-
 	/** The overall quality level, is config property.
 	 * 0:custom, 1:low, 2:medium, 3:high, 4:very high, 5:ultra. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overall Quality"))
@@ -123,9 +121,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Lock Index"))
 	int32 FPSLockIndexInternal;
 
-	/* ---------------------------------------------------
-	 *		Protected functions
-	 * --------------------------------------------------- */
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+public:
 
 	/** Loads the user settings from persistent storage */
 	virtual void LoadSettings(bool bForceReload) override;

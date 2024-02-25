@@ -176,7 +176,7 @@
 		}
 	},
 	{
-		"Name": "Settings.TextLine.VideoTab",
+		"Name": "Settings.TextLine.GameplayTab",
 		"SettingsPicker":
 		{
 			"SettingsType": "TextLine",
@@ -184,7 +184,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.TextLine.VideoTab"
+					"TagName": "Settings.TextLine.GameplayTab"
 				},
 				"Owner":
 				{
@@ -201,7 +201,7 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0606A8B34E9342299BF21DB4EE719FE7\", \"VIDEO\")",
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"158FFB6F4FEB9FFC58E5E9AB7D6D1E93\", \"GAMEPLAY\")",
 				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
 				"Padding":
 				{
@@ -264,183 +264,7 @@
 		}
 	},
 	{
-		"Name": "Settings.Checkbox.VSync",
-		"SettingsPicker":
-		{
-			"SettingsType": "Checkbox",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.Checkbox.VSync"
-				},
-				"Owner":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
-				},
-				"Setter":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "SetVSyncEnabled"
-				},
-				"Getter":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
-					"FunctionName": "IsVSyncEnabled"
-				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E3C445BF447C7C7057DD6FBC4387E065\", \"V-Sync\")",
-				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"B7FFF44B423CD59EE733BCA69238F83E\", \"Check to enable vertical synchronization\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 30,
-					"Bottom": 15
-				},
-				"LineHeight": 48,
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				},
-				"ShowNextToSettingOverride":
-				{
-					"TagName": "None"
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 0
-			},
-			"CustomWidget":
-			{
-				"CustomWidgetClass": "None"
-			}
-		}
-	},
-	{
-		"Name": "Settings.Checkbox.FullscreenMode",
-		"SettingsPicker":
-		{
-			"SettingsType": "Checkbox",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.Checkbox.FullscreenMode"
-				},
-				"Owner":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
-				},
-				"Setter":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "SetFullscreenEnabled"
-				},
-				"Getter":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "IsFullscreenEnabled"
-				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"30E1B9914168CFDFD022ACAAF72408A2\", \"Fullscreen\")",
-				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"D4DAAF084A3BE24A202DE68898F1E2E5\", \"Check to enable  the fullscreen mode\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 30,
-					"Bottom": 15
-				},
-				"LineHeight": 48,
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				},
-				"ShowNextToSettingOverride":
-				{
-					"TagName": "None"
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 0
-			},
-			"CustomWidget":
-			{
-				"CustomWidgetClass": "None"
-			}
-		}
-	},
-	{
-		"Name": "Settings.Combobox.Resolution",
+		"Name": "Settings.Combobox.Difficulty",
 		"SettingsPicker":
 		{
 			"SettingsType": "Combobox",
@@ -448,113 +272,25 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Combobox.Resolution"
+					"TagName": "Settings.Combobox.Difficulty"
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.GameDifficultySubsystem'",
+					"FunctionName": "GetGameDifficultySubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "SetResolutionByIndex"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.GameDifficultySubsystem'",
+					"FunctionName": "SetDifficultyLevel"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "GetResolutionIndex"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.GameDifficultySubsystem'",
+					"FunctionName": "GetDifficultyLevel"
 				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"CDB22C8D449DFC08EA86DC8127FB526E\", \"Screen Resolutions\")",
-				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"C17A26CF44C13399941A65A8751FC629\", \"Choose screen resolution\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 30,
-					"Bottom": 15
-				},
-				"LineHeight": 48,
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				},
-				"ShowNextToSettingOverride":
-				{
-					"TagName": "None"
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "GetTextResolutions"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 0
-			},
-			"CustomWidget":
-			{
-				"CustomWidgetClass": "None"
-			}
-		}
-	},
-	{
-		"Name": "Settings.Combobox.FramerateLock",
-		"SettingsPicker":
-		{
-			"SettingsType": "Combobox",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.Combobox.FramerateLock"
-				},
-				"Owner":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
-				},
-				"Setter":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "SetFPSLockByIndex"
-				},
-				"Getter":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
-					"FunctionName": "GetFPSLockIndex"
-				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"830704614CB4A9294A1192AC105A706A\", \"Framerate Lock\")",
-				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"102752ED4A6BFCA0C118E998176772A4\", \"Choose a limit on the allowed FPS\")",
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"17E689074C021878363191A8850A44C3\", \"Difficulty\")",
+				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E54B28574670C217638965A02A8D7B71\", \"Set new difficulty level that affects AI behavior\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -595,13 +331,10 @@
 					"FunctionName": "None"
 				},
 				"Members": [
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"C4A2940F4B4653B88F4EFCB4BFDB963B\", \"Uncapped\")",
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"86DC2E3B46D34F77B26BCA8C7D607740\", \"144 FPS\")",
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"605AD960496A5209ABEC389868383185\", \"120 FPS\")",
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"BC44B9B54E6FEE5CB234C7996F3DF0A0\", \"60 FPS\")",
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E6BC358440D8B05703C63087365BB1D0\", \"44 FPS\")",
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"1AD9C24B4924F3439AE20CA3AB95A741\", \"30 FPS\")",
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"B773F2754B23BB442CFA3A9D7F13EE42\", \"24 FPS\")"
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"2503BD4742C4B5A090040F8662F3745C\", \"Easy\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"7BD11C2F446ACF6089175E9887F5CF84\", \"Normal\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"69C060234A1322FB2F98A180AA66382E\", \"Hard\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"336F3BCA4E67C6F908939C9810338938\", \"Vanilla\")"
 				],
 				"TextJustify": "Center"
 			},
@@ -624,7 +357,95 @@
 		}
 	},
 	{
-		"Name": "Settings.Checkbox.FPSCounter",
+		"Name": "Settings.UserInput.PlayerName",
+		"SettingsPicker":
+		{
+			"SettingsType": "UserInput",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.UserInput.PlayerName"
+				},
+				"Owner":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetLocalPlayerState"
+				},
+				"Setter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
+					"FunctionName": "SetPlayerNameCustom"
+				},
+				"Getter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
+					"FunctionName": "GetPlayerFNameCustom"
+				},
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0A4D44494F98A414FFD6F399B8C3DAFE\", \"Player Name\")",
+				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"91BCE84A4CF9B58F61A9C8BB16663DB5\", \"Enter your nickname\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 8
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
+	},
+	{
+		"Name": "Settings.Checkbox.CameraLock",
 		"SettingsPicker":
 		{
 			"SettingsType": "Checkbox",
@@ -632,25 +453,25 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Checkbox.FPSCounter"
+					"TagName": "Settings.Checkbox.CameraLock"
 				},
 				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyHUD"
+					"FunctionName": "GetLevelCamera"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyHUD'",
-					"FunctionName": "SetFPSCounterEnabled"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyCameraComponent'",
+					"FunctionName": "SetCameraLockedOnCenter"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyHUD'",
-					"FunctionName": "IsFPSCounterEnabled"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyCameraComponent'",
+					"FunctionName": "IsCameraLockedOnCenter"
 				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E0880BDD4241E60FB2A3008CDB5CCA63\", \"FPS Counter\")",
-				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0523A0DC4613786EE0EB51BC0004E9E5\", \"Check to show the current FPS\")",
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"2214E63746C2245B5A145EB3F845C43F\", \"Camera Lock\")",
+				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"F8AA30AC44F4BED1BADAD780A53DB7E5\", \"Check if you want to lock camera on center\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1064,7 +885,7 @@
 		}
 	},
 	{
-		"Name": "Settings.TextLine.GameplayTab",
+		"Name": "Settings.TextLine.VideoTab",
 		"SettingsPicker":
 		{
 			"SettingsType": "TextLine",
@@ -1072,7 +893,7 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.TextLine.GameplayTab"
+					"TagName": "Settings.TextLine.VideoTab"
 				},
 				"Owner":
 				{
@@ -1089,7 +910,7 @@
 					"FunctionClass": "None",
 					"FunctionName": "None"
 				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"158FFB6F4FEB9FFC58E5E9AB7D6D1E93\", \"GAMEPLAY\")",
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0606A8B34E9342299BF21DB4EE719FE7\", \"VIDEO\")",
 				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
 				"Padding":
 				{
@@ -1099,7 +920,7 @@
 					"Bottom": 15
 				},
 				"LineHeight": 48,
-				"bStartOnNextColumn": false,
+				"bStartOnNextColumn": true,
 				"SettingsToUpdate":
 				{
 					"GameplayTags": [],
@@ -1152,95 +973,7 @@
 		}
 	},
 	{
-		"Name": "Settings.UserInput.PlayerName",
-		"SettingsPicker":
-		{
-			"SettingsType": "UserInput",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.UserInput.PlayerName"
-				},
-				"Owner":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetLocalPlayerState"
-				},
-				"Setter":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
-					"FunctionName": "SetPlayerNameCustom"
-				},
-				"Getter":
-				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
-					"FunctionName": "GetPlayerFNameCustom"
-				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0A4D44494F98A414FFD6F399B8C3DAFE\", \"Player Name\")",
-				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"91BCE84A4CF9B58F61A9C8BB16663DB5\", \"Enter your nickname\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 30,
-					"Bottom": 15
-				},
-				"LineHeight": 48,
-				"bStartOnNextColumn": false,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				},
-				"ShowNextToSettingOverride":
-				{
-					"TagName": "None"
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 8
-			},
-			"CustomWidget":
-			{
-				"CustomWidgetClass": "None"
-			}
-		}
-	},
-	{
-		"Name": "Settings.Checkbox.CameraLock",
+		"Name": "Settings.Checkbox.VSync",
 		"SettingsPicker":
 		{
 			"SettingsType": "Checkbox",
@@ -1248,25 +981,25 @@
 			{
 				"Tag":
 				{
-					"TagName": "Settings.Checkbox.CameraLock"
+					"TagName": "Settings.Checkbox.VSync"
 				},
 				"Owner":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetLevelCamera"
+					"FunctionName": "GetMyGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyCameraComponent'",
-					"FunctionName": "SetCameraLockedOnCenter"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
+					"FunctionName": "SetVSyncEnabled"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyCameraComponent'",
-					"FunctionName": "IsCameraLockedOnCenter"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Engine.GameUserSettings'",
+					"FunctionName": "IsVSyncEnabled"
 				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"2214E63746C2245B5A145EB3F845C43F\", \"Camera Lock\")",
-				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"F8AA30AC44F4BED1BADAD780A53DB7E5\", \"Check if you want to lock camera on center\")",
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E3C445BF447C7C7057DD6FBC4387E065\", \"V-Sync\")",
+				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"B7FFF44B423CD59EE733BCA69238F83E\", \"Check to enable vertical synchronization\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -1324,6 +1057,454 @@
 			"CustomWidget":
 			{
 				"CustomWidgetClass": "None"
+			}
+		}
+	},
+	{
+		"Name": "Settings.Checkbox.FullscreenMode",
+		"SettingsPicker":
+		{
+			"SettingsType": "Checkbox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Checkbox.FullscreenMode"
+				},
+				"Owner":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
+				},
+				"Setter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "SetFullscreenEnabled"
+				},
+				"Getter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "IsFullscreenEnabled"
+				},
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"30E1B9914168CFDFD022ACAAF72408A2\", \"Fullscreen\")",
+				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"D4DAAF084A3BE24A202DE68898F1E2E5\", \"Check to enable  the fullscreen mode\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
+	},
+	{
+		"Name": "Settings.Combobox.Resolution",
+		"SettingsPicker":
+		{
+			"SettingsType": "Combobox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Combobox.Resolution"
+				},
+				"Owner":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
+				},
+				"Setter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "SetResolutionByIndex"
+				},
+				"Getter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "GetResolutionIndex"
+				},
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"CDB22C8D449DFC08EA86DC8127FB526E\", \"Screen Resolution\")",
+				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"C17A26CF44C13399941A65A8751FC629\", \"Choose screen resolution\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "GetTextResolutions"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
+	},
+	{
+		"Name": "Settings.Combobox.FramerateLock",
+		"SettingsPicker":
+		{
+			"SettingsType": "Combobox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Combobox.FramerateLock"
+				},
+				"Owner":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyGameUserSettings"
+				},
+				"Setter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "SetFPSLockByIndex"
+				},
+				"Getter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionName": "GetFPSLockIndex"
+				},
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"830704614CB4A9294A1192AC105A706A\", \"Framerate Lock\")",
+				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"102752ED4A6BFCA0C118E998176772A4\", \"Choose a limit on the allowed FPS\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"C4A2940F4B4653B88F4EFCB4BFDB963B\", \"Uncapped\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"86DC2E3B46D34F77B26BCA8C7D607740\", \"144 FPS\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"605AD960496A5209ABEC389868383185\", \"120 FPS\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"BC44B9B54E6FEE5CB234C7996F3DF0A0\", \"60 FPS\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E6BC358440D8B05703C63087365BB1D0\", \"44 FPS\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"1AD9C24B4924F3439AE20CA3AB95A741\", \"30 FPS\")",
+					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"B773F2754B23BB442CFA3A9D7F13EE42\", \"24 FPS\")"
+				],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
+	},
+	{
+		"Name": "Settings.Checkbox.FPSCounter",
+		"SettingsPicker":
+		{
+			"SettingsType": "Checkbox",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Checkbox.FPSCounter"
+				},
+				"Owner":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionName": "GetMyHUD"
+				},
+				"Setter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyHUD'",
+					"FunctionName": "SetFPSCounterEnabled"
+				},
+				"Getter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyHUD'",
+					"FunctionName": "IsFPSCounterEnabled"
+				},
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E0880BDD4241E60FB2A3008CDB5CCA63\", \"FPS Counter\")",
+				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0523A0DC4613786EE0EB51BC0004E9E5\", \"Check to show the current FPS\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 30,
+					"Bottom": 15
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
+	},
+	{
+		"Name": "Settings.CustomWidget.InputControls",
+		"SettingsPicker":
+		{
+			"SettingsType": "CustomWidget",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.CustomWidget.InputControls"
+				},
+				"Owner":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Setter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Getter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"034DA8B649A7D12B0CE11488B7A32D41\", \"CONTROLS\")",
+				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 0,
+					"Right": 10,
+					"Bottom": 15
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "/Script/UMG.WidgetBlueprintGeneratedClass'/Game/Bomber/UI/UI1-3_Settings/Input/WBP_InputControls.WBP_InputControls_C'"
 			}
 		}
 	},
@@ -2379,94 +2560,6 @@
 			"CustomWidget":
 			{
 				"CustomWidgetClass": "None"
-			}
-		}
-	},
-	{
-		"Name": "Settings.CustomWidget.InputControls",
-		"SettingsPicker":
-		{
-			"SettingsType": "CustomWidget",
-			"PrimaryData":
-			{
-				"Tag":
-				{
-					"TagName": "Settings.CustomWidget.InputControls"
-				},
-				"Owner":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Setter":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Getter":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"034DA8B649A7D12B0CE11488B7A32D41\", \"CONTROLS\")",
-				"Tooltip": "NSLOCTEXT(\"Core\", \"None\", \"None\")",
-				"Padding":
-				{
-					"Left": 0,
-					"Top": 0,
-					"Right": 0,
-					"Bottom": 15
-				},
-				"LineHeight": 48,
-				"bStartOnNextColumn": true,
-				"SettingsToUpdate":
-				{
-					"GameplayTags": [],
-					"ParentTags": []
-				},
-				"ShowNextToSettingOverride":
-				{
-					"TagName": "None"
-				}
-			},
-			"Button":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"Checkbox":
-			{
-			},
-			"Combobox":
-			{
-				"SetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"GetMembers":
-				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
-				},
-				"Members": [],
-				"TextJustify": "Center"
-			},
-			"Slider":
-			{
-			},
-			"TextLine":
-			{
-				"VerticalAlignment": "Content",
-				"HorizontalAlignment": "HAlign_Fill"
-			},
-			"UserInput":
-			{
-				"MaxCharactersNumber": 0
-			},
-			"CustomWidget":
-			{
-				"CustomWidgetClass": "/Script/UMG.WidgetBlueprintGeneratedClass'/Game/Bomber/UI/UI1-3_Settings/Input/WBP_InputControls.WBP_InputControls_C'"
 			}
 		}
 	}
