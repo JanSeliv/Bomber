@@ -37,6 +37,12 @@ void UGameDifficultySubsystem::SetDifficultyType(EGameDifficulty InDifficultyTyp
 	SetDifficultyLevel(NewLevel);
 }
 
+// Returns true if the game difficulty level is matched with one or more specified types
+bool UGameDifficultySubsystem::HasDifficulty(int32 DifficultiesBitmask) const
+{
+	return EnumHasAnyFlags(GetDifficultyType(), TO_ENUM(EGameDifficulty, DifficultiesBitmask));
+}
+
 // Set new difficulty level. Higher value bigger difficulty
 void UGameDifficultySubsystem::SetDifficultyLevel(int32 InLevel)
 {

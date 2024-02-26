@@ -20,7 +20,7 @@ enum class EGameDifficulty : uint8
 	///< The hardest difficulty, is 2 as difficulty level
 	Hard = 1 << 2,
 	///< Original game difficulty, where AI is hardcoded in controller, but very smart
-	Vanilla = 1 << 3,
+	Vanilla = 1 << 3 UMETA(Hidden),
 	Any = Easy | Normal | Hard | Vanilla
 };
 
@@ -55,6 +55,10 @@ public:
 	/** Sets new game difficulty by enum type. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetDifficultyType(EGameDifficulty InDifficultyType);
+
+	/** Returns true if the game difficulty level is matched with one or more specified types. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool HasDifficulty(UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 DifficultiesBitmask) const;
 
 	/** Returns current difficulty level.
 	 * Where 0 is the easiest and 3 is the hardest. */

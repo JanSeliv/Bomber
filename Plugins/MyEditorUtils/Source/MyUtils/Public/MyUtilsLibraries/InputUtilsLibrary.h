@@ -30,7 +30,6 @@ enum class EInputActionInContextState : uint8
 	Any
 };
 
-//ENUM_RANGE_BY_FIRST_AND_LAST($ENUM$, $ENUM$::First, $ENUM$::Last);
 /**
  * The Enhanced Input functions library.
  * Extends Epic's API with some useful functions and tricks.
