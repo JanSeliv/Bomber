@@ -4,7 +4,9 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "Components/MapComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "LevelActors/BombActor.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CellsUtilsLibrary)
 
@@ -294,6 +296,25 @@ FCell UCellsUtilsLibrary::GetNearestFreeCell(const FCell& Cell)
 	FCells FreeCells = GetAllEmptyCellsWithoutActors();
 	FreeCells.Append(GetAllCellsWithActors(TO_FLAG(EAT::Player))); // Players are also considered as free cells
 	return GetCellArrayNearest(FreeCells, Cell);
+}
+
+// Returns all explosion cells on Level
+TSet<FCell> UCellsUtilsLibrary::GetAllExplosionCells()
+{
+	FMapComponents BombMapComponents;
+	AGeneratedMap::Get().GetMapComponents(BombMapComponents, TO_FLAG(EAT::Bomb));
+
+	FCells ExplosionCells;
+	for (const UMapComponent* MapComponentIt : BombMapComponents)
+	{
+		const ABombActor* BombActor = MapComponentIt ? MapComponentIt->GetOwner<ABombActor>() : nullptr;
+		if (BombActor)
+		{
+			ExplosionCells.Append(BombActor->GetExplosionCells());
+		}
+	}
+
+	return ExplosionCells;
 }
 
 // ---------------------------------------------------

@@ -170,19 +170,7 @@ void AGeneratedMap::GetSidesCells(
 	const bool bBreakOnExplosions = Pathfinder == EPathType::Safe || Pathfinder == EPathType::Secure;
 	if (bBreakOnExplosions) // if is the request to find the path without explosions.
 	{
-		FMapComponents BombsMapComponents;
-		GetMapComponents(BombsMapComponents, TO_FLAG(EAT::Bomb));
-		if (BombsMapComponents.Num() > 0)
-		{
-			for (const UMapComponent* MapComponentIt : BombsMapComponents)
-			{
-				const ABombActor* BombOwner = MapComponentIt ? MapComponentIt->GetOwner<ABombActor>() : nullptr;
-				if (BombOwner)
-				{
-					DangerousCells = DangerousCells.Union(BombOwner->GetExplosionCells());
-				}
-			}
-		}
+		DangerousCells.Append(UCellsUtilsLibrary::GetAllExplosionCells());
 	}
 
 	// ----- The specified cell adding -----

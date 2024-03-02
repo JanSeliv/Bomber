@@ -562,6 +562,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	static FCell GetNearestFreeCell(const FCell& Cell);
 
+	/** Returns all explosion cells on Level. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Dangerous"))
+	static TSet<FCell> GetAllExplosionCells();
+
 	/* ---------------------------------------------------
 	 *		Debug cells utilities
 	 * --------------------------------------------------- */
