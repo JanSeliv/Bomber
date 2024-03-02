@@ -19,6 +19,18 @@ void UNewAIEndQueryContext_Level::ProvideContext(FEnvQueryInstance& QueryInstanc
 	UEnvQueryItemType_Point::SetContextHelper(ContextData, ResultingLocation);
 }
 
+void UNewAIEndQueryContext_AllCellsOnLevel::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const
+{
+	Super::ProvideContext(QueryInstance, ContextData);
+
+	TArray<FVector> ContextLocations = FCell::CellsToVectors(UCellsUtilsLibrary::GetAllCellsOnLevel());
+	for (FVector& It : ContextLocations)
+	{
+		It.Z += FCell::CellSize;
+	}
+	UEnvQueryItemType_Point::SetContextHelper(ContextData, MoveTemp(ContextLocations));
+}
+
 void UNewAIEndQueryContext_Player::ProvideContext(FEnvQueryInstance& QueryInstance, FEnvQueryContextData& ContextData) const
 {
 	Super::ProvideContext(QueryInstance, ContextData);
