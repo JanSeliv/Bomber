@@ -31,6 +31,12 @@ AMySkeletalMeshActor::AMySkeletalMeshActor(const FObjectInitializer& ObjectIniti
 {
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+
+	// Since it's preview mesh, make sure it is always visible even with close camera
+	UMySkeletalMeshComponent& Mesh = GetMeshChecked();
+	Mesh.BoundsScale = 6.f;
+	Mesh.bNeverDistanceCull = true;
+	Mesh.bAllowCullDistanceVolume = false;
 }
 
 // Returns the Skeletal Mesh of bombers
