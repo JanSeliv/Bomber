@@ -49,6 +49,10 @@ public:
 	UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
 	UMySkeletalMeshComponent& GetMeshChecked() const;
 
+	/** Returns the Player Tag to which this mesh is associated with. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE FPlayerTag& GetPlayerTag() const { return PlayerTagInternal; }
+
 	/** Applies the specified player data by given type to the mesh. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "InPlayerTag"))
 	void InitMySkeletalMesh(const FPlayerTag& InPlayerTag, int32 InSkinIndex);
