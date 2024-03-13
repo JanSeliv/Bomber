@@ -144,7 +144,9 @@ void UMySkeletalMeshComponent::SetActive(bool bNewActive, bool bReset/*= false*/
 {
 	Super::SetActive(bNewActive, bReset);
 
-	SetHiddenInGame(!bNewActive, true);
+	// If anything activates or disables this preview actor, change its visibility as well
+	constexpr bool bPropagateToChildren = false; // don't affect attached actors such as Camera
+	SetHiddenInGame(!bNewActive, bPropagateToChildren);
 }
 
 // Init this component by specified player data
