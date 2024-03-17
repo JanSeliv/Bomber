@@ -24,7 +24,7 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnToggledInGameMenu, bool, bIsVisible);
 
 	/** Is called to notify listeners the In-Game Menu is opened or closed. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnToggledInGameMenu OnToggledInGameMenu;
 
 	/* ---------------------------------------------------

@@ -23,13 +23,13 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWidgetsInitialized);
 
 	/** Is called to notify that all widgets were initialized and ready. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnWidgetsInitialized OnWidgetsInitialized;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnClose);
 
 	/** Is called to notify listen widgets to be closed. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnClose OnClose;
 
 	/* ---------------------------------------------------

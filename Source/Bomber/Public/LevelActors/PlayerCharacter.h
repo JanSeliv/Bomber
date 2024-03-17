@@ -50,7 +50,7 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerTypeChanged, FPlayerTag, PlayerTag);
 
 	/** Called when chosen player's mesh changed for this pawn. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnPlayerTypeChanged OnPlayerTypeChanged;
 
 	/** ---------------------------------------------------

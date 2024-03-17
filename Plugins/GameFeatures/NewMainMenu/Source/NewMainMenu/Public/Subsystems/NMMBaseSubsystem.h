@@ -33,7 +33,7 @@ public:
 
 	/** Called when the state of New Main Menu game feature was changed.
 	 * Is local and not replicated. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FNMMOnStateChanged OnMainMenuStateChanged;
 
 	/** Applies the new state of New Main Menu game feature.

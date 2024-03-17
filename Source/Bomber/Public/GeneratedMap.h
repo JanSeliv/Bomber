@@ -30,25 +30,25 @@ public:
 
 	/** Called when this Generated Map actor wants to be reconstructed.
 	* Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructGeneratedMap(). */
-	UPROPERTY(BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintAssignable, Transient, Category = "C++")
 	FOnGeneratedMapWantsReconstruct OnGeneratedMapWantsReconstruct;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetNewLevelType, ELevelType, NewLevelType);
 
 	/** Called when new level type is set. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnSetNewLevelType OnSetNewLevelType;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratedLevelActors);
 
 	/** Is useful to react on regenerating level. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnGeneratedLevelActors OnGeneratedLevelActors;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
 
 	/** Called when any player or bot was exploded. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnAnyPlayerDestroyed OnAnyCharacterDestroyed;
 
 	/** Contains outside added dangerous cells, is useful for Game Features to notify bots that some cells are not safe.

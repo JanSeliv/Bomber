@@ -33,13 +33,13 @@ public:
 
 	/** Called when this component wants to be reconstructed on the Generated Map.
 	 * Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructOwnerActor(). */
-	UPROPERTY(BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintAssignable, Transient, Category = "C++")
 	FOnOwnerWantsReconstruct OnOwnerWantsReconstruct;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDeactivatedMapComponent, UMapComponent*, MapComponent, UObject*, DestroyCauser);
 
 	/** Called when this component is destroyed on the Generated Map, is called only on the server. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, BlueprintAuthorityOnly, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, BlueprintAuthorityOnly, Category = "C++")
 	FOnDeactivatedMapComponent OnDeactivatedMapComponent;
 
 #if WITH_EDITORONLY_DATA  // bShouldShowRenders

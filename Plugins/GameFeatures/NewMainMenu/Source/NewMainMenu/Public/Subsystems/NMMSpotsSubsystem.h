@@ -25,7 +25,7 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNMMOnSpotReady, UNMMSpotComponent*, MainMenuSpotComponent);
 
 	/** Called when the spot was spawned on new level and it finished loading its Master Sequence. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FNMMOnSpotReady OnMainMenuSpotReady;
 
 	/** Returns the index of the currently selected Main-Menu spot. */

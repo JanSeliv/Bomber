@@ -32,7 +32,7 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMouseVisibilityChanged, bool, bIsShown);
 
 	/** Called when mouse became shown or hidden. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnMouseVisibilityChanged OnMouseVisibilityChanged;
 
 	/*********************************************************************************************

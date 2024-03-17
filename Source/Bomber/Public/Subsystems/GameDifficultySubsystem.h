@@ -45,7 +45,7 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameDifficultyChanged, int32, NewDifficultyLevel);
 
 	/** Called when new difficulty level is set. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnGameDifficultyChanged OnGameDifficultyChanged;
 
 	/** Returns current difficulty as enum type, e.g: EGameDifficulty::Easy */
