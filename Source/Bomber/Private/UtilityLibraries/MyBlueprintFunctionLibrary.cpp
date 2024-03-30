@@ -112,7 +112,7 @@ USettingsWidget* UMyBlueprintFunctionLibrary::GetSettingsWidget(const UObject* O
 // Returns the Camera Component used on level
 UMyCameraComponent* UMyBlueprintFunctionLibrary::GetLevelCamera(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UGeneratedMapSubsystem* Subsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem(OptionalWorldContext);
+	const UGeneratedMapSubsystem* Subsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem();
 	const AGeneratedMap* GeneratedMap = Subsystem ? Subsystem->GetGeneratedMap() : nullptr;
 	return GeneratedMap ? GeneratedMap->GetCameraComponent() : nullptr;
 }

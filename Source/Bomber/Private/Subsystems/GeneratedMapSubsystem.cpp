@@ -20,19 +20,19 @@ UGeneratedMapSubsystem& UGeneratedMapSubsystem::Get()
 }
 
 // Returns the pointer to the Generated Map Subsystem
-UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem(const UObject* WorldContextObject/* = nullptr*/)
+UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem()
 {
-	const UWorld* FoundWorld = UUtilsLibrary::GetPlayWorld(WorldContextObject);
-	return FoundWorld ? FoundWorld->GetSubsystem<UGeneratedMapSubsystem>() : nullptr;
+	return GEngine ? GEngine->GetEngineSubsystem<UGeneratedMapSubsystem>() : nullptr;
 }
 
 // The Generated Map getter, nullptr otherwise
 AGeneratedMap* UGeneratedMapSubsystem::GetGeneratedMap() const
 {
+	AGeneratedMap* GeneratedMap = GeneratedMapInternal.Get();
 #if WITH_EDITOR
-	ensureMsgf(FEditorUtilsLibrary::IsCooking() || GeneratedMapInternal, TEXT("%s: [Editor] 'GeneratedMapInternal' is not valid"), *FString(__FUNCTION__));
+	ensureMsgf(FEditorUtilsLibrary::IsCooking() || GeneratedMap, TEXT("%s: [Editor] 'GeneratedMapInternal' is not valid"), *FString(__FUNCTION__));
 #endif // WITH_EDITOR
-	return GeneratedMapInternal;
+	return GeneratedMap;
 }
 
 // The Generated Map setter
