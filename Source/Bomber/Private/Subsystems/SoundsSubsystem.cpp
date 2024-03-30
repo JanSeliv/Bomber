@@ -243,8 +243,6 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		{
 			OnGameStateChanged(ECurrentGameState::Menu);
 		}
-
-		AGeneratedMap::Get().OnSetNewLevelType.AddUniqueDynamic(this, &ThisClass::OnGameLevelChanged);
 	}
 
 	PlayCurrentBackgroundMusic();
@@ -271,8 +269,3 @@ void USoundsSubsystem::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	PlayCurrentBackgroundMusic();
 }
 
-// Listen game levels to switch main menu background music
-void USoundsSubsystem::OnGameLevelChanged(ELevelType CurrentLevelType)
-{
-	PlayCurrentBackgroundMusic();
-}

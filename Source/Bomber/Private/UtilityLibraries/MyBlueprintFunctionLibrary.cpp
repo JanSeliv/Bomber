@@ -40,8 +40,8 @@ int32 UMyBlueprintFunctionLibrary::GetAlivePlayersNum()
 // Returns the type of the current level
 ELevelType UMyBlueprintFunctionLibrary::GetLevelType()
 {
-	const AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap();
-	return GeneratedMap ? GeneratedMap->GetLevelType() : ELevelType::None;
+	// @TODO JanSeliv W6wYmnHE: remove level type enum and replace related logic
+	return ELevelType::First;
 }
 
 /* ---------------------------------------------------

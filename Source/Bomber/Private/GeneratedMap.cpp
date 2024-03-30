@@ -27,8 +27,6 @@
 //---
 #include "EditorLevelUtils.h"
 #include "EditorUtilityLibrary.h"
-#include "Engine/LevelStreamingAlwaysLoaded.h"
-#include "Engine/LevelStreamingDynamic.h"
 #endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GeneratedMap)
@@ -624,18 +622,6 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 	MapComponent->SetCell(FoundFreeCell);
 }
 
-// Change level by type
-void AGeneratedMap::SetLevelType(ELevelType NewLevelType)
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	LevelTypeInternal = NewLevelType;
-	ApplyLevelType();
-}
-
 // Returns true if specified map component has non-generated owner that is manually dragged to the scene
 bool AGeneratedMap::IsDraggedMapComponent(const UMapComponent* MapComponent) const
 {
@@ -748,9 +734,6 @@ void AGeneratedMap::OnConstructionGeneratedMap(const FTransform& Transform)
 	// Actors generation
 	GenerateLevelActors();
 
-	// Update level stream
-	ApplyLevelType();
-
 	// Update camera position
 	if (CameraComponentInternal)
 	{
@@ -818,7 +801,6 @@ void AGeneratedMap::Destroyed()
 		{
 			// Remove editor bound delegates
 			UMyUnrealEdEngine::GOnAnyDataAssetChanged.RemoveAll(this);
-			FEditorDelegates::OnMapOpened.RemoveAll(this);
 		}
 #endif //WITH_EDITOR [IsEditorNotPieWorld]
 	}
@@ -833,7 +815,6 @@ void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 	DOREPLIFETIME(ThisClass, GridCellsInternal);
 	DOREPLIFETIME(ThisClass, MapComponentsInternal);
-	DOREPLIFETIME(ThisClass, LevelTypeInternal);
 	DOREPLIFETIME(ThisClass, bIsGameRunningInternal);
 }
 
@@ -1097,144 +1078,6 @@ void AGeneratedMap::ScaleDraggedCellsOnGrid(const FCells& OriginalGrid, const FC
 	}
 }
 
-// Updates current level type
-void AGeneratedMap::ApplyLevelType()
-{
-	UWorld* World = GetWorld();
-	TArray<FLevelStreamRow> LevelStreamRows;
-	UGeneratedMapDataAsset::Get().GetLevelStreamRows(LevelStreamRows);
-	if (!LevelStreamRows.Num()
-	    || !World)
-	{
-		return;
-	}
-
-	// Get Level Streaming by Index in LevelStreamingRows, returns if found stream should be visible
-	auto GetLevelStreaming = [&LevelStreamRows, NewLevelType = LevelTypeInternal](const int32& Index, FName& OutLevelName) -> bool
-	{
-		if (!LevelStreamRows.IsValidIndex(Index))
-		{
-			return false;
-		}
-
-		const FLevelStreamRow& LevelStreamRowIt = LevelStreamRows[Index];
-		OutLevelName = *LevelStreamRowIt.Level.GetLongPackageName();
-		return LevelStreamRowIt.LevelType == NewLevelType;
-	};
-
-	// ---- Changing streaming levels in the preview world ----
-
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
-	{
-		if (LevelTypeInternal == ELT::None)
-		{
-			// the level is not selected, choose persistent
-			UEditorLevelUtils::MakeLevelCurrent(World->PersistentLevel, false);
-			return;
-		}
-
-		// Iterate all levels, load all, show selected, hide others
-		UPackage* PersistentLevelPackage = World->PersistentLevel->GetPackage();
-		const bool bIsPersistentLevelDirty = PersistentLevelPackage && PersistentLevelPackage->IsDirty();
-		bool bClearPersistentLevelDirty = false;
-		for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
-		{
-			FName PackageName(NAME_None);
-			const bool bShouldBeVisibleIt = GetLevelStreaming(Index, PackageName);
-			if (PackageName.IsNone())
-			{
-				continue;
-			}
-
-			const TSubclassOf<ULevelStreaming>& StreamingClass = bShouldBeVisibleIt ? ULevelStreamingAlwaysLoaded::StaticClass() : ULevelStreamingDynamic::StaticClass();
-			const ULevelStreaming* LevelStreamingIt = UGameplayStatics::GetStreamingLevel(World, PackageName);
-			if (!LevelStreamingIt) // level is not added to the persistent
-			{
-				LevelStreamingIt = UEditorLevelUtils::AddLevelToWorld(World, *PackageName.ToString(), StreamingClass);
-			}
-
-			// Set visibility
-			ULevel* LoadedLevel = LevelStreamingIt ? LevelStreamingIt->GetLoadedLevel() : nullptr;
-			if (LoadedLevel)
-			{
-				UEditorLevelUtils::SetLevelVisibility(LoadedLevel, bShouldBeVisibleIt, false, ELevelVisibilityDirtyMode::DontModify);
-				if (bShouldBeVisibleIt)
-				{
-					// Make the selected level as current (it will make persistent as dirty)
-					UEditorLevelUtils::MakeLevelCurrent(LoadedLevel, true);
-					bClearPersistentLevelDirty = !bIsPersistentLevelDirty;
-				}
-			}
-		}
-
-		// Reset dirty flag for persistent marked by UEditorLevelUtils if level was not modified before
-		if (bClearPersistentLevelDirty
-		    && PersistentLevelPackage)
-		{
-			PersistentLevelPackage->ClearDirtyFlag();
-		}
-
-		// The editor stream was overridden, no need to continue
-		return;
-	}
-#endif // [IsEditorNotPieWorld]
-
-	// ---- Changing levels during the game ----
-
-	// show the specified level, hide other levels
-	for (int32 Index = 0; Index < LevelStreamRows.Num(); ++Index)
-	{
-		FName PackageName;
-		const bool bShouldBeVisibleIt = GetLevelStreaming(Index, PackageName);
-		if (PackageName.IsNone())
-		{
-			continue;
-		}
-
-		ULevelStreaming* LevelStreaming = UGameplayStatics::GetStreamingLevel(World, PackageName);
-		if (!ensureMsgf(LevelStreaming, TEXT("ASSERT: 'LevelStreaming' is not valid")))
-		{
-			continue;
-		}
-
-		if (!LevelStreaming->IsLevelLoaded())
-		{
-			LevelStreaming->OnLevelLoaded.AddUniqueDynamic(this, &ThisClass::ApplyLevelType);
-
-			FLatentActionInfo LatentInfo;
-			LatentInfo.UUID = Index;
-			constexpr bool bMakeVisibleAfterLoad = false;
-			constexpr bool bShouldBlockOnLoad = false;
-			UGameplayStatics::LoadStreamLevel(World, PackageName, bMakeVisibleAfterLoad, bShouldBlockOnLoad, LatentInfo);
-		}
-		else
-		{
-			LevelStreaming->SetShouldBeVisible(bShouldBeVisibleIt);
-		}
-	}
-
-	if (OnSetNewLevelType.IsBound())
-	{
-		OnSetNewLevelType.Broadcast(LevelTypeInternal);
-	}
-
-	// Once level is loading, prepare him
-	for (UMapComponent* MapComponentIt : MapComponentsInternal)
-	{
-		if (MapComponentIt)
-		{
-			MapComponentIt->ConstructOwnerActor();
-		}
-	}
-}
-
-// Is called on client and server to load new level
-void AGeneratedMap::OnRep_LevelType()
-{
-	ApplyLevelType();
-}
-
 // Is called on client to broadcast On Generated Level Actors delegate
 void AGeneratedMap::OnRep_MapComponents()
 {
@@ -1260,35 +1103,6 @@ void AGeneratedMap::MulticastSetLevelSize_Implementation(const FIntPoint& LevelS
 /* ---------------------------------------------------
  *					Editor development
  * --------------------------------------------------- */
-
-#if WITH_EDITOR	 // [GEditor]PostLoad();
-// Do any object-specific cleanup required immediately after loading an object. This is not called for newly-created objects
-void AGeneratedMap::PostLoad()
-{
-	Super::PostLoad();
-
-	if (!GEditor) // is bound before editor is loaded to update streams
-	{
-		return;
-	}
-
-	// Update streaming level on editor opening
-	TWeakObjectPtr<ThisClass> WeakThis(this);
-	auto UpdateLevelType = [WeakThis](const FString&, bool)
-	{
-		if (AGeneratedMap* GeneratedMap = WeakThis.Get())
-		{
-			FEditorDelegates::OnMapOpened.RemoveAll(GeneratedMap);
-			GeneratedMap->SetLevelType(GeneratedMap->LevelTypeInternal);
-		}
-	};
-
-	if (!FEditorDelegates::OnMapOpened.IsBoundToObject(this))
-	{
-		FEditorDelegates::OnMapOpened.AddWeakLambda(this, UpdateLevelType);
-	}
-}
-#endif	// WITH_EDITOR [GEditor]PostLoad();
 
 // The dragged version of the Add To Grid function to add the dragged actor on the level
 void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)

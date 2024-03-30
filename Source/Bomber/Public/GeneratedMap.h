@@ -33,12 +33,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Transient, Category = "C++")
 	FOnGeneratedMapWantsReconstruct OnGeneratedMapWantsReconstruct;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetNewLevelType, ELevelType, NewLevelType);
-
-	/** Called when new level type is set. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnSetNewLevelType OnSetNewLevelType;
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratedLevelActors);
 
 	/** Is useful to react on regenerating level. */
@@ -77,10 +71,6 @@ public:
 	 * E.g: X:9, Y:7 - set the size of the level to 9 columns (width) and 7 rows (length). */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetLevelSize(const FIntPoint& LevelSize);
-
-	/** Get the current level type. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE ELevelType GetLevelType() const { return LevelTypeInternal; }
 
 	/** Returns the camera component of the level. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -130,13 +120,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetNearestCell(UMapComponent* MapComponent);
 
-	/**
-	* Change level by type. Specified level will be shown, other levels will be hidden.
-	* @param NewLevelType the new level to apply.
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void SetLevelType(ELevelType NewLevelType);
-
 	/** Returns true if specified map component has non-generated owner that is manually dragged to the scene. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsDraggedMapComponent(const UMapComponent* MapComponent) const;
@@ -185,10 +168,6 @@ protected:
 	 * Is set in editor by adding and dragging actors, but can be changed during the game. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
 	TMap<FCell, EActorType> DraggedCellsInternal;
-
-	/** The current level type. Affects on the meshes of each level actor. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = "OnRep_LevelType", Category = "C++", meta = (BlueprintProtected, DisplayName = "Level Type"))
-	ELevelType LevelTypeInternal = ELT::First;
 
 	/** Attached camera component. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Component"))
@@ -295,14 +274,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ScaleDraggedCellsOnGrid(const TSet<FCell>& OriginalGrid, const TSet<FCell>& NewGrid);
 
-	/** Updates current level type. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyLevelType();
-
-	/** Is called on client to load new level. */
-	UFUNCTION()
-	void OnRep_LevelType();
-
 	/** Is called on client to broadcast On Generated Level Actors delegate. */
 	UFUNCTION()
 	void OnRep_MapComponents();
@@ -314,11 +285,6 @@ protected:
 	/* ---------------------------------------------------
 	 *					Editor development
 	 * --------------------------------------------------- */
-
-#if WITH_EDITOR	 // [GEditor]PostLoad();
-	/** Do any object-specific cleanup required immediately after loading an object. This is not called for newly-created objects. */
-	virtual void PostLoad() override;
-#endif	// WITH_EDITOR [GEditor]PostLoad();
 
 	/** The dragged version of the Add To Grid function to add the dragged actor on the level. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DevelopmentOnly))

@@ -142,8 +142,4 @@ protected:
 	/** Listen game states to switch background music. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Listen game levels to switch main menu background music. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
-	void OnGameLevelChanged(ELevelType CurrentLevelType);
 };
