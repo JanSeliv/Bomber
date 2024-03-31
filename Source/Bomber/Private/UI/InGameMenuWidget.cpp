@@ -7,6 +7,7 @@
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
@@ -39,14 +40,7 @@ void UInGameMenuWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	// Listen changing the game states to handle In-Game Menu visibility
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		BindOnGameStateChanged(MyGameState);
-	}
-	else
-	{
-		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
-	}
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Listen to update the End-Game state tex;
 	if (AMyPlayerState* MyPlayerState = MyPC->GetPlayerState<AMyPlayerState>())
@@ -113,20 +107,6 @@ void UInGameMenuWidget::OnEndGameStateChanged(EEndGameState EndGameState)
 	if (EndGameState != EEndGameState::None)
 	{
 		ShowInGameMenu();
-	}
-}
-
-// Is called to start listening game state changes
-void UInGameMenuWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
-{
-	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
-
-	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-
-	// Handle current game state if initialized with delay
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-	{
-		OnGameStateChanged(ECurrentGameState::Menu);
 	}
 }
 

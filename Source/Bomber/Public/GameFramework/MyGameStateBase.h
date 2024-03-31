@@ -18,26 +18,12 @@ class BOMBER_API AMyGameStateBase final : public AGameStateBase
 	GENERATED_BODY()
 
 public:
-	/* ---------------------------------------------------
-	*		Public properties
-	* --------------------------------------------------- */
-
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, ECurrentGameState, CurrentGameState);
-
-	/** Called when the current game state was changed. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnGameStateChanged OnGameStateChanged;
-
-	/* ---------------------------------------------------
-	*		Public functions
-	* --------------------------------------------------- */
-
 	/** Default constructor. */
 	AMyGameStateBase();
 
 	/** Returns the current game state, it will crash if can't be obtained, should be used only when the game is running. */
 	static AMyGameStateBase& Get();
-	
+
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++")
 	void ServerSetGameState(ECurrentGameState NewGameState);

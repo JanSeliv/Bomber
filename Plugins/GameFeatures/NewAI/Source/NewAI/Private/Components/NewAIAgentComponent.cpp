@@ -6,6 +6,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/AIUtilsLibrary.h"
 #include "Subsystems/GameDifficultySubsystem.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "AIController.h"
@@ -40,10 +41,7 @@ void UNewAIAgentComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-	}
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	UGameDifficultySubsystem::Get().OnGameDifficultyChanged.AddDynamic(this, &ThisClass::OnGameDifficultyChanged);
 }

@@ -8,6 +8,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/AudioComponent.h"
@@ -233,17 +234,7 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		CurrentPlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 	}
 
-	// Listen states
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	PlayCurrentBackgroundMusic();
 }

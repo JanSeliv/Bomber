@@ -5,6 +5,7 @@
 #include "GeneratedMap.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "GameFramework/MyPlayerState.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -100,6 +101,7 @@ void AMyGameStateBase::ApplyGameState()
 	}
 
 	// Notify listeners
+	const UGlobalEventsSubsystem::FOnGameStateChanged& OnGameStateChanged = UGlobalEventsSubsystem::Get().OnGameStateChanged;
 	if (OnGameStateChanged.IsBound())
 	{
 		OnGameStateChanged.Broadcast(CurrentGameStateInternal);

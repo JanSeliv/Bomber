@@ -9,6 +9,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -131,17 +132,7 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
-	// Listen states
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
 	SetAI(bMatchStarted);

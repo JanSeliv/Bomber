@@ -14,6 +14,7 @@
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -211,16 +212,7 @@ void APlayerCharacter::BeginPlay()
 	{
 		OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-		{
-			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-
-			// Handle current game state if initialized with delay
-			if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-			{
-				OnGameStateChanged(ECurrentGameState::Menu);
-			}
-		}
+		BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 		// Listen to handle possessing logic
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);

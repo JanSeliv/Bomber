@@ -12,6 +12,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UI/InGameMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
@@ -106,16 +107,7 @@ void AMyPlayerController::BeginPlay()
 	SetUIInputIgnored();
 
 	// Listen to handle input for each game state
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Handle UI inputs
 	if (AMyHUD* HUD = GetHUD<AMyHUD>())

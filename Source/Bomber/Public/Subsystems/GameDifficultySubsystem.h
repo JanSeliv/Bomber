@@ -27,7 +27,7 @@ enum class EGameDifficulty : uint8
 ENUM_CLASS_FLAGS(EGameDifficulty);
 
 /**
- * Contains New AI settings that are tweaked by player in Settings menu during the game.
+ * Contains difficulty settings that are tweaked by player in Settings menu during the game.
  */
 UCLASS(BlueprintType, Blueprintable, Config = "GameUserSettings", DefaultConfig)
 class BOMBER_API UGameDifficultySubsystem : public UEngineSubsystem

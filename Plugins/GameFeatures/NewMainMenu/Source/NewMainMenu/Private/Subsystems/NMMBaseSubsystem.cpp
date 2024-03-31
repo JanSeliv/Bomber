@@ -3,10 +3,9 @@
 #include "Subsystems/NMMBaseSubsystem.h"
 //---
 #include "NMMUtils.h"
-#include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "Subsystems/NMMSpotsSubsystem.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMBaseSubsystem)
@@ -50,7 +49,7 @@ void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnMainMenuSpotReady);
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Clears all transient data contained in this subsystem
@@ -64,21 +63,6 @@ void UNMMBaseSubsystem::Deinitialize()
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
-
-// Is called to start listening game state changes
-void UNMMBaseSubsystem::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
-{
-	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
-
-	// Handle current game state if initialized with delay
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-	{
-		OnGameStateChanged(ECurrentGameState::Menu);
-	}
-
-	// Listen states to handle this widget behavior
-	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-}
 
 // Called when the current game state was changed, handles Main Menu states accordingly
 void UNMMBaseSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
@@ -98,19 +82,5 @@ void UNMMBaseSubsystem::OnGameStateChanged_Implementation(ECurrentGameState Curr
 			break;
 		}
 	default: break;
-	}
-}
-
-// Called once the Main Menu spot is ready
-void UNMMBaseSubsystem::OnMainMenuSpotReady_Implementation(UNMMSpotComponent* MainMenuSpotComponent)
-{
-	// Listen game states
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		BindOnGameStateChanged(MyGameState);
-	}
-	else if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController())
-	{
-		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
 	}
 }

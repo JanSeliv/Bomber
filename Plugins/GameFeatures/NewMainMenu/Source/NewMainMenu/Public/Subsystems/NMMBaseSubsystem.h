@@ -56,7 +56,7 @@ protected:
 	 ********************************************************************************************* */
 public:
 	/** Returns the data asset that contains all the assets and tweaks of New Main Menu game feature.
-	 * @see UNMMSubsystem::NewMainMenuDataAssetInternal. */
+	 * @see UNMMBaseSubsystem::NewMainMenuDataAssetInternal. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const UNMMDataAsset* GetNewMainMenuDataAsset() const;
 
@@ -82,15 +82,7 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
-	/** Is called to start listening game state changes. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
-
 	/** Called when the current game state was changed, handles Main Menu states accordingly. */ 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Called once the Main Menu spot is ready. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnMainMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
 };

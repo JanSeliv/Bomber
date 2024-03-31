@@ -10,6 +10,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Structures/Cell.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -184,17 +185,8 @@ void ABombActor::BeginPlay()
 	{
 		SetLifeSpan();
 	}
-	else if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		// This dragged bomb should start listening in-game state to set lifespan
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel

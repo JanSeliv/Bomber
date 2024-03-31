@@ -4,6 +4,7 @@
 //---
 #include "DataAssets/PlayerInputDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "GameFramework/PlayerController.h"
@@ -128,16 +129,7 @@ void UMouseActivityComponent::BeginPlay()
 	SetMouseFocusOnUI(true);
 
 	// Listen to handle input for each game state
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Called every frame to calculate Delta Time

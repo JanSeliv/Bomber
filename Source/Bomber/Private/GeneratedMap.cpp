@@ -11,6 +11,7 @@
 #include "LevelActors/BombActor.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -771,17 +772,7 @@ void AGeneratedMap::PostInitializeComponents()
 
 	if (HasAuthority())
 	{
-		// Listen states
-		if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-		{
-			MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-
-			// Handle current game state if initialized with delay
-			if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-			{
-				OnGameStateChanged(ECurrentGameState::Menu);
-			}
-		}
+		BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 	}
 }
 

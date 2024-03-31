@@ -6,6 +6,9 @@
 //---
 #include "InGameMenuWidget.generated.h"
 
+enum class ECurrentGameState : uint8;
+enum class EEndGameState : uint8;
+
 /**
  * Allows player to interact with UI during the match.
  * Is shown automatically on ending the game.
@@ -73,10 +76,6 @@ protected:
 	/** Called when the end-game state was changed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnEndGameStateChanged(EEndGameState EndGameState);
-
-	/** Is called to start listening game state changes. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
 
 	/** Is called to start listening End-Game state changes. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

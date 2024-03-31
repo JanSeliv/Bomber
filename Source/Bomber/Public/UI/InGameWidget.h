@@ -55,8 +55,4 @@ protected:
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Is called to start listening game state changes. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
 };
