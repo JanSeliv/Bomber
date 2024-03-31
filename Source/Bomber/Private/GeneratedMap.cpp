@@ -42,6 +42,9 @@ AGeneratedMap::AGeneratedMap()
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
+	// Make this gameplay actor always loaded
+	bIsSpatiallyLoaded = false;
+
 	// Replicate an actor
 	bReplicates = true;
 	NetUpdateFrequency = 10.f;

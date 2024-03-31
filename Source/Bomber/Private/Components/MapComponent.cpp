@@ -282,6 +282,9 @@ void UMapComponent::OnRegister()
 	Owner->SetActorTickInterval(UGameStateDataAsset::Get().GetTickInterval());
 	Owner->SetActorTickEnabled(false);
 
+	// Make this gameplay actor always loaded
+	Owner->SetIsSpatiallyLoaded(false);
+
 	// Set the movable mobility for in-game attaching
 	if (Owner->GetRootComponent())
 	{
