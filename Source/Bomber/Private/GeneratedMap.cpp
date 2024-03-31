@@ -43,8 +43,10 @@ AGeneratedMap::AGeneratedMap()
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
+#if WITH_EDITORONLY_DATA
 	// Make this gameplay actor always loaded
 	bIsSpatiallyLoaded = false;
+#endif
 
 	// Replicate an actor
 	bReplicates = true;

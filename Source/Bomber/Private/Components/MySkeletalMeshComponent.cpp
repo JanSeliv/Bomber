@@ -32,8 +32,10 @@ AMySkeletalMeshActor::AMySkeletalMeshActor(const FObjectInitializer& ObjectIniti
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
+#if WITH_EDITORONLY_DATA
 	// Make this preview actor always loaded
 	bIsSpatiallyLoaded = false;
+#endif
 
 	// Since it's preview mesh, make sure it is always visible even with close camera
 	UMySkeletalMeshComponent& Mesh = GetMeshChecked();
