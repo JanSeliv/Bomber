@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
 #include "NewMainMenuModule.h"
-
-#define LOCTEXT_NAMESPACE "FNewMainMenuModule"
+//---
+#include "Modules/ModuleManager.h"
 
 void FNewMainMenuModule::StartupModule()
 {
@@ -15,7 +15,5 @@ void FNewMainMenuModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.
 	// For modules that support dynamic reloading, we call this function before unloading the module.
 }
-
-#undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE(FNewMainMenuModule, NewMainMenu)

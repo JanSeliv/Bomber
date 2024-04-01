@@ -37,7 +37,8 @@ public:
 
 	/** Returns all sections of specified class from the Master sequence in sorted order (from the beginning to the end).
 	 * @param MasterSequence The sequence to get sections from.
-	 * @param SectionClass The class of sections. */
+	 * @param SectionClass The class of sections.
+	 * @param OutSections The array to fill with found sections. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static void GetAllSectionsByClass(const UMovieSceneSequence* MasterSequence, TSubclassOf<UMovieSceneSection> SectionClass, TArray<UMovieSceneSection*>& OutSections);
 

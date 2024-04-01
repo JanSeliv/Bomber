@@ -233,7 +233,7 @@ void UMySkeletalMeshComponent::AttachProps()
 	for (const FAttachedMesh& AttachedMeshIt : PlayerProps)
 	{
 		UMeshComponent* MeshComponent = nullptr;
-		if (const auto SkeletalMeshProp = Cast<USkeletalMesh>(AttachedMeshIt.AttachedMesh))
+		if (USkeletalMesh* SkeletalMeshProp = Cast<USkeletalMesh>(AttachedMeshIt.AttachedMesh))
 		{
 			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this, NAME_None, RF_Transient);
 			SkeletalComponent->SetSkeletalMesh(SkeletalMeshProp);
@@ -244,7 +244,7 @@ void UMySkeletalMeshComponent::AttachProps()
 			}
 			MeshComponent = SkeletalComponent;
 		}
-		else if (const auto StaticMeshProp = Cast<UStaticMesh>(AttachedMeshIt.AttachedMesh))
+		else if (UStaticMesh* StaticMeshProp = Cast<UStaticMesh>(AttachedMeshIt.AttachedMesh))
 		{
 			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this, NAME_None, RF_Transient);
 			StaticMeshComponent->SetStaticMesh(StaticMeshProp);
@@ -298,12 +298,12 @@ bool UMySkeletalMeshComponent::ArePropsWantToUpdate() const
 	{
 		const bool bContains = AttachedMeshesInternal.ContainsByPredicate([&AttachedMeshIt](const UMeshComponent* MeshCompIt)
 		{
-			UMeshComponent* MeshComponent = nullptr;
 			if (const auto SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshCompIt))
 			{
 				return SkeletalMeshComp->GetSkinnedAsset() == AttachedMeshIt.AttachedMesh;
 			}
-			else if (const auto StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
+
+			if (const auto StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
 			{
 				return StaticMeshComp->GetStaticMesh() == AttachedMeshIt.AttachedMesh;
 			}

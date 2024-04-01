@@ -12,7 +12,7 @@ BOMBEREDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogBomberEditor, Log, All);
 class BOMBEREDITOR_API FBomberEditorModule final : public IModuleInterface
 {
 public:
-	/** Is used to to load and unload the Property Editor Module. */
+	/** Is used to load and unload the Property Editor Module. */
 	inline static const FName PropertyEditorModule = TEXT("PropertyEditor");
 
 	/**

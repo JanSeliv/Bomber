@@ -18,7 +18,7 @@ struct BOMBER_API FAttachedMesh
 
 	/** The attached static mesh or skeletal mesh.  */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn))
-	TObjectPtr<const class UStreamableRenderAsset> AttachedMesh = nullptr;
+	TObjectPtr<UStreamableRenderAsset> AttachedMesh = nullptr;
 
 	/** In the which socket should attach this prop. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))

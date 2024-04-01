@@ -470,6 +470,7 @@ bool UCellsUtilsLibrary::CanDisplayCellsForActorTypes(int32 ActorTypesBitmask)
 {
 #if !UE_BUILD_SHIPPING
 	return (ActorTypesBitmask & AGeneratedMap::Get().DisplayCellsActorTypes) != 0;
-#endif // !UE_BUILD_SHIPPING
-	return false;
+#else
+	return INDEX_NONE;
+#endif
 }

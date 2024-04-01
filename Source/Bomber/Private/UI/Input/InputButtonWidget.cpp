@@ -9,7 +9,6 @@
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 //---
-#include "PlayerMappableKeySettings.h"
 #include "Components/InputKeySelector.h"
 #include "Components/TextBlock.h"
 //---

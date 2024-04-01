@@ -9,7 +9,7 @@ const FPropertyData FPropertyData::Empty = FPropertyData();
 
 // Custom constructor, is not required, but fully init property data.
 FPropertyData::FPropertyData(TSharedRef<IPropertyHandle> InPropertyHandle)
-	: PropertyHandle(InPropertyHandle)
+	: PropertyHandle(MoveTemp(InPropertyHandle))
 {
 	PropertyName = GetPropertyNameFromHandle();
 	PropertyValue = GetPropertyValueFromHandle();

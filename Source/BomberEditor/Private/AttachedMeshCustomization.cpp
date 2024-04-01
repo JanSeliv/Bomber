@@ -113,7 +113,7 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 				PropertyCustomizationHelpers::MakeBrowseButton(
 					FSimpleDelegate::CreateSP(this, &ThisClass::OnBrowseSocket),
 					FText::FromString(TEXT("Select a different Parent Socket - cannot change socket on inherited components")),
-					TAttribute<bool>(true)
+					TAttribute(true)
 					)
 			]
 			+ SHorizontalBox::Slot()
@@ -125,7 +125,7 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 				PropertyCustomizationHelpers::MakeClearButton(
 					FSimpleDelegate::CreateSP(this, &ThisClass::InvalidateCustomProperty),
 					FText::FromString(TEXT("Clear the Parent Socket - cannot change socket on inherited components")),
-					TAttribute<bool>(true)
+					TAttribute(true)
 					)
 			]
 		];

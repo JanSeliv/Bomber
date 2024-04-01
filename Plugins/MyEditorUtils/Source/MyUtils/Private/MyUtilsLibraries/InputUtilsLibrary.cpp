@@ -102,7 +102,9 @@ void UInputUtilsLibrary::GetAllActionsInContext(const UObject* WorldContext, con
 	const TArray<FEnhancedActionKeyMapping>& AllMappings = InInputContext->GetMappings();
 	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
 	{
-		UInputAction* MyInputAction = Cast<UInputAction>(MappingIt.Action);
+		// const_cast to get rid of constness:
+		// it's required since 'Action' is init as const, however UE reflection doesn't support array as argument\return value that has const type
+		UInputAction* MyInputAction = MappingIt.Action ? const_cast<UInputAction*>(MappingIt.Action.Get()) : nullptr;
 		if (!MyInputAction
 			|| OutInputActions.Contains(MyInputAction))
 		{

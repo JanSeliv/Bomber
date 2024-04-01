@@ -109,7 +109,8 @@ public:
 
 	/** Destroys level actor by specified handle.
 	 * Handle version allows to destroy actor even if it is not spawned yet, but in processing queue.
-	 * @param Handle Unique ID from the Pool Manager to identify the level actor to destroy.*/
+	 * @param Handle Unique ID from the Pool Manager to identify the level actor to destroy.
+	 * @param DestroyCauser The actor that caused the destruction of the level actor. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
 	void DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, UObject* DestroyCauser = nullptr);
 

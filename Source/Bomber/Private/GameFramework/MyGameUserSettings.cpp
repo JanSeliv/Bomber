@@ -6,7 +6,6 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "DynamicRHI.h"
-#include "Engine/DataTable.h"
 #include "Misc/ConfigCacheIni.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameUserSettings)

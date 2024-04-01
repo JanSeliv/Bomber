@@ -3,11 +3,13 @@
 #pragma once
 
 #include "Modules/ModuleInterface.h"
+//---
+#include "UObject/NameTypes.h"
 
 class MYEDITORUTILS_API FMyEditorUtilsModule final : public IModuleInterface
 {
 public:
-	/** Is used to to load and unload the Property Editor Module. */
+	/** Is used to load and unload the Property Editor Module. */
 	inline static const FName PropertyEditorModule = TEXT("PropertyEditor");
 
 	/** Are used to register and unregister custom widget blueprint. */

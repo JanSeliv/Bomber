@@ -6,6 +6,8 @@
 //---
 #include "BoxActor.generated.h"
 
+enum class ECurrentGameState : uint8;
+
 /**
  * Boxes on destruction with some chances spawns an item.
  * @see Access its data with UBoxDataAsset (Content/Bomber/DataAssets/DA_Box).

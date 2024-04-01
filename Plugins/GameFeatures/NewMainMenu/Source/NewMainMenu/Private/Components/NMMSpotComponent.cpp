@@ -86,7 +86,7 @@ void UNMMSpotComponent::SetCinematicByState(ENMMState MainMenuState)
 	// --- Set the playback settings
 	const FMovieSceneSequencePlaybackSettings& PlaybackSettings = UNMMUtils::GetCinematicSettings(MainMenuState);
 	MasterPlayerInternal->SetPlaybackSettings(PlaybackSettings);
-	if (PlaybackSettings.bRestoreState)
+	if (PlaybackSettings.FinishCompletionStateOverride == EMovieSceneCompletionModeOverride::ForceRestoreState)
 	{
 		// Reset all 'Keep States' tracks to default
 		MasterPlayerInternal->RestorePreAnimatedState();

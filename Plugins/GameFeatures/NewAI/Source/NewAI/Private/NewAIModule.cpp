@@ -1,6 +1,8 @@
 // Copyright (c) Yevhenii Selivanov.
 
 #include "NewAIModule.h"
+//---
+#include "Modules/ModuleManager.h"
 
 void FNewAIModule::StartupModule()
 {

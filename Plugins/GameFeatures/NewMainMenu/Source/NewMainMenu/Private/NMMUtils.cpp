@@ -137,7 +137,8 @@ namespace NMMPlaybackSettings
 		Settings.LoopCount.Value = MainMenuState == ENMMState::Idle ? INDEX_NONE : 0; // Loop infinitely if idle, otherwise play once
 		Settings.bPauseAtEnd = true; // Pause at the end, so gameplay camera can blend-out from correct position
 		Settings.bDisableCameraCuts = true; // Let the Spot to control the camera possessing instead of auto-possessed one that prevents blend-out while active
-		Settings.bRestoreState = MainMenuState != ENMMState::Cinematic; // Reset all 'Keep States' tracks when entered to None or Idle states
+		const bool bRestoreState = MainMenuState != ENMMState::Cinematic; // Reset all 'Keep States' tracks when entered to None or Idle states
+		Settings.FinishCompletionStateOverride = bRestoreState ? EMovieSceneCompletionModeOverride::ForceRestoreState : EMovieSceneCompletionModeOverride::None;
 		return Settings;
 	}
 

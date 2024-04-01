@@ -16,7 +16,7 @@ enum class EEndGameState : uint8;
  * Is used to manage the game sounds.
  * @see Access its data with USoundsDataAsset (Content/Bomber/DataAssets/DA_Sounds).
  */
-UCLASS(Config = "GameUserSettings", Blueprintable, BlueprintType)
+UCLASS(Config = "GameUserSettings", DefaultConfig, Blueprintable, BlueprintType)
 class BOMBER_API USoundsSubsystem final : public UWorldSubsystem
 {
 	GENERATED_BODY()
@@ -35,7 +35,7 @@ public:
 
 	/** Returns true if sounds can be played. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	virtual bool CanPlaySounds() const;
+	bool CanPlaySounds() const;
 
 	/** The component that is used to store reference for EndGameCountdown SFX. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))

@@ -10,6 +10,7 @@
 #include "PlayerCharacter.generated.h"
 
 enum class ELevelType : uint8;
+enum class ECurrentGameState : uint8;
 
 /**
  * Numbers of power-ups that affect the abilities of a player during gameplay.

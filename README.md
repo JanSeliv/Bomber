@@ -67,6 +67,8 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 
 ## 📅 Changelog
 #### 
+- Updated to **Unreal Engine 5.4**.
+- Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
 - Added cinematic for Roger character on the Maya level.
 #### `13.01.2024`
 - Updated to **Unreal Engine 5.3**.
