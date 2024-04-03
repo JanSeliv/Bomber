@@ -11,6 +11,7 @@
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -91,6 +92,9 @@ void UNMMSpotComponent::SetCinematicByState(ENMMState MainMenuState)
 		// Reset all 'Keep States' tracks to default
 		MasterPlayerInternal->RestorePreAnimatedState();
 		MasterPlayerInternal->PreAnimatedState.EnableGlobalPreAnimatedStateCapture();
+
+		// RestorePreAnimatedState additionally resets the camera to default engine one, so we need to possess it again
+		UNMMCameraSubsystem::Get().PossessCamera(MainMenuState);
 	}
 
 	// --- Set the playback position
@@ -249,6 +253,12 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	CameraSettings.bOverrideAspectRatioAxisConstraint = true;
 	CameraSettings.AspectRatioAxisConstraint = UUtilsLibrary::GetViewportAspectRatioAxisConstraint();
 	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
+
+	if (IsActiveSpot())
+	{
+		// This is active spot has created master sequence, start playing to let Engine preload tracks
+		MasterPlayerInternal->Play();
+	}
 
 	// Notify that the spot is ready and finished loading
 	UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.Broadcast(this);
