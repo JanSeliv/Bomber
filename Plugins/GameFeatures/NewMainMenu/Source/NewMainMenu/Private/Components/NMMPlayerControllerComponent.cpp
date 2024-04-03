@@ -102,8 +102,16 @@ void UNMMPlayerControllerComponent::BeginPlay()
 	// Add Menu context as auto managed by Game State, so it will be enabled everytime the game is in the Menu state
 	GetPlayerControllerChecked().SetupInputContexts({UNMMDataAsset::Get().GetInputContext(ENMMState::Idle)});
 
-	// Listen to set Menu game state once first spot is ready
-	UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnMainMenuSpotReady);
+	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	if (SpotsSubsystem.IsAnyMainMenuSpotReady())
+	{
+		GetPlayerControllerChecked().SetMenuState();
+	}
+	else
+	{
+		// Listen to set Menu game state once first spot is ready
+		UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnMainMenuSpotReady);
+	}
 
 	// Disable auto camera possess by default, so it can be controlled by the spot
 	UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
@@ -171,6 +179,8 @@ void UNMMPlayerControllerComponent::OnMainMenuSpotReady_Implementation(UNMMSpotC
 	if (MainMenuSpotComponent->IsActiveSpot())
 	{
 		GetPlayerControllerChecked().SetMenuState();
+
+		UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.RemoveAll(this);
 	}
 }
 
