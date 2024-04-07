@@ -21,6 +21,7 @@ public class Bomber : ModuleRules
                 , "FunctionPicker" // Created properties in UMyInputAction
                 , "MetaCheatManager" // Created UMyCheatManager
                 , "PoolManager" // Created property in FMapComponentSpec
+                , "MyUtils" // Inherited from Base classes
 		    }
 		);
 
@@ -33,8 +34,8 @@ public class Bomber : ModuleRules
 				, "Niagara" // VFX
 				, "GameplayTags" // FGameplayTag
                 , "GameFeatures", "ModularGameplay" // Modular Game Features
+                , "ModelViewViewModel" // MVVM UI pattern
 				//My modules
-				, "MyUtils" // UUtilsLibrary
 				, "SettingsWidgetConstructor" // Generates settings
 			}
 		);

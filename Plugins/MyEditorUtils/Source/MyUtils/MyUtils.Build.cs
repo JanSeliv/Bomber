@@ -13,6 +13,7 @@ public class MyUtils : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core"
+				, "ModelViewViewModel" // Created MVVM base classes
 			}
 		);
 

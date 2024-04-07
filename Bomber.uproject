@@ -55,6 +55,10 @@
 		{
 			"Name": "CineCameraRigs",
 			"Enabled": true
+		},
+		{
+			"Name": "ModelViewViewModel",
+			"Enabled": true
 		}
 	]
 }
