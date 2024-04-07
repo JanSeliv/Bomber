@@ -314,8 +314,6 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 {
 	Super::SetActorHiddenInGame(bNewHidden);
 
-	ResetPowerups();
-
 	if (UMySkeletalMeshComponent* MySkeletalMeshComponent = GetMySkeletalMeshComponent())
 	{
 		const ECollisionEnabled::Type NewType = bNewHidden ? ECollisionEnabled::NoCollision : ECollisionEnabled::PhysicsOnly;
@@ -329,15 +327,15 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		ConstructPlayerCharacter();
 
 		TryPossessController();
-
-		return;
 	}
-
-	// Is removed from Generated Map
-	if (Controller)
+	else if (Controller)
 	{
+		// Is removed from Generated Map
+
 		Controller->UnPossess();
 	}
+
+	ResetPowerups();
 }
 
 // Called when this Pawn is possessed. Only called on the server (or in standalone)
@@ -454,7 +452,13 @@ void APlayerCharacter::ApplyPowerups()
 		MovementComponent->MaxWalkSpeed = SkateN;
 	}
 
-	// Apply others
+	// Apply others types of powerups
+
+	// Notify listeners
+	if (OnPowerUpsChanged.IsBound())
+	{
+		OnPowerUpsChanged.Broadcast(PowerupsInternal);
+	}
 }
 
 // Reset all picked up powerups

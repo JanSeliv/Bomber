@@ -35,6 +35,30 @@ UUserWidget* FWidgetUtilsLibrary::GetParentWidgetOfClass(const UUserWidget* InWi
 	return FoundWidget;
 }
 
+// Returns first child widget found by specified class iterating all widget objects
+UUserWidget* FWidgetUtilsLibrary::GetChildWidgetOfClass(const UUserWidget* ParentWidget, TSubclassOf<UUserWidget> ChildWidgetClass)
+{
+	if (!ParentWidget)
+	{
+		return nullptr;
+	}
+
+	TArray<UWidget*> ChildWidgets;
+	ParentWidget->WidgetTree->GetAllWidgets(ChildWidgets);
+
+	// Iterate through all child widgets to find the one of the specified class
+	for (UWidget* Widget : ChildWidgets)
+	{
+		UUserWidget* UserWidget = Cast<UUserWidget>(Widget);
+		if (UserWidget && UserWidget->IsA(ChildWidgetClass))
+		{
+			return UserWidget;
+		}
+	}
+
+	return nullptr;
+}
+
 // Returns first widget by specified class iterating all widget objects
 UUserWidget* FWidgetUtilsLibrary::FindWidgetOfClass(UObject* WorldContextObject, TSubclassOf<UUserWidget> ParentWidgetClass)
 {

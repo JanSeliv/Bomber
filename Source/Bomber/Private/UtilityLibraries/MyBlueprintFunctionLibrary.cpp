@@ -16,9 +16,9 @@
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "UI/InGameMenuWidget.h"
-#include "UI/InGameWidget.h"
 #include "UI/MyHUD.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
@@ -42,6 +42,13 @@ ELevelType UMyBlueprintFunctionLibrary::GetLevelType()
 {
 	// @TODO JanSeliv W6wYmnHE: remove level type enum and replace related logic
 	return ELevelType::First;
+}
+
+// Is used a lot by the UI View Models as 'Conversion Function' to show or hide own widget
+ESlateVisibility UMyBlueprintFunctionLibrary::GetVisibilityByGameState(const ECurrentGameState& GameStateProperty, int32 GameStates)
+{
+	const bool bMatching = EnumHasAnyFlags(GameStateProperty, TO_ENUM(ECurrentGameState, GameStates));
+	return bMatching ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
 }
 
 /* ---------------------------------------------------
@@ -125,7 +132,7 @@ AMyHUD* UMyBlueprintFunctionLibrary::GetMyHUD(const UObject* OptionalWorldContex
 }
 
 // Returns the In-Game widget
-UInGameWidget* UMyBlueprintFunctionLibrary::GetInGameWidget(const UObject* OptionalWorldContext/* = nullptr*/)
+UUserWidget* UMyBlueprintFunctionLibrary::GetInGameWidget(const UObject* OptionalWorldContext/* = nullptr*/)
 {
 	const AMyHUD* MyHUD = GetMyHUD(OptionalWorldContext);
 	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
@@ -134,8 +141,8 @@ UInGameWidget* UMyBlueprintFunctionLibrary::GetInGameWidget(const UObject* Optio
 // Returns the In-Game Menu widget
 UInGameMenuWidget* UMyBlueprintFunctionLibrary::GetInGameMenuWidget(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UInGameWidget* InGameWidget = GetInGameWidget(OptionalWorldContext);
-	return InGameWidget ? InGameWidget->GetInGameMenuWidget() : nullptr;
+	const UUserWidget* InGameWidget = GetInGameWidget(OptionalWorldContext);
+	return InGameWidget ? FWidgetUtilsLibrary::GetChildWidgetOfClass<UInGameMenuWidget>(InGameWidget) : nullptr;
 }
 
 // Returns specified player character, by default returns local player

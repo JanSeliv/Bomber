@@ -11,6 +11,7 @@
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UI/InGameMenuWidget.h"
@@ -140,6 +141,12 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 	// Try to rebind inputs for possessed pawn on server
 	constexpr bool bInvertRest = true;
 	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
+
+	// Notify client about pawn change
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InPawn))
+	{
+		UGlobalEventsSubsystem::Get().OnLocalPlayerReady.Broadcast(PlayerCharacter);
+	}
 }
 
 // Is overriden to notify the client when this controller possesses new player character
@@ -147,12 +154,15 @@ void AMyPlayerController::OnRep_Pawn()
 {
 	Super::OnRep_Pawn();
 
-	// Notify client about pawn change
-	GetOnNewPawnNotifier().Broadcast(GetPawn());
-
 	// Try to rebind inputs for possessed pawn on client
 	constexpr bool bInvertRest = true;
 	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
+
+	// Notify client about pawn change
+	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
+	{
+		UGlobalEventsSubsystem::Get().OnLocalPlayerReady.Broadcast(PlayerCharacter);
+	}
 }
 
 // Is overriden to notify the client when is set new player state

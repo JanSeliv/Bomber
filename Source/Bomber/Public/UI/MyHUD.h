@@ -45,7 +45,7 @@ public:
 
 	/** Returns the current in-game widget object. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class UInGameWidget* GetInGameWidget() const { return InGameWidgetInternal; }
+	FORCEINLINE class UUserWidget* GetInGameWidget() const { return InGameWidgetInternal; }
 
 	/** Returns the current settings widget object. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -89,7 +89,7 @@ protected:
 
 	/** The current in-game widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
-	TObjectPtr<class UInGameWidget> InGameWidgetInternal = nullptr;
+	TObjectPtr<class UUserWidget> InGameWidgetInternal = nullptr;
 
 	/** The current settings widget object. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))

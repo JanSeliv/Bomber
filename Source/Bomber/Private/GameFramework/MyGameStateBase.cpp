@@ -33,7 +33,7 @@ AMyGameStateBase& AMyGameStateBase::Get()
 
 /*********************************************************************************************
  * Current Game State enum
- * Can be tracked both on host and client by listening UMadGlobalEvents::Get().OnGameStateChanged
+ * Can be tracked both on host and client by listening UGlobalEventsSubsystem::Get().OnGameStateChanged
  ********************************************************************************************* */
 
 // Returns the AMyGameState::CurrentGameState property.
@@ -128,6 +128,28 @@ void AMyGameStateBase::OnAnyCharacterDestroyed()
  * 3-2-1-GO
  ********************************************************************************************* */
 
+// Sets the left second of the 'Three-two-one-GO' timer
+void AMyGameStateBase::SetStartingTimerSecondsRemain(float NewStartingTimerSecRemain)
+{
+	StartingTimerSecRemainInternal = NewStartingTimerSecRemain;
+	ApplyStartingTimerSecondsRemain();
+}
+
+// Is called on client when the 'Three-two-one-GO' timer was updated
+void AMyGameStateBase::OnRep_StartingTimerSecRemain()
+{
+	ApplyStartingTimerSecondsRemain();
+}
+
+// Updates current starting timer seconds remain
+void AMyGameStateBase::ApplyStartingTimerSecondsRemain()
+{
+	if (OnStartingTimerSecRemainChanged.IsBound())
+	{
+		OnStartingTimerSecRemainChanged.Broadcast(StartingTimerSecRemainInternal);
+	}
+}
+
 // Is called during the Game Starting state to handle the 'Three-two-one-GO' timer
 void AMyGameStateBase::DecrementStartingCountdown()
 {
@@ -136,7 +158,8 @@ void AMyGameStateBase::DecrementStartingCountdown()
 		return;
 	}
 
-	StartingTimerSecRemainInternal -= UGameStateDataAsset::Get().GetTickInterval();
+	const float NewValue = StartingTimerSecRemainInternal - UGameStateDataAsset::Get().GetTickInterval();
+	SetStartingTimerSecondsRemain(NewValue);
 
 	if (IsStartingTimerElapsed())
 	{
@@ -149,6 +172,28 @@ void AMyGameStateBase::DecrementStartingCountdown()
  * Runs during the match (120...0)
  ********************************************************************************************* */
 
+// Sets the left second to the end of the match
+void AMyGameStateBase::SetInGameTimerSecondsRemain(float NewInGameTimerSecRemain)
+{
+	InGameTimerSecRemainInternal = NewInGameTimerSecRemain;
+	ApplyInGameTimerSecondsRemain();
+}
+
+// Is called on client when in-match timer was updated
+void AMyGameStateBase::OnRep_InGameTimerSecRemain()
+{
+	ApplyInGameTimerSecondsRemain();
+}
+
+// Updates current in-match timer seconds remain
+void AMyGameStateBase::ApplyInGameTimerSecondsRemain()
+{
+	if (OnInGameTimerSecRemainChanged.IsBound())
+	{
+		OnInGameTimerSecRemainChanged.Broadcast(InGameTimerSecRemainInternal);
+	}
+}
+
 // Is called during the In-Game state to handle time consuming for the current match
 void AMyGameStateBase::DecrementInGameCountdown()
 {
@@ -158,7 +203,8 @@ void AMyGameStateBase::DecrementInGameCountdown()
 		return;
 	}
 
-	InGameTimerSecRemainInternal -= UGameStateDataAsset::Get().GetTickInterval();
+	const float NewValue = InGameTimerSecRemainInternal - UGameStateDataAsset::Get().GetTickInterval();
+	SetInGameTimerSecondsRemain(NewValue);
 
 	if (IsInGameTimerElapsed())
 	{
@@ -186,8 +232,8 @@ void AMyGameStateBase::TriggerCountdowns()
 		return;
 	}
 
-	StartingTimerSecRemainInternal = UGameStateDataAsset::Get().GetStartingCountdown();
-	InGameTimerSecRemainInternal = UGameStateDataAsset::Get().GetInGameCountdown();
+	SetStartingTimerSecondsRemain(UGameStateDataAsset::Get().GetStartingCountdown());
+	SetInGameTimerSecondsRemain(UGameStateDataAsset::Get().GetInGameCountdown());
 
 	constexpr bool bInLoop = true;
 	const float InRate = UGameStateDataAsset::Get().GetTickInterval();

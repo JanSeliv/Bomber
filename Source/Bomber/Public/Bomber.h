@@ -126,6 +126,7 @@ using EIT = EItemType;
 
 /**
  * The replicated states of the game. It shares the state between all the players at the same time.
+ * Can be tracked by listening UGlobalEventsSubsystem::Get().OnGameStateChanged
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ECurrentGameState : uint8

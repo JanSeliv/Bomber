@@ -16,7 +16,7 @@ enum class ECurrentGameState : uint8;
  * Numbers of power-ups that affect the abilities of a player during gameplay.
  * @todo JanSeliv UGi56jhn Use GAS attributes for picked up items
  */
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, DisplayName = "Power-Ups")
 struct BOMBER_API FPowerUp
 {
 	GENERATED_BODY()
@@ -53,6 +53,12 @@ public:
 	/** Called when chosen player's mesh changed for this pawn. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnPlayerTypeChanged OnPlayerTypeChanged;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPowerUpsChanged, const struct FPowerUp&, AllPowerUps);
+
+	/** Called when this character picked up any power-up or they were reset. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnPowerUpsChanged OnPowerUpsChanged;
 
 	/** ---------------------------------------------------
 	 *		Public functions

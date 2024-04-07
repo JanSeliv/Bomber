@@ -23,7 +23,7 @@ public:
 	/** Returns a class of the in-game widget.
 	 * @see UUIDataAsset::InGameWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UInGameWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
+	FORCEINLINE TSubclassOf<class UUserWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
 
 	/** Returns a class of the settings widget.
 	 * @see UUIDataAsset::SettingsWidgetClassInternal.*/
@@ -48,7 +48,7 @@ public:
 protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal = nullptr;
+	TSubclassOf<class UUserWidget> InGameWidgetClassInternal = nullptr;
 
 	/** The class of a Settings Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))

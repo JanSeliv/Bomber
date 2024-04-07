@@ -18,6 +18,11 @@ public:
 	static FORCEINLINE T* GetParentWidgetOfClass(const UUserWidget* ChildWidget) { return Cast<T>(GetParentWidgetOfClass(ChildWidget, T::StaticClass())); }
 	static UUserWidget* GetParentWidgetOfClass(const UUserWidget* InWidget, TSubclassOf<UUserWidget> ParentWidgetClass);
 
+	/** Returns first child widget found by specified class iterating all widget objects. */
+	template <typename T>
+	static FORCEINLINE T* GetChildWidgetOfClass(const UUserWidget* ParentWidget) { return Cast<T>(GetChildWidgetOfClass(ParentWidget, T::StaticClass())); }
+	static UUserWidget* GetChildWidgetOfClass(const UUserWidget* ParentWidget, TSubclassOf<UUserWidget> ChildWidgetClass);
+
 	/** Returns first widget found by specified class iterating all widget objects. */
 	template <typename T>
 	static FORCEINLINE T* FindWidgetOfClass(UObject* WorldContextObject) { return Cast<T>(FindWidgetOfClass(WorldContextObject, T::StaticClass())); }

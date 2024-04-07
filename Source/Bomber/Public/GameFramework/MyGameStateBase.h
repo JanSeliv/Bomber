@@ -26,7 +26,7 @@ public:
 
 	/*********************************************************************************************
 	 * Current Game State enum
-	 * Can be tracked both on host and client by listening UMadGlobalEvents::Get().OnGameStateChanged
+	 * Can be tracked both on host and client by listening UGlobalEventsSubsystem::Get().OnGameStateChanged
 	 ********************************************************************************************* */
 public:
 	/** Set the new game state for the current game.*/
@@ -77,6 +77,12 @@ protected:
 	 * 3-2-1-GO
 	 ********************************************************************************************* */
 public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStartingTimerSecRemainChanged, float, NewStartingTimerSecRemain);
+
+	/** Called when the 'Three-two-one-GO' timer was updated. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnStartingTimerSecRemainChanged OnStartingTimerSecRemainChanged;
+
 	/** Returns the left second of the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE float GetStartingTimerSecondsRemain() const { return StartingTimerSecRemainInternal; }
@@ -85,10 +91,22 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsStartingTimerElapsed() const { return FMath::IsNearlyZero(StartingTimerSecRemainInternal) || StartingTimerSecRemainInternal < 0.f; }
 
+	/** Sets the left second of the 'Three-two-one-GO' timer. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetStartingTimerSecondsRemain(float NewStartingTimerSecRemain);
+
 protected:
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Replicated, meta = (BlueprintProtected, DisplayName = "Starting Timer Seconds Remain"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_StartingTimerSecRemain", meta = (BlueprintProtected, DisplayName = "Starting Timer Seconds Remain"))
 	float StartingTimerSecRemainInternal = 0.F;
+
+	/** Is called on client when the 'Three-two-one-GO' timer was updated. */
+	UFUNCTION()
+	void OnRep_StartingTimerSecRemain();
+
+	/** Updates current starting timer seconds remain. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyStartingTimerSecondsRemain();
 
 	/** Is called during the Game Starting state to handle the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -99,6 +117,12 @@ protected:
 	 * Runs during the match (120...0)
 	 ********************************************************************************************* */
 public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInGameTimerSecRemainChanged, float, NewInGameTimerSecRemain);
+
+	/** Called when remain seconds to the end of the match timer was updated. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnInGameTimerSecRemainChanged OnInGameTimerSecRemainChanged;
+
 	/** Returns the left second to the end of the match. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE float GetInGameTimerSecondsRemain() const { return InGameTimerSecRemainInternal; }
@@ -107,10 +131,22 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsInGameTimerElapsed() const { return FMath::IsNearlyZero(InGameTimerSecRemainInternal) || InGameTimerSecRemainInternal < 0.f; }
 
+	/** Sets the left second to the end of the match. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetInGameTimerSecondsRemain(float NewInGameTimerSecRemain);
+
 protected:
 	/** Seconds to the end of the round. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Replicated, meta = (BlueprintProtected, DisplayName = "In-Game Timer Seconds Remain"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_InGameTimerSecRemain", meta = (BlueprintProtected, DisplayName = "In-Game Timer Seconds Remain"))
 	float InGameTimerSecRemainInternal = 0.F;
+
+	/** Is called on client when in-match timer was updated. */
+	UFUNCTION()
+	void OnRep_InGameTimerSecRemain();
+
+	/** Updates current in-match timer seconds remain. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyInGameTimerSecondsRemain();
 
 	/** Is called during the In-Game state to handle time consuming for the current match. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
