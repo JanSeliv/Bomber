@@ -7,6 +7,7 @@
 #include "DataAssets/AIDataAsset.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
@@ -116,12 +117,11 @@ void AMyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	if (!InPawn)
+	OwnerInternal = Cast<APlayerCharacter>(InPawn);
+	if (!OwnerInternal)
 	{
 		return;
 	}
-
-	OwnerInternal = Cast<APlayerCharacter>(InPawn);
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (FEditorUtilsLibrary::IsEditorNotPieWorld()
@@ -135,6 +135,20 @@ void AMyAIController::OnPossess(APawn* InPawn)
 
 	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
 	SetAI(bMatchStarted);
+
+	if (OwnerInternal->GetPlayerState() == nullptr)
+	{
+		// Spawn Player State for AI to replicate game-relevant info like scores, teams etc
+		AMyPlayerState* NewPlayerState = GetWorld()->SpawnActor<AMyPlayerState>(AMyPlayerState::StaticClass());
+		checkf(NewPlayerState, TEXT("ERROR: [%i] %s:\n'NewPlayerState' was not spawned!"), __LINE__, *FString(__FUNCTION__));
+		OwnerInternal->SetPlayerState(NewPlayerState);
+
+		const FString AIName = FString::Printf(TEXT("AI %s"), *FString::FromInt(OwnerInternal->GetCharacterID()));
+		NewPlayerState->SetPlayerNameCustom(FName(*AIName));
+	}
+
+	// Notify client about bot possession
+	UGlobalEventsSubsystem::Get().OnCharacterWithIDPossessed.Broadcast(OwnerInternal, OwnerInternal->GetCharacterID());
 }
 
 // Allows the controller to react on unpossessing the pawn

@@ -157,15 +157,11 @@ UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
 // Actualize the player name for this character
 void APlayerCharacter::UpdateNicknameOnNameplate()
 {
-	static const FName DefaultAIName(TEXT("AI"));
-	FName NewNickname = DefaultAIName;
-
 	if (const AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
 	{
-		NewNickname = MyPlayerState->GetPlayerFNameCustom();
+		const FName NewNickname = MyPlayerState->GetPlayerFNameCustom();
+		SetNicknameOnNameplate(NewNickname);
 	}
-
-	SetNicknameOnNameplate(NewNickname);
 }
 
 // Returns level type associated with player, e.g: Water level type for Roger character
