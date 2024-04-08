@@ -20,7 +20,8 @@ class BOMBER_API UMVVM_MyGameViewModel : public UMVVM_MyBaseViewModel
 public:
 	/** Setter and Getter widgets about the current game state. */
 	UFUNCTION()
-	void SetCurrentGameState(ECurrentGameState NewCurrentGameState);
+	void SetCurrentGameState(ECurrentGameState NewCurrentGameState) { UE_MVVM_SET_PROPERTY_VALUE(CurrentGameState, NewCurrentGameState); }
+
 	ECurrentGameState GetCurrentGameState() const { return CurrentGameState; }
 
 protected:
@@ -28,6 +29,35 @@ protected:
 	 * Is commonly used by 'UMyBlueprintFunctionLibrary::GetVisibilityByGameState' to show or hide own widget. */
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
 	ECurrentGameState CurrentGameState = ECurrentGameState::None;
+
+	/*********************************************************************************************
+	 * Countdown timers
+	 ********************************************************************************************* */
+public:
+	/** Setter and Getter about the summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
+	void SetStartingTimerSecRemain(const FText& NewStartingTimerSecRemain) { UE_MVVM_SET_PROPERTY_VALUE(StartingTimerSecRemain, NewStartingTimerSecRemain); }
+	const FText& GetStartingTimerSecRemain() const { return StartingTimerSecRemain; }
+
+	/** Setter and Getter about the seconds to the end of the round. */
+	void SetInGameTimerSecRemain(const FText& NewInGameTimerSecRemain) { UE_MVVM_SET_PROPERTY_VALUE(InGameTimerSecRemain, NewInGameTimerSecRemain); }
+	const FText& GetInGameTimerSecRemain() const { return InGameTimerSecRemain; }
+
+protected:
+	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	FText StartingTimerSecRemain = FText::GetEmpty();
+
+	/** Seconds to the end of the round. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	FText InGameTimerSecRemain = FText::GetEmpty();
+
+	/** Called when the 'Three-two-one-GO' timer was updated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnStartingTimerSecRemainChanged(float NewStartingTimerSecRemain);
+
+	/** Called when remain seconds to the end of the match timer was updated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnInGameTimerSecRemainChanged(float NewInGameTimerSecRemain);
 
 	/*********************************************************************************************
 	 * Events

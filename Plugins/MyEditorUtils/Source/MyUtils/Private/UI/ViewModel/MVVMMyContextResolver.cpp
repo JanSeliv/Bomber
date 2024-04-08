@@ -39,6 +39,13 @@ UObject* UMVVMMyContextResolver::CreateInstance(const UClass* ExpectedType, cons
 	UMVVMViewModelCollectionObject* Collection = MVVMSubsystem->GetViewModelCollection();
 	checkf(Collection, TEXT("ERROR: [%i] %s:\n'Collection' is null!"), __LINE__, *FString(__FUNCTION__));
 
+	const UMVVM_MyBaseViewModel* MyBaseViewModelCDO = ExpectedType->GetDefaultObject<UMVVM_MyBaseViewModel>();
+	checkf(MyBaseViewModelCDO, TEXT("ERROR: [%i] %s:\n'MyBaseViewModelCDO' is null!"), __LINE__, *FString(__FUNCTION__));
+	if (!ensureAlwaysMsgf(MyBaseViewModelCDO->CanConstructViewModel(), TEXT("ASSERT: [%i] %s:\n'It's forbidden to constuct '%s' View Model"), __LINE__, *FString(__FUNCTION__), *ExpectedType->GetName()))
+	{
+		return nullptr;
+	}
+
 	// Construct a new View Model
 	UMVVM_MyBaseViewModel* NewViewModel = NewObject<UMVVM_MyBaseViewModel>(UserWidget->GetOwningPlayer(), ExpectedType);
 	NewViewModel->OnViewModelConstruct(UserWidget);
