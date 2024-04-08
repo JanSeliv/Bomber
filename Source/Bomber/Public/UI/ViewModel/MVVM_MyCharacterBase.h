@@ -8,10 +8,6 @@
 
 /**
  * Contains UI character-related data to be used only by widgets, it can represent player as well as bot.
- * There is own child View Model for each character: UMVVM_MyCharacter0, UMVVM_MyCharacter1, UMVVM_MyCharacter2, UMVVM_MyCharacter3.
- * It does not use single View Model with Character ID as property, but View Model created per each character for next reasons:
- * - It is much easier for the UI designer to work with separate View Models such selecting the right View Model for the right character instead of using Conversion Functions.
- * - It is not the problem since the number of character is always limited.
  */
 UCLASS(Abstract, DisplayName = "[Abstract] My Character Base View Model")
 class BOMBER_API UMVVM_MyCharacterBase : public UMVVM_MyBaseViewModel
@@ -83,6 +79,23 @@ protected:
 	void OnPowerUpsChanged(const struct FPowerUp& NewPowerUps);
 
 	/*********************************************************************************************
+	 * Nickname
+	 ********************************************************************************************* */
+public:
+	/** Setter and Getter about Character's name. */
+	void SetNickname(const FText& NewNickname) { UE_MVVM_SET_PROPERTY_VALUE(Nickname, NewNickname); }
+	const FText& GetNickname() const { return Nickname; }
+
+protected:
+	/** Character's name. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	FText Nickname = FText::GetEmpty();
+
+	/** Called when changed Character's name. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnNicknameChanged(FName NewNickname);
+
+	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
 protected:
@@ -97,6 +110,14 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnCharacterWithIDPossessed(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
 };
+
+/*********************************************************************************************
+ * Below View Models per each character: UMVVM_MyCharacter0, UMVVM_MyCharacter1, UMVVM_MyCharacter2, UMVVM_MyCharacter3.
+ * It's done in such 'hardcoded' way for next reasons:
+ * - It is much easier for the UI designer to work with separate View Models 
+ * by selecting the right View Model for the right character instead of struggling with Conversion Functions.
+ * - It is not the problem since the number of character is always limited.
+ ********************************************************************************************* */
 
 UCLASS(DisplayName = "My Character #0 View Model")
 class BOMBER_API UMVVM_MyCharacter0 : public UMVVM_MyCharacterBase

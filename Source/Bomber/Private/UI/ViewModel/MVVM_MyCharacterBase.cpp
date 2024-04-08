@@ -2,12 +2,12 @@
 
 #include "UI/ViewModel/MVVM_MyCharacterBase.h"
 //---
+#include "DataAssets/ItemDataAsset.h"
+#include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "DataAssets/ItemDataAsset.h"
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MVVM_MyCharacterBase)
 
 /*********************************************************************************************
@@ -33,6 +33,16 @@ void UMVVM_MyCharacterBase::OnPowerUpsChanged_Implementation(const FPowerUp& New
 	SetPowerUpSkatePercent(static_cast<float>(NewPowerUps.SkateN) / MaxPowerUps);
 	SetPowerUpBombPercent(static_cast<float>(NewPowerUps.BombN) / MaxPowerUps);
 	SetPowerUpFirePercent(static_cast<float>(NewPowerUps.FireN) / MaxPowerUps);
+}
+
+/*********************************************************************************************
+ * Nickname
+ ********************************************************************************************* */
+
+// Called when changed Character's name
+void UMVVM_MyCharacterBase::OnNicknameChanged_Implementation(FName NewNickname)
+{
+	SetNickname(FText::FromName(NewNickname));
 }
 
 /*********************************************************************************************
@@ -69,4 +79,11 @@ void UMVVM_MyCharacterBase::OnCharacterWithIDPossessed(APlayerCharacter* PlayerC
 
 	checkf(PlayerCharacter, TEXT("ERROR: [%i] %s:\n'PlayerCharacter' is null!"), __LINE__, *FString(__FUNCTION__));
 	PlayerCharacter->OnPowerUpsChanged.AddUniqueDynamic(this, &ThisClass::OnPowerUpsChanged);
+
+	AMyPlayerState* CharacterState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
+	if (ensureMsgf(CharacterState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		CharacterState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnNicknameChanged);
+		OnNicknameChanged(CharacterState->GetPlayerFNameCustom());
+	}
 }
