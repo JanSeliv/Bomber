@@ -78,7 +78,7 @@ void UMVVM_MyHUD::OnViewModelConstruct_Implementation(const UUserWidget* UserWid
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
-	BIND_AND_CALL_ON_LOCAL_PLAYER_READY(this, ThisClass::OnLocalPlayerReady);
+	// @TODO refactor in next commit: BIND_ON_CHARACTER_WITH_ID_POSSESSED(this, ThisClass::OnLocalPlayerReady);
 }
 
 // Is called when this View Model is destructed

@@ -146,28 +146,23 @@ UInGameMenuWidget* UMyBlueprintFunctionLibrary::GetInGameMenuWidget(const UObjec
 }
 
 // Returns specified player character, by default returns local player
-APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 PlayerIndex, const UObject* OptionalWorldContext/* = nullptr*/)
+APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 CharacterID, const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyPlayerController* MyPC = GetMyPlayerController(PlayerIndex, OptionalWorldContext);
-	APlayerCharacter* FoundChar = MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
-	if (FoundChar)
+	if (CharacterID < 0)
 	{
-		return FoundChar;
+		return nullptr;
 	}
 
-	// Player character is not found in regular way, most likely PIE is not started, obtain it from Generated Map
-	int32 Idx = 0;
+	// Each Bomber character has own CharacterID, so we can't obtain it from the PlayerController, instead we should take it from the PlayerCharacter
 	FMapComponents MapComponents;
 	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
 	for (const UMapComponent* It : MapComponents)
 	{
 		APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(It->GetOwner());
-		checkf(PlayerChar, TEXT("ERROR: [%i] %s:\n'PlayerChar' is null!"), __LINE__, *FString(__FUNCTION__));
-		if (Idx == PlayerIndex)
+		if (PlayerChar && PlayerChar->GetCharacterID() == CharacterID)
 		{
 			return PlayerChar;
 		}
-		++Idx;
 	}
 
 	return nullptr;

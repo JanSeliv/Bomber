@@ -30,12 +30,12 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLocalPlayerReady, class APlayerCharacter*, LocalPlayerCharacter);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterWithIDPossessed, class APlayerCharacter*, Character, int32, CharacterID);
 
-	/** Called when local player character was spawned and possessed. Code usage example:
-	 * BIND_AND_CALL_ON_LOCAL_PLAYER_READY(this, ThisClass::OnLocalPlayerReady); */
+	/** Called when any character was spawned and possessed. Code usage example:
+	 * BIND_ON_CHARACTER_WITH_ID_POSSESSED(this, ThisClass::OnCharacterWithIDPossessed, 0); */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnLocalPlayerReady OnLocalPlayerReady;
+	FOnCharacterWithIDPossessed OnCharacterWithIDPossessed;
 };
 
 /** Helper macro to bind and call the function when the game state was changed. */
@@ -49,11 +49,11 @@ public:
 }
 
 /** Helper macro to bind and call the function when the local player character was spawned and possessed. */
-#define BIND_AND_CALL_ON_LOCAL_PLAYER_READY(Obj, Function) \
+#define BIND_ON_CHARACTER_WITH_ID_POSSESSED(Obj, Function, CharacterID) \
 { \
-	UGlobalEventsSubsystem::Get().OnLocalPlayerReady.AddUniqueDynamic(Obj, &Function); \
-	if (APlayerCharacter* LocalPlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter()) \
+	UGlobalEventsSubsystem::Get().OnCharacterWithIDPossessed.AddUniqueDynamic(Obj, &Function); \
+	if (APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetPlayerCharacter(CharacterID)) \
 	{ \
-		Function(LocalPlayerCharacter); \
+		Function(PlayerCharacter, CharacterID); \
 	} \
 }

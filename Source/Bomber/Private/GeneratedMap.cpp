@@ -1001,7 +1001,7 @@ void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, int
 		if (MapComponentIt
 		    && EnumHasAnyFlags(MapComponentIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
 		{
-			OutBitmaskedComponents.Emplace(MapComponentIt);
+			OutBitmaskedComponents.Add(MapComponentIt);
 		}
 	}
 }

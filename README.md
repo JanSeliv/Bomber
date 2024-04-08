@@ -38,6 +38,8 @@ This project could be useful for learners, demonstrating next features:
 - Enhanced Input
 - Modular Game Features
 - Complex cinematics (Level Sequences)
+- World Partition
+- Model-View-ViewModel (MVVM) UI Pattern
 - Data-Driven Design (Data Assets, Data Tables, Data Registries, _see below_)
 
 Despite this project is fully written in C++, it's extremely **blueprint-friendly**:
@@ -69,6 +71,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 #### 
 - Updated to **Unreal Engine 5.4**.
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
+- Adapted the UI to employ the Model-View-ViewModel (MVVM) Pattern
 - Added cinematic for Roger character on the Maya level.
 #### `13.01.2024`
 - Updated to **Unreal Engine 5.3**.

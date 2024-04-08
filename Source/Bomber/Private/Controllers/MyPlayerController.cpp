@@ -145,7 +145,7 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 	// Notify client about pawn change
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InPawn))
 	{
-		UGlobalEventsSubsystem::Get().OnLocalPlayerReady.Broadcast(PlayerCharacter);
+		UGlobalEventsSubsystem::Get().OnCharacterWithIDPossessed.Broadcast(PlayerCharacter, PlayerCharacter->GetCharacterID());
 	}
 }
 
@@ -161,7 +161,7 @@ void AMyPlayerController::OnRep_Pawn()
 	// Notify client about pawn change
 	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
-		UGlobalEventsSubsystem::Get().OnLocalPlayerReady.Broadcast(PlayerCharacter);
+		UGlobalEventsSubsystem::Get().OnCharacterWithIDPossessed.Broadcast(PlayerCharacter, PlayerCharacter->GetCharacterID());
 	}
 }
 

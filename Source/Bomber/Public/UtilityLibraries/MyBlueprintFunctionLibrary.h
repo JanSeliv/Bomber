@@ -96,7 +96,7 @@ public:
 
 	/** Returns specified player character. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
-	static class APlayerCharacter* GetPlayerCharacter(int32 PlayerIndex, const UObject* OptionalWorldContext = nullptr);
+	static class APlayerCharacter* GetPlayerCharacter(int32 CharacterID, const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns controlled player character. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
