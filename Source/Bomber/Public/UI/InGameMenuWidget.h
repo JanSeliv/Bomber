@@ -93,10 +93,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnSettingsButtonPressed();
 
-	/** Called to set Win,Draw or lose text on UI. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void UpdateEndGameText();
-
 	/** The in game menu is shown the result of the games match (win, lose, draw).
 	 *	If the match has not yet finished, it could be minimized or opened out by ESC button in order to
 	 *	continue watching the game or restart the play, or to return to the main menu. */

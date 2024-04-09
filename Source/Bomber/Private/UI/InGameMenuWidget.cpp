@@ -102,8 +102,6 @@ void UInGameMenuWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Called when the end-game state was changed
 void UInGameMenuWidget::OnEndGameStateChanged(EEndGameState EndGameState)
 {
-	UpdateEndGameText();
-
 	if (EndGameState != EEndGameState::None)
 	{
 		ShowInGameMenu();
@@ -150,27 +148,6 @@ void UInGameMenuWidget::OnSettingsButtonPressed()
 	{
 		SettingsWidget->OpenSettings();
 	}
-}
-
-// Called to set Win,Draw or lose text on UI
-void UInGameMenuWidget::UpdateEndGameText()
-{
-	const APlayerController* PC = GetOwningPlayer();
-	const AMyPlayerState* MyPlayerState = PC ? PC->GetPlayerState<AMyPlayerState>() : nullptr;
-	if (!ensureMsgf(MyPlayerState, TEXT("ASSERT: 'MyPlayerState' is not valid"))
-	    || !ensureMsgf(EndGameTextWidget, TEXT("ASSERT: 'MyPlayerState' is not valid")))
-	{
-		return;
-	}
-
-	FText EndGameText = FText::GetEmpty();
-	const EEndGameState EndGameState = MyPlayerState->GetEndGameState();
-	if (EndGameState != EEndGameState::None)
-	{
-		EndGameText = UUIDataAsset::Get().GetEndGameText(EndGameState);
-	}
-
-	EndGameTextWidget->SetText(EndGameText);
 }
 
 // Shows the in game menu.

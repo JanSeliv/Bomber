@@ -8,8 +8,6 @@
 
 enum class ELevelType : uint8;
 enum class EActorType : uint8;
-enum class ECurrentGameState : uint8;
-enum class ESlateVisibility : uint8;
 
 /**
  * 	The static functions library
@@ -31,16 +29,6 @@ public:
 	/** Returns the type of the current level. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static ELevelType GetLevelType();
-
-	/** Is used a lot by the UI View Models as 'Conversion Function' to show or hide own widget.
-	 * For instance, 3-2-1 countdown widget provides 'GameStateProperty' cached property while 'ByGameStates' is 'ECurrentGameState::GameStarting' enum.
-	 * @param GameStateProperty Provide the current game state to check. Enum is const-ref to require in blueprints select a property, but not default value.
-	 * @param ByGameStates Select one or multiple game states to check.
-	 * @return 'Visible' if the 'CurrentGameState' is in the 'GameStates', otherwise 'Collapsed'. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintAutocast))
-	static ESlateVisibility GetVisibilityByGameState(
-		const ECurrentGameState& GameStateProperty,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECurrentGameState")) int32 ByGameStates);
 
 	/* ---------------------------------------------------
 	 *		Framework pointer getters

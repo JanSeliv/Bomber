@@ -43,7 +43,7 @@ public:
 	/** Returns the localized texts about specified end game to display on UI.
 	 * @see UUIDataAsset::EndGameTexts. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FText& GetEndGameText(EEndGameState EndGameState) const { return EndGameTextsInternal.FindChecked(EndGameState); }
+	const FText& GetEndGameText(EEndGameState EndGameState) const;
 
 protected:
 	/** The class of a In-Game Widget blueprint. */

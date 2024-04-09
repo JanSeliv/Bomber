@@ -44,13 +44,6 @@ ELevelType UMyBlueprintFunctionLibrary::GetLevelType()
 	return ELevelType::First;
 }
 
-// Is used a lot by the UI View Models as 'Conversion Function' to show or hide own widget
-ESlateVisibility UMyBlueprintFunctionLibrary::GetVisibilityByGameState(const ECurrentGameState& GameStateProperty, int32 GameStates)
-{
-	const bool bMatching = EnumHasAnyFlags(GameStateProperty, TO_ENUM(ECurrentGameState, GameStates));
-	return bMatching ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
-}
-
 /* ---------------------------------------------------
  *		Framework pointer getters
  * --------------------------------------------------- */
