@@ -106,13 +106,34 @@ public:
 	ESlateVisibility GetIsDeadVisibility() const { return IsDeadVisibility; }
 
 protected:
-	/** Is 'Visible' when character is dead, collapsed otherwise. */ 
+	/** Is 'Visible' when character is dead, collapsed otherwise. */
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
 	ESlateVisibility IsDeadVisibility = ESlateVisibility::Collapsed;
 
 	/** Called when changed character Dead status is changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnCharacterDeadChanged(bool bIsCharacterDead);
+
+	/*********************************************************************************************
+	 * Is Human / Bot
+	 ********************************************************************************************* */
+public:
+	/** Setter and Getter is character human controlled, should be 'Visible' when character is human. */
+	void SetIsHumanVisibility(ESlateVisibility NewIsHumanVisibility) { UE_MVVM_SET_PROPERTY_VALUE(IsHumanVisibility, NewIsHumanVisibility); }
+	ESlateVisibility GetIsHumanVisibility() const { return IsHumanVisibility; }
+
+	/** Setter and Getter character bot controlled, should be 'Visible' when character is bot. */
+	void SetIsBotVisibility(ESlateVisibility NewIsBotVisibility) { UE_MVVM_SET_PROPERTY_VALUE(IsBotVisibility, NewIsBotVisibility); }
+	ESlateVisibility GetIsBotVisibility() const { return IsBotVisibility; }
+
+protected:
+	/** Is 'Visible' when character is human. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	ESlateVisibility IsHumanVisibility = ESlateVisibility::Collapsed;
+
+	/** Is 'Visible' when character is bot. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	ESlateVisibility IsBotVisibility = ESlateVisibility::Collapsed;
 
 	/*********************************************************************************************
 	 * Events

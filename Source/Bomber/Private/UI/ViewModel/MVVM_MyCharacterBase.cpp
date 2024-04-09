@@ -104,5 +104,10 @@ void UMVVM_MyCharacterBase::OnCharacterWithIDPossessed(APlayerCharacter* PlayerC
 
 		PlayerState->OnCharacterDeadChanged.AddUniqueDynamic(this, &ThisClass::OnCharacterDeadChanged);
 		OnCharacterDeadChanged(PlayerState->IsCharacterDead());
+
+		// Set by default Human\Bot visibility as there is no support for joining during the match
+		const bool IsABot = PlayerState->IsABot();
+		SetIsHumanVisibility(IsABot ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+		SetIsBotVisibility(IsABot ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
 }
