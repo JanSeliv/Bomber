@@ -239,4 +239,8 @@ protected:
 	/** Move the player character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
 	void MovePlayer(const struct FInputActionValue& ActionValue);
+
+	/** Is called when the player was destroyed. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
 };

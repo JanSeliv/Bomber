@@ -138,10 +138,7 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 		BombActor->InitBomb(PlayerCharacter);
 
 		// Start listening this bomb
-		if (!MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(PlayerCharacter, &ThisClass::OnBombDestroyed))
-		{
-			MapComponent->OnDeactivatedMapComponent.AddDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
-		}
+		MapComponent->OnDeactivatedMapComponent.AddUniqueDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
 	};
 
 	// Spawn bomb
@@ -310,6 +307,8 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 {
 	Super::SetActorHiddenInGame(bNewHidden);
 
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %s:\n'MapComponentInternal' is null!"), __LINE__, *FString(__FUNCTION__));
+
 	if (UMySkeletalMeshComponent* MySkeletalMeshComponent = GetMySkeletalMeshComponent())
 	{
 		const ECollisionEnabled::Type NewType = bNewHidden ? ECollisionEnabled::NoCollision : ECollisionEnabled::PhysicsOnly;
@@ -323,12 +322,16 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		ConstructPlayerCharacter();
 
 		TryPossessController();
+
+		MapComponentInternal->OnDeactivatedMapComponent.AddUniqueDynamic(this, &ThisClass::OnPlayerRemovedFromLevel);
 	}
 	else if (Controller)
 	{
 		// Is removed from Generated Map
 
 		Controller->UnPossess();
+
+		MapComponentInternal->OnDeactivatedMapComponent.RemoveAll(this);
 	}
 
 	ResetPowerups();
@@ -399,10 +402,7 @@ void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent, UObject* Des
 	}
 
 	// Stop listening this bomb
-	if (MapComponent->OnDeactivatedMapComponent.IsAlreadyBound(this, &ThisClass::OnBombDestroyed))
-	{
-		MapComponent->OnDeactivatedMapComponent.RemoveDynamic(this, &ThisClass::OnBombDestroyed);
-	}
+	MapComponent->OnDeactivatedMapComponent.RemoveAll(this);
 
 	if (PowerupsInternal.BombN < UItemDataAsset::Get().GetMaxAllowedItemsNum())
 	{
@@ -687,4 +687,13 @@ void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 
 	AddMovementInput(ForwardDirection, MovementVector.Y);
 	AddMovementInput(RightDirection, MovementVector.X);
+}
+
+// Is called when the player was destroyed
+void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser)
+{
+	if (AMyPlayerState* InPlayerState = GetPlayerState<AMyPlayerState>())
+	{
+		InPlayerState->SetCharacterDead(true);
+	}
 }
