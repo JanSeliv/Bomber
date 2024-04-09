@@ -46,6 +46,16 @@ void UMVVM_MyCharacterBase::OnNicknameChanged_Implementation(FName NewNickname)
 }
 
 /*********************************************************************************************
+ * Is Character Dead
+ ********************************************************************************************* */
+
+// Called when changed character Dead status is changed
+void UMVVM_MyCharacterBase::OnCharacterDeadChanged_Implementation(bool bIsCharacterDead)
+{
+	SetIsDeadVisibility(bIsCharacterDead ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+}
+
+/*********************************************************************************************
  * Events
  ********************************************************************************************* */
 
@@ -62,9 +72,15 @@ void UMVVM_MyCharacterBase::OnViewModelDestruct_Implementation()
 {
 	Super::OnViewModelDestruct_Implementation();
 
-	if (APlayerCharacter* Player = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter())
+	if (APlayerCharacter* Character = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter())
 	{
-		Player->OnPowerUpsChanged.RemoveAll(this);
+		Character->OnPowerUpsChanged.RemoveAll(this);
+
+		if (AMyPlayerState* PlayerState = Character->GetPlayerState<AMyPlayerState>())
+		{
+			PlayerState->OnPlayerNameChanged.RemoveAll(this);
+			PlayerState->OnCharacterDeadChanged.RemoveAll(this);
+		}
 	}
 }
 
@@ -80,10 +96,13 @@ void UMVVM_MyCharacterBase::OnCharacterWithIDPossessed(APlayerCharacter* PlayerC
 	checkf(PlayerCharacter, TEXT("ERROR: [%i] %s:\n'PlayerCharacter' is null!"), __LINE__, *FString(__FUNCTION__));
 	PlayerCharacter->OnPowerUpsChanged.AddUniqueDynamic(this, &ThisClass::OnPowerUpsChanged);
 
-	AMyPlayerState* CharacterState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
-	if (ensureMsgf(CharacterState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
+	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
+	if (ensureMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
 	{
-		CharacterState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnNicknameChanged);
-		OnNicknameChanged(CharacterState->GetPlayerFNameCustom());
+		PlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnNicknameChanged);
+		OnNicknameChanged(PlayerState->GetPlayerFNameCustom());
+
+		PlayerState->OnCharacterDeadChanged.AddUniqueDynamic(this, &ThisClass::OnCharacterDeadChanged);
+		OnCharacterDeadChanged(PlayerState->IsCharacterDead());
 	}
 }

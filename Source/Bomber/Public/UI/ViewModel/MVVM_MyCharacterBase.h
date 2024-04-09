@@ -4,6 +4,8 @@
 
 #include "UI/ViewModel/MVVM_MyBaseViewModel.h"
 //---
+#include "Components/SlateWrapperTypes.h"
+//---
 #include "MVVM_MyCharacterBase.generated.h"
 
 /**
@@ -94,6 +96,23 @@ protected:
 	/** Called when changed Character's name. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnNicknameChanged(FName NewNickname);
+
+	/*********************************************************************************************
+	 * Is Character Dead
+	 ********************************************************************************************* */
+public:
+	/** Setter and Getter character dead visibility, should be 'Visible' when character is dead, 'Collapsed' otherwise. */
+	void SetIsDeadVisibility(ESlateVisibility NewIsDeadVisibility) { UE_MVVM_SET_PROPERTY_VALUE(IsDeadVisibility, NewIsDeadVisibility); }
+	ESlateVisibility GetIsDeadVisibility() const { return IsDeadVisibility; }
+
+protected:
+	/** Is 'Visible' when character is dead, collapsed otherwise. */ 
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	ESlateVisibility IsDeadVisibility = ESlateVisibility::Collapsed;
+
+	/** Called when changed character Dead status is changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCharacterDeadChanged(bool bIsCharacterDead);
 
 	/*********************************************************************************************
 	 * Events
