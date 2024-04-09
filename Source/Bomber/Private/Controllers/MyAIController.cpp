@@ -136,10 +136,11 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
 	SetAI(bMatchStarted);
 
-	if (OwnerInternal->GetPlayerState() == nullptr)
+	if (GetPlayerState<AMyPlayerState>() == nullptr)
 	{
 		// Spawn Player State for AI to replicate game-relevant info like scores, teams etc
-		AMyPlayerState* NewPlayerState = GetWorld()->SpawnActor<AMyPlayerState>(AMyPlayerState::StaticClass());
+		InitPlayerState();
+		AMyPlayerState* NewPlayerState = GetPlayerState<AMyPlayerState>();
 		checkf(NewPlayerState, TEXT("ERROR: [%i] %s:\n'NewPlayerState' was not spawned!"), __LINE__, *FString(__FUNCTION__));
 		OwnerInternal->SetPlayerState(NewPlayerState);
 
