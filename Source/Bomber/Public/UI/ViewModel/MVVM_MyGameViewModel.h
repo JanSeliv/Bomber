@@ -2,12 +2,13 @@
 
 #pragma once
 
-#include "Bomber.h"
 #include "UI/ViewModel/MVVM_MyBaseViewModel.h"
 //---
+#include "Bomber.h"
+//---
+#include "Components/SlateWrapperTypes.h"
+//---
 #include "MVVM_MyGameViewModel.generated.h"
-
-enum class ECurrentGameState : uint8;
 
 /**
  * Contains general data to be used only by widgets. 
@@ -17,6 +18,9 @@ class BOMBER_API UMVVM_MyGameViewModel : public UMVVM_MyBaseViewModel
 {
 	GENERATED_BODY()
 
+	/*********************************************************************************************
+	 * Game State
+	 ********************************************************************************************* */
 public:
 	/** Setter and Getter widgets about the current game state. */
 	UFUNCTION()
@@ -29,6 +33,31 @@ protected:
 	 * Is commonly used by 'UMyBlueprintFunctionLibrary::GetVisibilityByGameState' to show or hide own widget. */
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
 	ECurrentGameState CurrentGameState = ECurrentGameState::None;
+
+	/*********************************************************************************************
+	 * End-Game State
+	 ********************************************************************************************* */
+public:
+	/** Setter and Getter about the End-Game State visibility. */
+	void SetEndGameStateVisibility(const ESlateVisibility& NewEndGameStateVisibility) { UE_MVVM_SET_PROPERTY_VALUE(EndGameStateVisibility, NewEndGameStateVisibility); }
+	const ESlateVisibility& GetEndGameStateVisibility() const { return EndGameStateVisibility; }
+
+	/** Setter and Getter about the End-Game result text. */
+	void SetEndGameResult(const FText& NewEndGameResult) { UE_MVVM_SET_PROPERTY_VALUE(EndGameResult, NewEndGameResult); }
+	const FText& GetEndGameResult() const { return EndGameResult; }
+
+protected:
+	/** Is 'Visible' when the game is ended with any result (win, lose, draw). */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	ESlateVisibility EndGameStateVisibility = ESlateVisibility::Collapsed;
+
+	/** The result of the game: Win, Lose, Draw. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	FText EndGameResult = FText::GetEmpty();
+
+	/** Called when the player state was changed. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnEndGameStateChanged(EEndGameState NewEndGameState);
 
 	/*********************************************************************************************
 	 * Countdown timers

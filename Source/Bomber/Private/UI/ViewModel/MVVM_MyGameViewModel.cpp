@@ -2,11 +2,27 @@
 
 #include "UI/ViewModel/MVVM_MyGameViewModel.h"
 //---
+#include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MVVM_MyGameViewModel)
+
+/*********************************************************************************************
+ * End-Game State
+ ********************************************************************************************* */
+
+// Called when the player state was changed
+void UMVVM_MyGameViewModel::OnEndGameStateChanged(EEndGameState NewEndGameState)
+{
+	const ESlateVisibility NewVisibility = NewEndGameState == EEndGameState::None ? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
+	SetEndGameStateVisibility(NewVisibility);
+
+	SetEndGameResult(UUIDataAsset::Get().GetEndGameText(NewEndGameState));
+}
 
 /*********************************************************************************************
  * Countdown timers
@@ -55,6 +71,13 @@ void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
 	{
 		MyGameState->OnStartingTimerSecRemainChanged.RemoveAll(this);
 		MyGameState->OnInGameTimerSecRemainChanged.RemoveAll(this);
+	}
+
+	const APlayerCharacter* Character = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+	AMyPlayerState* PlayerState = Character ? Character->GetPlayerState<AMyPlayerState>() : nullptr;
+	if (PlayerState)
+	{
+		PlayerState->OnEndGameStateChanged.RemoveAll(this);
 	}
 }
 
