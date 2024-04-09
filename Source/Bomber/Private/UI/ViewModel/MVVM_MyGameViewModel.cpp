@@ -37,9 +37,8 @@ void UMVVM_MyGameViewModel::OnViewModelConstruct_Implementation(const UUserWidge
 
 	UGlobalEventsSubsystem::Get().OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::SetCurrentGameState);
 
-	AMyGameStateBase& MyGameState = AMyGameStateBase::Get();
-	MyGameState.OnStartingTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnStartingTimerSecRemainChanged);
-	MyGameState.OnInGameTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnInGameTimerSecRemainChanged);
+	constexpr int32 LocalPlayerCharacterID = 0;
+	BIND_ON_CHARACTER_WITH_ID_POSSESSED(this, ThisClass::OnCharacterWithIDPossessed, LocalPlayerCharacterID);
 }
 
 // Is called when this View Model is destructed
@@ -57,4 +56,23 @@ void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
 		MyGameState->OnStartingTimerSecRemainChanged.RemoveAll(this);
 		MyGameState->OnInGameTimerSecRemainChanged.RemoveAll(this);
 	}
+}
+
+// Called when local player character was possessed, so we can bind to data
+void UMVVM_MyGameViewModel::OnCharacterWithIDPossessed(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+{
+	constexpr int32 LocalPlayerCharacterID = 0;
+	if (CharacterID != LocalPlayerCharacterID)
+	{
+		// This View Model is not for this character
+		return;
+	}
+
+	AMyGameStateBase& MyGameState = AMyGameStateBase::Get();
+	MyGameState.OnStartingTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnStartingTimerSecRemainChanged);
+	MyGameState.OnInGameTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnInGameTimerSecRemainChanged);
+
+	checkf(PlayerCharacter, TEXT("ERROR: [%i] %s:\n'PlayerCharacter' is null!"), __LINE__, *FString(__FUNCTION__));
+	AMyPlayerState& PlayerState = *PlayerCharacter->GetPlayerStateChecked<AMyPlayerState>();
+	PlayerState.OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }

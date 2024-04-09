@@ -128,6 +128,7 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(ThisClass, EndGameStateInternal);
 	DOREPLIFETIME(ThisClass, CustomPlayerNameInternal);
+	DOREPLIFETIME(ThisClass, bIsCharacterDeadInternal);
 }
 
 // Called when the game starts
