@@ -30,6 +30,12 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndGameStateChanged, EEndGameState, EndGameState);
+
+	/** Called when player's match result was changed (Win, lose, draw or none applied). */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnEndGameStateChanged OnEndGameStateChanged;
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterWithIDPossessed, class APlayerCharacter*, Character, int32, CharacterID);
 
 	/** Called when any character was spawned and possessed. Code usage example:

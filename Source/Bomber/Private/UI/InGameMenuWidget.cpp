@@ -6,7 +6,6 @@
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/MyHUD.h"
@@ -43,14 +42,7 @@ void UInGameMenuWidget::NativeConstruct()
 	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Listen to update the End-Game state tex;
-	if (AMyPlayerState* MyPlayerState = MyPC->GetPlayerState<AMyPlayerState>())
-	{
-		BindOnEndGameStateChanged(MyPlayerState);
-	}
-	else
-	{
-		MyPC->OnSetPlayerState.AddUniqueDynamic(this, &ThisClass::BindOnEndGameStateChanged);
-	}
+	UGlobalEventsSubsystem::Get().OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 
 	// Listen to toggle the game state widget when is requested
 	if (AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD())
@@ -106,17 +98,6 @@ void UInGameMenuWidget::OnEndGameStateChanged(EEndGameState EndGameState)
 	{
 		ShowInGameMenu();
 	}
-}
-
-// Is called to start listening End-Game state changes
-void UInGameMenuWidget::BindOnEndGameStateChanged(AMyPlayerState* MyPlayerState)
-{
-	if (!ensureMsgf(MyPlayerState, TEXT("ASSERT: 'MyPlayerState' is not valid")))
-	{
-		return;
-	}
-
-	MyPlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }
 
 // Is called when player pressed the button to restart the game

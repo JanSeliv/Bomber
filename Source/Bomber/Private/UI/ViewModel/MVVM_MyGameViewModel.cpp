@@ -4,7 +4,6 @@
 //---
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -65,19 +64,13 @@ void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
 	if (UGlobalEventsSubsystem* GlobalEventsSubsystem = UGlobalEventsSubsystem::GetGlobalEventsSubsystem())
 	{
 		GlobalEventsSubsystem->OnGameStateChanged.RemoveAll(this);
+		GlobalEventsSubsystem->OnEndGameStateChanged.RemoveAll(this);
 	}
 
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
 		MyGameState->OnStartingTimerSecRemainChanged.RemoveAll(this);
 		MyGameState->OnInGameTimerSecRemainChanged.RemoveAll(this);
-	}
-
-	const APlayerCharacter* Character = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
-	AMyPlayerState* PlayerState = Character ? Character->GetPlayerState<AMyPlayerState>() : nullptr;
-	if (PlayerState)
-	{
-		PlayerState->OnEndGameStateChanged.RemoveAll(this);
 	}
 }
 
@@ -95,7 +88,5 @@ void UMVVM_MyGameViewModel::OnCharacterWithIDPossessed(APlayerCharacter* PlayerC
 	MyGameState.OnStartingTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnStartingTimerSecRemainChanged);
 	MyGameState.OnInGameTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnInGameTimerSecRemainChanged);
 
-	checkf(PlayerCharacter, TEXT("ERROR: [%i] %s:\n'PlayerCharacter' is null!"), __LINE__, *FString(__FUNCTION__));
-	AMyPlayerState& PlayerState = *PlayerCharacter->GetPlayerStateChecked<AMyPlayerState>();
-	PlayerState.OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	UGlobalEventsSubsystem::Get().OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }

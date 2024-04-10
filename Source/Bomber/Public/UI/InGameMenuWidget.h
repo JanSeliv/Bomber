@@ -77,10 +77,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnEndGameStateChanged(EEndGameState EndGameState);
 
-	/** Is called to start listening End-Game state changes. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnEndGameStateChanged(class AMyPlayerState* MyPlayerState);
-
 	/** Is called when player pressed the button to restart the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnRestartButtonPressed();

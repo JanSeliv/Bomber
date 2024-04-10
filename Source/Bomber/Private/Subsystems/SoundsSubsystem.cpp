@@ -5,7 +5,6 @@
 #include "Bomber.h"
 #include "DataAssets/SoundsDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -228,10 +227,7 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	UGameplayStatics::SetBaseSoundMix(&InWorld, MainSoundMix);
 
 	// Listed the ending the current game to play the End-Game sound on
-	if (AMyPlayerState* CurrentPlayerState = UMyBlueprintFunctionLibrary::GetLocalPlayerState())
-	{
-		CurrentPlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
-	}
+	UGlobalEventsSubsystem::Get().OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 
 	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 

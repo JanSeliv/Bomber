@@ -23,14 +23,9 @@ public:
 	/*********************************************************************************************
 	 * End Game State
 	 * Is personal for each player: Win, Lose or Draw.
+	 * Can be tracked by listening UGlobalEventsSubsystem::Get().OnEndGameStateChanged
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndGameStateChanged, EEndGameState, EndGameState);
-
-	/** Called when the player state was changed. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnEndGameStateChanged OnEndGameStateChanged;
-
 	/** Returns result of the game for controlled player after ending the game. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EEndGameState GetEndGameState() const { return EndGameStateInternal; }

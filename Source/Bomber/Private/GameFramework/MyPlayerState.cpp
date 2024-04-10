@@ -78,9 +78,10 @@ void AMyPlayerState::MulticastSetEndGameState_Implementation(EEndGameState NewEn
 
 	EndGameStateInternal = NewEndGameState;
 
+	const UGlobalEventsSubsystem::FOnEndGameStateChanged& OnEndGameStateChanged = UGlobalEventsSubsystem::Get().OnEndGameStateChanged;
 	if (OnEndGameStateChanged.IsBound())
 	{
-		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+		OnEndGameStateChanged.Broadcast(NewEndGameState);
 	}
 }
 
