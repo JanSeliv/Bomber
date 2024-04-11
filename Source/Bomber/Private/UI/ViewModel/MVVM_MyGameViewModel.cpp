@@ -8,6 +8,8 @@
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "Engine/World.h"
+//---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MVVM_MyGameViewModel)
 
 /*********************************************************************************************
@@ -50,10 +52,20 @@ void UMVVM_MyGameViewModel::OnViewModelConstruct_Implementation(const UUserWidge
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
-	UGlobalEventsSubsystem::Get().OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::SetCurrentGameState);
+	UGlobalEventsSubsystem& GlobalEventsSubsystem = UGlobalEventsSubsystem::Get();
+	GlobalEventsSubsystem.OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::SetCurrentGameState);
+	GlobalEventsSubsystem.OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 
-	constexpr int32 LocalPlayerCharacterID = 0;
-	BIND_ON_CHARACTER_WITH_ID_POSSESSED(this, ThisClass::OnCharacterWithIDPossessed, LocalPlayerCharacterID);
+	if (AMyGameStateBase* GameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	{
+		OnGameStateCreated(GameState);
+	}
+	else
+	{
+		UWorld* World = GetWorld();
+		checkf(World, TEXT("ERROR: [%i] %s:\n'World' is null!"), __LINE__, *FString(__FUNCTION__));
+		World->GameStateSetEvent.AddUObject(this, &ThisClass::OnGameStateCreated);
+	}
 }
 
 // Is called when this View Model is destructed
@@ -74,19 +86,10 @@ void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
 	}
 }
 
-// Called when local player character was possessed, so we can bind to data
-void UMVVM_MyGameViewModel::OnCharacterWithIDPossessed(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+// Called when Game State was created in current world
+void UMVVM_MyGameViewModel::OnGameStateCreated_Implementation(AGameStateBase* GameState)
 {
-	constexpr int32 LocalPlayerCharacterID = 0;
-	if (CharacterID != LocalPlayerCharacterID)
-	{
-		// This View Model is not for this character
-		return;
-	}
-
-	AMyGameStateBase& MyGameState = AMyGameStateBase::Get();
+	AMyGameStateBase& MyGameState = *CastChecked<AMyGameStateBase>(GameState);
 	MyGameState.OnStartingTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnStartingTimerSecRemainChanged);
 	MyGameState.OnInGameTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnInGameTimerSecRemainChanged);
-
-	UGlobalEventsSubsystem::Get().OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }

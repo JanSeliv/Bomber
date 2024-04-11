@@ -79,14 +79,6 @@ void AMyPlayerController::SetIgnoreMoveInput(bool bShouldIgnore)
 	IgnoreMoveInput = bShouldIgnore;
 }
 
-// Called when an instance of this class is placed (in editor) or spawned
-void AMyPlayerController::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	BindOnGameStateCreated();
-}
-
 // This is called only in the gameplay before calling begin play
 void AMyPlayerController::PostInitializeComponents()
 {
@@ -293,37 +285,6 @@ void AMyPlayerController::BroadcastOnSetPlayerState()
 	}
 
 	OnSetPlayerState.Broadcast(MyPlayerState);
-}
-
-// Start listening creating the game state
-void AMyPlayerController::BindOnGameStateCreated()
-{
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
-	UWorld::FOnGameStateSetEvent& GameStateSetEvent = World->GameStateSetEvent;
-	if (!GameStateSetEvent.IsBoundToObject(this))
-	{
-		GameStateSetEvent.AddUObject(this, &ThisClass::BroadcastOnGameStateCreated);
-	}
-}
-
-// Is called on server and on client when the game state is initialized
-void AMyPlayerController::BroadcastOnGameStateCreated(AGameStateBase* GameState)
-{
-	AMyGameStateBase* MyGameState = Cast<AMyGameStateBase>(GameState);
-	if (!MyGameState)
-	{
-		return;
-	}
-
-	if (OnGameStateCreated.IsBound())
-	{
-		OnGameStateCreated.Broadcast(MyGameState);
-	}
 }
 
 // Returns true if Player Controller is ready to setup all the inputs

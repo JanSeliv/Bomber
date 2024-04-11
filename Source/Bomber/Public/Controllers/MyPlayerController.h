@@ -33,12 +33,6 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnSetPlayerState OnSetPlayerState;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateCreated, class AMyGameStateBase*, MyGameState);
-
-	/** Notifies the server and clients when the game state is initialized. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnGameStateCreated OnGameStateCreated;
-
 	/*********************************************************************************************
 	 * Public functions
 	 ********************************************************************************************* */
@@ -80,9 +74,6 @@ public:
 	virtual void SetIgnoreMoveInput(bool bShouldIgnore) override;
 
 protected:
-	/** Called when an instance of this class is placed (in editor) or spawned. */
-	virtual void OnConstruction(const FTransform& Transform) override;
-
 	/** This is called only in the gameplay before calling begin play. */
 	virtual void PostInitializeComponents() override;
 
@@ -122,14 +113,6 @@ protected:
 	/** Is called on server and on client when the player state is set. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BroadcastOnSetPlayerState();
-
-	/** Start listening creating the game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateCreated();
-
-	/** Is called on server and on client when the game state is initialized. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BroadcastOnGameStateCreated(class AGameStateBase* GameState);
 
 	/*********************************************************************************************
 	 * Inputs management
