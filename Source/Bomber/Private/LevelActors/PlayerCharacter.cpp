@@ -295,11 +295,19 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 }
 
 // Is overriden to handle the client login when is set new player state
-void APlayerCharacter::OnRep_PlayerState()
+void APlayerCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)
 {
-	Super::OnRep_PlayerState();
+	Super::OnPlayerStateChanged(NewPlayerState, OldPlayerState);
+
+	const AMyPlayerState* MyPlayerState = Cast<AMyPlayerState>(NewPlayerState);
+	if (!MyPlayerState)
+	{
+		return;
+	}
 
 	ApplyCustomPlayerMeshData();
+
+	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnPlayerStateInit(*MyPlayerState);
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -662,6 +670,8 @@ void APlayerCharacter::ApplyCharacterID()
 	}
 
 	UpdateCollisionObjectType();
+
+	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterIdAssigned(*this);
 }
 
 // Is called on clients to apply the characterID-dependent logic for this character

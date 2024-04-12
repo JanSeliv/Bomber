@@ -64,7 +64,7 @@ void UMVVM_MyCharacterBase::OnViewModelConstruct_Implementation(const UUserWidge
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
-	BIND_ON_CHARACTER_WITH_ID_POSSESSED(this, ThisClass::OnCharacterWithIDPossessed, GetCharacterId());
+	BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, GetCharacterId());
 }
 
 // Is called when this View Model is destructed
@@ -85,7 +85,7 @@ void UMVVM_MyCharacterBase::OnViewModelDestruct_Implementation()
 }
 
 // Called when local player character was spawned and possessed, so we can bind to data
-void UMVVM_MyCharacterBase::OnCharacterWithIDPossessed(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+void UMVVM_MyCharacterBase::OnCharacterReady(APlayerCharacter* PlayerCharacter, int32 CharacterID)
 {
 	if (CharacterID != GetCharacterId())
 	{
@@ -97,7 +97,7 @@ void UMVVM_MyCharacterBase::OnCharacterWithIDPossessed(APlayerCharacter* PlayerC
 	PlayerCharacter->OnPowerUpsChanged.AddUniqueDynamic(this, &ThisClass::OnPowerUpsChanged);
 
 	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
-	if (ensureMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
+	if (ensureAlwaysMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		PlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnNicknameChanged);
 		OnNicknameChanged(PlayerState->GetPlayerFNameCustom());

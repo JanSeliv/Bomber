@@ -134,10 +134,10 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 	constexpr bool bInvertRest = true;
 	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
 
-	// Notify client about pawn change
+	// Notify host about pawn change
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InPawn))
 	{
-		UGlobalEventsSubsystem::Get().OnCharacterWithIDPossessed.Broadcast(PlayerCharacter, PlayerCharacter->GetCharacterID());
+		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterPossessed(*PlayerCharacter);
 	}
 }
 
@@ -153,7 +153,7 @@ void AMyPlayerController::OnRep_Pawn()
 	// Notify client about pawn change
 	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
-		UGlobalEventsSubsystem::Get().OnCharacterWithIDPossessed.Broadcast(PlayerCharacter, PlayerCharacter->GetCharacterID());
+		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterPossessed(*PlayerCharacter);
 	}
 }
 

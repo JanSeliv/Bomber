@@ -4,6 +4,8 @@
 
 #include "Subsystems/WorldSubsystem.h"
 //---
+#include "Structures/OnCharactersReadyHandler.h"
+//---
 #include "GlobalEventsSubsystem.generated.h"
 
 /**
@@ -19,6 +21,10 @@ public:
 	/** Returns this Subsystem, is checked and will crash if can't be obtained.*/
 	static UGlobalEventsSubsystem& Get();
 
+	/*********************************************************************************************
+	 * Game States
+	 ********************************************************************************************* */
+public:
 	/** Returns the pointer to this Subsystem. Code usage example:
 	 * BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
@@ -36,12 +42,28 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnEndGameStateChanged OnEndGameStateChanged;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterWithIDPossessed, class APlayerCharacter*, Character, int32, CharacterID);
+	/*********************************************************************************************
+	 * On Character Ready
+	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterReady, class APlayerCharacter*, Character, int32, CharacterID);
 
-	/** Called when any character was spawned and possessed. Code usage example:
-	 * BIND_ON_CHARACTER_WITH_ID_POSSESSED(this, ThisClass::OnCharacterWithIDPossessed, 0); */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnCharacterWithIDPossessed OnCharacterWithIDPossessed;
+	/** Called when any character was spawned, possessed and replicated. Code usage example:
+	 * BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, 0);
+	 * Is not BlueprintCallable since should be broadcasted only by OnCharactersReadyHandler.
+	 * @warning Don't try to broadcast it in code, instead call OnCharactersReadyHandler's methods. */
+	UPROPERTY(BlueprintAssignable, Transient, Category = "C++")
+	FOnCharacterReady OnCharacterReady;
+
+	/** Internal structure to handle character ready event. */
+	FOnCharactersReadyHandler OnCharactersReadyHandler;
+
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
+	/** Is called when this Subsystem is removed. */
+	virtual void Deinitialize() override;
 };
 
 /** Helper macro to bind and call the function when the game state was changed. */
@@ -55,11 +77,12 @@ public:
 }
 
 /** Helper macro to bind and call the function when the local player character was spawned and possessed. */
-#define BIND_ON_CHARACTER_WITH_ID_POSSESSED(Obj, Function, CharacterID) \
+#define BIND_AND_CALL_ON_CHARACTER_READY(Obj, Function, CharacterID) \
 { \
-	UGlobalEventsSubsystem::Get().OnCharacterWithIDPossessed.AddUniqueDynamic(Obj, &Function); \
-	if (APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetPlayerCharacter(CharacterID)) \
+	UGlobalEventsSubsystem::Get().OnCharacterReady.AddUniqueDynamic(Obj, &Function); \
+	APlayerCharacter* Character = UMyBlueprintFunctionLibrary::GetPlayerCharacter(CharacterID); \
+	if (UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.IsCharacterReady(Character)) \
 	{ \
-		Function(PlayerCharacter, CharacterID); \
+		Function(Character, CharacterID); \
 	} \
 }

@@ -22,3 +22,11 @@ UGlobalEventsSubsystem* UGlobalEventsSubsystem::GetGlobalEventsSubsystem(const U
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
 	return World ? World->GetSubsystem<UGlobalEventsSubsystem>() : nullptr;
 }
+
+// Is called when the Subsystem is created
+void UGlobalEventsSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+
+	OnCharactersReadyHandler.Reset();
+}

@@ -148,8 +148,8 @@ void AMyAIController::OnPossess(APawn* InPawn)
 		NewPlayerState->SetPlayerNameCustom(FName(*AIName));
 	}
 
-	// Notify client about bot possession
-	UGlobalEventsSubsystem::Get().OnCharacterWithIDPossessed.Broadcast(OwnerInternal, OwnerInternal->GetCharacterID());
+	// Notify host about bot possession
+	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterPossessed(*OwnerInternal);
 }
 
 // Allows the controller to react on unpossessing the pawn

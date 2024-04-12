@@ -164,7 +164,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/** Is overriden to handle the client login when is set new player state. */
-	virtual void OnRep_PlayerState() override;
+	virtual void OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState) override;
 
 	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;
