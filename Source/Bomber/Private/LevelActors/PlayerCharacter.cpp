@@ -702,6 +702,12 @@ void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 // Is called when the player was destroyed
 void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
+	if (AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
+	{
+		// Ignore, is not gameplay destroy, likely level is regenerated
+		return;
+	}
+
 	if (AMyPlayerState* InPlayerState = GetPlayerState<AMyPlayerState>())
 	{
 		InPlayerState->SetCharacterDead(true);
