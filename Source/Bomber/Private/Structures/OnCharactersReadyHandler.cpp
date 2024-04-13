@@ -10,7 +10,8 @@
 // Should be called when character is possessed
 void FOnCharactersReadyHandler::OnCharacterPossessed(APlayerCharacter& Character)
 {
-	if (UUtilsLibrary::HasWorldBegunPlay())
+	if (UUtilsLibrary::HasWorldBegunPlay()
+	    && !IsCharacterReady(&Character)) // Skip if already ready
 	{
 		FindOrAdd(Character).bIsPossessed = true;
 		TryBroadcastOnCharacterReady(Character);
@@ -20,9 +21,10 @@ void FOnCharactersReadyHandler::OnCharacterPossessed(APlayerCharacter& Character
 // Should be called when character ID is assigned or replicated
 void FOnCharactersReadyHandler::OnCharacterIdAssigned(APlayerCharacter& Character)
 {
-	if (UUtilsLibrary::HasWorldBegunPlay())
+	if (UUtilsLibrary::HasWorldBegunPlay()
+	    && !IsCharacterReady(&Character)) // Skip if already ready
 	{
-		ensureAlwaysMsgf(Character.GetCharacterID() != INDEX_NONE, TEXT("ERROR: [%i] %s:\n'Character ID' is not assigned for next character: %s"), __LINE__, *FString(__FUNCTION__), *Character.GetName());
+		ensureAlwaysMsgf(Character.GetCharacterID() != INDEX_NONE, TEXT("ERROR: [%i] %hs:\n'Character ID' is not assigned for next character: %s"), __LINE__, __FUNCTION__, *Character.GetName());
 		FindOrAdd(Character).bHasCharacterID = true;
 		TryBroadcastOnCharacterReady(Character);
 	}
@@ -37,7 +39,8 @@ void FOnCharactersReadyHandler::OnPlayerStateInit(const AMyPlayerState& PlayerSt
 	}
 
 	APlayerCharacter* Character = PlayerState.GetPawn<APlayerCharacter>();
-	if (ensureAlwaysMsgf(Character, TEXT("ERROR: [%i] %s:\n'Character' is not assigned for next player state: %s"), __LINE__, *FString(__FUNCTION__), *PlayerState.GetName()))
+	if (ensureAlwaysMsgf(Character, TEXT("ERROR: [%i] %hs:\n'Character' is not assigned for next player state: %s"), __LINE__, __FUNCTION__, *PlayerState.GetName())
+	    && !IsCharacterReady(Character)) // Skip if already ready
 	{
 		FindOrAdd(*Character).PlayerState = &PlayerState;
 		TryBroadcastOnCharacterReady(*Character);
