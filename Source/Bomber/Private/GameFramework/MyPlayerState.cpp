@@ -138,7 +138,7 @@ void AMyPlayerState::BeginPlay()
 
 	if (HasAuthority())
 	{
-		BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 	}
 }
 

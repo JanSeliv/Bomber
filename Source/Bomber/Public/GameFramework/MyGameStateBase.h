@@ -26,7 +26,7 @@ public:
 
 	/*********************************************************************************************
 	 * Current Game State enum
-	 * Can be tracked both on host and client by listening UGlobalEventsSubsystem::Get().OnGameStateChanged
+	 * Can be tracked both on host and client by binding with BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); 
 	 ********************************************************************************************* */
 public:
 	/** Set the new game state for the current game.*/

@@ -27,33 +27,56 @@ public:
 
 	/*********************************************************************************************
 	 * Game States
-	 * - BIND_AND_CALL_ON_GAME_STATE_CHANGED - called when the current game state was changed.
+	 * - BIND_ON_GAME_STATE_CHANGED - called when the current game state was changed.
 	 * - BIND_ON_GAME_STATE_CREATED - called when the game state actor was created. 
 	 ********************************************************************************************* */
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, ECurrentGameState, CurrentGameState);
 
-	/** Called when the current game state was changed. Code usage example:
-	 * BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnGameStateChanged OnGameStateChanged;
+	/** Called when the current game state was changed.
+	 * @warning in code, use BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++", DisplayName = "On Game State Changed")
+	FOnGameStateChanged BP_OnGameStateChanged;
 
 	/*********************************************************************************************
-	 * On Character Ready
-	 * - BIND_AND_CALL_ON_CHARACTER_READY - when character was spawned, possessed and replicated.
+	 * On Player Ready
+	 * Thsese delegates are managed by 'OnCharactersReadyHandler'.
+     * @warning in code:
+     * - Instead of .Broadcast(), call OnCharactersReadyHandler.Broadcast_ methods.
+     * - Instead of .AddDynamic(), use next macros:
+	 * BIND_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, CharacterID);
+	 * BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
+	 * BIND_ON_PLAYER_STATE_READY(this, ThisClass::OnPlayerStateReady, CharacterID);
+	 * BIND_ON_LOCAL_PLAYER_STATE_READY(this, ThisClass::OnLocalPlayerStateReady);
 	 ********************************************************************************************* */
 public:
+	/** Encapsulates the managements of 'On Player Ready' delegates.
+	 * Contains various Broadcast_ methods. */
+	FOnCharactersReadyHandler OnCharactersReadyHandler;
+
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterReady, class APlayerCharacter*, Character, int32, CharacterID);
 
-	/** Called when any character was spawned, possessed and replicated. Code usage example:
-	 * BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, 0);
-	 * Is not BlueprintCallable since should be broadcasted only by OnCharactersReadyHandler.
-	 * @warning Don't try to broadcast it in code, instead call OnCharactersReadyHandler's methods. */
-	UPROPERTY(BlueprintAssignable, Transient, Category = "C++")
-	FOnCharacterReady OnCharacterReady;
+	/** Called when any character is spawned, possessed, and replicated.
+	 * @warning in code, use BIND_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, CharacterID); */
+	UPROPERTY(BlueprintAssignable, Transient, Category = "C++", DisplayName = "On Character Ready")
+	FOnCharacterReady BP_OnCharacterReady;
 
-	/** Internal structure to handle character ready event. */
-	FOnCharactersReadyHandler OnCharactersReadyHandler;
+	/** Called when the local player character is spawned, possessed, and replicated.
+	 * @warning in code, use BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady); */
+	UPROPERTY(BlueprintAssignable, Transient, Category = "C++", DisplayName = "On Local Character Ready")
+	FOnCharacterReady BP_OnLocalCharacterReady;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerStateReady, class AMyPlayerState*, PlayerState, int32, CharacterID);
+
+	/** Called when any player state is initialized and its assigned character is ready.
+	 * @warning in code, use BIND_ON_PLAYER_STATE_READY(this, ThisClass::OnPlayerStateReady, CharacterID); */
+	UPROPERTY(BlueprintAssignable, Transient, Category = "C++", DisplayName = "On Player State Ready")
+	FOnPlayerStateReady BP_OnPlayerStateReady;
+
+	/** Called when the local player state is initialized and its assigned character is ready.
+	 * @warning in code, use BIND_ON_LOCAL_PLAYER_STATE_READY(this, ThisClass::OnLocalPlayerStateReady); */
+	UPROPERTY(BlueprintAssignable, Transient, Category = "C++", DisplayName = "On Local Player State Ready")
+	FOnPlayerStateReady BP_OnLocalPlayerStateReady;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -69,23 +92,12 @@ protected:
  ********************************************************************************************* */
 
 /** Helper macro to bind and call the function when the game state was changed. */
-#define BIND_AND_CALL_ON_GAME_STATE_CHANGED(Obj, Function) \
+#define BIND_ON_GAME_STATE_CHANGED(Obj, Function) \
 { \
-	UGlobalEventsSubsystem::Get().OnGameStateChanged.AddUniqueDynamic(Obj, &Function); \
+	UGlobalEventsSubsystem::Get().BP_OnGameStateChanged.AddUniqueDynamic(Obj, &Function); \
 	if (AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::Menu) \
 	{ \
 		Obj->Function(ECurrentGameState::Menu); \
-	} \
-}
-
-/** Helper macro to bind and call the function when any character was spawned and possessed. */
-#define BIND_AND_CALL_ON_CHARACTER_READY(Obj, Function, CharacterID) \
-{ \
-	UGlobalEventsSubsystem::Get().OnCharacterReady.AddUniqueDynamic(Obj, &Function); \
-	APlayerCharacter* Character = UMyBlueprintFunctionLibrary::GetPlayerCharacter(CharacterID); \
-	if (UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.IsCharacterReady(Character)) \
-	{ \
-		Obj->Function(Character, CharacterID); \
 	} \
 }
 
@@ -101,3 +113,19 @@ protected:
 		World->GameStateSetEvent.AddUObject(Obj, &Function); \
 	} \
 }
+
+/** Helper macro to bind (or call if possible) when any character is spawned, possessed, and replicated. */ 
+#define BIND_ON_CHARACTER_READY(Obj, Function, CharacterID) \
+    INTERNAL_BIND_CHARACTER_READY(BP_OnCharacterReady, Obj, Function, PlayerCharacter, CharacterID)
+
+/** Helper macro to bind (or call if possible) when the local player character is spawned, possessed, and replicated. */
+#define BIND_ON_LOCAL_CHARACTER_READY(Obj, Function) \
+    INTERNAL_BIND_CHARACTER_READY(BP_OnLocalCharacterReady, Obj, Function, PlayerCharacter, INDEX_NONE)
+
+/** Helper macro to bind (or call if possible) when any player state is initialized and its assigned character is ready. */
+#define BIND_ON_PLAYER_STATE_READY(Obj, Function, CharacterID) \
+    INTERNAL_BIND_CHARACTER_READY(BP_OnPlayerStateReady, Obj, Function, MyPlayerState, CharacterID)
+
+/** Helper macro to bind (or call if possible) when the local player state is initialized and its assigned character is ready. */
+#define BIND_ON_LOCAL_PLAYER_STATE_READY(Obj, Function) \
+    INTERNAL_BIND_CHARACTER_READY(BP_OnLocalPlayerStateReady, Obj, Function, MyPlayerState, INDEX_NONE)

@@ -8,30 +8,30 @@
 #include "Subsystems/GlobalEventsSubsystem.h"
 
 // Should be called when character is possessed
-void FOnCharactersReadyHandler::OnCharacterPossessed(APlayerCharacter& Character)
+void FOnCharactersReadyHandler::Broadcast_OnCharacterPossessed(APlayerCharacter& Character)
 {
 	if (UUtilsLibrary::HasWorldBegunPlay()
 	    && !IsCharacterReady(&Character)) // Skip if already ready
 	{
 		FindOrAdd(Character).bIsPossessed = true;
-		TryBroadcastOnCharacterReady(Character);
+		TryBroadcastOnReady_Internal(Character);
 	}
 }
 
 // Should be called when character ID is assigned or replicated
-void FOnCharactersReadyHandler::OnCharacterIdAssigned(APlayerCharacter& Character)
+void FOnCharactersReadyHandler::Broadcast_OnCharacterIdAssigned(APlayerCharacter& Character)
 {
 	if (UUtilsLibrary::HasWorldBegunPlay()
 	    && !IsCharacterReady(&Character)) // Skip if already ready
 	{
 		ensureAlwaysMsgf(Character.GetCharacterID() != INDEX_NONE, TEXT("ERROR: [%i] %hs:\n'Character ID' is not assigned for next character: %s"), __LINE__, __FUNCTION__, *Character.GetName());
 		FindOrAdd(Character).bHasCharacterID = true;
-		TryBroadcastOnCharacterReady(Character);
+		TryBroadcastOnReady_Internal(Character);
 	}
 }
 
 // Should be called when player state is replicated
-void FOnCharactersReadyHandler::OnPlayerStateInit(const AMyPlayerState& PlayerState)
+void FOnCharactersReadyHandler::Broadcast_OnPlayerStateInit(const AMyPlayerState& PlayerState)
 {
 	if (!UUtilsLibrary::HasWorldBegunPlay())
 	{
@@ -43,13 +43,18 @@ void FOnCharactersReadyHandler::OnPlayerStateInit(const AMyPlayerState& PlayerSt
 	    && !IsCharacterReady(Character)) // Skip if already ready
 	{
 		FindOrAdd(*Character).PlayerState = &PlayerState;
-		TryBroadcastOnCharacterReady(*Character);
+		TryBroadcastOnReady_Internal(*Character);
 	}
 }
 
 // Returns true if the character is ready at this moment
 bool FOnCharactersReadyHandler::IsCharacterReady(const APlayerCharacter* Character) const
 {
+	if (!Character)
+	{
+		return false;
+	}
+
 	const FOnCharacterReadyData* FoundHandle = OnCharacterReadyHandles.FindByPredicate([&Character](const FOnCharacterReadyData& It)
 	{
 		return It.Character == Character;
@@ -62,12 +67,45 @@ bool FOnCharactersReadyHandler::IsCharacterReady(const APlayerCharacter* Charact
 	       && FoundHandle->bHasCharacterID;
 }
 
-// Broadcasts OnCharacterReady event if all conditions are met
-void FOnCharactersReadyHandler::TryBroadcastOnCharacterReady(APlayerCharacter& Character)
+// Returns true if the player state is ready at this moment
+bool FOnCharactersReadyHandler::IsCharacterReady(const AMyPlayerState* PlayerState) const
 {
-	if (IsCharacterReady(&Character))
+	return PlayerState && IsCharacterReady(PlayerState->GetPawn<APlayerCharacter>());
+}
+
+// Broadcasts OnCharacterReady event if all conditions are met
+void FOnCharactersReadyHandler::TryBroadcastOnReady_Internal(APlayerCharacter& Character)
+{
+	if (!IsCharacterReady(&Character))
 	{
-		UGlobalEventsSubsystem::Get().OnCharacterReady.Broadcast(&Character, Character.GetCharacterID());
+		// Not ready yet
+		return;
+	}
+
+	const UGlobalEventsSubsystem& EventsSubsystem = UGlobalEventsSubsystem::Get();
+	AMyPlayerState* PlayerState = CastChecked<AMyPlayerState>(Character.GetPlayerState());
+
+	const int32 CharacterID = Character.GetCharacterID();
+	const bool bIsLocalPlayer = Character.IsLocallyControlled() && Character.IsPlayerControlled();
+
+	if (EventsSubsystem.BP_OnCharacterReady.IsBound())
+	{
+		EventsSubsystem.BP_OnCharacterReady.Broadcast(&Character, CharacterID);
+	}
+
+	if (bIsLocalPlayer && EventsSubsystem.BP_OnLocalCharacterReady.IsBound())
+	{
+		EventsSubsystem.BP_OnLocalCharacterReady.Broadcast(&Character, CharacterID);
+	}
+
+	if (EventsSubsystem.BP_OnPlayerStateReady.IsBound())
+	{
+		EventsSubsystem.BP_OnPlayerStateReady.Broadcast(PlayerState, CharacterID);
+	}
+
+	if (bIsLocalPlayer && EventsSubsystem.BP_OnLocalPlayerStateReady.IsBound())
+	{
+		EventsSubsystem.BP_OnLocalPlayerStateReady.Broadcast(PlayerState, CharacterID);
 	}
 }
 

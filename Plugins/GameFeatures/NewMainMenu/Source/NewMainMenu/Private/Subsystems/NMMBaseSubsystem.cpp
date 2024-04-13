@@ -49,7 +49,7 @@ void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Clears all transient data contained in this subsystem

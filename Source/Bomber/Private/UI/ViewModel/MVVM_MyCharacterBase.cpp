@@ -45,7 +45,7 @@ void UMVVM_MyCharacterBase::OnViewModelConstruct_Implementation(const UUserWidge
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
-	BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, GetCharacterId());
+	BIND_ON_PLAYER_STATE_READY(this, ThisClass::OnPlayerStateReady, GetCharacterId());
 }
 
 // Is called when this View Model is destructed
@@ -60,8 +60,8 @@ void UMVVM_MyCharacterBase::OnViewModelDestruct_Implementation()
 	}
 }
 
-// Called when own player character was spawned and possessed, so we can bind to data
-void UMVVM_MyCharacterBase::OnCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+// Called when any player state is initialized and its assigned character is ready
+void UMVVM_MyCharacterBase::OnPlayerStateReady_Implementation(AMyPlayerState* PlayerState, int32 CharacterID)
 {
 	if (CharacterID != GetCharacterId())
 	{
@@ -69,18 +69,16 @@ void UMVVM_MyCharacterBase::OnCharacterReady_Implementation(APlayerCharacter* Pl
 		return;
 	}
 
-	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
-	if (ensureAlwaysMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
-	{
-		PlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnNicknameChanged);
-		OnNicknameChanged(PlayerState->GetPlayerFNameCustom());
+	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 
-		PlayerState->OnCharacterDeadChanged.AddUniqueDynamic(this, &ThisClass::OnCharacterDeadChanged);
-		OnCharacterDeadChanged(PlayerState->IsCharacterDead());
+	PlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnNicknameChanged);
+	OnNicknameChanged(PlayerState->GetPlayerFNameCustom());
 
-		// Set by default Human\Bot visibility as there is no support for joining during the match
-		const bool IsABot = PlayerState->IsABot();
-		SetIsHumanVisibility(IsABot ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
-		SetIsBotVisibility(IsABot ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-	}
+	PlayerState->OnCharacterDeadChanged.AddUniqueDynamic(this, &ThisClass::OnCharacterDeadChanged);
+	OnCharacterDeadChanged(PlayerState->IsCharacterDead());
+
+	// Set by default Human\Bot visibility as there is no support for joining during the match
+	const bool IsABot = PlayerState->IsABot();
+	SetIsHumanVisibility(IsABot ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+	SetIsBotVisibility(IsABot ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 }

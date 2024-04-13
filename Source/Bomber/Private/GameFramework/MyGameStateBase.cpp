@@ -33,7 +33,6 @@ AMyGameStateBase& AMyGameStateBase::Get()
 
 /*********************************************************************************************
  * Current Game State enum
- * Can be tracked both on host and client by listening UGlobalEventsSubsystem::Get().OnGameStateChanged
  ********************************************************************************************* */
 
 // Returns the AMyGameState::CurrentGameState property.
@@ -71,7 +70,7 @@ void AMyGameStateBase::ApplyGameState()
 	}
 
 	// Notify listeners
-	const UGlobalEventsSubsystem::FOnGameStateChanged& OnGameStateChanged = UGlobalEventsSubsystem::Get().OnGameStateChanged;
+	const UGlobalEventsSubsystem::FOnGameStateChanged& OnGameStateChanged = UGlobalEventsSubsystem::Get().BP_OnGameStateChanged;
 	if (OnGameStateChanged.IsBound())
 	{
 		OnGameStateChanged.Broadcast(CurrentGameStateInternal);

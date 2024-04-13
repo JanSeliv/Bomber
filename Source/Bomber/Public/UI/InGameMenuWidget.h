@@ -107,7 +107,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggleInGameMenu(bool bIsVisible);
 
-	/** Called when local player character was possessed. */
+	/** Called when the local player state is initialized and its assigned character is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+	void OnLocalPlayerStateReady(class AMyPlayerState* PlayerState, int32 CharacterID);
 };

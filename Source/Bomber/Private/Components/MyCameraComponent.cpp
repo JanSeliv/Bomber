@@ -215,7 +215,7 @@ void UMyCameraComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// Listen states to manage the tick
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Listen to recalculate camera location
 	if (UMyGameViewportClient* GameViewportClient = UMyBlueprintFunctionLibrary::GetGameViewportClient())

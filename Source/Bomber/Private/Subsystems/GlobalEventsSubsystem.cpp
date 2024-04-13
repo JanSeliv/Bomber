@@ -28,5 +28,11 @@ void UGlobalEventsSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 
+	BP_OnGameStateChanged.Clear();
+
 	OnCharactersReadyHandler.Reset();
+	BP_OnCharacterReady.Clear();
+	BP_OnLocalCharacterReady.Clear();
+	BP_OnPlayerStateReady.Clear();
+	BP_OnLocalPlayerStateReady.Clear();
 }

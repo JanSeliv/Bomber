@@ -131,7 +131,7 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
 	SetAI(bMatchStarted);
@@ -149,7 +149,7 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	}
 
 	// Notify host about bot possession
-	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterPossessed(*OwnerInternal);
+	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterPossessed(*OwnerInternal);
 }
 
 // Allows the controller to react on unpossessing the pawn

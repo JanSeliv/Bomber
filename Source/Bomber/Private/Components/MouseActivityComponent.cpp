@@ -129,7 +129,7 @@ void UMouseActivityComponent::BeginPlay()
 	SetMouseFocusOnUI(true);
 
 	// Listen to handle input for each game state
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Called every frame to calculate Delta Time

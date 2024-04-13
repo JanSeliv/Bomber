@@ -205,7 +205,7 @@ void APlayerCharacter::BeginPlay()
 	{
 		OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-		BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 		// Listen to handle possessing logic
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
@@ -307,7 +307,7 @@ void APlayerCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlaye
 
 	ApplyCustomPlayerMeshData();
 
-	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnPlayerStateInit(*MyPlayerState);
+	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnPlayerStateInit(*MyPlayerState);
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -671,7 +671,7 @@ void APlayerCharacter::ApplyCharacterID()
 
 	UpdateCollisionObjectType();
 
-	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterIdAssigned(*this);
+	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterIdAssigned(*this);
 }
 
 // Is called on clients to apply the characterID-dependent logic for this character

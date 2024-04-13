@@ -41,7 +41,7 @@ void UNewAIAgentComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	UGameDifficultySubsystem::Get().OnGameDifficultyChanged.AddDynamic(this, &ThisClass::OnGameDifficultyChanged);
 }

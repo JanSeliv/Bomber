@@ -185,7 +185,7 @@ void ABombActor::BeginPlay()
 		SetLifeSpan();
 	}
 
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel

@@ -160,7 +160,7 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateCreated(class AGameStateBase* GameState);
 
-	/** Called when local player character was possessed, so we can bind to data. */
+	/** Called when the local player character is spawned, possessed, and replicated. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
 };

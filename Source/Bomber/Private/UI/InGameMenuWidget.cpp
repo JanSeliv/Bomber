@@ -7,7 +7,6 @@
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/MyHUD.h"
@@ -41,9 +40,9 @@ void UInGameMenuWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 
 	// Listen changing the game states to handle In-Game Menu visibility
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
-	BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, INDEX_NONE);
+	INTERNAL_BIND_CHARACTER_READY(BP_OnLocalPlayerStateReady, this, ThisClass::OnLocalPlayerStateReady, MyPlayerState, INDEX_NONE);
 
 	// Listen to toggle the game state widget when is requested
 	if (AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD())
@@ -197,21 +196,11 @@ void UInGameMenuWidget::OnToggleInGameMenu(bool bIsVisible)
 	}
 }
 
-// Called when local player character was possessed
-void UInGameMenuWidget::OnCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+// Called when the local player state is initialized and its assigned character is ready
+void UInGameMenuWidget::OnLocalPlayerStateReady_Implementation(class AMyPlayerState* PlayerState, int32 CharacterID)
 {
-	checkf(PlayerCharacter, TEXT("ERROR: [%i] %hs:\n'PlayerCharacter' is null!"), __LINE__, __FUNCTION__);
-	if (!PlayerCharacter->IsLocallyControlled()
-	    || !PlayerCharacter->IsPlayerControlled())
-	{
-		// Is not local player character
-		return;
-	}
-
-	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
-	if (ensureAlwaysMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
-	{
-		// Listen to update the End-Game state text
-		PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
-	}
+	// Listen to update the End-Game state text
+	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
+	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }

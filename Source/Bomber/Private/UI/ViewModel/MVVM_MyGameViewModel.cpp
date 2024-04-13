@@ -72,9 +72,9 @@ void UMVVM_MyGameViewModel::OnViewModelConstruct_Implementation(const UUserWidge
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::SetCurrentGameState);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::SetCurrentGameState);
 
-	BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, INDEX_NONE);
+	BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
 
 	BIND_ON_GAME_STATE_CREATED(this, ThisClass::OnGameStateCreated);
 }
@@ -86,7 +86,7 @@ void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
 
 	if (UGlobalEventsSubsystem* GlobalEventsSubsystem = UGlobalEventsSubsystem::GetGlobalEventsSubsystem())
 	{
-		GlobalEventsSubsystem->OnGameStateChanged.RemoveAll(this);}
+		GlobalEventsSubsystem->BP_OnGameStateChanged.RemoveAll(this);}
 
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
@@ -103,22 +103,13 @@ void UMVVM_MyGameViewModel::OnGameStateCreated_Implementation(AGameStateBase* Ga
 	MyGameState.OnInGameTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnInGameTimerSecRemainChanged);
 }
 
-// Called when local player character was possessed, so we can bind to data
-void UMVVM_MyGameViewModel::OnCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+// Called when the local player character is spawned, possessed, and replicated
+void UMVVM_MyGameViewModel::OnLocalCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
 {
 	checkf(PlayerCharacter, TEXT("ERROR: [%i] %hs:\n'PlayerCharacter' is null!"), __LINE__, __FUNCTION__);
-	if (!PlayerCharacter->IsLocallyControlled()
-	    || !PlayerCharacter->IsPlayerControlled())
-	{
-		// This View Model is not for this character
-		return;
-	}
-
 	PlayerCharacter->OnPowerUpsChanged.AddUniqueDynamic(this, &ThisClass::OnPowerUpsChanged);
 
 	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
-	if (ensureAlwaysMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
-	{
-		PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
-	}
+	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
+	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }

@@ -89,9 +89,9 @@ protected:
 	/** Is called when this View Model is destructed. */
 	virtual void OnViewModelDestruct_Implementation() override;
 
-	/** Called when own player character was possessed, so we can bind to data. */
+	/** Called when any player state is initialized and its assigned character is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+	void OnPlayerStateReady(class AMyPlayerState* PlayerState, int32 CharacterID);
 };
 
 /*********************************************************************************************

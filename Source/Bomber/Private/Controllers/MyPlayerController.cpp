@@ -100,7 +100,7 @@ void AMyPlayerController::BeginPlay()
 	SetUIInputIgnored();
 
 	// Listen to handle input for each game state
-	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Handle UI inputs
 	if (AMyHUD* HUD = GetHUD<AMyHUD>())
@@ -135,7 +135,7 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 	// Notify host about pawn change
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InPawn))
 	{
-		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterPossessed(*PlayerCharacter);
+		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterPossessed(*PlayerCharacter);
 	}
 }
 
@@ -151,7 +151,7 @@ void AMyPlayerController::OnRep_Pawn()
 	// Notify client about pawn change
 	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
 	{
-		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterPossessed(*PlayerCharacter);
+		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterPossessed(*PlayerCharacter);
 	}
 }
 

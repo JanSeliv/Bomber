@@ -15,27 +15,42 @@ class APlayerCharacter;
 class AMyPlayerState;
 
 /**
- * Internal structure to handle character ready event.
- * Any of public methods can be called in any order.
+ * Encapsulates the managements of 'On Player Ready' delegates from 'GlobalEventsSubsystem'.
  */
 struct BOMBER_API FOnCharactersReadyHandler
 {
 public:
+	/*********************************************************************************************
+	 * Public Broadcasters.
+	 * Once all are broadcasted, original delegate will be automatically called.
+	 * Can be called in any order.
+	 ********************************************************************************************* */
+public:
 	/** Should be called when character is possessed. */
-	void OnCharacterPossessed(APlayerCharacter& Character);
+	void Broadcast_OnCharacterPossessed(APlayerCharacter& Character);
 
 	/** Should be called when character ID is assigned or replicated. */
-	void OnCharacterIdAssigned(APlayerCharacter& Character);
+	void Broadcast_OnCharacterIdAssigned(APlayerCharacter& Character);
 
 	/** Should be called when player state is replicated. */
-	void OnPlayerStateInit(const AMyPlayerState& PlayerState);
+	void Broadcast_OnPlayerStateInit(const AMyPlayerState& PlayerState);
 
+	/*********************************************************************************************
+	 * Public Helpers
+	 ********************************************************************************************* */
+public:
 	/** Returns true if the character is ready at this moment. */
 	bool IsCharacterReady(const APlayerCharacter* Character) const;
+
+	/** Returns true if the player state is ready at this moment. */
+	bool IsCharacterReady(const AMyPlayerState* PlayerState) const;
 
 	/** Perform cleanup. */
 	void Reset();
 
+	/*********************************************************************************************
+	 * Internal handling
+	 ********************************************************************************************* */
 private:
 	/** Internal data struct to handle character ready event. */
 	struct FOnCharacterReadyData
@@ -51,6 +66,17 @@ private:
 
 	FOnCharacterReadyData& FindOrAdd(APlayerCharacter& Character);
 
-	/** Broadcasts OnCharacterReady event if all conditions are met. */
-	void TryBroadcastOnCharacterReady(APlayerCharacter& Character);
+	/** Is internal method, shouldn't be called directly, instead Broadcast_ methods should be used. */
+	void TryBroadcastOnReady_Internal(APlayerCharacter& Character);
 };
+
+/** Internal macro for binding and calling delegate methods. */
+#define INTERNAL_BIND_CHARACTER_READY(Delegate, Obj, Function, Arg, ID) \
+{ \
+    UGlobalEventsSubsystem::Get().Delegate.AddUniqueDynamic(Obj, &Function); \
+    auto* Arg = UMyBlueprintFunctionLibrary::Get##Arg(ID); \
+    if (UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.IsCharacterReady(Arg)) \
+    { \
+        Obj->Function(Arg, ID); \
+    } \
+}
