@@ -143,10 +143,11 @@ APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 Characte
 {
 	if (CharacterID < 0)
 	{
-		return nullptr;
+		// No ID is set, return local player character
+		return GetLocalPlayerCharacter(OptionalWorldContext);
 	}
 
-	// Each Bomber character has own CharacterID, so we can't obtain it from the PlayerController, instead we should take it from the PlayerCharacter
+	// Each Bomber character has own CharacterID, so we can't rely on PlayerController's PlayerIndex, instead we should take it from the level
 	FMapComponents MapComponents;
 	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
 	for (const UMapComponent* It : MapComponents)
@@ -165,7 +166,8 @@ APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 Characte
 APlayerCharacter* UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter(const UObject* OptionalWorldContext/* = nullptr*/)
 {
 	static constexpr int32 LocalPlayerIndex = 0;
-	return GetPlayerCharacter(LocalPlayerIndex, OptionalWorldContext);
+	const AMyPlayerController* MyPC = GetMyPlayerController(LocalPlayerIndex, OptionalWorldContext);
+	return MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
 }
 
 // Returns implemented Game Viewport Client on the project side

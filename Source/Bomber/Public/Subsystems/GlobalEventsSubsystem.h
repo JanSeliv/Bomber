@@ -21,18 +21,21 @@ public:
 	/** Returns this Subsystem, is checked and will crash if can't be obtained.*/
 	static UGlobalEventsSubsystem& Get();
 
-	/*********************************************************************************************
-	 * Game States
-	 ********************************************************************************************* */
-public:
-	/** Returns the pointer to this Subsystem. Code usage example:
-	 * BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); */
+	/** Returns the pointer to this Subsystem. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
 	static UGlobalEventsSubsystem* GetGlobalEventsSubsystem(const UObject* OptionalWorldContext = nullptr);
 
+	/*********************************************************************************************
+	 * Game States
+	 * - BIND_AND_CALL_ON_GAME_STATE_CHANGED - called when the current game state was changed.
+	 * - BIND_ON_GAME_STATE_CREATED - called when the game state actor was created. 
+	 * - OnEndGameStateChanged - Called when player's match result was changed (Win, lose, draw or none applied).
+	 ********************************************************************************************* */
+public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, ECurrentGameState, CurrentGameState);
 
-	/** Called when the current game state was changed. */
+	/** Called when the current game state was changed. Code usage example:
+	 * BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged;
 
@@ -44,6 +47,7 @@ public:
 
 	/*********************************************************************************************
 	 * On Character Ready
+	 * - BIND_AND_CALL_ON_CHARACTER_READY - when character was spawned, possessed and replicated.
 	 ********************************************************************************************* */
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterReady, class APlayerCharacter*, Character, int32, CharacterID);
@@ -66,23 +70,41 @@ protected:
 	virtual void Deinitialize() override;
 };
 
+/*********************************************************************************************
+ * Macro Helpers
+ * In general, used to additionally call given function if event was broadcasted before binding.
+ ********************************************************************************************* */
+
 /** Helper macro to bind and call the function when the game state was changed. */
 #define BIND_AND_CALL_ON_GAME_STATE_CHANGED(Obj, Function) \
 { \
 	UGlobalEventsSubsystem::Get().OnGameStateChanged.AddUniqueDynamic(Obj, &Function); \
 	if (AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::Menu) \
 	{ \
-		Function(ECurrentGameState::Menu); \
+		Obj->Function(ECurrentGameState::Menu); \
 	} \
 }
 
-/** Helper macro to bind and call the function when the local player character was spawned and possessed. */
+/** Helper macro to bind and call the function when any character was spawned and possessed. */
 #define BIND_AND_CALL_ON_CHARACTER_READY(Obj, Function, CharacterID) \
 { \
 	UGlobalEventsSubsystem::Get().OnCharacterReady.AddUniqueDynamic(Obj, &Function); \
 	APlayerCharacter* Character = UMyBlueprintFunctionLibrary::GetPlayerCharacter(CharacterID); \
 	if (UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.IsCharacterReady(Character)) \
 	{ \
-		Function(Character, CharacterID); \
+		Obj->Function(Character, CharacterID); \
+	} \
+}
+
+/** Helper macro to bind and call the function when the game state actor was created. */
+#define BIND_ON_GAME_STATE_CREATED(Obj, Function) \
+{ \
+	if (AMyGameStateBase* GameState = UMyBlueprintFunctionLibrary::GetMyGameState()) \
+	{ \
+		Obj->Function(GameState); \
+	} \
+	else if (UWorld* World = GetWorld()) \
+	{ \
+		World->GameStateSetEvent.AddUObject(Obj, &Function); \
 	} \
 }

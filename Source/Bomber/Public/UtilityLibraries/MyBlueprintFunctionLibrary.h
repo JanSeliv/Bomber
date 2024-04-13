@@ -82,7 +82,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
 	static class UInGameMenuWidget* GetInGameMenuWidget(const UObject* OptionalWorldContext = nullptr);
 
-	/** Returns specified player character. */
+	/** Returns specified player character.
+	 * @param CharacterID - Global ID of a character in session to find:
+	 * INDEX_NONE - Local player, 0 - Host, 1 - client/AI1, 2 - client/AI2, 3 - client/AI3.
+	 * @param OptionalWorldContext - the world context object.
+	 * @warning CharacterID != PlayerIndex, so 0 will not return local player, but Host! */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
 	static class APlayerCharacter* GetPlayerCharacter(int32 CharacterID, const UObject* OptionalWorldContext = nullptr);
 
