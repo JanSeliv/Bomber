@@ -5,6 +5,8 @@
 #include "Bomber.h"
 #include "DataAssets/SoundsDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -226,16 +228,34 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	USoundMix* MainSoundMix = USoundsDataAsset::Get().GetMainSoundMix();
 	UGameplayStatics::SetBaseSoundMix(&InWorld, MainSoundMix);
 
-	// Listed the ending the current game to play the End-Game sound on
-	UGlobalEventsSubsystem::Get().OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, INDEX_NONE);
 
 	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	PlayCurrentBackgroundMusic();
 }
 
+// Called when local player character was possessed
+void USoundsSubsystem::OnCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+{
+	checkf(PlayerCharacter, TEXT("ERROR: [%i] %hs:\n'PlayerCharacter' is null!"), __LINE__, __FUNCTION__);
+	if (!PlayerCharacter->IsLocallyControlled()
+	    || !PlayerCharacter->IsPlayerControlled())
+	{
+		// Is not local player character
+		return;
+	}
+
+	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
+	if (ensureAlwaysMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		// Listen the ending the current game to play the End-Game sound on
+		PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	}
+}
+
 // Is called on ending the current game to play the End-Game sound
-void USoundsSubsystem::OnEndGameStateChanged(EEndGameState EndGameState)
+void USoundsSubsystem::OnEndGameStateChanged_Implementation(EEndGameState EndGameState)
 {
 	if (EndGameState == EEndGameState::None)
 	{
@@ -249,9 +269,8 @@ void USoundsSubsystem::OnEndGameStateChanged(EEndGameState EndGameState)
 }
 
 // Listen game states to switch background music
-void USoundsSubsystem::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void USoundsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	StopEndGameCountdownSFX();
 	PlayCurrentBackgroundMusic();
 }
-

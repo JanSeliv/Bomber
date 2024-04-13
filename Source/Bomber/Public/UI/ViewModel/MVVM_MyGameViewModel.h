@@ -56,7 +56,7 @@ protected:
 	FText EndGameResult = FText::GetEmpty();
 
 	/** Called when the player state was changed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnEndGameStateChanged(EEndGameState NewEndGameState);
 
 	/*********************************************************************************************

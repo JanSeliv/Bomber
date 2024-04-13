@@ -52,7 +52,7 @@ public:
 
 	/** Returns the Bomber Player State for specified player, nullptr otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	static class AMyPlayerState* GetMyPlayerState(const class APawn* Pawn);
+	static class AMyPlayerState* GetMyPlayerState(int32 CharacterID);
 
 	/** Returns the player state of current controller. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))

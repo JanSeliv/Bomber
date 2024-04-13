@@ -5,6 +5,7 @@
 #include "DataAssets/ItemDataAsset.h"
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -18,7 +19,7 @@
  ********************************************************************************************* */
 
 // Called when the player state was changed
-void UMVVM_MyGameViewModel::OnEndGameStateChanged(EEndGameState NewEndGameState)
+void UMVVM_MyGameViewModel::OnEndGameStateChanged_Implementation(EEndGameState NewEndGameState)
 {
 	const ESlateVisibility NewVisibility = NewEndGameState == EEndGameState::None ? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
 	SetEndGameStateVisibility(NewVisibility);
@@ -76,8 +77,6 @@ void UMVVM_MyGameViewModel::OnViewModelConstruct_Implementation(const UUserWidge
 	BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, INDEX_NONE);
 
 	BIND_ON_GAME_STATE_CREATED(this, ThisClass::OnGameStateCreated);
-
-	UGlobalEventsSubsystem::Get().OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }
 
 // Is called when this View Model is destructed
@@ -87,9 +86,7 @@ void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
 
 	if (UGlobalEventsSubsystem* GlobalEventsSubsystem = UGlobalEventsSubsystem::GetGlobalEventsSubsystem())
 	{
-		GlobalEventsSubsystem->OnGameStateChanged.RemoveAll(this);
-		GlobalEventsSubsystem->OnEndGameStateChanged.RemoveAll(this);
-	}
+		GlobalEventsSubsystem->OnGameStateChanged.RemoveAll(this);}
 
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
@@ -109,7 +106,7 @@ void UMVVM_MyGameViewModel::OnGameStateCreated_Implementation(AGameStateBase* Ga
 // Called when local player character was possessed, so we can bind to data
 void UMVVM_MyGameViewModel::OnCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
 {
-	checkf(PlayerCharacter, TEXT("ERROR: [%i] %s:\n'PlayerCharacter' is null!"), __LINE__, *FString(__FUNCTION__));
+	checkf(PlayerCharacter, TEXT("ERROR: [%i] %hs:\n'PlayerCharacter' is null!"), __LINE__, __FUNCTION__);
 	if (!PlayerCharacter->IsLocallyControlled()
 	    || !PlayerCharacter->IsPlayerControlled())
 	{
@@ -118,4 +115,10 @@ void UMVVM_MyGameViewModel::OnCharacterReady_Implementation(APlayerCharacter* Pl
 	}
 
 	PlayerCharacter->OnPowerUpsChanged.AddUniqueDynamic(this, &ThisClass::OnPowerUpsChanged);
+
+	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
+	if (ensureAlwaysMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	}
 }

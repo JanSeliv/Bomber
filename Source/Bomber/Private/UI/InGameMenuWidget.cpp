@@ -6,6 +6,8 @@
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/MyHUD.h"
@@ -41,8 +43,7 @@ void UInGameMenuWidget::NativeConstruct()
 	// Listen changing the game states to handle In-Game Menu visibility
 	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
-	// Listen to update the End-Game state tex;
-	UGlobalEventsSubsystem::Get().OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, INDEX_NONE);
 
 	// Listen to toggle the game state widget when is requested
 	if (AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD())
@@ -193,5 +194,24 @@ void UInGameMenuWidget::OnToggleInGameMenu(bool bIsVisible)
 	if (OnToggledInGameMenu.IsBound())
 	{
 		OnToggledInGameMenu.Broadcast(bIsVisible);
+	}
+}
+
+// Called when local player character was possessed
+void UInGameMenuWidget::OnCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+{
+	checkf(PlayerCharacter, TEXT("ERROR: [%i] %hs:\n'PlayerCharacter' is null!"), __LINE__, __FUNCTION__);
+	if (!PlayerCharacter->IsLocallyControlled()
+	    || !PlayerCharacter->IsPlayerControlled())
+	{
+		// Is not local player character
+		return;
+	}
+
+	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
+	if (ensureAlwaysMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		// Listen to update the End-Game state text
+		PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 	}
 }

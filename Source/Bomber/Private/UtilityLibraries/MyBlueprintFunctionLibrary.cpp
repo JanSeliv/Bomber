@@ -84,9 +84,10 @@ AMyPlayerController* UMyBlueprintFunctionLibrary::GetLocalPlayerController(const
 }
 
 // Returns the Bomber Player State for specified player, nullptr otherwise
-AMyPlayerState* UMyBlueprintFunctionLibrary::GetMyPlayerState(const APawn* Pawn)
+AMyPlayerState* UMyBlueprintFunctionLibrary::GetMyPlayerState(int32 CharacterID)
 {
-	return Pawn ? Pawn->GetPlayerState<AMyPlayerState>() : nullptr;
+	const APlayerCharacter* PlayerChar = GetPlayerCharacter(CharacterID);
+	return PlayerChar ? PlayerChar->GetPlayerState<AMyPlayerState>() : nullptr;
 }
 
 // Returns the player state of current controller

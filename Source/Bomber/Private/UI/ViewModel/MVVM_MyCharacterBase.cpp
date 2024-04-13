@@ -13,7 +13,7 @@
 bool UMVVM_MyCharacterBase::CanConstructViewModel_Implementation() const
 {
 	return Super::CanConstructViewModel_Implementation()
-		   && GetCharacterId() != INDEX_NONE;
+	       && GetCharacterId() != INDEX_NONE;
 }
 
 /*********************************************************************************************
@@ -53,15 +53,10 @@ void UMVVM_MyCharacterBase::OnViewModelDestruct_Implementation()
 {
 	Super::OnViewModelDestruct_Implementation();
 
-	if (APlayerCharacter* Character = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter())
+	if (AMyPlayerState* PlayerState = UMyBlueprintFunctionLibrary::GetMyPlayerState(GetCharacterId()))
 	{
-		Character->OnPowerUpsChanged.RemoveAll(this);
-
-		if (AMyPlayerState* PlayerState = Character->GetPlayerState<AMyPlayerState>())
-		{
-			PlayerState->OnPlayerNameChanged.RemoveAll(this);
-			PlayerState->OnCharacterDeadChanged.RemoveAll(this);
-		}
+		PlayerState->OnPlayerNameChanged.RemoveAll(this);
+		PlayerState->OnCharacterDeadChanged.RemoveAll(this);
 	}
 }
 

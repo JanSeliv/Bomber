@@ -128,8 +128,6 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 
 	SetControlRotation(FRotator::ZeroRotator);
 
-	BroadcastOnSetPlayerState();
-
 	// Try to rebind inputs for possessed pawn on server
 	constexpr bool bInvertRest = true;
 	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
@@ -155,14 +153,6 @@ void AMyPlayerController::OnRep_Pawn()
 	{
 		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.OnCharacterPossessed(*PlayerCharacter);
 	}
-}
-
-// Is overriden to notify the client when is set new player state
-void AMyPlayerController::OnRep_PlayerState()
-{
-	Super::OnRep_PlayerState();
-
-	BroadcastOnSetPlayerState();
 }
 
 /*********************************************************************************************
@@ -269,23 +259,6 @@ void AMyPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
 /*********************************************************************************************
  * Inputs management
  ********************************************************************************************* */
-
-// Is called on server and on client the player state is set
-void AMyPlayerController::BroadcastOnSetPlayerState()
-{
-	if (!OnSetPlayerState.IsBound())
-	{
-		return;
-	}
-
-	AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>();
-	if (!MyPlayerState)
-	{
-		return;
-	}
-
-	OnSetPlayerState.Broadcast(MyPlayerState);
-}
 
 // Returns true if Player Controller is ready to setup all the inputs
 bool AMyPlayerController::CanBindInputActions() const

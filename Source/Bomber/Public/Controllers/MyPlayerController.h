@@ -24,16 +24,6 @@ public:
 	AMyPlayerController();
 
 	/*********************************************************************************************
-	 * Delegates
-	 ********************************************************************************************* */
-public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSetPlayerState, class AMyPlayerState*, MyPlayerState);
-
-	/** Notifies the server and clients when the player state is set. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnSetPlayerState OnSetPlayerState;
-
-	/*********************************************************************************************
 	 * Public functions
 	 ********************************************************************************************* */
 public:
@@ -87,9 +77,6 @@ protected:
 	/** Is overriden to notify the client when this controller possesses new player character. */
 	virtual void OnRep_Pawn() override;
 
-	/** Is overriden to notify the client when is set new player state. */
-	virtual void OnRep_PlayerState() override;
-
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
@@ -109,10 +96,6 @@ protected:
 	/** Listens to handle input on opening and closing the Settings widget. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggledSettings(bool bIsVisible);
-
-	/** Is called on server and on client when the player state is set. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BroadcastOnSetPlayerState();
 
 	/*********************************************************************************************
 	 * Inputs management

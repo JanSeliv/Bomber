@@ -29,7 +29,6 @@ public:
 	 * Game States
 	 * - BIND_AND_CALL_ON_GAME_STATE_CHANGED - called when the current game state was changed.
 	 * - BIND_ON_GAME_STATE_CREATED - called when the game state actor was created. 
-	 * - OnEndGameStateChanged - Called when player's match result was changed (Win, lose, draw or none applied).
 	 ********************************************************************************************* */
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, ECurrentGameState, CurrentGameState);
@@ -38,12 +37,6 @@ public:
 	 * BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnGameStateChanged OnGameStateChanged;
-
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndGameStateChanged, EEndGameState, EndGameState);
-
-	/** Called when player's match result was changed (Win, lose, draw or none applied). */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnEndGameStateChanged OnEndGameStateChanged;
 
 	/*********************************************************************************************
 	 * On Character Ready

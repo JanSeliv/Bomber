@@ -106,4 +106,8 @@ protected:
 	/** Is called when In-Game menu became opened or closed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggleInGameMenu(bool bIsVisible);
+
+	/** Called when local player character was possessed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
 };
