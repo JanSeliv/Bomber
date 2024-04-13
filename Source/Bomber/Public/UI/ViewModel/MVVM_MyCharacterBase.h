@@ -24,63 +24,6 @@ public:
 	virtual bool CanConstructViewModel_Implementation() const override;
 
 	/*********************************************************************************************
-	 * PowerUps
-	 ********************************************************************************************* */
-public:
-	/** Setter and Getter about current amount of speed power-ups. */
-	void SetPowerUpSkateN(const FText& NewPowerUpSkate) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpSkateN, NewPowerUpSkate); }
-	const FText& GetPowerUpSkateN() const { return PowerUpSkateN; }
-
-	/** Setter and Getter about current amount of max bomb power-ups. */
-	void SetPowerUpBombN(const FText& NewPowerUpBomb) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpBombN, NewPowerUpBomb); }
-	const FText& GetPowerUpBombN() const { return PowerUpBombN; }
-
-	/** Setter and Getter about current amount of blast radius power-ups. */
-	void SetPowerUpFireN(const FText& NewPowerUpFire) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpFireN, NewPowerUpFire); }
-	const FText& GetPowerUpFireN() const { return PowerUpFireN; }
-
-	/** Setter and Getter about percentage of the current amount of speed power-ups. */
-	void SetPowerUpSkatePercent(float NewPowerUpSkatePercent) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpSkatePercent, NewPowerUpSkatePercent); }
-	float GetPowerUpSkatePercent() const { return PowerUpSkatePercent; }
-
-	/** Setter and Getter about percentage of the current amount of max bomb power-ups. */
-	void SetPowerUpBombPercent(float NewPowerUpBombPercent) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpBombPercent, NewPowerUpBombPercent); }
-	float GetPowerUpBombPercent() const { return PowerUpBombPercent; }
-
-	/** Setter and Getter about percentage of the current amount of blast radius power-ups. */
-	void SetPowerUpFirePercent(float NewPowerUpFirePercent) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpFirePercent, NewPowerUpFirePercent); }
-	float GetPowerUpFirePercent() const { return PowerUpFirePercent; }
-
-protected:
-	/** Current amount of speed power-ups. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
-	FText PowerUpSkateN = FText::GetEmpty();
-
-	/** Current amount of max bomb power-ups. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
-	FText PowerUpBombN = FText::GetEmpty();
-
-	/** Current amount of blast radius power-ups. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
-	FText PowerUpFireN = FText::GetEmpty();
-
-	/** Percentage of the current speed power-up. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
-	float PowerUpSkatePercent = 0.f;
-
-	/** Percentage of the current amount of max bomb power-ups. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
-	float PowerUpBombPercent = 0.f;
-
-	/** Percentage of the current amount of blast radius power-ups. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
-	float PowerUpFirePercent = 0.f;
-
-	/** Called when power-ups were updated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPowerUpsChanged(const struct FPowerUp& NewPowerUps);
-
-	/*********************************************************************************************
 	 * Nickname
 	 ********************************************************************************************* */
 public:
@@ -146,8 +89,8 @@ protected:
 	/** Is called when this View Model is destructed. */
 	virtual void OnViewModelDestruct_Implementation() override;
 
-	/** Called when local player character was possessed, so we can bind to data. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	/** Called when own player character was possessed, so we can bind to data. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
 };
 

@@ -2,6 +2,7 @@
 
 #include "UI/ViewModel/MVVM_MyGameViewModel.h"
 //---
+#include "DataAssets/ItemDataAsset.h"
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -44,6 +45,24 @@ void UMVVM_MyGameViewModel::OnInGameTimerSecRemainChanged_Implementation(float N
 }
 
 /*********************************************************************************************
+ * PowerUps
+ ********************************************************************************************* */
+
+// Called when power-ups were updated on local character
+void UMVVM_MyGameViewModel::OnPowerUpsChanged_Implementation(const FPowerUp& NewPowerUps)
+{
+	SetPowerUpSkateN(FText::AsNumber(NewPowerUps.SkateN));
+	SetPowerUpBombN(FText::AsNumber(NewPowerUps.BombN));
+	SetPowerUpFireN(FText::AsNumber(NewPowerUps.FireN));
+
+	const float MaxPowerUps = static_cast<float>(UItemDataAsset::Get().GetMaxAllowedItemsNum());
+	checkf(MaxPowerUps > 0.f, TEXT("ERROR: [%i] %s:\n'MaxPowerUps > 0' is null!"), __LINE__, *FString(__FUNCTION__));
+	SetPowerUpSkatePercent(static_cast<float>(NewPowerUps.SkateN) / MaxPowerUps);
+	SetPowerUpBombPercent(static_cast<float>(NewPowerUps.BombN) / MaxPowerUps);
+	SetPowerUpFirePercent(static_cast<float>(NewPowerUps.FireN) / MaxPowerUps);
+}
+
+/*********************************************************************************************
  * Events
  ********************************************************************************************* */
 
@@ -52,20 +71,13 @@ void UMVVM_MyGameViewModel::OnViewModelConstruct_Implementation(const UUserWidge
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
-	UGlobalEventsSubsystem& GlobalEventsSubsystem = UGlobalEventsSubsystem::Get();
-	GlobalEventsSubsystem.OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::SetCurrentGameState);
-	GlobalEventsSubsystem.OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+	BIND_AND_CALL_ON_GAME_STATE_CHANGED(this, ThisClass::SetCurrentGameState);
 
-	if (AMyGameStateBase* GameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		OnGameStateCreated(GameState);
-	}
-	else
-	{
-		UWorld* World = GetWorld();
-		checkf(World, TEXT("ERROR: [%i] %s:\n'World' is null!"), __LINE__, *FString(__FUNCTION__));
-		World->GameStateSetEvent.AddUObject(this, &ThisClass::OnGameStateCreated);
-	}
+	BIND_AND_CALL_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, INDEX_NONE);
+
+	BIND_ON_GAME_STATE_CREATED(this, ThisClass::OnGameStateCreated);
+
+	UGlobalEventsSubsystem::Get().OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }
 
 // Is called when this View Model is destructed
@@ -92,4 +104,18 @@ void UMVVM_MyGameViewModel::OnGameStateCreated_Implementation(AGameStateBase* Ga
 	AMyGameStateBase& MyGameState = *CastChecked<AMyGameStateBase>(GameState);
 	MyGameState.OnStartingTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnStartingTimerSecRemainChanged);
 	MyGameState.OnInGameTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnInGameTimerSecRemainChanged);
+}
+
+// Called when local player character was possessed, so we can bind to data
+void UMVVM_MyGameViewModel::OnCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+{
+	checkf(PlayerCharacter, TEXT("ERROR: [%i] %s:\n'PlayerCharacter' is null!"), __LINE__, *FString(__FUNCTION__));
+	if (!PlayerCharacter->IsLocallyControlled()
+	    || !PlayerCharacter->IsPlayerControlled())
+	{
+		// This View Model is not for this character
+		return;
+	}
+
+	PlayerCharacter->OnPowerUpsChanged.AddUniqueDynamic(this, &ThisClass::OnPowerUpsChanged);
 }

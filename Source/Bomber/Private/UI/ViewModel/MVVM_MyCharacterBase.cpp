@@ -2,7 +2,6 @@
 
 #include "UI/ViewModel/MVVM_MyCharacterBase.h"
 //---
-#include "DataAssets/ItemDataAsset.h"
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
@@ -10,29 +9,11 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MVVM_MyCharacterBase)
 
-/*********************************************************************************************
- * PowerUps
- ********************************************************************************************* */
-
 // Is overridden to prevent constructing this View Model, but only child classes
 bool UMVVM_MyCharacterBase::CanConstructViewModel_Implementation() const
 {
 	return Super::CanConstructViewModel_Implementation()
-	       && GetCharacterId() != INDEX_NONE;
-}
-
-// Called when power-ups were updated
-void UMVVM_MyCharacterBase::OnPowerUpsChanged_Implementation(const FPowerUp& NewPowerUps)
-{
-	SetPowerUpSkateN(FText::AsNumber(NewPowerUps.SkateN));
-	SetPowerUpBombN(FText::AsNumber(NewPowerUps.BombN));
-	SetPowerUpFireN(FText::AsNumber(NewPowerUps.FireN));
-
-	const int32 MaxPowerUps = static_cast<float>(UItemDataAsset::Get().GetMaxAllowedItemsNum());
-	checkf(MaxPowerUps > 0.f, TEXT("ERROR: [%i] %s:\n'MaxPowerUps > 0' is null!"), __LINE__, *FString(__FUNCTION__));
-	SetPowerUpSkatePercent(static_cast<float>(NewPowerUps.SkateN) / MaxPowerUps);
-	SetPowerUpBombPercent(static_cast<float>(NewPowerUps.BombN) / MaxPowerUps);
-	SetPowerUpFirePercent(static_cast<float>(NewPowerUps.FireN) / MaxPowerUps);
+		   && GetCharacterId() != INDEX_NONE;
 }
 
 /*********************************************************************************************
@@ -84,17 +65,14 @@ void UMVVM_MyCharacterBase::OnViewModelDestruct_Implementation()
 	}
 }
 
-// Called when local player character was spawned and possessed, so we can bind to data
-void UMVVM_MyCharacterBase::OnCharacterReady(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+// Called when own player character was spawned and possessed, so we can bind to data
+void UMVVM_MyCharacterBase::OnCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
 {
 	if (CharacterID != GetCharacterId())
 	{
 		// This View Model is not for this character
 		return;
 	}
-
-	checkf(PlayerCharacter, TEXT("ERROR: [%i] %s:\n'PlayerCharacter' is null!"), __LINE__, *FString(__FUNCTION__));
-	PlayerCharacter->OnPowerUpsChanged.AddUniqueDynamic(this, &ThisClass::OnPowerUpsChanged);
 
 	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
 	if (ensureAlwaysMsgf(PlayerState, TEXT("ASSERT: [%i] %s:\n'CharacterState' is null!"), __LINE__, *FString(__FUNCTION__)))
