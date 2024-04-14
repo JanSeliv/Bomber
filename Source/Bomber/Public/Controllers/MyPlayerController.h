@@ -89,10 +89,6 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-	/** Listens to handle input on opening and closing the InGame Menu widget. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnToggledInGameMenu(bool bIsVisible);
-
 	/** Listens to handle input on opening and closing the Settings widget. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnToggledSettings(bool bIsVisible);

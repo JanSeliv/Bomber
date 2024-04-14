@@ -14,7 +14,6 @@
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
-#include "UI/InGameMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -169,13 +168,6 @@ void AMyPlayerController::OnWidgetsInitialized_Implementation()
 		HUD->OnWidgetsInitialized.RemoveDynamic(this, &ThisClass::OnWidgetsInitialized);
 	}
 
-	// Listens to handle input on opening and closing the InGame Menu widget
-	UInGameMenuWidget* InGameMenuWidget = UMyBlueprintFunctionLibrary::GetInGameMenuWidget();
-	if (ensureMsgf(InGameMenuWidget, TEXT("ASSERT: 'InGameMenuWidget' is not valid")))
-	{
-		InGameMenuWidget->OnToggledInGameMenu.AddUniqueDynamic(this, &ThisClass::OnToggledInGameMenu);
-	}
-
 	// Listens to handle input on opening and closing the Settings widget
 	USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
 	if (ensureMsgf(SettingsWidget, TEXT("ASSERT: 'SettingsWidget' is not valid")))
@@ -215,26 +207,6 @@ void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState Cu
 
 	constexpr bool bInvertRest = true;
 	SetAllInputContextsEnabled(true, CurrentGameState, bInvertRest);
-}
-
-// Listens to handle input on opening and closing the InGame Menu widget
-void AMyPlayerController::OnToggledInGameMenu_Implementation(bool bIsVisible)
-{
-	if (ECurrentGameState::InGame != AMyGameStateBase::GetCurrentGameState())
-	{
-		// Do not handle input if not in game
-		// Note: End-Game state is handled automatically by switching states
-		return;
-	}
-
-	// Invert gameplay input contexts
-	SetAllInputContextsEnabled(!bIsVisible, ECurrentGameState::InGame);
-
-	// Turn on or off specific In-Game menu input context (it does not contain any game state)
-	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
-
-	checkf(MouseComponentInternal, TEXT("ERROR: [%i] %s:\n'MouseComponentInternal' is null!"), __LINE__, *FString(__FUNCTION__));
-	MouseComponentInternal->SetMouseVisibility(bIsVisible);
 }
 
 // Listens to handle input on opening and closing the Settings widget

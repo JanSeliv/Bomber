@@ -16,9 +16,7 @@
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
-#include "UI/InGameMenuWidget.h"
 #include "UI/MyHUD.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
@@ -130,13 +128,6 @@ UUserWidget* UMyBlueprintFunctionLibrary::GetInGameWidget(const UObject* Optiona
 {
 	const AMyHUD* MyHUD = GetMyHUD(OptionalWorldContext);
 	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
-}
-
-// Returns the In-Game Menu widget
-UInGameMenuWidget* UMyBlueprintFunctionLibrary::GetInGameMenuWidget(const UObject* OptionalWorldContext/* = nullptr*/)
-{
-	const UUserWidget* InGameWidget = GetInGameWidget(OptionalWorldContext);
-	return InGameWidget ? FWidgetUtilsLibrary::GetChildWidgetOfClass<UInGameMenuWidget>(InGameWidget) : nullptr;
 }
 
 // Returns specified player character, by default returns local player
