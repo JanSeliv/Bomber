@@ -17,6 +17,9 @@ AMyPlayerState::AMyPlayerState()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+
+	// Makes GetPlayerName() to call virtual GetPlayerNameCustom() to allow custom access
+	bUseCustomPlayerNames = true;
 }
 
 /*********************************************************************************************
@@ -97,15 +100,9 @@ void AMyPlayerState::SetPlayerNameCustom(FName NewName)
 		return;
 	}
 
-	bUseCustomPlayerNames = true;
 	CustomPlayerNameInternal = NewName;
 
-	SetPlayerName(NewName.ToString());
-
-	if (OnPlayerNameChanged.IsBound())
-	{
-		OnPlayerNameChanged.Broadcast(NewName);
-	}
+	ApplyCustomPlayerName();
 }
 
 // Returns custom player name
@@ -120,6 +117,61 @@ FName AMyPlayerState::GetPlayerFNameCustom() const
 
 	return CustomPlayerNameInternal;
 }
+
+// Applies and broadcasts player nam
+void AMyPlayerState::ApplyCustomPlayerName()
+{
+	if (OnPlayerNameChanged.IsBound())
+	{
+		OnPlayerNameChanged.Broadcast(CustomPlayerNameInternal);
+	}
+}
+
+// Called on client when custom player name is changed
+void AMyPlayerState::OnRep_CustomPlayerName()
+{
+	ApplyCustomPlayerName();
+}
+
+/*********************************************************************************************
+ * Is Character Dead
+ ********************************************************************************************* */
+
+// Called when character dead status is changed: character was killed or revived
+void AMyPlayerState::SetCharacterDead(bool bIsDead)
+{
+	if (bIsCharacterDeadInternal == bIsDead)
+	{
+		return;
+	}
+
+	bIsCharacterDeadInternal = bIsDead;
+	ApplyIsCharacterDead();
+}
+
+// Called on client when character Dead status is changed
+void AMyPlayerState::OnRep_IsCharacterDead()
+{
+	ApplyIsCharacterDead();
+}
+
+// Applies and broadcasts Is Character Dead status
+void AMyPlayerState::ApplyIsCharacterDead()
+{
+	if (bIsCharacterDeadInternal)
+	{
+		UpdateEndGameState();
+	}
+
+	if (OnCharacterDeadChanged.IsBound())
+	{
+		OnCharacterDeadChanged.Broadcast(bIsCharacterDeadInternal);
+	}
+}
+
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
 
 // Returns properties that are replicated for the lifetime of the actor channel.
 void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -164,41 +216,5 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 	if (CurrentGameState != ECGS::EndGame)
 	{
 		SetCharacterDead(false);
-	}
-}
-
-/*********************************************************************************************
- * Is Character Dead
- ********************************************************************************************* */
-
-// Called when character dead status is changed: character was killed or revived
-void AMyPlayerState::SetCharacterDead(bool bIsDead)
-{
-	if (bIsCharacterDeadInternal == bIsDead)
-	{
-		return;
-	}
-
-	bIsCharacterDeadInternal = bIsDead;
-	ApplyIsCharacterDead();
-}
-
-// Called on client when character Dead status is changed
-void AMyPlayerState::OnRep_IsCharacterDead()
-{
-	ApplyIsCharacterDead();
-}
-
-// Applies and broadcasts Is Character Dead status
-void AMyPlayerState::ApplyIsCharacterDead()
-{
-	if (bIsCharacterDeadInternal)
-	{
-		UpdateEndGameState();
-	}
-
-	if (OnCharacterDeadChanged.IsBound())
-	{
-		OnCharacterDeadChanged.Broadcast(bIsCharacterDeadInternal);
 	}
 }

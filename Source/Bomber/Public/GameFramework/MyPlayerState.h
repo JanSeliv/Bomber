@@ -70,10 +70,19 @@ public:
 	/** Is overriden to return own player name that is saved to config. */
 	virtual FORCEINLINE FString GetPlayerNameCustom() const override { return GetPlayerFNameCustom().ToString(); }
 
-	/** Config: custom name set by player.
+protected:
+	/** Replaces APlayerState::PlayerNamePrivate for saving purposes, since original property is not 'Config'.
 	 * Can contain different languages, uppercase, lowercase etc, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, ReplicatedUsing = "OnRep_CustomPlayerName", Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
 	FName CustomPlayerNameInternal;
+
+	/** Applies and broadcasts player name. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyCustomPlayerName();
+
+	/** Called on client when custom player name is changed. */
+	UFUNCTION()
+	void OnRep_CustomPlayerName();
 
 	/*********************************************************************************************
 	 * Is Character Dead
