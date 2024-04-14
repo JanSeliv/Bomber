@@ -68,11 +68,14 @@ Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a 
 Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
 ## 📅 Changelog
-#### 
+#### `XX.XX.2024`
 - Updated to **Unreal Engine 5.4**.
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
-- Adapted the UI to employ the Model-View-ViewModel (MVVM) Pattern
+- Adapted the UI to employ the Model-View-ViewModel (MVVM) Pattern.
+- **New HUD**:
+> ![NewHUD](https://github.com/)
 - Added cinematic for Roger character on the Maya level.
+> ![RogerCinematic](https://github.com/)
 #### `13.01.2024`
 - Updated to **Unreal Engine 5.3**.
 - **New Main Menu** with completely different UI and complex cinematics for Hugo and Fori characters on starting the game:
