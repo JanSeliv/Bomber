@@ -4,10 +4,10 @@
 //---
 #include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyGameUserSettings.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "GameFramework/MyGameUserSettings.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 //---
@@ -194,6 +194,25 @@ void AMyPlayerState::ApplyIsCharacterDead()
  * Events
  ********************************************************************************************* */
 
+// Is called when player state is initialized with assigned character
+void AMyPlayerState::OnPlayerStateInit_Implementation()
+{
+	if (IsPlayerStateLocallyControlled())
+	{
+		// Listen game settings to apply them once saved
+		UMyGameUserSettings::Get().OnSaveSettings.AddUniqueDynamic(this, &ThisClass::OnSaveSettings);
+
+		// Apply custom player name from config if any
+		if (!CustomPlayerNameInternal.IsNone())
+		{
+			SetPlayerNameCustom(CustomPlayerNameInternal);
+			ApplyCustomPlayerName();
+		}
+	}
+
+	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnPlayerStateInit(*this);
+}
+
 // Returns properties that are replicated for the lifetime of the actor channel.
 void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -213,19 +232,6 @@ void AMyPlayerState::BeginPlay()
 	{
 		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 	}
-
-	if (IsPlayerStateLocallyControlled())
-	{
-		// Listen game settings to apply them once saved
-		UMyGameUserSettings::Get().OnSaveSettings.AddUniqueDynamic(this, &ThisClass::OnSaveSettings);
-
-		// Apply custom player name from config if any
-		if (!CustomPlayerNameInternal.IsNone())
-		{
-			SetPlayerNameCustom(CustomPlayerNameInternal);
-			ApplyCustomPlayerName();
-		}
-	}
 }
 
 // Listens game settings to apply them once saved
@@ -236,6 +242,8 @@ void AMyPlayerState::OnSaveSettings_Implementation()
 	{
 		// Apply local player name on server
 		ServerSetPlayerNameCustom(LocalNickname);
+
+		// Apply locally now
 		ApplyCustomPlayerName();
 	}
 }

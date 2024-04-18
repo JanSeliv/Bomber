@@ -74,6 +74,10 @@ public:
 	/** Is overriden to return own player name that is saved to config. */
 	virtual FORCEINLINE FString GetPlayerNameCustom() const override { return GetPlayerFNameCustom().ToString(); }
 
+	/** Applies and broadcasts player name. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyCustomPlayerName();
+
 protected:
 	/** Replaces APlayerState::PlayerNamePrivate for saving purposes, since original property is not 'Config'.
 	 * Can contain different languages, uppercase, lowercase etc, is config property. */
@@ -83,10 +87,6 @@ protected:
 	/** Called on server when settings are saved to apply local player name. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void ServerSetPlayerNameCustom(FName NewName);
-
-	/** Applies and broadcasts player name. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyCustomPlayerName();
 
 	/** Called on client when custom player name is changed. */
 	UFUNCTION()
@@ -121,11 +121,16 @@ protected:
 
 	/** Applies and broadcasts Is Character Dead status. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyIsCharacterDead();
+	void ApplyIsCharacterDead();	
 
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
+public:
+	/** Is called when player state is initialized with assigned character. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++")
+	void OnPlayerStateInit();
+
 protected:
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;

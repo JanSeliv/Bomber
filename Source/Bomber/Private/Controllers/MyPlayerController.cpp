@@ -165,7 +165,7 @@ void AMyPlayerController::OnRep_Pawn()
 void AMyPlayerController::InitPlayerState()
 {
 	const int32 CharacterID = UMyBlueprintFunctionLibrary::GetCharacterID(this);
-	APlayerState* InPlayerState = UMyBlueprintFunctionLibrary::GetMyPlayerState(CharacterID);
+	AMyPlayerState* InPlayerState = UMyBlueprintFunctionLibrary::GetMyPlayerState(CharacterID);
 	if (!InPlayerState)
 	{
 		// If player state is not found, create a new one
@@ -173,8 +173,9 @@ void AMyPlayerController::InitPlayerState()
 		return;
 	}
 
-	// Set existing player state for the controller
+	// Set existing player state for this controller
 	PlayerState = InPlayerState;
+	PlayerState->SetOwner(this);
 }
 
 /*********************************************************************************************

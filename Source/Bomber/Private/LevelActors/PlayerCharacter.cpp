@@ -299,7 +299,7 @@ void APlayerCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlaye
 {
 	Super::OnPlayerStateChanged(NewPlayerState, OldPlayerState);
 
-	const AMyPlayerState* MyPlayerState = Cast<AMyPlayerState>(NewPlayerState);
+	AMyPlayerState* MyPlayerState = Cast<AMyPlayerState>(NewPlayerState);
 	if (!MyPlayerState)
 	{
 		return;
@@ -307,7 +307,7 @@ void APlayerCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlaye
 
 	ApplyCustomPlayerMeshData();
 
-	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnPlayerStateInit(*MyPlayerState);
+	MyPlayerState->OnPlayerStateInit();
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
