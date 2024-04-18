@@ -31,6 +31,12 @@ AMyPlayerController* AMyGameModeBase::GetPlayerController(int32 Index) const
 	return nullptr;
 }
 
+// Caches given player controller when it spawns
+void AMyGameModeBase::AddPlayerController(AMyPlayerController* PlayerController)
+{
+	PlayerControllersInternal.Add(PlayerController);
+}
+
 // Called when the game starts or when spawned
 void AMyGameModeBase::BeginPlay()
 {
@@ -55,7 +61,7 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayer);
+	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayer);
 	if (!MyPC)
 	{
 		return;
@@ -66,8 +72,6 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 		// Spectators are not supported
 		PlayerState->SetIsOnlyASpectator(false);
 	}
-
-	PlayerControllersInternal.AddUnique(MyPC);
 }
 
 // Called when a Controller with a PlayerState leaves the game or is destroyed

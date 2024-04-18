@@ -9,6 +9,7 @@
 #include "DataAssets/PlayerInputDataAsset.h"
 #include "FunctionPickerData/FunctionPickerTemplate.h"
 #include "GameFramework/MyCheatManager.h"
+#include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -17,7 +18,7 @@
 #include "UI/MyHUD.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
-///---
+//---
 #include "EnhancedInputComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Framework/Application/NavigationConfig.h"
@@ -81,10 +82,16 @@ void AMyPlayerController::SetIgnoreMoveInput(bool bShouldIgnore)
 // This is called only in the gameplay before calling begin play
 void AMyPlayerController::PostInitializeComponents()
 {
-	Super::PostInitializeComponents();
+	// Before calling the parent, register this controller it can be obtained at very beginning
+	if (AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode())
+	{
+		MyGameMode->AddPlayerController(this);
+	}
 
 	// Register controller to let to be implemented by game features
 	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+
+	Super::PostInitializeComponents();
 }
 
 // Called when the game starts or when spawned
@@ -152,6 +159,22 @@ void AMyPlayerController::OnRep_Pawn()
 	{
 		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterPossessed(*PlayerCharacter);
 	}
+}
+
+// Is overridden to spawn player state or reuse existing one
+void AMyPlayerController::InitPlayerState()
+{
+	const int32 CharacterID = UMyBlueprintFunctionLibrary::GetCharacterID(this);
+	APlayerState* InPlayerState = UMyBlueprintFunctionLibrary::GetMyPlayerState(CharacterID);
+	if (!InPlayerState)
+	{
+		// If player state is not found, create a new one
+		Super::InitPlayerState();
+		return;
+	}
+
+	// Set existing player state for the controller
+	PlayerState = InPlayerState;
 }
 
 /*********************************************************************************************

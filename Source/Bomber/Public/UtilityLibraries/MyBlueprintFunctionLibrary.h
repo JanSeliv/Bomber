@@ -46,6 +46,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
 	static class AMyPlayerController* GetMyPlayerController(int32 PlayerIndex, const UObject* OptionalWorldContext = nullptr);
 
+	/** Return Character ID from given context (character, controller or world). */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static int32 GetCharacterID(const UObject* Context = nullptr);
+
 	/** Returns the local Player Controller, nullptr otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
 	static class AMyPlayerController* GetLocalPlayerController(const UObject* OptionalWorldContext = nullptr);

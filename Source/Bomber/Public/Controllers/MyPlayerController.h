@@ -77,6 +77,9 @@ protected:
 	/** Is overriden to notify the client when this controller possesses new player character. */
 	virtual void OnRep_Pawn() override;
 
+	/** Is overridden to spawn player state or reuse existing one. */ 
+	virtual void InitPlayerState() override;
+
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
