@@ -20,6 +20,10 @@ public:
 	/** Default constructor. */
 	AMyPlayerState();
 
+	/** Returns true if this Player State is controlled by a locally controlled player. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsPlayerStateLocallyControlled() const;
+
 	/*********************************************************************************************
 	 * End Game State
 	 * Is personal for each player: Win, Lose or Draw.
@@ -59,7 +63,7 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnPlayerNameChanged OnPlayerNameChanged;
 
-	/** Is created to expose APlayerState::SetPlayerName(NewName) to blueprints. */
+	/** Sets locally the player name on each nickname change.*/
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetPlayerNameCustom(FName NewName);
 
@@ -75,6 +79,10 @@ protected:
 	 * Can contain different languages, uppercase, lowercase etc, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, ReplicatedUsing = "OnRep_CustomPlayerName", Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
 	FName CustomPlayerNameInternal;
+
+	/** Called on server when settings are saved to apply local player name. */
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void ServerSetPlayerNameCustom(FName NewName);
 
 	/** Applies and broadcasts player name. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -125,7 +133,11 @@ protected:
 	/** Called when the game starts. */
 	virtual void BeginPlay() override;
 
-	/** Listen game states to notify server about ending game for controlled player. */
+	/** Listens game states to notify server about ending game for controlled player. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Listens game settings to apply them once saved. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnSaveSettings();
 };

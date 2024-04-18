@@ -17,16 +17,28 @@ class BOMBER_API UMyGameUserSettings final : public UGameUserSettings
 	GENERATED_BODY()
 
 	/*********************************************************************************************
+	 * Delegates
+	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSaveSettings);
+
+	/** Called when the settings were saved. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnSaveSettings OnSaveSettings;
+
+	/*********************************************************************************************
 	 * Video settings
 	 ********************************************************************************************* */
 public:
-
 	/** Returns the game user settings.
 	 * Is init once and can not be destroyed. */
 	static UMyGameUserSettings& Get();
 
 	/** Validates and resets bad user settings to default. Deletes stale user settings file if necessary. */
 	virtual void ValidateSettings() override;
+
+	/** Save the user settings to persistent storage (automatically happens as part of ApplySettings). */
+	virtual void SaveSettings() override;
 
 	/** Changes all scalability settings at once based on a single overall quality level, is declared in parent as UFUNCTION.
 	 * @param Value New quality level.
@@ -125,7 +137,6 @@ protected:
 	 * Overrides
 	 ********************************************************************************************* */
 public:
-
 	/** Loads the user settings from persistent storage */
 	virtual void LoadSettings(bool bForceReload) override;
 };

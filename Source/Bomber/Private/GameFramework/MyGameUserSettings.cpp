@@ -35,6 +35,17 @@ void UMyGameUserSettings::ValidateSettings()
 	}
 }
 
+// Save the user settings to persistent storage (automatically happens as part of ApplySettings)
+void UMyGameUserSettings::SaveSettings()
+{
+	Super::SaveSettings();
+
+	if (OnSaveSettings.IsBound())
+	{
+		OnSaveSettings.Broadcast();
+	}
+}
+
 // Changes all scalability settings at once based on a single overall quality level
 void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
 {
@@ -133,7 +144,7 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		const float AspectRatioIt = FMath::DivideAndRoundDown<float>(WidthIt, HeightIt);
 
 		const bool bIsCorrectAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio)
-		                                || (bIsUltraWide && AspectRatioIt >= UltraWideAspectRatio);
+		                                   || (bIsUltraWide && AspectRatioIt >= UltraWideAspectRatio);
 		const bool bIsGreaterThanMin = WidthIt >= MinResolutionSizeXInternal
 		                               && HeightIt >= MinResolutionSizeYInternal;
 		const bool bIsLessThanMax = WidthIt <= MaxDisplayWidth

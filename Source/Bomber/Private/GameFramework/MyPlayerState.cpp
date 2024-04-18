@@ -7,6 +7,7 @@
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "GameFramework/MyGameUserSettings.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 //---
@@ -20,6 +21,13 @@ AMyPlayerState::AMyPlayerState()
 
 	// Makes GetPlayerName() to call virtual GetPlayerNameCustom() to allow custom access
 	bUseCustomPlayerNames = true;
+}
+
+// Returns true if this Player State is controlled by a locally controlled player
+bool AMyPlayerState::IsPlayerStateLocallyControlled() const
+{
+	const APlayerController* PC = GetPlayerController();
+	return PC && PC->IsLocalPlayerController();
 }
 
 /*********************************************************************************************
@@ -94,33 +102,46 @@ void AMyPlayerState::MulticastSetEndGameState_Implementation(EEndGameState NewEn
 // Set the custom player name by user input
 void AMyPlayerState::SetPlayerNameCustom(FName NewName)
 {
-	if (CustomPlayerNameInternal == NewName
+	if (GetOldPlayerName() == NewName
 	    || NewName.IsNone())
 	{
 		return;
 	}
 
-	CustomPlayerNameInternal = NewName;
-
-	ApplyCustomPlayerName();
+	// First set locally the old name while name is changing.
+	// Once settings are saved, ApplyCustomPlayerName() will be called
+	SetOldPlayerName(NewName.ToString());
 }
 
 // Returns custom player name
 FName AMyPlayerState::GetPlayerFNameCustom() const
 {
-	if (CustomPlayerNameInternal.IsNone())
+	const FString LocalNickname = GetOldPlayerName();
+	if (!LocalNickname.IsEmpty())
 	{
-		// Return default name
-		const FName PlatformUserName(UKismetSystemLibrary::GetPlatformUserName());
-		return PlatformUserName;
+		return *LocalNickname;
 	}
 
-	return CustomPlayerNameInternal;
+	if (!CustomPlayerNameInternal.IsNone())
+	{
+		return CustomPlayerNameInternal;
+	}
+
+	return *UKismetSystemLibrary::GetPlatformUserName();
+}
+
+// Called on server when settings are saved to apply new player name
+void AMyPlayerState::ServerSetPlayerNameCustom_Implementation(FName NewName)
+{
+	SetPlayerNameCustom(NewName);
+	ApplyCustomPlayerName();
 }
 
 // Applies and broadcasts player nam
 void AMyPlayerState::ApplyCustomPlayerName()
 {
+	CustomPlayerNameInternal = GetPlayerFNameCustom();
+
 	if (OnPlayerNameChanged.IsBound())
 	{
 		OnPlayerNameChanged.Broadcast(CustomPlayerNameInternal);
@@ -191,6 +212,31 @@ void AMyPlayerState::BeginPlay()
 	if (HasAuthority())
 	{
 		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	}
+
+	if (IsPlayerStateLocallyControlled())
+	{
+		// Listen game settings to apply them once saved
+		UMyGameUserSettings::Get().OnSaveSettings.AddUniqueDynamic(this, &ThisClass::OnSaveSettings);
+
+		// Apply custom player name from config if any
+		if (!CustomPlayerNameInternal.IsNone())
+		{
+			SetPlayerNameCustom(CustomPlayerNameInternal);
+			ApplyCustomPlayerName();
+		}
+	}
+}
+
+// Listens game settings to apply them once saved
+void AMyPlayerState::OnSaveSettings_Implementation()
+{
+	const FName LocalNickname = GetPlayerFNameCustom();
+	if (CustomPlayerNameInternal != LocalNickname)
+	{
+		// Apply local player name on server
+		ServerSetPlayerNameCustom(LocalNickname);
+		ApplyCustomPlayerName();
 	}
 }
 
