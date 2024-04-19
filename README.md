@@ -70,12 +70,17 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 ## 📅 Changelog
 #### `XX.XX.2024`
 - Updated to **Unreal Engine 5.4**.
-- Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
-- Adapted the UI to employ the Model-View-ViewModel (MVVM) Pattern.
 - **New HUD**:
 > ![NewHUD](https://github.com/)
-- Added cinematic for Roger character on the Maya level.
-> ![RogerCinematic](https://github.com/)
+- Implemented Switch Camera Transitions between characters in Main Menu:
+> ![Rails](https://github.com/JanSeliv/Bomber/assets/20540872/aa496ae1-a6bb-41d1-a578-566d1af48170)
+- Added cinematic for the Roger character on the Maya level.
+> ![RogerCinematic](https://github.com/JanSeliv/Bomber/assets/20540872/9931d8da-e8cb-4cf5-ab61-361f48afa20b)
+- Added cinematic for the Bastet character on the Maya level.
+> ![BastetCinematic](https://github.com/JanSeliv/Bomber/assets/20540872/0602cc7c-f68c-46fa-9400-46a8bc35c73c)
+- Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
+- Adapted the UI to employ the Model-View-ViewModel (MVVM) Pattern.
+
 #### `13.01.2024`
 - Updated to **Unreal Engine 5.3**.
 - **New Main Menu** with completely different UI and complex cinematics for Hugo and Fori characters on starting the game:
