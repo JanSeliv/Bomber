@@ -7,6 +7,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/AIUtilsLibrary.h"
 #include "Subsystems/GameDifficultySubsystem.h"
+#include "Subsystems/GeneratedMapSubsystem.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
@@ -40,6 +41,12 @@ const UNewAIDataAsset* UNewAIBaseSubsystem::GetNewAIDataAsset() const
 void UNewAIBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
+
+	if (!UGeneratedMapSubsystem::Get(&InWorld).HasGeneratedMap())
+	{
+		// Is different level opened
+		return;
+	}
 
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 

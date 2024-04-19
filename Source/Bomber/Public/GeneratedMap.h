@@ -57,9 +57,15 @@ public:
 	/** Sets default values for this actor's properties */
 	AGeneratedMap();
 
-	/** Returns the generated map.
+	/** Returns the generated map, it will crash if can't be obtained.
+	 * @warning shouldn't be used in Getters since it will crash on levels without Generated Map.
 	 * Is created only once, can not be destroyed and always exist in persistent level. */
-	static AGeneratedMap& Get();
+	static AGeneratedMap& Get(const UObject* OptionalWorldContext = nullptr);
+
+	/** Attempts to return the generated map, nullptr otherwise.
+	 * Is used in Getters to avoid crashes on levels without Generated Map. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	static AGeneratedMap* GetGeneratedMap(const UObject* OptionalWorldContext = nullptr);
 
 	/** Initialize this Generated Map actor, could be called multiple times. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -246,7 +252,7 @@ protected:
 	 * @param CellsToFind Cells to which needs to find any path.
 	 * @param OptionalPathBreakers Optional value for a cells that make an island, if empty, all walls on the level will break the path.
 	 */
-	bool DoesPathExistToCells(const FCells& CellsToFind, const FCells& OptionalPathBreakers = FCell::EmptyCells);
+	bool DoesPathExistToCells(const FCells& CellsToFind, const FCells& OptionalPathBreakers = FCell::EmptyCells) const;
 
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "C++", meta = (BlueprintProtected))

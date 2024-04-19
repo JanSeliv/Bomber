@@ -19,16 +19,20 @@ class BOMBER_API UGeneratedMapSubsystem final : public UWorldSubsystem
 public:
 #pragma region GetGeneratedMapSubsystem
 	/** Returns the Generated Map Subsystem, is checked and wil crash if can't be obtained. */
-	static UGeneratedMapSubsystem& Get();
+	static UGeneratedMapSubsystem& Get(const UObject* WorldContextObject = nullptr);
 
 	/** Returns the pointer to the Generated Map Subsystem. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static UGeneratedMapSubsystem* GetGeneratedMapSubsystem(const UObject* WorldContextObject = nullptr);
 #pragma endregion GetGeneratedMapSubsystem
 
+	/** Returns true if level has generated map. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE bool HasGeneratedMap() const { return GeneratedMapInternal != nullptr; }
+
 	/** The Generated Map getter, nullptr otherwise */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Level"))
-	AGeneratedMap* GetGeneratedMap() const;
+	AGeneratedMap* GetGeneratedMap(bool bWarnIfNull = true) const;
 
 	/** The Generated Map setter. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

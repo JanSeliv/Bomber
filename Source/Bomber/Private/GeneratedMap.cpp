@@ -73,11 +73,19 @@ AGeneratedMap::AGeneratedMap()
 }
 
 // Returns the generated map
-AGeneratedMap& AGeneratedMap::Get()
+AGeneratedMap& AGeneratedMap::Get(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap();
+	AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get(OptionalWorldContext).GetGeneratedMap();
 	checkf(GeneratedMap, TEXT("%s: ERROR: 'GeneratedMap' is null"), *FString(__FUNCTION__));
 	return *GeneratedMap;
+}
+
+// Attempts to return the generated map, nullptr otherwise
+AGeneratedMap* AGeneratedMap::GetGeneratedMap(const UObject* OptionalWorldContext/* = nullptr*/)
+{
+	constexpr bool bWarnIfNull = false;
+	const UGeneratedMapSubsystem* Subsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem(OptionalWorldContext);
+	return Subsystem ? Subsystem->GetGeneratedMap(bWarnIfNull) : nullptr;
 }
 
 // Initialize this Generated Map actor, could be called multiple times
@@ -229,7 +237,7 @@ void AGeneratedMap::GetSidesCells(
 }
 
 // Returns true if any player is able to reach all specified cells by any any path
-bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells& OptionalPathBreakers/* = FCell::EmptyCells*/)
+bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells& OptionalPathBreakers/* = FCell::EmptyCells*/) const
 {
 	FCells InOutSideCells = OptionalPathBreakers;
 	if (OptionalPathBreakers.IsEmpty())
@@ -562,7 +570,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	// Deactivate the iterated owner
 	UPoolManagerSubsystem* PoolManager = UPoolManagerSubsystem::GetPoolManager(this);
 	if (PoolManager
-		&& PoolManager->ContainsObjectInPool(ComponentOwner))
+	    && PoolManager->ContainsObjectInPool(ComponentOwner))
 	{
 		PoolManager->ReturnToPool(ComponentOwner);
 	}

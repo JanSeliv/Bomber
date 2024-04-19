@@ -4,8 +4,11 @@
 
 #include "Cell.generated.h"
 
+struct FCell;
+
 /** Typedef to allow for some nicer looking sets of cells. */
-typedef TSet<struct FCell> FCells;
+typedef TSet<FCell> FCells;
+typedef TArray<FCell> FCellsArr;
 
 /**
  * Represents one of direction of a cell.
@@ -51,6 +54,7 @@ struct BOMBER_API FCell
 	static const FCell RightCell;
 	static const FCell LeftCell;
 	static const FCells EmptyCells;
+	static const FCellsArr EmptyCellsArr;
 
 	/** The length of the one cell */
 	static constexpr float CellSize = 200.f;
