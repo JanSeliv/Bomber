@@ -146,6 +146,23 @@ protected:
 	void OnPowerUpsChanged(const struct FPowerUp& NewPowerUps);
 
 	/*********************************************************************************************
+	 * Mouse Visibility
+	 ********************************************************************************************* */
+public:
+	/** Setter and Getter about the current mouse visibility: is Visible when the mouse is shown. */
+	void SetMouseVisibility(ESlateVisibility NewMouseVisibility) { UE_MVVM_SET_PROPERTY_VALUE(MouseVisibility, NewMouseVisibility); }
+	ESlateVisibility GetMouseVisibility() const { return MouseVisibility; }
+
+protected:
+	/** Is Visible when the mouse is shown. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	ESlateVisibility MouseVisibility = ESlateVisibility::Hidden;
+
+	/** Called when mouse became shown or hidden. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnMouseVisibilityChanged(bool bIsShown);
+
+	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
 protected:

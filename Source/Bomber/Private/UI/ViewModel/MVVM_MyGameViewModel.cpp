@@ -2,6 +2,7 @@
 
 #include "UI/ViewModel/MVVM_MyGameViewModel.h"
 //---
+#include "Components/MouseActivityComponent.h"
 #include "DataAssets/ItemDataAsset.h"
 #include "DataAssets/UIDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
@@ -64,6 +65,17 @@ void UMVVM_MyGameViewModel::OnPowerUpsChanged_Implementation(const FPowerUp& New
 }
 
 /*********************************************************************************************
+ * Mouse Visibility
+ ********************************************************************************************* */
+
+// Called when mouse became shown or hidden
+void UMVVM_MyGameViewModel::OnMouseVisibilityChanged_Implementation(bool bIsShown)
+{
+	const ESlateVisibility NewVisibility = bIsShown ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	SetMouseVisibility(NewVisibility);
+}
+
+/*********************************************************************************************
  * Events
  ********************************************************************************************* */
 
@@ -86,7 +98,8 @@ void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
 
 	if (UGlobalEventsSubsystem* GlobalEventsSubsystem = UGlobalEventsSubsystem::GetGlobalEventsSubsystem())
 	{
-		GlobalEventsSubsystem->BP_OnGameStateChanged.RemoveAll(this);}
+		GlobalEventsSubsystem->BP_OnGameStateChanged.RemoveAll(this);
+	}
 
 	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
@@ -112,4 +125,8 @@ void UMVVM_MyGameViewModel::OnLocalCharacterReady_Implementation(APlayerCharacte
 	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+
+	UMouseActivityComponent* MouseActivityComponent = UMyBlueprintFunctionLibrary::GetMouseActivityComponent();
+	checkf(MouseActivityComponent, TEXT("ERROR: [%i] %hs:\n'MouseActivityComponent' is null!"), __LINE__, __FUNCTION__);
+	MouseActivityComponent->OnMouseVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnMouseVisibilityChanged);
 }
