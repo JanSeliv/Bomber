@@ -58,7 +58,7 @@ void UMouseActivityComponent::SetMouseVisibilitySettings(const FMouseVisibilityS
 	}
 }
 
-// Called to to set mouse cursor visibility
+// Called to set mouse cursor visibility
 void UMouseActivityComponent::SetMouseVisibility(bool bShouldShow)
 {
 	APlayerController& PC = GetPlayerControllerChecked();
@@ -87,22 +87,6 @@ void UMouseActivityComponent::SetMouseVisibility(bool bShouldShow)
 void UMouseActivityComponent::SetMouseFocusOnUI(bool bFocusOnUI)
 {
 	APlayerController& PC = GetPlayerControllerChecked();
-
-#if WITH_EDITOR // [IsEditorMultiplayer]
-	if (FEditorUtilsLibrary::IsEditorMultiplayer())
-	{
-		const ULocalPlayer* LocalPlayer = PC.GetLocalPlayer();
-		UGameViewportClient* GameViewport = LocalPlayer ? LocalPlayer->ViewportClient : nullptr;
-		FViewport* Viewport = GameViewport ? GameViewport->Viewport : nullptr;
-		if (!Viewport
-		    || !GameViewport->IsFocused(Viewport))
-		{
-			// Do not change the focus for inactive viewports in editor-multiplayer
-			// to avoid misleading focus on another game window
-			return;
-		}
-	}
-#endif // WITH_EDITOR [IsEditorMultiplayer]
 
 	if (bFocusOnUI)
 	{
