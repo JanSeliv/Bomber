@@ -39,7 +39,7 @@ public:
 	static UGameDifficultySubsystem& Get();
 
 	/** Returns the pointer to this Subsystem. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static UGameDifficultySubsystem* GetGameDifficultySubsystem(const UObject* OptionalWorldContext = nullptr);
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameDifficultyChanged, int32, NewDifficultyLevel);

@@ -17,6 +17,9 @@ class MYUTILS_API UMVVM_MyBaseViewModel : public UMVVMViewModelBase
 	GENERATED_BODY()
 
 public:
+	/** Returns the world where this View Model is created. */
+	virtual UWorld* GetWorld() const override;
+
 	/** If false, the View Model will not be constructed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "C++")
 	bool CanConstructViewModel() const;

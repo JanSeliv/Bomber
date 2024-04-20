@@ -35,15 +35,15 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Returns the Bomber Game Mode, nullptr otherwise. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyGameModeBase* GetMyGameMode(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Bomber Game state, nullptr otherwise. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyGameStateBase* GetMyGameState(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the specified Player Controller, nullptr otherwise. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyPlayerController* GetMyPlayerController(int32 PlayerIndex, const UObject* OptionalWorldContext = nullptr);
 
 	/** Return Character ID from given context (character, controller or world). */
@@ -51,7 +51,7 @@ public:
 	static int32 GetCharacterID(const UObject* Context = nullptr);
 
 	/** Returns the local Player Controller, nullptr otherwise. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyPlayerController* GetLocalPlayerController(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Bomber Player State for specified player, nullptr otherwise. */
@@ -59,27 +59,27 @@ public:
 	static class AMyPlayerState* GetMyPlayerState(int32 CharacterID);
 
 	/** Returns the player state of current controller. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyPlayerState* GetLocalPlayerState(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Bomber settings. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class UMyGameUserSettings* GetMyGameUserSettings(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Settings widget. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class USettingsWidget* GetSettingsWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Camera Component used on level. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class UMyCameraComponent* GetLevelCamera(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the HUD actor. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyHUD* GetMyHUD(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the In-Game widget. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class UUserWidget* GetInGameWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns specified player character.
@@ -87,11 +87,11 @@ public:
 	 * INDEX_NONE - Local player, 0 - Host, 1 - client/AI1, 2 - client/AI2, 3 - client/AI3.
 	 * @param OptionalWorldContext - the world context object.
 	 * @warning CharacterID != PlayerIndex, so 0 will not return local player, but Host! */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class APlayerCharacter* GetPlayerCharacter(int32 CharacterID, const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns controlled player character. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class APlayerCharacter* GetLocalPlayerCharacter(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns implemented Game Viewport Client on the project side. */
@@ -99,7 +99,7 @@ public:
 	static class UMyGameViewportClient* GetGameViewportClient();
 
 	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class UMouseActivityComponent* GetMouseActivityComponent(const UObject* OptionalWorldContext = nullptr);
 
 	/* ---------------------------------------------------

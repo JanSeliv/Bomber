@@ -64,7 +64,7 @@ public:
 
 	/** Attempts to return the generated map, nullptr otherwise.
 	 * Is used in Getters to avoid crashes on levels without Generated Map. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static AGeneratedMap* GetGeneratedMap(const UObject* OptionalWorldContext = nullptr);
 
 	/** Initialize this Generated Map actor, could be called multiple times. */

@@ -22,7 +22,7 @@ public:
 	static UGlobalEventsSubsystem& Get();
 
 	/** Returns the pointer to this Subsystem. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext"))
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static UGlobalEventsSubsystem* GetGlobalEventsSubsystem(const UObject* OptionalWorldContext = nullptr);
 
 	/*********************************************************************************************
