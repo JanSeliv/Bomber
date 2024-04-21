@@ -42,6 +42,13 @@ AMyPlayerController::AMyPlayerController()
 	MouseComponentInternal = CreateDefaultSubobject<UMouseActivityComponent>(TEXT("MouseActivityComponent"));
 }
 
+// Returns true if current game state can be eventually changed
+bool AMyPlayerController::CanChangeGameState(ECurrentGameState NewGameState) const
+{
+	return AMyGameStateBase::GetCurrentGameState() != NewGameState
+	       && !bCinematicMode; // Game is not run from the Render Movie
+}
+
 /*********************************************************************************************
  * Public functions
  ********************************************************************************************* */
@@ -59,13 +66,19 @@ void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState Ne
 // Sets the GameStarting game state
 void AMyPlayerController::SetGameStartingState()
 {
-	ServerSetGameState(ECurrentGameState::GameStarting);
+	if (CanChangeGameState(ECGS::GameStarting))
+	{
+		ServerSetGameState(ECGS::GameStarting);
+	}
 }
 
 // Sets the Menu game state
 void AMyPlayerController::SetMenuState()
 {
-	ServerSetGameState(ECurrentGameState::Menu);
+	if (CanChangeGameState(ECGS::Menu))
+	{
+		ServerSetGameState(ECGS::Menu);
+	}
 }
 
 /*********************************************************************************************

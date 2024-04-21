@@ -24,9 +24,13 @@ public:
 	AMyPlayerController();
 
 	/*********************************************************************************************
-	 * Public functions
+	 * Game States
 	 ********************************************************************************************* */
 public:
+	/** Returns true if current game state can be eventually changed. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool CanChangeGameState(ECurrentGameState NewGameState) const;
+
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
 	void ServerSetGameState(ECurrentGameState NewGameState);
@@ -38,10 +42,6 @@ public:
 	/** Sets the Menu game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMenuState();
-
-	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
 
 	/*********************************************************************************************
 	 * Protected properties
@@ -77,7 +77,7 @@ protected:
 	/** Is overriden to notify the client when this controller possesses new player character. */
 	virtual void OnRep_Pawn() override;
 
-	/** Is overridden to spawn player state or reuse existing one. */ 
+	/** Is overridden to spawn player state or reuse existing one. */
 	virtual void InitPlayerState() override;
 
 	/*********************************************************************************************
@@ -137,4 +137,8 @@ public:
 	 * @param InputContexts Contexts to manage.
 	 * @see AMyPlayerController::AllInputContextsInternal */
 	void AddNewInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+
+	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
 };
