@@ -272,9 +272,11 @@ Special thanks to the following companies for providing their licenses to suppor
 
 Feedback and contributions from the community are highly appreciated!
 
-If you'd like to contribute, please fork the project and create a pull request targeting the `develop` branch.
-
-If you've found a bug or have an idea for a new feature, please open a new issue on GitHub. Thank you!
+- **Tasks:** Check our [Google Sheets Tasks List](https://docs.google.com/spreadsheets/d/1BaElMO0IDiV7im5FNk19ewWBXH1vpg3-1TjiEX55Kw8/edit#gid=554015394) and [Bugs Backlog on Trello](https://trello.com/b/1jbKvyeh/bomber-kanban). Unassigned tasks and bugs are open for contribution.
+- **Report & Suggest:** Found a bug or have a feature idea? Open an issue.
+- **Fork & Pull:** Fork the project, make your changes, and submit a pull request to the `develop` branch.
+- **Standards:** Adhere to the [Unreal Engine Coding Standards](https://dev.epicgames.com/documentation/en-us/unreal-engine/epic-cplusplus-coding-standard-for-unreal-engine) and [Naming Standards](https://github.com/Allar/ue5-style-guide) when contributing.
+- **Blueprints & Assets:** If contributing blueprint logic or assets, attach screenshots to show what has changed.
 
 ## 📜 License
 
