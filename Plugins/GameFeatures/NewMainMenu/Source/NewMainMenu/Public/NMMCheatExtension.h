@@ -16,6 +16,6 @@ class NEWMAINMENU_API UNMMCheatExtension : public UMetaCheatManagerExtension
 
 public:
 	/** Removes a save file of the New Main Menu. */
-	UFUNCTION(Exec, meta = (CheatName = "Bomber.Saves.NewMainMenu.Reset"))
+	UFUNCTION(Exec, meta = (CheatName = "Bomber.Saves.Reset.NewMainMenu"))
 	static void ResetNewMainMenuSaves();
 };

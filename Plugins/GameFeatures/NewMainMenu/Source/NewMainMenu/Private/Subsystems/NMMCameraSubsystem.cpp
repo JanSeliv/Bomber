@@ -8,7 +8,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
-#include "MyUtilsLibraries/UtilsLibrary.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
@@ -60,7 +60,7 @@ ACameraActor* UNMMCameraSubsystem::GetCurrentRailCamera()
 {
 	// The Rail Camera is attached to the Rail Rig (not to the Spot directly)
 	const UNMMSpotComponent* CurrentSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
-	return CurrentSpot ? UUtilsLibrary::GetAttachedActorByClass<ACameraActor>(GetCurrentRailRig()) : nullptr;
+	return CurrentSpot ? UGameplayUtilsLibrary::GetAttachedActorByClass<ACameraActor>(GetCurrentRailRig()) : nullptr;
 }
 
 // Returns attached Rail of this spot that follows the camera to the next spot
@@ -71,7 +71,7 @@ ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 	const UNMMSpotComponent* MenuSpot = IsCameraForwardTransition()
 		                                    ? SpotsSubsystem.GetCurrentSpot()
 		                                    : SpotsSubsystem.GetNextSpot(1, UMyBlueprintFunctionLibrary::GetLevelType());
-	return MenuSpot ? UUtilsLibrary::GetAttachedActorByClass<ACineCameraRigRail>(MenuSpot->GetOwner()) : nullptr;
+	return MenuSpot ? UGameplayUtilsLibrary::GetAttachedActorByClass<ACineCameraRigRail>(MenuSpot->GetOwner()) : nullptr;
 }
 
 // Starts viewing through camera of current cinematic

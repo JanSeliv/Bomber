@@ -9,6 +9,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
@@ -38,27 +39,17 @@ AMyPlayerController& UNMMPlayerControllerComponent::GetPlayerControllerChecked()
 	return *MyPlayerController;
 }
 
-// Removes all saved data of the Main Menu
-void UNMMPlayerControllerComponent::ResetSaveGameData()
+// Assigns existing Save Game Data to this component 
+void UNMMPlayerControllerComponent::SetSaveGameData(class USaveGame* NewSaveGameData)
 {
-	const FString& SlotName = UNMMSaveGameData::GetSaveSlotName();
-	const int32 UserIndex = UNMMSaveGameData::GetSaveSlotIndex();
-
-	// Remove the data from the disk
-	if (UGameplayStatics::DoesSaveGameExist(SlotName, UserIndex))
+	UNMMSaveGameData* InSaveGameData = Cast<UNMMSaveGameData>(NewSaveGameData);
+	if (!InSaveGameData
+		|| InSaveGameData == SaveGameDataInternal)
 	{
-		UGameplayStatics::DeleteGameInSlot(SlotName, UserIndex);
+		return;
 	}
 
-	// Kill current save game object
-	if (IsValid(SaveGameDataInternal))
-	{
-		SaveGameDataInternal->ConditionalBeginDestroy();
-	}
-
-	// Create new save game object
-	SaveGameDataInternal = CastChecked<UNMMSaveGameData>(UGameplayStatics::CreateSaveGameObject(UNMMSaveGameData::StaticClass()));
-	SaveGameDataInternal->SaveDataAsync();
+	SaveGameDataInternal = InSaveGameData;
 }
 
 // Enables or disables the input context during Cinematic Main Menu State
@@ -189,10 +180,10 @@ void UNMMPlayerControllerComponent::OnAsyncLoadGameFromSlotCompleted_Implementat
 {
 	if (SaveGame)
 	{
-		SaveGameDataInternal = CastChecked<UNMMSaveGameData>(SaveGame);
+		SetSaveGameData(SaveGame);
 		return;
 	}
 
 	// There is no save game or it is corrupted, create a new one
-	ResetSaveGameData();
+	UGameplayUtilsLibrary::ResetSaveGameData(SaveGameDataInternal, UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex());
 }

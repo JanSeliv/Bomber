@@ -7,10 +7,6 @@
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/Engine.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Engine/SkeletalMesh.h"
-#include "Engine/StaticMesh.h"
 //---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -159,51 +155,4 @@ TEnumAsByte<EAspectRatioAxisConstraint> UUtilsLibrary::GetViewportAspectRatioAxi
 	const APlayerController* PlayerController = GEngine ? GEngine->GetFirstLocalPlayerController(GWorld) : nullptr;
 	const ULocalPlayer* LocalPlayer = PlayerController ? PlayerController->GetLocalPlayer() : nullptr;
 	return LocalPlayer ? LocalPlayer->AspectRatioAxisConstraint : TEnumAsByte(AspectRatio_MAX);
-}
-
-// Abstract method that allows set both static and skeletal meshes to the specified mesh component
-void UUtilsLibrary::SetMesh(UMeshComponent* MeshComponent, UStreamableRenderAsset* MeshAsset)
-{
-	if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponent))
-	{
-		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(MeshAsset));
-	}
-	else if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent))
-	{
-		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(MeshAsset));
-	}
-}
-
-// Returns the first child actor of the specified class
-AActor* UUtilsLibrary::GetAttachedActorByClass(const AActor* ParentActor, TSubclassOf<AActor> ChildActorClass, bool bIncludeDescendants/* = false*/)
-{
-	if (!ensureMsgf(ParentActor, TEXT("ASSERT: [%i] %s:\n'!ParentActor' is not valid!"), __LINE__, *FString(__FUNCTION__)))
-	{
-		return nullptr;
-	}
-
-	TArray<AActor*> AttachedActors;
-	ParentActor->GetAttachedActors(AttachedActors);
-	if (AttachedActors.IsEmpty())
-	{
-		return nullptr;
-	}
-
-	for (AActor* It : AttachedActors)
-	{
-		if (It && It->IsA(ChildActorClass))
-		{
-			return It;
-		}
-
-		if (bIncludeDescendants)
-		{
-			if (AActor* FoundActor = GetAttachedActorByClass(It, ChildActorClass, bIncludeDescendants))
-			{
-				return FoundActor;
-			}
-		}
-	}
-
-	return nullptr;
 }

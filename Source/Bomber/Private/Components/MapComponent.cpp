@@ -9,6 +9,7 @@
 #include "DataAssets/GameStateDataAsset.h"
 #include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
@@ -150,7 +151,7 @@ void UMapComponent::SetDefaultMesh()
 	}
 
 	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
-	UUtilsLibrary::SetMesh(MeshComponentInternal, FoundRow->Mesh);
+	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, FoundRow->Mesh);
 
 	// Reset custom mesh name for replication
 	const AActor* Owner = GetOwner();
@@ -169,7 +170,7 @@ void UMapComponent::SetCustomMeshAsset(UStreamableRenderAsset* CustomMeshAsset)
 		return;
 	}
 
-	UUtilsLibrary::SetMesh(MeshComponentInternal, CustomMeshAsset);
+	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, CustomMeshAsset);
 
 	// Update the mesh name for replication
 	const AActor* Owner = GetOwner();
