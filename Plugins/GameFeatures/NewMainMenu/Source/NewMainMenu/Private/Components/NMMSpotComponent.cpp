@@ -145,9 +145,9 @@ void UNMMSpotComponent::OnUnregister()
 	CinematicRowInternal = FNMMCinematicRow::Empty;
 
 	// Kill current cinematic player
-	if (MasterPlayerInternal)
+	if (IsValid(MasterPlayerInternal))
 	{
-		MasterPlayerInternal->Stop();
+		StopMasterSequence();
 		MasterPlayerInternal->ConditionalBeginDestroy();
 		MasterPlayerInternal = nullptr;
 	}
