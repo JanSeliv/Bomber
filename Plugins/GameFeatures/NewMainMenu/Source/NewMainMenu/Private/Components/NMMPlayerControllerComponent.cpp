@@ -9,7 +9,6 @@
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
-#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
@@ -178,12 +177,14 @@ void UNMMPlayerControllerComponent::OnMainMenuSpotReady_Implementation(UNMMSpotC
 // Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load
 void UNMMPlayerControllerComponent::OnAsyncLoadGameFromSlotCompleted_Implementation(const FString& SlotName, int32 UserIndex, USaveGame* SaveGame)
 {
-	if (SaveGame)
+	UNMMSaveGameData* InSaveGameData = Cast<UNMMSaveGameData>(SaveGame);
+	if (!InSaveGameData)
 	{
-		SetSaveGameData(SaveGame);
-		return;
+		// There is no save game, or it is corrupted, create a new one
+		InSaveGameData = NewObject<UNMMSaveGameData>(this);
+		InSaveGameData->SaveDataAsync();
+		// Fallback to cache it
 	}
 
-	// There is no save game or it is corrupted, create a new one
-	UGameplayUtilsLibrary::ResetSaveGameData(SaveGameDataInternal, UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex());
+	SetSaveGameData(SaveGame);
 }
