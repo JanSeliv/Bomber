@@ -86,7 +86,7 @@ void FOnCharactersReadyHandler::TryBroadcastOnReady_Internal(APlayerCharacter& C
 	AMyPlayerState* PlayerState = CastChecked<AMyPlayerState>(Character.GetPlayerState());
 
 	const int32 CharacterID = Character.GetCharacterID();
-	const bool bIsLocalPlayer = Character.IsLocallyControlled() && Character.IsPlayerControlled();
+	const bool bIsLocalPlayer = PlayerState->IsPlayerStateLocallyControlled();
 
 	if (EventsSubsystem.BP_OnCharacterReady.IsBound())
 	{
