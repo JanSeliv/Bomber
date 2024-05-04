@@ -327,7 +327,7 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 	}
 
 	// --- Prepare spawn requests
-	TArray<FSpawnRequest> InOutRequests;
+	TArray<FSpawnRequest> InRequests;
 	for (const TTuple<FCell, EActorType>& It : ActorsToSpawn)
 	{
 		const FCell& Cell = It.Key;
@@ -339,8 +339,7 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 			continue;
 		}
 
-		FSpawnRequest& NewRequestRef = InOutRequests.AddDefaulted_GetRef();
-		NewRequestRef.Class = UDataAssetsContainer::GetActorClassByType(Type);
+		FSpawnRequest& NewRequestRef = InRequests.Emplace_GetRef(UDataAssetsContainer::GetActorClassByType(Type));
 		NewRequestRef.Transform = FTransform(Cell);
 	}
 
@@ -368,13 +367,13 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 	};
 
 	// --- Spawn all actors
-	UPoolManagerSubsystem::Get().TakeFromPool(InOutRequests, OnCompleted);
+	TArray<FPoolObjectHandle> Handles;
+	UPoolManagerSubsystem::Get().TakeFromPoolArray(Handles, InRequests, OnCompleted);
 
 	// --- Add handles if requested spawning, so they can be canceled if regenerate before spawning finished
-	for (const FSpawnRequest& It : InOutRequests)
+	for (const FPoolObjectHandle& HandleIt : Handles)
 	{
-		checkf(It.Handle.IsValid(), TEXT("ERROR: [%i] %s:\n'Handle' is not valid!"), __LINE__, *FString(__FUNCTION__));
-		MapComponentsInternal.FindOrAdd(It.Handle);
+		MapComponentsInternal.FindOrAdd(HandleIt);
 	}
 }
 
