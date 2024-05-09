@@ -191,6 +191,16 @@ void AMyPlayerController::InitPlayerState()
 	PlayerState->SetOwner(this);
 }
 
+// Is overriden to setup camera manager once spawned
+void AMyPlayerController::SpawnPlayerCameraManager()
+{
+	Super::SpawnPlayerCameraManager();
+
+	// Allow clients to set their own ViewTarget and the server should not replicate it, so each client can view own cinematic
+	checkf(PlayerCameraManager, TEXT("ERROR: [%i] %hs:\n'PlayerCameraManager' was not spawned!"), __LINE__, __FUNCTION__);
+	PlayerCameraManager->bClientSimulatingViewTarget = true;
+}
+
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
