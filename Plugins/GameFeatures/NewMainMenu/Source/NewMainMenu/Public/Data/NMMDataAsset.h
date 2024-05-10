@@ -4,8 +4,6 @@
 
 #include "Engine/DataAsset.h"
 //---
-#include "Structures/MouseVisibilitySettings.h"
-//---
 #include "NMMDataAsset.generated.h"
 
 enum class ENMMState : uint8;
@@ -105,11 +103,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE float GetSkipCinematicHoldTime() const { return SkipCinematicHoldTimeInternal; }
 
-	/** Returns the mouse visibility settings by specified Main Menu state.
-	 * @see UNMMDataAsset::MouseVisibilitySettingsInternal. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FMouseVisibilitySettings& GetMouseVisibilitySettings(ENMMState GameState) const;
-
 protected:
 	/** List of input contexts to manage according their Main Menu States. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Input Contexts", ShowOnlyInnerProperties))
@@ -118,8 +111,4 @@ protected:
 	/** The time to hold the skip cinematic button to skip the cinematic. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Skip Cinematic Hold Time", ShowOnlyInnerProperties))
 	float SkipCinematicHoldTimeInternal = 1.f;
-
-	/** Determines mouse visibility behaviour per Main Menu states. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Mouse Visibility Settings"))
-	TMap<ENMMState, FMouseVisibilitySettings> MouseVisibilitySettingsInternal;
 };

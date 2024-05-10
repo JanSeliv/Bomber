@@ -66,6 +66,14 @@ void UNMMPlayerControllerComponent::SetCinematicInputContextEnabled(bool bEnable
 	MyPC.SetInputContextEnabled(bEnable, UNMMDataAsset::Get().GetInputContext(ENMMState::Cinematic));
 }
 
+// Enables or disables Cinematic mouse settings from Player Input data asset
+void UNMMPlayerControllerComponent::SetCinematicMouseVisibilityEnabled(bool bEnabled)
+{
+	static const FName CinematicStateName = GET_ENUMERATOR_NAME_CHECKED(ENMMState, Cinematic);
+	UMouseActivityComponent& MouseActivityComponent = GetPlayerControllerChecked().GetMouseActivityComponentChecked();
+	MouseActivityComponent.SetMouseVisibilitySettingsEnabledCustom(bEnabled, CinematicStateName);
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
@@ -156,10 +164,7 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENM
 	SetCinematicInputContextEnabled(NewState == ENMMState::Cinematic);
 
 	// Update mouse visibility
-	UMouseActivityComponent* MouseActivityComponent = MyPC.GetMouseActivityComponent();
-	checkf(MouseActivityComponent, TEXT("ERROR: [%i] %s:\n'MouseActivityComponent' is null!"), __LINE__, *FString(__FUNCTION__));
-	const FMouseVisibilitySettings& NewMouseSettings = UNMMDataAsset::Get().GetMouseVisibilitySettings(NewState);
-	MouseActivityComponent->SetMouseVisibilitySettings(NewMouseSettings);
+	SetCinematicMouseVisibilityEnabled(NewState == ENMMState::Cinematic);
 }
 
 // Is listen to set Menu game state once first spot is ready

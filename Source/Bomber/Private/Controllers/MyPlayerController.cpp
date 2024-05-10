@@ -475,3 +475,10 @@ void AMyPlayerController::AddNewInputContexts(const TArray<const UMyInputMapping
 		}
 	}
 }
+
+// Returns the component that responsible for mouse-related logic, or crash if null
+UMouseActivityComponent& AMyPlayerController::GetMouseActivityComponentChecked() const
+{
+	checkf(MouseComponentInternal, TEXT("ERROR: [%i] %hs:\n'MouseComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	return *MouseComponentInternal;
+}

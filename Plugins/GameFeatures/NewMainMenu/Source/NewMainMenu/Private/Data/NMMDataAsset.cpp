@@ -30,10 +30,3 @@ void UNMMDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& O
 		OutInputContexts.Emplace(It.Value);
 	}
 }
-
-// Returns the mouse visibility settings by specified Main Menu state
-const FMouseVisibilitySettings& UNMMDataAsset::GetMouseVisibilitySettings(ENMMState GameState) const
-{
-	const FMouseVisibilitySettings* FoundSettings = MouseVisibilitySettingsInternal.Find(GameState);
-	return FoundSettings ? *FoundSettings : FMouseVisibilitySettings::Invalid;
-}

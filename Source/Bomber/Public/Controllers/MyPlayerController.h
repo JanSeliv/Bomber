@@ -144,4 +144,5 @@ public:
 	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
+	UMouseActivityComponent& GetMouseActivityComponentChecked() const;
 };

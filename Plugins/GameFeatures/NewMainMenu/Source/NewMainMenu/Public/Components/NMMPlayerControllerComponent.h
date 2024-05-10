@@ -44,6 +44,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetCinematicInputContextEnabled(bool bEnable);
 
+	/** Enables or disables Cinematic mouse settings from Player Input data asset. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetCinematicMouseVisibilityEnabled(bool bEnabled);
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */

@@ -56,6 +56,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FMouseVisibilitySettings& GetMouseVisibilitySettings(ECurrentGameState GameState) const;
 
+	/** Returns the mouse visibility settings by custom game state.
+	 * @see UPlayerInputDataAsset::MouseVisibilitySettingsInternal. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FMouseVisibilitySettings& GetMouseVisibilitySettingsCustom(FName CustomGameState) const;
+
 	/** Returns true if specified key is mapped to any gameplay input context. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Key"))
 	bool IsMappedKey(const FKey& Key) const;
@@ -78,7 +83,7 @@ protected:
 
 	/** Determines mouse visibility behaviour per game states. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Mouse Visibility Settings"))
-	TMap<ECurrentGameState, FMouseVisibilitySettings> MouseVisibilitySettingsInternal;
+	TArray<FMouseVisibilitySettings> MouseVisibilitySettingsInternal;
 
 	/** Creates new contexts if is needed, is implemented to solve UE issues with remappings, see details below.
 	 * @see UPlayerInputDataAsset::GameplayInputContextClassesInternal */

@@ -57,7 +57,14 @@ const UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int
 // Returns the mouse visibility settings by specified game state
 const FMouseVisibilitySettings& UPlayerInputDataAsset::GetMouseVisibilitySettings(ECurrentGameState GameState) const
 {
-	const FMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettingsInternal.Find(GameState);
+	const FMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettingsInternal.FindByKey(GameState);
+	return FoundSettingsPtr ? *FoundSettingsPtr : FMouseVisibilitySettings::Invalid;
+}
+
+// Returns the mouse visibility settings by custom game state
+const FMouseVisibilitySettings& UPlayerInputDataAsset::GetMouseVisibilitySettingsCustom(FName CustomGameState) const
+{
+	const FMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettingsInternal.FindByKey(CustomGameState);
 	return FoundSettingsPtr ? *FoundSettingsPtr : FMouseVisibilitySettings::Invalid;
 }
 
