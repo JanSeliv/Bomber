@@ -48,9 +48,26 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FMouseVisibilitySettings& GetCurrentVisibilitySettings() const;
 
+	/** Applies the new mouse visibility settings by game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetMouseVisibilitySettingsEnabled(bool bEnable, ECurrentGameState GameState);
+
+	/** Applies the new mouse visibility settings by custom game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetMouseVisibilitySettingsEnabledCustom(bool bEnable, FName CustomGameState);
+
+	/*********************************************************************************************
+	 * Protected functions
+	 * Use SetMouseVisibilitySettingsEnabled and SetMouseVisibilitySettingsEnabledCustom instead.
+	 ********************************************************************************************* */
+public:
 	/** Applies the new mouse visibility settings. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMouseVisibilitySettings(const FMouseVisibilitySettings& NewSettings);
+	void EnableMouseVisibilitySettings(const FMouseVisibilitySettings& NewSettings);
+
+	/** Restores previous mouse visibility settings. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void DisableMouseVisibilitySettings();
 
 	/** Called to to set the mouse cursor visibility.
 	 * @param bShouldShow true to show mouse cursor, otherwise hide it. */
@@ -73,6 +90,10 @@ protected:
 	/** Currently used mouse visibility settings. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Visibility Settings"))
 	FMouseVisibilitySettings CurrentVisibilitySettingsInternal = FMouseVisibilitySettings::Invalid;
+
+	/** Last mouse visibility settings, used for restoring the previous state when disabling the current one. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Previous Visibility Settings"))
+	FMouseVisibilitySettings PreviousVisibilitySettingsInternal = FMouseVisibilitySettings::Invalid;
 
 	/*********************************************************************************************
 	 * Overrides

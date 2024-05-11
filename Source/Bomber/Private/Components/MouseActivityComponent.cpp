@@ -9,12 +9,6 @@
 //---
 #include "GameFramework/PlayerController.h"
 //---
-#if WITH_EDITOR
-#include "Engine/GameViewportClient.h"
-#include "Engine/LocalPlayer.h"
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#endif
-//---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MouseActivityComponent)
 
 // Sets default values for this component's properties
@@ -49,12 +43,56 @@ const FMouseVisibilitySettings& UMouseActivityComponent::GetCurrentVisibilitySet
 }
 
 // Applies the new mouse visibility settings
-void UMouseActivityComponent::SetMouseVisibilitySettings(const FMouseVisibilitySettings& NewSettings)
+void UMouseActivityComponent::SetMouseVisibilitySettingsEnabled(bool bEnable, ECurrentGameState GameState)
 {
-	if (NewSettings.IsValid())
+	if (bEnable)
 	{
+		const FMouseVisibilitySettings& NewSettings = UPlayerInputDataAsset::Get().GetMouseVisibilitySettings(GameState);
+		EnableMouseVisibilitySettings(NewSettings);
+	}
+	else if (CurrentVisibilitySettingsInternal.GameState == GameState)
+	{
+		DisableMouseVisibilitySettings();
+	}
+}
+
+// Applies the new mouse visibility settings by custom game state
+void UMouseActivityComponent::SetMouseVisibilitySettingsEnabledCustom(bool bEnable, FName CustomGameState)
+{
+	if (bEnable)
+	{
+		const FMouseVisibilitySettings& NewSettings = UPlayerInputDataAsset::Get().GetMouseVisibilitySettingsCustom(CustomGameState);
+		EnableMouseVisibilitySettings(NewSettings);
+	}
+	else if (CurrentVisibilitySettingsInternal.CustomGameState == CustomGameState)
+	{
+		DisableMouseVisibilitySettings();
+	}
+}
+
+/*********************************************************************************************
+ * Protected functions
+ ********************************************************************************************* */
+
+// Applies the new mouse visibility settings
+void UMouseActivityComponent::EnableMouseVisibilitySettings(const FMouseVisibilitySettings& NewSettings)
+{
+	if (ensureMsgf(NewSettings.IsValid(), TEXT("ASSERT: [%i] %hs:\n'NewSettings' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		PreviousVisibilitySettingsInternal = CurrentVisibilitySettingsInternal;
 		CurrentVisibilitySettingsInternal = NewSettings;
 		SetMouseVisibility(NewSettings.bIsVisible);
+	}
+}
+
+// Restores previous mouse visibility settings
+void UMouseActivityComponent::DisableMouseVisibilitySettings()
+{
+	if (PreviousVisibilitySettingsInternal.IsValid())
+	{
+		CurrentVisibilitySettingsInternal = PreviousVisibilitySettingsInternal;
+		PreviousVisibilitySettingsInternal = FMouseVisibilitySettings::Invalid;
+		SetMouseVisibility(CurrentVisibilitySettingsInternal.bIsVisible);
 	}
 }
 
@@ -149,6 +187,5 @@ void UMouseActivityComponent::OnMouseMove_Implementation()
 // Listen to toggle mouse visibility
 void UMouseActivityComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
-	const FMouseVisibilitySettings& NewSettings = UPlayerInputDataAsset::Get().GetMouseVisibilitySettings(CurrentGameState);
-	SetMouseVisibilitySettings(NewSettings);
+	SetMouseVisibilitySettingsEnabled(true, CurrentGameState);
 }

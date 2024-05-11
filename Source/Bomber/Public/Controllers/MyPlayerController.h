@@ -80,6 +80,9 @@ protected:
 	/** Is overridden to spawn player state or reuse existing one. */
 	virtual void InitPlayerState() override;
 
+	/** Is overriden to setup camera manager once spawned. */
+	virtual void SpawnPlayerCameraManager() override;
+
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
@@ -141,4 +144,5 @@ public:
 	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
+	UMouseActivityComponent& GetMouseActivityComponentChecked() const;
 };
