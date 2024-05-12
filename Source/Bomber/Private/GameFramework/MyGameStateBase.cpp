@@ -269,6 +269,20 @@ void AMyGameStateBase::OnCountdownTimerTicked()
  * Overrides
  ********************************************************************************************* */
 
+// Returns amount of players (host + clients) playing this game
+int32 AMyGameStateBase::GetPlayersInMultiplayerNum() const
+{
+	int32 PlayersNum = 0;
+	for (const APlayerState* PlayerStateIt : PlayerArray)
+	{
+		if (PlayerStateIt && !PlayerStateIt->IsABot())
+		{
+			++PlayersNum;
+		}
+	}
+	return PlayersNum;
+}
+
 // Returns properties that are replicated for the lifetime of the actor channel.
 void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

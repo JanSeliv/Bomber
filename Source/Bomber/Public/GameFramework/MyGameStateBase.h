@@ -175,11 +175,11 @@ protected:
 public:
 	/** Returns true if any client is connected to the game. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	bool IsMultiplayerGame() const { return GetPlayersInMultiplayerNum() > 1; }
+	FORCEINLINE bool IsMultiplayerGame() const { return GetPlayersInMultiplayerNum() > 1; }
 
-	/** Returns true if any client is connected to the game. */
+	/** Returns amount of players (host + clients) playing this game. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	int32 GetPlayersInMultiplayerNum() const { return PlayerArray.Num(); }
+	int32 GetPlayersInMultiplayerNum() const;
 
 	/*********************************************************************************************
 	 * Overrides
