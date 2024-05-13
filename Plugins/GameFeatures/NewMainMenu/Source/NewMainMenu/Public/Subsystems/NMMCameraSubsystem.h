@@ -74,6 +74,10 @@ public:
 	static float GetCameraLastTransitionValue();
 
 protected:
+	/** Is true during the transition when the camera is currently blending in to the rail or out from the Rail to the Spot. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Blending In/Out"))
+	bool bIsBlendingInOutInternal = false;
+
 	/** Is called on starts blending the camera towards current spot on the rail. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBeginTransition();
