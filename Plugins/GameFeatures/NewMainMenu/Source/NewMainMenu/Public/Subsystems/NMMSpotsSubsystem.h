@@ -9,6 +9,7 @@
 class UNMMSpotComponent;
 
 enum class ELevelType : uint8;
+enum class ENMMState : uint8;
 
 /**
  * Manages Main Menu cinematic spots and keeps their data.
@@ -28,7 +29,7 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FNMMOnSpotReady OnMainMenuSpotReady;
 
-	/** Returns true if any Main-Menu spot is fully initialized: spawned on the level and finished loading its Master Sequence. */ 
+	/** Returns true if any Main-Menu spot is fully initialized: spawned on the level and finished loading its Master Sequence. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsAnyMainMenuSpotReady() const;
 
@@ -87,7 +88,18 @@ protected:
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
-public:
+protected:
+	/** Is called when the world is initialized. */
+	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+
 	/** Clears all transient data contained in this subsystem. */
 	virtual void Deinitialize() override;
+
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
+	/** Called when the Main Menu state was changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnNewMainMenuStateChanged(ENMMState NewState);
 };

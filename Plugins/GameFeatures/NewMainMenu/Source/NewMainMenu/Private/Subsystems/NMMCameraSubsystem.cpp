@@ -81,14 +81,14 @@ void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	const UCameraComponent* CameraComponent = FindCameraComponent(MainMenuState);
 	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %s:\n'MyPC' is not valid!"), __LINE__, *FString(__FUNCTION__))
-		|| !ensureMsgf(CameraComponent, TEXT("ASSERT: [%i] %s:\n'CameraComponent' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+		|| !ensureMsgf(CameraComponent, TEXT("ASSERT: [%i] %s:\n'CameraComponent' is not valid!"), __LINE__, *FString(__FUNCTION__))
+		|| MyPC->GetViewTarget() == CameraComponent->GetOwner()) // Already possessed
 	{
 		return;
 	}
 
 	FViewTargetTransitionParams BlendParams;
 	const float CameraBlendTime = UNMMDataAsset::Get().GetCameraBlendTime();
-	constexpr float InstantBlendTime = 0.f;
 
 	switch (MainMenuState)
 	{
@@ -96,7 +96,11 @@ void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 		BlendParams.BlendTime = CameraBlendTime;
 		break;
 	case ENMMState::Idle:
-		BlendParams.BlendTime = UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled() ? InstantBlendTime : CameraBlendTime;
+		if (!UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled()
+			&& UNMMSpotsSubsystem::Get().GetLastMoveSpotDirection() != 0)
+		{
+			BlendParams.BlendTime = CameraBlendTime;
+		}
 		break;
 	default: break;
 	}
