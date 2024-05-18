@@ -8,8 +8,6 @@
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "Engine/World.h"
-//---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotsSubsystem)
 
 UNMMSpotsSubsystem& UNMMSpotsSubsystem::Get(const UObject* OptionalWorldContext)

@@ -105,6 +105,10 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void MarkCinematicAsSeen();
 
+	/** Triggers or stops cinematic by current state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyCinematicState(const ENMMState PreviousState);
+
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
