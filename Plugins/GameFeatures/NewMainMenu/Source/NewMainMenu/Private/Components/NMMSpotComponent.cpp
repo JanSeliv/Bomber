@@ -238,7 +238,8 @@ void UNMMSpotComponent::ApplyCinematicState(const ENMMState PreviousState)
 	// Reset the sequence if it was playing before
 	if (PreviousState == ENMMState::Cinematic)
 	{
-		MasterPlayerInternal->RestoreState();
+		constexpr bool bKeepCamera = true;
+		UCinematicUtils::ResetSequence(MasterPlayerInternal, bKeepCamera);
 	}
 
 	// Play the cinematic (in case of stop it will be paused automatically)

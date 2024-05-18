@@ -6,6 +6,7 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneSequencePlayer.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Sections/MovieSceneCameraCutSection.h"
 #include "Sections/MovieSceneSubSection.h"
 //---
@@ -116,4 +117,38 @@ void UCinematicUtils::GetAllSectionsByClass(const UMovieSceneSequence* MasterSeq
 	{
 		return A.GetRange().GetLowerBoundValue() < B.GetRange().GetLowerBoundValue();
 	});
+}
+
+// Resets the sequence player to the beginning.
+void UCinematicUtils::ResetSequence(UMovieSceneSequencePlayer* LevelSequencePlayer, bool bKeepCamera/* = false*/)
+{
+	if (!ensureMsgf(LevelSequencePlayer, TEXT("ASSERT: [%i] %hs:\n'LevelSequencePlayer' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	AActor* PrevViewTarget = nullptr;
+	APlayerController* PC = nullptr;
+	if (bKeepCamera)
+	{
+		PC = UGameplayStatics::GetPlayerController(LevelSequencePlayer, 0);
+		if (ensureMsgf(PC, TEXT("ASSERT: [%i] %hs:\n'PC' is not found!"), __LINE__, __FUNCTION__))
+		{
+			PrevViewTarget = PC->GetViewTarget();
+		}
+	}
+
+	// Reset all 'Keep States' tracks to default, it also always resets the camera
+	LevelSequencePlayer->RestorePreAnimatedState();
+	LevelSequencePlayer->PreAnimatedState.EnableGlobalPreAnimatedStateCapture();
+
+	if (bKeepCamera
+		&& PC)
+	{
+		const AActor* NewViewTarget = PC->GetViewTarget();
+		if (PrevViewTarget != NewViewTarget)
+		{
+			PC->SetViewTarget(PrevViewTarget);
+		}
+	}
 }
