@@ -2,8 +2,9 @@
 
 #include "FootTrailsUtils.h"
 //---
-#include "GeneratedMap.h"
+#include "FootTrailsDataAsset.h"
 #include "FootTrailsGeneratorComponent.h"
+#include "GeneratedMap.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FootTrailsUtils)
 
