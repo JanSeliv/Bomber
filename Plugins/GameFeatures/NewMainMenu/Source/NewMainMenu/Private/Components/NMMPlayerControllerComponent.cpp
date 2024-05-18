@@ -9,6 +9,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
+#include "DataAssets/MyInputMappingContext.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
@@ -74,6 +75,25 @@ void UNMMPlayerControllerComponent::SetCinematicMouseVisibilityEnabled(bool bEna
 	MouseActivityComponent.SetMouseVisibilitySettingsEnabledCustom(bEnabled, CinematicStateName);
 }
 
+// Enables or disables the input context according to new menu state
+void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState NewState)
+{
+	AMyPlayerController& PC = GetPlayerControllerChecked();
+
+	// Remove all previous input contexts managed by Controller
+	TArray<const UMyInputMappingContext*> OutInputContexts;
+	UNMMDataAsset::Get().GetAllInputContexts(/*out*/OutInputContexts);
+	PC.RemoveInputContexts(OutInputContexts);
+
+	// Add Menu context as auto managed by Game State, so it will be enabled everytime the game is in the Menu state
+	const UMyInputMappingContext* InputContext = UNMMDataAsset::Get().GetInputContext(NewState);
+	if (InputContext
+		&& InputContext->GetChosenGameStatesBitmask() > 0)
+	{
+		PC.SetupInputContexts({InputContext});
+	}
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
@@ -96,9 +116,6 @@ void UNMMPlayerControllerComponent::BeginPlay()
 	FAsyncLoadGameFromSlotDelegate AsyncLoadGameFromSlotDelegate;
 	AsyncLoadGameFromSlotDelegate.BindUObject(this, &ThisClass::OnAsyncLoadGameFromSlotCompleted);
 	UGameplayStatics::AsyncLoadGameFromSlot(UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex(), AsyncLoadGameFromSlotDelegate);
-
-	// Add Menu context as auto managed by Game State, so it will be enabled everytime the game is in the Menu state
-	GetPlayerControllerChecked().SetupInputContexts({UNMMDataAsset::Get().GetInputContext(ENMMState::Idle)});
 
 	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
 	if (SpotsSubsystem.IsAnyMainMenuSpotReady())
@@ -159,6 +176,9 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENM
 		}
 	default: break;
 	}
+
+	// Update input contexts
+	SetManagedInputContextsEnabled(NewState);
 
 	// Update input contexts
 	SetCinematicInputContextEnabled(NewState == ENMMState::Cinematic);

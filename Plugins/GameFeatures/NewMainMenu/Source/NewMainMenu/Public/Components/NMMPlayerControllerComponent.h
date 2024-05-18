@@ -48,6 +48,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetCinematicMouseVisibilityEnabled(bool bEnabled);
 
+	/** Enables or disables the input context according to new menu state. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetManagedInputContextsEnabled(ENMMState NewState);
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
