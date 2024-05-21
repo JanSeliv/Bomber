@@ -107,12 +107,16 @@ protected:
 
 	/** Triggers or stops cinematic by current state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyCinematicState(const ENMMState PreviousState);
+	void ApplyCinematicState();
 
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
 protected:
+	/** Called when the current game state was changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnNewMainMenuStateChanged(ENMMState NewState);
