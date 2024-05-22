@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsPlayerStateLocallyControlled() const;
 
+	/** Returns always valid owner (human or bot), or crash if nullptr. */
+	class APlayerCharacter& GetPlayerCharacterChecked() const;
+
 	/*********************************************************************************************
 	 * End Game State
 	 * Is personal for each player: Win, Lose or Draw.
@@ -53,9 +56,17 @@ protected:
 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void MulticastSetEndGameState(EEndGameState NewEndGameState);
 
-	/*********************************************************************************************
-	 * Player Name
-	 ********************************************************************************************* */
+	/***************************************************************************************************************************************
+	 * Nickname
+	 * - AMyPlayerState::SetDefaultAIName() for AI
+	 * - AMyPlayerState::SetPlayerName(Name) for human
+	 * _____________________________________________________________________________________________________________________________________
+	 * | Variable                | Getter Function       | Class | Applies | Cfg | Rep | Description                                       |
+	 * |-------------------------|-----------------------|-------|---------|-----|-----|---------------------------------------------------|
+	 * | PlayerNamePrivate       | GetPlayerName()       | Base  | All     | -   | +   | Best method to obtain current nickname            |
+	 * | OldNamePrivate          | GetPendingPlayerName()| This  | Human   | -   | -   | Pending changed nickname in settings char by char |
+	 * | SavedPlayerNameInternal | GetSavedPlayerName()  | This  | Human   | +   | +   | Saved nickname in game settings                   |
+	 **************************************************************************************************************************************/
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerNameChanged, FName, NewName);
 
@@ -63,34 +74,46 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnPlayerNameChanged OnPlayerNameChanged;
 
-	/** Sets locally the player name on each nickname change.*/
+	/** Exposes Base::SetOldPlayerName() to blueprints to set locally the player name on each nickname change.*/
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetPlayerNameCustom(FName NewName);
+	void SetPendingPlayerName(FName NewName) { SetOldPlayerName(NewName.ToString()); }
 
-	/** Returns custom player name. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get Player Name Custom"))
-	FName GetPlayerFNameCustom() const;
+	/** Exposes Base::GetOldPlayerName() to blueprints to get locally the player name on each nickname change.*/
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE FName GetPendingPlayerName() const { return *GetOldPlayerName(); }
 
-	/** Is overriden to return own player name that is saved to config. */
-	virtual FORCEINLINE FString GetPlayerNameCustom() const override { return GetPlayerFNameCustom().ToString(); }
+	/** Sets saved human name to config property.
+	 * SaveConfig() needs to be called separately to save it to the file. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetSavedPlayerName(FName NewName);
+
+	/** Returns saved human name from config file. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE FName GetSavedPlayerName() const { return SavedPlayerNameInternal; }
+
+	/** Applies default bots name based on current character ID like "AI 0", "AI 1" etc. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetDefaultAIName();
+
+	/** Is overridden to additionally set player name on server and broadcast it. */
+	virtual void SetPlayerName(const FString& S) override;
 
 	/** Applies and broadcasts player name. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyCustomPlayerName();
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplyPlayerName();
 
 protected:
-	/** Replaces APlayerState::PlayerNamePrivate for saving purposes, since original property is not 'Config'.
+	/** Is created for saving purposes since base APlayerState::PlayerNamePrivate property is not 'Config'.
 	 * Can contain different languages, uppercase, lowercase etc, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, ReplicatedUsing = "OnRep_CustomPlayerName", Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Player Name"))
-	FName CustomPlayerNameInternal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Saved Player Name"))
+	FName SavedPlayerNameInternal;
 
 	/** Called on server when settings are saved to apply local player name. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void ServerSetPlayerNameCustom(FName NewName);
+	void ServerSetPlayerName(FName NewName);
 
-	/** Called on client when custom player name is changed. */
-	UFUNCTION()
-	void OnRep_CustomPlayerName();
+	/** Called on client when player name is changed. */
+	virtual void OnRep_PlayerName() override;
 
 	/*********************************************************************************************
 	 * Is Character Dead
@@ -121,7 +144,7 @@ protected:
 
 	/** Applies and broadcasts Is Character Dead status. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyIsCharacterDead();	
+	void ApplyIsCharacterDead();
 
 	/*********************************************************************************************
 	 * Events
@@ -131,13 +154,6 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++")
 	void OnPlayerStateInit();
 
-protected:
-	/** Returns properties that are replicated for the lifetime of the actor channel. */
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
-	/** Called when the game starts. */
-	virtual void BeginPlay() override;
-
 	/** Listens game states to notify server about ending game for controlled player. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
@@ -145,4 +161,20 @@ protected:
 	/** Listens game settings to apply them once saved. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnSaveSettings();
+
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
+	/** Returns properties that are replicated for the lifetime of the actor channel. */
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	/** Called when the game starts. */
+	virtual void BeginPlay() override;
+
+	/** Register a player with the online subsystem. */
+	virtual void RegisterPlayerWithSession(bool bWasFromInvite) override;
+
+	/** Unregister a player with the online subsystem. */
+	virtual void UnregisterPlayerWithSession() override;
 };

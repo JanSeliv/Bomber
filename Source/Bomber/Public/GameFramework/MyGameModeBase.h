@@ -48,9 +48,6 @@ protected:
 	 * Overrides
 	 ********************************************************************************************* */
 protected:
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() override;
-
 	/** Initializes the game. */
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
@@ -59,6 +56,9 @@ protected:
 
 	/** Called when a Controller with a PlayerState leaves the game or is destroyed. */
 	virtual void Logout(AController* Exiting) override;
+
+	/** Sets the name for a controller. */
+	virtual void ChangeName(AController* Controller, const FString& NewName, bool bNameChange) override;
 
 #if WITH_EDITOR
 	/** Is called if start the game in 'Simulate in Editor' and then press 'Possess or eject player' button. */

@@ -5,6 +5,7 @@
 #include "GeneratedMap.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyGameUserSettings.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -18,9 +19,6 @@ AMyPlayerState::AMyPlayerState()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
-
-	// Makes GetPlayerName() to call virtual GetPlayerNameCustom() to allow custom access
-	bUseCustomPlayerNames = true;
 }
 
 // Returns true if this Player State is controlled by a locally controlled player
@@ -28,6 +26,12 @@ bool AMyPlayerState::IsPlayerStateLocallyControlled() const
 {
 	const APlayerController* PC = GetPlayerController();
 	return PC && PC->IsLocalPlayerController();
+}
+
+// Returns always valid owner (human or bot), or crash if nullptr
+APlayerCharacter& AMyPlayerState::GetPlayerCharacterChecked() const
+{
+	return *CastChecked<APlayerCharacter>(GetPawn());
 }
 
 /*********************************************************************************************
@@ -96,62 +100,79 @@ void AMyPlayerState::MulticastSetEndGameState_Implementation(EEndGameState NewEn
 }
 
 /*********************************************************************************************
- * Player Name
+ * Nickname
  ********************************************************************************************* */
 
-// Set the custom player name by user input
-void AMyPlayerState::SetPlayerNameCustom(FName NewName)
+// Called on server when settings are saved to apply new player name
+void AMyPlayerState::ServerSetPlayerName_Implementation(FName NewName)
 {
-	if (GetOldPlayerName() == NewName
-	    || NewName.IsNone())
+	SetPlayerName(NewName.ToString());
+}
+
+// Sets saved human name to config property
+void AMyPlayerState::SetSavedPlayerName(FName NewName)
+{
+	if (SavedPlayerNameInternal != NewName)
+	{
+		SavedPlayerNameInternal = NewName;
+
+		SetPlayerName(SavedPlayerNameInternal.ToString());
+	}
+}
+
+// Applies default AI name based on current character ID like "AI 0", "AI 1" etc
+void AMyPlayerState::SetDefaultAIName()
+{
+	if (!IsABot())
+	{
+		// Is not bot
+		return;
+	}
+
+	const int32 CharacterID = GetPlayerCharacterChecked().GetCharacterID();
+	const FString AIName = FString::Printf(TEXT("AI %s"), *FString::FromInt(CharacterID));
+	if (GetPlayerName() != AIName)
+	{
+		SetPlayerName(AIName);
+	}
+}
+
+// Overrides base method to additionally set player name on server and broadcast it
+void AMyPlayerState::SetPlayerName(const FString& S)
+{
+	if (S == GetPlayerName())
 	{
 		return;
 	}
 
-	// First set locally the old name while name is changing.
-	// Once settings are saved, ApplyCustomPlayerName() will be called
-	SetOldPlayerName(NewName.ToString());
-}
-
-// Returns custom player name
-FName AMyPlayerState::GetPlayerFNameCustom() const
-{
-	const FString LocalNickname = GetOldPlayerName();
-	if (!LocalNickname.IsEmpty())
+	if (HasAuthority())
 	{
-		return *LocalNickname;
+		Super::SetPlayerName(S);
 	}
-
-	if (!CustomPlayerNameInternal.IsNone())
+	else
 	{
-		return CustomPlayerNameInternal;
+		ServerSetPlayerName(*S);
+		ApplyPlayerName(); // apply locally
 	}
-
-	return *UKismetSystemLibrary::GetPlatformUserName();
-}
-
-// Called on server when settings are saved to apply new player name
-void AMyPlayerState::ServerSetPlayerNameCustom_Implementation(FName NewName)
-{
-	SetPlayerNameCustom(NewName);
-	ApplyCustomPlayerName();
 }
 
 // Applies and broadcasts player nam
-void AMyPlayerState::ApplyCustomPlayerName()
+void AMyPlayerState::ApplyPlayerName()
 {
-	CustomPlayerNameInternal = GetPlayerFNameCustom();
+	const FName PlayerNameCustom = *GetPlayerName();
 
 	if (OnPlayerNameChanged.IsBound())
 	{
-		OnPlayerNameChanged.Broadcast(CustomPlayerNameInternal);
+		OnPlayerNameChanged.Broadcast(PlayerNameCustom);
 	}
 }
 
 // Called on client when custom player name is changed
-void AMyPlayerState::OnRep_CustomPlayerName()
+void AMyPlayerState::OnRep_PlayerName()
 {
-	ApplyCustomPlayerName();
+	Super::OnRep_PlayerName();
+
+	ApplyPlayerName();
 }
 
 /*********************************************************************************************
@@ -197,55 +218,14 @@ void AMyPlayerState::ApplyIsCharacterDead()
 // Is called when player state is initialized with assigned character
 void AMyPlayerState::OnPlayerStateInit_Implementation()
 {
-	if (IsPlayerStateLocallyControlled())
-	{
-		// Listen game settings to apply them once saved
-		UMyGameUserSettings::Get().OnSaveSettings.AddUniqueDynamic(this, &ThisClass::OnSaveSettings);
-
-		// Apply custom player name from config if any
-		if (!CustomPlayerNameInternal.IsNone())
-		{
-			SetPlayerNameCustom(CustomPlayerNameInternal);
-			ApplyCustomPlayerName();
-		}
-	}
-
 	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnPlayerStateInit(*this);
-}
-
-// Returns properties that are replicated for the lifetime of the actor channel.
-void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ThisClass, EndGameStateInternal);
-	DOREPLIFETIME(ThisClass, CustomPlayerNameInternal);
-	DOREPLIFETIME(ThisClass, bIsCharacterDeadInternal);
-}
-
-// Called when the game starts
-void AMyPlayerState::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (HasAuthority())
-	{
-		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-	}
 }
 
 // Listens game settings to apply them once saved
 void AMyPlayerState::OnSaveSettings_Implementation()
 {
-	const FName LocalNickname = GetPlayerFNameCustom();
-	if (CustomPlayerNameInternal != LocalNickname)
-	{
-		// Apply local player name on server
-		ServerSetPlayerNameCustom(LocalNickname);
-
-		// Apply locally now
-		ApplyCustomPlayerName();
-	}
+	const FName PendingPlayerName = GetPendingPlayerName();
+	SetSavedPlayerName(PendingPlayerName);
 }
 
 // Listen game states to notify server about ending game for controlled player
@@ -271,4 +251,59 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 	{
 		SetCharacterDead(false);
 	}
+}
+
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
+
+// Returns properties that are replicated for the lifetime of the actor channel.
+void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, EndGameStateInternal);
+	DOREPLIFETIME(ThisClass, bIsCharacterDeadInternal);
+}
+
+// Called when the game starts
+void AMyPlayerState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (HasAuthority())
+	{
+		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	}
+}
+
+// Register a player with the online subsystem
+void AMyPlayerState::RegisterPlayerWithSession(bool bWasFromInvite)
+{
+	Super::RegisterPlayerWithSession(bWasFromInvite);
+
+	SetIsABot(false);
+
+	// Apply custom player name from config if any
+	if (IsPlayerStateLocallyControlled())
+	{
+		// Listen game settings to apply them once saved
+		UMyGameUserSettings::Get().OnSaveSettings.AddUniqueDynamic(this, &ThisClass::OnSaveSettings);
+
+		// Apply custom player name from config
+		if (SavedPlayerNameInternal.IsNone())
+		{
+			SavedPlayerNameInternal = *UKismetSystemLibrary::GetPlatformUserName();
+		}
+		SetPlayerName(SavedPlayerNameInternal.ToString());
+		SetPendingPlayerName(SavedPlayerNameInternal);
+	}
+}
+
+// Unregister a player with the online subsystem
+void AMyPlayerState::UnregisterPlayerWithSession()
+{
+	Super::UnregisterPlayerWithSession();
+
+	SetIsABot(true);
 }

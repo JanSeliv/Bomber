@@ -375,12 +375,12 @@
 				"Setter":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
-					"FunctionName": "SetPlayerNameCustom"
+					"FunctionName": "SetPendingPlayerName"
 				},
 				"Getter":
 				{
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
-					"FunctionName": "GetPlayerFNameCustom"
+					"FunctionName": "GetPendingPlayerName"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0A4D44494F98A414FFD6F399B8C3DAFE\", \"Player Name\")",
 				"Tooltip": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"91BCE84A4CF9B58F61A9C8BB16663DB5\", \"Enter your nickname\")",

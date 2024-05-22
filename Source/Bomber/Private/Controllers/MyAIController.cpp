@@ -144,10 +144,8 @@ void AMyAIController::OnPossess(APawn* InPawn)
 		checkf(NewPlayerState, TEXT("ERROR: [%i] %s:\n'NewPlayerState' was not spawned!"), __LINE__, *FString(__FUNCTION__));
 		OwnerInternal->SetPlayerState(NewPlayerState);
 
-		// Set default nickname for AI
-		const FString AIName = FString::Printf(TEXT("AI %s"), *FString::FromInt(OwnerInternal->GetCharacterID()));
-		NewPlayerState->SetPlayerNameCustom(FName(*AIName));
-		NewPlayerState->ApplyCustomPlayerName();
+		// Update default nickname for AI
+		NewPlayerState->SetDefaultAIName();
 	}
 
 	// Notify host about bot possession

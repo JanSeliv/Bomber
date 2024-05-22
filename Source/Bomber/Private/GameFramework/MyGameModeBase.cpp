@@ -37,12 +37,6 @@ void AMyGameModeBase::AddPlayerController(AMyPlayerController* PlayerController)
 	PlayerControllersInternal.Add(PlayerController);
 }
 
-// Called when the game starts or when spawned
-void AMyGameModeBase::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 // Initializes the game
 void AMyGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
@@ -85,6 +79,13 @@ void AMyGameModeBase::Logout(AController* Exiting)
 	}
 
 	Super::Logout(Exiting);
+}
+
+// Sets the name for a controller 
+void AMyGameModeBase::ChangeName(AController* Controller, const FString& NewName, bool bNameChange)
+{
+	// Super is not called since it's forbidden to change player name with this function
+	// Instead, AMyPlayerState API should be used
 }
 
 #if WITH_EDITOR

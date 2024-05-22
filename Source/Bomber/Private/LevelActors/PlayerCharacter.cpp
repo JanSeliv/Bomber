@@ -156,7 +156,7 @@ void APlayerCharacter::UpdateNicknameOnNameplate()
 {
 	if (const AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
 	{
-		const FName NewNickname = MyPlayerState->GetPlayerFNameCustom();
+		const FName NewNickname = *MyPlayerState->GetPlayerName();
 		SetNicknameOnNameplate(NewNickname);
 	}
 }
