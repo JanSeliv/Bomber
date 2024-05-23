@@ -57,7 +57,7 @@ public:
 
 	/** Returns the nickname widget by a player index. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class UUserWidget* GetNicknameWidget(int32 Index) const { return NicknameWidgetsInternal.IsValidIndex(Index) ? NicknameWidgetsInternal[Index] : nullptr; }
+	FORCEINLINE class UPlayerName3DWidget* GetNicknameWidget(int32 Index) const { return NicknameWidgetsInternal.IsValidIndex(Index) ? NicknameWidgetsInternal[Index] : nullptr; }
 
 	/** Notify listen UI widgets to
 	close widget. */
@@ -101,7 +101,7 @@ protected:
 
 	/** All nickname widget objects for each player. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nickname Widgets"))
-	TArray<TObjectPtr<class UUserWidget>> NicknameWidgetsInternal;
+	TArray<TObjectPtr<class UPlayerName3DWidget>> NicknameWidgetsInternal;
 
 	/** If true, shows FPS counter widget on the HUD, is config property. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is FPS Counter Enabled"))

@@ -87,10 +87,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
 
-	/** Actualize the player name for this character. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void UpdateNicknameOnNameplate();
-
 	/** Set and apply how a player has to look like.
 	 * @param CustomPlayerMeshData New data to apply. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
@@ -118,10 +114,6 @@ protected:
 	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
-
-	/** The static mesh nameplate */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Mesh Component"))
-	TObjectPtr<class UStaticMeshComponent> NameplateMeshInternal = nullptr;
 
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_Powerups", Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
@@ -200,10 +192,6 @@ protected:
 	UFUNCTION()
 	void OnRep_Powerups();
 
-	/** Updates new player name on a 3D widget component. */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
-	void SetNicknameOnNameplate(FName NewName);
-
 	/** Updates collision object type by current character ID. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateCollisionObjectType();
@@ -243,4 +231,23 @@ protected:
 	/** Is called when the player was destroyed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
+
+	/*********************************************************************************************
+	 * Nickname
+	 ********************************************************************************************* */
+public:
+	/** Updates new player name on a 3D widget component. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetNicknameOnNameplate(FName NewName);
+
+protected:
+	/** The static mesh nameplate (background material of the player name).
+	 * @todo JanSeliv whnin60J Get rid of `Nameplate Mesh` from Player Character: use Image background image in PlayerName3DWidget instead. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nameplate Mesh Component"))
+	TObjectPtr<class UStaticMeshComponent> NameplateMeshInternal = nullptr;
+
+	/** 3D widget component that displays the player name above the character. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Name 3D Widget Component"))
+	TObjectPtr<class UWidgetComponent> PlayerName3DWidgetComponentInternal = nullptr;
+
 };

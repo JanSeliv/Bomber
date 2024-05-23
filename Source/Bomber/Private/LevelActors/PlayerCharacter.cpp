@@ -15,6 +15,8 @@
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
+#include "UI/MyHUD.h"
+#include "UI/PlayerName3DWidget.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -22,9 +24,11 @@
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "UObject/ConstructorHelpers.h"
 //---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -76,6 +80,23 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	static const FVector NameplateRelativeScale(1.75f, 1.f, 1.f);
 	NameplateMeshInternal->SetRelativeScale3D_Direct(NameplateRelativeScale);
 	NameplateMeshInternal->SetUsingAbsoluteRotation(true);
+	NameplateMeshInternal->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneMesh(TEXT("/Engine/BasicShapes/Plane"));
+	checkf(PlaneMesh.Succeeded(), TEXT("ERROR: [%i] %hs:\n'PlaneMesh' failed to load!"), __LINE__, __FUNCTION__);
+	NameplateMeshInternal->SetStaticMesh(PlaneMesh.Object);
+
+	// Initialize 3D widget component for the player name
+	PlayerName3DWidgetComponentInternal = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerName3DWidgetComponent"));
+	PlayerName3DWidgetComponentInternal->SetupAttachment(NameplateMeshInternal);
+	static const FVector WidgetRelativeLocation(0.f, 0.f, 10.f);
+	PlayerName3DWidgetComponentInternal->SetRelativeLocation_Direct(WidgetRelativeLocation);
+	static const FRotator WidgetRelativeRotation(90.f, -90.f, 180.f);
+	PlayerName3DWidgetComponentInternal->SetRelativeRotation_Direct(WidgetRelativeRotation);
+	PlayerName3DWidgetComponentInternal->SetGenerateOverlapEvents(false);
+	static const FVector2D DrawSize(180.f, 50.f);
+	PlayerName3DWidgetComponentInternal->SetDrawSize(DrawSize);
+	static const FVector2D Pivot(0.5f, 0.4f);
+	PlayerName3DWidgetComponentInternal->SetPivot(Pivot);
 
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
@@ -151,16 +172,6 @@ UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
 	return Cast<UMySkeletalMeshComponent>(GetMesh());
 }
 
-// Actualize the player name for this character
-void APlayerCharacter::UpdateNicknameOnNameplate()
-{
-	if (const AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
-	{
-		const FName NewNickname = *MyPlayerState->GetPlayerName();
-		SetNicknameOnNameplate(NewNickname);
-	}
-}
-
 // Returns level type associated with player, e.g: Water level type for Roger character
 ELevelType APlayerCharacter::GetPlayerType() const
 {
@@ -210,11 +221,6 @@ void APlayerCharacter::BeginPlay()
 		// Listen to handle possessing logic
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
-
-	if (AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
-	{
-		MyPlayerState->OnPlayerNameChanged.AddDynamic(this, &ThisClass::SetNicknameOnNameplate);
-	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -242,8 +248,6 @@ void APlayerCharacter::OnConstructionPlayerCharacter()
 		CharacterIDInternal = PlayerCells.Num() - 1;
 		ApplyCharacterID();
 	}
-
-	UpdateNicknameOnNameplate();
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR
@@ -308,6 +312,9 @@ void APlayerCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlaye
 	ApplyCustomPlayerMeshData();
 
 	MyPlayerState->OnPlayerStateInit();
+
+	MyPlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::SetNicknameOnNameplate);
+	SetNicknameOnNameplate(*MyPlayerState->GetPlayerName());
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -351,8 +358,6 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	ApplyCustomPlayerMeshData();
-
-	UpdateNicknameOnNameplate();
 }
 
 // Triggers when this player character starts something overlap.
@@ -476,13 +481,6 @@ void APlayerCharacter::ResetPowerups()
 void APlayerCharacter::OnRep_Powerups()
 {
 	ApplyPowerups();
-}
-
-// Update player name on a 3D widget component
-void APlayerCharacter::SetNicknameOnNameplate_Implementation(FName NewName)
-{
-	// BP implementation
-	// ...
 }
 
 // Updates collision object type by current character ID
@@ -711,5 +709,29 @@ void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UOb
 	if (AMyPlayerState* InPlayerState = GetPlayerState<AMyPlayerState>())
 	{
 		InPlayerState->SetCharacterDead(true);
+	}
+}
+
+/*********************************************************************************************
+ * Nickname
+ ********************************************************************************************* */
+
+// Update player name on a 3D widget component
+void APlayerCharacter::SetNicknameOnNameplate(FName NewName)
+{
+	const AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD();
+	UPlayerName3DWidget* PlayerNameWidget = MyHUD ? MyHUD->GetNicknameWidget(CharacterIDInternal) : nullptr;
+	if (!ensureMsgf(PlayerNameWidget, TEXT("ASSERT: [%i] %hs:\n'PlayerNameWidget' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	PlayerNameWidget->SetPlayerName(NewName);
+
+	checkf(PlayerName3DWidgetComponentInternal, TEXT("ERROR: [%i] %hs:\n'PlayerName3DWidgetComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	const UUserWidget* LastWidget = PlayerName3DWidgetComponentInternal->GetWidget();
+	if (LastWidget != PlayerNameWidget)
+	{
+		PlayerName3DWidgetComponentInternal->SetWidget(PlayerNameWidget);
 	}
 }

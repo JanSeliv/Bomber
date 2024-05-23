@@ -4,6 +4,7 @@
 //---
 #include "DataAssets/UIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "UI/PlayerName3DWidget.h"
 #include "UI/SettingsWidget.h"
 //---
 #include "UnrealClient.h"
@@ -111,7 +112,8 @@ void AMyHUD::InitWidgets()
 	NicknameWidgetsInternal.Reserve(MaxPlayersNum);
 	for (int32 Index = 0; Index < MaxPlayersNum; ++Index)
 	{
-		UUserWidget* NicknameWidget = CreateWidgetByClass(UIDataAsset.GetNicknameWidgetClass(), /*bAddToViewport*/false); // Is drawn by 3D user widget component, no need add it to viewport
+		UPlayerName3DWidget* NicknameWidget = CreateWidgetByClass<UPlayerName3DWidget>(UIDataAsset.GetNicknameWidgetClass(), /*bAddToViewport*/false);
+		// Is drawn by 3D user widget component, no need add it to viewport
 		NicknameWidgetsInternal.Emplace(NicknameWidget);
 	}
 

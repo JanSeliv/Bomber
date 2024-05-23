@@ -33,7 +33,7 @@ public:
 	/** Returns a class of the nickname widget.
 	 * @see UUIDataAsset::NicknameWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UUserWidget> GetNicknameWidgetClass() const { return NicknameWidgetClassInternal; }
+	FORCEINLINE TSubclassOf<class UPlayerName3DWidget> GetNicknameWidgetClass() const { return NicknameWidgetClassInternal; }
 
 	/** Returns a class of the FPS counter widget.
 	 * @see UUIDataAsset::FPSCounterWidgetClassInternal.*/
@@ -56,7 +56,7 @@ protected:
 
 	/** The class of a Nickname Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nickname Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> NicknameWidgetClassInternal = nullptr;
+	TSubclassOf<class UPlayerName3DWidget> NicknameWidgetClassInternal = nullptr;
 
 	/** The class of a FPS counter widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "FPS Counter Widget Class", ShowOnlyInnerProperties))

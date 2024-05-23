@@ -58,12 +58,13 @@ protected:
 
 	/***************************************************************************************************************************************
 	 * Nickname
-	 * - AMyPlayerState::SetDefaultAIName() for AI
-	 * - AMyPlayerState::SetPlayerName(Name) for human
+	 * - Base::SetPlayerName(Name) for any (Human/AI)
+	 * - This::SetDefaultAIName() for AI
+	 * - This::SetSavedPlayerName(Name) for human
 	 * _____________________________________________________________________________________________________________________________________
 	 * | Variable                | Getter Function       | Class | Applies | Cfg | Rep | Description                                       |
 	 * |-------------------------|-----------------------|-------|---------|-----|-----|---------------------------------------------------|
-	 * | PlayerNamePrivate       | GetPlayerName()       | Base  | All     | -   | +   | Best method to obtain current nickname            |
+	 * | PlayerNamePrivate       | GetPlayerName()       | Base  | Human/AI| -   | +   | Best method to obtain current nickname            |
 	 * | OldNamePrivate          | GetPendingPlayerName()| This  | Human   | -   | -   | Pending changed nickname in settings char by char |
 	 * | SavedPlayerNameInternal | GetSavedPlayerName()  | This  | Human   | +   | +   | Saved nickname in game settings                   |
 	 **************************************************************************************************************************************/
