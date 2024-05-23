@@ -734,8 +734,9 @@ void APlayerCharacter::SetNicknameOnNameplate(FName NewName)
 {
 	const AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD();
 	UPlayerName3DWidget* PlayerNameWidget = MyHUD ? MyHUD->GetNicknameWidget(CharacterIDInternal) : nullptr;
-	if (!ensureMsgf(PlayerNameWidget, TEXT("ASSERT: [%i] %hs:\n'PlayerNameWidget' is not valid!"), __LINE__, __FUNCTION__))
+	if (!PlayerNameWidget)
 	{
+		// Widget is not created yet, might be called before HUD is initialized
 		return;
 	}
 

@@ -119,7 +119,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_Powerups", Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
 	FPowerUp PowerupsInternal = FPowerUp::DefaultData;
 
-	/** The ID identification of each character */
+	/** The ID identification of each character.
+	 * @todo JanSeliv 4ZkNWtmN Replace `APlayerCharacter::CharacterID` by `APlayerState::PlayerId`. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CharacterID", Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
 	int32 CharacterIDInternal = INDEX_NONE;
 
