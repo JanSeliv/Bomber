@@ -25,10 +25,10 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "UObject/ConstructorHelpers.h"
 //---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -68,22 +68,21 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 		SkeletalMeshComponent->SetRelativeLocation_Direct(MeshRelativeLocation);
 		static const FRotator MeshRelativeRotation(0, -90.f, 0);
 		SkeletalMeshComponent->SetRelativeRotation_Direct(MeshRelativeRotation);
-
-		SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SkeletalMeshComponent->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 	}
 
 	// Initialize the nameplate mesh component
 	NameplateMeshInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
 	NameplateMeshInternal->SetupAttachment(RootComponent);
-	static const FVector NameplateRelativeLocation(-60.f, 0.f, 150.f);
+	static const FVector NameplateRelativeLocation(0.f, 0.f, 210.f);
 	NameplateMeshInternal->SetRelativeLocation_Direct(NameplateRelativeLocation);
 	static const FVector NameplateRelativeScale(1.75f, 1.f, 1.f);
 	NameplateMeshInternal->SetRelativeScale3D_Direct(NameplateRelativeScale);
 	NameplateMeshInternal->SetUsingAbsoluteRotation(true);
 	NameplateMeshInternal->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneMesh(TEXT("/Engine/BasicShapes/Plane"));
-	checkf(PlaneMesh.Succeeded(), TEXT("ERROR: [%i] %hs:\n'PlaneMesh' failed to load!"), __LINE__, __FUNCTION__);
-	NameplateMeshInternal->SetStaticMesh(PlaneMesh.Object);
+	UStaticMesh* PlaneMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
+	checkf(PlaneMesh, TEXT("ERROR: [%i] %hs:\n'PlaneMesh' failed to load!"), __LINE__, __FUNCTION__);
+	NameplateMeshInternal->SetStaticMesh(PlaneMesh);
 
 	// Initialize 3D widget component for the player name
 	PlayerName3DWidgetComponentInternal = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerName3DWidgetComponent"));
@@ -107,6 +106,20 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 
 		// Do not push out clients from collision
 		MovementComponent->MaxDepenetrationWithGeometryAsProxy = 0.f;
+	}
+
+	if (UCapsuleComponent* RootCapsuleComponent = GetCapsuleComponent())
+	{
+		// Setup collision to allow overlap players with each other, but block all other actors
+		RootCapsuleComponent->CanCharacterStepUpOn = ECB_Yes;
+		RootCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		RootCapsuleComponent->SetCollisionProfileName(UCollisionProfile::CustomCollisionProfileName);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Player0, ECR_Overlap);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Player1, ECR_Overlap);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Player2, ECR_Overlap);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Player3, ECR_Overlap);
 	}
 }
 
