@@ -212,6 +212,49 @@ void AMyPlayerState::ApplyIsCharacterDead()
 }
 
 /*********************************************************************************************
+ * Is Human / Bot
+ ********************************************************************************************* */
+
+// Applies bot status, overloads engine's APlayerState::SetIsABot(bool) that is not virtual and not exposed to blueprints
+void AMyPlayerState::SetIsABot()
+{
+	if (IsABot())
+	{
+		return;
+	}
+
+	Super::SetIsABot(true);
+	ApplyIsABot();
+}
+
+// Applies human status
+void AMyPlayerState::SetIsHuman()
+{
+	if (!IsABot())
+	{
+		return;
+	}
+
+	Super::SetIsABot(false);
+	ApplyIsABot();
+}
+
+// Called on client when APlayerState::bIsABot is changed
+void AMyPlayerState::OnRep_IsABot()
+{
+	ApplyIsABot();
+}
+
+// Applies and broadcasts IsABot status
+void AMyPlayerState::ApplyIsABot()
+{
+	if (OnIsABotChanged.IsBound())
+	{
+		OnIsABotChanged.Broadcast(IsABot());
+	}
+}
+
+/*********************************************************************************************
  * Events
  ********************************************************************************************* */
 
@@ -282,7 +325,7 @@ void AMyPlayerState::RegisterPlayerWithSession(bool bWasFromInvite)
 {
 	Super::RegisterPlayerWithSession(bWasFromInvite);
 
-	SetIsABot(false);
+	SetIsHuman();
 
 	// Apply custom player name from config if any
 	if (IsPlayerStateLocallyControlled())
@@ -305,5 +348,21 @@ void AMyPlayerState::UnregisterPlayerWithSession()
 {
 	Super::UnregisterPlayerWithSession();
 
-	SetIsABot(true);
+	SetIsABot();
+}
+
+// Is overridden to handle own OnRep functions for engine properties
+void AMyPlayerState::PostRepNotifies()
+{
+	Super::PostRepNotifies();
+
+	// Engine's APlayerState::bIsABot property is 'Replicated', but not 'ReplicatedUsing'
+	// So, detect replication manually
+	static TMap<TWeakObjectPtr<ThisClass>, bool> IsBotCachedMap;
+	bool& bIsBotCachedRef = IsBotCachedMap.FindOrAdd(this);
+	if (bIsBotCachedRef != IsABot())
+	{
+		bIsBotCachedRef = IsABot();
+		OnRep_IsABot();
+	}
 }

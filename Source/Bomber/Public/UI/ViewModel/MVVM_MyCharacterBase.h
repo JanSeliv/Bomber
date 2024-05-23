@@ -78,6 +78,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
 	ESlateVisibility IsBotVisibility = ESlateVisibility::Collapsed;
 
+	/** Called when changed character Bot status is changed, applies both bot and human visibility. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnIsBotChanged(bool bIsBot);
+
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */

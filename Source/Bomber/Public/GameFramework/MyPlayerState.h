@@ -148,6 +148,34 @@ protected:
 	void ApplyIsCharacterDead();
 
 	/*********************************************************************************************
+	 * Is Human / Bot
+	 * APlayerState::bIsABot is used to determine if the player is a bot.
+	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsABotChanged, bool, bIsABot);
+
+	/** Called when player is changed from human to bot or vice versa. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnIsABotChanged OnIsABotChanged;
+
+	/** Applies bot status, overloads engine's APlayerState::SetIsABot(bool) that is not virtual and not exposed to blueprints. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetIsABot();
+
+	/** Applies human status. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetIsHuman();
+
+protected:
+	/** Called on client when APlayerState::bIsABot is changed. */
+	UFUNCTION()
+	void OnRep_IsABot();
+
+	/** Applies and broadcasts IsABot status. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyIsABot();
+
+	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
 public:
@@ -178,4 +206,8 @@ protected:
 
 	/** Unregister a player with the online subsystem. */
 	virtual void UnregisterPlayerWithSession() override;
+
+	/** Is overridden to handle own OnRep functions for engine properties.
+	 * Called right after calling all OnRep notifies (called even when there are no notifies). */
+	virtual void PostRepNotifies() override;
 };
