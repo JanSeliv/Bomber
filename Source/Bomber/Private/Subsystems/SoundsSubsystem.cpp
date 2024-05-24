@@ -230,8 +230,6 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	BIND_ON_LOCAL_PLAYER_STATE_READY(this, ThisClass::OnLocalPlayerStateReady);
 
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-
-	PlayCurrentBackgroundMusic();
 }
 
 // Is called on ending the current game to play the End-Game sound

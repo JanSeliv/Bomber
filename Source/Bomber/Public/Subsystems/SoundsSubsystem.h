@@ -140,7 +140,7 @@ protected:
 	void OnEndGameStateChanged(EEndGameState EndGameState);
 
 	/** Listen game states to switch background music. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Called when the local player state is initialized and its assigned character is ready. */
