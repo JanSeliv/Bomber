@@ -249,6 +249,15 @@ void USoundsSubsystem::OnEndGameStateChanged_Implementation(EEndGameState EndGam
 // Listen game states to switch background music
 void USoundsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
+	switch (CurrentGameState)
+	{
+		case ECurrentGameState::GameStarting:
+			PlayStartGameCountdownSFX();
+			break;
+		default:
+			break;
+	}
+
 	StopEndGameCountdownSFX();
 	PlayCurrentBackgroundMusic();
 }

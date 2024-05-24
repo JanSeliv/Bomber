@@ -237,8 +237,6 @@ void AMyGameStateBase::TriggerCountdowns()
 	constexpr bool bInLoop = true;
 	const float InRate = UGameStateDataAsset::Get().GetTickInterval();
 	World->GetTimerManager().SetTimer(CountdownTimerInternal, this, &ThisClass::OnCountdownTimerTicked, InRate, bInLoop);
-
-	USoundsSubsystem::Get().PlayStartGameCountdownSFX();
 }
 
 // Is called each UGameStateDataAsset::TickInternal to count different time in the game
