@@ -145,7 +145,7 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 	const AController* OwnedController = GetController();
 	if (!MapComponentInternal                     // The Map Component is not valid or transient
 	    || PowerupsInternal.FireN <= 0            // Null length of explosion
-	    || PowerupsInternal.BombN <= 0            // No more bombs
+	    || PowerupsInternal.BombNCurrent <= 0     // No more bombs
 	    || !OwnedController                       // controller is not valid
 	    || OwnedController->IsMoveInputIgnored()) // controller is blocked
 	{
@@ -166,7 +166,8 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 		checkf(MapComponent, TEXT("ERROR: [%i] %s:\n'MapComponent' is null!"), __LINE__, *FString(__FUNCTION__));
 
 		// Updating explosion cells
-		PlayerCharacter->PowerupsInternal.BombN--;
+		PlayerCharacter->PowerupsInternal.BombNCurrent--;
+		PlayerCharacter->ApplyPowerups();
 
 		// Init Bomb
 		BombActor->InitBomb(PlayerCharacter);
@@ -386,12 +387,9 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 	const UItemDataAsset& ItemDataAsset = UItemDataAsset::Get();
 
 	const int32 MaxAllowedItemsNum = ItemDataAsset.GetMaxAllowedItemsNum();
-	auto IncrementIfAllowed = [MaxAllowedItemsNum](int32& NumRef)
+	auto IncrementIfAllowed = [MaxAllowedItemsNum](int32& NumRef, int32 ClampMax = INDEX_NONE)
 	{
-		if (NumRef < MaxAllowedItemsNum)
-		{
-			++NumRef;
-		}
+		NumRef = FMath::Clamp(NumRef + 1, 0, ClampMax == INDEX_NONE ? MaxAllowedItemsNum : ClampMax);
 	};
 
 	switch (ItemType)
@@ -404,6 +402,7 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 		case EItemType::Bomb:
 		{
 			IncrementIfAllowed(PowerupsInternal.BombN);
+			IncrementIfAllowed(PowerupsInternal.BombNCurrent, PowerupsInternal.BombN);
 			break;
 		}
 		case EItemType::Fire:
@@ -430,9 +429,10 @@ void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent, UObject* Des
 	// Stop listening this bomb
 	MapComponent->OnDeactivatedMapComponent.RemoveAll(this);
 
-	if (PowerupsInternal.BombN < UItemDataAsset::Get().GetMaxAllowedItemsNum())
+	if (PowerupsInternal.BombNCurrent < PowerupsInternal.BombN)
 	{
-		++PowerupsInternal.BombN;
+		++PowerupsInternal.BombNCurrent;
+		ApplyPowerups();
 	}
 }
 

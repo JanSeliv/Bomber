@@ -28,9 +28,15 @@ struct BOMBER_API FPowerUp
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	int32 SkateN = 1;
 
-	/** The number of bombs that can be set at one time */
+	/** Maximum number of bombs that can be put at one time */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	int32 BombN = 1;
+
+	/** Current amount of bombs available.
+	 * Decreases with every bomb spawn and increases with every bomb explosion.
+	 * Is always less or equal to BombN. */
+	UPROPERTY(BlueprintReadWrite, VisibleInstanceOnly, Transient, Category = "C++")
+	int32 BombNCurrent = 1;
 
 	/** The number of items, that increases the bomb blast radius */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
@@ -250,5 +256,4 @@ protected:
 	/** 3D widget component that displays the player name above the character. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Name 3D Widget Component"))
 	TObjectPtr<class UWidgetComponent> PlayerName3DWidgetComponentInternal = nullptr;
-
 };

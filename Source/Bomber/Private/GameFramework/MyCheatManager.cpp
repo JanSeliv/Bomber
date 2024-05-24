@@ -127,6 +127,7 @@ void UMyCheatManager::SetPowerups(int32 NewLevel)
 		const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
 		NewLevel = FMath::Clamp(NewLevel, MinItemsNum, MaxItemsNum);
 		PlayerCharacter->PowerupsInternal.BombN = NewLevel;
+		PlayerCharacter->PowerupsInternal.BombNCurrent = NewLevel;
 		PlayerCharacter->PowerupsInternal.FireN = NewLevel;
 		PlayerCharacter->PowerupsInternal.SkateN = NewLevel;
 		PlayerCharacter->ApplyPowerups();
