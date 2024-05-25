@@ -21,9 +21,9 @@ public:
 	static const UUIDataAsset& Get();
 
 	/** Returns a class of the in-game widget.
-	 * @see UUIDataAsset::InGameWidgetClassInternal.*/
+	 * @see UUIDataAsset::HUDWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UUserWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
+	FORCEINLINE TSubclassOf<class UHUDWidget> GetHUDWidgetClass() const { return HUDWidgetClassInternal; }
 
 	/** Returns a class of the settings widget.
 	 * @see UUIDataAsset::SettingsWidgetClassInternal.*/
@@ -48,7 +48,7 @@ public:
 protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> InGameWidgetClassInternal = nullptr;
+	TSubclassOf<class UHUDWidget> HUDWidgetClassInternal = nullptr;
 
 	/** The class of a Settings Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))

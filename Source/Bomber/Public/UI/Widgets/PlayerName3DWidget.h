@@ -9,7 +9,7 @@
 /**
  * Is 3D widget above the player character with its name.
  */
-UCLASS()
+UCLASS(Abstract)
 class BOMBER_API UPlayerName3DWidget : public UUserWidget
 {
 	GENERATED_BODY()

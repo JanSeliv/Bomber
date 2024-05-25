@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "UI/PlayerName3DWidget.h"
+#include "UI/Widgets/PlayerName3DWidget.h"
 //---
 #include "Components/TextBlock.h"
 //---

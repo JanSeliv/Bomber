@@ -16,7 +16,7 @@
 #include "LevelActors/ItemActor.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UI/MyHUD.h"
-#include "UI/PlayerName3DWidget.h"
+#include "UI/Widgets/PlayerName3DWidget.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---

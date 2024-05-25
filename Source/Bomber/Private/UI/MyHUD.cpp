@@ -4,8 +4,9 @@
 //---
 #include "DataAssets/UIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "UI/PlayerName3DWidget.h"
 #include "UI/SettingsWidget.h"
+#include "UI/Widgets/HUDWidget.h"
+#include "UI/Widgets/PlayerName3DWidget.h"
 //---
 #include "UnrealClient.h"
 #include "Blueprint/UserWidget.h"
@@ -101,7 +102,7 @@ void AMyHUD::InitWidgets()
 
 	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
 
-	InGameWidgetInternal = CreateWidgetByClass<UUserWidget>(UIDataAsset.GetInGameWidgetClass());
+	HUDWidgetInternal = CreateWidgetByClass<UHUDWidget>(UIDataAsset.GetHUDWidgetClass());
 
 	FPSCounterWidgetInternal = CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
 

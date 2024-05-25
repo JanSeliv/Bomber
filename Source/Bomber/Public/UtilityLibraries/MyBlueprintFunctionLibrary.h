@@ -78,10 +78,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyHUD* GetMyHUD(const UObject* OptionalWorldContext = nullptr);
 
-	/** Returns the In-Game widget. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
-	static class UUserWidget* GetInGameWidget(const UObject* OptionalWorldContext = nullptr);
-
 	/** Returns specified player character.
 	 * @param CharacterID - Global ID of a character in session to find:
 	 * INDEX_NONE - Local player, 0 - Host, 1 - client/AI1, 2 - client/AI2, 3 - client/AI3.

@@ -147,13 +147,6 @@ AMyHUD* UMyBlueprintFunctionLibrary::GetMyHUD(const UObject* OptionalWorldContex
 	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
 }
 
-// Returns the In-Game widget
-UUserWidget* UMyBlueprintFunctionLibrary::GetInGameWidget(const UObject* OptionalWorldContext/* = nullptr*/)
-{
-	const AMyHUD* MyHUD = GetMyHUD(OptionalWorldContext);
-	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
-}
-
 // Returns specified player character, by default returns local player
 APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 CharacterID, const UObject* OptionalWorldContext/* = nullptr*/)
 {
