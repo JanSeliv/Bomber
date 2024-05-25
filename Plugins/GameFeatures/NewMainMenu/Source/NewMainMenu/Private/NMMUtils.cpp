@@ -15,7 +15,6 @@
 #include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
-#include "UI/MyHUD.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "MovieSceneSequencePlaybackSettings.h"
@@ -62,8 +61,8 @@ const UNMMDataAsset* UNMMUtils::GetDataAsset(const UObject* OptionalWorldContext
 // Returns the HUD component of the Main Menu
 UNMMHUDComponent* UNMMUtils::GetHUDComponent(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD(OptionalWorldContext);
-	return MyHUD ? MyHUD->FindComponentByClass<UNMMHUDComponent>() : nullptr;
+	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState(OptionalWorldContext);
+	return MyGameState ? MyGameState->FindComponentByClass<UNMMHUDComponent>() : nullptr;
 }
 
 // Returns the Player Controller component of the Main Menu

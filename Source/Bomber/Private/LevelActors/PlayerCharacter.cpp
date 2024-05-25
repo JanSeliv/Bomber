@@ -15,7 +15,7 @@
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
-#include "UI/MyHUD.h"
+#include "Subsystems/WidgetsSubsystem.h"
 #include "UI/Widgets/PlayerName3DWidget.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -732,11 +732,11 @@ void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UOb
 // Update player name on a 3D widget component
 void APlayerCharacter::SetNicknameOnNameplate(FName NewName)
 {
-	const AMyHUD* MyHUD = UMyBlueprintFunctionLibrary::GetMyHUD();
-	UPlayerName3DWidget* PlayerNameWidget = MyHUD ? MyHUD->GetNicknameWidget(CharacterIDInternal) : nullptr;
+	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	UPlayerName3DWidget* PlayerNameWidget = WidgetsSubsystem ? WidgetsSubsystem->GetNicknameWidget(CharacterIDInternal) : nullptr;
 	if (!PlayerNameWidget)
 	{
-		// Widget is not created yet, might be called before HUD is initialized
+		// Widget is not created yet, might be called before UI Subsystem is initialized
 		return;
 	}
 

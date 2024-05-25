@@ -17,10 +17,11 @@
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
-#include "UI/MyHUD.h"
+#include "Subsystems/WidgetsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
 #include "Engine/Engine.h"
+#include "Engine/LocalPlayer.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyBlueprintFunctionLibrary)
@@ -128,8 +129,8 @@ UMyGameUserSettings* UMyBlueprintFunctionLibrary::GetMyGameUserSettings(const UO
 // Returns the settings widget
 USettingsWidget* UMyBlueprintFunctionLibrary::GetSettingsWidget(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyHUD* MyHUD = GetMyHUD(OptionalWorldContext);
-	return MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
+	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem(OptionalWorldContext);
+	return WidgetsSubsystem ? WidgetsSubsystem->GetSettingsWidget() : nullptr;
 }
 
 // Returns the Camera Component used on level
@@ -138,13 +139,6 @@ UMyCameraComponent* UMyBlueprintFunctionLibrary::GetLevelCamera(const UObject* O
 	const UGeneratedMapSubsystem* Subsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem(OptionalWorldContext);
 	const AGeneratedMap* GeneratedMap = Subsystem ? Subsystem->GetGeneratedMap() : nullptr;
 	return GeneratedMap ? GeneratedMap->GetCameraComponent() : nullptr;
-}
-
-// Returns the HUD actor
-AMyHUD* UMyBlueprintFunctionLibrary::GetMyHUD(const UObject* OptionalWorldContext/* = nullptr*/)
-{
-	const AMyPlayerController* MyPlayerController = GetLocalPlayerController(OptionalWorldContext);
-	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
 }
 
 // Returns specified player character, by default returns local player

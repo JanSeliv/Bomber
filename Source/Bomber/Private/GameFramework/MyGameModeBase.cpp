@@ -5,7 +5,6 @@
 #include "Controllers/MyPlayerController.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "UI/MyHUD.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameModeBase)
 
@@ -14,7 +13,6 @@ AMyGameModeBase::AMyGameModeBase()
 {
 	// Custom defaults classes
 	GameStateClass = AMyGameStateBase::StaticClass();
-	HUDClass = AMyHUD::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	ReplaySpectatorPlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = nullptr;

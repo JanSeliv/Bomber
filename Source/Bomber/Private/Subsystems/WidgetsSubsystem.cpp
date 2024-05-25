@@ -1,34 +1,30 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "UI/WidgetsSubsystem.h"
+#include "Subsystems/WidgetsSubsystem.h"
 //---
+#include "Controllers/MyPlayerController.h"
 #include "DataAssets/UIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "UI/SettingsWidget.h"
 #include "UI/Widgets/HUDWidget.h"
 #include "UI/Widgets/PlayerName3DWidget.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "UnrealClient.h"
-#include "Blueprint/UserWidget.h"
-#include "Components/GameFrameworkComponentManager.h"
+#include "Components/Viewport.h"
 //---
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyHUD)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(WidgetsSubsystem)
 
-// Default constructor
-UWidgetsSubsystem::UWidgetsSubsystem()
+// Returns the pointer the UI Subsystem
+UWidgetsSubsystem* UWidgetsSubsystem::GetWidgetsSubsystem(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-	PrimaryActorTick.bStartWithTickEnabled = false;
-}
-
-// Go back input for UI widgets
-void UWidgetsSubsystem::BroadcastOnClose()
-{
-	if (OnClose.IsBound())
+	const ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(OptionalWorldContext);
+	if (!LocalPlayer)
 	{
-		OnClose.Broadcast();
+		const AMyPlayerController* PC = UMyBlueprintFunctionLibrary::GetLocalPlayerController(OptionalWorldContext);
+		LocalPlayer = PC ? PC->GetLocalPlayer() : nullptr;
 	}
+	return LocalPlayer ? LocalPlayer->GetSubsystem<UWidgetsSubsystem>() : nullptr;
 }
 
 // Set true to show the FPS counter widget on the HUD
@@ -42,41 +38,16 @@ void UWidgetsSubsystem::SetFPSCounterEnabled(bool bEnable)
 	}
 }
 
-// Init all widgets on gameplay starting before begin play
-void UWidgetsSubsystem::PostInitializeComponents()
+// Callback for when the player controller is changed on this subsystem's owning local player
+void UWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerController)
 {
-	Super::PostInitializeComponents();
+	Super::PlayerControllerChanged(NewPlayerController);
 
-	// Register HUD to let modular widgets to be dynamically added there
-	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
-
-	if (PlayerOwner
-	    && !PlayerOwner->MyHUD)
+	if (NewPlayerController
+	    && !AreWidgetInitialized())
 	{
-		PlayerOwner->MyHUD = this;
+		TryInitWidgets();
 	}
-
-	TryInitWidgets();
-}
-
-// Internal UUserWidget::CreateWidget wrapper
-UUserWidget* UWidgetsSubsystem::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/, int32 ZOrder/* = 0*/)
-{
-	if (!ensureMsgf(PlayerController, TEXT("%s: 'PlayerController' is null"), *FString(__FUNCTION__))
-	    || !ensureMsgf(WidgetClass, TEXT("%s: 'WidgetClass' is null"), *FString(__FUNCTION__)))
-	{
-		return nullptr;
-	}
-
-	UUserWidget* CreatedWidget = CreateWidget(PlayerController, WidgetClass);
-	checkf(CreatedWidget, TEXT("%s: ERROR: %s failed to create"), *FString(__FUNCTION__), *WidgetClass->GetName());
-
-	if (bAddToViewport)
-	{
-		CreatedWidget->AddToViewport(ZOrder);
-	}
-
-	return CreatedWidget;
 }
 
 // Will try to start the process of initializing all widgets used in game
@@ -102,18 +73,18 @@ void UWidgetsSubsystem::InitWidgets()
 
 	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
 
-	HUDWidgetInternal = CreateWidgetByClass<UHUDWidget>(UIDataAsset.GetHUDWidgetClass());
+	HUDWidgetInternal = FWidgetUtilsLibrary::CreateWidgetChecked<UHUDWidget>(UIDataAsset.GetHUDWidgetClass());
 
-	FPSCounterWidgetInternal = CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
+	FPSCounterWidgetInternal = FWidgetUtilsLibrary::CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
 
-	SettingsWidgetInternal = CreateWidgetByClass<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/4);
+	SettingsWidgetInternal = FWidgetUtilsLibrary::CreateWidgetChecked<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/4);
 	SettingsWidgetInternal->TryConstructSettings();
 
 	static constexpr int32 MaxPlayersNum = 4;
 	NicknameWidgetsInternal.Reserve(MaxPlayersNum);
 	for (int32 Index = 0; Index < MaxPlayersNum; ++Index)
 	{
-		UPlayerName3DWidget* NicknameWidget = CreateWidgetByClass<UPlayerName3DWidget>(UIDataAsset.GetNicknameWidgetClass(), /*bAddToViewport*/false);
+		UPlayerName3DWidget* NicknameWidget = FWidgetUtilsLibrary::CreateWidgetChecked<UPlayerName3DWidget>(UIDataAsset.GetNicknameWidgetClass(), /*bAddToViewport*/false);
 		// Is drawn by 3D user widget component, no need add it to viewport
 		NicknameWidgetsInternal.Emplace(NicknameWidget);
 	}

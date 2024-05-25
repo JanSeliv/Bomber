@@ -70,6 +70,9 @@ protected:
 	/** Called when the game starts or when spawned. */
 	virtual void BeginPlay() override;
 
+	/** Is overriden to be used when Input System is initialized. */
+	virtual void InitInputSystem() override;
+
 	/** Is overriden to notify when this controller possesses new player character.
 	 * @param InPawn The Pawn to be possessed. */
 	virtual void OnPossess(APawn* InPawn) override;

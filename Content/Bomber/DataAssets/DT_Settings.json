@@ -1345,17 +1345,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyHUD"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.WidgetsSubsystem'",
+					"FunctionName": "GetWidgetsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyHUD'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.WidgetsSubsystem'",
 					"FunctionName": "SetFPSCounterEnabled"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyHUD'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.WidgetsSubsystem'",
 					"FunctionName": "IsFPSCounterEnabled"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E0880BDD4241E60FB2A3008CDB5CCA63\", \"FPS Counter\")",

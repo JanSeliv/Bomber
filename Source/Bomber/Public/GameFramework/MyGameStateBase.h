@@ -188,6 +188,9 @@ protected:
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	/** This is called only in the gameplay before calling begin play. */
+	virtual void PostInitializeComponents() override;
+
 	/** Called when the game starts. */
 	virtual void BeginPlay() override;
 

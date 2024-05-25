@@ -2,20 +2,25 @@
 
 #pragma once
 
-#include "GameFramework/HUD.h"
+#include "Subsystems/LocalPlayerSubsystem.h"
 //---
 #include "WidgetsSubsystem.generated.h"
 
 /**
- * The custom HUD class. Also manages other widgets.
+ * Is used to manage User Widgets with lifetime of Local Player (similar to HUD).
  * @see Access its data with UUIDataAsset (Content/Bomber/DataAssets/DA_UI).
  */
 UCLASS(Config = "GameUserSettings", DefaultConfig)
-class BOMBER_API UWidgetsSubsystem final : public AHUD
+class BOMBER_API UWidgetsSubsystem : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 
 public:
+	/** Returns the pointer the UI Subsystem.
+	 * It will return null if Local Player is not initialized yet. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static UWidgetsSubsystem* GetWidgetsSubsystem(const UObject* OptionalWorldContext = nullptr);
+
 	/** ---------------------------------------------------
 	*		Public properties
 	* --------------------------------------------------- */
@@ -35,9 +40,6 @@ public:
 	/* ---------------------------------------------------
 	*		Public functions
 	* --------------------------------------------------- */
-
-	/** Default constructor. */
-	UWidgetsSubsystem();
 
 	/** Returns true if widgets ere initialized. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -59,11 +61,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UPlayerName3DWidget* GetNicknameWidget(int32 Index) const { return NicknameWidgetsInternal.IsValidIndex(Index) ? NicknameWidgetsInternal[Index] : nullptr; }
 
-	/** Notify listen UI widgets to
-	close widget. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void BroadcastOnClose();
-
 	/** Set true to show the FPS counter widget on the HUD. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetFPSCounterEnabled(bool bEnable);
@@ -71,12 +68,6 @@ public:
 	/** Returns true if the FPS counter widget is shown on the HUD. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool IsFPSCounterEnabled() const { return bIsFPSCounterEnabledInternal; }
-
-	/** Internal UUserWidget::CreateWidget wrapper. */
-	static UUserWidget* CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0);
-
-	template <typename T = UUserWidget>
-	FORCEINLINE T* CreateWidgetByClass(TSubclassOf<T> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0) const { return Cast<T>(CreateWidgetByClass(PlayerOwner.Get(), WidgetClass, bAddToViewport, ZOrder)); }
 
 protected:
 	/* ---------------------------------------------------
@@ -88,7 +79,7 @@ protected:
 	bool bAreWidgetInitializedInternal = false;
 
 	/** The current in-game widget object. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Widget"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "HUD Widget"))
 	TObjectPtr<class UHUDWidget> HUDWidgetInternal = nullptr;
 
 	/** The current settings widget object. */
@@ -111,8 +102,8 @@ protected:
 	*		Protected functions
 	* --------------------------------------------------- */
 
-	/** Init all widgets on gameplay starting before begin play. */
-	virtual void PostInitializeComponents() override;
+	/** Callback for when the player controller is changed on this subsystem's owning local player. */
+	virtual void PlayerControllerChanged(APlayerController* NewPlayerController) override;
 
 	/** Will try to start the process of initializing all widgets used in game. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

@@ -11,6 +11,7 @@
 //---
 #include "GameFeaturesSubsystem.h"
 #include "TimerManager.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Net/UnrealNetwork.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameStateBase)
@@ -289,6 +290,15 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ThisClass, CurrentGameStateInternal);
 	DOREPLIFETIME(ThisClass, StartingTimerSecRemainInternal);
 	DOREPLIFETIME(ThisClass, InGameTimerSecRemainInternal);
+}
+
+// This is called only in the gameplay before calling begin play
+void AMyGameStateBase::PostInitializeComponents()
+{
+	// Register it to let modular feature to be dynamically added
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+
+	Super::PostInitializeComponents();
 }
 
 // Called when the game starts

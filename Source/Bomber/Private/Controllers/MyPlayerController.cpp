@@ -15,7 +15,7 @@
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
-#include "UI/MyHUD.h"
+#include "Subsystems/WidgetsSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -121,23 +121,28 @@ void AMyPlayerController::BeginPlay()
 	// Listen to handle input for each game state
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
-	// Handle UI inputs
-	if (AMyHUD* HUD = GetHUD<AMyHUD>())
-	{
-		if (HUD->AreWidgetInitialized())
-		{
-			OnWidgetsInitialized();
-		}
-		else
-		{
-			HUD->OnWidgetsInitialized.AddDynamic(this, &ThisClass::OnWidgetsInitialized);
-		}
-	}
-
 	// Adds given contexts to the list of auto managed and binds their input actions
 	TArray<const UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(/*out*/InputContexts);
 	SetupInputContexts(InputContexts);
+}
+
+// Is overriden to be used when Input System is initialized
+void AMyPlayerController::InitInputSystem()
+{
+	Super::InitInputSystem();
+
+	// Handle UI inputs
+	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem(GetLocalPlayer());
+	checkf(WidgetsSubsystem, TEXT("ERROR: [%i] %hs:\n'WidgetsSubsystem' is null!"), __LINE__, __FUNCTION__);
+	if (WidgetsSubsystem->AreWidgetInitialized())
+	{
+		OnWidgetsInitialized();
+	}
+	else
+	{
+		WidgetsSubsystem->OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
+	}
 }
 
 // Is overriden to notify when this controller possesses new player character
@@ -208,12 +213,9 @@ void AMyPlayerController::SpawnPlayerCameraManager()
 // Is called when all game widgets are initialized
 void AMyPlayerController::OnWidgetsInitialized_Implementation()
 {
-	AMyHUD* HUD = GetHUD<AMyHUD>();
-	if (HUD
-	    && HUD->OnWidgetsInitialized.IsAlreadyBound(this, &ThisClass::OnWidgetsInitialized))
-	{
-		HUD->OnWidgetsInitialized.RemoveDynamic(this, &ThisClass::OnWidgetsInitialized);
-	}
+	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	checkf(WidgetsSubsystem, TEXT("ERROR: [%i] %hs:\n'WidgetsSubsystem' is null!"), __LINE__, __FUNCTION__);
+	WidgetsSubsystem->OnWidgetsInitialized.RemoveAll(this);
 
 	// Listens to handle input on opening and closing the Settings widget
 	USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
@@ -282,15 +284,11 @@ void AMyPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
 // Returns true if Player Controller is ready to setup all the inputs
 bool AMyPlayerController::CanBindInputActions() const
 {
-	if (!IsLocalController())
+	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	if (!IsLocalController()
+	    || !ensureMsgf(WidgetsSubsystem, TEXT("ASSERT: [%i] %hs:\n'WidgetsSubsystem' condition is FALSE"), __LINE__, __FUNCTION__)
+	    || !WidgetsSubsystem->AreWidgetInitialized())
 	{
-		return false;
-	}
-
-	const AMyHUD* HUD = GetHUD<AMyHUD>();
-	if (!HUD || !HUD->AreWidgetInitialized())
-	{
-		// UI inputs are listen, HUD has to be ready to handle them
 		return false;
 	}
 
