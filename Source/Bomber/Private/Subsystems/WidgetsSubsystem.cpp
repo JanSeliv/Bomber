@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "UI/MyHUD.h"
+#include "UI/WidgetsSubsystem.h"
 //---
 #include "DataAssets/UIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -15,7 +15,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyHUD)
 
 // Default constructor
-AMyHUD::AMyHUD()
+UWidgetsSubsystem::UWidgetsSubsystem()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -23,7 +23,7 @@ AMyHUD::AMyHUD()
 }
 
 // Go back input for UI widgets
-void AMyHUD::BroadcastOnClose()
+void UWidgetsSubsystem::BroadcastOnClose()
 {
 	if (OnClose.IsBound())
 	{
@@ -32,7 +32,7 @@ void AMyHUD::BroadcastOnClose()
 }
 
 // Set true to show the FPS counter widget on the HUD
-void AMyHUD::SetFPSCounterEnabled(bool bEnable)
+void UWidgetsSubsystem::SetFPSCounterEnabled(bool bEnable)
 {
 	if (FPSCounterWidgetInternal)
 	{
@@ -43,7 +43,7 @@ void AMyHUD::SetFPSCounterEnabled(bool bEnable)
 }
 
 // Init all widgets on gameplay starting before begin play
-void AMyHUD::PostInitializeComponents()
+void UWidgetsSubsystem::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
@@ -60,7 +60,7 @@ void AMyHUD::PostInitializeComponents()
 }
 
 // Internal UUserWidget::CreateWidget wrapper
-UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/, int32 ZOrder/* = 0*/)
+UUserWidget* UWidgetsSubsystem::CreateWidgetByClass(APlayerController* PlayerController, TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/, int32 ZOrder/* = 0*/)
 {
 	if (!ensureMsgf(PlayerController, TEXT("%s: 'PlayerController' is null"), *FString(__FUNCTION__))
 	    || !ensureMsgf(WidgetClass, TEXT("%s: 'WidgetClass' is null"), *FString(__FUNCTION__)))
@@ -80,7 +80,7 @@ UUserWidget* AMyHUD::CreateWidgetByClass(APlayerController* PlayerController, TS
 }
 
 // Will try to start the process of initializing all widgets used in game
-void AMyHUD::TryInitWidgets()
+void UWidgetsSubsystem::TryInitWidgets()
 {
 	if (UUtilsLibrary::IsViewportInitialized())
 	{
@@ -93,7 +93,7 @@ void AMyHUD::TryInitWidgets()
 }
 
 // Create and set widget objects once
-void AMyHUD::InitWidgets()
+void UWidgetsSubsystem::InitWidgets()
 {
 	if (AreWidgetInitialized())
 	{
@@ -127,7 +127,7 @@ void AMyHUD::InitWidgets()
 }
 
 // Is called right after the game was started and windows size is set
-void AMyHUD::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
+void UWidgetsSubsystem::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
 {
 	if (FViewport::ViewportResizedEvent.IsBoundToObject(this))
 	{

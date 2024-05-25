@@ -4,14 +4,14 @@
 
 #include "GameFramework/HUD.h"
 //---
-#include "MyHUD.generated.h"
+#include "WidgetsSubsystem.generated.h"
 
 /**
  * The custom HUD class. Also manages other widgets.
  * @see Access its data with UUIDataAsset (Content/Bomber/DataAssets/DA_UI).
  */
 UCLASS(Config = "GameUserSettings", DefaultConfig)
-class BOMBER_API AMyHUD final : public AHUD
+class BOMBER_API UWidgetsSubsystem final : public AHUD
 {
 	GENERATED_BODY()
 
@@ -37,7 +37,7 @@ public:
 	* --------------------------------------------------- */
 
 	/** Default constructor. */
-	AMyHUD();
+	UWidgetsSubsystem();
 
 	/** Returns true if widgets ere initialized. */
 	UFUNCTION(BlueprintPure, Category = "C++")
