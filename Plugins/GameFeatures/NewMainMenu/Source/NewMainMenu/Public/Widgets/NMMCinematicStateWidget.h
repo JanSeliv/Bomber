@@ -33,15 +33,15 @@ public:
 	 ********************************************************************************************* */
 protected:
 	/** The button to skip current cinematic. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UButton> SkipCinematicButton = nullptr;
 
 	/** Represents the progress of the hold button to skip cinematic. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class URadialSlider> SkipHoldProgress = nullptr;
 
 	/** Displays the 'Skip' text. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UTextBlock> SkipText = nullptr;
 
 	/** Contains current time player holds the skip cinematic button. */

@@ -21,6 +21,6 @@ public:
 
 protected:
 	/** The text block with player name. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UTextBlock> PlayerNameTextWidget = nullptr;
 };
