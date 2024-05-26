@@ -105,13 +105,20 @@ protected:
 	/** Callback for when the player controller is changed on this subsystem's owning local player. */
 	virtual void PlayerControllerChanged(APlayerController* NewPlayerController) override;
 
+	/** Is called when this Subsystem is removed. */
+	virtual void Deinitialize() override;
+
 	/** Will try to start the process of initializing all widgets used in game. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TryInitWidgets();
 
 	/** Create and set widget objects once. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void InitWidgets();
+
+	/** Removes all widgets and transient data. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void CleanupWidgets();
 
 	/** Is called right after the game was started and windows size is set. */
 	void OnViewportResizedWhenInit(class FViewport* Viewport, uint32 Index);

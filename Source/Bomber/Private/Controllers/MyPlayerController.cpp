@@ -135,13 +135,10 @@ void AMyPlayerController::InitInputSystem()
 	// Handle UI inputs
 	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem(GetLocalPlayer());
 	checkf(WidgetsSubsystem, TEXT("ERROR: [%i] %hs:\n'WidgetsSubsystem' is null!"), __LINE__, __FUNCTION__);
+	WidgetsSubsystem->OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
 	if (WidgetsSubsystem->AreWidgetInitialized())
 	{
 		OnWidgetsInitialized();
-	}
-	else
-	{
-		WidgetsSubsystem->OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
 	}
 }
 
@@ -213,10 +210,6 @@ void AMyPlayerController::SpawnPlayerCameraManager()
 // Is called when all game widgets are initialized
 void AMyPlayerController::OnWidgetsInitialized_Implementation()
 {
-	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
-	checkf(WidgetsSubsystem, TEXT("ERROR: [%i] %hs:\n'WidgetsSubsystem' is null!"), __LINE__, __FUNCTION__);
-	WidgetsSubsystem->OnWidgetsInitialized.RemoveAll(this);
-
 	// Listens to handle input on opening and closing the Settings widget
 	USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
 	if (ensureMsgf(SettingsWidget, TEXT("ASSERT: 'SettingsWidget' is not valid")))

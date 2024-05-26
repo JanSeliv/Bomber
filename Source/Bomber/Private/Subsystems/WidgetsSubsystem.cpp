@@ -43,11 +43,21 @@ void UWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerCont
 {
 	Super::PlayerControllerChanged(NewPlayerController);
 
-	if (NewPlayerController
-	    && !AreWidgetInitialized())
+	if (AreWidgetInitialized())
 	{
-		TryInitWidgets();
+		// New player controller is set, likely level was changed, so perform cleanup first
+		CleanupWidgets();
 	}
+
+	TryInitWidgets();
+}
+
+// Is called when this Subsystem is removed
+void UWidgetsSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+
+	CleanupWidgets();
 }
 
 // Will try to start the process of initializing all widgets used in game
@@ -95,6 +105,39 @@ void UWidgetsSubsystem::InitWidgets()
 	{
 		OnWidgetsInitialized.Broadcast();
 	}
+}
+
+// Removes all widgets and transient data
+void UWidgetsSubsystem::CleanupWidgets()
+{
+	if (HUDWidgetInternal)
+	{
+		FWidgetUtilsLibrary::DestroyWidget(*HUDWidgetInternal);
+		HUDWidgetInternal = nullptr;
+	}
+
+	if (FPSCounterWidgetInternal)
+	{
+		FWidgetUtilsLibrary::DestroyWidget(*FPSCounterWidgetInternal);
+		FPSCounterWidgetInternal = nullptr;
+	}
+
+	if (SettingsWidgetInternal)
+	{
+		FWidgetUtilsLibrary::DestroyWidget(*SettingsWidgetInternal);
+		SettingsWidgetInternal = nullptr;
+	}
+
+	for (UPlayerName3DWidget* NicknameWidgetIt : NicknameWidgetsInternal)
+	{
+		if (NicknameWidgetIt)
+		{
+			FWidgetUtilsLibrary::DestroyWidget(*NicknameWidgetIt);
+		}
+	}
+	NicknameWidgetsInternal.Empty();
+
+	bAreWidgetInitializedInternal = false;
 }
 
 // Is called right after the game was started and windows size is set
