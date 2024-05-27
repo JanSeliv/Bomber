@@ -10,6 +10,7 @@
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyCheatManager)
@@ -86,11 +87,11 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 	// Get all players
 	FCells CellsToDestroy;
 	FMapComponents MapComponents;
-	GeneratedMap.GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
-		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
-		const bool bDestroy = PlayerCharacter && (1 << PlayerCharacter->GetCharacterID() & Bitmask) != 0;
+		const int32 PlayerIndex = ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentIt);
+		const bool bDestroy = (1 << PlayerIndex & Bitmask) != 0;
 		if (bDestroy) // mark to destroy if specified in slot
 		{
 			CellsToDestroy.Emplace(MapComponentIt->GetCell());
@@ -106,7 +107,7 @@ void UMyCheatManager::SetItemChance(int32 Chance)
 {
 	// Get all boxes
 	FMapComponents MapComponents;
-	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::Box));
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Box));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
 		ABoxActor* BoxActor = MapComponentIt ? MapComponentIt->GetOwner<ABoxActor>() : nullptr;
@@ -149,11 +150,11 @@ void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
 {
 	// Set on the level to visualize new level actors
 	const int32 ActorTypesBitmask = GetBitmaskFromActorTypesString(ActorTypesString);
-	AGeneratedMap::Get().DisplayCellsActorTypes = ActorTypesBitmask;
+	AGeneratedMap::Get().SetDisplayCellsActorTypes(ActorTypesBitmask);
 
 	// Update existed level actors
 	FMapComponents MapComponents;
-	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::All));
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::All));
 	for (UMapComponent* MapComponentIt : MapComponents)
 	{
 		// Clear previous cell renders for all level actors in game

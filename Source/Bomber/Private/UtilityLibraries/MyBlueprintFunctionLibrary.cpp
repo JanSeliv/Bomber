@@ -19,9 +19,9 @@
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "Subsystems/WidgetsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 //---
 #include "Engine/Engine.h"
-#include "Engine/LocalPlayer.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyBlueprintFunctionLibrary)
@@ -150,19 +150,8 @@ APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 Characte
 		return GetLocalPlayerCharacter(OptionalWorldContext);
 	}
 
-	// Each Bomber character has own CharacterID, so we can't rely on PlayerController's PlayerIndex, instead we should take it from the level
-	FMapComponents MapComponents;
-	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
-	for (const UMapComponent* It : MapComponents)
-	{
-		APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(It->GetOwner());
-		if (PlayerChar && PlayerChar->GetCharacterID() == CharacterID)
-		{
-			return PlayerChar;
-		}
-	}
-
-	return nullptr;
+	const UMapComponent* PlayerMapComponent = ULevelActorsUtilsLibrary::GetLevelActorByIndex(CharacterID, TO_FLAG(EAT::Player));
+	return PlayerMapComponent ? PlayerMapComponent->GetOwner<APlayerCharacter>() : nullptr;
 }
 
 // Returns controlled player character

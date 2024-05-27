@@ -14,10 +14,12 @@
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/WidgetsSubsystem.h"
 #include "UI/Widgets/PlayerName3DWidget.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "InputActionValue.h"
@@ -29,10 +31,6 @@
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
-//---
-#if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerCharacter)
 
@@ -134,13 +132,11 @@ void APlayerCharacter::ConstructPlayerCharacter()
 // Spawns bomb on character position
 void APlayerCharacter::ServerSpawnBomb_Implementation()
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not spawn bomb in PIE
 		return;
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
 	const AController* OwnedController = GetController();
 	if (!MapComponentInternal                     // The Map Component is not valid or transient
@@ -264,9 +260,9 @@ void APlayerCharacter::OnConstructionPlayerCharacter()
 	}
 
 	// Spawn or destroy controller of specific ai with enabled visualization
-#if WITH_EDITOR
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
-	    && CharacterIDInternal > 0)                // Is a bot
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (UUtilsLibrary::IsEditorNotPieWorld()                                         // [IsEditorNotPieWorld] only
+	    && ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal) > 0) // Is a bot
 	{
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
 		if (!MapComponentInternal->bShouldShowRenders)
@@ -532,13 +528,11 @@ void APlayerCharacter::UpdateCollisionObjectType()
 // Possess a player or AI controller in dependence of current Character ID
 void APlayerCharacter::TryPossessController()
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not spawn posses in PIE
 		return;
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
 	if (!HasAuthority()
 	    || CharacterIDInternal < 0)

@@ -8,18 +8,15 @@
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/GeneratedMapDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
-#include "LevelActors/BombActor.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/GameFrameworkComponentManager.h"
-#include "Engine/LevelStreaming.h"
 #include "Engine/World.h"
-#include "Kismet/GameplayStatics.h"
-#include "Math/UnrealMathUtility.h"
 #include "Net/UnrealNetwork.h"
 //---
 #if WITH_EDITOR
@@ -468,7 +465,7 @@ void AGeneratedMap::IntersectCellsByTypes(
 	}
 
 	FMapComponents BitmaskedComponents;
-	GetMapComponents(BitmaskedComponents, ActorsTypesBitmask);
+	ULevelActorsUtilsLibrary::GetLevelActors(BitmaskedComponents, ActorsTypesBitmask);
 	if (!BitmaskedComponents.Num())
 	{
 		InOutCells.Empty(); // nothing found, returns empty OutCells array
@@ -688,6 +685,12 @@ FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorT
 	NewTransform.SetScale3D(FVector(NewLevelSize, MapScaleZ));
 
 	return MoveTemp(NewTransform);
+}
+
+// Set for which level actors should show debug renders, is not available in shipping build
+void AGeneratedMap::SetDisplayCellsActorTypes(int32 NewValue)
+{
+	DisplayCellsActorTypesInternal = NewValue;
 }
 
 /* ---------------------------------------------------
@@ -993,24 +996,6 @@ void AGeneratedMap::GenerateLevelActors()
 	// --- Part 2: Spawning ---
 
 	SpawnActorsByTypes(ActorsToSpawn);
-}
-
-//  Map components getter.
-void AGeneratedMap::GetMapComponents(FMapComponents& OutBitmaskedComponents, int32 ActorsTypesBitmask) const
-{
-	if (!MapComponentsInternal.Num())
-	{
-		return;
-	}
-
-	for (UMapComponent* MapComponentIt : MapComponentsInternal)
-	{
-		if (MapComponentIt
-		    && EnumHasAnyFlags(MapComponentIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
-		{
-			OutBitmaskedComponents.Add(MapComponentIt);
-		}
-	}
 }
 
 // Listen game states to generate level actors

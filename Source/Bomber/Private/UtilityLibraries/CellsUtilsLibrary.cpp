@@ -5,8 +5,10 @@
 #include "Bomber.h"
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
-#include "Components/TextRenderComponent.h"
 #include "LevelActors/BombActor.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
+//---
+#include "Components/TextRenderComponent.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CellsUtilsLibrary)
 
@@ -332,10 +334,7 @@ FCell UCellsUtilsLibrary::GetNearestFreeCell(const FCell& Cell)
 TSet<FCell> UCellsUtilsLibrary::GetAllExplosionCells()
 {
 	FMapComponents BombMapComponents;
-	if (const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap())
-	{
-		GeneratedMap->GetMapComponents(BombMapComponents, TO_FLAG(EAT::Bomb));
-	}
+	ULevelActorsUtilsLibrary::GetLevelActors(BombMapComponents, TO_FLAG(EAT::Bomb));
 
 	FCells ExplosionCells = FCell::EmptyCells;
 	for (const UMapComponent* MapComponentIt : BombMapComponents)
@@ -503,7 +502,7 @@ bool UCellsUtilsLibrary::CanDisplayCellsForActorTypes(int32 ActorTypesBitmask)
 {
 #if !UE_BUILD_SHIPPING
 	const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap();
-	return GeneratedMap && (ActorTypesBitmask & AGeneratedMap::Get().DisplayCellsActorTypes) != 0;
+	return GeneratedMap && (ActorTypesBitmask & AGeneratedMap::Get().DisplayCellsActorTypesInternal) != 0;
 #else
 	return false;
 #endif
