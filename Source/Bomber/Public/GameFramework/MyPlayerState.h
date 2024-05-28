@@ -9,7 +9,8 @@
 #include "MyPlayerState.generated.h"
 
 /**
- * The player state of a bomber player.
+ * Holds Player's data like nickname.
+ * It's replicated to all clients and persists between matches.
  */
 UCLASS(Config = "GameUserSettings", DefaultConfig)
 class BOMBER_API AMyPlayerState final : public APlayerState
@@ -92,9 +93,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE FName GetSavedPlayerName() const { return SavedPlayerNameInternal; }
 
-	/** Applies default bots name based on current character ID like "AI 0", "AI 1" etc. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetDefaultAIName();
+	/** Assigns default bots name based on current character ID like "AI 0", "AI 1" etc. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetDefaultBotName();
 
 	/** Is overridden to additionally set player name on server and broadcast it. */
 	virtual void SetPlayerName(const FString& S) override;
@@ -131,7 +132,7 @@ public:
 	FORCEINLINE bool IsCharacterDead() const { return bIsCharacterDeadInternal; }
 
 	/** Sets character dead status, true if was killed, false if was revived. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetCharacterDead(bool bIsDead);
 
 protected:
@@ -150,6 +151,8 @@ protected:
 	/*********************************************************************************************
 	 * Is Human / Bot
 	 * APlayerState::bIsABot is used to determine if the player is a bot.
+	 * - SetIsABot() to assign bot status
+	 * - SetIsHuman() to assign human status
 	 ********************************************************************************************* */
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIsABotChanged, bool, bIsABot);
@@ -159,11 +162,11 @@ public:
 	FOnIsABotChanged OnIsABotChanged;
 
 	/** Applies bot status, overloads engine's APlayerState::SetIsABot(bool) that is not virtual and not exposed to blueprints. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetIsABot();
 
 	/** Applies human status. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetIsHuman();
 
 protected:
@@ -174,6 +177,35 @@ protected:
 	/** Applies and broadcasts IsABot status. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyIsABot();
+
+	/*********************************************************************************************
+	 * Player ID (0, 1, 2, 3)
+	 * APlayerState::PlayerId is used to determine the player's ID.
+	 * - SetHumanId(PlayerController) to assign human ID
+	 * - SetDefaultBotId() to assign bot ID
+	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerIdChanged, int32, PlayerId);
+
+	/** Called when player ID is changed. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnPlayerIdChanged OnPlayerIdChanged;
+
+	/** Applies ID from order of player controllers, is always 0, 1, 2, 3. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetHumanId(class APlayerController* PlayerController);
+
+	/** Applies ID from order of spawned characters on level, is always 0, 1, 2, 3. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetDefaultBotId();
+
+protected:
+	/** Called on client when player ID is changed. */
+	virtual void OnRep_PlayerId() override;
+
+	/** Applies and broadcasts player ID. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyPlayerId();
 
 	/*********************************************************************************************
 	 * Events

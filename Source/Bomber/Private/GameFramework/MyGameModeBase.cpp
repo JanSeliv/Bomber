@@ -3,6 +3,7 @@
 #include "GameFramework/MyGameModeBase.h"
 //---
 #include "Controllers/MyPlayerController.h"
+#include "GameFramework/MyGameSession.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 //---
@@ -11,12 +12,15 @@
 // Sets default values for this actor's properties
 AMyGameModeBase::AMyGameModeBase()
 {
-	// Custom defaults classes
+	// Custom default classes. All of them can be overridden in child game mode in World Settings
 	GameStateClass = AMyGameStateBase::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	ReplaySpectatorPlayerControllerClass = AMyPlayerController::StaticClass();
-	DefaultPawnClass = nullptr;
 	PlayerStateClass = AMyPlayerState::StaticClass();
+	GameSessionClass = AMyGameSession::StaticClass();
+
+	// Spawn and possess pawn by ourselves manually
+	DefaultPawnClass = nullptr;
 }
 
 // Returns player controller by specified index

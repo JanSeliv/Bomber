@@ -75,30 +75,6 @@ AMyPlayerController* UMyBlueprintFunctionLibrary::GetMyPlayerController(int32 Pl
 	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(World, PlayerIndex));
 }
 
-// Return Character ID from given context (character, controller or world)
-int32 UMyBlueprintFunctionLibrary::GetCharacterID(const UObject* Context)
-{
-	if (const APlayerCharacter* ContextChar = Cast<APlayerCharacter>(Context))
-	{
-		return ContextChar->GetCharacterID();
-	}
-
-	if (const AMyGameModeBase* MyGameMode = GetMyGameMode(Context))
-	{
-		if (const AMyPlayerController* ContextPC = Cast<AMyPlayerController>(Context))
-		{
-			return MyGameMode->GetPlayerControllerIndex(ContextPC);
-		}
-
-		if (const AMyPlayerController* LocalPC = GetLocalPlayerController(Context))
-		{
-			return MyGameMode->GetPlayerControllerIndex(LocalPC);
-		}
-	}
-
-	return INDEX_NONE;
-}
-
 // Returns the local Player Controller, nullptr otherwise
 AMyPlayerController* UMyBlueprintFunctionLibrary::GetLocalPlayerController(const UObject* OptionalWorldContext/* = nullptr*/)
 {
@@ -116,8 +92,28 @@ AMyPlayerState* UMyBlueprintFunctionLibrary::GetMyPlayerState(int32 CharacterID)
 // Returns the player state of current controller
 AMyPlayerState* UMyBlueprintFunctionLibrary::GetLocalPlayerState(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyPlayerController* MyPlayerController = GetLocalPlayerController(OptionalWorldContext);
-	return MyPlayerController ? MyPlayerController->GetPlayerState<AMyPlayerState>() : nullptr;
+	const AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(OptionalWorldContext);
+	if (!MyPlayerController)
+	{
+		MyPlayerController = GetLocalPlayerController(OptionalWorldContext);
+		if (!MyPlayerController)
+		{
+			return nullptr;
+		}
+	}
+
+	if (AMyPlayerState* PlayerState = MyPlayerController->GetPlayerState<AMyPlayerState>())
+	{
+		return PlayerState;
+	}
+
+	if (const AMyGameModeBase* MyGameMode = GetMyGameMode(OptionalWorldContext))
+	{
+		const int32 PCIndex = MyGameMode->GetPlayerControllerIndex(MyPlayerController);
+		return GetMyPlayerState(PCIndex);
+	}
+
+	return nullptr;
 }
 
 // Returns the Bomber settings

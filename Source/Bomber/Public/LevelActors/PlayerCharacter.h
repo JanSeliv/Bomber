@@ -47,6 +47,7 @@ struct BOMBER_API FPowerUp
  * Players and AI, whose goal is to remain the last survivor for the win.
  * @see Access Player's data with UPlayerDataAsset (Content/Bomber/DataAssets/DA_Player).
  * @see Access AI's data with UAIDataAsset (Content/Bomber/DataAssets/DA_AI).
+ * @todo JanSeliv NlwqUwmc Reorder td sections of PlayerCharacter.h
  */
 UCLASS()
 class BOMBER_API APlayerCharacter final : public ACharacter
@@ -80,10 +81,6 @@ public:
 	/** Returns current powerup levels */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FPowerUp& GetPowerups() const { return PowerupsInternal; }
-
-	/** Returns the personal ID. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetCharacterID() const { return CharacterIDInternal; }
 
 	/** Spawns bomb on character position */
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "C++")
@@ -125,11 +122,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_Powerups", Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
 	FPowerUp PowerupsInternal = FPowerUp::DefaultData;
 
-	/** The ID identification of each character.
-	 * @todo JanSeliv 4ZkNWtmN Replace `APlayerCharacter::CharacterID` by `APlayerState::PlayerId`. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CharacterID", Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
-	int32 CharacterIDInternal = INDEX_NONE;
-
 	/** The character's AI controller */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
 	TObjectPtr<class AMyAIController> MyAIControllerInternal = nullptr;
@@ -138,10 +130,10 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_PlayerMeshData", Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty;
 
-	/** ---------------------------------------------------
-	 *		Protected functions
-	 * --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
 
@@ -172,6 +164,10 @@ protected:
 	 * @param NewController The controller possessing this pawn. */
 	virtual void PossessedBy(AController* NewController) override;
 
+	/*********************************************************************************************
+	 * Protected functions
+	 ********************************************************************************************* */
+protected:
 	/**
 	 * Triggers when this player character starts something overlap.
 	 * With item overlapping Increases +1 to numbers of character's powerups (Skate/Bomb/Fire).
@@ -223,14 +219,6 @@ protected:
 	UFUNCTION()
 	void OnRep_PlayerMeshData();
 
-	/** Apply the characterID-dependent logic for this character. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyCharacterID();
-
-	/** Is called on clients to apply the characterID-dependent logic for this character. */
-	UFUNCTION()
-	void OnRep_CharacterID();
-
 	/** Move the player character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
 	void MovePlayer(const struct FInputActionValue& ActionValue);
@@ -256,4 +244,26 @@ protected:
 	/** 3D widget component that displays the player name above the character. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Name 3D Widget Component"))
 	TObjectPtr<class UWidgetComponent> PlayerName3DWidgetComponentInternal = nullptr;
+
+	/*********************************************************************************************
+	 * Player ID
+	 ********************************************************************************************* */
+public:
+	/** Returns own character ID, e.g: 0, 1, 2, 3 */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	int32 GetPlayerId() const;
+
+	/** Applies the playerID-dependent logic for this character. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplyPlayerId();
+
+protected:
+	/** The ID identification of each character.
+	 * @todo JanSeliv 4ZkNWtmN Replace `APlayerCharacter::CharacterID` by `APlayerState::PlayerId`. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CharacterID", Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
+	int32 CharacterIDInternal = INDEX_NONE;
+
+	/** Is called on clients to apply the characterID-dependent logic for this character. */
+	UFUNCTION()
+	void OnRep_CharacterID();
 };

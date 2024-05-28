@@ -77,11 +77,11 @@ void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 	}
 
 	int32 InFireRadius = MIN_FIRE_RADIUS;
-	int32 CharacterID = INDEX_NONE;
+	int32 PlayerIndex = INDEX_NONE;
 	ELevelType PlayerType = ELevelType::None;
 	if (Causer)
 	{
-		CharacterID = Causer->GetCharacterID();
+		PlayerIndex = Causer->GetPlayerId();
 		InFireRadius = Causer->GetPowerups().FireN;
 		PlayerType = Causer->GetPlayerType();
 	}
@@ -104,10 +104,10 @@ void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 	{
 		// Is bot character, set material for its default bomb with the same mesh
 		const int32 BombMaterialsNum = BombDataAsset.GetBombMaterialsNum();
-		if (CharacterID != INDEX_NONE // Is not debug character
+		if (PlayerIndex != INDEX_NONE // Is not debug character
 		    && BombMaterialsNum)      // As least one bomb material
 		{
-			const int32 MaterialIndex = FMath::Abs(CharacterID) % BombMaterialsNum;
+			const int32 MaterialIndex = FMath::Abs(PlayerIndex) % BombMaterialsNum;
 			BombMaterialInternal = BombDataAsset.GetBombMaterial(MaterialIndex);
 		}
 	}
@@ -341,7 +341,7 @@ void ABombActor::UpdateCollisionResponseToAllPlayers()
 		{
 			if (const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OverlappingPlayerIt))
 			{
-				Bitmask |= 1 << PlayerCharacter->GetCharacterID();
+				Bitmask |= 1 << PlayerCharacter->GetPlayerId();
 			}
 		}
 

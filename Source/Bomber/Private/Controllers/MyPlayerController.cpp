@@ -179,8 +179,7 @@ void AMyPlayerController::OnRep_Pawn()
 // Is overridden to spawn player state or reuse existing one
 void AMyPlayerController::InitPlayerState()
 {
-	const int32 CharacterID = UMyBlueprintFunctionLibrary::GetCharacterID(this);
-	AMyPlayerState* InPlayerState = UMyBlueprintFunctionLibrary::GetMyPlayerState(CharacterID);
+	AMyPlayerState* InPlayerState = UMyBlueprintFunctionLibrary::GetLocalPlayerState(this);
 	if (!InPlayerState)
 	{
 		// If player state is not found, create a new one

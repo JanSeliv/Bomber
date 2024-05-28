@@ -129,6 +129,18 @@ void APlayerCharacter::ConstructPlayerCharacter()
 	MapComponentInternal->ConstructOwnerActor();
 }
 
+// Returns unique net id number based on online subsystem, e.g: 253, 254, 255
+int32 APlayerCharacter::GetPlayerId() const
+{
+	if (const AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
+	{
+		return MyPlayerState->GetPlayerId();
+	}
+
+	// Player state is not initialized yet, return it directly from the order on the level
+	return ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal);
+}
+
 // Spawns bomb on character position
 void APlayerCharacter::ServerSpawnBomb_Implementation()
 {
@@ -203,9 +215,9 @@ void APlayerCharacter::ServerSetCustomPlayerMeshData_Implementation(const FCusto
 	ApplyCustomPlayerMeshData();
 }
 
-/* ---------------------------------------------------
- *					Protected functions
- * --------------------------------------------------- */
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
@@ -256,7 +268,7 @@ void APlayerCharacter::OnConstructionPlayerCharacter()
 	{
 		const FCells PlayerCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
 		CharacterIDInternal = PlayerCells.Num() - 1;
-		ApplyCharacterID();
+		ApplyPlayerId();
 	}
 
 	// Spawn or destroy controller of specific ai with enabled visualization
@@ -369,6 +381,10 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 
 	ApplyCustomPlayerMeshData();
 }
+
+/*********************************************************************************************
+ * Protected functions
+ ********************************************************************************************* */
 
 // Triggers when this player character starts something overlap.
 void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
@@ -650,41 +666,6 @@ void APlayerCharacter::OnRep_PlayerMeshData()
 	ApplyCustomPlayerMeshData();
 }
 
-void APlayerCharacter::ApplyCharacterID()
-{
-	if (CharacterIDInternal == INDEX_NONE)
-	{
-		return;
-	}
-
-	SetDefaultPlayerMeshData();
-
-	// Set a nameplate material
-	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
-	{
-		const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
-		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
-		if (NameplateMeshesNum > 0)
-		{
-			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
-			if (UMaterialInterface* Material = PlayerDataAsset.GetNameplateMaterial(MaterialNo))
-			{
-				NameplateMeshInternal->SetMaterial(0, Material);
-			}
-		}
-	}
-
-	UpdateCollisionObjectType();
-
-	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterIdAssigned(*this);
-}
-
-// Is called on clients to apply the characterID-dependent logic for this character
-void APlayerCharacter::OnRep_CharacterID()
-{
-	ApplyCharacterID();
-}
-
 // Move the player character
 void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 {
@@ -742,4 +723,42 @@ void APlayerCharacter::SetNicknameOnNameplate(FName NewName)
 	{
 		PlayerName3DWidgetComponentInternal->SetWidget(PlayerNameWidget);
 	}
+}
+
+/*********************************************************************************************
+ * Player ID
+ ********************************************************************************************* */
+
+// Applies the playerID-dependent logic for this character
+void APlayerCharacter::ApplyPlayerId()
+{
+	if (CharacterIDInternal == INDEX_NONE)
+	{
+		return;
+	}
+
+	SetDefaultPlayerMeshData();
+
+	// Set a nameplate material
+	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
+	{
+		const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
+		if (NameplateMeshesNum > 0)
+		{
+			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
+			if (UMaterialInterface* Material = PlayerDataAsset.GetNameplateMaterial(MaterialNo))
+			{
+				NameplateMeshInternal->SetMaterial(0, Material);
+			}
+		}
+	}
+
+	UpdateCollisionObjectType();
+}
+
+// Is called on clients to apply the characterID-dependent logic for this character
+void APlayerCharacter::OnRep_CharacterID()
+{
+	ApplyPlayerId();
 }

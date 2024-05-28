@@ -3,10 +3,14 @@
 #include "GameFramework/MyPlayerState.h"
 //---
 #include "GeneratedMap.h"
+#include "Components/MapComponent.h"
+#include "Controllers/MyPlayerController.h"
+#include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyGameUserSettings.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Kismet/KismetSystemLibrary.h"
@@ -19,6 +23,9 @@ AMyPlayerState::AMyPlayerState()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+
+	// Reset default value to -1 to avoid conflicts with first player of 0 ID
+	SetPlayerId(INDEX_NONE);
 }
 
 // Returns true if this Player State is controlled by a locally controlled player
@@ -121,15 +128,16 @@ void AMyPlayerState::SetSavedPlayerName(FName NewName)
 }
 
 // Applies default AI name based on current character ID like "AI 0", "AI 1" etc
-void AMyPlayerState::SetDefaultAIName()
+void AMyPlayerState::SetDefaultBotName()
 {
-	if (!IsABot())
+	if (!HasAuthority()
+	    || !IsABot())
 	{
 		// Is not bot
 		return;
 	}
 
-	const int32 CharacterID = GetPlayerCharacterChecked().GetCharacterID();
+	const int32 CharacterID = GetPlayerCharacterChecked().GetPlayerId();
 	const FString AIName = FString::Printf(TEXT("AI %s"), *FString::FromInt(CharacterID));
 	if (GetPlayerName() != AIName)
 	{
@@ -182,7 +190,8 @@ void AMyPlayerState::OnRep_PlayerName()
 // Called when character dead status is changed: character was killed or revived
 void AMyPlayerState::SetCharacterDead(bool bIsDead)
 {
-	if (bIsCharacterDeadInternal == bIsDead)
+	if (!HasAuthority()
+	    || bIsCharacterDeadInternal == bIsDead)
 	{
 		return;
 	}
@@ -218,7 +227,8 @@ void AMyPlayerState::ApplyIsCharacterDead()
 // Applies bot status, overloads engine's APlayerState::SetIsABot(bool) that is not virtual and not exposed to blueprints
 void AMyPlayerState::SetIsABot()
 {
-	if (IsABot())
+	if (!HasAuthority()
+	    || IsABot())
 	{
 		return;
 	}
@@ -230,7 +240,8 @@ void AMyPlayerState::SetIsABot()
 // Applies human status
 void AMyPlayerState::SetIsHuman()
 {
-	if (!IsABot())
+	if (!HasAuthority()
+	    || !IsABot())
 	{
 		return;
 	}
@@ -255,12 +266,89 @@ void AMyPlayerState::ApplyIsABot()
 }
 
 /*********************************************************************************************
+ * Player ID (0, 1, 2, 3)
+ ********************************************************************************************* */
+
+// Applies ID from order of player controllers, is always 0, 1, 2, 3
+void AMyPlayerState::SetHumanId(APlayerController* PlayerController)
+{
+	if (!HasAuthority()
+	    && IsABot())
+	{
+		// Is not human
+		return;
+	}
+
+	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(PlayerController);
+	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPC' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	const AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode();
+	const int32 NewPlayerId = MyGameMode ? MyGameMode->GetPlayerControllerIndex(MyPC) : INDEX_NONE;
+	if (!ensureMsgf(NewPlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'NewPlayerId' can not be assigned!"), __LINE__, __FUNCTION__)
+	    || NewPlayerId == GetPlayerId())
+	{
+		return;
+	}
+
+	SetPlayerId(NewPlayerId);
+	ApplyPlayerId();
+}
+
+// Applies ID from order of spawned characters on level, is always 0, 1, 2, 3
+void AMyPlayerState::SetDefaultBotId()
+{
+	if (!HasAuthority()
+	    || !IsABot())
+	{
+		// Is not bot
+		return;
+	}
+
+	const UMapComponent* PlayerMapComponent = UMapComponent::GetMapComponent(GetPawn());
+	const int32 NewPlayerId = ULevelActorsUtilsLibrary::GetIndexByLevelActor(PlayerMapComponent);
+	if (!ensureMsgf(NewPlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'NewPlayerId' can not be assigned!"), __LINE__, __FUNCTION__)
+	    || NewPlayerId == GetPlayerId())
+	{
+		return;
+	}
+
+	SetPlayerId(NewPlayerId);
+	ApplyPlayerId();
+}
+
+// Called on client when player ID is changed
+void AMyPlayerState::OnRep_PlayerId()
+{
+	Super::OnRep_PlayerId();
+
+	ApplyPlayerId();
+}
+
+// Applies and broadcasts player ID
+void AMyPlayerState::ApplyPlayerId()
+{
+	if (OnPlayerIdChanged.IsBound())
+	{
+		OnPlayerIdChanged.Broadcast(GetPlayerId());
+	}
+}
+
+/*********************************************************************************************
  * Events
  ********************************************************************************************* */
 
 // Is called when player state is initialized with assigned character
 void AMyPlayerState::OnPlayerStateInit_Implementation()
 {
+	if (IsABot())
+	{
+		// Apply bot ID here while Human ID is called from Game Session
+		SetDefaultBotId();
+	}
+
 	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnPlayerStateInit(*this);
 }
 

@@ -90,7 +90,13 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
-		const int32 PlayerIndex = ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentIt);
+		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
+		if (!PlayerCharacter)
+		{
+			continue;
+		}
+
+		const int32 PlayerIndex = PlayerCharacter->GetPlayerId();
 		const bool bDestroy = (1 << PlayerIndex & Bitmask) != 0;
 		if (bDestroy) // mark to destroy if specified in slot
 		{
