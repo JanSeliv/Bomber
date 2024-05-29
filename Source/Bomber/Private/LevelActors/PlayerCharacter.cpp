@@ -262,14 +262,12 @@ void APlayerCharacter::OnConstructionPlayerCharacter()
 		return;
 	}
 
-	// Set ID
-	if (HasAuthority()
-	    && CharacterIDInternal == INDEX_NONE)
+	if (!PlayerMeshDataInternal.IsValid())
 	{
-		const FCells PlayerCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
-		CharacterIDInternal = PlayerCells.Num() - 1;
-		ApplyPlayerId();
+		SetDefaultPlayerMeshData();
 	}
+
+	ApplyPlayerId();
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR // [IsEditorNotPieWorld]
@@ -316,7 +314,6 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, PowerupsInternal);
-	DOREPLIFETIME(ThisClass, CharacterIDInternal);
 	DOREPLIFETIME(ThisClass, PlayerMeshDataInternal);
 }
 
@@ -331,12 +328,13 @@ void APlayerCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlaye
 		return;
 	}
 
-	ApplyCustomPlayerMeshData();
-
 	MyPlayerState->OnPlayerStateInit();
 
 	MyPlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::SetNicknameOnNameplate);
 	SetNicknameOnNameplate(*MyPlayerState->GetPlayerName());
+
+	MyPlayerState->OnPlayerIdChanged.AddUniqueDynamic(this, &ThisClass::ApplyPlayerId);
+	ApplyPlayerId();
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -511,16 +509,17 @@ void APlayerCharacter::OnRep_Powerups()
 // Updates collision object type by current character ID
 void APlayerCharacter::UpdateCollisionObjectType()
 {
+	const int32 PlayerId = GetPlayerId();
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
-	if (!ensureMsgf(CapsuleComp, TEXT("ASSERT: 'CapsuleComponent' is not valid"))
-	    || CharacterIDInternal == INDEX_NONE)
+	if (!ensureMsgf(CapsuleComp, TEXT("ASSERT: [%i] %hs:\n'CapsuleComp' is not valid!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	// Set the object collision type
 	ECollisionChannel CollisionObjectType = CapsuleComp->GetCollisionObjectType();
-	switch (CharacterIDInternal)
+	switch (PlayerId)
 	{
 		case 0:
 			CollisionObjectType = ECC_Player0;
@@ -544,27 +543,22 @@ void APlayerCharacter::UpdateCollisionObjectType()
 // Possess a player or AI controller in dependence of current Character ID
 void APlayerCharacter::TryPossessController()
 {
-	if (UUtilsLibrary::IsEditorNotPieWorld())
+	if (!HasAuthority()
+	    || UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not spawn posses in PIE
 		return;
 	}
 
-	if (!HasAuthority()
-	    || CharacterIDInternal < 0)
-	{
-		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (!World)
+	const int32 PlayerId = GetPlayerId();
+	if (!ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	AController* ControllerToPossess = nullptr;
 
-	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(CharacterIDInternal))
+	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId))
 	{
 		if (MyPC->bCinematicMode)
 		{
@@ -580,7 +574,7 @@ void APlayerCharacter::TryPossessController()
 		// Spawn AI if is needed
 		if (!MyAIControllerInternal)
 		{
-			MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+			MyAIControllerInternal = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		}
 
 		ControllerToPossess = MyAIControllerInternal;
@@ -605,6 +599,12 @@ void APlayerCharacter::TryPossessController()
 void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
 {
 	TryPossessController();
+
+	if (GetController() == NewPlayer)
+	{
+		// New player joined, set default player mesh
+		SetDefaultPlayerMeshData();
+	}
 }
 
 // Set and apply new skeletal mesh from current data
@@ -636,19 +636,26 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 // Set and apply default skeletal mesh for this player
 void APlayerCharacter::SetDefaultPlayerMeshData()
 {
-	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
-	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
-	if (!MeshesNum)
+	if (!HasAuthority())
 	{
 		return;
 	}
 
-	const bool bIsPlayer = IsLocallyControlled() || !CharacterIDInternal;
+	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
+	const int32 PlayerId = GetPlayerId();
+	if (!ensureMsgf(MeshesNum > 0, TEXT("ASSERT: [%i] %hs:\n'MeshesNum' is empty!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	const bool bIsPlayer = IsPlayerControlled() || PlayerId == 0;
 	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
 	constexpr ELevelType AIFlag = ELT::None;
 	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
 	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
-	if (!Row)
+	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
@@ -656,7 +663,7 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	const int32 SkinsNum = Row->GetMaterialInstancesDynamicNum();
 	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
 	CustomPlayerMeshData.PlayerRow = Row;
-	CustomPlayerMeshData.SkinIndex = CharacterIDInternal % SkinsNum;
+	CustomPlayerMeshData.SkinIndex = PlayerId % SkinsNum;
 	ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
 }
 
@@ -708,7 +715,7 @@ void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UOb
 void APlayerCharacter::SetNicknameOnNameplate(FName NewName)
 {
 	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
-	UPlayerName3DWidget* PlayerNameWidget = WidgetsSubsystem ? WidgetsSubsystem->GetNicknameWidget(CharacterIDInternal) : nullptr;
+	UPlayerName3DWidget* PlayerNameWidget = WidgetsSubsystem ? WidgetsSubsystem->GetNicknameWidget(GetPlayerId()) : nullptr;
 	if (!PlayerNameWidget)
 	{
 		// Widget is not created yet, might be called before UI Subsystem is initialized
@@ -730,14 +737,12 @@ void APlayerCharacter::SetNicknameOnNameplate(FName NewName)
  ********************************************************************************************* */
 
 // Applies the playerID-dependent logic for this character
-void APlayerCharacter::ApplyPlayerId()
+void APlayerCharacter::ApplyPlayerId(int32 CurrentPlayerId/* = INDEX_NONE*/)
 {
-	if (CharacterIDInternal == INDEX_NONE)
+	if (CurrentPlayerId == INDEX_NONE)
 	{
-		return;
+		CurrentPlayerId = GetPlayerId();
 	}
-
-	SetDefaultPlayerMeshData();
 
 	// Set a nameplate material
 	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
@@ -746,7 +751,7 @@ void APlayerCharacter::ApplyPlayerId()
 		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
 		if (NameplateMeshesNum > 0)
 		{
-			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
+			const int32 MaterialNo = CurrentPlayerId < NameplateMeshesNum ? CurrentPlayerId : CurrentPlayerId % NameplateMeshesNum;
 			if (UMaterialInterface* Material = PlayerDataAsset.GetNameplateMaterial(MaterialNo))
 			{
 				NameplateMeshInternal->SetMaterial(0, Material);
@@ -755,10 +760,4 @@ void APlayerCharacter::ApplyPlayerId()
 	}
 
 	UpdateCollisionObjectType();
-}
-
-// Is called on clients to apply the characterID-dependent logic for this character
-void APlayerCharacter::OnRep_CharacterID()
-{
-	ApplyPlayerId();
 }

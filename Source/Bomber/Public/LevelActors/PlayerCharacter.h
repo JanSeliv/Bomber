@@ -212,7 +212,7 @@ protected:
 	void ApplyCustomPlayerMeshData();
 
 	/** Set and apply default skeletal mesh for this player. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void SetDefaultPlayerMeshData();
 
 	/** Respond on changes in player mesh data to update the mesh on client. */
@@ -253,17 +253,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	int32 GetPlayerId() const;
 
+protected:
 	/** Applies the playerID-dependent logic for this character. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ApplyPlayerId();
-
-protected:
-	/** The ID identification of each character.
-	 * @todo JanSeliv 4ZkNWtmN Replace `APlayerCharacter::CharacterID` by `APlayerState::PlayerId`. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CharacterID", Category = "C++", meta = (BlueprintProtected, DisplayName = "Character ID"))
-	int32 CharacterIDInternal = INDEX_NONE;
-
-	/** Is called on clients to apply the characterID-dependent logic for this character. */
-	UFUNCTION()
-	void OnRep_CharacterID();
+	void ApplyPlayerId(int32 CurrentPlayerId = -1);
 };
