@@ -395,6 +395,11 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(ThisClass, EndGameStateInternal);
 	DOREPLIFETIME(ThisClass, bIsCharacterDeadInternal);
+
+	// APlayerState::bIsABot private property has replication condition as 'Initial'
+	// Reset to default condition, so the same player state can change its type without respawn
+	static const FName bIsABot_PrivateProperty = TEXT("bIsABot");
+	ResetReplicatedLifetimeProperty(StaticClass(), Super::StaticClass(), bIsABot_PrivateProperty, COND_None, OutLifetimeProps);
 }
 
 // Called when the game starts
