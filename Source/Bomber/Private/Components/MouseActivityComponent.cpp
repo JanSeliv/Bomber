@@ -139,8 +139,31 @@ void UMouseActivityComponent::SetMouseFocusOnUI(bool bFocusOnUI)
 	}
 }
 
+// Is called in tick to detect mouse movement and handle inactivity
+void UMouseActivityComponent::TickHandleInactivity(float DeltaTime)
+{
+	CurrentlyInactiveSecInternal += DeltaTime;
+
+	// Check if mouse position has changed
+	if (const APlayerController* PlayerController = GetPlayerController())
+	{
+		FVector2D OutMousePosition;
+		PlayerController->GetMousePosition(OutMousePosition.X, OutMousePosition.Y);
+		if (OutMousePosition != LastMousePositionInternal)
+		{
+			OnMouseMove();
+			LastMousePositionInternal = OutMousePosition;
+		}
+	}
+
+	if (CurrentlyInactiveSecInternal >= CurrentVisibilitySettingsInternal.SecToAutoHide)
+	{
+		SetMouseVisibility(false);
+	}
+}
+
 /*********************************************************************************************
- * Protected functions
+ * Overrides
  ********************************************************************************************* */
 
 // Called when the game starts
@@ -159,15 +182,9 @@ void UMouseActivityComponent::TickComponent(float DeltaTime, ELevelTick TickType
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	const FMouseVisibilitySettings& VisibilitySettings = GetCurrentVisibilitySettings();
-	if (VisibilitySettings.IsInactivityEnabled())
+	if (CurrentVisibilitySettingsInternal.IsInactivityEnabled())
 	{
-		CurrentlyInactiveSecInternal += DeltaTime;
-
-		if (CurrentlyInactiveSecInternal >= VisibilitySettings.SecToAutoHide)
-		{
-			SetMouseVisibility(false);
-		}
+		TickHandleInactivity(DeltaTime);
 	}
 }
 
