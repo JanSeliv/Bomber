@@ -6,8 +6,6 @@
 //---
 #include "NMMHUDComponent.generated.h"
 
-class AMyHUD;
-
 /**
  * Represents the HUD in the NewMain Menu module, where the Owner is HUD actor.
  * Is responsible for managing Main Menu widgets.
@@ -23,11 +21,6 @@ class NEWMAINMENU_API UNMMHUDComponent : public UActorComponent
 public:
 	/** Default constructor. */
 	UNMMHUDComponent();
-
-	/** Returns HUD actor of this component. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	AMyHUD* GetHUD() const;
-	AMyHUD& GetHUDChecked() const;
 
 	/** Returns created Main Menu widget. */
 	UFUNCTION(BlueprintPure, Category = "C++")

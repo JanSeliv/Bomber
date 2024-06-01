@@ -108,9 +108,13 @@ public:
 	void SetPowerUpSkatePercent(float NewPowerUpSkatePercent) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpSkatePercent, NewPowerUpSkatePercent); }
 	float GetPowerUpSkatePercent() const { return PowerUpSkatePercent; }
 
-	/** Setter and Getter about percentage of the current amount of max bomb power-ups. */
+	/** Setter and Getter about percentage of the amount of max bomb power-ups. */
 	void SetPowerUpBombPercent(float NewPowerUpBombPercent) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpBombPercent, NewPowerUpBombPercent); }
 	float GetPowerUpBombPercent() const { return PowerUpBombPercent; }
+
+	/** Setter and Getter about current percentage available of the amount of blast radius power-ups. */
+	void SetPowerUpBombCurrentPercent(float NewPowerUpBombCurrentPercent) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpBombCurrentPercent, NewPowerUpBombCurrentPercent); }
+	float GetPowerUpBombCurrentPercent() const { return PowerUpBombCurrentPercent; }
 
 	/** Setter and Getter about percentage of the current amount of blast radius power-ups. */
 	void SetPowerUpFirePercent(float NewPowerUpFirePercent) { UE_MVVM_SET_PROPERTY_VALUE(PowerUpFirePercent, NewPowerUpFirePercent); }
@@ -133,9 +137,13 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
 	float PowerUpSkatePercent = 0.f;
 
-	/** Percentage of the current amount of max bomb power-ups. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	/** Percentage of the amount of max bomb power-ups. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++", DisplayName = "Power Up Bomb Max Percent")
 	float PowerUpBombPercent = 0.f;
+
+	/** Percentage of the current available amount of max bomb power-ups. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	float PowerUpBombCurrentPercent = 0.f;
 
 	/** Percentage of the current amount of blast radius power-ups. */
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")

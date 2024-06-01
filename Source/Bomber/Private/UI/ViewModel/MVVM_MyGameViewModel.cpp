@@ -61,6 +61,7 @@ void UMVVM_MyGameViewModel::OnPowerUpsChanged_Implementation(const FPowerUp& New
 	checkf(MaxPowerUps > 0.f, TEXT("ERROR: [%i] %s:\n'MaxPowerUps > 0' is null!"), __LINE__, *FString(__FUNCTION__));
 	SetPowerUpSkatePercent(static_cast<float>(NewPowerUps.SkateN) / MaxPowerUps);
 	SetPowerUpBombPercent(static_cast<float>(NewPowerUps.BombN) / MaxPowerUps);
+	SetPowerUpBombCurrentPercent(static_cast<float>(NewPowerUps.BombNCurrent) / MaxPowerUps);
 	SetPowerUpFirePercent(static_cast<float>(NewPowerUps.FireN) / MaxPowerUps);
 }
 
@@ -121,6 +122,7 @@ void UMVVM_MyGameViewModel::OnLocalCharacterReady_Implementation(APlayerCharacte
 {
 	checkf(PlayerCharacter, TEXT("ERROR: [%i] %hs:\n'PlayerCharacter' is null!"), __LINE__, __FUNCTION__);
 	PlayerCharacter->OnPowerUpsChanged.AddUniqueDynamic(this, &ThisClass::OnPowerUpsChanged);
+	OnPowerUpsChanged(PlayerCharacter->GetPowerups());
 
 	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);

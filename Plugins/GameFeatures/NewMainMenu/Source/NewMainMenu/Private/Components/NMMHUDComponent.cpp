@@ -4,7 +4,7 @@
 //---
 #include "Data/NMMDataAsset.h"
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
-#include "UI/MyHUD.h"
+#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 #include "Widgets/NewMainMenuWidget.h"
 #include "Widgets/NMMCinematicStateWidget.h"
 //---
@@ -17,32 +17,16 @@ UNMMHUDComponent::UNMMHUDComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
-// Returns HUD actor of this component.
-AMyHUD* UNMMHUDComponent::GetHUD() const
-{
-	return Cast<AMyHUD>(GetOwner());
-}
-
-AMyHUD& UNMMHUDComponent::GetHUDChecked() const
-{
-	AMyHUD* MyHUD = GetHUD();
-	checkf(MyHUD, TEXT("%s: 'MyHUD' is null"), *FString(__FUNCTION__));
-	return *MyHUD;
-}
-
 // Called when a component is registered, after Scene is set, but before CreateRenderState_Concurrent or OnCreatePhysicsState are called
 void UNMMHUDComponent::OnRegister()
 {
 	Super::OnRegister();
 
-	const UNMMDataAsset& NewMainMenuDataAsset = UNMMDataAsset::Get(this);
-	const AMyHUD& HUD = GetHUDChecked();
-
 	constexpr int32 HighZOrder = 3;
 	constexpr bool bAddToViewport = true;
-	MainMenuWidgetInternal = HUD.CreateWidgetByClass<UNewMainMenuWidget>(NewMainMenuDataAsset.GetMainMenuWidgetClass(), bAddToViewport, HighZOrder);
+	MainMenuWidgetInternal = FWidgetUtilsLibrary::CreateWidgetChecked<UNewMainMenuWidget>(UNMMDataAsset::Get().GetMainMenuWidgetClass(), bAddToViewport, HighZOrder);
 
-	InCinematicStateWidgetInternal = HUD.CreateWidgetByClass<UNMMCinematicStateWidget>(NewMainMenuDataAsset.GetInCinematicStateWidgetClass());
+	InCinematicStateWidgetInternal = FWidgetUtilsLibrary::CreateWidgetChecked<UNMMCinematicStateWidget>(UNMMDataAsset::Get().GetInCinematicStateWidgetClass());
 }
 
 // Clears all transient data created by this component

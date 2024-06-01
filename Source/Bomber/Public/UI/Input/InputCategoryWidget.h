@@ -56,7 +56,7 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** Is parent widget of all dynamically created buttons. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UVerticalBox> VerticalBoxInputButtons = nullptr;
 
 	/** The class of the Input Button Widget. */

@@ -23,27 +23,27 @@ class NEWMAINMENU_API UNewMainMenuWidget : public UUserWidget
 	 ********************************************************************************************* */
 protected:
 	/** The button to allow player go back to the Main Menu. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> PlayButton = nullptr;
 
 	/** The button to choose next player. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> NextPlayerButton = nullptr;
 
 	/** The button to choose previous player. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> PrevPlayerButton = nullptr;
 
 	/** The button to switch the skin of chosen player. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> NextSkinButton = nullptr;
 
 	/** The button to open the Settings Menu. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> SettingsButton = nullptr;
 
 	/** The button to quit the game. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> QuitGameButton = nullptr;
 
 	/*********************************************************************************************

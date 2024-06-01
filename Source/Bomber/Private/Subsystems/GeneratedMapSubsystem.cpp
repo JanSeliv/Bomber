@@ -5,6 +5,8 @@
 #include "GeneratedMap.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 //---
+#include "Engine/World.h"
+//---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif

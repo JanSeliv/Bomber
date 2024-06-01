@@ -29,9 +29,6 @@ public:
 	/** Should be called when character is possessed. */
 	void Broadcast_OnCharacterPossessed(APlayerCharacter& Character);
 
-	/** Should be called when character ID is assigned or replicated. */
-	void Broadcast_OnCharacterIdAssigned(APlayerCharacter& Character);
-
 	/** Should be called when player state is replicated. */
 	void Broadcast_OnPlayerStateInit(const AMyPlayerState& PlayerState);
 
@@ -58,7 +55,6 @@ private:
 		TWeakObjectPtr<APlayerCharacter> Character = nullptr;
 		TWeakObjectPtr<const AMyPlayerState> PlayerState = nullptr;
 		bool bIsPossessed = false;
-		bool bHasCharacterID = false;
 	};
 
 	/** All registered character ready handles. */

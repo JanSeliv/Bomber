@@ -37,4 +37,10 @@ public:
 	 * Is useful for MGF-modules unloading in runtime.
 	 * In most gameplay cases it should not be used, since it's expensive: prefer collapse widget instead. */
 	static void DestroyWidget(UUserWidget& ParentWidget);
+
+	/** Is alternative to Engine's CreateWidget with build-in add to viewport functionality. */
+	static UUserWidget* CreateWidgetByClass(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0, const UObject* OptionalWorldContext = nullptr);
+
+	template <typename T = UUserWidget>
+	static FORCEINLINE T* CreateWidgetChecked(TSubclassOf<T> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0) { return CastChecked<T>(CreateWidgetByClass(WidgetClass, bAddToViewport, ZOrder)); }
 };

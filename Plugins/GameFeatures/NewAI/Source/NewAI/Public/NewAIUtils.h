@@ -19,6 +19,6 @@ class NEWAI_API UNewAIUtils : public UBlueprintFunctionLibrary
 	 ********************************************************************************************* */
 public:
 	/** Returns New AI subsystem that provides access to the most important data like Data Asset. */
-	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NewAI Base Subsystem", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext, CallableWithoutWorldContext))
+	UFUNCTION(BlueprintCallable, Category = "C++", DisplayName = "Get NewAI Base Subsystem", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class UNewAIBaseSubsystem* GetBaseSubsystem(const UObject* OptionalWorldContext = nullptr);
 };

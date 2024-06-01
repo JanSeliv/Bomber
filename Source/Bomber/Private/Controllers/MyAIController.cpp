@@ -18,7 +18,6 @@
 //---
 #if WITH_EDITOR
 #include "MyUnrealEdEngine.h"
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyAIController)
@@ -55,7 +54,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	}
 
 #if WITH_EDITOR	 // [IsEditor]
-	if (FEditorUtilsLibrary::IsEditor())
+	if (UUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
 		if (UUtilsLibrary::HasWorldBegunPlay()) // PIE
@@ -124,10 +123,15 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	}
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld()
-	    && !UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
-		UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		if (!UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
+		{
+			UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		}
+
+		// ! It's editor not Pie World, don't continue further runtime logic
+		return;
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
@@ -144,10 +148,8 @@ void AMyAIController::OnPossess(APawn* InPawn)
 		checkf(NewPlayerState, TEXT("ERROR: [%i] %s:\n'NewPlayerState' was not spawned!"), __LINE__, *FString(__FUNCTION__));
 		OwnerInternal->SetPlayerState(NewPlayerState);
 
-		// Set default nickname for AI
-		const FString AIName = FString::Printf(TEXT("AI %s"), *FString::FromInt(OwnerInternal->GetCharacterID()));
-		NewPlayerState->SetPlayerNameCustom(FName(*AIName));
-		NewPlayerState->ApplyCustomPlayerName();
+		// Update default nickname for AI
+		NewPlayerState->SetDefaultBotName();
 	}
 
 	// Notify host about bot possession
@@ -162,7 +164,7 @@ void AMyAIController::OnUnPossess()
 	OwnerInternal = nullptr;
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.RemoveAll(this);
 	}
@@ -202,13 +204,11 @@ void AMyAIController::UpdateAI()
 
 	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
 
-#if WITH_EDITOR
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	if (UUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		AIMoveToInternal = FCell::InvalidCell;
 	}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
 	// ----- Part 0: Before iterations -----
 

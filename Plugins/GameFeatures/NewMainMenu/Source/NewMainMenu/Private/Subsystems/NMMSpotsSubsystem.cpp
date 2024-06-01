@@ -8,8 +8,6 @@
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
-#include "Engine/World.h"
-//---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotsSubsystem)
 
 UNMMSpotsSubsystem& UNMMSpotsSubsystem::Get(const UObject* OptionalWorldContext)
@@ -128,10 +126,41 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 	return NextMainMenuSpot;
 }
 
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
+
+void UNMMSpotsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
+{
+	Super::OnWorldBeginPlay(InWorld);
+
+	// Listen Main Menu states
+	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
+	BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(this, &ThisClass::OnNewMainMenuStateChanged);
+	if (BaseSubsystem.GetCurrentMenuState() != ENMMState::None)
+	{
+		// State is already set, apply it
+		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
+	}
+}
+
 // Clears all transient data contained in this subsystem
 void UNMMSpotsSubsystem::Deinitialize()
 {
 	MainMenuSpotsInternal.Empty();
 
 	Super::Deinitialize();
+}
+
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
+
+// Called when the Main Menu state was changed
+void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
+{
+	if (NewState == ENMMState::None)
+	{
+		LastMoveSpotDirectionInternal = 0;
+	}
 }

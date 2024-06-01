@@ -7,11 +7,12 @@
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "MyDataTable/MyDataTable.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/NMMBaseSubsystem.h"
-#include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -60,51 +61,28 @@ ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
 // Prevents the spot from playing any cinematic
 void UNMMSpotComponent::StopMasterSequence()
 {
-	SetCinematicByState(ENMMState::None);
+	if (MasterPlayerInternal
+		&& MasterPlayerInternal->IsPlaying())
+	{
+		SetCinematicByState(ENMMState::None);
+	}
 }
 
 // Activate given cinematic state on this spot
 void UNMMSpotComponent::SetCinematicByState(ENMMState MainMenuState)
 {
-	if (!IsActiveSpot()) // Don't play for inactive spot
+	if (MainMenuState == ENMMState::Transition)
 	{
-		return;
+		// Don't set Transition state, instead apply idle while camera is moving
+		MainMenuState = ENMMState::Idle;
 	}
 
-	// --- Load cinematic synchronously if not loaded yet
-	const bool bIsCinematicLoading = !MasterPlayerInternal || CinematicRowInternal.LevelSequence.IsPending();
-	if (bIsCinematicLoading)
+	const ENMMState PrevState = CinematicStateInternal;
+	CinematicStateInternal = MainMenuState;
+
+	if (PrevState != MainMenuState)
 	{
-		OnMasterSequenceLoaded(CinematicRowInternal.LevelSequence.LoadSynchronous());
-	}
-	checkf(MasterPlayerInternal, TEXT("ERROR: [%i] %s:\n'MasterPlayerInternal' is null!"), __LINE__, *FString(__FUNCTION__));
-
-	// --- Set the length of the cinematic
-	constexpr int32 FirstFrame = 0;
-	const int32 TotalFrames = UNMMUtils::GetCinematicTotalFrames(MainMenuState, MasterPlayerInternal);
-	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
-
-	// --- Set the playback settings
-	const FMovieSceneSequencePlaybackSettings& PlaybackSettings = UNMMUtils::GetCinematicSettings(MainMenuState);
-	MasterPlayerInternal->SetPlaybackSettings(PlaybackSettings);
-	if (PlaybackSettings.FinishCompletionStateOverride == EMovieSceneCompletionModeOverride::ForceRestoreState)
-	{
-		// Reset all 'Keep States' tracks to default
-		MasterPlayerInternal->RestorePreAnimatedState();
-		MasterPlayerInternal->PreAnimatedState.EnableGlobalPreAnimatedStateCapture();
-
-		// RestorePreAnimatedState additionally resets the camera to default engine one, so we need to possess it again
-		UNMMCameraSubsystem::Get().PossessCamera(MainMenuState);
-	}
-
-	// --- Set the playback position
-	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(MainMenuState, MasterPlayerInternal);
-	MasterPlayerInternal->SetPlaybackPosition(PlaybackPositionParams);
-
-	// --- Play the cinematic (in case of stop it will be paused automatically)
-	if (MainMenuState != ENMMState::None)
-	{
-		MasterPlayerInternal->Play();
+		ApplyCinematicState();
 	}
 }
 
@@ -137,6 +115,8 @@ void UNMMSpotComponent::BeginPlay()
 		// State is already set, apply it
 		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
+
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Clears all transient data created by this component
@@ -234,6 +214,37 @@ void UNMMSpotComponent::MarkCinematicAsSeen()
 	}
 }
 
+// Triggers or stops cinematic by current state
+void UNMMSpotComponent::ApplyCinematicState()
+{
+	// --- Load cinematic synchronously if not loaded yet
+	const bool bIsCinematicLoading = !MasterPlayerInternal || CinematicRowInternal.LevelSequence.IsPending();
+	if (bIsCinematicLoading)
+	{
+		OnMasterSequenceLoaded(CinematicRowInternal.LevelSequence.LoadSynchronous());
+	}
+	checkf(MasterPlayerInternal, TEXT("ERROR: [%i] %s:\n'MasterPlayerInternal' is null!"), __LINE__, *FString(__FUNCTION__));
+
+	// --- Set the length of the cinematic
+	constexpr int32 FirstFrame = 0;
+	const int32 TotalFrames = UNMMUtils::GetCinematicTotalFrames(CinematicStateInternal, MasterPlayerInternal);
+	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
+
+	// --- Set the playback settings
+	const FMovieSceneSequencePlaybackSettings& PlaybackSettings = UNMMUtils::GetCinematicSettings(CinematicStateInternal);
+	MasterPlayerInternal->SetPlaybackSettings(PlaybackSettings);
+
+	// --- Set the playback position
+	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(CinematicStateInternal, MasterPlayerInternal);
+	MasterPlayerInternal->SetPlaybackPosition(PlaybackPositionParams);
+
+	// Play the cinematic (in case of stop it will be paused automatically)
+	if (CinematicStateInternal != ENMMState::None)
+	{
+		MasterPlayerInternal->Play();
+	}
+}
+
 // Is called when the cinematic was loaded to finish creation
 void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence)
 {
@@ -270,6 +281,18 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
+
+// Called when the current game state was changed
+void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+{
+	if (CurrentGameState == ECGS::Menu
+		&& IsActiveSpot())
+	{
+		// Reset the sequence to the beginning to make it ready for the next play
+		constexpr bool bKeepCamera = true;
+		UCinematicUtils::ResetSequence(MasterPlayerInternal, bKeepCamera);
+	}
+}
 
 // Called wen the Main Menu state was changed
 void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)

@@ -42,7 +42,7 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** A widget for remapping a single key. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UInputKeySelector> InputKeySelector = nullptr;
 
 	/** Contains mappable data for this button. */

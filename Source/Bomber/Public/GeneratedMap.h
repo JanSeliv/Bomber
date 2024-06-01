@@ -140,19 +140,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FTransform ActorTransformToGridTransform(const FTransform& ActorTransform);
 
+	/** Set for which level actors should show debug renders, is not available in shipping build. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+	void SetDisplayCellsActorTypes(int32 NewValue);
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
-	/** Gives access for the Cheat Manager to 'cheat'. */
-	friend class UMyCheatManager;
-
-	/** Gives access for helper utilities to expand cells operations on the Generated Map. */
+	/** Gives access for helper utilities to expand operations on the Generated Map. */
 	friend class UCellsUtilsLibrary;
-
-	/** Gives access for helper utilities. */
-	friend class UMyBlueprintFunctionLibrary;
+	friend class ULevelActorsUtilsLibrary;
 
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
@@ -185,8 +184,8 @@ protected:
 	bool bIsGameRunningInternal = false;
 
 	/** Specify for which level actors should show debug renders, is not available in shipping build. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
-	int32 DisplayCellsActorTypes = TO_FLAG(EAT::None);
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, DisplayName = "Display Cells Actor Types", Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
+	int32 DisplayCellsActorTypesInternal = TO_FLAG(EAT::None);
 
 	/* ---------------------------------------------------
 	 *		Protected functions
@@ -257,16 +256,6 @@ protected:
 	/** Spawns and fills the Grid Array values by level actors */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "C++", meta = (BlueprintProtected))
 	void GenerateLevelActors();
-
-	/** Map components getter.
-	 *
-	 * @param OutBitmaskedComponents Will contains map components of owners having the specified types.
-	 * @param ActorsTypesBitmask EActorType bitmask of actors types.
-	 */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	void GetMapComponents(
-		TSet<UMapComponent*>& OutBitmaskedComponents,
-		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask) const;
 
 	/** Listen game states to generate level actors. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))

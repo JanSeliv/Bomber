@@ -230,8 +230,6 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	BIND_ON_LOCAL_PLAYER_STATE_READY(this, ThisClass::OnLocalPlayerStateReady);
 
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-
-	PlayCurrentBackgroundMusic();
 }
 
 // Is called on ending the current game to play the End-Game sound
@@ -251,6 +249,15 @@ void USoundsSubsystem::OnEndGameStateChanged_Implementation(EEndGameState EndGam
 // Listen game states to switch background music
 void USoundsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
+	switch (CurrentGameState)
+	{
+		case ECurrentGameState::GameStarting:
+			PlayStartGameCountdownSFX();
+			break;
+		default:
+			break;
+	}
+
 	StopEndGameCountdownSFX();
 	PlayCurrentBackgroundMusic();
 }

@@ -72,13 +72,18 @@ void UMVVM_MyCharacterBase::OnPlayerStateReady_Implementation(AMyPlayerState* Pl
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 
 	PlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnNicknameChanged);
-	OnNicknameChanged(PlayerState->GetPlayerFNameCustom());
+	OnNicknameChanged(*PlayerState->GetPlayerName());
 
 	PlayerState->OnCharacterDeadChanged.AddUniqueDynamic(this, &ThisClass::OnCharacterDeadChanged);
 	OnCharacterDeadChanged(PlayerState->IsCharacterDead());
 
-	// Set by default Human\Bot visibility as there is no support for joining during the match
-	const bool IsABot = PlayerState->IsABot();
-	SetIsHumanVisibility(IsABot ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
-	SetIsBotVisibility(IsABot ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	PlayerState->OnIsABotChanged.AddUniqueDynamic(this, &ThisClass::OnIsBotChanged);
+	OnIsBotChanged(PlayerState->IsABot());
+}
+
+// Called when changed character Bot status is changed, applies both bot and human visibility
+void UMVVM_MyCharacterBase::OnIsBotChanged_Implementation(bool bIsBot)
+{
+	SetIsHumanVisibility(bIsBot ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+	SetIsBotVisibility(bIsBot ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 }

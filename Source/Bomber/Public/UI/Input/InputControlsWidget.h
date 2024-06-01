@@ -27,7 +27,7 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** Is parent widget of all dynamically created categories. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UScrollBox> ScrollBoxInputCategories = nullptr;
 
 	/** The class of the Input Button Widget. */

@@ -46,10 +46,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyPlayerController* GetMyPlayerController(int32 PlayerIndex, const UObject* OptionalWorldContext = nullptr);
 
-	/** Return Character ID from given context (character, controller or world). */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static int32 GetCharacterID(const UObject* Context = nullptr);
-
 	/** Returns the local Player Controller, nullptr otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class AMyPlayerController* GetLocalPlayerController(const UObject* OptionalWorldContext = nullptr);
@@ -73,14 +69,6 @@ public:
 	/** Returns the Camera Component used on level. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class UMyCameraComponent* GetLevelCamera(const UObject* OptionalWorldContext = nullptr);
-
-	/** Returns the HUD actor. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
-	static class AMyHUD* GetMyHUD(const UObject* OptionalWorldContext = nullptr);
-
-	/** Returns the In-Game widget. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
-	static class UUserWidget* GetInGameWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns specified player character.
 	 * @param CharacterID - Global ID of a character in session to find:

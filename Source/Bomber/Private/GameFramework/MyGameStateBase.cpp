@@ -11,6 +11,7 @@
 //---
 #include "GameFeaturesSubsystem.h"
 #include "TimerManager.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Net/UnrealNetwork.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameStateBase)
@@ -237,8 +238,6 @@ void AMyGameStateBase::TriggerCountdowns()
 	constexpr bool bInLoop = true;
 	const float InRate = UGameStateDataAsset::Get().GetTickInterval();
 	World->GetTimerManager().SetTimer(CountdownTimerInternal, this, &ThisClass::OnCountdownTimerTicked, InRate, bInLoop);
-
-	USoundsSubsystem::Get().PlayStartGameCountdownSFX();
 }
 
 // Is called each UGameStateDataAsset::TickInternal to count different time in the game
@@ -269,6 +268,20 @@ void AMyGameStateBase::OnCountdownTimerTicked()
  * Overrides
  ********************************************************************************************* */
 
+// Returns amount of players (host + clients) playing this game
+int32 AMyGameStateBase::GetPlayersInMultiplayerNum() const
+{
+	int32 PlayersNum = 0;
+	for (const APlayerState* PlayerStateIt : PlayerArray)
+	{
+		if (PlayerStateIt && !PlayerStateIt->IsABot())
+		{
+			++PlayersNum;
+		}
+	}
+	return PlayersNum;
+}
+
 // Returns properties that are replicated for the lifetime of the actor channel.
 void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -277,6 +290,15 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ThisClass, CurrentGameStateInternal);
 	DOREPLIFETIME(ThisClass, StartingTimerSecRemainInternal);
 	DOREPLIFETIME(ThisClass, InGameTimerSecRemainInternal);
+}
+
+// This is called only in the gameplay before calling begin play
+void AMyGameStateBase::PostInitializeComponents()
+{
+	// Register it to let modular feature to be dynamically added
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+
+	Super::PostInitializeComponents();
 }
 
 // Called when the game starts

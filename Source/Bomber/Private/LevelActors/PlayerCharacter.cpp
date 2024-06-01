@@ -14,21 +14,23 @@
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/BombActor.h"
 #include "LevelActors/ItemActor.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
+#include "Subsystems/WidgetsSubsystem.h"
+#include "UI/Widgets/PlayerName3DWidget.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "InputActionValue.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
-//---
-#if WITH_EDITOR
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerCharacter)
 
@@ -64,18 +66,34 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 		SkeletalMeshComponent->SetRelativeLocation_Direct(MeshRelativeLocation);
 		static const FRotator MeshRelativeRotation(0, -90.f, 0);
 		SkeletalMeshComponent->SetRelativeRotation_Direct(MeshRelativeRotation);
-
-		SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SkeletalMeshComponent->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
 	}
 
 	// Initialize the nameplate mesh component
 	NameplateMeshInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
 	NameplateMeshInternal->SetupAttachment(RootComponent);
-	static const FVector NameplateRelativeLocation(-60.f, 0.f, 150.f);
+	static const FVector NameplateRelativeLocation(0.f, 0.f, 210.f);
 	NameplateMeshInternal->SetRelativeLocation_Direct(NameplateRelativeLocation);
 	static const FVector NameplateRelativeScale(1.75f, 1.f, 1.f);
 	NameplateMeshInternal->SetRelativeScale3D_Direct(NameplateRelativeScale);
 	NameplateMeshInternal->SetUsingAbsoluteRotation(true);
+	NameplateMeshInternal->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+	UStaticMesh* PlaneMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
+	checkf(PlaneMesh, TEXT("ERROR: [%i] %hs:\n'PlaneMesh' failed to load!"), __LINE__, __FUNCTION__);
+	NameplateMeshInternal->SetStaticMesh(PlaneMesh);
+
+	// Initialize 3D widget component for the player name
+	PlayerName3DWidgetComponentInternal = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerName3DWidgetComponent"));
+	PlayerName3DWidgetComponentInternal->SetupAttachment(NameplateMeshInternal);
+	static const FVector WidgetRelativeLocation(0.f, 0.f, 10.f);
+	PlayerName3DWidgetComponentInternal->SetRelativeLocation_Direct(WidgetRelativeLocation);
+	static const FRotator WidgetRelativeRotation(90.f, -90.f, 180.f);
+	PlayerName3DWidgetComponentInternal->SetRelativeRotation_Direct(WidgetRelativeRotation);
+	PlayerName3DWidgetComponentInternal->SetGenerateOverlapEvents(false);
+	static const FVector2D DrawSize(180.f, 50.f);
+	PlayerName3DWidgetComponentInternal->SetDrawSize(DrawSize);
+	static const FVector2D Pivot(0.5f, 0.4f);
+	PlayerName3DWidgetComponentInternal->SetPivot(Pivot);
 
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
@@ -87,6 +105,20 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 		// Do not push out clients from collision
 		MovementComponent->MaxDepenetrationWithGeometryAsProxy = 0.f;
 	}
+
+	if (UCapsuleComponent* RootCapsuleComponent = GetCapsuleComponent())
+	{
+		// Setup collision to allow overlap players with each other, but block all other actors
+		RootCapsuleComponent->CanCharacterStepUpOn = ECB_Yes;
+		RootCapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		RootCapsuleComponent->SetCollisionProfileName(UCollisionProfile::CustomCollisionProfileName);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Player0, ECR_Overlap);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Player1, ECR_Overlap);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Player2, ECR_Overlap);
+		RootCapsuleComponent->SetCollisionResponseToChannel(ECC_Player3, ECR_Overlap);
+	}
 }
 
 // Initialize a player actor, could be called multiple times
@@ -97,21 +129,31 @@ void APlayerCharacter::ConstructPlayerCharacter()
 	MapComponentInternal->ConstructOwnerActor();
 }
 
+// Returns unique net id number based on online subsystem, e.g: 253, 254, 255
+int32 APlayerCharacter::GetPlayerId() const
+{
+	if (const AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
+	{
+		return MyPlayerState->GetPlayerId();
+	}
+
+	// Player state is not initialized yet, return it directly from the order on the level
+	return ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal);
+}
+
 // Spawns bomb on character position
 void APlayerCharacter::ServerSpawnBomb_Implementation()
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not spawn bomb in PIE
 		return;
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
 	const AController* OwnedController = GetController();
 	if (!MapComponentInternal                     // The Map Component is not valid or transient
 	    || PowerupsInternal.FireN <= 0            // Null length of explosion
-	    || PowerupsInternal.BombN <= 0            // No more bombs
+	    || PowerupsInternal.BombNCurrent <= 0     // No more bombs
 	    || !OwnedController                       // controller is not valid
 	    || OwnedController->IsMoveInputIgnored()) // controller is blocked
 	{
@@ -132,7 +174,8 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 		checkf(MapComponent, TEXT("ERROR: [%i] %s:\n'MapComponent' is null!"), __LINE__, *FString(__FUNCTION__));
 
 		// Updating explosion cells
-		PlayerCharacter->PowerupsInternal.BombN--;
+		PlayerCharacter->PowerupsInternal.BombNCurrent--;
+		PlayerCharacter->ApplyPowerups();
 
 		// Init Bomb
 		BombActor->InitBomb(PlayerCharacter);
@@ -149,16 +192,6 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
 {
 	return Cast<UMySkeletalMeshComponent>(GetMesh());
-}
-
-// Actualize the player name for this character
-void APlayerCharacter::UpdateNicknameOnNameplate()
-{
-	if (const AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
-	{
-		const FName NewNickname = MyPlayerState->GetPlayerFNameCustom();
-		SetNicknameOnNameplate(NewNickname);
-	}
 }
 
 // Returns level type associated with player, e.g: Water level type for Roger character
@@ -182,9 +215,9 @@ void APlayerCharacter::ServerSetCustomPlayerMeshData_Implementation(const FCusto
 	ApplyCustomPlayerMeshData();
 }
 
-/* ---------------------------------------------------
- *					Protected functions
- * --------------------------------------------------- */
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
@@ -210,11 +243,6 @@ void APlayerCharacter::BeginPlay()
 		// Listen to handle possessing logic
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
-
-	if (AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
-	{
-		MyPlayerState->OnPlayerNameChanged.AddDynamic(this, &ThisClass::SetNicknameOnNameplate);
-	}
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -234,21 +262,17 @@ void APlayerCharacter::OnConstructionPlayerCharacter()
 		return;
 	}
 
-	// Set ID
-	if (HasAuthority()
-	    && CharacterIDInternal == INDEX_NONE)
+	if (!PlayerMeshDataInternal.IsValid())
 	{
-		const FCells PlayerCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
-		CharacterIDInternal = PlayerCells.Num() - 1;
-		ApplyCharacterID();
+		SetDefaultPlayerMeshData();
 	}
 
-	UpdateNicknameOnNameplate();
+	ApplyPlayerId();
 
 	// Spawn or destroy controller of specific ai with enabled visualization
-#if WITH_EDITOR
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld() // [IsEditorNotPieWorld] only
-	    && CharacterIDInternal > 0)                // Is a bot
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (UUtilsLibrary::IsEditorNotPieWorld()                                         // [IsEditorNotPieWorld] only
+	    && ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal) > 0) // Is a bot
 	{
 		MyAIControllerInternal = Cast<AMyAIController>(GetController());
 		if (!MapComponentInternal->bShouldShowRenders)
@@ -290,7 +314,6 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, PowerupsInternal);
-	DOREPLIFETIME(ThisClass, CharacterIDInternal);
 	DOREPLIFETIME(ThisClass, PlayerMeshDataInternal);
 }
 
@@ -305,9 +328,13 @@ void APlayerCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlaye
 		return;
 	}
 
-	ApplyCustomPlayerMeshData();
-
 	MyPlayerState->OnPlayerStateInit();
+
+	MyPlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::SetNicknameOnNameplate);
+	SetNicknameOnNameplate(*MyPlayerState->GetPlayerName());
+
+	MyPlayerState->OnPlayerIdChanged.AddUniqueDynamic(this, &ThisClass::ApplyPlayerId);
+	ApplyPlayerId();
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
@@ -351,9 +378,11 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	ApplyCustomPlayerMeshData();
-
-	UpdateNicknameOnNameplate();
 }
+
+/*********************************************************************************************
+ * Protected functions
+ ********************************************************************************************* */
 
 // Triggers when this player character starts something overlap.
 void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
@@ -368,12 +397,9 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 	const UItemDataAsset& ItemDataAsset = UItemDataAsset::Get();
 
 	const int32 MaxAllowedItemsNum = ItemDataAsset.GetMaxAllowedItemsNum();
-	auto IncrementIfAllowed = [MaxAllowedItemsNum](int32& NumRef)
+	auto IncrementIfAllowed = [MaxAllowedItemsNum](int32& NumRef, int32 ClampMax = INDEX_NONE)
 	{
-		if (NumRef < MaxAllowedItemsNum)
-		{
-			++NumRef;
-		}
+		NumRef = FMath::Clamp(NumRef + 1, 0, ClampMax == INDEX_NONE ? MaxAllowedItemsNum : ClampMax);
 	};
 
 	switch (ItemType)
@@ -386,6 +412,7 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 		case EItemType::Bomb:
 		{
 			IncrementIfAllowed(PowerupsInternal.BombN);
+			IncrementIfAllowed(PowerupsInternal.BombNCurrent, PowerupsInternal.BombN);
 			break;
 		}
 		case EItemType::Fire:
@@ -412,9 +439,10 @@ void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent, UObject* Des
 	// Stop listening this bomb
 	MapComponent->OnDeactivatedMapComponent.RemoveAll(this);
 
-	if (PowerupsInternal.BombN < UItemDataAsset::Get().GetMaxAllowedItemsNum())
+	if (PowerupsInternal.BombNCurrent < PowerupsInternal.BombN)
 	{
-		++PowerupsInternal.BombN;
+		++PowerupsInternal.BombNCurrent;
+		ApplyPowerups();
 	}
 }
 
@@ -478,26 +506,20 @@ void APlayerCharacter::OnRep_Powerups()
 	ApplyPowerups();
 }
 
-// Update player name on a 3D widget component
-void APlayerCharacter::SetNicknameOnNameplate_Implementation(FName NewName)
-{
-	// BP implementation
-	// ...
-}
-
 // Updates collision object type by current character ID
 void APlayerCharacter::UpdateCollisionObjectType()
 {
+	const int32 PlayerId = GetPlayerId();
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
-	if (!ensureMsgf(CapsuleComp, TEXT("ASSERT: 'CapsuleComponent' is not valid"))
-	    || CharacterIDInternal == INDEX_NONE)
+	if (!ensureMsgf(CapsuleComp, TEXT("ASSERT: [%i] %hs:\n'CapsuleComp' is not valid!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	// Set the object collision type
 	ECollisionChannel CollisionObjectType = CapsuleComp->GetCollisionObjectType();
-	switch (CharacterIDInternal)
+	switch (PlayerId)
 	{
 		case 0:
 			CollisionObjectType = ECC_Player0;
@@ -521,29 +543,22 @@ void APlayerCharacter::UpdateCollisionObjectType()
 // Possess a player or AI controller in dependence of current Character ID
 void APlayerCharacter::TryPossessController()
 {
-#if WITH_EDITOR	 // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (!HasAuthority()
+	    || UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not spawn posses in PIE
 		return;
 	}
-#endif	//WITH_EDITOR [IsEditorNotPieWorld]
 
-	if (!HasAuthority()
-	    || CharacterIDInternal < 0)
-	{
-		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (!World)
+	const int32 PlayerId = GetPlayerId();
+	if (!ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	AController* ControllerToPossess = nullptr;
 
-	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(CharacterIDInternal))
+	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId))
 	{
 		if (MyPC->bCinematicMode)
 		{
@@ -559,7 +574,7 @@ void APlayerCharacter::TryPossessController()
 		// Spawn AI if is needed
 		if (!MyAIControllerInternal)
 		{
-			MyAIControllerInternal = World->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
+			MyAIControllerInternal = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
 		}
 
 		ControllerToPossess = MyAIControllerInternal;
@@ -584,6 +599,12 @@ void APlayerCharacter::TryPossessController()
 void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
 {
 	TryPossessController();
+
+	if (GetController() == NewPlayer)
+	{
+		// New player joined, set default player mesh
+		SetDefaultPlayerMeshData();
+	}
 }
 
 // Set and apply new skeletal mesh from current data
@@ -615,19 +636,26 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 // Set and apply default skeletal mesh for this player
 void APlayerCharacter::SetDefaultPlayerMeshData()
 {
-	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
-	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
-	if (!MeshesNum)
+	if (!HasAuthority())
 	{
 		return;
 	}
 
-	const bool bIsPlayer = IsLocallyControlled() || !CharacterIDInternal;
+	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
+	const int32 PlayerId = GetPlayerId();
+	if (!ensureMsgf(MeshesNum > 0, TEXT("ASSERT: [%i] %hs:\n'MeshesNum' is empty!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	const bool bIsPlayer = IsPlayerControlled() || PlayerId == 0;
 	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
 	constexpr ELevelType AIFlag = ELT::None;
 	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
 	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
-	if (!Row)
+	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
@@ -635,7 +663,7 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	const int32 SkinsNum = Row->GetMaterialInstancesDynamicNum();
 	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
 	CustomPlayerMeshData.PlayerRow = Row;
-	CustomPlayerMeshData.SkinIndex = CharacterIDInternal % SkinsNum;
+	CustomPlayerMeshData.SkinIndex = PlayerId % SkinsNum;
 	ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
 }
 
@@ -643,41 +671,6 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 void APlayerCharacter::OnRep_PlayerMeshData()
 {
 	ApplyCustomPlayerMeshData();
-}
-
-void APlayerCharacter::ApplyCharacterID()
-{
-	if (CharacterIDInternal == INDEX_NONE)
-	{
-		return;
-	}
-
-	SetDefaultPlayerMeshData();
-
-	// Set a nameplate material
-	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
-	{
-		const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
-		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
-		if (NameplateMeshesNum > 0)
-		{
-			const int32 MaterialNo = CharacterIDInternal < NameplateMeshesNum ? CharacterIDInternal : CharacterIDInternal % NameplateMeshesNum;
-			if (UMaterialInterface* Material = PlayerDataAsset.GetNameplateMaterial(MaterialNo))
-			{
-				NameplateMeshInternal->SetMaterial(0, Material);
-			}
-		}
-	}
-
-	UpdateCollisionObjectType();
-
-	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterIdAssigned(*this);
-}
-
-// Is called on clients to apply the characterID-dependent logic for this character
-void APlayerCharacter::OnRep_CharacterID()
-{
-	ApplyCharacterID();
 }
 
 // Move the player character
@@ -712,4 +705,59 @@ void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UOb
 	{
 		InPlayerState->SetCharacterDead(true);
 	}
+}
+
+/*********************************************************************************************
+ * Nickname
+ ********************************************************************************************* */
+
+// Update player name on a 3D widget component
+void APlayerCharacter::SetNicknameOnNameplate(FName NewName)
+{
+	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	UPlayerName3DWidget* PlayerNameWidget = WidgetsSubsystem ? WidgetsSubsystem->GetNicknameWidget(GetPlayerId()) : nullptr;
+	if (!PlayerNameWidget)
+	{
+		// Widget is not created yet, might be called before UI Subsystem is initialized
+		return;
+	}
+
+	PlayerNameWidget->SetPlayerName(NewName);
+
+	checkf(PlayerName3DWidgetComponentInternal, TEXT("ERROR: [%i] %hs:\n'PlayerName3DWidgetComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	const UUserWidget* LastWidget = PlayerName3DWidgetComponentInternal->GetWidget();
+	if (LastWidget != PlayerNameWidget)
+	{
+		PlayerName3DWidgetComponentInternal->SetWidget(PlayerNameWidget);
+	}
+}
+
+/*********************************************************************************************
+ * Player ID
+ ********************************************************************************************* */
+
+// Applies the playerID-dependent logic for this character
+void APlayerCharacter::ApplyPlayerId(int32 CurrentPlayerId/* = INDEX_NONE*/)
+{
+	if (CurrentPlayerId == INDEX_NONE)
+	{
+		CurrentPlayerId = GetPlayerId();
+	}
+
+	// Set a nameplate material
+	if (ensureMsgf(NameplateMeshInternal, TEXT("ASSERT: 'NameplateMeshComponent' is not valid")))
+	{
+		const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+		const int32 NameplateMeshesNum = PlayerDataAsset.GetNameplateMaterialsNum();
+		if (NameplateMeshesNum > 0)
+		{
+			const int32 MaterialNo = CurrentPlayerId < NameplateMeshesNum ? CurrentPlayerId : CurrentPlayerId % NameplateMeshesNum;
+			if (UMaterialInterface* Material = PlayerDataAsset.GetNameplateMaterial(MaterialNo))
+			{
+				NameplateMeshInternal->SetMaterial(0, Material);
+			}
+		}
+	}
+
+	UpdateCollisionObjectType();
 }

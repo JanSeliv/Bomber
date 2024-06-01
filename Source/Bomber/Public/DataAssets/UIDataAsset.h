@@ -21,9 +21,9 @@ public:
 	static const UUIDataAsset& Get();
 
 	/** Returns a class of the in-game widget.
-	 * @see UUIDataAsset::InGameWidgetClassInternal.*/
+	 * @see UUIDataAsset::HUDWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UUserWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
+	FORCEINLINE TSubclassOf<class UHUDWidget> GetHUDWidgetClass() const { return HUDWidgetClassInternal; }
 
 	/** Returns a class of the settings widget.
 	 * @see UUIDataAsset::SettingsWidgetClassInternal.*/
@@ -33,7 +33,7 @@ public:
 	/** Returns a class of the nickname widget.
 	 * @see UUIDataAsset::NicknameWidgetClassInternal.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UUserWidget> GetNicknameWidgetClass() const { return NicknameWidgetClassInternal; }
+	FORCEINLINE TSubclassOf<class UPlayerName3DWidget> GetNicknameWidgetClass() const { return NicknameWidgetClassInternal; }
 
 	/** Returns a class of the FPS counter widget.
 	 * @see UUIDataAsset::FPSCounterWidgetClassInternal.*/
@@ -48,7 +48,7 @@ public:
 protected:
 	/** The class of a In-Game Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> InGameWidgetClassInternal = nullptr;
+	TSubclassOf<class UHUDWidget> HUDWidgetClassInternal = nullptr;
 
 	/** The class of a Settings Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))
@@ -56,7 +56,7 @@ protected:
 
 	/** The class of a Nickname Widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nickname Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> NicknameWidgetClassInternal = nullptr;
+	TSubclassOf<class UPlayerName3DWidget> NicknameWidgetClassInternal = nullptr;
 
 	/** The class of a FPS counter widget blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "FPS Counter Widget Class", ShowOnlyInnerProperties))
