@@ -150,8 +150,7 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 	SetControlRotation(FRotator::ZeroRotator);
 
 	// Try to rebind inputs for possessed pawn on server
-	constexpr bool bInvertRest = true;
-	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
+	ApplyAllInputContexts();
 
 	// Notify host about pawn change
 	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InPawn))
@@ -166,8 +165,7 @@ void AMyPlayerController::OnRep_Pawn()
 	Super::OnRep_Pawn();
 
 	// Try to rebind inputs for possessed pawn on client
-	constexpr bool bInvertRest = true;
-	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
+	ApplyAllInputContexts();
 
 	// Notify client about pawn change
 	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
@@ -215,6 +213,9 @@ void AMyPlayerController::OnWidgetsInitialized_Implementation()
 	{
 		SettingsWidget->OnToggledSettings.AddUniqueDynamic(this, &ThisClass::OnToggledSettings);
 	}
+
+	// Try to rebind widget inputs
+	ApplyAllInputContexts();
 }
 
 // Listen to toggle movement input
@@ -246,8 +247,7 @@ void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState Cu
 			break;
 	}
 
-	constexpr bool bInvertRest = true;
-	SetAllInputContextsEnabled(true, CurrentGameState, bInvertRest);
+	ApplyAllInputContexts();
 }
 
 // Listens to handle input on opening and closing the Settings widget
@@ -381,6 +381,13 @@ void AMyPlayerController::SetAllInputContextsEnabled(bool bEnable, ECurrentGameS
 		const bool bFinalEnable = bIsForCurrentState ? bEnable : !bEnable;
 		SetInputContextEnabled(bFinalEnable, InputContextIt);
 	}
+}
+
+// Enables all managed input contexts by current game state
+void AMyPlayerController::ApplyAllInputContexts()
+{
+	constexpr bool bInvertRest = true;
+	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
 }
 
 // Enables or disables specified input context

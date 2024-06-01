@@ -117,7 +117,7 @@ public:
 	void RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
 
 	/** Prevents built-in slate input on UMG. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, DisplayName = "Set UI Input Ignored"))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Set UI Input Ignored"))
 	void SetUIInputIgnored();
 
 	/** Takes all cached inputs contexts and turns them on or off according given game state.
@@ -125,8 +125,12 @@ public:
 	 * @param CurrentGameState Game state to check matching.
 	 * @param bInvertRest If true, all other not matching contexts will be toggled to the opposite of given state (!bEnable).
 	 * @see AMyPlayerController::AddInputContexts */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetAllInputContextsEnabled(bool bEnable, ECurrentGameState CurrentGameState, bool bInvertRest = false);
+
+	/** Enables all managed input contexts by current game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplyAllInputContexts();
 
 	/** Enables or disables specified input context.
 	 * @param bEnable If true, the context will be enabled. If false, the context will be disabled.
@@ -135,7 +139,7 @@ public:
 	void SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InInputContext);
 
 	/** Set up input bindings in given contexts. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void BindInputActionsInContext(const UMyInputMappingContext* InInputContext);
 
 	/** Adds input contexts to the list to be auto turned of or on according current game state.
