@@ -9,7 +9,7 @@
 /**
  * Contains Main Menu settings that are tweaked by player in Settings menu during the game.
  */
-UCLASS(BlueprintType, Blueprintable, Config = "NewMainMenu", DefaultConfig)
+UCLASS(BlueprintType, Blueprintable, Config = "GameUserSettings", DefaultConfig)
 class NEWMAINMENU_API UNMMInGameSettingsSubsystem : public UEngineSubsystem
 {
 	GENERATED_BODY()
@@ -51,15 +51,15 @@ protected:
 	 * Is config property, can be set in Settings menu.
 	 * @warning in multiplayer, this setting is ignored, so cinematics are always skipped. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Skip Cinematics"))
-	bool bAutoSkipCinematicsInternal;
+	bool bAutoSkipCinematicsInternal = true;
 
 	/** The sound volume for Cinematics sound class.
 	 * Is config property, can be set in Settings menu. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
-	double CinematicsVolumeInternal;
+	double CinematicsVolumeInternal = 1.f;
 
 	/** Enable/disable smooth transitions when switching characters in the main menu.
 	 * Is config property, can be set in Settings menu. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Instant Character Switch"))
-	bool bInstantCharacterSwitchInternal;
+	bool bInstantCharacterSwitchInternal = false;
 };
