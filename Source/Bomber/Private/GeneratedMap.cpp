@@ -275,6 +275,10 @@ bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells
 	return false;
 }
 
+/*********************************************************************************************
+ * Spawn
+ ********************************************************************************************* */
+
 // Spawns level actor on the Generated Map by the specified type
 void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(AActor*)>& OnSpawned/* = nullptr*/)
 {
@@ -374,7 +378,27 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 	}
 }
 
-// The function that places the actor on the Generated Map, attaches it and writes this actor to the GridArray_
+// Spawns level actor of given type by the specified pattern
+void AGeneratedMap::SpawnActorsByPattern(EActorType ActorsType, const TArray<FIntPoint>& Positions)
+{
+	if (!HasAuthority()
+	    || !ensureMsgf(ActorsType != EAT::None, TEXT("ASSERT: [%i] %hs:\n'ActorsType' is None!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(!Positions.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'Positions' is empty!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	// Spawn actors by the specified columns (X) and rows (Y)
+	TMap<FCell, EActorType> CellsToSpawn;
+	for (const FIntPoint& It : Positions)
+	{
+		FCell Cell = UCellsUtilsLibrary::GetCellByPositionOnLevel(It.X, It.Y);
+		CellsToSpawn.Emplace(MoveTemp(Cell), ActorsType);
+	}
+	SpawnActorsByTypes(CellsToSpawn);
+}
+
+// Adding and attaching the specified Map Component to the Level
 void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 {
 	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
@@ -491,6 +515,10 @@ void AGeneratedMap::IntersectCellsByTypes(
 	}
 }
 
+/*********************************************************************************************
+ * Destroy
+ ********************************************************************************************* */
+
 // Destroy all actors from the set of cells
 void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* DestroyCauser/* = nullptr*/)
 {
@@ -604,6 +632,19 @@ void AGeneratedMap::DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, U
 	UPoolManagerSubsystem::Get().ReturnToPool(Handle);
 
 	MapComponentsInternal.Remove(Handle);
+}
+
+// Destroy all level actors of given type from the level
+void AGeneratedMap::DestroyLevelActorsByType(EActorType ActorsType, UObject* DestroyCauser)
+{
+	if (!HasAuthority()
+	    || ActorsType == EAT::None)
+	{
+		return;
+	}
+
+	const FCells ExistingActorCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorsType));
+	DestroyLevelActorsOnCells(ExistingActorCells);
 }
 
 // Finds the nearest cell pointer to the specified Map Component
@@ -829,7 +870,7 @@ void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 // Spawns and fills the Grid Array values by level actors
 void AGeneratedMap::GenerateLevelActors()
 {
-	if (!ensureMsgf(GridCellsInternal.Num() > 0, TEXT("Is no cells for the actors generation"))
+	if (!ensureMsgf(!GridCellsInternal.IsEmpty(), TEXT("ASSERT: [%i] %hs:\nThere are no cells on the Generated Map!"), __LINE__, __FUNCTION__)
 	    || !HasAuthority())
 	{
 		return;

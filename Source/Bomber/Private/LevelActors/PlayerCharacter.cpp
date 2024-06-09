@@ -188,12 +188,6 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 	AGeneratedMap::Get().SpawnActorByType(EAT::Bomb, MapComponentInternal->GetCell(), OnBombSpawned);
 }
 
-// Returns the Skeletal Mesh of bombers
-UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
-{
-	return Cast<UMySkeletalMeshComponent>(GetMesh());
-}
-
 // Returns level type associated with player, e.g: Water level type for Roger character
 ELevelType APlayerCharacter::GetPlayerType() const
 {
@@ -206,13 +200,6 @@ const FGameplayTag& APlayerCharacter::GetPlayerTag() const
 {
 	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
 	return PlayerRow ? PlayerRow->PlayerTag : FGameplayTag::EmptyTag;
-}
-
-// Set and apply how a player has to look lik
-void APlayerCharacter::ServerSetCustomPlayerMeshData_Implementation(const FCustomPlayerMeshData& CustomPlayerMeshData)
-{
-	PlayerMeshDataInternal = CustomPlayerMeshData;
-	ApplyCustomPlayerMeshData();
 }
 
 /*********************************************************************************************
@@ -607,72 +594,6 @@ void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* N
 	}
 }
 
-// Set and apply new skeletal mesh from current data
-void APlayerCharacter::ApplyCustomPlayerMeshData()
-{
-	UMySkeletalMeshComponent* MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
-	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: 'MySkeletalMeshComp' is not valid"))
-	    || !MapComponentInternal)
-	{
-		return;
-	}
-
-	if (!PlayerMeshDataInternal.IsValid())
-	{
-		// PlayerRow is not valid or mesh data is not set
-		return;
-	}
-
-	const UPlayerRow* PrevPlayerRow = MySkeletalMeshComp->GetCustomPlayerMeshData().PlayerRow;
-
-	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
-
-	if (PrevPlayerRow != PlayerMeshDataInternal.PlayerRow)
-	{
-		OnPlayerTypeChanged.Broadcast(PlayerMeshDataInternal.PlayerRow->PlayerTag);
-	}
-}
-
-// Set and apply default skeletal mesh for this player
-void APlayerCharacter::SetDefaultPlayerMeshData()
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
-	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
-	const int32 PlayerId = GetPlayerId();
-	if (!ensureMsgf(MeshesNum > 0, TEXT("ASSERT: [%i] %hs:\n'MeshesNum' is empty!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	const bool bIsPlayer = IsPlayerControlled() || PlayerId == 0;
-	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
-	constexpr ELevelType AIFlag = ELT::None;
-	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
-	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
-	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	const int32 SkinsNum = Row->GetMaterialInstancesDynamicNum();
-	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
-	CustomPlayerMeshData.PlayerRow = Row;
-	CustomPlayerMeshData.SkinIndex = PlayerId % SkinsNum;
-	ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
-}
-
-// Respond on changes in player mesh data to reset to set the mesh on client
-void APlayerCharacter::OnRep_PlayerMeshData()
-{
-	ApplyCustomPlayerMeshData();
-}
-
 // Move the player character
 void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 {
@@ -760,4 +681,101 @@ void APlayerCharacter::ApplyPlayerId(int32 CurrentPlayerId/* = INDEX_NONE*/)
 	}
 
 	UpdateCollisionObjectType();
+}
+
+/*********************************************************************************************
+ * Player Mesh
+ ********************************************************************************************* */
+
+// Returns the Skeletal Mesh of bombers
+UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
+{
+	return Cast<UMySkeletalMeshComponent>(GetMesh());
+}
+
+// Set and apply how a player has to look like
+void APlayerCharacter::SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData)
+{
+	if (HasAuthority())
+	{
+		PlayerMeshDataInternal = CustomPlayerMeshData;
+		ApplyCustomPlayerMeshData();
+	}
+	else
+	{
+		ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
+	}
+}
+
+// Set and apply how a player has to look lik
+void APlayerCharacter::ServerSetCustomPlayerMeshData_Implementation(const FCustomPlayerMeshData& CustomPlayerMeshData)
+{
+	PlayerMeshDataInternal = CustomPlayerMeshData;
+	ApplyCustomPlayerMeshData();
+}
+
+// Set and apply new skeletal mesh from current data
+void APlayerCharacter::ApplyCustomPlayerMeshData()
+{
+	UMySkeletalMeshComponent* MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
+	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: 'MySkeletalMeshComp' is not valid"))
+	    || !MapComponentInternal)
+	{
+		return;
+	}
+
+	if (!PlayerMeshDataInternal.IsValid())
+	{
+		// PlayerRow is not valid or mesh data is not set
+		return;
+	}
+
+	const UPlayerRow* PrevPlayerRow = MySkeletalMeshComp->GetCustomPlayerMeshData().PlayerRow;
+
+	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
+
+	if (PrevPlayerRow != PlayerMeshDataInternal.PlayerRow)
+	{
+		OnPlayerTypeChanged.Broadcast(PlayerMeshDataInternal.PlayerRow->PlayerTag);
+	}
+}
+
+// Set and apply default skeletal mesh for this player
+void APlayerCharacter::SetDefaultPlayerMeshData()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
+	const int32 PlayerId = GetPlayerId();
+	if (!ensureMsgf(MeshesNum > 0, TEXT("ASSERT: [%i] %hs:\n'MeshesNum' is empty!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	const bool bIsPlayer = IsPlayerControlled() || PlayerId == 0;
+	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
+	constexpr ELevelType AIFlag = ELT::None;
+	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
+	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
+	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	const int32 SkinsNum = Row->GetMaterialInstancesDynamicNum();
+	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
+	CustomPlayerMeshData.PlayerRow = Row;
+	CustomPlayerMeshData.SkinIndex = PlayerId % SkinsNum;
+	SetCustomPlayerMeshData(CustomPlayerMeshData);
+}
+
+// Respond on changes in player mesh data to reset to set the mesh on client
+void APlayerCharacter::OnRep_PlayerMeshData()
+{
+	ApplyCustomPlayerMeshData();
 }

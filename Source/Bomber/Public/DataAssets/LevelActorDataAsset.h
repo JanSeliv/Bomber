@@ -12,7 +12,7 @@
 /**
  * The base archetype of level actor rows. Is implemented in player, item rows, etc.
  */
-UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, Const, AutoExpandCategories=("C++"))
+UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, Const, CollapseCategories, AutoExpandCategories=("C++"))
 class BOMBER_API ULevelActorRow : public UObject
 {
 	GENERATED_BODY()

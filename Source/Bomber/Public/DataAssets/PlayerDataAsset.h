@@ -133,7 +133,7 @@ public:
 	FORCEINLINE FName GetSkinIndexParameter() const { return SkinIndexParameterInternal; }
 
 	/** Return first found row by specified player tag. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "PlayerTag"))
 	const UPlayerRow* GetRowByPlayerTag(const FPlayerTag& PlayerTag) const;
 
 protected:
