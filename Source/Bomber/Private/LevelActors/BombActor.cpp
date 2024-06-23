@@ -14,6 +14,7 @@
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
+#include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
@@ -59,8 +60,8 @@ void ABombActor::ConstructBombActor()
 FCells ABombActor::GetExplosionCells() const
 {
 	if (IsHidden()
-	    || FireRadiusInternal < MIN_FIRE_RADIUS
-	    || !MapComponentInternal)
+		|| FireRadiusInternal < MIN_FIRE_RADIUS
+		|| !MapComponentInternal)
 	{
 		return FCell::EmptyCells;
 	}
@@ -105,7 +106,7 @@ void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 		// Is bot character, set material for its default bomb with the same mesh
 		const int32 BombMaterialsNum = BombDataAsset.GetBombMaterialsNum();
 		if (PlayerIndex != INDEX_NONE // Is not debug character
-		    && BombMaterialsNum)      // As least one bomb material
+			&& BombMaterialsNum) // As least one bomb material
 		{
 			const int32 MaterialIndex = FMath::Abs(PlayerIndex) % BombMaterialsNum;
 			BombMaterialInternal = BombDataAsset.GetBombMaterial(MaterialIndex);
@@ -150,8 +151,8 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 // Is called on a bomb actor construction, could be called multiple times
 void ABombActor::OnConstructionBombActor()
 {
-	if (IS_TRANSIENT(this)                 // This actor is transient
-	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
+	if (IS_TRANSIENT(this) // This actor is transient
+		|| !IsValid(MapComponentInternal)) // Is not valid for map construction
 	{
 		return;
 	}
@@ -201,7 +202,7 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 void ABombActor::SetLifeSpan(float InLifespan/* = DEFAULT_LIFESPAN*/)
 {
 	if (InLifespan == DEFAULT_LIFESPAN
-	    && AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
+		&& AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
 	{
 		InLifespan = UBombDataAsset::Get().GetLifeSpan();
 	}
@@ -258,9 +259,9 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 void ABombActor::DetonateBomb()
 {
 	if (!HasAuthority()
-	    || IsHidden()
-	    || FireRadiusInternal < MIN_FIRE_RADIUS
-	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+		|| IsHidden()
+		|| FireRadiusInternal < MIN_FIRE_RADIUS
+		|| AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
@@ -285,7 +286,7 @@ void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& Explo
 	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().GetExplosionVFX();
 	for (const FCell& Cell : ExplosionCells)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionParticle, Cell.Location, GetActorRotation(), GetActorScale());
+		SpawnedVFXsInternal.Add(UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionParticle, Cell.Location, GetActorRotation(), GetActorScale()));
 	}
 
 	// Destroy all actors from array of cells
@@ -293,7 +294,9 @@ void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& Explo
 
 	USoundsSubsystem::Get().PlayExplosionSFX();
 
-	GetWorldTimerManager().ClearTimer(TimerHandle_LifeSpanExpired);
+	FTimerManager& TimerManager = GetWorldTimerManager();
+	TimerManager.ClearTimer(TimerHandle_LifeSpanExpired);
+	TimerManager.SetTimer(VFXDurationExpiredTimerHandle, this, &ThisClass::OnVFXDurationExpired, UBombDataAsset::Get().GetVFXDuration());
 }
 
 // Triggers when character end to overlaps with this bomb.
@@ -366,20 +369,20 @@ void ABombActor::MakeCollisionResponseToPlayerByID(FCollisionResponseContainer& 
 	ECollisionChannel CollisionChannel = ECC_WorldDynamic;
 	switch (CharacterID)
 	{
-		case 0:
-			CollisionChannel = ECC_Player0;
-			break;
-		case 1:
-			CollisionChannel = ECC_Player1;
-			break;
-		case 2:
-			CollisionChannel = ECC_Player2;
-			break;
-		case 3:
-			CollisionChannel = ECC_Player3;
-			break;
-		default:
-			break;
+	case 0:
+		CollisionChannel = ECC_Player0;
+		break;
+	case 1:
+		CollisionChannel = ECC_Player1;
+		break;
+	case 2:
+		CollisionChannel = ECC_Player2;
+		break;
+	case 3:
+		CollisionChannel = ECC_Player3;
+		break;
+	default:
+		break;
 	}
 
 	InOutCollisionResponses.SetResponse(CollisionChannel, NewResponse);
@@ -419,7 +422,7 @@ void ABombActor::GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const
 void ABombActor::ApplyMaterial()
 {
 	if (!BombMaterialInternal
-	    || !MapComponentInternal)
+		|| !MapComponentInternal)
 	{
 		return;
 	}
@@ -431,4 +434,17 @@ void ABombActor::ApplyMaterial()
 void ABombActor::OnRep_BombMaterial()
 {
 	ApplyMaterial();
+}
+
+// Is called when the bomb VFX duration is expired
+void ABombActor::OnVFXDurationExpired()
+{
+	for (UNiagaraComponent* VfxIt : SpawnedVFXsInternal)
+	{
+		if (VfxIt)
+		{
+			VfxIt->Deactivate();
+		}
+	}
+	SpawnedVFXsInternal.Empty();
 }

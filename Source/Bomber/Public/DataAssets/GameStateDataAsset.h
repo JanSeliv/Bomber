@@ -34,6 +34,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE TArray<FName>& GetGameFeaturesToEnable() const { return GameFeaturesToEnableInternal; }
 
+	/** Assign new match duration.
+	 * Might be useful for testing, but shouldn't be used in shipping. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
+	void SetInGameCountdown(int32 NewInGameCountdown) { InGameCountdownInternal = NewInGameCountdown; }
+
 protected:
 	/** General value how ofter update actors and states in the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Tick Interval", ShowOnlyInnerProperties))

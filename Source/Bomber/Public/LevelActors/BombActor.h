@@ -65,6 +65,13 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
 	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr;
 
+	/** All currently playing VFXs. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawned VFXs"))
+	TArray<TObjectPtr<class UNiagaraComponent>> SpawnedVFXsInternal;
+
+	/** The duration of the bomb VFX. */
+	FTimerHandle VFXDurationExpiredTimerHandle;
+
 	/* ---------------------------------------------------
  	 *		Protected functions
 	 * --------------------------------------------------- */
@@ -159,4 +166,8 @@ protected:
 	/** Is called on client to respond on changes in material of the bomb. */
 	UFUNCTION()
 	void OnRep_BombMaterial();
+
+	/** Is called when the bomb VFX duration is expired. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnVFXDurationExpired();
 };
