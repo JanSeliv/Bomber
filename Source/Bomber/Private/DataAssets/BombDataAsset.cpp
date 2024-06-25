@@ -10,6 +10,7 @@
 UBombDataAsset::UBombDataAsset()
 {
 	ActorTypeInternal = EAT::Bomb;
+	RowClassInternal = UBombRow::StaticClass();
 }
 
 // Returns the bomb data asset
