@@ -78,6 +78,8 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![BastetCinematic](https://github.com/JanSeliv/Bomber/assets/20540872/0602cc7c-f68c-46fa-9400-46a8bc35c73c)
 - Implemented **Switch Camera Transitions** between characters in Main Menu:
 > ![Rails](https://github.com/JanSeliv/Bomber/assets/20540872/aa496ae1-a6bb-41d1-a578-566d1af48170)
+- Unique Bomb VFX for each character:
+> ![BombVFXs](https://github.com/JanSeliv/Bomber/assets/20540872/3163ade3-7f5f-40be-9c9e-69c0426b8a29)
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
 
 #### `13.01.2024`

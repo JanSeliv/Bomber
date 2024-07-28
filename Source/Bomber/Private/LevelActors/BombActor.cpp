@@ -14,6 +14,7 @@
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
+#include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
@@ -78,17 +79,16 @@ void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 
 	int32 InFireRadius = MIN_FIRE_RADIUS;
 	int32 PlayerIndex = INDEX_NONE;
-	ELevelType PlayerType = ELevelType::None;
 	if (Causer)
 	{
 		PlayerIndex = Causer->GetPlayerId();
 		InFireRadius = Causer->GetPowerups().FireN;
-		PlayerType = Causer->GetPlayerType();
+		BombTypeInternal = Causer->GetPlayerType();
 	}
 
 	const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
 
-	const ULevelActorRow* BombRow = BombDataAsset.GetRowByLevelType(PlayerType);
+	const ULevelActorRow* BombRow = BombDataAsset.GetRowByLevelType(BombTypeInternal);
 	UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
 	if (ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %s:\n'BombMesh' is not found"), __LINE__, *FString(__FUNCTION__)))
 	{
@@ -100,7 +100,7 @@ void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 		BombMaterialInternal = BombMesh->GetMaterial(0);
 	}
 
-	if (PlayerType == ELevelType::None)
+	if (BombTypeInternal == ELevelType::None)
 	{
 		// Is bot character, set material for its default bomb with the same mesh
 		const int32 BombMaterialsNum = BombDataAsset.GetBombMaterialsNum();
@@ -194,6 +194,7 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, FireRadiusInternal);
+	DOREPLIFETIME(ThisClass, BombTypeInternal);
 	DOREPLIFETIME(ThisClass, BombMaterialInternal);
 }
 
@@ -249,6 +250,9 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 		DetonateBomb();
 
 		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
+
+		BombTypeInternal = ELevelType::None;
+		BombMaterialInternal = nullptr;
 	}
 
 	// Apply hidden flag
@@ -278,14 +282,20 @@ void ABombActor::DetonateBomb()
 // Destroy bomb and burst explosion cells
 void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& ExplosionCells)
 {
+	const UBombRow* BombRow = UBombDataAsset::Get().GetRowByLevelType<UBombRow>(BombTypeInternal);
+	if (!ensureMsgf(BombRow, TEXT("ASSERT: [%i] %hs:\n'BombRow' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
 	// Reset Fire Radius to avoid destroying the bomb again
 	FireRadiusInternal = INDEX_NONE;
 
 	// Spawn emitters
-	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().GetExplosionVFX();
+	ensureMsgf(BombRow->BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombRow->BombVFX' is not set!"), __LINE__, __FUNCTION__);
 	for (const FCell& Cell : ExplosionCells)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionParticle, Cell.Location, GetActorRotation(), GetActorScale());
+		SpawnedVFXsInternal.Add(UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, BombRow->BombVFX, Cell.Location, GetActorRotation(), GetActorScale()));
 	}
 
 	// Destroy all actors from array of cells
@@ -293,7 +303,9 @@ void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& Explo
 
 	USoundsSubsystem::Get().PlayExplosionSFX();
 
-	GetWorldTimerManager().ClearTimer(TimerHandle_LifeSpanExpired);
+	FTimerManager& TimerManager = GetWorldTimerManager();
+	TimerManager.ClearTimer(TimerHandle_LifeSpanExpired);
+	TimerManager.SetTimer(VFXDurationExpiredTimerHandle, this, &ThisClass::OnVFXDurationExpired, UBombDataAsset::Get().GetVFXDuration());
 }
 
 // Triggers when character end to overlaps with this bomb.
@@ -431,4 +443,17 @@ void ABombActor::ApplyMaterial()
 void ABombActor::OnRep_BombMaterial()
 {
 	ApplyMaterial();
+}
+
+// Is called when the bomb VFX duration is expired
+void ABombActor::OnVFXDurationExpired()
+{
+	for (UNiagaraComponent* VfxIt : SpawnedVFXsInternal)
+	{
+		if (VfxIt)
+		{
+			VfxIt->Deactivate();
+		}
+	}
+	SpawnedVFXsInternal.Empty();
 }

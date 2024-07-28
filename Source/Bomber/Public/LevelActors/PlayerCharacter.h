@@ -86,19 +86,6 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "C++")
 	void ServerSpawnBomb();
 
-	/** Returns the Skeletal Mesh of bombers. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
-
-	/** Set and apply how a player has to look like.
-	 * @param CustomPlayerMeshData New data to apply. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
-	void ServerSetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData);
-
-	/** Returns current player mesh data of  the local player applied to skeletal mesh. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
-
 	/** Returns level type associated with player, e.g: Water level type for Roger character. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ELevelType GetPlayerType() const;
@@ -125,10 +112,6 @@ protected:
 	/** The character's AI controller */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
 	TObjectPtr<class AMyAIController> MyAIControllerInternal = nullptr;
-
-	/** Contains custom data about mesh tweaked by player. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_PlayerMeshData", Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
-	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -207,18 +190,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPostLogin(class AGameModeBase* GameMode, class APlayerController* NewPlayer);
 
-	/** Set and apply new skeletal mesh from current data. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyCustomPlayerMeshData();
-
-	/** Set and apply default skeletal mesh for this player. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
-	void SetDefaultPlayerMeshData();
-
-	/** Respond on changes in player mesh data to update the mesh on client. */
-	UFUNCTION()
-	void OnRep_PlayerMeshData();
-
 	/** Move the player character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
 	void MovePlayer(const struct FInputActionValue& ActionValue);
@@ -257,4 +228,44 @@ protected:
 	/** Applies the playerID-dependent logic for this character. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ApplyPlayerId(int32 CurrentPlayerId = -1);
+
+	/*********************************************************************************************
+	 * Player Mesh
+	 ********************************************************************************************* */
+public:
+	/** Returns the Skeletal Mesh of bombers. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
+
+	/** Returns current player mesh data of  the local player applied to skeletal mesh. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE FCustomPlayerMeshData& GetCustomPlayerMeshData() const { return PlayerMeshDataInternal; }
+
+	/** Set and apply how a player has to look like.
+	 * It will call Server RPC if called on the client.
+	 * @param CustomPlayerMeshData New data to apply. May accept just tag from its constructor, in BP use MakeCustomPlayerMeshData. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
+	void SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData);
+
+protected:
+	/** Contains custom data about mesh tweaked by player. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_PlayerMeshData", Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
+	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty;
+
+	/** Server RPC to set and apply how a player has to look like.
+	 * @param CustomPlayerMeshData New data to apply. */
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "CustomPlayerMeshData"))
+	void ServerSetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData);
+
+	/** Set and apply new skeletal mesh from current data. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyCustomPlayerMeshData();
+
+	/** Set and apply default skeletal mesh for this player. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	void SetDefaultPlayerMeshData();
+
+	/** Respond on changes in player mesh data to update the mesh on client. */
+	UFUNCTION()
+	void OnRep_PlayerMeshData();
 };

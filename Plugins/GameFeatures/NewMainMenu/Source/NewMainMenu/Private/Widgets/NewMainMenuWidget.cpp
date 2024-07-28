@@ -143,7 +143,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpot ? MainMenuSpot->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
 	if (CustomPlayerMeshData.IsValid())
 	{
-		LocalPlayerCharacter->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
+		LocalPlayerCharacter->SetCustomPlayerMeshData(CustomPlayerMeshData);
 	}
 }
 
@@ -175,7 +175,7 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 	MainMenuMeshComp.SetSkin(NewSkinIndex);
 
 	// Update the player data
-	LocalPlayerCharacter->ServerSetCustomPlayerMeshData(MainMenuMeshComp.GetCustomPlayerMeshData());
+	LocalPlayerCharacter->SetCustomPlayerMeshData(MainMenuMeshComp.GetCustomPlayerMeshData());
 }
 
 // Is called when player pressed the button to open the Settings

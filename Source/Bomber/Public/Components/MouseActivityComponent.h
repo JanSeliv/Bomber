@@ -78,6 +78,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMouseFocusOnUI(bool bFocusOnUI);
 
+	/** Is called in tick to detect mouse movement and handle inactivity. */
+	void TickHandleInactivity(float DeltaTime);
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
@@ -94,6 +97,10 @@ protected:
 	/** Last mouse visibility settings, used for restoring the previous state when disabling the current one. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Previous Visibility Settings"))
 	FMouseVisibilitySettings PreviousVisibilitySettingsInternal = FMouseVisibilitySettings::Invalid;
+
+	/** Last mouse position to detect inactivity. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last Mouse Position"))
+	FVector2D LastMousePositionInternal = FVector2D::ZeroVector;
 
 	/*********************************************************************************************
 	 * Overrides

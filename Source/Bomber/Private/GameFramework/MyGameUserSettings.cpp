@@ -49,8 +49,7 @@ void UMyGameUserSettings::SaveSettings()
 // Changes all scalability settings at once based on a single overall quality level
 void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
 {
-	if (Value == OverallQualityInternal
-	    || GetOverallScalabilityLevel() == Value)
+	if (Value == OverallQualityInternal)
 	{
 		return;
 	}

@@ -4,12 +4,14 @@
 
 #include "GameFramework/Actor.h"
 //---
+#include "Bomber.h" // ELevelType
+//---
 #include "BombActor.generated.h"
 
 #define MIN_FIRE_RADIUS 1
 #define DEFAULT_LIFESPAN -1.f
 
-enum class ECurrentGameState : uint8;
+struct FCell;
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.
@@ -34,11 +36,15 @@ public:
 
 	/** Returns cells that bombs is going to destroy. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	TSet<struct FCell> GetExplosionCells() const;
+	TSet<FCell> GetExplosionCells() const;
 
 	/** Returns radius of the blast to each side. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetExplosionRadius() const { return FireRadiusInternal; }
+
+	/** Returns the type of the bomb. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE ELevelType GetBombType() const { return BombTypeInternal; }
 
 	/** Sets the defaults of the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
@@ -61,9 +67,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
 	int32 FireRadiusInternal = INDEX_NONE;
 
+	/** The type of the bomb, is set by player with InitBomb on spawning. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
+	ELevelType BombTypeInternal = ELevelType::None;
+
 	/** Current material of this bomb, is different for each player. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
 	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr;
+
+	/** All currently playing VFXs. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawned VFXs"))
+	TArray<TObjectPtr<class UNiagaraComponent>> SpawnedVFXsInternal;
+
+	/** The duration of the bomb VFX. */
+	FTimerHandle VFXDurationExpiredTimerHandle;
 
 	/* ---------------------------------------------------
  	 *		Protected functions
@@ -159,4 +176,8 @@ protected:
 	/** Is called on client to respond on changes in material of the bomb. */
 	UFUNCTION()
 	void OnRep_BombMaterial();
+
+	/** Is called when the bomb VFX duration is expired. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnVFXDurationExpired();
 };

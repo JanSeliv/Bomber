@@ -82,6 +82,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMyCameraComponent* GetCameraComponent() const { return CameraComponentInternal; }
 
+	/*********************************************************************************************
+	 * Spawn
+	 ********************************************************************************************* */
+public:
 	/** Spawns a level actor on the Generated Map by the specified type. Then calls AddToGrid().
 	 * @param Type Which type of level actors
 	 * @param Cell Actors location
@@ -96,11 +100,22 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn);
 
-	/** Adding and attaching the specified Map Component to the Level
+	/** Spawns level actor of given type by the specified pattern.
+	 * Is usefull for custom level generation. E.g: spawn Walls on (2,0), (3,1), (4,2) cells.
+	 * @param ActorsType All existing actors with given type will be destroyed first and then spawned on the specified positions.
+	 * @param Positions Columns (X) and rows (Y) positions of the actors to spawn. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "C++")
+	void SpawnActorsByPattern(EActorType ActorsType, const TArray<FIntPoint>& Positions);
+
+	/** Adding and attaching the specified Map Component to the Level.
 	 * @param AddedComponent The Map Component of the generated or dragged level actor. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void AddToGrid(UMapComponent* AddedComponent);
 
+	/*********************************************************************************************
+	 * Destroy
+	 ********************************************************************************************* */
+public:
 	/** Destroy all actors from the level on specified cells.
 	 * @param Cells The set of cells for destroying the found actors.
 	 * @param DestroyCauser The actor that caused the destruction of the level actor. */
@@ -119,6 +134,13 @@ public:
 	 * @param DestroyCauser The actor that caused the destruction of the level actor. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
 	void DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, UObject* DestroyCauser = nullptr);
+
+	/** Destroy all level actors of given type from the level.
+	 * Might be useful for regenerating the level.
+	 * @param ActorsType The type of actors to destroy.
+	 * @param DestroyCauser The actor that caused the destruction of the level actor. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
+	void DestroyLevelActorsByType(EActorType ActorsType, UObject* DestroyCauser = nullptr);
 
 	/** Finds the nearest cell pointer to the specified Map Component
 	 *
