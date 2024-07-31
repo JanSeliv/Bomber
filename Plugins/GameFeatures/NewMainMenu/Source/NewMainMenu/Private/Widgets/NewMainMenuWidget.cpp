@@ -17,6 +17,8 @@
 #include "Components/Button.h"
 #include "Kismet/KismetSystemLibrary.h"
 //---
+#include "Subsystems/NMMCameraSubsystem.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuWidget)
 
 // Called after the underlying slate widget is constructed
@@ -35,6 +37,11 @@ void UNewMainMenuWidget::NativeConstruct()
 		// State is already set, apply it
 		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
+
+	// Listen Camera Subsystem 
+	UNMMCameraSubsystem& CameraSubsystem = UNMMCameraSubsystem::Get();
+	CameraSubsystem.OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailEndTransition);
+
 
 	if (PlayButton)
 	{
@@ -137,14 +144,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
-	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
-
-	// Update the chosen player mesh on the level
-	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpot ? MainMenuSpot->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
-	if (CustomPlayerMeshData.IsValid())
-	{
-		LocalPlayerCharacter->SetCustomPlayerMeshData(CustomPlayerMeshData);
-	}
+	MainMenuSpotInternal = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
 }
 
 // Sets the next skin in the Menu
@@ -192,4 +192,24 @@ void UNewMainMenuWidget::OnQuitGameButtonPressed()
 {
 	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
 	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
+}
+
+// Called when the Camera Rail finished transitioning
+void UNewMainMenuWidget::OnCameraRailEndTransition_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
+{
+	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
+	{
+		APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
+		if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid")))
+		{
+			return;
+		}
+
+		// Update the chosen player mesh on the level
+		const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpotInternal ? MainMenuSpotInternal->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
+		if (CustomPlayerMeshData.IsValid())
+		{
+			LocalPlayerCharacter->SetCustomPlayerMeshData(CustomPlayerMeshData);
+		}	
+	}
 }

@@ -4,6 +4,7 @@
 
 #include "Blueprint/UserWidget.h"
 //---
+#include "Components/NMMSpotComponent.h"
 #include "NewMainMenuWidget.generated.h"
 
 enum class ENMMState : uint8;
@@ -46,6 +47,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> QuitGameButton = nullptr;
 
+	/** The current Main Menu Spot */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected))
+	TObjectPtr<UNMMSpotComponent> MainMenuSpotInternal = nullptr;
+
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
@@ -86,4 +91,8 @@ protected:
 	/** Is called when player pressed the button to quit the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnQuitGameButtonPressed();
+
+	/** Called when the Camera Rail finished transitioning */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCameraRailEndTransition(ENMMCameraRailTransitionState CameraRailTransitionStateChanged);
 };

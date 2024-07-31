@@ -186,6 +186,13 @@ float UNMMCameraSubsystem::GetCameraLastTransitionValue()
 	return IsCameraForwardTransition() ? 1.f : 0.f;
 }
 
+// Applies the new state of camera rail transition state
+void UNMMCameraSubsystem::SetNewCameraRailTranitionState(ENMMCameraRailTransitionState NewCameraRailState)
+{
+	CameraRailTransitionStateInternal = NewCameraRailState;
+	OnCameraRailTransitionStateChanged.Broadcast(CameraRailTransitionStateInternal);
+}
+
 // Is called on starts blending the camera towards current spot on the rail
 void UNMMCameraSubsystem::OnBeginTransition()
 {
@@ -211,6 +218,8 @@ void UNMMCameraSubsystem::OnBeginTransition()
 	{
 		Get().bIsBlendingInOutInternal = false;
 	}, TransitionToIdleBlendTime, false);
+
+	SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::BeginTransition);
 }
 
 // Is called on finishes blending the camera towards current spot on the rail
@@ -228,6 +237,8 @@ void UNMMCameraSubsystem::OnEndTransition()
 		Get().bIsBlendingInOutInternal = false;
 		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Idle);
 	}, TransitionToIdleBlendTime, false);
+
+	SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::EndTransition);
 }
 
 // Is called in tick to update the camera transition when transitioning
@@ -244,11 +255,38 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 	float Progress = DeltaTime / CameraTransitionTime;
 	Progress = IsCameraForwardTransition() ? CurrentRailRig->AbsolutePositionOnRail + Progress : CurrentRailRig->AbsolutePositionOnRail - Progress;
 	Progress = FMath::Clamp(Progress, 0.f, 1.f);
-
+	
 	CurrentRailRig->AbsolutePositionOnRail = Progress;
 
+	// checks if it's halfway of transition
+	IsHalfwayTransition();
+	
+	// continue execution to ensure full camera movement 
 	if (FMath::IsNearlyEqual(Progress, GetCameraLastTransitionValue(), KINDA_SMALL_NUMBER))
 	{
 		OnEndTransition();
+	}
+}
+
+// Is called to check if camera rail is halfway to another spot
+void UNMMCameraSubsystem::IsHalfwayTransition()
+{
+	ACineCameraRigRail* CurrentRailRig = GetCurrentRailRig();
+
+	// Check if halfway reached
+	if (IsCameraForwardTransition())
+	{
+		if (CurrentRailRig->AbsolutePositionOnRail >= 0.5f && CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition)
+		{
+			
+			SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::HalfwayTransition);
+		}
+	}
+	else
+	{
+		if (CurrentRailRig->AbsolutePositionOnRail <= 0.5f && CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition)
+		{
+			SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::HalfwayTransition);
+		}
 	}
 }
