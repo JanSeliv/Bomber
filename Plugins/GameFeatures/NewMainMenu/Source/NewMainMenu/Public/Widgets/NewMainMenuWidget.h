@@ -92,7 +92,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnQuitGameButtonPressed();
 
-	/** Called when the Camera Rail finished transitioning */
+	/** Called when the Camera Rail transition state changed */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnCameraRailEndTransition(ENMMCameraRailTransitionState CameraRailTransitionStateChanged);
+	void OnCameraRailTransitionStateChanged(ENMMCameraRailTransitionState CameraRailTransitionStateChanged);
 };

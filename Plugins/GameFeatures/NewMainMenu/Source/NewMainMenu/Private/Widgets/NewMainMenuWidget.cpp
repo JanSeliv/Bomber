@@ -40,7 +40,7 @@ void UNewMainMenuWidget::NativeConstruct()
 
 	// Listen Camera Subsystem 
 	UNMMCameraSubsystem& CameraSubsystem = UNMMCameraSubsystem::Get();
-	CameraSubsystem.OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailEndTransition);
+	CameraSubsystem.OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
 
 
 	if (PlayButton)
@@ -194,8 +194,8 @@ void UNewMainMenuWidget::OnQuitGameButtonPressed()
 	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
 }
 
-// Called when the Camera Rail finished transitioning
-void UNewMainMenuWidget::OnCameraRailEndTransition_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
+// Called when the Camera Rail transition state changed
+void UNewMainMenuWidget::OnCameraRailTransitionStateChanged_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
 {
 	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
 	{
