@@ -133,9 +133,7 @@ void UNewMainMenuWidget::OnPrevPlayerButtonPressed()
 // Sets the preview mesh of a player depending on specified incrementer
 void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 {
-	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
-		|| !Incrementer)
+	if (!Incrementer)
 	{
 		return;
 	}
@@ -145,6 +143,26 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 
 	// Switch the Main Menu spot
 	MainMenuSpotInternal = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
+	if (UNMMBaseSubsystem::Get().GetCurrentMenuState() == ENMMState::Idle)
+	{
+		UpdatePlayerCharacterMesh(MainMenuSpotInternal ? MainMenuSpotInternal->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty);
+	}
+}
+
+// Update the chosen player mesh on the level
+void UNewMainMenuWidget::UpdatePlayerCharacterMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
+{
+	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
+	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid")))
+	{
+		return;
+	}
+
+	// Update the chosen player mesh on the level
+	if (CustomPlayerMeshData.IsValid())
+	{
+		LocalPlayerCharacter->SetCustomPlayerMeshData(CustomPlayerMeshData);
+	}
 }
 
 // Sets the next skin in the Menu
@@ -199,17 +217,6 @@ void UNewMainMenuWidget::OnCameraRailTransitionStateChanged_Implementation(ENMMC
 {
 	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
 	{
-		APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-		if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid")))
-		{
-			return;
-		}
-
-		// Update the chosen player mesh on the level
-		const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpotInternal ? MainMenuSpotInternal->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
-		if (CustomPlayerMeshData.IsValid())
-		{
-			LocalPlayerCharacter->SetCustomPlayerMeshData(CustomPlayerMeshData);
-		}	
+		UpdatePlayerCharacterMesh(MainMenuSpotInternal ? MainMenuSpotInternal->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty);
 	}
 }
