@@ -83,6 +83,9 @@ void USoundsSubsystem::SetSFXVolume(double InVolume)
 // Play the background music for current game state and level
 void USoundsSubsystem::PlayCurrentBackgroundMusic()
 {
+	//stop current and play new
+	StopCurrentBackgroundMusic();
+	
 	if (!CanPlaySounds())
 	{
 		return;
@@ -106,7 +109,7 @@ void USoundsSubsystem::PlayCurrentBackgroundMusic()
 	}
 
 	if (BackgroundMusicComponentInternal->IsPlaying()
-	    && BackgroundMusicComponentInternal->GetSound() == BackgroundMusic)
+		&& BackgroundMusicComponentInternal->GetSound() == BackgroundMusic)
 	{
 		// Do not switch music since is the same
 		return;
@@ -167,17 +170,17 @@ void USoundsSubsystem::PlayEndGameCountdownSFX()
 
 	if (USoundBase* EndGameCountdownTimerSFX = USoundsDataAsset::Get().GetEndGameCountdownSFX())
 	{
-		ActiveEndGameCountdownSFX = UGameplayStatics::CreateSound2D(GetWorld(), EndGameCountdownTimerSFX);
-		ActiveEndGameCountdownSFX->Play();
+		ActiveEndGameCountdownSFXInternal = UGameplayStatics::CreateSound2D(GetWorld(), EndGameCountdownTimerSFX);
+		ActiveEndGameCountdownSFXInternal->Play();
 	}
 }
 
 // Stops the sound that is played right before the match ends.
 void USoundsSubsystem::StopEndGameCountdownSFX()
 {
-	if (ActiveEndGameCountdownSFX && ActiveEndGameCountdownSFX->IsPlaying())
+	if (ActiveEndGameCountdownSFXInternal && ActiveEndGameCountdownSFXInternal->IsPlaying())
 	{
-		ActiveEndGameCountdownSFX->Stop();
+		ActiveEndGameCountdownSFXInternal->Stop();
 	}
 }
 
@@ -185,14 +188,24 @@ void USoundsSubsystem::StopEndGameCountdownSFX()
 void USoundsSubsystem::PlayStartGameCountdownSFX()
 {
 	if (!CanPlaySounds()
-	    || AMyGameStateBase::GetCurrentGameState() != ECGS::GameStarting)
+		|| AMyGameStateBase::GetCurrentGameState() != ECGS::GameStarting)
 	{
 		return;
 	}
-
+	
 	if (USoundBase* StarGameCountdownSFX = USoundsDataAsset::Get().GetStartGameCountdownSFX())
 	{
-		UGameplayStatics::PlaySound2D(GetWorld(), StarGameCountdownSFX);
+		ActiveStartGameCountdownSFXInternal = UGameplayStatics::CreateSound2D(GetWorld(), StarGameCountdownSFX);
+		ActiveStartGameCountdownSFXInternal->Play();
+	}
+}
+
+// Stops the sound that is played right after the match starts
+void USoundsSubsystem::StopStartGameCountdownSFX()
+{
+	if (ActiveStartGameCountdownSFXInternal && ActiveStartGameCountdownSFXInternal->IsPlaying())
+	{
+		ActiveStartGameCountdownSFXInternal->Stop();
 	}
 }
 
@@ -253,6 +266,9 @@ void USoundsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState Curre
 	{
 		case ECurrentGameState::GameStarting:
 			PlayStartGameCountdownSFX();
+			break;
+		case ECurrentGameState::Menu:
+			StopStartGameCountdownSFX();;
 			break;
 		default:
 			break;
