@@ -143,10 +143,11 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
-	MainMenuSpotInternal = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
+	UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
 	if (UNMMBaseSubsystem::Get().GetCurrentMenuState() == ENMMState::Idle)
 	{
-		UpdatePlayerCharacterMesh(MainMenuSpotInternal ? MainMenuSpotInternal->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty);
+		FCustomPlayerMeshData PlayerMeshData = UNMMSpotsSubsystem::Get().GetCurrentSpot() ? UNMMSpotsSubsystem::Get().GetCurrentSpot()->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
+		UpdatePlayerCharacterMesh(PlayerMeshData);
 	}
 }
 
@@ -218,6 +219,7 @@ void UNewMainMenuWidget::OnCameraRailTransitionStateChanged_Implementation(ENMMC
 {
 	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
 	{
-		UpdatePlayerCharacterMesh(MainMenuSpotInternal ? MainMenuSpotInternal->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty);
+		FCustomPlayerMeshData PlayerMeshData  = UNMMSpotsSubsystem::Get().GetCurrentSpot() ? UNMMSpotsSubsystem::Get().GetCurrentSpot()->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
+		UpdatePlayerCharacterMesh(PlayerMeshData);
 	}
 }

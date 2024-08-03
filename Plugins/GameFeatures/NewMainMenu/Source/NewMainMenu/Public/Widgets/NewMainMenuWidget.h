@@ -4,7 +4,6 @@
 
 #include "Blueprint/UserWidget.h"
 //---
-#include "Components/NMMSpotComponent.h"
 #include "NewMainMenuWidget.generated.h"
 
 enum class ENMMState : uint8;
@@ -46,10 +45,6 @@ protected:
 	/** The button to quit the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<UButton> QuitGameButton = nullptr;
-
-	/** The current Main Menu Spot */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected))
-	TObjectPtr<UNMMSpotComponent> MainMenuSpotInternal = nullptr;
 
 	/*********************************************************************************************
 	 * Protected functions
