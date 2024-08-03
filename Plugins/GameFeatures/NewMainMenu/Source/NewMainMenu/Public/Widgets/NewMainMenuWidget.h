@@ -6,7 +6,9 @@
 //---
 #include "NewMainMenuWidget.generated.h"
 
+struct FCustomPlayerMeshData;
 enum class ENMMState : uint8;
+enum class ENMMCameraRailTransitionState : uint8;
 
 class UButton;
 
