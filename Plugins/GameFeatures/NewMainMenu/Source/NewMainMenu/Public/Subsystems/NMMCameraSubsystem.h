@@ -20,8 +20,8 @@ class NEWMAINMENU_API UNMMCameraSubsystem : public UTickableWorldSubsystem
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNMMOnCameraRailTransitionStateChange, ENMMCameraRailTransitionState, CameraRailState);
 	
-	/** Called when the Camera r
-	 * ail End Transition is called
+	/** Called when the Camera
+	 * Rail End Transition is called
 	 * Is local and not replicated. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FNMMOnCameraRailTransitionStateChange OnCameraRailTransitionStateChanged;
