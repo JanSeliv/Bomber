@@ -114,8 +114,5 @@ protected:
 
 	/** Is called in tick to update the camera transition when transitioning. */
 	void TickTransition(float DeltaTime);
-
-	/** Is called to check if camera rail is halfway to another spot. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void IsHalfwayTransition();
+	
 };

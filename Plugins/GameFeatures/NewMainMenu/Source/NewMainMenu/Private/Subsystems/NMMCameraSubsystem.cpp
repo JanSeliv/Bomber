@@ -259,7 +259,12 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 	CurrentRailRig->AbsolutePositionOnRail = Progress;
 
 	// checks if it's halfway of transition
-	IsHalfwayTransition();
+	constexpr float HalfwayPosition = 0.5f;
+	if (CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition && 
+		FMath::IsNearlyEqual(Progress, HalfwayPosition, KINDA_SMALL_NUMBER))
+	{
+		SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::HalfwayTransition);
+	}
 	
 	// continue execution to ensure full camera movement 
 	if (FMath::IsNearlyEqual(Progress, GetCameraLastTransitionValue(), KINDA_SMALL_NUMBER))
@@ -268,25 +273,3 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 	}
 }
 
-// Is called to check if camera rail is halfway to another spot
-void UNMMCameraSubsystem::IsHalfwayTransition()
-{
-	ACineCameraRigRail* CurrentRailRig = GetCurrentRailRig();
-
-	// Check if halfway reached
-	if (IsCameraForwardTransition())
-	{
-		if (CurrentRailRig->AbsolutePositionOnRail >= 0.5f && CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition)
-		{
-			
-			SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::HalfwayTransition);
-		}
-	}
-	else
-	{
-		if (CurrentRailRig->AbsolutePositionOnRail <= 0.5f && CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition)
-		{
-			SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::HalfwayTransition);
-		}
-	}
-}
