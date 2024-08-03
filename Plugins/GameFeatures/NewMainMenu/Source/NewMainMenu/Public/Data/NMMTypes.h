@@ -74,6 +74,6 @@ enum class ENMMCameraRailTransitionState : uint8
 	BeginTransition,
 	///< Camera moving between Spots reached it's halfway
 	HalfwayTransition,
-	///< Camera moving between Spots finished tranisition
+	///< Camera moving between Spots finished transition
 	EndTransition
 };
