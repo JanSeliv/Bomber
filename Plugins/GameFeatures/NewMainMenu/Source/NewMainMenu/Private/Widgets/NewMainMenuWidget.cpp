@@ -19,7 +19,6 @@
 #include "Kismet/KismetSystemLibrary.h"
 //---
 
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuWidget)
 
 // Called after the underlying slate widget is constructed
@@ -219,7 +218,7 @@ void UNewMainMenuWidget::OnCameraRailTransitionStateChanged_Implementation(ENMMC
 {
 	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
 	{
-		const FCustomPlayerMeshData PlayerMeshData  = UNMMSpotsSubsystem::Get().GetCurrentSpot() ? &UNMMSpotsSubsystem::Get().GetCurrentSpot()->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
+		const FCustomPlayerMeshData PlayerMeshData = UNMMSpotsSubsystem::Get().GetCurrentSpot() ? &UNMMSpotsSubsystem::Get().GetCurrentSpot()->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
 		UpdatePlayerCharacterMesh(PlayerMeshData);
 	}
 }

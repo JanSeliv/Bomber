@@ -255,21 +255,20 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 	float Progress = DeltaTime / CameraTransitionTime;
 	Progress = IsCameraForwardTransition() ? CurrentRailRig->AbsolutePositionOnRail + Progress : CurrentRailRig->AbsolutePositionOnRail - Progress;
 	Progress = FMath::Clamp(Progress, 0.f, 1.f);
-	
+
 	CurrentRailRig->AbsolutePositionOnRail = Progress;
 
 	// checks if it's halfway of transition
 	constexpr float HalfwayPosition = 0.5f;
-	if (CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition && 
+	if (CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition &&
 		FMath::IsNearlyEqual(Progress, HalfwayPosition, KINDA_SMALL_NUMBER))
 	{
 		SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::HalfwayTransition);
 	}
-	
+
 	// continue execution to ensure full camera movement 
 	if (FMath::IsNearlyEqual(Progress, GetCameraLastTransitionValue(), KINDA_SMALL_NUMBER))
 	{
 		OnEndTransition();
 	}
 }
-
