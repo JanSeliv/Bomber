@@ -110,5 +110,4 @@ protected:
 
 	/** Is called in tick to update the camera transition when transitioning. */
 	void TickTransition(float DeltaTime);
-	
 };

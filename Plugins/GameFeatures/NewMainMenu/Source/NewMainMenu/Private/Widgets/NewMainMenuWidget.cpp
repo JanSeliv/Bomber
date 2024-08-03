@@ -42,7 +42,6 @@ void UNewMainMenuWidget::NativeConstruct()
 	UNMMCameraSubsystem& CameraSubsystem = UNMMCameraSubsystem::Get();
 	CameraSubsystem.OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
 
-
 	if (PlayButton)
 	{
 		PlayButton->SetClickMethod(EButtonClickMethod::PreciseClick);
