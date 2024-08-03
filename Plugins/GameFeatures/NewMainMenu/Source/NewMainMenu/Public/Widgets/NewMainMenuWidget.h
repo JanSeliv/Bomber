@@ -6,7 +6,9 @@
 //---
 #include "NewMainMenuWidget.generated.h"
 
+struct FCustomPlayerMeshData;
 enum class ENMMState : uint8;
+enum class ENMMCameraRailTransitionState : uint8;
 
 class UButton;
 
@@ -75,6 +77,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SwitchCurrentPlayer(int32 Incrementer);
 
+	/** Update the chosen player mesh on the level
+	* @param CustomPlayerMeshData is the new player mesh */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdatePlayerCharacterMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
+
 	/** Sets the next skin in the Menu. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnNextSkinButtonPressed();
@@ -86,4 +93,8 @@ protected:
 	/** Is called when player pressed the button to quit the game. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnQuitGameButtonPressed();
+
+	/** Called when the Camera Rail transition state changed */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCameraRailTransitionStateChanged(ENMMCameraRailTransitionState CameraRailTransitionStateChanged);
 };

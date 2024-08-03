@@ -13,10 +13,12 @@
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Subsystems/NMMCameraSubsystem.h"
 //---
 #include "Components/Button.h"
 #include "Kismet/KismetSystemLibrary.h"
 //---
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuWidget)
 
 // Called after the underlying slate widget is constructed
@@ -35,6 +37,10 @@ void UNewMainMenuWidget::NativeConstruct()
 		// State is already set, apply it
 		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
+
+	// Listen Camera Subsystem 
+	UNMMCameraSubsystem& CameraSubsystem = UNMMCameraSubsystem::Get();
+	CameraSubsystem.OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
 
 	if (PlayButton)
 	{
@@ -126,9 +132,7 @@ void UNewMainMenuWidget::OnPrevPlayerButtonPressed()
 // Sets the preview mesh of a player depending on specified incrementer
 void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 {
-	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
-		|| !Incrementer)
+	if (!Incrementer)
 	{
 		return;
 	}
@@ -137,10 +141,25 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
-	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
+	const UNMMSpotComponent* MenuSpot = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
+	if (!ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %s:\n'MenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__))
+		&& UNMMBaseSubsystem::Get().GetCurrentMenuState() == ENMMState::Idle)
+	{
+		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot->GetMeshChecked().GetCustomPlayerMeshData();
+		UpdatePlayerCharacterMesh(PlayerMeshData);
+	}
+}
+
+// Update the chosen player mesh on the level
+void UNewMainMenuWidget::UpdatePlayerCharacterMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
+{
+	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
+	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid")))
+	{
+		return;
+	}
 
 	// Update the chosen player mesh on the level
-	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpot ? MainMenuSpot->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
 	if (CustomPlayerMeshData.IsValid())
 	{
 		LocalPlayerCharacter->SetCustomPlayerMeshData(CustomPlayerMeshData);
@@ -192,4 +211,16 @@ void UNewMainMenuWidget::OnQuitGameButtonPressed()
 {
 	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
 	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
+}
+
+// Called when the Camera Rail transition state changed
+void UNewMainMenuWidget::OnCameraRailTransitionStateChanged_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
+{
+	const UNMMSpotComponent* MenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
+	if (ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %hs:\n'MenuSpot' is not valid"), __LINE__, __FUNCTION__)
+		&& CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
+	{
+		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot->GetMeshChecked().GetCustomPlayerMeshData();
+		UpdatePlayerCharacterMesh(PlayerMeshData);
+	}
 }
