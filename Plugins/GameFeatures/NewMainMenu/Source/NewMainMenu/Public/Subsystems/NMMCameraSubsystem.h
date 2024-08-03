@@ -96,10 +96,6 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Blending In/Out"))
 	bool bIsBlendingInOutInternal = false;
 
-	/** Is true when the rail of the camera is currently halfway of the current Spot to the next */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = " Is Rail Half Way Reached"))
-	bool bIsRailHalfWayReached = false;
-
 	/** Current camera transition state  */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = " Camera Rail State"))
 	ENMMCameraRailTransitionState CameraRailTransitionStateInternal = ENMMCameraRailTransitionState::None;
