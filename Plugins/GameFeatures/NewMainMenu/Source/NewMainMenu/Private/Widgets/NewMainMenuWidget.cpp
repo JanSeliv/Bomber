@@ -143,9 +143,10 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 
 	// Switch the Main Menu spot
 	const UNMMSpotComponent* MenuSpot = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
-	if (UNMMBaseSubsystem::Get().GetCurrentMenuState() == ENMMState::Idle)
+	if(!ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %s:\n'MenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__))
+	   && UNMMBaseSubsystem::Get().GetCurrentMenuState() == ENMMState::Idle)
 	{
-		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot ? MenuSpot->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
+		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot->GetMeshChecked().GetCustomPlayerMeshData();
 		UpdatePlayerCharacterMesh(PlayerMeshData);
 	}
 }
@@ -216,9 +217,11 @@ void UNewMainMenuWidget::OnQuitGameButtonPressed()
 // Called when the Camera Rail transition state changed
 void UNewMainMenuWidget::OnCameraRailTransitionStateChanged_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
 {
-	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
+	const UNMMSpotComponent* MenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
+	if (ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %hs:\n'MenuSpot' is not valid"), __LINE__, __FUNCTION__)
+	&& CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
 	{
-		const FCustomPlayerMeshData PlayerMeshData = UNMMSpotsSubsystem::Get().GetCurrentSpot() ? &UNMMSpotsSubsystem::Get().GetCurrentSpot()->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
+		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot->GetMeshChecked().GetCustomPlayerMeshData();
 		UpdatePlayerCharacterMesh(PlayerMeshData);
 	}
 }
