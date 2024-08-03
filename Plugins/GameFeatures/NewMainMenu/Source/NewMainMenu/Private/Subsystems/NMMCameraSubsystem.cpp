@@ -187,7 +187,7 @@ float UNMMCameraSubsystem::GetCameraLastTransitionValue()
 }
 
 // Applies the new state of camera rail transition state
-void UNMMCameraSubsystem::SetNewCameraRailTranitionState(ENMMCameraRailTransitionState NewCameraRailState)
+void UNMMCameraSubsystem::SetNewCameraRailTransitionState(ENMMCameraRailTransitionState NewCameraRailState)
 {
 	CameraRailTransitionStateInternal = NewCameraRailState;
 	OnCameraRailTransitionStateChanged.Broadcast(CameraRailTransitionStateInternal);
@@ -219,7 +219,7 @@ void UNMMCameraSubsystem::OnBeginTransition()
 		Get().bIsBlendingInOutInternal = false;
 	}, TransitionToIdleBlendTime, false);
 
-	SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::BeginTransition);
+	SetNewCameraRailTransitionState(ENMMCameraRailTransitionState::BeginTransition);
 }
 
 // Is called on finishes blending the camera towards current spot on the rail
@@ -238,7 +238,7 @@ void UNMMCameraSubsystem::OnEndTransition()
 		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Idle);
 	}, TransitionToIdleBlendTime, false);
 
-	SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::EndTransition);
+	SetNewCameraRailTransitionState(ENMMCameraRailTransitionState::EndTransition);
 }
 
 // Is called in tick to update the camera transition when transitioning
@@ -263,7 +263,7 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 	if (CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition &&
 		FMath::IsNearlyEqual(Progress, HalfwayPosition, KINDA_SMALL_NUMBER))
 	{
-		SetNewCameraRailTranitionState(ENMMCameraRailTransitionState::HalfwayTransition);
+		SetNewCameraRailTransitionState(ENMMCameraRailTransitionState::HalfwayTransition);
 	}
 
 	// continue execution to ensure full camera movement 

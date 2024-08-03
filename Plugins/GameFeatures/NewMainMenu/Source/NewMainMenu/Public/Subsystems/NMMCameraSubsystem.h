@@ -85,7 +85,7 @@ public:
 	/** Applies the new state of camera rail transition state
 	 * Is local and not replicated. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetNewCameraRailTranitionState(ENMMCameraRailTransitionState NewCameraRailState);
+	void SetNewCameraRailTransitionState(ENMMCameraRailTransitionState NewCameraRailState);
 	
 	/** Returns the current state of Camera rail transition. */
 	UFUNCTION(BlueprintPure, Category = "C++")
