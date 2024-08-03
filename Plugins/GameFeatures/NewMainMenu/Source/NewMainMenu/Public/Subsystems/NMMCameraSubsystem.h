@@ -19,13 +19,13 @@ class NEWMAINMENU_API UNMMCameraSubsystem : public UTickableWorldSubsystem
 
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNMMOnCameraRailTransitionStateChange, ENMMCameraRailTransitionState, CameraRailState);
-	
+
 	/** Called when the Camera
 	 * Rail End Transition is called
 	 * Is local and not replicated. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FNMMOnCameraRailTransitionStateChange OnCameraRailTransitionStateChanged;
-	
+
 	/** Returns this Subsystem, is checked and wil crash if can't be obtained.*/
 	static UNMMCameraSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
 
@@ -86,7 +86,7 @@ public:
 	 * Is local and not replicated. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetNewCameraRailTransitionState(ENMMCameraRailTransitionState NewCameraRailState);
-	
+
 	/** Returns the current state of Camera rail transition. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE ENMMCameraRailTransitionState GetCurrentCameraRailTransitionState() const { return CameraRailTransitionStateInternal; }
