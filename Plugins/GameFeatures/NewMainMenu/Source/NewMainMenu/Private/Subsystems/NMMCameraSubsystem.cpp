@@ -189,6 +189,11 @@ float UNMMCameraSubsystem::GetCameraLastTransitionValue()
 // Applies the new state of camera rail transition state
 void UNMMCameraSubsystem::SetNewCameraRailTransitionState(ENMMCameraRailTransitionState NewCameraRailState)
 {
+	if (NewCameraRailState == CameraRailTransitionStateInternal)
+	{
+		return;
+	}
+
 	CameraRailTransitionStateInternal = NewCameraRailState;
 	OnCameraRailTransitionStateChanged.Broadcast(CameraRailTransitionStateInternal);
 }
