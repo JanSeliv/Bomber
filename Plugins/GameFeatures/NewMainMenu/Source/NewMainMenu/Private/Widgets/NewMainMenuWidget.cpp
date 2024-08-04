@@ -19,6 +19,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 //---
 
+#include "Subsystems/NMMInGameSettingsSubsystem.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuWidget)
 
 // Called after the underlying slate widget is constructed
@@ -142,8 +144,8 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 
 	// Switch the Main Menu spot
 	const UNMMSpotComponent* MenuSpot = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
-	if (!ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %s:\n'MenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__))
-		&& UNMMBaseSubsystem::Get().GetCurrentMenuState() == ENMMState::Idle)
+	if (ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %hs:\n'MenuSpot' is not valid!"), __LINE__, __FUNCTION__)
+		&& UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled())
 	{
 		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot->GetMeshChecked().GetCustomPlayerMeshData();
 		UpdatePlayerCharacterMesh(PlayerMeshData);
