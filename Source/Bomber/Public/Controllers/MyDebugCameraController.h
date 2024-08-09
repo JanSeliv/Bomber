@@ -17,4 +17,7 @@ class BOMBER_API AMyDebugCameraController : public ADebugCameraController
 protected:
 	/** Sets default values for this controller's properties. */
 	AMyDebugCameraController();
+
+	/** Is overridden to prevent spawning the Debug HUD. */
+	virtual void PostInitializeComponents() override;
 };
