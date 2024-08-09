@@ -27,6 +27,30 @@ UWidgetsSubsystem* UWidgetsSubsystem::GetWidgetsSubsystem(const UObject* Optiona
 	return LocalPlayer ? LocalPlayer->GetSubsystem<UWidgetsSubsystem>() : nullptr;
 }
 
+// Create specified widget and add it to Manageable widgets list, so its visibility can be changed globally
+UUserWidget* UWidgetsSubsystem::CreateManageableWidget(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport, int32 ZOrder, const UObject* OptionalWorldContext)
+{
+	UUserWidget* Widget = FWidgetUtilsLibrary::CreateWidgetByClass(WidgetClass, bAddToViewport, ZOrder, OptionalWorldContext);
+	if (Widget)
+	{
+		AllManageableWidgetsInternal.Add(Widget);
+	}
+	return Widget;
+}
+
+// Removes given widget from the list and destroys it
+void UWidgetsSubsystem::DestroyManageableWidget(UUserWidget* Widget)
+{
+	if (!Widget
+	    || !AllManageableWidgetsInternal.Contains(Widget))
+	{
+		return;
+	}
+
+	AllManageableWidgetsInternal.RemoveSwap(Widget);
+	FWidgetUtilsLibrary::DestroyWidget(*Widget);
+}
+
 // Set true to show the FPS counter widget on the HUD
 void UWidgetsSubsystem::SetFPSCounterEnabled(bool bEnable)
 {
@@ -91,23 +115,21 @@ void UWidgetsSubsystem::InitWidgets()
 
 	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
 
-	HUDWidgetInternal = FWidgetUtilsLibrary::CreateWidgetChecked<UHUDWidget>(UIDataAsset.GetHUDWidgetClass());
+	HUDWidgetInternal = CreateManageableWidgetChecked<UHUDWidget>(UIDataAsset.GetHUDWidgetClass());
 
-	FPSCounterWidgetInternal = FWidgetUtilsLibrary::CreateWidgetByClass(UIDataAsset.GetFPSCounterWidgetClass());
+	FPSCounterWidgetInternal = CreateManageableWidgetChecked(UIDataAsset.GetFPSCounterWidgetClass());
 
-	SettingsWidgetInternal = FWidgetUtilsLibrary::CreateWidgetChecked<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/4);
+	SettingsWidgetInternal = CreateManageableWidgetChecked<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/4);
 	SettingsWidgetInternal->TryConstructSettings();
 
 	static constexpr int32 MaxPlayersNum = 4;
 	NicknameWidgetsInternal.Reserve(MaxPlayersNum);
 	for (int32 Index = 0; Index < MaxPlayersNum; ++Index)
 	{
-		UPlayerName3DWidget* NicknameWidget = FWidgetUtilsLibrary::CreateWidgetChecked<UPlayerName3DWidget>(UIDataAsset.GetNicknameWidgetClass(), /*bAddToViewport*/false);
+		UPlayerName3DWidget* NicknameWidget = CreateManageableWidgetChecked<UPlayerName3DWidget>(UIDataAsset.GetNicknameWidgetClass(), /*bAddToViewport*/false);
 		// Is drawn by 3D user widget component, no need add it to viewport
 		NicknameWidgetsInternal.Emplace(NicknameWidget);
 	}
-
-	bAreWidgetInitializedInternal = true;
 
 	if (OnWidgetsInitialized.IsBound())
 	{
@@ -118,34 +140,17 @@ void UWidgetsSubsystem::InitWidgets()
 // Removes all widgets and transient data
 void UWidgetsSubsystem::CleanupWidgets()
 {
-	if (HUDWidgetInternal)
+	for (int32 Idx = AllManageableWidgetsInternal.Num() - 1; Idx >= 0; --Idx)
 	{
-		FWidgetUtilsLibrary::DestroyWidget(*HUDWidgetInternal);
-		HUDWidgetInternal = nullptr;
-	}
-
-	if (FPSCounterWidgetInternal)
-	{
-		FWidgetUtilsLibrary::DestroyWidget(*FPSCounterWidgetInternal);
-		FPSCounterWidgetInternal = nullptr;
-	}
-
-	if (SettingsWidgetInternal)
-	{
-		FWidgetUtilsLibrary::DestroyWidget(*SettingsWidgetInternal);
-		SettingsWidgetInternal = nullptr;
-	}
-
-	for (UPlayerName3DWidget* NicknameWidgetIt : NicknameWidgetsInternal)
-	{
-		if (NicknameWidgetIt)
+		UUserWidget* It = AllManageableWidgetsInternal.IsValidIndex(Idx) ? AllManageableWidgetsInternal[Idx] : nullptr;
+		if (It)
 		{
-			FWidgetUtilsLibrary::DestroyWidget(*NicknameWidgetIt);
+			DestroyManageableWidget(It);
 		}
 	}
-	NicknameWidgetsInternal.Empty();
 
-	bAreWidgetInitializedInternal = false;
+	AllManageableWidgetsInternal.Empty();
+	NicknameWidgetsInternal.Empty();
 }
 
 // Is called right after the game was started and windows size is set

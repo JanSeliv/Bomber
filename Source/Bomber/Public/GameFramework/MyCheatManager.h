@@ -156,4 +156,12 @@ public:
 	/** Tweak the minimal distance in UU from camera to the level. */
 	UFUNCTION(meta = (CheatName = "Bomber.Camera.MinDistance"))
 	static void MinDistance(float InMinDistance);
+
+	/*********************************************************************************************
+	 * UI
+	 ********************************************************************************************* */
+public:
+	/** Completely removes all widgets from UI. */
+	UFUNCTION(meta = (CheatName = "Bomber.UI.HideAllWidgets"))
+	static void SetUIHideAllWidgets();
 };

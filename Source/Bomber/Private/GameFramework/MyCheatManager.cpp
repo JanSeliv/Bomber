@@ -12,6 +12,7 @@
 #include "GameFramework/MyGameModeBase.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/WidgetsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -301,5 +302,19 @@ void UMyCheatManager::MinDistance(float InMinDistance)
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.MinDistance = InMinDistance;
 		LevelCamera->SetCameraDistanceParams(DistanceParams);
+	}
+}
+
+/*********************************************************************************************
+ * UI
+ ********************************************************************************************* */
+
+// Completely removes all widgets from UI
+void UMyCheatManager::SetUIHideAllWidgets()
+{
+	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	if (ensureMsgf(WidgetsSubsystem, TEXT("ASSERT: [%i] %hs:\n'WidgetsSubsystem' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		WidgetsSubsystem->CleanupWidgets();
 	}
 }
