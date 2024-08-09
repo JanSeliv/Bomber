@@ -43,6 +43,14 @@ void UWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerCont
 {
 	Super::PlayerControllerChanged(NewPlayerController);
 
+	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayerController);
+	if (!MyPC
+	    || MyPC->bIsDebugCameraEnabledInternal)
+	{
+		// Do not initialize widgets if different controller is possessed, likely Debug Controller, or Debug Camera is enabled
+		return;
+	}
+
 	if (AreWidgetInitialized())
 	{
 		// New player controller is set, likely level was changed, so perform cleanup first

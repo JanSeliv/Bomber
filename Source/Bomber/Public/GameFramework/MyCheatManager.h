@@ -16,6 +16,10 @@ class BOMBER_API UMyCheatManager final : public UMetaCheatManager
 {
 	GENERATED_BODY()
 
+public:
+	/** Default constructor. */
+	UMyCheatManager();
+
 	/*********************************************************************************************
 	 * Utils
 	 ********************************************************************************************* */
@@ -133,6 +137,14 @@ public:
 	 * Camera
 	 ********************************************************************************************* */
 public:
+	/** Is overridden to let internal systems know that camera manager is enabled.
+	 * Is commonly called from `ToggleDebugCamera` cheat. */
+	virtual void EnableDebugCamera() override;
+
+	/** Is overridden to let internal systems know that camera manager is disabled.
+	 * Is commonly called from `ToggleDebugCamera` cheat. */
+	virtual void DisableDebugCamera() override;
+
 	/** Tweak the custom additive angle to affect the fit distance calculation from camera to the level. */
 	UFUNCTION(meta = (CheatName = "Bomber.Camera.FitViewAdditiveAngle"))
 	static void FitViewAdditiveAngle(float InFitViewAdditiveAngle);

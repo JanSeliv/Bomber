@@ -6,7 +6,10 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
-#include "DataAssets/ItemDataAsset.h"
+#include "Controllers/MyAIController.h"
+#include "Controllers/MyDebugCameraController.h"
+#include "Controllers/MyPlayerController.h"
+#include "GameFramework/MyGameModeBase.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
@@ -14,6 +17,12 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyCheatManager)
+
+// Default constructor
+UMyCheatManager::UMyCheatManager()
+{
+	DebugCameraControllerClass = AMyDebugCameraController::StaticClass();
+}
 
 /*********************************************************************************************
  * Utils
@@ -228,6 +237,33 @@ void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 /*********************************************************************************************
  * Camera
  ********************************************************************************************* */
+
+// Is overridden to let internal systems know that camera manager is enabled
+void UMyCheatManager::EnableDebugCamera()
+{
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	if (ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPC' is null!"), __LINE__, __FUNCTION__))
+	{
+		// Enable the Debug Camera as early as possible, so during Super call it will be already enabled
+		MyPC->bIsDebugCameraEnabledInternal = true;
+	}
+
+	Super::EnableDebugCamera();
+}
+
+// Is overridden to let internal systems know that camera manager is disabled
+void UMyCheatManager::DisableDebugCamera()
+{
+	Super::DisableDebugCamera();
+
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	if (ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPC' is null!"), __LINE__, __FUNCTION__))
+	{
+		// Disable debug camera as late as possible, so during Super call it will be still enabled
+		MyPC->bIsDebugCameraEnabledInternal = false;
+		MyPC->ApplyAllInputContexts();
+	}
+}
 
 // Tweak the custom additive angle to affect the fit distance calculation from camera to the level
 void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
