@@ -112,6 +112,10 @@ public:
 	UFUNCTION(meta = (CheatName = "Bomber.AI.SetPowerups"))
 	static void SetAIPowerups(int32 NewLevel);
 
+	/** If called, all bots will change own skin to look like players. */
+	UFUNCTION(meta = (CheatName = "Bomber.AI.ApplyPlayersSkin"))
+	static void ApplyPlayersSkinOnAI();
+
 	/*********************************************************************************************
 	 * Debug
 	 ********************************************************************************************* */

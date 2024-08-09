@@ -210,6 +210,26 @@ void UMyCheatManager::SetAIPowerups(int32 NewLevel)
 	}
 }
 
+// If called, all bots will change own skin to look like players
+void UMyCheatManager::ApplyPlayersSkinOnAI()
+{
+	// Get all players
+	FMapComponents MapComponents;
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
+
+	// Apply players skin on AI
+	for (const UMapComponent* MapComponentIt : MapComponents)
+	{
+		APlayerCharacter* Character = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
+		if (Character
+		    && Character->IsBotControlled())
+		{
+			constexpr bool bForcePlayerSkin = true;
+			Character->SetDefaultPlayerMeshData(bForcePlayerSkin);
+		}
+	}
+}
+
 /*********************************************************************************************
  * Debug
  ********************************************************************************************* */

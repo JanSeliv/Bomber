@@ -249,6 +249,8 @@ protected:
 	 * Player Mesh
 	 ********************************************************************************************* */
 public:
+	friend class UMyCheatManager;
+
 	/** Returns the Skeletal Mesh of bombers. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
@@ -277,9 +279,10 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyCustomPlayerMeshData();
 
-	/** Set and apply default skeletal mesh for this player. */
+	/** Set and apply default skeletal mesh for this player.
+	 * @param bForcePlayerSkin If true, will force the bot to change own skin to look like a player. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
-	void SetDefaultPlayerMeshData();
+	void SetDefaultPlayerMeshData(bool bForcePlayerSkin = false);
 
 	/** Respond on changes in player mesh data to update the mesh on client. */
 	UFUNCTION()

@@ -787,7 +787,7 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 }
 
 // Set and apply default skeletal mesh for this player
-void APlayerCharacter::SetDefaultPlayerMeshData()
+void APlayerCharacter::SetDefaultPlayerMeshData(bool bForcePlayerSkin/* = false*/)
 {
 	if (!HasAuthority())
 	{
@@ -806,7 +806,14 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	const bool bIsPlayer = IsPlayerControlled() || PlayerId == 0;
 	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
 	constexpr ELevelType AIFlag = ELT::None;
-	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
+	ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
+
+	if (bForcePlayerSkin)
+	{
+		// Force each bot to look like different player
+		LevelType = static_cast<ELevelType>(1 << PlayerId);
+	}
+
 	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
 	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__))
 	{
