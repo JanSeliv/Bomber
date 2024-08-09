@@ -97,6 +97,10 @@ public:
 	UFUNCTION(meta = (CheatName = "Bomber.Player.SetGodMode"))
 	static void SetGodMode(bool bShouldEnable);
 
+	/** Enable or disable the Auto Copilot mode to make a controllable player to play automatically. */
+	UFUNCTION(meta = (CheatName = "Bomber.Player.SetAutoCopilot"))
+	static void SetAutoCopilot();
+
 	/*********************************************************************************************
 	 * AI
 	 ********************************************************************************************* */

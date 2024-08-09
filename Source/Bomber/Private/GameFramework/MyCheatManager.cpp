@@ -169,6 +169,23 @@ void UMyCheatManager::SetGodMode(bool bShouldEnable)
 	}
 }
 
+// Enable or disable the Auto Copilot mode to make a controllable player to play automatically
+void UMyCheatManager::SetAutoCopilot()
+{
+	APlayerCharacter* LocalPlayer = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+	if (!LocalPlayer
+	    || !LocalPlayer->HasAuthority())
+	{
+		return;
+	}
+
+	const AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode();
+	checkf(MyGameMode, TEXT("ERROR: [%i] %hs:\n'MyGameMode' is null!"), __LINE__, __FUNCTION__);
+
+	const TSubclassOf<AController> ControllerClass = LocalPlayer->IsPlayerControlled() ? LocalPlayer->AIControllerClass : MyGameMode->PlayerControllerClass;
+	LocalPlayer->TryPossessController(ControllerClass);
+}
+
 /*********************************************************************************************
  * AI
  ********************************************************************************************* */

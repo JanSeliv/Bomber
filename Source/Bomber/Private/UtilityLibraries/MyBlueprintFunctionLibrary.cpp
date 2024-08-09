@@ -155,7 +155,15 @@ APlayerCharacter* UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter(const UOb
 {
 	static constexpr int32 LocalPlayerIndex = 0;
 	const AMyPlayerController* MyPC = GetMyPlayerController(LocalPlayerIndex, OptionalWorldContext);
-	return MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
+	APlayerCharacter* LocalPlayer = MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
+
+	if (!LocalPlayer)
+	{
+		// In some edge cases, character is not possessed by the controller, try get it from the map
+		LocalPlayer = GetPlayerCharacter(LocalPlayerIndex, OptionalWorldContext);
+	}
+
+	return LocalPlayer;
 }
 
 // Returns implemented Game Viewport Client on the project side

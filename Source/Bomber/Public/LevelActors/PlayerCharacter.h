@@ -131,10 +131,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
-	/** The character's AI controller */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
-	TObjectPtr<class AMyAIController> MyAIControllerInternal = nullptr;
-
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
@@ -165,10 +161,6 @@ protected:
 	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 
-	/** Called when this Pawn is possessed. Only called on the server (or in standalone).
-	 * @param NewController The controller possessing this pawn. */
-	virtual void PossessedBy(AController* NewController) override;
-
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
@@ -192,10 +184,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateCollisionObjectType();
 
-	/** Possess a player or AI controller in dependence of current Character ID. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
-	void TryPossessController();
-
 	/** Is called on game mode post login to handle character logic when new player is connected. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPostLogin(class AGameModeBase* GameMode, class APlayerController* NewPlayer);
@@ -207,6 +195,24 @@ protected:
 	/** Is called when the player was destroyed. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
+
+	/*********************************************************************************************
+	 * Player/AI Controller
+	 ********************************************************************************************* */
+public:
+	/** Possess a player or AI controller in dependence of current Character ID.
+	 * @param ControllerClass If null, the class will be selected by the Character ID. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	void TryPossessController(TSubclassOf<AController> ControllerClass = nullptr);
+
+protected:
+	/** The character's AI controller */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
+	TObjectPtr<class AAIController> AIControllerInternal = nullptr;
+
+	/** Called when this Pawn is possessed. Only called on the server (or in standalone).
+	 * @param NewController The controller possessing this pawn. */
+	virtual void PossessedBy(AController* NewController) override;
 
 	/*********************************************************************************************
 	 * Nickname
