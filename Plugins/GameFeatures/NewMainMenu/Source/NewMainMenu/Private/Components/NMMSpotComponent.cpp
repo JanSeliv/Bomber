@@ -68,9 +68,31 @@ void UNMMSpotComponent::StopMasterSequence()
 	}
 }
 
+// Returns true if current game state can be eventually changed
+bool UNMMSpotComponent::CanChangeCinematicState(ENMMState NewMainMenuState) const
+{
+	if (CinematicStateInternal == NewMainMenuState)
+	{
+		return false;
+	}
+
+	if (const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController())
+	{
+		// Don't change any states if if game is run from the Render Movie
+		return !MyPC->bCinematicMode;
+	}
+
+	return true;
+}
+
 // Activate given cinematic state on this spot
 void UNMMSpotComponent::SetCinematicByState(ENMMState MainMenuState)
 {
+	if (!CanChangeCinematicState(MainMenuState))
+	{
+		return;
+	}
+
 	if (MainMenuState == ENMMState::Transition)
 	{
 		// Don't set Transition state, instead apply idle while camera is moving
@@ -268,7 +290,7 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	if (IsActiveSpot())
 	{
 		// This is active spot has created master sequence, start playing to let Engine preload tracks
-		MasterPlayerInternal->Play();
+		SetCinematicByState(ENMMState::Idle);
 	}
 
 	// Notify that the spot is ready and finished loading

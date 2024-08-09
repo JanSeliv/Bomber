@@ -58,6 +58,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void StopMasterSequence();
 
+	/** Returns true if current game state can be eventually changed. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool CanChangeCinematicState(ENMMState NewMainMenuState) const;
+
 	/** Activate given cinematic state on this spot. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetCinematicByState(ENMMState MainMenuState);
