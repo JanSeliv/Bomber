@@ -15,6 +15,10 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyCheatManager)
 
+/*********************************************************************************************
+ * Utils
+ ********************************************************************************************* */
+
 // Returns bitmask from reverse bitmask in string
 int32 UMyCheatManager::GetBitmaskFromReverseString(const FString& ReverseBitmaskStr)
 {
@@ -65,6 +69,10 @@ int32 UMyCheatManager::GetBitmaskFromActorTypesString(const FString& ActorTypesB
 	return Bitmask;
 }
 
+/*********************************************************************************************
+ * Destroy
+ ********************************************************************************************* */
+
 // Destroy all specified level actors on the map
 void UMyCheatManager::DestroyAllByType(EActorType ActorType)
 {
@@ -108,6 +116,10 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 	GeneratedMap.DestroyLevelActorsOnCells(CellsToDestroy);
 }
 
+/*********************************************************************************************
+ * Box
+ ********************************************************************************************* */
+
 // Override the chance to spawn item after box destroying
 void UMyCheatManager::SetItemChance(int32 Chance)
 {
@@ -125,19 +137,16 @@ void UMyCheatManager::SetItemChance(int32 Chance)
 	}
 }
 
+/*********************************************************************************************
+ * Player
+ ********************************************************************************************* */
+
 // Override the level of each powerup for a controlled player
-void UMyCheatManager::SetPowerups(int32 NewLevel)
+void UMyCheatManager::SetPlayerPowerups(int32 NewLevel)
 {
 	if (APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter())
 	{
-		static constexpr int32 MinItemsNum = 1;
-		const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
-		NewLevel = FMath::Clamp(NewLevel, MinItemsNum, MaxItemsNum);
-		PlayerCharacter->PowerupsInternal.BombN = NewLevel;
-		PlayerCharacter->PowerupsInternal.BombNCurrent = NewLevel;
-		PlayerCharacter->PowerupsInternal.FireN = NewLevel;
-		PlayerCharacter->PowerupsInternal.SkateN = NewLevel;
-		PlayerCharacter->ApplyPowerups();
+		PlayerCharacter->SetPowerups(NewLevel);
 	}
 }
 
@@ -150,6 +159,33 @@ void UMyCheatManager::SetGodMode(bool bShouldEnable)
 		MapComponent->SetUndestroyable(bShouldEnable);
 	}
 }
+
+/*********************************************************************************************
+ * AI
+ ********************************************************************************************* */
+
+// Override the level of each powerup for bots
+void UMyCheatManager::SetAIPowerups(int32 NewLevel)
+{
+	// Get all players
+	FMapComponents MapComponents;
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
+
+	// Override the level of each powerup for bots
+	for (const UMapComponent* MapComponentIt : MapComponents)
+	{
+		APlayerCharacter* Character = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
+		if (Character
+		    && Character->IsBotControlled())
+		{
+			Character->SetPowerups(NewLevel);
+		}
+	}
+}
+
+/*********************************************************************************************
+ * Debug
+ ********************************************************************************************* */
 
 // Shows coordinates of all level actors by specified types
 void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
@@ -171,6 +207,10 @@ void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
 	}
 }
 
+/*********************************************************************************************
+ * Level
+ ********************************************************************************************* */
+
 // Sets the size for generated map, it will automatically regenerate the level for given size
 void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 {
@@ -185,6 +225,10 @@ void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 	}
 }
 
+/*********************************************************************************************
+ * Camera
+ ********************************************************************************************* */
+
 // Tweak the custom additive angle to affect the fit distance calculation from camera to the level
 void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
 {
@@ -192,7 +236,7 @@ void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
 	{
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.FitViewAdditiveAngle = InFitViewAdditiveAngle;
-		LevelCamera->SetCameraDistanceParams(MoveTemp(DistanceParams));
+		LevelCamera->SetCameraDistanceParams(DistanceParams);
 	}
 }
 
@@ -203,6 +247,6 @@ void UMyCheatManager::MinDistance(float InMinDistance)
 	{
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.MinDistance = InMinDistance;
-		LevelCamera->SetCameraDistanceParams(MoveTemp(DistanceParams));
+		LevelCamera->SetCameraDistanceParams(DistanceParams);
 	}
 }

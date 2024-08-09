@@ -41,6 +41,9 @@ struct BOMBER_API FPowerUp
 	/** The number of items, that increases the bomb blast radius */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
 	int32 FireN = 1;
+
+	/** Operator to set all values at once from one integer. */
+	FPowerUp& operator=(int32 NewValue);
 };
 
 /**
@@ -61,26 +64,51 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnPlayerTypeChanged OnPlayerTypeChanged;
 
+	/*********************************************************************************************
+	 * Powerups
+	 ********************************************************************************************* */
+public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPowerUpsChanged, const struct FPowerUp&, AllPowerUps);
 
 	/** Called when this character picked up any power-up or they were reset. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnPowerUpsChanged OnPowerUpsChanged;
 
+	/** Returns current powerup levels */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE FPowerUp& GetPowerups() const { return PowerupsInternal; }
+
+	/** Set powerups levels all at once. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "Powerups"))
+	void SetPowerups(int32 NewLevel);
+
+	/** Apply effect of picked up powerups. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyPowerups();
+
+	/** Reset all picked up powerups. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ResetPowerups();
+
+protected:
+	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_Powerups", Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
+	FPowerUp PowerupsInternal = FPowerUp::DefaultData;
+
+	/** Is called on clients to apply powerups for this character. */
+	UFUNCTION()
+	void OnRep_Powerups();
+
 	/** ---------------------------------------------------
 	 *		Public functions
 	 * --------------------------------------------------- */
-
+public:
 	/** Sets default values for this character's properties */
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
 	/** Initialize a player actor, could be called multiple times. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ConstructPlayerCharacter();
-
-	/** Returns current powerup levels */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FPowerUp& GetPowerups() const { return PowerupsInternal; }
 
 	/** Spawns bomb on character position */
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "C++")
@@ -99,15 +127,9 @@ protected:
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
-	friend class UMyCheatManager;
-
 	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
-
-	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_Powerups", Category = "C++", meta = (BlueprintProtected, DisplayName = "Powerups", ShowOnlyInnerProperties))
-	FPowerUp PowerupsInternal = FPowerUp::DefaultData;
 
 	/** The character's AI controller */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
@@ -165,18 +187,6 @@ protected:
 	/** Listen to manage the tick. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
-
-	/** Apply effect of picked up powerups. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyPowerups();
-
-	/** Reset all picked up powerups. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ResetPowerups();
-
-	/** Is called on clients to apply powerups for this character. */
-	UFUNCTION()
-	void OnRep_Powerups();
 
 	/** Updates collision object type by current character ID. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

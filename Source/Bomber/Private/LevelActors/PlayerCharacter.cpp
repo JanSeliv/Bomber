@@ -34,8 +34,78 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerCharacter)
 
+/*********************************************************************************************
+ * Powerups
+ ********************************************************************************************* */
+
 // Default amount on picked up items
 const FPowerUp FPowerUp::DefaultData = FPowerUp();
+
+// Operator to set all values at once from one int32
+FPowerUp& FPowerUp::operator=(int32 NewValue)
+{
+	SkateN = NewValue;
+	BombN = NewValue;
+	BombNCurrent = NewValue;
+	FireN = NewValue;
+	return *this;
+}
+
+// Set powerups levels all at once
+void APlayerCharacter::SetPowerups(int32 NewLevel)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// Clamp by min and max values
+	static constexpr int32 MinItemsNum = 1;
+	const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
+	const int32 NewLevelClamped = FMath::Clamp(NewLevel, MinItemsNum, MaxItemsNum);
+
+	PowerupsInternal = NewLevelClamped;
+	ApplyPowerups();
+}
+
+// Apply effect of picked up powerups
+void APlayerCharacter::ApplyPowerups()
+{
+	// Apply speed
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		static constexpr float SpeedMultiplier = 100.F;
+		const float SkateAdditiveStrength = UItemDataAsset::Get().GetSkateAdditiveStrength();
+		const int32 SkateN = PowerupsInternal.SkateN * SpeedMultiplier + SkateAdditiveStrength;
+		MovementComponent->MaxWalkSpeed = SkateN;
+	}
+
+	// Here you might to apply others types of powerups
+	// ...
+
+	// Notify listeners
+	if (OnPowerUpsChanged.IsBound())
+	{
+		OnPowerUpsChanged.Broadcast(PowerupsInternal);
+	}
+}
+
+// Reset all picked up powerups
+void APlayerCharacter::ResetPowerups()
+{
+	PowerupsInternal = FPowerUp::DefaultData;
+	ApplyPowerups();
+}
+
+// Is called on clients to apply powerups
+void APlayerCharacter::OnRep_Powerups()
+{
+	ApplyPowerups();
+}
+
+/** ---------------------------------------------------
+ *		Public functions
+ * --------------------------------------------------- */
 
 // Sets default values
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
@@ -457,40 +527,6 @@ void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		default:
 			break;
 	}
-}
-
-// Apply effect of picked up powerups
-void APlayerCharacter::ApplyPowerups()
-{
-	// Apply speed
-	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
-	{
-		static constexpr float SpeedMultiplier = 100.F;
-		const float SkateAdditiveStrength = UItemDataAsset::Get().GetSkateAdditiveStrength();
-		const int32 SkateN = PowerupsInternal.SkateN * SpeedMultiplier + SkateAdditiveStrength;
-		MovementComponent->MaxWalkSpeed = SkateN;
-	}
-
-	// Apply others types of powerups
-
-	// Notify listeners
-	if (OnPowerUpsChanged.IsBound())
-	{
-		OnPowerUpsChanged.Broadcast(PowerupsInternal);
-	}
-}
-
-// Reset all picked up powerups
-void APlayerCharacter::ResetPowerups()
-{
-	PowerupsInternal = FPowerUp::DefaultData;
-	ApplyPowerups();
-}
-
-// Is called on clients to apply powerups
-void APlayerCharacter::OnRep_Powerups()
-{
-	ApplyPowerups();
 }
 
 // Updates collision object type by current character ID

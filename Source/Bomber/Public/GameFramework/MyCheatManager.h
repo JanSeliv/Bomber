@@ -16,6 +16,9 @@ class BOMBER_API UMyCheatManager final : public UMetaCheatManager
 {
 	GENERATED_BODY()
 
+	/*********************************************************************************************
+	 * Utils
+	 ********************************************************************************************* */
 public:
 	/**
 	 * Returns bitmask from reverse bitmask in string.
@@ -37,10 +40,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorTypesBitmaskStr"))
 	static int32 GetBitmaskFromActorTypesString(const FString& ActorTypesBitmaskStr);
 
-	/* ---------------------------------------------------
-	*		Destroy
-	* --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Destroy
+	 ********************************************************************************************* */
+public:
 	/**
 	 * Destroy all specified level actors on the map.
 	 * @param ActorType Bomb, Box, Item, Player, Wall, All
@@ -64,10 +67,10 @@ public:
 	UFUNCTION(meta = (CheatName = "Bomber.Destroy.PlayersBySlots"))
 	static void DestroyPlayersBySlots(const FString& Slot);
 
-	/* ---------------------------------------------------
-	*		Box
-	* --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Box
+	 ********************************************************************************************* */
+public:
 	/**
 	 * Override the chance to spawn item after box destroying.
 	 * @param Chance Put 0 to stop spawning, 100 to spawn all time.
@@ -75,25 +78,36 @@ public:
 	UFUNCTION(meta = (CheatName = "Bomber.Box.SetItemChance"))
 	static void SetItemChance(int32 Chance);
 
-	/* ---------------------------------------------------
-	*		Player
-	* --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Player
+	 ********************************************************************************************* */
+public:
 	/**
 	 * Override the level of each powerup for a controlled player.
 	 * @param NewLevel 1 is minimum, 5 is maximum.
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Player.SetPowerups"))
-	static void SetPowerups(int32 NewLevel);
+	static void SetPlayerPowerups(int32 NewLevel);
 
 	/** Enable or disable the God mode to make a controllable player undestroyable. */
 	UFUNCTION(meta = (CheatName = "Bomber.Player.SetGodMode"))
 	static void SetGodMode(bool bShouldEnable);
 
-	/* ---------------------------------------------------
-	 *		Debug
-	 * --------------------------------------------------- */
+	/*********************************************************************************************
+	 * AI
+	 ********************************************************************************************* */
+public:
+	/**
+	 * Override the level of each powerup for bots.
+	 * @param NewLevel 1 is minimum, 5 is maximum.
+	 */
+	UFUNCTION(meta = (CheatName = "Bomber.AI.SetPowerups"))
+	static void SetAIPowerups(int32 NewLevel);
 
+	/*********************************************************************************************
+	 * Debug
+	 ********************************************************************************************* */
+public:
 	/**
 	 * Shows coordinates of all level actors by specified types, ex: 'Box Item'.
 	 * Bomber.Debug.DisplayCells Wall - show walls.
@@ -104,10 +118,10 @@ public:
 	UFUNCTION(meta = (CheatName = "Bomber.Debug.DisplayCells"))
 	static void DisplayCells(const FString& ActorTypesString);
 
-	/* ---------------------------------------------------
-	 *		Level
-	 * --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Level
+	 ********************************************************************************************* */
+public:
 	/** Sets the size for generated map, it will automatically regenerate the level for given size.
 	 * @see LevelSize The new size where length and width have to be unpaired (odd).
 	 * Bomber.Level.SetSize 9x7 - set the size of the level to 9 columns (width) and 7 rows (length).
@@ -115,10 +129,10 @@ public:
 	UFUNCTION(meta = (CheatName = "Bomber.Level.SetSize"))
 	static void SetLevelSize(const FString& LevelSize);
 
-	/* ---------------------------------------------------
-	 *		Camera
-	 * --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Camera
+	 ********************************************************************************************* */
+public:
 	/** Tweak the custom additive angle to affect the fit distance calculation from camera to the level. */
 	UFUNCTION(meta = (CheatName = "Bomber.Camera.FitViewAdditiveAngle"))
 	static void FitViewAdditiveAngle(float InFitViewAdditiveAngle);
