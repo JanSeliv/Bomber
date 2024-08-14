@@ -48,7 +48,7 @@ public:
 	 ********************************************************************************************* */
 protected:
 	/** List of all input contexts to be auto turned of or on according current game state. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Input Contexts"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Input Contexts"))
 	TArray<TObjectPtr<const UMyInputMappingContext>> AllInputContextsInternal;
 
 	/** Component that responsible for mouse-related logic like showing and hiding itself. */
@@ -164,7 +164,7 @@ public:
 	/** Is called by ToggleDebugCamera cheat (in build) and F8 button (in editor).
 	 * @param bEnable true, when player moves the camera around the level freely during the game in editor or build.
 	 * Is not wrapped by WITH_EDITOR as might be called in the build. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (DevelopmentOnly, DisplayName = "Debug Camera Enabled"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (DevelopmentOnly, DisplayName = "Debug Camera Enabled"))
 	bool bIsDebugCameraEnabledInternal = false;
 
 #if WITH_EDITOR

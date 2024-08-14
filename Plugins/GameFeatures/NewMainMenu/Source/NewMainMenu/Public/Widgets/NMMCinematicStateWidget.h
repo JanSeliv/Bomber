@@ -45,7 +45,7 @@ protected:
 	TObjectPtr<class UTextBlock> SkipText = nullptr;
 
 	/** Contains current time player holds the skip cinematic button. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "NAME"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "NAME"))
 	float CurrentHoldTimeInternal = 0.f;
 
 	/*********************************************************************************************

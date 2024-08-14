@@ -207,7 +207,7 @@ public:
 
 protected:
 	/** The character's AI controller */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
 	TObjectPtr<class AAIController> AIControllerInternal = nullptr;
 
 	/** Called when this Pawn is possessed. Only called on the server (or in standalone).
@@ -267,7 +267,7 @@ public:
 
 protected:
 	/** Contains custom data about mesh tweaked by player. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_PlayerMeshData", Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_PlayerMeshData", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty;
 
 	/** Server RPC to set and apply how a player has to look like.

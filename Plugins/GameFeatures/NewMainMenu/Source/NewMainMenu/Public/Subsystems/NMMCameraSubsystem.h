@@ -93,11 +93,11 @@ public:
 
 protected:
 	/** Is true during the transition when the camera is currently blending in to the rail or out from the Rail to the Spot. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Blending In/Out"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Blending In/Out"))
 	bool bIsBlendingInOutInternal = false;
 
 	/** Current camera transition state  */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = " Camera Rail State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = " Camera Rail State"))
 	ENMMCameraRailTransitionState CameraRailTransitionStateInternal = ENMMCameraRailTransitionState::None;
 
 	/** Is called on starts blending the camera towards current spot on the rail. */

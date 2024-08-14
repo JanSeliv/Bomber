@@ -50,16 +50,16 @@ protected:
 	/** When setting enabled, skips previously seen cinematics automatically.
 	 * Is config property, can be set in Settings menu.
 	 * @warning in multiplayer, this setting is ignored, so cinematics are always skipped. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Skip Cinematics"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Skip Cinematics"))
 	bool bAutoSkipCinematicsInternal = true;
 
 	/** The sound volume for Cinematics sound class.
 	 * Is config property, can be set in Settings menu. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
 	double CinematicsVolumeInternal = 1.f;
 
 	/** Enable/disable smooth transitions when switching characters in the main menu.
 	 * Is config property, can be set in Settings menu. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Instant Character Switch"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Instant Character Switch"))
 	bool bInstantCharacterSwitchInternal = false;
 };

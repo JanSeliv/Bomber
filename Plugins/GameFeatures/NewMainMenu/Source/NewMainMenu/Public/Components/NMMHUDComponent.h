@@ -35,11 +35,11 @@ public:
 	 ********************************************************************************************* */
 protected:
 	/** Created Main Menu widget. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
 	TObjectPtr<class UNewMainMenuWidget> MainMenuWidgetInternal = nullptr;
 
 	/** Created In Cinematic State widget. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
 	TObjectPtr<class UNMMCinematicStateWidget> InCinematicStateWidgetInternal = nullptr;
 
 	/*********************************************************************************************

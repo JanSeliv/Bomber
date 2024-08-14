@@ -50,6 +50,6 @@ public:
 
 protected:
 	/** Cached data about last broadcasted aspect ratio. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last c Aspect Ratio"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last c Aspect Ratio"))
 	float LastUpdatedAspectRatioInternal = 0.f;
 };

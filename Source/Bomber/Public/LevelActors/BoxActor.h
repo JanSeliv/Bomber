@@ -37,7 +37,7 @@ protected:
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
 	/** Contains current spawn chance to spawn item. Can be overriden by the Cheat Manager. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
 	int32 SpawnItemChanceInternal = INDEX_NONE;
 
 	/* ---------------------------------------------------

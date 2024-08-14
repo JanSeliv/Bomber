@@ -32,7 +32,7 @@ public:
 
 protected:
 	/** NewAI data asset */
-	UPROPERTY(Config, VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "NewAI Data Asset"))
+	UPROPERTY(Config, VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "NewAI Data Asset"))
 	TSoftObjectPtr<const UNewAIDataAsset> NewAIDataAssetInternal;
 
 	/*********************************************************************************************

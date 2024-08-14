@@ -68,15 +68,15 @@ protected:
 	int32 FireRadiusInternal = INDEX_NONE;
 
 	/** The type of the bomb, is set by player with InitBomb on spawning. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Type"))
 	ELevelType BombTypeInternal = ELevelType::None;
 
 	/** Current material of this bomb, is different for each player. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
 	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr;
 
 	/** All currently playing VFXs. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawned VFXs"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawned VFXs"))
 	TArray<TObjectPtr<class UNiagaraComponent>> SpawnedVFXsInternal;
 
 	/** The duration of the bomb VFX. */

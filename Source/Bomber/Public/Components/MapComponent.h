@@ -140,7 +140,7 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Owner's cell location on the Generated Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
 	FCell CellInternal = FCell::InvalidCell;
 
 	/** Contains exposed for designers properties for the spawned owner. */
@@ -154,11 +154,11 @@ protected:
 	/** Hold custom mesh asset if changed.
 	 * Is null by default or when SetDefaultMesh() is called.
 	 * Is set in SetCustomMeshAsset(). */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CustomMeshAsset", Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CustomMeshAsset", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
 	TObjectPtr<UStreamableRenderAsset> CustomMeshAssetInternal = nullptr;
 
 	/** If true the owner is undestroyable, is used by skills and cheat manager. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
 	bool bIsUndestroyableInternal = false;
 
 	/** The Collision Component, is attached to an owner. */
@@ -166,7 +166,7 @@ protected:
 	TObjectPtr<class UBoxComponent> BoxCollisionComponentInternal = nullptr;
 
 	/** Actual response type of the collision box of an actor. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response"))
 	FCollisionResponseContainer CollisionResponseInternal = ECR_MAX;
 
 	/* ---------------------------------------------------

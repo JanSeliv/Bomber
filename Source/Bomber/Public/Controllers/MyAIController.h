@@ -41,11 +41,11 @@ protected:
 	FTimerHandle AIUpdateHandleInternal;
 
 	/** Cell position of current path segment's end */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "AI Move To"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "AI Move To"))
 	FCell AIMoveToInternal = FCell::InvalidCell;
 
 	/** Controlled character */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Owner Character"))
 	TObjectPtr<class APlayerCharacter> OwnerInternal = nullptr;
 
 	/* ---------------------------------------------------

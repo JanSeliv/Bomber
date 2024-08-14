@@ -87,19 +87,19 @@ public:
 protected:
 	/** How long the mouse is inactive at this moment. Is calculated in Tick if only inactivity is enabled.
 	 * @see FMouseVisibilitySettings::bHideOnInactivity */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Inactive Time"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Inactive Time"))
 	float CurrentlyInactiveSecInternal = 0.f;
 
 	/** Currently used mouse visibility settings. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Visibility Settings"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current Visibility Settings"))
 	FMouseVisibilitySettings CurrentVisibilitySettingsInternal = FMouseVisibilitySettings::Invalid;
 
 	/** Last mouse visibility settings, used for restoring the previous state when disabling the current one. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Previous Visibility Settings"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Previous Visibility Settings"))
 	FMouseVisibilitySettings PreviousVisibilitySettingsInternal = FMouseVisibilitySettings::Invalid;
 
 	/** Last mouse position to detect inactivity. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last Mouse Position"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last Mouse Position"))
 	FVector2D LastMousePositionInternal = FVector2D::ZeroVector;
 
 	/*********************************************************************************************

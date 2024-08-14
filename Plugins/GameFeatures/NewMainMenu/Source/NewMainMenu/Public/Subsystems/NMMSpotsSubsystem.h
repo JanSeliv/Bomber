@@ -74,15 +74,15 @@ public:
 protected:
 	/** Index of the currently selected Main-Menu spot, is according row index in Cinematics table.
 	 * @see FCinematicRow::RowIndex. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active Menu Spot Index"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active Menu Spot Index"))
 	int32 ActiveMenuSpotIdxInternal = 0;
 
 	/** Incrementer of the last Main-Menu spot direction, is used to determine the direction of the last move. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last Move Spot Direction"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last Move Spot Direction"))
 	int32 LastMoveSpotDirectionInternal = 0;
 
 	/** All Main Menu spots with characters placed on the level. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main-Menu Spots"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main-Menu Spots"))
 	TArray<TObjectPtr<UNMMSpotComponent>> MainMenuSpotsInternal;
 
 	/*********************************************************************************************

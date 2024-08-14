@@ -71,15 +71,15 @@ public:
 	 ********************************************************************************************* */
 protected:
 	/** Cached cinematic player of this spot. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Idle Player"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Idle Player"))
 	TObjectPtr<class ULevelSequencePlayer> MasterPlayerInternal = nullptr;
 
 	/** Cached Cinematic Row that contains data about this spot. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic Row"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic Row"))
 	FNMMCinematicRow CinematicRowInternal = FNMMCinematicRow::Empty;
 
 	/** Current cinematic state of this spot. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic State"))
 	ENMMState CinematicStateInternal = ENMMState::None;
 
 	/*********************************************************************************************

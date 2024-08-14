@@ -48,7 +48,7 @@ public:
 protected:
 	/** Contains the current state of New Main Menu game feature.
 	 * Is local and not replicated. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Current State"))
 	ENMMState CurrentMenuStateInternal = ENMMState::None;
 
 	/*********************************************************************************************
