@@ -149,6 +149,17 @@ void UMyCheatManager::SetItemChance(int32 Chance)
 }
 
 /*********************************************************************************************
+ * Bomb
+ ********************************************************************************************* */
+
+// Override blast radius of all bombs
+TAutoConsoleVariable<int32> UMyCheatManager::CVarBombRadius(
+	TEXT("Bomber.Bomb.SetRadius"),
+	INDEX_NONE,
+	TEXT("5 - Set five cells blast radius to each side of all bombs"),
+	ECVF_Cheat);
+
+/*********************************************************************************************
  * Player
  ********************************************************************************************* */
 

@@ -7,6 +7,7 @@
 #include "Components/MapComponent.h"
 #include "DataAssets/BombDataAsset.h"
 #include "DataAssets/DataAssetsContainer.h"
+#include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Structures/Cell.h"
@@ -60,13 +61,27 @@ void ABombActor::ConstructBombActor()
 FCells ABombActor::GetExplosionCells() const
 {
 	if (IsHidden()
-	    || FireRadiusInternal < MIN_FIRE_RADIUS
-	    || !MapComponentInternal)
+	    || !MapComponentInternal
+	    || GetExplosionRadius() < MIN_FIRE_RADIUS)
 	{
 		return FCell::EmptyCells;
 	}
 
-	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, FireRadiusInternal);
+	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, GetExplosionRadius());
+}
+
+// Returns radius of the blast to each side
+int32 ABombActor::GetExplosionRadius() const
+{
+#if !UE_BUILD_SHIPPING
+	const int32 CheatOverride = UMyCheatManager::CVarBombRadius.GetValueOnAnyThread();
+	if (CheatOverride > MIN_FIRE_RADIUS)
+	{
+		return CheatOverride;
+	}
+#endif //!UE_BUILD_SHIPPING
+
+	return FireRadiusInternal;
 }
 
 // Sets the defaults of the bomb
@@ -264,16 +279,14 @@ void ABombActor::DetonateBomb()
 {
 	if (!HasAuthority()
 	    || IsHidden()
-	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame
-	    || !ensureMsgf(FireRadiusInternal >= MIN_FIRE_RADIUS, TEXT("ASSERT: [%i] %hs:\n'FireRadiusInternal' (%i) is less than 'MIN_FIRE_RADIUS' (%i)!"), __LINE__, __FUNCTION__, FireRadiusInternal, MIN_FIRE_RADIUS))
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
 
 	const FCells ExplosionCells = GetExplosionCells();
-	if (ExplosionCells.IsEmpty())
+	if (!ensureMsgf(!ExplosionCells.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'ExplosionCells' is empty!"), __LINE__, __FUNCTION__))
 	{
-		// No cells to destroy
 		return;
 	}
 

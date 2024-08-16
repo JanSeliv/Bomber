@@ -38,9 +38,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	TSet<FCell> GetExplosionCells() const;
 
-	/** Returns radius of the blast to each side. */
+	/** Returns radius of the blast to each side.
+	 * It might be overriden by the cheat manager. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetExplosionRadius() const { return FireRadiusInternal; }
+	int32 GetExplosionRadius() const;
 
 	/** Returns the type of the bomb. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -63,7 +64,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
-	/** The radius of the blast to each side, is set by player with InitBomb on spawning. */
+	/** The radius of the blast to each side, is set by player with InitBomb on spawning.
+	 * @warning don't use directly, even in this class, but call GetExplosionRadius() instead to support cheat overrides. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
 	int32 FireRadiusInternal = MIN_FIRE_RADIUS;
 
