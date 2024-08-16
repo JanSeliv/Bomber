@@ -84,6 +84,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE ULevelActorRow* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const { return GetRowByPredicate([Mesh](const ULevelActorRow& RowIt) { return RowIt.Mesh == Mesh; }); }
 
+	/** Returns row by index. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE ULevelActorRow* GetRowByIndex(int32 Index) const { return RowsInternal.IsValidIndex(Index) ? RowsInternal[Index] : nullptr; }
+
+	template <typename T>
+	const FORCEINLINE T* GetRowByIndex(int32 Index) const { return Cast<T>(GetRowByIndex(Index)); }
+
 	/** Returns overall number of contained rows. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetRowsNum() const { return RowsInternal.Num(); }

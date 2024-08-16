@@ -112,9 +112,16 @@ public:
 	UFUNCTION(meta = (CheatName = "Bomber.AI.SetPowerups"))
 	static void SetAIPowerups(int32 NewLevel);
 
-	/** If called, all bots will change own skin to look like players. */
+	/** If called, all bots will change own skin to look like players.
+	 * Cheat is called without parameters. */
 	UFUNCTION(meta = (CheatName = "Bomber.AI.ApplyPlayersSkin"))
 	static void ApplyPlayersSkinOnAI();
+
+	/** Spawns additional bot at the center of the level.
+	 * It will add as many bots as called with no limit to the number of bots.
+	 * Cheat is called without parameters. */
+	UFUNCTION(meta = (CheatName = "Bomber.AI.AddBot"))
+	static void AddBot();
 
 	/*********************************************************************************************
 	 * Debug
@@ -140,6 +147,18 @@ public:
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Level.SetSize"))
 	static void SetLevelSize(const FString& LevelSize);
+
+	/**
+	 * Spawns an actor by type on the level. 
+	 * @param ActorType The type of actor to spawn: Bomb, Box, Item, Player, Wall
+	 * @param ColumnX Position on the X-axis by column: 0, 1... N
+	 * @param RowY  Position on the Y-axis by row: 0, 1... N
+	 * @param RowIndex The row from Data Assets to select across different variants of the same actor type: 0, 1... N
+	 * Bomber.Level.SpawnActorByType Bomb 1 1 0 - spawn a bomb at the position (1, 1) with the first variant of the bomb (row 0 - Maya).
+	 * Bomber.Level.SpawnActorByType Player 2 2 4 - spawn a player at the position (2, 2) with the fifth variant of the player (row 4 - AI). 
+	 */
+	UFUNCTION(meta = (CheatName = "Bomber.Level.SpawnActorByType"))
+	static void SpawnActorByType(EActorType ActorType, int32 ColumnX, int32 RowY, int32 RowIndex);
 
 	/*********************************************************************************************
 	 * Camera

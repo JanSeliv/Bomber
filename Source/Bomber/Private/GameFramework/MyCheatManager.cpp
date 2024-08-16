@@ -9,6 +9,7 @@
 #include "Controllers/MyAIController.h"
 #include "Controllers/MyDebugCameraController.h"
 #include "Controllers/MyPlayerController.h"
+#include "DataAssets/PlayerDataAsset.h"
 #include "GameFramework/MyGameModeBase.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -230,6 +231,14 @@ void UMyCheatManager::ApplyPlayersSkinOnAI()
 	}
 }
 
+// Spawns additional bots at the center of the level
+void UMyCheatManager::AddBot()
+{
+	const FIntPoint CenterPosition = UCellsUtilsLibrary::GetCenterCellPositionOnLevel();
+	const int32 LastRowIndex = UPlayerDataAsset::Get().GetRowsNum() - 1;
+	SpawnActorByType(EActorType::Player, CenterPosition.X, CenterPosition.Y, LastRowIndex);
+}
+
 /*********************************************************************************************
  * Debug
  ********************************************************************************************* */
@@ -270,6 +279,30 @@ void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 		const FIntPoint NewLevelSize(FCString::Atoi(*Width), FCString::Atoi(*Height));
 		AGeneratedMap::Get().SetLevelSize(NewLevelSize);
 	}
+}
+
+// Spawns an actor by type on the level
+void UMyCheatManager::SpawnActorByType(EActorType ActorType, int32 ColumnX, int32 RowY, int32 RowIndex)
+{
+	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
+	const FCell Cell = UCellsUtilsLibrary::GetCellByPositionOnLevel(ColumnX, RowY);
+
+	// Destroy existed actor on the cell
+	GeneratedMap.DestroyLevelActorsOnCells({Cell});
+
+	// Spawn new actor on the cell
+	const TFunction<void(AActor*)>& OnSpawned = [RowIndex](const AActor* SpawnedActor)
+	{
+		UMapComponent* MapComponent = UMapComponent::GetMapComponent(SpawnedActor);
+		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+
+		const ULevelActorRow* Row = MapComponent->GetActorDataAssetChecked().GetRowByIndex(RowIndex);
+		if (ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' was not found by '%i' index!"), __LINE__, __FUNCTION__, RowIndex))
+		{
+			MapComponent->SetCustomMeshAsset(Row->Mesh);
+		}
+	};
+	GeneratedMap.SpawnActorByType(ActorType, Cell, OnSpawned);
 }
 
 /*********************************************************************************************

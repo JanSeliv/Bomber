@@ -323,6 +323,7 @@ public:
 	 * E.g: for level with 5 rows and 5 columns, the center cell will be (2,2). */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static void GetCenterCellPositionOnLevel(int32& OutColumnX, int32& OutRowY);
+	static FIntPoint GetCenterCellPositionOnLevel();
 
 #pragma region CornerCell
 	/** Returns 4 corner cells of the Generated Map respecting its current size. */
