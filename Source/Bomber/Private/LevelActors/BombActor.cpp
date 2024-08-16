@@ -259,12 +259,13 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 	Super::SetActorHiddenInGame(bNewHidden);
 }
 
+// Destroy bomb and burst explosion cells, calls multicast event
 void ABombActor::DetonateBomb()
 {
 	if (!HasAuthority()
 	    || IsHidden()
-	    || FireRadiusInternal < MIN_FIRE_RADIUS
-	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame
+	    || !ensureMsgf(FireRadiusInternal >= MIN_FIRE_RADIUS, TEXT("ASSERT: [%i] %hs:\n'FireRadiusInternal' (%i) is less than 'MIN_FIRE_RADIUS' (%i)!"), __LINE__, __FUNCTION__, FireRadiusInternal, MIN_FIRE_RADIUS))
 	{
 		return;
 	}
@@ -289,7 +290,7 @@ void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& Explo
 	}
 
 	// Reset Fire Radius to avoid destroying the bomb again
-	FireRadiusInternal = INDEX_NONE;
+	FireRadiusInternal = MIN_FIRE_RADIUS;
 
 	// Spawn emitters
 	ensureMsgf(BombRow->BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombRow->BombVFX' is not set!"), __LINE__, __FUNCTION__);

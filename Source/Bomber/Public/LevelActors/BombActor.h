@@ -65,7 +65,7 @@ protected:
 
 	/** The radius of the blast to each side, is set by player with InitBomb on spawning. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
-	int32 FireRadiusInternal = INDEX_NONE;
+	int32 FireRadiusInternal = MIN_FIRE_RADIUS;
 
 	/** The type of the bomb, is set by player with InitBomb on spawning. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Type"))
