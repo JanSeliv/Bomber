@@ -4,6 +4,8 @@
 
 #include "MetaCheatManager.h"
 //---
+#include "HAL/IConsoleManager.h" // TAutoConsoleVariable
+//---
 #include "MyCheatManager.generated.h"
 
 enum class EActorType : uint8;
@@ -105,6 +107,10 @@ public:
 	 * AI
 	 ********************************************************************************************* */
 public:
+	/** Enable or disable all bots.
+	 * Bomber.AI.SetEnabled 0 - disable all bots. */
+	static TAutoConsoleVariable<bool> CVarAISetEnabled;
+
 	/**
 	 * Override the level of each powerup for bots.
 	 * @param NewLevel 1 is minimum, 5 is maximum.

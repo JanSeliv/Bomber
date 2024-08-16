@@ -192,6 +192,13 @@ void UMyCheatManager::SetAutoCopilot()
  * AI
  ********************************************************************************************* */
 
+// Enable or disable all bots
+TAutoConsoleVariable<bool> UMyCheatManager::CVarAISetEnabled(
+	TEXT("Bomber.AI.SetEnabled"),
+	true,
+	TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
+	ECVF_Cheat);
+
 // Override the level of each powerup for bots
 void UMyCheatManager::SetAIPowerups(int32 NewLevel)
 {

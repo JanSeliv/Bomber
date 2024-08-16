@@ -6,6 +6,7 @@
 #include "Components/MapComponent.h"
 #include "DataAssets/AIDataAsset.h"
 #include "DataAssets/GameStateDataAsset.h"
+#include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
@@ -21,13 +22,6 @@
 #endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyAIController)
-
-// Enable or disable all bots
-static TAutoConsoleVariable<bool> CVarAISetEnabled(
-	TEXT("Bomber.AI.SetEnabled"),
-	true,
-	TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
-	ECVF_Default);
 
 // Sets default values for this character's properties
 AMyAIController::AMyAIController()
@@ -197,7 +191,7 @@ void AMyAIController::UpdateAI()
 	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
 	if (!OwnerInternal
 	    || !IsValid(MapComponent)
-	    || !CVarAISetEnabled.GetValueOnAnyThread()) // AI is disabled
+	    || !UMyCheatManager::CVarAISetEnabled.GetValueOnAnyThread()) // AI is disabled
 	{
 		return;
 	}
