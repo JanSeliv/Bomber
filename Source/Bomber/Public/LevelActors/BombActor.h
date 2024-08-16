@@ -4,14 +4,13 @@
 
 #include "GameFramework/Actor.h"
 //---
-#include "Bomber.h" // ELevelType
-//---
 #include "BombActor.generated.h"
 
 #define MIN_FIRE_RADIUS 1
 #define DEFAULT_LIFESPAN -1.f
 
 struct FCell;
+enum class ELevelType : uint8;
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.
@@ -45,7 +44,11 @@ public:
 
 	/** Returns the type of the bomb. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE ELevelType GetBombType() const { return BombTypeInternal; }
+	ELevelType GetBombType() const;
+
+	/** Applies the bomb type. It impacts the bomb mesh, material and VFX. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetBombType(ELevelType InBombType);
 
 	/** Sets the defaults of the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
@@ -68,10 +71,6 @@ protected:
 	 * @warning don't use directly, even in this class, but call GetExplosionRadius() instead to support cheat overrides. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
 	int32 FireRadiusInternal = MIN_FIRE_RADIUS;
-
-	/** The type of the bomb, is set by player with InitBomb on spawning. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Type"))
-	ELevelType BombTypeInternal = ELevelType::None;
 
 	/** Current material of this bomb, is different for each player. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))

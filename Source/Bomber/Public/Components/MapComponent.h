@@ -9,6 +9,7 @@
 #include "MapComponent.generated.h"
 
 enum class EActorType : uint8;
+enum class ELevelType : uint8;
 
 /** Typedef to allow for some nicer looking sets of map components */
 typedef TSet<class UMapComponent*> FMapComponents;
@@ -99,6 +100,11 @@ public:
 	/** Get the owner's data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	EActorType GetActorType() const;
+
+	/** Returns the level type by current mesh.
+	 * If often used to determine the variation of the actor across different rows from the Data Asset. */ 
+	UFUNCTION(BlueprintPure, Category = "C++")
+	ELevelType GetLevelType() const;
 
 	/** Get the owner's data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")

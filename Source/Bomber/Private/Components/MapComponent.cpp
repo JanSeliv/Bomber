@@ -203,6 +203,13 @@ EActorType UMapComponent::GetActorType() const
 	return GetActorDataAssetChecked().GetActorType();
 }
 
+// Returns the level type by current mesh
+ELevelType UMapComponent::GetLevelType() const
+{
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByMesh(CustomMeshAssetInternal);
+	return FoundRow ? FoundRow->LevelType : ELevelType::None;
+}
+
 // Get the owner's data asset
 const ULevelActorDataAsset& UMapComponent::GetActorDataAssetChecked() const
 {
