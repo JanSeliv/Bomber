@@ -11,6 +11,7 @@
 class ULevelSequence;
 
 enum class ENMMState : uint8;
+enum class ENMMCameraRailTransitionState : uint8;
 
 /**
  * Represents a spot where a character can be selected in the Main Menu.
@@ -128,4 +129,8 @@ protected:
 	/** Called when the sequence is paused or when cinematic was ended. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnMasterSequencePaused();
+
+	/** Called when the Camera Rail transition state changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCameraRailTransitionStateChanged(ENMMCameraRailTransitionState CameraRailTransitionStateChanged);
 };

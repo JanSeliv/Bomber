@@ -13,6 +13,7 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -137,6 +138,8 @@ void UNMMSpotComponent::BeginPlay()
 		// State is already set, apply it
 		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
+
+	UNMMCameraSubsystem::Get().OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
 
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
@@ -362,5 +365,15 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 	{
 		// Cinematic is finished, start the countdown
 		MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
+	}
+}
+
+// Called when the Camera Rail transition state changed
+void UNMMSpotComponent::OnCameraRailTransitionStateChanged_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
+{
+	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition
+		&& !IsActiveSpot())
+	{
+		StopMasterSequence();
 	}
 }
