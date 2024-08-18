@@ -129,6 +129,15 @@ void UCellsUtilsLibrary::GetCenterCellPositionOnLevel(int32& OutColumnX, int32& 
 	OutRowY = CenterCellPosition.Y;
 }
 
+// Returns the center cell location on the level
+FIntPoint UCellsUtilsLibrary::GetCenterCellPositionOnLevel()
+{
+	int32 OutColumnX;
+	int32 OutRowY;
+	GetCenterCellPositionOnLevel(/*out*/OutColumnX, /*out*/OutRowY);
+	return FIntPoint(OutColumnX, OutRowY);
+}
+
 // Return closest corner cell to the given cell
 FCell UCellsUtilsLibrary::GetNearestCornerCellOnLevel(const FCell& CellToCheck)
 {

@@ -41,7 +41,7 @@ public:
 
 protected:
 	/** Contains all player controllers.  */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Controllers"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Controllers"))
 	TArray<TObjectPtr<class AMyPlayerController>> PlayerControllersInternal;
 
 	/*********************************************************************************************

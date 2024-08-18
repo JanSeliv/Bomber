@@ -109,27 +109,27 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** The general sound volume for all sound classes in game, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Volume"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Volume"))
 	double MasterVolumeInternal;
 
 	/** The sound volume for music sound class, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
 	double MusicVolumeInternal;
 
 	/** The sound volume for SFX sound class, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
 	double SFXVolumeInternal;
 
 	/** The component that is used to play different background musics.  */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))
 	TObjectPtr<UAudioComponent> BackgroundMusicComponentInternal = nullptr;
 
 	/** The component that is used to store reference for EndGameCountdown SFX. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))
 	TObjectPtr<UAudioComponent> ActiveEndGameCountdownSFXInternal = nullptr;
 
 	/** The component that is used to store reference for Active Start Game SFX. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active Start-Game Countdown SFX"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active Start-Game Countdown SFX"))
 	TObjectPtr<UAudioComponent> ActiveStartGameCountdownSFXInternal = nullptr;
 
 	/* ---------------------------------------------------

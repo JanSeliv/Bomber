@@ -6,6 +6,8 @@
 //---
 #include "WidgetsSubsystem.generated.h"
 
+enum class ESlateVisibility : uint8;
+
 /**
  * Is used to manage User Widgets with lifetime of Local Player (similar to HUD).
  * @see Access its data with UUIDataAsset (Content/Bomber/DataAssets/DA_UI).
@@ -22,7 +24,7 @@ public:
 	static UWidgetsSubsystem* GetWidgetsSubsystem(const UObject* OptionalWorldContext = nullptr);
 
 	/** ---------------------------------------------------
-	*		Public properties
+	*		Public delegates
 	* --------------------------------------------------- */
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWidgetsInitialized);
@@ -41,9 +43,20 @@ public:
 	*		Public functions
 	* --------------------------------------------------- */
 
+	/** Create specified widget and add it to Manageable widgets list, so its visibility can be changed globally. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	class UUserWidget* CreateManageableWidget(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0, const UObject* OptionalWorldContext = nullptr);
+
+	template <typename T = UUserWidget>
+	FORCEINLINE T* CreateManageableWidgetChecked(TSubclassOf<T> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0) { return CastChecked<T>(CreateManageableWidget(WidgetClass, bAddToViewport, ZOrder)); }
+
+	/** Removes given widget from the list and destroys it. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void DestroyManageableWidget(UUserWidget* Widget);
+
 	/** Returns true if widgets ere initialized. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool AreWidgetInitialized() const { return bAreWidgetInitializedInternal; }
+	FORCEINLINE bool AreWidgetInitialized() const { return !AllManageableWidgetsInternal.IsEmpty(); }
 
 	/** Returns the current in-game widget object. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -74,33 +87,35 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** Is true if widgets are initialized. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Are Widget Initialized"))
-	bool bAreWidgetInitializedInternal = false;
+	/** Contains all widgets that are managed by this subsystem. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Managable Widgets"))
+	TArray<TObjectPtr<UUserWidget>> AllManageableWidgetsInternal;
 
 	/** The current in-game widget object. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "HUD Widget"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "HUD Widget"))
 	TObjectPtr<class UHUDWidget> HUDWidgetInternal = nullptr;
 
 	/** The current settings widget object. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Settings Widget"))
 	TObjectPtr<class USettingsWidget> SettingsWidgetInternal = nullptr;
 
 	/** The current FPS counter widget object. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Counter Widget"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "FPS Counter Widget"))
 	TObjectPtr<class UUserWidget> FPSCounterWidgetInternal = nullptr;
 
 	/** All nickname widget objects for each player. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nickname Widgets"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Nickname Widgets"))
 	TArray<TObjectPtr<class UPlayerName3DWidget>> NicknameWidgetsInternal;
 
 	/** If true, shows FPS counter widget on the HUD, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is FPS Counter Enabled"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is FPS Counter Enabled"))
 	bool bIsFPSCounterEnabledInternal;
 
 	/* ---------------------------------------------------
 	*		Protected functions
 	* --------------------------------------------------- */
+
+	friend class UMyCheatManager;
 
 	/** Callback for when the player controller is changed on this subsystem's owning local player. */
 	virtual void PlayerControllerChanged(APlayerController* NewPlayerController) override;

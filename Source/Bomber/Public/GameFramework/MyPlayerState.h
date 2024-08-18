@@ -107,7 +107,7 @@ public:
 protected:
 	/** Is created for saving purposes since base APlayerState::PlayerNamePrivate property is not 'Config'.
 	 * Can contain different languages, uppercase, lowercase etc, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Saved Player Name"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Saved Player Name"))
 	FName SavedPlayerNameInternal;
 
 	/** Called on server when settings are saved to apply local player name. */
@@ -137,7 +137,7 @@ public:
 
 protected:
 	/** Is true when player is dead. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_IsCharacterDead", Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Character Dead"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_IsCharacterDead", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Character Dead"))
 	bool bIsCharacterDeadInternal = false;
 
 	/** Called on client when character Dead status is changed. */

@@ -9,6 +9,7 @@
 #include "MapComponent.generated.h"
 
 enum class EActorType : uint8;
+enum class ELevelType : uint8;
 
 /** Typedef to allow for some nicer looking sets of map components */
 typedef TSet<class UMapComponent*> FMapComponents;
@@ -100,6 +101,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	EActorType GetActorType() const;
 
+	/** Returns the level type by current mesh.
+	 * If often used to determine the variation of the actor across different rows from the Data Asset. */ 
+	UFUNCTION(BlueprintPure, Category = "C++")
+	ELevelType GetLevelType() const;
+
 	/** Get the owner's data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class ULevelActorDataAsset* GetActorDataAsset() const { return ActorDataAssetInternal; }
@@ -140,7 +146,7 @@ protected:
 	* --------------------------------------------------- */
 
 	/** Owner's cell location on the Generated Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
 	FCell CellInternal = FCell::InvalidCell;
 
 	/** Contains exposed for designers properties for the spawned owner. */
@@ -154,11 +160,11 @@ protected:
 	/** Hold custom mesh asset if changed.
 	 * Is null by default or when SetDefaultMesh() is called.
 	 * Is set in SetCustomMeshAsset(). */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CustomMeshAsset", Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CustomMeshAsset", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
 	TObjectPtr<UStreamableRenderAsset> CustomMeshAssetInternal = nullptr;
 
 	/** If true the owner is undestroyable, is used by skills and cheat manager. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
 	bool bIsUndestroyableInternal = false;
 
 	/** The Collision Component, is attached to an owner. */
@@ -166,7 +172,7 @@ protected:
 	TObjectPtr<class UBoxComponent> BoxCollisionComponentInternal = nullptr;
 
 	/** Actual response type of the collision box of an actor. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response"))
 	FCollisionResponseContainer CollisionResponseInternal = ECR_MAX;
 
 	/* ---------------------------------------------------

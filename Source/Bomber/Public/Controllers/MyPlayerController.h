@@ -48,7 +48,7 @@ public:
 	 ********************************************************************************************* */
 protected:
 	/** List of all input contexts to be auto turned of or on according current game state. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Input Contexts"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Input Contexts"))
 	TArray<TObjectPtr<const UMyInputMappingContext>> AllInputContextsInternal;
 
 	/** Component that responsible for mouse-related logic like showing and hiding itself. */
@@ -82,9 +82,6 @@ protected:
 
 	/** Is overridden to spawn player state or reuse existing one. */
 	virtual void InitPlayerState() override;
-
-	/** Is overriden to setup camera manager once spawned. */
-	virtual void SpawnPlayerCameraManager() override;
 
 	/*********************************************************************************************
 	 * Events
@@ -151,5 +148,27 @@ public:
 	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
+
 	UMouseActivityComponent& GetMouseActivityComponentChecked() const;
+
+	/*********************************************************************************************
+	 * Camera
+	 ********************************************************************************************* */
+public:
+	/** Is overriden to setup camera manager once spawned. */
+	virtual void SpawnPlayerCameraManager() override;
+
+	/** Is overriden to return correct camera location and rotation for the player. */
+	virtual void GetPlayerViewPoint(FVector& Location, FRotator& Rotation) const override;
+
+	/** Is called by ToggleDebugCamera cheat (in build) and F8 button (in editor).
+	 * @param bEnable true, when player moves the camera around the level freely during the game in editor or build.
+	 * Is not wrapped by WITH_EDITOR as might be called in the build. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (DevelopmentOnly, DisplayName = "Debug Camera Enabled"))
+	bool bIsDebugCameraEnabledInternal = false;
+
+#if WITH_EDITOR
+	/** Is called in editor by F8 button, when switched between PIE and SIE during the game to handle the Debug Camera. */
+	void OnPreSwitchBeginPIEAndSIE(bool bIsPIE);
+#endif // WITH_EDITOR
 };

@@ -39,7 +39,7 @@ public:
 
 protected:
 	/** Store the game state for the current game. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CurrentGameState", meta = (BlueprintProtected, DisplayName = "Current Game State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CurrentGameState", AdvancedDisplay, meta = (BlueprintProtected, DisplayName = "Current Game State"))
 	ECurrentGameState CurrentGameStateInternal = ECurrentGameState::None;
 
 	/** Updates current game state. */
@@ -97,7 +97,7 @@ public:
 
 protected:
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_StartingTimerSecRemain", meta = (BlueprintProtected, DisplayName = "Starting Timer Seconds Remain"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_StartingTimerSecRemain", AdvancedDisplay, meta = (BlueprintProtected, DisplayName = "Starting Timer Seconds Remain"))
 	float StartingTimerSecRemainInternal = 0.F;
 
 	/** Is called on client when the 'Three-two-one-GO' timer was updated. */
@@ -137,7 +137,7 @@ public:
 
 protected:
 	/** Seconds to the end of the round. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_InGameTimerSecRemain", meta = (BlueprintProtected, DisplayName = "In-Game Timer Seconds Remain"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_InGameTimerSecRemain", AdvancedDisplay, meta = (BlueprintProtected, DisplayName = "In-Game Timer Seconds Remain"))
 	float InGameTimerSecRemainInternal = 0.F;
 
 	/** Is called on client when in-match timer was updated. */

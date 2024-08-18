@@ -10,6 +10,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/ItemDataAsset.h"
 #include "DataAssets/PlayerDataAsset.h"
+#include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
 #include "LevelActors/BombActor.h"
@@ -34,8 +35,78 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerCharacter)
 
+/*********************************************************************************************
+ * Powerups
+ ********************************************************************************************* */
+
 // Default amount on picked up items
 const FPowerUp FPowerUp::DefaultData = FPowerUp();
+
+// Operator to set all values at once from one int32
+FPowerUp& FPowerUp::operator=(int32 NewValue)
+{
+	SkateN = NewValue;
+	BombN = NewValue;
+	BombNCurrent = NewValue;
+	FireN = NewValue;
+	return *this;
+}
+
+// Set powerups levels all at once
+void APlayerCharacter::SetPowerups(int32 NewLevel)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// Clamp by min and max values
+	static constexpr int32 MinItemsNum = 1;
+	const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
+	const int32 NewLevelClamped = FMath::Clamp(NewLevel, MinItemsNum, MaxItemsNum);
+
+	PowerupsInternal = NewLevelClamped;
+	ApplyPowerups();
+}
+
+// Apply effect of picked up powerups
+void APlayerCharacter::ApplyPowerups()
+{
+	// Apply speed
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		static constexpr float SpeedMultiplier = 100.F;
+		const float SkateAdditiveStrength = UItemDataAsset::Get().GetSkateAdditiveStrength();
+		const int32 SkateN = PowerupsInternal.SkateN * SpeedMultiplier + SkateAdditiveStrength;
+		MovementComponent->MaxWalkSpeed = SkateN;
+	}
+
+	// Here you might to apply others types of powerups
+	// ...
+
+	// Notify listeners
+	if (OnPowerUpsChanged.IsBound())
+	{
+		OnPowerUpsChanged.Broadcast(PowerupsInternal);
+	}
+}
+
+// Reset all picked up powerups
+void APlayerCharacter::ResetPowerups()
+{
+	PowerupsInternal = FPowerUp::DefaultData;
+	ApplyPowerups();
+}
+
+// Is called on clients to apply powerups
+void APlayerCharacter::OnRep_Powerups()
+{
+	ApplyPowerups();
+}
+
+/** ---------------------------------------------------
+ *		Public functions
+ * --------------------------------------------------- */
 
 // Sets default values
 APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
@@ -261,15 +332,15 @@ void APlayerCharacter::OnConstructionPlayerCharacter()
 	if (UUtilsLibrary::IsEditorNotPieWorld()                                         // [IsEditorNotPieWorld] only
 	    && ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal) > 0) // Is a bot
 	{
-		MyAIControllerInternal = Cast<AMyAIController>(GetController());
+		AIControllerInternal = Cast<AAIController>(GetController());
 		if (!MapComponentInternal->bShouldShowRenders)
 		{
-			if (MyAIControllerInternal)
+			if (AIControllerInternal)
 			{
-				MyAIControllerInternal->Destroy();
+				AIControllerInternal->Destroy();
 			}
 		}
-		else if (!MyAIControllerInternal) // Is a bot with debug visualization and AI controller is not created yet
+		else if (!AIControllerInternal) // Is a bot with debug visualization and AI controller is not created yet
 		{
 			SpawnDefaultController();
 			if (AController* PlayerController = GetController())
@@ -357,14 +428,6 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 	}
 
 	ResetPowerups();
-}
-
-// Called when this Pawn is possessed. Only called on the server (or in standalone)
-void APlayerCharacter::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-
-	ApplyCustomPlayerMeshData();
 }
 
 /*********************************************************************************************
@@ -459,40 +522,6 @@ void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
 	}
 }
 
-// Apply effect of picked up powerups
-void APlayerCharacter::ApplyPowerups()
-{
-	// Apply speed
-	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
-	{
-		static constexpr float SpeedMultiplier = 100.F;
-		const float SkateAdditiveStrength = UItemDataAsset::Get().GetSkateAdditiveStrength();
-		const int32 SkateN = PowerupsInternal.SkateN * SpeedMultiplier + SkateAdditiveStrength;
-		MovementComponent->MaxWalkSpeed = SkateN;
-	}
-
-	// Apply others types of powerups
-
-	// Notify listeners
-	if (OnPowerUpsChanged.IsBound())
-	{
-		OnPowerUpsChanged.Broadcast(PowerupsInternal);
-	}
-}
-
-// Reset all picked up powerups
-void APlayerCharacter::ResetPowerups()
-{
-	PowerupsInternal = FPowerUp::DefaultData;
-	ApplyPowerups();
-}
-
-// Is called on clients to apply powerups
-void APlayerCharacter::OnRep_Powerups()
-{
-	ApplyPowerups();
-}
-
 // Updates collision object type by current character ID
 void APlayerCharacter::UpdateCollisionObjectType()
 {
@@ -525,61 +554,6 @@ void APlayerCharacter::UpdateCollisionObjectType()
 	}
 
 	CapsuleComp->SetCollisionObjectType(CollisionObjectType);
-}
-
-// Possess a player or AI controller in dependence of current Character ID
-void APlayerCharacter::TryPossessController()
-{
-	if (!HasAuthority()
-	    || UUtilsLibrary::IsEditorNotPieWorld())
-	{
-		// Should not spawn posses in PIE
-		return;
-	}
-
-	const int32 PlayerId = GetPlayerId();
-	if (!ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	AController* ControllerToPossess = nullptr;
-
-	if (AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId))
-	{
-		if (MyPC->bCinematicMode)
-		{
-			// Prevent crash on trying to posses the player during playing the sequencer
-			return;
-		}
-
-		// Possess the player
-		ControllerToPossess = MyPC;
-	}
-	else // Possess the AI
-	{
-		// Spawn AI if is needed
-		if (!MyAIControllerInternal)
-		{
-			MyAIControllerInternal = GetWorld()->SpawnActor<AMyAIController>(AIControllerClass, GetActorTransform());
-		}
-
-		ControllerToPossess = MyAIControllerInternal;
-	}
-
-	if (!ControllerToPossess
-	    || ControllerToPossess == Controller)
-	{
-		return;
-	}
-
-	if (Controller)
-	{
-		// At first, unpossess previous controller
-		Controller->UnPossess();
-	}
-
-	ControllerToPossess->Possess(this);
 }
 
 // Is called on game mode post login to handle character logic when new player is connected
@@ -626,6 +600,78 @@ void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UOb
 	{
 		InPlayerState->SetCharacterDead(true);
 	}
+}
+
+/*********************************************************************************************
+ * Player/AI Controller
+ ********************************************************************************************* */
+
+// Possess a player or AI controller in dependence of current Character ID
+void APlayerCharacter::TryPossessController(TSubclassOf<AController> ControllerClass/* = nullptr*/)
+{
+	if (!HasAuthority()
+	    || UUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// Should not spawn posses in PIE
+		return;
+	}
+
+	const int32 PlayerId = GetPlayerId();
+	if (!ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	AController* ControllerToPossess = nullptr;
+
+	const AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode();
+	checkf(MyGameMode, TEXT("ERROR: [%i] %hs:\n'MyGameMode' is null!"), __LINE__, __FUNCTION__);
+
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId);
+	const bool bIsPlayerControllerClass = !ControllerClass || ControllerClass->IsChildOf(MyGameMode->PlayerControllerClass);
+
+	if (bIsPlayerControllerClass
+	    && MyPC
+	    && !MyPC->bCinematicMode) // Don't possess player if it's the Render Movie
+	{
+		ControllerToPossess = MyPC;
+	}
+	// Possess AI
+	else if (!bIsPlayerControllerClass
+	         || !ControllerToPossess)
+	{
+		const TSubclassOf<AController> FinalAIControllerClass = ControllerClass ? ControllerClass : AIControllerClass;
+		if (!AIControllerInternal
+		    || !AIControllerInternal->IsA(FinalAIControllerClass))
+		{
+			// Spawn AI controller
+			AIControllerInternal = GetWorld()->SpawnActor<AAIController>(FinalAIControllerClass, GetActorTransform());
+		}
+
+		ControllerToPossess = AIControllerInternal;
+	}
+
+	if (!ControllerToPossess
+	    || ControllerToPossess == Controller)
+	{
+		return;
+	}
+
+	if (Controller)
+	{
+		// At first, unpossess previous controller
+		Controller->UnPossess();
+	}
+
+	ControllerToPossess->Possess(this);
+}
+
+// Called when this Pawn is possessed. Only called on the server (or in standalone)
+void APlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	ApplyCustomPlayerMeshData();
 }
 
 /*********************************************************************************************
@@ -741,7 +787,7 @@ void APlayerCharacter::ApplyCustomPlayerMeshData()
 }
 
 // Set and apply default skeletal mesh for this player
-void APlayerCharacter::SetDefaultPlayerMeshData()
+void APlayerCharacter::SetDefaultPlayerMeshData(bool bForcePlayerSkin/* = false*/)
 {
 	if (!HasAuthority())
 	{
@@ -760,7 +806,14 @@ void APlayerCharacter::SetDefaultPlayerMeshData()
 	const bool bIsPlayer = IsPlayerControlled() || PlayerId == 0;
 	const ELevelType PlayerFlag = UMyBlueprintFunctionLibrary::GetLevelType();
 	constexpr ELevelType AIFlag = ELT::None;
-	const ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
+	ELevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
+
+	if (bForcePlayerSkin)
+	{
+		// Force each bot to look like different player
+		LevelType = static_cast<ELevelType>(1 << PlayerId);
+	}
+
 	const UPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UPlayerRow>(TO_ENUM(ELevelType, LevelType));
 	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__))
 	{

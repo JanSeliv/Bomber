@@ -47,11 +47,11 @@ protected:
 	TSoftObjectPtr<const class UFootTrailsDataAsset> FootTrailsDataAssetInternal = nullptr;
 
 	/** Converts actors with static meshes to instanced static meshes. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Instanced Static Mesh Actor"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Instanced Static Mesh Actor"))
 	TObjectPtr<class AInstancedStaticMeshActor> InstancedStaticMeshActorInternal = nullptr;
 
 	/** Loaded foot trails archetypes for all levels. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Foot Trail Instances"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Foot Trail Instances"))
 	TMap<FFootTrailArchetype, TObjectPtr<UStaticMesh>> FootTrailInstancesInternal;
 
 	/*********************************************************************************************

@@ -3,7 +3,7 @@
 #include "Components/NMMHUDComponent.h"
 //---
 #include "Data/NMMDataAsset.h"
-#include "MyUtilsLibraries/WidgetUtilsLibrary.h"
+#include "Subsystems/WidgetsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 #include "Widgets/NewMainMenuWidget.h"
 #include "Widgets/NMMCinematicStateWidget.h"
@@ -22,11 +22,13 @@ void UNMMHUDComponent::OnRegister()
 {
 	Super::OnRegister();
 
-	constexpr int32 HighZOrder = 3;
-	constexpr bool bAddToViewport = true;
-	MainMenuWidgetInternal = FWidgetUtilsLibrary::CreateWidgetChecked<UNewMainMenuWidget>(UNMMDataAsset::Get().GetMainMenuWidgetClass(), bAddToViewport, HighZOrder);
-
-	InCinematicStateWidgetInternal = FWidgetUtilsLibrary::CreateWidgetChecked<UNMMCinematicStateWidget>(UNMMDataAsset::Get().GetInCinematicStateWidgetClass());
+	if (UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem())
+	{
+		constexpr int32 HighZOrder = 3;
+		constexpr bool bAddToViewport = true;
+		MainMenuWidgetInternal = WidgetsSubsystem->CreateManageableWidgetChecked<UNewMainMenuWidget>(UNMMDataAsset::Get().GetMainMenuWidgetClass(), bAddToViewport, HighZOrder);
+		InCinematicStateWidgetInternal = WidgetsSubsystem->CreateManageableWidgetChecked<UNMMCinematicStateWidget>(UNMMDataAsset::Get().GetInCinematicStateWidgetClass());
+	}
 }
 
 // Clears all transient data created by this component
@@ -34,17 +36,14 @@ void UNMMHUDComponent::OnUnregister()
 {
 	// --- Destroy Main Menu widgets
 
-	if (MainMenuWidgetInternal)
+	if (UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem())
 	{
-		FWidgetUtilsLibrary::DestroyWidget(*MainMenuWidgetInternal);
-		MainMenuWidgetInternal = nullptr;
+		WidgetsSubsystem->DestroyManageableWidget(MainMenuWidgetInternal);
+		WidgetsSubsystem->DestroyManageableWidget(InCinematicStateWidgetInternal);
 	}
 
-	if (InCinematicStateWidgetInternal)
-	{
-		FWidgetUtilsLibrary::DestroyWidget(*InCinematicStateWidgetInternal);
-		InCinematicStateWidgetInternal = nullptr;
-	}
+	MainMenuWidgetInternal = nullptr;
+	InCinematicStateWidgetInternal = nullptr;
 
 	Super::OnUnregister();
 }

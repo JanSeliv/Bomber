@@ -80,6 +80,6 @@ public:
 protected:
 	/** The game difficulty level, where 0 is the easiest and 3 is the hardest.
 	 * Is config property, can be set in Settings menu. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Difficulty Level"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Difficulty Level"))
 	int32 DifficultyLevelInternal;
 };

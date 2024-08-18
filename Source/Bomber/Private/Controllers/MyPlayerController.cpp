@@ -24,6 +24,10 @@
 #include "Framework/Application/NavigationConfig.h"
 #include "Framework/Application/SlateApplication.h"
 //---
+#if WITH_EDITOR
+#include "Editor.h"
+#endif // WITH_EDITOR
+//---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyPlayerController)
 
 // Sets default values for this controller's properties
@@ -125,6 +129,14 @@ void AMyPlayerController::BeginPlay()
 	TArray<const UMyInputMappingContext*> InputContexts;
 	UPlayerInputDataAsset::Get().GetAllInputContexts(/*out*/InputContexts);
 	SetupInputContexts(InputContexts);
+
+#if WITH_EDITOR
+	if (GEditor)
+	{
+		// Listen to handle switch between PIE and SIE (F8) during the game
+		FEditorDelegates::OnPreSwitchBeginPIEAndSIE.AddUObject(this, &ThisClass::OnPreSwitchBeginPIEAndSIE);
+	}
+#endif // WITH_EDITOR
 }
 
 // Is overriden to be used when Input System is initialized
@@ -188,16 +200,6 @@ void AMyPlayerController::InitPlayerState()
 	// Set existing player state for this controller
 	PlayerState = InPlayerState;
 	PlayerState->SetOwner(this);
-}
-
-// Is overriden to setup camera manager once spawned
-void AMyPlayerController::SpawnPlayerCameraManager()
-{
-	Super::SpawnPlayerCameraManager();
-
-	// Allow clients to set their own ViewTarget and the server should not replicate it, so each client can view own cinematic
-	checkf(PlayerCameraManager, TEXT("ERROR: [%i] %hs:\n'PlayerCameraManager' was not spawned!"), __LINE__, __FUNCTION__);
-	PlayerCameraManager->bClientSimulatingViewTarget = true;
 }
 
 /*********************************************************************************************
@@ -479,3 +481,39 @@ UMouseActivityComponent& AMyPlayerController::GetMouseActivityComponentChecked()
 	checkf(MouseComponentInternal, TEXT("ERROR: [%i] %hs:\n'MouseComponentInternal' is null!"), __LINE__, __FUNCTION__);
 	return *MouseComponentInternal;
 }
+
+/*********************************************************************************************
+ * Camera
+ ********************************************************************************************* */
+
+// Is overriden to setup camera manager once spawned
+void AMyPlayerController::SpawnPlayerCameraManager()
+{
+	Super::SpawnPlayerCameraManager();
+
+	// Allow clients to set their own ViewTarget and the server should not replicate it, so each client can view own cinematic
+	checkf(PlayerCameraManager, TEXT("ERROR: [%i] %hs:\n'PlayerCameraManager' was not spawned!"), __LINE__, __FUNCTION__);
+	PlayerCameraManager->bClientSimulatingViewTarget = true;
+}
+
+// Is overriden to return correct camera location and rotation for the player
+void AMyPlayerController::GetPlayerViewPoint(FVector& Location, FRotator& Rotation) const
+{
+	Super::GetPlayerViewPoint(Location, Rotation);
+
+#if !UE_BUILD_SHIPPING
+	if (bIsDebugCameraEnabledInternal)
+	{
+		// Don't use our 2D-camera roll in debug camera to maintain proper rotation in 3D 
+		Rotation.Roll = 0.f;
+	}
+#endif // !UE_BUILD_SHIPPING
+}
+
+#if WITH_EDITOR
+// Is called in editor by F8 button, when switched between PIE and SIE during the game to handle the Debug Camera
+void AMyPlayerController::OnPreSwitchBeginPIEAndSIE(bool bPIE)
+{
+	bIsDebugCameraEnabledInternal = !bPIE;
+}
+#endif

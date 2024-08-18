@@ -9,16 +9,16 @@
 #include "Controllers/MyPlayerController.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMCameraSubsystem.h"
+#include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
-#include "Subsystems/NMMCameraSubsystem.h"
 //---
 #include "Components/Button.h"
 #include "Kismet/KismetSystemLibrary.h"
 //---
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuWidget)
 
 // Called after the underlying slate widget is constructed
@@ -89,14 +89,14 @@ void UNewMainMenuWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewS
 void UNewMainMenuWidget::OnPlayButtonPressed()
 {
 	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
-	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %s:\n'MyPc' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPc' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
 	const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
-	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %s:\n'CinematicRow' is not valid!"), __LINE__, *FString(__FUNCTION__))
+	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %hs:\n'CinematicRow' is not valid!"), __LINE__, __FUNCTION__)
 		|| !MainMenuSpot->GetMeshChecked().IsVisible())
 	{
 		// The spot is locked
@@ -142,8 +142,8 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 
 	// Switch the Main Menu spot
 	const UNMMSpotComponent* MenuSpot = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
-	if (!ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %s:\n'MenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__))
-		&& UNMMBaseSubsystem::Get().GetCurrentMenuState() == ENMMState::Idle)
+	if (ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %hs:\n'MenuSpot' is not valid!"), __LINE__, __FUNCTION__)
+		&& UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled())
 	{
 		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot->GetMeshChecked().GetCustomPlayerMeshData();
 		UpdatePlayerCharacterMesh(PlayerMeshData);

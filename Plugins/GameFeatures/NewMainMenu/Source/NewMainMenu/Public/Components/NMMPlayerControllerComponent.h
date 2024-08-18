@@ -57,7 +57,7 @@ public:
 	 ********************************************************************************************* */
 protected:
 	/** Contains loaded and cached Save Game Data of the Main Menu. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Save Game Data"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Save Game Data"))
 	TObjectPtr<class UNMMSaveGameData> SaveGameDataInternal = nullptr;
 
 	/*********************************************************************************************
