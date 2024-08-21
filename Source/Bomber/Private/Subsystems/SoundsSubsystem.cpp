@@ -199,9 +199,9 @@ void USoundsSubsystem::PlayStartGameCountdownSFX()
 
 void USoundsSubsystem::StopStartGameCountdownSFX()
 {
-	if (ActiveEndGameCountdownSFXInternal && ActiveEndGameCountdownSFXInternal->IsPlaying())
+	if (ActiveStartGameCountdownSFXInternal && ActiveStartGameCountdownSFXInternal->IsPlaying())
 	{
-		ActiveEndGameCountdownSFXInternal->Stop();
+		ActiveStartGameCountdownSFXInternal->Stop();
 	}
 }
 
