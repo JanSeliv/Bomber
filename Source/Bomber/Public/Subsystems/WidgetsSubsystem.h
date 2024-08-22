@@ -6,8 +6,6 @@
 //---
 #include "WidgetsSubsystem.generated.h"
 
-enum class ESlateVisibility : uint8;
-
 /**
  * Is used to manage User Widgets with lifetime of Local Player (similar to HUD).
  * @see Access its data with UUIDataAsset (Content/Bomber/DataAssets/DA_UI).
@@ -56,7 +54,7 @@ public:
 
 	/** Returns true if widgets ere initialized. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool AreWidgetInitialized() const { return !AllManageableWidgetsInternal.IsEmpty(); }
+	FORCEINLINE bool AreWidgetInitialized() const { return bAreWidgetInitializedInternal; }
 
 	/** Returns the current in-game widget object. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -86,6 +84,10 @@ protected:
 	/* ---------------------------------------------------
 	*		Protected properties
 	* --------------------------------------------------- */
+
+	/** Is true if widgets are initialized. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Are Widget Initialized"))
+	bool bAreWidgetInitializedInternal = false;
 
 	/** Contains all widgets that are managed by this subsystem. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Managable Widgets"))

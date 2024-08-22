@@ -131,6 +131,8 @@ void UWidgetsSubsystem::InitWidgets()
 		NicknameWidgetsInternal.Emplace(NicknameWidget);
 	}
 
+	bAreWidgetInitializedInternal = true;
+
 	if (OnWidgetsInitialized.IsBound())
 	{
 		OnWidgetsInitialized.Broadcast();
@@ -151,6 +153,8 @@ void UWidgetsSubsystem::CleanupWidgets()
 
 	AllManageableWidgetsInternal.Empty();
 	NicknameWidgetsInternal.Empty();
+
+	bAreWidgetInitializedInternal = false;
 }
 
 // Is called right after the game was started and windows size is set
