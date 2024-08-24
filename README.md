@@ -80,6 +80,8 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![Rails](https://github.com/JanSeliv/Bomber/assets/20540872/aa496ae1-a6bb-41d1-a578-566d1af48170)
 - Unique Bomb VFX for each character:
 > ![BombVFXs](https://github.com/JanSeliv/Bomber/assets/20540872/3163ade3-7f5f-40be-9c9e-69c0426b8a29)
+- Implemented **[Progression System](https://github.com/h4rdmol/ProgressionSystem)** by [Valeriy Rotermel](https://github.com/h4rdmol) that unlocks new playable characters as you progress in the game:
+> ![ProgressionSystem](https://github.com/user-attachments/assets/742ad861-f077-44f8-a6ae-048665b8a77f)
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
 
 #### `13.01.2024`
