@@ -266,7 +266,7 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 	// checks if it's halfway of transition
 	constexpr float HalfwayPosition = 0.5f;
 	if (CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition &&
-		FMath::IsNearlyEqual(Progress, HalfwayPosition, KINDA_SMALL_NUMBER))
+		FMath::IsNearlyEqual(Progress, HalfwayPosition, GetWorld()->DeltaTimeSeconds ))
 	{
 		SetNewCameraRailTransitionState(ENMMCameraRailTransitionState::HalfwayTransition);
 	}
