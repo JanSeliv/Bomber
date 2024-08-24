@@ -23,5 +23,5 @@
 	url = https://github.com/JanSeliv/InstancedStaticMeshConverter.git
 [submodule "Plugins/GameFeatures/ProgressionSystem"]
 	path = Plugins/GameFeatures/ProgressionSystem
-	url = git@github.com:h4rdmol/ProgressionSystem.git
+	url = https://github.com/h4rdmol/ProgressionSystem.git
 	branch = main
