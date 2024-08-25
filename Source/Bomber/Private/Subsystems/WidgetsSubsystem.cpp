@@ -27,6 +27,10 @@ UWidgetsSubsystem* UWidgetsSubsystem::GetWidgetsSubsystem(const UObject* Optiona
 	return LocalPlayer ? LocalPlayer->GetSubsystem<UWidgetsSubsystem>() : nullptr;
 }
 
+/*********************************************************************************************
+ * Widgets Creation
+ ********************************************************************************************* */
+
 // Create specified widget and add it to Manageable widgets list, so its visibility can be changed globally
 UUserWidget* UWidgetsSubsystem::CreateManageableWidget(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport, int32 ZOrder, const UObject* OptionalWorldContext)
 {
@@ -51,46 +55,6 @@ void UWidgetsSubsystem::DestroyManageableWidget(UUserWidget* Widget)
 	FWidgetUtilsLibrary::DestroyWidget(*Widget);
 }
 
-// Set true to show the FPS counter widget on the HUD
-void UWidgetsSubsystem::SetFPSCounterEnabled(bool bEnable)
-{
-	if (FPSCounterWidgetInternal)
-	{
-		const ESlateVisibility NewVisibility = bEnable ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed;
-		FPSCounterWidgetInternal->SetVisibility(NewVisibility);
-		bIsFPSCounterEnabledInternal = bEnable;
-	}
-}
-
-// Callback for when the player controller is changed on this subsystem's owning local player
-void UWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerController)
-{
-	Super::PlayerControllerChanged(NewPlayerController);
-
-	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayerController);
-	if (!MyPC
-	    || MyPC->bIsDebugCameraEnabledInternal)
-	{
-		// Do not initialize widgets if different controller is possessed, likely Debug Controller, or Debug Camera is enabled
-		return;
-	}
-
-	if (AreWidgetInitialized())
-	{
-		// New player controller is set, likely level was changed, so perform cleanup first
-		CleanupWidgets();
-	}
-
-	TryInitWidgets();
-}
-
-// Is called when this Subsystem is removed
-void UWidgetsSubsystem::Deinitialize()
-{
-	Super::Deinitialize();
-
-	CleanupWidgets();
-}
 
 // Will try to start the process of initializing all widgets used in game
 void UWidgetsSubsystem::TryInitWidgets()
@@ -155,6 +119,55 @@ void UWidgetsSubsystem::CleanupWidgets()
 	NicknameWidgetsInternal.Empty();
 
 	bAreWidgetInitializedInternal = false;
+}
+
+/*********************************************************************************************
+ * FPS Counter
+ ********************************************************************************************* */
+
+// Set true to show the FPS counter widget on the HUD
+void UWidgetsSubsystem::SetFPSCounterEnabled(bool bEnable)
+{
+	if (FPSCounterWidgetInternal)
+	{
+		const ESlateVisibility NewVisibility = bEnable ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed;
+		FPSCounterWidgetInternal->SetVisibility(NewVisibility);
+		bIsFPSCounterEnabledInternal = bEnable;
+	}
+}
+
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
+
+// Callback for when the player controller is changed on this subsystem's owning local player
+void UWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerController)
+{
+	Super::PlayerControllerChanged(NewPlayerController);
+
+	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayerController);
+	if (!MyPC
+	    || MyPC->bIsDebugCameraEnabledInternal)
+	{
+		// Do not initialize widgets if different controller is possessed, likely Debug Controller, or Debug Camera is enabled
+		return;
+	}
+
+	if (AreWidgetInitialized())
+	{
+		// New player controller is set, likely level was changed, so perform cleanup first
+		CleanupWidgets();
+	}
+
+	TryInitWidgets();
+}
+
+// Is called when this Subsystem is removed
+void UWidgetsSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+
+	CleanupWidgets();
 }
 
 // Is called right after the game was started and windows size is set
