@@ -122,6 +122,40 @@ void UWidgetsSubsystem::CleanupWidgets()
 }
 
 /*********************************************************************************************
+ * Widgets Visibility
+ ********************************************************************************************* */
+
+// If true, changes all visible manageable widgets to hidden
+void UWidgetsSubsystem::SetAllWidgetsVisibility(bool bMakeVisible)
+{
+	const ESlateVisibility DesiredVisibility = bMakeVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	const TArray<TObjectPtr<UUserWidget>>& WidgetsToProcess = bMakeVisible ? AllHiddenWidgetsInternal : AllManageableWidgetsInternal;
+
+	if (!bMakeVisible)
+	{
+		AllHiddenWidgetsInternal.Empty();
+	}
+
+	for (TObjectPtr<UUserWidget> Widget : WidgetsToProcess)
+	{
+		if (Widget && Widget->IsVisible() != bMakeVisible)
+		{
+			Widget->SetVisibility(DesiredVisibility);
+
+			if (!bMakeVisible)
+			{
+				AllHiddenWidgetsInternal.Add(Widget);
+			}
+		}
+	}
+
+	if (bMakeVisible)
+	{
+		AllHiddenWidgetsInternal.Empty();
+	}
+}
+
+/*********************************************************************************************
  * FPS Counter
  ********************************************************************************************* */
 

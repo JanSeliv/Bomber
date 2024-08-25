@@ -386,6 +386,7 @@ void UMyCheatManager::SetUIHideAllWidgets()
 	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
 	if (ensureMsgf(WidgetsSubsystem, TEXT("ASSERT: [%i] %hs:\n'WidgetsSubsystem' is not valid!"), __LINE__, __FUNCTION__))
 	{
-		WidgetsSubsystem->CleanupWidgets();
+		const bool bMakeVisibleInversed = WidgetsSubsystem->AreAllWidgetsHidden();
+		WidgetsSubsystem->SetAllWidgetsVisibility(bMakeVisibleInversed);
 	}
 }

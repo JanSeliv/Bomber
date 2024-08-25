@@ -70,6 +70,25 @@ protected:
 	void CleanupWidgets();
 
 	/*********************************************************************************************
+	 * Widgets Visibility
+	 ********************************************************************************************* */
+public:
+	/** Is called to toggle all manageable widgets visibility.
+	 * If true, changes all visible manageable widgets to hidden.
+	 * If false, restores visibility of all previously hidden widgets. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetAllWidgetsVisibility(bool bMakeVisible);
+
+	/** Returns true if all manageable widgets are hidden. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE bool AreAllWidgetsHidden() const { return !AllHiddenWidgetsInternal.IsEmpty(); }
+
+protected:
+	/** Contains widgets that globally were requested to hide, but were visible before, so their visibility will be restored when needed. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Hidden Widgets"))
+	TArray<TObjectPtr<UUserWidget>> AllHiddenWidgetsInternal;
+
+	/*********************************************************************************************
 	 * Cached Widgets
 	 ********************************************************************************************* */
 public:
@@ -127,9 +146,6 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
-
-	friend class UMyCheatManager;
-
 	/** Callback for when the player controller is changed on this subsystem's owning local player. */
 	virtual void PlayerControllerChanged(APlayerController* NewPlayerController) override;
 
