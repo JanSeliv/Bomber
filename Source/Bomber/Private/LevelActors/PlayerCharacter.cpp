@@ -820,7 +820,7 @@ void APlayerCharacter::SetDefaultPlayerMeshData(bool bForcePlayerSkin/* = false*
 		return;
 	}
 
-	const int32 SkinsNum = Row->GetMaterialInstancesDynamicNum();
+	const int32 SkinsNum = Row->GetSkinTexturesNum();
 	FCustomPlayerMeshData CustomPlayerMeshData = FCustomPlayerMeshData::Empty;
 	CustomPlayerMeshData.PlayerRow = Row;
 	CustomPlayerMeshData.SkinIndex = PlayerId % SkinsNum;

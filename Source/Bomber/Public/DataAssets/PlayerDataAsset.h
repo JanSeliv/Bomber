@@ -54,15 +54,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
 	TObjectPtr<class UAnimSequence> DanceAnimation = nullptr;
 
-	/** Returns the num of skin textures in the array of diffuse maps specified a player material instance. */
+	/** Returns the num of skin textures in the array of diffuse maps specified a player material instance.
+	 * @return The num of skin textures or INDEX_NONE if not found. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetMaterialInstancesDynamicNum() const { return MaterialInstancesDynamicInternal.Num(); }
+	int32 GetSkinTexturesNum() const;
 
 	/** Returns the dynamic material instance of a player with specified skin.
 	 * @param SkinIndex The skin position to get.
 	 * @see UPlayerRow::MaterialInstancesDynamicInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMaterialInstanceDynamic* GetMaterialInstanceDynamic(int32 SkinIndex) const;
+
+	/** Creates dynamic material instance for each skin if is not done before.
+	 * UPlayerRow::MaterialInstancesDynamicInternal */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdateSkinTextures();
 
 protected:
 	/** The material instance of a player.
@@ -75,21 +81,14 @@ protected:
 	 * Contains all created dynamic materials for each skin in the Material Instance.
 	 * Saves memory avoiding creation of dynamic materials for each mesh component, just use the same dynamic material for different meshes with the same skin.
 	 * Is filled on object creating and changing.
-	 * @warning Is not EditDefaultsOnly because have to be created dynamically, in the same time is incompatible with VisibleInstanceOnly.
+	 * @warning Is NOT transient as it is set in skeletal meshes; if do transient, it will fail the cook with the import error.
 	 * @see UPlayerRow::MaterialInstanceInternal. */
-	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Material Instances Dynamic"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "Row", meta = (BlueprintProtected, DisplayName = "Material Instances Dynamic"))
 	TArray<TObjectPtr<class UMaterialInstanceDynamic>> MaterialInstancesDynamicInternal;
 
 #if WITH_EDITOR
 	/** Handle adding and changing material instance to prepare dynamic materials. */
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-
-	/**
-	 * Create dynamic material instance for each ski if is not done before.
-	 * UPlayerRow::MaterialInstancesDynamicInternal
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TryCreateDynamicMaterials();
 #endif	//WITH_EDITOR
 };
 

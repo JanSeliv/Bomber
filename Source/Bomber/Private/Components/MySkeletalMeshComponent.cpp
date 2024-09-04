@@ -173,9 +173,20 @@ void UMySkeletalMeshComponent::InitMySkeletalMesh(const FCustomPlayerMeshData& C
 	USkeletalMesh* NewSkeletalMesh = Cast<USkeletalMesh>(CustomPlayerMeshData.PlayerRow->Mesh);
 	SetSkeletalMesh(NewSkeletalMesh, true);
 
+	UpdateSkinTextures();
+
 	AttachProps();
 
 	SetSkin(CustomPlayerMeshData.SkinIndex);
+}
+
+// Creates dynamic material instance for each skin if is not done before
+void UMySkeletalMeshComponent::UpdateSkinTextures()
+{
+	if (ensureMsgf(PlayerMeshDataInternal.PlayerRow, TEXT("ASSERT: [%i] %hs:\n'PlayerRow' is null!"), __LINE__, __FUNCTION__))
+	{
+		const_cast<UPlayerRow*>(PlayerMeshDataInternal.PlayerRow.Get())->UpdateSkinTextures();
+	}
 }
 
 // Returns level type to which this mesh is associated with
@@ -323,14 +334,14 @@ bool UMySkeletalMeshComponent::ArePropsWantToUpdate() const
 void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
 {
 	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
-	const int32 SkinTexturesNum = PlayerRow ? PlayerRow->GetMaterialInstancesDynamicNum() : 0;
+	const int32 SkinTexturesNum = PlayerRow ? PlayerRow->GetSkinTexturesNum() : 0;
 	if (!SkinTexturesNum)
 	{
 		return;
 	}
 
 	SkinIndex %= SkinTexturesNum;
-	const auto MaterialInstanceDynamic = PlayerRow->GetMaterialInstanceDynamic(SkinIndex);
+	class UMaterialInstanceDynamic* MaterialInstanceDynamic = PlayerRow->GetMaterialInstanceDynamic(SkinIndex);
 	if (!ensureMsgf(MaterialInstanceDynamic, TEXT("ASSERT: SetSkin: 'MaterialInstanceDynamic' is not valid contained by index %i"), SkinIndex))
 	{
 		return;

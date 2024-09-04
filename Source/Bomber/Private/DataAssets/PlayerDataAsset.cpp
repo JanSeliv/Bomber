@@ -15,6 +15,28 @@
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerDataAsset)
 
+// Returns the num of skin textures in the array of diffuse maps specified a player material instance
+int32 UPlayerRow::GetSkinTexturesNum() const
+{
+	const UPlayerDataAsset* PlayerDataAsset = Cast<UPlayerDataAsset>(GetOuter());
+	if (!PlayerDataAsset
+	    || !MaterialInstanceInternal)
+	{
+		return INDEX_NONE;
+	}
+
+	const FName SkinArrayParameterName = PlayerDataAsset->GetSkinArrayParameter();
+	if (!ensureMsgf(!SkinArrayParameterName.IsNone(), TEXT("ASSERT: [%i] %hs:\nNo skin array parameter name specified in the player data asset"), __LINE__, __FUNCTION__))
+	{
+		return INDEX_NONE;
+	}
+
+	UTexture* FoundTexture = nullptr;
+	MaterialInstanceInternal->GetTextureParameterValue(SkinArrayParameterName, /*out*/FoundTexture);
+	const UTexture2DArray* Texture2DArray = Cast<UTexture2DArray>(FoundTexture);
+	return Texture2DArray ? Texture2DArray->GetArraySize() : INDEX_NONE;
+}
+
 // Returns the dynamic material instance of a player with specified skin.
 UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const
 {
@@ -48,33 +70,29 @@ void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	{
 		// Force recreation of dynamic material instances
 		MaterialInstancesDynamicInternal.Empty();
-		TryCreateDynamicMaterials();
+		UpdateSkinTextures();
 	}
 }
+#endif	//WITH_EDITOR
 
 // Create dynamic material instance for each ski if is not done before.
-void UPlayerRow::TryCreateDynamicMaterials()
+void UPlayerRow::UpdateSkinTextures()
 {
-	const auto PlayerDataAsset = Cast<UPlayerDataAsset>(GetOuter());
+	UPlayerDataAsset* PlayerDataAsset = Cast<UPlayerDataAsset>(GetOuter());
 	if (!PlayerDataAsset
 	    || !MaterialInstanceInternal)
 	{
 		return;
 	}
 
-	static const FName SkinArrayParameterName = PlayerDataAsset->GetSkinArrayParameter();
-	static const FName SkinIndexParameterName = PlayerDataAsset->GetSkinIndexParameter();
-	static const bool bSkinParamNamesAreValid = !(SkinArrayParameterName.IsNone() && SkinIndexParameterName.IsNone());
-	if (!ensureMsgf(bSkinParamNamesAreValid, TEXT("ASSERT: TryCreateDynamicMaterials: 'bSkinParamNamesAreValid' is false")))
+	const FName SkinIndexParameterName = PlayerDataAsset->GetSkinIndexParameter();
+	const int32 SkinTexturesNum = GetSkinTexturesNum();
+	if (!ensureMsgf(SkinTexturesNum != INDEX_NONE, TEXT("ASSERT: [%i] %hs:\nNo skin textures found in the texture 2D array of player material instance"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(!SkinIndexParameterName.IsNone(), TEXT("ASSERT: [%i] %hs:\nNo skin index parameter name specified in the player data asset"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	// Find the number of skins in the texture 2D array of player material instance.
-	UTexture* FoundTexture = nullptr;
-	MaterialInstanceInternal->GetTextureParameterValue(SkinArrayParameterName, FoundTexture);
-	const auto Texture2DArray = Cast<UTexture2DArray>(FoundTexture);
-	const int32 SkinTexturesNum = Texture2DArray ? Texture2DArray->GetArraySize() : 0;
 	const int32 MaterialInstancesDynamicNum = MaterialInstancesDynamicInternal.Num();
 	if (SkinTexturesNum == MaterialInstancesDynamicNum)
 	{
@@ -97,7 +115,6 @@ void UPlayerRow::TryCreateDynamicMaterials()
 		MaterialInstanceDynamic->SetScalarParameterValue(SkinIndexParameterName, SkinPosition);
 	}
 }
-#endif	//WITH_EDITOR
 
 // Default constructor
 UPlayerDataAsset::UPlayerDataAsset()

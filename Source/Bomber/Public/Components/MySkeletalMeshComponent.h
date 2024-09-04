@@ -107,7 +107,7 @@ public:
 
 	/** Disables tick and visibility if inactive and vice versa. */
 	virtual void SetActive(bool bNewActive, bool bReset = false) override;
-	
+
 	/** Returns how this mesh looks like for now.
 	 * @see UMySkeletalMeshComponent::PlayerMeshDataInternal */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -119,6 +119,10 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CustomPlayerMeshData"))
 	void InitMySkeletalMesh(const FCustomPlayerMeshData& CustomPlayerMeshData);
+
+	/** Creates dynamic material instance for each skin if is not done before. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdateSkinTextures();
 
 	/** Returns true if mesh data is set. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -164,17 +168,15 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** Determines how this mesh looks like for now.
-	 * Is not transient, can be set in editor-time. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
+	/** Determines how this mesh looks like for now. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Mesh Data"))
 	FCustomPlayerMeshData PlayerMeshDataInternal = FCustomPlayerMeshData::Empty;
 
-	/** Current level type of attached meshes.
-	 * Is not transient, can be set in editor-time. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes Type"))
+	/** Current level type of attached meshes. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes Type"))
 	ELevelType AttachedMeshesTypeInternal = ELT::None;
 
 	/** Current attached mesh components. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))
 	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal;
 };
