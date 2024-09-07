@@ -23,17 +23,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static UWidgetsSubsystem* GetWidgetsSubsystem(const UObject* OptionalWorldContext = nullptr);
 
+	/** Returns the UI subsystem checked: it will crash if player controller is not initialized yet.
+	 * @warning don't call it on BeginPlay, do it not earlier than OnLocalCharacterReady */
+	static UWidgetsSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
+
 	/*********************************************************************************************
-	 * Widgets Creation
+	 * Widgets Management
+	 * Widgets using there methods are managed by this subsystem and can be controlled globally.
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWidgetsInitialized);
+	/** Adds given widget to the list of manageable widgets, so its visibility can be changed globally. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void RegisterManageableWidget(UUserWidget* Widget);
 
-	/** Is called to notify that all widgets were initialized and ready. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnWidgetsInitialized OnWidgetsInitialized;
-
-	/** Create specified widget and add it to Manageable widgets list, so its visibility can be changed globally. */
+	/** Creates and registers specified widget to the Manageable widgets list, so its visibility can be changed globally. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	UUserWidget* CreateManageableWidget(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0, const UObject* OptionalWorldContext = nullptr);
 
@@ -44,6 +47,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void DestroyManageableWidget(UUserWidget* Widget);
 
+protected:
+	/** Contains all widgets that are managed by this subsystem. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Managable Widgets"))
+	TArray<TObjectPtr<UUserWidget>> AllManageableWidgetsInternal;
+
+	/*********************************************************************************************
+	 * Core Widgets Initialization
+	 * Some core widgets (like HUD) that are created internally by this subsystem.
+	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWidgetsInitialized);
+
+	/** Is called to notify that all widgets were initialized and ready. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnWidgetsInitialized OnWidgetsInitialized;
+
 	/** Returns true if widgets ere initialized. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE bool AreWidgetInitialized() const { return bAreWidgetInitializedInternal; }
@@ -52,10 +71,6 @@ protected:
 	/** Is true if widgets are initialized. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Are Widget Initialized"))
 	bool bAreWidgetInitializedInternal = false;
-
-	/** Contains all widgets that are managed by this subsystem. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Managable Widgets"))
-	TArray<TObjectPtr<UUserWidget>> AllManageableWidgetsInternal;
 
 	/** Will try to start the process of initializing all widgets used in game. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

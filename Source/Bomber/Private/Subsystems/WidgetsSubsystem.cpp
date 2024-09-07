@@ -27,18 +27,32 @@ UWidgetsSubsystem* UWidgetsSubsystem::GetWidgetsSubsystem(const UObject* Optiona
 	return LocalPlayer ? LocalPlayer->GetSubsystem<UWidgetsSubsystem>() : nullptr;
 }
 
+// Returns the UI subsystem checked: it will crash if player controller is not initialized yet
+UWidgetsSubsystem& UWidgetsSubsystem::Get(const UObject* OptionalWorldContext)
+{
+	UWidgetsSubsystem* WidgetsSubsystem = GetWidgetsSubsystem(OptionalWorldContext);
+	checkf(WidgetsSubsystem, TEXT("%s: 'WidgetsSubsystem' is null, likely controller is not initialized yet!"), *FString(__FUNCTION__));
+	return *WidgetsSubsystem;
+}
+
 /*********************************************************************************************
- * Widgets Creation
+ * Widgets Management
  ********************************************************************************************* */
+
+// Adds given widget to the list of manageable widgets, so its visibility can be changed globally
+void UWidgetsSubsystem::RegisterManageableWidget(UUserWidget* Widget)
+{
+	if (ensureMsgf(Widget, TEXT("ASSERT: [%i] %hs:\n'Widget' is null, can't register!"), __LINE__, __FUNCTION__))
+	{
+		AllManageableWidgetsInternal.Add(Widget);
+	}
+}
 
 // Create specified widget and add it to Manageable widgets list, so its visibility can be changed globally
 UUserWidget* UWidgetsSubsystem::CreateManageableWidget(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport, int32 ZOrder, const UObject* OptionalWorldContext)
 {
 	UUserWidget* Widget = FWidgetUtilsLibrary::CreateWidgetByClass(WidgetClass, bAddToViewport, ZOrder, OptionalWorldContext);
-	if (Widget)
-	{
-		AllManageableWidgetsInternal.Add(Widget);
-	}
+	RegisterManageableWidget(Widget);
 	return Widget;
 }
 
@@ -55,6 +69,9 @@ void UWidgetsSubsystem::DestroyManageableWidget(UUserWidget* Widget)
 	FWidgetUtilsLibrary::DestroyWidget(*Widget);
 }
 
+/*********************************************************************************************
+ * Core Widgets Initialization
+ ********************************************************************************************* */
 
 // Will try to start the process of initializing all widgets used in game
 void UWidgetsSubsystem::TryInitWidgets()

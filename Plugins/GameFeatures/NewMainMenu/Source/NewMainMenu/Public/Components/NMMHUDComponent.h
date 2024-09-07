@@ -51,4 +51,8 @@ protected:
 
 	/** Clears all transient data created by this component. */
 	virtual void OnUnregister() override;
+
+	/** Called when the local player character is spawned, possessed, and replicated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
 };
