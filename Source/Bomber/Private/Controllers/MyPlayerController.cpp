@@ -49,8 +49,15 @@ AMyPlayerController::AMyPlayerController()
 // Returns true if current game state can be eventually changed
 bool AMyPlayerController::CanChangeGameState(ECurrentGameState NewGameState) const
 {
-	return AMyGameStateBase::GetCurrentGameState() != NewGameState
-	       && !bCinematicMode; // Game is not run from the Render Movie
+	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	if (!MyGameState
+	    || !MyGameState->CanChangeGameState(NewGameState))
+	{
+		return false;
+	}
+
+	// Don't change the game state if game is run from the `Render Movie`
+	return !bCinematicMode;
 }
 
 /*********************************************************************************************

@@ -36,20 +36,33 @@ AMyGameStateBase& AMyGameStateBase::Get()
  * Current Game State enum
  ********************************************************************************************* */
 
+// Returns true if current game state can be eventually changed
+bool AMyGameStateBase::CanChangeGameState(ECurrentGameState NewGameState) const
+{
+	if (LocalGameStateInternal == NewGameState)
+	{
+		return false;
+	}
+
+	// Don't allow to change the game state if local character is not initialized or destroyed
+	const APlayerCharacter* LocalChar = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+	return UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.IsCharacterReady(LocalChar);
+}
+
 // Returns the AMyGameState::CurrentGameState property.
 void AMyGameStateBase::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
 {
-	if (NewGameState == CurrentGameStateInternal)
+	if (!CanChangeGameState(NewGameState))
 	{
 		return;
 	}
 
-	CurrentGameStateInternal = NewGameState;
-	ApplyGameState();
-
 	// Update replicated state now, not waiting for the next tick
 	// So, the client will receive replicated state in first order in comparing with other replicates
 	ForceNetUpdate();
+
+	ReplicatedGameStateInternal = NewGameState;
+	ApplyGameState();
 }
 
 // Returns the AMyGameStateBase::CurrentGameState property
@@ -57,7 +70,7 @@ ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 {
 	if (const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
-		return MyGameState->CurrentGameStateInternal;
+		return MyGameState->LocalGameStateInternal;
 	}
 	return ECurrentGameState::None;
 }
@@ -65,7 +78,9 @@ ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 // Updates current game state
 void AMyGameStateBase::ApplyGameState()
 {
-	if (CurrentGameStateInternal == ECGS::GameStarting)
+	LocalGameStateInternal = ReplicatedGameStateInternal;
+
+	if (LocalGameStateInternal == ECGS::GameStarting)
 	{
 		TriggerCountdowns();
 	}
@@ -74,14 +89,17 @@ void AMyGameStateBase::ApplyGameState()
 	const UGlobalEventsSubsystem::FOnGameStateChanged& OnGameStateChanged = UGlobalEventsSubsystem::Get().BP_OnGameStateChanged;
 	if (OnGameStateChanged.IsBound())
 	{
-		OnGameStateChanged.Broadcast(CurrentGameStateInternal);
+		OnGameStateChanged.Broadcast(LocalGameStateInternal);
 	}
 }
 
 // Called on the AMyGameState::CurrentGameState property updating.
 void AMyGameStateBase::OnRep_CurrentGameState()
 {
-	ApplyGameState();
+	if (CanChangeGameState(ReplicatedGameStateInternal))
+	{
+			ApplyGameState();
+	}
 }
 
 /*********************************************************************************************
@@ -153,7 +171,7 @@ void AMyGameStateBase::ApplyStartingTimerSecondsRemain()
 // Is called during the Game Starting state to handle the 'Three-two-one-GO' timer
 void AMyGameStateBase::DecrementStartingCountdown()
 {
-	if (CurrentGameStateInternal != ECGS::GameStarting)
+	if (LocalGameStateInternal != ECGS::GameStarting)
 	{
 		return;
 	}
@@ -198,7 +216,7 @@ void AMyGameStateBase::ApplyInGameTimerSecondsRemain()
 void AMyGameStateBase::DecrementInGameCountdown()
 {
 	const UWorld* World = GetWorld();
-	if (!World || CurrentGameStateInternal != ECGS::InGame)
+	if (!World || LocalGameStateInternal != ECGS::InGame)
 	{
 		return;
 	}
@@ -249,7 +267,7 @@ void AMyGameStateBase::OnCountdownTimerTicked()
 		return;
 	}
 
-	switch (CurrentGameStateInternal)
+	switch (LocalGameStateInternal)
 	{
 		case ECGS::GameStarting:
 			DecrementStartingCountdown();
@@ -287,7 +305,7 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, CurrentGameStateInternal);
+	DOREPLIFETIME(ThisClass, ReplicatedGameStateInternal);
 	DOREPLIFETIME(ThisClass, StartingTimerSecRemainInternal);
 	DOREPLIFETIME(ThisClass, InGameTimerSecRemainInternal);
 }
@@ -312,6 +330,8 @@ void AMyGameStateBase::BeginPlay()
 	}
 
 	SetGameFeaturesEnabled(true);
+
+	BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
 }
 
 // Overridable function called whenever this actor is being removed from a level
@@ -350,5 +370,15 @@ void AMyGameStateBase::SetGameFeaturesEnabled(bool bEnable)
 		{
 			GameFeaturesSubsystem.DeactivateGameFeaturePlugin(GameFeatureURL, EmptyCallback);
 		}
+	}
+}
+
+// Called when the local player character is spawned, possessed, and replicated
+void AMyGameStateBase::OnLocalCharacterReady_Implementation(class APlayerCharacter* PlayerCharacter, int32 CharacterID)
+{
+	// Try update the game state when the local character is initialized, if not set yet
+	if (CanChangeGameState(ReplicatedGameStateInternal))
+	{
+		ApplyGameState();
 	}
 }

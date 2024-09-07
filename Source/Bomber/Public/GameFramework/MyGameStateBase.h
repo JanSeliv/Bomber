@@ -29,6 +29,10 @@ public:
 	 * Can be tracked both on host and client by binding with BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); 
 	 ********************************************************************************************* */
 public:
+	/** Returns true if current game state can be eventually changed. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool CanChangeGameState(ECurrentGameState NewGameState) const;
+
 	/** Set the new game state for the current game.*/
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++")
 	void ServerSetGameState(ECurrentGameState NewGameState);
@@ -38,9 +42,15 @@ public:
 	static ECurrentGameState GetCurrentGameState();
 
 protected:
-	/** Store the game state for the current game. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CurrentGameState", AdvancedDisplay, meta = (BlueprintProtected, DisplayName = "Current Game State"))
-	ECurrentGameState CurrentGameStateInternal = ECurrentGameState::None;
+	/** Is read-only local version of the game state that is not replicated, can be read on both server and client, but never should be set directly.
+	 * @warning Do not set it directly, use AMyGameStateBase::ServerSetGameState() instead to set ReplicatedGameStateInternal. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, AdvancedDisplay, meta = (BlueprintProtected, DisplayName = "Current Game State"))
+	ECurrentGameState LocalGameStateInternal = ECurrentGameState::None;
+
+	/** Is write-only replicated version of the game state, can be set only on the server but never should be read.
+	 * @warning Do not read it directly, use AMyGameStateBase::GetCurrentGameState() instead to read LocalGameStateInternal. */
+	UPROPERTY(Transient, ReplicatedUsing = "OnRep_CurrentGameState")
+	ECurrentGameState ReplicatedGameStateInternal = ECurrentGameState::None;
 
 	/** Updates current game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -201,4 +211,8 @@ protected:
 	 * @see UGameStateDataAsset::GetGameFeaturesToEnable() */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void SetGameFeaturesEnabled(bool bEnable);
+
+	/** Called when the local player character is spawned, possessed, and replicated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
 };
