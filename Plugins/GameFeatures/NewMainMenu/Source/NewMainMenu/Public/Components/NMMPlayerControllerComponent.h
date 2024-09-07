@@ -29,7 +29,7 @@ public:
 	AMyPlayerController& GetPlayerControllerChecked() const;
 
 	/*********************************************************************************************
-	 * Public functions
+	 * Main methods
 	 ********************************************************************************************* */
 public:
 	/** Returns loaded and cached Save Game Data of the Main Menu. */
@@ -51,6 +51,11 @@ public:
 	/** Enables or disables the input context according to new menu state. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetManagedInputContextsEnabled(ENMMState NewState);
+
+protected:
+	/** Tries to set the Menu game state on initializing the Main Menu system. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	void TrySetMenuState();
 
 	/*********************************************************************************************
 	 * Protected properties
@@ -74,6 +79,10 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
+	/** Called when the local player character is spawned, possessed, and replicated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+
 	/** Called wen the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnNewMainMenuStateChanged(ENMMState NewState);

@@ -10,6 +10,7 @@
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
 #include "DataAssets/MyInputMappingContext.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
@@ -38,6 +39,10 @@ AMyPlayerController& UNMMPlayerControllerComponent::GetPlayerControllerChecked()
 	checkf(MyPlayerController, TEXT("%s: 'MyPlayerController' is null"), *FString(__FUNCTION__));
 	return *MyPlayerController;
 }
+
+/*********************************************************************************************
+ * Main methods
+ ********************************************************************************************* */
 
 // Assigns existing Save Game Data to this component 
 void UNMMPlayerControllerComponent::SetSaveGameData(class USaveGame* NewSaveGameData)
@@ -94,6 +99,27 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState New
 	}
 }
 
+// Tries to set the Menu game state on initializing the Main Menu system
+void UNMMPlayerControllerComponent::TrySetMenuState()
+{
+	AMyPlayerController& PC = GetPlayerControllerChecked();
+	if (!PC.HasAuthority())
+	{
+		return;
+	}
+
+	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	if (SpotsSubsystem.IsAnyMainMenuSpotReady())
+	{
+		PC.SetMenuState();
+	}
+	else
+	{
+		// Listen to set Menu game state once first spot is ready
+		UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnMainMenuSpotReady);
+	}
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
@@ -102,6 +128,8 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState New
 void UNMMPlayerControllerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
 
 	// Listen Main Menu states
 	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
@@ -116,17 +144,6 @@ void UNMMPlayerControllerComponent::BeginPlay()
 	FAsyncLoadGameFromSlotDelegate AsyncLoadGameFromSlotDelegate;
 	AsyncLoadGameFromSlotDelegate.BindUObject(this, &ThisClass::OnAsyncLoadGameFromSlotCompleted);
 	UGameplayStatics::AsyncLoadGameFromSlot(UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex(), AsyncLoadGameFromSlotDelegate);
-
-	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
-	if (SpotsSubsystem.IsAnyMainMenuSpotReady())
-	{
-		GetPlayerControllerChecked().SetMenuState();
-	}
-	else
-	{
-		// Listen to set Menu game state once first spot is ready
-		UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnMainMenuSpotReady);
-	}
 
 	// Disable auto camera possess by default, so it can be controlled by the spot
 	UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
@@ -161,6 +178,13 @@ void UNMMPlayerControllerComponent::OnUnregister()
  * Events
  ********************************************************************************************* */
 
+// Called when the local player character is spawned, possessed, and replicated
+void UNMMPlayerControllerComponent::OnLocalCharacterReady_Implementation(class APlayerCharacter* PlayerCharacter, int32 CharacterID)
+{
+	// Set the Menu state OnLocalCharacterReady to guarantee that game enters the Menu state only when the character is initialized 
+	TrySetMenuState();
+}
+
 // Called wen the Main Menu state was changed
 void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
@@ -193,7 +217,7 @@ void UNMMPlayerControllerComponent::OnMainMenuSpotReady_Implementation(UNMMSpotC
 	checkf(MainMenuSpotComponent, TEXT("ERROR: [%i] %s:\n'MainMenuSpotComponent' is null!"), __LINE__, *FString(__FUNCTION__));
 	if (MainMenuSpotComponent->IsActiveSpot())
 	{
-		GetPlayerControllerChecked().SetMenuState();
+		TrySetMenuState();
 
 		UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.RemoveAll(this);
 	}

@@ -11,8 +11,9 @@
 void ULevelActorsUtilsLibrary::GetLevelActors(FMapComponents& OutBitmaskedComponents, int32 ActorsTypesBitmask)
 {
 	const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap();
-	if (!ensureMsgf(GeneratedMap, TEXT("ASSERT: [%i] %hs:\n'GeneratedMap' is not valid!"), __LINE__, __FUNCTION__))
+	if (!GeneratedMap)
 	{
+		// Might be null if called before the map is initialized
 		return;
 	}
 
