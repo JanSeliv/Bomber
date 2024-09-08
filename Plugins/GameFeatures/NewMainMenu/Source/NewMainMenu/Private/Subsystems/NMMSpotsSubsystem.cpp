@@ -18,12 +18,10 @@ UNMMSpotsSubsystem& UNMMSpotsSubsystem::Get(const UObject* OptionalWorldContext)
 }
 
 // Returns true if any Main-Menu spot is fully initialized: spawned on the level and finished loading its Master Sequence
-bool UNMMSpotsSubsystem::IsAnyMainMenuSpotReady() const
+bool UNMMSpotsSubsystem::IsActiveMenuSpotReady() const
 {
-	return MainMenuSpotsInternal.ContainsByPredicate([](const UNMMSpotComponent* MainMenuSpotComponent)
-	{
-		return MainMenuSpotComponent && MainMenuSpotComponent->GetMasterPlayer() != nullptr;
-	});
+	const UNMMSpotComponent* ActiveSpot = GetCurrentSpot();
+	return ActiveSpot && ActiveSpot->GetMasterPlayer() != nullptr;
 }
 
 // Add new Main-Menu spot, so it can be obtained by other objects

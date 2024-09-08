@@ -89,7 +89,7 @@ protected:
 
 	/** Is listen to set Menu game state once first spot is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnMainMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
+	void OnActiveMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
 
 	/** Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

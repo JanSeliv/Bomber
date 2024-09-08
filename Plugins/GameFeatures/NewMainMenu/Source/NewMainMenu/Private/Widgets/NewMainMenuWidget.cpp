@@ -26,9 +26,6 @@ void UNewMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// Hide this widget by default
-	SetVisibility(ESlateVisibility::Collapsed);
-
 	// Listen Main Menu states
 	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
 	BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(this, &ThisClass::OnNewMainMenuStateChanged);
@@ -36,6 +33,11 @@ void UNewMainMenuWidget::NativeConstruct()
 	{
 		// State is already set, apply it
 		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
+	}
+	else // Is none state
+	{
+		// Hide this widget by default if is none state
+		SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	// Listen Camera Subsystem 

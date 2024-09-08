@@ -294,10 +294,10 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	{
 		// This is active spot has created master sequence, start playing to let Engine preload tracks
 		SetCinematicByState(ENMMState::Idle);
+		
+		// Notify that the active spot is ready and finished loading
+        UNMMSpotsSubsystem::Get().OnActiveMenuSpotReady.Broadcast(this);
 	}
-
-	// Notify that the spot is ready and finished loading
-	UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.Broadcast(this);
 
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
 	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);

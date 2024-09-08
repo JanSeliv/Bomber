@@ -12,6 +12,7 @@
 #include "DataAssets/MyInputMappingContext.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -108,15 +109,9 @@ void UNMMPlayerControllerComponent::TrySetMenuState()
 		return;
 	}
 
-	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
-	if (SpotsSubsystem.IsAnyMainMenuSpotReady())
+	if (UNMMSpotsSubsystem::Get().IsActiveMenuSpotReady())
 	{
 		PC.SetMenuState();
-	}
-	else
-	{
-		// Listen to set Menu game state once first spot is ready
-		UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnMainMenuSpotReady);
 	}
 }
 
@@ -130,6 +125,17 @@ void UNMMPlayerControllerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
+
+	// Listen to set Menu game state once active spot is ready
+	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	if (SpotsSubsystem.IsActiveMenuSpotReady())
+	{
+		OnActiveMenuSpotReady(SpotsSubsystem.GetCurrentSpot());
+	}
+	else
+	{
+		SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
+	}
 
 	// Listen Main Menu states
 	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
@@ -212,15 +218,13 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENM
 }
 
 // Is listen to set Menu game state once first spot is ready
-void UNMMPlayerControllerComponent::OnMainMenuSpotReady_Implementation(UNMMSpotComponent* MainMenuSpotComponent)
+void UNMMPlayerControllerComponent::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* MainMenuSpotComponent)
 {
-	checkf(MainMenuSpotComponent, TEXT("ERROR: [%i] %s:\n'MainMenuSpotComponent' is null!"), __LINE__, *FString(__FUNCTION__));
-	if (MainMenuSpotComponent->IsActiveSpot())
-	{
-		TrySetMenuState();
+	TrySetMenuState();
 
-		UNMMSpotsSubsystem::Get().OnMainMenuSpotReady.RemoveAll(this);
-	}
+	UNMMCameraSubsystem::Get().PossessCamera(ENMMState::Idle);
+
+	UNMMSpotsSubsystem::Get().OnActiveMenuSpotReady.RemoveAll(this);
 }
 
 // Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load

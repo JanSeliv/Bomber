@@ -48,7 +48,8 @@ UCameraComponent* UNMMCameraSubsystem::FindCameraComponent(ENMMState MainMenuSta
 	case ENMMState::Cinematic:
 		{
 			const UNMMSpotComponent* CurrentSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
-			return CurrentSpot ? UCinematicUtils::FindSequenceCameraComponent(CurrentSpot->GetMasterPlayer()) : nullptr;
+			ULevelSequencePlayer* MasterPlayer = CurrentSpot ? CurrentSpot->GetMasterPlayer() : nullptr;
+			return MasterPlayer ? UCinematicUtils::FindSequenceCameraComponent(MasterPlayer) : nullptr;
 		}
 	default: break;
 	}
@@ -78,6 +79,13 @@ ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 // Starts viewing through camera of current cinematic
 void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 {
+	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	if (!SpotsSubsystem.IsActiveMenuSpotReady())
+	{
+		// Ignore if there is no active spot initialized yet, it will be called once the spot is ready
+		return;
+	}
+
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
 	const UCameraComponent* CameraComponent = FindCameraComponent(MainMenuState);
 	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %s:\n'MyPC' is not valid!"), __LINE__, *FString(__FUNCTION__))
@@ -97,7 +105,7 @@ void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 		break;
 	case ENMMState::Idle:
 		if (!UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled()
-			&& UNMMSpotsSubsystem::Get().GetLastMoveSpotDirection() != 0)
+			&& SpotsSubsystem.GetLastMoveSpotDirection() != 0)
 		{
 			BlendParams.BlendTime = CameraBlendTime;
 		}
