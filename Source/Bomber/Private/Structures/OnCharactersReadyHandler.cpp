@@ -48,10 +48,23 @@ bool FOnCharactersReadyHandler::IsCharacterReady(const APlayerCharacter* Charact
 		return It.Character == Character;
 	});
 
-	return FoundHandle
-	       && FoundHandle->Character.IsValid()
-	       && FoundHandle->PlayerState.IsValid()
-	       && (FoundHandle->bIsPossessed || !FoundHandle->Character->HasAuthority()); // Possessed or AI
+	// Check general conditions
+	if (!FoundHandle
+	    || !FoundHandle->Character.IsValid()
+	    || !FoundHandle->PlayerState.IsValid())
+	{
+		return false;
+	}
+
+	if (!FoundHandle->Character->HasAuthority()
+	    && FoundHandle->Character->IsBotControlled())
+	{
+		// It's a client bot, where controller does not exist by design, so it's ready
+		return true;
+	}
+
+	// Finally, check if controller is possessed, so character is completely ready
+	return FoundHandle->bIsPossessed;
 }
 
 // Returns true if the player state is ready at this moment
