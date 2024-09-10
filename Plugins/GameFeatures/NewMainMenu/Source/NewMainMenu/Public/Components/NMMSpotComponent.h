@@ -30,9 +30,9 @@ public:
 	/** Default constructor. */
 	UNMMSpotComponent();
 
-	/** Returns true if this spot is currently active and possessed by player. */
+	/** Returns true if this spot is currently selected and possessed by player. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	bool IsActiveSpot() const;
+	bool IsCurrentSpot() const;
 
 	/** Returns the Skeletal Mesh of the Bomber character. */
 	UFUNCTION(BlueprintPure, Category = "C++")

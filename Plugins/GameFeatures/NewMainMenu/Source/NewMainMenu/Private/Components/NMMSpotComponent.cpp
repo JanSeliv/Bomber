@@ -31,7 +31,7 @@ UNMMSpotComponent::UNMMSpotComponent()
 }
 
 // Returns true if this spot is currently active and possessed by player
-bool UNMMSpotComponent::IsActiveSpot() const
+bool UNMMSpotComponent::IsCurrentSpot() const
 {
 	return UNMMSpotsSubsystem::Get().GetCurrentSpot() == this;
 }
@@ -216,7 +216,7 @@ void UNMMSpotComponent::LoadMasterSequencePlayer()
 	}
 	else
 	{
-		const TAsyncLoadPriority Priority = IsActiveSpot() ? FStreamableManager::AsyncLoadHighPriority : FStreamableManager::DefaultAsyncLoadPriority;
+		const TAsyncLoadPriority Priority = IsCurrentSpot() ? FStreamableManager::AsyncLoadHighPriority : FStreamableManager::DefaultAsyncLoadPriority;
 		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
 		StreamableManager.RequestAsyncLoad(FoundMasterSequence.ToSoftObjectPath(),
 		                                   FStreamableDelegate::CreateUObject(this, &ThisClass::OnMasterSequenceLoaded, FoundMasterSequence),
@@ -227,7 +227,7 @@ void UNMMSpotComponent::LoadMasterSequencePlayer()
 // Marks own cinematic as seen by player for the save system
 void UNMMSpotComponent::MarkCinematicAsSeen()
 {
-	if (!IsActiveSpot())
+	if (!IsCurrentSpot())
 	{
 		// Since there are multiple spots, only current one should mark cinematic as seen
 		return;
@@ -290,13 +290,13 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	CameraSettings.AspectRatioAxisConstraint = UUtilsLibrary::GetViewportAspectRatioAxisConstraint();
 	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
 
-	if (IsActiveSpot())
+	if (IsCurrentSpot())
 	{
 		// This is active spot has created master sequence, start playing to let Engine preload tracks
 		SetCinematicByState(ENMMState::Idle);
-		
+
 		// Notify that the active spot is ready and finished loading
-        UNMMSpotsSubsystem::Get().OnActiveMenuSpotReady.Broadcast(this);
+		UNMMSpotsSubsystem::Get().OnActiveMenuSpotReady.Broadcast(this);
 	}
 
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
@@ -310,19 +310,30 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 // Called when the current game state was changed
 void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
-	if (CurrentGameState == ECGS::Menu
-		&& IsActiveSpot())
+	if (!IsCurrentSpot())
 	{
-		// Reset the sequence to the beginning to make it ready for the next play
-		constexpr bool bKeepCamera = true;
-		UCinematicUtils::ResetSequence(MasterPlayerInternal, bKeepCamera);
+		// Don't handle inactive spot
+		return;
+	}
+
+	switch (CurrentGameState)
+	{
+	case ECurrentGameState::Menu:
+		{
+			// Reset the sequence to the beginning to make it ready for the next play
+			constexpr bool bKeepCamera = true;
+			UCinematicUtils::ResetSequence(MasterPlayerInternal, bKeepCamera);
+			break;
+		}
+
+	default: break;
 	}
 }
 
 // Called wen the Main Menu state was changed
 void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
-	const bool bIsActiveSpot = IsActiveSpot();
+	const bool bIsActiveSpot = IsCurrentSpot();
 
 	switch (NewState)
 	{
@@ -372,7 +383,7 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 void UNMMSpotComponent::OnCameraRailTransitionStateChanged_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
 {
 	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition
-		&& !IsActiveSpot())
+		&& !IsCurrentSpot())
 	{
 		StopMasterSequence();
 	}
