@@ -7,10 +7,7 @@
 #include "Components/MySkeletalMeshComponent.h"
 #include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
-#include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/NMMBaseSubsystem.h"
-#include "Subsystems/NMMCameraSubsystem.h"
-#include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
@@ -39,10 +36,6 @@ void UNewMainMenuWidget::NativeConstruct()
 		// Hide this widget by default if is none state
 		SetVisibility(ESlateVisibility::Collapsed);
 	}
-
-	// Listen Camera Subsystem 
-	UNMMCameraSubsystem& CameraSubsystem = UNMMCameraSubsystem::Get();
-	CameraSubsystem.OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
 
 	if (PlayButton)
 	{
@@ -99,7 +92,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
 	const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
 	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %hs:\n'CinematicRow' is not valid!"), __LINE__, __FUNCTION__)
-		|| !MainMenuSpot->GetMeshChecked().IsVisible())
+		|| !MainMenuSpot->IsSpotAvailable())
 	{
 		// The spot is locked
 		return;
@@ -143,46 +136,15 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
-	const UNMMSpotComponent* MenuSpot = UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
-	if (ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %hs:\n'MenuSpot' is not valid!"), __LINE__, __FUNCTION__)
-		&& UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled())
-	{
-		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot->GetMeshChecked().GetCustomPlayerMeshData();
-		UpdatePlayerCharacterMesh(PlayerMeshData);
-	}
-}
-
-// Update the chosen player mesh on the level
-void UNewMainMenuWidget::UpdatePlayerCharacterMesh(const FCustomPlayerMeshData& CustomPlayerMeshData)
-{
-	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid")))
-	{
-		return;
-	}
-
-	// Update the chosen player mesh on the level
-	if (CustomPlayerMeshData.IsValid())
-	{
-		LocalPlayerCharacter->SetCustomPlayerMeshData(CustomPlayerMeshData);
-	}
+	UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
 }
 
 // Sets the next skin in the Menu
 void UNewMainMenuWidget::OnNextSkinButtonPressed()
 {
-	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
-	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerCharacter' is not valid"))
-		|| !ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid")))
-	{
-		return;
-	}
-
-	UMySkeletalMeshComponent& MainMenuMeshComp = MainMenuSpot->GetMeshChecked();
-	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp.GetCustomPlayerMeshData();
-	if (!ensureMsgf(CustomPlayerMeshData.IsValid(), TEXT("ASSERT: 'CustomPlayerMeshData' is not valid"))
-		|| !MainMenuMeshComp.IsVisible())
+	UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
+	if (!ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid"))
+		|| !MainMenuSpot->IsSpotAvailable())
 	{
 		// The spot is locked
 		return;
@@ -190,13 +152,15 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
-	// Switch the preview skin
+	// Switch the preview skin on the spot
 	static constexpr int32 NextSkin = 1;
+	UMySkeletalMeshComponent& MainMenuMeshComp = MainMenuSpot->GetMeshChecked();
+	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp.GetCustomPlayerMeshData();
 	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + NextSkin;
 	MainMenuMeshComp.SetSkin(NewSkinIndex);
 
-	// Update the player data
-	LocalPlayerCharacter->SetCustomPlayerMeshData(MainMenuMeshComp.GetCustomPlayerMeshData());
+	// Update in-game player skin
+	MainMenuSpot->ApplyMeshOnPlayer();
 }
 
 // Is called when player pressed the button to open the Settings
@@ -213,16 +177,4 @@ void UNewMainMenuWidget::OnQuitGameButtonPressed()
 {
 	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
 	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
-}
-
-// Called when the Camera Rail transition state changed
-void UNewMainMenuWidget::OnCameraRailTransitionStateChanged_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
-{
-	const UNMMSpotComponent* MenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
-	if (ensureMsgf(MenuSpot, TEXT("ASSERT: [%i] %hs:\n'MenuSpot' is not valid"), __LINE__, __FUNCTION__)
-		&& CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition)
-	{
-		const FCustomPlayerMeshData& PlayerMeshData = MenuSpot->GetMeshChecked().GetCustomPlayerMeshData();
-		UpdatePlayerCharacterMesh(PlayerMeshData);
-	}
 }

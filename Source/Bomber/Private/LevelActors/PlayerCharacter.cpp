@@ -742,6 +742,12 @@ UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
 // Set and apply how a player has to look like
 void APlayerCharacter::SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
+	if (!CustomPlayerMeshData.IsValid()
+	    || CustomPlayerMeshData == PlayerMeshDataInternal)
+	{
+		return;
+	}
+
 	if (HasAuthority())
 	{
 		PlayerMeshDataInternal = CustomPlayerMeshData;

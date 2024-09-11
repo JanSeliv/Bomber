@@ -10,6 +10,7 @@ class UNMMSpotComponent;
 
 enum class ELevelType : uint8;
 enum class ENMMState : uint8;
+enum class ECurrentGameState : uint8;
 
 /**
  * Manages Main Menu cinematic spots and keeps their data.
@@ -71,6 +72,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	UNMMSpotComponent* MoveMainMenuSpot(int32 Incrementer);
 
+	/** Is code alternative to MoveMainMenuSpot, but allows to use custom predicate,
+	 * where incrementer would behave as a step to the next spot, meaning it might be performed several times.
+	 * E.g: -1 will move left until the predicate is true, so it might skip few previous spots if they don't match the predicate. */
+	UNMMSpotComponent* MoveMainMenuSpotByPredicate(int32 Incrementer, const TFunctionRef<bool(UNMMSpotComponent*)>& Predicate);
+
 protected:
 	/** Index of the currently selected Main-Menu spot, is according row index in Cinematics table.
 	 * @see FCinematicRow::RowIndex. */
@@ -84,6 +90,10 @@ protected:
 	/** All Main Menu spots with characters placed on the level. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main-Menu Spots"))
 	TArray<TObjectPtr<UNMMSpotComponent>> MainMenuSpotsInternal;
+
+	/** Attempts to switch the active menu spot if current slot is not available for any reason. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void HandleUnavailableMenuSpot();
 
 	/*********************************************************************************************
 	 * Overrides
@@ -102,4 +112,8 @@ protected:
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnNewMainMenuStateChanged(ENMMState NewState);
+
+	/** Called when the current game state was changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

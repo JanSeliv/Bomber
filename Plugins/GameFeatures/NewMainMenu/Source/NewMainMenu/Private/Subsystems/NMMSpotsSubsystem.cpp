@@ -4,6 +4,8 @@
 //---
 #include "NMMUtils.h"
 #include "Components/NMMSpotComponent.h"
+#include "GameFramework/MyGameStateBase.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -116,12 +118,81 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 	ActiveMenuSpotIdxInternal = NextMainMenuSpot->GetCinematicRow().RowIndex;
 	LastMoveSpotDirectionInternal = Incrementer;
 
-	// If instant, then switch to the next spot, it will possess the camera and start playing its cinematic
-	// Otherwise start transition to the next spot
-	const bool bInstant = UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled();
-	UNMMBaseSubsystem::Get().SetNewMainMenuState(bInstant ? ENMMState::Idle : ENMMState::Transition);
+	// If transition happened in opened menu, change the internal state 
+	if (AMyGameStateBase::GetCurrentGameState() == ECGS::Menu)
+	{
+		// If instant, then switch to the next spot, it will possess the camera and start playing its cinematic
+		// Otherwise start transition to the next spot
+		const bool bInstant = UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled();
+		UNMMBaseSubsystem::Get().SetNewMainMenuState(bInstant ? ENMMState::Idle : ENMMState::Transition);
+	}
+	else // In-game
+	{
+		// Thw spot switch happened during the game, just update the mesh hiddenly
+		NextMainMenuSpot->ApplyMeshOnPlayer();
+	}
 
 	return NextMainMenuSpot;
+}
+
+// Is code alternative to MoveMainMenuSpot, but allows to use custom predicate
+UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpotByPredicate(int32 Incrementer, const TFunctionRef<bool(UNMMSpotComponent*)>& Predicate)
+{
+	const int32 FinalIncrementer = [&]() -> int32
+	{
+		const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
+		TArray<UNMMSpotComponent*> LevelTypeSpots;
+		GetMainMenuSpotsByLevelType(LevelTypeSpots, LevelType);
+
+		if (LevelTypeSpots.IsEmpty())
+		{
+			return 0;
+		}
+
+		UNMMSpotComponent* Spot = nullptr;
+		int32 Attempts = 0;
+		const int32 MaxAttempts = LevelTypeSpots.Num();
+		int32 NewIncrementer = Incrementer;
+
+		while (Attempts < MaxAttempts)
+		{
+			Spot = GetNextSpot(NewIncrementer, LevelType);
+			if (Spot && Predicate(Spot))
+			{
+				return NewIncrementer;
+			}
+
+			NewIncrementer += Incrementer;
+			Attempts++;
+		}
+
+		return 0;
+	}();
+
+	// -1 or 1 to move left or right, 0 if no spot found
+	if (FinalIncrementer == 0)
+	{
+		return nullptr;
+	}
+
+	// Move to the new spot
+	return MoveMainMenuSpot(FinalIncrementer);
+}
+
+// Attempts to switch to the active menu spot if current slot is not available for any reason
+void UNMMSpotsSubsystem::HandleUnavailableMenuSpot()
+{
+	const UNMMSpotComponent* CurrentSpot = GetCurrentSpot();
+	if (CurrentSpot && CurrentSpot->IsSpotAvailable())
+	{
+		// No need to switch, the current spot is valid
+		return;
+	}
+
+	// Current is inactive (hidden), likely it's locked by different systems
+	// Switch to any previous spot that is active
+	constexpr int32 BackwardDir = -1;
+	MoveMainMenuSpotByPredicate(BackwardDir, [](const UNMMSpotComponent* Spot) { return Spot->IsSpotAvailable(); });
 }
 
 /*********************************************************************************************
@@ -140,6 +211,8 @@ void UNMMSpotsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		// State is already set, apply it
 		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
+
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Clears all transient data contained in this subsystem
@@ -160,5 +233,18 @@ void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState NewS
 	if (NewState == ENMMState::None)
 	{
 		LastMoveSpotDirectionInternal = 0;
+	}
+}
+
+// Called when the current game state was changed
+void UNMMSpotsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+{
+	switch (CurrentGameState)
+	{
+	case ECGS::GameStarting:
+		HandleUnavailableMenuSpot();
+		break;
+
+	default: break;
 	}
 }

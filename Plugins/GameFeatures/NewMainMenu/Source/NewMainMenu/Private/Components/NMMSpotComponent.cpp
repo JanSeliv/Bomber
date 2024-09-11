@@ -8,6 +8,7 @@
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "LevelActors/PlayerCharacter.h"
 #include "MyDataTable/MyDataTable.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -28,12 +29,22 @@ UNMMSpotComponent::UNMMSpotComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
+	SetActiveFlag(true);
 }
 
 // Returns true if this spot is currently active and possessed by player
 bool UNMMSpotComponent::IsCurrentSpot() const
 {
 	return UNMMSpotsSubsystem::Get().GetCurrentSpot() == this;
+}
+
+// Returns true if this spot is visible, unlocked and can be selected by player
+bool UNMMSpotComponent::IsSpotAvailable() const
+{
+	const UMySkeletalMeshComponent& MeshComponent = GetMeshChecked();
+	return IsActive()
+		&& MeshComponent.IsActive()
+		&& MeshComponent.IsVisible();
 }
 
 // Returns the Skeletal Mesh of the Bomber character
@@ -47,6 +58,20 @@ UMySkeletalMeshComponent& UNMMSpotComponent::GetMeshChecked() const
 	UMySkeletalMeshComponent* Mesh = GetMySkeletalMeshComponent();
 	checkf(Mesh, TEXT("'Mesh' is nullptr, can not get mesh for '%s' spot."), *GetNameSafe(this));
 	return *Mesh;
+}
+
+// Sets the look of this spot to the in-game player character
+void UNMMSpotComponent::ApplyMeshOnPlayer()
+{
+	APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+	if (!ensureMsgf(PlayerCharacter, TEXT("ASSERT: [%i] %hs:\n'PlayerCharacter' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	// Update the chosen player mesh on the level
+	const FCustomPlayerMeshData& PlayerMeshData = GetMeshChecked().GetCustomPlayerMeshData();
+	PlayerCharacter->SetCustomPlayerMeshData(PlayerMeshData);
 }
 
 /*********************************************************************************************
@@ -333,19 +358,23 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState Curr
 // Called wen the Main Menu state was changed
 void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
-	const bool bIsActiveSpot = IsCurrentSpot();
+	const bool bIsCurrentSpot = IsCurrentSpot();
 
 	switch (NewState)
 	{
 	case ENMMState::Idle:
-		if (!bIsActiveSpot)
+		if (bIsCurrentSpot)
+		{
+			ApplyMeshOnPlayer();
+		}
+		else
 		{
 			// Stop other spots from playing their cinematic
 			StopMasterSequence();
 		}
 		break;
 	case ENMMState::Cinematic:
-		if (bIsActiveSpot)
+		if (bIsCurrentSpot)
 		{
 			MarkCinematicAsSeen();
 		}
@@ -353,7 +382,7 @@ void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewSt
 	default: break;
 	}
 
-	if (bIsActiveSpot)
+	if (bIsCurrentSpot)
 	{
 		SetCinematicByState(NewState);
 	}
@@ -382,9 +411,14 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 // Called when the Camera Rail transition state changed
 void UNMMSpotComponent::OnCameraRailTransitionStateChanged_Implementation(ENMMCameraRailTransitionState CameraRailTransitionStateChanged)
 {
-	if (CameraRailTransitionStateChanged == ENMMCameraRailTransitionState::HalfwayTransition
-		&& !IsCurrentSpot())
+	switch (CameraRailTransitionStateChanged)
 	{
-		StopMasterSequence();
+	case ENMMCameraRailTransitionState::HalfwayTransition:
+		if (IsCurrentSpot())
+		{
+			ApplyMeshOnPlayer();
+		}
+		break;
+	default: break;
 	}
 }

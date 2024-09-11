@@ -15,7 +15,9 @@ enum class ENMMCameraRailTransitionState : uint8;
 
 /**
  * Represents a spot where a character can be selected in the Main Menu.
- * Is responsible for playing cinematics (animation).
+ * Is responsible for:
+ * - playing cinematics (animation) in the Menu
+ * - Applying the player mesh to the in-game character.
  * Is added dynamically to the My Skeletal Mesh actors on the level.
  */
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -34,10 +36,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool IsCurrentSpot() const;
 
+	/** Returns true if this spot is visible, unlocked and can be selected by player.
+	 * To make this spot unavailable, call SetActive(false) on this spot ot its skeletal mesh. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsSpotAvailable() const;
+
 	/** Returns the Skeletal Mesh of the Bomber character. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
 	class UMySkeletalMeshComponent& GetMeshChecked() const;
+
+	/** Sets the look of this spot to the in-game player character. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplyMeshOnPlayer();
 
 	/*********************************************************************************************
 	 * Cinematics

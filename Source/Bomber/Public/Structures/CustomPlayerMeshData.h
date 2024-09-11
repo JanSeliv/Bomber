@@ -35,4 +35,7 @@ struct BOMBER_API FCustomPlayerMeshData
 
 	/** Returns true is data is valid. */
 	FORCEINLINE bool IsValid() const { return PlayerRow != nullptr; }
+
+	/** Equality operator to compare the mesh data. */
+	FORCEINLINE bool operator==(const FCustomPlayerMeshData& Other) const { return PlayerRow == Other.PlayerRow && SkinIndex == Other.SkinIndex; }
 };
