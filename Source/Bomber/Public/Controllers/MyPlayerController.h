@@ -86,6 +86,13 @@ protected:
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAnyCinematicStarted, const UObject*, LevelSequence, const UObject*, FromInstigator);
+
+	/** Is called only on local player on started watching an in-game cinematic. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnAnyCinematicStarted OnAnyCinematicStarted;
+
 protected:
 	/** Is called when all game widgets are initialized. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

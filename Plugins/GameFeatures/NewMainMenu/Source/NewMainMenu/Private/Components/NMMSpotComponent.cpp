@@ -102,13 +102,15 @@ bool UNMMSpotComponent::CanChangeCinematicState(ENMMState NewMainMenuState) cons
 		return false;
 	}
 
-	if (const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController())
+	const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	if (!MyPC || !MyPC->IsLocalController())
 	{
-		// Don't change any states if if game is run from the Render Movie
-		return !MyPC->bCinematicMode;
+		// Don't play cinematics for non-local players
+		return false;
 	}
 
-	return true;
+	// Don't change any states if game is run from the Render Movie
+	return !MyPC->bCinematicMode;
 }
 
 // Activate given cinematic state on this spot
@@ -288,10 +290,19 @@ void UNMMSpotComponent::ApplyCinematicState()
 	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(CinematicStateInternal, MasterPlayerInternal);
 	MasterPlayerInternal->SetPlaybackPosition(PlaybackPositionParams);
 
-	// Play the cinematic (in case of stop it will be paused automatically)
-	if (CinematicStateInternal != ENMMState::None)
+	if (CinematicStateInternal == ENMMState::None)
 	{
-		MasterPlayerInternal->Play();
+		// No need to stop it physically as playback settings above already paused a sequence
+		return;
+	}
+
+	MasterPlayerInternal->Play();
+
+	if (CinematicStateInternal == ENMMState::Cinematic)
+	{
+		const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+		checkf(MyPC, TEXT("ERROR: [%i] %hs:\n'MyPC' is null, local controller can not be obtained, cinematic can not be played!"), __LINE__, __FUNCTION__);
+		MyPC->OnAnyCinematicStarted.Broadcast(CinematicRowInternal.LevelSequence.Get(), this);
 	}
 }
 
