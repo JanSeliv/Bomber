@@ -4,6 +4,7 @@
 //---
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/CurveTable.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
 #include "GameFramework/SaveGame.h"
@@ -80,4 +81,100 @@ USaveGame* UGameplayUtilsLibrary::ResetSaveGameData(class USaveGame* SaveGame, c
 	UGameplayStatics::AsyncSaveGameToSlot(SaveGame, SaveSlotName, SaveSlotIndex);
 
 	return SaveGame;
+}
+
+// Is useful for animating actor's transform from values stored in the Curve Table
+bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, class UCurveTable* CurveTable, float TotalSecondsSinceStart)
+{
+	/* Example data (can be imported as csv into your Curve Table):
+
+		Name,0,0.1,0.2,0.5
+		LocationX,0,0.0,0.0,0
+		LocationY,0,0.0,0.0,0
+		LocationZ,0,0.0,0.0,0
+		RotationPitch,0,0.0,0.0,0
+		RotationYaw,0,0.0,0.0,0
+		RotationRoll,0,0.0,0.0,0
+		ScaleX,1,0.9,0.7,0
+		ScaleY,1,0.9,0.7,0
+		ScaleZ,1,0.9,0.7,0
+
+	Where ScaleZ will change from `1` (at 0 sec) to `0` (at 0.5 sec) */
+
+	if (!ensureMsgf(CurveTable, TEXT("ASSERT: [%i] %hs:\n'CurveTable' is not valid!"), __LINE__, __FUNCTION__)
+		|| !ensureMsgf(InActor, TEXT("ASSERT: [%i] %hs:\n'InActor' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return false;
+	}
+
+	static const TArray<FName> LocationRows = {FName("LocationX"), FName("LocationY"), FName("LocationZ")};
+	static const TArray<FName> RotationRows = {FName("RotationPitch"), FName("RotationYaw"), FName("RotationRoll")};
+	static const TArray<FName> ScaleRows = {FName("ScaleX"), FName("ScaleY"), FName("ScaleZ")};
+
+	FVector NewLocation = FVector::ZeroVector;
+	FVector NewScale = FVector::OneVector;
+	FVector RotationValues = FVector::ZeroVector;
+
+	float EvaluatedValue = 0.f;
+
+	auto EvaluateCurveRow = [](UCurveTable* CurveTable, FName RowName, float InXY, float& OutValue, const FString& ContextString) -> bool
+	{
+		FCurveTableRowHandle Handle;
+		Handle.CurveTable = CurveTable;
+		Handle.RowName = RowName;
+
+		const FRealCurve* Curve = CurveTable ? Handle.CurveTable->FindCurve(RowName, ContextString) : nullptr;
+		if (!Curve)
+		{
+			return false;
+		}
+
+		float MinTime = 0.f;
+		float MaxTime = 0.f;
+		Curve->GetTimeRange(MinTime, MaxTime);
+		if (InXY >= MaxTime)
+		{
+			// The curve is finished
+			return false;
+		}
+
+		return Handle.Eval(InXY, &OutValue, ContextString);
+	};
+
+	for (int32 Index = 0; Index < LocationRows.Num(); ++Index)
+	{
+		if (!EvaluateCurveRow(CurveTable, LocationRows[Index], TotalSecondsSinceStart, EvaluatedValue, TEXT("Location")))
+		{
+			return false;
+		}
+		NewLocation[Index] = EvaluatedValue;
+	}
+
+	for (int32 Index = 0; Index < RotationRows.Num(); ++Index)
+	{
+		if (!EvaluateCurveRow(CurveTable, RotationRows[Index], TotalSecondsSinceStart, EvaluatedValue, TEXT("Rotation")))
+		{
+			return false;
+		}
+		RotationValues[Index] = EvaluatedValue;
+	}
+	const FRotator NewRotation = FRotator::MakeFromEuler(RotationValues);
+
+	for (int32 Index = 0; Index < ScaleRows.Num(); ++Index)
+	{
+		if (!EvaluateCurveRow(CurveTable, ScaleRows[Index], TotalSecondsSinceStart, EvaluatedValue, TEXT("Scale")))
+		{
+			return false;
+		}
+		NewScale[Index] = EvaluatedValue;
+	}
+
+	FTransform WorldTransform;
+	WorldTransform.SetLocation(InActor->GetActorLocation() + NewLocation);
+	WorldTransform.SetRotation(InActor->GetActorRotation().Quaternion() * NewRotation.Quaternion());
+	WorldTransform.SetScale3D(InActor->GetActorScale3D() * NewScale);
+
+	InActor->SetActorTransform(WorldTransform);
+
+	return true;
 }
