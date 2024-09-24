@@ -1,6 +1,23 @@
-# 💣 About the Bomber Project
+<a href="https://github.com/JanSeliv/Bomber/blob/main/LICENSE">![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)</a>
+<a href="https://www.unrealengine.com/">![Unreal Engine](https://img.shields.io/badge/Unreal-5.4-dea309?style=flat&logo=unrealengine)</a>
 
-Bomber is an open-source indie game developed on Unreal Engine 5 for Windows and MacOS, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
+<br/>
+<p align="center">
+<a href="https://github.com/JanSeliv/Bomber">
+<img src="https://raw.githubusercontent.com/JanSeliv/Bomber/refs/heads/master/Build/Windows/Application.ico?raw=true" alt="Logo" width="80" height="80">
+</a>
+<h3 align="center">💣 Bomber Project</h3>
+<p align="center">
+<a href="https://discord.gg/jbWgwDefnE"><strong>Join our Discord ››</strong></a>
+<br/>
+<a href="https://github.com/JanSeliv/Bomber/releases">Releases</a>
+·
+<a href="https://trello.com/b/1jbKvyeh/bomber-kanban">Kanban Board</a>
+</p>
+
+## 🌟 About
+
+Bomber is an open-source multiplayer game developed on Unreal Engine 5 for Windows and MacOS, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
 
 ![Bomber](https://github.com/JanSeliv/Bomber/assets/20540872/2898eace-7a57-44d1-9530-4a5abc235b2d)
 
