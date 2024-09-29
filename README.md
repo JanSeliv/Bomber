@@ -1,10 +1,9 @@
 <a href="https://github.com/JanSeliv/Bomber/blob/main/LICENSE">![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)</a>
-<a href="https://www.unrealengine.com/">![Unreal Engine](https://img.shields.io/badge/Unreal-5.4-dea309?style=flat&logo=unrealengine)</a>
+<a href="https://www.unrealengine.com/">![Unreal Engine](https://img.shields.io/badge/Unreal-5.3-dea309?style=flat&logo=unrealengine)</a>
 
 <br/>
 <p align="center">
 <a href="https://github.com/JanSeliv/Bomber">
-<img src="https://raw.githubusercontent.com/JanSeliv/Bomber/refs/heads/master/Build/Windows/Application.ico?raw=true" alt="Logo" width="80" height="80">
 </a>
 <h3 align="center">💣 Bomber Project</h3>
 <p align="center">
@@ -13,6 +12,9 @@
 <a href="https://github.com/JanSeliv/Bomber/releases">Releases</a>
 ·
 <a href="https://trello.com/b/1jbKvyeh/bomber-kanban">Kanban Board</a>
+<br/>
+<br/>
+<img src="https://github.com/user-attachments/assets/e8774b8b-2f76-42f1-8eae-e6849658d2d3" alt="Logo" width="360" height="270">
 </p>
 
 ## 🌟 About
@@ -104,39 +106,39 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 - Updated Main-Menu background music for all levels.
 --- 
 #### `31.05.2022:`
- - Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
- - Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
- - Added new **SteelMan** character for AI players with 3 different skins.
+- Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
+- Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
+- Added new **SteelMan** character for AI players with 3 different skins.
 >  ![SteelMan_31-05-22](https://user-images.githubusercontent.com/20540872/171299202-3422db3c-7061-4b75-b51c-a08a67d65ab5.gif)
  ---
 #### `31.12.2021:`
- - The game migrated to the **Unreal Engine 5**.
- - Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
- - Added Controls tab in Settings to allow player remap input keys.
+- The game migrated to the **Unreal Engine 5**.
+- Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
+- Added Controls tab in Settings to allow player remap input keys.
 >  ![Settings_31-12-21](https://user-images.githubusercontent.com/20540872/147825296-ce7d33da-dfda-4757-b070-bfd08f700134.jpg)
  ---
 #### `03.06.2021:`
- - Completely updated the Maya level.
- - Added the Water level of the Roger character.
- - Added settings.
+- Completely updated the Maya level.
+- Added the Water level of the Roger character.
+- Added settings.
 >  ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
 >  ![](https://user-images.githubusercontent.com/20540872/120249541-8e5a9880-c27b-11eb-82cd-660878d33e6f.jpg)
 >  ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
  ---
 #### `31.01.2021:`
- - Added the Bastet (Sphynx cat) character with two skins.
- - Added the Roger character with one skin.
- - Fori and Hugo characters got additional second skins.
- > ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
+- Added the Bastet (Sphynx cat) character with two skins.
+- Added the Roger character with one skin.
+- Fori and Hugo characters got additional second skins.
+> ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
  ---
 #### `31.10.2020:` Added the third Level Map.
- > ![](https://user-images.githubusercontent.com/20540872/97792191-2d7ebb00-1bdb-11eb-9a27-c50d64394caa.jpg)
+> ![](https://user-images.githubusercontent.com/20540872/97792191-2d7ebb00-1bdb-11eb-9a27-c50d64394caa.jpg)
  ---
 #### `25.10.2020:`, developed the new UI prototype.
- - Added the second City Map.
- - Added the Hugo character.
- - Added the Fori character.
- > ![](https://user-images.githubusercontent.com/20540872/97118032-125a0a00-1708-11eb-8256-4bec419b1d48.gif)
+- Added the second City Map.
+- Added the Hugo character.
+- Added the Fori character.
+> ![](https://user-images.githubusercontent.com/20540872/97118032-125a0a00-1708-11eb-8256-4bec419b1d48.gif)
  ---
 #### `15.10.2019:` Uploaded first game-ready build.
 
