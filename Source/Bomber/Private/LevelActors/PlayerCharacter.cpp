@@ -422,8 +422,6 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 	{
 		// Is removed from Generated Map
 
-		Controller->UnPossess();
-
 		MapComponentInternal->OnDeactivatedMapComponent.RemoveAll(this);
 	}
 
