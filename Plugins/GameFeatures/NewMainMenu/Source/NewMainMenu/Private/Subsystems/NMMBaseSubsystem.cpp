@@ -37,7 +37,7 @@ void UNMMBaseSubsystem::SetNewMainMenuState(ENMMState NewState)
 // Returns the data asset that contains all the assets and tweaks of New Main Menu game feature
 const UNMMDataAsset* UNMMBaseSubsystem::GetNewMainMenuDataAsset() const
 {
-	return NewMainMenuDataAssetInternal.LoadSynchronous();
+	return UMyPrimaryDataAsset::GetOrLoadOnce(NewMainMenuDataAssetInternal);
 }
 
 /*********************************************************************************************
@@ -55,7 +55,7 @@ void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 // Clears all transient data contained in this subsystem
 void UNMMBaseSubsystem::Deinitialize()
 {
-	NewMainMenuDataAssetInternal.Reset();
+	UMyPrimaryDataAsset::ResetDataAsset(NewMainMenuDataAssetInternal);
 
 	Super::Deinitialize();
 }

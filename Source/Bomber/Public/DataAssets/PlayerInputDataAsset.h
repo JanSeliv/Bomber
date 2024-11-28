@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "Structures/MouseVisibilitySettings.h"
 //---
@@ -18,7 +18,7 @@ struct FKey;
 * Contains all data that describe player input.
 */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UPlayerInputDataAsset final : public UDataAsset
+class BOMBER_API UPlayerInputDataAsset final : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 

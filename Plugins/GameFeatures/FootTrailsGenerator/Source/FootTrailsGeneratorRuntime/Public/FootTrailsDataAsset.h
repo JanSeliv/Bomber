@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "FootTrailsDataAsset.generated.h"
 
@@ -12,7 +12,7 @@ class UDataTable;
  *  Contains all the assets and tweaks of Foot Trails game feature.
  */
 UCLASS(BlueprintType, Blueprintable)
-class FOOTTRAILSGENERATORRUNTIME_API UFootTrailsDataAsset : public UDataAsset
+class FOOTTRAILSGENERATORRUNTIME_API UFootTrailsDataAsset : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 

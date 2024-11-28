@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "UIDataAsset.generated.h"
 
@@ -12,7 +12,7 @@ enum class EEndGameState : uint8;
  * Contains in-game UI data.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UUIDataAsset final : public UDataAsset
+class BOMBER_API UUIDataAsset final : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 

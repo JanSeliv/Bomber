@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "SoundsDataAsset.generated.h"
 
@@ -19,7 +19,7 @@ enum class ECurrentGameState : uint8;
  * Contains all sound assets used in game.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API USoundsDataAsset final : public UDataAsset
+class BOMBER_API USoundsDataAsset final : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 

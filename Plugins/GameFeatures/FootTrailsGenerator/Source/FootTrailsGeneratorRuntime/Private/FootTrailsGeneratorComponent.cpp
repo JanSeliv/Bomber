@@ -23,6 +23,12 @@ UFootTrailsGeneratorComponent::UFootTrailsGeneratorComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+// Returns the data asset that contains all the assets and tweaks of Foot Trails game feature
+const UFootTrailsDataAsset* UFootTrailsGeneratorComponent::GetFootTrailsDataAsset() const
+{
+	return UMyPrimaryDataAsset::GetOrLoadOnce(FootTrailsDataAssetInternal);
+}
+
 // Guarantees that the data asset is loaded, otherwise, it will crash
 const UFootTrailsDataAsset& UFootTrailsGeneratorComponent::GetFootTrailsDataAssetChecked() const
 {
@@ -66,6 +72,8 @@ void UFootTrailsGeneratorComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 	}
 
 	FootTrailInstancesInternal.Empty();
+
+	UMyPrimaryDataAsset::ResetDataAsset(FootTrailsDataAssetInternal);
 
 	Super::EndPlay(EndPlayReason);
 }

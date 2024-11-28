@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "NewAIDataAsset.generated.h"
 
@@ -10,7 +10,7 @@
  * Contains all assets in NewAI plugin
  */
 UCLASS()
-class NEWAI_API UNewAIDataAsset : public UDataAsset
+class NEWAI_API UNewAIDataAsset : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 

@@ -30,7 +30,7 @@ UNewAIBaseSubsystem& UNewAIBaseSubsystem::Get(const UObject* OptionalWorldContex
 // Returns the NewAI data asset
 const UNewAIDataAsset* UNewAIBaseSubsystem::GetNewAIDataAsset() const
 {
-	return NewAIDataAssetInternal.LoadSynchronous();
+	return UMyPrimaryDataAsset::GetOrLoadOnce(NewAIDataAssetInternal);
 }
 
 /*********************************************************************************************
@@ -55,6 +55,14 @@ void UNewAIBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	UAIUtilsLibrary::RebuildNavMesh(&InWorld, UCellsUtilsLibrary::GetLevelGridTransform());
 
 	UGameDifficultySubsystem::Get().OnGameDifficultyChanged.AddDynamic(this, &ThisClass::OnNewAIDifficultyChanged);
+}
+
+// Clears all transient data contained in this subsystem
+void UNewAIBaseSubsystem::Deinitialize()
+{
+	UMyPrimaryDataAsset::ResetDataAsset(NewAIDataAssetInternal);
+
+	Super::Deinitialize();
 }
 
 // Disables all vanilla AI agents to override its behavior by the NewAI feature

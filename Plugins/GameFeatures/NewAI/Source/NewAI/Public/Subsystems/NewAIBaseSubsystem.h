@@ -42,6 +42,9 @@ protected:
 	/** Called when the game starts. */
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
+	/** Clears all transient data contained in this subsystem. */
+	virtual void Deinitialize() override;
+
 	/** Disables or enables all vanilla AI agents to override its behavior by the NewAI feature. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void HandleLegacyAI();

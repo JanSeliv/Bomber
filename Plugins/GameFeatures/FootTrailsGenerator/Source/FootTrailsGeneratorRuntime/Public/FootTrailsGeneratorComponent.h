@@ -29,7 +29,7 @@ public:
 	/** Returns the data asset that contains all the assets and tweaks of Foot Trails game feature.
 	 * @see UFootTrailsGeneratorComponent::FootTrailsDataAssetInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE class UFootTrailsDataAsset* GetFootTrailsDataAsset() const { return FootTrailsDataAssetInternal.LoadSynchronous(); }
+	const class UFootTrailsDataAsset* GetFootTrailsDataAsset() const;
 
 	/** Guarantees that the data asset is loaded, otherwise, it will crash. */
 	const class UFootTrailsDataAsset& GetFootTrailsDataAssetChecked() const;

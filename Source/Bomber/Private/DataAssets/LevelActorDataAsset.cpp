@@ -98,9 +98,3 @@ const ULevelActorRow* ULevelActorDataAsset::GetRowByPredicate(const TFunctionRef
 	}
 	return nullptr;
 }
-
-// Returns the class of an actor, whose data is described by this data asset
-UClass* ULevelActorDataAsset::GetActorClass() const
-{
-	return ActorClassInternal.LoadSynchronous();
-}

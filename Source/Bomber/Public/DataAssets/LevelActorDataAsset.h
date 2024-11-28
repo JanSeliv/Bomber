@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "Bomber.h"
 #include "Engine/EngineTypes.h" // ECollisionResponse
@@ -41,7 +41,7 @@ protected:
  * The base data asset for the Bomber's data.
  */
 UCLASS(Abstract, Blueprintable, BlueprintType, Const, AutoExpandCategories=("C++"))
-class BOMBER_API UBomberDataAsset : public UDataAsset
+class BOMBER_API UBomberDataAsset : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 
@@ -97,7 +97,7 @@ public:
 
 	/** Returns the class of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	UClass* GetActorClass() const;
+	TSubclassOf<class AActor> GetActorClass() const { return ActorClassInternal; }
 
 	/** Returns the actor type of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -122,7 +122,7 @@ protected:
 
 	/** Class of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))
-	TSoftClassPtr<class AActor> ActorClassInternal = nullptr;
+	TSubclassOf<class AActor> ActorClassInternal = nullptr;
 
 	/** Actor type of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))

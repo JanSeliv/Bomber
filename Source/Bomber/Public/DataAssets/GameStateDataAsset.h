@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "GameStateDataAsset.generated.h"
 
@@ -10,7 +10,7 @@
  * The data of the game match.
  */
 UCLASS()
-class BOMBER_API UGameStateDataAsset final : public UDataAsset
+class BOMBER_API UGameStateDataAsset final : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 

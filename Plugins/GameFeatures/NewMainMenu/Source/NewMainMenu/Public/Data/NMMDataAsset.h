@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "NMMDataAsset.generated.h"
 
@@ -12,7 +12,7 @@ enum class ENMMState : uint8;
  * Contains common data of the New Main Menu plugin to be tweaked.
  */
 UCLASS(Blueprintable, BlueprintType)
-class NEWMAINMENU_API UNMMDataAsset : public UDataAsset
+class NEWMAINMENU_API UNMMDataAsset : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 

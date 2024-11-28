@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "AIDataAsset.generated.h"
 
@@ -10,7 +10,7 @@
 * Contains AI data.
 */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UAIDataAsset final : public UDataAsset
+class BOMBER_API UAIDataAsset final : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 
