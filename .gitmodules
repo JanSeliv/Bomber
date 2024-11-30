@@ -25,3 +25,7 @@
 	path = Plugins/GameFeatures/ProgressionSystem
 	url = https://github.com/h4rdmol/ProgressionSystem.git
 	branch = main
+[submodule "Plugins/LevelSequencerAudioTrimmer"]
+	path = Plugins/LevelSequencerAudioTrimmer
+	url = git@github.com:JanSeliv/LevelSequencerAudioTrimmer.git
+	branch = develop
