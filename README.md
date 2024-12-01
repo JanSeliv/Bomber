@@ -84,6 +84,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![ProgressionSystem](https://github.com/user-attachments/assets/742ad861-f077-44f8-a6ae-048665b8a77f)
 - Updated **Box and Wall meshes** for the Maya level:
 > ![NewBoxAndWall](https://github.com/user-attachments/assets/01e72eb6-ca89-4392-957c-92aba9663cdc)
+- Added new skin for the Roger character.
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
 
 #### `13.01.2024`
