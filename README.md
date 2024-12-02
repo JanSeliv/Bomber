@@ -70,11 +70,11 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 ## 📅 Changelog
 #### `XX.XX.2024`
 - Updated to **Unreal Engine 5.4**.
-- Introduced **In-Game User Interface** with completely new look, utilizing the **Model-View-ViewModel** (MVVM) pattern.
+- Introduced **In-Game User Interface** with completely new look, utilizing the **Model-View-ViewModel** (MVVM) pattern:
 > ![NewHUD](https://github.com/JanSeliv/Bomber/assets/20540872/73c3c7f7-02b5-4d54-b34f-b354201bfc06)
-- Added cinematic for the Roger character on the Maya level.
+- Added cinematic for the Roger character on the Maya level by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
 > ![RogerCinematic](https://github.com/JanSeliv/Bomber/assets/20540872/9931d8da-e8cb-4cf5-ab61-361f48afa20b)
-- Added cinematic for the Bastet character on the Maya level.
+- Added cinematic for the Bastet character on the Maya level by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
 > ![BastetCinematic](https://github.com/JanSeliv/Bomber/assets/20540872/0602cc7c-f68c-46fa-9400-46a8bc35c73c)
 - Implemented **Switch Camera Transitions** between characters in Main Menu:
 > ![Rails](https://github.com/JanSeliv/Bomber/assets/20540872/aa496ae1-a6bb-41d1-a578-566d1af48170)
@@ -82,35 +82,35 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![BombVFXs](https://github.com/JanSeliv/Bomber/assets/20540872/3163ade3-7f5f-40be-9c9e-69c0426b8a29)
 - Implemented **[Progression System](https://github.com/h4rdmol/ProgressionSystem)** by [Valeriy Rotermel](https://github.com/h4rdmol) that unlocks new playable characters as you progress in the game:
 > ![ProgressionSystem](https://github.com/user-attachments/assets/742ad861-f077-44f8-a6ae-048665b8a77f)
-- Updated **Box and Wall meshes** for the Maya level:
+- New **Box and Wall meshes** for the Maya level by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 > ![NewBoxAndWall](https://github.com/user-attachments/assets/01e72eb6-ca89-4392-957c-92aba9663cdc)
 - Added new skin for the Roger character.
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
-
+ ---
 #### `13.01.2024`
 - Updated to **Unreal Engine 5.3**.
 - **New Main Menu** with completely different UI and complex cinematics for Hugo and Fori characters on starting the game:
 > ![NewMainMenu](https://github.com/JanSeliv/Bomber/assets/20540872/9c960fa4-6760-4298-a55b-54d0cb8a0b13)
-- **New Bomb meshes** for each character (shown from left to right: Bastet, Hugo, Fori, Roger):
+- **New Bomb meshes** for each character (shown from left to right: Bastet, Hugo, Fori, Roger) by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 > ![NewBombMeshes](https://github.com/JanSeliv/Bomber/assets/20540872/ce787e8c-d95c-4844-9282-e7aaff3dc243)
 - **New game icon**: ![GameIcon](https://github.com/JanSeliv/Bomber/assets/20540872/ca239a66-b550-4a45-ba4f-182d85e3c460)
-- **New Wall mesh** for the Maya level.
+ ---
 #### `12.06.2023`
 - Updated to **Unreal Engine 5.2**.
 - Added **MacOS** support.
 - Added **Ultra-wide** resolutions support.
 - Extracted logic into plugins, so other developers can benefit from it in their projects
-- Added Foot Trails for the Maya level as `Modular Game Feature`:
+- Added Foot Trails for the Maya level by [Anton Selivanov](https://github.com/antokior):
 >  <img width="560" alt="image" src="https://github.com/JanSeliv/Bomber/assets/20540872/a77c2e38-4fd6-4a04-988e-05d9613bd97e">
-- New power-ups meshes for the Maya level (shown from left to right: move speed, bomb length, bomb quantity):
+- New power-ups meshes for the Maya level (shown from left to right: move speed, bomb length, bomb quantity) by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 >  <img width="360" alt="image" src="https://github.com/JanSeliv/Bomber/assets/20540872/1e526fda-e51a-479c-b541-acccc8457725">
 - Added new cheats such as: `Bomber.Level.SetSize 9x7` (find more on the [Bomber cheats page](https://trello.com/c/5PiHt7Ah/308-bomber-cheats))
-- Updated Main-Menu background music for all levels.
---- 
+- Updated Main-Menu background music.
+ --- 
 #### `31.05.2022:`
  - Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
  - Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
- - Added new **SteelMan** character for AI players with 3 different skins.
+ - Added new **SteelMan** character for AI players with 3 different skins by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
 >  ![SteelMan_31-05-22](https://user-images.githubusercontent.com/20540872/171299202-3422db3c-7061-4b75-b51c-a08a67d65ab5.gif)
  ---
 #### `31.12.2021:`
@@ -120,26 +120,18 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 >  ![Settings_31-12-21](https://user-images.githubusercontent.com/20540872/147825296-ce7d33da-dfda-4757-b070-bfd08f700134.jpg)
  ---
 #### `03.06.2021:`
- - Completely updated the Maya level.
- - Added the Water level of the Roger character.
- - Added settings.
+ - Added the Maya level by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 >  ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
->  ![](https://user-images.githubusercontent.com/20540872/120249541-8e5a9880-c27b-11eb-82cd-660878d33e6f.jpg)
+ - Implemented `Settings` screen:
 >  ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
  ---
 #### `31.01.2021:`
- - Added the Bastet (Sphynx cat) character with two skins.
- - Added the Roger character with one skin.
- - Fori and Hugo characters got additional second skins.
+ - Added the Bastet (Sphynx cat) and Roger (Pirate) characters by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
+ - Fori and Hugo characters got additional second skins by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
  > ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
  ---
-#### `31.10.2020:` Added the third Level Map.
- > ![](https://user-images.githubusercontent.com/20540872/97792191-2d7ebb00-1bdb-11eb-9a27-c50d64394caa.jpg)
- ---
-#### `25.10.2020:`, developed the new UI prototype.
- - Added the second City Map.
- - Added the Hugo character.
- - Added the Fori character.
+#### `25.10.2020:
+ - Added the Hugo and Fori characters by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
  > ![](https://user-images.githubusercontent.com/20540872/97118032-125a0a00-1708-11eb-8256-4bec419b1d48.gif)
  ---
 #### `15.10.2019:` Uploaded first game-ready build.
@@ -268,6 +260,7 @@ _Grey Х: the selected cell on which the bot moves to._
 - **Kateryna Shchetinina** - Characters & Animations - [Artstation](https://www.artstation.com/kateseliv)
 - **Yevhenii Oksenchuk** - Game Design (Audio, UI, and Cinematics) - [Telegram](https://t.me/ComeThird)
 - **Valeriy Rotermel** - [Progression System](https://github.com/h4rdmol/ProgressionSystem) - [GitHub](https://github.com/h4rdmol)
+- **Anton Selivanov** - Foot Trails - [GitHub](https://github.com/antokior)
 
 Special thanks to the following companies for providing their licenses to support our open source development:
 
