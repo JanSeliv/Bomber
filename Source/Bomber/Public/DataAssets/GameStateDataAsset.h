@@ -30,10 +30,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdownInternal; }
 
-	/** Returns all game features need to be loaded and activated on starting the game. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE TArray<FName>& GetGameFeaturesToEnable() const { return GameFeaturesToEnableInternal; }
-
 	/** Assign new match duration.
 	 * Might be useful for testing, but shouldn't be used in shipping. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
@@ -51,8 +47,4 @@ protected:
 	/** Seconds to the end of the round. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, DisplayName = "In-Game Countdown"))
 	int32 InGameCountdownInternal = 120;
-
-	/** All game features need to be loaded and activated on starting the game. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Game Features To Enable", ShowOnlyInnerProperties))
-	TArray<FName> GameFeaturesToEnableInternal;
 };

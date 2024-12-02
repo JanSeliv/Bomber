@@ -16,7 +16,7 @@ class ULevelActorDataAsset;
  * Is set up in 'Project Settings' -> 'Game' -> 'Data Assets Container'.
  * The changes are saved in 'DefaultDataAssets.ini' file.
  */
-UCLASS(Config = "DataAssets", DefaultConfig, DisplayName = "Data Assets Container")
+UCLASS(Config = "DataAssets", DefaultConfig, DisplayName = "Bomber Data Assets Container")
 class BOMBER_API UDataAssetsContainer final : public UDeveloperSettings
 {
 	GENERATED_BODY()

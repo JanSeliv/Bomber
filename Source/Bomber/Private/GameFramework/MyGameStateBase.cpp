@@ -4,6 +4,7 @@
 //---
 #include "GeneratedMap.h"
 #include "DataAssets/GameStateDataAsset.h"
+#include "DataAssets/ModularGameFeatureSettings.h"
 #include "GameFramework/MyPlayerState.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
@@ -346,7 +347,7 @@ void AMyGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMyGameStateBase::SetGameFeaturesEnabled(bool bEnable)
 {
 	UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
-	const TArray<FName>& GameFeaturesToEnable = UGameStateDataAsset::Get().GetGameFeaturesToEnable();
+	const TArray<FName>& GameFeaturesToEnable = UModularGameFeatureSettings::Get().GetModularGameFeatures();
 	for (const FName GameFeatureName : GameFeaturesToEnable)
 	{
 		if (GameFeatureName.IsNone())
