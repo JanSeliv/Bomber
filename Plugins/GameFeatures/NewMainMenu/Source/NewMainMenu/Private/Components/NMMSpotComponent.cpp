@@ -19,10 +19,14 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "LevelSequencePlayer.h"
+#include "NativeGameplayTags.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotComponent)
+
+// Skeletal mesh actor should own this tag, used to prevent initializing menu spots on other skeletal mesh actors, like from cinematics
+UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_NMM_SPOT, TEXT("NMM.Spot"));
 
 // Default constructor
 UNMMSpotComponent::UNMMSpotComponent()
@@ -149,6 +153,15 @@ void UNMMSpotComponent::BeginPlay()
 	{
 		// Don't process modular if world is restarting
 		// It could happen since module could be loaded very late, right after request of restarting a level
+		return;
+	}
+
+	// Skeletal mesh actor should own this tag, used to prevent initializing menu spots on other skeletal mesh actors, like from cinematics
+	static const FName ExpectedTagName = TAG_NMM_SPOT.GetTag().GetTagName();
+	if (!GetOwner()->ActorHasTag(ExpectedTagName))
+	{
+		UE_LOG(LogBomber, Log, TEXT("[%i] %hs: Skip initializing '%s' spot for '%s' actor, it doesn't have '%s' tag."),
+		       __LINE__, __FUNCTION__, *GetNameSafe(this), *GetNameSafe(GetOwner()), *ExpectedTagName.ToString());
 		return;
 	}
 

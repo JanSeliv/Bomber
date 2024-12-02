@@ -26,6 +26,7 @@ public class NewMainMenu : ModuleRules
 				, "MovieScene", "LevelSequence" // Cinematics
 				, "AdvancedWidgets" // URadialSlider
 				, "CineCameraRigs" // Camera rails
+				, "GameplayTags" // UE_DEFINE_GAMEPLAY_TAG_STATIC
 				// My modules
 				, "MyUtils"
 				, "SettingsWidgetConstructor"
