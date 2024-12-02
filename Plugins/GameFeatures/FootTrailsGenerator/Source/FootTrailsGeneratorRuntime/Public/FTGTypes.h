@@ -7,13 +7,13 @@
 #include "Bomber.h" // ELevelType
 #include "Misc/EnumRange.h"
 //---
-#include "FootTrailsTypes.generated.h"
+#include "FTGTypes.generated.h"
 
 /**
  * All the Foot Trails types.
  */
 UENUM(BlueprintType)
-enum class EFootTrailType : uint8
+enum class EFTGTrailType : uint8
 {
 	None,
 	Crossroad,
@@ -23,19 +23,19 @@ enum class EFootTrailType : uint8
 	Turn
 };
 
-ENUM_RANGE_BY_FIRST_AND_LAST(EFootTrailType, EFootTrailType::Crossroad, EFootTrailType::Turn);
+ENUM_RANGE_BY_FIRST_AND_LAST(EFTGTrailType, EFTGTrailType::Crossroad, EFTGTrailType::Turn);
 
 /**
  * Specific foot trail archetype.
  */
 USTRUCT(BlueprintType)
-struct FOOTTRAILSGENERATORRUNTIME_API FFootTrailArchetype : public FTableRowBase
+struct FOOTTRAILSGENERATORRUNTIME_API FFTGArchetype : public FTableRowBase
 {
 	GENERATED_BODY()
 
 	/** The foot trail type. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	EFootTrailType FootTrailType = EFootTrailType::Crossroad;
+	EFTGTrailType FootTrailType = EFTGTrailType::Crossroad;
 
 	/** The level type that this foot trail can be spawned on. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
@@ -47,9 +47,9 @@ struct FOOTTRAILSGENERATORRUNTIME_API FFootTrailArchetype : public FTableRowBase
 
 	/** Compares for equality.
 	* @param Other The other object being compared. */
-	bool operator==(const FFootTrailArchetype& Other) const { return GetTypeHash(*this) == GetTypeHash(Other); }
+	bool operator==(const FFTGArchetype& Other) const { return GetTypeHash(*this) == GetTypeHash(Other); }
 
 	/** Creates a hash value.
 	* @param Other the other object to create a hash value for. */
-	friend FOOTTRAILSGENERATORRUNTIME_API uint32 GetTypeHash(const FFootTrailArchetype& Other) { return GetTypeHash(Other.FootTrailType) ^ GetTypeHash(Other.LevelType) ^ GetTypeHash(Other.Mesh); }
+	friend FOOTTRAILSGENERATORRUNTIME_API uint32 GetTypeHash(const FFTGArchetype& Other) { return GetTypeHash(Other.FootTrailType) ^ GetTypeHash(Other.LevelType) ^ GetTypeHash(Other.Mesh); }
 };

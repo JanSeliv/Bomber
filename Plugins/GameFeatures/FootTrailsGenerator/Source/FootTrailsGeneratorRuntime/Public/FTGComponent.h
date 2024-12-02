@@ -4,18 +4,18 @@
 
 #include "Components/ActorComponent.h"
 //---
-#include "FootTrailsTypes.h"
+#include "FTGTypes.h"
 //---
-#include "FootTrailsGeneratorComponent.generated.h"
+#include "FTGComponent.generated.h"
 
-class UFootTrailsDataAsset;
+class UFTGDataAsset;
 class UStaticMesh;
 
 /**
  * Is main logic component that generates foot trails.
  */
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class FOOTTRAILSGENERATORRUNTIME_API UFootTrailsGeneratorComponent : public UActorComponent
+class FOOTTRAILSGENERATORRUNTIME_API UFTGComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -24,19 +24,19 @@ class FOOTTRAILSGENERATORRUNTIME_API UFootTrailsGeneratorComponent : public UAct
 	 ********************************************************************************************* */
 public:
 	/** Sets default values for this component's properties. */
-	UFootTrailsGeneratorComponent();
+	UFTGComponent();
 
 	/** Returns the data asset that contains all the assets and tweaks of Foot Trails game feature.
 	 * @see UFootTrailsGeneratorComponent::FootTrailsDataAssetInternal */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const class UFootTrailsDataAsset* GetFootTrailsDataAsset() const;
+	const class UFTGDataAsset* GetFootTrailsDataAsset() const;
 
 	/** Guarantees that the data asset is loaded, otherwise, it will crash. */
-	const class UFootTrailsDataAsset& GetFootTrailsDataAssetChecked() const;
+	const class UFTGDataAsset& GetFootTrailsDataAssetChecked() const;
 
 	/** Returns the random foot trail instance for given types. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const UStaticMesh* GetRandomMesh(EFootTrailType FootTrailType) const;
+	const UStaticMesh* GetRandomMesh(EFTGTrailType FootTrailType) const;
 
 	/*********************************************************************************************
 	 * Protected properties
@@ -44,7 +44,7 @@ public:
 protected:
 	/** Contains all the assets and tweaks of Foot Trails game feature. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Foot Trails Data Asset"))
-	TSoftObjectPtr<const class UFootTrailsDataAsset> FootTrailsDataAssetInternal = nullptr;
+	TSoftObjectPtr<const class UFTGDataAsset> FootTrailsDataAssetInternal = nullptr;
 
 	/** Converts actors with static meshes to instanced static meshes. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Instanced Static Mesh Actor"))
@@ -52,7 +52,7 @@ protected:
 
 	/** Loaded foot trails archetypes for all levels. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Foot Trail Instances"))
-	TMap<FFootTrailArchetype, TObjectPtr<UStaticMesh>> FootTrailInstancesInternal;
+	TMap<FFTGArchetype, TObjectPtr<UStaticMesh>> FootTrailInstancesInternal;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -70,5 +70,5 @@ protected:
 
 	/** Spawns given Foot Trail by its type on the specified cell. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SpawnFootTrail(EFootTrailType FootTrailType, const struct FCell& Cell, float CellRotation);
+	void SpawnFootTrail(EFTGTrailType FootTrailType, const struct FCell& Cell, float CellRotation);
 };

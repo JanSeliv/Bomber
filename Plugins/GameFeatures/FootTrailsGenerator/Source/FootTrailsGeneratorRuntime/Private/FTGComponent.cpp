@@ -1,8 +1,8 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "FootTrailsGeneratorComponent.h"
+#include "FTGComponent.h"
 //---
-#include "FootTrailsDataAsset.h"
+#include "FTGDataAsset.h"
 #include "InstancedStaticMeshActor.h"
 #include "MyDataTable/MyDataTable.h"
 #include "Structures/Cell.h"
@@ -13,10 +13,10 @@
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 //---
-#include UE_INLINE_GENERATED_CPP_BY_NAME(FootTrailsGeneratorComponent)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(FTGComponent)
 
 // Sets default values for this component's properties
-UFootTrailsGeneratorComponent::UFootTrailsGeneratorComponent()
+UFTGComponent::UFTGComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -24,25 +24,25 @@ UFootTrailsGeneratorComponent::UFootTrailsGeneratorComponent()
 }
 
 // Returns the data asset that contains all the assets and tweaks of Foot Trails game feature
-const UFootTrailsDataAsset* UFootTrailsGeneratorComponent::GetFootTrailsDataAsset() const
+const UFTGDataAsset* UFTGComponent::GetFootTrailsDataAsset() const
 {
 	return UMyPrimaryDataAsset::GetOrLoadOnce(FootTrailsDataAssetInternal);
 }
 
 // Guarantees that the data asset is loaded, otherwise, it will crash
-const UFootTrailsDataAsset& UFootTrailsGeneratorComponent::GetFootTrailsDataAssetChecked() const
+const UFTGDataAsset& UFTGComponent::GetFootTrailsDataAssetChecked() const
 {
-	const UFootTrailsDataAsset* FootTrailsDataAsset = GetFootTrailsDataAsset();
+	const UFTGDataAsset* FootTrailsDataAsset = GetFootTrailsDataAsset();
 	checkf(FootTrailsDataAsset, TEXT("%s: 'FootTrailsDataAssetInternal' is not set"), *FString(__FUNCTION__));
 	return *FootTrailsDataAsset;
 }
 
 // Returns the random foot trail instance for given types
-const UStaticMesh* UFootTrailsGeneratorComponent::GetRandomMesh(EFootTrailType FootTrailType) const
+const UStaticMesh* UFTGComponent::GetRandomMesh(EFTGTrailType FootTrailType) const
 {
 	TArray<const UStaticMesh*> MatchingMeshes;
 	const ELevelType CurrentLevelType = UMyBlueprintFunctionLibrary::GetLevelType();
-	for (const TTuple<FFootTrailArchetype, TObjectPtr<UStaticMesh>>& It : FootTrailInstancesInternal)
+	for (const TTuple<FFTGArchetype, TObjectPtr<UStaticMesh>>& It : FootTrailInstancesInternal)
 	{
 		if (It.Key.FootTrailType == FootTrailType && It.Key.LevelType == CurrentLevelType)
 		{
@@ -55,7 +55,7 @@ const UStaticMesh* UFootTrailsGeneratorComponent::GetRandomMesh(EFootTrailType F
 }
 
 // Called when the game starts
-void UFootTrailsGeneratorComponent::BeginPlay()
+void UFTGComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -63,7 +63,7 @@ void UFootTrailsGeneratorComponent::BeginPlay()
 }
 
 // Called when the game ends
-void UFootTrailsGeneratorComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UFTGComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (InstancedStaticMeshActorInternal)
 	{
@@ -79,7 +79,7 @@ void UFootTrailsGeneratorComponent::EndPlay(const EEndPlayReason::Type EndPlayRe
 }
 
 // Loads all foot trails archetypes
-void UFootTrailsGeneratorComponent::Init()
+void UFTGComponent::Init()
 {
 	const UDataTable* FootTrailsDT = GetFootTrailsDataAssetChecked().GetFootTrailsDataTable();
 	if (!ensureMsgf(FootTrailsDT, TEXT("%s: 'FootTrailsDT' is not set"), *FString(__FUNCTION__))
@@ -92,11 +92,11 @@ void UFootTrailsGeneratorComponent::Init()
 	InstancedStaticMeshActorInternal = GetWorld()->SpawnActor<AInstancedStaticMeshActor>();
 	checkf(InstancedStaticMeshActorInternal, TEXT("%s: ERROR: 'InstancedStaticMeshActor' was not spawned!"), *FString(__FUNCTION__));
 
-	TMap<FName, FFootTrailArchetype> FootTrailsRows;
+	TMap<FName, FFTGArchetype> FootTrailsRows;
 	UMyDataTable::GetRows(*FootTrailsDT, FootTrailsRows);
-	for (const TTuple<FName, FFootTrailArchetype>& FootTrailsRowIt : FootTrailsRows)
+	for (const TTuple<FName, FFTGArchetype>& FootTrailsRowIt : FootTrailsRows)
 	{
-		const FFootTrailArchetype& ArchetypeIt = FootTrailsRowIt.Value;
+		const FFTGArchetype& ArchetypeIt = FootTrailsRowIt.Value;
 		if (ArchetypeIt.Mesh.IsNull())
 		{
 			// skip empty rows
@@ -108,11 +108,11 @@ void UFootTrailsGeneratorComponent::Init()
 }
 
 // Spawns given Foot Trail by its type on the specified cell
-void UFootTrailsGeneratorComponent::SpawnFootTrail(EFootTrailType FootTrailType, const FCell& Cell, float CellRotation)
+void UFTGComponent::SpawnFootTrail(EFTGTrailType FootTrailType, const FCell& Cell, float CellRotation)
 {
 	const UStaticMesh* FootTrailMesh = GetRandomMesh(FootTrailType);
 	if (!FootTrailMesh
-		|| !ensureMsgf(FootTrailType != EFootTrailType::None, TEXT("%s: 'FootTrailType' is none"), *FString(__FUNCTION__))
+		|| !ensureMsgf(FootTrailType != EFTGTrailType::None, TEXT("%s: 'FootTrailType' is none"), *FString(__FUNCTION__))
 		|| !ensureMsgf(InstancedStaticMeshActorInternal, TEXT("%s: 'InstancedStaticMeshActor' is not valid"), *FString(__FUNCTION__)))
 	{
 		return;
