@@ -43,8 +43,15 @@ AGeneratedMap* UGeneratedMapSubsystem::GetGeneratedMap(bool bWarnIfNull/* = true
 // The Generated Map setter
 void UGeneratedMapSubsystem::SetGeneratedMap(AGeneratedMap* InGeneratedMap)
 {
-	if (ensureMsgf(InGeneratedMap, TEXT("%s: 'InGeneratedMap' is not valid"), *FString(__FUNCTION__)))
+	if (!ensureMsgf(InGeneratedMap, TEXT("%s: 'InGeneratedMap' is not valid"), *FString(__FUNCTION__)))
 	{
-		GeneratedMapInternal = InGeneratedMap;
+		return;
+	}
+
+	GeneratedMapInternal = InGeneratedMap;
+
+	if (OnGeneratedMapReady.IsBound())
+	{
+		OnGeneratedMapReady.Broadcast(InGeneratedMap);
 	}
 }

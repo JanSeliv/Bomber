@@ -85,17 +85,6 @@ AGeneratedMap* AGeneratedMap::GetGeneratedMap(const UObject* OptionalWorldContex
 	return Subsystem ? Subsystem->GetGeneratedMap(bWarnIfNull) : nullptr;
 }
 
-// Initialize this Generated Map actor, could be called multiple times
-void AGeneratedMap::ConstructGeneratedMap(const FTransform& Transform)
-{
-	if (OnGeneratedMapWantsReconstruct.IsBound())
-	{
-		OnGeneratedMapWantsReconstruct.Broadcast(Transform);
-	}
-
-	OnConstructionGeneratedMap(Transform);
-}
-
 // Sets the size for generated map, it will automatically regenerate the level for given size
 void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 {
@@ -743,7 +732,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	ConstructGeneratedMap(Transform);
+	OnConstructionGeneratedMap(Transform);
 }
 
 // Initialize this Generated Map actor, could be called multiple times
@@ -821,7 +810,7 @@ void AGeneratedMap::PostInitializeComponents()
 	// Update the gameplay GeneratedMap reference in the singleton library
 	UGeneratedMapSubsystem::Get().SetGeneratedMap(this);
 
-	ConstructGeneratedMap(GetActorTransform());
+	OnConstructionGeneratedMap(GetActorTransform());
 
 	if (HasAuthority())
 	{
@@ -1128,7 +1117,7 @@ void AGeneratedMap::MulticastSetLevelSize_Implementation(const FIntPoint& LevelS
 {
 	FTransform CurrentTransform = GetActorTransform();
 	CurrentTransform.SetScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
-	ConstructGeneratedMap(CurrentTransform);
+	OnConstructionGeneratedMap(CurrentTransform);
 }
 
 /* ---------------------------------------------------

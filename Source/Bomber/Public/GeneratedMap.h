@@ -26,13 +26,6 @@ public:
 	 *		Public properties
 	 * --------------------------------------------------- */
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGeneratedMapWantsReconstruct, const FTransform&, Transform);
-
-	/** Called when this Generated Map actor wants to be reconstructed.
-	* Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructGeneratedMap(). */
-	UPROPERTY(BlueprintAssignable, Transient, Category = "C++")
-	FOnGeneratedMapWantsReconstruct OnGeneratedMapWantsReconstruct;
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratedLevelActors);
 
 	/** Is useful to react on regenerating level. */
@@ -66,10 +59,6 @@ public:
 	 * Is used in Getters to avoid crashes on levels without Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static AGeneratedMap* GetGeneratedMap(const UObject* OptionalWorldContext = nullptr);
-
-	/** Initialize this Generated Map actor, could be called multiple times. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ConstructGeneratedMap(const FTransform& Transform);
 
 	/** Sets the size for generated map, it will automatically regenerate the level for given size.
 	 * Is authority-only function.
@@ -217,10 +206,9 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	/** Is called on a this Generated Map actor construction, could be called multiple times.
-	 * Could be listened by binding to ThisClass::OnGeneratedMapWantsReconstruct delegate.
 	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructGeneratedMap() -> ThisClass::OnConstructionGeneratedMap().
-	 * @warning Do not call directly, use ThisClass::ConstructGeneratedMap() instead. */
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::OnConstructionGeneratedMap().
+	 * @warning Do not call directly. */
 	UFUNCTION()
 	void OnConstructionGeneratedMap(const FTransform& Transform);
 
