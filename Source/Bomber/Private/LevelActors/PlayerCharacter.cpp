@@ -610,21 +610,19 @@ void APlayerCharacter::TryPossessController(TSubclassOf<AController> ControllerC
 	if (!HasAuthority()
 	    || UUtilsLibrary::IsEditorNotPieWorld())
 	{
-		// Should not spawn posses in PIE
+		// Should not posses in PIE
 		return;
 	}
 
 	const int32 PlayerId = GetPlayerId();
-	if (!ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
+	const AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode();
+	if (!ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(MyGameMode, TEXT("ASSERT: [%i] %hs:\n'MyGameMode' is not valid! Make sure '%s' class is assigned to the '%s' level"), __LINE__, __FUNCTION__, *AMyGameModeBase::StaticClass()->GetName(), *GetWorld()->GetMapName()))
 	{
 		return;
 	}
 
 	AController* ControllerToPossess = nullptr;
-
-	const AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode();
-	checkf(MyGameMode, TEXT("ERROR: [%i] %hs:\n'MyGameMode' is null!"), __LINE__, __FUNCTION__);
-
 	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId);
 	const bool bIsPlayerControllerClass = !ControllerClass || ControllerClass->IsChildOf(MyGameMode->PlayerControllerClass);
 
