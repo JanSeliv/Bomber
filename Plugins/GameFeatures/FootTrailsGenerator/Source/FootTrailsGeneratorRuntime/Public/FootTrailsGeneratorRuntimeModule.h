@@ -3,10 +3,18 @@
 #pragma once
 
 #include "Modules/ModuleInterface.h"
+//---
+#include "CoreMinimal.h"
 
 class FOOTTRAILSGENERATORRUNTIME_API FFootTrailsGeneratorRuntimeModule : public IModuleInterface
 {
 public:
+	/** The name of the MGF plugin itself. */
+	inline static const FName FTGPluginName = TEXT("FootTrailsGenerator");
+
+	/** The name of this runtime module. */
+	inline static const FName FTGModuleName = TEXT("FootTrailsGeneratorRuntime");
+
 	/**
 	 * Called right after the module DLL has been loaded and the module object has been created.
 	 * Load dependent modules here, and they will be guaranteed to be available during ShutdownModule.

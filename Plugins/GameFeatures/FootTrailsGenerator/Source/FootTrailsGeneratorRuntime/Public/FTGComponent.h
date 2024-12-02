@@ -38,6 +38,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const UStaticMesh* GetRandomMesh(EFTGTrailType FootTrailType) const;
 
+	/** Loads all foot trails archetypes, should be called only once. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void InitOnce();
+
+	/** Triggers the generation of foot trails.
+	 * @warning is implemented in Blueprint. */
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "C++", DisplayName = "Generate Foot Trails")
+	void BPGenerateFootTrails();
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
@@ -63,10 +72,6 @@ protected:
 
 	/** Called when the game ends. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	/** Loads all foot trails archetypes. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void Init();
 
 	/** Spawns given Foot Trail by its type on the specified cell. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

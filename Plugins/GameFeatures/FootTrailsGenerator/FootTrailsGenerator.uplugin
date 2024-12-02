@@ -5,7 +5,7 @@
 	"FriendlyName": "Foot Trails Generator",
 	"Description": "Game Feature to generate paths on generated map",
 	"Category": "Game Features",
-	"CreatedBy": "Yevhenii Selivanov",
+	"CreatedBy": "Anton Selivanov & Yevhenii Selivanov",
 	"CreatedByURL": "https://github.com/JanSeliv/Bomber",
 	"DocsURL": "",
 	"MarketplaceURL": "",
@@ -19,6 +19,11 @@
 		{
 			"Name": "FootTrailsGeneratorRuntime",
 			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "FootTrailsGeneratorEditor",
+			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
 		}
 	],

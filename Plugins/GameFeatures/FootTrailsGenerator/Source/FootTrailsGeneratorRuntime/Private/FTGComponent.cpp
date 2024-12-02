@@ -3,6 +3,7 @@
 #include "FTGComponent.h"
 //---
 #include "FTGDataAsset.h"
+#include "GeneratedMap.h"
 #include "InstancedStaticMeshActor.h"
 #include "MyDataTable/MyDataTable.h"
 #include "Structures/Cell.h"
@@ -59,7 +60,7 @@ void UFTGComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Init();
+	InitOnce();
 }
 
 // Called when the game ends
@@ -79,7 +80,7 @@ void UFTGComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 
 // Loads all foot trails archetypes
-void UFTGComponent::Init()
+void UFTGComponent::InitOnce()
 {
 	const UDataTable* FootTrailsDT = GetFootTrailsDataAssetChecked().GetFootTrailsDataTable();
 	if (!ensureMsgf(FootTrailsDT, TEXT("%s: 'FootTrailsDT' is not set"), *FString(__FUNCTION__))
@@ -105,6 +106,10 @@ void UFTGComponent::Init()
 
 		FootTrailInstancesInternal.Emplace(ArchetypeIt, ArchetypeIt.Mesh.LoadSynchronous());
 	}
+
+	// Generate first trails and bind to further regenerations
+	BPGenerateFootTrails();
+	AGeneratedMap::Get().OnGeneratedLevelActors.AddUniqueDynamic(this, &ThisClass::BPGenerateFootTrails);
 }
 
 // Spawns given Foot Trail by its type on the specified cell
