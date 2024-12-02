@@ -84,6 +84,8 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![ProgressionSystem](https://github.com/user-attachments/assets/742ad861-f077-44f8-a6ae-048665b8a77f)
 - New **Box and Wall meshes** for the Maya level by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 > ![NewBoxAndWall](https://github.com/user-attachments/assets/01e72eb6-ca89-4392-957c-92aba9663cdc)
+- Implemented **Credits** screen by [Yevhenii Oksenchuk](https://t.me/ComeThird):
+> ![Credits](https://github.com/user-attachments/assets/5ec5c208-9b3e-4b1c-be3d-711a973ce652)
 - Added new skin for the Roger character.
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
  ---
