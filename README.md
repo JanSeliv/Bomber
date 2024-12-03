@@ -8,6 +8,7 @@ Bomber is an open-source indie game developed on Unreal Engine 5 for Windows and
 
 - [💣 About the Bomber Project](#-about-the-bomber-project)
 - [🚀 Getting Started](#-getting-started)
+- [💻 Platforms and Requirements](#-platforms-and-requirements)
 - [🛠 Key Features](#-key-features)
 - [💾 Play the Build](#-play-the-build)
 - [📋 Kanban Board](#-kanban-board)
@@ -27,6 +28,15 @@ If already cloned without submodules, you'll find empty folders in `Bomber\Plugi
 ```sh
 git submodule update --init --recursive
 ```
+
+## 💻 Platforms and Requirements
+
+The project has been tested and verified to run on the following platforms:
+
+- **Windows 10 22H2**
+- **macOS Sonoma 14.4** (Apple M2 hardware)
+
+**Minimum Disk Space Required:** 33GB
 
 ## 🛠 Key Features
 
