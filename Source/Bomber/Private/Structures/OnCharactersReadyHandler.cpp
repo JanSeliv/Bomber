@@ -38,6 +38,16 @@ void FOnCharactersReadyHandler::Broadcast_OnPlayerStateInit(const AMyPlayerState
 // Returns true if the character is ready at this moment
 bool FOnCharactersReadyHandler::IsCharacterReady(const APlayerCharacter* Character) const
 {
+	/*
+	| Row | Entity  | Details                         | Authority    | Possession   | Locally Controlled | Result |
+	|-----|---------|---------------------------------|--------------|--------------|--------------------|--------|
+	| 1   | Player  | Local or Host                   | Has Authority| Possessed    | Yes                | true   |
+	| 2   | Bot     | In Host World                   | Has Authority| Possessed    | No                 | true   |
+	| 3   | Player  | Local Client (Autonomous Proxy) | No Authority | Possessed    | Yes                | true   |
+	| 4   | Bot     | In Client World                 | No Authority | Not Possessed| No                 | true   |
+	| 5   | Player  | Local Client (Autonomous Proxy) | No Authority | Not Possessed| Yes                | false  |
+	| 6   | Player  | Other Client or Remote Host     | No Authority | Not Possessed| No                 | true   |
+	*/
 	if (!Character)
 	{
 		return false;
@@ -56,15 +66,49 @@ bool FOnCharactersReadyHandler::IsCharacterReady(const APlayerCharacter* Charact
 		return false;
 	}
 
-	if (!FoundHandle->Character->HasAuthority()
-	    && FoundHandle->Character->IsBotControlled())
+	if (FoundHandle->bIsPossessed)
 	{
-		// It's a client bot, where controller does not exist by design, so it's ready
+		// Is completely ready, all conditions are met: has character, player state, and is possessed
+		// Matches Row 1: Player (Local or Host)
+		// Matches Row 2: Bot (In Host World)
+		// Matches Row 3: Player - Local Client (Autonomous Proxy)
 		return true;
 	}
 
-	// Finally, check if controller is possessed, so character is completely ready
-	return FoundHandle->bIsPossessed;
+	const bool bHasAuthority = FoundHandle->Character->HasAuthority();
+	const bool bIsBot = FoundHandle->PlayerState->IsABot();
+	const bool bIsLocallyControlled = FoundHandle->Character->IsLocallyControlled();
+
+	if (bHasAuthority)
+	{
+		// Is host, both players and bots that should be possessed
+		return false;
+	}
+
+	if (bIsBot
+	    && !bIsLocallyControlled)
+	{
+		// Matches Row 4: Bot (In Client World), where controller does not exist by design
+		return true;
+	}
+
+	if (bIsLocallyControlled
+	    && !FoundHandle->bIsPossessed)
+	{
+		// Matches Row 5: Player - Local Client (Autonomous Proxy) not possessed
+		return false;
+	}
+
+	if (!bIsBot
+	    && !bIsLocallyControlled)
+	{
+		// Matches Row 6: Player - Other Client or Remote Host
+		return true;
+	}
+
+	return ensureMsgf(false, TEXT("ASSERT: [%i] %hs:\nUnhandled condition!\n"
+			"Character: '%s' | PlayerState: '%s' | bIsPossessed: %s | bIsBot: %s | bIsLocallyControlled: %s | HasAuthority: %s | ID: %i"),
+		__LINE__, __FUNCTION__, *Character->GetName(), *FoundHandle->PlayerState->GetName(), FoundHandle->bIsPossessed ? TEXT("true") : TEXT("false"), bIsBot ? TEXT("true") : TEXT("false"), bIsLocallyControlled ? TEXT("true") : TEXT("false"), FoundHandle->Character->HasAuthority() ? TEXT("true") : TEXT("false"), FoundHandle->PlayerState->GetPlayerId());
 }
 
 // Returns true if the player state is ready at this moment
