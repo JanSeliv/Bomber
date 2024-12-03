@@ -754,6 +754,9 @@ void APlayerCharacter::SetCustomPlayerMeshData(const FCustomPlayerMeshData& Cust
 	else
 	{
 		ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
+
+		// Is client, but broadcast event now locally for better responsiveness of other systems, meaning the mesh is changed, but not replicated yet
+		OnPlayerTypeChanged.Broadcast(CustomPlayerMeshData.PlayerRow->PlayerTag);
 	}
 }
 
