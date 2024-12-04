@@ -1,6 +1,6 @@
 # 💣 About the Bomber Project
 
-Bomber is an open-source indie game developed on Unreal Engine 5 for Windows and MacOS, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
+Bomber is an open-source indie game developed on Unreal Engine 5 for Windows, MacOS and Linux, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
 
 ![Bomber](https://github.com/JanSeliv/Bomber/assets/20540872/2898eace-7a57-44d1-9530-4a5abc235b2d)
 
@@ -35,6 +35,7 @@ The project has been tested and verified to run on the following platforms:
 
 - **Windows 10 22H2**
 - **macOS Sonoma 14.4** (Apple M2 hardware)
+- **Ubuntu 22.04 LTS**
 
 **Minimum Disk Space Required:** 33GB
 

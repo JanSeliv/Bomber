@@ -208,12 +208,32 @@ void AGeneratedMap::GetSidesCells(
 
 				const FCell FoundCell = GridCellsInternal[FoundIndex];
 
-				if (bBreakOnWalls && Walls.Contains(FoundCell)                   // cell contains a wall
-				    || bBreakOnObstacles && Obstacles.Contains(FoundCell)        // cell contains an obstacle (Bombs/Boxes)
-				    || bBreakOnPlayers && PlayersCells.Contains(FoundCell)       // cell contains a player
-				    || bBreakOnExplosions && DangerousCells.Contains(FoundCell)) // cell contains an explosion
+				if (bBreakOnWalls
+				    && Walls.Contains(FoundCell))
 				{
-					break; // to the next side
+					// cell contains a wall
+					break;
+				}
+
+				if (bBreakOnObstacles
+				    && Obstacles.Contains(FoundCell))
+				{
+					// cell contains an obstacle (Bombs/Boxes)
+					break;
+				}
+
+				if (bBreakOnPlayers
+				    && PlayersCells.Contains(FoundCell))
+				{
+					// cell contains a player
+					break;
+				}
+
+				if (bBreakOnExplosions
+				    && DangerousCells.Contains(FoundCell))
+				{
+					// cell contains an explosion
+					break;
 				}
 
 				OutCells.Emplace(FoundCell);
@@ -450,9 +470,15 @@ void AGeneratedMap::IntersectCellsByTypes(
 	int32 ActorsTypesBitmask,
 	bool bIntersectAllIfEmpty) const
 {
-	if (!GridCellsInternal.Num()                       // nothing to intersect
-	    || !bIntersectAllIfEmpty && !InOutCells.Num()) // should not intersect with all existed cells but the specified array is empty
+	if (!GridCellsInternal.Num())
 	{
+		// nothing to intersect
+		return;
+	}
+
+	if (!bIntersectAllIfEmpty && !InOutCells.Num())
+	{
+		// should not intersect with all existed cells but the specified array is empty
 		return;
 	}
 
@@ -528,8 +554,9 @@ void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* Dest
 
 		UMapComponent* MapComponentIt = MapComponentsInternal[Index];
 		const AActor* OwnerIt = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
+		const bool bCellIsOnGrid = MapComponentIt && Cells.Contains(MapComponentIt->GetCell());
 		if (!OwnerIt                                                        // if is null, destroy that object from the array
-		    || MapComponentIt && Cells.Contains(MapComponentIt->GetCell())) // the cell is contained on the grid
+		    || bCellIsOnGrid)
 		{
 			// Remove from the array
 			// First removing, because after the box destroying the item can be spawned and starts searching for an empty cell
@@ -930,7 +957,9 @@ void AGeneratedMap::GenerateLevelActors()
 		{
 			for (int32 X = 0; X <= MapHalfScale.X; ++X) // Columns
 			{
-				const bool IsSafeZone = X == 0 && Y == 1 || X == 1 && Y == 0;
+				const bool bIsSafeA = X == 0 && Y == 1;
+				const bool bIsSafeB = X == 1 && Y == 0;
+				const bool IsSafeZone = bIsSafeA || bIsSafeB;
 				FCell CellIt = GridCellsInternal[MapScale.X * Y + X];
 
 				// --- Part 0: Actors random filling to the ArrayToGenerate._ ---

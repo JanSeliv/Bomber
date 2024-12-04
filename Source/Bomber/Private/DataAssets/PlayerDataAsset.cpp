@@ -143,7 +143,7 @@ UMaterialInterface* UPlayerDataAsset::GetNameplateMaterial(int32 Index) const
 // Return first found row by specified player tag
 const UPlayerRow* UPlayerDataAsset::GetRowByPlayerTag(const FPlayerTag& PlayerTag) const
 {
-	for (const TObjectPtr<ULevelActorRow> RowIt : RowsInternal)
+	for (const ULevelActorRow* RowIt : RowsInternal)
 	{
 		const UPlayerRow* PlayerRow = Cast<UPlayerRow>(RowIt);
 		if (PlayerRow && PlayerRow->PlayerTag == PlayerTag)
