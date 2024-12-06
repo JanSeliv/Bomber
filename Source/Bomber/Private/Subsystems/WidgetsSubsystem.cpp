@@ -39,20 +39,11 @@ UWidgetsSubsystem& UWidgetsSubsystem::Get(const UObject* OptionalWorldContext)
  * Widgets Management
  ********************************************************************************************* */
 
-// Adds given widget to the list of manageable widgets, so its visibility can be changed globally
-void UWidgetsSubsystem::RegisterManageableWidget(UUserWidget* Widget)
-{
-	if (ensureMsgf(Widget, TEXT("ASSERT: [%i] %hs:\n'Widget' is null, can't register!"), __LINE__, __FUNCTION__))
-	{
-		AllManageableWidgetsInternal.Add(Widget);
-	}
-}
-
 // Create specified widget and add it to Manageable widgets list, so its visibility can be changed globally
-UUserWidget* UWidgetsSubsystem::CreateManageableWidget(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport, int32 ZOrder, const UObject* OptionalWorldContext)
+UUserWidget* UWidgetsSubsystem::CreateManageableWidget(const FManageableWidgetData& WidgetData, const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	UUserWidget* Widget = FWidgetUtilsLibrary::CreateWidgetByClass(WidgetClass, bAddToViewport, ZOrder, OptionalWorldContext);
-	RegisterManageableWidget(Widget);
+	UUserWidget* Widget = FWidgetUtilsLibrary::CreateWidgetByClass(WidgetData.WidgetClass, WidgetData.bAddToViewport, WidgetData.ZOrder, OptionalWorldContext);
+	AllManageableWidgetsInternal.Add(Widget);
 	return Widget;
 }
 
@@ -96,19 +87,18 @@ void UWidgetsSubsystem::InitWidgets()
 
 	const UUIDataAsset& UIDataAsset = UUIDataAsset::Get();
 
-	HUDWidgetInternal = CreateManageableWidgetChecked<UHUDWidget>(UIDataAsset.GetHUDWidgetClass());
+	HUDWidgetInternal = CreateManageableWidgetChecked<UHUDWidget>(UIDataAsset.GetHUDWidgetData());
 
-	FPSCounterWidgetInternal = CreateManageableWidgetChecked(UIDataAsset.GetFPSCounterWidgetClass());
+	FPSCounterWidgetInternal = CreateManageableWidgetChecked(UIDataAsset.GetFPSCounterWidgetData());
 
-	SettingsWidgetInternal = CreateManageableWidgetChecked<USettingsWidget>(UIDataAsset.GetSettingsWidgetClass(), /*bAddToViewport*/true, /*ZOrder*/4);
+	SettingsWidgetInternal = CreateManageableWidgetChecked<USettingsWidget>(UIDataAsset.GetSettingsWidgetData());
 	SettingsWidgetInternal->TryConstructSettings();
 
 	static constexpr int32 MaxPlayersNum = 4;
 	NicknameWidgetsInternal.Reserve(MaxPlayersNum);
 	for (int32 Index = 0; Index < MaxPlayersNum; ++Index)
 	{
-		UPlayerName3DWidget* NicknameWidget = CreateManageableWidgetChecked<UPlayerName3DWidget>(UIDataAsset.GetNicknameWidgetClass(), /*bAddToViewport*/false);
-		// Is drawn by 3D user widget component, no need add it to viewport
+		UPlayerName3DWidget* NicknameWidget = CreateManageableWidgetChecked<UPlayerName3DWidget>(UIDataAsset.GetNicknameWidgetData());
 		NicknameWidgetsInternal.Emplace(NicknameWidget);
 	}
 

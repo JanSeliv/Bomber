@@ -8,6 +8,8 @@
 
 class UUserWidget;
 
+struct FManageableWidgetData;
+
 /**
  * Is used to manage User Widgets with lifetime of Local Player (similar to HUD).
  * @see Access its data with UUIDataAsset (Content/Bomber/DataAssets/DA_UI).
@@ -32,16 +34,12 @@ public:
 	 * Widgets using there methods are managed by this subsystem and can be controlled globally.
 	 ********************************************************************************************* */
 public:
-	/** Adds given widget to the list of manageable widgets, so its visibility can be changed globally. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void RegisterManageableWidget(UUserWidget* Widget);
-
 	/** Creates and registers specified widget to the Manageable widgets list, so its visibility can be changed globally. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	UUserWidget* CreateManageableWidget(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0, const UObject* OptionalWorldContext = nullptr);
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	UUserWidget* CreateManageableWidget(const FManageableWidgetData& WidgetData, const UObject* OptionalWorldContext = nullptr);
 
 	template <typename T = UUserWidget>
-	FORCEINLINE T* CreateManageableWidgetChecked(TSubclassOf<T> WidgetClass, bool bAddToViewport = true, int32 ZOrder = 0) { return CastChecked<T>(CreateManageableWidget(WidgetClass, bAddToViewport, ZOrder)); }
+	FORCEINLINE T* CreateManageableWidgetChecked(const FManageableWidgetData& WidgetData) { return CastChecked<T>(CreateManageableWidget(WidgetData)); }
 
 	/** Removes given widget from the list and destroys it. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

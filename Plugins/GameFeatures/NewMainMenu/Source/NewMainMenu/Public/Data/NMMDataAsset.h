@@ -4,6 +4,8 @@
 
 #include "Data/MyPrimaryDataAsset.h"
 //---
+#include "Structures/ManageableWidgetData.h"
+//---
 #include "NMMDataAsset.generated.h"
 
 enum class ENMMState : uint8;
@@ -28,15 +30,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE class UDataTable* GetCinematicsDataTable() const { return CinematicsDataTableInternal; }
 
-	/** Returns a class of the Main Menu widget.
-	 * @see UNMMDataAsset::MainMenuWidgetClassInternal.*/
+	/** Returns data for the Main Menu widget.
+	 * @see UNMMDataAsset::MainMenuWidgetDataInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UNewMainMenuWidget> GetMainMenuWidgetClass() const { return MainMenuWidgetClassInternal; }
+	const FORCEINLINE FManageableWidgetData& GetMainMenuWidgetData() const { return MainMenuWidgetDataInternal; }
 
-	/** Returns a class of the In Cinematic State widget.
-	 * @see UNMMDataAsset::InCinematicStateWidgetClassInternal.*/
+	/** Returns data for the In Cinematic State widget.
+	 * @see UNMMDataAsset::InCinematicStateWidgetDataInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UNMMCinematicStateWidget> GetInCinematicStateWidgetClass() const { return InCinematicStateWidgetClassInternal; }
+	const FORCEINLINE FManageableWidgetData& GetInCinematicStateWidgetData() const { return InCinematicStateWidgetDataInternal; }
 
 	/** Returns the sound of cinematics music.
 	 * @see UNMMDataAsset::CinematicsSoundClassInternal */
@@ -48,13 +50,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Cinematics Data Table", ShowOnlyInnerProperties))
 	TObjectPtr<const class UDataTable> CinematicsDataTableInternal = nullptr;
 
-	/** The class of the Main Menu widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Main Menu Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UNewMainMenuWidget> MainMenuWidgetClassInternal = nullptr;
+	/** Data for the Main Menu widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
+	FManageableWidgetData MainMenuWidgetDataInternal;
 
-	/** The class of the In Cinematic State widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UNMMCinematicStateWidget> InCinematicStateWidgetClassInternal = nullptr;
+	/** Data for the In Cinematic State widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
+	FManageableWidgetData InCinematicStateWidgetDataInternal;
 
 	/** The sound of cinematics music. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
