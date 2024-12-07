@@ -197,8 +197,8 @@ public:
 	FCell& operator-=(const FCell& Other);
 	friend FORCEINLINE FCell operator-(const FCell& Lhs, const FCell& Rhs) { return FCell(Lhs.Location - Rhs.Location); }
 
-	/** Scales the cell. */
-	template <typename FArg, TEMPLATE_REQUIRES(std::is_arithmetic<FArg>::value)>
+	/** Scales the cell, where FArg requires scalar type. */
+	template <typename FArg UE_REQUIRES(std::is_arithmetic_v<FArg>)>
 	FORCEINLINE FCell operator*(FArg Scale) const { return FCell(Location * Scale); }
 
 	/** Creates a hash value from a FCell.
