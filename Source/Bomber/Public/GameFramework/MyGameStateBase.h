@@ -33,7 +33,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool CanChangeGameState(ECurrentGameState NewGameState) const;
 
-	/** Set the new game state for the current game.*/
+	/** Set the new game state for the current game.
+	 * Can be also changed by `Bomber.Game.SetGameState VALUE` cheat command. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++")
 	void ServerSetGameState(ECurrentGameState NewGameState);
 

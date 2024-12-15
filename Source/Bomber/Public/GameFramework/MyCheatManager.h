@@ -9,6 +9,7 @@
 #include "MyCheatManager.generated.h"
 
 enum class EActorType : uint8;
+enum class ECurrentGameState : uint8;
 
 /**
  * Contains debugging cheat command for non-shipping builds to test general game functionality.
@@ -201,4 +202,15 @@ public:
 	/** Completely removes all widgets from UI. */
 	UFUNCTION(meta = (CheatName = "Bomber.UI.HideAllWidgets"))
 	static void SetUIHideAllWidgets();
+
+	/*********************************************************************************************
+	 * Game
+	 ********************************************************************************************* */
+public:
+	/** Sets current game state to the specified one.
+     * @param GameState The state of the game to set: Menu, GameStarting, EndGame, InGame
+     * Is useful to trigger different game states skipping default transitions.  
+     * Bomber.Game.SetGameState InGame - the match will be started immediately without any countdown. */
+	UFUNCTION(meta = (CheatName = "Bomber.Game.SetGameState"))
+	static void SetGameState(ECurrentGameState GameState);
 };

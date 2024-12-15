@@ -11,6 +11,7 @@
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/PlayerDataAsset.h"
 #include "GameFramework/MyGameModeBase.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/WidgetsSubsystem.h"
@@ -388,5 +389,51 @@ void UMyCheatManager::SetUIHideAllWidgets()
 	{
 		const bool bMakeVisibleInversed = WidgetsSubsystem->AreAllWidgetsHidden();
 		WidgetsSubsystem->SetAllWidgetsVisibility(bMakeVisibleInversed);
+	}
+}
+
+/*********************************************************************************************
+ * Game
+ ********************************************************************************************* */
+
+// Sets current game state to the specified one
+void UMyCheatManager::SetGameState(ECurrentGameState GameState)
+{
+	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	if (!MyGameState
+	    || !MyGameState->HasAuthority())
+	{
+		return;
+	}
+
+	// Hardcoding the game state values for the state transitions is necessary because:
+	// - We cannot rely on iterating enums using TEnumRange or bitmasks as enum members may not be defined in a logical order.
+	// - This ensures deterministic transitions and avoids potential issues caused by chaotic ordering of enum members.
+	static const TArray<ECurrentGameState> GameStateOrder = {
+		ECurrentGameState::Menu,
+		ECurrentGameState::GameStarting,
+		ECurrentGameState::InGame,
+		ECurrentGameState::EndGame
+	};
+
+	// Find the current position and target position in the transition order
+	const ECurrentGameState CurrentState = MyGameState->GetCurrentGameState();
+	const int32 CurrentIndex = GameStateOrder.IndexOfByKey(CurrentState);
+	const int32 TargetIndex = GameStateOrder.IndexOfByKey(GameState);
+
+	// Execute immediately if the target state is not part of the standard order, in case if some state is part of additional modes
+	if (TargetIndex == INDEX_NONE)
+	{
+		MyGameState->ServerSetGameState(GameState);
+		return;
+	}
+
+	// Start iterating from the beginning if the target is before the current state, otherwise continue from the current state
+	constexpr int32 InitialIndex = 0;
+	int32 StartIndex = TargetIndex < CurrentIndex ? InitialIndex : CurrentIndex;
+    StartIndex = FMath::Max(InitialIndex, StartIndex);
+	for (int32 Index = StartIndex; Index <= TargetIndex; ++Index)
+	{
+		MyGameState->ServerSetGameState(GameStateOrder[Index]);
 	}
 }
