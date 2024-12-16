@@ -222,6 +222,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetNicknameOnNameplate(FName NewName);
 
+	/** Returns the static mesh nameplate (background material of the player name). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UStaticMeshComponent* GetNameplateMesh() const { return NameplateMeshInternal; }
+
+	/** Returns the 3D widget component that displays the player name above the character. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class UWidgetComponent* GetPlayerName3DWidgetComponent() const { return PlayerName3DWidgetComponentInternal; }
+
 protected:
 	/** The static mesh nameplate (background material of the player name).
 	 * @todo JanSeliv whnin60J Get rid of `Nameplate Mesh` from Player Character: use Image background image in PlayerName3DWidget instead. */

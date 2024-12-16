@@ -688,6 +688,7 @@ void APlayerCharacter::SetNicknameOnNameplate(FName NewName)
 	}
 
 	PlayerNameWidget->SetPlayerName(NewName);
+	PlayerNameWidget->SetPlayerOwner(this);
 
 	checkf(PlayerName3DWidgetComponentInternal, TEXT("ERROR: [%i] %hs:\n'PlayerName3DWidgetComponentInternal' is null!"), __LINE__, __FUNCTION__);
 	const UUserWidget* LastWidget = PlayerName3DWidgetComponentInternal->GetWidget();
