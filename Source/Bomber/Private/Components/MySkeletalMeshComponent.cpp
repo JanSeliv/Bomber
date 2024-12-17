@@ -42,6 +42,9 @@ AMySkeletalMeshActor::AMySkeletalMeshActor(const FObjectInitializer& ObjectIniti
 	Mesh.BoundsScale = 6.f;
 	Mesh.bNeverDistanceCull = true;
 	Mesh.bAllowCullDistanceVolume = false;
+
+	// Enable all lighting channels, so it's clearly visible in the dark
+	Mesh.SetLightingChannels(/*bChannel0*/true, /*bChannel1*/true, /*bChannel2*/true);
 }
 
 // Returns the Skeletal Mesh of bombers

@@ -131,14 +131,15 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 
 	// Initialize skeletal mesh
-	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
-	{
-		static const FVector MeshRelativeLocation(0, 0, -90.f);
-		SkeletalMeshComponent->SetRelativeLocation_Direct(MeshRelativeLocation);
-		static const FRotator MeshRelativeRotation(0, -90.f, 0);
-		SkeletalMeshComponent->SetRelativeRotation_Direct(MeshRelativeRotation);
-		SkeletalMeshComponent->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-	}
+	USkeletalMeshComponent* SkeletalMeshComponent = GetMesh();
+	checkf(SkeletalMeshComponent, TEXT("ERROR: [%i] %hs:\n'SkeletalMeshComponent' is null!"), __LINE__, __FUNCTION__);
+	static const FVector MeshRelativeLocation(0, 0, -90.f);
+	SkeletalMeshComponent->SetRelativeLocation_Direct(MeshRelativeLocation);
+	static const FRotator MeshRelativeRotation(0, -90.f, 0);
+	SkeletalMeshComponent->SetRelativeRotation_Direct(MeshRelativeRotation);
+	SkeletalMeshComponent->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
+	// Enable all lighting channels, so it's clearly visible in the dark
+	SkeletalMeshComponent->SetLightingChannels(/*bChannel0*/true, /*bChannel1*/true, /*bChannel2*/true);
 
 	// Initialize the nameplate mesh component
 	NameplateMeshInternal = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("NameplateMeshComponent"));
