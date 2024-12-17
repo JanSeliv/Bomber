@@ -81,6 +81,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 ## 📅 Changelog
 #### `XX.XX.2024`
 - Updated to **Unreal Engine 5.4**.
+- Added **Linux** support (tested on Ubuntu 22.04 LTS)
 - Introduced **In-Game User Interface** with completely new look, utilizing the **Model-View-ViewModel** (MVVM) pattern:
 > ![NewHUD](https://github.com/JanSeliv/Bomber/assets/20540872/73c3c7f7-02b5-4d54-b34f-b354201bfc06)
 - Added cinematic for the Roger character on the Maya level by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
@@ -97,7 +98,6 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![NewBoxAndWall](https://github.com/user-attachments/assets/01e72eb6-ca89-4392-957c-92aba9663cdc)
 - Implemented **Credits** screen by [Yevhenii Oksenchuk](https://t.me/ComeThird):
 > ![Credits](https://github.com/user-attachments/assets/5ec5c208-9b3e-4b1c-be3d-711a973ce652)
-- Added new skin for the Roger character.
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
  ---
 #### `13.01.2024`
