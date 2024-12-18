@@ -97,6 +97,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To Vector (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
 	static const FORCEINLINE FVector& Conv_CellToVector(const FCell& InCell) { return InCell.Location; }
 
+	/** Converts a set of cells to an array of vectors. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCells", DisplayName = "To Vectors (Cells)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FORCEINLINE TArray<FVector> Conv_CellsToVectors(const TSet<FCell>& InCells) { return FCell::CellsToVectors(InCells); }
+
+	/** Converts an array of vectors to a set of cells. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVectors", DisplayName = "To Cells (Vectors)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FORCEINLINE TSet<FCell> Conv_VectorsToCells(const TArray<FVector>& InVectors) { return FCell::VectorsToCells(InVectors); }
+
 	/** Returns true if cell A is equal to cell B (A == B) */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "A,B", DisplayName = "Equal Exactly (Cell)", CompactNodeTitle = "==", ScriptMethod = "IsNearEqual", ScriptOperator = "==", Keywords = "== equal"))
 	static FORCEINLINE bool EqualEqual_CellCell(const FCell& A, const FCell& B) { return A == B; }
