@@ -38,6 +38,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const UStaticMesh* GetRandomMesh(EFTGTrailType FootTrailType) const;
 
+	/** Returns the instanced static mesh actor that contains all foot trails, if spawned. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE class AInstancedStaticMeshActor* GetInstancedStaticMeshActor() const { return InstancedStaticMeshActorInternal; }
+
 	/** Loads all foot trails archetypes, should be called only once. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void InitOnce();

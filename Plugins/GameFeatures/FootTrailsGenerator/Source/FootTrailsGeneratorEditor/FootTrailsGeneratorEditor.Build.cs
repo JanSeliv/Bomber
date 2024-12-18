@@ -25,6 +25,7 @@ public class FootTrailsGeneratorEditor : ModuleRules
                 , "FootTrailsGeneratorRuntime" // UFTGComponent
                 , "Bomber" // AGeneratedMap
                 , "MyEditorUtils" // FEditorUtilsLibrary
+                , "InstancedStaticMeshConverter" // AInstancedStaticMeshActor
             }
         );
     }

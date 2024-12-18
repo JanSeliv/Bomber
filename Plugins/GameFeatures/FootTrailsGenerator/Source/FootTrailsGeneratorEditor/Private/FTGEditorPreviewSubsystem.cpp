@@ -7,6 +7,7 @@
 #include "GeneratedMap.h"
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
+#include "InstancedStaticMeshActor.h"
 //---
 #include "Engine/World.h"
 //---
@@ -87,4 +88,9 @@ void UFTGEditorPreviewSubsystem::OnGeneratedMapReady(class AGeneratedMap* Genera
 	FootTrailGeneratorInternal = NewObject<UFTGComponent>(GeneratedMap, ComponentClass);
 	FootTrailGeneratorInternal->RegisterComponent();
 	FootTrailGeneratorInternal->InitOnce();
+
+	// Hide editor-only version of trails in PIE
+	AInstancedStaticMeshActor* InstancedFootTrailsActor = FootTrailGeneratorInternal->GetInstancedStaticMeshActor();
+	checkf(InstancedFootTrailsActor, TEXT("ERROR: [%i] %hs:\n'InstancedFootTrailsActor' is null!"), __LINE__, __FUNCTION__);
+	InstancedFootTrailsActor->SetActorHiddenInGame(true);
 }
