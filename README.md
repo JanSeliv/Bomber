@@ -98,6 +98,8 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![NewBoxAndWall](https://github.com/user-attachments/assets/01e72eb6-ca89-4392-957c-92aba9663cdc)
 - Implemented **Credits** screen by [Yevhenii Oksenchuk](https://t.me/ComeThird):
 > ![Credits](https://github.com/user-attachments/assets/5ec5c208-9b3e-4b1c-be3d-711a973ce652)
+- New **Splash** by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
+> ![Splash](https://github.com/user-attachments/assets/8df95267-6c8d-4434-bb18-c7381c4ef601)
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
  ---
 #### `13.01.2024`
