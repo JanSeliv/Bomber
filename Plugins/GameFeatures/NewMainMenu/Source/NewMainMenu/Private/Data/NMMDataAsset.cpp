@@ -41,3 +41,12 @@ USoundBase* UNMMDataAsset::GetMainMenuMusic(ELevelType LevelType) const
 
 	return nullptr;
 }
+
+// Returns all main menu music
+void UNMMDataAsset::GetAllMainMenuMusic(TArray<USoundBase*>& OutMainMenuMusic) const
+{
+	for (const TTuple<ELevelType, TObjectPtr<USoundBase>>& It : MainMenuMusicInternal)
+	{
+		OutMainMenuMusic.AddUnique(It.Value);
+	}
+}

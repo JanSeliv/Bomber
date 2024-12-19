@@ -125,11 +125,6 @@ void UNMMPlayerControllerComponent::TrySetMenuState()
 // Trigger the background music to be played in the Main Menu
 void UNMMPlayerControllerComponent::PlayMainMenuMusic()
 {
-	if (!USoundsSubsystem::CanPlaySounds())
-	{
-		return;
-	}
-
 	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
 	USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic(LevelType);
 
@@ -140,30 +135,16 @@ void UNMMPlayerControllerComponent::PlayMainMenuMusic()
 		return;
 	}
 
-	if (!MainMenuMusicComponentInternal)
-	{
-		MainMenuMusicComponentInternal = UGameplayStatics::SpawnSound2D(GetWorld(), MainMenuMusic);
-		checkf(MainMenuMusicComponentInternal, TEXT("ASSERT: [%i] %hs:\n'MainMenuMusicComponentInternal' failed to create!"), __LINE__, __FUNCTION__);
-	}
-
-	if (MainMenuMusicComponentInternal->IsPlaying()
-		&& MainMenuMusicComponentInternal->GetSound() == MainMenuMusic)
-	{
-		// Do not switch music since is the same
-		return;
-	}
-
-	MainMenuMusicComponentInternal->SetSound(MainMenuMusic);
-	MainMenuMusicComponentInternal->Play();
+	USoundsSubsystem::Get().PlaySingleSound2D(MainMenuMusic);
 }
 
 // Stops currently played Main Menu background music
 void UNMMPlayerControllerComponent::StopMainMenuMusic()
 {
-	if (MainMenuMusicComponentInternal
-		&& MainMenuMusicComponentInternal->IsPlaying())
+	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
+	if (USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic(LevelType))
 	{
-		MainMenuMusicComponentInternal->Stop();
+		USoundsSubsystem::Get().StopSingleSound2D(MainMenuMusic);
 	}
 }
 
@@ -222,6 +203,17 @@ void UNMMPlayerControllerComponent::OnUnregister()
 		TArray<const UMyInputMappingContext*> MenuInputContexts;
 		DataAsset->GetAllInputContexts(/*out*/MenuInputContexts);
 		GetPlayerControllerChecked().RemoveInputContexts(MenuInputContexts);
+
+		// Cleanup all sounds
+		if (USoundsSubsystem* SoundSubsystem = USoundsSubsystem::GetSoundsSubsystem())
+		{
+			TArray<class USoundBase*> AllMainMenuMusic;
+			UNMMDataAsset::Get().GetAllMainMenuMusic(/*out*/AllMainMenuMusic);
+			for (USoundBase* MainMenuMusic : AllMainMenuMusic)
+			{
+				SoundSubsystem->DestroySingleSound2D(MainMenuMusic);
+			}
+		}
 	}
 
 	// Kill current save game object

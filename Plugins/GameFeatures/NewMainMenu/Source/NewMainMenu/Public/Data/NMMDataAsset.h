@@ -112,13 +112,18 @@ protected:
 public:
 	/** Returns the sound of cinematics music.
 	 * @see UNMMDataAsset::CinematicsSoundClassInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClassInternal; }
 
 	/** Returns the main menu music of specified level.
 	 * @see USoundsDataAsset::MainMenuMusicInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class USoundBase* GetMainMenuMusic(ELevelType LevelType) const;
+
+	/** Returns all main menu music.
+	 * @see USoundsDataAsset::MainMenuMusicInternal */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	void GetAllMainMenuMusic(TArray<class USoundBase*>& OutMainMenuMusic) const;
 
 protected:
 	/** The sound of cinematics music. */

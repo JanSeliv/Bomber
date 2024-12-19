@@ -70,11 +70,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void StopMainMenuMusic();
 
-protected:
-	/** The component that is used to play background music in the Main Menu. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))
-	TObjectPtr<class UAudioComponent> MainMenuMusicComponentInternal = nullptr;
-
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
