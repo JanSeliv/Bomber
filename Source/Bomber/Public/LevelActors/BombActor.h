@@ -11,6 +11,7 @@
 
 struct FCell;
 enum class ELevelType : uint8;
+enum class ECurrentGameState : uint8;
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.

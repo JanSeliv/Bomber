@@ -33,9 +33,9 @@ USoundsSubsystem* USoundsSubsystem::GetSoundsSubsystem(const UObject* WorldConte
 }
 
 // Returns true if sounds can be played
-bool USoundsSubsystem::CanPlaySounds() const
+bool USoundsSubsystem::CanPlaySounds()
 {
-	const UWorld* World = GetWorld();
+	const UWorld* World = UUtilsLibrary::GetPlayWorld();
 	return World && World->bAllowAudioPlayback && !World->IsNetMode(NM_DedicatedServer);
 }
 
@@ -80,49 +80,48 @@ void USoundsSubsystem::SetSFXVolume(double InVolume)
 	SetSoundVolumeByClass(SFXSoundClass, InVolume);
 }
 
-// Play the background music for current game state and level
-void USoundsSubsystem::PlayCurrentBackgroundMusic()
+// Trigger the background music to be played during the match
+void USoundsSubsystem::PlayInGameMusic()
 {
 	if (!CanPlaySounds())
 	{
 		return;
 	}
 
-	const ECurrentGameState GameState = AMyGameStateBase::GetCurrentGameState();
 	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
-	USoundBase* BackgroundMusic = USoundsDataAsset::Get().GetBackgroundMusic(GameState, LevelType);
+	USoundBase* InGameMusic = USoundsDataAsset::Get().GetInGameMusic(LevelType);
 
-	if (!BackgroundMusic)
+	if (!InGameMusic)
 	{
 		// Background music is not found for current state or level, disable current
-		StopCurrentBackgroundMusic();
+		StopInGameMusic();
 		return;
 	}
 
-	if (!BackgroundMusicComponentInternal)
+	if (!InGameMusicComponentInternal)
 	{
-		BackgroundMusicComponentInternal = UGameplayStatics::CreateSound2D(GetWorld(), BackgroundMusic);
-		check(BackgroundMusicComponentInternal);
+		InGameMusicComponentInternal = UGameplayStatics::CreateSound2D(GetWorld(), InGameMusic);
+		checkf(InGameMusicComponentInternal, TEXT("ERROR: [%i] %hs:\n'InGameMusicComponentInternal' failed to create!"), __LINE__, __FUNCTION__);
 	}
 
-	if (BackgroundMusicComponentInternal->IsPlaying()
-	    && BackgroundMusicComponentInternal->GetSound() == BackgroundMusic)
+	if (InGameMusicComponentInternal->IsPlaying()
+	    && InGameMusicComponentInternal->GetSound() == InGameMusic)
 	{
 		// Do not switch music since is the same
 		return;
 	}
 
-	BackgroundMusicComponentInternal->SetSound(BackgroundMusic);
-	BackgroundMusicComponentInternal->Play();
+	InGameMusicComponentInternal->SetSound(InGameMusic);
+	InGameMusicComponentInternal->Play();
 }
 
-// Stops currently played background music
-void USoundsSubsystem::StopCurrentBackgroundMusic()
+// Stops currently played in-match background music
+void USoundsSubsystem::StopInGameMusic()
 {
-	if (BackgroundMusicComponentInternal
-	    && BackgroundMusicComponentInternal->IsPlaying())
+	if (InGameMusicComponentInternal
+	    && InGameMusicComponentInternal->IsPlaying())
 	{
-		BackgroundMusicComponentInternal->Stop();
+		InGameMusicComponentInternal->Stop();
 	}
 }
 
@@ -175,7 +174,8 @@ void USoundsSubsystem::PlayEndGameCountdownSFX()
 // Stops the sound that is played right before the match ends.
 void USoundsSubsystem::StopEndGameCountdownSFX()
 {
-	if (ActiveEndGameCountdownSFXInternal && ActiveEndGameCountdownSFXInternal->IsPlaying())
+	if (ActiveEndGameCountdownSFXInternal
+	    && ActiveEndGameCountdownSFXInternal->IsPlaying())
 	{
 		ActiveEndGameCountdownSFXInternal->Stop();
 	}
@@ -260,20 +260,21 @@ void USoundsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState Curre
 {
 	switch (CurrentGameState)
 	{
-		case ECurrentGameState::GameStarting:
+		case ECGS::GameStarting:
+			PlayInGameMusic();
 			PlayStartGameCountdownSFX();
 			break;
-		case ECurrentGameState::Menu:
+		case ECGS::Menu:
+			StopInGameMusic();
 			StopStartGameCountdownSFX();
+			break;
+		case ECGS::EndGame:
+			StopEndGameCountdownSFX();
 			break;
 		default:
 			break;
 	}
-
-	StopEndGameCountdownSFX();
-	PlayCurrentBackgroundMusic();
 }
-
 
 // Called when the local player state is initialized and its assigned character is ready
 void USoundsSubsystem::OnLocalPlayerStateReady_Implementation(class AMyPlayerState* PlayerState, int32 CharacterID)

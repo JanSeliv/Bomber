@@ -33,9 +33,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
 	static USoundsSubsystem* GetSoundsSubsystem(const UObject* WorldContextObject = nullptr);
 
-	/** Returns true if sounds can be played. */
+	/** Static method that returns true if sounds can be played. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	bool CanPlaySounds() const;
+	static bool CanPlaySounds();
 
 	/** Set new sound volume.
 	 * @param InSoundClass The of the sounds.
@@ -67,13 +67,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get SFX Volume"))
 	FORCEINLINE double GetSFXVolume() const { return SFXVolumeInternal; }
 
-	/** Play the background music for current game state and level. */
+	/** Trigger the background music to be played during the match. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void PlayCurrentBackgroundMusic();
+	void PlayInGameMusic();
 
-	/** Stops currently played background music. */
+	/** Stops currently played in-match background music. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void StopCurrentBackgroundMusic();
+	void StopInGameMusic();
 
 	/** Play the blast sound of the bomb. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -120,9 +120,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
 	double SFXVolumeInternal;
 
-	/** The component that is used to play different background musics.  */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))
-	TObjectPtr<UAudioComponent> BackgroundMusicComponentInternal = nullptr;
+	/** The component that is used to play background music during the match. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "In-Game Music Component"))
+	TObjectPtr<UAudioComponent> InGameMusicComponentInternal = nullptr;
 
 	/** The component that is used to store reference for EndGameCountdown SFX. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Active End-Game Countdown SFX"))

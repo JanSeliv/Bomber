@@ -10,6 +10,7 @@
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
 #include "DataAssets/MyInputMappingContext.h"
+#include "GameFramework/MyGameStateBase.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMCameraSubsystem.h"
@@ -17,6 +18,8 @@
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "Components/AudioComponent.h"
+#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMPlayerControllerComponent)
@@ -116,6 +119,55 @@ void UNMMPlayerControllerComponent::TrySetMenuState()
 }
 
 /*********************************************************************************************
+ * Sounds
+ ********************************************************************************************* */
+
+// Trigger the background music to be played in the Main Menu
+void UNMMPlayerControllerComponent::PlayMainMenuMusic()
+{
+	if (!USoundsSubsystem::CanPlaySounds())
+	{
+		return;
+	}
+
+	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
+	USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic(LevelType);
+
+	if (!MainMenuMusic)
+	{
+		// Background music is not found for current state or level, disable current
+		StopMainMenuMusic();
+		return;
+	}
+
+	if (!MainMenuMusicComponentInternal)
+	{
+		MainMenuMusicComponentInternal = UGameplayStatics::SpawnSound2D(GetWorld(), MainMenuMusic);
+		checkf(MainMenuMusicComponentInternal, TEXT("ASSERT: [%i] %hs:\n'MainMenuMusicComponentInternal' failed to create!"), __LINE__, __FUNCTION__);
+	}
+
+	if (MainMenuMusicComponentInternal->IsPlaying()
+		&& MainMenuMusicComponentInternal->GetSound() == MainMenuMusic)
+	{
+		// Do not switch music since is the same
+		return;
+	}
+
+	MainMenuMusicComponentInternal->SetSound(MainMenuMusic);
+	MainMenuMusicComponentInternal->Play();
+}
+
+// Stops currently played Main Menu background music
+void UNMMPlayerControllerComponent::StopMainMenuMusic()
+{
+	if (MainMenuMusicComponentInternal
+		&& MainMenuMusicComponentInternal->IsPlaying())
+	{
+		MainMenuMusicComponentInternal->Stop();
+	}
+}
+
+/*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
 
@@ -125,6 +177,8 @@ void UNMMPlayerControllerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
+
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Listen to set Menu game state once active spot is ready
 	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
@@ -191,6 +245,22 @@ void UNMMPlayerControllerComponent::OnLocalCharacterReady_Implementation(class A
 	TrySetMenuState();
 }
 
+// Listen to react when entered the Menu state
+void UNMMPlayerControllerComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	switch (CurrentGameState)
+	{
+	case ECGS::Menu: // Entered the Main Menu
+		PlayMainMenuMusic();
+		break;
+	case ECGS::GameStarting: // Left the Main Menu
+		StopMainMenuMusic();
+		break;
+	default:
+		break;
+	}
+}
+
 // Called wen the Main Menu state was changed
 void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
@@ -199,12 +269,11 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENM
 	switch (NewState)
 	{
 	case ENMMState::Cinematic:
-		{
-			MyPC.SetIgnoreMoveInput(true);
-			USoundsSubsystem::Get().StopCurrentBackgroundMusic();
-			break;
-		}
-	default: break;
+		MyPC.SetIgnoreMoveInput(true);
+		StopMainMenuMusic();
+		break;
+	default:
+		break;
 	}
 
 	// Update input contexts

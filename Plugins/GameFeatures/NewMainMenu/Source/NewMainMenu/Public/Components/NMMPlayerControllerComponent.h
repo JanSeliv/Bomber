@@ -9,6 +9,7 @@
 class AMyPlayerController;
 
 enum class ENMMState : uint8;
+enum class ECurrentGameState : uint8;
 
 /**
  * Represents the Player Controller in the NewMain Menu module, where the Owner is Player Controller actor.
@@ -58,6 +59,23 @@ protected:
 	void TrySetMenuState();
 
 	/*********************************************************************************************
+	 * Sounds
+	 ********************************************************************************************* */
+public:
+	/** Trigger the background music to be played in the Main Menu. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayMainMenuMusic();
+
+	/** Stops currently played Main Menu background music. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void StopMainMenuMusic();
+
+protected:
+	/** The component that is used to play background music in the Main Menu. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Background Music Component"))
+	TObjectPtr<class UAudioComponent> MainMenuMusicComponentInternal = nullptr;
+
+	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
@@ -82,6 +100,10 @@ protected:
 	/** Called when the local player character is spawned, possessed, and replicated. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+
+	/** Listen to react when entered the Menu state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Called wen the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

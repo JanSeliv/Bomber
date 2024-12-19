@@ -9,6 +9,7 @@
 #include "NMMDataAsset.generated.h"
 
 enum class ENMMState : uint8;
+enum class ELevelType : uint8;
 
 /**
  * Contains common data of the New Main Menu plugin to be tweaked.
@@ -40,11 +41,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FManageableWidgetData& GetInCinematicStateWidgetData() const { return InCinematicStateWidgetDataInternal; }
 
-	/** Returns the sound of cinematics music.
-	 * @see UNMMDataAsset::CinematicsSoundClassInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClassInternal; }
-
 protected:
 	/** The data table with the cinematics to be played. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Cinematics Data Table", ShowOnlyInnerProperties))
@@ -57,10 +53,6 @@ protected:
 	/** Data for the In Cinematic State widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
 	FManageableWidgetData InCinematicStateWidgetDataInternal;
-
-	/** The sound of cinematics music. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundClass> CinematicsSoundClassInternal = nullptr;
 
 	/*********************************************************************************************
 	 * Camera
@@ -113,4 +105,27 @@ protected:
 	/** The time to hold the skip cinematic button to skip the cinematic. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Skip Cinematic Hold Time", ShowOnlyInnerProperties))
 	float SkipCinematicHoldTimeInternal = 1.f;
+
+	/*********************************************************************************************
+	 * Sounds
+	 ********************************************************************************************* */
+public:
+	/** Returns the sound of cinematics music.
+	 * @see UNMMDataAsset::CinematicsSoundClassInternal */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClassInternal; }
+
+	/** Returns the main menu music of specified level.
+	 * @see USoundsDataAsset::MainMenuMusicInternal */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	class USoundBase* GetMainMenuMusic(ELevelType LevelType) const;
+
+protected:
+	/** The sound of cinematics music. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
+	TObjectPtr<class USoundClass> CinematicsSoundClassInternal = nullptr;
+
+	/** Contains all sounds of each level in the main menu. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, DisplayName = "Main Menu Music", ShowOnlyInnerProperties))
+	TMap<ELevelType, TObjectPtr<class USoundBase>> MainMenuMusicInternal;
 };

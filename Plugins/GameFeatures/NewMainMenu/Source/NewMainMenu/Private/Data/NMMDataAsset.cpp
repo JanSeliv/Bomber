@@ -30,3 +30,14 @@ void UNMMDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& O
 		OutInputContexts.Emplace(It.Value);
 	}
 }
+
+// Returns the main menu music of specified level
+USoundBase* UNMMDataAsset::GetMainMenuMusic(ELevelType LevelType) const
+{
+	if (const TObjectPtr<USoundBase>* FoundMusic = MainMenuMusicInternal.Find(LevelType))
+	{
+		return *FoundMusic;
+	}
+
+	return nullptr;
+}

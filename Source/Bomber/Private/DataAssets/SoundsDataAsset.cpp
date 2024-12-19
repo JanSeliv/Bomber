@@ -17,41 +17,14 @@ const USoundsDataAsset& USoundsDataAsset::Get()
 }
 
 // Returns the music of specified level
-USoundBase* USoundsDataAsset::GetLevelMusic(ELevelType LevelType) const
+USoundBase* USoundsDataAsset::GetInGameMusic(ELevelType LevelType) const
 {
-	if (const TObjectPtr<USoundBase>* FoundMusic = LevelsMusicInternal.Find(LevelType))
+	if (const TObjectPtr<USoundBase>* FoundMusic = InGameMusicInternal.Find(LevelType))
 	{
 		return *FoundMusic;
 	}
 
 	return nullptr;
-}
-
-// Returns the main menu music of specified level
-USoundBase* USoundsDataAsset::GetLevelMainMenuMusic(ELevelType LevelType) const
-{
-	if (const TObjectPtr<USoundBase>* FoundMusic = LevelsMainMenuMusicInternal.Find(LevelType))
-	{
-		return *FoundMusic;
-	}
-
-	return nullptr;
-}
-
-// Return the background music by specified game state and level type
-USoundBase* USoundsDataAsset::GetBackgroundMusic(ECurrentGameState CurrentGameState, ELevelType LevelType) const
-{
-	switch (CurrentGameState)
-	{
-		case ECGS::Menu:
-			return GetLevelMainMenuMusic(LevelType);
-		case ECGS::GameStarting: // fall through
-		case ECGS::InGame:       // fall through
-		case ECGS::EndGame:
-			return GetLevelMusic(LevelType);
-		default:
-			return nullptr;
-	}
 }
 
 // Returns the End-Game sound by specified End-Game state
