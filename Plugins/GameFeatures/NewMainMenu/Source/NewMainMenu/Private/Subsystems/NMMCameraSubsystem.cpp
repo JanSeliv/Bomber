@@ -168,9 +168,6 @@ void UNMMCameraSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState New
 		break;
 	default: break;
 	}
-
-	// Change the camera according to the cinematic state
-	PossessCamera(NewState);
 }
 
 /*********************************************************************************************

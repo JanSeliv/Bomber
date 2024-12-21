@@ -409,6 +409,10 @@ void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewSt
 	if (bIsCurrentSpot)
 	{
 		SetCinematicByState(NewState);
+
+		// Change the camera according to the cinematic state
+		// Do it after the cinematic is played, otherwise camera will fail to obtain from not loaded sequence
+		UNMMCameraSubsystem::Get().PossessCamera(NewState);
 	}
 }
 
