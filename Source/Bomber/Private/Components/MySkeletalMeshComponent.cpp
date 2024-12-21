@@ -259,7 +259,7 @@ void UMySkeletalMeshComponent::AttachProps()
 		UMeshComponent* MeshComponent = nullptr;
 		if (USkeletalMesh* SkeletalMeshProp = Cast<USkeletalMesh>(AttachedMeshIt.AttachedMesh))
 		{
-			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this, NAME_None, RF_Transient);
+			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this);
 			SkeletalComponent->SetSkeletalMesh(SkeletalMeshProp);
 			SkeletalComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 			if (AttachedMeshIt.MeshAnimation)
@@ -270,7 +270,7 @@ void UMySkeletalMeshComponent::AttachProps()
 		}
 		else if (UStaticMesh* StaticMeshProp = Cast<UStaticMesh>(AttachedMeshIt.AttachedMesh))
 		{
-			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this, NAME_None, RF_Transient);
+			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
 			StaticMeshComponent->SetStaticMesh(StaticMeshProp);
 			StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -286,17 +286,24 @@ void UMySkeletalMeshComponent::AttachProps()
 		MeshComponent->SetCastShadow(CastShadow);
 		MeshComponent->LightingChannels = LightingChannels;
 
-		// Attach the prop: location is 0, rotation is parent's world, scale is 1
 		AttachedMeshesInternal.Emplace(MeshComponent);
 		MeshComponent->SetupAttachment(GetAttachmentRoot());
 		MeshComponent->SetWorldTransform(GetComponentTransform());
+		MeshComponent->RegisterComponent();
+
+		// Attach the prop: location is 0, rotation is parent's world, scale is 1
+		constexpr bool bInWeldSimulatedBodies = true;
 		const FAttachmentTransformRules AttachRules(
 			EAttachmentRule::SnapToTarget,
 			EAttachmentRule::KeepWorld,
 			EAttachmentRule::SnapToTarget,
-			true);
+			bInWeldSimulatedBodies);
+
+		// Before attach, mark it as transient only for this operation to avoid Modify()-call that asks to save the level
+		// However, remove the flag next as props have to be cooked
+		MeshComponent->SetFlags(RF_Transient);
 		MeshComponent->AttachToComponent(this, AttachRules, AttachedMeshIt.Socket);
-		MeshComponent->RegisterComponent();
+		MeshComponent->ClearFlags(RF_Transient);
 	}
 }
 
