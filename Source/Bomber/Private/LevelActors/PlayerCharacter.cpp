@@ -607,13 +607,25 @@ void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UOb
  * Player/AI Controller
  ********************************************************************************************* */
 
+// Is overridden to determine additional conditions for the player-controlled character
+bool APlayerCharacter::IsPlayerControlled() const
+{
+	if (Super::IsPlayerControlled())
+	{
+		return true;
+	}
+
+	// Player state is not initialized yet (so Super returned false), but 0 is always a player
+	return !GetPlayerState() && GetPlayerId() == 0;
+}
+
 // Possess a player or AI controller in dependence of current Character ID
-void APlayerCharacter::TryPossessController(TSubclassOf<AController> ControllerClass/* = nullptr*/)
+void APlayerCharacter::TryPossessController()
 {
 	if (!HasAuthority()
 	    || UUtilsLibrary::IsEditorNotPieWorld())
 	{
-		// Should not posses in PIE
+		// Should not possess in PIE
 		return;
 	}
 
@@ -626,25 +638,24 @@ void APlayerCharacter::TryPossessController(TSubclassOf<AController> ControllerC
 	}
 
 	AController* ControllerToPossess = nullptr;
-	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId);
-	const bool bIsPlayerControllerClass = !ControllerClass || ControllerClass->IsChildOf(MyGameMode->PlayerControllerClass);
 
-	if (bIsPlayerControllerClass
-	    && MyPC
-	    && !MyPC->bCinematicMode) // Don't possess player if it's the Render Movie
+	if (IsPlayerControlled())
 	{
-		ControllerToPossess = MyPC;
+		AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId);
+		if (MyPC
+		    && !MyPC->bCinematicMode) // Don't possess player if it's the Render Movie
+		{
+			ControllerToPossess = MyPC;
+		}
 	}
 	// Possess AI
-	else if (!bIsPlayerControllerClass
-	         || !ControllerToPossess)
+	else
 	{
-		const TSubclassOf<AController> FinalAIControllerClass = ControllerClass ? ControllerClass : AIControllerClass;
-		if (!AIControllerInternal
-		    || !AIControllerInternal->IsA(FinalAIControllerClass))
+		if (!AIControllerInternal                             // Is not spawned yet
+		    || !AIControllerInternal->IsA(AIControllerClass)) // Spawned, but wrong AI controller assigned
 		{
 			// Spawn AI controller
-			AIControllerInternal = GetWorld()->SpawnActor<AAIController>(FinalAIControllerClass, GetActorTransform());
+			AIControllerInternal = GetWorld()->SpawnActor<AAIController>(AIControllerClass, GetActorTransform());
 		}
 
 		ControllerToPossess = AIControllerInternal;

@@ -10,8 +10,8 @@
 #include "Controllers/MyDebugCameraController.h"
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/PlayerDataAsset.h"
-#include "GameFramework/MyGameModeBase.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/WidgetsSubsystem.h"
@@ -187,17 +187,15 @@ void UMyCheatManager::SetGodMode(bool bShouldEnable)
 void UMyCheatManager::SetAutoCopilot()
 {
 	APlayerCharacter* LocalPlayer = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
-	if (!LocalPlayer
-	    || !LocalPlayer->HasAuthority())
+	APlayerState* PlayerState = LocalPlayer ? LocalPlayer->GetPlayerState() : nullptr;
+	if (!PlayerState)
 	{
 		return;
 	}
 
-	const AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode();
-	checkf(MyGameMode, TEXT("ERROR: [%i] %hs:\n'MyGameMode' is null!"), __LINE__, __FUNCTION__);
-
-	const TSubclassOf<AController> ControllerClass = LocalPlayer->IsPlayerControlled() ? LocalPlayer->AIControllerClass : MyGameMode->PlayerControllerClass;
-	LocalPlayer->TryPossessController(ControllerClass);
+	// Toggle the Copilot mode
+	PlayerState->SetIsABot(!PlayerState->IsABot());
+	LocalPlayer->TryPossessController();
 }
 
 /*********************************************************************************************
@@ -431,7 +429,7 @@ void UMyCheatManager::SetGameState(ECurrentGameState GameState)
 	// Start iterating from the beginning if the target is before the current state, otherwise continue from the current state
 	constexpr int32 InitialIndex = 0;
 	int32 StartIndex = TargetIndex < CurrentIndex ? InitialIndex : CurrentIndex;
-    StartIndex = FMath::Max(InitialIndex, StartIndex);
+	StartIndex = FMath::Max(InitialIndex, StartIndex);
 	for (int32 Index = StartIndex; Index <= TargetIndex; ++Index)
 	{
 		MyGameState->ServerSetGameState(GameStateOrder[Index]);

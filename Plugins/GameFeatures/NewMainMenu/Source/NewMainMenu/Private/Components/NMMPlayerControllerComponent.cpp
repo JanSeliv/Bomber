@@ -106,15 +106,15 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState New
 // Tries to set the Menu game state on initializing the Main Menu system
 void UNMMPlayerControllerComponent::TrySetMenuState()
 {
-	AMyPlayerController& PC = GetPlayerControllerChecked();
-	if (!PC.HasAuthority())
+	if (AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::None)
 	{
+		// No need to initialize the Menu state, game state was already set by other systems
 		return;
 	}
 
 	if (UNMMSpotsSubsystem::Get().IsActiveMenuSpotReady())
 	{
-		PC.SetMenuState();
+		GetPlayerControllerChecked().SetMenuState();
 	}
 }
 

@@ -200,10 +200,12 @@ protected:
 	 * Player/AI Controller
 	 ********************************************************************************************* */
 public:
-	/** Possess a player or AI controller in dependence of current Character ID.
-	 * @param ControllerClass If null, the class will be selected by the Character ID. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
-	void TryPossessController(TSubclassOf<AController> ControllerClass = nullptr);
+	/** Is overridden to determine additional conditions for the player-controlled character. */
+	virtual bool IsPlayerControlled() const override;
+
+	/** Possess a player or AI controller in dependence of current Character ID. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void TryPossessController();
 
 protected:
 	/** The character's AI controller */
