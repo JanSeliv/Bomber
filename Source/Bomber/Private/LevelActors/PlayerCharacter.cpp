@@ -753,23 +753,26 @@ UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
 // Set and apply how a player has to look like
 void APlayerCharacter::SetCustomPlayerMeshData(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
-	if (!CustomPlayerMeshData.IsValid()
-	    || CustomPlayerMeshData == PlayerMeshDataInternal)
+	const UMySkeletalMeshComponent* MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
+	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: [%i] %hs:\n'MySkeletalMeshComp' is not valid!"), __LINE__, __FUNCTION__)
+	    || !CustomPlayerMeshData.IsValid())
 	{
 		return;
 	}
 
-	if (HasAuthority())
+	const FCustomPlayerMeshData& LocalMeshData = MySkeletalMeshComp->GetCustomPlayerMeshData();
+	if (LocalMeshData == CustomPlayerMeshData)
 	{
-		PlayerMeshDataInternal = CustomPlayerMeshData;
-		ApplyCustomPlayerMeshData();
+		// Is the same mesh data
+		return;
 	}
-	else
+
+	PlayerMeshDataInternal = CustomPlayerMeshData;
+	ApplyCustomPlayerMeshData();
+
+	if (!HasAuthority())
 	{
 		ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
-
-		// Is client, but broadcast event now locally for better responsiveness of other systems, meaning the mesh is changed, but not replicated yet
-		OnPlayerTypeChanged.Broadcast(CustomPlayerMeshData.PlayerRow->PlayerTag);
 	}
 }
 
@@ -784,23 +787,17 @@ void APlayerCharacter::ServerSetCustomPlayerMeshData_Implementation(const FCusto
 void APlayerCharacter::ApplyCustomPlayerMeshData()
 {
 	UMySkeletalMeshComponent* MySkeletalMeshComp = Cast<UMySkeletalMeshComponent>(GetMesh());
-	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: 'MySkeletalMeshComp' is not valid"))
-	    || !MapComponentInternal)
+	if (!ensureMsgf(MySkeletalMeshComp, TEXT("ASSERT: [%i] %hs:\n'MySkeletalMeshComp' is not valid!"), __LINE__, __FUNCTION__)
+	    || !PlayerMeshDataInternal.IsValid())
 	{
 		return;
 	}
 
-	if (!PlayerMeshDataInternal.IsValid())
-	{
-		// PlayerRow is not valid or mesh data is not set
-		return;
-	}
-
-	const UPlayerRow* PrevPlayerRow = MySkeletalMeshComp->GetCustomPlayerMeshData().PlayerRow;
+	const FCustomPlayerMeshData PrevMeshCopy = MySkeletalMeshComp->GetCustomPlayerMeshData();
 
 	MySkeletalMeshComp->InitMySkeletalMesh(PlayerMeshDataInternal);
 
-	if (PrevPlayerRow != PlayerMeshDataInternal.PlayerRow)
+	if (PrevMeshCopy != PlayerMeshDataInternal)
 	{
 		OnPlayerTypeChanged.Broadcast(PlayerMeshDataInternal.PlayerRow->PlayerTag);
 	}
