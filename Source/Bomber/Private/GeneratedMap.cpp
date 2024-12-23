@@ -586,23 +586,11 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 		return;
 	}
 
-	const bool bIsPlayer = MapComponent->GetActorType() == EAT::Player;
-	const bool bIsInGame = AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame;
-
-	if (bIsInGame
+	if (AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame
 	    && MapComponent->IsUndestroyable())
 	{
 		// Do not destroy actor during the game session if required
 		return;
-	}
-
-	if (bIsPlayer)
-	{
-		if (bIsInGame
-		    && OnAnyCharacterDestroyed.IsBound())
-		{
-			OnAnyCharacterDestroyed.Broadcast();
-		}
 	}
 
 	MapComponent->OnDeactivated(DestroyCauser);

@@ -99,7 +99,7 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 {
 	if (CanChangeGameState(ReplicatedGameStateInternal))
 	{
-			ApplyGameState();
+		ApplyGameState();
 	}
 }
 
@@ -108,38 +108,26 @@ void AMyGameStateBase::OnRep_CurrentGameState()
  * Result of finished match (Win, Lose or Draw)
  ********************************************************************************************* */
 
+// Try to register the End-Game state
+void AMyGameStateBase::TrySetEndGameState()
+{
+	bWantsUpdateEndStateInternal = true;
+}
+
 // Is called during the In-Game state to try to register the End-Game state
 void AMyGameStateBase::UpdateEndGameStates()
 {
-	if (!DoesWantUpdateEndState())
+	if (!bWantsUpdateEndStateInternal)
 	{
 		return;
 	}
 
 	bWantsUpdateEndStateInternal = false;
 
-	for (APlayerState* PlayerStateIt : PlayerArray)
-	{
-		AMyPlayerState* MyPlayerState = PlayerStateIt ? Cast<AMyPlayerState>(PlayerStateIt) : nullptr;
-		if (!MyPlayerState
-		    || MyPlayerState->GetEndGameState() != EEndGameState::None) // Already set the state
-		{
-			continue;
-		}
-
-		MyPlayerState->UpdateEndGameState();
-	}
-
 	if (UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
 	{
 		ServerSetGameState(ECGS::EndGame);
 	}
-}
-
-// Called when any player or bot was exploded
-void AMyGameStateBase::OnAnyCharacterDestroyed()
-{
-	bWantsUpdateEndStateInternal = true;
 }
 
 /*********************************************************************************************
@@ -324,11 +312,6 @@ void AMyGameStateBase::PostInitializeComponents()
 void AMyGameStateBase::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (HasAuthority())
-	{
-		AGeneratedMap::Get().OnAnyCharacterDestroyed.AddDynamic(this, &ThisClass::OnAnyCharacterDestroyed);
-	}
 
 	SetGameFeaturesEnabled(true);
 

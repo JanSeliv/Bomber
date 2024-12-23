@@ -32,12 +32,6 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnGeneratedLevelActors OnGeneratedLevelActors;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAnyPlayerDestroyed);
-
-	/** Called when any player or bot was exploded. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
-	FOnAnyPlayerDestroyed OnAnyCharacterDestroyed;
-
 	/** Contains outside added dangerous cells, is useful for Game Features to notify bots that some cells are not safe.
 	 * @todo JanSeliv 3JBOo7L8 Remove after NewAI implementation. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")

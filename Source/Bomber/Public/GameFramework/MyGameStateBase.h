@@ -66,9 +66,9 @@ protected:
 	 * Result of finished match (Win, Lose or Draw)
 	 ********************************************************************************************* */
 public:
-	/** Returns true if there request to update the End-Game state for players. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool DoesWantUpdateEndState() const { return bWantsUpdateEndStateInternal; }
+	/** Try to register the End-Game state. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void TrySetEndGameState();
 
 protected:
 	/** Is true where there request to update the End-Game state for players */
@@ -78,10 +78,6 @@ protected:
 	/** Is called during the In-Game state to try to register the End-Game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateEndGameStates();
-
-	/** Called when any player or bot was exploded. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnAnyCharacterDestroyed();
 
 	/*********************************************************************************************
 	 * Starting Timer

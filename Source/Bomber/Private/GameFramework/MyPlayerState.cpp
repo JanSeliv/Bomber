@@ -88,6 +88,8 @@ void AMyPlayerState::UpdateEndGameState()
 	{
 		MulticastSetEndGameState(EEndGameState::Win);
 	}
+
+	AMyGameStateBase::Get().TrySetEndGameState();
 }
 
 // Set new End-Game state, is made as multicast to notify own client asap
