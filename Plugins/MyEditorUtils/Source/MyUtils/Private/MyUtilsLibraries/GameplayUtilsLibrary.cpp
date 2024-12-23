@@ -84,7 +84,7 @@ USaveGame* UGameplayUtilsLibrary::ResetSaveGameData(class USaveGame* SaveGame, c
 }
 
 // Is useful for animating actor's transform from values stored in the Curve Table
-bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, class UCurveTable* CurveTable, float TotalSecondsSinceStart)
+bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const FTransform& CenterWorldTransform, UCurveTable* CurveTable, float TotalSecondsSinceStart)
 {
 	/* Example data (can be imported as csv into your Curve Table):
 
@@ -102,7 +102,9 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, class 
 	Where ScaleZ will change from `1` (at 0 sec) to `0` (at 0.5 sec) */
 
 	if (!ensureMsgf(CurveTable, TEXT("ASSERT: [%i] %hs:\n'CurveTable' is not valid!"), __LINE__, __FUNCTION__)
-		|| !ensureMsgf(InActor, TEXT("ASSERT: [%i] %hs:\n'InActor' is not valid!"), __LINE__, __FUNCTION__))
+		|| !ensureMsgf(InActor, TEXT("ASSERT: [%i] %hs:\n'InActor' is not valid!"), __LINE__, __FUNCTION__)
+		|| !ensureMsgf(TotalSecondsSinceStart >= 0.f, TEXT("ASSERT: [%i] %hs:\n'TotalSecondsSinceStart' must be greater or equal to 0!"), __LINE__, __FUNCTION__)
+		|| !ensureMsgf(CenterWorldTransform.IsValid(), TEXT("ASSERT: [%i] %hs:\n'CenterWorldTransform' is not valid, it should be initial transform of actor to apply animation on it!"), __LINE__, __FUNCTION__))
 	{
 		return false;
 	}
@@ -117,12 +119,13 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, class 
 
 	float EvaluatedValue = 0.f;
 
-	auto EvaluateCurveRow = [](UCurveTable* CurveTable, FName RowName, float InXY, float& OutValue, const FString& ContextString) -> bool
+	auto EvaluateCurveRow = [](UCurveTable* CurveTable, FName RowName, float InXY, float& OutValue) -> bool
 	{
 		FCurveTableRowHandle Handle;
 		Handle.CurveTable = CurveTable;
 		Handle.RowName = RowName;
 
+		const FString ContextString = RowName.ToString();
 		const FRealCurve* Curve = CurveTable ? Handle.CurveTable->FindCurve(RowName, ContextString) : nullptr;
 		if (!Curve)
 		{
@@ -143,7 +146,7 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, class 
 
 	for (int32 Index = 0; Index < LocationRows.Num(); ++Index)
 	{
-		if (!EvaluateCurveRow(CurveTable, LocationRows[Index], TotalSecondsSinceStart, EvaluatedValue, TEXT("Location")))
+		if (!EvaluateCurveRow(CurveTable, LocationRows[Index], TotalSecondsSinceStart, EvaluatedValue))
 		{
 			return false;
 		}
@@ -152,7 +155,7 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, class 
 
 	for (int32 Index = 0; Index < RotationRows.Num(); ++Index)
 	{
-		if (!EvaluateCurveRow(CurveTable, RotationRows[Index], TotalSecondsSinceStart, EvaluatedValue, TEXT("Rotation")))
+		if (!EvaluateCurveRow(CurveTable, RotationRows[Index], TotalSecondsSinceStart, EvaluatedValue))
 		{
 			return false;
 		}
@@ -162,17 +165,17 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, class 
 
 	for (int32 Index = 0; Index < ScaleRows.Num(); ++Index)
 	{
-		if (!EvaluateCurveRow(CurveTable, ScaleRows[Index], TotalSecondsSinceStart, EvaluatedValue, TEXT("Scale")))
+		if (!EvaluateCurveRow(CurveTable, ScaleRows[Index], TotalSecondsSinceStart, EvaluatedValue))
 		{
 			return false;
 		}
 		NewScale[Index] = EvaluatedValue;
 	}
 
-	FTransform WorldTransform;
-	WorldTransform.SetLocation(InActor->GetActorLocation() + NewLocation);
-	WorldTransform.SetRotation(InActor->GetActorRotation().Quaternion() * NewRotation.Quaternion());
-	WorldTransform.SetScale3D(InActor->GetActorScale3D() * NewScale);
+	FTransform WorldTransform = FTransform::Identity;
+	WorldTransform.SetLocation(CenterWorldTransform.GetLocation() + NewLocation);
+	WorldTransform.SetRotation(CenterWorldTransform.GetRotation() * NewRotation.Quaternion());
+	WorldTransform.SetScale3D(CenterWorldTransform.GetScale3D() * NewScale);
 
 	InActor->SetActorTransform(WorldTransform);
 
