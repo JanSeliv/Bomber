@@ -78,6 +78,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Transient, Category = "C++", DisplayName = "On Local Player State Ready")
 	FOnPlayerStateReady BP_OnLocalPlayerStateReady;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameProgressionCompleted);
+
+	/** Called when a player completes the progression of the game */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++", DisplayName = "On Progression Completion")
+	FOnGameProgressionCompleted OnGameProgressionCompleted;
+
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
@@ -114,7 +120,7 @@ protected:
 	} \
 }
 
-/** Helper macro to bind (or call if possible) when any character is spawned, possessed, and replicated. */ 
+/** Helper macro to bind (or call if possible) when any character is spawned, possessed, and replicated. */
 #define BIND_ON_CHARACTER_READY(Obj, Function, CharacterID) \
     INTERNAL_BIND_CHARACTER_READY(BP_OnCharacterReady, Obj, Function, PlayerCharacter, CharacterID)
 
