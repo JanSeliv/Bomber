@@ -45,7 +45,7 @@ APlayerCharacter& AMyPlayerState::GetPlayerCharacterChecked() const
  * End Game State
  ********************************************************************************************* */
 
-// Updates result of the game for controlled player
+// Tries to set new End-Game state for this player
 void AMyPlayerState::UpdateEndGameState()
 {
 	if (!HasAuthority())
@@ -64,47 +64,57 @@ void AMyPlayerState::UpdateEndGameState()
 	// handle timer is 0
 	if (MyGameState->IsInGameTimerElapsed())
 	{
-		MulticastSetEndGameState(EEndGameState::Draw);
+		SetEndGameState(EEndGameState::Draw);
 		return;
 	}
 
 	// Game is running
 
-	// locals
-	const int32 PlayerNum = UMyBlueprintFunctionLibrary::GetAlivePlayersNum();
-
-	if (IsCharacterDead())
+	const EEndGameState NewEndGameState = [&]
 	{
-		if (PlayerNum <= 0) // last players were blasted together
-		{
-			MulticastSetEndGameState(EEndGameState::Draw);
-		}
-		else
-		{
-			MulticastSetEndGameState(EEndGameState::Lose);
-		}
-	}
-	else if (PlayerNum == 1) // is alive owner and is the last player
-	{
-		MulticastSetEndGameState(EEndGameState::Win);
-	}
+		const int32 PlayerNum = UMyBlueprintFunctionLibrary::GetAlivePlayersNum();
 
-	AMyGameStateBase::Get().TrySetEndGameState();
+		if (IsCharacterDead())
+		{
+			// Draw: last players were blasted together
+			return PlayerNum <= 0 ? EEndGameState::Draw : EEndGameState::Lose;
+		}
+
+		// Win: Is alive owner and is the last player
+		return PlayerNum == 1 ? EEndGameState::Win : EEndGameState::None;
+	}();
+
+	SetEndGameState(NewEndGameState);
 }
 
-// Set new End-Game state, is made as multicast to notify own client asap
-void AMyPlayerState::MulticastSetEndGameState_Implementation(EEndGameState NewEndGameState)
+// Sets End-Game state to the specified one
+void AMyPlayerState::SetEndGameState(EEndGameState NewEndGameState)
 {
-	if (NewEndGameState == EndGameStateInternal)
+	if (NewEndGameState == EEndGameState::None
+	    || NewEndGameState == EndGameStateInternal)
 	{
+		// No changes needed
 		return;
 	}
 
 	EndGameStateInternal = NewEndGameState;
+	ApplyEndGameState();
 
+	AMyGameStateBase::Get().TrySetEndGameState();
+}
+
+// Called on client when End-Game player status is changed
+void AMyPlayerState::OnRep_EndGameState()
+{
+	ApplyEndGameState();
+}
+
+// Applies currently changed End-Game state for this player
+void AMyPlayerState::ApplyEndGameState()
+{
 	if (OnEndGameStateChanged.IsBound())
 	{
-		OnEndGameStateChanged.Broadcast(NewEndGameState);
+		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
 	}
 }
 
@@ -368,7 +378,7 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 	{
 		case ECurrentGameState::GameStarting:
 		{
-			MulticastSetEndGameState(EEndGameState::None);
+			EndGameStateInternal = EEndGameState::None;
 			break;
 		}
 		case ECurrentGameState::EndGame:

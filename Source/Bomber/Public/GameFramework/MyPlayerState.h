@@ -44,18 +44,26 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EEndGameState GetEndGameState() const { return EndGameStateInternal; }
 
-	/** Updates result of the game for controlled player. */
+	/** Tries to set new End-Game state for this player. */ 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void UpdateEndGameState();
 
+	/** Sets End-Game state to the specified one. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetEndGameState(EEndGameState NewEndGameState);
+
 protected:
 	/** Contains result of the game for controlled player after ending the game. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "End Game State"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_EndGameState", Category = "C++", meta = (BlueprintProtected, DisplayName = "End-Game State"))
 	EEndGameState EndGameStateInternal = EEndGameState::None;
 
-	/** Set new End-Game state, is made as multicast to notify own client asap. */
-	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void MulticastSetEndGameState(EEndGameState NewEndGameState);
+	/** Called on client when End-Game player status is changed. */
+	UFUNCTION()
+	void OnRep_EndGameState();
+
+	/** Applies currently changed End-Game state for this player. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyEndGameState();
 
 	/***************************************************************************************************************************************
 	 * Nickname
