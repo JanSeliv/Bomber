@@ -162,39 +162,43 @@ protected:
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 
 	/*********************************************************************************************
-	 * Protected functions
+	 * Events
 	 ********************************************************************************************* */
 protected:
 	/**
 	 * Triggers when this player character starts something overlap.
 	 * With item overlapping Increases +1 to numbers of character's powerups (Skate/Bomb/Fire).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	/** Event triggered when the bomb has been explicitly destroyed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBombDestroyed(class UMapComponent* MapComponent, UObject* DestroyCauser = nullptr);
 
 	/** Listen to manage the tick. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
+	/** Is called on game mode post login to handle character logic when new player is connected. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPostLogin(class AGameModeBase* GameMode, class APlayerController* NewPlayer);
+
+	/** Is called when the player was destroyed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
+
+	/*********************************************************************************************
+	 * Protected functions
+	 ********************************************************************************************* */
+protected:
 	/** Updates collision object type by current character ID. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateCollisionObjectType();
 
-	/** Is called on game mode post login to handle character logic when new player is connected. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPostLogin(class AGameModeBase* GameMode, class APlayerController* NewPlayer);
-
 	/** Move the player character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
 	void MovePlayer(const struct FInputActionValue& ActionValue);
-
-	/** Is called when the player was destroyed. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
 
 	/*********************************************************************************************
 	 * Player/AI Controller

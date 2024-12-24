@@ -432,11 +432,11 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 }
 
 /*********************************************************************************************
- * Protected functions
+ * Events
  ********************************************************************************************* */
 
 // Triggers when this player character starts something overlap.
-void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void APlayerCharacter::OnPlayerBeginOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)
 {
 	const AItemActor* OverlappedItem = Cast<AItemActor>(OtherActor);
 	const EItemType ItemType = OverlappedItem ? OverlappedItem->GetItemType() : EItemType::None;
@@ -479,7 +479,7 @@ void APlayerCharacter::OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* Oth
 }
 
 // Event triggered when the bomb has been explicitly destroyed.
-void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent, UObject* DestroyCauser/* = nullptr*/)
+void APlayerCharacter::OnBombDestroyed_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser/* = nullptr*/)
 {
 	if (!MapComponent
 	    || MapComponent->GetActorType() != EAT::Bomb)
@@ -498,7 +498,7 @@ void APlayerCharacter::OnBombDestroyed(UMapComponent* MapComponent, UObject* Des
 }
 
 // Listen to manage the tick
-void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	if (!HasAuthority())
 	{
@@ -522,6 +522,37 @@ void APlayerCharacter::OnGameStateChanged(ECurrentGameState CurrentGameState)
 			break;
 	}
 }
+
+// Is called on game mode post login to handle character logic when new player is connected
+void APlayerCharacter::OnPostLogin_Implementation(AGameModeBase* GameMode, APlayerController* NewPlayer)
+{
+	TryPossessController();
+
+	if (GetController() == NewPlayer)
+	{
+		// New player joined, set default player mesh
+		SetDefaultPlayerMeshData();
+	}
+}
+
+// Is called when the player was destroyed
+void APlayerCharacter::OnPlayerRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+{
+	if (AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
+	{
+		// Ignore, is not gameplay destroy, likely level is regenerated
+		return;
+	}
+
+	if (AMyPlayerState* InPlayerState = GetPlayerState<AMyPlayerState>())
+	{
+		InPlayerState->SetCharacterDead(true);
+	}
+}
+
+/*********************************************************************************************
+ * Protected functions
+ ********************************************************************************************* */
 
 // Updates collision object type by current character ID
 void APlayerCharacter::UpdateCollisionObjectType()
@@ -557,18 +588,6 @@ void APlayerCharacter::UpdateCollisionObjectType()
 	CapsuleComp->SetCollisionObjectType(CollisionObjectType);
 }
 
-// Is called on game mode post login to handle character logic when new player is connected
-void APlayerCharacter::OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
-{
-	TryPossessController();
-
-	if (GetController() == NewPlayer)
-	{
-		// New player joined, set default player mesh
-		SetDefaultPlayerMeshData();
-	}
-}
-
 // Move the player character
 void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 {
@@ -586,21 +605,6 @@ void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 
 	AddMovementInput(ForwardDirection, MovementVector.Y);
 	AddMovementInput(RightDirection, MovementVector.X);
-}
-
-// Is called when the player was destroyed
-void APlayerCharacter::OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser)
-{
-	if (AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
-	{
-		// Ignore, is not gameplay destroy, likely level is regenerated
-		return;
-	}
-
-	if (AMyPlayerState* InPlayerState = GetPlayerState<AMyPlayerState>())
-	{
-		InPlayerState->SetCharacterDead(true);
-	}
 }
 
 /*********************************************************************************************
