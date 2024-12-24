@@ -302,6 +302,8 @@ void APlayerCharacter::BeginPlay()
 		// Listen to handle possessing logic
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
+
+	BIND_ON_CHARACTER_READY(this, ThisClass::OnCharacterReady, GetPlayerId());
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -547,6 +549,35 @@ void APlayerCharacter::OnPlayerRemovedFromLevel_Implementation(UMapComponent* Ma
 	if (AMyPlayerState* InPlayerState = GetPlayerState<AMyPlayerState>())
 	{
 		InPlayerState->SetCharacterDead(true);
+	}
+}
+
+// Is called when the player character is fully initialized
+void APlayerCharacter::OnCharacterReady_Implementation(APlayerCharacter* Character, int32 CharacterID)
+{
+	if (Character != this)
+	{
+		// Is not this character
+		return;
+	}
+
+	if (UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem()) // Is null on remote clients 
+	{
+		WidgetsSubsystem->OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
+		if (WidgetsSubsystem->AreWidgetInitialized())
+		{
+			OnWidgetsInitialized();
+		}
+	}
+}
+
+// Is called when all game widgets are initialized to handle UI-related logic
+void APlayerCharacter::OnWidgetsInitialized_Implementation()
+{
+	// Set current nickname on the nameplate
+	if (const AMyPlayerState* MyPlayerState = GetPlayerState<AMyPlayerState>())
+	{
+		SetNicknameOnNameplate(*MyPlayerState->GetPlayerName());
 	}
 }
 

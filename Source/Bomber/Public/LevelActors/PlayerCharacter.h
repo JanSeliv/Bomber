@@ -188,6 +188,15 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
 
+	/** Is called when the player character is fully initialized. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCharacterReady(APlayerCharacter* Character, int32 CharacterID);
+
+	/** Is called when all game widgets are initialized to handle UI-related logic.
+	 * Is not called on remote clients. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnWidgetsInitialized();
+
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
