@@ -62,8 +62,8 @@ public:
 	const FMouseVisibilitySettings& GetMouseVisibilitySettingsCustom(FName CustomGameState) const;
 
 	/** Returns true if specified key is mapped to any gameplay input context. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Key"))
-	bool IsMappedKey(const FKey& Key) const;
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext", AutoCreateRefTerm = "Key"))
+	bool IsMappedKey(const UObject* WorldContext, const FKey& Key) const;
 
 protected:
 	/** Enhanced Input Mapping Contexts of gameplay input actions where any selected input can be remapped by player.

@@ -69,11 +69,11 @@ const FMouseVisibilitySettings& UPlayerInputDataAsset::GetMouseVisibilitySetting
 }
 
 // Returns true if specified key is mapped to any gameplay input context
-bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
+bool UPlayerInputDataAsset::IsMappedKey(const UObject* WorldContext, const FKey& Key) const
 {
-	return GameplayInputContextsInternal.ContainsByPredicate([&Key](const UMyInputMappingContext* ContextIt)
+	return GameplayInputContextsInternal.ContainsByPredicate([&Key, WorldContext](const UMyInputMappingContext* ContextIt)
 	{
-		return ContextIt && UInputUtilsLibrary::IsMappedKeyInContext(Key, ContextIt);
+		return ContextIt && UInputUtilsLibrary::IsMappedKeyInContext(WorldContext, Key, ContextIt);
 	});
 }
 

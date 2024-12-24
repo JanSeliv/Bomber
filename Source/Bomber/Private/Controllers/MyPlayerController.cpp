@@ -88,7 +88,7 @@ void AMyPlayerController::SetMenuState()
 void AMyPlayerController::SetEndGameState()
 {
 	if (CanChangeGameState(ECGS::EndGame)
-		&& UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
+	    && UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
 	{
 		ServerSetGameState(ECGS::EndGame);
 	}
@@ -170,6 +170,15 @@ void AMyPlayerController::InitInputSystem()
 	if (WidgetsSubsystem->AreWidgetInitialized())
 	{
 		OnWidgetsInitialized();
+	}
+
+	// Register gameplay mappings, so they can be remapped
+	TArray<const UMyInputMappingContext*> GameplayInputContexts;
+	UPlayerInputDataAsset::Get().GetAllGameplayInputContexts(/*out*/GameplayInputContexts);
+	for (const UMyInputMappingContext* InputContextIt : GameplayInputContexts)
+	{
+		constexpr bool bRegisterMappings = true;
+		UInputUtilsLibrary::SetAllMappingsRegisteredInContext(this, bRegisterMappings, InputContextIt);
 	}
 }
 

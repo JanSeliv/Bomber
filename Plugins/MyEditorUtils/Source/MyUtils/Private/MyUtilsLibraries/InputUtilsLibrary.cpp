@@ -2,8 +2,6 @@
 
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 //---
-#include "MyUtilsLibraries/UtilsLibrary.h"
-//---
 #include "EnhancedActionKeyMapping.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -12,7 +10,7 @@
 #include "Engine/Engine.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
-#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InputUtilsLibrary)
 
@@ -40,6 +38,13 @@ UEnhancedPlayerInput* UInputUtilsLibrary::GetEnhancedPlayerInput(const UObject* 
 {
 	const APlayerController* PlayerController = GetLocalPlayerController(WorldContext);
 	return PlayerController ? Cast<UEnhancedPlayerInput>(PlayerController->PlayerInput) : nullptr;
+}
+
+// Returns the Enhanced Input User Settings for remapping keys
+class UEnhancedInputUserSettings* UInputUtilsLibrary::GetEnhancedInputUserSettings(const UObject* WorldContext)
+{
+	const UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem(WorldContext);
+	return InputSubsystem ? InputSubsystem->GetUserSettings() : nullptr;
 }
 
 /*********************************************************************************************
@@ -159,44 +164,15 @@ bool UInputUtilsLibrary::IsInputActionBound(const UObject* WorldContext, const U
  * Mappings
  ********************************************************************************************* */
 
-// Returns keys mapped to this action in the active input mapping contexts sorted by its priorities
-void UInputUtilsLibrary::GetAllMappingsInAction(const UObject* WorldContext, const UInputAction* InInputAction, TArray<FKey>& OutKeys)
-{
-	if (!ensureMsgf(InInputAction, TEXT("ASSERT: [%i] %s:\n'InInputAction' is not valid!"), __LINE__, *FString(__FUNCTION__)))
-	{
-		return;
-	}
-
-	const UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem = GetEnhancedInputSubsystem(WorldContext);
-	if (!EnhancedInputSubsystem)
-	{
-		return;
-	}
-
-	if (!OutKeys.IsEmpty())
-	{
-		OutKeys.Empty();
-	}
-
-	OutKeys = EnhancedInputSubsystem->QueryKeysMappedToAction(InInputAction);
-}
-
-// Returns the first mapped key to this action in most priority active input context
-FKey UInputUtilsLibrary::GetFirstMappingInAction(const UObject* WorldContext, const UInputAction* InInputAction)
-{
-	TArray<FKey> OutKeys;
-	GetAllMappingsInAction(WorldContext, InInputAction, OutKeys);
-
-	constexpr int32 KeyIndex = 0;
-	static const FKey EmptyKey{};
-	return OutKeys.IsValidIndex(KeyIndex) ? OutKeys[KeyIndex] : EmptyKey;
-}
-
 // Returns all mappings where bIsPlayerMappable is true
-void UInputUtilsLibrary::GetAllMappingsInContext(const UInputMappingContext* InInputContext, TArray<FEnhancedActionKeyMapping>& OutMappings)
+void UInputUtilsLibrary::GetAllMappingsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext, TArray<FPlayerKeyMapping>& OutMappings)
 {
-	if (!ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %s:\n'InInputContext' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	const UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem(WorldContext);
+	const UEnhancedInputUserSettings* EnhancedInputUserSettings = InputSubsystem ? InputSubsystem->GetUserSettings() : nullptr;
+	if (!ensureMsgf(EnhancedInputUserSettings, TEXT("ASSERT: [%i] %hs:\n'EnhancedInputUserSettings' is null, make sure 'Enable User Settings' is enabled in the Project Settings!"), __LINE__, __FUNCTION__)
+		|| !ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %hs:\n'InInputContext' is not valid!"), __LINE__, __FUNCTION__))
 	{
+		// Can be null on remote clients, do nothing
 		return;
 	}
 
@@ -208,61 +184,56 @@ void UInputUtilsLibrary::GetAllMappingsInContext(const UInputMappingContext* InI
 	const TArray<FEnhancedActionKeyMapping>& AllMappings = InInputContext->GetMappings();
 	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
 	{
-		if (MappingIt.IsPlayerMappable())
+		if (!MappingIt.IsPlayerMappable())
 		{
-			OutMappings.Emplace(MappingIt);
+			continue;
 		}
-	}
-}
 
-// Returns mappings by specified input action
-void UInputUtilsLibrary::GetMappingsInContextByAction(const UInputMappingContext* InInputContext, const UInputAction* ByInputAction, TArray<FEnhancedActionKeyMapping>& OutMappings)
-{
-	if (!ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %s:\n'InInputContext' is not valid!"), __LINE__, *FString(__FUNCTION__))
-		|| !ensureMsgf(ByInputAction, TEXT("ASSERT: [%i] %s:\n'ByInputAction' is not valid!"), __LINE__, *FString(__FUNCTION__)))
-	{
-		return;
-	}
-
-	if (!OutMappings.IsEmpty())
-	{
-		OutMappings.Empty();
-	}
-
-	TArray<FEnhancedActionKeyMapping> AllMappings;
-	GetAllMappingsInContext(InInputContext, /*out*/AllMappings);
-	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
-	{
-		if (MappingIt.Action == ByInputAction)
+		const FPlayerKeyMapping* FoundMapping = EnhancedInputUserSettings->FindCurrentMappingForSlot(MappingIt.GetMappingName(), EPlayerMappableKeySlot::First);
+		if (!FoundMapping)
 		{
-			OutMappings.Emplace(MappingIt);
+			// The key is mappable, but it's not even registered in Enhanced Input User Settings (SetAllMappingsRegisteredInContext is not called)
+			continue;
 		}
+
+		FPlayerKeyMapping RemappedMapping = *FoundMapping;
+		OutMappings.Emplace(MoveTemp(RemappedMapping));
 	}
 }
 
 // Returns true if specified key is mapped to given input context
-bool UInputUtilsLibrary::IsMappedKeyInContext(const FKey& Key, const UInputMappingContext* InInputContext)
+bool UInputUtilsLibrary::IsMappedKeyInContext(const UObject* WorldContext, const FKey& Key, const UInputMappingContext* InInputContext)
 {
-	if (!ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %s:\n'InInputContext' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	const UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem(WorldContext);
+	const UEnhancedInputUserSettings* EnhancedInputUserSettings = InputSubsystem ? InputSubsystem->GetUserSettings() : nullptr;
+	if (!ensureMsgf(EnhancedInputUserSettings, TEXT("ASSERT: [%i] %hs:\n'EnhancedInputUserSettings' is null, make sure 'Enable User Settings' is enabled in the Project Settings!"), __LINE__, __FUNCTION__)
+		|| !ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %hs:\n'InInputContext' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return false;
 	}
 
-	TArray<FEnhancedActionKeyMapping> AllMappings;
-	GetAllMappingsInContext(InInputContext, /*out*/AllMappings);
-	return AllMappings.ContainsByPredicate([&Key](const FEnhancedActionKeyMapping& MappingIt)
+	TArray<FPlayerKeyMapping> AllMappings;
+	GetAllMappingsInContext(WorldContext, InInputContext, /*out*/AllMappings);
+	return AllMappings.ContainsByPredicate([&Key](const FPlayerKeyMapping& MappingIt)
 	{
-		return MappingIt.Key == Key;
+		return MappingIt.GetCurrentKey() == Key;
 	});
 }
 
 // Unmap previous key and map new one
-bool UInputUtilsLibrary::RemapKeyInContext(UInputMappingContext* InInputContext, const UInputAction* ByInputAction, const FKey& PrevKey, const FKey& NewKey)
+bool UInputUtilsLibrary::RemapKeyInContext(const UObject* WorldContextObject, const UInputMappingContext* InInputContext, const UInputAction* ByInputAction, const FKey& PrevKey, const FKey& NewKey)
 {
 	if (!ensureMsgf(InInputContext, TEXT("ASSERT: 'InInputContext' is not valid"))
 		|| !ensureMsgf(ByInputAction, TEXT("ASSERT: [%i] %s:\n'ByInputAction' is not valid!"), __LINE__, *FString(__FUNCTION__))
 		|| NewKey == PrevKey
-		|| IsMappedKeyInContext(NewKey, InInputContext))
+		|| IsMappedKeyInContext(WorldContextObject, NewKey, InInputContext))
+	{
+		return false;
+	}
+
+	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = GetEnhancedInputSubsystem(WorldContextObject);
+	UEnhancedInputUserSettings* EnhancedInputUserSettings = InputSubsystem ? InputSubsystem->GetUserSettings() : nullptr;
+	if (!ensureMsgf(EnhancedInputUserSettings, TEXT("ASSERT: [%i] %hs:\n'EnhancedInputUserSettings' is null, make sure 'Enable User Settings' is enabled in the Project Settings!"), __LINE__, __FUNCTION__))
 	{
 		return false;
 	}
@@ -271,14 +242,24 @@ bool UInputUtilsLibrary::RemapKeyInContext(UInputMappingContext* InInputContext,
 	const TArray<FEnhancedActionKeyMapping>& AllMappings = InInputContext->GetMappings();
 	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
 	{
-		if (MappingIt.Action == ByInputAction
-			&& MappingIt.Key == PrevKey)
+		if (MappingIt.Action != ByInputAction)
 		{
-			InInputContext->UnmapKey(ByInputAction, PrevKey);
-			InInputContext->MapKey(ByInputAction, NewKey);
-			bRemapped = true;
-			break;
+			continue;
 		}
+
+		FMapPlayerKeyArgs Args;
+		Args.MappingName = MappingIt.GetMappingName();
+		Args.Slot = EPlayerMappableKeySlot::First;
+		Args.NewKey = NewKey;
+		Args.bCreateMatchingSlotIfNeeded = true;
+
+		FGameplayTagContainer FailureReason;
+		EnhancedInputUserSettings->UnMapPlayerKey(Args, FailureReason);
+
+		EnhancedInputUserSettings->MapPlayerKey(Args, FailureReason);
+		bRemapped = FailureReason.IsEmpty();
+
+		break;
 	}
 
 	if (!bRemapped)
@@ -286,19 +267,30 @@ bool UInputUtilsLibrary::RemapKeyInContext(UInputMappingContext* InInputContext,
 		return false;
 	}
 
-	if (CanSaveMappingsInConfig())
-	{
-		UGameplayUtilsLibrary::SaveConfig(InInputContext);
-	}
+	InputSubsystem->RequestRebuildControlMappings();
+	EnhancedInputUserSettings->ApplySettings();
+	EnhancedInputUserSettings->AsyncSaveSettings();
 
 	return true;
 }
 
-// Unmap previous key and map new one
-bool UInputUtilsLibrary::RemapKeyInContext(const UInputMappingContext* InInputContext, const FEnhancedActionKeyMapping& InMapping, const FKey& NewKey)
+// Register all mappings in the specified contexts
+void UInputUtilsLibrary::SetAllMappingsRegisteredInContext(const UObject* WorldContext, bool bRegister, const UInputMappingContext* InInputContext)
 {
-	UInputMappingContext* ContextToRemap = const_cast<UInputMappingContext*>(InInputContext);
-	return RemapKeyInContext(ContextToRemap, InMapping.Action, InMapping.Key, NewKey);
+	UEnhancedInputUserSettings* EnhancedInputUserSettings = GetEnhancedInputUserSettings(WorldContext);
+	if (!ensureMsgf(EnhancedInputUserSettings, TEXT("ASSERT: [%i] %hs:\n'EnhancedInputUserSettings' is null, make sure 'Enable User Settings' is enabled in the Project Settings!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	if (bRegister)
+	{
+		EnhancedInputUserSettings->RegisterInputMappingContext(InInputContext);
+	}
+	else
+	{
+		EnhancedInputUserSettings->UnregisterInputMappingContext(InInputContext);
+	}
 }
 
 /*********************************************************************************************
@@ -321,12 +313,4 @@ APlayerController* UInputUtilsLibrary::GetLocalPlayerController(const UObject* W
 	}
 
 	return nullptr;
-}
-
-// Returns true if remapped key is allowed to be saved in config
-bool UInputUtilsLibrary::CanSaveMappingsInConfig()
-{
-	// Always return true in cook since there remaps should be saved into config file and taken there.
-	// We don't want to save remaps in Editor, it gets serialised right into asset
-	return !UUtilsLibrary::IsEditor();
 }

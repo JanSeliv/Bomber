@@ -15,9 +15,9 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InputButtonWidget)
 
 // Sets this button to let player remap input specified in mappable data
-void UInputButtonWidget::InitButton(const FEnhancedActionKeyMapping& InMappableData, const UMyInputMappingContext* InInputMappingContext)
+void UInputButtonWidget::InitButton(const FPlayerKeyMapping& InMappableData, const UMyInputMappingContext* InInputMappingContext)
 {
-	if (!ensureMsgf(InMappableData.Action, TEXT("%s: 'InMappableData.Action' is not valid"), *FString(__FUNCTION__))
+	if (!ensureMsgf(InMappableData.GetAssociatedInputAction(), TEXT("%s: 'InMappableData.Action' is not valid"), *FString(__FUNCTION__))
 	    || !ensureMsgf(InInputMappingContext, TEXT("ASSERT: 'InInputMappingContext' is not valid")))
 	{
 		return;
@@ -33,9 +33,9 @@ void UInputButtonWidget::SetCurrentKey(const FKey& NewKey)
 	const FKey& LastKey = GetCurrentKey();
 
 	bool bMapped = false;
-	if (!UPlayerInputDataAsset::Get().IsMappedKey(NewKey))
+	if (!UPlayerInputDataAsset::Get().IsMappedKey(this, NewKey))
 	{
-		bMapped = UInputUtilsLibrary::RemapKeyInContext(InputContextInternal, MappableDataInternal, NewKey);
+		bMapped = UInputUtilsLibrary::RemapKeyInContext(this, InputContextInternal, MappableDataInternal.GetAssociatedInputAction(), MappableDataInternal.GetCurrentKey(), NewKey);
 	}
 
 	if (!bMapped)
@@ -46,7 +46,7 @@ void UInputButtonWidget::SetCurrentKey(const FKey& NewKey)
 		return;
 	}
 
-	MappableDataInternal.Key = NewKey;
+	MappableDataInternal.SetCurrentKey(NewKey);
 }
 
 // Called after the underlying slate widget is constructed
@@ -59,7 +59,7 @@ void UInputButtonWidget::NativeConstruct()
 		return;
 	}
 
-	InputKeySelector->SetSelectedKey(MappableDataInternal.Key);
+	InputKeySelector->SetSelectedKey(MappableDataInternal.GetCurrentKey());
 	InputKeySelector->OnKeySelected.AddUniqueDynamic(this, &UInputButtonWidget::OnKeySelected);
 	InputKeySelector->OnIsSelectingKeyChanged.AddUniqueDynamic(this, &UInputButtonWidget::OnIsSelectingKeyChanged);
 

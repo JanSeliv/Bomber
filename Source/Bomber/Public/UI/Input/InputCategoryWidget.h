@@ -31,10 +31,10 @@ struct FInputCategoryData
 
 	/** All mappings with this input category name. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	TArray<struct FEnhancedActionKeyMapping> Mappings;
+	TArray<struct FPlayerKeyMapping> Mappings;
 
 	/** Returns all categories from the specified input mapping context. */
-	static void GetCategoriesDataFromMappings(const UMyInputMappingContext& InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData);
+	static void GetCategoriesDataFromMappings(const UObject& WorldContext, const UMyInputMappingContext& InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData);
 };
 
 /**
