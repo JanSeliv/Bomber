@@ -97,7 +97,7 @@ void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
 	if (MyGameState && MyGameState->GetCurrentGameState() == ECGS::InGame)
 	{
-		MyGameState->ServerSetGameState(ECurrentGameState::GameStarting);
+		MyGameState->SetGameState(ECurrentGameState::GameStarting);
 	}
 
 	MulticastSetLevelSize(LevelSize);

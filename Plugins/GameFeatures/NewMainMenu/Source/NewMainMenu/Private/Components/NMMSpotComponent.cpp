@@ -432,7 +432,7 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 	if (CurrentFrame >= EndFrame)
 	{
 		// Cinematic is finished, start the countdown
-		MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
+		MyPC->SetGameStartingState();
 	}
 }
 

@@ -102,7 +102,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 
 	if (UNMMUtils::ShouldSkipCinematic(CinematicRow))
 	{
-		MyPC->ServerSetGameState(ECurrentGameState::GameStarting);
+		MyPC->SetGameStartingState();
 	}
 	else
 	{

@@ -422,7 +422,7 @@ void UMyCheatManager::SetGameState(ECurrentGameState GameState)
 	// Execute immediately if the target state is not part of the standard order, in case if some state is part of additional modes
 	if (TargetIndex == INDEX_NONE)
 	{
-		MyGameState->ServerSetGameState(GameState);
+		MyGameState->SetGameState(GameState);
 		return;
 	}
 
@@ -432,6 +432,6 @@ void UMyCheatManager::SetGameState(ECurrentGameState GameState)
 	StartIndex = FMath::Max(InitialIndex, StartIndex);
 	for (int32 Index = StartIndex; Index <= TargetIndex; ++Index)
 	{
-		MyGameState->ServerSetGameState(GameStateOrder[Index]);
+		MyGameState->SetGameState(GameStateOrder[Index]);
 	}
 }

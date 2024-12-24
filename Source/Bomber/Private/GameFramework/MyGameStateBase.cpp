@@ -51,9 +51,10 @@ bool AMyGameStateBase::CanChangeGameState(ECurrentGameState NewGameState) const
 }
 
 // Returns the AMyGameState::CurrentGameState property.
-void AMyGameStateBase::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
+void AMyGameStateBase::SetGameState(ECurrentGameState NewGameState)
 {
-	if (!CanChangeGameState(NewGameState))
+	if (!HasAuthority()
+		|| !CanChangeGameState(NewGameState))
 	{
 		return;
 	}
@@ -143,7 +144,7 @@ void AMyGameStateBase::DecrementStartingCountdown()
 
 	if (IsStartingTimerElapsed())
 	{
-		ServerSetGameState(ECurrentGameState::InGame);
+		SetGameState(ECurrentGameState::InGame);
 	}
 }
 
@@ -188,7 +189,7 @@ void AMyGameStateBase::DecrementInGameCountdown()
 
 	if (IsInGameTimerElapsed())
 	{
-		ServerSetGameState(ECurrentGameState::EndGame);
+		SetGameState(ECurrentGameState::EndGame);
 	}
 	else
 	{

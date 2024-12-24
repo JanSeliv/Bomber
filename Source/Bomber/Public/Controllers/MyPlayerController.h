@@ -25,27 +25,31 @@ public:
 
 	/*********************************************************************************************
 	 * Game States
+	 * Is designed for clients to change the game state
+	 * Server can call AMyGameStateBase::Get().SetGameState(NewState) directly
 	 ********************************************************************************************* */
 public:
 	/** Returns true if current game state can be eventually changed. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool CanChangeGameState(ECurrentGameState NewGameState) const;
 
-	/** Set the new game state for the current game. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (DisplayName = "Set Game State"))
-	void ServerSetGameState(ECurrentGameState NewGameState);
-
-	/** Sets the GameStarting game state. */
+	/** Sets and replicates the Starting game state (3-2-1 countdown), can be called on the client. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetGameStartingState();
 
-	/** Sets the Menu game state. */
+	/** Sets and replicates the Menu game state, can be called on the client. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMenuState();
 
-	/** Is called during the In-Game state to show results to all players regarding finished match (Win, Lose or Draw). */
+	/** Is called during the In-Game state to show results to all players regarding finished match (Win, Lose or Draw).
+	 * Can be called on the client. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetEndGameState();
+
+protected:
+	/** Set the new game state for the current game. */
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void ServerSetGameState(ECurrentGameState NewGameState);
 
 	/*********************************************************************************************
 	 * Protected properties

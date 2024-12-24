@@ -46,6 +46,12 @@ AMyPlayerController::AMyPlayerController()
 	MouseComponentInternal = CreateDefaultSubobject<UMouseActivityComponent>(TEXT("MouseActivityComponent"));
 }
 
+/*********************************************************************************************
+ * Game States
+ * Is designed for clients to change the game state
+ * Server can call AMyGameStateBase::Get().SetGameState(NewState) directly
+ ********************************************************************************************* */
+
 // Returns true if current game state can be eventually changed
 bool AMyPlayerController::CanChangeGameState(ECurrentGameState NewGameState) const
 {
@@ -60,21 +66,7 @@ bool AMyPlayerController::CanChangeGameState(ECurrentGameState NewGameState) con
 	return !bCinematicMode;
 }
 
-/*********************************************************************************************
- * Public functions
- ********************************************************************************************* */
-
-// Set the new game state for the current game
-void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
-{
-	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->ServerSetGameState(NewGameState);
-	}
-}
-
-// Sets the GameStarting game state
+// Sets and replicates the Starting game state (3-2-1 countdown), can be called on the client
 void AMyPlayerController::SetGameStartingState()
 {
 	if (CanChangeGameState(ECGS::GameStarting))
@@ -83,7 +75,7 @@ void AMyPlayerController::SetGameStartingState()
 	}
 }
 
-// Sets the Menu game state
+// Sets and replicates the Menu game state, can be called on the client
 void AMyPlayerController::SetMenuState()
 {
 	if (CanChangeGameState(ECGS::Menu))
@@ -99,6 +91,16 @@ void AMyPlayerController::SetEndGameState()
 		&& UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
 	{
 		ServerSetGameState(ECGS::EndGame);
+	}
+}
+
+// Set the new game state for the current game
+void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
+{
+	// Listen states to manage the tick
+	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	{
+		MyGameState->SetGameState(NewGameState);
 	}
 }
 

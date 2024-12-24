@@ -34,9 +34,11 @@ public:
 	bool CanChangeGameState(ECurrentGameState NewGameState) const;
 
 	/** Set the new game state for the current game.
+	 * Should be called only on the server.
+	 * Clients can change the game state only from AMyPlayerController.
 	 * Can be also changed by `Bomber.Game.SetGameState VALUE` cheat command. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++")
-	void ServerSetGameState(ECurrentGameState NewGameState);
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetGameState(ECurrentGameState NewGameState);
 
 	/** Returns the AMyGameStateBase::CurrentGameState property. */
 	UFUNCTION(BlueprintPure, Category = "C++")
