@@ -2,15 +2,58 @@
 
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 //---
+#include "MyUtilsLibraries/UtilsLibrary.h"
+//---
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/CurveTable.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/World.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "GameFramework/SaveGame.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayUtilsLibrary)
+
+/*********************************************************************************************
+ * Multiplayer Helpers
+ ********************************************************************************************* */
+
+// Returns true if this instance has authority
+bool UGameplayUtilsLibrary::IsServer()
+{
+	const UWorld* World = UUtilsLibrary::GetPlayWorld();
+	return World && !World->IsNetMode(NM_Client);
+}
+
+// Returns amount of players (host + clients) playing this game
+int32 UGameplayUtilsLibrary::GetPlayersInMultiplayerNum()
+{
+	int32 PlayersNum = 0;
+
+	const UWorld* World = UUtilsLibrary::GetPlayWorld();
+	const AGameStateBase* GameState = World ? World->GetGameState() : nullptr;
+	if (!GameState)
+	{
+		return PlayersNum;
+	}
+
+	for (const APlayerState* PlayerStateIt : GameState->PlayerArray)
+	{
+		if (PlayerStateIt && !PlayerStateIt->IsABot())
+		{
+			++PlayersNum;
+		}
+	}
+
+	return PlayersNum;
+}
+
+/*********************************************************************************************
+ * Actor Helpers
+ ********************************************************************************************* */
 
 // Abstract method that allows set both static and skeletal meshes to the specified mesh component
 void UGameplayUtilsLibrary::SetMesh(UMeshComponent* MeshComponent, UStreamableRenderAsset* MeshAsset)
@@ -57,30 +100,6 @@ AActor* UGameplayUtilsLibrary::GetAttachedActorByClass(const AActor* ParentActor
 	}
 
 	return nullptr;
-}
-
-// Completely removes given save data and creates new empty one
-USaveGame* UGameplayUtilsLibrary::ResetSaveGameData(class USaveGame* SaveGame, const FString& SaveSlotName, int32 SaveSlotIndex)
-{
-	if (!ensureMsgf(SaveGame, TEXT("ASSERT: [%i] %hs:\n'SaveGame' is not valid!"), __LINE__, __FUNCTION__))
-	{
-		return nullptr;
-	}
-
-	// Remove the data from the disk
-	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, SaveSlotIndex))
-	{
-		UGameplayStatics::DeleteGameInSlot(SaveSlotName, SaveSlotIndex);
-	}
-
-	// Kill current save game object
-	SaveGame->ConditionalBeginDestroy();
-
-	// Create new save game object
-	SaveGame = UGameplayStatics::CreateSaveGameObject(SaveGame->GetClass());
-	UGameplayStatics::AsyncSaveGameToSlot(SaveGame, SaveSlotName, SaveSlotIndex);
-
-	return SaveGame;
 }
 
 // Is useful for animating actor's transform from values stored in the Curve Table
@@ -180,4 +199,32 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const 
 	InActor->SetActorTransform(WorldTransform);
 
 	return true;
+}
+
+/*********************************************************************************************
+ * Save Helpers
+ ********************************************************************************************* */
+
+// Completely removes given save data and creates new empty one
+USaveGame* UGameplayUtilsLibrary::ResetSaveGameData(class USaveGame* SaveGame, const FString& SaveSlotName, int32 SaveSlotIndex)
+{
+	if (!ensureMsgf(SaveGame, TEXT("ASSERT: [%i] %hs:\n'SaveGame' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return nullptr;
+	}
+
+	// Remove the data from the disk
+	if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, SaveSlotIndex))
+	{
+		UGameplayStatics::DeleteGameInSlot(SaveSlotName, SaveSlotIndex);
+	}
+
+	// Kill current save game object
+	SaveGame->ConditionalBeginDestroy();
+
+	// Create new save game object
+	SaveGame = UGameplayStatics::CreateSaveGameObject(SaveGame->GetClass());
+	UGameplayStatics::AsyncSaveGameToSlot(SaveGame, SaveSlotName, SaveSlotIndex);
+
+	return SaveGame;
 }

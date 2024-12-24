@@ -17,6 +17,26 @@ class MYUTILS_API UGameplayUtilsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	/*********************************************************************************************
+	 * Multiplayer Helpers
+	 ********************************************************************************************* */
+public:
+	/** Returns true if this instance has authority. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static bool IsServer();
+
+	/** Returns true if any client is connected to the game. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE bool IsMultiplayerGame() { return GetPlayersInMultiplayerNum() > 1; }
+
+	/** Returns amount of players (host + clients) playing this game. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static int32 GetPlayersInMultiplayerNum();
+
+	/*********************************************************************************************
+	 * Actor Helpers
+	 ********************************************************************************************* */
+public:
 	/** Abstract method that allows set both static and skeletal meshes to the specified mesh component.
 	 * @param MeshComponent The mesh component to set mesh.
 	 * @param MeshAsset The mesh asset to set to the mesh component. */
@@ -34,14 +54,6 @@ public:
 	template <typename T>
 	static T* GetAttachedActorByClass(const AActor* ParentActor, bool bIncludeDescendants = false) { return Cast<T>(GetAttachedActorByClass(ParentActor, T::StaticClass(), bIncludeDescendants)); }
 
-	/** Completely removes given save data and creates new empty one.
-	 * @param SaveGame The save game to reset.
-	 * @param SaveSlotName The name of the save slot.
-	 * @param SaveSlotIndex The index of the save slot.
-	 * @return The new empty save game object. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static USaveGame* ResetSaveGameData(USaveGame* SaveGame, const FString& SaveSlotName, int32 SaveSlotIndex);
-
 	/** Is useful for animating actor's transform from values stored in the Curve Table.
 	 * Applies the transform in local space from a given Curve Table to the specified actor over time (seconds).
 	 * @param InActor The actor to which the evaluated transform will be applied.
@@ -52,4 +64,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CenterWorldTransform"))
 	static bool ApplyTransformFromCurveTable(AActor* InActor, const FTransform& CenterWorldTransform, class UCurveTable* CurveTable, float TotalSecondsSinceStart);
 
+	/*********************************************************************************************
+	 * Save Helpers
+	 ********************************************************************************************* */
+public:
+	/** Completely removes given save data and creates new empty one.
+	 * @param SaveGame The save game to reset.
+	 * @param SaveSlotName The name of the save slot.
+	 * @param SaveSlotIndex The index of the save slot.
+	 * @return The new empty save game object. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static USaveGame* ResetSaveGameData(USaveGame* SaveGame, const FString& SaveSlotName, int32 SaveSlotIndex);
 };

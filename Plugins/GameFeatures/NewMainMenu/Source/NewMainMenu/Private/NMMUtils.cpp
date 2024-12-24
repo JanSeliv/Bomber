@@ -10,6 +10,7 @@
 #include "Data/NMMTypes.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMCameraSubsystem.h"
@@ -103,7 +104,7 @@ ENMMState UNMMUtils::GetMainMenuState()
 // Returns true if given cinematic wants to skip
 bool UNMMUtils::ShouldSkipCinematic(const FNMMCinematicRow& CinematicRow)
 {
-	if (AMyGameStateBase::Get().IsMultiplayerGame())
+	if (UGameplayUtilsLibrary::IsMultiplayerGame())
 	{
 		// According design, all the cinematics are available only in single player game
 		// while in multiplayer have to skip all of them for all players

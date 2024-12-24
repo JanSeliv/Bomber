@@ -104,13 +104,6 @@ bool UUtilsLibrary::HasWorldBegunPlay()
 	return World && World->HasBegunPlay();
 }
 
-// Returns true if this instance is server
-bool UUtilsLibrary::IsServer()
-{
-	const UWorld* World = GetPlayWorld();
-	return World && !World->IsNetMode(NM_Client);
-}
-
 // Returns true if viewport is initialized, is always true in PIE, but takes a while in builds
 bool UUtilsLibrary::IsViewportInitialized()
 {

@@ -161,18 +161,6 @@ protected:
 	void OnCountdownTimerTicked();
 
 	/*********************************************************************************************
-	 * Multiplayer helpers
-	 ********************************************************************************************* */
-public:
-	/** Returns true if any client is connected to the game. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsMultiplayerGame() const { return GetPlayersInMultiplayerNum() > 1; }
-
-	/** Returns amount of players (host + clients) playing this game. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	int32 GetPlayersInMultiplayerNum() const;
-
-	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
 protected:

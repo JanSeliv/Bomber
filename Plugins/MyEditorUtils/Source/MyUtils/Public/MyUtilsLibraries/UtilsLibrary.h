@@ -52,10 +52,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool HasWorldBegunPlay();
 
-	/** Returns true if this instance is server. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static bool IsServer();
-
 	/*********************************************************************************************
 	 * Viewport
 	 ********************************************************************************************* */
