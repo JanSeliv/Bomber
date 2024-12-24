@@ -31,7 +31,6 @@ public:
 	/*********************************************************************************************
 	 * End Game State
 	 * Is personal for each player: Win, Lose or Draw.
-	 * Can be tracked by listening UGlobalEventsSubsystem::Get().OnEndGameStateChanged
 	 ********************************************************************************************* */
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEndGameStateChanged, EEndGameState, EndGameState);
@@ -44,7 +43,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EEndGameState GetEndGameState() const { return EndGameStateInternal; }
 
-	/** Tries to set new End-Game state for this player. */ 
+	/** Tries to set new End-Game state for this player. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void UpdateEndGameState();
 
@@ -155,6 +154,10 @@ protected:
 	/** Applies and broadcasts Is Character Dead status. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyIsCharacterDead();
+
+	/** Is called at the end of frame when this character received dead status. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPostCharacterDead(const TSet<struct FCell>& Cells);
 
 	/*********************************************************************************************
 	 * Is Human / Bot

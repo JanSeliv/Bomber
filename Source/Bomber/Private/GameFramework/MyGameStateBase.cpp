@@ -111,7 +111,10 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 // Try to register the End-Game state
 void AMyGameStateBase::TrySetEndGameState()
 {
-	bWantsUpdateEndStateInternal = true;
+	if (HasAuthority())
+	{
+		bWantsUpdateEndStateInternal = true;
+	}
 }
 
 // Is called during the In-Game state to try to register the End-Game state

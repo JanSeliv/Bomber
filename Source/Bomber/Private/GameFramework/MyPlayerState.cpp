@@ -99,8 +99,6 @@ void AMyPlayerState::SetEndGameState(EEndGameState NewEndGameState)
 
 	EndGameStateInternal = NewEndGameState;
 	ApplyEndGameState();
-
-	AMyGameStateBase::Get().TrySetEndGameState();
 }
 
 // Called on client when End-Game player status is changed
@@ -112,6 +110,8 @@ void AMyPlayerState::OnRep_EndGameState()
 // Applies currently changed End-Game state for this player
 void AMyPlayerState::ApplyEndGameState()
 {
+	AMyGameStateBase::Get().TrySetEndGameState();
+
 	if (OnEndGameStateChanged.IsBound())
 	{
 		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
@@ -221,14 +221,25 @@ void AMyPlayerState::OnRep_IsCharacterDead()
 // Applies and broadcasts Is Character Dead status
 void AMyPlayerState::ApplyIsCharacterDead()
 {
-	if (bIsCharacterDeadInternal)
+	if (HasAuthority())
 	{
-		UpdateEndGameState();
+		AGeneratedMap::Get().OnPostDestroyedLevelActors.AddUniqueDynamic(this, &ThisClass::OnPostCharacterDead);
 	}
 
 	if (OnCharacterDeadChanged.IsBound())
 	{
 		OnCharacterDeadChanged.Broadcast(bIsCharacterDeadInternal);
+	}
+}
+
+// Is called at the end of frame when this character received dead status
+void AMyPlayerState::OnPostCharacterDead_Implementation(const FCells& Cells)
+{
+	if (bIsCharacterDeadInternal)
+	{
+		AGeneratedMap::Get().OnPostDestroyedLevelActors.RemoveAll(this);
+
+		UpdateEndGameState();
 	}
 }
 

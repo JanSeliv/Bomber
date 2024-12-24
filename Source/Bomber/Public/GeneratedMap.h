@@ -28,9 +28,17 @@ public:
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGeneratedLevelActors);
 
-	/** Is useful to react on regenerating level. */
+	/** Is useful to react on regenerating level.
+	 * Is called both on server and client. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnGeneratedLevelActors OnGeneratedLevelActors;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPostDestroyedLevelActors, const TSet<FCell>&, DestroyedCells);
+
+	/** Called each time when any level actors were destroyed.
+	 * @warning is called only on the server as destroying level actors is an authority-only operation. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnPostDestroyedLevelActors OnPostDestroyedLevelActors;
 
 	/** Contains outside added dangerous cells, is useful for Game Features to notify bots that some cells are not safe.
 	 * @todo JanSeliv 3JBOo7L8 Remove after NewAI implementation. */

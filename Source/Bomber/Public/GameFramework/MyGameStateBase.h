@@ -67,7 +67,7 @@ protected:
 	 ********************************************************************************************* */
 public:
 	/** Try to register the End-Game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void TrySetEndGameState();
 
 protected:
