@@ -90,8 +90,8 @@ void AMyPlayerState::UpdateEndGameState()
 // Sets End-Game state to the specified one
 void AMyPlayerState::SetEndGameState(EEndGameState NewEndGameState)
 {
-	if (NewEndGameState == EEndGameState::None
-	    || NewEndGameState == EndGameStateInternal)
+	if (!HasAuthority()
+		|| NewEndGameState == EndGameStateInternal)
 	{
 		// No changes needed
 		return;
@@ -376,9 +376,12 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 {
 	switch (CurrentGameState)
 	{
-		case ECurrentGameState::GameStarting:
+		case ECGS::Menu:         // fallthrough
+		case ECGS::GameStarting: // Fallthrough
+		case ECGS::InGame:
 		{
-			EndGameStateInternal = EEndGameState::None;
+			SetCharacterDead(false);
+			SetEndGameState(EEndGameState::None);
 			break;
 		}
 		case ECurrentGameState::EndGame:
@@ -388,11 +391,6 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 		}
 		default:
 			break;
-	}
-
-	if (CurrentGameState != ECGS::EndGame)
-	{
-		SetCharacterDead(false);
 	}
 }
 
