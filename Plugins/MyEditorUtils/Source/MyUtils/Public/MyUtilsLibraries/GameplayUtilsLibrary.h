@@ -75,4 +75,16 @@ public:
 	 * @return The new empty save game object. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static USaveGame* ResetSaveGameData(USaveGame* SaveGame, const FString& SaveSlotName, int32 SaveSlotIndex);
+
+	/** Returns true if given object's config properties can be saved to the config file.
+	 * Is useful for validations to avoid unexpected behavior in builds.
+	 * @param Object The object to check. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static bool CanSaveConfig(const UObject* Object);
+
+	/** Saves the given object's config properties to the config file.
+	 * Is useful because of its validation to avoid unexpected behavior in builds.
+	 * @param Object The object to save. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static void SaveConfig(UObject* Object);
 };

@@ -12,6 +12,7 @@
 #include "Engine/Engine.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InputUtilsLibrary)
 
@@ -287,7 +288,7 @@ bool UInputUtilsLibrary::RemapKeyInContext(UInputMappingContext* InInputContext,
 
 	if (CanSaveMappingsInConfig())
 	{
-		InInputContext->SaveConfig();
+		UGameplayUtilsLibrary::SaveConfig(InInputContext);
 	}
 
 	return true;
