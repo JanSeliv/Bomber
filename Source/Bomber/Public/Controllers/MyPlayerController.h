@@ -43,6 +43,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMenuState();
 
+	/** Is called during the In-Game state to show results to all players regarding finished match (Win, Lose or Draw). */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetEndGameState();
+
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */

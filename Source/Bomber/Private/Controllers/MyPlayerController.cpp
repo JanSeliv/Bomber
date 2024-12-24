@@ -92,6 +92,16 @@ void AMyPlayerController::SetMenuState()
 	}
 }
 
+// Is called during the In-Game state to show results to all players regarding finished match (Win, Lose or Draw)
+void AMyPlayerController::SetEndGameState()
+{
+	if (CanChangeGameState(ECGS::EndGame)
+		&& UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
+	{
+		ServerSetGameState(ECGS::EndGame);
+	}
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */

@@ -104,36 +104,6 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 }
 
 /*********************************************************************************************
- * End-Game State enum
- * Result of finished match (Win, Lose or Draw)
- ********************************************************************************************* */
-
-// Try to register the End-Game state
-void AMyGameStateBase::TrySetEndGameState()
-{
-	if (HasAuthority())
-	{
-		bWantsUpdateEndStateInternal = true;
-	}
-}
-
-// Is called during the In-Game state to try to register the End-Game state
-void AMyGameStateBase::UpdateEndGameStates()
-{
-	if (!bWantsUpdateEndStateInternal)
-	{
-		return;
-	}
-
-	bWantsUpdateEndStateInternal = false;
-
-	if (UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
-	{
-		ServerSetGameState(ECGS::EndGame);
-	}
-}
-
-/*********************************************************************************************
  * Starting Timer
  * 3-2-1-GO
  ********************************************************************************************* */
@@ -266,7 +236,6 @@ void AMyGameStateBase::OnCountdownTimerTicked()
 			break;
 		case ECGS::InGame:
 			DecrementInGameCountdown();
-			UpdateEndGameStates();
 			break;
 		default:
 			World->GetTimerManager().ClearTimer(CountdownTimerInternal);

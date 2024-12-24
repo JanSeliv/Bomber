@@ -62,24 +62,6 @@ protected:
 	void OnRep_CurrentGameState();
 
 	/*********************************************************************************************
-	 * End-Game State enum
-	 * Result of finished match (Win, Lose or Draw)
-	 ********************************************************************************************* */
-public:
-	/** Try to register the End-Game state. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void TrySetEndGameState();
-
-protected:
-	/** Is true where there request to update the End-Game state for players */
-	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Wants Update End State"))
-	bool bWantsUpdateEndStateInternal = false;
-
-	/** Is called during the In-Game state to try to register the End-Game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void UpdateEndGameStates();
-
-	/*********************************************************************************************
 	 * Starting Timer
 	 * 3-2-1-GO
 	 ********************************************************************************************* */
