@@ -110,10 +110,10 @@ void AMyPlayerState::OnRep_EndGameState()
 // Applies currently changed End-Game state for this player
 void AMyPlayerState::ApplyEndGameState()
 {
-	AMyPlayerController* MyPC = IsPlayerStateLocallyControlled() ? Cast<AMyPlayerController>(GetPlayerController()) : nullptr;
-	if (MyPC)
+	if (HasAuthority()
+		&& UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
 	{
-		MyPC->SetEndGameState();
+		AMyGameStateBase::Get().SetGameState(ECGS::EndGame);
 	}
 
 	if (OnEndGameStateChanged.IsBound())
