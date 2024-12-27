@@ -23,8 +23,8 @@
 	url = https://github.com/JanSeliv/InstancedStaticMeshConverter.git
 [submodule "Plugins/GameFeatures/ProgressionSystem"]
 	path = Plugins/GameFeatures/ProgressionSystem
-	url = https://github.com/h4rdmol/ProgressionSystem.git
-	branch = main
+	url = https://github.com/JanSeliv/ProgressionSystem.git
+	branch = develop
 [submodule "Plugins/LevelSequencerAudioTrimmer"]
 	path = Plugins/LevelSequencerAudioTrimmer
 	url = https://github.com/JanSeliv/LevelSequencerAudioTrimmer.git
