@@ -38,7 +38,8 @@ ABombActor::ABombActor()
 
 	// Replicate an actor
 	bReplicates = true;
-	NetUpdateFrequency = 10.f;
+	static constexpr float NewNewUpdateFrequency = 10.f;
+	SetNetUpdateFrequency(NewNewUpdateFrequency);
 	bAlwaysRelevant = true;
 	SetReplicatingMovement(true);
 

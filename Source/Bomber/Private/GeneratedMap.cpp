@@ -47,7 +47,8 @@ AGeneratedMap::AGeneratedMap()
 
 	// Replicate an actor
 	bReplicates = true;
-	NetUpdateFrequency = 10.f;
+	static constexpr float NewNewUpdateFrequency = 10.f;
+	SetNetUpdateFrequency(NewNewUpdateFrequency);
 	bAlwaysRelevant = true;
 
 #if WITH_EDITOR	 //[Editor]
@@ -555,7 +556,7 @@ void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* Dest
 		UMapComponent* MapComponentIt = MapComponentsInternal[Index];
 		const AActor* OwnerIt = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		const bool bCellIsOnGrid = MapComponentIt && Cells.Contains(MapComponentIt->GetCell());
-		if (!OwnerIt                                                        // if is null, destroy that object from the array
+		if (!OwnerIt // if is null, destroy that object from the array
 		    || bCellIsOnGrid)
 		{
 			// Remove from the array

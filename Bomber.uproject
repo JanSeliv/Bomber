@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.4",
+	"EngineAssociation": "5.5",
 	"Category": "",
 	"Description": "Open-source Bomberman game made in Unreal Engine 5",
 	"Modules": [
@@ -22,6 +22,10 @@
 		},
 		{
 			"Name": "MagicLeap",
+			"Enabled": false
+		},
+		{
+			"Name": "Fab",
 			"Enabled": false
 		},
 		{

@@ -68,7 +68,7 @@ public:
 	template <typename T = ULevelActorDataAsset>
 	static const FORCEINLINE T& GetLevelActorDataAssetChecked()
 	{
-		static_assert(TIsDerivedFrom<T, ULevelActorDataAsset>::IsDerived, TEXT("T must be a subclass of ULevelActorDataAsset"));
+		static_assert(TIsDerivedFrom<T, ULevelActorDataAsset>::IsDerived, "T must be a subclass of ULevelActorDataAsset");
 		return *CastChecked<T>(GetLevelActorDataAsset(T::StaticClass()));
 	}
 
