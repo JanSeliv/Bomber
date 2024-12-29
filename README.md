@@ -1,8 +1,29 @@
-# 💣 About the Bomber Project
+<a href="https://github.com/JanSeliv/Bomber/blob/main/LICENSE">![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)</a>
+<a href="https://www.unrealengine.com/">![Unreal Engine](https://img.shields.io/badge/Unreal-5.4-dea309?style=flat&logo=unrealengine)</a>
 
-Bomber is an open-source indie game developed on Unreal Engine 5 for Windows, MacOS and Linux, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
+<br/>
+<p align="center">
+<a href="https://github.com/JanSeliv/Bomber">
+</a>
+<h3 align="center">💣 Bomberrage</h3>
+<p align="center">
+<a href="https://discord.gg/jbWgwDefnE"><strong>Join our Discord ››</strong></a>
+<br/>
+<a href="https://github.com/JanSeliv/Bomber/releases">Releases</a>
+·
+<a href="https://trello.com/b/1jbKvyeh/bomber-kanban">Kanban Board</a>
+<br/>
+<br/>
+<img src="https://github.com/user-attachments/assets/835bfb02-76ee-4373-a00b-543a0bde7057" width="1440">
+</p>
 
-![Bomber](https://github.com/JanSeliv/Bomber/assets/20540872/2898eace-7a57-44d1-9530-4a5abc235b2d)
+## 🌟 About
+
+Bomberrage is an open-source indie game developed on Unreal Engine 5 for Windows, MacOS and Linux.
+
+Forget hidden exits and classic rules - Bomberrage is a fast, competitive game where you beat tough AI or friends in explosive multiplayer battles!
+
+![Bomberrage](https://github.com/user-attachments/assets/e8774b8b-2f76-42f1-8eae-e6849658d2d3)
 
 ## Table of Contents
 
@@ -37,7 +58,7 @@ The project has been tested and verified to run on the following platforms:
 - **macOS Sonoma 14.4** (Apple M2 hardware)
 - **Ubuntu 22.04 LTS**
 
-**Minimum Disk Space Required:** 33GB
+**Project Disk Space:** 33GB
 
 ## 🛠 Key Features
 
