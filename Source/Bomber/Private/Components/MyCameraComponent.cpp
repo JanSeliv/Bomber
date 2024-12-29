@@ -9,6 +9,7 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/Cell.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -214,16 +215,7 @@ void UMyCameraComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Listen to recalculate camera location
 	if (UMyGameViewportClient* GameViewportClient = UMyBlueprintFunctionLibrary::GetGameViewportClient())

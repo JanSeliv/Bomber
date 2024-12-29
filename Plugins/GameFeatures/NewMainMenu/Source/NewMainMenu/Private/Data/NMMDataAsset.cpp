@@ -2,45 +2,51 @@
 
 #include "Data/NMMDataAsset.h"
 //---
-#include "Bomber.h"
-#include "Data/NMMSubsystem.h"
 #include "DataAssets/MyInputMappingContext.h"
+#include "Subsystems/NMMBaseSubsystem.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMDataAsset)
 
 // Returns this Data Asset, is checked and wil crash if can't be obtained, e.g: when is not set
 const UNMMDataAsset& UNMMDataAsset::Get(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const UNMMDataAsset* DataAsset = UNMMSubsystem::Get(OptionalWorldContext).GetNewMainMenuDataAsset();
+	const UNMMDataAsset* DataAsset = UNMMBaseSubsystem::Get(OptionalWorldContext).GetNewMainMenuDataAsset();
 	checkf(DataAsset, TEXT("%s: 'DataAsset' is not set"), *FString(__FUNCTION__));
 	return *DataAsset;
 }
 
-// Returns an input context by given game state
-const UMyInputMappingContext* UNMMDataAsset::GetInputContext(ECurrentGameState CurrentGameState) const
+// Returns an input context by given Main Menu State
+const UMyInputMappingContext* UNMMDataAsset::GetInputContext(ENMMState MenuState) const
 {
-	for (const UMyInputMappingContext* InputContextIt : InputContextsInternal)
-	{
-		if (!InputContextIt)
-		{
-			continue;
-		}
-
-		const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
-		if (GameStatesBitmask & TO_FLAG(CurrentGameState))
-		{
-			return InputContextIt;
-		}
-	}
-
-	return nullptr;
+	const TObjectPtr<const UMyInputMappingContext>* FoundContext = InputContextsInternal.Find(MenuState);
+	return FoundContext ? *FoundContext : nullptr;
 }
 
 // Returns all input contexts
 void UNMMDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& OutInputContexts) const
 {
-	for (const UMyInputMappingContext* InputContext : InputContextsInternal)
+	for (const TTuple<ENMMState, TObjectPtr<const UMyInputMappingContext>>& It : InputContextsInternal)
 	{
-		OutInputContexts.Emplace(InputContext);
+		OutInputContexts.Emplace(It.Value);
+	}
+}
+
+// Returns the main menu music of specified level
+USoundBase* UNMMDataAsset::GetMainMenuMusic(ELevelType LevelType) const
+{
+	if (const TObjectPtr<USoundBase>* FoundMusic = MainMenuMusicInternal.Find(LevelType))
+	{
+		return *FoundMusic;
+	}
+
+	return nullptr;
+}
+
+// Returns all main menu music
+void UNMMDataAsset::GetAllMainMenuMusic(TArray<USoundBase*>& OutMainMenuMusic) const
+{
+	for (const TTuple<ELevelType, TObjectPtr<USoundBase>>& It : MainMenuMusicInternal)
+	{
+		OutMainMenuMusic.AddUnique(It.Value);
 	}
 }

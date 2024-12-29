@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
 //---
 #include "Bomber.h"
 #include "Engine/EngineTypes.h" // ECollisionResponse
@@ -12,7 +12,7 @@
 /**
  * The base archetype of level actor rows. Is implemented in player, item rows, etc.
  */
-UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, Const, AutoExpandCategories=("C++"))
+UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, Const, CollapseCategories, AutoExpandCategories=("C++"))
 class BOMBER_API ULevelActorRow : public UObject
 {
 	GENERATED_BODY()
@@ -41,7 +41,7 @@ protected:
  * The base data asset for the Bomber's data.
  */
 UCLASS(Abstract, Blueprintable, BlueprintType, Const, AutoExpandCategories=("C++"))
-class BOMBER_API UBomberDataAsset : public UDataAsset
+class BOMBER_API UBomberDataAsset : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 
@@ -84,13 +84,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE ULevelActorRow* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const { return GetRowByPredicate([Mesh](const ULevelActorRow& RowIt) { return RowIt.Mesh == Mesh; }); }
 
+	/** Returns row by index. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	const FORCEINLINE ULevelActorRow* GetRowByIndex(int32 Index) const { return RowsInternal.IsValidIndex(Index) ? RowsInternal[Index] : nullptr; }
+
+	template <typename T>
+	const FORCEINLINE T* GetRowByIndex(int32 Index) const { return Cast<T>(GetRowByIndex(Index)); }
+
 	/** Returns overall number of contained rows. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetRowsNum() const { return RowsInternal.Num(); }
 
 	/** Returns the class of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	UClass* GetActorClass() const;
+	TSubclassOf<class AActor> GetActorClass() const { return ActorClassInternal; }
 
 	/** Returns the actor type of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -115,7 +122,7 @@ protected:
 
 	/** Class of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))
-	TSoftClassPtr<class AActor> ActorClassInternal = nullptr;
+	TSubclassOf<class AActor> ActorClassInternal = nullptr;
 
 	/** Actor type of an actor, whose data is described by this data asset. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))

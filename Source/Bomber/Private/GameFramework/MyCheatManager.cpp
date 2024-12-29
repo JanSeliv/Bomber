@@ -6,13 +6,30 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "Components/MyCameraComponent.h"
-#include "DataAssets/ItemDataAsset.h"
+#include "Controllers/MyAIController.h"
+#include "Controllers/MyDebugCameraController.h"
+#include "Controllers/MyPlayerController.h"
+#include "DataAssets/PlayerDataAsset.h"
+#include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/WidgetsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyCheatManager)
+
+// Default constructor
+UMyCheatManager::UMyCheatManager()
+{
+	DebugCameraControllerClass = AMyDebugCameraController::StaticClass();
+}
+
+/*********************************************************************************************
+ * Utils
+ ********************************************************************************************* */
 
 // Returns bitmask from reverse bitmask in string
 int32 UMyCheatManager::GetBitmaskFromReverseString(const FString& ReverseBitmaskStr)
@@ -64,6 +81,10 @@ int32 UMyCheatManager::GetBitmaskFromActorTypesString(const FString& ActorTypesB
 	return Bitmask;
 }
 
+/*********************************************************************************************
+ * Destroy
+ ********************************************************************************************* */
+
 // Destroy all specified level actors on the map
 void UMyCheatManager::DestroyAllByType(EActorType ActorType)
 {
@@ -86,11 +107,17 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 	// Get all players
 	FCells CellsToDestroy;
 	FMapComponents MapComponents;
-	GeneratedMap.GetMapComponents(MapComponents, TO_FLAG(EAT::Player));
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
 		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
-		const bool bDestroy = PlayerCharacter && (1 << PlayerCharacter->GetCharacterID() & Bitmask) != 0;
+		if (!PlayerCharacter)
+		{
+			continue;
+		}
+
+		const int32 PlayerIndex = PlayerCharacter->GetPlayerId();
+		const bool bDestroy = (1 << PlayerIndex & Bitmask) != 0;
 		if (bDestroy) // mark to destroy if specified in slot
 		{
 			CellsToDestroy.Emplace(MapComponentIt->GetCell());
@@ -101,12 +128,16 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 	GeneratedMap.DestroyLevelActorsOnCells(CellsToDestroy);
 }
 
+/*********************************************************************************************
+ * Box
+ ********************************************************************************************* */
+
 // Override the chance to spawn item after box destroying
 void UMyCheatManager::SetItemChance(int32 Chance)
 {
 	// Get all boxes
 	FMapComponents MapComponents;
-	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::Box));
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Box));
 	for (const UMapComponent* MapComponentIt : MapComponents)
 	{
 		ABoxActor* BoxActor = MapComponentIt ? MapComponentIt->GetOwner<ABoxActor>() : nullptr;
@@ -118,18 +149,27 @@ void UMyCheatManager::SetItemChance(int32 Chance)
 	}
 }
 
+/*********************************************************************************************
+ * Bomb
+ ********************************************************************************************* */
+
+// Override blast radius of all bombs
+TAutoConsoleVariable<int32> UMyCheatManager::CVarBombRadius(
+	TEXT("Bomber.Bomb.SetRadius"),
+	INDEX_NONE,
+	TEXT("5 - Set five cells blast radius to each side of all bombs"),
+	ECVF_Cheat);
+
+/*********************************************************************************************
+ * Player
+ ********************************************************************************************* */
+
 // Override the level of each powerup for a controlled player
-void UMyCheatManager::SetPowerups(int32 NewLevel)
+void UMyCheatManager::SetPlayerPowerups(int32 NewLevel)
 {
 	if (APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter())
 	{
-		static constexpr int32 MinItemsNum = 1;
-		const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
-		NewLevel = FMath::Clamp(NewLevel, MinItemsNum, MaxItemsNum);
-		PlayerCharacter->PowerupsInternal.BombN = NewLevel;
-		PlayerCharacter->PowerupsInternal.FireN = NewLevel;
-		PlayerCharacter->PowerupsInternal.SkateN = NewLevel;
-		PlayerCharacter->ApplyPowerups();
+		PlayerCharacter->SetPowerups(NewLevel);
 	}
 }
 
@@ -143,16 +183,93 @@ void UMyCheatManager::SetGodMode(bool bShouldEnable)
 	}
 }
 
+// Enable or disable the Auto Copilot mode to make a controllable player to play automatically
+void UMyCheatManager::SetAutoCopilot()
+{
+	APlayerCharacter* LocalPlayer = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+	APlayerState* PlayerState = LocalPlayer ? LocalPlayer->GetPlayerState() : nullptr;
+	if (!PlayerState)
+	{
+		return;
+	}
+
+	// Toggle the Copilot mode
+	PlayerState->SetIsABot(!PlayerState->IsABot());
+	LocalPlayer->TryPossessController();
+}
+
+/*********************************************************************************************
+ * AI
+ ********************************************************************************************* */
+
+// Enable or disable all bots
+TAutoConsoleVariable<bool> UMyCheatManager::CVarAISetEnabled(
+	TEXT("Bomber.AI.SetEnabled"),
+	true,
+	TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
+	ECVF_Cheat);
+
+// Override the level of each powerup for bots
+void UMyCheatManager::SetAIPowerups(int32 NewLevel)
+{
+	// Get all players
+	FMapComponents MapComponents;
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
+
+	// Override the level of each powerup for bots
+	for (const UMapComponent* MapComponentIt : MapComponents)
+	{
+		APlayerCharacter* Character = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
+		if (Character
+		    && Character->IsBotControlled())
+		{
+			Character->SetPowerups(NewLevel);
+		}
+	}
+}
+
+// If called, all bots will change own skin to look like players
+void UMyCheatManager::ApplyPlayersSkinOnAI()
+{
+	// Get all players
+	FMapComponents MapComponents;
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
+
+	// Apply players skin on AI
+	for (const UMapComponent* MapComponentIt : MapComponents)
+	{
+		APlayerCharacter* Character = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
+		if (Character
+		    && Character->IsBotControlled())
+		{
+			constexpr bool bForcePlayerSkin = true;
+			Character->SetDefaultPlayerMeshData(bForcePlayerSkin);
+		}
+	}
+}
+
+// Spawns additional bots at the center of the level
+void UMyCheatManager::AddBot()
+{
+	const FIntPoint CenterPosition = UCellsUtilsLibrary::GetCenterCellPositionOnLevel();
+	const int32 LastRowIndex = UPlayerDataAsset::Get().GetRowsNum() - 1;
+	SpawnActorByType(EActorType::Player, CenterPosition.X, CenterPosition.Y, LastRowIndex);
+}
+
+/*********************************************************************************************
+ * Debug
+ ********************************************************************************************* */
+
 // Shows coordinates of all level actors by specified types
 void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
 {
 	// Set on the level to visualize new level actors
 	const int32 ActorTypesBitmask = GetBitmaskFromActorTypesString(ActorTypesString);
-	AGeneratedMap::Get().DisplayCellsActorTypes = ActorTypesBitmask;
+	AGeneratedMap::Get().SetDisplayCellsActorTypes(ActorTypesBitmask);
 
 	// Update existed level actors
 	FMapComponents MapComponents;
-	AGeneratedMap::Get().GetMapComponents(MapComponents, TO_FLAG(EAT::All));
+	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::All));
 	for (UMapComponent* MapComponentIt : MapComponents)
 	{
 		// Clear previous cell renders for all level actors in game
@@ -162,6 +279,10 @@ void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
 		MapComponentIt->TryDisplayOwnedCell();
 	}
 }
+
+/*********************************************************************************************
+ * Level
+ ********************************************************************************************* */
 
 // Sets the size for generated map, it will automatically regenerate the level for given size
 void UMyCheatManager::SetLevelSize(const FString& LevelSize)
@@ -177,6 +298,61 @@ void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 	}
 }
 
+// Spawns an actor by type on the level
+void UMyCheatManager::SpawnActorByType(EActorType ActorType, int32 ColumnX, int32 RowY, int32 RowIndex)
+{
+	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
+	const FCell Cell = UCellsUtilsLibrary::GetCellByPositionOnLevel(ColumnX, RowY);
+
+	// Destroy existed actor on the cell
+	GeneratedMap.DestroyLevelActorsOnCells({Cell});
+
+	// Spawn new actor on the cell
+	const TFunction<void(AActor*)>& OnSpawned = [RowIndex](const AActor* SpawnedActor)
+	{
+		UMapComponent* MapComponent = UMapComponent::GetMapComponent(SpawnedActor);
+		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+
+		const ULevelActorRow* Row = MapComponent->GetActorDataAssetChecked().GetRowByIndex(RowIndex);
+		if (ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' was not found by '%i' index!"), __LINE__, __FUNCTION__, RowIndex))
+		{
+			MapComponent->SetCustomMeshAsset(Row->Mesh);
+		}
+	};
+	GeneratedMap.SpawnActorByType(ActorType, Cell, OnSpawned);
+}
+
+/*********************************************************************************************
+ * Camera
+ ********************************************************************************************* */
+
+// Is overridden to let internal systems know that camera manager is enabled
+void UMyCheatManager::EnableDebugCamera()
+{
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	if (ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPC' is null!"), __LINE__, __FUNCTION__))
+	{
+		// Enable the Debug Camera as early as possible, so during Super call it will be already enabled
+		MyPC->bIsDebugCameraEnabledInternal = true;
+	}
+
+	Super::EnableDebugCamera();
+}
+
+// Is overridden to let internal systems know that camera manager is disabled
+void UMyCheatManager::DisableDebugCamera()
+{
+	Super::DisableDebugCamera();
+
+	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	if (ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPC' is null!"), __LINE__, __FUNCTION__))
+	{
+		// Disable debug camera as late as possible, so during Super call it will be still enabled
+		MyPC->bIsDebugCameraEnabledInternal = false;
+		MyPC->ApplyAllInputContexts();
+	}
+}
+
 // Tweak the custom additive angle to affect the fit distance calculation from camera to the level
 void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
 {
@@ -184,7 +360,7 @@ void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
 	{
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.FitViewAdditiveAngle = InFitViewAdditiveAngle;
-		LevelCamera->SetCameraDistanceParams(MoveTemp(DistanceParams));
+		LevelCamera->SetCameraDistanceParams(DistanceParams);
 	}
 }
 
@@ -195,6 +371,67 @@ void UMyCheatManager::MinDistance(float InMinDistance)
 	{
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.MinDistance = InMinDistance;
-		LevelCamera->SetCameraDistanceParams(MoveTemp(DistanceParams));
+		LevelCamera->SetCameraDistanceParams(DistanceParams);
+	}
+}
+
+/*********************************************************************************************
+ * UI
+ ********************************************************************************************* */
+
+// Completely removes all widgets from UI
+void UMyCheatManager::SetUIHideAllWidgets()
+{
+	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	if (ensureMsgf(WidgetsSubsystem, TEXT("ASSERT: [%i] %hs:\n'WidgetsSubsystem' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		const bool bMakeVisibleInversed = WidgetsSubsystem->AreAllWidgetsHidden();
+		WidgetsSubsystem->SetAllWidgetsVisibility(bMakeVisibleInversed);
+	}
+}
+
+/*********************************************************************************************
+ * Game
+ ********************************************************************************************* */
+
+// Sets current game state to the specified one
+void UMyCheatManager::SetGameState(ECurrentGameState GameState)
+{
+	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	if (!MyGameState
+	    || !MyGameState->HasAuthority())
+	{
+		return;
+	}
+
+	// Hardcoding the game state values for the state transitions is necessary because:
+	// - We cannot rely on iterating enums using TEnumRange or bitmasks as enum members may not be defined in a logical order.
+	// - This ensures deterministic transitions and avoids potential issues caused by chaotic ordering of enum members.
+	static const TArray<ECurrentGameState> GameStateOrder = {
+		ECurrentGameState::Menu,
+		ECurrentGameState::GameStarting,
+		ECurrentGameState::InGame,
+		ECurrentGameState::EndGame
+	};
+
+	// Find the current position and target position in the transition order
+	const ECurrentGameState CurrentState = MyGameState->GetCurrentGameState();
+	const int32 CurrentIndex = GameStateOrder.IndexOfByKey(CurrentState);
+	const int32 TargetIndex = GameStateOrder.IndexOfByKey(GameState);
+
+	// Execute immediately if the target state is not part of the standard order, in case if some state is part of additional modes
+	if (TargetIndex == INDEX_NONE)
+	{
+		MyGameState->SetGameState(GameState);
+		return;
+	}
+
+	// Start iterating from the beginning if the target is before the current state, otherwise continue from the current state
+	constexpr int32 InitialIndex = 0;
+	int32 StartIndex = TargetIndex < CurrentIndex ? InitialIndex : CurrentIndex;
+	StartIndex = FMath::Max(InitialIndex, StartIndex);
+	for (int32 Index = StartIndex; Index <= TargetIndex; ++Index)
+	{
+		MyGameState->SetGameState(GameStateOrder[Index]);
 	}
 }

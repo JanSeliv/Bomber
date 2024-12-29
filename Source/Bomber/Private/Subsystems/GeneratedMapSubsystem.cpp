@@ -5,16 +5,18 @@
 #include "GeneratedMap.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 //---
+#include "Engine/World.h"
+//---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GeneratedMapSubsystem)
 
-// Returns the Generated Map Subsystem, is checked and wil crash if can't be obtained
-UGeneratedMapSubsystem& UGeneratedMapSubsystem::Get()
+// Returns the Generated Map Subsystem, is checked and will crash if can't be obtained
+UGeneratedMapSubsystem& UGeneratedMapSubsystem::Get(const UObject* WorldContextObject/* = nullptr*/)
 {
-	UGeneratedMapSubsystem* GeneratedMapSubsystem = GetGeneratedMapSubsystem();
+	UGeneratedMapSubsystem* GeneratedMapSubsystem = GetGeneratedMapSubsystem(WorldContextObject);
 	checkf(GeneratedMapSubsystem, TEXT("%s: 'GeneratedMapSubsystem' is null"), *FString(__FUNCTION__));
 	return *GeneratedMapSubsystem;
 }
@@ -27,10 +29,13 @@ UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem(const U
 }
 
 // The Generated Map getter, nullptr otherwise
-AGeneratedMap* UGeneratedMapSubsystem::GetGeneratedMap() const
+AGeneratedMap* UGeneratedMapSubsystem::GetGeneratedMap(bool bWarnIfNull/* = true*/) const
 {
 #if WITH_EDITOR
-	ensureMsgf(FEditorUtilsLibrary::IsCooking() || GeneratedMapInternal, TEXT("%s: [Editor] 'GeneratedMapInternal' is not valid"), *FString(__FUNCTION__));
+	if (bWarnIfNull)
+	{
+		ensureMsgf(FEditorUtilsLibrary::IsCooking() || GeneratedMapInternal, TEXT("%s: [Editor] 'GeneratedMapInternal' is not valid"), *FString(__FUNCTION__));
+	}
 #endif // WITH_EDITOR
 	return GeneratedMapInternal;
 }
@@ -38,8 +43,15 @@ AGeneratedMap* UGeneratedMapSubsystem::GetGeneratedMap() const
 // The Generated Map setter
 void UGeneratedMapSubsystem::SetGeneratedMap(AGeneratedMap* InGeneratedMap)
 {
-	if (ensureMsgf(InGeneratedMap, TEXT("%s: 'InGeneratedMap' is not valid"), *FString(__FUNCTION__)))
+	if (!ensureMsgf(InGeneratedMap, TEXT("%s: 'InGeneratedMap' is not valid"), *FString(__FUNCTION__)))
 	{
-		GeneratedMapInternal = InGeneratedMap;
+		return;
+	}
+
+	GeneratedMapInternal = InGeneratedMap;
+
+	if (OnGeneratedMapReady.IsBound())
+	{
+		OnGeneratedMapReady.Broadcast(InGeneratedMap);
 	}
 }

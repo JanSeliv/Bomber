@@ -2,7 +2,9 @@
 
 #pragma once
 
-#include "Engine/DataAsset.h"
+#include "Data/MyPrimaryDataAsset.h"
+//---
+#include "Structures/ManageableWidgetData.h"
 //---
 #include "UIDataAsset.generated.h"
 
@@ -12,7 +14,7 @@ enum class EEndGameState : uint8;
  * Contains in-game UI data.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UUIDataAsset final : public UDataAsset
+class BOMBER_API UUIDataAsset final : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 
@@ -20,49 +22,49 @@ public:
 	/** Returns the UI data asset. */
 	static const UUIDataAsset& Get();
 
-	/** Returns a class of the in-game widget.
-	 * @see UUIDataAsset::InGameWidgetClassInternal.*/
+	/** Returns data for the in-game widget.
+	 * @see UUIDataAsset::HUDWidgetDataInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UInGameWidget> GetInGameWidgetClass() const { return InGameWidgetClassInternal; }
+	const FORCEINLINE FManageableWidgetData& GetHUDWidgetData() const { return HUDWidgetDataInternal; }
 
-	/** Returns a class of the settings widget.
-	 * @see UUIDataAsset::SettingsWidgetClassInternal.*/
+	/** Returns data for the settings widget.
+	 * @see UUIDataAsset::SettingsWidgetDataInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class USettingsWidget> GetSettingsWidgetClass() const { return SettingsWidgetClassInternal; }
+	const FORCEINLINE FManageableWidgetData& GetSettingsWidgetData() const { return SettingsWidgetDataInternal; }
 
-	/** Returns a class of the nickname widget.
-	 * @see UUIDataAsset::NicknameWidgetClassInternal.*/
+	/** Returns data for the nickname widget.
+	 * @see UUIDataAsset::NicknameWidgetDataInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UUserWidget> GetNicknameWidgetClass() const { return NicknameWidgetClassInternal; }
+	const FORCEINLINE FManageableWidgetData& GetNicknameWidgetData() const { return NicknameWidgetDataInternal; }
 
-	/** Returns a class of the FPS counter widget.
-	 * @see UUIDataAsset::FPSCounterWidgetClassInternal.*/
+	/** Returns data for the FPS counter widget.
+	 * @see UUIDataAsset::FPSCounterWidgetDataInternal. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UUserWidget> GetFPSCounterWidgetClass() const { return FPSCounterWidgetClassInternal; }
+	const FORCEINLINE FManageableWidgetData& GetFPSCounterWidgetData() const { return FPSCounterWidgetDataInternal; }
 
 	/** Returns the localized texts about specified end game to display on UI.
 	 * @see UUIDataAsset::EndGameTexts. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FText& GetEndGameText(EEndGameState EndGameState) const { return EndGameTextsInternal.FindChecked(EndGameState); }
+	const FText& GetEndGameText(EEndGameState EndGameState) const;
 
 protected:
-	/** The class of a In-Game Widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "In-Game Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UInGameWidget> InGameWidgetClassInternal = nullptr;
+	/** Data for the In-Game Widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "HUD Widget"))
+	FManageableWidgetData HUDWidgetDataInternal;
 
-	/** The class of a Settings Widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class USettingsWidget> SettingsWidgetClassInternal = nullptr;
+	/** Data for the Settings Widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Settings Widget"))
+	FManageableWidgetData SettingsWidgetDataInternal;
 
-	/** The class of a Nickname Widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nickname Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> NicknameWidgetClassInternal = nullptr;
+	/** Data for the Nickname Widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "3D Nickname Widget"))
+	FManageableWidgetData NicknameWidgetDataInternal;
 
-	/** The class of a FPS counter widget blueprint. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "FPS Counter Widget Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UUserWidget> FPSCounterWidgetClassInternal = nullptr;
+	/** Data for the FPS Counter Widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "FPS Counter Widget"))
+	FManageableWidgetData FPSCounterWidgetDataInternal;
 
 	/** Contains the localized texts about specified end game to display on UI. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game Texts", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "End-Game Names"))
 	TMap<EEndGameState, FText> EndGameTextsInternal;
 };

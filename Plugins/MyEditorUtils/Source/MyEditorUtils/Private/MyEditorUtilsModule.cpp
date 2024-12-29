@@ -10,8 +10,6 @@
 #include "Modules/ModuleManager.h"
 #include "WidgetBlueprintCompiler.h"
 
-#define LOCTEXT_NAMESPACE "FMyEditorUtilsModule"
-
 // Called right after the module DLL has been loaded and the module object has been created
 void FMyEditorUtilsModule::StartupModule()
 {
@@ -55,7 +53,5 @@ void FMyEditorUtilsModule::UnregisterMyUserWidgetBlueprint()
 	IKismetCompilerInterface& KismetCompilerModule = FModuleManager::LoadModuleChecked<IKismetCompilerInterface>(KismetCompilerModuleName);
 	KismetCompilerModule.GetCompilers().Remove(UMGEditorModule.GetRegisteredCompiler());
 }
-
-#undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE(FMyEditorUtilsModule, MyEditorUtils)

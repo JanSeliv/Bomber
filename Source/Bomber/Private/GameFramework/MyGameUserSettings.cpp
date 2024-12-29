@@ -6,7 +6,6 @@
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "DynamicRHI.h"
-#include "Engine/DataTable.h"
 #include "Misc/ConfigCacheIni.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameUserSettings)
@@ -36,11 +35,21 @@ void UMyGameUserSettings::ValidateSettings()
 	}
 }
 
+// Save the user settings to persistent storage (automatically happens as part of ApplySettings)
+void UMyGameUserSettings::SaveSettings()
+{
+	Super::SaveSettings();
+
+	if (OnSaveSettings.IsBound())
+	{
+		OnSaveSettings.Broadcast();
+	}
+}
+
 // Changes all scalability settings at once based on a single overall quality level
 void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
 {
-	if (Value == OverallQualityInternal
-	    || GetOverallScalabilityLevel() == Value)
+	if (Value == OverallQualityInternal)
 	{
 		return;
 	}
@@ -134,7 +143,7 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		const float AspectRatioIt = FMath::DivideAndRoundDown<float>(WidthIt, HeightIt);
 
 		const bool bIsCorrectAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio)
-		                                || (bIsUltraWide && AspectRatioIt >= UltraWideAspectRatio);
+		                                   || (bIsUltraWide && AspectRatioIt >= UltraWideAspectRatio);
 		const bool bIsGreaterThanMin = WidthIt >= MinResolutionSizeXInternal
 		                               && HeightIt >= MinResolutionSizeYInternal;
 		const bool bIsLessThanMax = WidthIt <= MaxDisplayWidth

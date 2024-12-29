@@ -3,22 +3,24 @@
 #include "GameFramework/MyGameModeBase.h"
 //---
 #include "Controllers/MyPlayerController.h"
+#include "GameFramework/MyGameSession.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/MyPlayerState.h"
-#include "UI/MyHUD.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameModeBase)
 
 // Sets default values for this actor's properties
 AMyGameModeBase::AMyGameModeBase()
 {
-	// Custom defaults classes
+	// Custom default classes. All of them can be overridden in child game mode in World Settings
 	GameStateClass = AMyGameStateBase::StaticClass();
-	HUDClass = AMyHUD::StaticClass();
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	ReplaySpectatorPlayerControllerClass = AMyPlayerController::StaticClass();
-	DefaultPawnClass = nullptr;
 	PlayerStateClass = AMyPlayerState::StaticClass();
+	GameSessionClass = AMyGameSession::StaticClass();
+
+	// Spawn and possess pawn by ourselves manually
+	DefaultPawnClass = nullptr;
 }
 
 // Returns player controller by specified index
@@ -31,10 +33,10 @@ AMyPlayerController* AMyGameModeBase::GetPlayerController(int32 Index) const
 	return nullptr;
 }
 
-// Called when the game starts or when spawned
-void AMyGameModeBase::BeginPlay()
+// Caches given player controller when it spawns
+void AMyGameModeBase::AddPlayerController(AMyPlayerController* PlayerController)
 {
-	Super::BeginPlay();
+	PlayerControllersInternal.Add(PlayerController);
 }
 
 // Initializes the game
@@ -55,7 +57,7 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayer);
+	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayer);
 	if (!MyPC)
 	{
 		return;
@@ -66,8 +68,6 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 		// Spectators are not supported
 		PlayerState->SetIsOnlyASpectator(false);
 	}
-
-	PlayerControllersInternal.AddUnique(MyPC);
 }
 
 // Called when a Controller with a PlayerState leaves the game or is destroyed
@@ -81,6 +81,13 @@ void AMyGameModeBase::Logout(AController* Exiting)
 	}
 
 	Super::Logout(Exiting);
+}
+
+// Sets the name for a controller 
+void AMyGameModeBase::ChangeName(AController* Controller, const FString& NewName, bool bNameChange)
+{
+	// Super is not called since it's forbidden to change player name with this function
+	// Instead, AMyPlayerState API should be used
 }
 
 #if WITH_EDITOR

@@ -12,7 +12,7 @@
 	"SupportURL": "mailto:janseliw@gmail.com",
 	"EnabledByDefault": true,
 	"CanContainContent": true,
-	"IsBetaVersion": true,
+	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
 	"Modules": [
@@ -35,6 +35,10 @@
 		},
 		{
 			"Name": "MetaCheatManager",
+			"Enabled": true
+		},
+		{
+			"Name": "CineCameraRigs",
 			"Enabled": true
 		}
 	]

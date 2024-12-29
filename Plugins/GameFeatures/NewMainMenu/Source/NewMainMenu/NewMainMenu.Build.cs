@@ -15,6 +15,7 @@ public class NewMainMenu : ModuleRules
 				"Core", "Engine"
 				, "UMG" // UUserWidget creation
 				// My modules
+				, "Bomber"
 				, "MetaCheatManager" // UNMMCheatExtension
 			}
 		);
@@ -23,8 +24,10 @@ public class NewMainMenu : ModuleRules
 			{
 				"CoreUObject", "Slate", "SlateCore" // Core
 				, "MovieScene", "LevelSequence" // Cinematics
+				, "AdvancedWidgets" // URadialSlider
+				, "CineCameraRigs" // Camera rails
+				, "GameplayTags" // UE_DEFINE_GAMEPLAY_TAG_STATIC
 				// My modules
-				, "Bomber"
 				, "MyUtils"
 				, "SettingsWidgetConstructor"
 			}

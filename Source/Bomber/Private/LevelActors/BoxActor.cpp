@@ -7,6 +7,7 @@
 #include "Components/MapComponent.h"
 #include "DataAssets/BoxDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Math/UnrealMathUtility.h"
@@ -72,17 +73,7 @@ void ABoxActor::BeginPlay()
 		MapComponentInternal->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnDeactivatedMapComponent);
 	}
 
-	// Listen states
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
-
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 void ABoxActor::SetActorHiddenInGame(bool bNewHidden)

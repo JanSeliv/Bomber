@@ -8,18 +8,18 @@
 
 class AMyPlayerController;
 
+enum class ENMMState : uint8;
+enum class ECurrentGameState : uint8;
+
 /**
  * Represents the Player Controller in the NewMain Menu module, where the Owner is Player Controller actor.
  * Is responsible for managing Main Menu inputs.
  */
-UCLASS(Config = "GameUserSettings", DefaultConfig, Blueprintable, BlueprintType, DisplayName = "New Main Menu Player Controller Component", ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class NEWMAINMENU_API UNMMPlayerControllerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	/*********************************************************************************************
-	 * Public functions
-	 ********************************************************************************************* */
 public:
 	/** Default constructor. */
 	UNMMPlayerControllerComponent();
@@ -29,54 +29,57 @@ public:
 	AMyPlayerController* GetPlayerController() const;
 	AMyPlayerController& GetPlayerControllerChecked() const;
 
-	/** Returns true is setting enabled to skips previously seen cinematics automatically.
-	 * @see UNMMPlayerControllerComponent::bAutoSkipCinematicsInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsAutoSkipCinematicsSetting() const { return bAutoSkipCinematicsSettingInternal; }
-
-	/** Set true to skip previously seen cinematics automatically.
-	 * Is called from Settings menu once its checkbox is changed. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetAutoSkipCinematicsSetting(bool bEnable);
-
+	/*********************************************************************************************
+	 * Main methods
+	 ********************************************************************************************* */
+public:
 	/** Returns loaded and cached Save Game Data of the Main Menu. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UNMMSaveGameData* GetSaveGameData() const { return SaveGameDataInternal; }
 
-	/** Removes all saved data of the Main Menu and creates new empty data. */
+	/** Assigns existing Save Game Data to this component. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ResetSaveGameData();
+	void SetSaveGameData(class USaveGame* NewSaveGameData);
 
-	/** Set new sound volume for Cinematics sound class.
-	 * Is called from Settings menu once Cinematics slider is changed.*/
+	/** Enables or disables the input context during Cinematic Main Menu State. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetCinematicsVolume(double InVolume);
+	void SetCinematicInputContextEnabled(bool bEnable);
 
-	/** Returns the sound volume for Cinematics sound class. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE double GetCinematicsVolume() const { return CinematicsVolumeInternal; }
+	/** Enables or disables Cinematic mouse settings from Player Input data asset. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetCinematicMouseVisibilityEnabled(bool bEnabled);
+
+	/** Enables or disables the input context according to new menu state. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetManagedInputContextsEnabled(ENMMState NewState);
+
+protected:
+	/** Tries to set the Menu game state on initializing the Main Menu system. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	void TrySetMenuState();
+
+	/*********************************************************************************************
+	 * Sounds
+	 ********************************************************************************************* */
+public:
+	/** Trigger the background music to be played in the Main Menu. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void PlayMainMenuMusic();
+
+	/** Stops currently played Main Menu background music. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void StopMainMenuMusic();
 
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
-	/** When setting enabled, skips previously seen cinematics automatically.
-	 * Is config property, can be set in Settings menu.
-	 * Note: with other players this setting is ignored and cinematics are always skipped. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Skip Cinematics"))
-	bool bAutoSkipCinematicsSettingInternal = true;
-
 	/** Contains loaded and cached Save Game Data of the Main Menu. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Save Game Data"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Save Game Data"))
 	TObjectPtr<class UNMMSaveGameData> SaveGameDataInternal = nullptr;
 
-	/** The sound volume for Cinematics sound class.
-	 * Is config property, can be set in Settings menu. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
-	double CinematicsVolumeInternal = 1.0;
-
 	/*********************************************************************************************
-	 * Protected functions
+	 * Overrides
 	 ********************************************************************************************* */
 protected:
 	/** Called when the owning Actor begins play or when the component is created if the Actor has already begun play. */
@@ -84,10 +87,26 @@ protected:
 
 	/** Clears all transient data created by this component */
 	virtual void OnUnregister() override;
-	
+
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
+	/** Called when the local player character is spawned, possessed, and replicated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+
+	/** Listen to react when entered the Menu state. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Called wen the Main Menu state was changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnNewMainMenuStateChanged(ENMMState NewState);
+
 	/** Is listen to set Menu game state once first spot is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnMainMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
+	void OnActiveMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
 
 	/** Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

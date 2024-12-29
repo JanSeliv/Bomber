@@ -5,6 +5,7 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 //---
 #include "Engine/LocalPlayer.h"
+#include "Engine/Engine.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameViewportClient)
 
@@ -27,7 +28,7 @@ void UMyGameViewportClient::RedrawRequested(FViewport* InViewport)
 // Dynamically changes aspect ratio constraint to support all screens like ultra-wide and vertical one
 void UMyGameViewportClient::UpdateAspectRatio()
 {
-	const TArray<ULocalPlayer*>& LocalPlayers = GetOuterUEngine()->GetGamePlayers(this);
+	const TArray<ULocalPlayer*>& LocalPlayers = GEngine->GetGamePlayers(this);
 	const FIntPoint ViewportResolution = UUtilsLibrary::GetViewportResolution();
 	if (LocalPlayers.IsEmpty()
 	    || ViewportResolution == FIntPoint::ZeroValue)

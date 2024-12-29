@@ -2,15 +2,48 @@
 
 #include "Widgets/NMMCinematicStateWidget.h"
 //---
-#include "Bomber.h"
-#include "Components/MouseActivityComponent.h"
 #include "Controllers/MyPlayerController.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Data/NMMDataAsset.h"
+#include "Data/NMMTypes.h"
+#include "Subsystems/NMMBaseSubsystem.h"
 //---
 #include "Components/Button.h"
+#include "Components/RadialSlider.h"
+#include "Components/TextBlock.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMCinematicStateWidget)
+
+// Applies the given time to hold the skip progress to skip the cinematic
+void UNMMCinematicStateWidget::SetCurrentHoldTime(float NewHoldTime)
+{
+	CurrentHoldTimeInternal = NewHoldTime;
+
+	const float MaxHoldTime = UNMMDataAsset::Get().GetSkipCinematicHoldTime();
+	const float HoldProgressNormalized = FMath::Clamp(CurrentHoldTimeInternal / MaxHoldTime, 0.f, 1.f);
+
+	checkf(SkipHoldProgress, TEXT("ERROR: [%i] %s:\n'SkipHoldProgress' is null!"), __LINE__, *FString(__FUNCTION__));
+	SkipHoldProgress->SetValue(HoldProgressNormalized);
+
+	const UWorld* World = GetWorld();
+	checkf(World, TEXT("ERROR: [%i] %s:\n'World' is null!"), __LINE__, *FString(__FUNCTION__));
+	if (CurrentHoldTimeInternal > 0.f && CurrentHoldTimeInternal <= World->GetDeltaSeconds())
+	{
+		OnCinematicSkipStarted();
+	}
+	else if (CurrentHoldTimeInternal >= MaxHoldTime)
+	{
+		OnCinematicSkipFinished();
+	}
+}
+
+// Reset to default state
+void UNMMCinematicStateWidget::ResetWidget()
+{
+	SetCurrentHoldTime(0.f);
+
+	checkf(SkipText, TEXT("ERROR: [%i] %s:\n'SkipText' is null!"), __LINE__, *FString(__FUNCTION__));
+	SkipText->SetVisibility(ESlateVisibility::Collapsed);
+}
 
 // // Called after the underlying slate widget is constructed
 void UNMMCinematicStateWidget::NativeConstruct()
@@ -20,61 +53,64 @@ void UNMMCinematicStateWidget::NativeConstruct()
 	// Hide this widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
-	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	// Listen Main Menu states
+	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
+	BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(this, &ThisClass::OnNewMainMenuStateChanged);
+	if (BaseSubsystem.GetCurrentMenuState() != ENMMState::None)
 	{
-		BindOnGameStateChanged(MyGameState);
-	}
-	else if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
-	{
-		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
+		// State is already set, apply it
+		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
 
 	if (SkipCinematicButton)
 	{
 		SkipCinematicButton->SetClickMethod(EButtonClickMethod::PreciseClick);
-		SkipCinematicButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnSkipCinematicButtonPressed);
-	}
-
-	if (UMouseActivityComponent* MouseActivityComponent = UMyBlueprintFunctionLibrary::GetMouseActivityComponent())
-	{
-		MouseActivityComponent->OnMouseVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnMouseVisibilityChanged);
+		SkipCinematicButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnCinematicSkipFinished);
 	}
 }
 
-// Called when the current game state was changed
-void UNMMCinematicStateWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
+// Called when the Main Menu state was changed
+void UNMMCinematicStateWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
 	// Show this widget in Cinematic state
-	SetVisibility(CurrentGameState == ECurrentGameState::Cinematic ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	SetVisibility(NewState == ENMMState::Cinematic ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+
+	ResetWidget();
 }
 
-// Is called to start listening game state changes
-void UNMMCinematicStateWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
+/*********************************************************************************************
+ * Inputs
+ ********************************************************************************************* */
+
+// Is calling while the skip holding button is ongoing
+void UNMMCinematicStateWidget::OnCinematicSkipOngoing_Implementation()
 {
-	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
+	const UWorld* World = GetWorld();
+	checkf(World, TEXT("ERROR: [%i] %s:\n'World' is null!"), __LINE__, *FString(__FUNCTION__));
+	const float NewHoldTime = CurrentHoldTimeInternal + World->GetDeltaSeconds();
 
-	// Listen states to handle this widget behavior
-	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-	{
-		OnGameStateChanged(ECurrentGameState::Menu);
-	}
+	SetCurrentHoldTime(NewHoldTime);
 }
 
-// Is called to skip cinematic
-void UNMMCinematicStateWidget::OnSkipCinematicButtonPressed()
+// Is called on skip cinematic button released (cancelled)
+void UNMMCinematicStateWidget::OnCinematicSkipReleased_Implementation()
 {
+	ResetWidget();
+}
+
+// Is called on the beginning of holding the skip button
+void UNMMCinematicStateWidget::OnCinematicSkipStarted_Implementation()
+{
+	checkf(SkipText, TEXT("ERROR: [%i] %s:\n'SkipText' is null!"), __LINE__, *FString(__FUNCTION__));
+	SkipText->SetVisibility(ESlateVisibility::Visible);
+}
+
+// Is called to skip cinematic on finished holding the skip button or clicked on UI
+void UNMMCinematicStateWidget::OnCinematicSkipFinished_Implementation()
+{
+	// Skip cinematic
 	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
 	{
 		MyPC->SetGameStartingState();
 	}
-}
-
-// Is bound to toggle 'SkipCinematicButton' visibility when mouse became shown or hidden
-void UNMMCinematicStateWidget::OnMouseVisibilityChanged_Implementation(bool bIsShown)
-{
-	checkf(SkipCinematicButton, TEXT("ERROR: [%i] %s:\n'SkipCinematicButton' is null!"), __LINE__, *FString(__FUNCTION__));
-	SkipCinematicButton->SetVisibility(bIsShown ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 }

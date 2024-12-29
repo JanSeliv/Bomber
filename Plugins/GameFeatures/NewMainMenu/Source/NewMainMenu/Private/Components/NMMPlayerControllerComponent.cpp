@@ -3,15 +3,23 @@
 #include "Components/NMMPlayerControllerComponent.h"
 //---
 #include "NMMUtils.h"
+#include "Components/MouseActivityComponent.h"
 #include "Components/MyCameraComponent.h"
 #include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
-#include "Data/NMMSubsystem.h"
+#include "DataAssets/MyInputMappingContext.h"
+#include "GameFramework/MyGameStateBase.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
+#include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMCameraSubsystem.h"
+#include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "Components/AudioComponent.h"
+#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMPlayerControllerComponent)
@@ -36,61 +44,147 @@ AMyPlayerController& UNMMPlayerControllerComponent::GetPlayerControllerChecked()
 	return *MyPlayerController;
 }
 
-// Set to skips previously seen cinematics automatically
-void UNMMPlayerControllerComponent::SetAutoSkipCinematicsSetting(bool bEnable)
-{
-	bAutoSkipCinematicsSettingInternal = bEnable;
-}
+/*********************************************************************************************
+ * Main methods
+ ********************************************************************************************* */
 
-// Removes all saved data of the Main Menu
-void UNMMPlayerControllerComponent::ResetSaveGameData()
+// Assigns existing Save Game Data to this component 
+void UNMMPlayerControllerComponent::SetSaveGameData(class USaveGame* NewSaveGameData)
 {
-	const FString& SlotName = UNMMSaveGameData::GetSaveSlotName();
-	const int32 UserIndex = UNMMSaveGameData::GetSaveSlotIndex();
-
-	// Remove the data from the disk
-	if (UGameplayStatics::DoesSaveGameExist(SlotName, UserIndex))
+	UNMMSaveGameData* InSaveGameData = Cast<UNMMSaveGameData>(NewSaveGameData);
+	if (!InSaveGameData
+		|| InSaveGameData == SaveGameDataInternal)
 	{
-		UGameplayStatics::DeleteGameInSlot(SlotName, UserIndex);
+		return;
 	}
 
-	// Kill current save game object
-	if (IsValid(SaveGameDataInternal))
+	SaveGameDataInternal = InSaveGameData;
+}
+
+// Enables or disables the input context during Cinematic Main Menu State
+void UNMMPlayerControllerComponent::SetCinematicInputContextEnabled(bool bEnable)
+{
+	AMyPlayerController& MyPC = GetPlayerControllerChecked();
+
+	if (bEnable)
 	{
-		SaveGameDataInternal->ConditionalBeginDestroy();
+		// Disable all other first
+		MyPC.SetAllInputContextsEnabled(false, ECurrentGameState::Max);
 	}
 
-	// Create new save game object
-	SaveGameDataInternal = CastChecked<UNMMSaveGameData>(UGameplayStatics::CreateSaveGameObject(UNMMSaveGameData::StaticClass()));
-	SaveGameDataInternal->SaveDataAsync();
+	// Enable Cinematic inputs
+	MyPC.SetInputContextEnabled(bEnable, UNMMDataAsset::Get().GetInputContext(ENMMState::Cinematic));
 }
 
-// Set new sound volume for Cinematics sound class
-void UNMMPlayerControllerComponent::SetCinematicsVolume(double InVolume)
+// Enables or disables Cinematic mouse settings from Player Input data asset
+void UNMMPlayerControllerComponent::SetCinematicMouseVisibilityEnabled(bool bEnabled)
 {
-	CinematicsVolumeInternal = InVolume;
-
-	USoundClass* CinematicsSoundClass = UNMMDataAsset::Get().GetCinematicsSoundClass();
-	USoundsSubsystem::Get().SetSoundVolumeByClass(CinematicsSoundClass, InVolume);
+	static const FName CinematicStateName = GET_ENUMERATOR_NAME_CHECKED(ENMMState, Cinematic);
+	UMouseActivityComponent& MouseActivityComponent = GetPlayerControllerChecked().GetMouseActivityComponentChecked();
+	MouseActivityComponent.SetMouseVisibilitySettingsEnabledCustom(bEnabled, CinematicStateName);
 }
+
+// Enables or disables the input context according to new menu state
+void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState NewState)
+{
+	AMyPlayerController& PC = GetPlayerControllerChecked();
+
+	// Remove all previous input contexts managed by Controller
+	TArray<const UMyInputMappingContext*> OutInputContexts;
+	UNMMDataAsset::Get().GetAllInputContexts(/*out*/OutInputContexts);
+	PC.RemoveInputContexts(OutInputContexts);
+
+	// Add Menu context as auto managed by Game State, so it will be enabled everytime the game is in the Menu state
+	const UMyInputMappingContext* InputContext = UNMMDataAsset::Get().GetInputContext(NewState);
+	if (InputContext
+		&& InputContext->GetChosenGameStatesBitmask() > 0)
+	{
+		PC.SetupInputContexts({InputContext});
+	}
+}
+
+// Tries to set the Menu game state on initializing the Main Menu system
+void UNMMPlayerControllerComponent::TrySetMenuState()
+{
+	if (AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::None)
+	{
+		// No need to initialize the Menu state, game state was already set by other systems
+		return;
+	}
+
+	if (UNMMSpotsSubsystem::Get().IsActiveMenuSpotReady())
+	{
+		GetPlayerControllerChecked().SetMenuState();
+	}
+}
+
+/*********************************************************************************************
+ * Sounds
+ ********************************************************************************************* */
+
+// Trigger the background music to be played in the Main Menu
+void UNMMPlayerControllerComponent::PlayMainMenuMusic()
+{
+	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
+	USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic(LevelType);
+
+	if (!MainMenuMusic)
+	{
+		// Background music is not found for current state or level, disable current
+		StopMainMenuMusic();
+		return;
+	}
+
+	USoundsSubsystem::Get().PlaySingleSound2D(MainMenuMusic);
+}
+
+// Stops currently played Main Menu background music
+void UNMMPlayerControllerComponent::StopMainMenuMusic()
+{
+	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
+	if (USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic(LevelType))
+	{
+		USoundsSubsystem::Get().StopSingleSound2D(MainMenuMusic);
+	}
+}
+
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
 
 // Called when the owning Actor begins play or when the component is created if the Actor has already begun play
 void UNMMPlayerControllerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
+
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+
+	// Listen to set Menu game state once active spot is ready
+	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	if (SpotsSubsystem.IsActiveMenuSpotReady())
+	{
+		OnActiveMenuSpotReady(SpotsSubsystem.GetCurrentSpot());
+	}
+	else
+	{
+		SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
+	}
+
+	// Listen Main Menu states
+	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
+	BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(this, &ThisClass::OnNewMainMenuStateChanged);
+	if (BaseSubsystem.GetCurrentMenuState() != ENMMState::None)
+	{
+		// State is already set, apply it
+		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
+	}
+
 	// Load save game data of the Main Menu
 	FAsyncLoadGameFromSlotDelegate AsyncLoadGameFromSlotDelegate;
 	AsyncLoadGameFromSlotDelegate.BindUObject(this, &ThisClass::OnAsyncLoadGameFromSlotCompleted);
 	UGameplayStatics::AsyncLoadGameFromSlot(UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex(), AsyncLoadGameFromSlotDelegate);
-
-	// Setup Main menu inputs
-	TArray<const UMyInputMappingContext*> MenuInputContexts;
-	UNMMDataAsset::Get().GetAllInputContexts(/*out*/MenuInputContexts);
-	GetPlayerControllerChecked().SetupInputContexts(MenuInputContexts);
-
-	// Listen to set Menu game state once first spot is ready
-	UNMMSubsystem::Get().OnMainMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnMainMenuSpotReady);
 
 	// Disable auto camera possess by default, so it can be controlled by the spot
 	UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
@@ -104,11 +198,22 @@ void UNMMPlayerControllerComponent::BeginPlay()
 void UNMMPlayerControllerComponent::OnUnregister()
 {
 	// Remove all input contexts managed by Controller
-	if (const UNMMDataAsset* DataAsset = UNMMUtils::GetNewMainMenuDataAsset(this))
+	if (const UNMMDataAsset* DataAsset = UNMMUtils::GetDataAsset(this))
 	{
 		TArray<const UMyInputMappingContext*> MenuInputContexts;
 		DataAsset->GetAllInputContexts(/*out*/MenuInputContexts);
 		GetPlayerControllerChecked().RemoveInputContexts(MenuInputContexts);
+
+		// Cleanup all sounds
+		if (USoundsSubsystem* SoundSubsystem = USoundsSubsystem::GetSoundsSubsystem())
+		{
+			TArray<class USoundBase*> AllMainMenuMusic;
+			UNMMDataAsset::Get().GetAllMainMenuMusic(/*out*/AllMainMenuMusic);
+			for (USoundBase* MainMenuMusic : AllMainMenuMusic)
+			{
+				SoundSubsystem->DestroySingleSound2D(MainMenuMusic);
+			}
+		}
 	}
 
 	// Kill current save game object
@@ -121,25 +226,79 @@ void UNMMPlayerControllerComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
-// Is listen to set Menu game state once first spot is ready
-void UNMMPlayerControllerComponent::OnMainMenuSpotReady_Implementation(UNMMSpotComponent* MainMenuSpotComponent)
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
+
+// Called when the local player character is spawned, possessed, and replicated
+void UNMMPlayerControllerComponent::OnLocalCharacterReady_Implementation(class APlayerCharacter* PlayerCharacter, int32 CharacterID)
 {
-	checkf(MainMenuSpotComponent, TEXT("ERROR: [%i] %s:\n'MainMenuSpotComponent' is null!"), __LINE__, *FString(__FUNCTION__));
-	if (MainMenuSpotComponent->IsActiveSpot())
+	// Set the Menu state OnLocalCharacterReady to guarantee that game enters the Menu state only when the character is initialized 
+	TrySetMenuState();
+}
+
+// Listen to react when entered the Menu state
+void UNMMPlayerControllerComponent::OnGameStateChanged(ECurrentGameState CurrentGameState)
+{
+	switch (CurrentGameState)
 	{
-		GetPlayerControllerChecked().SetMenuState();
+	case ECGS::Menu: // Entered the Main Menu
+		PlayMainMenuMusic();
+		break;
+	case ECGS::GameStarting: // Left the Main Menu
+		StopMainMenuMusic();
+		break;
+	default:
+		break;
 	}
+}
+
+// Called wen the Main Menu state was changed
+void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
+{
+	AMyPlayerController& MyPC = GetPlayerControllerChecked();
+
+	switch (NewState)
+	{
+	case ENMMState::Cinematic:
+		MyPC.SetIgnoreMoveInput(true);
+		StopMainMenuMusic();
+		break;
+	default:
+		break;
+	}
+
+	// Update input contexts
+	SetManagedInputContextsEnabled(NewState);
+
+	// Update input contexts
+	SetCinematicInputContextEnabled(NewState == ENMMState::Cinematic);
+
+	// Update mouse visibility
+	SetCinematicMouseVisibilityEnabled(NewState == ENMMState::Cinematic);
+}
+
+// Is listen to set Menu game state once first spot is ready
+void UNMMPlayerControllerComponent::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* MainMenuSpotComponent)
+{
+	TrySetMenuState();
+
+	UNMMCameraSubsystem::Get().PossessCamera(ENMMState::Idle);
+
+	UNMMSpotsSubsystem::Get().OnActiveMenuSpotReady.RemoveAll(this);
 }
 
 // Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load
 void UNMMPlayerControllerComponent::OnAsyncLoadGameFromSlotCompleted_Implementation(const FString& SlotName, int32 UserIndex, USaveGame* SaveGame)
 {
-	if (SaveGame)
+	UNMMSaveGameData* InSaveGameData = Cast<UNMMSaveGameData>(SaveGame);
+	if (!InSaveGameData)
 	{
-		SaveGameDataInternal = CastChecked<UNMMSaveGameData>(SaveGame);
-		return;
+		// There is no save game, or it is corrupted, create a new one
+		InSaveGameData = NewObject<UNMMSaveGameData>(this);
+		InSaveGameData->SaveDataAsync();
+		// Fallback to cache it
 	}
 
-	// There is no save game or it is corrupted, create a new one
-	ResetSaveGameData();
+	SetSaveGameData(SaveGame);
 }

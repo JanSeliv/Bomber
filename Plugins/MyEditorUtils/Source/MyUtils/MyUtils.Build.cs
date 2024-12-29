@@ -13,6 +13,7 @@ public class MyUtils : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core"
+				, "ModelViewViewModel" // Created MVVM base classes
 			}
 		);
 
@@ -22,6 +23,7 @@ public class MyUtils : ModuleRules
 				, "UMG" // UUserWidget
 				, "MovieScene", "MovieSceneTracks" // UCinematicUtils
 				, "EnhancedInput", "InputCore" // UInputUtilsLibrary
+				, "NavigationSystem", "AIModule" // UAIUtilsLibrary
 			}
 		);
 

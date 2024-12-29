@@ -6,6 +6,7 @@
 #include "MovieSceneSequence.h"
 #include "MovieSceneSequencePlayer.h"
 #include "Camera/CameraComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Sections/MovieSceneCameraCutSection.h"
 #include "Sections/MovieSceneSubSection.h"
 //---
@@ -14,24 +15,15 @@
 // Finds subsequence by given index inside specified Master sequence
 const UMovieSceneSequence* UCinematicUtils::FindSubsequence(int32 SubsequenceIndex, const UMovieSceneSequence* MasterSequence)
 {
-	const UMovieScene* InMovieScene = MasterSequence ? MasterSequence->GetMovieScene() : nullptr;
-	if (!InMovieScene)
-	{
-		return nullptr;
-	}
+	TArray<UMovieSceneSubSection*> AllTracks;
+	GetAllSectionsByClass(MasterSequence, AllTracks);
 
 	int32 CurrentSubsequenceIdx = 0;
-	const TArray<UMovieSceneSection*>& AllSections = InMovieScene->GetAllSections();
-	for (int32 Idx = AllSections.Num() - 1; Idx >= 0; --Idx)
+	for (const UMovieSceneSubSection* It : AllTracks)
 	{
-		const UMovieSceneSubSection* SubSection = Cast<UMovieSceneSubSection>(AllSections[Idx]);
-		const UMovieSceneSequence* SubSequence = SubSection ? Cast<UMovieSceneSequence>(SubSection->GetSequence()) : nullptr;
-		if (!SubSection)
-		{
-			continue;
-		}
-
-		if (CurrentSubsequenceIdx == SubsequenceIndex)
+		const UMovieSceneSequence* SubSequence = It ? It->GetSequence() : nullptr;
+		if (SubSequence
+			&& CurrentSubsequenceIdx == SubsequenceIndex)
 		{
 			return SubSequence;
 		}
@@ -68,27 +60,95 @@ UCameraComponent* UCinematicUtils::FindSequenceCameraComponent(UMovieSceneSequen
 {
 	const UMovieSceneSequence* LevelSequence = LevelSequencePlayer ? LevelSequencePlayer->GetSequence() : nullptr;
 	const UMovieScene* InMovieScene = LevelSequence ? LevelSequence->GetMovieScene() : nullptr;
-	if (!InMovieScene)
+	if (!ensureMsgf(InMovieScene, TEXT("ASSERT: [%i] %s:\n'InMovieScene' is not valid!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		return nullptr;
 	}
 
-	const TArray<UMovieSceneSection*>& AllSections = InMovieScene->GetAllSections();
-	for (const UMovieSceneSection* Section : AllSections)
-	{
-		const UMovieSceneCameraCutSection* CameraCutSection = Cast<UMovieSceneCameraCutSection>(Section);
-		if (!CameraCutSection)
-		{
-			continue;
-		}
+	TArray<UMovieSceneCameraCutSection*> AllCameraCutSections;
+	GetAllSectionsByClass(LevelSequence, AllCameraCutSections);
 
+	for (const UMovieSceneCameraCutSection* CameraCutSectionIt : AllCameraCutSections)
+	{
+		checkf(CameraCutSectionIt, TEXT("ERROR: [%i] %s:\n'CameraCutSectionIt' is null!"), __LINE__, *FString(__FUNCTION__));
 		static const FMovieSceneSequenceID ID{0};
 		IMovieScenePlayer& InPlayer = *LevelSequencePlayer;
-		if (UCameraComponent* FoundCamera = CameraCutSection->GetFirstCamera(InPlayer, ID))
+		if (UCameraComponent* FoundCamera = CameraCutSectionIt->GetFirstCamera(InPlayer, ID))
 		{
 			return FoundCamera;
 		}
 	}
 
 	return nullptr;
+}
+
+// Returns all sections of specified class from the Master sequence in sorted order (from the beginning to the end)
+void UCinematicUtils::GetAllSectionsByClass(const UMovieSceneSequence* MasterSequence, TSubclassOf<UMovieSceneSection> SectionClass, TArray<UMovieSceneSection*>& OutSections)
+{
+	if (!OutSections.IsEmpty())
+	{
+		OutSections.Empty();
+	}
+
+	const UMovieScene* InMovieScene = MasterSequence ? MasterSequence->GetMovieScene() : nullptr;
+	if (!ensureMsgf(InMovieScene, TEXT("ASSERT: [%i] %s:\n'InMovieScene' is not valid!"), __LINE__, *FString(__FUNCTION__))
+		|| !ensureMsgf(SectionClass, TEXT("ASSERT: [%i] %s:\n'SectionClass' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return;
+	}
+
+	// Find all sections of specified class
+	const TArray<UMovieSceneSection*> AllSections = InMovieScene->GetAllSections();
+	for (UMovieSceneSection* Section : AllSections)
+	{
+		if (Section && Section->IsA(SectionClass))
+		{
+			OutSections.Emplace(Section);
+		}
+	}
+
+	if (!ensureMsgf(!OutSections.IsEmpty(), TEXT("ASSERT: [%i] %s:\nIs not found any section of class '%s' in the Master sequence!"), __LINE__, *FString(__FUNCTION__), *SectionClass->GetName()))
+	{
+		return;
+	}
+
+	// Sort all sections by their time
+	OutSections.Sort([](const UMovieSceneSection& A, const UMovieSceneSection& B)
+	{
+		return A.GetRange().GetLowerBoundValue() < B.GetRange().GetLowerBoundValue();
+	});
+}
+
+// Resets the sequence player to the beginning.
+void UCinematicUtils::ResetSequence(UMovieSceneSequencePlayer* LevelSequencePlayer, bool bKeepCamera/* = false*/)
+{
+	if (!ensureMsgf(LevelSequencePlayer, TEXT("ASSERT: [%i] %hs:\n'LevelSequencePlayer' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	AActor* PrevViewTarget = nullptr;
+	APlayerController* PC = nullptr;
+	if (bKeepCamera)
+	{
+		PC = UGameplayStatics::GetPlayerController(LevelSequencePlayer, 0);
+		if (ensureMsgf(PC, TEXT("ASSERT: [%i] %hs:\n'PC' is not found!"), __LINE__, __FUNCTION__))
+		{
+			PrevViewTarget = PC->GetViewTarget();
+		}
+	}
+
+	// Reset all 'Keep States' tracks to default, it also always resets the camera
+	LevelSequencePlayer->RestorePreAnimatedState();
+	LevelSequencePlayer->PreAnimatedState.EnableGlobalPreAnimatedStateCapture();
+
+	if (bKeepCamera
+		&& PC)
+	{
+		const AActor* NewViewTarget = PC->GetViewTarget();
+		if (PrevViewTarget != NewViewTarget)
+		{
+			PC->SetViewTarget(PrevViewTarget);
+		}
+	}
 }

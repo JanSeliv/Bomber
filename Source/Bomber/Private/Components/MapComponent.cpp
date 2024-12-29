@@ -9,6 +9,7 @@
 #include "DataAssets/GameStateDataAsset.h"
 #include "DataAssets/LevelActorDataAsset.h"
 #include "LevelActors/PlayerCharacter.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
@@ -150,7 +151,7 @@ void UMapComponent::SetDefaultMesh()
 	}
 
 	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
-	UUtilsLibrary::SetMesh(MeshComponentInternal, FoundRow->Mesh);
+	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, FoundRow->Mesh);
 
 	// Reset custom mesh name for replication
 	const AActor* Owner = GetOwner();
@@ -169,7 +170,7 @@ void UMapComponent::SetCustomMeshAsset(UStreamableRenderAsset* CustomMeshAsset)
 		return;
 	}
 
-	UUtilsLibrary::SetMesh(MeshComponentInternal, CustomMeshAsset);
+	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, CustomMeshAsset);
 
 	// Update the mesh name for replication
 	const AActor* Owner = GetOwner();
@@ -200,6 +201,13 @@ UMapComponent* UMapComponent::GetMapComponent(const AActor* Owner)
 EActorType UMapComponent::GetActorType() const
 {
 	return GetActorDataAssetChecked().GetActorType();
+}
+
+// Returns the level type by current mesh
+ELevelType UMapComponent::GetLevelType() const
+{
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByMesh(CustomMeshAssetInternal);
+	return FoundRow ? FoundRow->LevelType : ELevelType::None;
 }
 
 // Get the owner's data asset
@@ -281,6 +289,11 @@ void UMapComponent::OnRegister()
 	// Set the tick disabled by default and decrease the interval
 	Owner->SetActorTickInterval(UGameStateDataAsset::Get().GetTickInterval());
 	Owner->SetActorTickEnabled(false);
+
+#if WITH_EDITOR
+	// Make this gameplay actor always loaded
+	Owner->SetIsSpatiallyLoaded(false);
+#endif
 
 	// Set the movable mobility for in-game attaching
 	if (Owner->GetRootComponent())

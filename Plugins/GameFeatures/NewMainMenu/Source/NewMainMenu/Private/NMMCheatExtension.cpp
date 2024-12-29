@@ -4,14 +4,19 @@
 //---
 #include "NMMUtils.h"
 #include "Components/NMMPlayerControllerComponent.h"
+#include "Data/NMMSaveGameData.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMCheatExtension)
 
 // Removes a save file of the New Main Menu
 void UNMMCheatExtension::ResetNewMainMenuSaves()
 {
-	if (UNMMPlayerControllerComponent* MenuControllerComp = UNMMUtils::GetPlayerControllerComponent())
+	UNMMPlayerControllerComponent* MenuControllerComp = UNMMUtils::GetPlayerControllerComponent();
+	UNMMSaveGameData* CurrentSave = MenuControllerComp ? MenuControllerComp->GetSaveGameData() : nullptr;
+	if (CurrentSave)
 	{
-		MenuControllerComp->ResetSaveGameData();
+		USaveGame* NewSave = UGameplayUtilsLibrary::ResetSaveGameData(CurrentSave, UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex());
+		MenuControllerComp->SetSaveGameData(NewSave);
 	}
 }

@@ -1,7 +1,8 @@
 {
-	"BuildId": "27405482",
+	"BuildId": "33043543",
 	"Modules": 
 	{
+		"FootTrailsGeneratorEditor": "UnrealEditor-FootTrailsGeneratorEditor.dll",
 		"FootTrailsGeneratorRuntime": "UnrealEditor-FootTrailsGeneratorRuntime.dll"
 	}
 }

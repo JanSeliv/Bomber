@@ -8,12 +8,16 @@
 //---
 #include "NMMSpotComponent.generated.h"
 
-enum class ECurrentGameState : uint8;
-
 class ULevelSequence;
+
+enum class ENMMState : uint8;
+enum class ENMMCameraRailTransitionState : uint8;
 
 /**
  * Represents a spot where a character can be selected in the Main Menu.
+ * Is responsible for:
+ * - playing cinematics (animation) in the Menu
+ * - Applying the player mesh to the in-game character.
  * Is added dynamically to the My Skeletal Mesh actors on the level.
  */
 UCLASS(Blueprintable, BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -28,14 +32,23 @@ public:
 	/** Default constructor. */
 	UNMMSpotComponent();
 
-	/** Returns true if this spot is currently active and possessed by player. */
+	/** Returns true if this spot is currently selected and possessed by player. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	bool IsActiveSpot() const;
+	bool IsCurrentSpot() const;
+
+	/** Returns true if this spot is visible, unlocked and can be selected by player.
+	 * To make this spot unavailable, call SetActive(false) on this spot ot its skeletal mesh. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	bool IsSpotAvailable() const;
 
 	/** Returns the Skeletal Mesh of the Bomber character. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
 	class UMySkeletalMeshComponent& GetMeshChecked() const;
+
+	/** Sets the look of this spot to the in-game player character. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplyMeshOnPlayer();
 
 	/*********************************************************************************************
 	 * Cinematics
@@ -45,6 +58,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FNMMCinematicRow& GetCinematicRow() const { return CinematicRowInternal; }
 
+	/** Returns cached cinematic player of this spot. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE class ULevelSequencePlayer* GetMasterPlayer() const { return MasterPlayerInternal; }
+
 	/** Returns main cinematic of this spot. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ULevelSequence* GetMasterSequence() const;
@@ -53,30 +70,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void StopMasterSequence();
 
-	/** Returns in which state the cinematic is currently playing
-	 * @see CinematicStateInternal */
+	/** Returns true if current game state can be eventually changed. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE ENMMCinematicState GetCurrentCinematicState() const { return CinematicStateInternal; }
+	bool CanChangeCinematicState(ENMMState NewMainMenuState) const;
 
 	/** Activate given cinematic state on this spot. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetCinematicState(ENMMCinematicState CinematicState);
+	void SetCinematicByState(ENMMState MainMenuState);
 
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
 	/** Cached cinematic player of this spot. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Idle Player"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Idle Player"))
 	TObjectPtr<class ULevelSequencePlayer> MasterPlayerInternal = nullptr;
 
 	/** Cached Cinematic Row that contains data about this spot. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic Row"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic Row"))
 	FNMMCinematicRow CinematicRowInternal = FNMMCinematicRow::Empty;
 
 	/** Current cinematic state of this spot. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic State"))
-	ENMMCinematicState CinematicStateInternal = ENMMCinematicState::None;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Cinematic State"))
+	ENMMState CinematicStateInternal = ENMMState::None;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -87,10 +103,6 @@ protected:
 
 	/** Clears all transient data created by this component. */
 	virtual void OnUnregister() override;
-
-	/** Is called to start listening game state changes. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void BindOnGameStateChanged(class AMyGameStateBase* MyGameState);
 
 	/** Obtains and caches cinematic data from the table to this spot.
 	 * @see UNMMSpotComponent::CinematicRowInternal */
@@ -105,13 +117,13 @@ protected:
 	/** Is called when the cinematic was loaded to finish creation. */
 	void OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence);
 
-	/** Starts viewing through camera of current cinematic or gameplay one depending on given state. */
+	/** Marks own cinematic as seen by player for the save system. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void PossessCamera(ENMMCinematicState CinematicState);
+	void MarkCinematicAsSeen();
 
-	/** Marks own cinematic as seen by player. */
+	/** Triggers or stops cinematic by current state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TryMarkCinematicAsSeen();
+	void ApplyCinematicState();
 
 	/*********************************************************************************************
 	 * Events
@@ -121,7 +133,15 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
+	/** Called when the Main Menu state was changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnNewMainMenuStateChanged(ENMMState NewState);
+
 	/** Called when the sequence is paused or when cinematic was ended. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnMasterSequencePaused();
+
+	/** Called when the Camera Rail transition state changed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCameraRailTransitionStateChanged(ENMMCameraRailTransitionState CameraRailTransitionStateChanged);
 };

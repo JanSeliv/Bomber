@@ -21,7 +21,7 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAspectRatioChanged, float, NewAspectRatio, EAspectRatioAxisConstraint, NewAxisConstraint);
 
 	/** Called when the aspect ratio has been changed. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnAspectRatioChanged OnAspectRatioChanged;
 
 	/** Returns the Axis Constraint of the viewport based on current aspect ratio.
@@ -50,6 +50,6 @@ public:
 
 protected:
 	/** Cached data about last broadcasted aspect ratio. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last c Aspect Ratio"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Last c Aspect Ratio"))
 	float LastUpdatedAspectRatioInternal = 0.f;
 };

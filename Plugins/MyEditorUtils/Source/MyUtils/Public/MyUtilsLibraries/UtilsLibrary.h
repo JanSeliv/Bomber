@@ -52,10 +52,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool HasWorldBegunPlay();
 
-	/** Returns true if this instance is server. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static bool IsServer();
-
 	/*********************************************************************************************
 	 * Viewport
 	 ********************************************************************************************* */
@@ -72,14 +68,4 @@ public:
 	/** Returns 'MaintainYFOV' if Horizontal FOV is currently used while 'MaintainXFOV' for the Vertical one.*/
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static TEnumAsByte<EAspectRatioAxisConstraint> GetViewportAspectRatioAxisConstraint();
-
-	/*********************************************************************************************
-	 * Gameplay
-	 ********************************************************************************************* */
-public:
-	/** Abstract method that allows set both static and skeletal meshes to the specified mesh component.
-	 * @param MeshComponent The mesh component to set mesh.
-	 * @param MeshAsset The mesh asset to set to the mesh component. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static void SetMesh(class UMeshComponent* MeshComponent, class UStreamableRenderAsset* MeshAsset);
 };

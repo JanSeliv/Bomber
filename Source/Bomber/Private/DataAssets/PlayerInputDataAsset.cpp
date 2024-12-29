@@ -6,7 +6,6 @@
 #include "DataAssets/MyInputMappingContext.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Engine/World.h"
 //---
@@ -55,12 +54,26 @@ const UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int
 	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
 }
 
-// Returns true if specified key is mapped to any gameplay input context
-bool UPlayerInputDataAsset::IsMappedKey(const FKey& Key) const
+// Returns the mouse visibility settings by specified game state
+const FMouseVisibilitySettings& UPlayerInputDataAsset::GetMouseVisibilitySettings(ECurrentGameState GameState) const
 {
-	return GameplayInputContextsInternal.ContainsByPredicate([&Key](const UMyInputMappingContext* ContextIt)
+	const FMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettingsInternal.FindByKey(GameState);
+	return FoundSettingsPtr ? *FoundSettingsPtr : FMouseVisibilitySettings::Invalid;
+}
+
+// Returns the mouse visibility settings by custom game state
+const FMouseVisibilitySettings& UPlayerInputDataAsset::GetMouseVisibilitySettingsCustom(FName CustomGameState) const
+{
+	const FMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettingsInternal.FindByKey(CustomGameState);
+	return FoundSettingsPtr ? *FoundSettingsPtr : FMouseVisibilitySettings::Invalid;
+}
+
+// Returns true if specified key is mapped to any gameplay input context
+bool UPlayerInputDataAsset::IsMappedKey(const UObject* WorldContext, const FKey& Key) const
+{
+	return GameplayInputContextsInternal.ContainsByPredicate([&Key, WorldContext](const UMyInputMappingContext* ContextIt)
 	{
-		return ContextIt && UInputUtilsLibrary::IsMappedKeyInContext(Key, ContextIt);
+		return ContextIt && UInputUtilsLibrary::IsMappedKeyInContext(WorldContext, Key, ContextIt);
 	});
 }
 

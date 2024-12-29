@@ -49,13 +49,31 @@ struct NEWMAINMENU_API FNMMCinematicRow : public FTableRowBase
 /**
  * Represents the state of the Main Menu cinematics.
  */
-UENUM(BlueprintType, DisplayName = "Cinematic State")
-enum class ENMMCinematicState : uint8
+UENUM(BlueprintType, DisplayName = "New Main Menu State")
+enum class ENMMState : uint8
 {
-	///< Is not playing cinematic
+	///< Is not in the Menu
 	None,
-	///< Is playing the idle in loop
-	IdlePart,
-	///< Is playing the main parts of cinematic after player pressed the button
-	MainPart
+	///< Player has camera moving between Spots, both spots are playing idle in loop
+	Transition,
+	///< Player sees chosen character, only this spot is playing idle in loop
+	Idle,
+	///< Is playing the main parts of cinematic after play button is pressed
+	Cinematic
+};
+
+/**
+ * Represents the state of the camera rail state.
+ */
+UENUM(BlueprintType, DisplayName = "New Main Menu Camera Rail State")
+enum class ENMMCameraRailTransitionState : uint8
+{
+	///< Transition is not started
+	None,
+	///< Camera moving between Spots started
+	BeginTransition,
+	///< Camera moving between Spots reached it's halfway
+	HalfwayTransition,
+	///< Camera moving between Spots finished transition
+	EndTransition
 };

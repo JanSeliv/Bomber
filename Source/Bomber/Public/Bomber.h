@@ -126,6 +126,7 @@ using EIT = EItemType;
 
 /**
  * The replicated states of the game. It shares the state between all the players at the same time.
+ * Can be tracked both on host and client by binding with BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ECurrentGameState : uint8
@@ -139,9 +140,8 @@ enum class ECurrentGameState : uint8
 	EndGame = 1 << 2,
 	///< Is active during the active match.
 	InGame = 1 << 3,
-	///< Is active while player is watching cutscene of chosen character, is happening in single-player only since cinematics are automatically skipped in multiplayer.
-	Cinematic = 1 << 4,
-	Max = Menu | GameStarting | EndGame | InGame | Cinematic UMETA(DisplayName = "Any")
+	///< Any of the states
+	Max = Menu | GameStarting | EndGame | InGame UMETA(DisplayName = "Any")
 };
 
 ENUM_CLASS_FLAGS(ECurrentGameState);
@@ -149,6 +149,7 @@ using ECGS = ECurrentGameState;
 
 /**
  * The round result.
+ * Can be tracked by listening AMyPlayerState::OnEndGameStateChanged delegate.
  */
 UENUM(BlueprintType)
 enum class EEndGameState : uint8

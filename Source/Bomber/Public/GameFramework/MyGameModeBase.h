@@ -18,6 +18,10 @@ public:
 	/** Sets default values for this actor's properties */
 	AMyGameModeBase();
 
+	/*********************************************************************************************
+	 * Player Controllers
+	 ********************************************************************************************* */
+public:
 	/** Get overall number of all player controllers. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetPlayerControllersNum() const { return PlayerControllersInternal.Num(); }
@@ -27,14 +31,23 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class AMyPlayerController* GetPlayerController(int32 Index) const;
 
+	/** Returns index of the specified player controller. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetPlayerControllerIndex(const AMyPlayerController* PlayerController) const { return PlayerControllersInternal.IndexOfByKey(PlayerController); }
+
+	/** Caches given player controller when it spawns. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void AddPlayerController(class AMyPlayerController* PlayerController);
+
 protected:
 	/** Contains all player controllers.  */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Controllers"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Controllers"))
 	TArray<TObjectPtr<class AMyPlayerController>> PlayerControllersInternal;
 
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() override;
-
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
 	/** Initializes the game. */
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
@@ -43,6 +56,9 @@ protected:
 
 	/** Called when a Controller with a PlayerState leaves the game or is destroyed. */
 	virtual void Logout(AController* Exiting) override;
+
+	/** Sets the name for a controller. */
+	virtual void ChangeName(AController* Controller, const FString& NewName, bool bNameChange) override;
 
 #if WITH_EDITOR
 	/** Is called if start the game in 'Simulate in Editor' and then press 'Possess or eject player' button. */

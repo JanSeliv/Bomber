@@ -4,6 +4,7 @@
 //---
 #include "Bomber.h"
 #include "GeneratedMap.h"
+#include "Components/MapComponent.h"
 #include "Components/MouseActivityComponent.h"
 #include "Controllers/MyPlayerController.h"
 #include "DataAssets/DataAssetsContainer.h"
@@ -16,10 +17,9 @@
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
-#include "UI/InGameMenuWidget.h"
-#include "UI/InGameWidget.h"
-#include "UI/MyHUD.h"
+#include "Subsystems/WidgetsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 //---
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
@@ -39,8 +39,8 @@ int32 UMyBlueprintFunctionLibrary::GetAlivePlayersNum()
 // Returns the type of the current level
 ELevelType UMyBlueprintFunctionLibrary::GetLevelType()
 {
-	const AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get().GetGeneratedMap();
-	return GeneratedMap ? GeneratedMap->GetLevelType() : ELevelType::None;
+	// @TODO JanSeliv StB8orDX: remove level type enum and replace related logic
+	return ELevelType::First;
 }
 
 /* ---------------------------------------------------
@@ -83,16 +83,37 @@ AMyPlayerController* UMyBlueprintFunctionLibrary::GetLocalPlayerController(const
 }
 
 // Returns the Bomber Player State for specified player, nullptr otherwise
-AMyPlayerState* UMyBlueprintFunctionLibrary::GetMyPlayerState(const APawn* Pawn)
+AMyPlayerState* UMyBlueprintFunctionLibrary::GetMyPlayerState(int32 CharacterID)
 {
-	return Pawn ? Pawn->GetPlayerState<AMyPlayerState>() : nullptr;
+	const APlayerCharacter* PlayerChar = GetPlayerCharacter(CharacterID);
+	return PlayerChar ? PlayerChar->GetPlayerState<AMyPlayerState>() : nullptr;
 }
 
 // Returns the player state of current controller
 AMyPlayerState* UMyBlueprintFunctionLibrary::GetLocalPlayerState(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyPlayerController* MyPlayerController = GetLocalPlayerController(OptionalWorldContext);
-	return MyPlayerController ? MyPlayerController->GetPlayerState<AMyPlayerState>() : nullptr;
+	const AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(OptionalWorldContext);
+	if (!MyPlayerController)
+	{
+		MyPlayerController = GetLocalPlayerController(OptionalWorldContext);
+		if (!MyPlayerController)
+		{
+			return nullptr;
+		}
+	}
+
+	if (AMyPlayerState* PlayerState = MyPlayerController->GetPlayerState<AMyPlayerState>())
+	{
+		return PlayerState;
+	}
+
+	if (const AMyGameModeBase* MyGameMode = GetMyGameMode(OptionalWorldContext))
+	{
+		const int32 PCIndex = MyGameMode->GetPlayerControllerIndex(MyPlayerController);
+		return GetMyPlayerState(PCIndex);
+	}
+
+	return nullptr;
 }
 
 // Returns the Bomber settings
@@ -104,8 +125,8 @@ UMyGameUserSettings* UMyBlueprintFunctionLibrary::GetMyGameUserSettings(const UO
 // Returns the settings widget
 USettingsWidget* UMyBlueprintFunctionLibrary::GetSettingsWidget(const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyHUD* MyHUD = GetMyHUD(OptionalWorldContext);
-	return MyHUD ? MyHUD->GetSettingsWidget() : nullptr;
+	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem(OptionalWorldContext);
+	return WidgetsSubsystem ? WidgetsSubsystem->GetSettingsWidget() : nullptr;
 }
 
 // Returns the Camera Component used on level
@@ -116,39 +137,33 @@ UMyCameraComponent* UMyBlueprintFunctionLibrary::GetLevelCamera(const UObject* O
 	return GeneratedMap ? GeneratedMap->GetCameraComponent() : nullptr;
 }
 
-// Returns the HUD actor
-AMyHUD* UMyBlueprintFunctionLibrary::GetMyHUD(const UObject* OptionalWorldContext/* = nullptr*/)
-{
-	const AMyPlayerController* MyPlayerController = GetLocalPlayerController(OptionalWorldContext);
-	return MyPlayerController ? MyPlayerController->GetHUD<AMyHUD>() : nullptr;
-}
-
-// Returns the In-Game widget
-UInGameWidget* UMyBlueprintFunctionLibrary::GetInGameWidget(const UObject* OptionalWorldContext/* = nullptr*/)
-{
-	const AMyHUD* MyHUD = GetMyHUD(OptionalWorldContext);
-	return MyHUD ? MyHUD->GetInGameWidget() : nullptr;
-}
-
-// Returns the In-Game Menu widget
-UInGameMenuWidget* UMyBlueprintFunctionLibrary::GetInGameMenuWidget(const UObject* OptionalWorldContext/* = nullptr*/)
-{
-	const UInGameWidget* InGameWidget = GetInGameWidget(OptionalWorldContext);
-	return InGameWidget ? InGameWidget->GetInGameMenuWidget() : nullptr;
-}
-
 // Returns specified player character, by default returns local player
-APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 PlayerIndex, const UObject* OptionalWorldContext/* = nullptr*/)
+APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 CharacterID, const UObject* OptionalWorldContext/* = nullptr*/)
 {
-	const AMyPlayerController* MyPC = GetMyPlayerController(PlayerIndex, OptionalWorldContext);
-	return MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
+	if (CharacterID < 0)
+	{
+		// No ID is set, return local player character
+		return GetLocalPlayerCharacter(OptionalWorldContext);
+	}
+
+	const UMapComponent* PlayerMapComponent = ULevelActorsUtilsLibrary::GetLevelActorByIndex(CharacterID, TO_FLAG(EAT::Player));
+	return PlayerMapComponent ? PlayerMapComponent->GetOwner<APlayerCharacter>() : nullptr;
 }
 
 // Returns controlled player character
 APlayerCharacter* UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter(const UObject* OptionalWorldContext/* = nullptr*/)
 {
 	static constexpr int32 LocalPlayerIndex = 0;
-	return GetPlayerCharacter(LocalPlayerIndex, OptionalWorldContext);
+	const AMyPlayerController* MyPC = GetMyPlayerController(LocalPlayerIndex, OptionalWorldContext);
+	APlayerCharacter* LocalPlayer = MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
+
+	if (!LocalPlayer)
+	{
+		// In some edge cases, character is not possessed by the controller, try get it from the map
+		LocalPlayer = GetPlayerCharacter(LocalPlayerIndex, OptionalWorldContext);
+	}
+
+	return LocalPlayer;
 }
 
 // Returns implemented Game Viewport Client on the project side

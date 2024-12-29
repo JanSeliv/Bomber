@@ -2,6 +2,8 @@
 
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 //---
+#include "MyUtilsLibraries/UtilsLibrary.h"
+//---
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
 
@@ -33,6 +35,30 @@ UUserWidget* FWidgetUtilsLibrary::GetParentWidgetOfClass(const UUserWidget* InWi
 	}
 
 	return FoundWidget;
+}
+
+// Returns first child widget found by specified class iterating all widget objects
+UUserWidget* FWidgetUtilsLibrary::GetChildWidgetOfClass(const UUserWidget* ParentWidget, TSubclassOf<UUserWidget> ChildWidgetClass)
+{
+	if (!ParentWidget)
+	{
+		return nullptr;
+	}
+
+	TArray<UWidget*> ChildWidgets;
+	ParentWidget->WidgetTree->GetAllWidgets(ChildWidgets);
+
+	// Iterate through all child widgets to find the one of the specified class
+	for (UWidget* Widget : ChildWidgets)
+	{
+		UUserWidget* UserWidget = Cast<UUserWidget>(Widget);
+		if (UserWidget && UserWidget->IsA(ChildWidgetClass))
+		{
+			return UserWidget;
+		}
+	}
+
+	return nullptr;
 }
 
 // Returns first widget by specified class iterating all widget objects
@@ -73,4 +99,25 @@ void FWidgetUtilsLibrary::DestroyWidget(UUserWidget& ParentWidget)
 
 	// RemoveFromParent() does not completely destroy widget, so schedule the child widget for destruction
 	ParentWidget.ConditionalBeginDestroy();
+}
+
+// Is alternative to Engine's CreateWidget with build-in add to viewport functionality
+UUserWidget* FWidgetUtilsLibrary::CreateWidgetByClass(TSubclassOf<UUserWidget> WidgetClass, bool bAddToViewport/*= true*/, int32 ZOrder/* = 0*/, const UObject* OptionalWorldContext/* = nullptr*/)
+{
+	UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
+	if (!ensureMsgf(World, TEXT("ASSERT: [%i] %hs:\n'World' is not valid!"), __LINE__, __FUNCTION__)
+		|| !ensureMsgf(WidgetClass, TEXT("ASSERT: [%i] %hs:\n'WidgetClass' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return nullptr;
+	}
+
+	UUserWidget* CreatedWidget = CreateWidget(World, WidgetClass);
+	checkf(CreatedWidget, TEXT("ERROR: [%i] %hs:\n'CreatedWidget' is null!"), __LINE__, __FUNCTION__);
+
+	if (bAddToViewport)
+	{
+		CreatedWidget->AddToViewport(ZOrder);
+	}
+
+	return CreatedWidget;
 }

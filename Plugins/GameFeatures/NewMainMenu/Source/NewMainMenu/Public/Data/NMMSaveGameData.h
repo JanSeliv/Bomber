@@ -38,6 +38,6 @@ public:
 protected:
 	/** Contains a bitmask of row indexes in Cinematics table that have been seen by the player.
 	 * Is bitmask instead of array since there are less than 32 cinematics in New Main Menu. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, Category = "C++", DisplayName = "Cinematics Played Bitmask")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, AdvancedDisplay, Category = "C++", DisplayName = "Cinematics Played Bitmask")
 	int32 AllSeenCinematicsBitmaskInternal = 0;
 };

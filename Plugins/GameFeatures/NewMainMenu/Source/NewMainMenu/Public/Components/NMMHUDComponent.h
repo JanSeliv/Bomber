@@ -6,8 +6,6 @@
 //---
 #include "NMMHUDComponent.generated.h"
 
-class AMyHUD;
-
 /**
  * Represents the HUD in the NewMain Menu module, where the Owner is HUD actor.
  * Is responsible for managing Main Menu widgets.
@@ -24,11 +22,6 @@ public:
 	/** Default constructor. */
 	UNMMHUDComponent();
 
-	/** Returns HUD actor of this component. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	AMyHUD* GetHUD() const;
-	AMyHUD& GetHUDChecked() const;
-
 	/** Returns created Main Menu widget. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UNewMainMenuWidget* GetMainMenuWidget() const { return MainMenuWidgetInternal; }
@@ -42,11 +35,11 @@ public:
 	 ********************************************************************************************* */
 protected:
 	/** Created Main Menu widget. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
 	TObjectPtr<class UNewMainMenuWidget> MainMenuWidgetInternal = nullptr;
 
 	/** Created In Cinematic State widget. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
 	TObjectPtr<class UNMMCinematicStateWidget> InCinematicStateWidgetInternal = nullptr;
 
 	/*********************************************************************************************
@@ -58,4 +51,8 @@ protected:
 
 	/** Clears all transient data created by this component. */
 	virtual void OnUnregister() override;
+
+	/** Called when the local player character is spawned, possessed, and replicated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
 };

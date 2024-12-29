@@ -8,6 +8,7 @@
 #include "UI/Input/InputCategoryWidget.h"
 //---
 #include "Components/ScrollBox.h"
+#include "UserSettings/EnhancedInputUserSettings.h" // FPlayerKeyMapping
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InputControlsWidget)
 
@@ -37,7 +38,7 @@ void UInputControlsWidget::CreateAllInputCategories()
 	{
 		// Inside each input context, there could be different input categories
 		TArray<FInputCategoryData> InputCategoriesData;
-		FInputCategoryData::GetCategoriesDataFromMappings(*InputContextIt, /*Out*/InputCategoriesData);
+		FInputCategoryData::GetCategoriesDataFromMappings(*this, *InputContextIt, /*Out*/InputCategoriesData);
 
 		for (const FInputCategoryData& InputCategoryDataIt : InputCategoriesData)
 		{

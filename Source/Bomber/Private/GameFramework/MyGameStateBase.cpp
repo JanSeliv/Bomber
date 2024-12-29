@@ -4,12 +4,14 @@
 //---
 #include "GeneratedMap.h"
 #include "DataAssets/GameStateDataAsset.h"
-#include "GameFramework/MyPlayerState.h"
+#include "DataAssets/ModularGameFeatureSettings.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "GameFeaturesSubsystem.h"
 #include "TimerManager.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Net/UnrealNetwork.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameStateBase)
@@ -30,145 +32,145 @@ AMyGameStateBase& AMyGameStateBase::Get()
 	return *MyGameState;
 }
 
+/*********************************************************************************************
+ * Current Game State enum
+ ********************************************************************************************* */
+
+// Returns true if current game state can be eventually changed
+bool AMyGameStateBase::CanChangeGameState(ECurrentGameState NewGameState) const
+{
+	if (LocalGameStateInternal == NewGameState)
+	{
+		return false;
+	}
+
+	// Don't allow to change the game state if local character is not initialized or destroyed
+	const APlayerCharacter* LocalChar = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+	return UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.IsCharacterReady(LocalChar);
+}
+
+// Returns the AMyGameState::CurrentGameState property.
+void AMyGameStateBase::SetGameState(ECurrentGameState NewGameState)
+{
+	if (!HasAuthority()
+		|| !CanChangeGameState(NewGameState))
+	{
+		return;
+	}
+
+	// Update replicated state now, not waiting for the next tick
+	// So, the client will receive replicated state in first order in comparing with other replicates
+	ForceNetUpdate();
+
+	ReplicatedGameStateInternal = NewGameState;
+	ApplyGameState();
+}
+
 // Returns the AMyGameStateBase::CurrentGameState property
 ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 {
 	if (const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
 	{
-		return MyGameState->CurrentGameStateInternal;
+		return MyGameState->LocalGameStateInternal;
 	}
 	return ECurrentGameState::None;
-}
-
-// Returns the AMyGameState::CurrentGameState property.
-void AMyGameStateBase::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
-{
-	if (NewGameState == CurrentGameStateInternal)
-	{
-		return;
-	}
-
-	CurrentGameStateInternal = NewGameState;
-	ApplyGameState();
-
-	// Update replicated state now, not waiting for the next tick
-	// So, the client will receive replicated state in first order in comparing with other replicates
-	ForceNetUpdate();
-}
-
-/* ---------------------------------------------------
- *		Protected
- * --------------------------------------------------- */
-
-// Returns properties that are replicated for the lifetime of the actor channel.
-void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ThisClass, CurrentGameStateInternal);
-	DOREPLIFETIME(ThisClass, StartingTimerSecRemainInternal);
-	DOREPLIFETIME(ThisClass, InGameTimerSecRemainInternal);
-}
-
-// Called when the game starts
-void AMyGameStateBase::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (HasAuthority())
-	{
-		AGeneratedMap::Get().OnAnyCharacterDestroyed.AddDynamic(this, &ThisClass::OnAnyCharacterDestroyed);
-	}
-
-	SetGameFeaturesEnabled(true);
-}
-
-// Overridable function called whenever this actor is being removed from a level
-void AMyGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-
-	SetGameFeaturesEnabled(false);
 }
 
 // Updates current game state
 void AMyGameStateBase::ApplyGameState()
 {
-	if (CurrentGameStateInternal == ECGS::GameStarting)
+	LocalGameStateInternal = ReplicatedGameStateInternal;
+
+	if (LocalGameStateInternal == ECGS::GameStarting)
 	{
 		TriggerCountdowns();
 	}
 
 	// Notify listeners
+	const UGlobalEventsSubsystem::FOnGameStateChanged& OnGameStateChanged = UGlobalEventsSubsystem::Get().BP_OnGameStateChanged;
 	if (OnGameStateChanged.IsBound())
 	{
-		OnGameStateChanged.Broadcast(CurrentGameStateInternal);
+		OnGameStateChanged.Broadcast(LocalGameStateInternal);
 	}
 }
 
 // Called on the AMyGameState::CurrentGameState property updating.
 void AMyGameStateBase::OnRep_CurrentGameState()
 {
-	ApplyGameState();
+	if (CanChangeGameState(ReplicatedGameStateInternal))
+	{
+		ApplyGameState();
+	}
 }
 
-// Called to starting counting different time in the game
-void AMyGameStateBase::TriggerCountdowns()
+/*********************************************************************************************
+ * Starting Timer
+ * 3-2-1-GO
+ ********************************************************************************************* */
+
+// Sets the left second of the 'Three-two-one-GO' timer
+void AMyGameStateBase::SetStartingTimerSecondsRemain(float NewStartingTimerSecRemain)
 {
-	const UWorld* World = GetWorld();
-	if (!World
-	    || !HasAuthority())
-	{
-		return;
-	}
-
-	StartingTimerSecRemainInternal = UGameStateDataAsset::Get().GetStartingCountdown();
-	InGameTimerSecRemainInternal = UGameStateDataAsset::Get().GetInGameCountdown();
-
-	constexpr bool bInLoop = true;
-	const float InRate = UGameStateDataAsset::Get().GetTickInterval();
-	World->GetTimerManager().SetTimer(CountdownTimerInternal, this, &ThisClass::OnCountdownTimerTicked, InRate, bInLoop);
-
-	USoundsSubsystem::Get().PlayStartGameCountdownSFX();
+	StartingTimerSecRemainInternal = NewStartingTimerSecRemain;
+	ApplyStartingTimerSecondsRemain();
 }
 
-// Is called each UGameStateDataAsset::TickInternal to count different time in the game
-void AMyGameStateBase::OnCountdownTimerTicked()
+// Is called on client when the 'Three-two-one-GO' timer was updated
+void AMyGameStateBase::OnRep_StartingTimerSecRemain()
 {
-	const UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
+	ApplyStartingTimerSecondsRemain();
+}
 
-	switch (CurrentGameStateInternal)
+// Updates current starting timer seconds remain
+void AMyGameStateBase::ApplyStartingTimerSecondsRemain()
+{
+	if (OnStartingTimerSecRemainChanged.IsBound())
 	{
-		case ECGS::GameStarting:
-			DecrementStartingCountdown();
-			break;
-		case ECGS::InGame:
-			DecrementInGameCountdown();
-			UpdateEndGameStates();
-			break;
-		default:
-			World->GetTimerManager().ClearTimer(CountdownTimerInternal);
-			break;
+		OnStartingTimerSecRemainChanged.Broadcast(StartingTimerSecRemainInternal);
 	}
 }
 
 // Is called during the Game Starting state to handle the 'Three-two-one-GO' timer
 void AMyGameStateBase::DecrementStartingCountdown()
 {
-	if (CurrentGameStateInternal != ECGS::GameStarting)
+	if (LocalGameStateInternal != ECGS::GameStarting)
 	{
 		return;
 	}
 
-	StartingTimerSecRemainInternal -= UGameStateDataAsset::Get().GetTickInterval();
+	const float NewValue = StartingTimerSecRemainInternal - UGameStateDataAsset::Get().GetTickInterval();
+	SetStartingTimerSecondsRemain(NewValue);
 
 	if (IsStartingTimerElapsed())
 	{
-		ServerSetGameState(ECurrentGameState::InGame);
+		SetGameState(ECurrentGameState::InGame);
+	}
+}
+
+/*********************************************************************************************
+ * In-Game Timer
+ * Runs during the match (120...0)
+ ********************************************************************************************* */
+
+// Sets the left second to the end of the match
+void AMyGameStateBase::SetInGameTimerSecondsRemain(float NewInGameTimerSecRemain)
+{
+	InGameTimerSecRemainInternal = NewInGameTimerSecRemain;
+	ApplyInGameTimerSecondsRemain();
+}
+
+// Is called on client when in-match timer was updated
+void AMyGameStateBase::OnRep_InGameTimerSecRemain()
+{
+	ApplyInGameTimerSecondsRemain();
+}
+
+// Updates current in-match timer seconds remain
+void AMyGameStateBase::ApplyInGameTimerSecondsRemain()
+{
+	if (OnInGameTimerSecRemainChanged.IsBound())
+	{
+		OnInGameTimerSecRemainChanged.Broadcast(InGameTimerSecRemainInternal);
 	}
 }
 
@@ -176,16 +178,17 @@ void AMyGameStateBase::DecrementStartingCountdown()
 void AMyGameStateBase::DecrementInGameCountdown()
 {
 	const UWorld* World = GetWorld();
-	if (!World || CurrentGameStateInternal != ECGS::InGame)
+	if (!World || LocalGameStateInternal != ECGS::InGame)
 	{
 		return;
 	}
 
-	InGameTimerSecRemainInternal -= UGameStateDataAsset::Get().GetTickInterval();
+	const float NewValue = InGameTimerSecRemainInternal - UGameStateDataAsset::Get().GetTickInterval();
+	SetInGameTimerSecondsRemain(NewValue);
 
 	if (IsInGameTimerElapsed())
 	{
-		ServerSetGameState(ECurrentGameState::EndGame);
+		SetGameState(ECurrentGameState::EndGame);
 	}
 	else
 	{
@@ -199,45 +202,93 @@ void AMyGameStateBase::DecrementInGameCountdown()
 	}
 }
 
-// Is called during the In-Game state to try to register the End-Game state
-void AMyGameStateBase::UpdateEndGameStates()
+// Called to starting counting different time in the game
+void AMyGameStateBase::TriggerCountdowns()
 {
-	if (!DoesWantUpdateEndState())
+	const UWorld* World = GetWorld();
+	if (!World
+	    || !HasAuthority())
 	{
 		return;
 	}
 
-	bWantsUpdateEndStateInternal = false;
+	SetStartingTimerSecondsRemain(UGameStateDataAsset::Get().GetStartingCountdown());
+	SetInGameTimerSecondsRemain(UGameStateDataAsset::Get().GetInGameCountdown());
 
-	for (APlayerState* PlayerStateIt : PlayerArray)
+	constexpr bool bInLoop = true;
+	const float InRate = UGameStateDataAsset::Get().GetTickInterval();
+	World->GetTimerManager().SetTimer(CountdownTimerInternal, this, &ThisClass::OnCountdownTimerTicked, InRate, bInLoop);
+}
+
+// Is called each UGameStateDataAsset::TickInternal to count different time in the game
+void AMyGameStateBase::OnCountdownTimerTicked()
+{
+	const UWorld* World = GetWorld();
+	if (!World)
 	{
-		AMyPlayerState* MyPlayerState = PlayerStateIt ? Cast<AMyPlayerState>(PlayerStateIt) : nullptr;
-		if (!MyPlayerState
-		    || MyPlayerState->GetEndGameState() != EEndGameState::None) // Already set the state
-		{
-			continue;
-		}
-
-		MyPlayerState->UpdateEndGameState();
+		return;
 	}
 
-	if (UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
+	switch (LocalGameStateInternal)
 	{
-		ServerSetGameState(ECGS::EndGame);
+		case ECGS::GameStarting:
+			DecrementStartingCountdown();
+			break;
+		case ECGS::InGame:
+			DecrementInGameCountdown();
+			break;
+		default:
+			World->GetTimerManager().ClearTimer(CountdownTimerInternal);
+			break;
 	}
 }
 
-// Called when any player or bot was exploded
-void AMyGameStateBase::OnAnyCharacterDestroyed()
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
+
+// Returns properties that are replicated for the lifetime of the actor channel.
+void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	bWantsUpdateEndStateInternal = true;
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, ReplicatedGameStateInternal);
+	DOREPLIFETIME(ThisClass, StartingTimerSecRemainInternal);
+	DOREPLIFETIME(ThisClass, InGameTimerSecRemainInternal);
+}
+
+// This is called only in the gameplay before calling begin play
+void AMyGameStateBase::PostInitializeComponents()
+{
+	// Register it to let modular feature to be dynamically added
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+
+	Super::PostInitializeComponents();
+}
+
+// Called when the game starts
+void AMyGameStateBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetGameFeaturesEnabled(true);
+
+	BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
+}
+
+// Overridable function called whenever this actor is being removed from a level
+void AMyGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	SetGameFeaturesEnabled(false);
 }
 
 // Enables or disable all game features
 void AMyGameStateBase::SetGameFeaturesEnabled(bool bEnable)
 {
 	UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
-	const TArray<FName>& GameFeaturesToEnable = UGameStateDataAsset::Get().GetGameFeaturesToEnable();
+	const TArray<FName>& GameFeaturesToEnable = UModularGameFeatureSettings::Get().GetModularGameFeatures();
 	for (const FName GameFeatureName : GameFeaturesToEnable)
 	{
 		if (GameFeatureName.IsNone())
@@ -261,5 +312,15 @@ void AMyGameStateBase::SetGameFeaturesEnabled(bool bEnable)
 		{
 			GameFeaturesSubsystem.DeactivateGameFeaturePlugin(GameFeatureURL, EmptyCallback);
 		}
+	}
+}
+
+// Called when the local player character is spawned, possessed, and replicated
+void AMyGameStateBase::OnLocalCharacterReady_Implementation(class APlayerCharacter* PlayerCharacter, int32 CharacterID)
+{
+	// Try update the game state when the local character is initialized, if not set yet
+	if (CanChangeGameState(ReplicatedGameStateInternal))
+	{
+		ApplyGameState();
 	}
 }

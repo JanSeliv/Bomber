@@ -10,6 +10,7 @@ const FCell FCell::BackwardCell = FCell(-1.f, 0.f, 0.f);
 const FCell FCell::RightCell = FCell(0.f, 1.f, 0.f);
 const FCell FCell::LeftCell = FCell(0.f, -1.f, 0.f);
 const FCells FCell::EmptyCells = FCells{};
+const FCellsArr FCell::EmptyCellsArr = FCellsArr{};
 
 // Vector to cell constructor
 FCell::FCell(const FVector& Vector)
@@ -308,6 +309,11 @@ FVector2D FCell::GetCellArraySize(const FCells& InCells)
 // Returns number of columns (X) in specified cells array, where each 1 unit means 1 cell
 float FCell::GetCellArrayWidth(const FCells& InCells)
 {
+	if (InCells.IsEmpty())
+	{
+		return 0.f;
+	}
+
 	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
 	const FBox CellsBox(CellsToVectors(UnrotatedCells));
 	return CellsBox.GetSize().X / CellSize + 1.f;
@@ -316,6 +322,11 @@ float FCell::GetCellArrayWidth(const FCells& InCells)
 // Returns number of rows (Y) in specified cells array, where each 1 unit means 1 cell
 float FCell::GetCellArrayLength(const FCells& InCells)
 {
+	if (InCells.IsEmpty())
+	{
+		return 0.f;
+	}
+
 	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
 	const FBox CellsBox(CellsToVectors(UnrotatedCells));
 	return CellsBox.GetSize().Y / CellSize + 1.f;

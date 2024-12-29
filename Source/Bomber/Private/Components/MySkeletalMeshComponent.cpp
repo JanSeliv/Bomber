@@ -31,6 +31,20 @@ AMySkeletalMeshActor::AMySkeletalMeshActor(const FObjectInitializer& ObjectIniti
 {
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+
+#if WITH_EDITORONLY_DATA
+	// Make this preview actor always loaded
+	bIsSpatiallyLoaded = false;
+#endif
+
+	// Since it's preview mesh, make sure it is always visible even with close camera
+	UMySkeletalMeshComponent& Mesh = GetMeshChecked();
+	Mesh.BoundsScale = 6.f;
+	Mesh.bNeverDistanceCull = true;
+	Mesh.bAllowCullDistanceVolume = false;
+
+	// Enable all lighting channels, so it's clearly visible in the dark
+	Mesh.SetLightingChannels(/*bChannel0*/true, /*bChannel1*/true, /*bChannel2*/true);
 }
 
 // Returns the Skeletal Mesh of bombers
@@ -138,7 +152,19 @@ void UMySkeletalMeshComponent::SetActive(bool bNewActive, bool bReset/*= false*/
 {
 	Super::SetActive(bNewActive, bReset);
 
-	SetHiddenInGame(!bNewActive, true);
+	// If anything activates or disables this preview actor, change its visibility as well
+	constexpr bool bPropagateToChildren = false; // don't affect attached actors such as Camera
+	SetHiddenInGame(!bNewActive, bPropagateToChildren);
+
+	// Handle all attached props
+	for (UMeshComponent* AttachedMeshIt : AttachedMeshesInternal)
+	{
+		if (AttachedMeshIt)
+		{
+			AttachedMeshIt->SetActive(bNewActive, bReset);
+			AttachedMeshIt->SetHiddenInGame(!bNewActive, bPropagateToChildren);
+		}
+	}
 }
 
 // Init this component by specified player data
@@ -160,9 +186,20 @@ void UMySkeletalMeshComponent::InitMySkeletalMesh(const FCustomPlayerMeshData& C
 	USkeletalMesh* NewSkeletalMesh = Cast<USkeletalMesh>(CustomPlayerMeshData.PlayerRow->Mesh);
 	SetSkeletalMesh(NewSkeletalMesh, true);
 
+	UpdateSkinTextures();
+
 	AttachProps();
 
 	SetSkin(CustomPlayerMeshData.SkinIndex);
+}
+
+// Creates dynamic material instance for each skin if is not done before
+void UMySkeletalMeshComponent::UpdateSkinTextures()
+{
+	if (ensureMsgf(PlayerMeshDataInternal.PlayerRow, TEXT("ASSERT: [%i] %hs:\n'PlayerRow' is null!"), __LINE__, __FUNCTION__))
+	{
+		const_cast<UPlayerRow*>(PlayerMeshDataInternal.PlayerRow.Get())->UpdateSkinTextures();
+	}
 }
 
 // Returns level type to which this mesh is associated with
@@ -220,9 +257,9 @@ void UMySkeletalMeshComponent::AttachProps()
 	for (const FAttachedMesh& AttachedMeshIt : PlayerProps)
 	{
 		UMeshComponent* MeshComponent = nullptr;
-		if (const auto SkeletalMeshProp = Cast<USkeletalMesh>(AttachedMeshIt.AttachedMesh))
+		if (USkeletalMesh* SkeletalMeshProp = Cast<USkeletalMesh>(AttachedMeshIt.AttachedMesh))
 		{
-			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this, NAME_None, RF_Transient);
+			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this);
 			SkeletalComponent->SetSkeletalMesh(SkeletalMeshProp);
 			SkeletalComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 			if (AttachedMeshIt.MeshAnimation)
@@ -231,9 +268,9 @@ void UMySkeletalMeshComponent::AttachProps()
 			}
 			MeshComponent = SkeletalComponent;
 		}
-		else if (const auto StaticMeshProp = Cast<UStaticMesh>(AttachedMeshIt.AttachedMesh))
+		else if (UStaticMesh* StaticMeshProp = Cast<UStaticMesh>(AttachedMeshIt.AttachedMesh))
 		{
-			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this, NAME_None, RF_Transient);
+			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
 			StaticMeshComponent->SetStaticMesh(StaticMeshProp);
 			StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -249,17 +286,24 @@ void UMySkeletalMeshComponent::AttachProps()
 		MeshComponent->SetCastShadow(CastShadow);
 		MeshComponent->LightingChannels = LightingChannels;
 
-		// Attach the prop: location is 0, rotation is parent's world, scale is 1
 		AttachedMeshesInternal.Emplace(MeshComponent);
 		MeshComponent->SetupAttachment(GetAttachmentRoot());
 		MeshComponent->SetWorldTransform(GetComponentTransform());
+		MeshComponent->RegisterComponent();
+
+		// Attach the prop: location is 0, rotation is parent's world, scale is 1
+		constexpr bool bInWeldSimulatedBodies = true;
 		const FAttachmentTransformRules AttachRules(
 			EAttachmentRule::SnapToTarget,
 			EAttachmentRule::KeepWorld,
 			EAttachmentRule::SnapToTarget,
-			true);
+			bInWeldSimulatedBodies);
+
+		// Before attach, mark it as transient only for this operation to avoid Modify()-call that asks to save the level
+		// However, remove the flag next as props have to be cooked
+		MeshComponent->SetFlags(RF_Transient);
 		MeshComponent->AttachToComponent(this, AttachRules, AttachedMeshIt.Socket);
-		MeshComponent->RegisterComponent();
+		MeshComponent->ClearFlags(RF_Transient);
 	}
 }
 
@@ -285,12 +329,12 @@ bool UMySkeletalMeshComponent::ArePropsWantToUpdate() const
 	{
 		const bool bContains = AttachedMeshesInternal.ContainsByPredicate([&AttachedMeshIt](const UMeshComponent* MeshCompIt)
 		{
-			UMeshComponent* MeshComponent = nullptr;
 			if (const auto SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshCompIt))
 			{
 				return SkeletalMeshComp->GetSkinnedAsset() == AttachedMeshIt.AttachedMesh;
 			}
-			else if (const auto StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
+
+			if (const auto StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
 			{
 				return StaticMeshComp->GetStaticMesh() == AttachedMeshIt.AttachedMesh;
 			}
@@ -310,14 +354,14 @@ bool UMySkeletalMeshComponent::ArePropsWantToUpdate() const
 void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
 {
 	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
-	const int32 SkinTexturesNum = PlayerRow ? PlayerRow->GetMaterialInstancesDynamicNum() : 0;
+	const int32 SkinTexturesNum = PlayerRow ? PlayerRow->GetSkinTexturesNum() : 0;
 	if (!SkinTexturesNum)
 	{
 		return;
 	}
 
 	SkinIndex %= SkinTexturesNum;
-	const auto MaterialInstanceDynamic = PlayerRow->GetMaterialInstanceDynamic(SkinIndex);
+	class UMaterialInstanceDynamic* MaterialInstanceDynamic = PlayerRow->GetMaterialInstanceDynamic(SkinIndex);
 	if (!ensureMsgf(MaterialInstanceDynamic, TEXT("ASSERT: SetSkin: 'MaterialInstanceDynamic' is not valid contained by index %i"), SkinIndex))
 	{
 		return;

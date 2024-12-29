@@ -18,49 +18,37 @@
 // Returns the Levels Data Asset
 const UGeneratedMapDataAsset* UDataAssetsContainer::GetGeneratedMapDataAsset()
 {
-	const UGeneratedMapDataAsset* LevelsDataAsset = Get().GeneratedMapDataAssetInternal.LoadSynchronous();
-	checkf(LevelsDataAsset, TEXT("%s: 'LevelsDataAsset' is not loaded"), *FString(__FUNCTION__));
-	return LevelsDataAsset;
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UGeneratedMapDataAsset>(Get().GeneratedMapDataAssetInternal);
 }
 
 // Returns the UI Data Asset
 const UUIDataAsset* UDataAssetsContainer::GetUIDataAsset()
 {
-	const UUIDataAsset* UIDataAsset = Get().UIDataAssetInternal.LoadSynchronous();
-	checkf(UIDataAsset, TEXT("%s: 'UIDataAsset' is not loaded"), *FString(__FUNCTION__));
-	return UIDataAsset;
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UUIDataAsset>(Get().UIDataAssetInternal);
 }
 
 // Returns the AI Data Asset
 const UAIDataAsset* UDataAssetsContainer::GetAIDataAsset()
 {
-	const UAIDataAsset* AIDataAsset = Get().AIDataAssetInternal.LoadSynchronous();
-	checkf(AIDataAsset, TEXT("%s: 'AIDataAsset' is not loaded"), *FString(__FUNCTION__));
-	return AIDataAsset;
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UAIDataAsset>(Get().AIDataAssetInternal);
 }
 
 // Returns the Player Input Data Asset
 const UPlayerInputDataAsset* UDataAssetsContainer::GetPlayerInputDataAsset()
 {
-	const UPlayerInputDataAsset* PlayerInputDataAsset = Get().PlayerInputDataAssetInternal.LoadSynchronous();
-	checkf(PlayerInputDataAsset, TEXT("%s: 'PlayerInputDataAsset' is not loaded"), *FString(__FUNCTION__));
-	return PlayerInputDataAsset;
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UPlayerInputDataAsset>(Get().PlayerInputDataAssetInternal);
 }
 
 // Returns the Sounds Data Asset
 const USoundsDataAsset* UDataAssetsContainer::GetSoundsDataAsset()
 {
-	const USoundsDataAsset* SoundsDataAsset = Get().SoundsDataAssetInternal.LoadSynchronous();
-	checkf(SoundsDataAsset, TEXT("%s: 'SoundsDataAsset' is not loaded"), *FString(__FUNCTION__));
-	return SoundsDataAsset;
+	return UMyPrimaryDataAsset::GetOrLoadOnce<USoundsDataAsset>(Get().SoundsDataAssetInternal);
 }
 
 // Returns the Game State Data Asset
 const UGameStateDataAsset* UDataAssetsContainer::GetGameStateDataAsset()
 {
-	const UGameStateDataAsset* GameStateDataAsset = Get().GameStateDataAssetInternal.LoadSynchronous();
-	checkf(GameStateDataAsset, TEXT("%s: 'GameStateDataAsset' is not loaded"), *FString(__FUNCTION__));
-	return GameStateDataAsset;
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UGameStateDataAsset>(Get().GameStateDataAssetInternal);
 }
 
 // Best suits for blueprints to get the data asset by its class since converts the result to the specified class
@@ -71,11 +59,10 @@ const ULevelActorDataAsset* UDataAssetsContainer::GetLevelActorDataAsset(TSubcla
 		return nullptr;
 	}
 
-	const TArray<TSoftObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (const TSoftObjectPtr<ULevelActorDataAsset>& DataAssetSoftIt : ActorsDataAssets)
+	const UDataAssetsContainer& Container = Get();
+	for (const TSoftObjectPtr<const ULevelActorDataAsset>& DataAssetSoftIt : Container.ActorsDataAssetsInternal)
 	{
-		const ULevelActorDataAsset* DataAssetIt = DataAssetSoftIt.LoadSynchronous();
-		checkf(DataAssetIt, TEXT("%s: 'DataAssetIt' is not loaded"), *FString(__FUNCTION__));
+		const ULevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
 		if (DataAssetIt->IsA(DataAssetClass))
 		{
 			return DataAssetIt;
@@ -93,11 +80,10 @@ const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorClass(const
 		return nullptr;
 	}
 
-	const TArray<TSoftObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (const TSoftObjectPtr<ULevelActorDataAsset>& DataAssetSoftIt : ActorsDataAssets)
+	const UDataAssetsContainer& Container = Get();
+	for (const TSoftObjectPtr<const ULevelActorDataAsset>& DataAssetSoftIt : Container.ActorsDataAssetsInternal)
 	{
-		const ULevelActorDataAsset* DataAssetIt = DataAssetSoftIt.LoadSynchronous();
-		checkf(DataAssetIt, TEXT("%s: 'DataAssetIt' is not loaded"), *FString(__FUNCTION__));
+		const ULevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
 
 		const UClass* ActorClassIt = DataAssetIt ? DataAssetIt->GetActorClass() : nullptr;
 		if (ActorClassIt
@@ -110,13 +96,12 @@ const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorClass(const
 }
 
 // Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types.
-void UDataAssetsContainer::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
+void UDataAssetsContainer::GetDataAssetsByActorTypes(TArray<const ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
 {
-	const TArray<TSoftObjectPtr<ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (const TSoftObjectPtr<ULevelActorDataAsset>& DataAssetSoftIt : ActorsDataAssets)
+	const TArray<TSoftObjectPtr<const ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
+	for (const TSoftObjectPtr<const ULevelActorDataAsset>& DataAssetSoftIt : ActorsDataAssets)
 	{
-		ULevelActorDataAsset* DataAssetIt = DataAssetSoftIt.LoadSynchronous();
-		checkf(DataAssetIt, TEXT("%s: 'DataAssetIt' is not loaded"), *FString(__FUNCTION__));
+		const ULevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
 
 		if (DataAssetIt
 		    && (ActorsTypesBitmask & TO_FLAG(DataAssetIt->GetActorType())) != 0)
@@ -129,7 +114,7 @@ void UDataAssetsContainer::GetDataAssetsByActorTypes(TArray<ULevelActorDataAsset
 // Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type
 const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorType(EActorType ActorType)
 {
-	TArray<ULevelActorDataAsset*> FoundDataAssets;
+	TArray<const ULevelActorDataAsset*> FoundDataAssets;
 	GetDataAssetsByActorTypes(FoundDataAssets, TO_FLAG(ActorType));
 	return FoundDataAssets.IsValidIndex(0) ? FoundDataAssets[0] : nullptr;
 }

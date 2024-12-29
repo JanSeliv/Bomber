@@ -7,9 +7,8 @@
 #include "Components/MySkeletalMeshComponent.h"
 #include "Components/NMMSpotComponent.h"
 #include "Controllers/MyPlayerController.h"
-#include "Data/NMMSubsystem.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
@@ -24,17 +23,18 @@ void UNewMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// Hide this widget by default
-	SetVisibility(ESlateVisibility::Collapsed);
-
-	// Listen states to spawn widgets
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	// Listen Main Menu states
+	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
+	BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(this, &ThisClass::OnNewMainMenuStateChanged);
+	if (BaseSubsystem.GetCurrentMenuState() != ENMMState::None)
 	{
-		BindOnGameStateChanged(MyGameState);
+		// State is already set, apply it
+		OnNewMainMenuStateChanged(BaseSubsystem.GetCurrentMenuState());
 	}
-	else if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
+	else // Is none state
 	{
-		MyPC->OnGameStateCreated.AddUniqueDynamic(this, &ThisClass::BindOnGameStateChanged);
+		// Hide this widget by default if is none state
+		SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	if (PlayButton)
@@ -74,41 +74,25 @@ void UNewMainMenuWidget::NativeConstruct()
 	}
 }
 
-// Called when the current game state was changed
-void UNewMainMenuWidget::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void UNewMainMenuWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewState)
 {
-	// Show this widget in Menu game state
-	SetVisibility(CurrentGameState == ECurrentGameState::Menu ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-}
-
-// Is called to prepare the Main Menu widget for Menu game state
-void UNewMainMenuWidget::BindOnGameStateChanged(AMyGameStateBase* MyGameState)
-{
-	checkf(MyGameState, TEXT("ERROR: 'MyGameState' is null!"));
-
-	// Listen states to handle this widget behavior
-	MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-
-	if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-	{
-		// Handle current game state if initialized with delay
-		OnGameStateChanged(ECurrentGameState::Menu);
-	}
+	// Show this widget in Idle Menu state
+	SetVisibility(NewState == ENMMState::Idle ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 }
 
 // Is called when player pressed the button to start the game
 void UNewMainMenuWidget::OnPlayButtonPressed()
 {
 	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
-	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %s:\n'MyPc' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPc' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
+	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
 	const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
-	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %s:\n'CinematicRow' is not valid!"), __LINE__, *FString(__FUNCTION__))
-		|| !MainMenuSpot->GetMeshChecked().IsVisible())
+	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %hs:\n'CinematicRow' is not valid!"), __LINE__, __FUNCTION__)
+		|| !MainMenuSpot->IsSpotAvailable())
 	{
 		// The spot is locked
 		return;
@@ -116,10 +100,14 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
-	// Start cinematic
-	// If should skip, then start the game instead
-	const ECGS NewState = !UNMMUtils::ShouldSkipCinematic(CinematicRow) ? ECGS::Cinematic : ECGS::GameStarting;
-	MyPC->ServerSetGameState(NewState);
+	if (UNMMUtils::ShouldSkipCinematic(CinematicRow))
+	{
+		MyPC->SetGameStartingState();
+	}
+	else
+	{
+		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Cinematic);
+	}
 }
 
 // Is called when player pressed the button to choose next player
@@ -139,9 +127,7 @@ void UNewMainMenuWidget::OnPrevPlayerButtonPressed()
 // Sets the preview mesh of a player depending on specified incrementer
 void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 {
-	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerState' is not valid"))
-		|| !Incrementer)
+	if (!Incrementer)
 	{
 		return;
 	}
@@ -150,31 +136,15 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
-	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().MoveMainMenuSpot(Incrementer);
-
-	// Update the chosen player mesh on the level
-	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuSpot ? MainMenuSpot->GetMeshChecked().GetCustomPlayerMeshData() : FCustomPlayerMeshData::Empty;
-	if (CustomPlayerMeshData.IsValid())
-	{
-		LocalPlayerCharacter->ServerSetCustomPlayerMeshData(CustomPlayerMeshData);
-	}
+	UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
 }
 
 // Sets the next skin in the Menu
 void UNewMainMenuWidget::OnNextSkinButtonPressed()
 {
-	APlayerCharacter* LocalPlayerCharacter = GetOwningPlayerPawn<APlayerCharacter>();
-	const UNMMSpotComponent* MainMenuSpot = UNMMSubsystem::Get().GetActiveMainMenuSpotComponent();
-	if (!ensureMsgf(LocalPlayerCharacter, TEXT("ASSERT: 'LocalPlayerCharacter' is not valid"))
-		|| !ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid")))
-	{
-		return;
-	}
-
-	UMySkeletalMeshComponent& MainMenuMeshComp = MainMenuSpot->GetMeshChecked();
-	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp.GetCustomPlayerMeshData();
-	if (!ensureMsgf(CustomPlayerMeshData.IsValid(), TEXT("ASSERT: 'CustomPlayerMeshData' is not valid"))
-		|| !MainMenuMeshComp.IsVisible())
+	UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
+	if (!ensureMsgf(MainMenuSpot, TEXT("ASSERT: 'MainMenuSpot' is not valid"))
+		|| !MainMenuSpot->IsSpotAvailable())
 	{
 		// The spot is locked
 		return;
@@ -182,13 +152,15 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
-	// Switch the preview skin
+	// Switch the preview skin on the spot
 	static constexpr int32 NextSkin = 1;
+	UMySkeletalMeshComponent& MainMenuMeshComp = MainMenuSpot->GetMeshChecked();
+	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp.GetCustomPlayerMeshData();
 	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + NextSkin;
 	MainMenuMeshComp.SetSkin(NewSkinIndex);
 
-	// Update the player data
-	LocalPlayerCharacter->ServerSetCustomPlayerMeshData(MainMenuMeshComp.GetCustomPlayerMeshData());
+	// Update in-game player skin
+	MainMenuSpot->ApplyMeshOnPlayer();
 }
 
 // Is called when player pressed the button to open the Settings

@@ -7,10 +7,6 @@
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/Engine.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Engine/SkeletalMesh.h"
-#include "Engine/StaticMesh.h"
 //---
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -51,8 +47,9 @@ bool UUtilsLibrary::IsEditor()
 {
 #if WITH_EDITOR
 	return FEditorUtilsLibrary::IsEditor();
-#endif
+#else
 	return false;
+#endif
 }
 
 // Checks is the current world placed in the editor and the game not started yet
@@ -60,8 +57,9 @@ bool UUtilsLibrary::IsEditorNotPieWorld()
 {
 #if WITH_EDITOR
 	return FEditorUtilsLibrary::IsEditorNotPieWorld();
-#endif
+#else
 	return false;
+#endif
 }
 
 // Returns true if game is started in the Editor
@@ -69,8 +67,9 @@ bool UUtilsLibrary::IsPIE()
 {
 #if WITH_EDITOR
 	return FEditorUtilsLibrary::IsPIE();
-#endif
+#else
 	return false;
+#endif
 }
 
 // Returns true if is started multiplayer game (server + client(s)) right in the Editor
@@ -78,8 +77,9 @@ bool UUtilsLibrary::IsEditorMultiplayer()
 {
 #if WITH_EDITOR
 	return FEditorUtilsLibrary::IsEditorMultiplayer();
-#endif
+#else
 	return false;
+#endif
 }
 
 // Returns the index of current player during editor multiplayer
@@ -87,8 +87,9 @@ int32 UUtilsLibrary::GetEditorPlayerIndex()
 {
 #if WITH_EDITOR
 	return FEditorUtilsLibrary::IsEditorMultiplayer();
-#endif
+#else
 	return INDEX_NONE;
+#endif
 }
 
 // Returns true if game was started
@@ -101,13 +102,6 @@ bool UUtilsLibrary::HasWorldBegunPlay()
 
 	const UWorld* World = GetPlayWorld();
 	return World && World->HasBegunPlay();
-}
-
-// Returns true if this instance is server
-bool UUtilsLibrary::IsServer()
-{
-	const UWorld* World = GetPlayWorld();
-	return World && !World->IsNetMode(NM_Client);
 }
 
 // Returns true if viewport is initialized, is always true in PIE, but takes a while in builds
@@ -154,17 +148,4 @@ TEnumAsByte<EAspectRatioAxisConstraint> UUtilsLibrary::GetViewportAspectRatioAxi
 	const APlayerController* PlayerController = GEngine ? GEngine->GetFirstLocalPlayerController(GWorld) : nullptr;
 	const ULocalPlayer* LocalPlayer = PlayerController ? PlayerController->GetLocalPlayer() : nullptr;
 	return LocalPlayer ? LocalPlayer->AspectRatioAxisConstraint : TEnumAsByte(AspectRatio_MAX);
-}
-
-// Abstract method that allows set both static and skeletal meshes to the specified mesh component
-void UUtilsLibrary::SetMesh(UMeshComponent* MeshComponent, UStreamableRenderAsset* MeshAsset)
-{
-	if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponent))
-	{
-		SkeletalMeshComponent->SetSkeletalMesh(Cast<USkeletalMesh>(MeshAsset));
-	}
-	else if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent))
-	{
-		StaticMeshComponent->SetStaticMesh(Cast<UStaticMesh>(MeshAsset));
-	}
 }

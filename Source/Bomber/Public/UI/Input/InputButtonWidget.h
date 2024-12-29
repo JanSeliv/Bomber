@@ -4,7 +4,7 @@
 
 #include "UI/SettingSubWidget.h"
 //---
-#include "EnhancedActionKeyMapping.h"
+#include "UserSettings/EnhancedInputUserSettings.h" // FPlayerKeyMapping
 //---
 #include "InputButtonWidget.generated.h"
 
@@ -26,11 +26,11 @@ class BOMBER_API UInputButtonWidget final : public USettingSubWidget
 public:
 	/** Sets this button to let player remap input specified in mappable data. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void InitButton(const FEnhancedActionKeyMapping& InMappableData, const class UMyInputMappingContext* InInputMappingContext);
+	void InitButton(const FPlayerKeyMapping& InMappableData, const class UMyInputMappingContext* InInputMappingContext);
 
 	/** Returns last selected key for the current input selector. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FKey& GetCurrentKey() const { return MappableDataInternal.Key; }
+	const FORCEINLINE FKey& GetCurrentKey() const { return MappableDataInternal.GetCurrentKey(); }
 
 	/** Sets specified key for the current input key selector. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -42,12 +42,12 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** A widget for remapping a single key. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UInputKeySelector> InputKeySelector = nullptr;
 
 	/** Contains mappable data for this button. */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mappable Data"))
-	FEnhancedActionKeyMapping MappableDataInternal;
+	FPlayerKeyMapping MappableDataInternal;
 
 	/** An input context that is owns this input button. */
 	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Context"))

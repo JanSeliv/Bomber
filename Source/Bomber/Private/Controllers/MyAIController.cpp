@@ -6,28 +6,22 @@
 #include "Components/MapComponent.h"
 #include "DataAssets/AIDataAsset.h"
 #include "DataAssets/GameStateDataAsset.h"
+#include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
+#include "GameFramework/MyPlayerState.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "TimerManager.h"
 #include "Components/GameFrameworkComponentManager.h"
 //---
 #if WITH_EDITOR
 #include "MyUnrealEdEngine.h"
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MyAIController)
-
-// Enable or disable all bots
-static TAutoConsoleVariable<bool> CVarAISetEnabled(
-	TEXT("Bomber.AI.SetEnabled"),
-	true,
-	TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
-	ECVF_Default);
 
 // Sets default values for this character's properties
 AMyAIController::AMyAIController()
@@ -54,7 +48,7 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 	}
 
 #if WITH_EDITOR	 // [IsEditor]
-	if (FEditorUtilsLibrary::IsEditor())
+	if (UUtilsLibrary::IsEditor())
 	{
 		// Visualize and show destination cell
 		if (UUtilsLibrary::HasWorldBegunPlay()) // PIE
@@ -116,35 +110,44 @@ void AMyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	if (!InPawn)
+	OwnerInternal = Cast<APlayerCharacter>(InPawn);
+	if (!OwnerInternal)
 	{
 		return;
 	}
 
-	OwnerInternal = Cast<APlayerCharacter>(InPawn);
-
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld()
-	    && !UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
-		UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		if (!UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
+		{
+			UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+		}
+
+		// ! It's editor not Pie World, don't continue further runtime logic
+		return;
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
-	// Listen states
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		MyGameState->OnGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnGameStateChanged);
-
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
 	SetAI(bMatchStarted);
+
+	if (GetPlayerState<AMyPlayerState>() == nullptr)
+	{
+		// Spawn Player State for AI to replicate game-relevant info like scores, teams etc
+		InitPlayerState();
+		AMyPlayerState* NewPlayerState = GetPlayerState<AMyPlayerState>();
+		checkf(NewPlayerState, TEXT("ERROR: [%i] %s:\n'NewPlayerState' was not spawned!"), __LINE__, *FString(__FUNCTION__));
+		OwnerInternal->SetPlayerState(NewPlayerState);
+
+		// Update default nickname for AI
+		NewPlayerState->SetDefaultBotName();
+	}
+
+	// Notify host about bot possession
+	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterPossessed(*OwnerInternal);
 }
 
 // Allows the controller to react on unpossessing the pawn
@@ -155,7 +158,7 @@ void AMyAIController::OnUnPossess()
 	OwnerInternal = nullptr;
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld())
+	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.RemoveAll(this);
 	}
@@ -188,20 +191,18 @@ void AMyAIController::UpdateAI()
 	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
 	if (!OwnerInternal
 	    || !IsValid(MapComponent)
-	    || !CVarAISetEnabled.GetValueOnAnyThread()) // AI is disabled
+	    || !UMyCheatManager::CVarAISetEnabled.GetValueOnAnyThread()) // AI is disabled
 	{
 		return;
 	}
 
 	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
 
-#if WITH_EDITOR
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	if (UUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
 		UCellsUtilsLibrary::ClearDisplayedCells(OwnerInternal);
 		AIMoveToInternal = FCell::InvalidCell;
 	}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]
 
 	// ----- Part 0: Before iterations -----
 

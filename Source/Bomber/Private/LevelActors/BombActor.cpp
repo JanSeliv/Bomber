@@ -7,13 +7,15 @@
 #include "Components/MapComponent.h"
 #include "DataAssets/BombDataAsset.h"
 #include "DataAssets/DataAssetsContainer.h"
+#include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Structures/Cell.h"
+#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
+#include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "TimerManager.h"
 #include "Components/BoxComponent.h"
@@ -59,55 +61,80 @@ void ABombActor::ConstructBombActor()
 FCells ABombActor::GetExplosionCells() const
 {
 	if (IsHidden()
-	    || FireRadiusInternal < MIN_FIRE_RADIUS
-	    || !MapComponentInternal)
+	    || !MapComponentInternal
+	    || GetExplosionRadius() < MIN_FIRE_RADIUS)
 	{
 		return FCell::EmptyCells;
 	}
 
-	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, FireRadiusInternal);
+	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, GetExplosionRadius());
+}
+
+// Returns radius of the blast to each side
+int32 ABombActor::GetExplosionRadius() const
+{
+#if !UE_BUILD_SHIPPING
+	const int32 CheatOverride = UMyCheatManager::CVarBombRadius.GetValueOnAnyThread();
+	if (CheatOverride > MIN_FIRE_RADIUS)
+	{
+		return CheatOverride;
+	}
+#endif //!UE_BUILD_SHIPPING
+
+	return FireRadiusInternal;
+}
+
+//  Returns the type of the bomb
+ELevelType ABombActor::GetBombType() const
+{
+	return MapComponentInternal ? MapComponentInternal->GetLevelType() : ELevelType::None;
+}
+
+// Applies the bomb type. It impacts the bomb mesh, material and VFX
+void ABombActor::SetBombType(ELevelType InBombType)
+{
+	const ULevelActorRow* BombRow = UBombDataAsset::Get().GetRowByLevelType(InBombType);
+	UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
+	if (!ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %hs:\n'BombMesh' is not found"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	// Override mesh
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	MapComponentInternal->SetCustomMeshAsset(BombMesh);
+
+	// Override material
+	BombMaterialInternal = BombMesh->GetMaterial(0);
 }
 
 // Sets the defaults of the bomb
 void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 {
-	if (!HasAuthority())
+	if (!HasAuthority()
+	    || !MapComponentInternal)
 	{
 		return;
 	}
 
 	int32 InFireRadius = MIN_FIRE_RADIUS;
-	int32 CharacterID = INDEX_NONE;
-	ELevelType PlayerType = ELevelType::None;
-	if (Causer)
+	int32 PlayerIndex = INDEX_NONE;
+	if (Causer) // Might be null if spawned from external source (e.g. cheat manager)
 	{
-		CharacterID = Causer->GetCharacterID();
+		PlayerIndex = Causer->GetPlayerId();
 		InFireRadius = Causer->GetPowerups().FireN;
-		PlayerType = Causer->GetPlayerType();
+		SetBombType(Causer->GetPlayerType());
 	}
 
 	const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
-
-	const ULevelActorRow* BombRow = BombDataAsset.GetRowByLevelType(PlayerType);
-	UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
-	if (ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %s:\n'BombMesh' is not found"), __LINE__, *FString(__FUNCTION__)))
-	{
-		// Override mesh
-		checkf(MapComponentInternal, TEXT("ERROR: [%i] %s:\n'MapComponentInternal' is null!"), __LINE__, *FString(__FUNCTION__));
-		MapComponentInternal->SetCustomMeshAsset(BombMesh);
-
-		// Override material
-		BombMaterialInternal = BombMesh->GetMaterial(0);
-	}
-
-	if (PlayerType == ELevelType::None)
+	if (GetBombType() == ELevelType::None)
 	{
 		// Is bot character, set material for its default bomb with the same mesh
 		const int32 BombMaterialsNum = BombDataAsset.GetBombMaterialsNum();
-		if (CharacterID != INDEX_NONE // Is not debug character
+		if (PlayerIndex != INDEX_NONE // Is not debug character
 		    && BombMaterialsNum)      // As least one bomb material
 		{
-			const int32 MaterialIndex = FMath::Abs(CharacterID) % BombMaterialsNum;
+			const int32 MaterialIndex = FMath::Abs(PlayerIndex) % BombMaterialsNum;
 			BombMaterialInternal = BombDataAsset.GetBombMaterial(MaterialIndex);
 		}
 	}
@@ -184,17 +211,8 @@ void ABombActor::BeginPlay()
 	{
 		SetLifeSpan();
 	}
-	else if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
-	{
-		// This dragged bomb should start listening in-game state to set lifespan
-		MyGameState->OnGameStateChanged.AddDynamic(this, &ThisClass::OnGameStateChanged);
 
-		// Handle current game state if initialized with delay
-		if (MyGameState->GetCurrentGameState() == ECurrentGameState::Menu)
-		{
-			OnGameStateChanged(ECurrentGameState::Menu);
-		}
-	}
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -258,26 +276,27 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 		DetonateBomb();
 
 		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
+
+		BombMaterialInternal = nullptr;
 	}
 
 	// Apply hidden flag
 	Super::SetActorHiddenInGame(bNewHidden);
 }
 
+// Destroy bomb and burst explosion cells, calls multicast event
 void ABombActor::DetonateBomb()
 {
 	if (!HasAuthority()
 	    || IsHidden()
-	    || FireRadiusInternal < MIN_FIRE_RADIUS
 	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
 
 	const FCells ExplosionCells = GetExplosionCells();
-	if (ExplosionCells.IsEmpty())
+	if (!ensureMsgf(!ExplosionCells.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'ExplosionCells' is empty!"), __LINE__, __FUNCTION__))
 	{
-		// No cells to destroy
 		return;
 	}
 
@@ -287,14 +306,20 @@ void ABombActor::DetonateBomb()
 // Destroy bomb and burst explosion cells
 void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& ExplosionCells)
 {
+	const UBombRow* BombRow = UBombDataAsset::Get().GetRowByLevelType<UBombRow>(GetBombType());
+	if (!ensureMsgf(BombRow, TEXT("ASSERT: [%i] %hs:\n'BombRow' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
 	// Reset Fire Radius to avoid destroying the bomb again
-	FireRadiusInternal = INDEX_NONE;
+	FireRadiusInternal = MIN_FIRE_RADIUS;
 
 	// Spawn emitters
-	UNiagaraSystem* ExplosionParticle = UBombDataAsset::Get().GetExplosionVFX();
+	ensureMsgf(BombRow->BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombRow->BombVFX' is not set!"), __LINE__, __FUNCTION__);
 	for (const FCell& Cell : ExplosionCells)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ExplosionParticle, Cell.Location, GetActorRotation(), GetActorScale());
+		SpawnedVFXsInternal.Add(UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, BombRow->BombVFX, Cell.Location, GetActorRotation(), GetActorScale()));
 	}
 
 	// Destroy all actors from array of cells
@@ -302,7 +327,9 @@ void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& Explo
 
 	USoundsSubsystem::Get().PlayExplosionSFX();
 
-	GetWorldTimerManager().ClearTimer(TimerHandle_LifeSpanExpired);
+	FTimerManager& TimerManager = GetWorldTimerManager();
+	TimerManager.ClearTimer(TimerHandle_LifeSpanExpired);
+	TimerManager.SetTimer(VFXDurationExpiredTimerHandle, this, &ThisClass::OnVFXDurationExpired, UBombDataAsset::Get().GetVFXDuration());
 }
 
 // Triggers when character end to overlaps with this bomb.
@@ -350,7 +377,7 @@ void ABombActor::UpdateCollisionResponseToAllPlayers()
 		{
 			if (const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OverlappingPlayerIt))
 			{
-				Bitmask |= 1 << PlayerCharacter->GetCharacterID();
+				Bitmask |= 1 << PlayerCharacter->GetPlayerId();
 			}
 		}
 
@@ -440,4 +467,17 @@ void ABombActor::ApplyMaterial()
 void ABombActor::OnRep_BombMaterial()
 {
 	ApplyMaterial();
+}
+
+// Is called when the bomb VFX duration is expired
+void ABombActor::OnVFXDurationExpired()
+{
+	for (UNiagaraComponent* VfxIt : SpawnedVFXsInternal)
+	{
+		if (VfxIt)
+		{
+			VfxIt->Deactivate();
+		}
+	}
+	SpawnedVFXsInternal.Empty();
 }

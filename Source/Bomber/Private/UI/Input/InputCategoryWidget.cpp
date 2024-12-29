@@ -8,20 +8,20 @@
 #include "UI/SettingsWidget.h"
 #include "UI/Input/InputButtonWidget.h"
 //---
-#include "EnhancedActionKeyMapping.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
+#include "UserSettings/EnhancedInputUserSettings.h" // FPlayerKeyMapping
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(InputCategoryWidget)
 
 // Returns all categories from the specified input mapping context
-void FInputCategoryData::GetCategoriesDataFromMappings(const UMyInputMappingContext& InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData)
+void FInputCategoryData::GetCategoriesDataFromMappings(const UObject& WorldContext, const UMyInputMappingContext& InInputMappingContext, TArray<FInputCategoryData>& OutInputCategoriesData)
 {
-	TArray<FEnhancedActionKeyMapping> AllMappings;
-	UInputUtilsLibrary::GetAllMappingsInContext(&InInputMappingContext, /*out*/AllMappings);
+	TArray<FPlayerKeyMapping> AllMappings;
+	UInputUtilsLibrary::GetAllMappingsInContext(&WorldContext, &InInputMappingContext, /*out*/AllMappings);
 
 	// Find all categories in every mapping
-	for (const FEnhancedActionKeyMapping& MappingIt : AllMappings)
+	for (const FPlayerKeyMapping& MappingIt : AllMappings)
 	{
 		const FText& DisplayCategory = MappingIt.GetDisplayCategory();
 		FInputCategoryData* CategoryData = OutInputCategoriesData.FindByPredicate([&DisplayCategory](const FInputCategoryData& CategoryDataIt)
@@ -56,7 +56,7 @@ void UInputCategoryWidget::CreateInputButtons(const FInputCategoryData& InInputC
 
 	InputCategoryDataInternal = InInputCategoryData;
 
-	for (const FEnhancedActionKeyMapping& MappableDataIt : InInputCategoryData.Mappings)
+	for (const FPlayerKeyMapping& MappableDataIt : InInputCategoryData.Mappings)
 	{
 		FSettingsPrimary NewPrimaryRow = PrimaryDataInternal;
 		UInputButtonWidget* InputButtonWidget = GetSettingsWidgetChecked().CreateSettingSubWidget<UInputButtonWidget>(NewPrimaryRow, InputButtonClassInternal);

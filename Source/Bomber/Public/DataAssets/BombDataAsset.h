@@ -7,6 +7,20 @@
 #include "BombDataAsset.generated.h"
 
 /**
+ * Describes bomb by mesh.
+ */
+UCLASS(Blueprintable, BlueprintType)
+class BOMBER_API UBombRow final : public ULevelActorRow
+{
+	GENERATED_BODY()
+
+public:
+	/** VFX of the bomb. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
+	TObjectPtr<class UNiagaraSystem> BombVFX = nullptr;
+};
+
+/**
  * Describes common data for all bombs.
  */
 UCLASS(Blueprintable, BlueprintType)
@@ -25,6 +39,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE float GetLifeSpan() const { return LifeSpanInternal; }
 
+	/** Returns the duration of the bomb VFX. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	FORCEINLINE float GetVFXDuration() const { return VFXDurationInternal; }
+
 	/** Returns the amount of bomb materials. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetBombMaterialsNum() const { return BombMaterialsInternal.Num(); }
@@ -34,20 +52,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMaterialInterface* GetBombMaterial(int32 Index) const { return BombMaterialsInternal.IsValidIndex(Index) ? BombMaterialsInternal[Index] : nullptr; }
 
-	/** Get the bomb explosion VFX. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE class UNiagaraSystem* GetExplosionVFX() const { return ExplosionVFXInternal; }
-
 protected:
 	/** The lifetime of a bomb. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Life Span", ShowOnlyInnerProperties))
 	float LifeSpanInternal = 2.f;
 
+	/** The duration of the bomb VFX. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "VFX Duration", ShowOnlyInnerProperties))
+	float VFXDurationInternal = 1.f;
+
 	/** All bomb materials. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Bomb Materials", ShowOnlyInnerProperties))
 	TArray<TObjectPtr<class UMaterialInterface>> BombMaterialsInternal;
-
-	/** The emitter of the bomb explosion */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Particle", ShowOnlyInnerProperties))
-	TObjectPtr<class UNiagaraSystem> ExplosionVFXInternal = nullptr;
 };

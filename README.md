@@ -1,11 +1,11 @@
 <a href="https://github.com/JanSeliv/Bomber/blob/main/LICENSE">![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)</a>
-<a href="https://www.unrealengine.com/">![Unreal Engine](https://img.shields.io/badge/Unreal-5.3-dea309?style=flat&logo=unrealengine)</a>
+<a href="https://www.unrealengine.com/">![Unreal Engine](https://img.shields.io/badge/Unreal-5.4-dea309?style=flat&logo=unrealengine)</a>
 
 <br/>
 <p align="center">
 <a href="https://github.com/JanSeliv/Bomber">
 </a>
-<h3 align="center">💣 Bomber Project</h3>
+<h3 align="center">💣 Bomberrage</h3>
 <p align="center">
 <a href="https://discord.gg/jbWgwDefnE"><strong>Join our Discord ››</strong></a>
 <br/>
@@ -14,19 +14,22 @@
 <a href="https://trello.com/b/1jbKvyeh/bomber-kanban">Kanban Board</a>
 <br/>
 <br/>
-<img src="https://github.com/user-attachments/assets/e8774b8b-2f76-42f1-8eae-e6849658d2d3" alt="Logo" width="360" height="270">
+<img src="https://github.com/user-attachments/assets/835bfb02-76ee-4373-a00b-543a0bde7057" width="1440">
 </p>
 
 ## 🌟 About
 
-Bomber is an open-source multiplayer game developed on Unreal Engine 5 for Windows and MacOS, offering fast-paced, bomb-laying action where the objective is to be the last one standing.
+Bomberrage is an open-source indie game developed on Unreal Engine 5 for Windows, MacOS and Linux.
 
-![Bomber](https://github.com/JanSeliv/Bomber/assets/20540872/2898eace-7a57-44d1-9530-4a5abc235b2d)
+Forget hidden exits and classic rules - Bomberrage is a fast, competitive game where you beat tough AI or friends in explosive multiplayer battles!
+
+![Bomberrage](https://github.com/user-attachments/assets/e8774b8b-2f76-42f1-8eae-e6849658d2d3)
 
 ## Table of Contents
 
 - [💣 About the Bomber Project](#-about-the-bomber-project)
 - [🚀 Getting Started](#-getting-started)
+- [💻 Platforms and Requirements](#-platforms-and-requirements)
 - [🛠 Key Features](#-key-features)
 - [💾 Play the Build](#-play-the-build)
 - [📋 Kanban Board](#-kanban-board)
@@ -47,6 +50,16 @@ If already cloned without submodules, you'll find empty folders in `Bomber\Plugi
 git submodule update --init --recursive
 ```
 
+## 💻 Platforms and Requirements
+
+The project has been tested and verified to run on the following platforms:
+
+- **Windows 10 22H2**
+- **macOS Sonoma 14.4** (Apple M2 hardware)
+- **Ubuntu 22.04 LTS**
+
+**Project Disk Space:** 33GB
+
 ## 🛠 Key Features
 
 This project could be useful for learners, demonstrating next features:
@@ -57,6 +70,8 @@ This project could be useful for learners, demonstrating next features:
 - Enhanced Input
 - Modular Game Features
 - Complex cinematics (Level Sequences)
+- World Partition
+- Model-View-ViewModel (MVVM) UI Pattern
 - Data-Driven Design (Data Assets, Data Tables, Data Registries, _see below_)
 
 Despite this project is fully written in C++, it's extremely **blueprint-friendly**:
@@ -73,6 +88,7 @@ Next [plugins](https://github.com/JanSeliv/Bomber/tree/master/Plugins) were deve
 - [🎭 Morphs Player](https://github.com/JanSeliv/MorphsPlayer)
 - [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
 - [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
+- [✂️ Level Sequencer Audio Trimmer](https://github.com/JanSeliv/LevelSequencerAudioTrimmer)
 
 ## 💾 Play the Build
 
@@ -85,62 +101,77 @@ Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a 
 Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
 ## 📅 Changelog
-#### `13.01.2024`
+#### `2024-12-29:`
+- Updated to **Unreal Engine 5.4**.
+- Added **Linux** support (tested on Ubuntu 22.04 LTS)
+- Introduced **In-Game User Interface** with completely new look, utilizing the **Model-View-ViewModel** (MVVM) pattern:
+> ![NewHUD](https://github.com/JanSeliv/Bomber/assets/20540872/73c3c7f7-02b5-4d54-b34f-b354201bfc06)
+- Added cinematic for the Roger character on the Maya level by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
+> ![RogerCinematic](https://github.com/JanSeliv/Bomber/assets/20540872/9931d8da-e8cb-4cf5-ab61-361f48afa20b)
+- Added cinematic for the Bastet character on the Maya level by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
+> ![BastetCinematic](https://github.com/JanSeliv/Bomber/assets/20540872/0602cc7c-f68c-46fa-9400-46a8bc35c73c)
+- Implemented **Switch Camera Transitions** between characters in Main Menu:
+> ![Rails](https://github.com/JanSeliv/Bomber/assets/20540872/aa496ae1-a6bb-41d1-a578-566d1af48170)
+- Unique **Bomb VFX** for each character:
+> ![BombVFXs](https://github.com/JanSeliv/Bomber/assets/20540872/3163ade3-7f5f-40be-9c9e-69c0426b8a29)
+- Implemented **[Progression System](https://github.com/h4rdmol/ProgressionSystem)** by [Valeriy Rotermel](https://github.com/h4rdmol) that unlocks new playable characters as you progress in the game:
+> ![ProgressionSystem](https://github.com/user-attachments/assets/742ad861-f077-44f8-a6ae-048665b8a77f)
+- New **Box and Wall meshes** for the Maya level by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
+> ![NewBoxAndWall](https://github.com/user-attachments/assets/01e72eb6-ca89-4392-957c-92aba9663cdc)
+- Implemented **Credits** screen by [Yevhenii Oksenchuk](https://t.me/ComeThird):
+> ![Credits](https://github.com/user-attachments/assets/5ec5c208-9b3e-4b1c-be3d-711a973ce652)
+- New **Splash** by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
+> ![Splash](https://github.com/user-attachments/assets/8df95267-6c8d-4434-bb18-c7381c4ef601)
+- Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
+ ---
+#### `2024-01-13:`
 - Updated to **Unreal Engine 5.3**.
 - **New Main Menu** with completely different UI and complex cinematics for Hugo and Fori characters on starting the game:
 > ![NewMainMenu](https://github.com/JanSeliv/Bomber/assets/20540872/9c960fa4-6760-4298-a55b-54d0cb8a0b13)
-- **New Bomb meshes** for each character (shown from left to right: Bastet, Hugo, Fori, Roger):
+- **New Bomb meshes** for each character (shown from left to right: Bastet, Hugo, Fori, Roger) by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 > ![NewBombMeshes](https://github.com/JanSeliv/Bomber/assets/20540872/ce787e8c-d95c-4844-9282-e7aaff3dc243)
 - **New game icon**: ![GameIcon](https://github.com/JanSeliv/Bomber/assets/20540872/ca239a66-b550-4a45-ba4f-182d85e3c460)
-- **New Wall mesh** for the Maya level.
-#### `12.06.2023`
+ ---
+#### `2023-06-12:`
 - Updated to **Unreal Engine 5.2**.
 - Added **MacOS** support.
 - Added **Ultra-wide** resolutions support.
 - Extracted logic into plugins, so other developers can benefit from it in their projects
-- Added Foot Trails for the Maya level as `Modular Game Feature`:
+- Added Foot Trails for the Maya level by [Anton Selivanov](https://github.com/antokior):
 >  <img width="560" alt="image" src="https://github.com/JanSeliv/Bomber/assets/20540872/a77c2e38-4fd6-4a04-988e-05d9613bd97e">
-- New power-ups meshes for the Maya level (shown from left to right: move speed, bomb length, bomb quantity):
+- New power-ups meshes for the Maya level (shown from left to right: move speed, bomb length, bomb quantity) by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 >  <img width="360" alt="image" src="https://github.com/JanSeliv/Bomber/assets/20540872/1e526fda-e51a-479c-b541-acccc8457725">
 - Added new cheats such as: `Bomber.Level.SetSize 9x7` (find more on the [Bomber cheats page](https://trello.com/c/5PiHt7Ah/308-bomber-cheats))
-- Updated Main-Menu background music for all levels.
---- 
-#### `31.05.2022:`
-- Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
-- Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
-- Added new **SteelMan** character for AI players with 3 different skins.
+- Updated Main-Menu background music.
+ --- 
+#### `2022-05-31:`
+ - Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
+ - Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
+ - Added new **SteelMan** character for AI players with 3 different skins by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
 >  ![SteelMan_31-05-22](https://user-images.githubusercontent.com/20540872/171299202-3422db3c-7061-4b75-b51c-a08a67d65ab5.gif)
  ---
-#### `31.12.2021:`
-- The game migrated to the **Unreal Engine 5**.
-- Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
-- Added Controls tab in Settings to allow player remap input keys.
+#### `2021-12-31:`
+ - The game migrated to the **Unreal Engine 5**.
+ - Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
+ - Added Controls tab in Settings to allow player remap input keys.
 >  ![Settings_31-12-21](https://user-images.githubusercontent.com/20540872/147825296-ce7d33da-dfda-4757-b070-bfd08f700134.jpg)
  ---
-#### `03.06.2021:`
-- Completely updated the Maya level.
-- Added the Water level of the Roger character.
-- Added settings.
+#### `2021-06-03:`
+ - Added the Maya level by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 >  ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
->  ![](https://user-images.githubusercontent.com/20540872/120249541-8e5a9880-c27b-11eb-82cd-660878d33e6f.jpg)
+ - Implemented `Settings` screen:
 >  ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
  ---
-#### `31.01.2021:`
-- Added the Bastet (Sphynx cat) character with two skins.
-- Added the Roger character with one skin.
-- Fori and Hugo characters got additional second skins.
-> ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
+#### `2021-01-31:`
+ - Added the Bastet (Sphynx cat) and Roger (Pirate) characters by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
+ - Fori and Hugo characters got additional second skins by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
+ > ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
  ---
-#### `31.10.2020:` Added the third Level Map.
-> ![](https://user-images.githubusercontent.com/20540872/97792191-2d7ebb00-1bdb-11eb-9a27-c50d64394caa.jpg)
+#### `25.10.2020:
+ - Added the Hugo and Fori characters by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
+ > ![](https://user-images.githubusercontent.com/20540872/97118032-125a0a00-1708-11eb-8256-4bec419b1d48.gif)
  ---
-#### `25.10.2020:`, developed the new UI prototype.
-- Added the second City Map.
-- Added the Hugo character.
-- Added the Fori character.
-> ![](https://user-images.githubusercontent.com/20540872/97118032-125a0a00-1708-11eb-8256-4bec419b1d48.gif)
- ---
-#### `15.10.2019:` Uploaded first game-ready build.
+#### `2019-10-15:` Uploaded first game-ready build.
 
 ## 🎮 Overview
 
@@ -266,6 +297,7 @@ _Grey Х: the selected cell on which the bot moves to._
 - **Kateryna Shchetinina** - Characters & Animations - [Artstation](https://www.artstation.com/kateseliv)
 - **Yevhenii Oksenchuk** - Game Design (Audio, UI, and Cinematics) - [Telegram](https://t.me/ComeThird)
 - **Valeriy Rotermel** - [Progression System](https://github.com/h4rdmol/ProgressionSystem) - [GitHub](https://github.com/h4rdmol)
+- **Anton Selivanov** - Foot Trails - [GitHub](https://github.com/antokior)
 
 Special thanks to the following companies for providing their licenses to support our open source development:
 
@@ -276,9 +308,11 @@ Special thanks to the following companies for providing their licenses to suppor
 
 Feedback and contributions from the community are highly appreciated!
 
-If you'd like to contribute, please fork the project and create a pull request targeting the `develop` branch.
-
-If you've found a bug or have an idea for a new feature, please open a new issue on GitHub. Thank you!
+- **Tasks:** Check our [Google Sheets Tasks List](https://docs.google.com/spreadsheets/d/1BaElMO0IDiV7im5FNk19ewWBXH1vpg3-1TjiEX55Kw8/edit#gid=554015394) and [Bugs Backlog on Trello](https://trello.com/b/1jbKvyeh/bomber-kanban). Unassigned tasks and bugs are open for contribution.
+- **Report & Suggest:** Found a bug or have a feature idea? Open an issue.
+- **Fork & Pull:** Fork the project, make your changes, and submit a pull request to the `develop` branch.
+- **Standards:** Adhere to the [Unreal Engine Coding Standards](https://dev.epicgames.com/documentation/en-us/unreal-engine/epic-cplusplus-coding-standard-for-unreal-engine) and [Naming Standards](https://github.com/Allar/ue5-style-guide) when contributing.
+- **Blueprints & Assets:** If contributing blueprint logic or assets, attach screenshots to show what has changed.
 
 ## 📜 License
 
