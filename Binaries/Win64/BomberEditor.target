@@ -12,8 +12,8 @@
 	{
 		"MajorVersion": 5,
 		"MinorVersion": 4,
-		"PatchVersion": 3,
-		"Changelist": 34507850,
+		"PatchVersion": 4,
+		"Changelist": 35576357,
 		"CompatibleChangelist": 33043543,
 		"IsLicenseeVersion": 0,
 		"IsPromotedBuild": 0,
@@ -568,6 +568,30 @@
 		{
 			"Path": "$(EngineDir)/Binaries/Win64/EOSSDK-Win64-Shipping.dll",
 			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/Win64/LinuxArm64/UnrealEditor-LinuxArm64TargetPlatform.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/Win64/LinuxArm64/UnrealEditor-LinuxArm64TargetPlatform.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/Win64/LinuxArm64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/Win64/Linux/UnrealEditor-LinuxTargetPlatform.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/Win64/Linux/UnrealEditor-LinuxTargetPlatform.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/Win64/Linux/UnrealEditor.modules",
+			"Type": "RequiredResource"
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/Win64/NvmlWrapper.dll",
@@ -5487,26 +5511,6 @@
 		},
 		{
 			"Path": "$(EngineDir)/Plugins/BlueprintFileUtils/Binaries/Win64/UnrealEditor.modules",
-			"Type": "RequiredResource"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Binaries/Win64/UnrealEditor-Bridge.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Binaries/Win64/UnrealEditor-Bridge.pdb",
-			"Type": "SymbolFile"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Binaries/Win64/UnrealEditor-MegascansPlugin.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Binaries/Win64/UnrealEditor-MegascansPlugin.pdb",
-			"Type": "SymbolFile"
-		},
-		{
-			"Path": "$(EngineDir)/Plugins/Bridge/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -16362,6 +16366,14 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/Binaries/Win64/UnrealEditor-FootTrailsGeneratorEditor.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/Binaries/Win64/UnrealEditor-FootTrailsGeneratorEditor.pdb",
+			"Type": "SymbolFile"
+		},
+		{
 			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/Binaries/Win64/UnrealEditor-FootTrailsGeneratorRuntime.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -16371,18 +16383,6 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/Binaries/Win64/UnrealEditor.modules",
-			"Type": "RequiredResource"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewAI/Binaries/Win64/UnrealEditor-NewAI.dll",
-			"Type": "DynamicLibrary"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewAI/Binaries/Win64/UnrealEditor-NewAI.pdb",
-			"Type": "SymbolFile"
-		},
-		{
-			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewAI/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -16398,6 +16398,18 @@
 			"Type": "RequiredResource"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/ProgressionSystem/Binaries/Win64/UnrealEditor-ProgressionSystemRuntime.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/ProgressionSystem/Binaries/Win64/UnrealEditor-ProgressionSystemRuntime.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/ProgressionSystem/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
 			"Path": "$(ProjectDir)/Plugins/InstancedStaticMeshConverter/Binaries/Win64/UnrealEditor-InstancedStaticMeshConverter.dll",
 			"Type": "DynamicLibrary"
 		},
@@ -16407,6 +16419,18 @@
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/InstancedStaticMeshConverter/Binaries/Win64/UnrealEditor.modules",
+			"Type": "RequiredResource"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/LevelSequencerAudioTrimmer/Binaries/Win64/UnrealEditor-LevelSequencerAudioTrimmerEd.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/LevelSequencerAudioTrimmer/Binaries/Win64/UnrealEditor-LevelSequencerAudioTrimmerEd.pdb",
+			"Type": "SymbolFile"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/LevelSequencerAudioTrimmer/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		},
 		{
@@ -21740,6 +21764,446 @@
 			"Type": "NonUFS"
 		},
 		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/BdfFontFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/BlpImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/BmpImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/BufrStubImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ContainerIO.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/CurImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/DcxImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/DdsImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/EpsImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ExifTags.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/FitsImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/FliImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/FontFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/FpxImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/FtexImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/GbrImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/GdImageFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/GifImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/GimpGradientFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/GimpPaletteFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/GribStubImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/Hdf5StubImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/IcnsImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/IcoImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/Image.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageChops.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageCms.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageColor.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageDraw.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageDraw2.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageEnhance.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageFilter.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageFont.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageGrab.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageMath.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageMode.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageMorph.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageOps.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImagePalette.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImagePath.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageQt.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageSequence.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageShow.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageStat.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageTk.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageTransform.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImageWin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/ImtImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/IptcImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/Jpeg2KImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/JpegImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/JpegPresets.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/McIdasImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/MicImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/MpegImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/MpoImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/MspImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PSDraw.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PaletteFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PalmImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PcdImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PcfFontFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PcxImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PdfImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PdfParser.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PixarImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PngImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PpmImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PsdImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/PyAccess.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/QoiImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/SgiImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/SpiderImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/SunImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/TarIO.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/TgaImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/TiffImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/TiffTags.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/WalImageFile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/WebPImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/WmfImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/XVThumbImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/XbmImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/XpmImagePlugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/__main__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_binary.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_deprecate.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imaging.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imaging.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingcms.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingcms.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingft.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingft.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingmath.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingmath.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingmorph.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingmorph.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_imagingtk.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_tkinter_finder.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_typing.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_util.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_version.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_webp.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/_webp.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/features.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/py.typed",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/PIL/report.py",
+			"Type": "NonUFS"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/README.txt",
 			"Type": "NonUFS"
 		},
@@ -21753,6 +22217,4214 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/distutils-precedence.pth",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio-2.35.1.dist-info/INSTALLER",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio-2.35.1.dist-info/LICENSE",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio-2.35.1.dist-info/METADATA",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio-2.35.1.dist-info/RECORD",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio-2.35.1.dist-info/REQUESTED",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio-2.35.1.dist-info/WHEEL",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio-2.35.1.dist-info/entry_points.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio-2.35.1.dist-info/top_level.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/__main__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/config/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/config/extensions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/config/extensions.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/config/plugins.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/config/plugins.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/fetching.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/findlib.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/format.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/format.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/imopen.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/imopen.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/legacy_plugin_wrapper.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/legacy_plugin_wrapper.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/request.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/request.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/util.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/core/v3_plugin_api.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/freeze.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/_bsdf.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/_dicom.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/_freeimage.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/_swf.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/_tifffile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/bsdf.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/dicom.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/example.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/feisem.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/ffmpeg.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/fits.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/freeimage.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/freeimagemulti.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/gdal.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/grab.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/lytro.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/npz.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/opencv.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/pillow.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/pillow_info.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/pillow_legacy.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/pillowmulti.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/pyav.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/rawpy.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/simpleitk.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/spe.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/swf.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/tifffile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/plugins/tifffile_v3.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/py.typed",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/testing.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/typing.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/v2.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/v2.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/v3.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio/v3.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg-0.5.1.dist-info/INSTALLER",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg-0.5.1.dist-info/LICENSE",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg-0.5.1.dist-info/METADATA",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg-0.5.1.dist-info/RECORD",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg-0.5.1.dist-info/WHEEL",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg-0.5.1.dist-info/top_level.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg/_definitions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg/_io.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg/_parsing.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg/_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg/binaries/README.md",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg/binaries/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/imageio_ffmpeg/binaries/ffmpeg-win64-v4.2.2.exe",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy-2.1.0-cp311-cp311-win_amd64.whl",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy-2.1.0.dist-info/DELVEWHEEL",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy-2.1.0.dist-info/INSTALLER",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy-2.1.0.dist-info/LICENSE.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy-2.1.0.dist-info/METADATA",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy-2.1.0.dist-info/RECORD",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy-2.1.0.dist-info/WHEEL",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy-2.1.0.dist-info/entry_points.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy.libs/libscipy_openblas64_-c16e4918366c6bc1f1cd71e28ca36fc0.dll",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy.libs/msvcp140-23ebcc0b37c8e3d074511f362feac48b.dll",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/__config__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/__init__.cython-30.pxd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/__init__.pxd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_array_api_info.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_array_api_info.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_configtool.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_add_newdocs.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_add_newdocs_scalars.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_asarray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_asarray.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_dtype.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_dtype_ctypes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_exceptions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_internal.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_internal.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_machar.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_methods.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_multiarray_tests.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_multiarray_tests.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_multiarray_umath.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_multiarray_umath.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_operand_flag_tests.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_operand_flag_tests.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_rational_tests.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_rational_tests.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_simd.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_simd.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_string_helpers.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_struct_ufunc_tests.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_struct_ufunc_tests.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_type_aliases.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_type_aliases.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_ufunc_config.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_ufunc_config.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_umath_tests.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/_umath_tests.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/arrayprint.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/arrayprint.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/cversions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/defchararray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/defchararray.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/einsumfunc.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/einsumfunc.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/fromnumeric.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/fromnumeric.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/function_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/function_base.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/getlimits.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/getlimits.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/__multiarray_api.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/__multiarray_api.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/__ufunc_api.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/__ufunc_api.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/_neighborhood_iterator_imp.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/_numpyconfig.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/_public_dtype_api_table.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/arrayobject.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/arrayscalars.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/dtype_api.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/halffloat.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/ndarrayobject.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/ndarraytypes.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_1_7_deprecated_api.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_2_compat.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_2_complexcompat.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_3kcompat.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_common.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_cpu.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_endian.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_math.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_no_deprecated_api.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/npy_os.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/numpyconfig.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/random/LICENSE.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/random/bitgen.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/random/distributions.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/random/libdivide.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/ufuncobject.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/include/numpy/utils.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/lib/npy-pkg-config/mlib.ini",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/lib/npy-pkg-config/npymath.ini",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/lib/npymath.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/lib/pkgconfig/numpy.pc",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/memmap.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/memmap.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/multiarray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/multiarray.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/numeric.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/numeric.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/numerictypes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/numerictypes.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/overrides.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/printoptions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/records.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/records.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/shape_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/shape_base.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/strings.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/strings.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/_locales.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/_natype.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/astype_copy.pkl",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/generate_umath_validation_data.cpp",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/recarray_from_file.fits",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-README.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-arccos.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-arccosh.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-arcsin.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-arcsinh.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-arctan.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-arctanh.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-cbrt.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-cos.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-cosh.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-exp.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-exp2.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-expm1.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-log.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-log10.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-log1p.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-log2.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-sin.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-sinh.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-tan.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/data/umath-validation-set-tanh.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/examples/cython/checks.pyx",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/examples/cython/meson.build",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/examples/cython/setup.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/examples/limited_api/limited_api1.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/examples/limited_api/limited_api2.pyx",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/examples/limited_api/limited_api_latest.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/examples/limited_api/meson.build",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/examples/limited_api/setup.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test__exceptions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_abc.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_api.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_argparse.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_array_api_info.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_array_coercion.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_array_interface.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_arraymethod.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_arrayobject.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_arrayprint.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_casting_floatingpoint_errors.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_casting_unittests.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_conversion_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_cpu_dispatcher.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_cpu_features.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_custom_dtypes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_cython.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_datetime.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_defchararray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_deprecations.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_dlpack.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_dtype.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_einsum.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_errstate.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_extint128.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_function_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_getlimits.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_half.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_hashtable.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_indexerrors.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_indexing.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_item_selection.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_limited_api.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_longdouble.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_machar.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_mem_overlap.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_mem_policy.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_memmap.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_multiarray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_multithreading.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_nditer.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_nep50_promotions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_numeric.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_numerictypes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_overrides.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_print.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_protocols.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_records.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_regression.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_scalar_ctors.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_scalar_methods.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_scalarbuffer.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_scalarinherit.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_scalarmath.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_scalarprint.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_shape_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_simd.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_simd_module.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_stringdtype.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_strings.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_ufunc.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_umath.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_umath_accuracy.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_umath_complex.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/tests/test_unicode.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_core/umath.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_distributor_init.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_expired_attrs_2_0.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_globals.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_pyinstaller/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_pyinstaller/hook-numpy.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_pyinstaller/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_pyinstaller/tests/pyinstaller-smoke.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_pyinstaller/tests/test_pyinstaller.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_pytesttester.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_pytesttester.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_add_docstring.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_array_like.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_callable.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_char_codes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_dtype_like.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_extended_precision.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_nbit.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_nested_sequence.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_scalars.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_shape.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_typing/_ufunc.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_utils/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_utils/_convertions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_utils/_inspect.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/_utils/_pep440.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/char/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/char/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/compat/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/compat/py3k.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/compat/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/conftest.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/_dtype.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/_dtype_ctypes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/_internal.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/_multiarray_umath.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/arrayprint.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/defchararray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/einsumfunc.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/fromnumeric.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/function_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/getlimits.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/multiarray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/numeric.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/numerictypes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/overrides.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/records.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/shape_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/core/umath.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ctypeslib.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ctypeslib.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/_shell_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/armccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/ccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/ccompiler_opt.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_asimd.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_asimddp.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_asimdfhm.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_asimdhp.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx2.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512_clx.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512_cnl.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512_icl.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512_knl.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512_knm.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512_skx.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512_spr.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512cd.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_avx512f.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_f16c.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_fma3.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_fma4.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_neon.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_neon_fp16.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_neon_vfpv4.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_popcnt.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_rvv.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_sse.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_sse2.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_sse3.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_sse41.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_sse42.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_ssse3.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_sve.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_vsx.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_vsx2.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_vsx3.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_vsx4.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_vx.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_vxe.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_vxe2.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/cpu_xop.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/extra_avx512bw_mask.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/extra_avx512dq_mask.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/extra_avx512f_reduce.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/extra_vsx3_half_double.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/extra_vsx4_mma.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/extra_vsx_asm.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/checks/test_flags.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/autodist.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/bdist_rpm.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/build.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/build_clib.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/build_ext.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/build_py.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/build_scripts.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/build_src.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/config.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/config_compiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/develop.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/egg_info.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/install.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/install_clib.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/install_data.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/install_headers.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/command/sdist.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/conv_template.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/core.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/cpuinfo.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/exec_command.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/extension.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/absoft.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/arm.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/compaq.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/environment.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/fujitsu.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/g95.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/gnu.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/hpux.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/ibm.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/intel.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/lahey.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/mips.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/nag.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/none.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/nv.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/pathf95.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/pg.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/sun.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fcompiler/vast.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/from_template.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/fujitsuccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/intelccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/lib2def.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/line_endings.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/log.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/mingw32ccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/mingw/gfortran_vs2003_hack.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/misc_util.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/msvc9compiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/msvccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/npy_pkg_config.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/numpy_distribution.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/pathccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/system_info.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_build_ext.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_ccompiler_opt.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_ccompiler_opt_conf.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_exec_command.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_fcompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_fcompiler_gnu.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_fcompiler_intel.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_fcompiler_nagfor.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_from_template.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_log.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_mingw32ccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_misc_util.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_npy_pkg_config.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_shell_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/test_system_info.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/tests/utilities.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/distutils/unixccompiler.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/doc/ufuncs.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/dtypes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/dtypes.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/exceptions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/exceptions.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/__main__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/__version__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/_backends/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/_backends/_backend.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/_backends/_distutils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/_backends/_meson.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/_backends/meson.build.template",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/_isocbind.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/_src_pyf.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/auxfuncs.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/capi_maps.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/cb_rules.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/cfuncs.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/common_rules.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/crackfortran.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/diagnose.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/f2py2e.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/f90mod_rules.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/func2subr.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/rules.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/setup.cfg",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/src/fortranobject.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/src/fortranobject.h",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/symbolic.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/abstract_interface/foo.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/abstract_interface/gh18403_mod.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/array_from_pyobj/wrapmodule.c",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/assumed_shape/.f2py_f2cmap",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/assumed_shape/foo_free.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/assumed_shape/foo_mod.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/assumed_shape/foo_use.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/assumed_shape/precision.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/block_docstring/foo.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/callback/foo.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/callback/gh17797.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/callback/gh18335.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/callback/gh25211.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/callback/gh25211.pyf",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/cli/gh_22819.pyf",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/cli/hi77.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/cli/hiworld.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/common/block.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/common/gh19161.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/accesstype.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/data_common.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/data_multiplier.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/data_stmts.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/data_with_comments.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/foo_deps.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/gh15035.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/gh17859.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/gh22648.pyf",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/gh23533.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/gh23598.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/gh23598Warn.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/gh23879.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/gh2848.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/operators.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/privatemod.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/publicmod.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/pubprivmod.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/crackfortran/unicode_comment.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/f2cmap/.f2py_f2cmap",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/f2cmap/isoFortranEnvMap.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/isocintrin/isoCtests.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/kind/foo.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/mixed/foo.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/mixed/foo_fixed.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/mixed/foo_free.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/modules/gh25337/data.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/modules/gh25337/use_data.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/modules/module_data_docstring.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/modules/use_modules.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/negative_bounds/issue_20853.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/parameter/constant_array.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/parameter/constant_both.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/parameter/constant_compound.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/parameter/constant_integer.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/parameter/constant_non_compound.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/parameter/constant_real.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/quoted_character/foo.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/regression/AB.inc",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/regression/f77comments.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/regression/f77fixedform.f95",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/regression/f90continuation.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/regression/incfile.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/regression/inout.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_character/foo77.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_character/foo90.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_complex/foo77.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_complex/foo90.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_integer/foo77.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_integer/foo90.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_logical/foo77.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_logical/foo90.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_real/foo77.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/return_real/foo90.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/size/foo.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/char.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/fixed_string.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/gh24008.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/gh24662.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/gh25286.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/gh25286.pyf",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/gh25286_bc.pyf",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/scalar_string.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/string/string.f",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/src/value_attrspec/gh21665.f90",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_abstract_interface.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_array_from_pyobj.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_assumed_shape.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_block_docstring.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_callback.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_character.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_common.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_crackfortran.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_data.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_docs.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_f2cmap.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_f2py2e.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_isoc.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_kind.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_mixed.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_modules.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_parameter.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_pyf_src.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_quoted_character.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_regression.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_return_character.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_return_complex.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_return_integer.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_return_logical.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_return_real.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_semicolon_split.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_size.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_string.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_symbolic.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/test_value_attrspec.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/tests/util.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/f2py/use_rules.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/_helper.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/_helper.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/_pocketfft.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/_pocketfft.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/_pocketfft_umath.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/_pocketfft_umath.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/helper.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/tests/test_helper.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/fft/tests/test_pocketfft.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_array_utils_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_array_utils_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_arraypad_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_arraypad_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_arraysetops_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_arraysetops_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_arrayterator_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_arrayterator_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_datasource.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_function_base_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_function_base_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_histograms_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_histograms_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_index_tricks_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_index_tricks_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_iotools.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_nanfunctions_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_nanfunctions_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_npyio_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_npyio_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_polynomial_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_polynomial_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_scimath_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_scimath_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_shape_base_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_shape_base_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_stride_tricks_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_stride_tricks_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_twodim_base_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_twodim_base_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_type_check_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_type_check_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_ufunclike_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_ufunclike_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_user_array_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_utils_impl.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_utils_impl.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_version.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/_version.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/array_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/array_utils.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/format.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/format.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/introspect.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/mixins.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/mixins.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/npyio.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/npyio.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/recfunctions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/scimath.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/scimath.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/stride_tricks.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/stride_tricks.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/data/py2-np0-objarr.npy",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/data/py2-objarr.npy",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/data/py2-objarr.npz",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/data/py3-objarr.npy",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/data/py3-objarr.npz",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/data/python3.npy",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/data/win64python2.npy",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test__datasource.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test__iotools.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test__version.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_array_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_arraypad.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_arraysetops.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_arrayterator.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_format.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_function_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_histograms.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_index_tricks.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_io.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_loadtxt.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_mixins.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_nanfunctions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_packbits.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_polynomial.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_recfunctions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_regression.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_shape_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_stride_tricks.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_twodim_base.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_type_check.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_ufunclike.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/tests/test_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/lib/user_array.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/_linalg.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/_linalg.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/_umath_linalg.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/_umath_linalg.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/lapack_lite.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/lapack_lite.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/linalg.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/tests/test_deprecations.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/tests/test_linalg.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/linalg/tests/test_regression.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/API_CHANGES.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/LICENSE",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/README.rst",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/core.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/core.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/extras.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/extras.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/mrecords.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/mrecords.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/test_arrayobject.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/test_core.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/test_deprecations.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/test_extras.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/test_mrecords.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/test_old_ma.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/test_regression.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/tests/test_subclassing.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/testutils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/ma/timer_comparison.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matlib.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/defmatrix.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/defmatrix.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/tests/test_defmatrix.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/tests/test_interaction.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/tests/test_masked_matrix.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/tests/test_matrix_linalg.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/tests/test_multiarray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/tests/test_numeric.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/matrixlib/tests/test_regression.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/_polybase.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/_polybase.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/_polytypes.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/chebyshev.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/chebyshev.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/hermite.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/hermite.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/hermite_e.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/hermite_e.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/laguerre.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/laguerre.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/legendre.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/legendre.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/polynomial.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/polynomial.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/polyutils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/polyutils.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_chebyshev.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_classes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_hermite.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_hermite_e.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_laguerre.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_legendre.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_polynomial.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_polyutils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_printing.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/polynomial/tests/test_symbol.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/py.typed",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/LICENSE.md",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/__init__.pxd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_bounded_integers.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_bounded_integers.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_bounded_integers.pxd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_common.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_common.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_common.pxd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_examples/cffi/extending.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_examples/cffi/parse.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_examples/cython/extending.pyx",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_examples/cython/extending_distributions.pyx",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_examples/cython/meson.build",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_examples/numba/extending.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_examples/numba/extending_distributions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_generator.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_generator.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_generator.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_mt19937.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_mt19937.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_mt19937.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_pcg64.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_pcg64.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_pcg64.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_philox.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_philox.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_philox.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_pickle.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_sfc64.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_sfc64.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/_sfc64.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/bit_generator.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/bit_generator.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/bit_generator.pxd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/bit_generator.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/c_distributions.pxd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/lib/npyrandom.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/mtrand.cp311-win_amd64.lib",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/mtrand.cp311-win_amd64.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/mtrand.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/generator_pcg64_np121.pkl.gz",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/generator_pcg64_np126.pkl.gz",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/mt19937-testset-1.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/mt19937-testset-2.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/pcg64-testset-1.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/pcg64-testset-2.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/pcg64dxsm-testset-1.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/pcg64dxsm-testset-2.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/philox-testset-1.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/philox-testset-2.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/sfc64-testset-1.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/sfc64-testset-2.csv",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/data/sfc64_np126.pkl.gz",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_direct.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_extending.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_generator_mt19937.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_generator_mt19937_regressions.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_random.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_randomstate.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_randomstate_regression.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_regression.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_seed_sequence.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/random/tests/test_smoke.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/rec/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/rec/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/strings/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/strings/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/__init__.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/_private/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/_private/extbuild.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/_private/utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/_private/utils.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/overrides.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/print_coercion_tables.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/testing/tests/test_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test__all__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_configtool.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_ctypeslib.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_lazyloading.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_matlib.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_numpy_config.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_numpy_version.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_public_api.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_reloading.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_scripts.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/tests/test_warnings.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/mypy_plugin.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/arithmetic.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/array_constructors.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/array_like.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/array_pad.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/arrayprint.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/arrayterator.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/bitwise_ops.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/char.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/chararray.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/comparisons.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/constants.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/datasource.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/dtype.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/einsumfunc.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/false_positives.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/flatiter.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/fromnumeric.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/histograms.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/index_tricks.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/lib_function_base.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/lib_polynomial.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/lib_utils.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/lib_version.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/linalg.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/memmap.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/modules.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/multiarray.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/ndarray.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/ndarray_misc.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/nditer.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/nested_sequence.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/npyio.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/numerictypes.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/random.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/rec.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/scalars.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/shape.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/shape_base.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/stride_tricks.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/strings.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/testing.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/twodim_base.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/type_check.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/ufunc_config.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/ufunclike.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/ufuncs.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/fail/warnings_and_errors.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/misc/extended_precision.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/mypy.ini",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/arithmetic.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/array_constructors.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/array_like.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/arrayprint.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/arrayterator.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/bitwise_ops.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/comparisons.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/dtype.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/einsumfunc.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/flatiter.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/fromnumeric.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/index_tricks.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/lib_utils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/lib_version.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/literal.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/ma.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/mod.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/modules.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/multiarray.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/ndarray_conversion.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/ndarray_misc.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/ndarray_shape_manipulation.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/numeric.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/numerictypes.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/random.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/scalars.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/shape.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/simple.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/simple_py3.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/ufunc_config.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/ufunclike.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/ufuncs.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/pass/warnings_and_errors.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/arithmetic.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/array_api_info.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/array_constructors.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/arraypad.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/arrayprint.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/arraysetops.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/arrayterator.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/bitwise_ops.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/char.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/chararray.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/comparisons.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/constants.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/ctypeslib.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/datasource.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/dtype.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/einsumfunc.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/emath.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/false_positives.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/fft.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/flatiter.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/fromnumeric.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/getlimits.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/histograms.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/index_tricks.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/lib_function_base.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/lib_polynomial.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/lib_utils.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/lib_version.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/linalg.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/matrix.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/memmap.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/mod.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/modules.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/multiarray.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/nbit_base_example.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/ndarray_conversion.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/ndarray_misc.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/ndarray_shape_manipulation.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/nditer.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/nested_sequence.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/npyio.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/numeric.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/numerictypes.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/polynomial_polybase.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/polynomial_polyutils.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/polynomial_series.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/random.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/rec.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/scalars.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/shape.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/shape_base.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/stride_tricks.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/strings.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/testing.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/twodim_base.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/type_check.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/ufunc_config.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/ufunclike.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/ufuncs.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/data/reveal/warnings_and_errors.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/test_isfile.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/test_runtime.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/typing/tests/test_typing.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/version.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/numpy/version.pyi",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pillow-10.4.0.dist-info/INSTALLER",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pillow-10.4.0.dist-info/LICENSE",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pillow-10.4.0.dist-info/METADATA",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pillow-10.4.0.dist-info/RECORD",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pillow-10.4.0.dist-info/WHEEL",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pillow-10.4.0.dist-info/top_level.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pillow-10.4.0.dist-info/zip-safe",
 			"Type": "NonUFS"
 		},
 		{
@@ -21789,6 +26461,42 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.0.dist-info/top_level.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/AUTHORS.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/INSTALLER",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/LICENSE.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/METADATA",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/RECORD",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/REQUESTED",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/WHEEL",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/entry_points.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip-24.2.dist-info/top_level.txt",
 			"Type": "NonUFS"
 		},
 		{
@@ -21833,6 +26541,10 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_internal/cli/command_context.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_internal/cli/index_command.py",
 			"Type": "NonUFS"
 		},
 		{
@@ -22333,6 +27045,10 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_internal/utils/packaging.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_internal/utils/retry.py",
 			"Type": "NonUFS"
 		},
 		{
@@ -22868,6 +27584,10 @@
 			"Type": "NonUFS"
 		},
 		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/packaging/_elffile.py",
+			"Type": "NonUFS"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/packaging/_manylinux.py",
 			"Type": "NonUFS"
 		},
@@ -22876,11 +27596,23 @@
 			"Type": "NonUFS"
 		},
 		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/packaging/_parser.py",
+			"Type": "NonUFS"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/packaging/_structures.py",
 			"Type": "NonUFS"
 		},
 		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/packaging/_tokenizer.py",
+			"Type": "NonUFS"
+		},
+		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/packaging/markers.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/packaging/metadata.py",
 			"Type": "NonUFS"
 		},
 		{
@@ -23073,6 +27805,10 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/pygments/styles/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pip/_vendor/pygments/styles/_mapping.py",
 			"Type": "NonUFS"
 		},
 		{
@@ -24029,6 +28765,150 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/pkg_resources/extern/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil-6.0.0.dist-info/INSTALLER",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil-6.0.0.dist-info/LICENSE",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil-6.0.0.dist-info/METADATA",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil-6.0.0.dist-info/RECORD",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil-6.0.0.dist-info/WHEEL",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil-6.0.0.dist-info/top_level.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_common.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_compat.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_psaix.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_psbsd.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_pslinux.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_psosx.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_psposix.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_pssunos.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_psutil_windows.pyd",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/_pswindows.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/__init__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/__main__.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/runner.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_aix.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_bsd.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_connections.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_contracts.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_linux.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_memleaks.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_misc.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_osx.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_posix.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_process.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_process_all.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_sunos.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_system.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_testutils.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_unicode.py",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Lib/site-packages/psutil/tests/test_windows.py",
 			"Type": "NonUFS"
 		},
 		{
@@ -31113,6 +35993,22 @@
 		},
 		{
 			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/NEWS.txt",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Scripts/f2py.exe",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Scripts/imageio_download_bin.exe",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Scripts/imageio_remove_bin.exe",
+			"Type": "NonUFS"
+		},
+		{
+			"Path": "$(EngineDir)/Binaries/ThirdParty/Python3/Win64/Scripts/numpy-config.exe",
 			"Type": "NonUFS"
 		},
 		{
@@ -42336,6 +47232,10 @@
 			"Type": "UFS"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/CreditsSystem/CreditsSystem.uplugin",
+			"Type": "UFS"
+		},
+		{
 			"Path": "$(ProjectDir)/Plugins/GameFeatures/FootTrailsGenerator/FootTrailsGenerator.uplugin",
 			"Type": "UFS"
 		},
@@ -42344,16 +47244,24 @@
 			"Type": "UFS"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewAI/NewAI.uplugin",
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewMainMenu/NewMainMenu.uplugin",
 			"Type": "UFS"
 		},
 		{
-			"Path": "$(ProjectDir)/Plugins/GameFeatures/NewMainMenu/NewMainMenu.uplugin",
+			"Path": "$(ProjectDir)/Plugins/GameFeatures/ProgressionSystem/ProgressionSystem.uplugin",
 			"Type": "UFS"
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/InstancedStaticMeshConverter/InstancedStaticMeshConverter.uplugin",
 			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/LevelSequencerAudioTrimmer/LevelSequencerAudioTrimmer.uplugin",
+			"Type": "UFS"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/LevelSequencerAudioTrimmer/Source/ThirdParty/ffmpeg/Windows/ffmpeg.exe",
+			"Type": "NonUFS"
 		},
 		{
 			"Path": "$(ProjectDir)/Plugins/MetaCheatManager/MetaCheatManager.uplugin",
@@ -42429,6 +47337,7 @@
 		"ControlRig",
 		"ControlRigModules",
 		"ControlRigSpline",
+		"CreditsSystem",
 		"CryptoKeys",
 		"CurveEditorTools",
 		"CustomMeshComponent",
@@ -42472,6 +47381,7 @@
 		"LauncherChunkInstaller",
 		"LevelActorsMovement",
 		"LevelSequenceEditor",
+		"LevelSequencerAudioTrimmer",
 		"LightMixer",
 		"LinuxDeviceProfileSelector",
 		"LocalizableMessage",
@@ -42494,7 +47404,6 @@
 		"MsQuic",
 		"MyEditorUtils",
 		"N10XSourceCodeAccess",
-		"NewAI",
 		"NewMainMenu",
 		"Niagara",
 		"NiagaraSimCaching",
@@ -42520,6 +47429,7 @@
 		"PoolManager",
 		"PortableObjectFileDataSource",
 		"ProceduralMeshComponent",
+		"ProgressionSystem",
 		"PropertyAccessEditor",
 		"PropertyAccessNode",
 		"ProxyLODPlugin",

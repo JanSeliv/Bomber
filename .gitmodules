@@ -27,5 +27,5 @@
 	branch = main
 [submodule "Plugins/LevelSequencerAudioTrimmer"]
 	path = Plugins/LevelSequencerAudioTrimmer
-	url = git@github.com:JanSeliv/LevelSequencerAudioTrimmer.git
+	url = https://github.com/JanSeliv/LevelSequencerAudioTrimmer.git
 	branch = develop

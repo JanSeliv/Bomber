@@ -67,6 +67,7 @@ Next [plugins](https://github.com/JanSeliv/Bomber/tree/master/Plugins) were deve
 - [🎭 Morphs Player](https://github.com/JanSeliv/MorphsPlayer)
 - [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
 - [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
+- [✂️ Level Sequencer Audio Trimmer](https://github.com/JanSeliv/LevelSequencerAudioTrimmer)
 
 ## 💾 Play the Build
 
@@ -79,7 +80,7 @@ Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a 
 Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
 ## 📅 Changelog
-#### `XX.XX.2024`
+#### `2024-12-29:`
 - Updated to **Unreal Engine 5.4**.
 - Added **Linux** support (tested on Ubuntu 22.04 LTS)
 - Introduced **In-Game User Interface** with completely new look, utilizing the **Model-View-ViewModel** (MVVM) pattern:
@@ -102,7 +103,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![Splash](https://github.com/user-attachments/assets/8df95267-6c8d-4434-bb18-c7381c4ef601)
 - Converted the Maya level to the **World Partition** to benefit from automatic streaming and External Data Layers.
  ---
-#### `13.01.2024`
+#### `2024-01-13:`
 - Updated to **Unreal Engine 5.3**.
 - **New Main Menu** with completely different UI and complex cinematics for Hugo and Fori characters on starting the game:
 > ![NewMainMenu](https://github.com/JanSeliv/Bomber/assets/20540872/9c960fa4-6760-4298-a55b-54d0cb8a0b13)
@@ -110,7 +111,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > ![NewBombMeshes](https://github.com/JanSeliv/Bomber/assets/20540872/ce787e8c-d95c-4844-9282-e7aaff3dc243)
 - **New game icon**: ![GameIcon](https://github.com/JanSeliv/Bomber/assets/20540872/ca239a66-b550-4a45-ba4f-182d85e3c460)
  ---
-#### `12.06.2023`
+#### `2023-06-12:`
 - Updated to **Unreal Engine 5.2**.
 - Added **MacOS** support.
 - Added **Ultra-wide** resolutions support.
@@ -122,25 +123,25 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 - Added new cheats such as: `Bomber.Level.SetSize 9x7` (find more on the [Bomber cheats page](https://trello.com/c/5PiHt7Ah/308-bomber-cheats))
 - Updated Main-Menu background music.
  --- 
-#### `31.05.2022:`
+#### `2022-05-31:`
  - Added initial **multiplayer** support for 4 players (without Steam now, use 'Open' command to connect to each other).
  - Created the **Pool Manager** for the generated level to avoid spawning and destroying actors on each level reconstruction.
  - Added new **SteelMan** character for AI players with 3 different skins by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
 >  ![SteelMan_31-05-22](https://user-images.githubusercontent.com/20540872/171299202-3422db3c-7061-4b75-b51c-a08a67d65ab5.gif)
  ---
-#### `31.12.2021:`
+#### `2021-12-31:`
  - The game migrated to the **Unreal Engine 5**.
  - Added sounds (background music, UI, in-game sounds) and sliders to tweak volumes in Settings Audio tab (Master, Music and SFX).
  - Added Controls tab in Settings to allow player remap input keys.
 >  ![Settings_31-12-21](https://user-images.githubusercontent.com/20540872/147825296-ce7d33da-dfda-4757-b070-bfd08f700134.jpg)
  ---
-#### `03.06.2021:`
+#### `2021-06-03:`
  - Added the Maya level by [Maksim Shashkov](https://www.artstation.com/maksimshashkov):
 >  ![](https://user-images.githubusercontent.com/20540872/120249537-8bf83e80-c27b-11eb-81be-583e8c30aa62.jpg)
  - Implemented `Settings` screen:
 >  ![](https://user-images.githubusercontent.com/20540872/120127584-0e232d00-c1c0-11eb-8467-74633600c180.jpg)
  ---
-#### `31.01.2021:`
+#### `2021-01-31:`
  - Added the Bastet (Sphynx cat) and Roger (Pirate) characters by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
  - Fori and Hugo characters got additional second skins by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
  > ![](https://user-images.githubusercontent.com/20540872/106404153-23ff2c00-6432-11eb-8cb1-d3a7bc33b51b.gif)
@@ -149,7 +150,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
  - Added the Hugo and Fori characters by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
  > ![](https://user-images.githubusercontent.com/20540872/97118032-125a0a00-1708-11eb-8256-4bec419b1d48.gif)
  ---
-#### `15.10.2019:` Uploaded first game-ready build.
+#### `2019-10-15:` Uploaded first game-ready build.
 
 ## 🎮 Overview
 
