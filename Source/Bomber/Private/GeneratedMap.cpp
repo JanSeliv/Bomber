@@ -86,6 +86,23 @@ AGeneratedMap* AGeneratedMap::GetGeneratedMap(const UObject* OptionalWorldContex
 	return Subsystem ? Subsystem->GetGeneratedMap(bWarnIfNull) : nullptr;
 }
 
+// Returns the settings used for generating the map
+const FGeneratedMapSettings& AGeneratedMap::GetGenerationSetting() const
+{
+	if (bOverrideGenerationSettingsInternal)
+	{
+		return OverriddenGenerationSettingsInternal;
+	}
+
+	if (const UGeneratedMapDataAsset* GeneratedMapDataAsset = UDataAssetsContainer::GetGeneratedMapDataAsset())
+	{
+		return GeneratedMapDataAsset->GetGenerationSettings();
+	}
+
+	static constexpr FGeneratedMapSettings DefaultSettings{};
+	return DefaultSettings;
+}
+
 // Sets the size for generated map, it will automatically regenerate the level for given size
 void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 {
@@ -713,7 +730,7 @@ FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorT
 
 	// Align location snapping to the grid size
 	FVector NewLocation = FVector::ZeroVector;
-	if (!UGeneratedMapDataAsset::Get().IsLockedOnZero())
+	if (!Get().GetGenerationSetting().LockOnZero)
 	{
 		NewLocation = FCell::SnapCell(ActorTransform.GetLocation());
 	}
@@ -897,7 +914,9 @@ void AGeneratedMap::GenerateLevelActors()
 	checkf(MapComponentsToDestroy.IsEmpty(), TEXT("ERROR: [%i] %s:\n'MapComponentsToDestroy' is not empty after removing all!"), __LINE__, *FString(__FUNCTION__));
 
 	// Calls before generation preview actors to updating of all dragged to the Generated Map actors
-	FCells DraggedCells, DraggedWalls, DraggedItems;
+	FCells DraggedCells = FCell::EmptyCells;
+	FCells DraggedWalls = FCell::EmptyCells;
+	FCells DraggedItems = FCell::EmptyCells;
 	for (const TTuple<FCell, EActorType>& It : DraggedCellsInternal)
 	{
 		const FCell& Cell = It.Key;
@@ -927,9 +946,9 @@ void AGeneratedMap::GenerateLevelActors()
 	* Part 2: Spawning these actors
 	*/
 
-	const UGeneratedMapDataAsset& LevelsDataAsset = UGeneratedMapDataAsset::Get();
-	float WallsChance = LevelsDataAsset.GetWallsChance(); // Copy to decrease chance after each failed generation
-	int32 BoxesChance = LevelsDataAsset.GetBoxesChance();
+	const FGeneratedMapSettings& GenerationSettings = GetGenerationSetting();
+	float WallsChance = GenerationSettings.WallsChance; // Copy to decrease chance after each failed generation
+	int32 BoxesChance = GenerationSettings.BoxesChance;
 	TMap<FCell, EActorType> ActorsToSpawn;
 	int32 Counter = 0;
 	bool bFoundPath = false;

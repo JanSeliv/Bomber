@@ -7,6 +7,7 @@
 #include "Bomber.h"
 #include "Structures/Cell.h"
 #include "Structures/MapComponentsContainer.h"
+#include "Structures/GeneratedMapSettings.h"
 //---
 #include "GeneratedMap.generated.h"
 
@@ -42,8 +43,8 @@ public:
 
 	/** Contains outside added dangerous cells, is useful for Game Features to notify bots that some cells are not safe.
 	 * @todo JanSeliv 3JBOo7L8 Remove after NewAI implementation. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	TSet<FCell> AdditionalDangerousCells;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++")
+	TSet<FCell> AdditionalDangerousCells = FCell::EmptyCells;
 
 	/* ---------------------------------------------------
 	 *		Public functions
@@ -61,6 +62,11 @@ public:
 	 * Is used in Getters to avoid crashes on levels without Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static AGeneratedMap* GetGeneratedMap(const UObject* OptionalWorldContext = nullptr);
+
+	/** Returns the settings used for generating the map.
+	 * Returns overridden if is set in the Class Defaults of the Generated Map itself, otherwise defaults from the Data Asset. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FGeneratedMapSettings& GetGenerationSetting() const;
 
 	/** Sets the size for generated map, it will automatically regenerate the level for given size.
 	 * Is authority-only function.
@@ -150,7 +156,7 @@ public:
 	 * Transform location and rotation is the center of new grid
 	 * Transform scale-X is number of columns.
 	 * Transform scale-Y is number of rows. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorTransform"))
 	static FTransform ActorTransformToGridTransform(const FTransform& ActorTransform);
 
 	/** Set for which level actors should show debug renders, is not available in shipping build. */
@@ -166,6 +172,14 @@ protected:
 	friend class UCellsUtilsLibrary;
 	friend class ULevelActorsUtilsLibrary;
 
+	/** If toggled, custom data will be used for the level generation instead of the default one. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overide Generation Settings"))
+	bool bOverrideGenerationSettingsInternal = false;
+
+	/** Is optional settings to override the default data. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Overidden Generation Settings", EditCondition = "bOverrideGenerationSettingsInternal == true", EditConditionHides))
+	FGeneratedMapSettings OverriddenGenerationSettingsInternal;
+
 	/** The blueprint background actor  */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Component"))
 	TObjectPtr<class UChildActorComponent> CollisionComponentInternal = nullptr;
@@ -173,19 +187,19 @@ protected:
 	/** Cells storage. Is separated from MapComponents array,
 	 * since GridCells is changing rarely (only when the level size is changed).
 	 * It means, each cell represents a tile on the level, even if there is no Map Component on it. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
-	TArray<FCell> GridCellsInternal;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
+	TArray<FCell> GridCellsInternal = FCell::EmptyCellsArr;
 
 	/** Map components of all level actors currently spawned on the Generated Map.
 	 * Is changing during the game on explosions and on the level regeneration.
 	 * Array of components is wrapped by FMapComponentsContainer.
 	 * It allows to replicate array faster, as the whole and even if the number of elements remains the same. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_MapComponents", Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, ReplicatedUsing = "OnRep_MapComponents", Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	FMapComponentsContainer MapComponentsInternal;
 
 	/** Contains map components that were dragged to the scene
 	 * Is set in editor by adding and dragging actors, but can be changed during the game. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Dragged Cells"))
 	TMap<FCell, EActorType> DraggedCellsInternal;
 
 	/** Attached camera component. */
@@ -193,7 +207,7 @@ protected:
 	TObjectPtr<class UMyCameraComponent> CameraComponentInternal = nullptr;
 
 	/** Is true when current state is Game Starting. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
 	bool bIsGameRunningInternal = false;
 
 	/** Specify for which level actors should show debug renders, is not available in shipping build. */
