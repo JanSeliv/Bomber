@@ -310,7 +310,8 @@ void AMyGameStateBase::SetGameFeaturesEnabled(bool bEnable)
 		}
 		else
 		{
-			GameFeaturesSubsystem.DeactivateGameFeaturePlugin(GameFeatureURL, EmptyCallback);
+			constexpr bool bKeepRegistered = true;
+			GameFeaturesSubsystem.UnloadGameFeaturePlugin(GameFeatureURL, EmptyCallback, bKeepRegistered);
 		}
 	}
 }
