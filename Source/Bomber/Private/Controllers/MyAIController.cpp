@@ -380,8 +380,8 @@ void AMyAIController::UpdateAI()
 		static constexpr int32 VisualizationTypesNum = 3;
 		for (int32 Index = 0; Index < VisualizationTypesNum; ++Index)
 		{
-			FCells VisualizingStep;
-			FLinearColor Color;
+			FCells VisualizingStep = FCell::EmptyCells;
+			FLinearColor Color = FLinearColor::White;
 			FName Symbol = TEXT("+");
 			FVector Position = FVector::ZeroVector;
 			switch (Index)
@@ -410,7 +410,10 @@ void AMyAIController::UpdateAI()
 				default:
 					break;
 			}
-			const FDisplayCellsParams DisplayParams{Color, 263.f, 124.f, Symbol, Position};
+
+			constexpr float TextHeight = 263.f;
+			constexpr float TextSize = 124.f;
+			const FDisplayCellsParams DisplayParams{Color, TextHeight, TextSize, Symbol, Position};
 			UCellsUtilsLibrary::DisplayCells(OwnerInternal, VisualizingStep, DisplayParams);
 		} // [Loopy visualization]
 	}
