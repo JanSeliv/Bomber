@@ -1,5 +1,5 @@
 <a href="https://github.com/JanSeliv/Bomber/blob/main/LICENSE">![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)</a>
-<a href="https://www.unrealengine.com/">![Unreal Engine](https://img.shields.io/badge/Unreal-5.4-dea309?style=flat&logo=unrealengine)</a>
+<a href="https://www.unrealengine.com/">![Unreal Engine](https://img.shields.io/badge/Unreal-5.5-dea309?style=flat&logo=unrealengine)</a>
 
 <br/>
 <p align="center">
@@ -101,6 +101,9 @@ Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a 
 Stay updated with the current progress and plans on the [Trello board](https://trello.com/b/1jbKvyeh/bomber-kanban).
 
 ## 📅 Changelog
+#### `2025-XX-XX:`
+- Updated to **Unreal Engine 5.5**.
+ ---
 #### `2024-12-29:`
 - Updated to **Unreal Engine 5.4**.
 - Added **Linux** support (tested on Ubuntu 22.04 LTS)
