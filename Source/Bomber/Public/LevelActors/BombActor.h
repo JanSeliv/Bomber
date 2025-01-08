@@ -9,7 +9,6 @@
 #define MIN_FIRE_RADIUS 1
 #define DEFAULT_LIFESPAN -1.f
 
-struct FCell;
 enum class ELevelType : uint8;
 enum class ECurrentGameState : uint8;
 
@@ -23,25 +22,12 @@ class BOMBER_API ABombActor final : public AActor
 	GENERATED_BODY()
 
 public:
-	/* ---------------------------------------------------
-	 *		Public functions
-	 * --------------------------------------------------- */
-
 	/** Sets default values for this actor's properties */
 	ABombActor();
 
 	/** Preinitialize a bomb actor, could be called multiple times. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ConstructBombActor();
-
-	/** Returns cells that bombs is going to destroy. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	TSet<FCell> GetExplosionCells() const;
-
-	/** Returns radius of the blast to each side.
-	 * It might be overriden by the cheat manager. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	int32 GetExplosionRadius() const;
 
 	/** Returns the type of the bomb. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -51,31 +37,43 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetBombType(ELevelType InBombType);
 
-	/** Sets the defaults of the bomb. */
+protected:
+	/** The MapComponent manages this actor on the Generated Map */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
+	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
+
+	/*********************************************************************************************
+	 * Detonation
+	 ********************************************************************************************* */
+public:
+	/** Sets the defaults of the bomb.
+	 * @param BombPlacer - the player who placed the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void InitBomb(const class APlayerCharacter* Causer = nullptr);
+	void InitBomb(const class APlayerCharacter* BombPlacer = nullptr);
+
+	/** Returns cells that bombs is going to destroy. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	TSet<struct FCell> GetExplosionCells() const;
+
+	/** Returns radius of the blast to each side.
+	 * It might be overriden by the cheat manager. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	int32 GetExplosionRadius() const;
 
 	/** Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void TryDisplayExplosionCells();
 
 protected:
-	/* ---------------------------------------------------
-	 *		Protected properties
-	 * --------------------------------------------------- */
-
-	/** The MapComponent manages this actor on the Generated Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
-
 	/** The radius of the blast to each side, is set by player with InitBomb on spawning.
 	 * @warning don't use directly, even in this class, but call GetExplosionRadius() instead to support cheat overrides. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
 	int32 FireRadiusInternal = MIN_FIRE_RADIUS;
 
-	/** Current material of this bomb, is different for each player. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
-	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr;
+	/** The character who placed the bomb, is set by InitBomb on spawning.
+	 * Is used to track who spawned the bomb, e.g: to record the score. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Owner"))
+	TObjectPtr<const class APlayerCharacter> BombPlacerInternal = nullptr;
 
 	/** All currently playing VFXs. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawned VFXs"))
@@ -84,10 +82,19 @@ protected:
 	/** The duration of the bomb VFX. */
 	FTimerHandle VFXDurationExpiredTimerHandle;
 
-	/* ---------------------------------------------------
- 	 *		Protected functions
-	 * --------------------------------------------------- */
+	/** Destroy bomb and burst explosion cells, calls multicast event.*/
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
+	void DetonateBomb();
 
+	/** Destroy bomb and burst explosion cells.
+	 * Calls destroying request of all actors by cells in explosion cells array.*/
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
+	void MulticastDetonateBomb(const TArray<struct FCell>& ExplosionCells);
+
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
@@ -115,27 +122,23 @@ protected:
 	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 
-	/** Destroy bomb and burst explosion cells, calls multicast event.*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
-	void DetonateBomb();
-
-	/** Destroy bomb and burst explosion cells.
-	  * Calls destroying request of all actors by cells in explosion cells array.*/
-	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void MulticastDetonateBomb(const TArray<FCell>& ExplosionCells);
-
-	/**
-	 * Triggers when character end to overlaps with this bomb.
-	 * Sets the collision preset to block all dynamics.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
+	/** Triggers when character end to overlaps with this bomb.
+	 * Sets the collision preset to block all dynamics. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	/** Listen by dragged bombs to handle game resetting. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-#pragma region CustomCollisionResponse
+	/*********************************************************************************************
+	 * Custom Collision Response
+	 ********************************************************************************************* */
+public:
 	/** Sets actual collision response to all players for this bomb. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateCollisionResponseToAllPlayers();
@@ -169,17 +172,21 @@ protected:
 	/** Returns all players overlapping with this bomb. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const;
-#pragma endregion CustomCollisionResponse
 
+	/*********************************************************************************************
+	 * Material
+	 ********************************************************************************************* */
+public:
 	/** Updates current material for this bomb actor. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ApplyMaterial();
+
+protected:
+	/** Current material of this bomb, is different for each player. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
+	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr;
 
 	/** Is called on client to respond on changes in material of the bomb. */
 	UFUNCTION()
 	void OnRep_BombMaterial();
-
-	/** Is called when the bomb VFX duration is expired. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnVFXDurationExpired();
 };

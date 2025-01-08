@@ -58,33 +58,6 @@ void ABombActor::ConstructBombActor()
 	MapComponentInternal->ConstructOwnerActor();
 }
 
-// Returns cells that bombs is going to destroy
-FCells ABombActor::GetExplosionCells() const
-{
-	if (IsHidden()
-	    || !MapComponentInternal
-	    || GetExplosionRadius() < MIN_FIRE_RADIUS)
-	{
-		return FCell::EmptyCells;
-	}
-
-	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, GetExplosionRadius());
-}
-
-// Returns radius of the blast to each side
-int32 ABombActor::GetExplosionRadius() const
-{
-#if !UE_BUILD_SHIPPING
-	const int32 CheatOverride = UMyCheatManager::CVarBombRadius.GetValueOnAnyThread();
-	if (CheatOverride > MIN_FIRE_RADIUS)
-	{
-		return CheatOverride;
-	}
-#endif //!UE_BUILD_SHIPPING
-
-	return FireRadiusInternal;
-}
-
 //  Returns the type of the bomb
 ELevelType ABombActor::GetBombType() const
 {
@@ -109,8 +82,12 @@ void ABombActor::SetBombType(ELevelType InBombType)
 	BombMaterialInternal = BombMesh->GetMaterial(0);
 }
 
+/*********************************************************************************************
+ * Detonation
+ ********************************************************************************************* */
+
 // Sets the defaults of the bomb
-void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
+void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 {
 	if (!HasAuthority()
 	    || !MapComponentInternal)
@@ -120,11 +97,14 @@ void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 
 	int32 InFireRadius = MIN_FIRE_RADIUS;
 	int32 PlayerIndex = INDEX_NONE;
-	if (Causer) // Might be null if spawned from external source (e.g. cheat manager)
+	if (BombPlacer) // Might be null if spawned from external source (e.g. cheat manager)
 	{
-		PlayerIndex = Causer->GetPlayerId();
-		InFireRadius = Causer->GetPowerups().FireN;
-		SetBombType(Causer->GetPlayerType());
+		// Set bomb placer, so others can track who spawned the bomb, e.g: to record the score 
+		BombPlacerInternal = BombPlacer;
+
+		PlayerIndex = BombPlacer->GetPlayerId();
+		InFireRadius = BombPlacer->GetPowerups().FireN;
+		SetBombType(BombPlacer->GetPlayerType());
 	}
 
 	const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
@@ -149,6 +129,33 @@ void ABombActor::InitBomb(const APlayerCharacter* Causer/* = nullptr*/)
 	TryDisplayExplosionCells();
 }
 
+// Returns cells that bombs is going to destroy
+FCells ABombActor::GetExplosionCells() const
+{
+	if (IsHidden()
+		|| !MapComponentInternal
+		|| GetExplosionRadius() < MIN_FIRE_RADIUS)
+	{
+		return FCell::EmptyCells;
+	}
+
+	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, GetExplosionRadius());
+}
+
+// Returns radius of the blast to each side
+int32 ABombActor::GetExplosionRadius() const
+{
+#if !UE_BUILD_SHIPPING
+	const int32 CheatOverride = UMyCheatManager::CVarBombRadius.GetValueOnAnyThread();
+	if (CheatOverride > MIN_FIRE_RADIUS)
+	{
+		return CheatOverride;
+	}
+#endif //!UE_BUILD_SHIPPING
+
+	return FireRadiusInternal;
+}
+
 // Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build
 void ABombActor::TryDisplayExplosionCells()
 {
@@ -163,9 +170,77 @@ void ABombActor::TryDisplayExplosionCells()
 #endif // !UE_BUILD_SHIPPING
 }
 
-/* ---------------------------------------------------
- *					Protected functions
- * --------------------------------------------------- */
+// Destroy bomb and burst explosion cells, calls multicast event
+void ABombActor::DetonateBomb()
+{
+	if (!HasAuthority()
+	    || IsHidden()
+	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	{
+		return;
+	}
+
+	const FCells ExplosionCells = GetExplosionCells();
+	if (!ensureMsgf(!ExplosionCells.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'ExplosionCells' is empty!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	MulticastDetonateBomb(ExplosionCells.Array());
+}
+
+// Destroy bomb and burst explosion cells
+void ABombActor::MulticastDetonateBomb_Implementation(const FCellsArr& ExplosionCells)
+{
+	const UBombRow* BombRow = UBombDataAsset::Get().GetRowByLevelType<UBombRow>(GetBombType());
+	if (!ensureMsgf(BombRow, TEXT("ASSERT: [%i] %hs:\n'BombRow' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	// Reset Fire Radius to avoid destroying the bomb again
+	FireRadiusInternal = MIN_FIRE_RADIUS;
+
+	// Spawn emitters
+	ensureMsgf(BombRow->BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombRow->BombVFX' is not set!"), __LINE__, __FUNCTION__);
+	for (const FCell& Cell : ExplosionCells)
+	{
+		SpawnedVFXsInternal.Add(UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, BombRow->BombVFX, Cell.Location, GetActorRotation(), GetActorScale()));
+	}
+
+	// Destroy all actors from array of cells
+	AGeneratedMap::Get().DestroyLevelActorsOnCells(FCells{ExplosionCells}, this);
+
+	USoundsSubsystem::Get().PlayExplosionSFX();
+
+	auto OnVFXDurationExpired = [WeakThis = TWeakObjectPtr(this)]()
+	{
+		ABombActor* This = WeakThis.Get();
+		if (!This)
+		{
+			return;
+		}
+
+		for (UNiagaraComponent* VfxIt : This->SpawnedVFXsInternal)
+		{
+			if (VfxIt)
+			{
+				VfxIt->Deactivate();
+			}
+		}
+
+		This->SpawnedVFXsInternal.Empty();
+	};
+
+	constexpr bool bLoop = false;
+	FTimerManager& TimerManager = GetWorldTimerManager();
+	TimerManager.ClearTimer(TimerHandle_LifeSpanExpired);
+	TimerManager.SetTimer(VFXDurationExpiredTimerHandle, OnVFXDurationExpired, UBombDataAsset::Get().GetVFXDuration(), bLoop);
+}
+
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
 
 // Called when an instance of this class is placed (in editor) or spawned.
 void ABombActor::OnConstruction(const FTransform& Transform)
@@ -223,6 +298,7 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 	DOREPLIFETIME(ThisClass, FireRadiusInternal);
 	DOREPLIFETIME(ThisClass, BombMaterialInternal);
+	DOREPLIFETIME(ThisClass, BombPlacerInternal);
 }
 
 // Set the lifespan of this actor. When it expires the object will be destroyed
@@ -276,65 +352,22 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 		// Bomb is removed from Generated Map, detonate it
 		DetonateBomb();
 
-		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
+		OnActorEndOverlap.RemoveAll(this);
 
 		BombMaterialInternal = nullptr;
+		BombPlacerInternal = nullptr;
 	}
 
 	// Apply hidden flag
 	Super::SetActorHiddenInGame(bNewHidden);
 }
 
-// Destroy bomb and burst explosion cells, calls multicast event
-void ABombActor::DetonateBomb()
-{
-	if (!HasAuthority()
-	    || IsHidden()
-	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
-	{
-		return;
-	}
-
-	const FCells ExplosionCells = GetExplosionCells();
-	if (!ensureMsgf(!ExplosionCells.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'ExplosionCells' is empty!"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	MulticastDetonateBomb(ExplosionCells.Array());
-}
-
-// Destroy bomb and burst explosion cells
-void ABombActor::MulticastDetonateBomb_Implementation(const TArray<FCell>& ExplosionCells)
-{
-	const UBombRow* BombRow = UBombDataAsset::Get().GetRowByLevelType<UBombRow>(GetBombType());
-	if (!ensureMsgf(BombRow, TEXT("ASSERT: [%i] %hs:\n'BombRow' is not valid!"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	// Reset Fire Radius to avoid destroying the bomb again
-	FireRadiusInternal = MIN_FIRE_RADIUS;
-
-	// Spawn emitters
-	ensureMsgf(BombRow->BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombRow->BombVFX' is not set!"), __LINE__, __FUNCTION__);
-	for (const FCell& Cell : ExplosionCells)
-	{
-		SpawnedVFXsInternal.Add(UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, BombRow->BombVFX, Cell.Location, GetActorRotation(), GetActorScale()));
-	}
-
-	// Destroy all actors from array of cells
-	AGeneratedMap::Get().DestroyLevelActorsOnCells(FCells{ExplosionCells}, this);
-
-	USoundsSubsystem::Get().PlayExplosionSFX();
-
-	FTimerManager& TimerManager = GetWorldTimerManager();
-	TimerManager.ClearTimer(TimerHandle_LifeSpanExpired);
-	TimerManager.SetTimer(VFXDurationExpiredTimerHandle, this, &ThisClass::OnVFXDurationExpired, UBombDataAsset::Get().GetVFXDuration());
-}
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
 
 // Triggers when character end to overlaps with this bomb.
-void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void ABombActor::OnBombEndOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)
 {
 	const bool bIsPlayerOverlap = Cast<APlayerCharacter>(OtherActor) != nullptr;
 	if (!bIsPlayerOverlap)
@@ -346,7 +379,7 @@ void ABombActor::OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 }
 
 // Listen by dragged bombs to handle game resetting
-void ABombActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void ABombActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	if (CurrentGameState == ECurrentGameState::InGame)
 	{
@@ -355,6 +388,10 @@ void ABombActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		SetLifeSpan();
 	}
 }
+
+/*********************************************************************************************
+ * Custom Collision Response
+ ********************************************************************************************* */
 
 // Sets actual collision responses to all players for this bomb
 void ABombActor::UpdateCollisionResponseToAllPlayers()
@@ -368,7 +405,7 @@ void ABombActor::UpdateCollisionResponseToAllPlayers()
 	{
 		// There are no characters on the bomb, block all
 		MakeCollisionResponseToAllPlayers(/*out*/CollisionResponses, ECR_Block);
-		OnActorEndOverlap.RemoveDynamic(this, &ABombActor::OnBombEndOverlap);
+		OnActorEndOverlap.RemoveAll(this);
 	}
 	else
 	{
@@ -452,6 +489,10 @@ void ABombActor::GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const
 	}
 }
 
+/*********************************************************************************************
+ * Material
+ ********************************************************************************************* */
+
 // Updates current material for this bomb actor
 void ABombActor::ApplyMaterial()
 {
@@ -468,17 +509,4 @@ void ABombActor::ApplyMaterial()
 void ABombActor::OnRep_BombMaterial()
 {
 	ApplyMaterial();
-}
-
-// Is called when the bomb VFX duration is expired
-void ABombActor::OnVFXDurationExpired()
-{
-	for (UNiagaraComponent* VfxIt : SpawnedVFXsInternal)
-	{
-		if (VfxIt)
-		{
-			VfxIt->Deactivate();
-		}
-	}
-	SpawnedVFXsInternal.Empty();
 }
