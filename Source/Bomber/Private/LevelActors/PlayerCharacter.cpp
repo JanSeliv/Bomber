@@ -546,9 +546,26 @@ void APlayerCharacter::OnPlayerRemovedFromLevel_Implementation(UMapComponent* Ma
 		return;
 	}
 
+	// Mark this player as dead in own PlayerState
 	if (AMyPlayerState* InPlayerState = GetPlayerState<AMyPlayerState>())
 	{
 		InPlayerState->SetCharacterDead(true);
+	}
+
+	// In the KillerPlayerState, mark this player as killed by DestroyCauser
+	AMyPlayerState* KillerPlayerState = [DestroyCauser]
+	{
+		const APlayerCharacter* CauserCharacter = Cast<APlayerCharacter>(DestroyCauser);
+		if (!CauserCharacter)
+		{
+			const ABombActor* Bomb = DestroyCauser ? Cast<ABombActor>(DestroyCauser) : nullptr;
+			CauserCharacter = Bomb ? Bomb->GetBombPlacer() : nullptr;
+		}
+		return CauserCharacter ? CauserCharacter->GetPlayerState<AMyPlayerState>() : nullptr;
+	}();
+	if (KillerPlayerState)
+	{
+		KillerPlayerState->SetOpponentKilled(this);
 	}
 }
 

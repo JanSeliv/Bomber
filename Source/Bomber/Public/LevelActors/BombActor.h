@@ -60,6 +60,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	int32 GetExplosionRadius() const;
 
+	/** Returns the character who placed the bomb. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FORCEINLINE class APlayerCharacter* GetBombPlacer() const { return BombPlacerInternal; }
+
 	/** Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
 	void TryDisplayExplosionCells();

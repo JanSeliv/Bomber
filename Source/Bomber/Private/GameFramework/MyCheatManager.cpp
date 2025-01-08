@@ -125,7 +125,8 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 	}
 
 	// Destroy all specified
-	GeneratedMap.DestroyLevelActorsOnCells(CellsToDestroy);
+	APlayerCharacter* DestroyCauser = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+	GeneratedMap.DestroyLevelActorsOnCells(CellsToDestroy, DestroyCauser);
 }
 
 /*********************************************************************************************

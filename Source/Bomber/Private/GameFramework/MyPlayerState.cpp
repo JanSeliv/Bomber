@@ -91,7 +91,7 @@ void AMyPlayerState::UpdateEndGameState()
 void AMyPlayerState::SetEndGameState(EEndGameState NewEndGameState)
 {
 	if (!HasAuthority()
-		|| NewEndGameState == EndGameStateInternal)
+	    || NewEndGameState == EndGameStateInternal)
 	{
 		// No changes needed
 		return;
@@ -111,7 +111,7 @@ void AMyPlayerState::OnRep_EndGameState()
 void AMyPlayerState::ApplyEndGameState()
 {
 	if (HasAuthority()
-		&& UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
+	    && UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
 	{
 		AMyGameStateBase::Get().SetGameState(ECGS::EndGame);
 	}
@@ -245,6 +245,51 @@ void AMyPlayerState::OnPostCharacterDead_Implementation(const FCells& Cells)
 
 		UpdateEndGameState();
 	}
+}
+
+/*********************************************************************************************
+ * Killed Opponents Num
+ *********************************************************************************************/
+
+// Called when an opponent is killed
+void AMyPlayerState::SetOpponentKilled(const class APlayerCharacter* KilledOpponent)
+{
+	if (!HasAuthority()
+	    || !KilledOpponent
+	    || KilledOpponent == GetPawn()) // is killed by itself
+	{
+		return;
+	}
+
+	OpponentsKilledNumInternal++;
+	ApplyOpponentsKilledNum();
+}
+
+// Called on client when Opponents Killed Num changes
+void AMyPlayerState::OnRep_OpponentsKilledNum()
+{
+	ApplyOpponentsKilledNum();
+}
+
+// Applies and broadcasts Opponents Killed Num changes
+void AMyPlayerState::ApplyOpponentsKilledNum()
+{
+	if (OnOpponentsKilledNumChanged.IsBound())
+	{
+		OnOpponentsKilledNumChanged.Broadcast(OpponentsKilledNumInternal);
+	}
+}
+
+void AMyPlayerState::ResetOpponentsKilledNum()
+{
+	if (!HasAuthority()
+	    || OpponentsKilledNumInternal <= 0)
+	{
+		return;
+	}
+
+	OpponentsKilledNumInternal = 0;
+	ApplyOpponentsKilledNum();
 }
 
 /*********************************************************************************************
@@ -391,11 +436,12 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 {
 	switch (CurrentGameState)
 	{
-		case ECGS::Menu:         // fallthrough
+		case ECGS::Menu:         // Fallthrough
 		case ECGS::GameStarting: // Fallthrough
 		case ECGS::InGame:
 		{
 			SetCharacterDead(false);
+			ResetOpponentsKilledNum();
 			SetEndGameState(EEndGameState::None);
 			break;
 		}
@@ -420,6 +466,7 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 
 	DOREPLIFETIME(ThisClass, EndGameStateInternal);
 	DOREPLIFETIME(ThisClass, bIsCharacterDeadInternal);
+	DOREPLIFETIME(ThisClass, OpponentsKilledNumInternal);
 
 	// APlayerState::bIsABot private property has replication condition as 'Initial'
 	// Reset to default condition, so the same player state can change its type without respawn

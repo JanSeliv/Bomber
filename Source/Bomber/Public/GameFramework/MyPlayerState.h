@@ -160,6 +160,45 @@ protected:
 	void OnPostCharacterDead(const TSet<struct FCell>& Cells);
 
 	/*********************************************************************************************
+	 * Killed Opponents Num
+	 * Is opposite to IsCharacterDead, is increased when this player kills an opponent.
+	 *********************************************************************************************/
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOpponentsKilledNumChanged, int32, OpponentsKilledNum);
+
+	/** Called when an opponent is killed. May be triggered multiple times during multi-kill increments.
+	 * Broadcast only number of killed opponents, might be useful for scoreboards.
+	 * To track who exactly killed the player, use delegates like UMapComponent::OnDeactivatedMapComponent. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnOpponentsKilledNumChanged OnOpponentsKilledNumChanged;
+
+	/** Returns the number of opponents killed by the player associated with this Player State. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetOpponentsKilledNum() const { return OpponentsKilledNumInternal; }
+
+	/** Increments the number of opponents killed.
+	 * @param DefeatedCharacter The character of the opponent who was killed by the player associated with this Player State. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetOpponentKilled(const class APlayerCharacter* DefeatedCharacter);
+
+protected:
+	/** Holds the number of opponents killed */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_OpponentsKilledNum", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Opponents Killed Num"))
+	int32 OpponentsKilledNumInternal = 0;
+
+	/** Called on client when Opponents Killed Num changes */
+	UFUNCTION()
+	void OnRep_OpponentsKilledNum();
+
+	/** Applies and broadcasts Opponents Killed Num changes */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void ApplyOpponentsKilledNum();
+
+	/** Clears the number of opponents killed. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void ResetOpponentsKilledNum();
+
+	/*********************************************************************************************
 	 * Is Human / Bot
 	 * APlayerState::bIsABot is used to determine if the player is a bot.
 	 * - SetIsABot() to assign bot status
