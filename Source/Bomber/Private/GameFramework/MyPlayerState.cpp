@@ -76,8 +76,14 @@ void AMyPlayerState::UpdateEndGameState()
 
 		if (IsCharacterDead())
 		{
-			// Draw: last players were blasted together
-			return PlayerNum <= 0 ? EEndGameState::Draw : EEndGameState::Lose;
+			if (PlayerNum <= 0)
+			{
+				// Draw: last players were blasted together
+				return EEndGameState::Draw;
+			}
+
+			// Lose: player is dead, or Honor Loss if player has killed anyone else before dying
+			return OpponentsKilledNumInternal > 0 ? EEndGameState::HonorLoss : EEndGameState::Lose;
 		}
 
 		// Win: Is alive owner and is the last player

@@ -155,7 +155,12 @@ UENUM(BlueprintType)
 enum class EEndGameState : uint8
 {
 	None,
+	///< Player is last alive
 	Win,
+	///< Player has died
 	Lose,
+	///< Player has killed anyone else before dying
+	HonorLoss,
+	///< Last players have blasted each other or the time has run out
 	Draw
 };
