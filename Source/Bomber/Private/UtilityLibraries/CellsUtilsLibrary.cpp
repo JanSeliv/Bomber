@@ -23,9 +23,9 @@ void UCellsUtilsLibrary::BreakCell(const FCell& InCell, double& X, double& Y, do
 	Z = InCell.Z();
 }
 
-// ---------------------------------------------------
-//		Grid transform library
-// ---------------------------------------------------
+/*********************************************************************************************
+ * Transform (Location, Rotation, Scale) on the level
+ ********************************************************************************************* */
 
 // Returns transform of cells grid on current level
 FTransform UCellsUtilsLibrary::GetLevelGridTransform()
@@ -93,9 +93,9 @@ int32 UCellsUtilsLibrary::GetLastRowIndexOnLevel()
 	return GetCellRowsNumOnLevel() - 1;
 }
 
-// ---------------------------------------------------
-//		Generated Map related cell functions
-// ---------------------------------------------------
+/*********************************************************************************************
+ * Generated Map related cell functions
+ ********************************************************************************************* */
 
 // Takes the cell and returns its row and column position on the level if exists, -1 otherwise
 void UCellsUtilsLibrary::GetPositionByCellOnLevel(const FCell& InCell, int32& OutColumnX, int32& OutRowY)
@@ -136,13 +136,6 @@ FIntPoint UCellsUtilsLibrary::GetCenterCellPositionOnLevel()
 	int32 OutRowY;
 	GetCenterCellPositionOnLevel(/*out*/OutColumnX, /*out*/OutRowY);
 	return FIntPoint(OutColumnX, OutRowY);
-}
-
-// Return closest corner cell to the given cell
-FCell UCellsUtilsLibrary::GetNearestCornerCellOnLevel(const FCell& CellToCheck)
-{
-	const TSet<FCell> AllCornerCells = GetCornerCellsOnLevel();
-	return GetCellArrayNearest(AllCornerCells, CellToCheck);
 }
 
 // Returns all empty grid cell locations on the Generated Map where non of actors are present
@@ -358,9 +351,16 @@ TSet<FCell> UCellsUtilsLibrary::GetAllExplosionCells()
 	return ExplosionCells;
 }
 
-// ---------------------------------------------------
-//		 Debug cells utilities
-// ---------------------------------------------------
+// Return closest corner cell to the given cell
+FCell UCellsUtilsLibrary::GetNearestCornerCellOnLevel(const FCell& CellToCheck)
+{
+	const TSet<FCell> AllCornerCells = GetCornerCellsOnLevel();
+	return GetCellArrayNearest(AllCornerCells, CellToCheck);
+}
+
+/*********************************************************************************************
+ * Debug cells utilities
+ ********************************************************************************************* */
 
 // Remove all text renders of the Owner, is not available in shipping build
 void UCellsUtilsLibrary::ClearDisplayedCells(const UObject* Owner)

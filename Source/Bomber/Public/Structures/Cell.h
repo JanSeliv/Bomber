@@ -88,28 +88,27 @@ struct BOMBER_API FCell
 	/** Returns Cell's Z component. */
 	float Z() const { return Location.Z; }
 
-	/** Gets a copy of given cell rotated around given transform to the same yaw degree.
-	 * @param InCell - The cell to rotate.
-	 * @param AxisZ The Z param of the axis to rotate around.
-	 * @param OriginTransformNoScale The transform of the origin of the rotation. */
-	static FCell RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTransform& OriginTransformNoScale);
-
 	/** Comparing with uninitialized Invalid Cell. */
 	FORCEINLINE bool IsInvalidCell() const { return *this == InvalidCell; }
 
 	/** Check is valid this cell. */
 	FORCEINLINE bool IsValid() const { return *this != InvalidCell; }
 
-	/** Finds the closest cell to the given cell within array of cells.
-	 * @param Cells The array of cells to search in.
-	 * @param CellToCheck The start position of the cell to check. */
-	static FCell GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck);
+	/*********************************************************************************************
+	 * Rotation
+	 ********************************************************************************************* */
+public:
+	/** Gets a copy of given cell rotated around given transform to the same yaw degree.
+	 * @param InCell - The cell to rotate.
+	 * @param AxisZ The Z param of the axis to rotate around.
+	 * @param OriginTransformNoScale The transform of the origin of the rotation. */
+	static FCell RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTransform& OriginTransformNoScale);
 
 	/** Allows rotate or unrotated given grid around its origin. */
 	static FCells RotateCellArray(float AxisZ, const FCells& InCells);
 
 	/*********************************************************************************************
-	 * Grid
+	 * Grid (Array of cells)
 	 ********************************************************************************************* */
 public:
 	/** Constructs and returns new grid from given transform.
@@ -144,10 +143,6 @@ public:
 	/** Gets a copy of given cell snapped its location to a grid while it does not respect rotated grids. */
 	static FORCEINLINE FCell SnapCell(const FCell& InCell) { return InCell.Location.GridSnap(CellSize); }
 
-	/*********************************************************************************************
-	 * Transform
-	 ********************************************************************************************* */
-public:
 	/** Makes origin transform for given grid. */
 	static FTransform GetCellArrayTransform(const FCells& InCells);
 	static FTransform GetCellArrayTransformNoScale(const FCells& InCells);
@@ -163,6 +158,11 @@ public:
 	static FVector2D GetCellArraySize(const FCells& InCells);
 	static float GetCellArrayWidth(const FCells& InCells);
 	static float GetCellArrayLength(const FCells& InCells);
+
+	/** Finds the closest cell to the given cell within array of cells.
+	 * @param InCells The array of cells to search in.
+	 * @param CellToCheck The start position of the cell to check. */
+	static FCell GetCellArrayNearest(const FCells& InCells, const FCell& CellToCheck);
 
 	/*********************************************************************************************
 	 * Distance

@@ -57,10 +57,10 @@ class BOMBER_API UCellsUtilsLibrary final : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	/* ---------------------------------------------------
-	*		Exposing FCells function to blueprints
-	* --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Conversions
+	 ********************************************************************************************* */
+public:
 	/** Creates 'Make Cell' node with Cell  as an input parameter. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", NativeMakeFunc, Keywords = "construct build"))
 	static FORCEINLINE FCell MakeCell(double X, double Y, double Z) { return FCell(X, Y, Z); }
@@ -155,10 +155,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", ScriptMethod = "IsValidCell", Keywords = "Is Not Zero Cell"))
 	static FORCEINLINE bool Cell_IsValid(const FCell& Cell) { return Cell.IsValid(); }
 
-	/* ---------------------------------------------------
-	 *		Math library
-	 * --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Grid (Array of cells)
+	 * Exposed FCell math functions to blueprints
+	 ********************************************************************************************* */
+public:
 	/** Calculate the length between two cells.
 	 * Could be useful to check how far two cells are far between themselves.
 	 *
@@ -183,7 +184,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE TSet<FCell> RotateCellArray(float AxisZ, const TSet<FCell>& InCells) { return FCell::RotateCellArray(AxisZ, InCells); }
 
-#pragma region Grid
 	/** Constructs and returns new grid from given transform.
 	 * @param OriginTransform its location and rotation is the center of new grid, its scale-X is number of columns, scale-Y is number of rows. */
 	UFUNCTION(BlueprintPure, Category = "C++")
@@ -216,9 +216,7 @@ public:
 	 * @return scaled cell, is not aligned to any existed cell, make sure to snap it to the grid. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FCell ScaleCellToNewGrid(const FCell& OriginalCell, const TSet<FCell>& NewCornerCells) { return FCell::ScaleCellToNewGrid(OriginalCell, NewCornerCells); }
-#pragma endregion Grid
 
-#pragma region Transform
 	/** Makes origin transform for given grid. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FTransform GetCellArrayTransform(const TSet<FCell>& InCells) { return FCell::GetCellArrayTransform(InCells); }
@@ -245,12 +243,11 @@ public:
 	 * E.g: if given cells are corner cells on 7x9 level, it will return 9 length that represent rows (Y). */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "size,scale"))
 	static FORCEINLINE float GetCellArrayLength(const TSet<FCell>& InCells) { return FCell::GetCellArrayLength(InCells); }
-#pragma endregion Transform
 
-	/* ---------------------------------------------------
-	*		Grid transform library
-	* --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Transform (Location, Rotation, Scale) on the level
+	 ********************************************************************************************* */
+public:
 	/** Returns transform of cells grid on current level, where:
 	 * Transform location and rotation is the center of the grid.
 	 * Transform scale-X is number of columns (width).
@@ -302,10 +299,10 @@ public:
 	static int32 GetLastRowIndexOnLevel();
 #pragma endregion Scale
 
-	/* ---------------------------------------------------
-	 *		Generated Map related cell functions
-	 * --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Generated Map related cell functions
+	 ********************************************************************************************* */
+public:
 	/** Returns the cell by specified column (X) and row (Y) on current level if exists, invalid cell otherwise. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FCell GetCellByPositionOnLevel(int32 ColumnX, int32 RowY) { return GetCellByPositionOnGrid(FIntPoint(ColumnX, RowY), GetAllCellsOnLevel()); }
@@ -332,25 +329,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static void GetCenterCellPositionOnLevel(int32& OutColumnX, int32& OutRowY);
 	static FIntPoint GetCenterCellPositionOnLevel();
-
-#pragma region CornerCell
-	/** Returns 4 corner cells of the Generated Map respecting its current size. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static FORCEINLINE TSet<FCell> GetCornerCellsOnLevel() { return GetCornerCellsOnGrid(GetAllCellsOnLevel()); }
-
-	/** Returns specified corner cell in given grid. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static FORCEINLINE FCell GetCellByCornerOnLevel(EGridCorner CornerType) { return GetCellByCornerOnGrid(CornerType, GetAllCellsOnLevel()); }
-
-	/** Returns true if given cell is corner cell of current level. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
-	static FORCEINLINE bool IsCornerCellOnLevel(const FCell& Cell) { return GetCornerCellsOnLevel().Contains(Cell); }
-
-	/** Return closest corner cell to the given cell.
-	 * @param CellToCheck The start position of the cell to check. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CellToCheck"))
-	static FCell GetNearestCornerCellOnLevel(const FCell& CellToCheck);
-#pragma endregion CornerCell
 
 	/** Returns all empty grid cell locations on the Generated Map where non of actors are present. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Free"))
@@ -575,10 +553,31 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Dangerous"))
 	static TSet<FCell> GetAllExplosionCells();
 
-	/* ---------------------------------------------------
-	 *		Debug cells utilities
-	 * --------------------------------------------------- */
+	/*********************************************************************************************
+	 * Corner Cell
+	 ********************************************************************************************* */
+public:
+	/** Returns 4 corner cells of the Generated Map respecting its current size. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE TSet<FCell> GetCornerCellsOnLevel() { return GetCornerCellsOnGrid(GetAllCellsOnLevel()); }
 
+	/** Returns specified corner cell in given grid. */
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static FORCEINLINE FCell GetCellByCornerOnLevel(EGridCorner CornerType) { return GetCellByCornerOnGrid(CornerType, GetAllCellsOnLevel()); }
+
+	/** Returns true if given cell is corner cell of current level. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
+	static FORCEINLINE bool IsCornerCellOnLevel(const FCell& Cell) { return GetCornerCellsOnLevel().Contains(Cell); }
+
+	/** Return closest corner cell to the given cell.
+	 * @param CellToCheck The start position of the cell to check. */
+	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "CellToCheck"))
+	static FCell GetNearestCornerCellOnLevel(const FCell& CellToCheck);
+
+	/*********************************************************************************************
+	 * Debug cells utilities
+	 ********************************************************************************************* */
+public:
 	/** Remove all text renders of the Owner, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
 	static void ClearDisplayedCells(const UObject* Owner);

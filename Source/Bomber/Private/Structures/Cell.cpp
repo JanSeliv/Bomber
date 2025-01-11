@@ -43,6 +43,10 @@ FCell& FCell::operator=(const FVector& Vector)
 	return *this;
 }
 
+/*********************************************************************************************
+ * Rotation
+ ********************************************************************************************* */
+
 // Gets a copy of given cell rotated around given transform to the same yaw degree
 FCell FCell::RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTransform& OriginTransformNoScale)
 {
@@ -52,40 +56,6 @@ FCell FCell::RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTra
 	const FVector RotatedVector = Dimensions.RotateAngleAxis(AngleDeg, Axis);
 	FCell RotatedCell(InCell.Location + RotatedVector - Dimensions);
 	return MoveTemp(RotatedCell);
-}
-
-// Finds the closest cell to the given cell within array of cells
-FCell FCell::GetCellArrayNearest(const FCells& Cells, const FCell& CellToCheck)
-{
-	//-----------------
-	// +-----+-----+   |
-	// |  1  |  2  |   | 1-4: are given values in 'Cells' array
-	// +-----+-----+   |
-	// | [3] |  4  |   | [3]: is the found nearest cell.
-	// +-----+-----+   |
-	//    X            | X: is given 'CellToCheck'
-	//-----------------
-
-	if (!Cells.Num())
-	{
-		return InvalidCell;
-	}
-
-	FCell NearestCell = InvalidCell;
-	static constexpr float MaxFloat = TNumericLimits<float>::Max();
-	float NearestDistance = MaxFloat;
-
-	for (const FCell& CellIt : Cells)
-	{
-		const float DistanceIt = Distance<float>(CellIt, CellToCheck);
-		if (DistanceIt < NearestDistance)
-		{
-			NearestCell = CellIt;
-			NearestDistance = DistanceIt;
-		}
-	}
-
-	return NearestCell;
 }
 
 // Allows rotate or unrotated given grid around its origin
@@ -118,6 +88,10 @@ FCells FCell::RotateCellArray(float AxisZ, const FCells& InCells)
 
 	return MoveTemp(RotatedCells);
 }
+
+/*********************************************************************************************
+ * Grid
+ ********************************************************************************************* */
 
 // Constructs and returns new grid from given transform
 FCells FCell::MakeCellGridByTransform(const FTransform& OriginTransform)
@@ -332,6 +306,44 @@ float FCell::GetCellArrayLength(const FCells& InCells)
 	return CellsBox.GetSize().Y / CellSize + 1.f;
 }
 
+// Finds the closest cell to the given cell within array of cells
+FCell FCell::GetCellArrayNearest(const FCells& InCells, const FCell& CellToCheck)
+{
+	//-----------------
+	// +-----+-----+   |
+	// |  1  |  2  |   | 1-4: are given values in 'Cells' array
+	// +-----+-----+   |
+	// | [3] |  4  |   | [3]: is the found nearest cell.
+	// +-----+-----+   |
+	//    X            | X: is given 'CellToCheck'
+	//-----------------
+
+	if (!InCells.Num())
+	{
+		return InvalidCell;
+	}
+
+	FCell NearestCell = InvalidCell;
+	static constexpr float MaxFloat = TNumericLimits<float>::Max();
+	float NearestDistance = MaxFloat;
+
+	for (const FCell& CellIt : InCells)
+	{
+		const float DistanceIt = Distance<float>(CellIt, CellToCheck);
+		if (DistanceIt < NearestDistance)
+		{
+			NearestCell = CellIt;
+			NearestDistance = DistanceIt;
+		}
+	}
+
+	return NearestCell;
+}
+
+/*********************************************************************************************
+ * Math operators
+ ********************************************************************************************* */
+
 // Sums cells
 FCell& FCell::operator+=(const FCell& Other)
 {
@@ -345,6 +357,10 @@ FCell& FCell::operator-=(const FCell& Other)
 	Location -= Other.Location;
 	return *this;
 }
+
+/*********************************************************************************************
+ * Conversion
+ ********************************************************************************************* */
 
 // Returns the cell direction by its enum.
 const FCell& FCell::GetCellDirection(ECellDirection CellDirection)
