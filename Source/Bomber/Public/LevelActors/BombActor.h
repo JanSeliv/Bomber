@@ -71,12 +71,12 @@ public:
 protected:
 	/** The radius of the blast to each side, is set by player with InitBomb on spawning.
 	 * @warning don't use directly, even in this class, but call GetExplosionRadius() instead to support cheat overrides. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
 	int32 FireRadiusInternal = MIN_FIRE_RADIUS;
 
 	/** The character who placed the bomb, is set by InitBomb on spawning.
 	 * Is used to track who spawned the bomb, e.g: to record the score. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Owner"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Placer"))
 	TObjectPtr<const class APlayerCharacter> BombPlacerInternal = nullptr;
 
 	/** All currently playing VFXs. */

@@ -102,7 +102,7 @@ public:
 	EActorType GetActorType() const;
 
 	/** Returns the level type by current mesh.
-	 * If often used to determine the variation of the actor across different rows from the Data Asset. */ 
+	 * If often used to determine the variation of the actor across different rows from the Data Asset. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ELevelType GetLevelType() const;
 
@@ -145,17 +145,22 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	/** Owner's cell location on the Generated Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Replicated, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
-	FCell CellInternal = FCell::InvalidCell;
-
-	/** Contains exposed for designers properties for the spawned owner. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))
-	TObjectPtr<const class ULevelActorDataAsset> ActorDataAssetInternal = nullptr;
-
 	/** Mesh of an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
 	TObjectPtr<class UMeshComponent> MeshComponentInternal = nullptr;
+
+	/** The Collision Component, is attached to an owner. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Collision Component"))
+	TObjectPtr<class UBoxComponent> BoxCollisionComponentInternal = nullptr;
+
+	/** Represents the archetype of the owner, is set automatically on spawn.
+	 * Is not Transient since it's set and saved in editor before the game starts. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Actor Data Asset"))
+	TObjectPtr<const class ULevelActorDataAsset> ActorDataAssetInternal = nullptr;
+
+	/** Owner's cell location on the Generated Map */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
+	FCell CellInternal = FCell::InvalidCell;
 
 	/** Hold custom mesh asset if changed.
 	 * Is null by default or when SetDefaultMesh() is called.
@@ -163,13 +168,10 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CustomMeshAsset", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
 	TObjectPtr<UStreamableRenderAsset> CustomMeshAssetInternal = nullptr;
 
-	/** If true the owner is undestroyable, is used by skills and cheat manager. */
+	/** If true the owner is undestroyable, is used by skills and cheat manager.
+	 * Is not replicated since evaluated only on the server. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
 	bool bIsUndestroyableInternal = false;
-
-	/** The Collision Component, is attached to an owner. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Collision Component"))
-	TObjectPtr<class UBoxComponent> BoxCollisionComponentInternal = nullptr;
 
 	/** Actual response type of the collision box of an actor. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response"))
