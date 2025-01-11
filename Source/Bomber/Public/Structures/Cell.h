@@ -164,6 +164,22 @@ public:
 	 * @param CellToCheck The start position of the cell to check. */
 	static FCell GetCellArrayNearest(const FCells& InCells, const FCell& CellToCheck);
 
+	/** Keeps cells within range of the StartingCell and avoids barriers.
+	 * E.g: might be useful to exclude all explosions cells and those that are out of explosions, so the bot (Starting Cell) will not attempt to go through explosions.
+	 * @param ActiveCells The cells to process and filter.
+	 * @param BoundaryCells The cells acting as barriers.
+	 * @param StartingCell The reference cell for proximity and direction.
+	 * @return A set of filtered cells (`FCells`) that meet the criteria. */
+	static FCells FilterCellsByBounds(const FCells& ActiveCells, const FCells& BoundaryCells, const FCell& StartingCell);
+
+	/** Returns true if the Starting Cell is in line of sight (in the direction of the Target Cell) within the given angle when comparing cells on the grid.
+	 * Might be useful for AI to check does it see the bomb or player in the line of sight.
+	 * @param StartingCell The reference starting cell (who is looking).
+	 * @param TargetCell The target cell to check direction to (that can be seen).
+	 * @param AllVisibleCells All cells that can be seen from the starting cell, the grid or just part of it.
+	 * @param MaxAngleDegrees The maximum allowable angle (in degrees) for alignment, is recommended around 20 degrees. */
+	static bool CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell, const FCells& AllVisibleCells, float MaxAngleDegrees = 21.f);
+
 	/*********************************************************************************************
 	 * Distance
 	 ********************************************************************************************* */

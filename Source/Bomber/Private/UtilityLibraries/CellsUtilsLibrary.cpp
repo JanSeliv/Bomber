@@ -324,6 +324,12 @@ FCell UCellsUtilsLibrary::RotateCellAroundLevelOrigin(const FCell& Cell, float A
 	return FCell::RotateCellAroundOrigin(Cell, AxisZ, GridTransformNoScale);
 }
 
+// Gets actor location snapped to nearest cell on the level grid
+FCell UCellsUtilsLibrary::SnapActorOnLevel(AActor* Actor)
+{
+	return Actor ? SnapVectorOnLevel(Actor->GetActorLocation()) : FCell::InvalidCell;
+}
+
 // Returns nearest free cell to given cell, where free means cell with no other level actors except players
 FCell UCellsUtilsLibrary::GetNearestFreeCell(const FCell& Cell)
 {

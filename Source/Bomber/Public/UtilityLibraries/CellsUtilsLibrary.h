@@ -56,7 +56,6 @@ class BOMBER_API UCellsUtilsLibrary final : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-public:
 	/*********************************************************************************************
 	 * Conversions
 	 ********************************************************************************************* */
@@ -243,6 +242,24 @@ public:
 	 * E.g: if given cells are corner cells on 7x9 level, it will return 9 length that represent rows (Y). */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "size,scale"))
 	static FORCEINLINE float GetCellArrayLength(const TSet<FCell>& InCells) { return FCell::GetCellArrayLength(InCells); }
+
+	/** Keeps cells within range of the StartingCell and avoids barriers.
+	 * E.g: might be useful to exclude all explosions cells and those that are out of explosions, so the bot (Starting Cell) will not attempt to go through explosions.
+	 * @param ActiveCells The cells to process and filter.
+	 * @param BoundaryCells The cells acting as barriers.
+	 * @param StartingCell The reference cell for proximity and direction.
+	 * @return A set of filtered cells (`FCells`) that meet the criteria. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "StartingCell"))
+	static FORCEINLINE TSet<FCell> FilterCellsByBounds(const TSet<FCell>& ActiveCells, const TSet<FCell>& BoundaryCells, const FCell& StartingCell) { return FCell::FilterCellsByBounds(ActiveCells, BoundaryCells, StartingCell); }
+
+	/** Returns true if the Starting Cell is in line of sight (in the direction of the Target Cell) within the given angle when comparing cells on the grid.
+	 * Might be useful for AI to check does it see the bomb or player in the line of sight.
+	 * @param StartingCell The reference starting cell (who is looking).
+	 * @param TargetCell The target cell to check direction to (that can be seen).
+	 * @param AllVisibleCells All cells that can be seen from the starting cell, the grid or just part of it.
+	 * @param MaxAngleDegrees The maximum allowable angle (in degrees) for alignment, is recommended around 20 degrees. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "StartingCell,TargetCell"))
+	static FORCEINLINE bool CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell, const TSet<FCell>& AllVisibleCells, float MaxAngleDegrees) { return FCell::CanCellSeeTarget(StartingCell, TargetCell, AllVisibleCells, MaxAngleDegrees); }
 
 	/*********************************************************************************************
 	 * Transform (Location, Rotation, Scale) on the level
@@ -544,6 +561,15 @@ public:
 	/** Gets a copy of given cell snapped to nearest cell on the level grid. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", Keywords = "Grid Snap,near"))
 	static FORCEINLINE FCell SnapCellOnLevel(const FCell& Cell) { return GetCellArrayNearest(GetAllCellsOnLevel(), Cell); }
+
+	/** Gets nearest cell on the level grid to the given vector. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Vector", Keywords = "Grid Snap,near"))
+	static FORCEINLINE FCell SnapVectorOnLevel(const FVector& Vector) { return SnapCellOnLevel(Vector); }
+
+	/** Gets actor location snapped to nearest cell on the level grid.
+	 * @param Actor The actor to obtain location and snap to the grid. Is not `const` because of `BlueprintAutocast` limitation to make Drag & Drop work from Actor parameter to Cell parameter. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (BlueprintAutocast))
+	static FCell SnapActorOnLevel(class AActor* Actor);
 
 	/** Returns nearest free cell to given cell, where free means cell with no other level actors except players. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))

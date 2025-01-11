@@ -340,6 +340,104 @@ FCell FCell::GetCellArrayNearest(const FCells& InCells, const FCell& CellToCheck
 	return NearestCell;
 }
 
+// Keeps cells within range of the StartingCell and avoids barriers
+FCells FCell::FilterCellsByBounds(const FCells& ActiveCells, const FCells& BoundaryCells, const FCell& StartingCell)
+{
+	// Input Grid:            Resulting Grid:
+	// +---+---+---+---+      +---+---+---+---+
+	// | + | B | + | + |      | - | B | - | + |
+	// +---+---+---+---+      +---+---+---+---+
+	// | B | B | B | + |      | B | B | B | + |
+	// +---+---+---+---+      +---+---+---+---+
+	// | + | B | + | + |      | - | B | + | + |
+	// +---+---+---+---+      +---+---+---+---+
+	// | + | + | + |[S]|      | + | + | + |[S]|
+	// +---+---+---+---+      +---+---+---+---+
+	//
+	// B are cells in BoundaryCells (act as barriers)
+	// S is Starting cell (reference point for trimming)
+	// + are Active Cells to be processed and filtered
+	// - are cells that are filtered out
+
+	FCells ResultCells = EmptyCells;
+
+	// First iteration, determine all cells within line of sight
+	FCells VisibleCells = EmptyCells;
+	for (const FCell& ActiveCellIt : ActiveCells)
+	{
+		if (CanCellSeeTarget(StartingCell, ActiveCellIt, BoundaryCells))
+		{
+			// The cell is withing the bounds, add it to further processing
+			VisibleCells.Add(ActiveCellIt);
+			continue;
+		}
+
+		// By default, all not visible cells are treated as within the bounds (as they are not arounded by any boundary cells)
+		ResultCells.Add(ActiveCellIt);
+	}
+
+	// Second iteration: Process the visible cells by comparing distances to StartingCell
+	for (const FCell& VisibleCellIt : VisibleCells)
+	{
+		bool bKeepCell = true;
+		const float DistanceToVisible = FVector::Dist(StartingCell.Location, VisibleCellIt.Location);
+
+		for (const FCell& BoundaryCellIt : BoundaryCells)
+		{
+			const float DistanceToBoundary = FVector::Dist(StartingCell.Location, BoundaryCellIt.Location);
+
+			// Exclude the visible cell if it's farther than (or equal to) any boundary cell
+			if (DistanceToVisible >= DistanceToBoundary)
+			{
+				bKeepCell = false;
+				break;
+			}
+		}
+
+		if (bKeepCell)
+		{
+			ResultCells.Add(VisibleCellIt);
+		}
+	}
+
+	return ResultCells;
+}
+
+// Returns true if Starting Cell is in the direction of any of the Target Cells within the given angle
+bool FCell::CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell, const FCells& AllVisibleCells, float MaxAngleDegrees/* = 21.f*/)
+{
+	/**     .  .  .  T  .  .  .
+	 *             \ | /
+	 *              \|/
+	 *               S
+	 *
+	 * S - StartingCell
+	 * T - TargetCells */
+
+	const FCell NearestCell = GetCellArrayNearest(AllVisibleCells, TargetCell);
+
+	const FVector DirectionTarget = (TargetCell.Location - StartingCell.Location).GetSafeNormal();
+	if (DirectionTarget.IsNearlyZero())
+	{
+		return false;
+	}
+
+	const FVector DirectionNearest = (NearestCell.Location - StartingCell.Location).GetSafeNormal();
+	if (DirectionNearest.IsNearlyZero())
+	{
+		return false;
+	}
+
+	const float Dot = FVector::DotProduct(DirectionTarget, DirectionNearest);
+	if (Dot <= 0.0f)
+	{
+		return false;
+	}
+
+	const float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));
+	return AngleDegrees <= MaxAngleDegrees;
+}
+
 /*********************************************************************************************
  * Math operators
  ********************************************************************************************* */
