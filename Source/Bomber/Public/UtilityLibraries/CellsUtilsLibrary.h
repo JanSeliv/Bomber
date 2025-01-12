@@ -28,7 +28,7 @@ struct BOMBER_API FDisplayCellsParams
 
 	/** Height offset for displayed text above the cell. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	float TextHeight = 261.f;
+	float TextHeight = 273.f;
 
 	/** Size of displayed text. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
@@ -618,6 +618,6 @@ public:
 
 	/** Returns true if cells of specified actor type(s) can be displayed.
 	 * It takes into considerations the types that are set by 'Bomber.Debug.DisplayCells' cheat or directly in the Generated Map. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static bool CanDisplayCellsForActorTypes(UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorTypesBitmask);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DevelopmentOnly, DefaultToSelf = "Owner"))
+	static bool CanDisplayCells(const UObject* Owner);
 };

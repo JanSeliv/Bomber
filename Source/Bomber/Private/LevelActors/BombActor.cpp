@@ -132,9 +132,8 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 // Returns cells that bombs is going to destroy
 FCells ABombActor::GetExplosionCells() const
 {
-	if (IsHidden()
-		|| !MapComponentInternal
-		|| GetExplosionRadius() < MIN_FIRE_RADIUS)
+	if (!MapComponentInternal
+	    || GetExplosionRadius() < MIN_FIRE_RADIUS)
 	{
 		return FCell::EmptyCells;
 	}
@@ -160,13 +159,10 @@ int32 ABombActor::GetExplosionRadius() const
 void ABombActor::TryDisplayExplosionCells()
 {
 #if !UE_BUILD_SHIPPING
-	if (UCellsUtilsLibrary::CanDisplayCellsForActorTypes(TO_FLAG(EAT::Bomb)))
-	{
-		FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
-		Params.TextColor = FLinearColor::Red;
-		Params.TextHeight += 1.f;
-		UCellsUtilsLibrary::DisplayCells(this, GetExplosionCells(), Params);
-	}
+	FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
+	Params.TextColor = FLinearColor::Red;
+	Params.TextHeight += 1.f;
+	UCellsUtilsLibrary::DisplayCells(this, GetExplosionCells(), Params);
 #endif // !UE_BUILD_SHIPPING
 }
 

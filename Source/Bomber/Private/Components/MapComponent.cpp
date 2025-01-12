@@ -106,6 +106,8 @@ bool UMapComponent::OnConstructionOwnerActor()
 
 	SetDefaultMesh();
 
+	TryDisplayOwnedCell();
+
 	const ECollisionResponse CollisionResponse = GetActorDataAssetChecked().GetCollisionResponse();
 	SetCollisionResponses(CollisionResponse);
 
@@ -132,12 +134,9 @@ void UMapComponent::SetCell(const FCell& Cell)
 void UMapComponent::TryDisplayOwnedCell()
 {
 #if !UE_BUILD_SHIPPING
-	if (UCellsUtilsLibrary::CanDisplayCellsForActorTypes(TO_FLAG(GetActorType())))
-	{
-		FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
-		Params.bClearPreviousDisplays = true;
-		UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
-	}
+	FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
+	Params.bClearPreviousDisplays = true;
+	UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
 #endif // !UE_BUILD_SHIPPING
 }
 

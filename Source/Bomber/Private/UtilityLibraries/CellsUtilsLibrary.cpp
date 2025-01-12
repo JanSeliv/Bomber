@@ -418,9 +418,16 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 		}
 	}
 
+	// Firstly, try to clear previous displays first
 	if (Params.bClearPreviousDisplays)
 	{
-		ClearDisplayedCells(Owner);
+		ClearDisplayedCells(OwnerActor);
+	}
+
+	// Next, try to display new cells (if allowed)
+	if (!CanDisplayCells(OwnerActor))
+	{
+		return;
 	}
 
 	// Have the render text rotated
@@ -513,11 +520,39 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 }
 
 // Returns true if cells of specified actor type(s) can be displayed
-bool UCellsUtilsLibrary::CanDisplayCellsForActorTypes(int32 ActorTypesBitmask)
+bool UCellsUtilsLibrary::CanDisplayCells(const UObject* Owner)
 {
 #if !UE_BUILD_SHIPPING
+	if (!Owner)
+	{
+		return false;
+	}
+
+	const AActor* OwnerActor = Cast<AActor>(Owner);
+	if (!OwnerActor)
+	{
+		const UActorComponent* Component = Cast<UActorComponent>(Owner);
+		OwnerActor = Component ? Component->GetOwner() : nullptr;
+		if (!OwnerActor)
+		{
+			// Can't display cells for this owner
+			return false;
+		}
+	}
+
+	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerActor);
+	if (!MapComponent)
+	{
+		// It's custom actor without Map Component, always allow by default
+		return true;
+	}
+
+	const int32 ActorTypesBitmask = TO_FLAG(MapComponent->GetActorType());
 	const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap();
-	return GeneratedMap && (ActorTypesBitmask & AGeneratedMap::Get().DisplayCellsActorTypesInternal) != 0;
+	const bool bAllowedGlobally = GeneratedMap && (ActorTypesBitmask & AGeneratedMap::Get().DisplayCellsActorTypesInternal) != 0;
+	const bool bAllowedLocally = MapComponent->bShouldShowRenders;
+
+	return bAllowedGlobally || bAllowedLocally;
 #else
 	return false;
 #endif
