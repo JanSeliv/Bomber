@@ -160,7 +160,9 @@ void ABombActor::TryDisplayExplosionCells()
 {
 #if !UE_BUILD_SHIPPING
 	FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
-	Params.TextColor = FLinearColor::Red;
+	Params.bClearPreviousDisplays = true;
+	Params.TextColor = FLinearColor::Yellow;
+	Params.TextSize += 50.f;
 	Params.TextHeight += 1.f;
 	UCellsUtilsLibrary::DisplayCells(this, GetExplosionCells(), Params);
 #endif // !UE_BUILD_SHIPPING
@@ -261,14 +263,6 @@ void ABombActor::OnConstructionBombActor()
 		InitBomb();
 
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
-
-		if (MapComponentInternal->bShouldShowRenders)
-		{
-			FDisplayCellsParams DisplayParams;
-			DisplayParams.TextColor = FLinearColor::Red;
-			DisplayParams.bClearPreviousDisplays = true;
-			UCellsUtilsLibrary::DisplayCells(this, GetExplosionCells(), DisplayParams);
-		}
 	}
 #endif //WITH_EDITOR [IsEditorNotPieWorld]
 }

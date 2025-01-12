@@ -431,9 +431,7 @@ void UCellsUtilsLibrary::DisplayCells(UObject* Owner, const FCells& Cells, const
 	}
 
 	// Have the render text rotated
-	const FQuat CellGridQuaternion = Cells.Num() > 1
-		                                 ? GetCellArrayRotation(Cells).Quaternion() // Get rotator from array
-		                                 : GetLevelGridRotation().Quaternion();     // Get current level rotator
+	const FQuat CellGridQuaternion = GetLevelGridRotation().Quaternion();
 
 	for (const FCell& CellIt : Cells)
 	{
