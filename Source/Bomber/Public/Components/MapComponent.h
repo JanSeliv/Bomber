@@ -43,11 +43,9 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, BlueprintAuthorityOnly, Category = "C++")
 	FOnDeactivatedMapComponent OnDeactivatedMapComponent;
 
-#if WITH_EDITORONLY_DATA  // bShouldShowRenders
 	/** Mark the editor updating visualization(text renders) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly))
 	bool bShouldShowRenders = false;
-#endif	//WITH_EDITORONLY_DATA bShouldShowRenders
 
 	/* ---------------------------------------------------
 	 *		Public functions
