@@ -365,6 +365,12 @@ FCells FCell::FilterCellsByBounds(const FCells& ActiveCells, const FCells& Bound
 	FCells VisibleCells = EmptyCells;
 	for (const FCell& ActiveCellIt : ActiveCells)
 	{
+		if (BoundaryCells.Contains(ActiveCellIt))
+		{
+			// Active cell is a boundary cell, skip it completely
+			continue;
+		}
+
 		if (CanCellSeeTarget(StartingCell, ActiveCellIt, BoundaryCells))
 		{
 			// The cell is withing the bounds, add it to further processing
@@ -387,7 +393,8 @@ FCells FCell::FilterCellsByBounds(const FCells& ActiveCells, const FCells& Bound
 			const float DistanceToBoundary = FVector::Dist(StartingCell.Location, BoundaryCellIt.Location);
 
 			// Exclude the visible cell if it's farther than (or equal to) any boundary cell
-			if (DistanceToVisible >= DistanceToBoundary)
+			if (DistanceToVisible >= DistanceToBoundary
+			    || DistanceToVisible < CellSize)
 			{
 				bKeepCell = false;
 				break;
@@ -404,7 +411,7 @@ FCells FCell::FilterCellsByBounds(const FCells& ActiveCells, const FCells& Bound
 }
 
 // Returns true if Starting Cell is in the direction of any of the Target Cells within the given angle
-bool FCell::CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell, const FCells& AllVisibleCells, float MaxAngleDegrees/* = 21.f*/)
+bool FCell::CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell, const FCells& AllVisibleCells, float MaxAngleDegrees/* = 40.f*/)
 {
 	/**     .  .  .  T  .  .  .
 	 *             \ | /
@@ -414,28 +421,39 @@ bool FCell::CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell,
 	 * S - StartingCell
 	 * T - TargetCells */
 
-	const FCell NearestCell = GetCellArrayNearest(AllVisibleCells, TargetCell);
-
 	const FVector DirectionTarget = (TargetCell.Location - StartingCell.Location).GetSafeNormal();
 	if (DirectionTarget.IsNearlyZero())
 	{
 		return false;
 	}
 
-	const FVector DirectionNearest = (NearestCell.Location - StartingCell.Location).GetSafeNormal();
-	if (DirectionNearest.IsNearlyZero())
+	for (const FCell& VisibleCell : AllVisibleCells)
 	{
-		return false;
+		// Compute direction from StartingCell to the current visible cell
+		const FVector DirectionVisible = (VisibleCell.Location - StartingCell.Location).GetSafeNormal();
+		if (DirectionVisible.IsNearlyZero())
+		{
+			continue;
+		}
+
+		// Dot product tells us how aligned the two directions are
+		const float Dot = FVector::DotProduct(DirectionTarget, DirectionVisible);
+		if (Dot <= 0.0f)
+		{
+			// Directions are more than 90 degrees apart or invalid
+			continue;
+		}
+
+		// Convert the dot product result into an angle (in degrees)
+		const float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));
+		if (AngleDegrees <= MaxAngleDegrees)
+		{
+			// As soon as we find a visible cell meeting the criteria, we can return true
+			return true;
+		}
 	}
 
-	const float Dot = FVector::DotProduct(DirectionTarget, DirectionNearest);
-	if (Dot <= 0.0f)
-	{
-		return false;
-	}
-
-	const float AngleDegrees = FMath::RadiansToDegrees(FMath::Acos(Dot));
-	return AngleDegrees <= MaxAngleDegrees;
+	return false;
 }
 
 /*********************************************************************************************

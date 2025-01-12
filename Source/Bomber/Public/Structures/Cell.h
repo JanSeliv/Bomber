@@ -178,7 +178,7 @@ public:
 	 * @param TargetCell The target cell to check direction to (that can be seen).
 	 * @param AllVisibleCells All cells that can be seen from the starting cell, the grid or just part of it.
 	 * @param MaxAngleDegrees The maximum allowable angle (in degrees) for alignment, is recommended around 20 degrees. */
-	static bool CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell, const FCells& AllVisibleCells, float MaxAngleDegrees = 21.f);
+	static bool CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell, const FCells& AllVisibleCells, float MaxAngleDegrees = 40.f);
 
 	/*********************************************************************************************
 	 * Distance
