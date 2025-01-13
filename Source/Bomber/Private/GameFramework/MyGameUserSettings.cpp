@@ -126,7 +126,50 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 	LastUserConfirmedResolutionSizeX = NewResolution.X;
 	LastUserConfirmedResolutionSizeY = NewResolution.Y;
 
+	const bool bIsMaxRes = Index == 0;
+	if (IsFullscreenEnabled() != bIsMaxRes)
+	{
+		// Update fullscreen mode to match resolution
+		SetFullscreenEnabled(bIsMaxRes);
+	}
+
 	ApplyResolutionSettings(false);
+}
+
+// Syncs the current resolution index with the actual resolution, is useful when it's changed outside (e.g. by Alt+Enter).
+void UMyGameUserSettings::TryUpdateCurrentResolution()
+{
+	const bool bIsResolutionChangedOutside = LastUserConfirmedResolutionSizeX != ResolutionSizeX
+	                                         || LastUserConfirmedResolutionSizeY != ResolutionSizeY;
+	if (!bIsResolutionChangedOutside)
+	{
+		// Resolution is already up to date
+		return;
+	}
+
+	const int32 NewResolutionIndex = IntResolutionsInternal.IndexOfByPredicate([&](const FIntPoint& ResolutionIt)
+	{
+		return ResolutionIt.X == ResolutionSizeX
+		       && ResolutionIt.Y == ResolutionSizeY;
+	});
+
+	if (NewResolutionIndex != INDEX_NONE)
+	{
+		SetResolutionByIndex(NewResolutionIndex);
+	}
+
+	// Finally, try update the setting on UI
+	if (USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget())
+	{
+		static FGameplayTagContainer ResolutionSettingTag = FGameplayTagContainer::EmptyContainer;
+		if (ResolutionSettingTag.IsEmpty())
+		{
+			static const FSettingFunctionPicker SetResolutionFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetResolutionByIndex));
+			ResolutionSettingTag.AddTag(SettingsWidget->GetTagByFunction(SetResolutionFunction));
+		}
+
+		SettingsWidget->UpdateSettings(ResolutionSettingTag);
+	}
 }
 
 /*********************************************************************************************
@@ -141,32 +184,54 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 		return;
 	}
 
-	const EWindowMode::Type NewFullscreenMode = bIsFullscreen ? EWindowMode::Fullscreen : EWindowMode::Windowed;
+	const EWindowMode::Type NewFullscreenMode = GetSupportedWindowModeType(bIsFullscreen);
 	SetFullscreenMode(NewFullscreenMode);
 
 	LastConfirmedFullscreenMode = NewFullscreenMode;
 
+	const bool bIsMaxRes = CurrentResolutionIndexInternal == 0;
+	if (bIsFullscreen != bIsMaxRes)
+	{
+		// User enabled fullscreen: set max resolution
+		// User disabled fullscreen: set Max+1 resolution
+		constexpr int32 MaxResolutionIndex = 0;
+		constexpr int32 PrevResolutionIndex = MaxResolutionIndex + 1;
+		const int32 NewResolutionIndex = bIsFullscreen ? MaxResolutionIndex : PrevResolutionIndex;
+		SetResolutionByIndex(NewResolutionIndex);
+	}
+
 	ApplyResolutionSettings(false);
 }
 
-// Update fullscreen mode on UI for cases when it's changed outside (e.g. by Alt+Enter)
-void UMyGameUserSettings::UpdateFullscreenEnabled()
+// Syncs the current Fullscreen mode with the actual mode, is useful when it's changed outside (e.g. by Alt+Enter)
+void UMyGameUserSettings::TryUpdateCurrentFullscreenMode()
 {
-	USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
-	if (!SettingsWidget)
+	if (LastConfirmedFullscreenMode == FullscreenMode)
 	{
+		// Fullscreen mode is already up to date
 		return;
 	}
 
-	static const FSettingFunctionPicker SetFullscreenFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFullscreenEnabled));
-	const FSettingTag& FullscreenTag = SettingsWidget->GetTagByFunction(SetFullscreenFunction);
-	if (!FullscreenTag.IsValid())
+	const bool bIsMaxRes = CurrentResolutionIndexInternal == 0;
+	if (IsFullscreenEnabled() && !bIsMaxRes)
 	{
-		return;
+		// Update resolution to maximum to enter in fullscreen
+		constexpr int32 MaxResolutionIndex = 0;
+		SetResolutionByIndex(MaxResolutionIndex);
 	}
 
-	const bool bIsFullscreenEnabled = IsFullscreenEnabled();
-	SettingsWidget->SetSettingCheckbox(FullscreenTag, bIsFullscreenEnabled);
+	// Finally, try update the setting on UI
+	if (USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget())
+	{
+		static FGameplayTagContainer FullscreenSettingTag = FGameplayTagContainer::EmptyContainer;
+		if (FullscreenSettingTag.IsEmpty())
+		{
+			static const FSettingFunctionPicker SetFullscreenFunction(GetClass(), GET_FUNCTION_NAME_CHECKED(ThisClass, SetFullscreenEnabled));
+			FullscreenSettingTag.AddTag(SettingsWidget->GetTagByFunction(SetFullscreenFunction));
+		}
+
+		SettingsWidget->UpdateSettings(FullscreenSettingTag);
+	}
 }
 
 /*********************************************************************************************
@@ -327,10 +392,9 @@ int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
 // Mark current video mode settings (fullscreenmode/resolution) as being confirmed by the user
 void UMyGameUserSettings::ConfirmVideoMode()
 {
-	if (LastConfirmedFullscreenMode != FullscreenMode)
-	{
-		UpdateFullscreenEnabled();
-	}
+	TryUpdateCurrentResolution();
+
+	TryUpdateCurrentFullscreenMode();
 
 	Super::ConfirmVideoMode();
 }

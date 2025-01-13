@@ -1099,8 +1099,19 @@
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
-					"GameplayTags": [],
-					"ParentTags": []
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Combobox.Resolution"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Combobox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
 				},
 				"ShowNextToSettingOverride":
 				{
@@ -1187,8 +1198,19 @@
 				"bStartOnNextColumn": false,
 				"SettingsToUpdate":
 				{
-					"GameplayTags": [],
-					"ParentTags": []
+					"GameplayTags": [
+						{
+							"TagName": "Settings.Checkbox.FullscreenMode"
+						}
+					],
+					"ParentTags": [
+						{
+							"TagName": "Settings.Checkbox"
+						},
+						{
+							"TagName": "Settings"
+						}
+					]
 				},
 				"ShowNextToSettingOverride":
 				{

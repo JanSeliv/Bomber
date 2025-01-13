@@ -64,6 +64,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetResolutionByIndex(int32 Index);
 
+	/** Syncs the current resolution index with the actual resolution, is useful when it's changed outside (e.g. by Alt+Enter). */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void TryUpdateCurrentResolution();
+
 protected:
 	/** The min allowed resolution width.
 	 * Is set on starting from game (not settings) config.
@@ -94,17 +98,25 @@ protected:
 	 * In base class: GetFullscreenMode()
 	 ********************************************************************************************* */
 public:
+	/** Returns the enum type of supported fullscreen mode.
+	 * Is expanded as a function to avoid usage of unsupported modes.
+	 * Never use directly EWindowMode type, but only this function. 
+	 * @param bReturnFullscreen If true, then EWindowMode::WindowedFullscreen will be returned, otherwise EWindowMode::Windowed.
+	 * @warning Native Fullscreen (EWindowMode::Fullscreen) is not supported at all because of various engine issues, WindowedFullscreen is used instead. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FORCEINLINE EWindowMode::Type GetSupportedWindowModeType(bool bReturnFullscreen) { return bReturnFullscreen ? EWindowMode::WindowedFullscreen : EWindowMode::Windowed; }
+
 	/** Returns true if the game is in fullscreen mode. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsFullscreenEnabled() const { return GetFullscreenMode() == EWindowMode::Fullscreen; }
+	FORCEINLINE bool IsFullscreenEnabled() const { return GetFullscreenMode() == GetSupportedWindowModeType(/*bReturnFullscreen*/true); }
 
 	/** Set and apply fullscreen mode. If false, the windowed mode will be applied. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetFullscreenEnabled(bool bIsFullscreen);
 
-	/** Update fullscreen mode on UI for cases when it's changed outside (e.g. by Alt+Enter). */
+	/** Syncs the current Fullscreen mode with the actual mode, is useful when it's changed outside (e.g. by Alt+Enter). */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void UpdateFullscreenEnabled();
+	void TryUpdateCurrentFullscreenMode();
 
 	/*********************************************************************************************
 	 * FPS Lock
