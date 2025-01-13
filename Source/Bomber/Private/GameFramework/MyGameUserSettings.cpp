@@ -18,72 +18,9 @@ UMyGameUserSettings& UMyGameUserSettings::Get()
 	return *MyGameUserSettings;
 }
 
-// Validates and resets bad user settings to default. Deletes stale user settings file if necessary
-void UMyGameUserSettings::ValidateSettings()
-{
-	Super::ValidateSettings();
-
-	// Validate resolution
-	if (IntResolutionsInternal.IsValidIndex(CurrentResolutionIndexInternal))
-	{
-		const FIntPoint ChosenScreenResolution(IntResolutionsInternal[CurrentResolutionIndexInternal]);
-		const FIntPoint CurrentScreenResolution(GetScreenResolution());
-		if (ChosenScreenResolution != CurrentScreenResolution)
-		{
-			SetResolutionByIndex(CurrentResolutionIndexInternal);
-		}
-	}
-}
-
-// Save the user settings to persistent storage (automatically happens as part of ApplySettings)
-void UMyGameUserSettings::SaveSettings()
-{
-	Super::SaveSettings();
-
-	if (OnSaveSettings.IsBound())
-	{
-		OnSaveSettings.Broadcast();
-	}
-}
-
-// Changes all scalability settings at once based on a single overall quality level
-void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
-{
-	if (Value == OverallQualityInternal)
-	{
-		return;
-	}
-
-	OverallQualityInternal = Value;
-
-	if (!OverallQualityInternal)
-	{
-		// Custom scalability is set
-		return;
-	}
-
-	static constexpr int32 QualityOffset = 1;
-	Super::SetOverallScalabilityLevel(Value - QualityOffset);
-}
-
-// Returns the overall scalability level
-int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
-{
-	static constexpr int32 QualityOffset = 1;
-	const int32 OverallScalabilityLevel = Super::GetOverallScalabilityLevel();
-	return OverallScalabilityLevel + QualityOffset;
-}
-
-// Mark current video mode settings (fullscreenmode/resolution) as being confirmed by the user
-void UMyGameUserSettings::ConfirmVideoMode()
-{
-	if (LastConfirmedFullscreenMode != FullscreenMode)
-	{
-		UpdateFullscreenEnabled();
-	}
-
-	Super::ConfirmVideoMode();
-}
+/*********************************************************************************************
+ * Resolutions
+ ********************************************************************************************* */
 
 // Get all supported resolutions of the primary monitor
 void UMyGameUserSettings::UpdateSupportedResolutions()
@@ -192,6 +129,10 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 	ApplyResolutionSettings(false);
 }
 
+/*********************************************************************************************
+ * Fullscreen
+ ********************************************************************************************* */
+
 // Set and apply fullscreen mode. If false, the windowed mode will be applied
 void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 {
@@ -227,6 +168,10 @@ void UMyGameUserSettings::UpdateFullscreenEnabled()
 	const bool bIsFullscreenEnabled = IsFullscreenEnabled();
 	SettingsWidget->SetSettingCheckbox(FullscreenTag, bIsFullscreenEnabled);
 }
+
+/*********************************************************************************************
+ * FPS Lock
+ ********************************************************************************************* */
 
 // Set the FPS cap by specified member index
 void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
@@ -287,6 +232,34 @@ void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 	SetFPSLock(UncappedFPS);
 }
 
+/*********************************************************************************************
+ * Overall Quality (Scalability)
+ ********************************************************************************************* */
+
+// Changes all scalability settings at once based on a single overall quality level
+void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
+{
+	if (Value == OverallQualityInternal)
+	{
+		return;
+	}
+
+	OverallQualityInternal = Value;
+
+	if (!OverallQualityInternal)
+	{
+		// Custom scalability is set
+		return;
+	}
+
+	static constexpr int32 QualityOffset = 1;
+	Super::SetOverallScalabilityLevel(Value - QualityOffset);
+}
+
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
+
 // Loads the user settings from persistent storage
 void UMyGameUserSettings::LoadSettings(bool bForceReload)
 {
@@ -313,4 +286,51 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 		RunHardwareBenchmark();
 		ApplyHardwareBenchmarkResults();
 	}
+}
+
+// Validates and resets bad user settings to default. Deletes stale user settings file if necessary
+void UMyGameUserSettings::ValidateSettings()
+{
+	Super::ValidateSettings();
+
+	// Validate resolution
+	if (IntResolutionsInternal.IsValidIndex(CurrentResolutionIndexInternal))
+	{
+		const FIntPoint ChosenScreenResolution(IntResolutionsInternal[CurrentResolutionIndexInternal]);
+		const FIntPoint CurrentScreenResolution(GetScreenResolution());
+		if (ChosenScreenResolution != CurrentScreenResolution)
+		{
+			SetResolutionByIndex(CurrentResolutionIndexInternal);
+		}
+	}
+}
+
+// Save the user settings to persistent storage (automatically happens as part of ApplySettings)
+void UMyGameUserSettings::SaveSettings()
+{
+	Super::SaveSettings();
+
+	if (OnSaveSettings.IsBound())
+	{
+		OnSaveSettings.Broadcast();
+	}
+}
+
+// Returns the overall scalability level
+int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
+{
+	static constexpr int32 QualityOffset = 1;
+	const int32 OverallScalabilityLevel = Super::GetOverallScalabilityLevel();
+	return OverallScalabilityLevel + QualityOffset;
+}
+
+// Mark current video mode settings (fullscreenmode/resolution) as being confirmed by the user
+void UMyGameUserSettings::ConfirmVideoMode()
+{
+	if (LastConfirmedFullscreenMode != FullscreenMode)
+	{
+		UpdateFullscreenEnabled();
+	}
+
+	Super::ConfirmVideoMode();
 }
