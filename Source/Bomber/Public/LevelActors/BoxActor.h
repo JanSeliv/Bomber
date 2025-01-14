@@ -30,15 +30,9 @@ protected:
 	*		Protected properties
 	* --------------------------------------------------- */
 
-	friend class UMyCheatManager;
-
 	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
-
-	/** Contains current spawn chance to spawn item. Can be overriden by the Cheat Manager. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawn Item Chance"))
-	int32 SpawnItemChanceInternal = INDEX_NONE;
 
 	/* ---------------------------------------------------
 	*		Protected functions
@@ -66,14 +60,6 @@ protected:
 	void OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser);
 
 	/** Spawn item with a chance. */
-	UFUNCTION(BlueprintPure = false, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void TrySpawnItem();
-
-	/** The item chance can be overrided in game, so it should be reset for each new game. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void UpdateItemChance();
-
-	/** Listen to reset item chance for each new game. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 };

@@ -12,7 +12,6 @@
 #include "DataAssets/PlayerDataAsset.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "GameFramework/PlayerState.h"
-#include "LevelActors/BoxActor.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Subsystems/WidgetsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
@@ -133,22 +132,12 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
  * Box
  ********************************************************************************************* */
 
-// Override the chance to spawn item after box destroying
-void UMyCheatManager::SetItemChance(int32 Chance)
-{
-	// Get all boxes
-	FMapComponents MapComponents;
-	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Box));
-	for (const UMapComponent* MapComponentIt : MapComponents)
-	{
-		ABoxActor* BoxActor = MapComponentIt ? MapComponentIt->GetOwner<ABoxActor>() : nullptr;
-		if (BoxActor)
-		{
-			// Override new chance
-			BoxActor->SpawnItemChanceInternal = Chance;
-		}
-	}
-}
+// Override the percentage of items spawn from boxes
+TAutoConsoleVariable<int32> UMyCheatManager::CVarPowerupsChance(
+	TEXT("Bomber.Box.SetPowerupsChance"),
+	0.f,
+	TEXT("100 - is maximum, 0 - is disabled (default chance will be used)"),
+	ECVF_Cheat);
 
 /*********************************************************************************************
  * Bomb

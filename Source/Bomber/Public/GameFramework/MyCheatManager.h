@@ -78,12 +78,9 @@ public:
 	 * Box
 	 ********************************************************************************************* */
 public:
-	/**
-	 * Override the chance to spawn item after box destroying.
-	 * @param Chance Put 0 to stop spawning, 100 to spawn all time.
-	 */
-	UFUNCTION(meta = (CheatName = "Bomber.Box.SetItemChance"))
-	static void SetItemChance(int32 Chance);
+	/** Override the percentage of items spawn from boxes, where 100 is maximum, 0 is disabled (default chance will be used). 
+	 * e.g Bomber.Box.SetPowerupsChance 100 - set 100% chance to spawn powerups. */
+	static TAutoConsoleVariable<int32> CVarPowerupsChance;
 
 	/*********************************************************************************************
 	 * Bomb

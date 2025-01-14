@@ -21,9 +21,10 @@ public:
 	/** Returns the box data asset. */
 	static const UBoxDataAsset& Get();
 
-	/** Returns the chance to spawn item after box destroying. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetSpawnItemChance() const { return SpawnItemChanceInternal; }
+	/** Returns default value from the data asset of the chance to spawn item after box destroying.
+	 * It might be overridden by `Bomber.Box.SetPowerupsChance` cheat. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	int32 GetPowerupsChance() const;
 
 protected:
 	/** The chance to spawn item after box destroying. */

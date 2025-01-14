@@ -38,7 +38,7 @@ ABoxActor::ABoxActor()
 // Initialize a box actor, could be called multiple times
 void ABoxActor::ConstructBoxActor()
 {
-	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
 	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionBoxActor);
 	MapComponentInternal->ConstructOwnerActor();
 }
@@ -60,7 +60,7 @@ void ABoxActor::OnConstructionBoxActor()
 		return;
 	}
 
-	UpdateItemChance();
+	// Implement here any logic on spawn this actor
 }
 
 // Called when the game starts or when spawned
@@ -73,8 +73,6 @@ void ABoxActor::BeginPlay()
 		check(MapComponentInternal);
 		MapComponentInternal->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnDeactivatedMapComponent);
 	}
-
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 
 void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
@@ -108,29 +106,11 @@ void ABoxActor::TrySpawnItem()
 	}
 
 	// Spawn item with the chance
-	static constexpr int32 Max = 100;
-	if (FMath::RandHelper(Max) < SpawnItemChanceInternal)
+	constexpr int32 MaxChance = 100;
+	const int32 CurrentChance = FMath::RandHelper(MaxChance);
+	const int32 PowerupsChance = UBoxDataAsset::Get().GetPowerupsChance();
+	if (CurrentChance <= PowerupsChance)
 	{
 		AGeneratedMap::Get().SpawnActorByType(EAT::Item, MapComponentInternal->GetCell());
-	}
-}
-
-// The item chance can be overrided in game, so it should be reset for each new game
-void ABoxActor::UpdateItemChance()
-{
-	// Update current chance from Data Asset
-	if (MapComponentInternal)
-	{
-		SpawnItemChanceInternal = UBoxDataAsset::Get().GetSpawnItemChance();
-	}
-}
-
-// Listen to reset item chance for each new game
-void ABoxActor::OnGameStateChanged(ECurrentGameState CurrentGameState)
-{
-	if (CurrentGameState == ECurrentGameState::GameStarting)
-	{
-		// Update current chance from Data Asset
-		UpdateItemChance();
 	}
 }
