@@ -318,9 +318,9 @@ void ABombActor::SetLifeSpan(float InLifespan/* = DEFAULT_LIFESPAN*/)
 // Called when the lifespan of an actor expires (if he has one)
 void ABombActor::LifeSpanExpired()
 {
-	// Override to prevent destroying, do not call super
-
-	DetonateBomb();
+	// Super::LifeSpanExpired() is not called here intentionally, because it destroys this actor directly 
+	// Instead, call DestroyLevelActor from Generated Map to destroy it properly
+	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal, this);
 }
 
 // Sets the actor to be hidden in the game. Alternatively used to avoid destroying
