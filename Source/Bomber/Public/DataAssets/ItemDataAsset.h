@@ -55,6 +55,6 @@ protected:
 	float SkateAdditiveStrengthInternal = 500.f;
 
 	/** Max possible items to be picked up by player. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Max Allowed Items Num", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Max Allowed Items Num", ShowOnlyInnerProperties, ClampMin = "1", UIMin = "1"))
 	int32 MaxAllowedItemsNumInternal = 5;
 };

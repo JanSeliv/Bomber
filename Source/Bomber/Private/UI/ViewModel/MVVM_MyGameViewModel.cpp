@@ -57,12 +57,17 @@ void UMVVM_MyGameViewModel::OnPowerUpsChanged_Implementation(const FPowerUp& New
 	SetPowerUpBombN(FText::AsNumber(NewPowerUps.BombN));
 	SetPowerUpFireN(FText::AsNumber(NewPowerUps.FireN));
 
-	const float MaxPowerUps = static_cast<float>(UItemDataAsset::Get().GetMaxAllowedItemsNum());
-	checkf(MaxPowerUps > 0.f, TEXT("ERROR: [%i] %s:\n'MaxPowerUps > 0' is null!"), __LINE__, *FString(__FUNCTION__));
-	SetPowerUpSkatePercent(static_cast<float>(NewPowerUps.SkateN) / MaxPowerUps);
-	SetPowerUpBombPercent(static_cast<float>(NewPowerUps.BombN) / MaxPowerUps);
+	constexpr float MinPowerUps = 1.f;
+	const float MaxPowerUps = FMath::Max(static_cast<float>(UItemDataAsset::Get().GetMaxAllowedItemsNum()), MinPowerUps);
+
+	// Display amount of bombs placed (including the first default item)
 	SetPowerUpBombCurrentPercent(static_cast<float>(NewPowerUps.BombNCurrent) / MaxPowerUps);
-	SetPowerUpFirePercent(static_cast<float>(NewPowerUps.FireN) / MaxPowerUps);
+
+	// Display powerups in percentage, but adjust to exclude the first default item (-1)
+	const float MaxAdjustedPowerUps = FMath::Max(MaxPowerUps - 1.f, MinPowerUps);
+	SetPowerUpSkatePercent(static_cast<float>(NewPowerUps.SkateN - 1) / MaxAdjustedPowerUps);
+	SetPowerUpBombPercent(static_cast<float>(NewPowerUps.BombN - 1) / MaxAdjustedPowerUps);
+	SetPowerUpFirePercent(static_cast<float>(NewPowerUps.FireN - 1) / MaxAdjustedPowerUps);
 }
 
 /*********************************************************************************************
