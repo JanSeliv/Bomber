@@ -43,24 +43,35 @@ void ABoxActor::ConstructBoxActor()
 	MapComponentInternal->ConstructOwnerActor();
 }
 
+// Spawn item with a chance
+void ABoxActor::TrySpawnItem()
+{
+	if (!IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
+		|| AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
+	{
+		return;
+	}
+
+	// Spawn item with the chance
+	constexpr int32 MaxChance = 100;
+	const int32 CurrentChance = FMath::RandHelper(MaxChance);
+	const int32 PowerupsChance = UBoxDataAsset::Get().GetPowerupsChance();
+	if (CurrentChance <= PowerupsChance)
+	{
+		AGeneratedMap::Get().SpawnActorByType(EAT::Item, MapComponentInternal->GetCell());
+	}
+}
+
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
+
 // Called when an instance of this class is placed (in editor) or spawned.
 void ABoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
 	ConstructBoxActor();
-}
-
-// Is called on a box actor construction, could be called multiple times
-void ABoxActor::OnConstructionBoxActor()
-{
-	if (IS_TRANSIENT(this)                 // This actor is transient
-	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Implement here any logic on spawn this actor
 }
 
 // Called when the game starts or when spawned
@@ -86,31 +97,28 @@ void ABoxActor::SetActorHiddenInGame(bool bNewHidden)
 	}
 }
 
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
+
+// Is called on a box actor construction, could be called multiple times
+void ABoxActor::OnConstructionBoxActor_Implementation()
+{
+	if (IS_TRANSIENT(this)                 // This actor is transient
+	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
+	{
+		return;
+	}
+
+	// Implement here any logic on spawn this actor
+}
+
 // Called when owned map component is destroyed on the Generated Map
-void ABoxActor::OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser)
+void ABoxActor::OnDeactivatedMapComponent_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
 	const bool bIsCauserAllowedForItems = UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
 	if (bIsCauserAllowedForItems)
 	{
 		TrySpawnItem();
-	}
-}
-
-// Spawn item with a chance
-void ABoxActor::TrySpawnItem()
-{
-	if (!IsValid(MapComponentInternal) // The Map Component is not valid or is destroyed already
-	    || AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
-	{
-		return;
-	}
-
-	// Spawn item with the chance
-	constexpr int32 MaxChance = 100;
-	const int32 CurrentChance = FMath::RandHelper(MaxChance);
-	const int32 PowerupsChance = UBoxDataAsset::Get().GetPowerupsChance();
-	if (CurrentChance <= PowerupsChance)
-	{
-		AGeneratedMap::Get().SpawnActorByType(EAT::Item, MapComponentInternal->GetCell());
 	}
 }

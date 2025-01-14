@@ -50,7 +50,6 @@ struct BOMBER_API FPowerUp
  * Players and AI, whose goal is to remain the last survivor for the win.
  * @see Access Player's data with UPlayerDataAsset (Content/Bomber/DataAssets/DA_Player).
  * @see Access AI's data with UAIDataAsset (Content/Bomber/DataAssets/DA_AI).
- * @todo JanSeliv NlwqUwmc Reorder td sections of PlayerCharacter.h
  */
 UCLASS()
 class BOMBER_API APlayerCharacter final : public ACharacter
@@ -110,10 +109,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ConstructPlayerCharacter();
 
-	/** Spawns bomb on character position */
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "C++")
-	void ServerSpawnBomb();
-
 	/** Returns level type associated with player, e.g: Water level type for Roger character. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ELevelType GetPlayerType() const;
@@ -123,10 +118,6 @@ public:
 	const FGameplayTag& GetPlayerTag() const;
 
 protected:
-	/** ---------------------------------------------------
-	 *		Protected properties
-	 * --------------------------------------------------- */
-
 	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
@@ -140,14 +131,6 @@ protected:
 
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
-
-	/** Is called on a player character construction, could be called multiple times.
-	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
-	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructPlayerCharacter() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionPlayerCharacter().
-	 * @warning Do not call directly, use ThisClass::ConstructPlayerCharacter() instead. */
-	UFUNCTION()
-	void OnConstructionPlayerCharacter();
 
 	/** Called every frame, is disabled on start, tick interval is decreased. */
 	virtual void Tick(float DeltaTime) override;
@@ -165,16 +148,20 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
+	/** Is called on a player character construction, could be called multiple times.
+	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
+	 * See the call stack below for more details:
+	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructPlayerCharacter() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionPlayerCharacter().
+	 * @warning Do not call directly, use ThisClass::ConstructPlayerCharacter() instead. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnConstructionPlayerCharacter();
+
 	/**
 	 * Triggers when this player character starts something overlap.
 	 * With item overlapping Increases +1 to numbers of character's powerups (Skate/Bomb/Fire).
 	 */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPlayerBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
-
-	/** Event triggered when the bomb has been explicitly destroyed. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnBombDestroyed(class UMapComponent* MapComponent, UObject* DestroyCauser = nullptr);
 
 	/** Listen to manage the tick. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -205,12 +192,8 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void UpdateCollisionObjectType();
 
-	/** Move the player character. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
-	void MovePlayer(const struct FInputActionValue& ActionValue);
-
 	/*********************************************************************************************
-	 * Player/AI Controller
+	 * Controller (AI/Player)
 	 ********************************************************************************************* */
 public:
 	/** Is overridden to determine additional conditions for the player-controlled character. */
@@ -219,6 +202,10 @@ public:
 	/** Possess a player or AI controller in dependence of current Character ID. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void TryPossessController();
+
+	/** Move the player character. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
+	void MovePlayer(const struct FInputActionValue& ActionValue);
 
 protected:
 	/** The character's AI controller */
@@ -310,4 +297,17 @@ protected:
 	/** Respond on changes in player mesh data to update the mesh on client. */
 	UFUNCTION()
 	void OnRep_PlayerMeshData();
+
+	/*********************************************************************************************
+	 * Bomb Placement
+	 ********************************************************************************************* */
+public:
+	/** Spawns bomb on character position */
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "C++")
+	void ServerSpawnBomb();
+
+protected:
+	/** Event triggered when the bomb has been explicitly destroyed. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnBombDestroyed(class UMapComponent* MapComponent, UObject* DestroyCauser = nullptr);
 };

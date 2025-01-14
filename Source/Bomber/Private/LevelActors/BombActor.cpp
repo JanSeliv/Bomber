@@ -248,25 +248,6 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	ConstructBombActor();
 }
 
-// Is called on a bomb actor construction, could be called multiple times
-void ABombActor::OnConstructionBombActor()
-{
-	if (IS_TRANSIENT(this)                 // This actor is transient
-	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-#if WITH_EDITOR //[IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
-	{
-		InitBomb();
-
-		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
-	}
-#endif //WITH_EDITOR [IsEditorNotPieWorld]
-}
-
 // Called when the game starts or when spawned
 void ABombActor::BeginPlay()
 {
@@ -360,6 +341,25 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
+
+// Is called on a bomb actor construction, could be called multiple times
+void ABombActor::OnConstructionBombActor_Implementation()
+{
+	if (IS_TRANSIENT(this)                 // This actor is transient
+		|| !IsValid(MapComponentInternal)) // Is not valid for map construction
+	{
+		return;
+	}
+
+#if WITH_EDITOR //[IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	{
+		InitBomb();
+
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
+	}
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
+}
 
 // Triggers when character end to overlaps with this bomb.
 void ABombActor::OnBombEndOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)

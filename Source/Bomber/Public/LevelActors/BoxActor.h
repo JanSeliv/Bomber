@@ -6,8 +6,6 @@
 //---
 #include "BoxActor.generated.h"
 
-enum class ECurrentGameState : uint8;
-
 /**
  * Boxes on destruction with some chances spawns an item.
  * @see Access its data with UBoxDataAsset (Content/Bomber/DataAssets/DA_Box).
@@ -25,29 +23,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ConstructBoxActor();
 
-protected:
-	/* ---------------------------------------------------
-	*		Protected properties
-	* --------------------------------------------------- */
+	/** Spawn item with a chance. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void TrySpawnItem();
 
+protected:
 	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
 	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
 
-	/* ---------------------------------------------------
-	*		Protected functions
-	* --------------------------------------------------- */
-
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
-
-	/** Is called on a box actor construction, could be called multiple times.
-	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
-	 * See the call stack below for more details:
-	* AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructBoxActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionBoxActor().
-	 * @warning Do not call directly, use ThisClass::ConstructBoxActor() instead. */
-	UFUNCTION()
-	void OnConstructionBoxActor();
 
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;
@@ -55,11 +45,19 @@ protected:
 	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;
 
-	/** Called when owned map component is destroyed on the Generated Map. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser);
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
+	/** Is called on a box actor construction, could be called multiple times.
+     * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
+     * See the call stack below for more details:
+    * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructBoxActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionBoxActor().
+     * @warning Do not call directly, use ThisClass::ConstructBoxActor() instead. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnConstructionBoxActor();
 
-	/** Spawn item with a chance. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TrySpawnItem();
+	/** Called when owned map component is destroyed on the Generated Map. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser);
 };

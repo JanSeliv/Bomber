@@ -44,8 +44,8 @@ protected:
 	 * See the call stack below for more details:
 	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructWallActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionWallActor().
 	 * @warning Do not call directly, use ThisClass::ConstructWallActor() instead. */
-	UFUNCTION()
-	void OnConstructionWallActor() {}
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnConstructionWallActor();
 
 	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
 	virtual void SetActorHiddenInGame(bool bNewHidden) override;

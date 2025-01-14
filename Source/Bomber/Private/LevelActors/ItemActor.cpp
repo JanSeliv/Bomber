@@ -43,35 +43,16 @@ void AItemActor::ConstructItemActor()
 	MapComponentInternal->ConstructOwnerActor();
 }
 
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
+
 // Called when an instance of this class is placed (in editor) or spawned
 void AItemActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
 	ConstructItemActor();
-}
-
-// Is called on an item actor construction, could be called multiple times
-void AItemActor::OnConstructionItemActor()
-{
-	if (IS_TRANSIENT(this)                 // This actor is transient
-	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	// Rand the item type if not set yet
-	if (ItemTypeInternal == EItemType::None)
-	{
-		const int32 RandomIndex = FMath::RandRange(EIT_FIRST_FLAG, EIT_LAST_FLAG);
-		ItemTypeInternal = static_cast<EItemType>(RandomIndex);
-	}
-
-	// Override mesh
-	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, UMyBlueprintFunctionLibrary::GetLevelType()))
-	{
-		MapComponentInternal->SetCustomMeshAsset(FoundItemRow->Mesh);
-	}
 }
 
 // Called when the game starts or when spawned
@@ -95,7 +76,7 @@ void AItemActor::SetActorHiddenInGame(bool bNewHidden)
 	}
 
 	// Is removed from Generated Map
-	ResetItemType();
+	ItemTypeInternal = EItemType::None;
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -106,8 +87,35 @@ void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(ThisClass, ItemTypeInternal);
 }
 
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
+
+// Is called on an item actor construction, could be called multiple times
+void AItemActor::OnConstructionItemActor_Implementation()
+{
+	if (IS_TRANSIENT(this)                 // This actor is transient
+	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
+	{
+		return;
+	}
+
+	// Rand the item type if not set yet
+	if (ItemTypeInternal == EItemType::None)
+	{
+		const int32 RandomIndex = FMath::RandRange(EIT_FIRST_FLAG, EIT_LAST_FLAG);
+		ItemTypeInternal = static_cast<EItemType>(RandomIndex);
+	}
+
+	// Override mesh
+	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, UMyBlueprintFunctionLibrary::GetLevelType()))
+	{
+		MapComponentInternal->SetCustomMeshAsset(FoundItemRow->Mesh);
+	}
+}
+
 // Triggers when this item starts overlap a player character to destroy itself
-void AItemActor::OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void AItemActor::OnItemBeginOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)
 {
 	if (!OtherActor
 	    || !OtherActor->IsA(UDataAssetsContainer::GetActorClassByType(EAT::Player)))

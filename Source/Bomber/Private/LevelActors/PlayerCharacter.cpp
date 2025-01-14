@@ -213,53 +213,6 @@ int32 APlayerCharacter::GetPlayerId() const
 	return ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal);
 }
 
-// Spawns bomb on character position
-void APlayerCharacter::ServerSpawnBomb_Implementation()
-{
-	if (UUtilsLibrary::IsEditorNotPieWorld())
-	{
-		// Should not spawn bomb in PIE
-		return;
-	}
-
-	const AController* OwnedController = GetController();
-	if (!MapComponentInternal                     // The Map Component is not valid or transient
-	    || PowerupsInternal.FireN <= 0            // Null length of explosion
-	    || PowerupsInternal.BombNCurrent <= 0     // No more bombs
-	    || !OwnedController                       // controller is not valid
-	    || OwnedController->IsMoveInputIgnored()) // controller is blocked
-	{
-		return;
-	}
-
-	const TWeakObjectPtr<ThisClass> WeakThis = this;
-	const TFunction<void(AActor*)> OnBombSpawned = [WeakThis](AActor* SpawnedActor)
-	{
-		APlayerCharacter* PlayerCharacter = WeakThis.Get();
-		if (!PlayerCharacter)
-		{
-			return;
-		}
-
-		ABombActor* BombActor = CastChecked<ABombActor>(SpawnedActor);
-		UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
-		checkf(MapComponent, TEXT("ERROR: [%i] %s:\n'MapComponent' is null!"), __LINE__, *FString(__FUNCTION__));
-
-		// Updating explosion cells
-		PlayerCharacter->PowerupsInternal.BombNCurrent--;
-		PlayerCharacter->ApplyPowerups();
-
-		// Init Bomb
-		BombActor->InitBomb(PlayerCharacter);
-
-		// Start listening this bomb
-		MapComponent->OnDeactivatedMapComponent.AddUniqueDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
-	};
-
-	// Spawn bomb
-	AGeneratedMap::Get().SpawnActorByType(EAT::Bomb, MapComponentInternal->GetCell(), OnBombSpawned);
-}
-
 // Returns level type associated with player, e.g: Water level type for Roger character
 ELevelType APlayerCharacter::GetPlayerType() const
 {
@@ -312,47 +265,6 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	ConstructPlayerCharacter();
-}
-
-// Is called on a player character construction, could be called multiple times
-void APlayerCharacter::OnConstructionPlayerCharacter()
-{
-	if (IS_TRANSIENT(this)        // This actor is transient
-	    || !MapComponentInternal) // Is not valid for map construction
-	{
-		return;
-	}
-
-	if (!PlayerMeshDataInternal.IsValid())
-	{
-		SetDefaultPlayerMeshData();
-	}
-
-	ApplyPlayerId();
-
-	// Spawn or destroy controller of specific ai with enabled visualization
-#if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (UUtilsLibrary::IsEditorNotPieWorld()                                         // [IsEditorNotPieWorld] only
-	    && ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal) > 0) // Is a bot
-	{
-		AIControllerInternal = Cast<AAIController>(GetController());
-		if (!MapComponentInternal->bShouldShowRenders)
-		{
-			if (AIControllerInternal)
-			{
-				AIControllerInternal->Destroy();
-			}
-		}
-		else if (!AIControllerInternal) // Is a bot with debug visualization and AI controller is not created yet
-		{
-			SpawnDefaultController();
-			if (AController* PlayerController = GetController())
-			{
-				PlayerController->bIsEditorOnlyActor = true;
-			}
-		}
-	}
-#endif	// WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 // Called every frame, is disabled on start, tick interval is decreased
@@ -437,6 +349,47 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
  * Events
  ********************************************************************************************* */
 
+// Is called on a player character construction, could be called multiple times
+void APlayerCharacter::OnConstructionPlayerCharacter_Implementation()
+{
+	if (IS_TRANSIENT(this)        // This actor is transient
+	    || !MapComponentInternal) // Is not valid for map construction
+	{
+		return;
+	}
+
+	if (!PlayerMeshDataInternal.IsValid())
+	{
+		SetDefaultPlayerMeshData();
+	}
+
+	ApplyPlayerId();
+
+	// Spawn or destroy controller of specific ai with enabled visualization
+#if WITH_EDITOR // [IsEditorNotPieWorld]
+	if (UUtilsLibrary::IsEditorNotPieWorld()                                         // [IsEditorNotPieWorld] only
+	    && ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal) > 0) // Is a bot
+	{
+		AIControllerInternal = Cast<AAIController>(GetController());
+		if (!MapComponentInternal->bShouldShowRenders)
+		{
+			if (AIControllerInternal)
+			{
+				AIControllerInternal->Destroy();
+			}
+		}
+		else if (!AIControllerInternal) // Is a bot with debug visualization and AI controller is not created yet
+		{
+			SpawnDefaultController();
+			if (AController* PlayerController = GetController())
+			{
+				PlayerController->bIsEditorOnlyActor = true;
+			}
+		}
+	}
+#endif	// WITH_EDITOR [IsEditorNotPieWorld]
+}
+
 // Triggers when this player character starts something overlap.
 void APlayerCharacter::OnPlayerBeginOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)
 {
@@ -478,25 +431,6 @@ void APlayerCharacter::OnPlayerBeginOverlap_Implementation(AActor* OverlappedAct
 	}
 
 	ApplyPowerups();
-}
-
-// Event triggered when the bomb has been explicitly destroyed.
-void APlayerCharacter::OnBombDestroyed_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser/* = nullptr*/)
-{
-	if (!MapComponent
-	    || MapComponent->GetActorType() != EAT::Bomb)
-	{
-		return;
-	}
-
-	// Stop listening this bomb
-	MapComponent->OnDeactivatedMapComponent.RemoveAll(this);
-
-	if (PowerupsInternal.BombNCurrent < PowerupsInternal.BombN)
-	{
-		++PowerupsInternal.BombNCurrent;
-		ApplyPowerups();
-	}
 }
 
 // Listen to manage the tick
@@ -636,27 +570,8 @@ void APlayerCharacter::UpdateCollisionObjectType()
 	CapsuleComp->SetCollisionObjectType(CollisionObjectType);
 }
 
-// Move the player character
-void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
-{
-	// input is a Vector2D
-	const FVector2D MovementVector = ActionValue.Get<FVector2D>();
-
-	// Find out which way is forward
-	const FRotator ForwardRotation = UCellsUtilsLibrary::GetLevelGridRotation();
-
-	// Get forward vector
-	const FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
-
-	// Get right vector
-	const FVector RightDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::Y);
-
-	AddMovementInput(ForwardDirection, MovementVector.Y);
-	AddMovementInput(RightDirection, MovementVector.X);
-}
-
 /*********************************************************************************************
- * Player/AI Controller
+ * Controller (AI/Player)
  ********************************************************************************************* */
 
 // Is overridden to determine additional conditions for the player-controlled character
@@ -726,6 +641,25 @@ void APlayerCharacter::TryPossessController()
 	}
 
 	ControllerToPossess->Possess(this);
+}
+
+// Move the player character
+void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
+{
+	// input is a Vector2D
+	const FVector2D MovementVector = ActionValue.Get<FVector2D>();
+
+	// Find out which way is forward
+	const FRotator ForwardRotation = UCellsUtilsLibrary::GetLevelGridRotation();
+
+	// Get forward vector
+	const FVector ForwardDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::X);
+
+	// Get right vector
+	const FVector RightDirection = FRotationMatrix(ForwardRotation).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(ForwardDirection, MovementVector.Y);
+	AddMovementInput(RightDirection, MovementVector.X);
 }
 
 // Called when this Pawn is possessed. Only called on the server (or in standalone)
@@ -900,4 +834,74 @@ void APlayerCharacter::SetDefaultPlayerMeshData(bool bForcePlayerSkin/* = false*
 void APlayerCharacter::OnRep_PlayerMeshData()
 {
 	ApplyCustomPlayerMeshData();
+}
+
+/*********************************************************************************************
+ * Bomb Placement
+ ********************************************************************************************* */
+
+// Spawns bomb on character position
+void APlayerCharacter::ServerSpawnBomb_Implementation()
+{
+	if (UUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// Should not spawn bomb in PIE
+		return;
+	}
+
+	const AController* OwnedController = GetController();
+	if (!MapComponentInternal                     // The Map Component is not valid or transient
+	    || PowerupsInternal.FireN <= 0            // Null length of explosion
+	    || PowerupsInternal.BombNCurrent <= 0     // No more bombs
+	    || !OwnedController                       // controller is not valid
+	    || OwnedController->IsMoveInputIgnored()) // controller is blocked
+	{
+		return;
+	}
+
+	const TWeakObjectPtr<ThisClass> WeakThis = this;
+	const TFunction<void(AActor*)> OnBombSpawned = [WeakThis](AActor* SpawnedActor)
+	{
+		APlayerCharacter* PlayerCharacter = WeakThis.Get();
+		if (!PlayerCharacter)
+		{
+			return;
+		}
+
+		ABombActor* BombActor = CastChecked<ABombActor>(SpawnedActor);
+		UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
+		checkf(MapComponent, TEXT("ERROR: [%i] %s:\n'MapComponent' is null!"), __LINE__, *FString(__FUNCTION__));
+
+		// Updating explosion cells
+		PlayerCharacter->PowerupsInternal.BombNCurrent--;
+		PlayerCharacter->ApplyPowerups();
+
+		// Init Bomb
+		BombActor->InitBomb(PlayerCharacter);
+
+		// Start listening this bomb
+		MapComponent->OnDeactivatedMapComponent.AddUniqueDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
+	};
+
+	// Spawn bomb
+	AGeneratedMap::Get().SpawnActorByType(EAT::Bomb, MapComponentInternal->GetCell(), OnBombSpawned);
+}
+
+// Event triggered when the bomb has been explicitly destroyed.
+void APlayerCharacter::OnBombDestroyed_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser/* = nullptr*/)
+{
+	if (!MapComponent
+	    || MapComponent->GetActorType() != EAT::Bomb)
+	{
+		return;
+	}
+
+	// Stop listening this bomb
+	MapComponent->OnDeactivatedMapComponent.RemoveAll(this);
+
+	if (PowerupsInternal.BombNCurrent < PowerupsInternal.BombN)
+	{
+		++PowerupsInternal.BombNCurrent;
+		ApplyPowerups();
+	}
 }
