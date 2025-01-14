@@ -139,6 +139,10 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
+	/** Called when owned map component is destroyed on the Generated Map. */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
+	void OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser);
+
 	/*********************************************************************************************
 	 * Custom Collision Response
 	 ********************************************************************************************* */

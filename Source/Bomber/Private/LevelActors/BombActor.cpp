@@ -336,11 +336,16 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 
 		// Binding to the event, that triggered when character end to overlaps the collision component
 		OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
+
+		// Listen when this bomb is destroyed on the Generated Map by itself or by other actors
+		MapComponentInternal->OnDeactivatedMapComponent.AddUniqueDynamic(this, &ThisClass::OnDeactivatedMapComponent);
 	}
 	else
 	{
 		// Bomb is removed from Generated Map, detonate it
-		DetonateBomb();
+
+		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+		MapComponentInternal->OnDeactivatedMapComponent.RemoveAll(this);
 
 		OnActorEndOverlap.RemoveAll(this);
 
@@ -382,6 +387,13 @@ void ABombActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGame
 /*********************************************************************************************
  * Custom Collision Response
  ********************************************************************************************* */
+
+// Called when owned map component is destroyed on the Generated Map
+void ABombActor::OnDeactivatedMapComponent_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+{
+	// Bomb is removed from Generated Map, detonate it
+	DetonateBomb();
+}
 
 // Sets actual collision responses to all players for this bomb
 void ABombActor::UpdateCollisionResponseToAllPlayers()
