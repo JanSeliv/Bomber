@@ -39,7 +39,8 @@ public:
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDeactivatedMapComponent, UMapComponent*, MapComponent, UObject*, DestroyCauser);
 
-	/** Called when this component is destroyed on the Generated Map, is called only on the server. */
+	/** Notified when this component is destroyed on the Generated Map.
+	 * Is called on both server and clients. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, BlueprintAuthorityOnly, Category = "C++")
 	FOnDeactivatedMapComponent OnDeactivatedMapComponent;
 
@@ -130,7 +131,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "NewResponses"))
 	void SetCollisionResponses(const FCollisionResponseContainer& NewResponses);
 
-	/** Is called when an owner was destroyed on the Generated Map. */
+	/** Is called when an owner was destroyed on the Generated Map, on both server and clients. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void OnDeactivated(UObject* DestroyCauser = nullptr);
 
@@ -157,7 +158,7 @@ protected:
 	TObjectPtr<const class ULevelActorDataAsset> ActorDataAssetInternal = nullptr;
 
 	/** Owner's cell location on the Generated Map */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_Cell", Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
 	FCell CellInternal = FCell::InvalidCell;
 
 	/** Hold custom mesh asset if changed.
@@ -207,6 +208,10 @@ protected:
 	/** Is called on client to respond on changes in collision responses. */
 	UFUNCTION()
 	void OnRep_CollisionResponse();
+
+	/** Is called on client to update current cell. */
+	UFUNCTION()
+	void OnRep_Cell();
 
 #if WITH_EDITOR
 	/** Returns true whether this component or its owner is an editor-only object or not. */

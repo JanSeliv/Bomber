@@ -125,6 +125,13 @@ bool UMapComponent::OnConstructionOwnerActor()
 // Override current cell data, where owner is located on the Generated Map
 void UMapComponent::SetCell(const FCell& Cell)
 {
+	const AActor* Owner = GetOwner();
+	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
+	if (!Owner->HasAuthority())
+	{
+		return;
+	}
+
 	CellInternal = Cell;
 
 	TryDisplayOwnedCell();
@@ -238,7 +245,7 @@ void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& New
 	ApplyCollisionResponse();
 }
 
-// Is called when an owner was destroyed on the Generated Map
+// Is called when an owner was destroyed on the Generated Map, on both server and clients
 void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 {
 	if (OnDeactivatedMapComponent.IsBound())
@@ -265,6 +272,8 @@ void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 		// Remove all text renders of the Owner
 		UCellsUtilsLibrary::ClearDisplayedCells(GetOwner());
 	}
+
+	SetCell(FCell::InvalidCell);
 }
 
 //  Called when a component is registered (not loaded)
@@ -418,6 +427,15 @@ void UMapComponent::ApplyCollisionResponse()
 void UMapComponent::OnRep_CollisionResponse()
 {
 	ApplyCollisionResponse();
+}
+
+// Is called on client to update current cell
+void UMapComponent::OnRep_Cell()
+{
+	if (CellInternal.IsInvalidCell())
+	{
+		OnDeactivated();
+	}
 }
 
 #if WITH_EDITOR
