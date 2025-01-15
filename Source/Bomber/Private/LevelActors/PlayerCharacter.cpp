@@ -250,8 +250,6 @@ void APlayerCharacter::BeginPlay()
 	{
 		OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-
 		// Listen to handle possessing logic
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
@@ -332,6 +330,8 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		TryPossessController();
 
 		MapComponentInternal->OnDeactivatedMapComponent.AddUniqueDynamic(this, &ThisClass::OnPlayerRemovedFromLevel);
+
+		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 	}
 	else if (Controller)
 	{
@@ -340,6 +340,8 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		Controller->SetIgnoreMoveInput(true);
 
 		MapComponentInternal->OnDeactivatedMapComponent.RemoveAll(this);
+
+		UGlobalEventsSubsystem::Get().BP_OnGameStateChanged.RemoveAll(this);
 	}
 
 	ResetPowerups();
