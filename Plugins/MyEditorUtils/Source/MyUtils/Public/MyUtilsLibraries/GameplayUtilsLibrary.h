@@ -37,7 +37,16 @@ public:
 	 * Actor Helpers
 	 ********************************************************************************************* */
 public:
-	/** Abstract method that allows set both static and skeletal meshes to the specified mesh component.
+	/** Abstract getter that allows to obtain the static or skeletal mesh from given mesh component (base class of both).
+	 * @param MeshComponent The mesh component to get mesh. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static class UStreamableRenderAsset* GetMesh(const class UMeshComponent* MeshComponent);
+
+	/** Alternative code-only getter, e.g: UStaticMesh* StaticMesh = UGameplayUtilsLibrary::GetMesh<UStaticMesh>(MeshComponent); */
+	template <typename T>
+	static T* GetMesh(const UMeshComponent* MeshComponent) { return Cast<T>(GetMesh(MeshComponent)); }
+
+	/** Abstract method that allows set both static and skeletal meshes to the specified mesh component by its base class.
 	 * @param MeshComponent The mesh component to set mesh.
 	 * @param MeshAsset The mesh asset to set to the mesh component. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

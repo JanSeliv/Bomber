@@ -80,7 +80,7 @@ public:
 
 	/** Returns mesh asset if changed or null if default. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	class UStreamableRenderAsset* GetCustomMeshAsset() const { return CustomMeshAssetInternal; }
+	class UStreamableRenderAsset* GetCustomMeshAsset() const;
 
 	/** Changes mesh from default to given one.
 	 * Is useful for rows that have more than one mesh per row, like items.
@@ -161,11 +161,11 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_Cell", Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
 	FCell CellInternal = FCell::InvalidCell;
 
-	/** Hold custom mesh asset if changed.
-	 * Is null by default or when SetDefaultMesh() is called.
-	 * Is set in SetCustomMeshAsset(). */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CustomMeshAsset", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
-	TObjectPtr<UStreamableRenderAsset> CustomMeshAssetInternal = nullptr;
+	/** Holds index of the row in Actor Data Asset. -1 means is not set.
+	 * It's assuming all meshes are assigned in the Data Asset.
+	 * Is primarily used for replicated of the mesh. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_RowIndex", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
+	int32 RowIndexInternal = -1;
 
 	/** If true the owner is undestroyable, is used by skills and cheat manager.
 	 * Is not replicated since evaluated only on the server. */
@@ -199,7 +199,7 @@ protected:
 
 	/** Is called on client to update custom mesh if changed. */
 	UFUNCTION()
-	void OnRep_CustomMeshAsset();
+	void OnRep_RowIndex();
 
 	/** Updates current collisions for the Box Collision Component. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

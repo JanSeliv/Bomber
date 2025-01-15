@@ -161,29 +161,50 @@ void UMapComponent::SetDefaultMesh()
 
 	// Reset custom mesh name for replication
 	const AActor* Owner = GetOwner();
-	checkf(Owner, TEXT("ERROR: [%i] %s:\n'Owner' is null!"), __LINE__, *FString(__FUNCTION__));
+	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
 	if (Owner->HasAuthority())
 	{
-		CustomMeshAssetInternal = nullptr;
+		RowIndexInternal = INDEX_NONE;
 	}
+}
+
+// Returns mesh asset if changed or null if default
+class UStreamableRenderAsset* UMapComponent::GetCustomMeshAsset() const
+{
+	if (UStreamableRenderAsset* CurrentMesh = UGameplayUtilsLibrary::GetMesh(MeshComponentInternal))
+	{
+		return CurrentMesh;
+	}
+
+	// Try to find the mesh by the row index if the mesh is not set yet for any reason
+	if (RowIndexInternal != INDEX_NONE)
+	{
+		const ULevelActorRow* FoundRow = ActorDataAssetInternal ? ActorDataAssetInternal->GetRowByIndex(RowIndexInternal) : nullptr;
+		return FoundRow ? FoundRow->Mesh : nullptr;
+	}
+
+	return nullptr;
 }
 
 // Overrides mesh to the Owner ignoring current level type and Level Row
 void UMapComponent::SetCustomMeshAsset(UStreamableRenderAsset* CustomMeshAsset)
 {
-	if (!ensureMsgf(CustomMeshAsset, TEXT("ASSERT: [%i] %s:\n'CustomMeshAsset' is null, attempted to set null mesh!"), __LINE__, *FString(__FUNCTION__)))
+	if (!ensureMsgf(CustomMeshAsset, TEXT("ASSERT: [%i] %hs:\n'CustomMeshAsset' is null, attempted to set null mesh!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, CustomMeshAsset);
 
-	// Update the mesh name for replication
+	// Set the index of the mesh, is primarily used for replicating the mesh to the clients
 	const AActor* Owner = GetOwner();
-	checkf(Owner, TEXT("ERROR: [%i] %s:\n'Owner' is null!"), __LINE__, *FString(__FUNCTION__));
+	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
 	if (Owner->HasAuthority())
 	{
-		CustomMeshAssetInternal = CustomMeshAsset;
+		checkf(ActorDataAssetInternal, TEXT("ERROR: [%i] %hs:\n'ActorDataAssetInternal' is null!"), __LINE__, __FUNCTION__);
+		const int32 NewRowIndex = ActorDataAssetInternal->GetIndexByRow(ActorDataAssetInternal->GetRowByMesh(CustomMeshAsset));
+		ensureMsgf(NewRowIndex != INDEX_NONE, TEXT("ASSERT: [%i] %hs:\nAttempted to set the '%s' mesh on '%s' actor that is not stored in the '%s' data asset!"), __LINE__, __FUNCTION__, *GetNameSafe(CustomMeshAsset), *GetNameSafe(Owner), *GetNameSafe(ActorDataAssetInternal));
+		RowIndexInternal = NewRowIndex;
 	}
 }
 
@@ -212,7 +233,7 @@ EActorType UMapComponent::GetActorType() const
 // Returns the level type by current mesh
 ELevelType UMapComponent::GetLevelType() const
 {
-	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByMesh(CustomMeshAssetInternal);
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByIndex(RowIndexInternal);
 	return FoundRow ? FoundRow->LevelType : ELevelType::None;
 }
 
@@ -257,7 +278,7 @@ void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 
 	SetCollisionResponses(ECR_Ignore);
 
-	if (CustomMeshAssetInternal != nullptr)
+	if (RowIndexInternal != INDEX_NONE)
 	{
 		SetDefaultMesh();
 	}
@@ -393,14 +414,14 @@ void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, CellInternal);
-	DOREPLIFETIME(ThisClass, CustomMeshAssetInternal);
+	DOREPLIFETIME(ThisClass, RowIndexInternal);
 	DOREPLIFETIME(ThisClass, CollisionResponseInternal);
 }
 
 // Is called on client to update current level actor row
-void UMapComponent::OnRep_CustomMeshAsset()
+void UMapComponent::OnRep_RowIndex()
 {
-	if (!CustomMeshAssetInternal)
+	if (RowIndexInternal == INDEX_NONE)
 	{
 		// It was reset to default mesh on server
 		SetDefaultMesh();
@@ -408,7 +429,11 @@ void UMapComponent::OnRep_CustomMeshAsset()
 	}
 
 	// Apply replicated mesh on client
-	SetCustomMeshAsset(CustomMeshAssetInternal);
+	const ULevelActorRow* ReplicatedRow = GetActorDataAssetChecked().GetRowByIndex(RowIndexInternal);
+	if (ensureMsgf(ReplicatedRow, TEXT("ASSERT: [%i] %hs:\n'ReplicatedRow' is null!"), __LINE__, __FUNCTION__))
+	{
+		SetCustomMeshAsset(ReplicatedRow->Mesh);
+	}
 }
 
 // Updates current collisions for the Box Collision Component

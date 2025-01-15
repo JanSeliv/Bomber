@@ -53,6 +53,22 @@ int32 UGameplayUtilsLibrary::GetPlayersInMultiplayerNum()
 	return PlayersNum;
 }
 
+// Abstract getter that allows to obtain the static or skeletal mesh from given mesh component (base class of both)
+class UStreamableRenderAsset* UGameplayUtilsLibrary::GetMesh(const class UMeshComponent* MeshComponent)
+{
+	if (const USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponent))
+	{
+		return SkeletalMeshComponent->GetSkeletalMeshAsset();
+	}
+
+	if (const UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent))
+	{
+		return StaticMeshComponent->GetStaticMesh();
+	}
+
+	return nullptr;
+}
+
 /*********************************************************************************************
  * Actor Helpers
  ********************************************************************************************* */
