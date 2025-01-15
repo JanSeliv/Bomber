@@ -102,9 +102,6 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() override;
-
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -134,10 +131,6 @@ protected:
 	 * Sets the collision preset to block all dynamics. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
-
-	/** Listen by dragged bombs to handle game resetting. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
 	/** Called when owned map component is destroyed on the Generated Map. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

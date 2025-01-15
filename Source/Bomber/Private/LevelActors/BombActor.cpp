@@ -56,6 +56,12 @@ void ABombActor::ConstructBombActor()
 	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
 	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionBombActor);
 	MapComponentInternal->ConstructOwnerActor();
+
+	// Init bomb by default, if it's spawned from player, it will be reinitialized again
+	InitBomb();
+
+	// Start countdown to destroy the bomb
+	SetLifeSpan();
 }
 
 //  Returns the type of the bomb
@@ -248,20 +254,6 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 	ConstructBombActor();
 }
 
-// Called when the game starts or when spawned
-void ABombActor::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// Destroy itself after N seconds
-	if (AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
-	{
-		SetLifeSpan();
-	}
-
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-}
-
 // Returns properties that are replicated for the lifetime of the actor channel
 void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -313,8 +305,6 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 
 		ConstructBombActor();
 
-		SetLifeSpan();
-
 		// Binding to the event, that triggered when character end to overlaps the collision component
 		OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
 
@@ -346,7 +336,7 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 void ABombActor::OnConstructionBombActor_Implementation()
 {
 	if (IS_TRANSIENT(this)                 // This actor is transient
-		|| !IsValid(MapComponentInternal)) // Is not valid for map construction
+	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
 	{
 		return;
 	}
@@ -354,8 +344,6 @@ void ABombActor::OnConstructionBombActor_Implementation()
 #if WITH_EDITOR //[IsEditorNotPieWorld]
 	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		InitBomb();
-
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 	}
 #endif //WITH_EDITOR [IsEditorNotPieWorld]
@@ -371,17 +359,6 @@ void ABombActor::OnBombEndOverlap_Implementation(AActor* OverlappedActor, AActor
 	}
 
 	UpdateCollisionResponseToAllPlayers();
-}
-
-// Listen by dragged bombs to handle game resetting
-void ABombActor::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
-{
-	if (CurrentGameState == ECurrentGameState::InGame)
-	{
-		// Reinit bomb and restart lifespan
-		InitBomb();
-		SetLifeSpan();
-	}
 }
 
 /*********************************************************************************************
