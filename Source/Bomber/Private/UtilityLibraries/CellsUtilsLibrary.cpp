@@ -106,7 +106,7 @@ void UCellsUtilsLibrary::GetPositionByCellOnLevel(const FCell& InCell, int32& Ou
 }
 
 // Returns all grid cell location on the Generated Map
-const TArray<FCell>& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
+const FCellsArr& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
 {
 	const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap();
 	return GeneratedMap ? GeneratedMap->GridCellsInternal : FCell::EmptyCellsArr;

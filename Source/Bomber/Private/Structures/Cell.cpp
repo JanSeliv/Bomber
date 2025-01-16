@@ -130,7 +130,7 @@ FCell FCell::GetCellByPositionOnGrid(const FIntPoint& CellPosition, const FCells
 {
 	const int32 MaxWidth = FMath::FloorToInt32(GetCellArrayWidth(InGrid));
 	const int32 CellIndex = CellPosition.Y/*Row*/ * MaxWidth/*ColumnsNum*/ + CellPosition.X/*Column*/;
-	const TArray<FCell>& GridArray = InGrid.Array();
+	const FCellsArr& GridArray = InGrid.Array();
 	return GridArray.IsValidIndex(CellIndex) ? GridArray[CellIndex] : InvalidCell;
 }
 
