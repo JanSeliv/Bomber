@@ -76,13 +76,6 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Placer"))
 	TObjectPtr<const class APlayerCharacter> BombPlacerInternal = nullptr;
 
-	/** All currently playing VFXs. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawned VFXs"))
-	TArray<TObjectPtr<class UNiagaraComponent>> SpawnedVFXsInternal;
-
-	/** The duration of the bomb VFX. */
-	FTimerHandle VFXDurationExpiredTimerHandle;
-
 	/** Destroy bomb and burst explosion cells, calls multicast event.*/
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
 	void DetonateBomb();
@@ -91,6 +84,22 @@ protected:
 	 * Calls destroying request of all actors by cells in explosion cells array.*/
 	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
 	void MulticastDetonateBomb(const TArray<struct FCell>& ExplosionCells);
+
+	/*********************************************************************************************
+	 * Cue (VFXs and SFXs)
+	 ********************************************************************************************* */
+public:
+	/** Spawns VFXs and SFXs, is allowed to call both on server and clients. */
+	UFUNCTION(Blueprintable, Category = "C++")
+	void PlayExplosionsCue(const TArray<struct FCell>& ExplosionCells);
+
+protected:
+	/** All currently playing VFXs. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Spawned VFXs"))
+	TArray<TObjectPtr<class UNiagaraComponent>> SpawnedVFXsInternal;
+
+	/** The duration of the bomb VFX. */
+	FTimerHandle VFXDurationExpiredTimerHandle;
 
 	/*********************************************************************************************
 	 * Overrides

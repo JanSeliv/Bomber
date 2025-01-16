@@ -200,18 +200,43 @@ void ABombActor::MulticastDetonateBomb_Implementation(const FCellsArr& Explosion
 	// Reset Fire Radius to avoid destroying the bomb again
 	FireRadiusInternal = 0;
 
-	// Spawn emitters
-	ensureMsgf(BombRow->BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombRow->BombVFX' is not set!"), __LINE__, __FUNCTION__);
-	for (const FCell& Cell : ExplosionCells)
-	{
-		SpawnedVFXsInternal.Add(UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, BombRow->BombVFX, Cell.Location, GetActorRotation(), GetActorScale()));
-	}
+	PlayExplosionsCue(ExplosionCells);
 
 	// Destroy all actors from array of cells
 	AGeneratedMap::Get().DestroyLevelActorsOnCells(FCells{ExplosionCells}, this);
 
 	USoundsSubsystem::Get().PlayExplosionSFX();
+}
 
+/*********************************************************************************************
+ * Cue (VFXs and SFXs)
+ ********************************************************************************************* */
+
+// Spawns VFXs and SFXs, is allowed to call both on server and clients
+void ABombActor::PlayExplosionsCue(const FCellsArr& ExplosionCells)
+{
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	{
+		return;
+	}
+
+	const UBombRow* BombRow = UBombDataAsset::Get().GetRowByLevelType<UBombRow>(GetBombType());
+	UNiagaraSystem* BombVFX = BombRow ? BombRow->BombVFX : nullptr;
+	if (!ensureMsgf(BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombVFX' is not set!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	// Play SFX
+	USoundsSubsystem::Get().PlayExplosionSFX();
+
+	// Spawn VFXs
+	for (const FCell& Cell : ExplosionCells)
+	{
+		SpawnedVFXsInternal.Add(UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, BombVFX, Cell.Location, GetActorRotation(), GetActorScale()));
+	}
+
+	// Stop VFXs after the duration, so they all have the same duration
 	auto OnVFXDurationExpired = [WeakThis = TWeakObjectPtr(this)]()
 	{
 		ABombActor* This = WeakThis.Get();
