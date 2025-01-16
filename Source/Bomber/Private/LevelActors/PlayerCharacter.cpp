@@ -329,7 +329,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 
 		TryPossessController();
 
-		MapComponentInternal->OnDeactivatedMapComponent.AddUniqueDynamic(this, &ThisClass::OnPlayerRemovedFromLevel);
+		MapComponentInternal->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
 
 		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 	}
@@ -339,7 +339,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 
 		Controller->SetIgnoreMoveInput(true);
 
-		MapComponentInternal->OnDeactivatedMapComponent.RemoveAll(this);
+		MapComponentInternal->OnPreRemovedFromLevel.RemoveAll(this);
 
 		UGlobalEventsSubsystem::Get().BP_OnGameStateChanged.RemoveAll(this);
 	}
@@ -474,7 +474,7 @@ void APlayerCharacter::OnPostLogin_Implementation(AGameModeBase* GameMode, APlay
 }
 
 // Is called when the player was destroyed
-void APlayerCharacter::OnPlayerRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+void APlayerCharacter::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
 	if (AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
 	{
@@ -882,7 +882,7 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 		BombActor->InitBomb(PlayerCharacter);
 
 		// Start listening this bomb
-		MapComponent->OnDeactivatedMapComponent.AddUniqueDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
+		MapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
 	};
 
 	// Spawn bomb
@@ -899,7 +899,7 @@ void APlayerCharacter::OnBombDestroyed_Implementation(UMapComponent* MapComponen
 	}
 
 	// Stop listening this bomb
-	MapComponent->OnDeactivatedMapComponent.RemoveAll(this);
+	MapComponent->OnPostRemovedFromLevel.RemoveAll(this);
 
 	if (PowerupsInternal.BombNCurrent < PowerupsInternal.BombN)
 	{

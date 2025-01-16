@@ -617,7 +617,8 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 		return;
 	}
 
-	MapComponent->OnDeactivated(DestroyCauser);
+	// Notify listeners right before destroying and reset the actor
+	MapComponent->OnPreRemoved(DestroyCauser);
 
 	// Deactivate the iterated owner
 	UPoolManagerSubsystem* PoolManager = UPoolManagerSubsystem::GetPoolManager(this);
@@ -633,6 +634,9 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	}
 
 	DestroyLevelActorDragged(MapComponent);
+
+	// Notify listeners after destroying being performed
+	MapComponent->OnPostRemoved(DestroyCauser);
 }
 
 // Destroys level actor by specified handle

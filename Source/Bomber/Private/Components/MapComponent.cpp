@@ -99,7 +99,8 @@ void UMapComponent::OnRep_Cell()
 	if (CellInternal.IsInvalidCell())
 	{
 		// It's client which invalidated the cell, broadcast events manually as initial removal happened only on the server
-		OnDeactivated();
+		OnPreRemoved();
+		OnPostRemoved();
 	}
 }
 
@@ -464,12 +465,21 @@ bool UMapComponent::OnConstructionOwnerActor_Implementation()
 	return true;
 }
 
-// Is called directly from Generated Map to broadcast delegate and performs own logic
-void UMapComponent::OnDeactivated_Implementation(UObject* DestroyCauser/* = nullptr*/)
+// Is called directly from Generated Map to broadcast OnPreRemovedFromLevel delegate and performs own logic
+void UMapComponent::OnPreRemoved_Implementation(UObject* DestroyCauser)
 {
-	if (OnDeactivatedMapComponent.IsBound())
+	if (OnPreRemovedFromLevel.IsBound())
 	{
-		OnDeactivatedMapComponent.Broadcast(this, DestroyCauser);
+		OnPreRemovedFromLevel.Broadcast(this, DestroyCauser);
+	}
+}
+
+// Is called directly from Generated Map to broadcast OnPostRemovedFromLevel delegate and performs own logic
+void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = nullptr*/)
+{
+	if (OnPostRemovedFromLevel.IsBound())
+	{
+		OnPostRemovedFromLevel.Broadcast(this, DestroyCauser);
 	}
 
 	// -- Clear and discard all runtime changes

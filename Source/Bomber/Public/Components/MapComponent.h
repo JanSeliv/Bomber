@@ -50,12 +50,18 @@ public:
 	UPROPERTY(BlueprintAssignable, Transient, Category = "C++")
 	FOnOwnerWantsReconstruct OnOwnerWantsReconstruct;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnDeactivatedMapComponent, UMapComponent*, MapComponent, UObject*, DestroyCauser);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPreRemovedFromLevel, UMapComponent*, MapComponent, UObject*, DestroyCauser);
 
-	/** Notified when this component is destroyed on the Generated Map.
-	 * Is called on both server and clients. */
+	/** Called right before owner actor going to remove from the Generated Map, on both server and clients.
+	 * Is useful to listen for actor before it is exploded and its data being reset. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, BlueprintAuthorityOnly, Category = "C++")
-	FOnDeactivatedMapComponent OnDeactivatedMapComponent;
+	FOnPreRemovedFromLevel OnPreRemovedFromLevel;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPostRemovedFromLevel, UMapComponent*, MapComponent, UObject*, DestroyCauser);
+
+	/** Called each time after owner actor was removed from Generated Map, on both server and clients. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnPostRemovedFromLevel OnPostRemovedFromLevel;
 
 	/*********************************************************************************************
 	 * Cell (Location)
@@ -235,9 +241,13 @@ protected:
 
 	friend class AGeneratedMap;
 
-	/** Is called directly from Generated Map to broadcast delegate and performs own logic. */
+	/** Is called directly from Generated Map to broadcast OnPreRemovedFromLevel delegate and performs own logic. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnDeactivated(UObject* DestroyCauser = nullptr);
+	void OnPreRemoved(UObject* DestroyCauser = nullptr);
+
+	/** Is called directly from Generated Map to broadcast OnPostRemovedFromLevel delegate and performs own logic. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPostRemoved(UObject* DestroyCauser = nullptr);
 
 	/*********************************************************************************************
 	 * Debug

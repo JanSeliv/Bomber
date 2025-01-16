@@ -59,5 +59,5 @@ protected:
 
 	/** Called when owned map component is destroyed on the Generated Map. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnDeactivatedMapComponent(UMapComponent* MapComponent, UObject* DestroyCauser);
+	void OnPostRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
 };

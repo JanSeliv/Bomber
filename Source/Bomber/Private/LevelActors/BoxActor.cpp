@@ -82,7 +82,7 @@ void ABoxActor::BeginPlay()
 	if (HasAuthority())
 	{
 		check(MapComponentInternal);
-		MapComponentInternal->OnDeactivatedMapComponent.AddDynamic(this, &ThisClass::OnDeactivatedMapComponent);
+		MapComponentInternal->OnPostRemovedFromLevel.AddDynamic(this, &ThisClass::OnPostRemovedFromLevel);
 	}
 }
 
@@ -114,7 +114,7 @@ void ABoxActor::OnConstructionBoxActor_Implementation()
 }
 
 // Called when owned map component is destroyed on the Generated Map
-void ABoxActor::OnDeactivatedMapComponent_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+void ABoxActor::OnPostRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
 	const bool bIsCauserAllowedForItems = UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
 	if (bIsCauserAllowedForItems)

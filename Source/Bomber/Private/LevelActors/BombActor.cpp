@@ -329,14 +329,14 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 		OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
 
 		// Listen when this bomb is destroyed on the Generated Map by itself or by other actors
-		MapComponentInternal->OnDeactivatedMapComponent.AddUniqueDynamic(this, &ThisClass::OnDeactivatedMapComponent);
+		MapComponentInternal->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
 	}
 	else
 	{
 		// Bomb is removed from Generated Map, detonate it
 
 		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-		MapComponentInternal->OnDeactivatedMapComponent.RemoveAll(this);
+		MapComponentInternal->OnPreRemovedFromLevel.RemoveAll(this);
 
 		OnActorEndOverlap.RemoveAll(this);
 
@@ -386,7 +386,7 @@ void ABombActor::OnBombEndOverlap_Implementation(AActor* OverlappedActor, AActor
  ********************************************************************************************* */
 
 // Called when owned map component is destroyed on the Generated Map
-void ABombActor::OnDeactivatedMapComponent_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+void ABombActor::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
 	// Bomb is removed from Generated Map, detonate it
 	DetonateBomb();

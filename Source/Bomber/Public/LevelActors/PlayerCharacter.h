@@ -173,7 +173,7 @@ protected:
 
 	/** Is called when the player was destroyed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPlayerRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
+	void OnPreRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
 
 	/** Is called when the player character is fully initialized. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
