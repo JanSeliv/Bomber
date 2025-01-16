@@ -148,6 +148,12 @@ void UMapComponent::TryDisplayOwnedCell()
 // Updates current mesh to default according current level type
 void UMapComponent::SetDefaultMesh()
 {
+	if (GetActorDataAssetChecked().GetActorType() == EActorType::Player)
+	{
+		// ACharacter has own mesh component, no need to manage it
+		return;
+	}
+
 	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
 	if (!ensureMsgf(FoundRow, TEXT("ASSERT: [%i] %hs:\n'FoundRow' is not valid!"), __LINE__, __FUNCTION__))
 	{
@@ -201,6 +207,12 @@ void UMapComponent::SetCustomMeshAsset(UStreamableRenderAsset* CustomMeshAsset)
 // Sets mesh to empty, is used for cleanup
 void UMapComponent::ResetMesh()
 {
+	if (GetActorDataAssetChecked().GetActorType() == EActorType::Player)
+	{
+		// ACharacter has own mesh component, no need to manage it
+		return;
+	}
+
 	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, nullptr);
 
 	const AActor* Owner = GetOwner();
