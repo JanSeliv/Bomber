@@ -143,6 +143,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE class UMeshComponent* GetMeshComponent() const { return MeshComponentInternal; }
 
+	/** Returns the row index of the actor in the Data Asset. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetRowIndex() const { return RowIndexInternal; }
+
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties

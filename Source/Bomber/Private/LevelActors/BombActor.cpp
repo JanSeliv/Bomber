@@ -11,7 +11,6 @@
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
 #include "Structures/Cell.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 //---
@@ -101,7 +100,8 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 		return;
 	}
 
-	int32 InFireRadius = MIN_FIRE_RADIUS;
+	constexpr int32 MinFireRadius = 1;
+	int32 InFireRadius = MinFireRadius;
 	int32 PlayerIndex = INDEX_NONE;
 	if (BombPlacer) // Might be null if spawned from external source (e.g. cheat manager)
 	{
@@ -112,6 +112,17 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 		InFireRadius = BombPlacer->GetPowerups().FireN;
 		SetBombType(BombPlacer->GetPlayerType());
 	}
+
+#if !UE_BUILD_SHIPPING
+	const int32 CheatOverride = UMyCheatManager::CVarBombRadius.GetValueOnAnyThread();
+	if (CheatOverride > MinFireRadius)
+	{
+		InFireRadius = CheatOverride;
+	}
+#endif //!UE_BUILD_SHIPPING
+
+	// Set fire radius (from player, cheat manager or default) and update explosion cells
+	FireRadiusInternal = InFireRadius;
 
 	const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
 	if (GetBombType() == ELevelType::None)
@@ -128,8 +139,6 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 
 	ApplyMaterial();
 
-	FireRadiusInternal = InFireRadius;
-
 	UpdateCollisionResponseToAllPlayers();
 
 	TryDisplayExplosionCells();
@@ -139,26 +148,12 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 FCells ABombActor::GetExplosionCells() const
 {
 	if (!MapComponentInternal
-	    || GetExplosionRadius() < MIN_FIRE_RADIUS)
+	    || FireRadiusInternal <= 0)
 	{
 		return FCell::EmptyCells;
 	}
 
-	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, GetExplosionRadius());
-}
-
-// Returns radius of the blast to each side
-int32 ABombActor::GetExplosionRadius() const
-{
-#if !UE_BUILD_SHIPPING
-	const int32 CheatOverride = UMyCheatManager::CVarBombRadius.GetValueOnAnyThread();
-	if (CheatOverride > MIN_FIRE_RADIUS)
-	{
-		return CheatOverride;
-	}
-#endif //!UE_BUILD_SHIPPING
-
-	return FireRadiusInternal;
+	return UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, FireRadiusInternal);
 }
 
 // Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build
@@ -203,7 +198,7 @@ void ABombActor::MulticastDetonateBomb_Implementation(const FCellsArr& Explosion
 	}
 
 	// Reset Fire Radius to avoid destroying the bomb again
-	FireRadiusInternal = MIN_FIRE_RADIUS;
+	FireRadiusInternal = 0;
 
 	// Spawn emitters
 	ensureMsgf(BombRow->BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombRow->BombVFX' is not set!"), __LINE__, __FUNCTION__);

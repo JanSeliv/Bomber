@@ -6,11 +6,9 @@
 //---
 #include "BombActor.generated.h"
 
-#define MIN_FIRE_RADIUS 1
 #define DEFAULT_LIFESPAN -1.f
 
 enum class ELevelType : uint8;
-enum class ECurrentGameState : uint8;
 
 /**
  * Bombs are put by the character to destroy the level actors, trigger other bombs.
@@ -58,7 +56,7 @@ public:
 	/** Returns radius of the blast to each side.
 	 * It might be overriden by the cheat manager. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	int32 GetExplosionRadius() const;
+	FORCEINLINE int32 GetFireRadius() const { return FireRadiusInternal; }
 
 	/** Returns the character who placed the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -69,10 +67,9 @@ public:
 	void TryDisplayExplosionCells();
 
 protected:
-	/** The radius of the blast to each side, is set by player with InitBomb on spawning.
-	 * @warning don't use directly, even in this class, but call GetExplosionRadius() instead to support cheat overrides. */
+	/** The radius of the blast to each side, is during initialization: from the player, cheat manager or 1 as a default. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
-	int32 FireRadiusInternal = MIN_FIRE_RADIUS;
+	int32 FireRadiusInternal = 0;
 
 	/** The character who placed the bomb, is set by InitBomb on spawning.
 	 * Is used to track who spawned the bomb, e.g: to record the score. */
