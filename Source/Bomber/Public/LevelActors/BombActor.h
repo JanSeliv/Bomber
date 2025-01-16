@@ -31,10 +31,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ELevelType GetBombType() const;
 
-	/** Applies the bomb type. It impacts the bomb mesh, material and VFX. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetBombType(ELevelType InBombType);
-
 protected:
 	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
@@ -73,8 +69,12 @@ protected:
 
 	/** The character who placed the bomb, is set by InitBomb on spawning.
 	 * Is used to track who spawned the bomb, e.g: to record the score. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Placer"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombPlacer", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Placer"))
 	TObjectPtr<const class APlayerCharacter> BombPlacerInternal = nullptr;
+
+	/** Is called on client to update current bomb placer. */
+	UFUNCTION()
+	void OnRep_BombPlacer();
 
 	/** Destroy bomb and burst explosion cells, calls multicast event.*/
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
@@ -86,12 +86,16 @@ protected:
 	void MulticastDetonateBomb(const TArray<struct FCell>& ExplosionCells);
 
 	/*********************************************************************************************
-	 * Cue (VFXs and SFXs)
+	 * Cue Visuals: VFXs, SFXs, Materials
 	 ********************************************************************************************* */
 public:
 	/** Spawns VFXs and SFXs, is allowed to call both on server and clients. */
 	UFUNCTION(Blueprintable, Category = "C++")
 	void PlayExplosionsCue(const TArray<struct FCell>& ExplosionCells);
+
+	/** Updates current material for this bomb actor, based on this bomb and Player placer types. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplyMaterial();
 
 protected:
 	/** All currently playing VFXs. */
@@ -179,21 +183,4 @@ public:
 	/** Returns all players overlapping with this bomb. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
 	void GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const;
-
-	/*********************************************************************************************
-	 * Material
-	 ********************************************************************************************* */
-public:
-	/** Updates current material for this bomb actor. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ApplyMaterial();
-
-protected:
-	/** Current material of this bomb, is different for each player. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombMaterial", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Material"))
-	TObjectPtr<class UMaterialInterface> BombMaterialInternal = nullptr;
-
-	/** Is called on client to respond on changes in material of the bomb. */
-	UFUNCTION()
-	void OnRep_BombMaterial();
 };

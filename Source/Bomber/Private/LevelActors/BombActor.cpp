@@ -69,24 +69,6 @@ ELevelType ABombActor::GetBombType() const
 	return MapComponentInternal ? MapComponentInternal->GetLevelType() : ELevelType::None;
 }
 
-// Applies the bomb type. It impacts the bomb mesh, material and VFX
-void ABombActor::SetBombType(ELevelType InBombType)
-{
-	const ULevelActorRow* BombRow = UBombDataAsset::Get().GetRowByLevelType(InBombType);
-	UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
-	if (!ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %hs:\n'BombMesh' is not found"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	// Override mesh
-	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-	MapComponentInternal->SetCustomMeshAsset(BombMesh);
-
-	// Override material
-	BombMaterialInternal = BombMesh->GetMaterial(0);
-}
-
 /*********************************************************************************************
  * Detonation
  ********************************************************************************************* */
@@ -94,23 +76,24 @@ void ABombActor::SetBombType(ELevelType InBombType)
 // Sets the defaults of the bomb
 void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 {
-	if (!HasAuthority()
-	    || !MapComponentInternal)
+	if (!HasAuthority())
 	{
 		return;
 	}
 
 	constexpr int32 MinFireRadius = 1;
 	int32 InFireRadius = MinFireRadius;
-	int32 PlayerIndex = INDEX_NONE;
 	if (BombPlacer) // Might be null if spawned from external source (e.g. cheat manager)
 	{
 		// Set bomb placer, so others can track who spawned the bomb, e.g: to record the score 
 		BombPlacerInternal = BombPlacer;
 
-		PlayerIndex = BombPlacer->GetPlayerId();
 		InFireRadius = BombPlacer->GetPowerups().FireN;
-		SetBombType(BombPlacer->GetPlayerType());
+
+		// Override default mesh with one with the player type (each character has own bomb)
+		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+		const ULevelActorRow* BombRow = UBombDataAsset::Get().GetRowByLevelType(BombPlacer->GetPlayerType());
+		MapComponentInternal->SetCustomMeshAsset(BombRow->Mesh);
 	}
 
 #if !UE_BUILD_SHIPPING
@@ -123,19 +106,6 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 
 	// Set fire radius (from player, cheat manager or default) and update explosion cells
 	FireRadiusInternal = InFireRadius;
-
-	const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
-	if (GetBombType() == ELevelType::None)
-	{
-		// Is bot character, set material for its default bomb with the same mesh
-		const int32 BombMaterialsNum = BombDataAsset.GetBombMaterialsNum();
-		if (PlayerIndex != INDEX_NONE // Is not debug character
-		    && BombMaterialsNum)      // As least one bomb material
-		{
-			const int32 MaterialIndex = FMath::Abs(PlayerIndex) % BombMaterialsNum;
-			BombMaterialInternal = BombDataAsset.GetBombMaterial(MaterialIndex);
-		}
-	}
 
 	ApplyMaterial();
 
@@ -167,6 +137,15 @@ void ABombActor::TryDisplayExplosionCells()
 	Params.TextHeight += 1.f;
 	UCellsUtilsLibrary::DisplayCells(this, GetExplosionCells(), Params);
 #endif // !UE_BUILD_SHIPPING
+}
+
+// Is called on client to update current bomb placer
+void ABombActor::OnRep_BombPlacer()
+{
+	if (BombPlacerInternal)
+	{
+		ApplyMaterial();
+	}
 }
 
 // Destroy bomb and burst explosion cells, calls multicast event
@@ -209,7 +188,7 @@ void ABombActor::MulticastDetonateBomb_Implementation(const FCellsArr& Explosion
 }
 
 /*********************************************************************************************
- * Cue (VFXs and SFXs)
+ * Cue Visuals: VFXs, SFXs, Materials
  ********************************************************************************************* */
 
 // Spawns VFXs and SFXs, is allowed to call both on server and clients
@@ -262,6 +241,45 @@ void ABombActor::PlayExplosionsCue(const FCellsArr& ExplosionCells)
 	TimerManager.SetTimer(VFXDurationExpiredTimerHandle, OnVFXDurationExpired, UBombDataAsset::Get().GetVFXDuration(), bLoop);
 }
 
+// Updates current material for this bomb actor, based on this bomb and Player placer types
+void ABombActor::ApplyMaterial()
+{
+	TObjectPtr<class UMaterialInterface> NewBombMaterial = nullptr;
+
+	// If bot character, override material with the player type
+	if (BombPlacerInternal
+	    && BombPlacerInternal->IsBotControlled())
+	{
+		// If bot character, set material for its default bomb with the same mesh
+		const int32 PlayerIndex = BombPlacerInternal->GetPlayerId();
+		const UBombDataAsset& BombDataAsset = UBombDataAsset::Get();
+		const int32 BombMaterialsNum = BombDataAsset.GetBombMaterialsNum();
+		if (PlayerIndex != INDEX_NONE // Is not debug character
+		    && BombMaterialsNum)      // As least one bomb material
+		{
+			const int32 MaterialIndex = FMath::Abs(PlayerIndex) % BombMaterialsNum;
+			NewBombMaterial = BombDataAsset.GetBombMaterial(MaterialIndex);
+		}
+	}
+	else
+	{
+		// Set material by bomb type (default)
+		const ULevelActorRow* BombRow = UBombDataAsset::Get().GetRowByLevelType(GetBombType());
+		const UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
+		if (ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %hs:\n'BombMesh' is not found"), __LINE__, __FUNCTION__))
+		{
+			NewBombMaterial = BombMesh->GetMaterial(0);
+		}
+	}
+
+	// Apply material
+	if (NewBombMaterial)
+	{
+		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+		MapComponentInternal->SetMaterial(NewBombMaterial);
+	}
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
@@ -280,7 +298,6 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, FireRadiusInternal);
-	DOREPLIFETIME(ThisClass, BombMaterialInternal);
 	DOREPLIFETIME(ThisClass, BombPlacerInternal);
 }
 
@@ -340,7 +357,6 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
 
 		OnActorEndOverlap.RemoveAll(this);
 
-		BombMaterialInternal = nullptr;
 		BombPlacerInternal = nullptr;
 	}
 
@@ -486,26 +502,4 @@ void ABombActor::GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const
 	{
 		BombCollisionComponent->GetOverlappingActors(OutPlayers, UDataAssetsContainer::GetActorClassByType(EAT::Player));
 	}
-}
-
-/*********************************************************************************************
- * Material
- ********************************************************************************************* */
-
-// Updates current material for this bomb actor
-void ABombActor::ApplyMaterial()
-{
-	if (!BombMaterialInternal
-	    || !MapComponentInternal)
-	{
-		return;
-	}
-
-	MapComponentInternal->SetMaterial(BombMaterialInternal);
-}
-
-// Is called on client to respond on changes in material of the bomb
-void ABombActor::OnRep_BombMaterial()
-{
-	ApplyMaterial();
 }
