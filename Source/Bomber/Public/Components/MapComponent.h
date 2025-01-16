@@ -84,9 +84,13 @@ public:
 
 	/** Changes mesh from default to given one.
 	 * Is useful for rows that have more than one mesh per row, like items.
-	 * Is reset to null by SetDefaultMesh(). */
+	 * Is reset to null by ResetMesh(). */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetCustomMeshAsset(class UStreamableRenderAsset* CustomMeshAsset);
+
+	/** Sets mesh to empty, is used for cleanup. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ResetMesh();
 
 	/** Set material to the mesh. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -164,7 +168,7 @@ protected:
 	/** Holds index of the row in Actor Data Asset. -1 means is not set.
 	 * It's assuming all meshes are assigned in the Data Asset.
 	 * Is primarily used for replicated of the mesh. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_RowIndex", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Custom Mesh Asset"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_RowIndex", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Row Index"))
 	int32 RowIndexInternal = -1;
 
 	/** If true the owner is undestroyable, is used by skills and cheat manager.

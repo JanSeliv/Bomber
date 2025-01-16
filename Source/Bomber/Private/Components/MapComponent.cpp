@@ -8,7 +8,6 @@
 #include "DataAssets/DataAssetsContainer.h"
 #include "DataAssets/GameStateDataAsset.h"
 #include "DataAssets/LevelActorDataAsset.h"
-#include "LevelActors/PlayerCharacter.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Subsystems/GeneratedMapSubsystem.h"
@@ -17,7 +16,6 @@
 //---
 #include "Components/BoxComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/StreamableRenderAsset.h"
@@ -150,22 +148,13 @@ void UMapComponent::TryDisplayOwnedCell()
 // Updates current mesh to default according current level type
 void UMapComponent::SetDefaultMesh()
 {
-	if (GetActorDataAssetChecked().GetActorType() == EActorType::Player)
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
+	if (!ensureMsgf(FoundRow, TEXT("ASSERT: [%i] %hs:\n'FoundRow' is not valid!"), __LINE__, __FUNCTION__))
 	{
-		// ACharacter has own mesh component, no need to manage it
 		return;
 	}
 
-	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
-	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, FoundRow->Mesh);
-
-	// Reset custom mesh name for replication
-	const AActor* Owner = GetOwner();
-	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
-	if (Owner->HasAuthority())
-	{
-		RowIndexInternal = INDEX_NONE;
-	}
+	SetCustomMeshAsset(FoundRow->Mesh);
 }
 
 // Returns mesh asset if changed or null if default
@@ -189,7 +178,8 @@ class UStreamableRenderAsset* UMapComponent::GetCustomMeshAsset() const
 // Overrides mesh to the Owner ignoring current level type and Level Row
 void UMapComponent::SetCustomMeshAsset(UStreamableRenderAsset* CustomMeshAsset)
 {
-	if (!ensureMsgf(CustomMeshAsset, TEXT("ASSERT: [%i] %hs:\n'CustomMeshAsset' is null, attempted to set null mesh!"), __LINE__, __FUNCTION__))
+	if (!ensureMsgf(CustomMeshAsset, TEXT("ASSERT: [%i] %hs:\n'CustomMeshAsset' is null, attempted to set null mesh!"), __LINE__, __FUNCTION__)
+	    || UGameplayUtilsLibrary::GetMesh(MeshComponentInternal) == CustomMeshAsset) // Is already set
 	{
 		return;
 	}
@@ -205,6 +195,20 @@ void UMapComponent::SetCustomMeshAsset(UStreamableRenderAsset* CustomMeshAsset)
 		const int32 NewRowIndex = ActorDataAssetInternal->GetIndexByRow(ActorDataAssetInternal->GetRowByMesh(CustomMeshAsset));
 		ensureMsgf(NewRowIndex != INDEX_NONE, TEXT("ASSERT: [%i] %hs:\nAttempted to set the '%s' mesh on '%s' actor that is not stored in the '%s' data asset!"), __LINE__, __FUNCTION__, *GetNameSafe(CustomMeshAsset), *GetNameSafe(Owner), *GetNameSafe(ActorDataAssetInternal));
 		RowIndexInternal = NewRowIndex;
+	}
+}
+
+// Sets mesh to empty, is used for cleanup
+void UMapComponent::ResetMesh()
+{
+	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, nullptr);
+
+	const AActor* Owner = GetOwner();
+	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
+	if (Owner->HasAuthority()
+	    && RowIndexInternal != INDEX_NONE)
+	{
+		RowIndexInternal = INDEX_NONE;
 	}
 }
 
@@ -278,10 +282,7 @@ void UMapComponent::OnDeactivated(UObject* DestroyCauser/* = nullptr*/)
 
 	SetCollisionResponses(ECR_Ignore);
 
-	if (RowIndexInternal != INDEX_NONE)
-	{
-		SetDefaultMesh();
-	}
+	ResetMesh();
 
 	if (IsUndestroyable())
 	{
@@ -351,8 +352,7 @@ void UMapComponent::OnRegister()
 	if (ActorDataAssetInternal->GetActorType() == EAT::Player)
 	{
 		// The character class already has own initialized skeletal component
-		const ACharacter* Player = CastChecked<ACharacter>(Owner);
-		MeshComponentInternal = Player->GetMesh();
+		MeshComponentInternal = Owner->FindComponentByClass<UMeshComponent>();
 		check(MeshComponentInternal);
 	}
 	else
@@ -360,8 +360,6 @@ void UMapComponent::OnRegister()
 		MeshComponentInternal = NewObject<UStaticMeshComponent>(Owner);
 		MeshComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		MeshComponentInternal->RegisterComponent();
-
-		SetDefaultMesh();
 	}
 
 	// Do not receive decals for level actors by default
@@ -424,7 +422,7 @@ void UMapComponent::OnRep_RowIndex()
 	if (RowIndexInternal == INDEX_NONE)
 	{
 		// It was reset to default mesh on server
-		SetDefaultMesh();
+		ResetMesh();
 		return;
 	}
 
