@@ -63,6 +63,13 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnPostRemovedFromLevel OnPostRemovedFromLevel;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorTypeChanged, UMapComponent*, MapComponent, const class ULevelActorRow*, NewRow, const class ULevelActorRow*, PreviousRow);
+
+	/** Is called when the Row from current Data Asset is changed for owner on the level, on both server and clients.
+	 * Is useful to listen when own actor is applied all visual changes like mesh, material, etc. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnActorTypeChanged OnActorTypeChanged;
+
 	/*********************************************************************************************
 	 * Cell (Location)
 	 ********************************************************************************************* */
@@ -82,12 +89,8 @@ public:
 
 protected:
 	/** Owner's cell location on the Generated Map */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, ReplicatedUsing = "OnRep_Cell", Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
 	FCell CellInternal = FCell::InvalidCell;
-
-	/** Is called on client to update current cell. */
-	UFUNCTION()
-	void OnRep_Cell();
 
 	/*********************************************************************************************
 	 * Mesh
@@ -128,7 +131,7 @@ protected:
 
 	/** Is called on client to update custom mesh if changed. */
 	UFUNCTION()
-	void OnRep_RowIndex();
+	void OnRep_RowIndex(int32 PreviousRowIndex);
 
 	/*********************************************************************************************
 	 * Collision

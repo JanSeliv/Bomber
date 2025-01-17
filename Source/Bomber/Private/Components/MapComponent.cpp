@@ -93,17 +93,6 @@ void UMapComponent::TryDisplayOwnedCell()
 #endif // !UE_BUILD_SHIPPING
 }
 
-// Is called on client to update current cell
-void UMapComponent::OnRep_Cell()
-{
-	if (CellInternal.IsInvalidCell())
-	{
-		// It's client which invalidated the cell, broadcast events manually as initial removal happened only on the server
-		OnPreRemoved();
-		OnPostRemoved();
-	}
-}
-
 /*********************************************************************************************
  * Mesh
  ********************************************************************************************* */
@@ -111,41 +100,36 @@ void UMapComponent::OnRep_Cell()
 // Returns current mesh asset
 class UStreamableRenderAsset* UMapComponent::GetMesh() const
 {
-	if (UStreamableRenderAsset* CurrentMesh = UGameplayUtilsLibrary::GetMesh(MeshComponentInternal))
-	{
-		return CurrentMesh;
-	}
-
-	// Try to find the mesh by the row index if the mesh is not set yet for any reason
-	if (RowIndexInternal != INDEX_NONE)
-	{
-		const ULevelActorRow* FoundRow = ActorDataAssetInternal ? ActorDataAssetInternal->GetRowByIndex(RowIndexInternal) : nullptr;
-		return FoundRow ? FoundRow->Mesh : nullptr;
-	}
-
-	return nullptr;
+	return UGameplayUtilsLibrary::GetMesh(MeshComponentInternal);
 }
 
 // Applies given mesh on owner actor, or resets the mesh if null is passed
 void UMapComponent::SetMesh(UStreamableRenderAsset* NewMesh)
 {
-	if (UGameplayUtilsLibrary::GetMesh(MeshComponentInternal) == NewMesh // is already set
-		|| GetActorDataAssetChecked().GetActorType() == EActorType::Player) // ACharacter has own mesh component, no need to manage it
+	if (GetMesh() == NewMesh                                                // is already set
+	    || GetActorDataAssetChecked().GetActorType() == EActorType::Player) // ACharacter has own mesh component, no need to manage it
 	{
 		return;
 	}
 
-	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, NewMesh);
-
-	// Set the index of the mesh, is primarily used for replicating the mesh to the clients, it's INDEX_NONE when reset the mesh (null is passed)
 	const AActor* Owner = GetOwner();
 	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
+
+	const UStreamableRenderAsset* PreviousMesh = GetMesh();
+	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, NewMesh);
+
 	if (Owner->HasAuthority())
 	{
-		const ULevelActorRow* NewRow = NewMesh ? ActorDataAssetInternal->GetRowByMesh(NewMesh) : nullptr;
+		const ULevelActorRow* PreviousRow = GetActorDataAssetChecked().GetRowByMesh(PreviousMesh);
+		const ULevelActorRow* NewRow = NewMesh ? GetActorDataAssetChecked().GetRowByMesh(NewMesh) : nullptr;
+
+		// On server, set the index of the mesh, is primarily used for replicating the mesh to the clients, it's INDEX_NONE when reset the mesh (null is passed)
 		const int32 NewRowIndex = NewRow ? ActorDataAssetInternal->GetIndexByRow(NewRow) : INDEX_NONE;
 		ensureMsgf(!NewMesh || NewRowIndex != INDEX_NONE, TEXT("ASSERT: [%i] %hs:\nAttempted to set the '%s' mesh on '%s' actor that is not stored in the '%s' data asset!"), __LINE__, __FUNCTION__, *GetNameSafe(NewMesh), *GetNameSafe(Owner), *GetNameSafe(ActorDataAssetInternal));
 		RowIndexInternal = NewRowIndex;
+
+		// On server, broadcast event; clients will get notify later by replicating the RowIndex
+		OnActorTypeChanged.Broadcast(this, NewRow, PreviousRow);
 	}
 }
 
@@ -160,20 +144,24 @@ void UMapComponent::SetMaterial(UMaterialInterface* Material)
 }
 
 // Is called on client to update current level actor row
-void UMapComponent::OnRep_RowIndex()
+void UMapComponent::OnRep_RowIndex(int32 PreviousRowIndex)
 {
+	const ULevelActorDataAsset& ActorDataAsset = GetActorDataAssetChecked();
+	const ULevelActorRow* PreviousRow = ActorDataAsset.GetRowByIndex(PreviousRowIndex);
+	const ULevelActorRow* NewRow = ActorDataAsset.GetRowByIndex(RowIndexInternal);
+
+	// The mesh might be null, then perform the cleanup
+	UStreamableRenderAsset* NewMesh = NewRow ? NewRow->Mesh : nullptr;
+	SetMesh(NewMesh);
+
+	// On client, broadcast event post RowIndex replication
+	OnActorTypeChanged.Broadcast(this, NewRow, PreviousRow);
+
 	if (RowIndexInternal == INDEX_NONE)
 	{
-		// On server, the mesh was reset, so cleanup it on client as well 
-		SetMesh(nullptr);
-		return;
-	}
-
-	// Apply replicated mesh on client
-	const ULevelActorRow* ReplicatedRow = GetActorDataAssetChecked().GetRowByIndex(RowIndexInternal);
-	if (ensureMsgf(ReplicatedRow, TEXT("ASSERT: [%i] %hs:\n'ReplicatedRow' is null: can not obtain mesh from replicated 'RowIndexInternal': %d!"), __LINE__, __FUNCTION__, RowIndexInternal))
-	{
-		SetMesh(ReplicatedRow->Mesh);
+		// It's client which invalidated mesh, broadcast events manually as initial removal happened only on the server
+		OnPreRemoved();
+		OnPostRemoved();
 	}
 }
 
@@ -458,9 +446,6 @@ void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = null
 
 	SetCollisionResponses(ECR_Ignore);
 
-	// Reset the mesh
-	SetMesh(nullptr);
-
 	if (IsUndestroyable())
 	{
 		SetUndestroyable(false);
@@ -472,7 +457,14 @@ void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = null
 		UCellsUtilsLibrary::ClearDisplayedCells(GetOwner());
 	}
 
-	SetCell(FCell::InvalidCell);
+	// On server, reset the data (it will be replicated to clients)
+	const AActor* Owner = GetOwner();
+	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
+	if (Owner->HasAuthority())
+	{
+		SetMesh(nullptr);
+		SetCell(FCell::InvalidCell);
+	}
 }
 
 /*********************************************************************************************
