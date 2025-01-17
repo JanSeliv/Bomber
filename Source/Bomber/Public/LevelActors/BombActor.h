@@ -4,6 +4,8 @@
 
 #include "GameFramework/Actor.h"
 //---
+#include "Structures/Cell.h"
+//---
 #include "BombActor.generated.h"
 
 #define DEFAULT_LIFESPAN -1.f
@@ -40,14 +42,14 @@ protected:
 	 * Detonation
 	 ********************************************************************************************* */
 public:
-	/** Sets the defaults of the bomb.
+	/** Is server-only, initiates the explosion: starts countdown and initializes the data.
 	 * @param BombPlacer - the player who placed the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void InitBomb(const class APlayerCharacter* BombPlacer = nullptr);
 
-	/** Returns cells that bombs is going to destroy. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	TSet<struct FCell> GetExplosionCells() const;
+	/** Returns cells are going to explode by this bomb. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FORCEINLINE TArray<FCell>& GetExplosionCells() const { return LocalExplosionCellsInternal; }
 
 	/** Returns radius of the blast to each side.
 	 * It might be overriden by the cheat manager. */
@@ -63,35 +65,43 @@ public:
 	void TryDisplayExplosionCells();
 
 protected:
-	/** The radius of the blast to each side, is during initialization: from the player, cheat manager or 1 as a default. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
+	/** The radius of the blast to each side, is primarily used for the explosion cells calculation and replication. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_FireRadius", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Fire Radius"))
 	int32 FireRadiusInternal = 0;
+
+	/** Is not replicated, is calculated locally on the server and clients from the FireRadiusInternal. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Local Explosion Cells"))
+	TArray<FCell> LocalExplosionCellsInternal = FCell::EmptyCellsArr;
 
 	/** The character who placed the bomb, is set by InitBomb on spawning.
 	 * Is used to track who spawned the bomb, e.g: to record the score. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombPlacer", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Placer"))
 	TObjectPtr<const class APlayerCharacter> BombPlacerInternal = nullptr;
 
+	/** Is server-only, immediately detonates the bomb. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
+	void DetonateBomb();
+
+	/** Calculates the explosion cells based on current fire radius. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void UpdateExplosionCells();
+
 	/** Is called on client to update current bomb placer. */
 	UFUNCTION()
 	void OnRep_BombPlacer();
 
-	/** Destroy bomb and burst explosion cells, calls multicast event.*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
-	void DetonateBomb();
-
-	/** Destroy bomb and burst explosion cells.
-	 * Calls destroying request of all actors by cells in explosion cells array.*/
-	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void MulticastDetonateBomb(const TArray<struct FCell>& ExplosionCells);
+	/** Is called on client to recalculate the explosion cells. */
+	UFUNCTION()
+	void OnRep_FireRadius();
 
 	/*********************************************************************************************
 	 * Cue Visuals: VFXs, SFXs, Materials
 	 ********************************************************************************************* */
 public:
-	/** Spawns VFXs and SFXs, is allowed to call both on server and clients. */
+	/** Spawns VFXs and SFXs, is allowed to call both on server and clients.
+	 * @param BombRow - optional bomb row to get the visuals data from, if null, then it will be taken from current bomb type. */
 	UFUNCTION(Blueprintable, Category = "C++")
-	void PlayExplosionsCue(const TArray<struct FCell>& ExplosionCells);
+	void PlayExplosionsCue(const class UBombRow* BombRow = nullptr);
 
 	/** Updates current material for this bomb actor, based on this bomb and Player placer types. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -134,7 +144,7 @@ protected:
 	 * See the call stack below for more details:
 	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructBombActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionBombActor().
 	 * @warning Do not call directly, use ThisClass::ConstructBombActor() instead. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnConstructionBombActor();
 
 	/** Triggers when character end to overlaps with this bomb.
@@ -142,9 +152,13 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
-	/** Called when owned map component is destroyed on the Generated Map. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	/** Is called to listen when this bomb is destroyed on the Generated Map by itself or by other actors. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void OnPreRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
+
+	/** Is used on client to react when bomb is reset to play explosions cue locally. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnActorTypeChanged(UMapComponent* MapComponent, const class ULevelActorRow* NewRow, const class ULevelActorRow* PreviousRow);
 
 	/*********************************************************************************************
 	 * Custom Collision Response
