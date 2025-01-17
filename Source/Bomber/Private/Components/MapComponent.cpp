@@ -298,7 +298,6 @@ void UMapComponent::OnRegister()
 	{
 		// The character class already has own initialized skeletal component
 		MeshComponentInternal = Owner->FindComponentByClass<UMeshComponent>();
-		check(MeshComponentInternal);
 	}
 	else
 	{
@@ -306,9 +305,17 @@ void UMapComponent::OnRegister()
 		MeshComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		MeshComponentInternal->RegisterComponent();
 	}
+	checkf(MeshComponentInternal, TEXT("ERROR: [%i] %hs:\n'MeshComponentInternal' is null!"), __LINE__, __FUNCTION__);
 
 	// Do not receive decals for level actors by default
 	MeshComponentInternal->SetReceivesDecals(false);
+
+	// On client, first spawn skips the SetActorHiddenInGame event in playing world on which level actors rely, call it manually
+	if (UUtilsLibrary::HasWorldBegunPlay()
+	    && !Owner->HasAuthority())
+	{
+		Owner->SetActorHiddenInGame(Owner->IsHidden());
+	}
 
 	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
