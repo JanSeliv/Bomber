@@ -93,7 +93,7 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 		// Override default mesh with one with the player type (each character has own bomb)
 		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
 		const ULevelActorRow* BombRow = UBombDataAsset::Get().GetRowByLevelType(BombPlacer->GetPlayerType());
-		MapComponentInternal->SetCustomMeshAsset(BombRow->Mesh);
+		MapComponentInternal->SetMesh(BombRow->Mesh);
 	}
 
 #if !UE_BUILD_SHIPPING

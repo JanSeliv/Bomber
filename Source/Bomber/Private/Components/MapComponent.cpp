@@ -108,26 +108,8 @@ void UMapComponent::OnRep_Cell()
  * Mesh
  ********************************************************************************************* */
 
-// Updates current mesh to default according current level type
-void UMapComponent::SetDefaultMesh()
-{
-	if (GetActorDataAssetChecked().GetActorType() == EActorType::Player)
-	{
-		// ACharacter has own mesh component, no need to manage it
-		return;
-	}
-
-	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
-	if (!ensureMsgf(FoundRow, TEXT("ASSERT: [%i] %hs:\n'FoundRow' is not valid!"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	SetCustomMeshAsset(FoundRow->Mesh);
-}
-
-// Returns mesh asset if changed or null if default
-class UStreamableRenderAsset* UMapComponent::GetCustomMeshAsset() const
+// Returns current mesh asset
+class UStreamableRenderAsset* UMapComponent::GetMesh() const
 {
 	if (UStreamableRenderAsset* CurrentMesh = UGameplayUtilsLibrary::GetMesh(MeshComponentInternal))
 	{
@@ -144,46 +126,26 @@ class UStreamableRenderAsset* UMapComponent::GetCustomMeshAsset() const
 	return nullptr;
 }
 
-// Overrides mesh to the Owner ignoring current level type and Level Row
-void UMapComponent::SetCustomMeshAsset(UStreamableRenderAsset* CustomMeshAsset)
+// Applies given mesh on owner actor, or resets the mesh if null is passed
+void UMapComponent::SetMesh(UStreamableRenderAsset* NewMesh)
 {
-	if (!ensureMsgf(CustomMeshAsset, TEXT("ASSERT: [%i] %hs:\n'CustomMeshAsset' is null, attempted to set null mesh!"), __LINE__, __FUNCTION__)
-	    || UGameplayUtilsLibrary::GetMesh(MeshComponentInternal) == CustomMeshAsset) // Is already set
+	if (UGameplayUtilsLibrary::GetMesh(MeshComponentInternal) == NewMesh // is already set
+		|| GetActorDataAssetChecked().GetActorType() == EActorType::Player) // ACharacter has own mesh component, no need to manage it
 	{
 		return;
 	}
 
-	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, CustomMeshAsset);
+	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, NewMesh);
 
-	// Set the index of the mesh, is primarily used for replicating the mesh to the clients
+	// Set the index of the mesh, is primarily used for replicating the mesh to the clients, it's INDEX_NONE when reset the mesh (null is passed)
 	const AActor* Owner = GetOwner();
 	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
 	if (Owner->HasAuthority())
 	{
-		checkf(ActorDataAssetInternal, TEXT("ERROR: [%i] %hs:\n'ActorDataAssetInternal' is null!"), __LINE__, __FUNCTION__);
-		const int32 NewRowIndex = ActorDataAssetInternal->GetIndexByRow(ActorDataAssetInternal->GetRowByMesh(CustomMeshAsset));
-		ensureMsgf(NewRowIndex != INDEX_NONE, TEXT("ASSERT: [%i] %hs:\nAttempted to set the '%s' mesh on '%s' actor that is not stored in the '%s' data asset!"), __LINE__, __FUNCTION__, *GetNameSafe(CustomMeshAsset), *GetNameSafe(Owner), *GetNameSafe(ActorDataAssetInternal));
+		const ULevelActorRow* NewRow = NewMesh ? ActorDataAssetInternal->GetRowByMesh(NewMesh) : nullptr;
+		const int32 NewRowIndex = NewRow ? ActorDataAssetInternal->GetIndexByRow(NewRow) : INDEX_NONE;
+		ensureMsgf(!NewMesh || NewRowIndex != INDEX_NONE, TEXT("ASSERT: [%i] %hs:\nAttempted to set the '%s' mesh on '%s' actor that is not stored in the '%s' data asset!"), __LINE__, __FUNCTION__, *GetNameSafe(NewMesh), *GetNameSafe(Owner), *GetNameSafe(ActorDataAssetInternal));
 		RowIndexInternal = NewRowIndex;
-	}
-}
-
-// Sets mesh to empty, is used for cleanup
-void UMapComponent::ResetMesh()
-{
-	if (GetActorDataAssetChecked().GetActorType() == EActorType::Player)
-	{
-		// ACharacter has own mesh component, no need to manage it
-		return;
-	}
-
-	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, nullptr);
-
-	const AActor* Owner = GetOwner();
-	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
-	if (Owner->HasAuthority()
-	    && RowIndexInternal != INDEX_NONE)
-	{
-		RowIndexInternal = INDEX_NONE;
 	}
 }
 
@@ -202,16 +164,16 @@ void UMapComponent::OnRep_RowIndex()
 {
 	if (RowIndexInternal == INDEX_NONE)
 	{
-		// It was reset to default mesh on server
-		ResetMesh();
+		// On server, the mesh was reset, so cleanup it on client as well 
+		SetMesh(nullptr);
 		return;
 	}
 
 	// Apply replicated mesh on client
 	const ULevelActorRow* ReplicatedRow = GetActorDataAssetChecked().GetRowByIndex(RowIndexInternal);
-	if (ensureMsgf(ReplicatedRow, TEXT("ASSERT: [%i] %hs:\n'ReplicatedRow' is null!"), __LINE__, __FUNCTION__))
+	if (ensureMsgf(ReplicatedRow, TEXT("ASSERT: [%i] %hs:\n'ReplicatedRow' is null: can not obtain mesh from replicated 'RowIndexInternal': %d!"), __LINE__, __FUNCTION__, RowIndexInternal))
 	{
-		SetCustomMeshAsset(ReplicatedRow->Mesh);
+		SetMesh(ReplicatedRow->Mesh);
 	}
 }
 
@@ -447,7 +409,10 @@ bool UMapComponent::OnConstructionOwnerActor_Implementation()
 		return false;
 	}
 
-	SetDefaultMesh();
+	// Set the default mesh, any system can override it later by calling SetCustomMeshAsset(Mesh). 
+	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
+	ensureMsgf(FoundRow && FoundRow->Mesh, TEXT("ASSERT: [%i] %hs:\n'FoundRow' is not valid, can not set the default mesh!"), __LINE__, __FUNCTION__);
+	SetMesh(FoundRow->Mesh);
 
 	TryDisplayOwnedCell();
 
@@ -486,7 +451,8 @@ void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = null
 
 	SetCollisionResponses(ECR_Ignore);
 
-	ResetMesh();
+	// Reset the mesh
+	SetMesh(nullptr);
 
 	if (IsUndestroyable())
 	{

@@ -97,27 +97,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UMeshComponent* GetMeshComponent() const { return MeshComponentInternal; }
 
-	/** Returns mesh asset if changed or null if default. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class UStreamableRenderAsset* GetCustomMeshAsset() const;
-
 	/** Returns the row index of the actor in the Data Asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetRowIndex() const { return RowIndexInternal; }
 
-	/** Updates current mesh to default by current level type. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void SetDefaultMesh();
+	/** Returns current mesh asset. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	class UStreamableRenderAsset* GetMesh() const;
 
-	/** Changes mesh from default to given one.
+	/** Applies given mesh on owner actor, or resets the mesh if null is passed.
 	 * Is useful for rows that have more than one mesh per row, like items.
-	 * Is reset to null by ResetMesh(). */
+	 * @param NewMesh - the mesh to be set on the owner, might be null to reset the mesh, but if provided, then it's required to match with any row from the Data Asset. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetCustomMeshAsset(class UStreamableRenderAsset* CustomMeshAsset);
-
-	/** Sets mesh to empty, is used for cleanup. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ResetMesh();
+	void SetMesh(class UStreamableRenderAsset* NewMesh);
 
 	/** Set material to the mesh. */
 	UFUNCTION(BlueprintCallable, Category = "C++")

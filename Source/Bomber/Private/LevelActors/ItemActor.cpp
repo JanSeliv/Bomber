@@ -110,7 +110,7 @@ void AItemActor::OnConstructionItemActor_Implementation()
 	// Override mesh
 	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, UMyBlueprintFunctionLibrary::GetLevelType()))
 	{
-		MapComponentInternal->SetCustomMeshAsset(FoundItemRow->Mesh);
+		MapComponentInternal->SetMesh(FoundItemRow->Mesh);
 	}
 }
 

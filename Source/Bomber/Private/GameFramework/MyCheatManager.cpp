@@ -306,7 +306,7 @@ void UMyCheatManager::SpawnActorByType(EActorType ActorType, int32 ColumnX, int3
 		const ULevelActorRow* Row = MapComponent->GetActorDataAssetChecked().GetRowByIndex(RowIndex);
 		if (ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' was not found by '%i' index!"), __LINE__, __FUNCTION__, RowIndex))
 		{
-			MapComponent->SetCustomMeshAsset(Row->Mesh);
+			MapComponent->SetMesh(Row->Mesh);
 		}
 	};
 	GeneratedMap.SpawnActorByType(ActorType, Cell, OnSpawned);
