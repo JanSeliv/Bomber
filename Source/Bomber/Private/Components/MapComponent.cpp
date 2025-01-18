@@ -449,11 +449,6 @@ void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = null
 
 	SetCollisionResponses(ECR_Ignore);
 
-	if (!Owner->CanBeDamaged())
-	{
-		Owner->SetCanBeDamaged(true);
-	}
-
 	if (UUtilsLibrary::IsEditor())
 	{
 		// Remove all text renders of the Owner

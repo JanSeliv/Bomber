@@ -595,10 +595,6 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	}
 
 	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
-
-	// Remove from the array (MapComponent can be invalid)
-	MapComponentsInternal.Remove(MapComponent);
-
 	if (!ComponentOwner)
 	{
 		return;
@@ -607,9 +603,11 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	if (AMyGameStateBase::GetCurrentGameState() == ECGS::InGame
 	    && !ComponentOwner->CanBeDamaged())
 	{
-		// Do not destroy actor during the game session if required
+		// Do not destroy in-game actor during the play session if required
 		return;
 	}
+
+	MapComponentsInternal.Remove(MapComponent);
 
 	// Notify listeners right before destroying and reset the actor
 	MapComponent->OnPreRemoved(DestroyCauser);
