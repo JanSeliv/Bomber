@@ -795,20 +795,6 @@ void AGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransform& 
 	// Align transform and build cells
 	BuildGridCells(Transform);
 
-#if WITH_EDITOR // [Editor-Standalone]
-	if (UUtilsLibrary::HasWorldBegunPlay())
-	{
-		// Level actors are spawned differently on client for unsaved level if run without RunInderOneProcess or Standalone
-		// so destroy from pool all unsaved level actors to avoid it being unsynced on clients
-		auto IsDirtyPredicate = [](const UObject* PoolObject) -> bool
-		{
-			return PoolObject && !PoolObject->HasAllFlags(RF_WasLoaded | RF_LoadCompleted);
-		};
-
-		UPoolManagerSubsystem::Get().EmptyAllByPredicate(IsDirtyPredicate);
-	}
-#endif // WITH_EDITOR // [Editor-Standalone]
-
 	// Actors generation
 	GenerateLevelActors();
 
