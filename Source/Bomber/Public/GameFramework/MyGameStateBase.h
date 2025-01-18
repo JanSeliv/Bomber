@@ -25,7 +25,7 @@ public:
 	static AMyGameStateBase& Get();
 
 	/*********************************************************************************************
-	 * Current Game State enum
+	 * Game State
 	 * Can be tracked both on host and client by binding with BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged); 
 	 ********************************************************************************************* */
 public:
@@ -40,12 +40,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetGameState(ECurrentGameState NewGameState);
 
-	/** Returns the AMyGameStateBase::CurrentGameState property. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	/** Returns the Game State that is currently applied. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static ECurrentGameState GetCurrentGameState();
+
+	/** Returns the Game State that was applied before the current one.
+	 * Is useful to check from which state the game was transitioned
+	 * E.g: if current is GameStarting, but previous is InGame, but not Menu, then it means the game was restarted. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static ECurrentGameState GetPreviousGameState();
 
 protected:
 	/** Is read-only local version of the game state that is not replicated, can be read on both server and client, but never should be set directly.
+	 * Is populated in order to allow local clients apply (update) the game state before it will be replicated.
 	 * @warning Do not set it directly, use AMyGameStateBase::ServerSetGameState() instead to set ReplicatedGameStateInternal. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, AdvancedDisplay, meta = (BlueprintProtected, DisplayName = "Current Game State"))
 	ECurrentGameState LocalGameStateInternal = ECurrentGameState::None;
@@ -54,6 +61,10 @@ protected:
 	 * @warning Do not read it directly, use AMyGameStateBase::GetCurrentGameState() instead to read LocalGameStateInternal. */
 	UPROPERTY(Transient, ReplicatedUsing = "OnRep_CurrentGameState")
 	ECurrentGameState ReplicatedGameStateInternal = ECurrentGameState::None;
+
+	/** Is not-replicated local game state that always stores the previous one to track from which state the game was transitioned. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, AdvancedDisplay, meta = (BlueprintProtected, DisplayName = "Previous Game State"))
+	ECurrentGameState LocalPreviousGameStateInternal = ECurrentGameState::None;
 
 	/** Updates current game state. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

@@ -66,7 +66,7 @@ void AMyGameStateBase::SetGameState(ECurrentGameState NewGameState)
 	ApplyGameState();
 }
 
-// Returns the AMyGameStateBase::CurrentGameState property
+// Returns the Game State that is currently applied
 ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 {
 	if (const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
@@ -76,9 +76,20 @@ ECurrentGameState AMyGameStateBase::GetCurrentGameState()
 	return ECurrentGameState::None;
 }
 
+// Returns the Game State that was applied before the current one
+ECurrentGameState AMyGameStateBase::GetPreviousGameState()
+{
+	if (const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	{
+		return MyGameState->LocalPreviousGameStateInternal;
+	}
+	return ECurrentGameState::None;
+}
+
 // Updates current game state
 void AMyGameStateBase::ApplyGameState()
 {
+	LocalPreviousGameStateInternal = LocalGameStateInternal;
 	LocalGameStateInternal = ReplicatedGameStateInternal;
 
 	if (LocalGameStateInternal == ECGS::GameStarting)

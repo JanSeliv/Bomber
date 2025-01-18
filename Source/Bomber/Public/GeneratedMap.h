@@ -207,10 +207,6 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Component"))
 	TObjectPtr<class UMyCameraComponent> CameraComponentInternal = nullptr;
 
-	/** Is true when current state is Game Starting. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Game Running"))
-	bool bIsGameRunningInternal = false;
-
 	/** Specify for which level actors should show debug renders, is not available in shipping build. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, DisplayName = "Display Cells Actor Types", Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
 	int32 DisplayCellsActorTypesInternal = TO_FLAG(EAT::None);

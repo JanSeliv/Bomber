@@ -848,10 +848,7 @@ void AGeneratedMap::PostInitializeComponents()
 
 	OnConstructionGeneratedMap(GetActorTransform());
 
-	if (HasAuthority())
-	{
-		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-	}
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// During the game, OnConstruction is not called when location, rotation or scale is changed, so bind to listen transform updates
 	checkf(RootComponent, TEXT("ERROR: [%i] %hs:\n'RootComponent' is null!"), __LINE__, __FUNCTION__);
@@ -904,7 +901,6 @@ void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 	DOREPLIFETIME(ThisClass, GridCellsInternal);
 	DOREPLIFETIME(ThisClass, MapComponentsInternal);
-	DOREPLIFETIME(ThisClass, bIsGameRunningInternal);
 }
 
 // Spawns and fills the Grid Array values by level actors
@@ -924,6 +920,8 @@ void AGeneratedMap::GenerateLevelActors()
 		DestroyLevelActorByHandle(MapComponentsToDestroy[Idx].PoolObjectHandle);
 	}
 	checkf(MapComponentsToDestroy.IsEmpty(), TEXT("ERROR: [%i] %s:\n'MapComponentsToDestroy' is not empty after removing all!"), __LINE__, *FString(__FUNCTION__));
+
+	AdditionalDangerousCells.Reset();
 
 	// Calls before generation preview actors to updating of all dragged to the Generated Map actors
 	FCells DraggedCells = FCell::EmptyCells;
@@ -1093,24 +1091,16 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 
 	switch (CurrentGameState)
 	{
-		case ECurrentGameState::Menu:
+		case ECGS::Menu: // Fallthrough
+		case ECGS::GameStarting:
 		{
-			// on returning to menu case
-			GenerateLevelActors();
-			bIsGameRunningInternal = false;
-			break;
-		}
-
-		case ECurrentGameState::GameStarting:
-		{
-			if (bIsGameRunningInternal)
+			// Regenerate in menu to prepare the world and let it replicate to clients
+			// Only regenerate in GameStarting if restarting after playing, not from menu
+			if (CurrentGameState == ECGS::Menu 
+				|| AMyGameStateBase::GetPreviousGameState() == ECGS::InGame)
 			{
-				// on reset pressed case
 				GenerateLevelActors();
 			}
-
-			bIsGameRunningInternal = true;
-			AdditionalDangerousCells.Reset();
 			break;
 		}
 
