@@ -68,8 +68,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	const FGeneratedMapSettings& GetGenerationSetting() const;
 
-	/** Sets the size for generated map, it will automatically regenerate the level for given size.
-	 * Is authority-only function.
+	/* Allows to change the size for generated map in runtime, it will automatically regenerate the level.
+	 * Is server-only function, so it will replicate the new transform to clients.
+	 * @warning to change location or rotation, just call SetActorTransform, SetLocation or SetRotation.
 	 * @param LevelSize The new size where length and width have to be unpaired (odd).
 	 * E.g: X:9, Y:7 - set the size of the level to 9 columns (width) and 7 rows (length). */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
@@ -225,7 +226,7 @@ protected:
 	 * See the call stack below for more details:
 	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::OnConstructionGeneratedMap().
 	 * @warning Do not call directly. */
-	UFUNCTION()
+	UFUNCTION(BlueprintNativeEvent, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void OnConstructionGeneratedMap(const FTransform& Transform);
 
 	/** Called right before components are initialized, only called during gameplay. */
@@ -289,8 +290,8 @@ protected:
 
 	/** Align transform and build cells.
 	* @param Transform New transform of the Generated Map. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void TransformGeneratedMap(const FTransform& Transform);
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	void BuildGridCells(const FTransform& Transform);
 
 	/** Scales dragged cells according new grid if sizes are different. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
@@ -299,10 +300,6 @@ protected:
 	/** Is called on client to broadcast On Generated Level Actors delegate. */
 	UFUNCTION()
 	void OnRep_MapComponents();
-
-	/** Internal multicast function to set new size for generated map for all instances. */
-	UFUNCTION(BlueprintCallable, NetMulticast, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void MulticastSetLevelSize(const FIntPoint& LevelSize);
 
 	/* ---------------------------------------------------
 	 *					Editor development

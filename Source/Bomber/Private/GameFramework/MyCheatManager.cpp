@@ -281,11 +281,21 @@ void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 	FString Width = TEXT("");
 	FString Height = TEXT("");
 
-	if (LevelSize.Split(Delimiter, &Width, &Height, ESearchCase::IgnoreCase))
+	if (!LevelSize.Split(Delimiter, &Width, &Height, ESearchCase::IgnoreCase))
 	{
-		const FIntPoint NewLevelSize(FCString::Atoi(*Width), FCString::Atoi(*Height));
-		AGeneratedMap::Get().SetLevelSize(NewLevelSize);
+		return;
 	}
+
+	// Restart the level
+	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	if (AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
+	{
+		MyGameState->SetGameState(ECurrentGameState::GameStarting);
+	}
+
+	// Update the level size
+	const FIntPoint NewLevelSize(FCString::Atoi(*Width), FCString::Atoi(*Height));
+	AGeneratedMap::Get().SetLevelSize(NewLevelSize);
 }
 
 // Spawns an actor by type on the level

@@ -13,7 +13,6 @@
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/LevelActorsUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
@@ -60,6 +59,7 @@ AGeneratedMap::AGeneratedMap()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	static const FVector DefaultRelativeScale(9.F, 9.F, 1.F);
 	RootComponent->SetRelativeScale3D_Direct(DefaultRelativeScale);
+	RootComponent->SetIsReplicated(true); // Enable to replicate own transform and attached level actors
 
 	// Find blueprint class of the background
 	CollisionComponentInternal = CreateDefaultSubobject<UChildActorComponent>(TEXT("Collision Component"));
@@ -103,7 +103,7 @@ const FGeneratedMapSettings& AGeneratedMap::GetGenerationSetting() const
 	return DefaultSettings;
 }
 
-// Sets the size for generated map, it will automatically regenerate the level for given size
+// Allows to change the size for generated map in runtime, it will automatically regenerate the level
 void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 {
 	if (!HasAuthority()
@@ -112,13 +112,7 @@ void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 		return;
 	}
 
-	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
-	if (MyGameState && MyGameState->GetCurrentGameState() == ECGS::InGame)
-	{
-		MyGameState->SetGameState(ECurrentGameState::GameStarting);
-	}
-
-	MulticastSetLevelSize(LevelSize);
+	SetActorScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
 }
 
 // Getting an array of cells by four sides of an input center cell and type of breaks
@@ -779,9 +773,10 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 }
 
 // Initialize this Generated Map actor, could be called multiple times
-void AGeneratedMap::OnConstructionGeneratedMap(const FTransform& Transform)
+void AGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransform& Transform)
 {
-	if (IS_TRANSIENT(this)) // the Generated Map is transient
+	if (IS_TRANSIENT(this)
+	    || !HasAuthority())
 	{
 		return;
 	}
@@ -806,7 +801,7 @@ void AGeneratedMap::OnConstructionGeneratedMap(const FTransform& Transform)
 	}
 
 	// Align transform and build cells
-	TransformGeneratedMap(Transform);
+	BuildGridCells(Transform);
 
 #if WITH_EDITOR // [Editor-Standalone]
 	if (UUtilsLibrary::HasWorldBegunPlay())
@@ -859,6 +854,16 @@ void AGeneratedMap::PostInitializeComponents()
 	{
 		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 	}
+
+	// During the game, OnConstruction is not called when location, rotation or scale is changed, so bind to listen transform updates
+	checkf(RootComponent, TEXT("ERROR: [%i] %hs:\n'RootComponent' is null!"), __LINE__, __FUNCTION__);
+	RootComponent->TransformUpdated.AddLambda([WeakThis = TWeakObjectPtr(this)](USceneComponent*, EUpdateTransformFlags, ETeleportType)
+	{
+		if (AGeneratedMap* This = WeakThis.Get())
+		{
+			This->OnConstructionGeneratedMap(This->GetActorTransform());
+		}
+	});
 }
 
 // Called when is explicitly being destroyed to destroy level actors, not called during level streaming or gameplay ending
@@ -884,6 +889,11 @@ void AGeneratedMap::Destroyed()
 			UMyUnrealEdEngine::GOnAnyDataAssetChanged.RemoveAll(this);
 		}
 #endif //WITH_EDITOR [IsEditorNotPieWorld]
+	}
+
+	if (RootComponent)
+	{
+		RootComponent->TransformUpdated.RemoveAll(this);
 	}
 
 	Super::Destroyed();
@@ -1112,8 +1122,13 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 }
 
 // Align transform and build cells
-void AGeneratedMap::TransformGeneratedMap(const FTransform& Transform)
+void AGeneratedMap::BuildGridCells(const FTransform& Transform)
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	const FTransform NewGridTransform = ActorTransformToGridTransform(Transform);
 	const FCells NewGridCells = FCell::MakeCellGridByTransform(NewGridTransform);
 
@@ -1157,14 +1172,6 @@ void AGeneratedMap::OnRep_MapComponents()
 		// and array contains only valid specs (all actors are spawned and replicated)
 		OnGeneratedLevelActors.Broadcast();
 	}
-}
-
-// Internal multicast function to set new size for generated map for all instances
-void AGeneratedMap::MulticastSetLevelSize_Implementation(const FIntPoint& LevelSize)
-{
-	FTransform CurrentTransform = GetActorTransform();
-	CurrentTransform.SetScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
-	OnConstructionGeneratedMap(CurrentTransform);
 }
 
 /* ---------------------------------------------------
