@@ -71,13 +71,6 @@ void UMapComponent::ConstructOwnerActor()
 // Override current cell data, where owner is located on the Generated Map
 void UMapComponent::SetCell(const FCell& Cell)
 {
-	const AActor* Owner = GetOwner();
-	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
-	if (!Owner->HasAuthority())
-	{
-		return;
-	}
-
 	CellInternal = Cell;
 
 	TryDisplayOwnedCell();
