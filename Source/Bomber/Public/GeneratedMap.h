@@ -160,10 +160,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorTransform"))
 	static FTransform ActorTransformToGridTransform(const FTransform& ActorTransform);
 
-	/** Set for which level actors should show debug renders, is not available in shipping build. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	void SetDisplayCellsActorTypes(int32 NewValue);
-
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties
@@ -207,7 +203,8 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Component"))
 	TObjectPtr<class UMyCameraComponent> CameraComponentInternal = nullptr;
 
-	/** Specify for which level actors should show debug renders, is not available in shipping build. */
+	/** Specify for which level actors should show debug renders, is not available in shipping build.
+	 * Can be overridden by `Bomber.Debug.DisplayCells VALUES` cheat. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C++", meta = (DevelopmentOnly, DisplayName = "Display Cells Actor Types", Bitmask, BitmaskEnum = "/Script/Bomber.EActorType"))
 	int32 DisplayCellsActorTypesInternal = TO_FLAG(EAT::None);
 

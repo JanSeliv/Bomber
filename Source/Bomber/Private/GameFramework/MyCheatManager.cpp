@@ -240,25 +240,12 @@ void UMyCheatManager::AddBot()
  * Debug
  ********************************************************************************************* */
 
-// Shows coordinates of all level actors by specified types
-void UMyCheatManager::DisplayCells(const FString& ActorTypesString)
-{
-	// Set on the level to visualize new level actors
-	const int32 ActorTypesBitmask = GetBitmaskFromActorTypesString(ActorTypesString);
-	AGeneratedMap::Get().SetDisplayCellsActorTypes(ActorTypesBitmask);
-
-	// Update existed level actors
-	FMapComponents MapComponents;
-	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::All));
-	for (UMapComponent* MapComponentIt : MapComponents)
-	{
-		// Clear previous cell renders for all level actors in game
-		UCellsUtilsLibrary::ClearDisplayedCells(MapComponentIt);
-
-		// Show new cell renders for specified level actors
-		MapComponentIt->TryDisplayOwnedCell();
-	}
-}
+// Override the percentage of items spawn from boxes
+TAutoConsoleVariable<FString> UMyCheatManager::CVarDisplayCells(
+	TEXT("Bomber.Debug.DisplayCells"),
+	TEXT(""),
+	TEXT("Shows coordinates of level actors of specified types (requires regeneration), e.g: Bomber.Debug.DisplayCells Bomb Player - show bombs and players"),
+	ECVF_Cheat);
 
 /*********************************************************************************************
  * Level

@@ -135,15 +135,12 @@ public:
 	 * Debug
 	 ********************************************************************************************* */
 public:
-	/**
-	 * Shows coordinates of all level actors by specified types, ex: 'Box Item'.
+	/** Shows coordinates of level actors of specified types (requires regeneration), e.g: 'Box Item'.
 	 * Bomber.Debug.DisplayCells Wall - show walls.
 	 * Bomber.Debug.DisplayCells Wall Bomb - show walls and bombs.
 	 * Bomber.Debug.DisplayCells Wall Bomb Player - show walls, bombs and players.
-	 * Bomber.Debug.DisplayCells All - show all actors (walls, bombs, players, items and boxes).
-	 */
-	UFUNCTION(meta = (CheatName = "Bomber.Debug.DisplayCells"))
-	static void DisplayCells(const FString& ActorTypesString);
+	 * Bomber.Debug.DisplayCells All - show all actors (walls, bombs, players, items and boxes). */
+	static TAutoConsoleVariable<FString> CVarDisplayCells;
 
 	/*********************************************************************************************
 	 * Level

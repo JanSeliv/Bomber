@@ -752,12 +752,6 @@ FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorT
 	return MoveTemp(NewTransform);
 }
 
-// Set for which level actors should show debug renders, is not available in shipping build
-void AGeneratedMap::SetDisplayCellsActorTypes(int32 NewValue)
-{
-	DisplayCellsActorTypesInternal = NewValue;
-}
-
 /* ---------------------------------------------------
  *		Generated Map protected functions
  * --------------------------------------------------- */

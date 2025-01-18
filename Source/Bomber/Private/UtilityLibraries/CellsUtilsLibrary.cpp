@@ -7,6 +7,7 @@
 #include "Components/MapComponent.h"
 #include "LevelActors/BombActor.h"
 #include "UtilityLibraries/LevelActorsUtilsLibrary.h"
+#include "GameFramework/MyCheatManager.h"
 //---
 #include "Components/TextRenderComponent.h"
 //---
@@ -546,11 +547,22 @@ bool UCellsUtilsLibrary::CanDisplayCells(const UObject* Owner)
 	}
 
 	const int32 ActorTypesBitmask = TO_FLAG(MapComponent->GetActorType());
+	const FString CheatValue = UMyCheatManager::CVarDisplayCells.GetValueOnAnyThread();
+	const bool bAllowedFromCheat = (ActorTypesBitmask & UMyCheatManager::GetBitmaskFromActorTypesString(CheatValue)) != 0;
+	if (bAllowedFromCheat)
+	{
+		return true;
+	}
+
 	const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap();
 	const bool bAllowedGlobally = GeneratedMap && (ActorTypesBitmask & AGeneratedMap::Get().DisplayCellsActorTypesInternal) != 0;
-	const bool bAllowedLocally = MapComponent->bShouldShowRenders;
+	if (bAllowedGlobally)
+	{
+		return true;
+	}
 
-	return bAllowedGlobally || bAllowedLocally;
+	const bool bAllowedLocally = MapComponent->bShouldShowRenders;
+	return bAllowedLocally;
 #else
 	return false;
 #endif
