@@ -101,10 +101,6 @@ public:
 	UFUNCTION(meta = (CheatName = "Bomber.Player.SetPowerups"))
 	static void SetPlayerPowerups(int32 NewLevel);
 
-	/** Enable or disable the God mode to make a controllable player undestroyable. */
-	UFUNCTION(meta = (CheatName = "Bomber.Player.SetGodMode"))
-	static void SetGodMode(bool bShouldEnable);
-
 	/** Enable or disable the Auto Copilot mode to make a controllable player to play automatically. */
 	UFUNCTION(meta = (CheatName = "Bomber.Player.SetAutoCopilot"))
 	static void SetAutoCopilot();

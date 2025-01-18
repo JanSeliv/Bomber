@@ -437,6 +437,9 @@ void UMapComponent::OnPreRemoved_Implementation(UObject* DestroyCauser)
 // Is called directly from Generated Map to broadcast OnPostRemovedFromLevel delegate and performs own logic
 void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = nullptr*/)
 {
+	AActor* Owner = GetOwner();
+	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
+
 	if (OnPostRemovedFromLevel.IsBound())
 	{
 		OnPostRemovedFromLevel.Broadcast(this, DestroyCauser);
@@ -446,9 +449,9 @@ void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = null
 
 	SetCollisionResponses(ECR_Ignore);
 
-	if (IsUndestroyable())
+	if (!Owner->CanBeDamaged())
 	{
-		SetUndestroyable(false);
+		Owner->SetCanBeDamaged(true);
 	}
 
 	if (UUtilsLibrary::IsEditor())
@@ -458,8 +461,6 @@ void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = null
 	}
 
 	// On server, reset the data (it will be replicated to clients)
-	const AActor* Owner = GetOwner();
-	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
 	if (Owner->HasAuthority())
 	{
 		SetMesh(nullptr);

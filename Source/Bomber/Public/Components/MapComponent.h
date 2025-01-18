@@ -192,24 +192,6 @@ protected:
 	TObjectPtr<const class ULevelActorDataAsset> ActorDataAssetInternal = nullptr;
 
 	/*********************************************************************************************
-	 * Undestroyable
-	 ********************************************************************************************* */
-public:
-	/** Returns true if an owner is set by cheat manager or skills to be undestroyable in game. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsUndestroyable() const { return bIsUndestroyableInternal; }
-
-	/** Set true to make an owner to be undestroyable on this level. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetUndestroyable(bool bIsUndestroyable) { bIsUndestroyableInternal = bIsUndestroyable; }
-
-protected:
-	/** If true the owner is undestroyable, is used by skills and cheat manager.
-	 * Is not replicated since evaluated only on the server. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Undestroyable"))
-	bool bIsUndestroyableInternal = false;
-
-	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
 protected:

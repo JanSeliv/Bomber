@@ -163,16 +163,6 @@ void UMyCheatManager::SetPlayerPowerups(int32 NewLevel)
 	}
 }
 
-// Enable or disable the God mode to make a controllable player undestroyable
-void UMyCheatManager::SetGodMode(bool bShouldEnable)
-{
-	const APlayerCharacter* ControllablePlayer = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
-	if (UMapComponent* MapComponent = UMapComponent::GetMapComponent(ControllablePlayer))
-	{
-		MapComponent->SetUndestroyable(bShouldEnable);
-	}
-}
-
 // Enable or disable the Auto Copilot mode to make a controllable player to play automatically
 void UMyCheatManager::SetAutoCopilot()
 {

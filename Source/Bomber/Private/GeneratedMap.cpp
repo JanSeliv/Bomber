@@ -604,8 +604,8 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 		return;
 	}
 
-	if (AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame
-	    && MapComponent->IsUndestroyable())
+	if (AMyGameStateBase::GetCurrentGameState() == ECGS::InGame
+	    && !ComponentOwner->CanBeDamaged())
 	{
 		// Do not destroy actor during the game session if required
 		return;
