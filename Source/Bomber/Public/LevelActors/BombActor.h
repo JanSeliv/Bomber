@@ -70,7 +70,7 @@ protected:
 	int32 FireRadiusInternal = 0;
 
 	/** Is not replicated, is calculated locally on the server and clients from the FireRadiusInternal. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Local Explosion Cells"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells"))
 	TArray<FCell> LocalExplosionCellsInternal = FCell::EmptyCellsArr;
 
 	/** The character who placed the bomb, is set by InitBomb on spawning.
@@ -153,7 +153,7 @@ protected:
 	void OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
 	/** Is called to listen when this bomb is destroyed on the Generated Map by itself or by other actors. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPreRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
 
 	/** Is used on client to react when bomb is reset to play explosions cue locally. */

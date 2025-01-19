@@ -54,7 +54,7 @@ public:
 
 	/** Called right before owner actor going to remove from the Generated Map, on both server and clients.
 	 * Is useful to listen for actor before it is exploded and its data being reset. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, BlueprintAuthorityOnly, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnPreRemovedFromLevel OnPreRemovedFromLevel;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPostRemovedFromLevel, UMapComponent*, MapComponent, UObject*, DestroyCauser);
