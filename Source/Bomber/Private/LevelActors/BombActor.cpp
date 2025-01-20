@@ -133,8 +133,6 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 	ApplyMaterial();
 
 	UpdateCollisionResponseToAllPlayers();
-
-	TryDisplayExplosionCells();
 }
 
 // Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build
@@ -195,6 +193,8 @@ void ABombActor::UpdateExplosionCells()
 	}
 
 	LocalExplosionCellsInternal = UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, FireRadiusInternal).Array();
+
+	TryDisplayExplosionCells();
 }
 
 // Is called on client to update current bomb placer

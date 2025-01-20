@@ -81,7 +81,7 @@ void UMapComponent::TryDisplayOwnedCell()
 {
 #if !UE_BUILD_SHIPPING
 	FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
-	Params.bClearPreviousDisplays = true;
+	Params.bClearPreviousDisplays = UUtilsLibrary::IsEditorNotPieWorld(); // Clear cells before PIE on uncheck the bShouldShowRenders
 	UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
 #endif // !UE_BUILD_SHIPPING
 }
@@ -430,7 +430,7 @@ void UMapComponent::OnPreRemoved_Implementation(UObject* DestroyCauser)
 // Is called directly from Generated Map to broadcast OnPostRemovedFromLevel delegate and performs own logic
 void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = nullptr*/)
 {
-	AActor* Owner = GetOwner();
+	const AActor* Owner = GetOwner();
 	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
 
 	if (OnPostRemovedFromLevel.IsBound())
