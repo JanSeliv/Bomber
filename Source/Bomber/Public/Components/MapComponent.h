@@ -83,9 +83,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	void SetCell(const FCell& Cell);
 
-	/** Show current cell if owned actor type is allowed, is not available in shipping build. */
+	/** Show current cell if owned actor type is allowed, is not available in shipping build.
+	 * @param bClearPrevious - if true, then all previous cells will be cleared displayed by owned Level Actor. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
-	void TryDisplayOwnedCell();
+	void TryDisplayOwnedCell(bool bClearPrevious = false);
 
 protected:
 	/** Owner's cell location on the Generated Map */

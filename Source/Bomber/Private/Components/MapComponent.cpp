@@ -77,11 +77,12 @@ void UMapComponent::SetCell(const FCell& Cell)
 }
 
 // Show current cell if owned actor type is allowed, is not available in shipping build
-void UMapComponent::TryDisplayOwnedCell()
+void UMapComponent::TryDisplayOwnedCell(bool bClearPrevious/* = false*/)
 {
 #if !UE_BUILD_SHIPPING
 	FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
-	Params.bClearPreviousDisplays = UUtilsLibrary::IsEditorNotPieWorld(); // Clear cells before PIE on uncheck the bShouldShowRenders
+	Params.bClearPreviousDisplays = bClearPrevious
+	                                || UUtilsLibrary::IsEditorNotPieWorld(); // Always clear before PIE, so it properly updates when uncheck bShouldShowRenders
 	UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
 #endif // !UE_BUILD_SHIPPING
 }
