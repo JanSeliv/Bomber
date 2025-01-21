@@ -270,6 +270,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	ensureMsgf(HasAuthority(), TEXT("ASSERT: [%i] %hs was called on client for %s"), __LINE__, __FUNCTION__, *GetName());
 	if (MapComponentInternal)
 	{
 		// Update a player location on the Generated Map

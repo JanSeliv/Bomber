@@ -247,6 +247,12 @@ void UMapComponent::OnRegister()
 	Owner->SetActorTickInterval(UGameStateDataAsset::Get().GetTickInterval());
 	Owner->SetActorTickEnabled(false);
 
+	if (!Owner->HasAuthority())
+	{
+		// Never tick on clients
+		Owner->PrimaryActorTick.bCanEverTick = false;
+	}
+
 #if WITH_EDITOR
 	// Make this gameplay actor always loaded
 	Owner->SetIsSpatiallyLoaded(false);
