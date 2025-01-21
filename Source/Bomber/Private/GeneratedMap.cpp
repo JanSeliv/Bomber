@@ -671,15 +671,15 @@ void AGeneratedMap::DestroyLevelActorsByType(EActorType ActorsType, UObject* Des
 	DestroyLevelActorsOnCells(ExistingActorCells);
 }
 
-// Finds the nearest cell pointer to the specified Map Component
-void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
+// Applies the snapped cell to the specified Map Component
+bool AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 {
 	const AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
 	    || !ComponentOwner
 	    || !ComponentOwner->HasAuthority())
 	{
-		return;
+		return false;
 	}
 
 	const FCell CurrentCellByLocation = ComponentOwner->GetActorLocation();
@@ -689,7 +689,7 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 	    && UCellsUtilsLibrary::SnapCellOnLevel(CurrentCellByLocation) == LastCell)
 	{
 		// The actor is already aligned on the level
-		return;
+		return false;
 	}
 
 	const FCell FoundFreeCell = UCellsUtilsLibrary::GetNearestFreeCell(CurrentCellByLocation);
@@ -697,6 +697,8 @@ void AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 	SetNearestCellDragged(MapComponent, FoundFreeCell);
 
 	MapComponent->SetCell(FoundFreeCell);
+
+	return true;
 }
 
 // Returns true if specified map component has non-generated owner that is manually dragged to the scene
@@ -1076,8 +1078,8 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		{
 			// Regenerate in menu to prepare the world and let it replicate to clients
 			// Only regenerate in GameStarting if restarting after playing, not from menu
-			if (CurrentGameState == ECGS::Menu 
-				|| AMyGameStateBase::GetPreviousGameState() == ECGS::InGame)
+			if (CurrentGameState == ECGS::Menu
+			    || AMyGameStateBase::GetPreviousGameState() == ECGS::InGame)
 			{
 				GenerateLevelActors();
 			}

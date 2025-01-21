@@ -140,12 +140,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DefaultToSelf = "DestroyCauser"))
 	void DestroyLevelActorsByType(EActorType ActorsType, UObject* DestroyCauser = nullptr);
 
-	/** Finds the nearest cell pointer to the specified Map Component
-	 *
-	 * @param MapComponent The component whose owner is being searched
-	 */
+	/** Applies the snapped cell to the specified Map Component.
+	 * @param MapComponent The Map Component to apply the snapped cell.
+	 * @return true if changed: new cell was applied to given Map Component; false is already snapped or failed. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void SetNearestCell(UMapComponent* MapComponent);
+	bool SetNearestCell(UMapComponent* MapComponent);
 
 	/** Returns true if specified map component has non-generated owner that is manually dragged to the scene. */
 	UFUNCTION(BlueprintPure, Category = "C++")

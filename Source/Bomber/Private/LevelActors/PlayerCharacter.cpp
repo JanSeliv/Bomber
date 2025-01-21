@@ -271,11 +271,13 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	ensureMsgf(HasAuthority(), TEXT("ASSERT: [%i] %hs was called on client for %s"), __LINE__, __FUNCTION__, *GetName());
-	if (MapComponentInternal)
-	{
-		// Update a player location on the Generated Map
-		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
 
+	// Update a player location on the Generated Map
+	const bool bIsChanged = AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+
+	if (bIsChanged
+	    && MapComponentInternal)
+	{
 		MapComponentInternal->TryDisplayOwnedCell(/*bClearPrevious*/true);
 	}
 }
