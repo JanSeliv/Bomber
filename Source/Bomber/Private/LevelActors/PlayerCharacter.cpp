@@ -273,13 +273,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	ensureMsgf(HasAuthority(), TEXT("ASSERT: [%i] %hs was called on client for %s"), __LINE__, __FUNCTION__, *GetName());
 
 	// Update a player location on the Generated Map
-	const bool bIsChanged = AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
-
-	if (bIsChanged
-	    && MapComponentInternal)
-	{
-		MapComponentInternal->TryDisplayOwnedCell(/*bClearPrevious*/true);
-	}
+	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -333,6 +327,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		TryPossessController();
 
 		MapComponentInternal->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
+		MapComponentInternal->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnCellChanged);
 
 		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 	}
@@ -343,6 +338,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		Controller->SetIgnoreMoveInput(true);
 
 		MapComponentInternal->OnPreRemovedFromLevel.RemoveAll(this);
+		MapComponentInternal->OnCellChanged.RemoveAll(this);
 
 		UGlobalEventsSubsystem::Get().BP_OnGameStateChanged.RemoveAll(this);
 	}
@@ -505,6 +501,17 @@ void APlayerCharacter::OnPreRemovedFromLevel_Implementation(UMapComponent* MapCo
 	if (KillerPlayerState)
 	{
 		KillerPlayerState->SetOpponentKilled(this);
+	}
+}
+
+// Is called for everytime when character changed its cell on the Generated Map
+void APlayerCharacter::OnCellChanged_Implementation(UMapComponent* MapComponent, const FCell& NewCell, const FCell& PreviousCell)
+{
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is guaranteed to be valid!"), __LINE__, __FUNCTION__);
+	if (HasActorBegunPlay())
+	{
+		// Visualize the cell changes during the gameplay
+		MapComponentInternal->TryDisplayOwnedCell(/*bClearPrevious*/true);
 	}
 }
 

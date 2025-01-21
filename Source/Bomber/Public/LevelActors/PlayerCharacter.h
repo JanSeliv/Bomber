@@ -175,6 +175,10 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPreRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
 
+	/** Is called for everytime when character changed its position on the Generated Map. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCellChanged(UMapComponent* MapComponent, const struct FCell& NewCell, const struct FCell& PreviousCell);
+
 	/** Is called when the player character is fully initialized. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnCharacterReady(APlayerCharacter* Character, int32 CharacterID);

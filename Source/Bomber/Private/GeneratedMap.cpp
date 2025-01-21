@@ -698,6 +698,14 @@ bool AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 
 	MapComponent->SetCell(FoundFreeCell);
 
+	// If Map Component is added to the level (spec exists), then update its cell for the replication purpose
+	// It might be not added to the level yet by design, so it will be added and updated later
+	if (FMapComponentSpec* Spec = MapComponentsInternal.Find(MapComponent))
+	{
+		Spec->Cell = FoundFreeCell;
+		MapComponentsInternal.MarkItemDirty(*Spec);
+	}
+
 	return true;
 }
 

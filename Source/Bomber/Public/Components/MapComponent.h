@@ -70,16 +70,23 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
 	FOnActorTypeChanged OnActorTypeChanged;
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCellChanged, UMapComponent*, MapComponent, const FCell&, NewCell, const FCell&, PreviousCell);
+
+	/** Called when the cell of the owner is changed on the Generated Map, on both server and clients.
+	 * When changed to any valid cell, then it means the map component was added to the level (initialized) on server or replicated on clients. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnCellChanged OnCellChanged;
+
 	/*********************************************************************************************
 	 * Cell (Location)
 	 ********************************************************************************************* */
 public:
 	/** Returns the current cell, where owner is located on the Generated Map. */
 	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FCell& GetCell() const { return CellInternal; }
+	const FORCEINLINE FCell& GetCell() const { return LocalCellInternal; }
 
-	/** Override current cell data, where owner is located on the Generated Map.
-	 * It does not move an owner on the level, to move it call AGeneratedMap::SetNearestCell function as well. */
+	/** Allows to change locally the cell of the owner on the Generated Map.
+	 * @warning Don't set it directly, use AGeneratedMap::SetNearestCell(MapComponent) instead. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	void SetCell(const FCell& Cell);
 
@@ -89,9 +96,10 @@ public:
 	void TryDisplayOwnedCell(bool bClearPrevious = false);
 
 protected:
-	/** Owner's cell location on the Generated Map */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Replicated, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
-	FCell CellInternal = FCell::InvalidCell;
+	/** Represents the point location of the level actor owner on the Generated Map.
+	 * Is not replicated here, but in the Map Components Container which is changed by the Generated Map. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
+	FCell LocalCellInternal = FCell::InvalidCell;
 
 	/*********************************************************************************************
 	 * Mesh

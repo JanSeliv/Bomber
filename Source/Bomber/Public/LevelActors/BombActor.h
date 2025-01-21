@@ -160,6 +160,10 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnActorTypeChanged(UMapComponent* MapComponent, const class ULevelActorRow* NewRow, const class ULevelActorRow* PreviousRow);
 
+	/** Is used on client to react when bomb is added to the level. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnCellChanged(UMapComponent* MapComponent, const struct FCell& NewCell, const struct FCell& PreviousCell);
+
 	/*********************************************************************************************
 	 * Custom Collision Response
 	 ********************************************************************************************* */

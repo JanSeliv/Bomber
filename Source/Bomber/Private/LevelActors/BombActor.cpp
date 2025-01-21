@@ -77,6 +77,9 @@ void ABombActor::ConstructBombActor()
 	// Listen for client to react when bomb is reset to play explosions cue
 	MapComponentInternal->OnActorTypeChanged.AddUniqueDynamic(this, &ThisClass::OnActorTypeChanged);
 
+	// Listen for client to react when bomb is added to the level
+	MapComponentInternal->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnCellChanged);
+
 #if WITH_EDITOR //[IsEditorNotPieWorld]
 	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
@@ -180,15 +183,11 @@ void ABombActor::DetonateBomb()
 // Calculates the explosion cells based on current fire radius
 void ABombActor::UpdateExplosionCells()
 {
-	if (FireRadiusInternal <= 0)
+	if (!IsValid(MapComponentInternal)
+	    || MapComponentInternal->GetCell().IsInvalidCell()
+	    || FireRadiusInternal <= 0)
 	{
-		return;
-	}
-
-	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-	const FCell& Cell = MapComponentInternal->GetCell();
-	if (!ensureMsgf(Cell.IsValid(), TEXT("ASSERT: [%i] %hs:\n'Cell' is not valid!"), __LINE__, __FUNCTION__))
-	{
+		// On client some data might be not replicated yet
 		return;
 	}
 
@@ -209,7 +208,12 @@ void ABombActor::OnRep_BombPlacer()
 // Is called on client to recalculate the explosion cells
 void ABombActor::OnRep_FireRadius()
 {
-	UpdateExplosionCells();
+	if (FireRadiusInternal > 0
+	    && MapComponentInternal
+	    && MapComponentInternal->GetCell().IsValid())
+	{
+		UpdateExplosionCells();
+	}
 }
 
 /*********************************************************************************************
@@ -219,7 +223,8 @@ void ABombActor::OnRep_FireRadius()
 // Spawns VFXs and SFXs, is allowed to call both on server and clients
 void ABombActor::PlayExplosionsCue(const UBombRow* BombRow/* = nullptr*/)
 {
-	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame
+	    || !ensureMsgf(!LocalExplosionCellsInternal.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'LocalExplosionCellsInternal' is empty!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
@@ -321,7 +326,8 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 
 	if (HasAuthority())
 	{
-		// On server, init bomb by default, if it's spawned from player, it will be reinitialized again
+		// On server, init bomb by default
+		// if it's spawned from player, it will be reinitialized again
 		InitBomb();
 	}
 	else
@@ -415,6 +421,7 @@ void ABombActor::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponen
 	{
 		MapComponentInternal->OnPreRemovedFromLevel.RemoveAll(this);
 		MapComponentInternal->OnActorTypeChanged.RemoveAll(this);
+		MapComponentInternal->OnCellChanged.RemoveAll(this);
 	}
 
 	OnActorEndOverlap.RemoveAll(this);
@@ -433,6 +440,17 @@ void ABombActor::OnActorTypeChanged_Implementation(UMapComponent* MapComponent, 
 	{
 		// The bomb was just reset on client, play visuals from Previous Row, which was reset 
 		PlayExplosionsCue(CastChecked<UBombRow>(PreviousRow));
+	}
+}
+
+// Is used on client to react when bomb is added to the level
+void ABombActor::OnCellChanged_Implementation(UMapComponent* MapComponent, const FCell& NewCell, const FCell& PreviousCell)
+{
+	if (NewCell.IsValid()
+	    && !HasAuthority())
+	{
+		// On client, the bomb was just added to the level, update cells
+		UpdateExplosionCells();
 	}
 }
 

@@ -68,12 +68,25 @@ void UMapComponent::ConstructOwnerActor()
  * Cell (Location)
  ********************************************************************************************* */
 
-// Override current cell data, where owner is located on the Generated Map
+// Allows to change locally the cell of the owner on the Generated Map
 void UMapComponent::SetCell(const FCell& Cell)
 {
-	CellInternal = Cell;
+	if (Cell == LocalCellInternal)
+	{
+		return;
+	}
+
+	const FCell PreviousCell = LocalCellInternal;
+
+	// Set new cell locally, is not replicated here, but in the Map Components Container which is changed by the Generated Map
+	LocalCellInternal = Cell;
 
 	TryDisplayOwnedCell();
+
+	if (OnCellChanged.IsBound())
+	{
+		OnCellChanged.Broadcast(this, LocalCellInternal, PreviousCell);
+	}
 }
 
 // Show current cell if owned actor type is allowed, is not available in shipping build
@@ -83,7 +96,7 @@ void UMapComponent::TryDisplayOwnedCell(bool bClearPrevious/* = false*/)
 	FDisplayCellsParams Params = FDisplayCellsParams::EmptyParams;
 	Params.bClearPreviousDisplays = bClearPrevious
 	                                || UUtilsLibrary::IsEditorNotPieWorld(); // Always clear before PIE, so it properly updates when uncheck bShouldShowRenders
-	UCellsUtilsLibrary::DisplayCell(GetOwner(), CellInternal, Params);
+	UCellsUtilsLibrary::DisplayCell(GetOwner(), LocalCellInternal, Params);
 #endif // !UE_BUILD_SHIPPING
 }
 
@@ -351,7 +364,6 @@ void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, CellInternal);
 	DOREPLIFETIME(ThisClass, RowIndexInternal);
 	DOREPLIFETIME(ThisClass, CollisionResponseInternal);
 }
@@ -392,17 +404,13 @@ bool UMapComponent::OnConstructionOwnerActor_Implementation()
 	// Find new Location at dragging and update-delegate
 	GeneratedMap.SetNearestCell(this);
 
-	if (CellInternal.IsInvalidCell())
+	if (LocalCellInternal.IsInvalidCell())
 	{
 		return false;
 	}
 
 	// Owner updating
 	GeneratedMap.AddToGrid(this);
-	if (IS_TRANSIENT(Owner)) // Check again, dragged owner can be moved to the persistent
-	{
-		return false;
-	}
 
 	// Set the default mesh, any system can override it later by calling SetCustomMeshAsset(Mesh). 
 	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
@@ -455,12 +463,9 @@ void UMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser/* = null
 		UCellsUtilsLibrary::ClearDisplayedCells(GetOwner());
 	}
 
-	// On server, reset the data (it will be replicated to clients)
-	if (Owner->HasAuthority())
-	{
-		SetMesh(nullptr);
-		SetCell(FCell::InvalidCell);
-	}
+	SetMesh(nullptr);
+
+	SetCell(FCell::InvalidCell);
 }
 
 /*********************************************************************************************
