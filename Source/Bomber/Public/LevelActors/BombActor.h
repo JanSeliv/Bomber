@@ -49,7 +49,7 @@ public:
 
 	/** Returns cells are going to explode by this bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE TArray<FCell>& GetExplosionCells() const { return LocalExplosionCellsInternal; }
+	const FORCEINLINE TSet<FCell>& GetExplosionCells() const { return LocalExplosionCellsInternal; }
 
 	/** Returns radius of the blast to each side.
 	 * It might be overriden by the cheat manager. */
@@ -71,7 +71,7 @@ protected:
 
 	/** Is not replicated, is calculated locally on the server and clients from the FireRadiusInternal. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Explosion Cells"))
-	TArray<FCell> LocalExplosionCellsInternal = FCell::EmptyCellsArr;
+	TSet<FCell> LocalExplosionCellsInternal = FCell::EmptyCells;
 
 	/** The character who placed the bomb, is set by InitBomb on spawning.
 	 * Is used to track who spawned the bomb, e.g: to record the score. */

@@ -192,7 +192,7 @@ void ABombActor::UpdateExplosionCells()
 		return;
 	}
 
-	LocalExplosionCellsInternal = UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, FireRadiusInternal).Array();
+	LocalExplosionCellsInternal = UCellsUtilsLibrary::GetCellsAround(MapComponentInternal->GetCell(), EPathType::Explosion, FireRadiusInternal);
 
 	TryDisplayExplosionCells();
 }
@@ -421,7 +421,7 @@ void ABombActor::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponen
 
 	BombPlacerInternal = nullptr;
 
-	LocalExplosionCellsInternal = FCell::EmptyCellsArr;
+	LocalExplosionCellsInternal = FCell::EmptyCells;
 }
 
 // Listen when bomb changed visuals
