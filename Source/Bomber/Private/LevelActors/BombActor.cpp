@@ -324,17 +324,7 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (HasAuthority())
-	{
-		// On server, init bomb by default
-		// if it's spawned from player, it will be reinitialized again
-		InitBomb();
-	}
-	else
-	{
-		// On clients, simply start countdown locally to play VFX and SFX later
-		SetLifeSpan();
-	}
+	ConstructBombActor();
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
