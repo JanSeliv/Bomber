@@ -289,6 +289,7 @@ void UMapComponent::OnRegister()
 	{
 		BoxCollisionComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		BoxCollisionComponentInternal->SetBoxExtent(ActorDataAssetInternal->GetCollisionExtent());
+		BoxCollisionComponentInternal->IgnoreActorWhenMoving(Owner, true);
 #if WITH_EDITOR
 		BoxCollisionComponentInternal->SetHiddenInGame(!bShouldShowRenders);
 #endif
