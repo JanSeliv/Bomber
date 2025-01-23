@@ -147,33 +147,21 @@ protected:
 	 ********************************************************************************************* */
 public:
 	/** Returns the collision component. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UBoxComponent* GetBoxCollisionComponent() const { return BoxCollisionComponentInternal; }
 
 	/** Returns current collisions data of the Box Collision Component. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FCollisionResponseContainer& GetCollisionResponses() const { return CollisionResponseInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FCollisionResponseContainer GetCollisionResponses() const;
 
-	/** Set new collisions data for any channel of the Box Collision Component. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "NewResponses"))
+	/** Set new collisions data for any channel of the Box Collision Component, is allowed to call on both server and clients. */ 
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewResponses"))
 	void SetCollisionResponses(const FCollisionResponseContainer& NewResponses);
 
 protected:
 	/** The Collision Component, is attached to an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Box Collision Component"))
 	TObjectPtr<class UBoxComponent> BoxCollisionComponentInternal = nullptr;
-
-	/** Actual response type of the collision box of an actor. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_CollisionResponse", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Collision Response"))
-	FCollisionResponseContainer CollisionResponseInternal = ECR_MAX;
-
-	/** Updates current collisions for the Box Collision Component. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyCollisionResponse();
-
-	/** Is called on client to respond on changes in collision responses. */
-	UFUNCTION()
-	void OnRep_CollisionResponse();
 
 	/*********************************************************************************************
 	 * Data Asset

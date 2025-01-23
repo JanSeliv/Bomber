@@ -554,7 +554,7 @@ void APlayerCharacter::UpdateCollisionObjectType()
 	const int32 PlayerId = GetPlayerId();
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
 	if (!ensureMsgf(CapsuleComp, TEXT("ASSERT: [%i] %hs:\n'CapsuleComp' is not valid!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
+	    || PlayerId < 0) // Might be replicating yet
 	{
 		return;
 	}

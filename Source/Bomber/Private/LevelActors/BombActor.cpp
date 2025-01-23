@@ -69,7 +69,7 @@ void ABombActor::ConstructBombActor()
 	SetLifeSpan();
 
 	// Binding to the event, that triggered when character end to overlaps the collision component
-	OnActorEndOverlap.AddUniqueDynamic(this, &ABombActor::OnBombEndOverlap);
+	OnActorEndOverlap.AddUniqueDynamic(this, &ThisClass::OnBombEndOverlap);
 
 	// Listen when this bomb is destroyed on the Generated Map by itself or by other actors
 	MapComponentInternal->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
@@ -451,8 +451,9 @@ void ABombActor::OnCellChanged_Implementation(UMapComponent* MapComponent, const
 // Sets actual collision responses to all players for this bomb
 void ABombActor::UpdateCollisionResponseToAllPlayers()
 {
-	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
-	FCollisionResponseContainer CollisionResponses = MapComponentInternal->GetCollisionResponses();
+	const UBoxComponent* BoxCollisionComponent = MapComponentInternal ? MapComponentInternal->GetBoxCollisionComponent() : nullptr;
+	checkf(BoxCollisionComponent, TEXT("ERROR: [%i] %hs:\n'BoxCollisionComponent' is null!"), __LINE__, __FUNCTION__);
+	FCollisionResponseContainer CollisionResponses = BoxCollisionComponent->GetCollisionResponseToChannels();
 
 	TArray<AActor*> OverlappingPlayers;
 	GetOverlappingPlayers(OverlappingPlayers);
@@ -475,7 +476,6 @@ void ABombActor::UpdateCollisionResponseToAllPlayers()
 		}
 
 		// Set overlap response for overlapping players, block others
-		CollisionResponses = MapComponentInternal->GetCollisionResponses();
 		constexpr ECollisionResponse BitOnResponse = ECR_Overlap;
 		constexpr ECollisionResponse BitOffResponse = ECR_Block;
 		MakeCollisionResponseToPlayersInBitmask(/*out*/CollisionResponses, Bitmask, BitOnResponse, BitOffResponse);

@@ -176,38 +176,25 @@ void UMapComponent::OnRep_RowIndex(int32 PreviousRowIndex)
  * Collision
  ********************************************************************************************* */
 
+// Returns current collisions data of the Box Collision Component
+FCollisionResponseContainer UMapComponent::GetCollisionResponses() const
+{
+	return BoxCollisionComponentInternal ? BoxCollisionComponentInternal->GetCollisionResponseToChannels() : FCollisionResponseContainer(ECR_MAX);
+}
+
 // Set new collisions data for any channel of the Box Collision Component
 void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& NewResponses)
 {
 	const AActor* Owner = GetOwner();
 	if (!Owner
-	    || !Owner->HasAuthority()
 	    || NewResponses == ECR_MAX
-	    || NewResponses == CollisionResponseInternal)
+	    || NewResponses == GetCollisionResponses())
 	{
 		return;
 	}
 
-	CollisionResponseInternal = NewResponses;
-	ApplyCollisionResponse();
-}
-
-// Updates current collisions for the Box Collision Component
-void UMapComponent::ApplyCollisionResponse()
-{
-	if (!BoxCollisionComponentInternal
-	    || CollisionResponseInternal == ECR_MAX)
-	{
-		return;
-	}
-
-	BoxCollisionComponentInternal->SetCollisionResponseToChannels(CollisionResponseInternal);
-}
-
-// Is called on client to response on changes in collision responses
-void UMapComponent::OnRep_CollisionResponse()
-{
-	ApplyCollisionResponse();
+	checkf(BoxCollisionComponentInternal, TEXT("ERROR: [%i] %hs:\n'BoxCollisionComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	BoxCollisionComponentInternal->SetCollisionResponseToChannels(NewResponses);
 }
 
 /*********************************************************************************************
@@ -366,7 +353,6 @@ void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, RowIndexInternal);
-	DOREPLIFETIME(ThisClass, CollisionResponseInternal);
 }
 
 /*********************************************************************************************
@@ -400,18 +386,12 @@ bool UMapComponent::OnConstructionOwnerActor_Implementation()
 		return false;
 	}
 
+	// Setup this component on the Generated Map
 	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
-
-	// Find new Location at dragging and update-delegate
-	GeneratedMap.SetNearestCell(this);
-
-	if (LocalCellInternal.IsInvalidCell())
+	if (GeneratedMap.SetNearestCell(this))
 	{
-		return false;
+		GeneratedMap.AddToGrid(this);
 	}
-
-	// Owner updating
-	GeneratedMap.AddToGrid(this);
 
 	// Set the default mesh, any system can override it later by calling SetCustomMeshAsset(Mesh). 
 	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
