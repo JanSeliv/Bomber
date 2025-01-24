@@ -247,22 +247,15 @@ void UMapComponent::OnRegister()
 	Owner->SetActorTickInterval(UGameStateDataAsset::Get().GetTickInterval());
 	Owner->SetActorTickEnabled(false);
 
-	if (!Owner->HasAuthority())
-	{
-		// Never tick on clients
-		Owner->PrimaryActorTick.bCanEverTick = false;
-	}
-
 #if WITH_EDITOR
 	// Make this gameplay actor always loaded
 	Owner->SetIsSpatiallyLoaded(false);
 #endif
 
 	// Set the movable mobility for in-game attaching
-	if (Owner->GetRootComponent())
-	{
-		Owner->GetRootComponent()->SetMobility(EComponentMobility::Movable);
-	}
+	USceneComponent* OwnerRootComponent = Owner->GetRootComponent();
+	checkf(OwnerRootComponent, TEXT("ERROR: [%i] %hs:\n'OwnerRootComponent' is null!"), __LINE__, __FUNCTION__);
+	OwnerRootComponent->SetMobility(EComponentMobility::Movable);
 
 	// Finding the actor data asset
 	ActorDataAssetInternal = UDataAssetsContainer::GetDataAssetByActorClass(Owner->GetClass());
@@ -401,8 +394,12 @@ bool UMapComponent::OnConstructionOwnerActor_Implementation()
 
 	TryDisplayOwnedCell();
 
+	// Apply default collision
 	const ECollisionResponse CollisionResponse = GetActorDataAssetChecked().GetCollisionResponse();
 	SetCollisionResponses(CollisionResponse);
+
+	// Disable tick by default: actor itself might re-enable it in runtime like from game state change
+	Owner->SetActorTickEnabled(false);
 
 	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{

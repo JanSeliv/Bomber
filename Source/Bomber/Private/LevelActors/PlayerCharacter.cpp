@@ -270,10 +270,18 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	ensureMsgf(HasAuthority(), TEXT("ASSERT: [%i] %hs was called on client for %s"), __LINE__, __FUNCTION__, *GetName());
-
-	// Update a player location on the Generated Map
-	AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+	if (HasAuthority())
+	{
+		// On server, update a player location on the Generated Map
+		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+	}
+	else if (IsLocallyControlled())
+	{
+		// On local client, directly set a player location for responsiveness while server replicates it
+		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+		const FCell SnappedCell = UCellsUtilsLibrary::SnapActorOnLevel(this);
+		MapComponentInternal->SetCell(SnappedCell);
+	}
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -437,11 +445,6 @@ void APlayerCharacter::OnPlayerBeginOverlap_Implementation(AActor* OverlappedAct
 // Listen to manage the tick
 void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
-	if (!HasAuthority())
-	{
-		return;
-	}
-
 	switch (CurrentGameState)
 	{
 		case ECurrentGameState::Menu: // fallthrough
