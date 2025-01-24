@@ -674,27 +674,32 @@ void AGeneratedMap::DestroyLevelActorsByType(EActorType ActorsType, UObject* Des
 // Applies the snapped cell to the specified Map Component
 bool AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 {
-	const AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
+	AActor* LevelActor = MapComponent ? MapComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
-	    || !ComponentOwner
-	    || !ComponentOwner->HasAuthority())
+	    || !LevelActor)
 	{
 		return false;
 	}
 
-	const FCell CurrentCellByLocation = ComponentOwner->GetActorLocation();
-
-	const FCell LastCell = MapComponent->GetCell();
+	// Snap the actor to the current cell (even if the cell is occupied by others)
+	const FCell& LastCell = MapComponent->GetCell();
+	FCell FoundFreeCell = UCellsUtilsLibrary::SnapActorOnLevel(LevelActor);
 	if (LastCell.IsValid()
-	    && UCellsUtilsLibrary::SnapCellOnLevel(CurrentCellByLocation) == LastCell)
+	    && FoundFreeCell == LastCell)
 	{
 		// The actor is already aligned on the level
 		return false;
 	}
 
-	const FCell FoundFreeCell = UCellsUtilsLibrary::GetNearestFreeCell(CurrentCellByLocation);
+#if WITH_EDITOR //[IsEditorNotPieWorld]
+	if (UUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// In editor world, always move to the free cell without any actors, so dragged actor will never overlap
+		FoundFreeCell = UCellsUtilsLibrary::GetNearestFreeCell(LevelActor->GetActorLocation());
 
-	SetNearestCellDragged(MapComponent, FoundFreeCell);
+		SetNearestCellDragged(MapComponent, FoundFreeCell);
+	}
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
 
 	MapComponent->SetCell(FoundFreeCell);
 
