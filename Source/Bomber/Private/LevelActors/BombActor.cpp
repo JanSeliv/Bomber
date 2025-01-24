@@ -6,13 +6,12 @@
 #include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 #include "DataAssets/BombDataAsset.h"
-#include "DataAssets/DataAssetsContainer.h"
 #include "GameFramework/MyCheatManager.h"
 #include "GameFramework/MyGameStateBase.h"
 #include "LevelActors/PlayerCharacter.h"
-#include "Structures/Cell.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 //---
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -68,9 +67,6 @@ void ABombActor::ConstructBombActor()
 	// Start countdown to destroy the bomb
 	SetLifeSpan();
 
-	// Binding to the event, that triggered when character end to overlaps the collision component
-	OnActorEndOverlap.AddUniqueDynamic(this, &ThisClass::OnBombEndOverlap);
-
 	// Listen when this bomb is destroyed on the Generated Map by itself or by other actors
 	MapComponentInternal->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
 
@@ -78,7 +74,19 @@ void ABombActor::ConstructBombActor()
 	MapComponentInternal->OnActorTypeChanged.AddUniqueDynamic(this, &ThisClass::OnActorTypeChanged);
 
 	// Listen for client to react when bomb is added to the level
-	MapComponentInternal->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnCellChanged);
+	if (!HasAuthority())
+	{
+		const FCell& CurrentCell = MapComponentInternal->GetCell();
+		if (CurrentCell.IsValid())
+		{
+			OnBombCellChanged(MapComponentInternal, CurrentCell, FCell::InvalidCell);
+		}
+		else
+		{
+			// Wait until cell is set (bomb is added to the level)
+			MapComponentInternal->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnBombCellChanged);
+		}
+	}
 
 #if WITH_EDITOR //[IsEditorNotPieWorld]
 	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
@@ -133,9 +141,9 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 	FireRadiusInternal = InFireRadius;
 	UpdateExplosionCells();
 
-	ApplyMaterial();
+	InitCollisionResponseToAllPlayers();
 
-	UpdateCollisionResponseToAllPlayers();
+	ApplyMaterial();
 }
 
 // Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build
@@ -386,18 +394,6 @@ void ABombActor::SetActorHiddenInGame(bool bNewHidden)
  * Events
  ********************************************************************************************* */
 
-// Triggers when character end to overlaps with this bomb.
-void ABombActor::OnBombEndOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)
-{
-	const bool bIsPlayerOverlap = Cast<APlayerCharacter>(OtherActor) != nullptr;
-	if (!bIsPlayerOverlap)
-	{
-		return;
-	}
-
-	UpdateCollisionResponseToAllPlayers();
-}
-
 // Called when owned map component is destroyed on the Generated Map
 void ABombActor::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
@@ -413,8 +409,6 @@ void ABombActor::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponen
 		MapComponentInternal->OnActorTypeChanged.RemoveAll(this);
 		MapComponentInternal->OnCellChanged.RemoveAll(this);
 	}
-
-	OnActorEndOverlap.RemoveAll(this);
 
 	BombPlacerInternal = nullptr;
 
@@ -434,14 +428,38 @@ void ABombActor::OnActorTypeChanged_Implementation(UMapComponent* MapComponent, 
 }
 
 // Is used on client to react when bomb is added to the level
-void ABombActor::OnCellChanged_Implementation(UMapComponent* MapComponent, const FCell& NewCell, const FCell& PreviousCell)
+void ABombActor::OnBombCellChanged_Implementation(UMapComponent* MapComponent, const FCell& NewCell, const FCell& PreviousCell)
 {
 	if (NewCell.IsValid()
 	    && !HasAuthority())
 	{
 		// On client, the bomb was just added to the level, update cells
 		UpdateExplosionCells();
+		InitCollisionResponseToAllPlayers();
 	}
+}
+
+// Is called when character leaves the bomb to update collision response
+void ABombActor::OnPlayerCellChanged_Implementation(UMapComponent* PlayerMapComponent, const FCell& NewCell, const FCell& PreviousCell)
+{
+	checkf(PlayerMapComponent && MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'PlayerMapComponent || MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	const APlayerCharacter& PlayerCharacter = *CastChecked<APlayerCharacter>(PlayerMapComponent->GetOwner());
+
+	if (NewCell == MapComponentInternal->GetCell())
+	{
+		return;
+	}
+
+	const UBoxComponent* BoxCollisionComponent = MapComponentInternal ? MapComponentInternal->GetBoxCollisionComponent() : nullptr;
+	checkf(BoxCollisionComponent, TEXT("ERROR: [%i] %hs:\n'BoxCollisionComponent' is null!"), __LINE__, __FUNCTION__);
+	FCollisionResponseContainer CollisionResponses = BoxCollisionComponent->GetCollisionResponseToChannels();
+
+	// Player left the bomb, block collision (all other channels and players will stay as they are)
+	GetCollisionResponseToPlayerByID(/*InOut*/CollisionResponses, PlayerCharacter.GetPlayerId(), ECR_Block);
+	MapComponentInternal->SetCollisionResponses(CollisionResponses);
+
+	// Stop listening the character which left the bomb (however, still continue to listen other characters)
+	PlayerMapComponent->OnCellChanged.RemoveAll(this);
 }
 
 /*********************************************************************************************
@@ -449,43 +467,49 @@ void ABombActor::OnCellChanged_Implementation(UMapComponent* MapComponent, const
  ********************************************************************************************* */
 
 // Sets actual collision responses to all players for this bomb
-void ABombActor::UpdateCollisionResponseToAllPlayers()
+void ABombActor::InitCollisionResponseToAllPlayers()
 {
+	// Obtain all overlapped level actors on the bomb cell to enable overlap response for players inside the bomb
+	FMapComponents OverlapMapComponents;
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	ULevelActorsUtilsLibrary::GetLevelActorsOnCells(/*out*/OverlapMapComponents, {MapComponentInternal->GetCell()});
+
+	// Obtain default collision responses
 	const UBoxComponent* BoxCollisionComponent = MapComponentInternal ? MapComponentInternal->GetBoxCollisionComponent() : nullptr;
 	checkf(BoxCollisionComponent, TEXT("ERROR: [%i] %hs:\n'BoxCollisionComponent' is null!"), __LINE__, __FUNCTION__);
 	FCollisionResponseContainer CollisionResponses = BoxCollisionComponent->GetCollisionResponseToChannels();
 
-	TArray<AActor*> OverlappingPlayers;
-	GetOverlappingPlayers(OverlappingPlayers);
-	if (!OverlappingPlayers.Num())
+	// Block all players by default (all non-player channels will remain unchanged)
+	static constexpr int32 MaxPlayerID = 3;
+	for (int32 CharacterID = 0; CharacterID <= MaxPlayerID; ++CharacterID)
 	{
-		// There are no characters on the bomb, block all
-		MakeCollisionResponseToAllPlayers(/*out*/CollisionResponses, ECR_Block);
-		OnActorEndOverlap.RemoveAll(this);
+		GetCollisionResponseToPlayerByID(/*InOut*/CollisionResponses, CharacterID, ECR_Block);
 	}
-	else
+
+	// Unlock (allow overlap) those players which overlap with this bomb
+	for (const UMapComponent* OverlapMapComponentIt : OverlapMapComponents)
 	{
-		// Add to bitmask overlapping players
-		int32 Bitmask = 0;
-		for (const AActor* OverlappingPlayerIt : OverlappingPlayers)
+		const APlayerCharacter* PlayerCharacter = OverlapMapComponentIt ? OverlapMapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
+		if (!PlayerCharacter)
 		{
-			if (const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OverlappingPlayerIt))
-			{
-				Bitmask |= 1 << PlayerCharacter->GetPlayerId();
-			}
+			// Is different overlapped actor, likely bomb itself
+			continue;
 		}
 
-		// Set overlap response for overlapping players, block others
-		constexpr ECollisionResponse BitOnResponse = ECR_Overlap;
-		constexpr ECollisionResponse BitOffResponse = ECR_Block;
-		MakeCollisionResponseToPlayersInBitmask(/*out*/CollisionResponses, Bitmask, BitOnResponse, BitOffResponse);
+		// Change response for the player which overlaps with this bomb (all other channels and players will stay as they are)
+		GetCollisionResponseToPlayerByID(/*InOut*/CollisionResponses, PlayerCharacter->GetPlayerId(), ECR_Overlap);
+
+		// Listen when character end to overlaps with this bomb to block collision
+		UMapComponent* PlayerMapComponent = UMapComponent::GetMapComponent(PlayerCharacter);
+		checkf(PlayerMapComponent, TEXT("ERROR: [%i] %hs:\n'PlayerMapComponent' is null!"), __LINE__, __FUNCTION__);
+		PlayerMapComponent->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnPlayerCellChanged);
 	}
 
 	MapComponentInternal->SetCollisionResponses(CollisionResponses);
 }
 
 // Takes your container and returns is with new specified response for player by its specified ID
-void ABombActor::MakeCollisionResponseToPlayerByID(FCollisionResponseContainer& InOutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse)
+void ABombActor::GetCollisionResponseToPlayerByID(FCollisionResponseContainer& InOutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse)
 {
 	if (CharacterID < 0)
 	{
@@ -512,34 +536,4 @@ void ABombActor::MakeCollisionResponseToPlayerByID(FCollisionResponseContainer& 
 	}
 
 	InOutCollisionResponses.SetResponse(CollisionChannel, NewResponse);
-}
-
-// Takes your container and returns new specified response for all players
-void ABombActor::MakeCollisionResponseToAllPlayers(FCollisionResponseContainer& InOutCollisionResponses, ECollisionResponse NewResponse)
-{
-	static constexpr int32 BitsOffOnly = 0;
-	constexpr ECollisionResponse BitOnResponse = ECR_MAX;
-	MakeCollisionResponseToPlayersInBitmask(InOutCollisionResponses, BitsOffOnly, BitOnResponse, NewResponse);
-}
-
-// Takes your container and returns new specified response for those players who match their ID in specified bitmask
-void ABombActor::MakeCollisionResponseToPlayersInBitmask(FCollisionResponseContainer& InOutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse)
-{
-	static constexpr int32 MaxPlayerID = 3;
-	for (int32 CharacterID = 0; CharacterID <= MaxPlayerID; ++CharacterID)
-	{
-		const bool bIsBitOn = ((1 << CharacterID) & Bitmask) != 0;
-		const ECollisionResponse Response = bIsBitOn ? BitOnResponse : BitOffResponse;
-		MakeCollisionResponseToPlayerByID(InOutCollisionResponses, CharacterID, Response);
-	}
-}
-
-// Returns all players overlapping with this bomb
-void ABombActor::GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const
-{
-	const UBoxComponent* BombCollisionComponent = MapComponentInternal ? MapComponentInternal->GetBoxCollisionComponent() : nullptr;
-	if (BombCollisionComponent)
-	{
-		BombCollisionComponent->GetOverlappingActors(OutPlayers, UDataAssetsContainer::GetActorClassByType(EAT::Player));
-	}
 }

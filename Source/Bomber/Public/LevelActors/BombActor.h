@@ -147,11 +147,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnConstructionBombActor();
 
-	/** Triggers when character end to overlaps with this bomb.
-	 * Sets the collision preset to block all dynamics. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnBombEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
-
 	/** Is called to listen when this bomb is destroyed on the Generated Map by itself or by other actors. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPreRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
@@ -162,43 +157,24 @@ protected:
 
 	/** Is used on client to react when bomb is added to the level. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnCellChanged(UMapComponent* MapComponent, const struct FCell& NewCell, const struct FCell& PreviousCell);
+	void OnBombCellChanged(UMapComponent* MapComponent, const FCell& NewCell, const FCell& PreviousCell);
+
+	/** Is called when character leaves the bomb to update collision response. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPlayerCellChanged(UMapComponent* PlayerMapComponent, const FCell& NewCell, const FCell& PreviousCell);
 
 	/*********************************************************************************************
 	 * Custom Collision Response
 	 ********************************************************************************************* */
 public:
 	/** Sets actual collision response to all players for this bomb. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void UpdateCollisionResponseToAllPlayers();
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void InitCollisionResponseToAllPlayers();
 
 	/** Takes your container and returns is with new specified response for player by its specified ID.
 	 * @param InOutCollisionResponses Will contain requested response.
 	 * @param CharacterID Player to set response.
 	 * @param NewResponse New response to set. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	static void MakeCollisionResponseToPlayerByID(FCollisionResponseContainer& InOutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse);
-
-	/** Takes your container and returns new specified response for all players.
-	  * @param InOutCollisionResponses Will contain requested responses.
-	  * @param NewResponse New response to set. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	static void MakeCollisionResponseToAllPlayers(FCollisionResponseContainer& InOutCollisionResponses, ECollisionResponse NewResponse);
-
-	/** Takes your container and returns new specified response for those players who match their ID in specified bitmask.
-	  * @param InOutCollisionResponses Will contain requested responses.
-	  * @param Bitmask Each bit represents the character ID.
-	  * @param BitOnResponse Applies response for toggles bits.
-	  * @param BitOffResponse Applies response for clear bits.
-	  * Set 'ECollisionResponse::ECR_MAX' to avoid changing response for toggled or clear bits.
-	  * E.g: Bitmask = 11, BitOnResponse = ECR_Block, BitOffResponse = ECR_MAX:
-	  * specified '11' in binary is '1 0 1 1',
-	  * so characters with IDs '0', '1' and '3' will apply 'ECR_Block' response,
-	  * player with Character ID '2' won't change its response since it's specified as 'ECR_MAX'. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	static void MakeCollisionResponseToPlayersInBitmask(FCollisionResponseContainer& InOutCollisionResponses, int32 Bitmask, ECollisionResponse BitOnResponse, ECollisionResponse BitOffResponse);
-
-	/** Returns all players overlapping with this bomb. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintProtected))
-	void GetOverlappingPlayers(TArray<AActor*>& OutPlayers) const;
+	UFUNCTION(BlueprintPure, Category = "C++")
+	static void GetCollisionResponseToPlayerByID(FCollisionResponseContainer& InOutCollisionResponses, int32 CharacterID, ECollisionResponse NewResponse);
 };
