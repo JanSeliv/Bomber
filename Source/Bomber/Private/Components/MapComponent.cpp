@@ -388,7 +388,8 @@ bool UMapComponent::OnConstructionOwnerActor_Implementation()
 
 	// Setup this component on the Generated Map
 	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
-	if (GeneratedMap.SetNearestCell(this))
+	if (GeneratedMap.SetNearestCell(this)
+	    || UUtilsLibrary::IsEditorNotPieWorld()) // In editor world, always Add to Grid for correct snapping (even if the same cell)
 	{
 		GeneratedMap.AddToGrid(this);
 	}
