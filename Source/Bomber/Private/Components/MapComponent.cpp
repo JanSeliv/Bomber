@@ -43,9 +43,6 @@ UMapComponent::UMapComponent()
 
 	// Replicate a component
 	SetIsReplicatedByDefault(true);
-
-	// Initialize the Box Collision component
-	BoxCollisionComponentInternal = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
 }
 
 // Rerun owner's construction scripts. The temporary only editor owner will not be updated
@@ -187,6 +184,7 @@ void UMapComponent::SetCollisionResponses(const FCollisionResponseContainer& New
 {
 	const AActor* Owner = GetOwner();
 	if (!Owner
+	    || !GetActorDataAssetChecked().IsEnabledCollision()
 	    || NewResponses == ECR_MAX
 	    || NewResponses == GetCollisionResponses())
 	{
@@ -265,14 +263,16 @@ void UMapComponent::OnRegister()
 	}
 
 	// Initialize the Box Collision Component
-	if (ensureMsgf(BoxCollisionComponentInternal, TEXT("ASSERT: 'BoxCollisionInternal' is not valid")))
+	if (ActorDataAssetInternal->IsEnabledCollision())
 	{
+		BoxCollisionComponentInternal = NewObject<UBoxComponent>(Owner);
 		BoxCollisionComponentInternal->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		BoxCollisionComponentInternal->SetBoxExtent(ActorDataAssetInternal->GetCollisionExtent());
 		BoxCollisionComponentInternal->IgnoreActorWhenMoving(Owner, true);
 #if WITH_EDITOR
 		BoxCollisionComponentInternal->SetHiddenInGame(!bShouldShowRenders);
 #endif
+		BoxCollisionComponentInternal->RegisterComponent();
 	}
 
 	// Initialize mesh component

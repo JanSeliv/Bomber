@@ -153,6 +153,7 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	UStaticMesh* PlaneMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
 	checkf(PlaneMesh, TEXT("ERROR: [%i] %hs:\n'PlaneMesh' failed to load!"), __LINE__, __FUNCTION__);
 	NameplateMeshInternal->SetStaticMesh(PlaneMesh);
+	NameplateMeshInternal->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// Initialize 3D widget component for the player name
 	PlayerName3DWidgetComponentInternal = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerName3DWidgetComponent"));
@@ -166,6 +167,7 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	PlayerName3DWidgetComponentInternal->SetDrawSize(DrawSize);
 	static const FVector2D Pivot(0.5f, 0.4f);
 	PlayerName3DWidgetComponentInternal->SetPivot(Pivot);
+	PlayerName3DWidgetComponentInternal->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{

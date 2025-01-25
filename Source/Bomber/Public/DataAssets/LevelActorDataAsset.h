@@ -107,14 +107,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
 
-	/** Returns a extent size of the collision box of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FVector& GetCollisionExtent() const { return CollisionExtentInternal; }
-
-	/** Returns a response type of the collision box of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
-
 protected:
 	/** DevelopmentOnly: internal class of rows, is overriden by child data assets, used on adding new row. */
 	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Row Class", DevelopmentOnly))
@@ -132,14 +124,39 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))
 	EActorType ActorTypeInternal = EAT::None;
 
+	/*********************************************************************************************
+	 * Collision
+	 ********************************************************************************************* */
+public:
+	/** Returns true if the collision is enabled for an actor, whose data is described by this data asset. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE bool IsEnabledCollision() const { return bEnableCollisionInternal; }
+
+	/** Returns an extent size of the collision box of an actor, whose data is described by this data asset. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const FORCEINLINE FVector& GetCollisionExtent() const { return CollisionExtentInternal; }
+
+	/** Returns a response type of the collision box of an actor, whose data is described by this data asset. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
+
+protected:
+	/** If enabled, the Box Collision component is added to actors, whose data is described by this data asset. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, DisplayName = "Enable Collision", ShowOnlyInnerProperties))
+	bool bEnableCollisionInternal = true;
+
 	/** Extent size of the collision box of an actor, whose data is described by this data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collision Extent", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, DisplayName = "Collision Extent", ShowOnlyInnerProperties, EditCondition = "bEnableCollisionInternal"))
 	FVector CollisionExtentInternal = FVector(100.f);
 
 	/** Response type of the collision box of an actor, whose data is described by this data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties, EditCondition = "bEnableCollisionInternal"))
 	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap;
 
+	/*********************************************************************************************
+	 * Editor
+	 ********************************************************************************************* */
+protected:
 #if WITH_EDITOR
 	/** Handle adding new rows. */
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
