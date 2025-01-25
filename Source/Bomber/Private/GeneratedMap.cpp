@@ -1092,7 +1092,7 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 			// Regenerate in menu to prepare the world and let it replicate to clients
 			// Only regenerate in GameStarting if restarting after playing, not from menu
 			if (CurrentGameState == ECGS::Menu
-			    || AMyGameStateBase::GetPreviousGameState() == ECGS::InGame)
+			    || AMyGameStateBase::GetPreviousGameState() != ECGS::Menu)
 			{
 				GenerateLevelActors();
 			}
