@@ -28,6 +28,16 @@ void FMapComponentSpec::UpdateCellInComponent()
 	}
 }
 
+void FMapComponentSpec::PreReplicatedRemove(const FMapComponentsContainer& InMapComponentsContainer)
+{
+	// On client, level actor removal was just replicated, perform cleanup to avoid unsynced cell data or dangling map component pointer
+
+	Cell = FCell::InvalidCell;
+	UpdateCellInComponent();
+
+	MapComponent = nullptr;
+}
+
 FMapComponentsIterator::FMapComponentsIterator(const TArray<FMapComponentSpec>& InItems)
 	: Items(InItems)
 	, Index(0) {}

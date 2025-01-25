@@ -59,7 +59,7 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 	 * FFastArraySerializerItem implementation
 	 ********************************************************************************************* */
 
-	void PreReplicatedRemove(const FMapComponentsContainer& InMapComponentsContainer) { UpdateCellInComponent(); }
+	void PreReplicatedRemove(const FMapComponentsContainer& InMapComponentsContainer);
 	void PostReplicatedAdd(const FMapComponentsContainer& InMapComponentsContainer) { UpdateCellInComponent(); }
 	void PostReplicatedChange(const FMapComponentsContainer& InMapComponentsContainer) { UpdateCellInComponent(); }
 
