@@ -53,7 +53,7 @@ bool AMyGameStateBase::CanChangeGameState(ECurrentGameState NewGameState) const
 void AMyGameStateBase::SetGameState(ECurrentGameState NewGameState)
 {
 	if (!HasAuthority()
-		|| !CanChangeGameState(NewGameState))
+	    || !CanChangeGameState(NewGameState))
 	{
 		return;
 	}
@@ -92,9 +92,19 @@ void AMyGameStateBase::ApplyGameState()
 	LocalPreviousGameStateInternal = LocalGameStateInternal;
 	LocalGameStateInternal = ReplicatedGameStateInternal;
 
-	if (LocalGameStateInternal == ECGS::GameStarting)
+	StopInGameCountdown();
+	StopStartingCountdown();
+
+	switch (LocalGameStateInternal)
 	{
-		TriggerCountdowns();
+		case ECGS::GameStarting:
+			TriggerStartingCountdown();
+			break;
+		case ECGS::InGame:
+			TriggerInGameCountdown();
+			break;
+		default:
+			break;
 	}
 
 	// Notify listeners
@@ -123,33 +133,43 @@ void AMyGameStateBase::OnRep_CurrentGameState()
 void AMyGameStateBase::SetStartingTimerSecondsRemain(float NewStartingTimerSecRemain)
 {
 	StartingTimerSecRemainInternal = NewStartingTimerSecRemain;
-	ApplyStartingTimerSecondsRemain();
-}
 
-// Is called on client when the 'Three-two-one-GO' timer was updated
-void AMyGameStateBase::OnRep_StartingTimerSecRemain()
-{
-	ApplyStartingTimerSecondsRemain();
-}
-
-// Updates current starting timer seconds remain
-void AMyGameStateBase::ApplyStartingTimerSecondsRemain()
-{
 	if (OnStartingTimerSecRemainChanged.IsBound())
 	{
 		OnStartingTimerSecRemainChanged.Broadcast(StartingTimerSecRemainInternal);
 	}
 }
 
-// Is called during the Game Starting state to handle the 'Three-two-one-GO' timer
-void AMyGameStateBase::DecrementStartingCountdown()
+// Starts counting the 3-2-1-GO timer when match is starting, can be called both on the server and clients
+void AMyGameStateBase::TriggerStartingCountdown()
 {
-	if (LocalGameStateInternal != ECGS::GameStarting)
+	const UWorld* World = GetWorld();
+	if (!World)
 	{
 		return;
 	}
 
-	const float NewValue = StartingTimerSecRemainInternal - UGameStateDataAsset::Get().GetTickInterval();
+	SetStartingTimerSecondsRemain(UGameStateDataAsset::Get().GetStartingCountdown());
+
+	constexpr bool bInLoop = true;
+	World->GetTimerManager().SetTimer(StartingTimerInternal, this, &ThisClass::OnStartingTimerTick, DefaultTimerIntervalSec, bInLoop);
+}
+
+// Clears the Starting timer and stops counting it
+void AMyGameStateBase::StopStartingCountdown()
+{
+	if (StartingTimerInternal.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(StartingTimerInternal);
+	}
+
+	SetStartingTimerSecondsRemain(0.f);
+}
+
+// Is called once a second during the Game Starting state to decrement the 'Three-two-one-GO' timer, both on the server and clients
+void AMyGameStateBase::OnStartingTimerTick()
+{
+	const float NewValue = StartingTimerSecRemainInternal - DefaultTimerIntervalSec;
 	SetStartingTimerSecondsRemain(NewValue);
 
 	if (IsStartingTimerElapsed())
@@ -167,72 +187,15 @@ void AMyGameStateBase::DecrementStartingCountdown()
 void AMyGameStateBase::SetInGameTimerSecondsRemain(float NewInGameTimerSecRemain)
 {
 	InGameTimerSecRemainInternal = NewInGameTimerSecRemain;
-	ApplyInGameTimerSecondsRemain();
-}
 
-// Is called on client when in-match timer was updated
-void AMyGameStateBase::OnRep_InGameTimerSecRemain()
-{
-	ApplyInGameTimerSecondsRemain();
-}
-
-// Updates current in-match timer seconds remain
-void AMyGameStateBase::ApplyInGameTimerSecondsRemain()
-{
 	if (OnInGameTimerSecRemainChanged.IsBound())
 	{
 		OnInGameTimerSecRemainChanged.Broadcast(InGameTimerSecRemainInternal);
 	}
 }
 
-// Is called during the In-Game state to handle time consuming for the current match
-void AMyGameStateBase::DecrementInGameCountdown()
-{
-	const UWorld* World = GetWorld();
-	if (!World || LocalGameStateInternal != ECGS::InGame)
-	{
-		return;
-	}
-
-	const float NewValue = InGameTimerSecRemainInternal - UGameStateDataAsset::Get().GetTickInterval();
-	SetInGameTimerSecondsRemain(NewValue);
-
-	if (IsInGameTimerElapsed())
-	{
-		SetGameState(ECurrentGameState::EndGame);
-	}
-	else
-	{
-		// @todo JanSeliv baYkHels Adjust hardcoded value to match the duration of the EndGame SFX from meta sound
-		const float Tolerance = UGameStateDataAsset::Get().GetTickInterval() - World->GetDeltaSeconds();
-		constexpr float SoundDuration = 10.f;
-		if (FMath::IsNearlyEqual(InGameTimerSecRemainInternal, SoundDuration, Tolerance))
-		{
-			USoundsSubsystem::Get().PlayEndGameCountdownSFX();
-		}
-	}
-}
-
-// Called to starting counting different time in the game
-void AMyGameStateBase::TriggerCountdowns()
-{
-	const UWorld* World = GetWorld();
-	if (!World
-	    || !HasAuthority())
-	{
-		return;
-	}
-
-	SetStartingTimerSecondsRemain(UGameStateDataAsset::Get().GetStartingCountdown());
-	SetInGameTimerSecondsRemain(UGameStateDataAsset::Get().GetInGameCountdown());
-
-	constexpr bool bInLoop = true;
-	const float InRate = UGameStateDataAsset::Get().GetTickInterval();
-	World->GetTimerManager().SetTimer(CountdownTimerInternal, this, &ThisClass::OnCountdownTimerTicked, InRate, bInLoop);
-}
-
-// Is called each UGameStateDataAsset::TickInternal to count different time in the game
-void AMyGameStateBase::OnCountdownTimerTicked()
+// Starts counting the (120...0) timer during the match, can be called both on the server and clients
+void AMyGameStateBase::TriggerInGameCountdown()
 {
 	const UWorld* World = GetWorld();
 	if (!World)
@@ -240,17 +203,44 @@ void AMyGameStateBase::OnCountdownTimerTicked()
 		return;
 	}
 
-	switch (LocalGameStateInternal)
+	SetInGameTimerSecondsRemain(UGameStateDataAsset::Get().GetInGameCountdown());
+
+	constexpr bool bInLoop = true;
+	World->GetTimerManager().SetTimer(InGameTimerInternal, this, &ThisClass::OnInGameTimerTick, DefaultTimerIntervalSec, bInLoop);
+}
+
+// Clears the In-Game timer and stops counting it
+void AMyGameStateBase::StopInGameCountdown()
+{
+	if (InGameTimerInternal.IsValid())
 	{
-		case ECGS::GameStarting:
-			DecrementStartingCountdown();
-			break;
-		case ECGS::InGame:
-			DecrementInGameCountdown();
-			break;
-		default:
-			World->GetTimerManager().ClearTimer(CountdownTimerInternal);
-			break;
+		GetWorldTimerManager().ClearTimer(InGameTimerInternal);
+	}
+
+	SetInGameTimerSecondsRemain(0.f);
+}
+
+// Is called once a second during the In-Game state to decrement the match timer, both on the server and clients
+void AMyGameStateBase::OnInGameTimerTick()
+{
+	const float NewValue = InGameTimerSecRemainInternal - DefaultTimerIntervalSec;
+	SetInGameTimerSecondsRemain(NewValue);
+
+	// @todo JanSeliv baYkHels Adjust hardcoded value to match the duration of the EndGame SFX from meta sound
+	{
+		constexpr float SoundDuration = 10.f;
+		const UWorld* World = GetWorld();
+		checkf(World, TEXT("ERROR: [%i] %hs:\n'World' is null!"), __LINE__, __FUNCTION__);
+		const float Tolerance = DefaultTimerIntervalSec - World->GetDeltaSeconds();
+		if (FMath::IsNearlyEqual(InGameTimerSecRemainInternal, SoundDuration, Tolerance))
+		{
+			USoundsSubsystem::Get().PlayEndGameCountdownSFX();
+		}
+	}
+
+	if (IsInGameTimerElapsed())
+	{
+		SetGameState(ECurrentGameState::EndGame);
 	}
 }
 
@@ -264,8 +254,6 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, ReplicatedGameStateInternal);
-	DOREPLIFETIME(ThisClass, StartingTimerSecRemainInternal);
-	DOREPLIFETIME(ThisClass, InGameTimerSecRemainInternal);
 }
 
 // This is called only in the gameplay before calling begin play
