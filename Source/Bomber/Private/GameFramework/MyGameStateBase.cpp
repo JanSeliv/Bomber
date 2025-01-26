@@ -162,8 +162,6 @@ void AMyGameStateBase::StopStartingCountdown()
 	{
 		GetWorldTimerManager().ClearTimer(StartingTimerInternal);
 	}
-
-	SetStartingTimerSecondsRemain(0.f);
 }
 
 // Is called once a second during the Game Starting state to decrement the 'Three-two-one-GO' timer, both on the server and clients
@@ -216,8 +214,6 @@ void AMyGameStateBase::StopInGameCountdown()
 	{
 		GetWorldTimerManager().ClearTimer(InGameTimerInternal);
 	}
-
-	SetInGameTimerSecondsRemain(0.f);
 }
 
 // Is called once a second during the In-Game state to decrement the match timer, both on the server and clients
