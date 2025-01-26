@@ -176,10 +176,15 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetOpponentsKilledNum() const { return OpponentsKilledNumInternal; }
 
-	/** Increments the number of opponents killed.
+	/** Increments the number of opponents killed, is server-only.
 	 * @param DefeatedCharacter The character of the opponent who was killed by the player associated with this Player State. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetOpponentKilled(const class APlayerCharacter* DefeatedCharacter);
+
+	/** Sets the number of opponents killed by the player associated with this Player State, is server-only.
+	 * @param NewOpponentsKilledNum The new number of total opponents killed. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetOpponentKilledNum(int32 NewOpponentsKilledNum);
 
 protected:
 	/** Holds the number of opponents killed */
@@ -193,10 +198,6 @@ protected:
 	/** Applies and broadcasts Opponents Killed Num changes */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ApplyOpponentsKilledNum();
-
-	/** Clears the number of opponents killed. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void ResetOpponentsKilledNum();
 
 	/*********************************************************************************************
 	 * Is Human / Bot

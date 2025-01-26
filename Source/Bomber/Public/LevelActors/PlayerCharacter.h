@@ -11,6 +11,7 @@
 
 enum class ELevelType : uint8;
 enum class ECurrentGameState : uint8;
+enum class EItemType : uint8;
 
 /**
  * Numbers of power-ups that affect the abilities of a player during gameplay.
@@ -23,27 +24,29 @@ struct BOMBER_API FPowerUp
 
 	/** Default amount on picked up items. */
 	static const FPowerUp DefaultData;
+	static constexpr int32 DefaultLevel = 1;
 
 	/** The number of items, that increases the movement speed of the character */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int32 SkateN = 1;
+	int32 SkateN = DefaultLevel;
 
 	/** Maximum number of bombs that can be put at one time */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int32 BombN = 1;
+	int32 BombN = DefaultLevel;
 
 	/** Current amount of bombs available.
 	 * Decreases with every bomb spawn and increases with every bomb explosion.
 	 * Is always less or equal to BombN. */
 	UPROPERTY(BlueprintReadWrite, VisibleInstanceOnly, Transient, Category = "C++")
-	int32 BombNCurrent = 1;
+	int32 BombNCurrent = DefaultLevel;
 
 	/** The number of items, that increases the bomb blast radius */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "C++")
-	int32 FireN = 1;
+	int32 FireN = DefaultLevel;
 
-	/** Operator to set all values at once from one integer. */
+	/** Operators to set all values at once from one integer. */
 	FPowerUp& operator=(int32 NewValue);
+	bool operator==(int32 OtherValue) const;
 };
 
 /**
@@ -77,17 +80,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	const FORCEINLINE FPowerUp& GetPowerups() const { return PowerupsInternal; }
 
-	/** Set powerups levels all at once. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (AutoCreateRefTerm = "Powerups"))
+	/** Set powerups levels all at once, can be called only on the server. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SetPowerups(int32 NewLevel);
 
-	/** Apply effect of picked up powerups. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ApplyPowerups();
+	/** Adds +1 level to the powerup type, can be called only on the server. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void IncrementPowerup(EItemType ItemType);
 
-	/** Reset all picked up powerups. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void ResetPowerups();
+	/** Apply effect of picked up powerups, can be called both on server and clients. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplyPowerups();
 
 protected:
 	/** Count of items that affect on a player during gameplay. Can be overriden by the Cheat Manager. */
@@ -309,6 +312,10 @@ public:
 	/** Spawns bomb on character position */
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "C++")
 	void ServerSpawnBomb();
+
+	/** Changes the amount of currently available bombs for this player, can be called only on the server. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetCurrentBombNum(int32 NewBombNum);
 
 protected:
 	/** Event triggered when the bomb has been explicitly destroyed. */

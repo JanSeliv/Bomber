@@ -43,6 +43,19 @@ void AItemActor::ConstructItemActor()
 	MapComponentInternal->ConstructOwnerActor();
 }
 
+// Set new item type, can be called on the server-only
+void AItemActor::SetItemType(EItemType NewItemType)
+{
+	if (!HasAuthority()
+		|| ItemTypeInternal == NewItemType)
+	{
+		return;
+	}
+
+	ItemTypeInternal = NewItemType;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ItemTypeInternal, this);
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
@@ -76,7 +89,7 @@ void AItemActor::SetActorHiddenInGame(bool bNewHidden)
 	}
 
 	// Is removed from Generated Map
-	ItemTypeInternal = EItemType::None;
+	SetItemType(EItemType::None);
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -84,7 +97,10 @@ void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, ItemTypeInternal);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ItemTypeInternal, Params);
 }
 
 /*********************************************************************************************
@@ -104,7 +120,8 @@ void AItemActor::OnConstructionItemActor_Implementation()
 	if (ItemTypeInternal == EItemType::None)
 	{
 		const int32 RandomIndex = FMath::RandRange(EIT_FIRST_FLAG, EIT_LAST_FLAG);
-		ItemTypeInternal = static_cast<EItemType>(RandomIndex);
+		const EItemType NewItemType = static_cast<EItemType>(RandomIndex);
+		SetItemType(NewItemType);
 	}
 
 	// Override mesh

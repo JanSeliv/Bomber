@@ -10,6 +10,8 @@
 
 #define DEFAULT_LIFESPAN -1.f
 
+class APlayerCharacter;
+
 enum class ELevelType : uint8;
 
 /**
@@ -45,7 +47,7 @@ public:
 	/** Is server-only, initiates the explosion: starts countdown and initializes the data.
 	 * @param BombPlacer - the player who placed the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void InitBomb(const class APlayerCharacter* BombPlacer = nullptr);
+	void InitBomb(const APlayerCharacter* BombPlacer = nullptr);
 
 	/** Returns cells are going to explode by this bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
@@ -56,9 +58,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE int32 GetFireRadius() const { return FireRadiusInternal; }
 
+	/** Sets new radius of the blast to each side of the bomb, can be called on the server-only. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetFireRadius(int32 InFireRadius);
+
 	/** Returns the character who placed the bomb. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE class APlayerCharacter* GetBombPlacer() const { return BombPlacerInternal; }
+	const FORCEINLINE APlayerCharacter* GetBombPlacer() const { return BombPlacerInternal; }
+
+	/** Sets the character who placed the bomb, can be called on the server-only. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	void SetBombPlacer(const APlayerCharacter* InBombPlacer);
 
 	/** Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DevelopmentOnly))
@@ -76,10 +86,10 @@ protected:
 	/** The character who placed the bomb, is set by InitBomb on spawning.
 	 * Is used to track who spawned the bomb, e.g: to record the score. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_BombPlacer", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Bomb Placer"))
-	TObjectPtr<const class APlayerCharacter> BombPlacerInternal = nullptr;
+	TObjectPtr<const APlayerCharacter> BombPlacerInternal = nullptr;
 
 	/** Is server-only, immediately detonates the bomb. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected, DefaultToSelf = "DestroyedActor"))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void DetonateBomb();
 
 	/** Calculates the explosion cells based on current fire radius. */

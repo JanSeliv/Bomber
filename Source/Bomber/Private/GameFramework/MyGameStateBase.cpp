@@ -58,11 +58,9 @@ void AMyGameStateBase::SetGameState(ECurrentGameState NewGameState)
 		return;
 	}
 
-	// Update replicated state now, not waiting for the next tick
-	// So, the client will receive replicated state in first order in comparing with other replicates
-	ForceNetUpdate();
-
 	ReplicatedGameStateInternal = NewGameState;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedGameStateInternal, this);
+
 	ApplyGameState();
 }
 
@@ -249,7 +247,10 @@ void AMyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, ReplicatedGameStateInternal);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedGameStateInternal, Params);
 }
 
 // This is called only in the gameplay before calling begin play

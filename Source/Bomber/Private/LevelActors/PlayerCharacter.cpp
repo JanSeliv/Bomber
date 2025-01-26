@@ -52,7 +52,15 @@ FPowerUp& FPowerUp::operator=(int32 NewValue)
 	return *this;
 }
 
-// Set powerups levels all at once
+bool FPowerUp::operator==(int32 OtherValue) const
+{
+	return SkateN == OtherValue
+	       && BombN == OtherValue
+	       && BombNCurrent == OtherValue
+	       && FireN == OtherValue;
+}
+
+// Set powerups levels all at once, can be called only on the server
 void APlayerCharacter::SetPowerups(int32 NewLevel)
 {
 	if (!HasAuthority())
@@ -65,11 +73,70 @@ void APlayerCharacter::SetPowerups(int32 NewLevel)
 	const int32 MaxItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
 	const int32 NewLevelClamped = FMath::Clamp(NewLevel, MinItemsNum, MaxItemsNum);
 
+	if (PowerupsInternal == NewLevelClamped)
+	{
+		return;
+	}
+
 	PowerupsInternal = NewLevelClamped;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PowerupsInternal, this);
+
 	ApplyPowerups();
 }
 
-// Apply effect of picked up powerups
+// Adds +1 level to the powerup type, can be called only on the server
+void APlayerCharacter::IncrementPowerup(EItemType ItemType)
+{
+	if (!HasAuthority()
+	    || ItemType == EItemType::None)
+	{
+		return;
+	}
+
+	auto IncrementIfAllowed = [](int32& NumRef, int32 ClampMax = INDEX_NONE)
+	{
+		const int32 MaxAllowedItemsNum = UItemDataAsset::Get().GetMaxAllowedItemsNum();
+		const int32 NewNum = FMath::Clamp(NumRef + 1, 0, ClampMax == INDEX_NONE ? MaxAllowedItemsNum : ClampMax);
+		if (NumRef != NewNum)
+		{
+			NumRef = NewNum;
+			return true;
+		}
+		return false;
+	};
+
+	bool bIsPickedUp = false;
+	switch (ItemType)
+	{
+		case EItemType::Skate:
+		{
+			bIsPickedUp = IncrementIfAllowed(PowerupsInternal.SkateN);
+			break;
+		}
+		case EItemType::Bomb:
+		{
+			bIsPickedUp = IncrementIfAllowed(PowerupsInternal.BombN);
+			bIsPickedUp |= IncrementIfAllowed(PowerupsInternal.BombNCurrent, PowerupsInternal.BombN);
+			break;
+		}
+		case EItemType::Fire:
+		{
+			bIsPickedUp = IncrementIfAllowed(PowerupsInternal.FireN);
+			break;
+		}
+		default:
+			break;
+	}
+
+	if (bIsPickedUp)
+	{
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PowerupsInternal, this);
+
+		ApplyPowerups();
+	}
+}
+
+// Apply effect of picked up powerups, can be called both on server and clients
 void APlayerCharacter::ApplyPowerups()
 {
 	// Apply speed
@@ -89,13 +156,6 @@ void APlayerCharacter::ApplyPowerups()
 	{
 		OnPowerUpsChanged.Broadcast(PowerupsInternal);
 	}
-}
-
-// Reset all picked up powerups
-void APlayerCharacter::ResetPowerups()
-{
-	PowerupsInternal = FPowerUp::DefaultData;
-	ApplyPowerups();
 }
 
 // Is called on clients to apply powerups
@@ -291,8 +351,11 @@ void APlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, PowerupsInternal);
-	DOREPLIFETIME(ThisClass, PlayerMeshDataInternal);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, PowerupsInternal, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, PlayerMeshDataInternal, Params);
 }
 
 // Is overriden to handle the client login when is set new player state
@@ -353,7 +416,7 @@ void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
 		UGlobalEventsSubsystem::Get().BP_OnGameStateChanged.RemoveAll(this);
 	}
 
-	ResetPowerups();
+	SetPowerups(FPowerUp::DefaultLevel);
 }
 
 /*********************************************************************************************
@@ -404,44 +467,10 @@ void APlayerCharacter::OnConstructionPlayerCharacter_Implementation()
 // Triggers when this player character starts something overlap.
 void APlayerCharacter::OnPlayerBeginOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)
 {
-	const AItemActor* OverlappedItem = Cast<AItemActor>(OtherActor);
-	const EItemType ItemType = OverlappedItem ? OverlappedItem->GetItemType() : EItemType::None;
-	if (ItemType == EItemType::None) // item is not valid
+	if (const AItemActor* OverlappedItem = Cast<AItemActor>(OtherActor))
 	{
-		return;
+		IncrementPowerup(OverlappedItem->GetItemType());
 	}
-
-	const UItemDataAsset& ItemDataAsset = UItemDataAsset::Get();
-
-	const int32 MaxAllowedItemsNum = ItemDataAsset.GetMaxAllowedItemsNum();
-	auto IncrementIfAllowed = [MaxAllowedItemsNum](int32& NumRef, int32 ClampMax = INDEX_NONE)
-	{
-		NumRef = FMath::Clamp(NumRef + 1, 0, ClampMax == INDEX_NONE ? MaxAllowedItemsNum : ClampMax);
-	};
-
-	switch (ItemType)
-	{
-		case EItemType::Skate:
-		{
-			IncrementIfAllowed(PowerupsInternal.SkateN);
-			break;
-		}
-		case EItemType::Bomb:
-		{
-			IncrementIfAllowed(PowerupsInternal.BombN);
-			IncrementIfAllowed(PowerupsInternal.BombNCurrent, PowerupsInternal.BombN);
-			break;
-		}
-		case EItemType::Fire:
-		{
-			IncrementIfAllowed(PowerupsInternal.FireN);
-			break;
-		}
-		default:
-			break;
-	}
-
-	ApplyPowerups();
 }
 
 // Listen to manage the tick
@@ -771,6 +800,8 @@ void APlayerCharacter::SetCustomPlayerMeshData(const FCustomPlayerMeshData& Cust
 	}
 
 	PlayerMeshDataInternal = CustomPlayerMeshData;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PlayerMeshDataInternal, this);
+
 	ApplyCustomPlayerMeshData();
 
 	if (!HasAuthority())
@@ -782,8 +813,7 @@ void APlayerCharacter::SetCustomPlayerMeshData(const FCustomPlayerMeshData& Cust
 // Set and apply how a player has to look lik
 void APlayerCharacter::ServerSetCustomPlayerMeshData_Implementation(const FCustomPlayerMeshData& CustomPlayerMeshData)
 {
-	PlayerMeshDataInternal = CustomPlayerMeshData;
-	ApplyCustomPlayerMeshData();
+	SetCustomPlayerMeshData(CustomPlayerMeshData);
 }
 
 // Set and apply new skeletal mesh from current data
@@ -889,9 +919,8 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 		UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
 		checkf(MapComponent, TEXT("ERROR: [%i] %s:\n'MapComponent' is null!"), __LINE__, *FString(__FUNCTION__));
 
-		// Updating explosion cells
-		PlayerCharacter->PowerupsInternal.BombNCurrent--;
-		PlayerCharacter->ApplyPowerups();
+		const int32 DecrementedCurrentNum = PlayerCharacter->GetPowerups().BombNCurrent - 1;
+		PlayerCharacter->SetCurrentBombNum(DecrementedCurrentNum);
 
 		// Init Bomb
 		BombActor->InitBomb(PlayerCharacter);
@@ -902,6 +931,21 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 
 	// Spawn bomb
 	AGeneratedMap::Get().SpawnActorByType(EAT::Bomb, MapComponentInternal->GetCell(), OnBombSpawned);
+}
+
+// Changes the amount of currently available bombs for this player, can be called only on the server
+void APlayerCharacter::SetCurrentBombNum(int32 NewBombNum)
+{
+	if (!HasAuthority()
+		|| NewBombNum == PowerupsInternal.BombNCurrent)
+	{
+		return;
+	}
+
+	PowerupsInternal.BombNCurrent = NewBombNum;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PowerupsInternal, this);
+
+	ApplyPowerups();
 }
 
 // Event triggered when the bomb has been explicitly destroyed.
@@ -918,7 +962,7 @@ void APlayerCharacter::OnBombDestroyed_Implementation(UMapComponent* MapComponen
 
 	if (PowerupsInternal.BombNCurrent < PowerupsInternal.BombN)
 	{
-		++PowerupsInternal.BombNCurrent;
-		ApplyPowerups();
+		const int32 IncrementedCurrentNum = PowerupsInternal.BombNCurrent + 1;
+		SetCurrentBombNum(IncrementedCurrentNum);
 	}
 }

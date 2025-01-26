@@ -64,7 +64,7 @@ The project has been tested and verified to run on the following platforms:
 
 This project could be useful for learners, demonstrating next features:
 
-- Multiplayer
+- Push Model networking
 - Procedurally generated playfield
 - Challenging AI
 - Enhanced Input
@@ -103,6 +103,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 ## 📅 Changelog
 #### `2025-XX-XX:`
 - Updated to **Unreal Engine 5.5**.
+- Enabled the **Push Model** networking.
 - Added new skins for each character by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
 > ![NewSkins](https://github.com/user-attachments/assets/11decad0-fa4c-45ff-ba33-9a6e2d805773)
  ---

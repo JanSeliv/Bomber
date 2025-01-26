@@ -119,7 +119,7 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 	if (BombPlacer) // Might be null if spawned from external source (e.g. cheat manager)
 	{
 		// Set bomb placer, so others can track who spawned the bomb, e.g: to record the score 
-		BombPlacerInternal = BombPlacer;
+		SetBombPlacer(BombPlacer);
 
 		InFireRadius = BombPlacer->GetPowerups().FireN;
 
@@ -138,12 +138,38 @@ void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 #endif //!UE_BUILD_SHIPPING
 
 	// Set fire radius (from player, cheat manager or default) and update explosion cells
-	FireRadiusInternal = InFireRadius;
+	SetFireRadius(InFireRadius);
 	UpdateExplosionCells();
 
 	InitCollisionResponseToAllPlayers();
 
 	ApplyMaterial();
+}
+
+// Sets new radius of the blast to each side of the bomb, can be called on the server-only
+void ABombActor::SetFireRadius(int32 InFireRadius)
+{
+	if (!HasAuthority()
+	    || FireRadiusInternal == InFireRadius)
+	{
+		return;
+	}
+
+	FireRadiusInternal = InFireRadius;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, FireRadiusInternal, this);
+}
+
+// Sets the character who placed the bomb, can be called on the server-only
+void ABombActor::SetBombPlacer(const APlayerCharacter* InBombPlacer)
+{
+	if (!HasAuthority()
+	    || BombPlacerInternal == InBombPlacer)
+	{
+		return;
+	}
+
+	BombPlacerInternal = InBombPlacer;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, BombPlacerInternal, this);
 }
 
 // Show current explosion cells if the bomb type is allowed to be displayed, is not available in shipping build
@@ -178,7 +204,7 @@ void ABombActor::DetonateBomb()
 	SetLifeSpan();
 
 	// Reset Fire Radius to avoid destroying the bomb again
-	FireRadiusInternal = 0;
+	SetFireRadius(0);
 
 	PlayExplosionsCue();
 
@@ -340,8 +366,11 @@ void ABombActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, FireRadiusInternal);
-	DOREPLIFETIME(ThisClass, BombPlacerInternal);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, FireRadiusInternal, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, BombPlacerInternal, Params);
 }
 
 // Set the lifespan of this actor. When it expires the object will be destroyed
@@ -410,7 +439,7 @@ void ABombActor::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponen
 		MapComponentInternal->OnCellChanged.RemoveAll(this);
 	}
 
-	BombPlacerInternal = nullptr;
+	SetBombPlacer(nullptr);
 
 	LocalExplosionCellsInternal = FCell::EmptyCells;
 }

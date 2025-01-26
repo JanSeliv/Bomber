@@ -104,6 +104,8 @@ void AMyPlayerState::SetEndGameState(EEndGameState NewEndGameState)
 	}
 
 	EndGameStateInternal = NewEndGameState;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, EndGameStateInternal, this);
+
 	ApplyEndGameState();
 }
 
@@ -219,6 +221,8 @@ void AMyPlayerState::SetCharacterDead(bool bIsDead)
 	}
 
 	bIsCharacterDeadInternal = bIsDead;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bIsCharacterDeadInternal, this);
+
 	ApplyIsCharacterDead();
 }
 
@@ -267,7 +271,21 @@ void AMyPlayerState::SetOpponentKilled(const class APlayerCharacter* KilledOppon
 		return;
 	}
 
-	OpponentsKilledNumInternal++;
+	const int32 NewValue = OpponentsKilledNumInternal + 1;
+	SetOpponentKilledNum(NewValue);
+}
+
+void AMyPlayerState::SetOpponentKilledNum(int32 NewOpponentsKilledNum)
+{
+	if (!HasAuthority()
+	    || NewOpponentsKilledNum == OpponentsKilledNumInternal)
+	{
+		return;
+	}
+
+	OpponentsKilledNumInternal = NewOpponentsKilledNum;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, OpponentsKilledNumInternal, this);
+
 	ApplyOpponentsKilledNum();
 }
 
@@ -284,18 +302,6 @@ void AMyPlayerState::ApplyOpponentsKilledNum()
 	{
 		OnOpponentsKilledNumChanged.Broadcast(OpponentsKilledNumInternal);
 	}
-}
-
-void AMyPlayerState::ResetOpponentsKilledNum()
-{
-	if (!HasAuthority()
-	    || OpponentsKilledNumInternal <= 0)
-	{
-		return;
-	}
-
-	OpponentsKilledNumInternal = 0;
-	ApplyOpponentsKilledNum();
 }
 
 /*********************************************************************************************
@@ -447,7 +453,7 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 		case ECGS::InGame:
 		{
 			SetCharacterDead(false);
-			ResetOpponentsKilledNum();
+			SetOpponentKilledNum(0);
 			SetEndGameState(EEndGameState::None);
 			break;
 		}
@@ -470,9 +476,12 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, EndGameStateInternal);
-	DOREPLIFETIME(ThisClass, bIsCharacterDeadInternal);
-	DOREPLIFETIME(ThisClass, OpponentsKilledNumInternal);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, EndGameStateInternal, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bIsCharacterDeadInternal, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OpponentsKilledNumInternal, Params);
 
 	// APlayerState::bIsABot private property has replication condition as 'Initial'
 	// Reset to default condition, so the same player state can change its type without respawn

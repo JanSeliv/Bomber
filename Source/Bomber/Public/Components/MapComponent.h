@@ -98,7 +98,7 @@ public:
 protected:
 	/** Represents the point location of the level actor owner on the Generated Map.
 	 * Is not replicated here, but in the Map Components Container which is changed by the Generated Map. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, Replicated, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "Cell"))
 	FCell LocalCellInternal = FCell::InvalidCell;
 
 	/*********************************************************************************************

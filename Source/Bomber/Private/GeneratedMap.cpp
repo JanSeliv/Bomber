@@ -894,8 +894,11 @@ void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, GridCellsInternal);
-	DOREPLIFETIME(ThisClass, MapComponentsInternal);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, GridCellsInternal, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MapComponentsInternal, Params);
 }
 
 // Spawns and fills the Grid Array values by level actors
@@ -1120,6 +1123,7 @@ void AGeneratedMap::BuildGridCells(const FTransform& Transform)
 	SetActorTransform(NewGridTransform);
 
 	GridCellsInternal = NewGridCells.Array();
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GridCellsInternal, this);
 }
 
 // Scales dragged cells according new grid if sizes are different

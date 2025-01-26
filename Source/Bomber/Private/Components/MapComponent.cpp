@@ -131,6 +131,7 @@ void UMapComponent::SetMesh(UStreamableRenderAsset* NewMesh)
 		const int32 NewRowIndex = NewRow ? ActorDataAssetInternal->GetIndexByRow(NewRow) : INDEX_NONE;
 		ensureMsgf(!NewMesh || NewRowIndex != INDEX_NONE, TEXT("ASSERT: [%i] %hs:\nAttempted to set the '%s' mesh on '%s' actor that is not stored in the '%s' data asset!"), __LINE__, __FUNCTION__, *GetNameSafe(NewMesh), *GetNameSafe(Owner), *GetNameSafe(ActorDataAssetInternal));
 		RowIndexInternal = NewRowIndex;
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, RowIndexInternal, this);
 
 		// On server, broadcast event; clients will get notify later by replicating the RowIndex
 		OnActorTypeChanged.Broadcast(this, NewRow, PreviousRow);
@@ -345,7 +346,10 @@ void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, RowIndexInternal);
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RowIndexInternal, Params);
 }
 
 /*********************************************************************************************
