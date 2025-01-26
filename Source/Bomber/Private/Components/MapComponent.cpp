@@ -320,7 +320,11 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 		ComponentOwner->SetActorEnableCollision(false);
 
 		// Delete spawned collision component
-		BoxCollisionComponentInternal->DestroyComponent();
+		if (IsValid(BoxCollisionComponentInternal))
+		{
+			BoxCollisionComponentInternal->DestroyComponent();
+			BoxCollisionComponentInternal = nullptr;
+		}
 
 		if (UUtilsLibrary::IsEditorNotPieWorld())
 		{
