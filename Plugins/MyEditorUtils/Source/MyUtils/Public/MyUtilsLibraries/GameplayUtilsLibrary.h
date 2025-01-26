@@ -16,23 +16,6 @@ class MYUTILS_API UGameplayUtilsLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-public:
-	/*********************************************************************************************
-	 * Multiplayer Helpers
-	 ********************************************************************************************* */
-public:
-	/** Returns true if this instance has authority. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static bool IsServer();
-
-	/** Returns true if any client is connected to the game. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static FORCEINLINE bool IsMultiplayerGame() { return GetPlayersInMultiplayerNum() > 1; }
-
-	/** Returns amount of players (host + clients) playing this game. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static int32 GetPlayersInMultiplayerNum();
-
 	/*********************************************************************************************
 	 * Actor Helpers
 	 ********************************************************************************************* */

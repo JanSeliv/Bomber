@@ -2,59 +2,23 @@
 
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 //---
-#include "MyUtilsLibraries/UtilsLibrary.h"
-//---
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/CurveTable.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
-#include "Engine/World.h"
-#include "GameFramework/GameStateBase.h"
-#include "GameFramework/PlayerState.h"
 #include "GameFramework/SaveGame.h"
-#include "HAL/FileManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/ConfigCacheIni.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayUtilsLibrary)
 
 /*********************************************************************************************
- * Multiplayer Helpers
+ * Actor Helpers
  ********************************************************************************************* */
 
-// Returns true if this instance has authority
-bool UGameplayUtilsLibrary::IsServer()
-{
-	const UWorld* World = UUtilsLibrary::GetPlayWorld();
-	return World && !World->IsNetMode(NM_Client);
-}
-
-// Returns amount of players (host + clients) playing this game
-int32 UGameplayUtilsLibrary::GetPlayersInMultiplayerNum()
-{
-	int32 PlayersNum = 0;
-
-	const UWorld* World = UUtilsLibrary::GetPlayWorld();
-	const AGameStateBase* GameState = World ? World->GetGameState() : nullptr;
-	if (!GameState)
-	{
-		return PlayersNum;
-	}
-
-	for (const APlayerState* PlayerStateIt : GameState->PlayerArray)
-	{
-		if (PlayerStateIt && !PlayerStateIt->IsABot())
-		{
-			++PlayersNum;
-		}
-	}
-
-	return PlayersNum;
-}
-
 // Abstract getter that allows to obtain the static or skeletal mesh from given mesh component (base class of both)
-class UStreamableRenderAsset* UGameplayUtilsLibrary::GetMesh(const class UMeshComponent* MeshComponent)
+class UStreamableRenderAsset* UGameplayUtilsLibrary::GetMesh(const UMeshComponent* MeshComponent)
 {
 	if (const USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponent))
 	{
@@ -68,10 +32,6 @@ class UStreamableRenderAsset* UGameplayUtilsLibrary::GetMesh(const class UMeshCo
 
 	return nullptr;
 }
-
-/*********************************************************************************************
- * Actor Helpers
- ********************************************************************************************* */
 
 // Abstract method that allows set both static and skeletal meshes to the specified mesh component
 void UGameplayUtilsLibrary::SetMesh(UMeshComponent* MeshComponent, UStreamableRenderAsset* MeshAsset)
