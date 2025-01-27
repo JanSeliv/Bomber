@@ -87,6 +87,8 @@ ECurrentGameState AMyGameStateBase::GetPreviousGameState()
 // Updates current game state
 void AMyGameStateBase::ApplyGameState()
 {
+	TRACE_BOOKMARK(TEXT("%s"), *UEnum::GetValueAsString(ReplicatedGameStateInternal));
+
 	LocalPreviousGameStateInternal = LocalGameStateInternal;
 	LocalGameStateInternal = ReplicatedGameStateInternal;
 

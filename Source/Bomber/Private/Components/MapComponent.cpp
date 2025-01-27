@@ -369,6 +369,8 @@ bool UMapComponent::OnConstructionOwnerActor_Implementation()
 		return false;
 	}
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(UMapComponent::OnConstructionOwnerActor);
+
 	// Check the object state in the Pool Manager
 	UPoolManagerSubsystem& PoolManager = UPoolManagerSubsystem::Get();
 	const EPoolObjectState PoolObjectState = PoolManager.GetPoolObjectState(Owner);

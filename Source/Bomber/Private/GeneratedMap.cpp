@@ -310,6 +310,8 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 		return;
 	}
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(AGeneratedMap::SpawnActorByType);
+
 	// --- Prepare spawn request
 	const TWeakObjectPtr<ThisClass> WeakThis(this);
 	const FOnSpawnCallback OnCompleted = [WeakThis, OnSpawned](const FPoolObjectData& CreatedObject)
@@ -593,6 +595,8 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	{
 		return;
 	}
+
+	TRACE_CPUPROFILER_EVENT_SCOPE(AGeneratedMap::DestroyLevelActor);
 
 	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
 	if (!ComponentOwner)
@@ -909,6 +913,8 @@ void AGeneratedMap::GenerateLevelActors()
 	{
 		return;
 	}
+
+	TRACE_CPUPROFILER_EVENT_SCOPE(AGeneratedMap::GenerateLevelActors);
 
 	// Destroy all actors first
 	// Iterate it by handles to cancel spawning even if the actor is not spawned yet

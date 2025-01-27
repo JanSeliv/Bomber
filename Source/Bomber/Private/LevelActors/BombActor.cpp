@@ -263,6 +263,8 @@ void ABombActor::PlayExplosionsCue(const UBombRow* BombRow/* = nullptr*/)
 		return;
 	}
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(ABombActor::PlayExplosionsCue);
+
 	if (!BombRow)
 	{
 		// Row is optional, if null, then it's taken from current bomb type
