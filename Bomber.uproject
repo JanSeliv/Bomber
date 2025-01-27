@@ -17,19 +17,7 @@
 	],
 	"Plugins": [
 		{
-			"Name": "MagicLeapMedia",
-			"Enabled": false
-		},
-		{
-			"Name": "MagicLeap",
-			"Enabled": false
-		},
-		{
 			"Name": "Fab",
-			"Enabled": false
-		},
-		{
-			"Name": "Bridge",
 			"Enabled": false
 		},
 		{
