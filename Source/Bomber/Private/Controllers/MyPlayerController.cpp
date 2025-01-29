@@ -44,6 +44,9 @@ AMyPlayerController::AMyPlayerController()
 
 	// Create the mouse activity component, so it will be responsible for mouse visibility
 	MouseComponentInternal = CreateDefaultSubobject<UMouseActivityComponent>(TEXT("MouseActivityComponent"));
+
+	// Attach to pawn by default, so controller has always valid location: is useful for replication
+	bAttachToPawn = true;
 }
 
 /*********************************************************************************************

@@ -10,13 +10,16 @@ public class Bomber : ModuleRules
 		CppStandard = CppStandardVersion.Latest;
 		bEnableNonInlinedGenCppWarnings = true;
 
+		// Network: enable Iris replication
+		const bool bAddAsPublicDependency = true; // Created FMapComponentsContainer
+		SetupIrisSupport(Target, bAddAsPublicDependency);
+
 		PublicDependencyModuleNames.AddRange(new[]
 		    {
                 "Core" // Core
                 , "UMG" // UUserWidget creation
                 , "EnhancedInput" // Created UMyInputAction, UMyInputMappingContext
                 , "DeveloperSettings" // Created UDataAssetsContainer
-                , "NetCore" // Created FMapComponentsContainer
                 //My modules
                 , "FunctionPicker" // Created properties in UMyInputAction
                 , "MetaCheatManager" // Created UMyCheatManager
@@ -28,6 +31,7 @@ public class Bomber : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
+				, "NetCore" // Network: FFastArraySerializer, PushModel, Iris
 				, "InputCore" // FKey
 				, "RHI", "ApplicationCore" // Resolutions
 				, "AIModule" // AI

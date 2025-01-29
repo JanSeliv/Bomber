@@ -497,7 +497,8 @@ void APlayerCharacter::OnGameStateChanged_Implementation(ECurrentGameState Curre
 // Is called on game mode post login to handle character logic when new player is connected
 void APlayerCharacter::OnPostLogin_Implementation(AGameModeBase* GameMode, APlayerController* NewPlayer)
 {
-	TryPossessController();
+	constexpr bool bForcePlayerController = true;
+	TryPossessController(bForcePlayerController);
 
 	if (GetController() == NewPlayer)
 	{
@@ -633,9 +634,10 @@ bool APlayerCharacter::IsPlayerControlled() const
 }
 
 // Possess a player or AI controller in dependence of current Character ID
-void APlayerCharacter::TryPossessController()
+void APlayerCharacter::TryPossessController(bool bForcePlayerController/* = false*/)
 {
 	if (!HasAuthority()
+		|| !IsActorInitialized() // Engine doesn't allow posses before BeginPlay\PostInitializeComponents
 	    || UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not possess in PIE
@@ -652,7 +654,8 @@ void APlayerCharacter::TryPossessController()
 
 	AController* ControllerToPossess = nullptr;
 
-	if (IsPlayerControlled())
+	if (IsPlayerControlled()
+		|| bForcePlayerController)
 	{
 		AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId);
 		if (MyPC
@@ -937,7 +940,7 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 void APlayerCharacter::SetCurrentBombNum(int32 NewBombNum)
 {
 	if (!HasAuthority()
-		|| NewBombNum == PowerupsInternal.BombNCurrent)
+	    || NewBombNum == PowerupsInternal.BombNCurrent)
 	{
 		return;
 	}

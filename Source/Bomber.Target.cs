@@ -10,5 +10,8 @@ public class BomberTarget : TargetRules
         IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
         DefaultBuildSettings = BuildSettingsVersion.Latest;
         ExtraModuleNames.AddRange(new[] {"Bomber"});
+
+		// Network: enable the Iris replication
+		bUseIris = true;
     }
 }

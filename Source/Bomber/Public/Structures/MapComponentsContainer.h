@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Net/Serialization/FastArraySerializer.h"
+#include "Iris/ReplicationState/IrisFastArraySerializer.h"
 //---
 #include "Cell.h"
 #include "PoolManagerTypes.h" // FPoolObjectHandle
@@ -101,7 +101,7 @@ public:
  * PostReplicatedChange can be added to handle custom logic after the array has been replicated.
  */
 USTRUCT(BlueprintType)
-struct BOMBER_API FMapComponentsContainer : public FFastArraySerializer
+struct BOMBER_API FMapComponentsContainer : public FIrisFastArraySerializer
 {
 	GENERATED_BODY()
 

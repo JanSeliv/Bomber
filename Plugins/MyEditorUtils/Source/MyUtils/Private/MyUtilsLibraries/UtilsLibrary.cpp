@@ -95,13 +95,13 @@ int32 UUtilsLibrary::GetEditorPlayerIndex()
 // Returns true if game was started
 bool UUtilsLibrary::HasWorldBegunPlay()
 {
-	if (IsPIE())
-	{
-		return true;
-	}
-
-	const UWorld* World = GetPlayWorld();
-	return World && World->HasBegunPlay();
+	// Check if the world has begun play only in the editor, otherwise assume the world is always playing (in -game or cook)
+#if WITH_EDITOR
+	const bool bIsMinusGame = !FEditorUtilsLibrary::IsEditor();
+	return bIsMinusGame || FEditorUtilsLibrary::IsPIE();
+#else
+	return true;
+#endif
 }
 
 // Returns true if viewport is initialized, is always true in PIE, but takes a while in builds

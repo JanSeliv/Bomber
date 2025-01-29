@@ -206,9 +206,10 @@ public:
 	/** Is overridden to determine additional conditions for the player-controlled character. */
 	virtual bool IsPlayerControlled() const override;
 
-	/** Possess a player or AI controller in dependence of current Character ID. */
+	/** Possess a player or AI controller in dependence of current Character ID.
+	 * @param bForcePlayerController If true, will force the player controller to possess this character. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void TryPossessController();
+	void TryPossessController(bool bForcePlayerController = false);
 
 	/** Move the player character. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
