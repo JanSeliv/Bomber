@@ -4,8 +4,8 @@
 
 #include "Iris/ReplicationState/IrisFastArraySerializer.h"
 //---
-#include "Cell.h"
 #include "PoolManagerTypes.h" // FPoolObjectHandle
+#include "Engine/NetSerialization.h" // FVector_NetQuantize
 //---
 #include "MapComponentsContainer.generated.h"
 
@@ -17,6 +17,7 @@
  *********************************************************************************************/
 
 struct FMapComponentsContainer;
+struct FCell;
 
 class UMapComponent;
 
@@ -39,9 +40,10 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 	TObjectPtr<UMapComponent> MapComponent = nullptr;
 
 	/** The position of the map component on the level.
-	 * Is replicated much faster than the component itself. */
+	 * Replicated here instead of in the component to stay in sync with the array, avoiding component replication delay
+	 * Uses NetQuantize to optimize network traffic */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FCell Cell = FCell::InvalidCell;
+	FVector_NetQuantize Cell;
 
 	/** Unique ID of Map Component's owner actor in the Pool Manager.
 	 * Is useful to track the owner actor lifecycle even it is not spawned yet, but its Spawn Request is in queue.

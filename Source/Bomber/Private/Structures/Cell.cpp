@@ -2,6 +2,8 @@
 
 #include "Structures/Cell.h"
 //---
+#include "Engine/NetSerialization.h"
+//---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Cell)
 
 const FCell FCell::InvalidCell = FCell(0.f, 0.f, -1.f);
@@ -19,6 +21,9 @@ FCell::FCell(const FVector& Vector)
 	Location.Y = FMath::RoundToFloat(Vector.Y);
 	Location.Z = FMath::RoundToFloat(Vector.Z);
 }
+
+FCell::FCell(const FVector_NetQuantize& Vector)
+	: FCell(FVector(Vector)) {}
 
 // Floats to cell constructor
 FCell::FCell(float X, float Y, float Z)
@@ -40,6 +45,12 @@ FCell::FCell(double X, double Y, double Z)
 FCell& FCell::operator=(const FVector& Vector)
 {
 	Location = Vector;
+	return *this;
+}
+
+FCell& FCell::operator=(const FVector_NetQuantize& Vector)
+{
+	Location = FVector(Vector);
 	return *this;
 }
 
@@ -477,6 +488,12 @@ FCell& FCell::operator-=(const FCell& Other)
 /*********************************************************************************************
  * Conversion
  ********************************************************************************************* */
+
+// Vector operator to return cell location
+FCell::operator FVector_NetQuantize() const
+{
+	return FVector_NetQuantize(Location);
+}
 
 // Returns the cell direction by its enum.
 const FCell& FCell::GetCellDirection(ECellDirection CellDirection)

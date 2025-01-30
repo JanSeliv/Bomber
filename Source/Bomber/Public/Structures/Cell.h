@@ -5,6 +5,7 @@
 #include "Cell.generated.h"
 
 struct FCell;
+struct FVector_NetQuantize;
 
 /** Typedef to allow for some nicer looking sets of cells. */
 typedef TSet<FCell> FCells;
@@ -69,6 +70,7 @@ struct BOMBER_API FCell
 
 	/** Vector to cell constructor. */
 	FCell(const FVector& Vector);
+	FCell(const FVector_NetQuantize& Vector);
 
 	/** Floats to cell constructor. */
 	explicit FCell(float X, float Y, float Z);
@@ -78,6 +80,7 @@ struct BOMBER_API FCell
 
 	/** Equal operator for vectors to directly copy its value to the cell. */
 	FCell& operator=(const FVector& Vector);
+	FCell& operator=(const FVector_NetQuantize& Vector);
 
 	/** Returns Cell's X component. */
 	float X() const { return Location.X; }
@@ -228,6 +231,7 @@ public:
 public:
 	/** Vector operator to return cell location. */
 	FORCEINLINE operator FVector() const { return this->Location; }
+	operator FVector_NetQuantize() const;
 
 	/** Returns the cell as a string. */
 	FString ToString() const { return FVector2D(Location).ToString(); }
