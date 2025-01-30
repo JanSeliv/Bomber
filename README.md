@@ -103,7 +103,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 ## 📅 Changelog
 #### `2025-XX-XX:`
 - Updated to **Unreal Engine 5.5**.
-- Migrated networking to the **Push Model** and **Iris** replication.
+- Migrated networking to the **Push Model** and **Iris** replication, [resulting](https://trello.com/c/A3kK1Uqj) in significant improvement to network efficiency.
 - Added new skins for each character by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
 > ![NewSkins](https://github.com/user-attachments/assets/11decad0-fa4c-45ff-ba33-9a6e2d805773)
  ---
