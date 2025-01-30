@@ -153,7 +153,7 @@ void AGeneratedMap::GetSidesCells(
 	}
 
 	// the index of the specified cell
-	const int32 C0 = GridCellsInternal.IndexOfByPredicate([&Cell](const FCell& InCell) { return InCell == Cell; });
+	const int32 C0 = LocalGridCellsInternal.IndexOfByPredicate([&Cell](const FCell& InCell) { return InCell == Cell; });
 	if (C0 == INDEX_NONE) // if index was found and cell is contained in the array
 	{
 		return;
@@ -213,12 +213,12 @@ void AGeneratedMap::GetSidesCells(
 				}
 				const int32 FoundIndex = C0 + Distance;
 				if (PositionC0 != (bIsY ? FoundIndex % MaxWidth : FoundIndex / MaxWidth) // PositionC0 != PositionX
-				    || !GridCellsInternal.IsValidIndex(FoundIndex))                      // is not in range
+				    || !LocalGridCellsInternal.IsValidIndex(FoundIndex))                 // is not in range
 				{
 					break; // to the next side
 				}
 
-				const FCell FoundCell = GridCellsInternal[FoundIndex];
+				const FCell FoundCell = LocalGridCellsInternal[FoundIndex];
 
 				if (bBreakOnWalls
 				    && Walls.Contains(FoundCell))
@@ -265,8 +265,8 @@ bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells
 	}
 
 	// Contains all cells need to find their side cells
-	check(GridCellsInternal.IsValidIndex(0));
-	FCells CellsToIterate{GridCellsInternal[0]};
+	checkf(!LocalGridCellsInternal.IsEmpty(), TEXT("ERROR: [%i] %hs:\n'LocalGridCellsInternal' is empty!"), __LINE__, __FUNCTION__);
+	FCells CellsToIterate{LocalGridCellsInternal[0]};
 
 	FCells FoundCells = FCell::EmptyCells;
 	while (CellsToIterate.Num())
@@ -484,7 +484,7 @@ void AGeneratedMap::IntersectCellsByTypes(
 	int32 ActorsTypesBitmask,
 	bool bIntersectAllIfEmpty) const
 {
-	if (!GridCellsInternal.Num())
+	if (LocalGridCellsInternal.IsEmpty())
 	{
 		// nothing to intersect
 		return;
@@ -500,7 +500,7 @@ void AGeneratedMap::IntersectCellsByTypes(
 	{
 		// Find all empty grid cell locations where non of actors are present
 		const FCells AllEmptyCells = FCells(
-			GridCellsInternal.FilterByPredicate([&MapComponents = MapComponentsInternal](const FCell& CellIt)
+			LocalGridCellsInternal.FilterByPredicate([&MapComponents = MapComponentsInternal](const FCell& CellIt)
 			{
 				return !MapComponents.Contains(CellIt);
 			}));
@@ -787,7 +787,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 void AGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransform& Transform)
 {
 	if (IS_TRANSIENT(this)
-	    || !HasAuthority())
+	    || !ensureMsgf(!Transform.GetScale3D().IsZero(), TEXT("ASSERT: [%i] %hs:\n'Transform' has zero scale!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
@@ -901,14 +901,13 @@ void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, GridCellsInternal, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MapComponentsInternal, Params);
 }
 
 // Spawns and fills the Grid Array values by level actors
 void AGeneratedMap::GenerateLevelActors()
 {
-	if (!ensureMsgf(!GridCellsInternal.IsEmpty(), TEXT("ASSERT: [%i] %hs:\nThere are no cells on the Generated Map!"), __LINE__, __FUNCTION__)
+	if (!ensureMsgf(!LocalGridCellsInternal.IsEmpty(), TEXT("ASSERT: [%i] %hs:\nThere are no cells on the Generated Map!"), __LINE__, __FUNCTION__)
 	    || !HasAuthority())
 	{
 		return;
@@ -988,7 +987,7 @@ void AGeneratedMap::GenerateLevelActors()
 				const bool bIsSafeA = X == 0 && Y == 1;
 				const bool bIsSafeB = X == 1 && Y == 0;
 				const bool IsSafeZone = bIsSafeA || bIsSafeB;
-				FCell CellIt = GridCellsInternal[MapScale.X * Y + X];
+				FCell CellIt = LocalGridCellsInternal[MapScale.X * Y + X];
 
 				// --- Part 0: Actors random filling to the ArrayToGenerate._ ---
 
@@ -1043,7 +1042,7 @@ void AGeneratedMap::GenerateLevelActors()
 								break;
 						}
 
-						CellIt = GridCellsInternal[MapScale.X * Yi + Xi];
+						CellIt = LocalGridCellsInternal[MapScale.X * Yi + Xi];
 					}
 
 					if (!LDraggedCells.Contains(CellIt)) // the cell is free
@@ -1116,20 +1115,23 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 // Align transform and build cells
 void AGeneratedMap::BuildGridCells(const FTransform& Transform)
 {
-	if (!HasAuthority())
+	const FTransform NewGridTransform = ActorTransformToGridTransform(Transform);
+	if (UCellsUtilsLibrary::GetLevelGridTransform().Equals(NewGridTransform))
 	{
+		// Do not rebuild if the transform is the same
 		return;
 	}
 
-	const FTransform NewGridTransform = ActorTransformToGridTransform(Transform);
 	const FCells NewGridCells = FCell::MakeCellGridByTransform(NewGridTransform);
 
-	ScaleDraggedCellsOnGrid(FCells{GridCellsInternal}, NewGridCells);
+	ScaleDraggedCellsOnGrid(FCells{LocalGridCellsInternal}, NewGridCells);
 
-	SetActorTransform(NewGridTransform);
+	if (HasAuthority())
+	{
+		SetActorTransform(NewGridTransform);
+	}
 
-	GridCellsInternal = NewGridCells.Array();
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GridCellsInternal, this);
+	LocalGridCellsInternal = NewGridCells.Array();
 }
 
 // Scales dragged cells according new grid if sizes are different

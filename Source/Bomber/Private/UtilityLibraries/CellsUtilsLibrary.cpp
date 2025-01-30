@@ -110,7 +110,7 @@ void UCellsUtilsLibrary::GetPositionByCellOnLevel(const FCell& InCell, int32& Ou
 const FCellsArr& UCellsUtilsLibrary::GetAllCellsOnLevelAsArray()
 {
 	const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap();
-	return GeneratedMap ? GeneratedMap->GridCellsInternal : FCell::EmptyCellsArr;
+	return GeneratedMap ? GeneratedMap->LocalGridCellsInternal : FCell::EmptyCellsArr;
 }
 
 // Returns the cell location of the Generated Map

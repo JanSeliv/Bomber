@@ -182,9 +182,10 @@ protected:
 
 	/** Cells storage. Is separated from MapComponents array,
 	 * since GridCells is changing rarely (only when the level size is changed).
-	 * It means, each cell represents a tile on the level, even if there is no Map Component on it. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
-	TArray<FCell> GridCellsInternal = FCell::EmptyCellsArr;
+	 * It means, each cell represents a tile on the level, even if there is no Map Component on it.
+	 * Is not replicated and building locally on each instance based on replicated actor transform of the Generated Map. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
+	TArray<FCell> LocalGridCellsInternal = FCell::EmptyCellsArr;
 
 	/** Map components of all level actors currently spawned on the Generated Map.
 	 * Is changing during the game on explosions and on the level regeneration.
@@ -214,11 +215,11 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Is called on a this Generated Map actor construction, could be called multiple times.
+	/** Is called on this Generated Map actor construction or when level size (transform) is changed, on both server and clients.
 	 * See the call stack below for more details:
 	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::OnConstructionGeneratedMap().
-	 * @warning Do not call directly. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	 * @warning Do not call directly, but change the actor transform instead. */
+	UFUNCTION(BlueprintNativeEvent, Category = "C++", meta = (BlueprintProtected))
 	void OnConstructionGeneratedMap(const FTransform& Transform);
 
 	/** Called right before components are initialized, only called during gameplay. */
@@ -280,9 +281,10 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
 
-	/** Align transform and build cells.
-	* @param Transform New transform of the Generated Map. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
+	/** Align transform and build cells, on both server and clients.
+	 * Is called everytime the level size (transform) is changed.
+	 * @param Transform New transform of the Generated Map. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void BuildGridCells(const FTransform& Transform);
 
 	/** Scales dragged cells according new grid if sizes are different. */
