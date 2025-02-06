@@ -10,7 +10,6 @@
 #include "DataAssets/LevelActorDataAsset.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/GeneratedMapSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
 //---
@@ -312,26 +311,14 @@ void UMapComponent::OnRegister()
 // Called when a component is destroyed for removing the owner from the Generated Map.
 void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	AActor* ComponentOwner = GetOwner();
+	const AActor* ComponentOwner = GetOwner();
 	if (ComponentOwner && IsValid(this) // Could be called multiple times, make sure it is called once for valid object
-	    && !GExitPurge)                 // Do not call on exit
+		&& !GExitPurge)                 // Do not call on exit
 	{
-		// Disable collision for safety
-		ComponentOwner->SetActorEnableCollision(false);
-
-		// Delete spawned collision component
-		if (IsValid(BoxCollisionComponentInternal))
-		{
-			BoxCollisionComponentInternal->DestroyComponent();
-			BoxCollisionComponentInternal = nullptr;
-		}
-
 		if (UUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// The owner was removed from the editor level
-			const UGeneratedMapSubsystem* GeneratedMapSubsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem();
-			AGeneratedMap* GeneratedMap = GeneratedMapSubsystem ? GeneratedMapSubsystem->GetGeneratedMap() : nullptr;
-			if (GeneratedMap) // Can be invalid if remove the Generated Map or opening another map
+			if (AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap()) // Can be invalid if remove the Generated Map or opening another map
 			{
 				GeneratedMap->DestroyLevelActor(this);
 			}
@@ -339,6 +326,13 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 #if WITH_EDITOR
 			UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 #endif
+		}
+
+		// Delete spawned collision component
+		if (IsValid(BoxCollisionComponentInternal))
+		{
+			BoxCollisionComponentInternal->DestroyComponent();
+			BoxCollisionComponentInternal = nullptr;
 		}
 	}
 
