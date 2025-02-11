@@ -44,22 +44,6 @@ UMapComponent::UMapComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-// Rerun owner's construction scripts. The temporary only editor owner will not be updated
-void UMapComponent::ConstructOwnerActor()
-{
-	// Construct the actor's map component
-	const bool bIsConstructed = OnConstructionOwnerActor();
-	if (!bIsConstructed)
-	{
-		return;
-	}
-
-	if (OnOwnerWantsReconstruct.IsBound())
-	{
-		OnOwnerWantsReconstruct.Broadcast();
-	}
-}
-
 /*********************************************************************************************
  * Cell (Location)
  ********************************************************************************************* */
@@ -354,42 +338,13 @@ void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
  * Events
  ********************************************************************************************* */
 
-// Is called on an owner actor construction, could be called multiple times
-bool UMapComponent::OnConstructionOwnerActor_Implementation()
+// Called when this level actor is reconstructed or added on the Generated Map
+bool UMapComponent::OnAdded_Implementation()
 {
 	AActor* Owner = GetOwner();
-	if (IS_TRANSIENT(Owner))
-	{
-		return false;
-	}
+	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
 
-	TRACE_CPUPROFILER_EVENT_SCOPE(UMapComponent::OnConstructionOwnerActor);
-
-	// Check the object state in the Pool Manager
-	UPoolManagerSubsystem& PoolManager = UPoolManagerSubsystem::Get();
-	const EPoolObjectState PoolObjectState = PoolManager.GetPoolObjectState(Owner);
-	if (PoolObjectState == EPoolObjectState::None)
-	{
-		// The owner actor is not in the pool
-		// Most likely it is a dragged actor, since all generated actors are always taken from the pool
-		// Add this object to the pool and continue construction
-		FPoolObjectData ObjectData(Owner);
-		ObjectData.bIsActive = true;
-		PoolManager.RegisterObjectInPool(ObjectData);
-	}
-	else if (PoolObjectState == EPoolObjectState::Inactive)
-	{
-		// Do not reconstruct inactive object
-		return false;
-	}
-
-	// Setup this component on the Generated Map
-	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
-	if (GeneratedMap.SetNearestCell(this)
-	    || UUtilsLibrary::IsEditorNotPieWorld()) // In editor world, always Add to Grid for correct snapping (even if the same cell)
-	{
-		GeneratedMap.AddToGrid(this);
-	}
+	TRACE_CPUPROFILER_EVENT_SCOPE(UMapComponent::OnAdded);
 
 	// Set the default mesh, any system can override it later by calling SetCustomMeshAsset(Mesh). 
 	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
@@ -412,6 +367,9 @@ bool UMapComponent::OnConstructionOwnerActor_Implementation()
 		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
 #endif
 	}
+
+	// Notify listeners about the actor was added to the level
+	OnAddedToLevel.Broadcast(this);
 
 	return true;
 }

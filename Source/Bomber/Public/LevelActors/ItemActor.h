@@ -21,10 +21,6 @@ public:
 	/** Sets default values for this actor's properties */
 	AItemActor();
 
-	/** Initialize an item actor, could be called multiple times. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ConstructItemActor();
-
 	/** Return current item type. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	FORCEINLINE EItemType GetItemType() const { return ItemTypeInternal; }
@@ -53,12 +49,6 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Called when the game starts or when spawned */
-	virtual void BeginPlay() override;
-
-	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
-	virtual void SetActorHiddenInGame(bool bNewHidden) override;
-
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -66,15 +56,16 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
-	/** Is called on an item actor construction, could be called multiple times.
-	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
-	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructItemActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionItemActor().
-	 * @warning Do not call directly, use ThisClass::ConstructItemActor() instead. */
+	/** Called when this level actor is reconstructed or added on the Generated Map.
+	 * Is used by Level Actors instead of the BeginPlay(). */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnConstructionItemActor();
+	void OnAddedToLevel(UMapComponent* MapComponent);
 
 	/** Triggers when this item starts overlap a player character to destroy itself. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnItemBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+
+	/** Called when this level actor is destroyed from the Generated Map. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPostRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
 };

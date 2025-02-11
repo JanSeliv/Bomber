@@ -48,54 +48,6 @@ ABombActor::ABombActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
-// Initialize a bomb actor, could be called multiple times
-void ABombActor::ConstructBombActor()
-{
-	if (IS_TRANSIENT(this)                 // This actor is transient
-	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
-
-	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionBombActor);
-	MapComponentInternal->ConstructOwnerActor();
-
-	// Init bomb by default, if it's spawned from player, it will be reinitialized again
-	InitBomb();
-
-	// Start countdown to destroy the bomb
-	SetLifeSpan();
-
-	// Listen when this bomb is destroyed on the Generated Map by itself or by other actors
-	MapComponentInternal->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
-
-	// Listen for client to react when bomb is reset to play explosions cue
-	MapComponentInternal->OnActorTypeChanged.AddUniqueDynamic(this, &ThisClass::OnActorTypeChanged);
-
-	// Listen for client to react when bomb is added to the level
-	if (!HasAuthority())
-	{
-		const FCell& CurrentCell = MapComponentInternal->GetCell();
-		if (CurrentCell.IsValid())
-		{
-			OnBombCellChanged(MapComponentInternal, CurrentCell, FCell::InvalidCell);
-		}
-		else
-		{
-			// Wait until cell is set (bomb is added to the level)
-			MapComponentInternal->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnBombCellChanged);
-		}
-	}
-
-#if WITH_EDITOR //[IsEditorNotPieWorld]
-	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
-	{
-		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
-	}
-#endif //WITH_EDITOR [IsEditorNotPieWorld]
-}
-
 //  Returns the type of the bomb
 ELevelType ABombActor::GetBombType() const
 {
@@ -360,7 +312,9 @@ void ABombActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	ConstructBombActor();
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	MapComponentInternal->OnAddedToLevel.AddUniqueDynamic(this, &ThisClass::OnAddedToLevel);
+	AGeneratedMap::Get().AddToGrid(MapComponentInternal);
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -407,25 +361,51 @@ void ABombActor::LifeSpanExpired()
 	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal, this);
 }
 
-// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
-void ABombActor::SetActorHiddenInGame(bool bNewHidden)
-{
-	if (!bNewHidden)
-	{
-		// Is added on Generated Map
-
-		ConstructBombActor();
-	}
-
-	// Apply hidden flag
-	Super::SetActorHiddenInGame(bNewHidden);
-}
-
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
 
-// Called when owned map component is destroyed on the Generated Map
+// Called when this level actor is reconstructed or added on the Generated Map
+void ABombActor::OnAddedToLevel_Implementation(UMapComponent* MapComponent)
+{
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+
+	// Init bomb by default, if it's spawned from player, it will be reinitialized again
+	InitBomb();
+
+	// Start countdown to destroy the bomb
+	SetLifeSpan();
+
+	// Listen when this bomb is destroyed on the Generated Map by itself or by other actors
+	MapComponent->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
+
+	// Listen for client to react when bomb is reset to play explosions cue
+	MapComponent->OnActorTypeChanged.AddUniqueDynamic(this, &ThisClass::OnActorTypeChanged);
+
+	// Listen for client to react when bomb is added to the level
+	if (!HasAuthority())
+	{
+		const FCell& CurrentCell = MapComponent->GetCell();
+		if (CurrentCell.IsValid())
+		{
+			OnBombCellChanged(MapComponent, CurrentCell, FCell::InvalidCell);
+		}
+		else
+		{
+			// Wait until cell is set (bomb is added to the level)
+			MapComponent->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnBombCellChanged);
+		}
+	}
+
+#if WITH_EDITOR //[IsEditorNotPieWorld]
+	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
+	{
+		UMyUnrealEdEngine::GOnAIUpdatedDelegate.Broadcast();
+	}
+#endif //WITH_EDITOR [IsEditorNotPieWorld]
+}
+
+// Called when this level actor is destroyed on the Generated Map
 void ABombActor::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
 {
 	if (HasAuthority())

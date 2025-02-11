@@ -35,19 +35,11 @@ AItemActor::AItemActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
-// Initialize an item actor, could be called multiple times
-void AItemActor::ConstructItemActor()
-{
-	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
-	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionItemActor);
-	MapComponentInternal->ConstructOwnerActor();
-}
-
 // Set new item type, can be called on the server-only
 void AItemActor::SetItemType(EItemType NewItemType)
 {
 	if (!HasAuthority()
-		|| ItemTypeInternal == NewItemType)
+	    || ItemTypeInternal == NewItemType)
 	{
 		return;
 	}
@@ -65,31 +57,9 @@ void AItemActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	ConstructItemActor();
-}
-
-// Called when the game starts or when spawned
-void AItemActor::BeginPlay()
-{
-	Super::BeginPlay();
-
-	OnActorBeginOverlap.AddDynamic(this, &AItemActor::OnItemBeginOverlap);
-}
-
-// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
-void AItemActor::SetActorHiddenInGame(bool bNewHidden)
-{
-	Super::SetActorHiddenInGame(bNewHidden);
-
-	if (!bNewHidden)
-	{
-		// Is added on Generated Map
-		ConstructItemActor();
-		return;
-	}
-
-	// Is removed from Generated Map
-	SetItemType(EItemType::None);
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	MapComponentInternal->OnAddedToLevel.AddUniqueDynamic(this, &ThisClass::OnAddedToLevel);
+	AGeneratedMap::Get().AddToGrid(MapComponentInternal);
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -107,14 +77,13 @@ void AItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
  * Events
  ********************************************************************************************* */
 
-// Is called on an item actor construction, could be called multiple times
-void AItemActor::OnConstructionItemActor_Implementation()
+// Called when this level actor is reconstructed or added on the Generated Map
+void AItemActor::OnAddedToLevel_Implementation(UMapComponent* MapComponent)
 {
-	if (IS_TRANSIENT(this)                 // This actor is transient
-	    || !IsValid(MapComponentInternal)) // Is not valid for map construction
-	{
-		return;
-	}
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	MapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
+
+	OnActorBeginOverlap.AddUniqueDynamic(this, &AItemActor::OnItemBeginOverlap);
 
 	// Rand the item type if not set yet
 	if (ItemTypeInternal == EItemType::None)
@@ -127,7 +96,7 @@ void AItemActor::OnConstructionItemActor_Implementation()
 	// Override mesh
 	if (const UItemRow* FoundItemRow = UItemDataAsset::Get().GetRowByItemType(ItemTypeInternal, UMyBlueprintFunctionLibrary::GetLevelType()))
 	{
-		MapComponentInternal->SetMesh(FoundItemRow->Mesh);
+		MapComponent->SetMesh(FoundItemRow->Mesh);
 	}
 }
 
@@ -144,4 +113,15 @@ void AItemActor::OnItemBeginOverlap_Implementation(AActor* OverlappedActor, AAct
 
 	// Destroy itself on overlapping
 	AGeneratedMap::Get().DestroyLevelActor(MapComponentInternal, OtherActor);
+}
+
+// Called when this level actor is destroyed from the Generated Map
+void AItemActor::OnPostRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+{
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	MapComponent->OnPostRemovedFromLevel.RemoveAll(this);
+
+	OnActorBeginOverlap.RemoveAll(this);
+
+	SetItemType(EItemType::None);
 }

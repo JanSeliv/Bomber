@@ -19,10 +19,6 @@ public:
 	/** Sets default values for this actor's properties */
 	AWallActor();
 
-	/** Initialize a wall actor, could be called multiple times. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ConstructWallActor();
-
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -39,14 +35,8 @@ protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	/** Is called on a wall actor construction, could be called multiple times.
-	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
-	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructWallActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionWallActor().
-	 * @warning Do not call directly, use ThisClass::ConstructWallActor() instead. */
+	/** Called when this level actor is reconstructed or added on the Generated Map.
+	 * Is used by Level Actors instead of the BeginPlay(). */
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnConstructionWallActor();
-
-	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
-	virtual void SetActorHiddenInGame(bool bNewHidden) override;
+	void OnAddedToLevel(UMapComponent* MapComponent);
 };

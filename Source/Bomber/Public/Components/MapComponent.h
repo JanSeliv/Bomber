@@ -33,22 +33,18 @@ public:
 	/** Sets default values for this component's properties */
 	UMapComponent();
 
-	/** Rerun owner's construction. Is created to:
-	 * - Bypass RerunConstructionScripts() limitation that could be called only in editor.
-	 * - Let others to react on construction of this actor like editor objects that implements its behaviour by binding to UMapComponent::OnOwnerWantsReconstruct.*/
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ConstructOwnerActor();
-
 	/*********************************************************************************************
 	 * Delegates
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOwnerWantsReconstruct);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAddedToLevel, UMapComponent*, MapComponent);
 
-	/** Called when this component wants to be reconstructed on the Generated Map.
-	 * Is not BlueprintCallable since has to be broadcasted by ThisClass::ConstructOwnerActor(). */
-	UPROPERTY(BlueprintAssignable, Transient, Category = "C++")
-	FOnOwnerWantsReconstruct OnOwnerWantsReconstruct;
+	/** Called when this level actor is reconstructed or added on the Generated Map, on both server and clients.
+	 * Is used by Level Actors instead of the BeginPlay().
+	 * In Editor on construction: AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> AGeneratedMap::AddToGrid() -> ThisClass::OnAdded()
+	 * In build: AGeneratedMap::SpawnActorByType() -> AGeneratedMap::AddToGrid() -> ThisClass::OnAdded() */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	FOnAddedToLevel OnAddedToLevel;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPreRemovedFromLevel, UMapComponent*, MapComponent, UObject*, DestroyCauser);
 
@@ -154,7 +150,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FCollisionResponseContainer GetCollisionResponses() const;
 
-	/** Set new collisions data for any channel of the Box Collision Component, is allowed to call on both server and clients. */ 
+	/** Set new collisions data for any channel of the Box Collision Component, is allowed to call on both server and clients. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "NewResponses"))
 	void SetCollisionResponses(const FCollisionResponseContainer& NewResponses);
 
@@ -205,15 +201,12 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
-	/** Is called on an owner actor construction, could be called multiple times.
-	 * Could be listened by binding to ThisClass::OnOwnerWantsReconstruct delegate.
-	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> [OwnerActor]::Construct[OwnerName]() -> ThisClass::ConstructOwnerActor() -> ThisClass::OnConstructionOwnerActor().
-	 * @warning Do not call directly, use ThisClass::ConstructOwnerActor() instead. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	bool OnConstructionOwnerActor();
-
 	friend class AGeneratedMap;
+	friend struct FMapComponentSpec;
+
+	/** Called when this level actor is reconstructed or added on the Generated Map. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	bool OnAdded();
 
 	/** Is called directly from Generated Map to broadcast OnPreRemovedFromLevel delegate and performs own logic. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

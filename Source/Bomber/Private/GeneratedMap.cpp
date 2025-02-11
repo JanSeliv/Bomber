@@ -313,8 +313,8 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 	const TWeakObjectPtr<ThisClass> WeakThis(this);
 	const FOnSpawnCallback OnCompleted = [WeakThis, OnSpawned](const FPoolObjectData& CreatedObject)
 	{
-		AGeneratedMap* GeneratedMap = WeakThis.Get();
-		if (!GeneratedMap)
+		AGeneratedMap* This = WeakThis.Get();
+		if (!This)
 		{
 			return;
 		}
@@ -322,7 +322,10 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 		// Setup spawned actor
 		AActor& SpawnedActor = CreatedObject.GetChecked<AActor>();
 		SpawnedActor.SetFlags(RF_Transient); // Do not save generated actors into the map
-		SpawnedActor.SetOwner(GeneratedMap);
+		SpawnedActor.SetOwner(This);
+
+		UMapComponent* MapComponent = UMapComponent::GetMapComponent(&SpawnedActor);
+		This->AddToGrid(MapComponent);
 
 		if (OnSpawned != nullptr)
 		{
@@ -380,6 +383,9 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 			AActor& SpawnedActor = CreatedObject.GetChecked<AActor>();
 			SpawnedActor.SetFlags(RF_Transient); // Do not save generated actors into the map
 			SpawnedActor.SetOwner(This);
+
+			UMapComponent* MapComponent = UMapComponent::GetMapComponent(&SpawnedActor);
+			This->AddToGrid(MapComponent);
 		}
 
 		This->MapComponentsInternal.MarkArrayDirty();
@@ -423,21 +429,33 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 {
 	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
-	    || !ComponentOwner
-	    || !ComponentOwner->HasAuthority())
+	    || IS_TRANSIENT(ComponentOwner))
 	{
 		return;
 	}
 
-	const FPoolObjectHandle& Handle = UPoolManagerSubsystem::Get().FindPoolHandleByObject(ComponentOwner);
-	if (!ensureMsgf(Handle.IsValid(), TEXT("ASSERT: [%i] %s:\n'Handle' is not valid, this object has to be known by Pool Manager!"), __LINE__, *FString(__FUNCTION__)))
+	if (MapComponentsInternal.Contains(AddedComponent))
 	{
 		return;
 	}
+
+	// First, add it to the Pool Manager if level actor was spawned manually
+	UPoolManagerSubsystem& PoolManager = UPoolManagerSubsystem::Get();
+	const FPoolObjectHandle& Handle = PoolManager.FindPoolHandleByObject(ComponentOwner);
+	if (!Handle.IsValid())
+	{
+		FPoolObjectData ObjectData(Owner);
+		ObjectData.bIsActive = true;
+		PoolManager.RegisterObjectInPool(ObjectData);
+	}
+
+	// Snap to the nearest cell
+	SetNearestCell(AddedComponent);
 
 	const FCell& Cell = AddedComponent->GetCell();
 	if (!ensureMsgf(Cell.IsValid(), TEXT("ASSERT: 'Cell' is zero")))
 	{
+		// Actor is already added on the level
 		return;
 	}
 
@@ -473,6 +491,9 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 
 	// Locate actor on cell
 	ComponentOwner->SetActorTransform(FTransform(ActorRotation, ActorLocation, FVector::OneVector));
+
+	// Notify listeners
+	AddedComponent->OnAdded();
 }
 
 // The intersection of (OutCells ∩ ActorsTypesBitmask).
@@ -1193,7 +1214,7 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 		return;
 	}
 
-	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
+	const AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
 	if (!ComponentOwner
 	    || ComponentOwner->bIsEditorPreviewActor)
 	{
@@ -1217,10 +1238,6 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 	{
 		DraggedCellsInternal.Emplace(DraggedCell, AddedComponent->GetActorType());
 	}
-
-	FPoolObjectData ObjectData(ComponentOwner);
-	ObjectData.bIsActive = true;
-	UPoolManagerSubsystem::Get().RegisterObjectInPool(ObjectData);
 #endif	//WITH_EDITOR [IsEditorNotPieWorld]
 }
 

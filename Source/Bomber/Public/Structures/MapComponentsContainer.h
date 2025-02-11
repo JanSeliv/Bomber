@@ -4,6 +4,7 @@
 
 #include "Iris/ReplicationState/IrisFastArraySerializer.h"
 //---
+#include "Cell.h"
 #include "PoolManagerTypes.h" // FPoolObjectHandle
 #include "Engine/NetSerialization.h" // FVector_NetQuantize
 //---
@@ -43,7 +44,7 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 	 * Replicated here instead of in the component to stay in sync with the array, avoiding component replication delay
 	 * Uses NetQuantize to optimize network traffic */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FVector_NetQuantize Cell;
+	FVector_NetQuantize Cell = FCell::InvalidCell;
 
 	/** Unique ID of Map Component's owner actor in the Pool Manager.
 	 * Is useful to track the owner actor lifecycle even it is not spawned yet, but its Spawn Request is in queue.
@@ -62,8 +63,8 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 	 ********************************************************************************************* */
 
 	void PreReplicatedRemove(const FMapComponentsContainer& InMapComponentsContainer);
-	void PostReplicatedAdd(const FMapComponentsContainer& InMapComponentsContainer) { UpdateCellInComponent(); }
-	void PostReplicatedChange(const FMapComponentsContainer& InMapComponentsContainer) { UpdateCellInComponent(); }
+	void PostReplicatedAdd(const FMapComponentsContainer& InMapComponentsContainer);
+	void PostReplicatedChange(const FMapComponentsContainer& InMapComponentsContainer);
 
 	/*********************************************************************************************
 	 * Convenience operators to treat FMapComponentSpec as a UMapComponent*

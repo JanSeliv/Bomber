@@ -38,6 +38,25 @@ void FMapComponentSpec::PreReplicatedRemove(const FMapComponentsContainer& InMap
 	MapComponent = nullptr;
 }
 
+void FMapComponentSpec::PostReplicatedAdd(const FMapComponentsContainer& InMapComponentsContainer)
+{
+	// The level actor was added, update both the replicated cell and the map component
+
+	UpdateCellInComponent();
+
+	if (MapComponent)
+	{
+		MapComponent->OnAdded();
+	}
+}
+
+void FMapComponentSpec::PostReplicatedChange(const FMapComponentsContainer& InMapComponentsContainer)
+{
+	// The level actor was changed, update the replicated cell e.g: player character moved
+
+	UpdateCellInComponent();
+}
+
 FMapComponentsIterator::FMapComponentsIterator(const TArray<FMapComponentSpec>& InItems)
 	: Items(InItems)
 	, Index(0) {}

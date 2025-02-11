@@ -27,10 +27,6 @@ public:
 	/** Sets default values for this actor's properties */
 	ABombActor();
 
-	/** Preinitialize a bomb actor, could be called multiple times. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ConstructBombActor();
-
 	/** Returns the type of the bomb. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ELevelType GetBombType() const;
@@ -142,20 +138,14 @@ protected:
 	/** Called when the lifespan of an actor expires (if he has one). */
 	virtual void LifeSpanExpired() override;
 
-	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
-	virtual void SetActorHiddenInGame(bool bNewHidden) override;
-
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
 protected:
-	/** Is called on a bomb actor construction, could be called multiple times.
-	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
-	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructBombActor() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionBombActor().
-	 * @warning Do not call directly, use ThisClass::ConstructBombActor() instead. */
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnConstructionBombActor();
+	/** Called when this level actor is reconstructed or added on the Generated Map.
+	 * Is used by Level Actors instead of the BeginPlay(). */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnAddedToLevel(UMapComponent* MapComponent);
 
 	/** Is called to listen when this bomb is destroyed on the Generated Map by itself or by other actors. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

@@ -2,6 +2,7 @@
 
 #include "LevelActors/WallActor.h"
 //---
+#include "GeneratedMap.h"
 #include "Components/MapComponent.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(WallActor)
@@ -27,30 +28,12 @@ AWallActor::AWallActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
-// Initialize a wall actor, could be called multiple times
-void AWallActor::ConstructWallActor()
-{
-	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
-	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionWallActor);
-	MapComponentInternal->ConstructOwnerActor();
-}
-
 // Called when an instance of this class is placed (in editor) or spawned
 void AWallActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	ConstructWallActor();
-}
-
-// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
-void AWallActor::SetActorHiddenInGame(bool bNewHidden)
-{
-	Super::SetActorHiddenInGame(bNewHidden);
-
-	if (!bNewHidden)
-	{
-		// Is added on Generated Map
-		ConstructWallActor();
-	}
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	MapComponentInternal->OnAddedToLevel.AddUniqueDynamic(this, &ThisClass::OnAddedToLevel);
+	AGeneratedMap::Get().AddToGrid(MapComponentInternal);
 }

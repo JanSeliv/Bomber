@@ -255,14 +255,6 @@ APlayerCharacter::APlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	}
 }
 
-// Initialize a player actor, could be called multiple times
-void APlayerCharacter::ConstructPlayerCharacter()
-{
-	checkf(MapComponentInternal, TEXT("%s: 'MapComponentInternal' is null"), *FString(__FUNCTION__));
-	MapComponentInternal->OnOwnerWantsReconstruct.AddUniqueDynamic(this, &ThisClass::OnConstructionPlayerCharacter);
-	MapComponentInternal->ConstructOwnerActor();
-}
-
 // Returns unique net id number based on online subsystem, e.g: 253, 254, 255
 int32 APlayerCharacter::GetPlayerId() const
 {
@@ -299,19 +291,18 @@ void APlayerCharacter::BeginPlay()
 	// Call to super
 	Super::BeginPlay();
 
-	// Set the animation
+	// Set the animation blueprint on very first character spawn
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
 		const TSubclassOf<UAnimInstance> AnimInstanceClass = UPlayerDataAsset::Get().GetAnimInstanceClass();
 		MeshComp->SetAnimInstanceClass(AnimInstanceClass);
 	}
 
+	// Attempt to posses player or AI on very first spawn
 	TryPossessController();
 
 	if (HasAuthority())
 	{
-		OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnPlayerBeginOverlap);
-
 		// Listen to handle possessing logic
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
@@ -324,7 +315,9 @@ void APlayerCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	ConstructPlayerCharacter();
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	MapComponentInternal->OnAddedToLevel.AddUniqueDynamic(this, &ThisClass::OnAddedToLevel);
+	AGeneratedMap::Get().AddToGrid(MapComponentInternal);
 }
 
 // Called every frame, is disabled on start, tick interval is decreased
@@ -378,58 +371,23 @@ void APlayerCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlaye
 	ApplyPlayerId();
 }
 
-// Sets the actor to be hidden in the game. Alternatively used to avoid destroying
-void APlayerCharacter::SetActorHiddenInGame(bool bNewHidden)
-{
-	Super::SetActorHiddenInGame(bNewHidden);
-
-	checkf(MapComponentInternal, TEXT("ERROR: [%i] %s:\n'MapComponentInternal' is null!"), __LINE__, *FString(__FUNCTION__));
-
-	if (UMySkeletalMeshComponent* MySkeletalMeshComponent = GetMySkeletalMeshComponent())
-	{
-		const ECollisionEnabled::Type NewType = bNewHidden ? ECollisionEnabled::NoCollision : ECollisionEnabled::PhysicsOnly;
-		MySkeletalMeshComponent->SetCollisionEnabled(NewType);
-	}
-
-	if (!bNewHidden)
-	{
-		// Is added on Generated Map
-
-		ConstructPlayerCharacter();
-
-		TryPossessController();
-
-		MapComponentInternal->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
-		MapComponentInternal->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnCellChanged);
-
-		BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-	}
-	else if (Controller)
-	{
-		// Is removed from Generated Map
-
-		Controller->SetIgnoreMoveInput(true);
-
-		MapComponentInternal->OnPreRemovedFromLevel.RemoveAll(this);
-		MapComponentInternal->OnCellChanged.RemoveAll(this);
-
-		UGlobalEventsSubsystem::Get().BP_OnGameStateChanged.RemoveAll(this);
-	}
-
-	SetPowerups(FPowerUp::DefaultLevel);
-}
-
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
 
-// Is called on a player character construction, could be called multiple times
-void APlayerCharacter::OnConstructionPlayerCharacter_Implementation()
+// Called when this level actor is reconstructed or added on the Generated Map
+void APlayerCharacter::OnAddedToLevel_Implementation(UMapComponent* MapComponent)
 {
-	if (IS_TRANSIENT(this)        // This actor is transient
-	    || !MapComponentInternal) // Is not valid for map construction
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+	MapComponent->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
+	MapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
+	MapComponent->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnCellChanged);
+
+	OnActorBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnPlayerBeginOverlap);
+
+	if (UMySkeletalMeshComponent* MySkeletalMeshComponent = GetMySkeletalMeshComponent())
 	{
-		return;
+		MySkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	}
 
 	if (!PlayerMeshDataInternal.IsValid())
@@ -441,11 +399,11 @@ void APlayerCharacter::OnConstructionPlayerCharacter_Implementation()
 
 	// Spawn or destroy controller of specific ai with enabled visualization
 #if WITH_EDITOR // [IsEditorNotPieWorld]
-	if (UUtilsLibrary::IsEditorNotPieWorld()                                         // [IsEditorNotPieWorld] only
-	    && ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponentInternal) > 0) // Is a bot
+	if (UUtilsLibrary::IsEditorNotPieWorld()                                 // [IsEditorNotPieWorld] only
+	    && ULevelActorsUtilsLibrary::GetIndexByLevelActor(MapComponent) > 0) // Is a bot
 	{
 		AIControllerInternal = Cast<AAIController>(GetController());
-		if (!MapComponentInternal->bShouldShowRenders)
+		if (!MapComponent->bShouldShowRenders)
 		{
 			if (AIControllerInternal)
 			{
@@ -462,6 +420,12 @@ void APlayerCharacter::OnConstructionPlayerCharacter_Implementation()
 		}
 	}
 #endif	// WITH_EDITOR [IsEditorNotPieWorld]
+
+	TryPossessController();
+
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+
+	SetPowerups(FPowerUp::DefaultLevel);
 }
 
 // Triggers when this player character starts something overlap.
@@ -537,6 +501,32 @@ void APlayerCharacter::OnPreRemovedFromLevel_Implementation(UMapComponent* MapCo
 	{
 		KillerPlayerState->SetOpponentKilled(this);
 	}
+}
+
+// Is used for cleaning up the character's data after it was removed from the level
+void APlayerCharacter::OnPostRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+{
+	// -- Handle cleanup after removed player from the level
+
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+	MapComponent->OnPostRemovedFromLevel.RemoveAll(this);
+	MapComponent->OnCellChanged.RemoveAll(this);
+
+	OnActorBeginOverlap.RemoveAll(this);
+
+	UGlobalEventsSubsystem::Get().BP_OnGameStateChanged.RemoveAll(this);
+
+	if (UMySkeletalMeshComponent* MySkeletalMeshComponent = GetMySkeletalMeshComponent())
+	{
+		MySkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	if (Controller)
+	{
+		Controller->SetIgnoreMoveInput(true);
+	}
+
+	SetPowerups(FPowerUp::DefaultLevel);
 }
 
 // Is called for everytime when character changed its cell on the Generated Map
@@ -637,7 +627,7 @@ bool APlayerCharacter::IsPlayerControlled() const
 void APlayerCharacter::TryPossessController(bool bForcePlayerController/* = false*/)
 {
 	if (!HasAuthority()
-		|| !IsActorInitialized() // Engine doesn't allow posses before BeginPlay\PostInitializeComponents
+	    || !IsActorInitialized() // Engine doesn't allow posses before BeginPlay\PostInitializeComponents
 	    || UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		// Should not possess in PIE
@@ -655,7 +645,7 @@ void APlayerCharacter::TryPossessController(bool bForcePlayerController/* = fals
 	AController* ControllerToPossess = nullptr;
 
 	if (IsPlayerControlled()
-		|| bForcePlayerController)
+	    || bForcePlayerController)
 	{
 		AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetMyPlayerController(PlayerId);
 		if (MyPC

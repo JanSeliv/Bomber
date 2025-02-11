@@ -108,10 +108,6 @@ public:
 	/** Sets default values for this character's properties */
 	APlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
-	/** Initialize a player actor, could be called multiple times. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ConstructPlayerCharacter();
-
 	/** Returns level type associated with player, e.g: Water level type for Roger character. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	ELevelType GetPlayerType() const;
@@ -144,20 +140,14 @@ protected:
 	/** Is overriden to handle the client login when is set new player state. */
 	virtual void OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState) override;
 
-	/** Sets the actor to be hidden in the game. Alternatively used to avoid destroying. */
-	virtual void SetActorHiddenInGame(bool bNewHidden) override;
-
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
 protected:
-	/** Is called on a player character construction, could be called multiple times.
-	 * Could be listened by binding to UMapComponent::OnOwnerWantsReconstruct delegate.
-	 * See the call stack below for more details:
-	 * AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ThisClass::ConstructPlayerCharacter() -> UMapComponent::ConstructOwnerActor() -> ThisClass::OnConstructionPlayerCharacter().
-	 * @warning Do not call directly, use ThisClass::ConstructPlayerCharacter() instead. */
+	/** Called when this level actor is reconstructed or added on the Generated Map.
+	 * Is used by Level Actors instead of the BeginPlay(). */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnConstructionPlayerCharacter();
+	void OnAddedToLevel(UMapComponent* MapComponent);
 
 	/**
 	 * Triggers when this player character starts something overlap.
@@ -174,13 +164,19 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPostLogin(class AGameModeBase* GameMode, class APlayerController* NewPlayer);
 
-	/** Is called when the player was destroyed. */
+	/** Called right before owner actor going to remove from the Generated Map, on both server and clients.
+	 * Is used for handling the in-game dying logic before this character is removed from the level. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPreRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
+	void OnPreRemovedFromLevel(class UMapComponent* MapComponent, UObject* DestroyCauser);
+
+	/** Called each time after owner actor was removed from Generated Map, on both server and clients.
+	 * Is used for cleaning up the character's data after it was removed from the level. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPostRemovedFromLevel(class UMapComponent* MapComponent, UObject* DestroyCauser);
 
 	/** Is called for everytime when character changed its position on the Generated Map. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnCellChanged(UMapComponent* MapComponent, const struct FCell& NewCell, const struct FCell& PreviousCell);
+	void OnCellChanged(class UMapComponent* MapComponent, const struct FCell& NewCell, const struct FCell& PreviousCell);
 
 	/** Is called when the player character is fully initialized. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
