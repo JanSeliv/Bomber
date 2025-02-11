@@ -777,7 +777,11 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	OnConstructionGeneratedMap(Transform);
+	if (UUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// In editor, construct this actor for preview
+		OnConstructionGeneratedMap(Transform);
+	}
 }
 
 // Initialize this Generated Map actor, could be called multiple times
@@ -1089,15 +1093,25 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		return;
 	}
 
+	const ECurrentGameState PreviousGameState = AMyGameStateBase::GetPreviousGameState();
 	switch (CurrentGameState)
 	{
 		case ECGS::Menu: // Fallthrough
 		case ECGS::GameStarting:
 		{
-			// Regenerate in menu to prepare the world and let it replicate to clients
-			// Only regenerate in GameStarting if restarting after playing, not from menu
-			if (CurrentGameState == ECGS::Menu
-			    || AMyGameStateBase::GetPreviousGameState() != ECGS::Menu)
+			if (PreviousGameState == ECGS::None)
+			{
+				// Game is starting for the first time, do nothing, the level is expected to be generated in the OnConstruction
+				break;
+			}
+
+			// Regenerate level actors when:
+			// 1. Returning to the menu (ensures the world resets properly)
+			// 2. Restarting the game (ensures a fresh state between matches)
+			const bool bNowInMenu = CurrentGameState == ECGS::Menu;
+			const bool bRestartedMatch = PreviousGameState != ECGS::Menu;
+			if (bNowInMenu
+			    || bRestartedMatch)
 			{
 				GenerateLevelActors();
 			}
