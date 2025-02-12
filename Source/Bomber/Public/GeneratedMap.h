@@ -110,6 +110,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void AddToGrid(UMapComponent* AddedComponent);
 
+	/** Internal client-only method to resolve a newly spawned Map Component. 
+	 * Unlike actors, components lack automatic FNetGUID resolution if the reference replicates 
+	 * before the component is spawned. Manually binds the component to its replicated entry. */
+	void ResolveSpawnedMapComponent(UMapComponent& AddedComponent);
+
 	/*********************************************************************************************
 	 * Destroy
 	 ********************************************************************************************* */

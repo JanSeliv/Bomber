@@ -283,6 +283,12 @@ void UMapComponent::OnRegister()
 		Owner->SetActorHiddenInGame(Owner->IsHidden());
 	}
 
+	if (AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap())
+	{
+		// Manually resolve replicated Map Component if spawned late
+		GeneratedMap->ResolveSpawnedMapComponent(*this);
+	}
+
 	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
 #if WITH_EDITORONLY_DATA

@@ -388,8 +388,6 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 			This->AddToGrid(MapComponent);
 		}
 
-		This->MapComponentsInternal.MarkArrayDirty();
-
 		This->OnGeneratedLevelActors.Broadcast();
 	};
 
@@ -496,6 +494,34 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 	AddedComponent->OnAdded();
 }
 
+// Client-only method to resolve a newly spawned Map Component
+void AGeneratedMap::ResolveSpawnedMapComponent(UMapComponent& AddedComponent)
+{
+	if (HasAuthority())
+	{
+		// Is not a client
+		return;
+	}
+
+	const FCell Cell = UCellsUtilsLibrary::SnapActorOnLevel(AddedComponent.GetOwner());
+	FMapComponentSpec* FoundSpec = MapComponentsInternal.Find(Cell);
+	if (!FoundSpec)
+	{
+		// Not found, nothing to resolve
+		return;
+	}
+
+	const bool bNeedsResolve = !FoundSpec->MapComponent;
+	if (bNeedsResolve)
+	{
+		// The reference was replicated before the component was spawned
+		// Validate the reference to fixup broken reference
+		// It intentionally affects only this client, but not server and other players
+		FoundSpec->MapComponent = AddedComponent;
+		FoundSpec->PostReplicatedAdd(MapComponentsInternal);
+	}
+}
+
 // The intersection of (OutCells ∩ ActorsTypesBitmask).
 void AGeneratedMap::IntersectCellsByTypes(
 	FCells& InOutCells,
@@ -597,7 +623,6 @@ void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* Dest
 		}
 	}
 	MapComponentsInternal.Items.Shrink();
-	MapComponentsInternal.MarkArrayDirty();
 
 	if (OnPostDestroyedLevelActors.IsBound())
 	{

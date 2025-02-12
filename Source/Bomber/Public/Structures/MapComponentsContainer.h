@@ -51,12 +51,8 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 	 * Is NOT replicated and exists only on the server side. */
 	FPoolObjectHandle PoolObjectHandle = FPoolObjectHandle::EmptyHandle;
 
-	/** Updates the cell of the map component according current data.
-	 * Allows to set the cell much faster than waiting for its replication. */
-	void UpdateCellInComponent();
-
 	/** Returns if current data is valid. If not, probably it's pending spawn or not replicated yet. */
-	bool IsValid() const { return MapComponent != nullptr; }
+	bool FORCEINLINE IsValid() const { return FCell(Cell).IsValid() && MapComponent != nullptr; }
 
 	/*********************************************************************************************
 	 * FFastArraySerializerItem implementation
@@ -72,7 +68,7 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 
 	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FMapComponentSpec& B) { return A.MapComponent == B.MapComponent && A.Cell == B.Cell && A.PoolObjectHandle == B.PoolObjectHandle; }
 	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const UMapComponent* B) { return A.MapComponent == B; }
-	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FCell& B);
+	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FCell& B) { return A.Cell == B; }
 	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FPoolObjectHandle& B) { return A.PoolObjectHandle == B; }
 };
 
@@ -108,7 +104,8 @@ struct BOMBER_API FMapComponentsContainer : public FIrisFastArraySerializer
 {
 	GENERATED_BODY()
 
-	/** The main data array for replication. */
+	/** The main data array for replication.
+	 * @warning It shouldn't be accessed directly, use ULevelActorsUtilsLibrary functions instead for obtaining Level Actors. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
 	TArray<FMapComponentSpec> Items;
 
@@ -122,6 +119,9 @@ struct BOMBER_API FMapComponentsContainer : public FIrisFastArraySerializer
 	/** Checks if an item should be written during delta serialization, considering client or server context. */
 	template <typename Type, typename SerializerType>
 	static bool ShouldWriteFastArrayItem(const Type& Item, const bool bIsWritingOnClient);
+
+	/** Marks this spec as dirty to push changes for replication, if valid. */
+	void MarkItemDirty(FFastArraySerializerItem& Item);
 
 	/*********************************************************************************************
 	 * Convenience methods to treat FMapComponentsContainer as a TArray<UMapComponent*>
@@ -139,7 +139,7 @@ public:
 	FORCEINLINE bool ContainsByPredicate(const TFunctionRef<bool(const FMapComponentSpec&)>& Predicate) const { return Items.ContainsByPredicate(Predicate); }
 
 	FMapComponentSpec* Find(const UMapComponent* Item) { return Items.FindByKey(Item); }
-	FMapComponentSpec* Find(const FCell& Cell) { return Items.FindByKey(Cell); }
+	FMapComponentSpec* Find(const FCell& Cell) { return Cell.IsValid() ? Items.FindByKey(Cell) : nullptr; }
 	FMapComponentSpec* Find(const FPoolObjectHandle& PoolObjectHandle) { return Items.FindByKey(PoolObjectHandle); }
 
 	FMapComponentSpec& FindOrAdd(UMapComponent& MapComponent);
