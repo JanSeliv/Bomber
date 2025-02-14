@@ -17,5 +17,5 @@ class MYUTILS_API FDebugUtilsLibrary
 public:
 	/** Returns previous function in current callstack.
 	 * Can be passed in log by as %hs as __CALLER__ */
-	static const char* GetCallerFunctionANSI();
+	static const ANSICHAR* GetCallerFunctionANSI();
 };

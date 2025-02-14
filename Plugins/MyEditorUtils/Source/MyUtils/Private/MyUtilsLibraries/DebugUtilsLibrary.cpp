@@ -7,16 +7,16 @@
 #endif // !UE_BUILD_SHIPPING
 
 // Returns previous function in current callstack
-const char* FDebugUtilsLibrary::GetCallerFunctionANSI()
+const ANSICHAR* FDebugUtilsLibrary::GetCallerFunctionANSI()
 {
 #if UE_BUILD_SHIPPING
-	static constexpr char UnavailableMsg[] = "None";
+	static constexpr ANSICHAR UnavailableMsg[] = "None";
 	return UnavailableMsg;
 #else
 	constexpr int32 MaxDepth = 10;
 	constexpr int32 CallerFrameIndex = 3;
 
-	static char FunctionName[1024] = "Unknown caller";
+	static ANSICHAR FunctionName[1024] = "Unknown caller";
 	uint64 StackTrace[MaxDepth] = {0};
 
 	const int32 Depth = FPlatformStackWalk::CaptureStackBackTrace(StackTrace, MaxDepth);
@@ -26,8 +26,8 @@ const char* FDebugUtilsLibrary::GetCallerFunctionANSI()
 	}
 
 	FProgramCounterSymbolInfo SymbolInfo;
-	FPlatformStackWalk::ProgramCounterToSymbolInfo(StackTrace[CallerFrameIndex], SymbolInfo);
-	if (!SymbolInfo.FunctionName)
+	FPlatformStackWalk::ProgramCounterToSymbolInfo(StackTrace[CallerFrameIndex], /*out*/SymbolInfo);
+	if (SymbolInfo.FunctionName[0] == '\0')
 	{
 		return FunctionName;
 	}
@@ -35,8 +35,7 @@ const char* FDebugUtilsLibrary::GetCallerFunctionANSI()
 	FCStringAnsi::Strncpy(FunctionName, SymbolInfo.FunctionName, sizeof(FunctionName) - 1);
 	FunctionName[sizeof(FunctionName) - 1] = '\0';
 
-	char* BracketPos = FCStringAnsi::Strrchr(FunctionName, '(');
-	if (BracketPos)
+	if (ANSICHAR* BracketPos = FCStringAnsi::Strrchr(FunctionName, '('))
 	{
 		*BracketPos = '\0';
 	}
