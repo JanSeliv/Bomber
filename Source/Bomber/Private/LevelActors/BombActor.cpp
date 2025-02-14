@@ -48,24 +48,13 @@ ABombActor::ABombActor()
 	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
 }
 
-//  Returns the type of the bomb
-ELevelType ABombActor::GetBombType() const
-{
-	return MapComponentInternal ? MapComponentInternal->GetLevelType() : ELevelType::None;
-}
-
 /*********************************************************************************************
  * Detonation
  ********************************************************************************************* */
 
-// Sets the defaults of the bomb
+// Initiates the explosion: starts countdown and initializes the data (fire radius, explosion cells, etc.)
 void ABombActor::InitBomb(const APlayerCharacter* BombPlacer/* = nullptr*/)
 {
-	if (!HasAuthority())
-	{
-		return;
-	}
-
 	constexpr int32 MinFireRadius = 1;
 	int32 InFireRadius = MinFireRadius;
 	if (BombPlacer) // Might be null if spawned from external source (e.g. cheat manager)
@@ -162,18 +151,22 @@ void ABombActor::DetonateBomb()
 
 	// Destroy all actors from array of cells
 	AGeneratedMap::Get().DestroyLevelActorsOnCells(FCells{LocalExplosionCellsInternal}, this);
-
-	USoundsSubsystem::Get().PlayExplosionSFX();
 }
 
 // Calculates the explosion cells based on current fire radius
 void ABombActor::UpdateExplosionCells()
 {
-	if (!IsValid(MapComponentInternal)
+	if (!MapComponentInternal
 	    || MapComponentInternal->GetCell().IsInvalidCell()
 	    || FireRadiusInternal <= 0)
 	{
 		// On client some data might be not replicated yet
+		return;
+	}
+
+	const bool bIsAlreadySetByDefault = !LocalExplosionCellsInternal.IsEmpty() && FireRadiusInternal <= 1;
+	if (bIsAlreadySetByDefault)
+	{
 		return;
 	}
 
@@ -187,7 +180,7 @@ void ABombActor::OnRep_BombPlacer()
 {
 	if (BombPlacerInternal)
 	{
-		ApplyMaterial();
+		InitBomb(BombPlacerInternal);
 	}
 }
 
@@ -207,7 +200,7 @@ void ABombActor::OnRep_FireRadius()
  ********************************************************************************************* */
 
 // Spawns VFXs and SFXs, is allowed to call both on server and clients
-void ABombActor::PlayExplosionsCue(const UBombRow* BombRow/* = nullptr*/)
+void ABombActor::PlayExplosionsCue()
 {
 	if (AMyGameStateBase::GetCurrentGameState() != ECGS::InGame
 	    || !ensureMsgf(!LocalExplosionCellsInternal.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'LocalExplosionCellsInternal' is empty!"), __LINE__, __FUNCTION__))
@@ -217,12 +210,8 @@ void ABombActor::PlayExplosionsCue(const UBombRow* BombRow/* = nullptr*/)
 
 	TRACE_CPUPROFILER_EVENT_SCOPE(ABombActor::PlayExplosionsCue);
 
-	if (!BombRow)
-	{
-		// Row is optional, if null, then it's taken from current bomb type
-		BombRow = UBombDataAsset::Get().GetRowByLevelType<UBombRow>(GetBombType());
-	}
-
+	checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	const UBombRow* BombRow = MapComponentInternal->GetMeshRow<UBombRow>();
 	UNiagaraSystem* BombVFX = BombRow ? BombRow->BombVFX : nullptr;
 	if (!ensureMsgf(BombVFX, TEXT("ASSERT: [%i] %hs:\n'BombVFX' is not set!"), __LINE__, __FUNCTION__))
 	{
@@ -287,8 +276,8 @@ void ABombActor::ApplyMaterial()
 	else
 	{
 		// Set material by bomb type (default)
-		const ULevelActorRow* BombRow = UBombDataAsset::Get().GetRowByLevelType(GetBombType());
-		const UStaticMesh* BombMesh = BombRow ? Cast<UStaticMesh>(BombRow->Mesh) : nullptr;
+		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+		const UStaticMesh* BombMesh = MapComponentInternal->GetMesh<UStaticMesh>();
 		if (ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %hs:\n'BombMesh' is not found"), __LINE__, __FUNCTION__))
 		{
 			NewBombMaterial = BombMesh->GetMaterial(0);
@@ -299,7 +288,7 @@ void ABombActor::ApplyMaterial()
 	if (NewBombMaterial)
 	{
 		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-		MapComponentInternal->SetMaterial(NewBombMaterial);
+		MapComponentInternal->SetMeshMaterial(NewBombMaterial);
 	}
 }
 
@@ -379,24 +368,6 @@ void ABombActor::OnAddedToLevel_Implementation(UMapComponent* MapComponent)
 	// Listen when this bomb is destroyed on the Generated Map by itself or by other actors
 	MapComponent->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
 
-	// Listen for client to react when bomb is reset to play explosions cue
-	MapComponent->OnActorTypeChanged.AddUniqueDynamic(this, &ThisClass::OnActorTypeChanged);
-
-	// Listen for client to react when bomb is added to the level
-	if (!HasAuthority())
-	{
-		const FCell& CurrentCell = MapComponent->GetCell();
-		if (CurrentCell.IsValid())
-		{
-			OnBombCellChanged(MapComponent, CurrentCell, FCell::InvalidCell);
-		}
-		else
-		{
-			// Wait until cell is set (bomb is added to the level)
-			MapComponent->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnBombCellChanged);
-		}
-	}
-
 #if WITH_EDITOR //[IsEditorNotPieWorld]
 	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
@@ -413,41 +384,21 @@ void ABombActor::OnPreRemovedFromLevel_Implementation(UMapComponent* MapComponen
 		// On server, bomb is removed from Generated Map, detonate it
 		DetonateBomb();
 	}
+	else
+	{
+		// On client, play explosions cue locally
+		PlayExplosionsCue();
+	}
 
 	if (MapComponentInternal)
 	{
 		MapComponentInternal->OnPreRemovedFromLevel.RemoveAll(this);
-		MapComponentInternal->OnActorTypeChanged.RemoveAll(this);
 		MapComponentInternal->OnCellChanged.RemoveAll(this);
 	}
 
 	SetBombPlacer(nullptr);
 
 	LocalExplosionCellsInternal = FCell::EmptyCells;
-}
-
-// Listen when bomb changed visuals
-void ABombActor::OnActorTypeChanged_Implementation(UMapComponent* MapComponent, const class ULevelActorRow* NewRow, const class ULevelActorRow* PreviousRow)
-{
-	const bool bIsBombReset = !NewRow && PreviousRow;
-	if (bIsBombReset
-	    && !HasAuthority())
-	{
-		// The bomb was just reset on client, play visuals from Previous Row, which was reset 
-		PlayExplosionsCue(CastChecked<UBombRow>(PreviousRow));
-	}
-}
-
-// Is used on client to react when bomb is added to the level
-void ABombActor::OnBombCellChanged_Implementation(UMapComponent* MapComponent, const FCell& NewCell, const FCell& PreviousCell)
-{
-	if (NewCell.IsValid()
-	    && !HasAuthority())
-	{
-		// On client, the bomb was just added to the level, update cells
-		UpdateExplosionCells();
-		InitCollisionResponseToAllPlayers();
-	}
 }
 
 // Is called when character leaves the bomb to update collision response

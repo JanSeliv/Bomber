@@ -27,10 +27,6 @@ public:
 	/** Sets default values for this actor's properties */
 	ABombActor();
 
-	/** Returns the type of the bomb. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	ELevelType GetBombType() const;
-
 protected:
 	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
@@ -40,9 +36,10 @@ protected:
 	 * Detonation
 	 ********************************************************************************************* */
 public:
-	/** Is server-only, initiates the explosion: starts countdown and initializes the data.
+	/** Initiates the explosion: starts countdown and initializes the data (fire radius, explosion cells, etc.).
+	 * Can be called on both server and clients.
 	 * @param BombPlacer - the player who placed the bomb. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "C++")
 	void InitBomb(const APlayerCharacter* BombPlacer = nullptr);
 
 	/** Returns cells are going to explode by this bomb. */
@@ -104,10 +101,9 @@ protected:
 	 * Cue Visuals: VFXs, SFXs, Materials
 	 ********************************************************************************************* */
 public:
-	/** Spawns VFXs and SFXs, is allowed to call both on server and clients.
-	 * @param BombRow - optional bomb row to get the visuals data from, if null, then it will be taken from current bomb type. */
+	/** Spawns VFXs and SFXs, is allowed to call both on server and clients. */
 	UFUNCTION(Blueprintable, Category = "C++")
-	void PlayExplosionsCue(const class UBombRow* BombRow = nullptr);
+	void PlayExplosionsCue();
 
 	/** Updates current material for this bomb actor, based on this bomb and Player placer types. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
@@ -150,14 +146,6 @@ protected:
 	/** Is called to listen when this bomb is destroyed on the Generated Map by itself or by other actors. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnPreRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
-
-	/** Is used on client to react when bomb is reset to play explosions cue locally. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnActorTypeChanged(UMapComponent* MapComponent, const class ULevelActorRow* NewRow, const class ULevelActorRow* PreviousRow);
-
-	/** Is used on client to react when bomb is added to the level. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnBombCellChanged(UMapComponent* MapComponent, const FCell& NewCell, const FCell& PreviousCell);
 
 	/** Is called when character leaves the bomb to update collision response. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))

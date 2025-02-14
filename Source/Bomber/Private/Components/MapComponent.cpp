@@ -39,9 +39,6 @@ UMapComponent::UMapComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-
-	// Replicate a component
-	SetIsReplicatedByDefault(true);
 }
 
 /*********************************************************************************************
@@ -90,6 +87,13 @@ class UStreamableRenderAsset* UMapComponent::GetMesh() const
 	return UGameplayUtilsLibrary::GetMesh(MeshComponentInternal);
 }
 
+// Returns the row of the current mes
+const ULevelActorRow* UMapComponent::GetMeshRow() const
+{
+	const UStreamableRenderAsset* Mesh = GetMesh();
+	return Mesh ? GetActorDataAssetChecked().GetRowByMesh(Mesh) : nullptr;
+}
+
 // Applies given mesh on owner actor, or resets the mesh if null is passed
 void UMapComponent::SetMesh(UStreamableRenderAsset* NewMesh)
 {
@@ -105,52 +109,21 @@ void UMapComponent::SetMesh(UStreamableRenderAsset* NewMesh)
 	const UStreamableRenderAsset* PreviousMesh = GetMesh();
 	UGameplayUtilsLibrary::SetMesh(MeshComponentInternal, NewMesh);
 
-	if (Owner->HasAuthority())
-	{
-		const ULevelActorRow* PreviousRow = GetActorDataAssetChecked().GetRowByMesh(PreviousMesh);
-		const ULevelActorRow* NewRow = NewMesh ? GetActorDataAssetChecked().GetRowByMesh(NewMesh) : nullptr;
-
-		// On server, set the index of the mesh, is primarily used for replicating the mesh to the clients, it's INDEX_NONE when reset the mesh (null is passed)
-		const int32 NewRowIndex = NewRow ? ActorDataAssetInternal->GetIndexByRow(NewRow) : INDEX_NONE;
-		ensureMsgf(!NewMesh || NewRowIndex != INDEX_NONE, TEXT("ASSERT: [%i] %hs:\nAttempted to set the '%s' mesh on '%s' actor that is not stored in the '%s' data asset!"), __LINE__, __FUNCTION__, *GetNameSafe(NewMesh), *GetNameSafe(Owner), *GetNameSafe(ActorDataAssetInternal));
-		RowIndexInternal = NewRowIndex;
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, RowIndexInternal, this);
-
-		// On server, broadcast event; clients will get notify later by replicating the RowIndex
-		OnActorTypeChanged.Broadcast(this, NewRow, PreviousRow);
-	}
+	const ULevelActorRow* PreviousRow = GetActorDataAssetChecked().GetRowByMesh(PreviousMesh);
+	const ULevelActorRow* NewRow = NewMesh ? GetActorDataAssetChecked().GetRowByMesh(NewMesh) : nullptr;
+	OnActorTypeChanged.Broadcast(this, NewRow, PreviousRow);
 }
 
 /** Set material to the mesh. */
-void UMapComponent::SetMaterial(UMaterialInterface* Material)
+void UMapComponent::SetMeshMaterial(UMaterialInterface* NewMaterial)
 {
-	if (MeshComponentInternal
-	    && Material)
+	if (!ensureMsgf(NewMaterial, TEXT("ASSERT: [%i] %hs:\n'Material' is not valid!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(MeshComponentInternal, TEXT("ASSERT: [%i] %hs:\n'MeshComponentInternal' is null!"), __LINE__, __FUNCTION__))
 	{
-		MeshComponentInternal->SetMaterial(0, Material);
+		return;
 	}
-}
 
-// Is called on client to update current level actor row
-void UMapComponent::OnRep_RowIndex(int32 PreviousRowIndex)
-{
-	const ULevelActorDataAsset& ActorDataAsset = GetActorDataAssetChecked();
-	const ULevelActorRow* PreviousRow = ActorDataAsset.GetRowByIndex(PreviousRowIndex);
-	const ULevelActorRow* NewRow = ActorDataAsset.GetRowByIndex(RowIndexInternal);
-
-	// The mesh might be null, then perform the cleanup
-	UStreamableRenderAsset* NewMesh = NewRow ? NewRow->Mesh : nullptr;
-	SetMesh(NewMesh);
-
-	// On client, broadcast event post RowIndex replication
-	OnActorTypeChanged.Broadcast(this, NewRow, PreviousRow);
-
-	if (RowIndexInternal == INDEX_NONE)
-	{
-		// It's client which invalidated mesh, broadcast events manually as initial removal happened only on the server
-		OnPreRemoved();
-		OnPostRemoved();
-	}
+	MeshComponentInternal->SetMaterial(0, NewMaterial);
 }
 
 /*********************************************************************************************
@@ -194,13 +167,6 @@ const ULevelActorDataAsset& UMapComponent::GetActorDataAssetChecked() const
 EActorType UMapComponent::GetActorType() const
 {
 	return GetActorDataAssetChecked().GetActorType();
-}
-
-// Returns the level type by current mesh
-ELevelType UMapComponent::GetLevelType() const
-{
-	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByIndex(RowIndexInternal);
-	return FoundRow ? FoundRow->LevelType : ELevelType::None;
 }
 
 /*********************************************************************************************
@@ -303,7 +269,7 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	const AActor* ComponentOwner = GetOwner();
 	if (ComponentOwner && IsValid(this) // Could be called multiple times, make sure it is called once for valid object
-		&& !GExitPurge)                 // Do not call on exit
+	    && !GExitPurge)                 // Do not call on exit
 	{
 		if (UUtilsLibrary::IsEditorNotPieWorld())
 		{
@@ -329,17 +295,6 @@ void UMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
 
-// Returns properties that are replicated for the lifetime of the actor channel
-void UMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	FDoRepLifetimeParams Params;
-	Params.bIsPushBased = true;
-
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RowIndexInternal, Params);
-}
-
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
@@ -352,10 +307,13 @@ bool UMapComponent::OnAdded_Implementation()
 
 	TRACE_CPUPROFILER_EVENT_SCOPE(UMapComponent::OnAdded);
 
-	// Set the default mesh, any system can override it later by calling SetCustomMeshAsset(Mesh). 
-	const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
-	ensureMsgf(FoundRow && FoundRow->Mesh, TEXT("ASSERT: [%i] %hs:\n'FoundRow' is not valid, can not set the default mesh!"), __LINE__, __FUNCTION__);
-	SetMesh(FoundRow->Mesh);
+	// Set the default mesh (if any custom is not set yet), any system can override it later
+	if (!GetMesh())
+	{
+		const ULevelActorRow* FoundRow = GetActorDataAssetChecked().GetRowByLevelType(UMyBlueprintFunctionLibrary::GetLevelType());
+		ensureMsgf(FoundRow && FoundRow->Mesh, TEXT("ASSERT: [%i] %hs:\n'FoundRow' is not valid, can not set the default mesh!"), __LINE__, __FUNCTION__);
+		SetMesh(FoundRow->Mesh);
+	}
 
 	TryDisplayOwnedCell();
 

@@ -105,13 +105,23 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	FORCEINLINE class UMeshComponent* GetMeshComponent() const { return MeshComponentInternal; }
 
-	/** Returns the row index of the actor in the Data Asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetRowIndex() const { return RowIndexInternal; }
-
 	/** Returns current mesh asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	class UStreamableRenderAsset* GetMesh() const;
+
+	/** Cast-version: e.g: UStaticMesh, USkeletalMesh. */
+	template <typename T>
+	FORCEINLINE T* GetMesh() const { return Cast<T>(GetMesh()); }
+
+	/** Returns the row of the current mesh.
+	 * It assumes that the mesh is set by the row from the Data Asset.
+	 * Is actively used by Players (e.g: EAT::Maya is Bastet player) and for Bombs (EAT::Maya is Bastet's bomb). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	const ULevelActorRow* GetMeshRow() const;
+
+	/** Cast-version: e.g: UBombRow, UItemRow. */
+	template <typename T>
+	const FORCEINLINE T* GetMeshRow() const { return Cast<T>(GetMeshRow()); }
 
 	/** Applies given mesh on owner actor, or resets the mesh if null is passed.
 	 * Is useful for rows that have more than one mesh per row, like items.
@@ -119,24 +129,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetMesh(class UStreamableRenderAsset* NewMesh);
 
-	/** Set material to the mesh. */
+	/** Overrides default material of current mesh component.
+	 * @param NewMaterial - the material to be set on the mesh component. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetMaterial(class UMaterialInterface* Material);
+	void SetMeshMaterial(class UMaterialInterface* NewMaterial);
 
 protected:
 	/** Mesh of an owner. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
 	TObjectPtr<class UMeshComponent> MeshComponentInternal = nullptr;
-
-	/** Holds index of the row in Actor Data Asset. -1 means is not set.
-	 * It's assuming all meshes are assigned in the Data Asset.
-	 * Is primarily used for replicated of the mesh. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_RowIndex", AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Row Index"))
-	int32 RowIndexInternal = -1;
-
-	/** Is called on client to update custom mesh if changed. */
-	UFUNCTION()
-	void OnRep_RowIndex(int32 PreviousRowIndex);
 
 	/*********************************************************************************************
 	 * Collision
@@ -169,14 +170,9 @@ public:
 
 	const ULevelActorDataAsset& GetActorDataAssetChecked() const;
 
-	/** Get the owner's data asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	/** Returns the type of the owne: Player, Bomb, etc. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	EActorType GetActorType() const;
-
-	/** Returns the level type by current mesh.
-	 * If often used to determine the variation of the actor across different rows from the Data Asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	ELevelType GetLevelType() const;
 
 protected:
 	/** Represents the archetype of the owner, is set automatically on spawn.
@@ -193,9 +189,6 @@ protected:
 
 	/** Called when a component is destroyed for removing the owner from the Generated Map. */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
-
-	/** Returns properties that are replicated for the lifetime of the actor channel. */
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/*********************************************************************************************
 	 * Events
