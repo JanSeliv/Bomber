@@ -118,7 +118,8 @@ void AMyPlayerState::OnRep_EndGameState()
 // Applies currently changed End-Game state for this player
 void AMyPlayerState::ApplyEndGameState()
 {
-	if (HasAuthority()
+	// Try to end the game globally for all players
+	if (EndGameStateInternal != EEndGameState::None
 	    && UMyBlueprintFunctionLibrary::GetAlivePlayersNum() <= 1)
 	{
 		AMyGameStateBase::Get().SetGameState(ECGS::EndGame);
