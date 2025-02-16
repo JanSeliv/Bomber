@@ -12,7 +12,6 @@
 #include "Subsystems/GeneratedMapSubsystem.h"
 #include "Subsystems/GlobalEventsSubsystem.h"
 #include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
 //---
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
@@ -104,193 +103,12 @@ const FGeneratedMapSettings& AGeneratedMap::GetGenerationSetting() const
 void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 {
 	if (!HasAuthority()
-	    || !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%s: 'LevelSize' is invalid: %s"), *FString(__FUNCTION__), *LevelSize.ToString()))
+		|| !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%s: 'LevelSize' is invalid: %s"), *FString(__FUNCTION__), *LevelSize.ToString()))
 	{
 		return;
 	}
 
 	SetActorScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
-}
-
-// Getting an array of cells by four sides of an input center cell and type of breaks
-void AGeneratedMap::GetSidesCells(
-	FCells& OutCells,
-	const FCell& Cell,
-	EPathType Pathfinder,
-	int32 SideLength,
-	int32 DirectionsBitmask,
-	bool bBreakInputCells) const
-{
-	const int32 MaxWidth = UCellsUtilsLibrary::GetCellColumnsNumOnLevel();
-	if (!ensureMsgf(MaxWidth, TEXT("ASSERT: Level has zero width (Scale.X)"))
-	    || !ensureMsgf(DirectionsBitmask, TEXT("ASSERT: 'DirectionsBitmask' is not set"))
-	    || !ensureMsgf(SideLength > 0, TEXT("ASSERT: 'SideLength' is less than 1"))
-	    || !ensureMsgf(Cell.IsValid(), TEXT("ASSERT: 'Cell' is invalid")))
-	{
-		return;
-	}
-
-	const bool bIsAnyPath = Pathfinder == EPathType::Any;
-
-	// ----- Walls definition -----
-	FCells Walls;
-	bool bBreakOnWalls = !bIsAnyPath && !OutCells.Num();
-	if (bBreakOnWalls)
-	{
-		Walls = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Wall));
-	}
-	else if (bBreakInputCells) // specified OutCells is not empty, these cells break lines as the Wall behavior
-	{
-		bBreakOnWalls = true;
-		Walls = OutCells; // these cells break lines as the Wall behavior, don't empty specified array
-	}
-	else // !bBreakOnWalls && !bBreakInputCells
-	{
-		OutCells.Empty(); // should empty array in order to return only sides cells
-	}
-
-	// the index of the specified cell
-	const int32 C0 = LocalGridCellsInternal.IndexOfByPredicate([&Cell](const FCell& InCell) { return InCell == Cell; });
-	if (C0 == INDEX_NONE) // if index was found and cell is contained in the array
-	{
-		return;
-	}
-
-	// ----- A path without obstacles -----
-	FCells Obstacles;
-	const bool bBreakOnObstacles = !bIsAnyPath && Pathfinder != EPathType::Explosion;
-	if (bBreakOnObstacles) // if is the request to find the path without Bombs/Boxes
-	{
-		Obstacles = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Bomb | EAT::Box));
-	}
-
-	// ----- Secure: a path without players -----
-	FCells PlayersCells;
-	const bool bBreakOnPlayers = Pathfinder == EPathType::Secure;
-	if (bBreakOnPlayers) // if is the request to find the path without players cells.
-	{
-		PlayersCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
-	}
-
-	// ----- A path without explosions -----
-	FCells DangerousCells = AdditionalDangerousCells;
-	const bool bBreakOnExplosions = Pathfinder == EPathType::Safe || Pathfinder == EPathType::Secure;
-	if (bBreakOnExplosions) // if is the request to find the path without explosions.
-	{
-		DangerousCells.Append(UCellsUtilsLibrary::GetAllExplosionCells());
-	}
-
-	// ----- The specified cell adding -----
-	if (bBreakOnExplosions == false        // can be danger
-	    || !DangerousCells.Contains(Cell)) // is not dangerous cell
-	{
-		OutCells.Emplace(Cell);
-	}
-
-	// ----- Cells finding -----
-	for (int8 bIsY = 0; bIsY <= 1; ++bIsY) // 0(X-raw direction) and 1(Y-column direction)
-	{
-		const int32 PositionC0 = bIsY ? /*Y-column*/ C0 % MaxWidth : C0 / MaxWidth /*raw*/;
-		for (int8 SideMultiplier = -1; SideMultiplier <= 1; SideMultiplier += 2) // -1(Left|Down) and 1(Right|Up)
-		{
-			const FVector& VectorDirection = bIsY ? FVector::BackwardVector : FVector::RightVector;
-			const FCell CellDirection = VectorDirection * FVector(SideMultiplier);
-			const ECellDirection EnumDirection = FCell::GetCellDirection(CellDirection);
-			if (!EnumHasAnyFlags(EnumDirection, TO_ENUM(ECellDirection, DirectionsBitmask)))
-			{
-				continue;
-			}
-
-			for (int8 i = 1; i <= SideLength; ++i)
-			{
-				int32 Distance = i * SideMultiplier;
-				if (bIsY)
-				{
-					Distance *= MaxWidth;
-				}
-				const int32 FoundIndex = C0 + Distance;
-				if (PositionC0 != (bIsY ? FoundIndex % MaxWidth : FoundIndex / MaxWidth) // PositionC0 != PositionX
-				    || !LocalGridCellsInternal.IsValidIndex(FoundIndex))                 // is not in range
-				{
-					break; // to the next side
-				}
-
-				const FCell FoundCell = LocalGridCellsInternal[FoundIndex];
-
-				if (bBreakOnWalls
-				    && Walls.Contains(FoundCell))
-				{
-					// cell contains a wall
-					break;
-				}
-
-				if (bBreakOnObstacles
-				    && Obstacles.Contains(FoundCell))
-				{
-					// cell contains an obstacle (Bombs/Boxes)
-					break;
-				}
-
-				if (bBreakOnPlayers
-				    && PlayersCells.Contains(FoundCell))
-				{
-					// cell contains a player
-					break;
-				}
-
-				if (bBreakOnExplosions
-				    && DangerousCells.Contains(FoundCell))
-				{
-					// cell contains an explosion
-					break;
-				}
-
-				OutCells.Emplace(FoundCell);
-			} // Cells iterating
-		}     // Each side iterating: -1(Left|Down) and 1(Right|Up)
-	}         // Each direction iterating: 0(X-raw) and 1(Y-column)
-}
-
-// Returns true if any player is able to reach all specified cells by any any path
-bool AGeneratedMap::DoesPathExistToCells(const FCells& CellsToFind, const FCells& OptionalPathBreakers/* = FCell::EmptyCells*/) const
-{
-	FCells InOutSideCells = OptionalPathBreakers;
-	if (OptionalPathBreakers.IsEmpty())
-	{
-		// Include walls to prevent finding way through their cells
-		InOutSideCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Wall));
-	}
-
-	// Contains all cells need to find their side cells
-	checkf(!LocalGridCellsInternal.IsEmpty(), TEXT("ERROR: [%i] %hs:\n'LocalGridCellsInternal' is empty!"), __LINE__, __FUNCTION__);
-	FCells CellsToIterate{LocalGridCellsInternal[0]};
-
-	FCells FoundCells = FCell::EmptyCells;
-	while (CellsToIterate.Num())
-	{
-		// Cache all previous side cells
-		const FCells PrevSideCells = InOutSideCells;
-
-		for (const FCell& CellIt : CellsToIterate)
-		{
-			constexpr int32 MaxInteger = TNumericLimits<int32>::Max();
-			constexpr bool bBreakInputCells = true;
-			// InOutAllFoundCells include as wall cells as well all previous iterated cells
-			GetSidesCells(/*InOut*/InOutSideCells, CellIt, EPathType::Explosion, MaxInteger, TO_FLAG(ECellDirection::All), bBreakInputCells);
-		}
-
-		// Extract newly found cells
-		CellsToIterate = InOutSideCells.Difference(PrevSideCells);
-
-		const FCells NotFoundCells = CellsToFind.Difference(FoundCells);
-		FoundCells = CellsToIterate.Intersect(NotFoundCells).Union(FoundCells);
-		if (FoundCells.Includes(CellsToFind))
-		{
-			return true;
-		}
-	}
-
-	return false;
 }
 
 /*********************************************************************************************
@@ -519,72 +337,6 @@ void AGeneratedMap::ResolveSpawnedMapComponent(UMapComponent& AddedComponent)
 		// It intentionally affects only this client, but not server and other players
 		FoundSpec->MapComponent = AddedComponent;
 		FoundSpec->PostReplicatedAdd(MapComponentsInternal);
-	}
-}
-
-// The intersection of (OutCells ∩ ActorsTypesBitmask).
-void AGeneratedMap::IntersectCellsByTypes(
-	FCells& InOutCells,
-	int32 ActorsTypesBitmask,
-	bool bIntersectAllIfEmpty) const
-{
-	if (LocalGridCellsInternal.IsEmpty())
-	{
-		// nothing to intersect
-		return;
-	}
-
-	if (!bIntersectAllIfEmpty && !InOutCells.Num())
-	{
-		// should not intersect with all existed cells but the specified array is empty
-		return;
-	}
-
-	if (!ActorsTypesBitmask)
-	{
-		// Find all empty grid cell locations where non of actors are present
-		const FCells AllEmptyCells = FCells(
-			LocalGridCellsInternal.FilterByPredicate([&MapComponents = MapComponentsInternal](const FCell& CellIt)
-			{
-				return !MapComponents.Contains(CellIt);
-			}));
-
-		if (InOutCells.Num())
-		{
-			InOutCells = InOutCells.Intersect(AllEmptyCells);
-		}
-		else
-		{
-			InOutCells = AllEmptyCells;
-		}
-
-		return;
-	}
-
-	FMapComponents BitmaskedComponents;
-	ULevelActorsUtilsLibrary::GetLevelActors(BitmaskedComponents, ActorsTypesBitmask);
-	if (!BitmaskedComponents.Num())
-	{
-		InOutCells.Empty(); // nothing found, returns empty OutCells array
-		return;
-	}
-
-	FCells BitmaskedCells;
-	for (const UMapComponent* MapCompIt : BitmaskedComponents)
-	{
-		if (MapCompIt)
-		{
-			BitmaskedCells.Emplace(MapCompIt->GetCell());
-		}
-	}
-
-	if (InOutCells.Num())
-	{
-		InOutCells = InOutCells.Intersect(BitmaskedCells);
-	}
-	else
-	{
-		InOutCells = BitmaskedCells;
 	}
 }
 
@@ -1111,8 +863,13 @@ void AGeneratedMap::GenerateLevelActors()
 
 		// --- Part 1 : Checking if there is a path to the bottom and side edges. If not, go to the 0 step._ ---
 
-		const FCells PathBreakers = WallsToSpawn.Union(DraggedWalls);
-		bFoundPath = DoesPathExistToCells(LCellsToFind, PathBreakers);
+		FCells PathBreakers = WallsToSpawn.Union(DraggedWalls);
+		if (PathBreakers.IsEmpty())
+		{
+			// Include walls to prevent finding way through their cells
+			PathBreakers = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Wall));
+		}
+		bFoundPath = UCellsUtilsLibrary::DoesPathExistToCellsOnLevel(LCellsToFind, PathBreakers);
 
 		// Go to the step 0 if don't found
 		if (!bFoundPath)

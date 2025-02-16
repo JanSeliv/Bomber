@@ -72,7 +72,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InVector", DisplayName = "To Cell (Vector)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FORCEINLINE FCell Conv_VectorToCell(const FVector& InVector) { return FCell(InVector); }
 
-	/** Converts a cell value to a string, in the form 'X= Y=' */
+	/** Converts a cell value to a string, in the form `X= Y=` */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "InCell", DisplayName = "To String (Cell)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FORCEINLINE FString Conv_CellToString(const FCell& InCell) { return InCell.ToString(); }
 
@@ -144,7 +144,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (ScriptConstant = "Invalid", ScriptConstantHost = "/Script/Bomber.Cell", Keywords = "Zero"))
 	static const FORCEINLINE FCell& Cell_Invalid() { return FCell::InvalidCell; }
 
-	/** Returns true if cell is invalid (Cell == InvalidCell), to check is not the same as UCellUtillsLibrary::IsCellExistsOnLevel
+	/** Returns true if cell is invalid (Cell == InvalidCell), to check is not the same as UCellsUtilsLibrary::IsCellExistsOnLevel
 	 * Some functions returns the Invalid Cell, so it could be useful to check is the cell was found or not. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", ScriptMethod = "IsInvalidCell", Keywords = "Is Zero Cell"))
 	static FORCEINLINE bool Cell_IsInvalid(const FCell& Cell) { return Cell.IsInvalidCell(); }
@@ -179,7 +179,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FCell GetCellArrayNearest(const TSet<FCell>& Cells, const FCell& CellToCheck) { return FCell::GetCellArrayNearest(Cells, CellToCheck); }
 
-	/** Allows rotate or unrotated given grid around its origin. */
+	/** Allows to rotate or unrotated given grid around its origin. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE TSet<FCell> RotateCellArray(float AxisZ, const TSet<FCell>& InCells) { return FCell::RotateCellArray(AxisZ, InCells); }
 
@@ -220,7 +220,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static FORCEINLINE FTransform GetCellArrayTransform(const TSet<FCell>& InCells) { return FCell::GetCellArrayTransform(InCells); }
 
-	/** Find the average of an set of cells. */
+	/** Find the average of a set of cells. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "location"))
 	static FORCEINLINE FCell GetCellArrayCenter(const TSet<FCell>& Cells) { return FCell::GetCellArrayCenter(Cells); }
 
@@ -311,7 +311,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "width,X,size,scale,grid"))
 	static int32 GetLastColumnIndexOnLevel();
 
-	/** Returns Returns GetCellRowsNumOnLevel - 1. */
+	/** Returns GetCellRowsNumOnLevel - 1. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "length,Y,size,scale,grid"))
 	static int32 GetLastRowIndexOnLevel();
 #pragma endregion Scale
@@ -347,23 +347,32 @@ public:
 	static void GetCenterCellPositionOnLevel(int32& OutColumnX, int32& OutRowY);
 	static FIntPoint GetCenterCellPositionOnLevel();
 
-	/** Returns all empty grid cell locations on the Generated Map where non of actors are present. */
+	/** Returns all empty grid cell locations on the Generated Map where none of actors are present. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Free"))
 	static TSet<FCell> GetAllEmptyCellsWithoutActors();
 
 	/** Returns all grid cell locations on the Generated Map by specified actor types.
-	 * If non of actors are chosen, returns all empty cells without actors. */
+	 * If none of actors are chosen, returns all empty cells without actors. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Cell By Actor"))
 	static TSet<FCell> GetAllCellsWithActors(
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EActorType")) int32 ActorsTypesBitmask);
 
-	/** Takes cells and returns only empty cells where non of actors are present.
+	/** The intersection of (OutCells ∩ ActorsTypesBitmask).
+	 * @warning Is not public blueprintable since all related ufunctions are already use this method, they all do the same e.g: FilterCellsByActors, IsCellHasAnyMatchingActor etc.
+	 * 
+	 * @param InOutCells Will contain cells with actors of specified types.
+	 * @param ActorsTypesBitmask Bitmask of actors types to intersect.
+	 * @param bIntersectAllIfEmpty If the specified set is empty, then all non-empty cells of each actor will be iterated as a source set.
+	 */
+	static void IntersectCellsByTypes(FCells& InOutCells, int32 ActorsTypesBitmask, bool bIntersectAllIfEmpty);
+
+	/** Takes cells and returns only empty cells where none of actors are present.
 	 * Could be useful to extract only free no actor cells with within given cells. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Free"))
 	static TSet<FCell> FilterEmptyCellsWithoutActors(const TSet<FCell>& InCells);
 
 	/** Takes cells and returns only matching with specified actor types.
-	 * If non of actors are chosen, returns matching empty cells without actors.
+	 * If none of actors are chosen, returns matching empty cells without actors.
 	 * Could be useful to extract only items within given cells.
 	 *
 	 * @param InCells Cells to filter.
@@ -381,7 +390,7 @@ public:
 	static bool IsEmptyCellWithoutActor(const FCell& Cell);
 
 	/** Returns true if a cell has an actor of specified type (or its type matches with at least one type if put more than one type).
-	 * If non of actors are chosen, then returns true if specified cell is empty, so it does not have own actor.
+	 * If none of actors are chosen, then returns true if specified cell is empty, so it does not have own actor.
 	 * Could be useful to determine does input cell contain specific actor in itself like wall, so there is no way. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell"))
 	static bool IsCellHasAnyMatchingActor(
@@ -393,7 +402,7 @@ public:
 	static bool IsAnyCellEmptyWithoutActor(const TSet<FCell>& Cells);
 
 	/** Returns true if at least one cell has actors of specified types.
-	 * If non of actors are chosen, then returns true if at least one cell along specified is empty, so it does not have own actor.
+	 * If none of actors are chosen, then returns true if at least one cell along specified is empty, so it does not have own actor.
 	 * Could be useful to determine do input cells contain at least one item. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool AreCellsHaveAnyMatchingActors(
@@ -406,7 +415,7 @@ public:
 	static bool AreAllCellsEmptyWithoutActors(const TSet<FCell>& Cells);
 
 	/** Returns true if all cells have actors of specified types.
-	 * If non of actors are chosen, then returns true if all specified cells are empty, so don't have own actors.
+	 * If none of actors are chosen, then returns true if all specified cells are empty, so don't have own actors.
 	 * Could be useful to make sure there only players on input cells. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	static bool AreCellsHaveAllMatchingActors(
@@ -419,7 +428,7 @@ public:
 	static FORCEINLINE bool IsCellExistsOnLevel(const FCell& Cell) { return Cell.IsValid() && GetAllCellsOnLevel().Contains(Cell); }
 
 	/** Returns true if the cell is present on the Generated Map with such row and column indexes.
-	 * Could be useful to check row and and column. */
+	 * Could be useful to check row and column. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Valid"))
 	static FORCEINLINE bool IsCellPositionExistsOnLevel(int32 ColumnX, int32 RowY) { return GetCellByPositionOnLevel(ColumnX, RowY).IsValid(); }
 
@@ -431,6 +440,24 @@ public:
 	 * Could be useful to determine are all input cells valid. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "valid"))
 	static FORCEINLINE bool AreAllCellsExistOnLevel(const TSet<FCell>& Cells) { return GetAllCellsOnLevel().Includes(Cells); }
+
+	/** Getting an array of cells by any sides from an input center cell and type of breaks.
+	 * @warning Is not public blueprintable since all related ufunctions are already use this method, they all do the same e.g: GetCellsAround, GetCellInDirection etc.
+	 * 
+	 * @param OutCells Will contain found cells.
+	 * @param Cell The start of searching by the sides.
+	 * @param Pathfinder Type of cells searching.
+	 * @param SideLength Distance in number of cells from a center.
+	 * @param DirectionsBitmask All sides need to iterate.
+	 * @param bBreakInputCells In case, specified OutCells is not empty, these cells break lines as the Wall behavior, will not be removed from the array.
+	 */
+	static void GetSideCells(
+		FCells& OutCells,
+		const FCell& Cell,
+		EPathType Pathfinder,
+		int32 SideLength,
+		int32 DirectionsBitmask,
+		bool bBreakInputCells = false);
 
 	/** Returns cells around the center in specified radius and according desired type of breaks.
 	 * Could be useful to find all possible ways around.
@@ -446,7 +473,7 @@ public:
 		int32 Radius);
 
 	/** Returns cells that match specified actors in specified radius from a center, according desired type of breaks.
-	 * If non of actors are chosen, returns matching empty cells around without actors.
+	 * If none of actors are chosen, returns matching empty cells around without actors.
 	 * Could be useful to determine are there any players or items around.
 	 *
 	 * @param CenterCell The start of searching in specified direction.
@@ -516,7 +543,7 @@ public:
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECellDirection")) int32 DirectionsBitmask);
 
 	/** Returns cells that match specified actors in specified direction from a center, according desired type of breaks.
-	 * If non of actors are chosen, returns matching empty cells without actors in chosen direction(s).
+	 * If none of actors are chosen, returns matching empty cells without actors in chosen direction(s).
 	 * Could be useful to determine are there any players or items on the way.
 	 *
 	 * @param CenterCell The start of searching in specified direction.
@@ -548,7 +575,7 @@ public:
 		int32 SideLength,
 		UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECellDirection")) int32 DirectionsBitmask);
 
-	/** Returns true if player is not able to reach specified cell by any any path. */
+	/** Returns true if player is not able to reach specified cell by any path. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "Cell", Keywords = "Path"))
 	static bool IsIslandCell(const FCell& Cell);
 
@@ -578,6 +605,13 @@ public:
 	/** Returns all explosion cells on Level. */
 	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Dangerous"))
 	static TSet<FCell> GetAllExplosionCells();
+
+	/** Returns true if any player is able to reach all specified cells by any path.
+	 * @param CellsToFind Cells to which needs to find any path.
+	 * @param OptionalPathBreakers Unreachable cells, where path will stop (e.g: walls), can be empty.
+	 * @TODO JanSeliv twoZAVVk Improve algorithm to be more efficient and faster. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "OptionalPathBreakers"))
+	static bool DoesPathExistToCellsOnLevel(const TSet<FCell>& CellsToFind, const TSet<FCell>& OptionalPathBreakers);
 
 	/*********************************************************************************************
 	 * Corner Cell
