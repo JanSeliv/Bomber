@@ -94,15 +94,21 @@ public:
 };
 
 /**
- * Custom container struct to hold FMapComponentSpec objects, inheriting from FFastArraySerializer 
- * to utilize Unreal's fast array serialization mechanics. This ensures reliable network replication 
- * even when the number of components in the array remains unchanged.
- * PostReplicatedChange can be added to handle custom logic after the array has been replicated.
+ * Is exposed to replicate the Map Components and their cells.
+ * Utilizes the fast array serialization instead of regular array of objects for next reasons:
+ * - reliable network replication even when the number of components in the array remains unchanged
+ * - minimizes bandwidth usage, essential as it can be large and frequently changing
+ * - efficiently tracks changes, including additions and removals
+ * - ensures each component and its cell replicate together as one package due to its structured design
  */
 USTRUCT(BlueprintType)
 struct BOMBER_API FMapComponentsContainer : public FIrisFastArraySerializer
 {
 	GENERATED_BODY()
+
+	/** Internal token for tracking replication progress, is not replicated, but is incremented locally on each instance whenever any level actor is spawned. */
+	UPROPERTY(Transient, NotReplicated)
+	int32 LocalReplicationToken = 0;
 
 	/** The main data array for replication.
 	 * @warning It shouldn't be accessed directly, use ULevelActorsUtilsLibrary functions instead for obtaining Level Actors. */

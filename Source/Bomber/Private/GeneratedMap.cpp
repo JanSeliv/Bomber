@@ -103,7 +103,7 @@ const FGeneratedMapSettings& AGeneratedMap::GetGenerationSetting() const
 void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 {
 	if (!HasAuthority()
-		|| !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%s: 'LevelSize' is invalid: %s"), *FString(__FUNCTION__), *LevelSize.ToString()))
+	    || !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%hs: 'LevelSize' is invalid: %s"), __FUNCTION__, *LevelSize.ToString()))
 	{
 		return;
 	}
@@ -344,6 +344,18 @@ void AGeneratedMap::ResolveSpawnedMapComponent(UMapComponent& AddedComponent)
 		// It intentionally affects only this client, but not server and other players
 		FoundSpec->MapComponent = AddedComponent;
 		FoundSpec->PostReplicatedAdd(MapComponentsInternal);
+	}
+}
+
+// Internal method called on both server and client to increment the replication token whenever any level actor is spawned
+void AGeneratedMap::IncrementReplicationToken()
+{
+	++MapComponentsInternal.LocalReplicationToken;
+
+	if (MapComponentsInternal.LocalReplicationToken == GenerateLevelActorsTokenInternal)
+	{
+		// All level actors completed spawn (on server) or all replicated (on client)
+		OnGeneratedLevelActors.Broadcast();
 	}
 }
 
@@ -708,6 +720,7 @@ void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Params.bIsPushBased = true;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MapComponentsInternal, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, GenerateLevelActorsTokenInternal, Params);
 }
 
 // Spawns and fills the Grid Array values by level actors
@@ -894,12 +907,15 @@ void AGeneratedMap::GenerateLevelActors()
 
 	const TFunction<void(const TArray<UMapComponent*>&)> OnSpawned = [WeakThis = TWeakObjectPtr(this)](const TArray<UMapComponent*>& MapComponents)
 	{
-		const AGeneratedMap* This = WeakThis.Get();
+		AGeneratedMap* This = WeakThis.Get();
 		if (!This)
 		{
 			return;
 		}
 
+		// Replicate the token to clients, so they can track when all actors completed generation
+		This->GenerateLevelActorsTokenInternal = This->MapComponentsInternal.LocalReplicationToken;
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsTokenInternal, This);
 		This->OnGeneratedLevelActors.Broadcast();
 	};
 
@@ -984,20 +1000,6 @@ void AGeneratedMap::ScaleDraggedCellsOnGrid(const FCells& OriginalGrid, const FC
 		FCell& CurrentCellRef = DraggedCellRefIt.Key;
 		const FCell ScaledCell = FCell::ScaleCellToNewGrid(CurrentCellRef, CornerCells);
 		CurrentCellRef = FCell::GetCellArrayNearest(NewGridWithoutCorners, ScaledCell);
-	}
-}
-
-// Is called on client to broadcast On Generated Level Actors delegate
-void AGeneratedMap::OnRep_MapComponents()
-{
-	// Array of level actors is just replicated, try to broadcast On Generated Level Actors delegate
-	if (OnGeneratedLevelActors.IsBound()
-	    && AMyGameStateBase::GetCurrentGameState() != ECGS::InGame
-	    && !MapComponentsInternal.ContainsByPredicate([](const FMapComponentSpec& It) { return !It.IsValid(); }))
-	{
-		// It is not regular match, probably is Menu state or game is currently starting (3-2-1)
-		// and array contains only valid specs (all actors are spawned and replicated)
-		OnGeneratedLevelActors.Broadcast();
 	}
 }
 

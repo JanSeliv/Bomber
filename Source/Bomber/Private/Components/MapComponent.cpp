@@ -335,6 +335,9 @@ bool UMapComponent::OnAdded_Implementation()
 	// Notify listeners about the actor was added to the level
 	OnAddedToLevel.Broadcast(this);
 
+	// Increment the token to track the replication changes
+	AGeneratedMap::Get().IncrementReplicationToken();
+
 	return true;
 }
 

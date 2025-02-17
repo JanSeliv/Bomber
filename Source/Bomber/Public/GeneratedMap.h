@@ -118,6 +118,9 @@ public:
 	 * before the component is spawned. Manually binds the component to its replicated entry. */
 	void ResolveSpawnedMapComponent(UMapComponent& AddedComponent);
 
+	/** Internal method called on both server and client to increment the replication token whenever any level actor is spawned. */
+	void IncrementReplicationToken();
+
 	/*********************************************************************************************
 	 * Destroy
 	 ********************************************************************************************* */
@@ -195,12 +198,18 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Grid Cells", ShowOnlyInnerProperties))
 	TArray<FCell> LocalGridCellsInternal = FCell::EmptyCellsArr;
 
-	/** Map components of all level actors currently spawned on the Generated Map.
-	 * Is changing during the game on explosions and on the level regeneration.
-	 * Array of components is wrapped by FMapComponentsContainer.
-	 * It allows to replicate array faster, as the whole and even if the number of elements remains the same. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, ReplicatedUsing = "OnRep_MapComponents", Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
+	/** Stores and replicates map components of currently spawned level actors. 
+	 * Updates dynamically during level regeneration, explosions, player movement, and item spawns. 
+	 * Uses a fast array to replicate efficiently while minimizing network usage. 
+	 * Ensures reliable replication even when the number of components remains unchanged. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Components"))
 	FMapComponentsContainer MapComponentsInternal;
+
+	/** Is exposed to track when the Generate Level Actors is completed on the client. 
+	 * Server updates this token on every Generate Level Actors call.
+	 * Client monitors updates and confirms when tokens match to broadcast the On Generated Level Actors event. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Generate Level Actors Token"))
+	int32 GenerateLevelActorsTokenInternal = 0;
 
 	/** Contains map components that were dragged to the scene
 	 * Is set in editor by adding and dragging actors, but can be changed during the game. */
@@ -259,10 +268,6 @@ protected:
 	/** Scales dragged cells according new grid if sizes are different. */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void ScaleDraggedCellsOnGrid(const TSet<FCell>& OriginalGrid, const TSet<FCell>& NewGrid);
-
-	/** Is called on client to broadcast On Generated Level Actors delegate. */
-	UFUNCTION()
-	void OnRep_MapComponents();
 
 	/* ---------------------------------------------------
 	 *					Editor development
