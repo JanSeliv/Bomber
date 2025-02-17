@@ -899,8 +899,7 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 		return;
 	}
 
-	const TWeakObjectPtr<ThisClass> WeakThis = this;
-	const TFunction<void(AActor*)> OnBombSpawned = [WeakThis](AActor* SpawnedActor)
+	const TFunction<void(UMapComponent&)> OnBombSpawned = [WeakThis = TWeakObjectPtr(this)](UMapComponent& MapComponent)
 	{
 		APlayerCharacter* PlayerCharacter = WeakThis.Get();
 		if (!PlayerCharacter)
@@ -908,18 +907,15 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 			return;
 		}
 
-		ABombActor* BombActor = CastChecked<ABombActor>(SpawnedActor);
-		UMapComponent* MapComponent = UMapComponent::GetMapComponent(BombActor);
-		checkf(MapComponent, TEXT("ERROR: [%i] %s:\n'MapComponent' is null!"), __LINE__, *FString(__FUNCTION__));
-
 		const int32 DecrementedCurrentNum = PlayerCharacter->GetPowerups().BombNCurrent - 1;
 		PlayerCharacter->SetCurrentBombNum(DecrementedCurrentNum);
 
 		// Init Bomb
-		BombActor->InitBomb(PlayerCharacter);
+		ABombActor& BombActor = *CastChecked<ABombActor>(MapComponent.GetOwner());
+		BombActor.InitBomb(PlayerCharacter);
 
 		// Start listening this bomb
-		MapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
+		MapComponent.OnPostRemovedFromLevel.AddUniqueDynamic(PlayerCharacter, &ThisClass::OnBombDestroyed);
 	};
 
 	// Spawn bomb

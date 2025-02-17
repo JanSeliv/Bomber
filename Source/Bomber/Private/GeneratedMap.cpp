@@ -116,7 +116,7 @@ void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
  ********************************************************************************************* */
 
 // Spawns level actor on the Generated Map by the specified type
-void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(AActor*)>& OnSpawned/* = nullptr*/)
+void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(UMapComponent&)>& OnSpawned/* = nullptr*/)
 {
 	if (!HasAuthority()
 	    || UCellsUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
@@ -128,8 +128,7 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 	TRACE_CPUPROFILER_EVENT_SCOPE(AGeneratedMap::SpawnActorByType);
 
 	// --- Prepare spawn request
-	const TWeakObjectPtr<ThisClass> WeakThis(this);
-	const FOnSpawnCallback OnCompleted = [WeakThis, OnSpawned](const FPoolObjectData& CreatedObject)
+	const FOnSpawnCallback OnCompleted = [WeakThis = TWeakObjectPtr(this), OnSpawned](const FPoolObjectData& CreatedObject)
 	{
 		AGeneratedMap* This = WeakThis.Get();
 		if (!This)
@@ -143,11 +142,13 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 		SpawnedActor.SetOwner(This);
 
 		UMapComponent* MapComponent = UMapComponent::GetMapComponent(&SpawnedActor);
+		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+
 		This->AddToGrid(MapComponent);
 
 		if (OnSpawned != nullptr)
 		{
-			OnSpawned(&SpawnedActor);
+			OnSpawned(*MapComponent);
 		}
 	};
 
@@ -160,8 +161,8 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 	MapComponentsInternal.FindOrAdd(Handle);
 }
 
-// Spawns many level actors at once, used for level generation
-void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn)
+// Spawns multiple level actors at once, mostly used for level generation
+void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn, const TFunction<void(const TArray<UMapComponent*>&)>& OnSpawned/* = nullptr*/)
 {
 	if (!HasAuthority())
 	{
@@ -186,8 +187,7 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 	}
 
 	// --- Prepare On Spawn All callback
-	TWeakObjectPtr<ThisClass> WeakThis(this);
-	const FOnSpawnAllCallback OnCompleted = [WeakThis](const TArray<FPoolObjectData>& CreatedObjects)
+	const FOnSpawnAllCallback OnCompleted = [WeakThis = TWeakObjectPtr(this), OnSpawned](const TArray<FPoolObjectData>& CreatedObjects)
 	{
 		AGeneratedMap* This = WeakThis.Get();
 		if (!This)
@@ -196,6 +196,7 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 		}
 
 		// Setup spawned actors
+		TArray<UMapComponent*> MapComponents;
 		for (const FPoolObjectData& CreatedObject : CreatedObjects)
 		{
 			AActor& SpawnedActor = CreatedObject.GetChecked<AActor>();
@@ -203,10 +204,16 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 			SpawnedActor.SetOwner(This);
 
 			UMapComponent* MapComponent = UMapComponent::GetMapComponent(&SpawnedActor);
+			checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+			MapComponents.AddUnique(MapComponent);
+
 			This->AddToGrid(MapComponent);
 		}
 
-		This->OnGeneratedLevelActors.Broadcast();
+		if (OnSpawned != nullptr)
+		{
+			OnSpawned(MapComponents);
+		}
 	};
 
 	// --- Spawn all actors
@@ -885,7 +892,18 @@ void AGeneratedMap::GenerateLevelActors()
 
 	// --- Part 2: Spawning ---
 
-	SpawnActorsByTypes(ActorsToSpawn);
+	const TFunction<void(const TArray<UMapComponent*>&)> OnSpawned = [WeakThis = TWeakObjectPtr(this)](const TArray<UMapComponent*>& MapComponents)
+	{
+		const AGeneratedMap* This = WeakThis.Get();
+		if (!This)
+		{
+			return;
+		}
+
+		This->OnGeneratedLevelActors.Broadcast();
+	};
+
+	SpawnActorsByTypes(ActorsToSpawn, OnSpawned);
 }
 
 // Listen game states to generate level actors

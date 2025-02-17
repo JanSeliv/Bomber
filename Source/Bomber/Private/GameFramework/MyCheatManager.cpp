@@ -285,15 +285,12 @@ void UMyCheatManager::SpawnActorByType(EActorType ActorType, int32 ColumnX, int3
 	GeneratedMap.DestroyLevelActorsOnCells({Cell});
 
 	// Spawn new actor on the cell
-	const TFunction<void(AActor*)>& OnSpawned = [RowIndex](const AActor* SpawnedActor)
+	const TFunction<void(UMapComponent&)>& OnSpawned = [RowIndex](UMapComponent& MapComponent)
 	{
-		UMapComponent* MapComponent = UMapComponent::GetMapComponent(SpawnedActor);
-		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-
-		const ULevelActorRow* Row = MapComponent->GetActorDataAssetChecked().GetRowByIndex(RowIndex);
+		const ULevelActorRow* Row = MapComponent.GetActorDataAssetChecked().GetRowByIndex(RowIndex);
 		if (ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' was not found by '%i' index!"), __LINE__, __FUNCTION__, RowIndex))
 		{
-			MapComponent->SetMesh(Row->Mesh);
+			MapComponent.SetMesh(Row->Mesh);
 		}
 	};
 	GeneratedMap.SpawnActorByType(ActorType, Cell, OnSpawned);

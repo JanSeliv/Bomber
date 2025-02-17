@@ -89,20 +89,23 @@ public:
 	 * @param Cell Actors location
 	 * @return Spawned actor on the Generated Map, nullptr otherwise. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DisplayName = "Spawn Actor by Type", AutoCreateRefTerm = "Cell"))
-	void BPSpawnActorByType(EActorType Type, const FCell& Cell) { SpawnActorByType(Type, Cell, nullptr); }
+	void K2_SpawnActorByType(EActorType Type, const FCell& Cell) { SpawnActorByType(Type, Cell, nullptr); }
 
 	/** Code alternative function with OnSpawn callback. */
-	void SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(AActor*)>& OnSpawned = nullptr);
+	void SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(UMapComponent&)>& OnSpawned = nullptr);
 
-	/** Spawns many level actors at once, used for level generation. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn);
+	/** Blueprint-only method to spawn multiple level actors at once. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (DisplayName = "Spawn Actors by Types"))
+	void K2_SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn) { SpawnActorsByTypes(ActorsToSpawn, nullptr); }
+
+	/** Code alternative function with OnSpawn callback, is mostly used for level generation. */
+	void SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn, const TFunction<void(const TArray<UMapComponent*>&)>& OnSpawned = nullptr);
 
 	/** Spawns level actor of given type by the specified pattern.
-	 * Is usefull for custom level generation. E.g: spawn Walls on (2,0), (3,1), (4,2) cells.
+	 * Is useful for custom level generation. E.g: spawn Walls on (2,0), (3,1), (4,2) cells.
 	 * @param ActorsType All existing actors with given type will be destroyed first and then spawned on the specified positions.
 	 * @param Positions Columns (X) and rows (Y) positions of the actors to spawn. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
 	void SpawnActorsByPattern(EActorType ActorsType, const TArray<FIntPoint>& Positions);
 
 	/** Adding and attaching the specified Map Component to the Level.
