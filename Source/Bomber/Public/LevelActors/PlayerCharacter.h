@@ -211,6 +211,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected, AutoCreateRefTerm = "ActionValue"))
 	void MovePlayer(const struct FInputActionValue& ActionValue);
 
+	/** Takes the player current vector location and updates it on the level as a cell. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void UpdateLocation();
+
 protected:
 	/** The character's AI controller */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))

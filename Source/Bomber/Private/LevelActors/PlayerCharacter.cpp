@@ -325,18 +325,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (HasAuthority())
-	{
-		// On server, update a player location on the Generated Map
-		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
-	}
-	else if (IsLocallyControlled())
-	{
-		// On local client, directly set a player location for responsiveness while server replicates it
-		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-		const FCell SnappedCell = UCellsUtilsLibrary::SnapActorOnLevel(this);
-		MapComponentInternal->SetCell(SnappedCell);
-	}
+	UpdateLocation();
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
@@ -701,6 +690,23 @@ void APlayerCharacter::MovePlayer(const FInputActionValue& ActionValue)
 	AddMovementInput(RightDirection, MovementVector.X);
 }
 
+// Takes the player current vector location and updates it on the level as a cell
+void APlayerCharacter::UpdateLocation()
+{
+	if (HasAuthority())
+	{
+		// On server, update a player location on the Generated Map
+		AGeneratedMap::Get().SetNearestCell(MapComponentInternal);
+	}
+	else if (IsLocallyControlled())
+	{
+		// On local client, directly set a player location for responsiveness while server replicates it
+		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
+		const FCell SnappedCell = UCellsUtilsLibrary::SnapActorOnLevel(this);
+		MapComponentInternal->SetCell(SnappedCell);
+	}
+}
+
 // Called when this Pawn is possessed. Only called on the server (or in standalone)
 void APlayerCharacter::PossessedBy(AController* NewController)
 {
@@ -898,6 +904,9 @@ void APlayerCharacter::ServerSpawnBomb_Implementation()
 	{
 		return;
 	}
+
+	// Bomb is spawned on the current location, so make sure it's synced
+	UpdateLocation();
 
 	const TFunction<void(UMapComponent&)> OnBombSpawned = [WeakThis = TWeakObjectPtr(this)](UMapComponent& MapComponent)
 	{
