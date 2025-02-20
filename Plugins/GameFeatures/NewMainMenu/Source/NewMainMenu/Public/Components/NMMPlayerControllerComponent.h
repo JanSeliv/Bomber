@@ -110,5 +110,5 @@ protected:
 
 	/** Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnAsyncLoadGameFromSlotCompleted(const FString& SlotName, int32 UserIndex, class USaveGame* SaveGame);
+	void OnAsyncLoadGameFromSlotCompleted(class USaveGame* SaveGame);
 };

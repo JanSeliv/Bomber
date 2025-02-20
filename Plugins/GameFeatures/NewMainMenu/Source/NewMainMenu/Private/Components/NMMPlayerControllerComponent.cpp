@@ -17,10 +17,9 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 #include "Subsystems/SoundsSubsystem.h"
 #include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "MyUtilsLibraries/SaveUtilsLibrary.h"
 //---
 #include "Components/AudioComponent.h"
-#include "Engine/World.h"
-#include "Kismet/GameplayStatics.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMPlayerControllerComponent)
 
@@ -182,9 +181,9 @@ void UNMMPlayerControllerComponent::BeginPlay()
 	}
 
 	// Load save game data of the Main Menu
-	FAsyncLoadGameFromSlotDelegate AsyncLoadGameFromSlotDelegate;
+	FAsyncLoadGameFromSlot AsyncLoadGameFromSlotDelegate;
 	AsyncLoadGameFromSlotDelegate.BindUObject(this, &ThisClass::OnAsyncLoadGameFromSlotCompleted);
-	UGameplayStatics::AsyncLoadGameFromSlot(UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex(), AsyncLoadGameFromSlotDelegate);
+	USaveUtilsLibrary::AsyncLoadGameFromSlot(this, UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex(), AsyncLoadGameFromSlotDelegate);
 
 	// Disable auto camera possess by default, so it can be controlled by the spot
 	UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera();
@@ -289,7 +288,7 @@ void UNMMPlayerControllerComponent::OnActiveMenuSpotReady_Implementation(UNMMSpo
 }
 
 // Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load
-void UNMMPlayerControllerComponent::OnAsyncLoadGameFromSlotCompleted_Implementation(const FString& SlotName, int32 UserIndex, USaveGame* SaveGame)
+void UNMMPlayerControllerComponent::OnAsyncLoadGameFromSlotCompleted_Implementation(USaveGame* SaveGame)
 {
 	UNMMSaveGameData* InSaveGameData = Cast<UNMMSaveGameData>(SaveGame);
 	if (!InSaveGameData)

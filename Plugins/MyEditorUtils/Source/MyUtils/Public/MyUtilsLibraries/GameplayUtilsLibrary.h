@@ -6,8 +6,6 @@
 //---
 #include "GameplayUtilsLibrary.generated.h"
 
-class USaveGame;
-
 /**
  * Function library with gameplay-related helpers.
  */
@@ -55,28 +53,4 @@ public:
 	 * @return Returns false if Curve Table is finished or can not be evaluated (no row found, etc.). */
 	UFUNCTION(BlueprintCallable, Category = "C++", meta = (AutoCreateRefTerm = "CenterWorldTransform"))
 	static bool ApplyTransformFromCurveTable(AActor* InActor, const FTransform& CenterWorldTransform, class UCurveTable* CurveTable, float TotalSecondsSinceStart);
-
-	/*********************************************************************************************
-	 * Save Helpers
-	 ********************************************************************************************* */
-public:
-	/** Completely removes given save data and creates new empty one.
-	 * @param SaveGame The save game to reset.
-	 * @param SaveSlotName The name of the save slot.
-	 * @param SaveSlotIndex The index of the save slot.
-	 * @return The new empty save game object. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static USaveGame* ResetSaveGameData(USaveGame* SaveGame, const FString& SaveSlotName, int32 SaveSlotIndex);
-
-	/** Returns true if given object's config properties can be saved to the config file.
-	 * Is useful for validations to avoid unexpected behavior in builds.
-	 * @param Object The object to check. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static bool CanSaveConfig(const UObject* Object);
-
-	/** Saves the given object's config properties to the config file.
-	 * Is useful because of its validation to avoid unexpected behavior in builds.
-	 * @param Object The object to save. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static void SaveConfig(UObject* Object);
 };

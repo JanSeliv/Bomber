@@ -5,7 +5,7 @@
 #include "NMMUtils.h"
 #include "Components/NMMPlayerControllerComponent.h"
 #include "Data/NMMSaveGameData.h"
-#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+#include "MyUtilsLibraries/SaveUtilsLibrary.h"
 //---
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMCheatExtension)
 
@@ -16,7 +16,7 @@ void UNMMCheatExtension::ResetNewMainMenuSaves()
 	UNMMSaveGameData* CurrentSave = MenuControllerComp ? MenuControllerComp->GetSaveGameData() : nullptr;
 	if (CurrentSave)
 	{
-		USaveGame* NewSave = UGameplayUtilsLibrary::ResetSaveGameData(CurrentSave, UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex());
+		USaveGame* NewSave = USaveUtilsLibrary::ResetSaveGameData(CurrentSave, UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex());
 		MenuControllerComp->SetSaveGameData(NewSave);
 	}
 }
