@@ -81,7 +81,15 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, meta = (BlueprintProtected))
 	void SetAI(bool bShouldEnable);
 
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
 	/** Listen game states to enable or disable AI. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
 	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+
+	/** Called when this level actor is destroyed on the Generated Map. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	void OnPostRemovedFromLevel(class UMapComponent* MapComponent, UObject* DestroyCauser);
 };

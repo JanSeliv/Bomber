@@ -148,6 +148,10 @@ void AMyAIController::OnPossess(APawn* InPawn)
 
 	// Notify host about bot possession
 	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterPossessed(*OwnerInternal);
+
+	UMapComponent* MapComponent = UMapComponent::GetMapComponent(OwnerInternal);
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+	MapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
 }
 
 // Allows the controller to react on unpossessing the pawn
@@ -446,8 +450,12 @@ void AMyAIController::SetAI(bool bShouldEnable)
 	}
 }
 
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
+
 // Listen game states to enable or disable AI
-void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
@@ -466,4 +474,10 @@ void AMyAIController::OnGameStateChanged(ECurrentGameState CurrentGameState)
 		default:
 			break;
 	}
+}
+
+// Called when this level actor is destroyed on the Generated Map
+void AMyAIController::OnPostRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+{
+	SetAI(false);
 }
