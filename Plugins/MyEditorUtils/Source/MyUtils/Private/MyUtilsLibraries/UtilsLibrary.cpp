@@ -17,14 +17,17 @@
 // Returns the current play world
 UWorld* UUtilsLibrary::GetPlayWorld(const UObject* OptionalWorldContext)
 {
-	UWorld* FoundWorld = nullptr;
-	if (GEngine)
+	if (!GEngine || !GEngine->IsInitialized())
 	{
-		FoundWorld = GEngine->GetWorldFromContextObject(OptionalWorldContext, EGetWorldErrorMode::ReturnNull);
-		if (!FoundWorld)
-		{
-			FoundWorld = GEngine->GetCurrentPlayWorld();
-		}
+		// It's attempted to obtain current world when even the engine itself is not initialized yet
+		// Likely called from some constructor
+		return nullptr;
+	}
+
+	UWorld* FoundWorld = GEngine->GetWorldFromContextObject(OptionalWorldContext, EGetWorldErrorMode::ReturnNull);
+	if (!FoundWorld)
+	{
+		FoundWorld = GEngine->GetCurrentPlayWorld();
 	}
 
 #if WITH_EDITOR
@@ -34,11 +37,12 @@ UWorld* UUtilsLibrary::GetPlayWorld(const UObject* OptionalWorldContext)
 	}
 #endif
 
-	if (!ensureMsgf(FoundWorld, TEXT("%s: Can not obtain current world"), *FString(__FUNCTION__)))
+	if (!FoundWorld)
 	{
-		return nullptr;
+		FoundWorld = GWorld;
 	}
 
+	ensureMsgf(FoundWorld, TEXT("ASSERT: [%i] %hs:\n'FoundWorld' is null: failed to obtain current world!"), __LINE__, __FUNCTION__);
 	return FoundWorld;
 }
 

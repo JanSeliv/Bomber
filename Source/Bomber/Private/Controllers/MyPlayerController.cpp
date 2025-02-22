@@ -167,10 +167,9 @@ void AMyPlayerController::InitInputSystem()
 	Super::InitInputSystem();
 
 	// Handle UI inputs
-	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem(GetLocalPlayer());
-	checkf(WidgetsSubsystem, TEXT("ERROR: [%i] %hs:\n'WidgetsSubsystem' is null!"), __LINE__, __FUNCTION__);
-	WidgetsSubsystem->OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
-	if (WidgetsSubsystem->AreWidgetInitialized())
+	UWidgetsSubsystem& WidgetsSubsystem = UWidgetsSubsystem::Get(GetLocalPlayer());
+	WidgetsSubsystem.OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
+	if (WidgetsSubsystem.AreWidgetInitialized())
 	{
 		OnWidgetsInitialized();
 	}
