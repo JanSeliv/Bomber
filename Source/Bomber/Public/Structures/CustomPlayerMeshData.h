@@ -5,8 +5,7 @@
 #include "CustomPlayerMeshData.generated.h"
 
 /**
- * Determines how the character looks.
- * Contains additional data.
+ * Is runtime representation of the read-only Player Row.
  */
 USTRUCT(BlueprintType, meta = (HasNativeMake = "/Script/Bomber.PlayerMeshDataUtils.MakeCustomPlayerMeshData"))
 struct BOMBER_API FCustomPlayerMeshData
@@ -29,13 +28,26 @@ struct BOMBER_API FCustomPlayerMeshData
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
 	TObjectPtr<const class UPlayerRow> PlayerRow = nullptr;
 
-	/** The index of the texture to set. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	int32 SkinIndex = 0;
-
 	/** Returns true is data is valid. */
 	FORCEINLINE bool IsValid() const { return PlayerRow != nullptr; }
 
 	/** Equality operator to compare the mesh data. */
 	FORCEINLINE bool operator==(const FCustomPlayerMeshData& Other) const { return PlayerRow == Other.PlayerRow && SkinIndex == Other.SkinIndex; }
+
+	/*********************************************************************************************
+	 * Skins
+	 ********************************************************************************************* */
+public:
+	/** The index of the texture is currently set, since this data represents the row, where multiple skins can be stored. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	int32 SkinIndex = 0;
+
+	/** Bitmask for available skins (up to 32 skins).
+	 * Each bit represents a skin: 0 = locked, 1 = unlocked.
+	 * By default, all skins are unlocked.
+	 * 0001 -> Only first skin is unlocked
+	 * 0111 -> First three skins are unlocked
+	 * 1111 -> All skins are unlocked */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
+	int32 SkinAvailabilityMask = TNumericLimits<int32>::Max();
 };

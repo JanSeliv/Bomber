@@ -190,7 +190,7 @@ void UMySkeletalMeshComponent::InitMySkeletalMesh(const FCustomPlayerMeshData& C
 
 	AttachProps();
 
-	SetSkin(CustomPlayerMeshData.SkinIndex);
+	ApplySkinByIndex(CustomPlayerMeshData.SkinIndex);
 }
 
 // Creates dynamic material instance for each skin if is not done before
@@ -350,19 +350,86 @@ bool UMySkeletalMeshComponent::ArePropsWantToUpdate() const
 	return false;
 }
 
-// Some bomber characters have more than 1 texture, it will change a player skin if possible
-void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
+/*********************************************************************************************
+ * Skins
+ ********************************************************************************************* */
+
+// Returns the total number of skins for current mesh (player row)
+int32 UMySkeletalMeshComponent::GetSkinTexturesNum() const
 {
 	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
-	const int32 SkinTexturesNum = PlayerRow ? PlayerRow->GetSkinTexturesNum() : 0;
-	if (!SkinTexturesNum)
+	return PlayerRow ? PlayerRow->GetSkinTexturesNum() : 0;
+}
+
+// Checks if a skin is available and can be applied by index
+bool UMySkeletalMeshComponent::IsSkinAvailable(int32 SkinIdx) const
+{
+	constexpr int32 MaxSkinBits = 32;
+	if (!FMath::IsWithin(SkinIdx, 0, MaxSkinBits))
+	{
+		// Index is out of bits range
+		return false;
+	}
+
+	if (SkinIdx >= GetSkinTexturesNum())
+	{
+		// Index exceeds the total number of textures
+		return false;
+	}
+
+	// Check if the corresponding skin bit is set (available), e.g: 0101 -> Only first and third skins are available
+	return (PlayerMeshDataInternal.SkinAvailabilityMask & (1 << SkinIdx)) != 0;
+}
+
+// Makes skin unavailable or allows to apply by index
+void UMySkeletalMeshComponent::SetSkinAvailable(bool bMakeAvailable, int32 SkinIdx)
+{
+	if (IsSkinAvailable(SkinIdx) == bMakeAvailable)
+	{
+		// Is already set
+		return;
+	}
+
+	constexpr int32 MaxSkinBits = 32;
+	const int32 MaxSkinTextures = GetSkinTexturesNum();
+	if (!ensureMsgf(FMath::IsWithin(SkinIdx, 0, MaxSkinBits), TEXT("ASSERT: [%i] %hs:\n'Attempted to set skin %i, but it is out of range [0, %i]"), __LINE__, __FUNCTION__, SkinIdx, MaxSkinBits)
+	    || !ensureMsgf(SkinIdx < MaxSkinTextures, TEXT("ASSERT: [%i] %hs:\n'Attempted to set skin %i, which is larger than the total number of skins %i"), __LINE__, __FUNCTION__, SkinIdx, MaxSkinTextures))
 	{
 		return;
 	}
 
-	SkinIndex %= SkinTexturesNum;
-	class UMaterialInstanceDynamic* MaterialInstanceDynamic = PlayerRow->GetMaterialInstanceDynamic(SkinIndex);
-	if (!ensureMsgf(MaterialInstanceDynamic, TEXT("ASSERT: SetSkin: 'MaterialInstanceDynamic' is not valid contained by index %i"), SkinIndex))
+	// Example: currently skin #0 is already unlocked: 0001
+	// Is call SetSkinAvailable(true, 2), then both skins #0 and #2 will be unlocked: 0101
+
+	if (bMakeAvailable)
+	{
+		// Set the bit at SkinIdx to 1 to unlock the skin
+		PlayerMeshDataInternal.SkinAvailabilityMask |= (1 << SkinIdx);
+		return;
+	}
+
+	// Clear the bit at SkinIdx to 0 to lock the skin
+	PlayerMeshDataInternal.SkinAvailabilityMask &= ~(1 << SkinIdx);
+
+	// If the currently applied skin became unavailable, apply the next available one
+	if (PlayerMeshDataInternal.SkinIndex == SkinIdx)
+	{
+		ApplyNextSkin();
+	}
+}
+
+// Set and apply new skin for current mesh, by index from player row
+void UMySkeletalMeshComponent::ApplySkinByIndex(int32 SkinIndex)
+{
+	if (!IsSkinAvailable(SkinIndex)
+	    || !ensureMsgf(PlayerMeshDataInternal.PlayerRow, TEXT("ASSERT: [%i] %hs:\n'PlayerMeshDataInternal.PlayerRow' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	const UPlayerRow* PlayerRow = PlayerMeshDataInternal.PlayerRow;
+	UMaterialInstanceDynamic* MaterialInstanceDynamic = PlayerRow->GetMaterialInstanceDynamic(SkinIndex);
+	if (!ensureMsgf(MaterialInstanceDynamic, TEXT("ASSERT: ApplySkinByIndex: 'MaterialInstanceDynamic' is not valid for index %i"), SkinIndex))
 	{
 		return;
 	}
@@ -389,4 +456,24 @@ void UMySkeletalMeshComponent::SetSkin(int32 SkinIndex)
 	}
 
 	PlayerMeshDataInternal.SkinIndex = SkinIndex;
+}
+
+// Applies the next available skin, looping back if exceeding the available range
+void UMySkeletalMeshComponent::ApplyNextSkin()
+{
+	const int32 SkinTexturesNum = GetSkinTexturesNum();
+	if (SkinTexturesNum == 0)
+	{
+		return;
+	}
+
+	for (int32 Offset = 1; Offset < SkinTexturesNum; ++Offset)
+	{
+		const int32 NextSkinIndex = (PlayerMeshDataInternal.SkinIndex + Offset) % SkinTexturesNum;
+		if (IsSkinAvailable(NextSkinIndex))
+		{
+			ApplySkinByIndex(NextSkinIndex);
+			break;
+		}
+	}
 }

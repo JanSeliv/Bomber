@@ -272,6 +272,7 @@ public:
 	/** Returns the Skeletal Mesh of bombers. */
 	UFUNCTION(BlueprintPure, Category = "C++")
 	class UMySkeletalMeshComponent* GetMySkeletalMeshComponent() const;
+	UMySkeletalMeshComponent& GetMeshChecked() const;
 
 	/** Returns current player mesh data of  the local player applied to skeletal mesh. */
 	UFUNCTION(BlueprintPure, Category = "C++")

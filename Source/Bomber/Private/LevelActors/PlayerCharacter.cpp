@@ -374,10 +374,7 @@ void APlayerCharacter::OnAddedToLevel_Implementation(UMapComponent* MapComponent
 
 	OnActorBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnPlayerBeginOverlap);
 
-	if (UMySkeletalMeshComponent* MySkeletalMeshComponent = GetMySkeletalMeshComponent())
-	{
-		MySkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	}
+	GetMeshChecked().SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 
 	if (!PlayerMeshDataInternal.IsValid())
 	{
@@ -505,10 +502,7 @@ void APlayerCharacter::OnPostRemovedFromLevel_Implementation(UMapComponent* MapC
 
 	UGlobalEventsSubsystem::Get().BP_OnGameStateChanged.RemoveAll(this);
 
-	if (UMySkeletalMeshComponent* MySkeletalMeshComponent = GetMySkeletalMeshComponent())
-	{
-		MySkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+	GetMeshChecked().SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	if (Controller)
 	{
@@ -779,6 +773,11 @@ void APlayerCharacter::ApplyPlayerId(int32 CurrentPlayerId/* = INDEX_NONE*/)
 UMySkeletalMeshComponent* APlayerCharacter::GetMySkeletalMeshComponent() const
 {
 	return Cast<UMySkeletalMeshComponent>(GetMesh());
+}
+
+UMySkeletalMeshComponent& APlayerCharacter::GetMeshChecked() const
+{
+	return *CastChecked<UMySkeletalMeshComponent>(GetMesh());
 }
 
 // Set and apply how a player has to look like

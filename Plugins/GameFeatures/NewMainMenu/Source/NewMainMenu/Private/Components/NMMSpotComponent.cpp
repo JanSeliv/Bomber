@@ -45,10 +45,11 @@ bool UNMMSpotComponent::IsCurrentSpot() const
 // Returns true if this spot is visible, unlocked and can be selected by player
 bool UNMMSpotComponent::IsSpotAvailable() const
 {
-	const UMySkeletalMeshComponent& MeshComponent = GetMeshChecked();
+	const UMySkeletalMeshComponent* MeshComponent = GetMySkeletalMeshComponent();
 	return IsActive()
-		&& MeshComponent.IsActive()
-		&& MeshComponent.IsVisible();
+		&& MeshComponent
+		&& MeshComponent->IsActive()
+		&& MeshComponent->IsVisible();
 }
 
 // Returns the Skeletal Mesh of the Bomber character

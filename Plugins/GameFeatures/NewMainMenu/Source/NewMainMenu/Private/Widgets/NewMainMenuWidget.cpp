@@ -153,11 +153,7 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the preview skin on the spot
-	static constexpr int32 NextSkin = 1;
-	UMySkeletalMeshComponent& MainMenuMeshComp = MainMenuSpot->GetMeshChecked();
-	const FCustomPlayerMeshData& CustomPlayerMeshData = MainMenuMeshComp.GetCustomPlayerMeshData();
-	const int32 NewSkinIndex = CustomPlayerMeshData.SkinIndex + NextSkin;
-	MainMenuMeshComp.SetSkin(NewSkinIndex);
+	MainMenuSpot->GetMeshChecked().ApplyNextSkin();
 
 	// Update in-game player skin
 	MainMenuSpot->ApplyMeshOnPlayer();

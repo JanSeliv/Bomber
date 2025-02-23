@@ -154,15 +154,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "C++")
 	bool ArePropsWantToUpdate() const;
 
-	/**
-	 * Set the skin, specified by index, to this mesh and its attached props
-	 * Some bomber characters have more than 1 diffuse, it will change a player skin if possible.
-	 * @param SkinIndex The index of the texture to set.
-	 * @see UPlayerRow::SkinTextures
-	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetSkin(int32 SkinIndex);
-
 protected:
 	/* ---------------------------------------------------
 	*		Protected properties
@@ -179,4 +170,32 @@ protected:
 	/** Current attached mesh components. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Attached Meshes"))
 	TArray<TObjectPtr<class UMeshComponent>> AttachedMeshesInternal;
+
+	/*********************************************************************************************
+	 * Skins
+	 ********************************************************************************************* */
+public:
+	/** Returns the total number of skins for current mesh (player row). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	int32 GetSkinTexturesNum() const;
+
+	/** Checks if a skin is available and can be applied by index. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	bool IsSkinAvailable(int32 SkinIdx) const;
+
+	/** Allows to change the availability of the skin by index.
+	 * When a skin is unavailable, it will not apply anymore until unlocked.
+	 * @param bMakeAvailable True to unlock, false to lock.
+	 * @param SkinIdx The index of the texture to change availability. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void SetSkinAvailable(bool bMakeAvailable, int32 SkinIdx);
+
+	/** Set and apply new skin for current mesh, by index from player row.
+	 * @param SkinIndex The index of the texture to set. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplySkinByIndex(int32 SkinIndex);
+
+	/** Applies the next available skin, looping back if exceeding the available range. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	void ApplyNextSkin();
 };
