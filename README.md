@@ -9,7 +9,7 @@
 <p align="center">
 <a href="https://discord.gg/jbWgwDefnE"><strong>Join our Discord ››</strong></a>
 <br/>
-<a href="https://github.com/JanSeliv/Bomber/releases">Releases</a>
+<a href="https://store.steampowered.com/app/1873240/Bomberrage/">Steam</a>
 ·
 <a href="https://trello.com/b/1jbKvyeh/bomber-kanban">Kanban Board</a>
 <br/>
@@ -29,9 +29,9 @@ Forget hidden exits and classic rules - Bomberrage is a fast, competitive game w
 
 - [💣 About the Bomber Project](#-about-the-bomber-project)
 - [🚀 Getting Started](#-getting-started)
-- [💻 Platforms and Requirements](#-platforms-and-requirements)
-- [🛠 Key Features](#-key-features)
 - [💾 Play the Build](#-play-the-build)
+- [💻 Unreal Project Requirements](#-platforms-and-requirements)
+- [🛠 Key Features](#-key-features)
 - [📋 Kanban Board](#-kanban-board)
 - [📅 Changelog](#-changelog)
 - [🎮 Overview](#-overview)
@@ -50,15 +50,24 @@ If already cloned without submodules, you'll find empty folders in `Bomber\Plugi
 git submodule update --init --recursive
 ```
 
-## 💻 Platforms and Requirements
+## 💾 Play the Build
 
-The project has been tested and verified to run on the following platforms:
+- **Download the latest build on Steam** via [**Download Bomberrage Demo**](https://store.steampowered.com/app/1873240/Bomberrage/):
+
+[![Download on Steam](https://github.com/user-attachments/assets/39bbd233-fc1f-4a16-aec4-f33983a92cd8)](https://store.steampowered.com/app/1873240/Bomberrage/)
+
+- Mirror link: [**GitHub Releases**](https://github.com/JanSeliv/Bomber/releases/)
+
+## 💻 Unreal Project Requirements
+
+- **Unreal Engine 5.4**
+- **Project Disk Space:** 33GB
+
+The project has been tested and launching the editor on the following platforms:
 
 - **Windows 10 22H2**
 - **macOS Sonoma 14.4** (Apple M2 hardware)
 - **Ubuntu 22.04 LTS**
-
-**Project Disk Space:** 33GB
 
 ## 🛠 Key Features
 
@@ -89,12 +98,6 @@ Next [plugins](https://github.com/JanSeliv/Bomber/tree/master/Plugins) were deve
 - [ƒ Function Picker](https://github.com/JanSeliv/FunctionPicker)
 - [\>_ Meta Cheat Manager](https://github.com/JanSeliv/MetaCheatManager)
 - [✂️ Level Sequencer Audio Trimmer](https://github.com/JanSeliv/LevelSequencerAudioTrimmer)
-
-## 💾 Play the Build
-
-To download and play the build, visit [GitHub Releases](https://github.com/JanSeliv/Bomber/releases/) or [GDrive](https://drive.google.com/open?id=1oxBUQwnQX322IxQUK8Y6A-L09WompiGi).
-
-Want to test develop branch on Steam? [Message me](https://t.me/JanSeliv) for a key.
 
 ## 📋 Kanban Board
 
