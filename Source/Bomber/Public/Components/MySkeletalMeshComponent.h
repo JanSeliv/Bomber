@@ -184,18 +184,19 @@ public:
 	bool IsSkinAvailable(int32 SkinIdx) const;
 
 	/** Allows to change the availability of the skin by index.
-	 * When a skin is unavailable, it will not apply anymore until unlocked.
 	 * @param bMakeAvailable True to unlock, false to lock.
-	 * @param SkinIdx The index of the texture to change availability. */
+	 * @param SkinIdx The index of the texture to change availability.
+	 * @warning Unavailable skin still might apply if call ApplySkinByIndex:
+	 * its responsibility of the caller to check availability with IsSkinAvailable. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void SetSkinAvailable(bool bMakeAvailable, int32 SkinIdx);
+
+	/** Returns the skin index that is currently applied to the mesh. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	FORCEINLINE int32 GetAppliedSkinIndex() const { return PlayerMeshDataInternal.SkinIndex; }
 
 	/** Set and apply new skin for current mesh, by index from player row.
 	 * @param SkinIndex The index of the texture to set. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	void ApplySkinByIndex(int32 SkinIndex);
-
-	/** Applies the next available skin, looping back if exceeding the available range. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void ApplyNextSkin();
 };

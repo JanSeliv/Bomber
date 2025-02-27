@@ -2,7 +2,6 @@
 
 #include "Widgets/NewMainMenuWidget.h"
 //---
-#include "Bomber.h"
 #include "NMMUtils.h"
 #include "Components/MySkeletalMeshComponent.h"
 #include "Components/NMMSpotComponent.h"
@@ -153,7 +152,9 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 	USoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the preview skin on the spot
-	MainMenuSpot->GetMeshChecked().ApplyNextSkin();
+	UMySkeletalMeshComponent& MeshComp = MainMenuSpot->GetMeshChecked();
+	const int32 NextSkinIndex = (MeshComp.GetAppliedSkinIndex() + 1) % MeshComp.GetSkinTexturesNum();
+	MeshComp.ApplySkinByIndex(NextSkinIndex);
 
 	// Update in-game player skin
 	MainMenuSpot->ApplyMeshOnPlayer();
