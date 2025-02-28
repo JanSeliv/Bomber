@@ -406,8 +406,7 @@ void UMySkeletalMeshComponent::SetSkinAvailable(bool bMakeAvailable, int32 SkinI
 // Set and apply new skin for current mesh, by index from player row
 void UMySkeletalMeshComponent::ApplySkinByIndex(int32 SkinIndex)
 {
-	if (!ensureMsgf(PlayerMeshDataInternal.PlayerRow, TEXT("ASSERT: [%i] %hs:\n'PlayerMeshDataInternal.PlayerRow' is not valid!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(FMath::IsWithin(SkinIndex, 0, GetSkinTexturesNum()), TEXT("ASSERT: [%i] %hs:\n'Attempted to apply skin %i, but it is out of total skin textures"), __LINE__, __FUNCTION__, SkinIndex))
+	if (!ensureMsgf(PlayerMeshDataInternal.PlayerRow, TEXT("ASSERT: [%i] %hs:\n'PlayerMeshDataInternal.PlayerRow' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
