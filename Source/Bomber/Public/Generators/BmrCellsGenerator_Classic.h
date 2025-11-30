@@ -29,5 +29,5 @@ class BOMBER_API UBmrCellsGenerator_Classic : public UBmrCellsGenerator_Base
 
 public:
 	/** Is overriden to implement custom level generation logic. */
-	virtual TMap<FCell, EActorType> GenerateLevel(FBmrGeneratorData&& GeneratorData) override;
+	virtual TMap<FBmrCell, EBmrActorType> GenerateLevel(FBmrGeneratorData&& GeneratorData) override;
 };

@@ -1,35 +1,35 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "Structures/Cell.h"
+#include "Structures/BmrCell.h"
 
 // Bomber
 #include "Engine/NetSerialization.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(Cell)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrCell)
 
-const FCell FCell::InvalidCell = FCell(0.f, 0.f, -1.f);
-const FCell FCell::ForwardCell = FCell(1.f, 0.f, 0.f);
-const FCell FCell::BackwardCell = FCell(-1.f, 0.f, 0.f);
-const FCell FCell::RightCell = FCell(0.f, 1.f, 0.f);
-const FCell FCell::LeftCell = FCell(0.f, -1.f, 0.f);
-const FCells FCell::EmptyCells = FCells{};
-const FCellsArr FCell::EmptyCellsArr = FCellsArr{};
+const FBmrCell FBmrCell::InvalidCell = FBmrCell(0.f, 0.f, -1.f);
+const FBmrCell FBmrCell::ForwardCell = FBmrCell(1.f, 0.f, 0.f);
+const FBmrCell FBmrCell::BackwardCell = FBmrCell(-1.f, 0.f, 0.f);
+const FBmrCell FBmrCell::RightCell = FBmrCell(0.f, 1.f, 0.f);
+const FBmrCell FBmrCell::LeftCell = FBmrCell(0.f, -1.f, 0.f);
+const FBmrCells FBmrCell::EmptyCells = FBmrCells{};
+const FBmrCellsArr FBmrCell::EmptyCellsArr = FBmrCellsArr{};
 
 // Vector to cell constructor
-FCell::FCell(const FVector& Vector)
+FBmrCell::FBmrCell(const FVector& Vector)
 {
 	Location.X = FMath::RoundToFloat(Vector.X);
 	Location.Y = FMath::RoundToFloat(Vector.Y);
 	Location.Z = FMath::RoundToFloat(Vector.Z);
 }
 
-FCell::FCell(const FVector_NetQuantize& Vector)
-    : FCell(FVector(Vector))
+FBmrCell::FBmrCell(const FVector_NetQuantize& Vector)
+    : FBmrCell(FVector(Vector))
 {
 }
 
 // Floats to cell constructor
-FCell::FCell(float X, float Y, float Z)
+FBmrCell::FBmrCell(float X, float Y, float Z)
 {
 	Location.X = FMath::RoundToFloat(X);
 	Location.Y = FMath::RoundToFloat(Y);
@@ -37,7 +37,7 @@ FCell::FCell(float X, float Y, float Z)
 }
 
 // Doubles to cell constructor
-FCell::FCell(double X, double Y, double Z)
+FBmrCell::FBmrCell(double X, double Y, double Z)
 {
 	Location.X = FMath::RoundToDouble(X);
 	Location.Y = FMath::RoundToDouble(Y);
@@ -45,13 +45,13 @@ FCell::FCell(double X, double Y, double Z)
 }
 
 // Equal operator for vectors to directly copy its value to the cell
-FCell& FCell::operator=(const FVector& Vector)
+FBmrCell& FBmrCell::operator=(const FVector& Vector)
 {
 	Location = Vector;
 	return *this;
 }
 
-FCell& FCell::operator=(const FVector_NetQuantize& Vector)
+FBmrCell& FBmrCell::operator=(const FVector_NetQuantize& Vector)
 {
 	Location = FVector(Vector);
 	return *this;
@@ -62,18 +62,18 @@ FCell& FCell::operator=(const FVector_NetQuantize& Vector)
  ********************************************************************************************* */
 
 // Gets a copy of given cell rotated around given transform to the same yaw degree
-FCell FCell::RotateCellAroundOrigin(const FCell& InCell, float AxisZ, const FTransform& OriginTransformNoScale)
+FBmrCell FBmrCell::RotateCellAroundOrigin(const FBmrCell& InCell, float AxisZ, const FTransform& OriginTransformNoScale)
 {
 	const FVector Dimensions = InCell.Location - OriginTransformNoScale.GetLocation();
 	const float AngleDeg = OriginTransformNoScale.GetRotation().Rotator().Yaw;
 	const FVector Axis(FVector2D::ZeroVector, AxisZ);
 	const FVector RotatedVector = Dimensions.RotateAngleAxis(AngleDeg, Axis);
-	FCell RotatedCell(InCell.Location + RotatedVector - Dimensions);
+	FBmrCell RotatedCell(InCell.Location + RotatedVector - Dimensions);
 	return MoveTemp(RotatedCell);
 }
 
 // Allows rotate or unrotated given grid around its origin
-FCells FCell::RotateCellArray(float AxisZ, const FCells& InCells)
+FBmrCells FBmrCell::RotateCellArray(float AxisZ, const FBmrCells& InCells)
 {
 	// In:rotated cells		Out:unrotated cells
 	//     /\     				 __ __ __ __
@@ -92,11 +92,11 @@ FCells FCell::RotateCellArray(float AxisZ, const FCells& InCells)
 
 	const FTransform CellArrayTransformNoScale = GetCellArrayTransformNoScale(InCells);
 
-	FCells RotatedCells = EmptyCells;
-	for (const FCell& CellIt : InCells)
+	FBmrCells RotatedCells = EmptyCells;
+	for (const FBmrCell& CellIt : InCells)
 	{
-		const FCell RotatedCell = RotateCellAroundOrigin(CellIt, AxisZ, CellArrayTransformNoScale);
-		FCell SnappedCell = SnapCell(RotatedCell);
+		const FBmrCell RotatedCell = RotateCellAroundOrigin(CellIt, AxisZ, CellArrayTransformNoScale);
+		FBmrCell SnappedCell = SnapCell(RotatedCell);
 		RotatedCells.Emplace(MoveTemp(SnappedCell));
 	}
 
@@ -108,13 +108,13 @@ FCells FCell::RotateCellArray(float AxisZ, const FCells& InCells)
  ********************************************************************************************* */
 
 // Constructs and returns new grid from given transform
-FCells FCell::MakeCellGridByTransform(const FTransform& OriginTransform)
+FBmrCells FBmrCell::MakeCellGridByTransform(const FTransform& OriginTransform)
 {
 	const FVector LevelLocation = OriginTransform.GetLocation();
 	const FVector LevelScale = OriginTransform.GetScale3D();
 	const FIntPoint LevelSize(LevelScale.X, LevelScale.Y);
 
-	FCells GridCells;
+	FBmrCells GridCells;
 	GridCells.Reserve(LevelSize.X * LevelSize.Y);
 	for (int32 Y = 0; Y < LevelSize.Y; ++Y)
 	{
@@ -128,9 +128,9 @@ FCells FCell::MakeCellGridByTransform(const FTransform& OriginTransform)
 			// Subtract the deviation from the center
 			FoundVector -= (LevelScale / 2.f) * CellSize;
 			// Snap to the cell
-			const FCell SnappedCell = SnapCell(FoundVector);
+			const FBmrCell SnappedCell = SnapCell(FoundVector);
 			// Cell was found, add rotated cell to the array
-			FCell RotatedCell = RotateCellAroundOrigin(SnappedCell, 1.f, OriginTransform);
+			FBmrCell RotatedCell = RotateCellAroundOrigin(SnappedCell, 1.f, OriginTransform);
 
 			GridCells.Emplace(MoveTemp(RotatedCell));
 		}
@@ -140,28 +140,28 @@ FCells FCell::MakeCellGridByTransform(const FTransform& OriginTransform)
 }
 
 // Returns the cell by specified column (X) and row (Y) on given grid if exists, invalid cell otherwise
-FCell FCell::GetCellByPositionOnGrid(const FIntPoint& CellPosition, const FCells& InGrid)
+FBmrCell FBmrCell::GetCellByPositionOnGrid(const FIntPoint& CellPosition, const FBmrCells& InGrid)
 {
 	const int32 MaxWidth = FMath::FloorToInt32(GetCellArrayWidth(InGrid));
 	return GetCellByPositionOnGrid(CellPosition, InGrid.Array(), MaxWidth);
 }
 
 // More optimized version of GetCellByPositionOnGrid which requires the Grid Width to be passed
-FCell FCell::GetCellByPositionOnGrid(const FIntPoint& CellPosition, const FCellsArr& InGrid, int32 GridWidth)
+FBmrCell FBmrCell::GetCellByPositionOnGrid(const FIntPoint& CellPosition, const FBmrCellsArr& InGrid, int32 GridWidth)
 {
 	const int32 CellIndex = CellPosition.Y /*Row*/ * GridWidth /*ColumnsNum*/ + CellPosition.X /*Column*/;
 	return InGrid.IsValidIndex(CellIndex) ? InGrid[CellIndex] : InvalidCell;
 }
 
 // Takes the cell and returns its column (X) and row (Y) position on given grid if exists, -1 otherwise
-FIntPoint FCell::GetPositionByCellOnGrid(const FCell& InCell, const FCells& InGrid)
+FIntPoint FBmrCell::GetPositionByCellOnGrid(const FBmrCell& InCell, const FBmrCells& InGrid)
 {
 	const int32 MaxWidth = GetCellArrayWidth(InGrid);
 	return GetPositionByCellOnGrid(InCell, InGrid.Array(), MaxWidth);
 }
 
 // More optimized version of GetPositionByCellOnGrid which requires the Grid Size to be passed
-FIntPoint FCell::GetPositionByCellOnGrid(const FCell& InCell, const FCellsArr& InGrid, int32 GridWidth)
+FIntPoint FBmrCell::GetPositionByCellOnGrid(const FBmrCell& InCell, const FBmrCellsArr& InGrid, int32 GridWidth)
 {
 	if (GridWidth <= 0)
 	{
@@ -181,10 +181,10 @@ FIntPoint FCell::GetPositionByCellOnGrid(const FCell& InCell, const FCellsArr& I
 }
 
 // Returns a map of cells to their positions on the grid
-TMap<FCell, FIntPoint> FCell::GetPositionsByCellsOnGrid(const FCellsArr& InGrid, int32 GridWidth)
+TMap<FBmrCell, FIntPoint> FBmrCell::GetPositionsByCellsOnGrid(const FBmrCellsArr& InGrid, int32 GridWidth)
 {
-	TMap<FCell, FIntPoint> AllCellPositions;
-	for (const FCell& It : InGrid)
+	TMap<FBmrCell, FIntPoint> AllCellPositions;
+	for (const FBmrCell& It : InGrid)
 	{
 		const FIntPoint Position = GetPositionByCellOnGrid(It, InGrid, GridWidth);
 		if (Position.X >= 0 && Position.Y >= 0)
@@ -197,7 +197,7 @@ TMap<FCell, FIntPoint> FCell::GetPositionsByCellsOnGrid(const FCellsArr& InGrid,
 }
 
 // Returns the center column (X) and row (Y) position on given grid
-FIntPoint FCell::GetCenterCellPositionOnGrid(const FCells& InGrid)
+FIntPoint FBmrCell::GetCenterCellPositionOnGrid(const FBmrCells& InGrid)
 {
 	return FIntPoint(
 	    FMath::FloorToInt32(GetCellArrayWidth(InGrid) / 2.f),
@@ -205,17 +205,17 @@ FIntPoint FCell::GetCenterCellPositionOnGrid(const FCells& InGrid)
 }
 
 // Returns 4 corner cells on given cells grid
-FCells FCell::GetCornerCellsOnGrid(const FCells& InGrid)
+FBmrCells FBmrCell::GetCornerCellsOnGrid(const FBmrCells& InGrid)
 {
-	return FCells{
-	    GetCellByCornerOnGrid(EGridCorner::TopLeft, InGrid),
-	    GetCellByCornerOnGrid(EGridCorner::TopRight, InGrid),
-	    GetCellByCornerOnGrid(EGridCorner::BottomLeft, InGrid),
-	    GetCellByCornerOnGrid(EGridCorner::BottomRight, InGrid)};
+	return FBmrCells{
+	    GetCellByCornerOnGrid(EBmrGridCorner::TopLeft, InGrid),
+	    GetCellByCornerOnGrid(EBmrGridCorner::TopRight, InGrid),
+	    GetCellByCornerOnGrid(EBmrGridCorner::BottomLeft, InGrid),
+	    GetCellByCornerOnGrid(EBmrGridCorner::BottomRight, InGrid)};
 }
 
 // Returns specified corner cell in given grid
-FCell FCell::GetCellByCornerOnGrid(EGridCorner CornerType, const FCells& InGrid)
+FBmrCell FBmrCell::GetCellByCornerOnGrid(EBmrGridCorner CornerType, const FBmrCells& InGrid)
 {
 	// +---+---+---+
 	// | X |   | X |
@@ -231,13 +231,13 @@ FCell FCell::GetCellByCornerOnGrid(EGridCorner CornerType, const FCells& InGrid)
 
 	switch (CornerType)
 	{
-		case EGridCorner::TopLeft:
+		case EBmrGridCorner::TopLeft:
 			return GetCellByPositionOnGrid(FIntPoint(FirstCellIndex, FirstCellIndex), InGrid);
-		case EGridCorner::TopRight:
+		case EBmrGridCorner::TopRight:
 			return GetCellByPositionOnGrid(FIntPoint(LastColumnIndex, FirstCellIndex), InGrid);
-		case EGridCorner::BottomLeft:
+		case EBmrGridCorner::BottomLeft:
 			return GetCellByPositionOnGrid(FIntPoint(FirstCellIndex, LastRowIndex), InGrid);
-		case EGridCorner::BottomRight:
+		case EBmrGridCorner::BottomRight:
 			return GetCellByPositionOnGrid(FIntPoint(LastColumnIndex, LastRowIndex), InGrid);
 		default:
 			return InvalidCell;
@@ -245,7 +245,7 @@ FCell FCell::GetCellByCornerOnGrid(EGridCorner CornerType, const FCells& InGrid)
 }
 
 // Scales specified cell maintaining relative distance from the corners of the new grid
-FCell FCell::ScaleCellToNewGrid(const FCell& OriginalCell, const FCells& NewCornerCells)
+FBmrCell FBmrCell::ScaleCellToNewGrid(const FBmrCell& OriginalCell, const FBmrCells& NewCornerCells)
 {
 	constexpr int32 CornerNums = 4;
 	if (!ensureMsgf(NewCornerCells.Num() == CornerNums, TEXT("%s: 'NewCornerCells' has different number than 4"), *FString(__FUNCTION__)))
@@ -261,8 +261,8 @@ FCell FCell::ScaleCellToNewGrid(const FCell& OriginalCell, const FCells& NewCorn
 	    OriginalCell.X() * OriginalCell.Y(),
 	};
 
-	const TArray<FCell> Corners = NewCornerCells.Array();
-	FCell ScaledCell = InvalidCell;
+	const TArray<FBmrCell> Corners = NewCornerCells.Array();
+	FBmrCell ScaledCell = InvalidCell;
 	for (int32 i = 0; i < NewCornerCells.Num(); ++i)
 	{
 		ScaledCell += Corners[i] * Weights[i];
@@ -272,7 +272,7 @@ FCell FCell::ScaleCellToNewGrid(const FCell& OriginalCell, const FCells& NewCorn
 }
 
 // Makes origin transform for given grid
-FTransform FCell::GetCellArrayTransform(const FCells& InCells)
+FTransform FBmrCell::GetCellArrayTransform(const FBmrCells& InCells)
 {
 	FTransform OriginTransform = GetCellArrayTransformNoScale(InCells);
 	OriginTransform.SetScale3D(FVector(GetCellArraySize(InCells), 1.f));
@@ -280,7 +280,7 @@ FTransform FCell::GetCellArrayTransform(const FCells& InCells)
 }
 
 // Makes origin transform for given grid without scale
-FTransform FCell::GetCellArrayTransformNoScale(const FCells& InCells)
+FTransform FBmrCell::GetCellArrayTransformNoScale(const FBmrCells& InCells)
 {
 	FTransform OriginTransform = FTransform::Identity;
 	OriginTransform.SetLocation(GetCellArrayCenter(InCells));
@@ -289,40 +289,40 @@ FTransform FCell::GetCellArrayTransformNoScale(const FCells& InCells)
 }
 
 // Find the average of an array of vectors
-FCell FCell::GetCellArrayCenter(const FCells& Cells)
+FBmrCell FBmrCell::GetCellArrayCenter(const FBmrCells& Cells)
 {
 	FVector Sum = FVector::ZeroVector;
 	FVector Average = FVector::ZeroVector;
 	const float CellsNum = static_cast<float>(Cells.Num());
 	if (CellsNum > 0.f)
 	{
-		for (const FCell& CellIt : Cells)
+		for (const FBmrCell& CellIt : Cells)
 		{
 			Sum += CellIt.Location;
 		}
 
 		Average = Sum / CellsNum;
 	}
-	return FCell(Average);
+	return FBmrCell(Average);
 }
 
 // Makes rotator for given grid its origin
-FRotator FCell::GetCellArrayRotation(const FCells& InCells)
+FRotator FBmrCell::GetCellArrayRotation(const FBmrCells& InCells)
 {
 	if (InCells.Num() < 2)
 	{
 		return FRotator::ZeroRotator;
 	}
 
-	const FCell& FirstCell = *InCells.CreateConstIterator();
-	const FCell& SecondCell = *++InCells.CreateConstIterator();
+	const FBmrCell& FirstCell = *InCells.CreateConstIterator();
+	const FBmrCell& SecondCell = *++InCells.CreateConstIterator();
 	const FVector Direction = SecondCell - FirstCell;
 	FRotator Rotator = Direction.Rotation();
 	return MoveTemp(Rotator);
 }
 
 // Returns the width (columns X) and the length (rows Y) in specified cells, where each 1 unit means 1 cell
-FVector2D FCell::GetCellArraySize(const FCells& InCells)
+FVector2D FBmrCell::GetCellArraySize(const FBmrCells& InCells)
 {
 	const float WidthX = GetCellArrayWidth(InCells);
 	const float LengthY = GetCellArrayLength(InCells);
@@ -330,33 +330,33 @@ FVector2D FCell::GetCellArraySize(const FCells& InCells)
 }
 
 // Returns number of columns (X) in specified cells array, where each 1 unit means 1 cell
-float FCell::GetCellArrayWidth(const FCells& InCells)
+float FBmrCell::GetCellArrayWidth(const FBmrCells& InCells)
 {
 	if (InCells.IsEmpty())
 	{
 		return 0.f;
 	}
 
-	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
+	const FBmrCells UnrotatedCells = RotateCellArray(-1.f, InCells);
 	const FBox CellsBox(CellsToVectors(UnrotatedCells));
 	return CellsBox.GetSize().X / CellSize + 1.f;
 }
 
 // Returns number of rows (Y) in specified cells array, where each 1 unit means 1 cell
-float FCell::GetCellArrayLength(const FCells& InCells)
+float FBmrCell::GetCellArrayLength(const FBmrCells& InCells)
 {
 	if (InCells.IsEmpty())
 	{
 		return 0.f;
 	}
 
-	const FCells UnrotatedCells = RotateCellArray(-1.f, InCells);
+	const FBmrCells UnrotatedCells = RotateCellArray(-1.f, InCells);
 	const FBox CellsBox(CellsToVectors(UnrotatedCells));
 	return CellsBox.GetSize().Y / CellSize + 1.f;
 }
 
 // Finds the closest cell to the given cell within array of cells
-FCell FCell::GetCellArrayNearest(const FCells& InCells, const FCell& CellToCheck)
+FBmrCell FBmrCell::GetCellArrayNearest(const FBmrCells& InCells, const FBmrCell& CellToCheck)
 {
 	//-----------------
 	// +-----+-----+   |
@@ -372,11 +372,11 @@ FCell FCell::GetCellArrayNearest(const FCells& InCells, const FCell& CellToCheck
 		return InvalidCell;
 	}
 
-	FCell NearestCell = InvalidCell;
+	FBmrCell NearestCell = InvalidCell;
 	static constexpr float MaxFloat = TNumericLimits<float>::Max();
 	float NearestDistance = MaxFloat;
 
-	for (const FCell& CellIt : InCells)
+	for (const FBmrCell& CellIt : InCells)
 	{
 		const float DistanceIt = Distance<float>(CellIt, CellToCheck);
 		if (DistanceIt < NearestDistance)
@@ -390,7 +390,7 @@ FCell FCell::GetCellArrayNearest(const FCells& InCells, const FCell& CellToCheck
 }
 
 // Keeps cells within range of the StartingCell and avoids barriers
-FCells FCell::FilterCellsByBounds(const FCells& ActiveCells, const FCells& BoundaryCells, const FCell& StartingCell)
+FBmrCells FBmrCell::FilterCellsByBounds(const FBmrCells& ActiveCells, const FBmrCells& BoundaryCells, const FBmrCell& StartingCell)
 {
 	// Input Grid:            Resulting Grid:
 	// +---+---+---+---+      +---+---+---+---+
@@ -408,11 +408,11 @@ FCells FCell::FilterCellsByBounds(const FCells& ActiveCells, const FCells& Bound
 	// + are Active Cells to be processed and filtered
 	// - are cells that are filtered out
 
-	FCells ResultCells = EmptyCells;
+	FBmrCells ResultCells = EmptyCells;
 
 	// First iteration, determine all cells within line of sight
-	FCells VisibleCells = EmptyCells;
-	for (const FCell& ActiveCellIt : ActiveCells)
+	FBmrCells VisibleCells = EmptyCells;
+	for (const FBmrCell& ActiveCellIt : ActiveCells)
 	{
 		if (BoundaryCells.Contains(ActiveCellIt))
 		{
@@ -432,12 +432,12 @@ FCells FCell::FilterCellsByBounds(const FCells& ActiveCells, const FCells& Bound
 	}
 
 	// Second iteration: Process the visible cells by comparing distances to StartingCell
-	for (const FCell& VisibleCellIt : VisibleCells)
+	for (const FBmrCell& VisibleCellIt : VisibleCells)
 	{
 		bool bKeepCell = true;
 		const float DistanceToVisible = FVector::Dist(StartingCell.Location, VisibleCellIt.Location);
 
-		for (const FCell& BoundaryCellIt : BoundaryCells)
+		for (const FBmrCell& BoundaryCellIt : BoundaryCells)
 		{
 			const float DistanceToBoundary = FVector::Dist(StartingCell.Location, BoundaryCellIt.Location);
 
@@ -460,7 +460,7 @@ FCells FCell::FilterCellsByBounds(const FCells& ActiveCells, const FCells& Bound
 }
 
 // Returns true if Starting Cell is in the direction of any of the Target Cells within the given angle
-bool FCell::CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell, const FCells& AllVisibleCells, float MaxAngleDegrees /* = 40.f*/)
+bool FBmrCell::CanCellSeeTarget(const FBmrCell& StartingCell, const FBmrCell& TargetCell, const FBmrCells& AllVisibleCells, float MaxAngleDegrees /* = 40.f*/)
 {
 	/**     .  .  .  T  .  .  .
 	 *             \ | /
@@ -476,7 +476,7 @@ bool FCell::CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell,
 		return false;
 	}
 
-	for (const FCell& VisibleCell : AllVisibleCells)
+	for (const FBmrCell& VisibleCell : AllVisibleCells)
 	{
 		// Compute direction from StartingCell to the current visible cell
 		const FVector DirectionVisible = (VisibleCell.Location - StartingCell.Location).GetSafeNormal();
@@ -506,7 +506,7 @@ bool FCell::CanCellSeeTarget(const FCell& StartingCell, const FCell& TargetCell,
 }
 
 // Fisher-Yates shuffle algorithm to reorder the array elements
-void FCell::RandShuffle(FCellsArr& InOutArray)
+void FBmrCell::RandShuffle(FBmrCellsArr& InOutArray)
 {
 	const int32 LastIndex = InOutArray.Num() - 1;
 	for (int32 Index = LastIndex; Index > 0; --Index)
@@ -520,9 +520,9 @@ void FCell::RandShuffle(FCellsArr& InOutArray)
 }
 
 // Extracts the top-left quarter of the grid
-FCellsArr FCell::GetTopLeftQuarterOnGrid(const FCellsArr& InGrid, const FIntPoint& MapScale)
+FBmrCellsArr FBmrCell::GetTopLeftQuarterOnGrid(const FBmrCellsArr& InGrid, const FIntPoint& MapScale)
 {
-	FCellsArr QuarterCells;
+	FBmrCellsArr QuarterCells;
 	static constexpr int32 HalfAxisScaleDivider = 2;
 	const FIntPoint QuarterScale(MapScale.X / HalfAxisScaleDivider + 1, MapScale.Y / HalfAxisScaleDivider + 1);
 
@@ -545,14 +545,14 @@ FCellsArr FCell::GetTopLeftQuarterOnGrid(const FCellsArr& InGrid, const FIntPoin
  ********************************************************************************************* */
 
 // Sums cells
-FCell& FCell::operator+=(const FCell& Other)
+FBmrCell& FBmrCell::operator+=(const FBmrCell& Other)
 {
 	Location += Other.Location;
 	return *this;
 }
 
 // Subtracts a cell from another cell
-FCell& FCell::operator-=(const FCell& Other)
+FBmrCell& FBmrCell::operator-=(const FBmrCell& Other)
 {
 	Location -= Other.Location;
 	return *this;
@@ -563,23 +563,23 @@ FCell& FCell::operator-=(const FCell& Other)
  ********************************************************************************************* */
 
 // Vector operator to return cell location
-FCell::operator FVector_NetQuantize() const
+FBmrCell::operator FVector_NetQuantize() const
 {
 	return FVector_NetQuantize(Location);
 }
 
 // Returns the cell direction by its enum.
-const FCell& FCell::GetCellDirection(ECellDirection CellDirection)
+const FBmrCell& FBmrCell::GetCellDirection(EBmrCellDirection CellDirection)
 {
 	switch (CellDirection)
 	{
-		case ECellDirection::Forward:
+		case EBmrCellDirection::Forward:
 			return ForwardCell;
-		case ECellDirection::Backward:
+		case EBmrCellDirection::Backward:
 			return BackwardCell;
-		case ECellDirection::Right:
+		case EBmrCellDirection::Right:
 			return RightCell;
-		case ECellDirection::Left:
+		case EBmrCellDirection::Left:
 			return LeftCell;
 		default:
 			return InvalidCell;
@@ -587,33 +587,33 @@ const FCell& FCell::GetCellDirection(ECellDirection CellDirection)
 }
 
 // Returns the enum direction by its cell
-ECellDirection FCell::GetCellDirection(const FCell& CellDirection)
+EBmrCellDirection FBmrCell::GetCellDirection(const FBmrCell& CellDirection)
 {
 	if (CellDirection == ForwardCell)
 	{
-		return ECellDirection::Forward;
+		return EBmrCellDirection::Forward;
 	}
 	if (CellDirection == BackwardCell)
 	{
-		return ECellDirection::Backward;
+		return EBmrCellDirection::Backward;
 	}
 	if (CellDirection == RightCell)
 	{
-		return ECellDirection::Right;
+		return EBmrCellDirection::Right;
 	}
 	if (CellDirection == LeftCell)
 	{
-		return ECellDirection::Left;
+		return EBmrCellDirection::Left;
 	}
-	return ECellDirection::None;
+	return EBmrCellDirection::None;
 }
 
 // Converts set of cells to array of vectors
-TArray<FVector> FCell::CellsToVectors(const FCells& Cells)
+TArray<FVector> FBmrCell::CellsToVectors(const FBmrCells& Cells)
 {
 	TArray<FVector> Vectors;
 	Vectors.Reserve(Cells.Num());
-	for (const FCell& Cell : Cells)
+	for (const FBmrCell& Cell : Cells)
 	{
 		Vectors.Add(Cell.Location);
 	}
@@ -621,13 +621,13 @@ TArray<FVector> FCell::CellsToVectors(const FCells& Cells)
 }
 
 // Converts array of vectors to to set of cells
-FCells FCell::VectorsToCells(const TArray<FVector>& Vectors)
+FBmrCells FBmrCell::VectorsToCells(const TArray<FVector>& Vectors)
 {
-	FCells Cells;
+	FBmrCells Cells;
 	Cells.Reserve(Vectors.Num());
 	for (const FVector& Vector : Vectors)
 	{
-		Cells.Add(FCell(Vector));
+		Cells.Add(FBmrCell(Vector));
 	}
 	return MoveTemp(Cells);
 }

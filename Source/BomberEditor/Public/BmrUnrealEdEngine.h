@@ -4,14 +4,14 @@
 
 #include "Editor/UnrealEdEngine.h"
 
-#include "MyUnrealEdEngine.generated.h"
+#include "BmrUnrealEdEngine.generated.h"
 
 /**
  * Extends the Unreal Editor Engine class
  * to provide own singleton objects for editor clients in multiplayer.
  */
 UCLASS(Transient)
-class BOMBEREDITOR_API UMyUnrealEdEngine : public UUnrealEdEngine
+class BOMBEREDITOR_API UBmrUnrealEdEngine : public UUnrealEdEngine
 {
 	GENERATED_BODY()
 
@@ -25,5 +25,5 @@ public:
 	static FUpdateAI GOnAIUpdatedDelegate;
 
 	/** Returns this Unreal Editor Engine object. */
-	static const UMyUnrealEdEngine& Get();
+	static const UBmrUnrealEdEngine& Get();
 };

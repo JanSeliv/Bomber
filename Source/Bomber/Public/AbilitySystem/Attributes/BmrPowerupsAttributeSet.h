@@ -21,34 +21,34 @@ class BOMBER_API UBmrPowerupsAttributeSet : public UAttributeSet
 
 public:
 	/** Returns the powerups attribute set for the specified owner. It will return nullptr if can't be obtained. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "InOwner"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DefaultToSelf = "InOwner"))
 	static const UBmrPowerupsAttributeSet* GetPowerupsAttributeSet(const UObject* InOwner);
 
 	/** Returns the powerups attribute set for the specified owner. It will crash if can't be obtained. */
 	static const UBmrPowerupsAttributeSet& Get(const UObject* InOwner);
 
 	/** Converts powerup tag to base attribute */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "To Base Attribute (Powerup Tag)", CompactNodeTitle = "->", BlueprintAutocast))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "To Base Attribute (Powerup Tag)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FGameplayAttribute Conv_TagToBaseAttribute(FBmrPowerupTag InTag);
 
 	/** Converts powerup tag to max attribute */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "To Max Attribute (Powerup Tag)", CompactNodeTitle = "->"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "To Max Attribute (Powerup Tag)", CompactNodeTitle = "->"))
 	static FGameplayAttribute Conv_TagToMaxAttribute(FBmrPowerupTag InTag);
 
 	/** Converts attribute to powerup tag */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "To Powerup Tag (Attribute)", CompactNodeTitle = "->", BlueprintAutocast))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "To Powerup Tag (Attribute)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FBmrPowerupTag Conv_AttributeToTag(const FGameplayAttribute& InAttribute);
 
 	/** Returns the value of the attribute associated with the specified powerup tag, or -1 if not found. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	float GetPowerupValueByTag(FBmrPowerupTag InTag) const;
 
 	/** Returns the value of the max attribute associated with the specified powerup tag, or -1 if not found. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	float GetPowerupMaxValueByTag(FBmrPowerupTag InTag) const;
 
 	/** Returns true if the current value of the powerup associated with the specified tag is at its maximum. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	bool IsPowerupValueAtMax(FBmrPowerupTag InTag) const;
 
 	/*********************************************************************************************
@@ -56,32 +56,32 @@ public:
 	 ********************************************************************************************* */
 public:
 	/** Current explosion radius enhancement from fire powerups. */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_Fire", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_Fire", Category = "[Bomber]")
 	FGameplayAttributeData Powerup_Fire;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_Fire)
 
 	/** Maximum allowed explosion radius. */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_MaxFire", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_MaxFire", Category = "[Bomber]")
 	FGameplayAttributeData Powerup_MaxFire;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_MaxFire)
 
 	/** Amount of skate items collected (each adds +100 speed to base movement speed). */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_Skate", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_Skate", Category = "[Bomber]")
 	FGameplayAttributeData Powerup_Skate;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_Skate)
 
 	/** Maximum allowed skate items. */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_MaxSkate", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_MaxSkate", Category = "[Bomber]")
 	FGameplayAttributeData Powerup_MaxSkate;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_MaxSkate)
 
 	/** Current available bombs for placement: decremented when placed, incremented when exploded. */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_BombsAvailable", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_BombsAvailable", Category = "[Bomber]")
 	FGameplayAttributeData Powerup_BombsAvailable;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_BombsAvailable)
 
 	/** Maximum bomb capacity. */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_MaxBombs", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_MaxBombs", Category = "[Bomber]")
 	FGameplayAttributeData Powerup_MaxBombs;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_MaxBombs)
 

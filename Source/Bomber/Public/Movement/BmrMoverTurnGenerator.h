@@ -16,7 +16,7 @@ class BOMBER_API UBmrMoverTurnGenerator : public ULinearTurnGenerator
 
 public:
 	/** Whether to orient rotation to movement direction */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
 	bool bOrientRotationToMovement = true;
 
 	/** Is overridden to handle orientation-related movement. */

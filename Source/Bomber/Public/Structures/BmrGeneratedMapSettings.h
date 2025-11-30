@@ -2,18 +2,18 @@
 
 #pragma once
 
-#include "GeneratedMapSettings.generated.h"
+#include "BmrGeneratedMapSettings.generated.h"
 
 /**
  * Contains settings for runtime generation of the level map.
  */
 USTRUCT(BlueprintType)
-struct BOMBER_API FGeneratedMapSettings
+struct BOMBER_API FBmrGeneratedMapSettings
 {
 	GENERATED_BODY()
 
 	/** Empty generation settings instance. */
-	static const FGeneratedMapSettings Empty;
+	static const FBmrGeneratedMapSettings Empty;
 
 	/** The chance of walls generation. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ShowOnlyInnerProperties, Units = "Percent", ClampMin = "0", ClampMax = "100"))

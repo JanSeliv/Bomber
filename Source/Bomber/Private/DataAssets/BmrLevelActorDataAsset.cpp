@@ -1,43 +1,43 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "DataAssets/LevelActorDataAsset.h"
+#include "DataAssets/BmrLevelActorDataAsset.h"
 
 // Bomber
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 #if WITH_EDITOR
-#include "MyUnrealEdEngine.h"
+#include "BmrUnrealEdEngine.h"
 #endif
 
 // UE
 #include "GameFramework/Actor.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(LevelActorDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrLevelActorDataAsset)
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 // Called to handle row changes
-void ULevelActorRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UBmrLevelActorRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 }
 
 // Called to notify on any data asset changes
-void UBomberDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UBmrBaseDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
-		UMyUnrealEdEngine::GOnAnyDataAssetChanged.Broadcast();
+		UBmrUnrealEdEngine::GOnAnyDataAssetChanged.Broadcast();
 	}
 }
 
 // Handle adding new rows of level actor data assets
-void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UBmrLevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (!ensureMsgf(RowClassInternal, TEXT("ASSERT: 'RowClassInternal' is not valid")))
+	if (!ensureMsgf(RowClass, TEXT("ASSERT: 'RowClass' is not valid")))
 	{
 		return;
 	}
@@ -49,7 +49,7 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 	}
 
 	// Continue only if was added new row
-	static const FString PropertyName = GET_MEMBER_NAME_STRING_CHECKED(ThisClass, RowsInternal);
+	static const FString PropertyName = GET_MEMBER_NAME_STRING_CHECKED(ThisClass, Rows);
 	const FProperty* Property = PropertyChangedEvent.Property;
 	if (!Property
 	    || !Property->IsA<FArrayProperty>()
@@ -61,25 +61,25 @@ void ULevelActorDataAsset::PostEditChangeProperty(FPropertyChangedEvent& Propert
 
 	// Initialize new row
 	const int32 AddedAtIndex = PropertyChangedEvent.GetArrayIndex(PropertyName);
-	if (RowsInternal.IsValidIndex(AddedAtIndex))
+	if (Rows.IsValidIndex(AddedAtIndex))
 	{
-		TObjectPtr<ULevelActorRow>& Row = RowsInternal[AddedAtIndex];
+		TObjectPtr<UBmrLevelActorRow>& Row = Rows[AddedAtIndex];
 		if (!Row)
 		{
-			Row = NewObject<ULevelActorRow>(this, RowClassInternal, NAME_None, RF_Public | RF_Transactional);
+			Row = NewObject<UBmrLevelActorRow>(this, RowClass, NAME_None, RF_Public | RF_Transactional);
 		}
 	}
 }
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 // Return first found row by specified level types
-void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, int32 LevelsTypesBitmask) const
+void UBmrLevelActorDataAsset::GetRowsByLevelType(TArray<UBmrLevelActorRow*>& OutRows, int32 LevelsTypesBitmask) const
 {
-	for (ULevelActorRow* RowIt : RowsInternal)
+	for (UBmrLevelActorRow* RowIt : Rows)
 	{
 		if (RowIt
 		    && RowIt->Mesh // is not empty
-		    && EnumHasAnyFlags(RowIt->LevelType, TO_ENUM(ELevelType, LevelsTypesBitmask)))
+		    && EnumHasAnyFlags(RowIt->LevelType, TO_ENUM(EBmrLevelType, LevelsTypesBitmask)))
 		{
 			OutRows.Emplace(RowIt);
 		}
@@ -87,9 +87,9 @@ void ULevelActorDataAsset::GetRowsByLevelType(TArray<ULevelActorRow*>& OutRows, 
 }
 
 // Returns first found row by given predicate function
-const ULevelActorRow* ULevelActorDataAsset::GetRowByPredicate(const TFunctionRef<bool(const ULevelActorRow&)>& Predicate) const
+const UBmrLevelActorRow* UBmrLevelActorDataAsset::GetRowByPredicate(const TFunctionRef<bool(const UBmrLevelActorRow&)>& Predicate) const
 {
-	for (const ULevelActorRow* RowIt : RowsInternal)
+	for (const UBmrLevelActorRow* RowIt : Rows)
 	{
 		if (RowIt
 		    && RowIt->IsValid()
@@ -102,18 +102,18 @@ const ULevelActorRow* ULevelActorDataAsset::GetRowByPredicate(const TFunctionRef
 }
 
 // Return first found row by specified level types
-const ULevelActorRow* ULevelActorDataAsset::GetRowByLevelType(ELevelType LevelType) const
+const UBmrLevelActorRow* UBmrLevelActorDataAsset::GetRowByLevelType(EBmrLevelType LevelType) const
 {
-	return GetRowByPredicate([LevelType](const ULevelActorRow& RowIt)
+	return GetRowByPredicate([LevelType](const UBmrLevelActorRow& RowIt)
 	{
 		return RowIt.LevelType == LevelType || RowIt.LevelType == ELT::Max;
 	});
 }
 
 // Return first found row by specified mesh
-const ULevelActorRow* ULevelActorDataAsset::GetRowByMesh(const class UStreamableRenderAsset* Mesh) const
+const UBmrLevelActorRow* UBmrLevelActorDataAsset::GetRowByMesh(const class UStreamableRenderAsset* Mesh) const
 {
-	return GetRowByPredicate([Mesh](const ULevelActorRow& RowIt)
+	return GetRowByPredicate([Mesh](const UBmrLevelActorRow& RowIt)
 	{
 		return RowIt.Mesh == Mesh;
 	});

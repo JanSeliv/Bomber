@@ -1,24 +1,24 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "GameFramework/MyPlayerState.h"
+#include "GameFramework/BmrPlayerState.h"
 
 // Bomber
 #include "AbilitySystem/Attributes/BmrHealthAttributeSet.h"
 #include "AbilitySystem/Attributes/BmrPowerupsAttributeSet.h"
+#include "Actors/BmrGeneratedMap.h"
+#include "Actors/BmrPawn.h"
 #include "AdvancedIdentityLibrary.h"
 #include "AdvancedSteamFriendsLibrary.h"
-#include "Components/MapComponent.h"
-#include "Controllers/MyPlayerController.h"
-#include "DataAssets/PlayerDataAsset.h"
-#include "GameFramework/MyGameModeBase.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyGameUserSettings.h"
-#include "GeneratedMap.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "Components/BmrMapComponent.h"
+#include "Controllers/BmrPlayerController.h"
+#include "DataAssets/BmrPlayerDataAsset.h"
+#include "GameFramework/BmrGameMode.h"
+#include "GameFramework/BmrGameState.h"
+#include "GameFramework/BmrGameUserSettings.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrActorUtilsLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "AbilitySystemComponent.h"
@@ -29,63 +29,57 @@
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyPlayerState)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerState)
 
-AMyPlayerState::AMyPlayerState()
+ABmrPlayerState::ABmrPlayerState()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	// Create ASC on player state, so even if different character is possessed (like from mod), it will still have the same attributes and abilities
-	AbilitySystemComponentInternal = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-	AbilitySystemComponentInternal->SetIsReplicated(true);
-	AbilitySystemComponentInternal->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
-	PowerupsSetInternal = CreateDefaultSubobject<UBmrPowerupsAttributeSet>(TEXT("PowerupsAttributeSet"));
-	HealthSetInternal = CreateDefaultSubobject<UBmrHealthAttributeSet>(TEXT("HealthAttributeSet"));
+	PowerupsSet = CreateDefaultSubobject<UBmrPowerupsAttributeSet>(TEXT("PowerupsAttributeSet"));
+	HealthSet = CreateDefaultSubobject<UBmrHealthAttributeSet>(TEXT("HealthAttributeSet"));
 
 	// Reset default value to -1 to avoid conflicts with first player of 0 ID
 	SetPlayerId(INDEX_NONE);
 }
 
 // Returns true if this Player State is controlled by a locally controlled player
-bool AMyPlayerState::IsPlayerStateLocallyControlled() const
+bool ABmrPlayerState::IsPlayerStateLocallyControlled() const
 {
 	const APlayerController* PC = GetPlayerController();
 	return PC && PC->IsLocalPlayerController();
 }
 
-// Returns owner human or bot character
-APlayerCharacter* AMyPlayerState::GetPlayerCharacter() const
-{
-	return GetPawn<APlayerCharacter>();
-}
-
 // Returns always valid owner (human or bot), or crash if nullptr
-APlayerCharacter& AMyPlayerState::GetPlayerCharacterChecked() const
+ABmrPawn& ABmrPlayerState::GetPawnChecked() const
 {
-	APlayerCharacter* PlayerCharacter = GetPlayerCharacter();
-	checkf(PlayerCharacter, TEXT("ERROR: [%i] %hs:\n'PlayerCharacter' is null!"), __LINE__, __FUNCTION__);
-	return *PlayerCharacter;
+	ABmrPawn* Pawn = GetPawn<ABmrPawn>();
+	checkf(Pawn, TEXT("ERROR: [%i] %hs:\n'Pawn' is null!"), __LINE__, __FUNCTION__);
+	return *Pawn;
 }
 
 // Returns ability system component that is used to manage abilities and attributes for owned player, crash if nullptr
-UAbilitySystemComponent& AMyPlayerState::GetAbilitySystemComponentChecked() const
+UAbilitySystemComponent& ABmrPlayerState::GetAbilitySystemComponentChecked() const
 {
-	checkf(AbilitySystemComponentInternal, TEXT("ERROR: [%i] %hs:\n'AbilitySystemComponentInternal' is null!"), __LINE__, __FUNCTION__);
-	return *AbilitySystemComponentInternal;
+	checkf(AbilitySystemComponent, TEXT("ERROR: [%i] %hs:\n'AbilitySystemComponent' is null!"), __LINE__, __FUNCTION__);
+	return *AbilitySystemComponent;
 }
 
 // Initializes all attributes with default values
-void AMyPlayerState::ApplyDefaultAttributes()
+void ABmrPlayerState::ApplyDefaultAttributes()
 {
 	if (!HasAuthority())
 	{
 		return;
 	}
 
-	checkf(AbilitySystemComponentInternal, TEXT("ERROR: [%i] %hs:\n'AbilitySystemComponentInternal' is null!"), __LINE__, __FUNCTION__);
+	checkf(AbilitySystemComponent, TEXT("ERROR: [%i] %hs:\n'AbilitySystemComponent' is null!"), __LINE__, __FUNCTION__);
 
 	// Initialize all attributes with default values
 	const UAbilitySystemGlobals* AbilityGlobals = IGameplayAbilitiesModule::Get().GetAbilitySystemGlobals();
@@ -93,7 +87,7 @@ void AMyPlayerState::ApplyDefaultAttributes()
 	if (ensureMsgf(AttributeSetInitter, TEXT("ASSERT: [%i] %hs:\n'AttributeSetInitter' is null!"), __LINE__, __FUNCTION__))
 	{
 		static const FName GroupName = TEXT("Default");
-		AttributeSetInitter->InitAttributeSetDefaults(AbilitySystemComponentInternal, GroupName, /*Level*/ 1, /*bInitialInit*/ true);
+		AttributeSetInitter->InitAttributeSetDefaults(AbilitySystemComponent, GroupName, /*Level*/ 1, /*bInitialInit*/ true);
 	}
 }
 
@@ -102,17 +96,17 @@ void AMyPlayerState::ApplyDefaultAttributes()
  ********************************************************************************************* */
 
 // Tries to set new End-Game state for this player
-void AMyPlayerState::UpdateEndGameState()
+void ABmrPlayerState::UpdateEndGameState()
 {
 	if (!HasAuthority())
 	{
 		return;
 	}
 
-	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
-	const ECurrentGameState CurrentGameState = MyGameState ? MyGameState->GetCurrentGameState() : ECGS::None;
+	const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	const EBmrCurrentGameState CurrentGameState = MyGameState ? MyGameState->GetCurrentGameState() : ECGS::None;
 	if (CurrentGameState == ECGS::None // is not valid game state, nullptr or not fully initialized
-	    || EndGameStateInternal != EEndGameState::None) // end state was set already for current game
+	    || EndGameState != EBmrEndGameState::None) // end state was set already for current game
 	{
 		return;
 	}
@@ -120,73 +114,73 @@ void AMyPlayerState::UpdateEndGameState()
 	// handle timer is 0
 	if (MyGameState->IsInGameTimerElapsed())
 	{
-		SetEndGameState(EEndGameState::Draw);
+		SetEndGameState(EBmrEndGameState::Draw);
 		return;
 	}
 
 	// Game is running
 
-	const EEndGameState NewEndGameState = [&]
+	const EBmrEndGameState NewEndGameState = [&]
 	{
-		const int32 PlayerNum = UMyBlueprintFunctionLibrary::GetAlivePlayersNum(EPlayerType::Any);
+		const int32 PlayerNum = UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Any);
 
-		if (IsCharacterDead())
+		if (IsPlayerDead())
 		{
 			if (PlayerNum <= 0)
 			{
 				// Draw: last players were blasted together
-				return EEndGameState::Draw;
+				return EBmrEndGameState::Draw;
 			}
 
 			// Lose: player is dead, or Honor Loss if player has killed anyone else before dying
-			return OpponentsKilledNumInternal > 0 ? EEndGameState::HonorLoss : EEndGameState::Lose;
+			return OpponentsKilledNum > 0 ? EBmrEndGameState::HonorLoss : EBmrEndGameState::Lose;
 		}
 
 		// Win: Is alive owner and is the last player
-		return PlayerNum == 1 ? EEndGameState::Win : EEndGameState::None;
+		return PlayerNum == 1 ? EBmrEndGameState::Win : EBmrEndGameState::None;
 	}();
 
 	SetEndGameState(NewEndGameState);
 }
 
 // Sets End-Game state to the specified one
-void AMyPlayerState::SetEndGameState(EEndGameState NewEndGameState)
+void ABmrPlayerState::SetEndGameState(EBmrEndGameState NewEndGameState)
 {
 	if (!HasAuthority()
-	    || NewEndGameState == EndGameStateInternal)
+	    || NewEndGameState == EndGameState)
 	{
 		// No changes needed
 		return;
 	}
 
-	EndGameStateInternal = NewEndGameState;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, EndGameStateInternal, this);
+	EndGameState = NewEndGameState;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, EndGameState, this);
 
 	ApplyEndGameState();
 }
 
 // Called on client when End-Game player status is changed
-void AMyPlayerState::OnRep_EndGameState()
+void ABmrPlayerState::OnRep_EndGameState()
 {
 	ApplyEndGameState();
 }
 
 // Applies currently changed End-Game state for this player
-void AMyPlayerState::ApplyEndGameState()
+void ABmrPlayerState::ApplyEndGameState()
 {
 	// Try to end the game globally for all players
-	if (EndGameStateInternal != EEndGameState::None)
+	if (EndGameState != EBmrEndGameState::None)
 	{
-		if (UMyBlueprintFunctionLibrary::GetAlivePlayersNum(EPlayerType::Any) <= 1 // no characters to play with
-		    || UMyBlueprintFunctionLibrary::GetAlivePlayersNum(EPlayerType::Human) == 0) // all human players are dead
+		if (UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Any) <= 1 // no characters to play with
+		    || UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Human) == 0) // all human players are dead
 		{
-			AMyGameStateBase::Get().SetGameState(ECGS::EndGame);
+			ABmrGameState::Get().SetGameState(ECGS::EndGame);
 		}
 	}
 
 	if (OnEndGameStateChanged.IsBound())
 	{
-		OnEndGameStateChanged.Broadcast(EndGameStateInternal);
+		OnEndGameStateChanged.Broadcast(EndGameState);
 	}
 }
 
@@ -195,34 +189,34 @@ void AMyPlayerState::ApplyEndGameState()
  ********************************************************************************************* */
 
 // Called on server when settings are saved to apply new player name
-void AMyPlayerState::ServerSetPlayerName_Implementation(FName NewName)
+void ABmrPlayerState::ServerSetPlayerName_Implementation(FName NewName)
 {
 	SetPlayerName(NewName.ToString());
 }
 
 // Is created on expose code-only GetOldPlayerName() base method to blueprints to get locally the player name on each nickname change
-FName AMyPlayerState::GetPendingPlayerName() const
+FName ABmrPlayerState::GetPendingPlayerName() const
 {
 	const FName OldPlayerName = *GetOldPlayerName();
-	return !OldPlayerName.IsNone() ? OldPlayerName : SavedPlayerNameInternal;
+	return !OldPlayerName.IsNone() ? OldPlayerName : SavedPlayerName;
 }
 
 // Sets saved human name to config property
-void AMyPlayerState::SetSavedPlayerName(FName NewName)
+void ABmrPlayerState::SetSavedPlayerName(FName NewName)
 {
-	if (SavedPlayerNameInternal == NewName
+	if (SavedPlayerName == NewName
 	    || !IsPlayerStateLocallyControlled())
 	{
 		return;
 	}
 
-	SavedPlayerNameInternal = NewName;
+	SavedPlayerName = NewName;
 
-	SetPlayerName(SavedPlayerNameInternal.ToString());
+	SetPlayerName(SavedPlayerName.ToString());
 }
 
 // Attempts to assign default nickname
-void AMyPlayerState::SetDefaultPlayerName()
+void ABmrPlayerState::SetDefaultPlayerName()
 {
 	if (!HasAuthority())
 	{
@@ -230,13 +224,13 @@ void AMyPlayerState::SetDefaultPlayerName()
 	}
 
 	FString NewName = TEXT("");
-	const EPlayerType PlayerType = GetPlayerType();
+	const EBmrPlayerType PlayerType = GetPlayerType();
 	switch (PlayerType)
 	{
-		case EPlayerType::Bot:
+		case EBmrPlayerType::Bot:
 		{
-			const int32 CharacterID = GetPlayerId();
-			const FString AIName = FString::Printf(TEXT("AI %s"), *FString::FromInt(CharacterID));
+			const int32 InPlayerId = GetPlayerId();
+			const FString AIName = FString::Printf(TEXT("AI %s"), *FString::FromInt(InPlayerId));
 			if (GetPlayerName() != AIName)
 			{
 				NewName = AIName;
@@ -244,7 +238,7 @@ void AMyPlayerState::SetDefaultPlayerName()
 			break;
 		}
 
-		case EPlayerType::Human:
+		case EBmrPlayerType::Human:
 		{
 			if (IsPlayerStateLocallyControlled())
 			{
@@ -282,7 +276,7 @@ void AMyPlayerState::SetDefaultPlayerName()
 }
 
 // Overrides base method to additionally set player name on server and broadcast it
-void AMyPlayerState::SetPlayerName(const FString& NewPlayerName)
+void ABmrPlayerState::SetPlayerName(const FString& NewPlayerName)
 {
 	if (NewPlayerName == GetPlayerName()
 	    || NewPlayerName.IsEmpty())
@@ -303,7 +297,7 @@ void AMyPlayerState::SetPlayerName(const FString& NewPlayerName)
 }
 
 // Applies and broadcasts player nam
-void AMyPlayerState::ApplyPlayerName()
+void ABmrPlayerState::ApplyPlayerName()
 {
 	const FName PlayerNameCustom = *GetPlayerName();
 
@@ -314,7 +308,7 @@ void AMyPlayerState::ApplyPlayerName()
 }
 
 // Called on client when custom player name is changed
-void AMyPlayerState::OnRep_PlayerName()
+void ABmrPlayerState::OnRep_PlayerName()
 {
 	Super::OnRep_PlayerName();
 
@@ -326,48 +320,48 @@ void AMyPlayerState::OnRep_PlayerName()
  ********************************************************************************************* */
 
 // Called when character dead status is changed: character was killed or revived
-void AMyPlayerState::SetCharacterDead(bool bIsDead)
+void ABmrPlayerState::SetPlayerDead(bool bIsDead)
 {
 	if (!HasAuthority()
-	    || bIsCharacterDeadInternal == bIsDead)
+	    || bIsPlayerDead == bIsDead)
 	{
 		return;
 	}
 
-	bIsCharacterDeadInternal = bIsDead;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bIsCharacterDeadInternal, this);
+	bIsPlayerDead = bIsDead;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bIsPlayerDead, this);
 
-	ApplyIsCharacterDead();
+	ApplyIsPlayerDead();
 }
 
 // Called on client when character Dead status is changed
-void AMyPlayerState::OnRep_IsCharacterDead()
+void ABmrPlayerState::OnRep_IsPlayerDead()
 {
-	ApplyIsCharacterDead();
+	ApplyIsPlayerDead();
 }
 
 // Applies and broadcasts Is Character Dead status
-void AMyPlayerState::ApplyIsCharacterDead()
+void ABmrPlayerState::ApplyIsPlayerDead()
 {
 	if (HasAuthority())
 	{
 		// @TODO JanSeliv 5oWCcakc - Implement the player state manager to avoid using timer here
 		GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]()
 		{
-			OnPostCharacterDead();
+			OnPostPlayerDead();
 		}));
 	}
 
-	if (OnCharacterDeadChanged.IsBound())
+	if (OnPlayerDeadChanged.IsBound())
 	{
-		OnCharacterDeadChanged.Broadcast(bIsCharacterDeadInternal);
+		OnPlayerDeadChanged.Broadcast(bIsPlayerDead);
 	}
 }
 
 // Is called at the end of frame when this character received dead status
-void AMyPlayerState::OnPostCharacterDead_Implementation()
+void ABmrPlayerState::OnPostPlayerDead_Implementation()
 {
-	if (bIsCharacterDeadInternal)
+	if (bIsPlayerDead)
 	{
 		UpdateEndGameState();
 	}
@@ -378,7 +372,7 @@ void AMyPlayerState::OnPostCharacterDead_Implementation()
  *********************************************************************************************/
 
 // Called when an opponent is killed
-void AMyPlayerState::SetOpponentKilled(const class APlayerCharacter* KilledOpponent)
+void ABmrPlayerState::SetOpponentKilled(const class ABmrPawn* KilledOpponent)
 {
 	if (!HasAuthority()
 	    || !KilledOpponent
@@ -387,36 +381,36 @@ void AMyPlayerState::SetOpponentKilled(const class APlayerCharacter* KilledOppon
 		return;
 	}
 
-	const int32 NewValue = OpponentsKilledNumInternal + 1;
+	const int32 NewValue = OpponentsKilledNum + 1;
 	SetOpponentKilledNum(NewValue);
 }
 
-void AMyPlayerState::SetOpponentKilledNum(int32 NewOpponentsKilledNum)
+void ABmrPlayerState::SetOpponentKilledNum(int32 NewOpponentsKilledNum)
 {
 	if (!HasAuthority()
-	    || NewOpponentsKilledNum == OpponentsKilledNumInternal)
+	    || NewOpponentsKilledNum == OpponentsKilledNum)
 	{
 		return;
 	}
 
-	OpponentsKilledNumInternal = NewOpponentsKilledNum;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, OpponentsKilledNumInternal, this);
+	OpponentsKilledNum = NewOpponentsKilledNum;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, OpponentsKilledNum, this);
 
 	ApplyOpponentsKilledNum();
 }
 
 // Called on client when Opponents Killed Num changes
-void AMyPlayerState::OnRep_OpponentsKilledNum()
+void ABmrPlayerState::OnRep_OpponentsKilledNum()
 {
 	ApplyOpponentsKilledNum();
 }
 
 // Applies and broadcasts Opponents Killed Num changes
-void AMyPlayerState::ApplyOpponentsKilledNum()
+void ABmrPlayerState::ApplyOpponentsKilledNum()
 {
 	if (OnOpponentsKilledNumChanged.IsBound())
 	{
-		OnOpponentsKilledNumChanged.Broadcast(OpponentsKilledNumInternal);
+		OnOpponentsKilledNumChanged.Broadcast(OpponentsKilledNum);
 	}
 }
 
@@ -425,7 +419,7 @@ void AMyPlayerState::ApplyOpponentsKilledNum()
  ********************************************************************************************* */
 
 // Applies bot status, overloads engine's APlayerState::SetIsABot(bool) that is not virtual and not exposed to blueprints
-void AMyPlayerState::SetIsABot()
+void ABmrPlayerState::SetIsABot()
 {
 	if (!HasAuthority()
 	    || IsABot())
@@ -438,7 +432,7 @@ void AMyPlayerState::SetIsABot()
 }
 
 // Applies human status
-void AMyPlayerState::SetIsHuman()
+void ABmrPlayerState::SetIsHuman()
 {
 	if (!HasAuthority()
 	    || !IsABot())
@@ -451,13 +445,13 @@ void AMyPlayerState::SetIsHuman()
 }
 
 // Called on client when APlayerState::bIsABot is changed
-void AMyPlayerState::OnRep_IsABot()
+void ABmrPlayerState::OnRep_IsABot()
 {
 	ApplyIsABot();
 }
 
 // Applies and broadcasts IsABot status
-void AMyPlayerState::ApplyIsABot()
+void ABmrPlayerState::ApplyIsABot()
 {
 	// Depending on player type, set different replication mode for ASC: bots dont need to replicate all effects, so use Minimal mode
 	const EGameplayEffectReplicationMode ReplicationMode = IsABot() ? EGameplayEffectReplicationMode::Minimal : EGameplayEffectReplicationMode::Mixed;
@@ -474,7 +468,7 @@ void AMyPlayerState::ApplyIsABot()
  ********************************************************************************************* */
 
 // Applies ID from order of player controllers, is always 0, 1, 2, 3
-void AMyPlayerState::SetHumanId(APlayerController* PlayerController)
+void ABmrPlayerState::SetHumanId(APlayerController* PlayerController)
 {
 	if (!HasAuthority()
 	    && IsABot())
@@ -483,13 +477,13 @@ void AMyPlayerState::SetHumanId(APlayerController* PlayerController)
 		return;
 	}
 
-	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(PlayerController);
+	const ABmrPlayerController* MyPC = Cast<ABmrPlayerController>(PlayerController);
 	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPC' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	const AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode();
+	const ABmrGameMode* MyGameMode = UBmrBlueprintFunctionLibrary::GetGameMode();
 	const int32 NewPlayerId = MyGameMode ? MyGameMode->GetPlayerControllerIndex(MyPC) : INDEX_NONE;
 	if (!ensureMsgf(NewPlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'NewPlayerId' can not be assigned!"), __LINE__, __FUNCTION__)
 	    || NewPlayerId == GetPlayerId())
@@ -502,7 +496,7 @@ void AMyPlayerState::SetHumanId(APlayerController* PlayerController)
 }
 
 // Applies ID from order of spawned characters on level, is always 0, 1, 2, 3
-void AMyPlayerState::SetDefaultBotId()
+void ABmrPlayerState::SetDefaultBotId()
 {
 	if (!HasAuthority()
 	    || !IsABot())
@@ -511,8 +505,8 @@ void AMyPlayerState::SetDefaultBotId()
 		return;
 	}
 
-	const UMapComponent* PlayerMapComponent = UMapComponent::GetMapComponent(GetPawn());
-	const int32 NewPlayerId = ULevelActorsUtilsLibrary::GetIndexByLevelActor(PlayerMapComponent);
+	const UBmrMapComponent* PlayerMapComponent = UBmrMapComponent::GetMapComponent(GetPawn());
+	const int32 NewPlayerId = UBmrActorUtilsLibrary::GetIndexByLevelActor(PlayerMapComponent);
 	if (!ensureMsgf(NewPlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'NewPlayerId' can not be assigned!"), __LINE__, __FUNCTION__)
 	    || NewPlayerId == GetPlayerId())
 	{
@@ -524,7 +518,7 @@ void AMyPlayerState::SetDefaultBotId()
 }
 
 // Called on client when player ID is changed
-void AMyPlayerState::OnRep_PlayerId()
+void ABmrPlayerState::OnRep_PlayerId()
 {
 	Super::OnRep_PlayerId();
 
@@ -532,7 +526,7 @@ void AMyPlayerState::OnRep_PlayerId()
 }
 
 // Applies and broadcasts player ID
-void AMyPlayerState::ApplyPlayerId()
+void ABmrPlayerState::ApplyPlayerId()
 {
 	if (OnPlayerIdChanged.IsBound())
 	{
@@ -541,7 +535,7 @@ void AMyPlayerState::ApplyPlayerId()
 }
 
 // Is called on server and clients when new owned pawn is possessed or changed
-void AMyPlayerState::OnPawnChanged_Implementation(APawn* NewPawn)
+void ABmrPlayerState::OnPawnChanged_Implementation(APawn* NewPawn)
 {
 	GetAbilitySystemComponentChecked().InitAbilityActorInfo(this, NewPawn);
 }
@@ -551,7 +545,7 @@ void AMyPlayerState::OnPawnChanged_Implementation(APawn* NewPawn)
  ********************************************************************************************* */
 
 // Is called when player state is initialized with assigned character
-void AMyPlayerState::OnPlayerStateInit_Implementation()
+void ABmrPlayerState::OnPlayerStateInit_Implementation()
 {
 	if (IsABot())
 	{
@@ -563,16 +557,16 @@ void AMyPlayerState::OnPlayerStateInit_Implementation()
 
 	ApplyIsABot();
 
-	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnPlayerStateInit(*this);
+	UBmrGlobalEventsSubsystem::Get().ReadyHandler.Broadcast_OnPlayerStateInit(*this);
 
 	if (IsPlayerStateLocallyControlled())
 	{
 		// Listen game settings to apply them once saved
-		UMyGameUserSettings::Get().OnSaveSettings.AddUniqueDynamic(this, &ThisClass::OnSaveSettings);
+		UBmrGameUserSettings::Get().OnSaveSettings.AddUniqueDynamic(this, &ThisClass::OnSaveSettings);
 
 		// Apply custom player name from config
-		SetPlayerName(SavedPlayerNameInternal.ToString());
-		if (SavedPlayerNameInternal.IsNone())
+		SetPlayerName(SavedPlayerName.ToString());
+		if (SavedPlayerName.IsNone())
 		{
 			// Game is firstly launched, update config with default name
 			SetDefaultPlayerName();
@@ -582,7 +576,7 @@ void AMyPlayerState::OnPlayerStateInit_Implementation()
 }
 
 // Listen game states to notify server about ending game for controlled player
-void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void ABmrPlayerState::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
 {
 	if (!HasAuthority())
 	{
@@ -595,12 +589,12 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 		case ECGS::GameStarting: // Fallthrough
 		case ECGS::InGame:
 		{
-			SetCharacterDead(false);
+			SetPlayerDead(false);
 			SetOpponentKilledNum(0);
-			SetEndGameState(EEndGameState::None);
+			SetEndGameState(EBmrEndGameState::None);
 			break;
 		}
-		case ECurrentGameState::EndGame:
+		case EBmrCurrentGameState::EndGame:
 		{
 			UpdateEndGameState();
 			break;
@@ -611,7 +605,7 @@ void AMyPlayerState::OnGameStateChanged_Implementation(ECurrentGameState Current
 }
 
 // Listens game settings to apply them once saved
-void AMyPlayerState::OnSaveSettings_Implementation()
+void ABmrPlayerState::OnSaveSettings_Implementation()
 {
 	const FName PendingPlayerName = GetPendingPlayerName();
 	SetSavedPlayerName(PendingPlayerName);
@@ -622,17 +616,17 @@ void AMyPlayerState::OnSaveSettings_Implementation()
  ********************************************************************************************* */
 
 // Returns properties that are replicated for the lifetime of the actor channel.
-void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ABmrPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AbilitySystemComponentInternal, Params);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, EndGameStateInternal, Params);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bIsCharacterDeadInternal, Params);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OpponentsKilledNumInternal, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AbilitySystemComponent, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, EndGameState, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bIsPlayerDead, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OpponentsKilledNum, Params);
 
 	// Override APlayerState's COND_InitialOnly properties with default params to allow updates on reused instances without requiring respawn
 	DOREPLIFETIME_OVERRIDE(Super, PlayerId, Params);
@@ -642,7 +636,7 @@ void AMyPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 }
 
 // This is called only in the gameplay before calling begin play
-void AMyPlayerState::PostInitializeComponents()
+void ABmrPlayerState::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
@@ -650,7 +644,7 @@ void AMyPlayerState::PostInitializeComponents()
 	{
 		ApplyDefaultAttributes();
 
-		const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+		const UBmrPlayerDataAsset& PlayerDataAsset = UBmrPlayerDataAsset::Get();
 		const int32 StartupAbilitiesNum = PlayerDataAsset.GetStartupAbilitiesNum();
 		for (int32 Idx = 0; Idx < StartupAbilitiesNum; ++Idx)
 		{
@@ -661,7 +655,7 @@ void AMyPlayerState::PostInitializeComponents()
 }
 
 // Called when the game starts
-void AMyPlayerState::BeginPlay()
+void ABmrPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -669,14 +663,14 @@ void AMyPlayerState::BeginPlay()
 }
 
 // Is overridden to prevent the player state from being destroyed to be able to reuse it by bots
-void AMyPlayerState::OnDeactivated()
+void ABmrPlayerState::OnDeactivated()
 {
 	// Do not call super to avoid destroying the player state
 	return;
 }
 
 // Register a player with the online subsystem
-void AMyPlayerState::RegisterPlayerWithSession(bool bWasFromInvite)
+void ABmrPlayerState::RegisterPlayerWithSession(bool bWasFromInvite)
 {
 	if (!GetUniqueId().IsValid())
 	{
@@ -690,7 +684,7 @@ void AMyPlayerState::RegisterPlayerWithSession(bool bWasFromInvite)
 }
 
 // Unregister a player with the online subsystem
-void AMyPlayerState::UnregisterPlayerWithSession()
+void ABmrPlayerState::UnregisterPlayerWithSession()
 {
 	Super::UnregisterPlayerWithSession();
 
@@ -714,7 +708,7 @@ void AMyPlayerState::UnregisterPlayerWithSession()
 }
 
 // Is overridden to handle own OnRep functions for engine properties
-void AMyPlayerState::PostRepNotifies()
+void ABmrPlayerState::PostRepNotifies()
 {
 	Super::PostRepNotifies();
 

@@ -22,7 +22,7 @@ public class FootTrailsGeneratorEditor : ModuleRules
                 , "GameFeatures" // UGameFeaturesSubsystem
                 // My modules
                 , "FootTrailsGeneratorRuntime" // UFTGComponent
-                , "Bomber" // AGeneratedMap
+                , "Bomber" // ABmrGeneratedMap
                 , "MyEditorUtils" // FEditorUtilsLibrary
                 , "InstancedStaticMeshConverter" // AInstancedStaticMeshActor
             }

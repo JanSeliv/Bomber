@@ -1,34 +1,34 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "Controllers/MyAIController.h"
+#include "Controllers/BmrAIController.h"
 
 // Bomber
 #include "AbilitySystem/Attributes/BmrPowerupsAttributeSet.h"
+#include "Actors/BmrPawn.h"
 #include "Bomber.h"
+#include "Components/BmrMapComponent.h"
 #include "Components/BmrMoverComponent.h"
-#include "Components/MapComponent.h"
-#include "DataAssets/AIDataAsset.h"
-#include "DataAssets/GameStateDataAsset.h"
-#include "GameFramework/MyCheatManager.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "DataAssets/BmrAIDataAsset.h"
+#include "DataAssets/BmrGameStateDataAsset.h"
+#include "GameFramework/BmrCheatManager.h"
+#include "GameFramework/BmrGameState.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
-#include "MyUnrealEdEngine.h"
+#include "BmrUnrealEdEngine.h"
 #endif
 
 // UE
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyAIController)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrAIController)
 
 // Sets default values for this character's properties
-AMyAIController::AMyAIController()
+ABmrAIController::ABmrAIController()
 {
 	// Set this AI controller to don't call Tick()
 	PrimaryActorTick.bCanEverTick = false;
@@ -38,10 +38,10 @@ AMyAIController::AMyAIController()
 }
 
 // Makes AI go toward specified destination cell
-void AMyAIController::MoveToCell(const FCell& DestinationCell)
+void ABmrAIController::MoveToCell(const FBmrCell& DestinationCell)
 {
-	APlayerCharacter* InOwner = GetPawn<APlayerCharacter>();
-	const UMapComponent* MapComponent = UMapComponent::GetMapComponent(InOwner);
+	ABmrPawn* InOwner = GetPawn<ABmrPawn>();
+	const UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InOwner);
 	UBmrMoverComponent* MoverComponent = InOwner ? InOwner->GetMoverComponent() : nullptr;
 	if (!MapComponent
 	    || !MoverComponent)
@@ -51,9 +51,9 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 
 	if (!MoverComponent->IsBlockedMovement())
 	{
-		const FCell& CurrentCell = MapComponent->GetCell();
+		const FBmrCell& CurrentCell = MapComponent->GetCell();
 		const bool bHasArrived = CurrentCell == DestinationCell;
-		AIMoveToInternal = bHasArrived ? FCell::InvalidCell : DestinationCell;
+		LastMoveToCell = bHasArrived ? FBmrCell::InvalidCell : DestinationCell;
 
 		// AI is moving directly in desired direction without navmesh usage (instead of MoveToLocation with navmesh)
 		const FVector Direction = bHasArrived ? FVector::ZeroVector : (DestinationCell.Location - InOwner->GetActorLocation()).GetSafeNormal2D();
@@ -66,26 +66,26 @@ void AMyAIController::MoveToCell(const FCell& DestinationCell)
 		// Visualize and show destination cell
 		if (UUtilsLibrary::HasWorldBegunPlay()) // PIE
 		{
-			UCellsUtilsLibrary::ClearDisplayedCells(InOwner);
+			UBmrCellUtilsLibrary::ClearDisplayedCells(InOwner);
 		}
 
 		if (MapComponent->bShouldShowRenders)
 		{
-			static const FDisplayCellsParams DisplayParams{FLinearColor::Gray, 255.f, 300.f, TEXT("x")};
-			UCellsUtilsLibrary::DisplayCell(InOwner, DestinationCell, DisplayParams);
+			static const FBmrDisplayCellsParams DisplayParams{FLinearColor::Gray, 255.f, 300.f, TEXT("x")};
+			UBmrCellUtilsLibrary::DisplayCell(InOwner, DestinationCell, DisplayParams);
 		}
 	}
 #endif
 }
 
 // Returns true if AI is enabled (move input is not ignored and cheat is not enabled)
-bool AMyAIController::IsAIEnabled() const
+bool ABmrAIController::IsAIEnabled() const
 {
-	const APlayerCharacter* InOwner = GetPawn<APlayerCharacter>();
+	const ABmrPawn* InOwner = GetPawn<ABmrPawn>();
 	const UBmrMoverComponent* MoverComponent = InOwner ? InOwner->GetMoverComponent() : nullptr;
 	return MoverComponent
 	       && !MoverComponent->IsBlockedMovement()
-	       && UMyCheatManager::CVarAISetEnabled.GetValueOnAnyThread();
+	       && UBmrCheatManager::CVarAISetEnabled.GetValueOnAnyThread();
 }
 
 /* ---------------------------------------------------
@@ -93,7 +93,7 @@ bool AMyAIController::IsAIEnabled() const
  * --------------------------------------------------- */
 
 // This is called only in the gameplay before calling begin play
-void AMyAIController::PostInitializeComponents()
+void ABmrAIController::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
@@ -102,11 +102,11 @@ void AMyAIController::PostInitializeComponents()
 }
 
 // Allows the controller to react on possessing the pawn
-void AMyAIController::OnPossess(APawn* InPawn)
+void ABmrAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	APlayerCharacter* InOwner = Cast<APlayerCharacter>(InPawn);
+	ABmrPawn* InOwner = Cast<ABmrPawn>(InPawn);
 	if (!InPawn)
 	{
 		return;
@@ -115,9 +115,9 @@ void AMyAIController::OnPossess(APawn* InPawn)
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
-		if (!UMyUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
+		if (!UBmrUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
 		{
-			UMyUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+			UBmrUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
 		}
 
 		// ! It's editor not Pie World, don't continue further runtime logic
@@ -125,11 +125,11 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
-	if (GetPlayerState<AMyPlayerState>() == nullptr)
+	if (GetPlayerState<ABmrPlayerState>() == nullptr)
 	{
 		// Spawn Player State for AI to replicate game-relevant info like scores, teams etc
 		InitPlayerState();
-		AMyPlayerState* NewPlayerState = GetPlayerState<AMyPlayerState>();
+		ABmrPlayerState* NewPlayerState = GetPlayerState<ABmrPlayerState>();
 		checkf(NewPlayerState, TEXT("ERROR: [%i] %s:\n'NewPlayerState' was not spawned!"), __LINE__, *FString(__FUNCTION__));
 		InOwner->SetPlayerState(NewPlayerState);
 
@@ -140,9 +140,9 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Notify host about bot possession
-	UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterPossessed(*InOwner);
+	UBmrGlobalEventsSubsystem::Get().ReadyHandler.Broadcast_OnPawnPossessed(*InOwner);
 
-	UMapComponent* MapComponent = UMapComponent::GetMapComponent(InOwner);
+	UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InOwner);
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 	MapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
 
@@ -151,25 +151,25 @@ void AMyAIController::OnPossess(APawn* InPawn)
 	checkf(MoverComponent, TEXT("ERROR: [%i] %hs:\n'MoverComponent' is null!"), __LINE__, __FUNCTION__);
 	MoverComponent->OnPostSimulationTick.AddUniqueDynamic(this, &ThisClass::OnOwnerMovementCompleted);
 
-	const bool bMatchStarted = AMyGameStateBase::GetCurrentGameState() == ECGS::InGame;
+	const bool bMatchStarted = ABmrGameState::GetCurrentGameState() == ECGS::InGame;
 	SetAI(bMatchStarted);
 }
 
 // Allows the controller to react on unpossessing the pawn
-void AMyAIController::OnUnPossess()
+void ABmrAIController::OnUnPossess()
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
-		UMyUnrealEdEngine::GOnAIUpdatedDelegate.RemoveAll(this);
+		UBmrUnrealEdEngine::GOnAIUpdatedDelegate.RemoveAll(this);
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 
 	SetAI(false);
 
-	if (const APlayerCharacter* InOwner = GetPawn<APlayerCharacter>())
+	if (const ABmrPawn* InOwner = GetPawn<ABmrPawn>())
 	{
-		UMapComponent* MapComponent = UMapComponent::GetMapComponent(InOwner);
+		UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InOwner);
 		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 		MapComponent->OnPostRemovedFromLevel.RemoveAll(this);
 
@@ -182,15 +182,15 @@ void AMyAIController::OnUnPossess()
 }
 
 // Stops running to target
-void AMyAIController::Reset()
+void ABmrAIController::Reset()
 {
 	// Abort current movement task
 	Super::Reset();
 
 	// Reset target location
-	AIMoveToInternal = FCell::InvalidCell;
+	LastMoveToCell = FBmrCell::InvalidCell;
 
-	const APlayerCharacter* InOwner = GetPawn<APlayerCharacter>();
+	const ABmrPawn* InOwner = GetPawn<ABmrPawn>();
 	UBmrMoverComponent* MoverComponent = InOwner ? InOwner->GetMoverComponent() : nullptr;
 	if (MoverComponent)
 	{
@@ -199,10 +199,10 @@ void AMyAIController::Reset()
 }
 
 // The main AI logic
-void AMyAIController::UpdateAI()
+void ABmrAIController::UpdateAI()
 {
-	APlayerCharacter* InOwner = GetPawn<APlayerCharacter>();
-	const UMapComponent* MapComponent = InOwner ? UMapComponent::GetMapComponent(InOwner) : nullptr;
+	ABmrPawn* InOwner = GetPawn<ABmrPawn>();
+	const UBmrMapComponent* MapComponent = InOwner ? UBmrMapComponent::GetMapComponent(InOwner) : nullptr;
 	if (!MapComponent
 	    || !IsAIEnabled())
 	{
@@ -211,41 +211,41 @@ void AMyAIController::UpdateAI()
 
 	// Throttle AI updates to match desired tick rate
 	const float CurrentTime = GetWorld()->GetTimeSeconds();
-	const float TimeSinceLastUpdate = CurrentTime - LastAIUpdateTimeInternal;
-	if (TimeSinceLastUpdate < UGameStateDataAsset::Get().GetTickInterval())
+	const float TimeSinceLastUpdate = CurrentTime - LastAIUpdateTime;
+	if (TimeSinceLastUpdate < UBmrGameStateDataAsset::Get().GetTickInterval())
 	{
 		return;
 	}
-	LastAIUpdateTimeInternal = CurrentTime;
+	LastAIUpdateTime = CurrentTime;
 
 	// Stop movement if arrived at destination
-	if (AIMoveToInternal.IsValid()
-	    && MapComponent->GetCell() == AIMoveToInternal)
+	if (LastMoveToCell.IsValid()
+	    && MapComponent->GetCell() == LastMoveToCell)
 	{
 		Reset();
 		// Fall through to choose new destination
 	}
 
-	const UAIDataAsset& AIDataAsset = UAIDataAsset::Get();
+	const UBmrAIDataAsset& AIDataAsset = UBmrAIDataAsset::Get();
 
 	if (UUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
-		UCellsUtilsLibrary::ClearDisplayedCells(InOwner);
-		AIMoveToInternal = FCell::InvalidCell;
+		UBmrCellUtilsLibrary::ClearDisplayedCells(InOwner);
+		LastMoveToCell = FBmrCell::InvalidCell;
 	}
 
 	// ----- Part 0: Before iterations -----
 
 	// Set the START cell searching bot location
-	const FCell& F0 = MapComponent->GetCell();
+	const FBmrCell& F0 = MapComponent->GetCell();
 
 	// Searching 'SAFE NEIGHBORS'
 	static constexpr int32 MaxInteger = TNumericLimits<int32>::Max();
-	FCells Free;
+	FBmrCells Free;
 	uint8 bIsDangerous;
 	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous) // two searches (safe and free)
 	{
-		Free = UCellsUtilsLibrary::GetCellsAround(F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MaxInteger);
+		Free = UBmrCellUtilsLibrary::GetCellsAround(F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MaxInteger);
 		if (!bIsDangerous && Free.Num() > 0)
 		{
 			// Remove this cell from array
@@ -257,31 +257,31 @@ void AMyAIController::UpdateAI()
 	// Is there an item nearby?
 	if (bIsDangerous == false)
 	{
-		const FCells ItemsFromF0 = UCellsUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius(), TO_FLAG(EAT::Item));
+		const FBmrCells ItemsFromF0 = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius(), TO_FLAG(EAT::Item));
 		if (!ItemsFromF0.IsEmpty())
 		{
-			MoveToCell(FCell::GetFirstCellInSet(ItemsFromF0));
+			MoveToCell(FBmrCell::GetFirstCellInSet(ItemsFromF0));
 			return;
 		}
 	}
 	// ----- Part 1: Cells iteration -----
 
-	FCells AllCrossways; //  cells of all crossways
-	FCells SecureCrossways; // crossways without players
-	FCells FoundItems;
+	FBmrCells AllCrossways; //  cells of all crossways
+	FBmrCells SecureCrossways; // crossways without players
+	FBmrCells FoundItems;
 	bool bIsItemInDirect = false;
 
 	for (auto F = Free.CreateIterator(); F; ++F)
 	{
 		if (bIsDangerous // is not dangerous situation
-		    && FCell::Distance<float>(F0, *F) > AIDataAsset.GetNearDangerousRadius())
+		    && FBmrCell::Distance<float>(F0, *F) > AIDataAsset.GetNearDangerousRadius())
 		{
 			F.RemoveCurrent(); // removing distant cells
 			continue;
 		}
 
-		const FCells ThisCrossway = UCellsUtilsLibrary::GetCellsAround(*F, EPathType::Safe, AIDataAsset.GetCrosswaySearchRadius());
-		FCells Way = Free; // Way = Safe / (Free + F0)
+		const FBmrCells ThisCrossway = UBmrCellUtilsLibrary::GetCellsAround(*F, EPathType::Safe, AIDataAsset.GetCrosswaySearchRadius());
+		FBmrCells Way = Free; // Way = Safe / (Free + F0)
 		Way.Emplace(F0); // Way = Free + F0
 		Way = ThisCrossway.Difference(Way); // Way = Safe / Way
 
@@ -289,7 +289,7 @@ void AMyAIController::UpdateAI()
 		{
 			// Finding crossways
 			AllCrossways.Emplace(*F); // is the crossway
-			Way = UCellsUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Player));
+			Way = UBmrCellUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Player));
 			Way.Remove(MapComponent->GetCell());
 			if (Way.Num() == 0)
 			{
@@ -297,7 +297,7 @@ void AMyAIController::UpdateAI()
 			}
 
 			// Finding items
-			FCells ItemsAround = UCellsUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Item));
+			FBmrCells ItemsAround = UBmrCellUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Item));
 			if (ItemsAround.Num() > 0) // Is there items in this crossway?
 			{
 				ItemsAround = ItemsAround.Intersect(Free); // ItemsAround = ItemsAround ∪ Free
@@ -331,28 +331,28 @@ void AMyAIController::UpdateAI()
 
 	// ----- Part 2: Cells filtration -----
 
-	FCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free; // selected cells
+	FBmrCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free; // selected cells
 	bool bIsFilteringFailed = false;
 	static constexpr int32 FilteringStepsNum = 4;
 	for (int32 Index = 0; Index < FilteringStepsNum; ++Index)
 	{
-		FCells FilteringStep;
+		FBmrCells FilteringStep;
 		switch (Index)
 		{
 			case 0: // All crossways: Filtered ∪ AllCrossways
 				FilteringStep = Filtered.Intersect(AllCrossways);
 				break;
 			case 1: // Without players
-				FilteringStep = UCellsUtilsLibrary::GetCellsAround(F0, EPathType::Secure, MaxInteger);
+				FilteringStep = UBmrCellUtilsLibrary::GetCellsAround(F0, EPathType::Secure, MaxInteger);
 				FilteringStep = Filtered.Intersect(FilteringStep);
 				break;
 			case 2: // Without crossways with another players
 				FilteringStep = Filtered.Intersect(SecureCrossways);
 				break;
 			case 3: // Only nearest cells (length <= near radius)
-				for (const FCell& It : Filtered)
+				for (const FBmrCell& It : Filtered)
 				{
-					if (FCell::Distance<float>(F0, It) <= AIDataAsset.GetNearFilterRadius())
+					if (FBmrCell::Distance<float>(F0, It) <= AIDataAsset.GetNearFilterRadius())
 					{
 						FilteringStep.Emplace(It);
 					}
@@ -380,7 +380,7 @@ void AMyAIController::UpdateAI()
 	    && !bIsItemInDirect) // was not found direct items
 	{
 		const float Fire = UBmrPowerupsAttributeSet::Get(InOwner).GetPowerup_Fire();
-		FCells BoxesAndPlayers = UCellsUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Explosion, Fire, TO_FLAG(EAT::Box | EAT::Player));
+		FBmrCells BoxesAndPlayers = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Explosion, Fire, TO_FLAG(EAT::Box | EAT::Player));
 		BoxesAndPlayers.Remove(MapComponent->GetCell());
 		if (BoxesAndPlayers.Num() > 0) // Are bombs or players in own bomb radius
 		{
@@ -390,8 +390,8 @@ void AMyAIController::UpdateAI()
 #if WITH_EDITOR // [Editor]
 			if (MapComponent->bShouldShowRenders)
 			{
-				static const FDisplayCellsParams DisplayParams{FLinearColor::Red, 261.F, 95.F, TEXT("Attack")};
-				UCellsUtilsLibrary::DisplayCell(InOwner, F0, DisplayParams);
+				static const FBmrDisplayCellsParams DisplayParams{FLinearColor::Red, 261.F, 95.F, TEXT("Attack")};
+				UBmrCellUtilsLibrary::DisplayCell(InOwner, F0, DisplayParams);
 			}
 #endif // [Editor]
 		}
@@ -399,7 +399,7 @@ void AMyAIController::UpdateAI()
 
 	// ----- Part 3: Making choice-----
 
-	if (Free.Contains(AIMoveToInternal))
+	if (Free.Contains(LastMoveToCell))
 	{
 		return;
 	}
@@ -412,7 +412,7 @@ void AMyAIController::UpdateAI()
 		static constexpr int32 VisualizationTypesNum = 3;
 		for (int32 Index = 0; Index < VisualizationTypesNum; ++Index)
 		{
-			FCells VisualizingStep = FCell::EmptyCells;
+			FBmrCells VisualizingStep = FBmrCell::EmptyCells;
 			FLinearColor Color = FLinearColor::White;
 			FName Symbol = TEXT("+");
 			FVector Position = FVector::ZeroVector;
@@ -445,17 +445,17 @@ void AMyAIController::UpdateAI()
 
 			constexpr float TextHeight = 263.f;
 			constexpr float TextSize = 124.f;
-			const FDisplayCellsParams DisplayParams{Color, TextHeight, TextSize, Symbol, Position};
-			UCellsUtilsLibrary::DisplayCells(InOwner, VisualizingStep, DisplayParams);
+			const FBmrDisplayCellsParams DisplayParams{Color, TextHeight, TextSize, Symbol, Position};
+			UBmrCellUtilsLibrary::DisplayCells(InOwner, VisualizingStep, DisplayParams);
 		} // [Loopy visualization]
 	}
 #endif // [Editor]
 }
 
 // Enable or disable AI for this bot
-void AMyAIController::SetAI(bool bShouldEnable)
+void ABmrAIController::SetAI(bool bShouldEnable)
 {
-	const APlayerCharacter* InOwner = GetPawn<APlayerCharacter>();
+	const ABmrPawn* InOwner = GetPawn<ABmrPawn>();
 	const bool bWantsEnableDeadAI = !InOwner && bShouldEnable;
 	if (bWantsEnableDeadAI
 	    || !HasAuthority())
@@ -477,20 +477,20 @@ void AMyAIController::SetAI(bool bShouldEnable)
  ********************************************************************************************* */
 
 // Listen game states to enable or disable AI
-void AMyAIController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void ABmrAIController::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
 {
-	const bool bMatchStarted = CurrentGameState == ECurrentGameState::InGame;
+	const bool bMatchStarted = CurrentGameState == EBmrCurrentGameState::InGame;
 	SetAI(bMatchStarted);
 }
 
 // Called when this level actor is destroyed on the Generated Map
-void AMyAIController::OnPostRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+void ABmrAIController::OnPostRemovedFromLevel_Implementation(UBmrMapComponent* MapComponent, UObject* DestroyCauser)
 {
 	SetAI(false);
 }
 
 // Called when owner's movement is completed for the time step
-void AMyAIController::OnOwnerMovementCompleted_Implementation(const FMoverTimeStep& TimeStep)
+void ABmrAIController::OnOwnerMovementCompleted_Implementation(const FMoverTimeStep& TimeStep)
 {
 	UpdateAI();
 }

@@ -112,9 +112,9 @@ void UBmrHealthAttributeSet::PostAttributeChange(const FGameplayAttribute& Attri
 		}
 	}
 
-	if (bOutOfHealthInternal && GetHealth() > 0.f)
+	if (bOutOfHealth && GetHealth() > 0.f)
 	{
-		bOutOfHealthInternal = false;
+		bOutOfHealth = false;
 	}
 }
 
@@ -156,7 +156,7 @@ void UBmrHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		SetHealth(FMath::Clamp(GetHealth(), MinimumHealth, GetMaxHealth()));
 	}
 
-	if (GetHealth() <= 0.f && !bOutOfHealthInternal)
+	if (GetHealth() <= 0.f && !bOutOfHealth)
 	{
 		FGameplayEventData EventData;
 		EventData.Instigator = Data.EffectSpec.GetEffectContext().GetInstigator();
@@ -164,5 +164,5 @@ void UBmrHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	}
 
 	// Check health again in case an event above changed it.
-	bOutOfHealthInternal = GetHealth() <= 0.f;
+	bOutOfHealth = GetHealth() <= 0.f;
 }

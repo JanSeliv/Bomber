@@ -1,44 +1,44 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/BombDataAsset.h"
+#include "DataAssets/BmrBombDataAsset.h"
 
 // Bomber
-#include "Components/MapComponent.h"
-#include "Components/MySkeletalMeshComponent.h"
-#include "DataAssets/DataAssetsContainer.h"
+#include "Components/BmrMapComponent.h"
+#include "Components/BmrSkeletalMeshComponent.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(BombDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBombDataAsset)
 
 // Default constructor
-UBombDataAsset::UBombDataAsset()
+UBmrBombDataAsset::UBmrBombDataAsset()
 {
-	ActorTypeInternal = EAT::Bomb;
-	RowClassInternal = UBombRow::StaticClass();
+	ActorType = EAT::Bomb;
+	RowClass = UBmrBombRow::StaticClass();
 }
 
 // Returns the bomb data asset
-const UBombDataAsset& UBombDataAsset::Get()
+const UBmrBombDataAsset& UBmrBombDataAsset::Get()
 {
-	return UDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }
 
 // Returns associated bomb row by associated instigator actor (e.g: Fori character -> Third (Forest) row)
-const UBombRow* UBombDataAsset::GetBombRow(const AActor* InInstigator) const
+const UBmrBombRow* UBmrBombDataAsset::GetBombRow(const AActor* InInstigator) const
 {
 	if (!ensureMsgf(InInstigator, TEXT("ASSERT: [%i] %hs:\n'InInstigator' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return nullptr;
 	}
 
-	ELevelType LevelType = ELevelType::None;
-	if (const UMapComponent* MapComponent = UMapComponent::GetMapComponent(InInstigator))
+	EBmrLevelType LevelType = EBmrLevelType::None;
+	if (const UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InInstigator))
 	{
-		const ULevelActorRow* MeshRow = MapComponent->GetMeshRow();
+		const UBmrLevelActorRow* MeshRow = MapComponent->GetMeshRow();
 		LevelType = MeshRow ? MeshRow->LevelType : ELT::None;
 	}
-	else if (const UMySkeletalMeshComponent* MeshComponent = InInstigator->FindComponentByClass<UMySkeletalMeshComponent>())
+	else if (const UBmrSkeletalMeshComponent* MeshComponent = InInstigator->FindComponentByClass<UBmrSkeletalMeshComponent>())
 	{
 		LevelType = MeshComponent->GetAssociatedLevelType();
 	}
-	return GetRowByLevelType<UBombRow>(LevelType);
+	return GetRowByLevelType<UBmrBombRow>(LevelType);
 }

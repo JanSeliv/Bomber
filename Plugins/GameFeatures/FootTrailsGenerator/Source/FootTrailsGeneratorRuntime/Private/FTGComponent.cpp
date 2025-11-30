@@ -6,12 +6,12 @@
 #include "FTGDataAsset.h"
 
 // Bomber
-#include "GeneratedMap.h"
+#include "Actors/BmrGeneratedMap.h"
 #include "InstancedStaticMeshActor.h"
 #include "MyDataTable/MyDataTable.h"
-#include "Structures/Cell.h"
-#include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Structures/BmrCell.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
 #include "Engine/StaticMesh.h"
@@ -31,23 +31,23 @@ UFTGComponent::UFTGComponent()
 // Returns the data asset that contains all the assets and tweaks of Foot Trails game feature
 const UFTGDataAsset* UFTGComponent::GetFootTrailsDataAsset() const
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce(FootTrailsDataAssetInternal);
+	return UMyPrimaryDataAsset::GetOrLoadOnce(FootTrailsDataAsset);
 }
 
 // Guarantees that the data asset is loaded, otherwise, it will crash
 const UFTGDataAsset& UFTGComponent::GetFootTrailsDataAssetChecked() const
 {
-	const UFTGDataAsset* FootTrailsDataAsset = GetFootTrailsDataAsset();
-	checkf(FootTrailsDataAsset, TEXT("%s: 'FootTrailsDataAssetInternal' is not set"), *FString(__FUNCTION__));
-	return *FootTrailsDataAsset;
+	const UFTGDataAsset* InFootTrailsDataAsset = GetFootTrailsDataAsset();
+	checkf(InFootTrailsDataAsset, TEXT("%s: 'FootTrailsDataAsset' is not set"), *FString(__FUNCTION__));
+	return *InFootTrailsDataAsset;
 }
 
 // Returns the random foot trail instance for given types
 const UStaticMesh* UFTGComponent::GetRandomMesh(EFTGTrailType FootTrailType) const
 {
 	TArray<const UStaticMesh*> MatchingMeshes;
-	const ELevelType CurrentLevelType = UMyBlueprintFunctionLibrary::GetLevelType();
-	for (const TTuple<FFTGArchetype, TObjectPtr<UStaticMesh>>& It : FootTrailInstancesInternal)
+	const EBmrLevelType CurrentLevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
+	for (const TTuple<FFTGArchetype, TObjectPtr<UStaticMesh>>& It : FootTrailInstances)
 	{
 		if (It.Key.FootTrailType == FootTrailType && It.Key.LevelType == CurrentLevelType)
 		{
@@ -70,15 +70,15 @@ void UFTGComponent::BeginPlay()
 // Called when the game ends
 void UFTGComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (InstancedStaticMeshActorInternal)
+	if (InstancedStaticMeshActor)
 	{
-		InstancedStaticMeshActorInternal->Destroy();
-		InstancedStaticMeshActorInternal = nullptr;
+		InstancedStaticMeshActor->Destroy();
+		InstancedStaticMeshActor = nullptr;
 	}
 
-	FootTrailInstancesInternal.Empty();
+	FootTrailInstances.Empty();
 
-	UMyPrimaryDataAsset::ResetDataAsset(FootTrailsDataAssetInternal);
+	UMyPrimaryDataAsset::ResetDataAsset(FootTrailsDataAsset);
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -88,14 +88,14 @@ void UFTGComponent::InitOnce()
 {
 	const UDataTable* FootTrailsDT = GetFootTrailsDataAssetChecked().GetFootTrailsDataTable();
 	if (!ensureMsgf(FootTrailsDT, TEXT("%s: 'FootTrailsDT' is not set"), *FString(__FUNCTION__))
-	    || !FootTrailInstancesInternal.IsEmpty())
+	    || !FootTrailInstances.IsEmpty())
 	{
 		// is already initialized
 		return;
 	}
 
-	InstancedStaticMeshActorInternal = GetWorld()->SpawnActor<AInstancedStaticMeshActor>();
-	checkf(InstancedStaticMeshActorInternal, TEXT("%s: ERROR: 'InstancedStaticMeshActor' was not spawned!"), *FString(__FUNCTION__));
+	InstancedStaticMeshActor = GetWorld()->SpawnActor<AInstancedStaticMeshActor>();
+	checkf(InstancedStaticMeshActor, TEXT("%s: ERROR: 'InstancedStaticMeshActor' was not spawned!"), *FString(__FUNCTION__));
 
 	TMap<FName, FFTGArchetype> FootTrailsRows;
 	UMyDataTable::GetRows(*FootTrailsDT, FootTrailsRows);
@@ -108,21 +108,21 @@ void UFTGComponent::InitOnce()
 			continue;
 		}
 
-		FootTrailInstancesInternal.Emplace(ArchetypeIt, ArchetypeIt.Mesh.LoadSynchronous());
+		FootTrailInstances.Emplace(ArchetypeIt, ArchetypeIt.Mesh.LoadSynchronous());
 	}
 
 	// Generate first trails and bind to further regenerations
 	BPGenerateFootTrails();
-	AGeneratedMap::Get().OnGeneratedLevelActors.AddUniqueDynamic(this, &ThisClass::BPGenerateFootTrails);
+	ABmrGeneratedMap::Get().OnGeneratedLevelActors.AddUniqueDynamic(this, &ThisClass::BPGenerateFootTrails);
 }
 
 // Spawns given Foot Trail by its type on the specified cell
-void UFTGComponent::SpawnFootTrail(EFTGTrailType FootTrailType, const FCell& Cell, float CellRotation)
+void UFTGComponent::SpawnFootTrail(EFTGTrailType FootTrailType, const FBmrCell& Cell, float CellRotation)
 {
 	const UStaticMesh* FootTrailMesh = GetRandomMesh(FootTrailType);
 	if (!FootTrailMesh
 	    || !ensureMsgf(FootTrailType != EFTGTrailType::None, TEXT("%s: 'FootTrailType' is none"), *FString(__FUNCTION__))
-	    || !ensureMsgf(InstancedStaticMeshActorInternal, TEXT("%s: 'InstancedStaticMeshActor' is not valid"), *FString(__FUNCTION__)))
+	    || !ensureMsgf(InstancedStaticMeshActor, TEXT("%s: 'InstancedStaticMeshActor' is not valid"), *FString(__FUNCTION__)))
 	{
 		return;
 	}
@@ -130,9 +130,9 @@ void UFTGComponent::SpawnFootTrail(EFTGTrailType FootTrailType, const FCell& Cel
 	const AActor* Owner = GetOwner();
 	checkf(Owner, TEXT("%s: ERROR: 'Owner' is null!"), *FString(__FUNCTION__));
 	const FRotator OwnerLootAtRot = Owner->GetActorRotation();
-	CellRotation += UCellsUtilsLibrary::GetCellYawDegree();
+	CellRotation += UBmrCellUtilsLibrary::GetCellYawDegree();
 	const FRotator CellRot(OwnerLootAtRot.Pitch, CellRotation, OwnerLootAtRot.Roll);
 	const FTransform CellTransform(CellRot, Cell, FVector::OneVector);
 
-	InstancedStaticMeshActorInternal->SpawnInstanceByMesh(CellTransform, FootTrailMesh);
+	InstancedStaticMeshActor->SpawnInstanceByMesh(CellTransform, FootTrailMesh);
 }

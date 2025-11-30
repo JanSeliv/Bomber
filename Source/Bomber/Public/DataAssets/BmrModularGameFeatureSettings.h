@@ -5,9 +5,9 @@
 #include "Engine/DeveloperSettings.h"
 
 // Bomber
-#include "Structures/GameDifficultyData.h" // FDifficultyGameFeaturesData
+#include "Structures/BmrGameDifficultyData.h" // FBmrDifficultyGameFeaturesData
 
-#include "ModularGameFeatureSettings.generated.h"
+#include "BmrModularGameFeatureSettings.generated.h"
 
 /**
  * Contains all core tweaks for Modular Game Features (MGF).
@@ -16,13 +16,13 @@
  * It's not data asset for easier access and better tracking in version control.
  */
 UCLASS(Config = "ModularGameFeatures", DefaultConfig, DisplayName = "Bomber Modular Game Features (MGF)")
-class BOMBER_API UModularGameFeatureSettings final : public UDeveloperSettings
+class BOMBER_API UBmrModularGameFeatureSettings final : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
 	/** Returns this instance. */
-	static const UModularGameFeatureSettings& Get() { return *GetDefault<ThisClass>(); }
+	static const UBmrModularGameFeatureSettings& Get() { return *GetDefault<ThisClass>(); }
 
 	/** Gets the settings container name for the settings, either Project or Editor */
 	virtual FName GetContainerName() const override { return TEXT("Project"); }
@@ -35,19 +35,19 @@ public:
 	 ********************************************************************************************* */
 public:
 	/** Returns all game features need to be loaded and activated on starting the game. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE TArray<FName>& GetModularGameFeatures() const { return ModularGameFeaturesInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const FORCEINLINE TArray<FName>& GetModularGameFeatures() const { return ModularGameFeatures; }
 
 	/** Returns Game Features that are enabled by the game difficulty levels. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	const FORCEINLINE TArray<FDifficultyGameFeaturesData>& GetDifficultyGameFeatures() const { return DifficultyGameFeaturesInternal; }
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	const FORCEINLINE TArray<FBmrDifficultyGameFeaturesData>& GetDifficultyGameFeatures() const { return DifficultyGameFeatures; }
 
 protected:
 	/** All game features need to be loaded and activated on starting the game, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Modular Game Features", ShowOnlyInnerProperties))
-	TArray<FName> ModularGameFeaturesInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TArray<FName> ModularGameFeatures;
 
 	/** Game Features that are enabled by the game difficulty levels, where multiple difficulties can be selected per each feature, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Difficulty Game Features", ShowOnlyInnerProperties))
-	TArray<FDifficultyGameFeaturesData> DifficultyGameFeaturesInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TArray<FBmrDifficultyGameFeaturesData> DifficultyGameFeatures;
 };

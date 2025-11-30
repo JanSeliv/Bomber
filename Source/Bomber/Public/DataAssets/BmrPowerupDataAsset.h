@@ -2,18 +2,18 @@
 
 #pragma once
 
-#include "DataAssets/LevelActorDataAsset.h"
+#include "DataAssets/BmrLevelActorDataAsset.h"
 
 // Bomber
 #include "Structures/BmrPowerupTag.h"
 
-#include "ItemDataAsset.generated.h"
+#include "BmrPowerupDataAsset.generated.h"
 
 /**
  * Row that describes each unique item.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UItemRow final : public ULevelActorRow
+class BOMBER_API UBmrPowerupRow final : public UBmrLevelActorRow
 {
 	GENERATED_BODY()
 
@@ -31,18 +31,18 @@ public:
  * Describes common data for all items.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UItemDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UBmrPowerupDataAsset final : public UBmrLevelActorDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	/** Default constructor. */
-	UItemDataAsset();
+	UBmrPowerupDataAsset();
 
 	/** Returns the item data asset. */
-	static const UItemDataAsset& Get();
+	static const UBmrPowerupDataAsset& Get();
 
 	/** Return row by specified item type. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const UItemRow* GetRowByItemType(FBmrPowerupTag ItemType, ELevelType LevelType) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const UBmrPowerupRow* GetRowByItemType(FBmrPowerupTag ItemType, EBmrLevelType LevelType) const;
 };

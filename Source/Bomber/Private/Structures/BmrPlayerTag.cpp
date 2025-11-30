@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Structures/PlayerTag.h"
+#include "Structures/BmrPlayerTag.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerTag)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerTag)
 
 // The Player Character tag that contains nothing chosen by default
-const FPlayerTag FPlayerTag::None = EmptyTag;
+const FBmrPlayerTag FBmrPlayerTag::None = EmptyTag;
 
 // Custom constructor to set all members values
-FPlayerTag::FPlayerTag(const FGameplayTag& Tag)
+FBmrPlayerTag::FBmrPlayerTag(const FGameplayTag& Tag)
     : FGameplayTag(Tag)
 {
 }

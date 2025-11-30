@@ -24,7 +24,7 @@ protected:
 	virtual int32 AddLocalPlayer(ULocalPlayer* NewPlayer, FPlatformUserId UserId) override;
 
 	/** Is called when first local player has had a new outer. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnPlayerControllerReady(class APlayerController* PlayerController);
 
 	/*********************************************************************************************
@@ -33,11 +33,11 @@ protected:
 	 ********************************************************************************************* */
 public:
 	/** Attempts to create a session. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void TryCreateSession(class APlayerController* PlayerController);
 
 	/** Attempts to join a session. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void TryJoinSession(const struct FBlueprintSessionResult& SessionToJoin);
 
 protected:

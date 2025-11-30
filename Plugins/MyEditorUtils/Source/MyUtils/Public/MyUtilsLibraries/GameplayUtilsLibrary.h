@@ -37,7 +37,7 @@ public:
 	 * @param ParentActor The parent actor to search in.
 	 * @param ChildActorClass The class of the attached actor to find.
 	 * @param bIncludeDescendants If true, also include all attached actors of each attached actor. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static AActor* GetAttachedActorByClass(const AActor* ParentActor, TSubclassOf<AActor> ChildActorClass, bool bIncludeDescendants = false);
 
 	/** Returns the first child actor of the specified class. */

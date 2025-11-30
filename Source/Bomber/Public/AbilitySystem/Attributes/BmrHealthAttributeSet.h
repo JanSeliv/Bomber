@@ -19,7 +19,7 @@ class BOMBER_API UBmrHealthAttributeSet : public UAttributeSet
 
 public:
 	/** Returns the health attribute set for the specified owner. It will return nullptr if can't be obtained. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DefaultToSelf = "InOwner"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DefaultToSelf = "InOwner"))
 	static const UBmrHealthAttributeSet* GetHealthAttributeSet(const UObject* InOwner);
 
 	/** Returns the health attribute set for the specified owner. It will crash if can't be obtained. */
@@ -30,33 +30,33 @@ public:
 	 ********************************************************************************************* */
 public:
 	/** Current player health (when 0 triggers death ability). */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Health", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Health", Category = "[Bomber]")
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Health)
 
 	/** Maximum health value for clamping. */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_MaxHealth", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_MaxHealth", Category = "[Bomber]")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, MaxHealth)
 
 	/** OutcomingDamage can be changed via gameplay effect modifiers (powerups, buffs, debuffs).
 	 * Flow: Multiple effects modify this value → Damage execution captures final result → Applies to target IncomingDamage.
 	 * Replicated for UI display and feedback purposes. */
-	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_OutcomingDamage", Category = "C++")
+	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_OutcomingDamage", Category = "[Bomber]")
 	FGameplayAttributeData OutcomingDamage;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, OutcomingDamage)
 
 	/** Meta attribute for incoming damage calculation. Set only by damage execution calculations, never by direct modifiers.
 	 * Flow: Damage execution captures source OutcomingDamage → Sets this value → PostGameplayEffectExecute processes it into health reduction.
 	 * Non-replicated as it's immediately processed and cleared. Hidden from modifiers to prevent direct manipulation. */
-	UPROPERTY(BlueprintReadOnly, Transient, Category = "C++", meta = (HideFromModifiers = "true"))
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "[Bomber]", meta = (HideFromModifiers = "true"))
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, IncomingDamage)
 
 protected:
 	/** Used to track when the health reaches 0. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "NAME"))
-	bool bOutOfHealthInternal = false;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	bool bOutOfHealth = false;
 
 	/*********************************************************************************************
 	 * OnRep notifies

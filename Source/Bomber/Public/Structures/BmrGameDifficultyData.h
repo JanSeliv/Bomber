@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "GameDifficultyData.generated.h"
+#include "BmrGameDifficultyData.generated.h"
 
 /**
  * The type of the game difficulty.
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class EGameDifficulty : uint8
+enum class EBmrGameDifficulty : uint8
 {
 	None = 0 UMETA(Hidden),
 	///< The easiest difficulty, is 0 as difficulty level
@@ -22,13 +22,13 @@ enum class EGameDifficulty : uint8
 	Any = Easy | Normal | Hard | Vanilla
 };
 
-ENUM_CLASS_FLAGS(EGameDifficulty);
+ENUM_CLASS_FLAGS(EBmrGameDifficulty);
 
 /**
  * Determines the Game Features to be enabled by the game difficulty levels.
  */
 USTRUCT(BlueprintType)
-struct BOMBER_API FDifficultyGameFeaturesData
+struct BOMBER_API FBmrDifficultyGameFeaturesData
 {
 	GENERATED_BODY()
 
@@ -37,6 +37,6 @@ struct BOMBER_API FDifficultyGameFeaturesData
 	FName ModularGameFeatureName = NAME_None;
 
 	/** Difficulty levels that are enabled for the specified game feature, multiple difficulties can be selected per each feature. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ShowOnlyInnerProperties, Bitmask, BitmaskEnum = "/Script/Bomber.EGameDifficulty"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ShowOnlyInnerProperties, Bitmask, BitmaskEnum = "/Script/Bomber.EBmrGameDifficulty"))
 	int32 GameDifficulties = 0;
 };

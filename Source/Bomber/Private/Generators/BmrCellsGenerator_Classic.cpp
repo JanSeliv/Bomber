@@ -8,7 +8,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrCellsGenerator_Classic)
 
 // Is overriden to implement custom level generation logic
-TMap<FCell, EActorType> UBmrCellsGenerator_Classic::GenerateLevel(FBmrGeneratorData&& GeneratorData)
+TMap<FBmrCell, EBmrActorType> UBmrCellsGenerator_Classic::GenerateLevel(FBmrGeneratorData&& GeneratorData)
 {
 	if (!GeneratorData.IsValid())
 	{
@@ -16,8 +16,8 @@ TMap<FCell, EActorType> UBmrCellsGenerator_Classic::GenerateLevel(FBmrGeneratorD
 		return Super::GenerateLevel(MoveTemp(GeneratorData));
 	}
 
-	TMap<FCell, EActorType> ActorsToSpawn;
-	FCellsArr PossibleBoxCells;
+	TMap<FBmrCell, EBmrActorType> ActorsToSpawn;
+	FBmrCellsArr PossibleBoxCells;
 
 	// --- Define the safe zones around all four player corners ---
 	TSet<FIntPoint> SafeZoneCoordinates;
@@ -45,13 +45,13 @@ TMap<FCell, EActorType> UBmrCellsGenerator_Classic::GenerateLevel(FBmrGeneratorD
 
 			const bool bIsUnevenX = PosX % 2 != 0;
 			const bool bIsUnevenY = PosY % 2 != 0;
-			const FCell TargetCell = FCell::GetCellByPositionOnGrid(CurrentPosition, GeneratorData.AllCells, GeneratorData.MapScale.X);
+			const FBmrCell TargetCell = FBmrCell::GetCellByPositionOnGrid(CurrentPosition, GeneratorData.AllCells, GeneratorData.MapScale.X);
 
 			if (bIsUnevenX && bIsUnevenY)
 			{
 				if (TargetCell.IsValid())
 				{
-					ActorsToSpawn.Emplace(TargetCell, EActorType::Wall);
+					ActorsToSpawn.Emplace(TargetCell, EBmrActorType::Wall);
 				}
 			}
 			else // All other non-safe cells are candidates for destructible boxes
@@ -76,8 +76,8 @@ TMap<FCell, EActorType> UBmrCellsGenerator_Classic::GenerateLevel(FBmrGeneratorD
 		}
 
 		const int32 RandomIndex = FMath::RandRange(0, PossibleBoxCells.Num() - 1);
-		const FCell BoxCell = PossibleBoxCells[RandomIndex];
-		ActorsToSpawn.Emplace(BoxCell, EActorType::Box);
+		const FBmrCell BoxCell = PossibleBoxCells[RandomIndex];
+		ActorsToSpawn.Emplace(BoxCell, EBmrActorType::Box);
 		PossibleBoxCells.RemoveAtSwap(RandomIndex);
 	}
 
@@ -89,10 +89,10 @@ TMap<FCell, EActorType> UBmrCellsGenerator_Classic::GenerateLevel(FBmrGeneratorD
 
 	for (const FIntPoint& CornerPos : CornerPositions)
 	{
-		const FCell CornerCell = FCell::GetCellByPositionOnGrid(CornerPos, GeneratorData.AllCells, GeneratorData.MapScale.X);
+		const FBmrCell CornerCell = FBmrCell::GetCellByPositionOnGrid(CornerPos, GeneratorData.AllCells, GeneratorData.MapScale.X);
 		if (CornerCell.IsValid())
 		{
-			ActorsToSpawn.Emplace(CornerCell, EActorType::Player);
+			ActorsToSpawn.Emplace(CornerCell, EBmrActorType::Player);
 		}
 	}
 

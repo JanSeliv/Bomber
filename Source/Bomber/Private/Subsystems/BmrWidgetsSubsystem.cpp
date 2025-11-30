@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "Subsystems/WidgetsSubsystem.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
 
 // Bomber
-#include "Controllers/MyPlayerController.h"
-#include "DataAssets/UIDataAsset.h"
+#include "Controllers/BmrPlayerController.h"
+#include "DataAssets/BmrUIDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Components/Viewport.h"
@@ -15,28 +15,28 @@
 #include "GameFeaturesSubsystem.h"
 #include "Misc/PackageName.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(WidgetsSubsystem)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrWidgetsSubsystem)
 
 // Returns the pointer the UI Subsystem
-UWidgetsSubsystem* UWidgetsSubsystem::GetWidgetsSubsystem(const UObject* OptionalWorldContext /* = nullptr*/)
+UBmrWidgetsSubsystem* UBmrWidgetsSubsystem::GetWidgetsSubsystem(const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	const ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(OptionalWorldContext);
 	if (!LocalPlayer)
 	{
-		const AMyPlayerController* PC = Cast<AMyPlayerController>(OptionalWorldContext);
+		const ABmrPlayerController* PC = Cast<ABmrPlayerController>(OptionalWorldContext);
 		if (!PC)
 		{
-			PC = UMyBlueprintFunctionLibrary::GetLocalPlayerController(OptionalWorldContext);
+			PC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController(OptionalWorldContext);
 		}
 		LocalPlayer = PC ? PC->GetLocalPlayer() : nullptr;
 	}
-	return LocalPlayer ? LocalPlayer->GetSubsystem<UWidgetsSubsystem>() : nullptr;
+	return LocalPlayer ? LocalPlayer->GetSubsystem<UBmrWidgetsSubsystem>() : nullptr;
 }
 
 // Returns the UI subsystem checked: it will crash if player controller is not initialized yet
-UWidgetsSubsystem& UWidgetsSubsystem::Get(const UObject* OptionalWorldContext)
+UBmrWidgetsSubsystem& UBmrWidgetsSubsystem::Get(const UObject* OptionalWorldContext)
 {
-	UWidgetsSubsystem* WidgetsSubsystem = GetWidgetsSubsystem(OptionalWorldContext);
+	UBmrWidgetsSubsystem* WidgetsSubsystem = GetWidgetsSubsystem(OptionalWorldContext);
 	checkf(WidgetsSubsystem, TEXT("%s: 'WidgetsSubsystem' is null, likely controller is not initialized yet!"), *FString(__FUNCTION__));
 	return *WidgetsSubsystem;
 }
@@ -46,7 +46,7 @@ UWidgetsSubsystem& UWidgetsSubsystem::Get(const UObject* OptionalWorldContext)
  ********************************************************************************************* */
 
 // Create specified widget and add it to Manageable widgets list, so its visibility can be changed globally
-UUserWidget* UWidgetsSubsystem::CreateManageableWidget(const FManageableWidgetData& WidgetData, const UObject* OptionalWorldContext /* = nullptr*/)
+UUserWidget* UBmrWidgetsSubsystem::CreateManageableWidget(const FBmrManageableWidgetData& WidgetData, const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	if (!ensureMsgf(WidgetData.IsValid(), TEXT("ASSERT: [%i] %hs:\n'WidgetData' is not valid, likely not set in the UI Data Asset: %s"), __LINE__, __FUNCTION__, *WidgetData.ToString()))
 	{
@@ -54,22 +54,22 @@ UUserWidget* UWidgetsSubsystem::CreateManageableWidget(const FManageableWidgetDa
 	}
 
 	UUserWidget* Widget = FWidgetUtilsLibrary::CreateWidgetByClass(WidgetData.WidgetClass, WidgetData.bAddToViewport, WidgetData.ZOrder, OptionalWorldContext);
-	FBmrManageableWidgetsContainer& WidgetsContainer = AllManageableWidgetsInternal.FindOrAdd(WidgetData.WidgetTag);
+	FBmrManageableWidgetsContainer& WidgetsContainer = AllManageableWidgets.FindOrAdd(WidgetData.WidgetTag);
 	WidgetsContainer.WidgetInstances.Add(Widget);
 
 	return Widget;
 }
 
 // The same as CreateManageableWidget, but finds widget data by tag from the UI Data Asset
-UUserWidget* UWidgetsSubsystem::CreateManageableWidgetByTag(FGameplayTag WidgetTag, const UObject* OptionalWorldContext)
+UUserWidget* UBmrWidgetsSubsystem::CreateManageableWidgetByTag(FGameplayTag WidgetTag, const UObject* OptionalWorldContext)
 {
-	return CreateManageableWidget(UUIDataAsset::Get().GetWidgetDataByTag(WidgetTag), OptionalWorldContext);
+	return CreateManageableWidget(UBmrUIDataAsset::Get().GetWidgetDataByTag(WidgetTag), OptionalWorldContext);
 }
 
 // Returns the widget instance by its tag
-UUserWidget* UWidgetsSubsystem::GetWidgetByTag(FGameplayTag WidgetTag, int32 OptionalIndex /* = 0*/) const
+UUserWidget* UBmrWidgetsSubsystem::GetWidgetByTag(FGameplayTag WidgetTag, int32 OptionalIndex /* = 0*/) const
 {
-	const FBmrManageableWidgetsContainer* WidgetsContainer = AllManageableWidgetsInternal.Find(WidgetTag);
+	const FBmrManageableWidgetsContainer* WidgetsContainer = AllManageableWidgets.Find(WidgetTag);
 	if (!WidgetsContainer
 	    || !WidgetsContainer->WidgetInstances.IsValidIndex(OptionalIndex))
 	{
@@ -80,9 +80,9 @@ UUserWidget* UWidgetsSubsystem::GetWidgetByTag(FGameplayTag WidgetTag, int32 Opt
 }
 
 // Returns all widgets associated with the given tag
-void UWidgetsSubsystem::GetAllWidgetsByTag(FGameplayTag WidgetTag, TArray<UUserWidget*>& OutWidgets) const
+void UBmrWidgetsSubsystem::GetAllWidgetsByTag(FGameplayTag WidgetTag, TArray<UUserWidget*>& OutWidgets) const
 {
-	for (const TPair<FGameplayTag, FBmrManageableWidgetsContainer>& PairIt : AllManageableWidgetsInternal)
+	for (const TPair<FGameplayTag, FBmrManageableWidgetsContainer>& PairIt : AllManageableWidgets)
 	{
 		if (PairIt.Key.MatchesTag(WidgetTag))
 		{
@@ -98,14 +98,14 @@ void UWidgetsSubsystem::GetAllWidgetsByTag(FGameplayTag WidgetTag, TArray<UUserW
 }
 
 // Removes given widget from the list and destroys it by its tag
-void UWidgetsSubsystem::DestroyManageableWidgetByTag(FGameplayTag WidgetTag)
+void UBmrWidgetsSubsystem::DestroyManageableWidgetByTag(FGameplayTag WidgetTag)
 {
 	if (!ensureMsgf(WidgetTag.IsValid(), TEXT("ASSERT: [%i] %hs:\n'WidgetTag' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	FBmrManageableWidgetsContainer* WidgetsContainer = AllManageableWidgetsInternal.Find(WidgetTag);
+	FBmrManageableWidgetsContainer* WidgetsContainer = AllManageableWidgets.Find(WidgetTag);
 	if (!WidgetsContainer)
 	{
 		// Such widget tag is not even registered
@@ -123,9 +123,9 @@ void UWidgetsSubsystem::DestroyManageableWidgetByTag(FGameplayTag WidgetTag)
 		WidgetsContainer->WidgetInstances.RemoveAtSwap(Index);
 	}
 
-	AllManageableWidgetsInternal.Remove(WidgetTag);
+	AllManageableWidgets.Remove(WidgetTag);
 
-	AllHiddenWidgetsInternal.RemoveTag(WidgetTag);
+	AllHiddenWidgets.RemoveTag(WidgetTag);
 }
 
 /*********************************************************************************************
@@ -133,7 +133,7 @@ void UWidgetsSubsystem::DestroyManageableWidgetByTag(FGameplayTag WidgetTag)
  ********************************************************************************************* */
 
 // Will try to start the process of initializing all widgets used in game
-void UWidgetsSubsystem::TryInitWidgets()
+void UBmrWidgetsSubsystem::TryInitWidgets()
 {
 	if (UUtilsLibrary::IsViewportInitialized())
 	{
@@ -146,21 +146,21 @@ void UWidgetsSubsystem::TryInitWidgets()
 }
 
 // Create and set widget objects once
-void UWidgetsSubsystem::InitWidgets()
+void UBmrWidgetsSubsystem::InitWidgets()
 {
 	if (AreWidgetInitialized())
 	{
 		return;
 	}
 
-	const TArray<FManageableWidgetData>& AllWidgetData = UUIDataAsset::Get().GetAllWidgetData();
-	for (const FManageableWidgetData& WidgetDataIt : AllWidgetData)
+	const TArray<FBmrManageableWidgetData>& AllWidgetData = UBmrUIDataAsset::Get().GetAllWidgetData();
+	for (const FBmrManageableWidgetData& WidgetDataIt : AllWidgetData)
 	{
 		// Automatically create and add all widgets to the viewport from the UI Data Asset
 		CreateManageableWidget(WidgetDataIt);
 	}
 
-	bAreWidgetInitializedInternal = true;
+	bAreWidgetInitialized = true;
 
 	if (OnWidgetsInitialized.IsBound())
 	{
@@ -169,19 +169,19 @@ void UWidgetsSubsystem::InitWidgets()
 }
 
 // Removes all widgets and transient data
-void UWidgetsSubsystem::CleanupWidgets()
+void UBmrWidgetsSubsystem::CleanupWidgets()
 {
-	while (!AllManageableWidgetsInternal.IsEmpty())
+	while (!AllManageableWidgets.IsEmpty())
 	{
-		const FGameplayTag WidgetTag = AllManageableWidgetsInternal.CreateIterator().Key();
+		const FGameplayTag WidgetTag = AllManageableWidgets.CreateIterator().Key();
 		DestroyManageableWidgetByTag(WidgetTag);
-		AllManageableWidgetsInternal.Remove(WidgetTag);
+		AllManageableWidgets.Remove(WidgetTag);
 	}
 
-	AllManageableWidgetsInternal.Empty();
-	AllHiddenWidgetsInternal = FGameplayTagContainer::EmptyContainer;
+	AllManageableWidgets.Empty();
+	AllHiddenWidgets = FGameplayTagContainer::EmptyContainer;
 
-	bAreWidgetInitializedInternal = false;
+	bAreWidgetInitialized = false;
 }
 
 /*********************************************************************************************
@@ -189,7 +189,7 @@ void UWidgetsSubsystem::CleanupWidgets()
  ********************************************************************************************* */
 
 // If true, changes all visible manageable widgets to hidden
-void UWidgetsSubsystem::SetAllWidgetsVisibility(bool bMakeVisible, bool bCanRestoreVisibilityLater /* = true*/)
+void UBmrWidgetsSubsystem::SetAllWidgetsVisibility(bool bMakeVisible, bool bCanRestoreVisibilityLater /* = true*/)
 {
 	const ESlateVisibility DesiredVisibility = bMakeVisible ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed;
 	const FGameplayTagContainer TagsToProcess = [&]()
@@ -197,12 +197,12 @@ void UWidgetsSubsystem::SetAllWidgetsVisibility(bool bMakeVisible, bool bCanRest
 		FGameplayTagContainer Result = FGameplayTagContainer::EmptyContainer;
 		if (bMakeVisible)
 		{
-			Result = AllHiddenWidgetsInternal;
+			Result = AllHiddenWidgets;
 		}
 		else
 		{
 			TArray<FGameplayTag> AllTags;
-			AllManageableWidgetsInternal.GenerateKeyArray(AllTags);
+			AllManageableWidgets.GenerateKeyArray(AllTags);
 			Result = FGameplayTagContainer::CreateFromArray(AllTags);
 		}
 		return Result;
@@ -210,12 +210,12 @@ void UWidgetsSubsystem::SetAllWidgetsVisibility(bool bMakeVisible, bool bCanRest
 
 	if (!bMakeVisible)
 	{
-		AllHiddenWidgetsInternal = FGameplayTagContainer::EmptyContainer;
+		AllHiddenWidgets = FGameplayTagContainer::EmptyContainer;
 	}
 
 	for (const FGameplayTag& WidgetTag : TagsToProcess)
 	{
-		const FBmrManageableWidgetsContainer* Container = AllManageableWidgetsInternal.Find(WidgetTag);
+		const FBmrManageableWidgetsContainer* Container = AllManageableWidgets.Find(WidgetTag);
 		if (!Container)
 		{
 			continue;
@@ -229,7 +229,7 @@ void UWidgetsSubsystem::SetAllWidgetsVisibility(bool bMakeVisible, bool bCanRest
 
 				if (!bMakeVisible && bCanRestoreVisibilityLater)
 				{
-					AllHiddenWidgetsInternal.AddTag(WidgetTag);
+					AllHiddenWidgets.AddTag(WidgetTag);
 				}
 			}
 		}
@@ -237,7 +237,7 @@ void UWidgetsSubsystem::SetAllWidgetsVisibility(bool bMakeVisible, bool bCanRest
 
 	if (bMakeVisible)
 	{
-		AllHiddenWidgetsInternal = FGameplayTagContainer::EmptyContainer;
+		AllHiddenWidgets = FGameplayTagContainer::EmptyContainer;
 	}
 }
 
@@ -246,7 +246,7 @@ void UWidgetsSubsystem::SetAllWidgetsVisibility(bool bMakeVisible, bool bCanRest
  ********************************************************************************************* */
 
 // Is overridden to perform initial bindings (however, is too early to init widgets here until controller ready)
-void UWidgetsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void UBmrWidgetsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
@@ -254,7 +254,7 @@ void UWidgetsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 }
 
 // Is overridden to cleanup injected widgets to let them unload properly
-void UWidgetsSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& Context, const FString& PluginURL)
+void UBmrWidgetsSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& Context, const FString& PluginURL)
 {
 	checkf(GameFeatureData, TEXT("ERROR: [%i] %hs:\n'GameFeatureData' is null!"), __LINE__, __FUNCTION__);
 
@@ -264,7 +264,7 @@ void UWidgetsSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* GameFe
 	FPackageName::SplitLongPackageName(GameFeatureData->GetPathName(), OutModuleRootPath, OutPackagePath, OutPackageName);
 
 	FGameplayTagContainer WidgetsOwnedByModule = FGameplayTagContainer::EmptyContainer;
-	for (const TPair<FGameplayTag, FBmrManageableWidgetsContainer>& It : AllManageableWidgetsInternal)
+	for (const TPair<FGameplayTag, FBmrManageableWidgetsContainer>& It : AllManageableWidgets)
 	{
 		for (const UUserWidget* WidgetInstanceIt : It.Value.WidgetInstances)
 		{
@@ -294,13 +294,13 @@ void UWidgetsSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* GameFe
 }
 
 // Callback for when the player controller is changed on this subsystem's owning local player
-void UWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerController)
+void UBmrWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerController)
 {
 	Super::PlayerControllerChanged(NewPlayerController);
 
-	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayerController);
+	const ABmrPlayerController* MyPC = Cast<ABmrPlayerController>(NewPlayerController);
 	if (!MyPC
-	    || MyPC->bIsDebugCameraEnabledInternal)
+	    || MyPC->bIsDebugCameraEnabled)
 	{
 		// Do not initialize widgets if different controller is possessed, likely Debug Controller, or Debug Camera is enabled
 		return;
@@ -316,7 +316,7 @@ void UWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerCont
 }
 
 // Is called when this Subsystem is removed
-void UWidgetsSubsystem::Deinitialize()
+void UBmrWidgetsSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 
@@ -326,7 +326,7 @@ void UWidgetsSubsystem::Deinitialize()
 }
 
 // Is called right after the game was started and windows size is set
-void UWidgetsSubsystem::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
+void UBmrWidgetsSubsystem::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
 {
 	if (FViewport::ViewportResizedEvent.IsBoundToObject(this))
 	{

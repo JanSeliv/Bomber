@@ -10,13 +10,13 @@
 // UE
 #include "Components/SlateWrapperTypes.h"
 
-#include "MVVM_MyGameViewModel.generated.h"
+#include "BmrMVVM_GameViewModel.generated.h"
 
 /**
  * Contains general data to be used only by widgets.
  */
-UCLASS(DisplayName = "My Game View Model")
-class BOMBER_API UMVVM_MyGameViewModel : public UMVVM_MyBaseViewModel
+UCLASS(DisplayName = "Bomber Game View Model")
+class BOMBER_API UBmrMVVM_GameViewModel : public UMVVM_MyBaseViewModel
 {
 	GENERATED_BODY()
 
@@ -26,19 +26,19 @@ class BOMBER_API UMVVM_MyGameViewModel : public UMVVM_MyBaseViewModel
 public:
 	/** Setter and Getter widgets about the current game state. */
 	UFUNCTION()
-	void SetCurrentGameState(ECurrentGameState NewCurrentGameState) { UE_MVVM_SET_PROPERTY_VALUE(CurrentGameState, NewCurrentGameState); }
+	void SetCurrentGameState(EBmrCurrentGameState NewCurrentGameState) { UE_MVVM_SET_PROPERTY_VALUE(CurrentGameState, NewCurrentGameState); }
 
-	ECurrentGameState GetCurrentGameState() const { return CurrentGameState; }
+	EBmrCurrentGameState GetCurrentGameState() const { return CurrentGameState; }
 
 protected:
 	/** Represents the current game state.
-	 * Is commonly used by 'UMyBlueprintFunctionLibrary::GetVisibilityByGameState' to show or hide own widget. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
-	ECurrentGameState CurrentGameState = ECurrentGameState::None;
+	 * Is commonly used by 'UBmrBlueprintFunctionLibrary::GetVisibilityByGameState' to show or hide own widget. */
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
+	EBmrCurrentGameState CurrentGameState = EBmrCurrentGameState::None;
 
 	/** Called when the current game state was changed. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState InGameState);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnGameStateChanged(EBmrCurrentGameState InGameState);
 
 	/*********************************************************************************************
 	 * End-Game State
@@ -54,16 +54,16 @@ public:
 
 protected:
 	/** Is 'Visible' when the game is ended with any result (win, lose, draw). */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	ESlateVisibility EndGameStateVisibility = ESlateVisibility::Collapsed;
 
 	/** The result of the game: Win, Lose, Draw. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	FText EndGameResult = FText::GetEmpty();
 
 	/** Called when the player state was changed. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnEndGameStateChanged(EEndGameState NewEndGameState);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnEndGameStateChanged(EBmrEndGameState NewEndGameState);
 
 	/*********************************************************************************************
 	 * Countdown timers
@@ -79,19 +79,19 @@ public:
 
 protected:
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	FText StartingTimerSecRemain = FText::GetEmpty();
 
 	/** Seconds to the end of the round. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	FText InGameTimerSecRemain = FText::GetEmpty();
 
 	/** Called when the 'Three-two-one-GO' timer was updated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnStartingTimerSecRemainChanged(float NewStartingTimerSecRemain);
 
 	/** Called when remain seconds to the end of the match timer was updated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnInGameTimerSecRemainChanged(float NewInGameTimerSecRemain);
 
 	/*********************************************************************************************
@@ -104,11 +104,11 @@ public:
 
 protected:
 	/** Is Visible when the mouse is shown. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	ESlateVisibility MouseVisibility = ESlateVisibility::Hidden;
 
 	/** Called when mouse became shown or hidden. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnMouseVisibilityChanged(bool bIsShown);
 
 	/*********************************************************************************************
@@ -121,7 +121,7 @@ public:
 
 protected:
 	/** Determines if the player is the party leader */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter = "SetCanRestartGame", Getter = "GetCanRestartGame", Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter = "SetCanRestartGame", Getter = "GetCanRestartGame", Category = "[Bomber]")
 	bool bCanRestart = true;
 
 	/*********************************************************************************************
@@ -136,10 +136,10 @@ protected:
 	virtual void OnViewModelDestruct_Implementation() override;
 
 	/** Called when Game State was created in current world. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnGameStateCreated(class AGameStateBase* GameState);
 
 	/** Called when the local player character is spawned, possessed, and replicated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnLocalPawnReady(class ABmrPawn* Pawn, int32 PlayerId);
 };

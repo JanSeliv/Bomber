@@ -7,9 +7,9 @@
 #include "NMMUtils.h"
 
 // Bomber
-#include "GameFramework/MyGameStateBase.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "GameFramework/BmrGameState.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMBaseSubsystem)
 
@@ -28,8 +28,8 @@ UNMMBaseSubsystem& UNMMBaseSubsystem::Get(const UObject* OptionalWorldContext /*
 // Applies the new state of New Main Menu game feature
 void UNMMBaseSubsystem::SetNewMainMenuState(ENMMState NewState)
 {
-	const ENMMState PreviousState = CurrentMenuStateInternal;
-	CurrentMenuStateInternal = NewState;
+	const ENMMState PreviousState = CurrentMenuState;
+	CurrentMenuState = NewState;
 
 	OnMainMenuStateChanged.Broadcast(NewState, PreviousState);
 }
@@ -41,7 +41,7 @@ void UNMMBaseSubsystem::SetNewMainMenuState(ENMMState NewState)
 // Returns the data asset that contains all the assets and tweaks of New Main Menu game feature
 const UNMMDataAsset* UNMMBaseSubsystem::GetNewMainMenuDataAsset() const
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce(NewMainMenuDataAssetInternal);
+	return UMyPrimaryDataAsset::GetOrLoadOnce(NewMainMenuDataAsset);
 }
 
 /*********************************************************************************************
@@ -59,7 +59,7 @@ void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 // Clears all transient data contained in this subsystem
 void UNMMBaseSubsystem::Deinitialize()
 {
-	UMyPrimaryDataAsset::ResetDataAsset(NewMainMenuDataAssetInternal);
+	UMyPrimaryDataAsset::ResetDataAsset(NewMainMenuDataAsset);
 
 	Super::Deinitialize();
 }
@@ -69,17 +69,17 @@ void UNMMBaseSubsystem::Deinitialize()
  ********************************************************************************************* */
 
 // Called when the current game state was changed, handles Main Menu states accordingly
-void UNMMBaseSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void UNMMBaseSubsystem::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
-		case ECurrentGameState::Menu:
+		case EBmrCurrentGameState::Menu:
 		{
 			// Player returns to the Main Menu, means Main Menu is in Idle state
 			SetNewMainMenuState(ENMMState::Idle);
 			break;
 		}
-		case ECurrentGameState::GameStarting:
+		case EBmrCurrentGameState::GameStarting:
 		{
 			// Player left the Main Menu
 			SetNewMainMenuState(ENMMState::None);

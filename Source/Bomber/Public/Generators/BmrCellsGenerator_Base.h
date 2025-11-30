@@ -5,23 +5,23 @@
 #include "UObject/Object.h"
 
 // Bomber
-#include "Structures/Cell.h"
-#include "Structures/GeneratedMapSettings.h"
+#include "Structures/BmrCell.h"
+#include "Structures/BmrGeneratedMapSettings.h"
 
 #include "BmrCellsGenerator_Base.generated.h"
 
-enum class EActorType : uint8;
+enum class EBmrActorType : uint8;
 
 /**
  * Holds all necessary runtime data for the level generation process.
  */
 struct FBmrGeneratorData
 {
-	FCellsArr AllCells;
+	FBmrCellsArr AllCells;
 	FIntPoint MapScale = FIntPoint::ZeroValue;
-	TMap<FCell, FIntPoint> AllCellPositions;
-	FGeneratedMapSettings GenerationSettings;
-	TMap<FCell, EActorType> DraggedCells;
+	TMap<FBmrCell, FIntPoint> AllCellPositions;
+	FBmrGeneratedMapSettings GenerationSettings;
+	TMap<FBmrCell, EBmrActorType> DraggedCells;
 
 	FORCEINLINE bool IsValid() const { return !AllCellPositions.IsEmpty() && MapScale.X > 0 && MapScale.Y > 0; }
 };
@@ -44,5 +44,5 @@ public:
 	 * @param Params A struct containing all necessary data for the generation.
 	 * @return A map of cells to actor types for the entire level.
 	 */
-	virtual TMap<FCell, EActorType> GenerateLevel(FBmrGeneratorData&& Params);
+	virtual TMap<FBmrCell, EBmrActorType> GenerateLevel(FBmrGeneratorData&& Params);
 };

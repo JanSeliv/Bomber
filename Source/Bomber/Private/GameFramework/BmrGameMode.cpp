@@ -1,24 +1,24 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "GameFramework/MyGameModeBase.h"
+#include "GameFramework/BmrGameMode.h"
 
 // Bomber
-#include "Controllers/MyPlayerController.h"
-#include "GameFramework/MyGameSession.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
+#include "Controllers/BmrPlayerController.h"
+#include "GameFramework/BmrGameSession.h"
+#include "GameFramework/BmrGameState.h"
+#include "GameFramework/BmrPlayerState.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameModeBase)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameMode)
 
 // Sets default values for this actor's properties
-AMyGameModeBase::AMyGameModeBase()
+ABmrGameMode::ABmrGameMode()
 {
 	// Custom default classes. All of them can be overridden in child game mode in World Settings
-	GameStateClass = AMyGameStateBase::StaticClass();
-	PlayerControllerClass = AMyPlayerController::StaticClass();
-	ReplaySpectatorPlayerControllerClass = AMyPlayerController::StaticClass();
-	PlayerStateClass = AMyPlayerState::StaticClass();
-	GameSessionClass = AMyGameSession::StaticClass();
+	GameStateClass = ABmrGameState::StaticClass();
+	PlayerControllerClass = ABmrPlayerController::StaticClass();
+	ReplaySpectatorPlayerControllerClass = ABmrPlayerController::StaticClass();
+	PlayerStateClass = ABmrPlayerState::StaticClass();
+	GameSessionClass = ABmrGameSession::StaticClass();
 
 	// Spawn and possess pawn by ourselves manually
 	DefaultPawnClass = nullptr;
@@ -27,23 +27,23 @@ AMyGameModeBase::AMyGameModeBase()
 }
 
 // Returns player controller by specified index
-AMyPlayerController* AMyGameModeBase::GetPlayerController(int32 Index) const
+ABmrPlayerController* ABmrGameMode::GetPlayerController(int32 Index) const
 {
-	if (PlayerControllersInternal.IsValidIndex(Index))
+	if (PlayerControllers.IsValidIndex(Index))
 	{
-		return PlayerControllersInternal[Index];
+		return PlayerControllers[Index];
 	}
 	return nullptr;
 }
 
 // Caches given player controller when it spawns
-void AMyGameModeBase::AddPlayerController(AMyPlayerController* PlayerController)
+void ABmrGameMode::AddPlayerController(ABmrPlayerController* PlayerController)
 {
-	PlayerControllersInternal.Add(PlayerController);
+	PlayerControllers.Add(PlayerController);
 }
 
 // Initializes the game
-void AMyGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+void ABmrGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
@@ -56,20 +56,20 @@ void AMyGameModeBase::InitGame(const FString& MapName, const FString& Options, F
 }
 
 // Called after a successful login
-void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
+void ABmrGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	const AMyPlayerController* MyPC = Cast<AMyPlayerController>(NewPlayer);
+	const ABmrPlayerController* MyPC = Cast<ABmrPlayerController>(NewPlayer);
 	if (!MyPC)
 	{
 		return;
 	}
 
 	// When new player joins to running game (any state is set), return everyone to the menu: joining running match and spectating are not supported at this moment
-	if (AMyGameStateBase::GetCurrentGameState() != ECGS::None)
+	if (ABmrGameState::GetCurrentGameState() != ECGS::None)
 	{
-		AMyGameStateBase::Get().SetGameState(ECGS::Menu);
+		ABmrGameState::Get().SetGameState(ECGS::Menu);
 	}
 
 	if (APlayerState* PlayerState = MyPC->GetPlayerState<APlayerState>())
@@ -80,27 +80,27 @@ void AMyGameModeBase::PostLogin(APlayerController* NewPlayer)
 }
 
 // Called when a Controller with a PlayerState leaves the game or is destroyed
-void AMyGameModeBase::Logout(AController* Exiting)
+void ABmrGameMode::Logout(AController* Exiting)
 {
-	AMyPlayerController* MyPC = Cast<AMyPlayerController>(Exiting);
+	ABmrPlayerController* MyPC = Cast<ABmrPlayerController>(Exiting);
 	if (MyPC && MyPC->HasClientLoadedCurrentWorld())
 	{
-		PlayerControllersInternal.RemoveSwap(MyPC);
+		PlayerControllers.RemoveSwap(MyPC);
 	}
 
 	Super::Logout(Exiting);
 }
 
 // Sets the name for a controller
-void AMyGameModeBase::ChangeName(AController* Controller, const FString& NewName, bool bNameChange)
+void ABmrGameMode::ChangeName(AController* Controller, const FString& NewName, bool bNameChange)
 {
 	// Super is not called since it's forbidden to change player name with this function
-	// Instead, AMyPlayerState API should be used
+	// Instead, ABmrPlayerState API should be used
 }
 
 #if WITH_EDITOR
 // Is called if start the game in 'Simulate in Editor' and then press 'Possess or eject player' button
-bool AMyGameModeBase::SpawnPlayerFromSimulate(const FVector& NewLocation, const FRotator& NewRotation)
+bool ABmrGameMode::SpawnPlayerFromSimulate(const FVector& NewLocation, const FRotator& NewRotation)
 {
 	// Super is not called since there no need to spawn default player
 	return true;

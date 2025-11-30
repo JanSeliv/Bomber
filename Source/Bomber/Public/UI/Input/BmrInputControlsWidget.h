@@ -4,20 +4,20 @@
 
 #include "UI/SettingSubWidget.h"
 
-#include "InputControlsWidget.generated.h"
+#include "BmrInputControlsWidget.generated.h"
 
 /* Widgets hierarchy:
  *
- * ╔UInputControlsWidget
- * ╚════╦UInputCategoryWidget
- *		╚════UInputButtonWidget
+ * ╔UBmrInputControlsWidget
+ * ╚════╦UBmrInputCategoryWidget
+ *		╚════UBmrInputButtonWidget
  */
 
 /**
  * Allows player to rebind input mappings.
  */
 UCLASS()
-class BOMBER_API UInputControlsWidget final : public USettingCustomWidget
+class BOMBER_API UBmrInputControlsWidget final : public USettingCustomWidget
 {
 	GENERATED_BODY()
 
@@ -27,16 +27,16 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** Is parent widget of all dynamically created categories. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "[Bomber]", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UScrollBox> ScrollBoxInputCategories = nullptr;
 
 	/** The class of the Input Button Widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Category Class"))
-	TSubclassOf<class UInputCategoryWidget> InputCategoryClassInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "[Bomber]", meta = (BlueprintProtected))
+	TSubclassOf<class UBmrInputCategoryWidget> InputCategoryClass = nullptr;
 
 	/** Contains all dynamically created categories, where every category represents own mapping context. */
-	UPROPERTY(BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Input Categories"))
-	TArray<TObjectPtr<class UInputCategoryWidget>> InputCategoriesInternal;
+	UPROPERTY(BlueprintReadWrite, Transient, Category = "[Bomber]", meta = (BlueprintProtected))
+	TArray<TObjectPtr<class UBmrInputCategoryWidget>> InputCategories;
 
 	/** ---------------------------------------------------
 	 *		Protected functions
@@ -49,6 +49,6 @@ protected:
 	virtual void NativeConstruct() override;
 
 	/** Adds input categories for each mapping context. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void CreateAllInputCategories();
 };

@@ -1,21 +1,21 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "UI/Input/InputControlsWidget.h"
+#include "UI/Input/BmrInputControlsWidget.h"
 
 // Bomber
-#include "DataAssets/MyInputMappingContext.h"
-#include "DataAssets/PlayerInputDataAsset.h"
-#include "UI/Input/InputCategoryWidget.h"
+#include "DataAssets/BmrInputMappingContext.h"
+#include "DataAssets/BmrPlayerInputDataAsset.h"
+#include "UI/Input/BmrInputCategoryWidget.h"
 #include "UI/SettingsWidget.h"
 
 // UE
 #include "Components/ScrollBox.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(InputControlsWidget)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrInputControlsWidget)
 
 // Called after the underlying slate widget is constructed
-void UInputControlsWidget::NativeConstruct()
+void UBmrInputControlsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
@@ -25,18 +25,18 @@ void UInputControlsWidget::NativeConstruct()
 }
 
 // Adds input categories for each mapping context
-void UInputControlsWidget::CreateAllInputCategories()
+void UBmrInputControlsWidget::CreateAllInputCategories()
 {
-	if (!InputCategoriesInternal.IsEmpty()
-	    || !ensureMsgf(InputCategoryClassInternal, TEXT("ASSERT: 'Input Category Class' is null")))
+	if (!InputCategories.IsEmpty()
+	    || !ensureMsgf(InputCategoryClass, TEXT("ASSERT: 'Input Category Class' is null")))
 	{
 		return;
 	}
 
-	TArray<const UMyInputMappingContext*> OutGameplayInputContexts;
-	UPlayerInputDataAsset::Get().GetAllGameplayInputContexts(OutGameplayInputContexts);
+	TArray<const UBmrInputMappingContext*> OutGameplayInputContexts;
+	UBmrPlayerInputDataAsset::Get().GetAllGameplayInputContexts(OutGameplayInputContexts);
 
-	for (const UMyInputMappingContext* InputContextIt : OutGameplayInputContexts)
+	for (const UBmrInputMappingContext* InputContextIt : OutGameplayInputContexts)
 	{
 		// Inside each input context, there could be different input categories
 		TArray<FInputCategoryData> InputCategoriesData;
@@ -46,9 +46,9 @@ void UInputControlsWidget::CreateAllInputCategories()
 		{
 			FSettingsPrimary NewPrimaryRow = PrimaryDataInternal;
 			NewPrimaryRow.Caption = InputCategoryDataIt.CategoryName;
-			UInputCategoryWidget* InputCategoryWidget = GetSettingsWidgetChecked().CreateSettingSubWidget<UInputCategoryWidget>(NewPrimaryRow, InputCategoryClassInternal);
+			UBmrInputCategoryWidget* InputCategoryWidget = GetSettingsWidgetChecked().CreateSettingSubWidget<UBmrInputCategoryWidget>(NewPrimaryRow, InputCategoryClass);
 
-			InputCategoriesInternal.Emplace(InputCategoryWidget);
+			InputCategories.Emplace(InputCategoryWidget);
 			InputCategoryWidget->CreateInputButtons(InputCategoryDataIt);
 
 			checkf(ScrollBoxInputCategories, TEXT("%s: 'ScrollBoxInputCategories' is not set as BindWidget"), *FString(__FUNCTION__));

@@ -22,8 +22,8 @@ namespace BmrGameplayTags
 	{
 		namespace Block
 		{
-			UE_DEFINE_GAMEPLAY_TAG_COMMENT(IncomingDamage, "GameplayEffect.Block.IncomingDamage", "Is added by UPlayerDataAsset::BlockIncomingDamageEffectInternal, defines a temporary immunity effect for incoming damage, e.g., god mode, join game in progress etc");
-			UE_DEFINE_GAMEPLAY_TAG_COMMENT(Movement, "GameplayEffect.Block.Movement", "Is added by UPlayerDataAsset::BlockMovementEffectInternal, defines that player movement is disabled, e.g., in menu, during 3-2-1 timer, when died etc.");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(IncomingDamage, "GameplayEffect.Block.IncomingDamage", "Is added by UBmrPlayerDataAsset::BlockIncomingDamageEffectInternal, defines a temporary immunity effect for incoming damage, e.g., god mode, join game in progress etc");
+			UE_DEFINE_GAMEPLAY_TAG_COMMENT(Movement, "GameplayEffect.Block.Movement", "Is added by UBmrPlayerDataAsset::BlockMovementEffectInternal, defines that player movement is disabled, e.g., in menu, during 3-2-1 timer, when died etc.");
 		} // namespace Block
 	} // namespace GameplayEffect
 

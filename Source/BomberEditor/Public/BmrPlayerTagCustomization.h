@@ -7,7 +7,7 @@
 /**
  * Is customized to show only selected in-game option.
  */
-class BOMBEREDITOR_API FPlayerTagCustomization : public FGameplayTagCustomizationPublic
+class BOMBEREDITOR_API FBmrPlayerTagCustomization : public FGameplayTagCustomizationPublic
 {
 public:
 	/** Is used to load and unload the Property Editor Module. */

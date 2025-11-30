@@ -1,35 +1,35 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "GameFramework/MyCheatManager.h"
+#include "GameFramework/BmrCheatManager.h"
 
 // Bomber
 #include "AbilitySystem/Attributes/BmrPowerupsAttributeSet.h"
+#include "Actors/BmrGeneratedMap.h"
+#include "Actors/BmrPawn.h"
 #include "Bomber.h"
-#include "Components/MapComponent.h"
-#include "Components/MyCameraComponent.h"
-#include "Controllers/MyAIController.h"
-#include "Controllers/MyDebugCameraController.h"
-#include "Controllers/MyPlayerController.h"
-#include "DataAssets/DataAssetsContainer.h"
-#include "DataAssets/GeneratedMapDataAsset.h"
-#include "DataAssets/PlayerDataAsset.h"
-#include "GameFramework/MyGameStateBase.h"
+#include "Components/BmrCameraComponent.h"
+#include "Components/BmrMapComponent.h"
+#include "Controllers/BmrAIController.h"
+#include "Controllers/BmrDebugCameraController.h"
+#include "Controllers/BmrPlayerController.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DataAssets/BmrGeneratedMapDataAsset.h"
+#include "DataAssets/BmrPlayerDataAsset.h"
+#include "GameFramework/BmrGameState.h"
 #include "GameFramework/PlayerState.h"
-#include "GeneratedMap.h"
-#include "LevelActors/PlayerCharacter.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrPowerupTag.h"
-#include "Subsystems/WidgetsSubsystem.h"
-#include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrCellUtilsLibrary.h"
+#include "UtilityLibraries/BmrActorUtilsLibrary.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyCheatManager)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrCheatManager)
 
 // Default constructor
-UMyCheatManager::UMyCheatManager()
+UBmrCheatManager::UBmrCheatManager()
 {
-	DebugCameraControllerClass = AMyDebugCameraController::StaticClass();
+	DebugCameraControllerClass = ABmrDebugCameraController::StaticClass();
 }
 
 /*********************************************************************************************
@@ -37,7 +37,7 @@ UMyCheatManager::UMyCheatManager()
  ********************************************************************************************* */
 
 // Returns bitmask from reverse bitmask in string
-int32 UMyCheatManager::GetBitmaskFromReverseString(const FString& ReverseBitmaskStr)
+int32 UBmrCheatManager::GetBitmaskFromReverseString(const FString& ReverseBitmaskStr)
 {
 	int32 Bitmask = 0;
 	int32 Index = 0;
@@ -55,7 +55,7 @@ int32 UMyCheatManager::GetBitmaskFromReverseString(const FString& ReverseBitmask
 }
 
 // Returns bitmask by actor types in string
-int32 UMyCheatManager::GetBitmaskFromActorTypesString(const FString& ActorTypesBitmaskStr)
+int32 UBmrCheatManager::GetBitmaskFromActorTypesString(const FString& ActorTypesBitmaskStr)
 {
 	if (ActorTypesBitmaskStr.IsEmpty())
 	{
@@ -66,7 +66,7 @@ int32 UMyCheatManager::GetBitmaskFromActorTypesString(const FString& ActorTypesB
 	TArray<FString> ActorTypesStrings;
 	ActorTypesBitmaskStr.ParseIntoArray(ActorTypesStrings, *Delimiter);
 
-	const static FString ActorTypeEnumPathName = TEXT("/Script/Bomber.EActorType");
+	const static FString ActorTypeEnumPathName = TEXT("/Script/Bomber.EBmrActorType");
 	static const UEnum* ActorTypeEnumClass = UClass::TryFindTypeSlow<UEnum>(ActorTypeEnumPathName, EFindFirstObjectOptions::ExactClass);
 	if (!ensureMsgf(ActorTypeEnumClass, TEXT("%s: 'ActorTypeEnumClass' is not found by next path: %s"), *FString(__FUNCTION__), *ActorTypeEnumPathName))
 	{
@@ -91,14 +91,14 @@ int32 UMyCheatManager::GetBitmaskFromActorTypesString(const FString& ActorTypesB
  ********************************************************************************************* */
 
 // Destroy all specified level actors on the map
-void UMyCheatManager::DestroyAllByType(EActorType ActorType)
+void UBmrCheatManager::DestroyAllByType(EBmrActorType ActorType)
 {
-	const FCells Cells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorType));
-	AGeneratedMap::Get().DestroyLevelActorsOnCells(Cells);
+	const FBmrCells Cells = UBmrCellUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorType));
+	ABmrGeneratedMap::Get().DestroyLevelActorsOnCells(Cells);
 }
 
 // Destroy characters in specified slots
-void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
+void UBmrCheatManager::DestroyPlayersBySlots(const FString& Slot)
 {
 	// Set bitmask
 	const int32 Bitmask = GetBitmaskFromReverseString(Slot);
@@ -108,24 +108,24 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
 	}
 
 	// Get all players
-	FCells CellsToDestroy;
+	FBmrCells CellsToDestroy;
 	FMapComponents MapComponents;
-	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
-	for (const UMapComponent* MapComponentIt : MapComponents)
+	UBmrActorUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
+	for (const UBmrMapComponent* MapComponentIt : MapComponents)
 	{
-		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
-		UAbilitySystemComponent* ASC = PlayerCharacter ? PlayerCharacter->GetAbilitySystemComponent() : nullptr;
+		const ABmrPawn* Pawn = MapComponentIt ? MapComponentIt->GetOwner<ABmrPawn>() : nullptr;
+		UAbilitySystemComponent* ASC = Pawn ? Pawn->GetAbilitySystemComponent() : nullptr;
 		if (!ASC)
 		{
 			continue;
 		}
 
-		const int32 PlayerIndex = PlayerCharacter->GetPlayerId();
+		const int32 PlayerIndex = Pawn->GetPlayerId();
 		const bool bIsMatchInSlot = (1 << PlayerIndex & Bitmask) != 0;
 		if (bIsMatchInSlot)
 		{
 			FGameplayEventData EventData;
-			EventData.Instigator = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+			EventData.Instigator = UBmrBlueprintFunctionLibrary::GetLocalPawn();
 			ASC->HandleGameplayEvent(BmrGameplayTags::Event::Player_Death, &EventData);
 		}
 	}
@@ -136,7 +136,7 @@ void UMyCheatManager::DestroyPlayersBySlots(const FString& Slot)
  ********************************************************************************************* */
 
 // Override the percentage of items spawn from boxes
-TAutoConsoleVariable<int32> UMyCheatManager::CVarPowerupsChance(
+TAutoConsoleVariable<int32> UBmrCheatManager::CVarPowerupsChance(
     TEXT("Bomber.Box.SetPowerupsChance"),
     0.f,
     TEXT("100 - is maximum, 0 - is disabled (default chance will be used)"),
@@ -147,13 +147,13 @@ TAutoConsoleVariable<int32> UMyCheatManager::CVarPowerupsChance(
  ********************************************************************************************* */
 
 // Is overridden to apply damage immunity effect for proper integration with Ability System
-void UMyCheatManager::God()
+void UBmrCheatManager::God()
 {
 	// Super is not called intentionally to implement custom god mode through GAS
 
-	const APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
-	UAbilitySystemComponent* ASC = PlayerCharacter ? PlayerCharacter->GetAbilitySystemComponent() : nullptr;
-	const TSubclassOf<UGameplayEffect> BlockIncomingDamageEffect = UPlayerDataAsset::Get().GetBlockIncomingDamageEffect();
+	const ABmrPawn* Pawn = UBmrBlueprintFunctionLibrary::GetLocalPawn();
+	UAbilitySystemComponent* ASC = Pawn ? Pawn->GetAbilitySystemComponent() : nullptr;
+	const TSubclassOf<UGameplayEffect> BlockIncomingDamageEffect = UBmrPlayerDataAsset::Get().GetBlockIncomingDamageEffect();
 	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__)
 	    || !ensureMsgf(BlockIncomingDamageEffect, TEXT("ASSERT: [%i] %hs:\n'BlockIncomingDamageEffect' is not valid!"), __LINE__, __FUNCTION__))
 	{
@@ -174,10 +174,10 @@ void UMyCheatManager::God()
 }
 
 // Forcing locally controlled player to destroy itself immediately, resulting in loss
-void UMyCheatManager::Suicide()
+void UBmrCheatManager::Suicide()
 {
-	const APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
-	const int32 PlayerId = PlayerCharacter ? PlayerCharacter->GetPlayerId() : INDEX_NONE;
+	const ABmrPawn* Pawn = UBmrBlueprintFunctionLibrary::GetLocalPawn();
+	const int32 PlayerId = Pawn ? Pawn->GetPlayerId() : INDEX_NONE;
 	if (PlayerId < 0)
 	{
 		return;
@@ -189,10 +189,10 @@ void UMyCheatManager::Suicide()
 }
 
 // Override the level of each powerup for a controlled player
-void UMyCheatManager::SetPlayerPowerups(int32 NewLevel)
+void UBmrCheatManager::SetPlayerPowerups(int32 NewLevel)
 {
-	const APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
-	UAbilitySystemComponent* ASC = PlayerCharacter ? PlayerCharacter->GetAbilitySystemComponent() : nullptr;
+	const ABmrPawn* Pawn = UBmrBlueprintFunctionLibrary::GetLocalPawn();
+	UAbilitySystemComponent* ASC = Pawn ? Pawn->GetAbilitySystemComponent() : nullptr;
 	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
@@ -209,9 +209,9 @@ void UMyCheatManager::SetPlayerPowerups(int32 NewLevel)
 }
 
 // Enable or disable the Auto Copilot mode to make a controllable player to play automatically
-void UMyCheatManager::SetAutoCopilot()
+void UBmrCheatManager::SetAutoCopilot()
 {
-	APlayerCharacter* LocalPlayer = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
+	ABmrPawn* LocalPlayer = UBmrBlueprintFunctionLibrary::GetLocalPawn();
 	APlayerState* PlayerState = LocalPlayer ? LocalPlayer->GetPlayerState() : nullptr;
 	if (!PlayerState)
 	{
@@ -220,7 +220,7 @@ void UMyCheatManager::SetAutoCopilot()
 
 	// Toggle the Copilot mode
 	PlayerState->SetIsABot(!PlayerState->IsABot());
-	LocalPlayer->TryPossessController(EPlayerType::Any);
+	LocalPlayer->TryPossessController(EBmrPlayerType::Any);
 }
 
 /*********************************************************************************************
@@ -228,24 +228,24 @@ void UMyCheatManager::SetAutoCopilot()
  ********************************************************************************************* */
 
 // Enable or disable all bots
-TAutoConsoleVariable<bool> UMyCheatManager::CVarAISetEnabled(
+TAutoConsoleVariable<bool> UBmrCheatManager::CVarAISetEnabled(
     TEXT("Bomber.AI.SetEnabled"),
     true,
     TEXT("Enable or disable all bots: 1 (Enable) OR 0 (Disable)"),
     ECVF_Cheat);
 
 // Override the level of each powerup for bots
-void UMyCheatManager::SetAIPowerups(int32 NewLevel)
+void UBmrCheatManager::SetAIPowerups(int32 NewLevel)
 {
 	// Get all players
 	FMapComponents MapComponents;
-	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
+	UBmrActorUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
 
 	// Override the level of each powerup for bots
-	for (const UMapComponent* MapComponentIt : MapComponents)
+	for (const UBmrMapComponent* MapComponentIt : MapComponents)
 	{
-		const APlayerCharacter* PlayerCharacter = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
-		UAbilitySystemComponent* ASC = PlayerCharacter && PlayerCharacter->IsBotControlled() ? PlayerCharacter->GetAbilitySystemComponent() : nullptr;
+		const ABmrPawn* Pawn = MapComponentIt ? MapComponentIt->GetOwner<ABmrPawn>() : nullptr;
+		UAbilitySystemComponent* ASC = Pawn && Pawn->IsBotControlled() ? Pawn->GetAbilitySystemComponent() : nullptr;
 		if (ASC)
 		{
 			ASC->ApplyModToAttributeUnsafe(UBmrPowerupsAttributeSet::GetPowerup_SkateAttribute(), EGameplayModOp::Override, NewLevel);
@@ -256,16 +256,16 @@ void UMyCheatManager::SetAIPowerups(int32 NewLevel)
 }
 
 // If called, all bots will change own skin to look like players
-void UMyCheatManager::ApplyPlayersSkinOnAI()
+void UBmrCheatManager::ApplyPlayersSkinOnAI()
 {
 	// Get all players
 	FMapComponents MapComponents;
-	ULevelActorsUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
+	UBmrActorUtilsLibrary::GetLevelActors(MapComponents, TO_FLAG(EAT::Player));
 
 	// Apply players skin on AI
-	for (const UMapComponent* MapComponentIt : MapComponents)
+	for (const UBmrMapComponent* MapComponentIt : MapComponents)
 	{
-		APlayerCharacter* Character = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
+		ABmrPawn* Character = MapComponentIt ? MapComponentIt->GetOwner<ABmrPawn>() : nullptr;
 		if (Character
 		    && Character->IsBotControlled())
 		{
@@ -276,11 +276,11 @@ void UMyCheatManager::ApplyPlayersSkinOnAI()
 }
 
 // Spawns additional bots at the center of the level
-void UMyCheatManager::AddBot()
+void UBmrCheatManager::AddBot()
 {
-	const FIntPoint CenterPosition = UCellsUtilsLibrary::GetCenterCellPositionOnLevel();
-	const int32 LastRowIndex = UPlayerDataAsset::Get().GetRowsNum() - 1;
-	SpawnActorByType(EActorType::Player, CenterPosition.X, CenterPosition.Y, LastRowIndex);
+	const FIntPoint CenterPosition = UBmrCellUtilsLibrary::GetCenterCellPositionOnLevel();
+	const int32 LastRowIndex = UBmrPlayerDataAsset::Get().GetRowsNum() - 1;
+	SpawnActorByType(EBmrActorType::Player, CenterPosition.X, CenterPosition.Y, LastRowIndex);
 }
 
 /*********************************************************************************************
@@ -288,7 +288,7 @@ void UMyCheatManager::AddBot()
  ********************************************************************************************* */
 
 // Override the percentage of items spawn from boxes
-TAutoConsoleVariable<FString> UMyCheatManager::CVarDisplayCells(
+TAutoConsoleVariable<FString> UBmrCheatManager::CVarDisplayCells(
     TEXT("Bomber.Debug.DisplayCells"),
     TEXT(""),
     TEXT("Shows coordinates of level actors of specified types (requires regeneration), e.g: Bomber.Debug.DisplayCells Bomb Player - show bombs and players"),
@@ -299,7 +299,7 @@ TAutoConsoleVariable<FString> UMyCheatManager::CVarDisplayCells(
  ********************************************************************************************* */
 
 // Sets the size for generated map, it will automatically regenerate the level for given size
-void UMyCheatManager::SetLevelSize(const FString& LevelSize)
+void UBmrCheatManager::SetLevelSize(const FString& LevelSize)
 {
 	static const FString Delimiter = TEXT("x");
 	FString Width = TEXT("");
@@ -311,50 +311,50 @@ void UMyCheatManager::SetLevelSize(const FString& LevelSize)
 	}
 
 	// Restart the level
-	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
-	if (AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
+	ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	if (ABmrGameState::GetCurrentGameState() == ECGS::InGame)
 	{
-		MyGameState->SetGameState(ECurrentGameState::GameStarting);
+		MyGameState->SetGameState(EBmrCurrentGameState::GameStarting);
 	}
 
 	// Update the level size
 	const FIntPoint NewLevelSize(FCString::Atoi(*Width), FCString::Atoi(*Height));
-	AGeneratedMap::Get().SetLevelSize(NewLevelSize);
+	ABmrGeneratedMap::Get().SetLevelSize(NewLevelSize);
 }
 
 // Spawns an actor by type on the level
-void UMyCheatManager::SpawnActorByType(EActorType ActorType, int32 ColumnX, int32 RowY, int32 RowIndex)
+void UBmrCheatManager::SpawnActorByType(EBmrActorType ActorType, int32 ColumnX, int32 RowY, int32 RowIndex)
 {
-	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
-	const FCell Cell = UCellsUtilsLibrary::GetCellByPositionOnLevel(ColumnX, RowY);
+	ABmrGeneratedMap& GeneratedMap = ABmrGeneratedMap::Get();
+	const FBmrCell Cell = UBmrCellUtilsLibrary::GetCellByPositionOnLevel(ColumnX, RowY);
 
 	// Destroy existed actor on the cell
 	GeneratedMap.DestroyLevelActorsOnCells({Cell});
 
 	// Spawn new actor on the cell
-	const ULevelActorDataAsset* DataAsset = UDataAssetsContainer::Get().GetDataAssetByActorType(ActorType);
+	const UBmrLevelActorDataAsset* DataAsset = UBmrDataAssetsContainer::Get().GetDataAssetByActorType(ActorType);
 	checkf(DataAsset, TEXT("ERROR: [%i] %hs:\n'DataAsset' is null!"), __LINE__, __FUNCTION__);
-	const ULevelActorRow* Row = DataAsset->GetRowByIndex(RowIndex);
+	const UBmrLevelActorRow* Row = DataAsset->GetRowByIndex(RowIndex);
 	GeneratedMap.SpawnActorWithMesh(ActorType, Cell, {Row});
 }
 
 // Overrides the percentage of walls spawn during the level generation
-void UMyCheatManager::SetWallsChance(int32 WallsChance)
+void UBmrCheatManager::SetWallsChance(int32 WallsChance)
 {
-	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
-	FGeneratedMapSettings CurrentSettings = GeneratedMap.GetGenerationSetting();
+	ABmrGeneratedMap& GeneratedMap = ABmrGeneratedMap::Get();
+	FBmrGeneratedMapSettings CurrentSettings = GeneratedMap.GetGenerationSetting();
 
 	// Use default from data asset if -1, otherwise use provided value
 	constexpr int32 MaxChance = 100;
 	WallsChance = FMath::Min(WallsChance, MaxChance);
-	CurrentSettings.WallsChance = WallsChance >= 0 ? WallsChance : UGeneratedMapDataAsset::Get().GetGenerationSettings().WallsChance;
+	CurrentSettings.WallsChance = WallsChance >= 0 ? WallsChance : UBmrGeneratedMapDataAsset::Get().GetGenerationSettings().WallsChance;
 	GeneratedMap.SetOverriddenGenerationSettings(/*bEnableOverride*/ true, CurrentSettings);
 
 	// Restart the level
-	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
-	if (AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
+	ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	if (ABmrGameState::GetCurrentGameState() == ECGS::InGame)
 	{
-		MyGameState->SetGameState(ECurrentGameState::GameStarting);
+		MyGameState->SetGameState(EBmrCurrentGameState::GameStarting);
 	}
 	else
 	{
@@ -363,22 +363,22 @@ void UMyCheatManager::SetWallsChance(int32 WallsChance)
 }
 
 // Overrides the percentage of boxes spawn during the level generation
-void UMyCheatManager::SetBoxesChance(int32 BoxesChance)
+void UBmrCheatManager::SetBoxesChance(int32 BoxesChance)
 {
-	AGeneratedMap& GeneratedMap = AGeneratedMap::Get();
-	FGeneratedMapSettings CurrentSettings = GeneratedMap.GetGenerationSetting();
+	ABmrGeneratedMap& GeneratedMap = ABmrGeneratedMap::Get();
+	FBmrGeneratedMapSettings CurrentSettings = GeneratedMap.GetGenerationSetting();
 
 	// Use default from data asset if -1, otherwise use provided value
 	constexpr int32 MaxChance = 100;
 	BoxesChance = FMath::Min(BoxesChance, MaxChance);
-	CurrentSettings.BoxesChance = BoxesChance >= 0 ? BoxesChance : UGeneratedMapDataAsset::Get().GetGenerationSettings().BoxesChance;
+	CurrentSettings.BoxesChance = BoxesChance >= 0 ? BoxesChance : UBmrGeneratedMapDataAsset::Get().GetGenerationSettings().BoxesChance;
 	GeneratedMap.SetOverriddenGenerationSettings(/*bEnableOverride*/ true, CurrentSettings);
 
 	// Restart the level
-	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
-	if (AMyGameStateBase::GetCurrentGameState() == ECGS::InGame)
+	ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	if (ABmrGameState::GetCurrentGameState() == ECGS::InGame)
 	{
-		MyGameState->SetGameState(ECurrentGameState::GameStarting);
+		MyGameState->SetGameState(EBmrCurrentGameState::GameStarting);
 	}
 	else
 	{
@@ -391,36 +391,36 @@ void UMyCheatManager::SetBoxesChance(int32 BoxesChance)
  ********************************************************************************************* */
 
 // Is overridden to let internal systems know that camera manager is enabled
-void UMyCheatManager::EnableDebugCamera()
+void UBmrCheatManager::EnableDebugCamera()
 {
-	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPC' is null!"), __LINE__, __FUNCTION__))
 	{
 		// Enable the Debug Camera as early as possible, so during Super call it will be already enabled
-		MyPC->bIsDebugCameraEnabledInternal = true;
+		MyPC->bIsDebugCameraEnabled = true;
 	}
 
 	Super::EnableDebugCamera();
 }
 
 // Is overridden to let internal systems know that camera manager is disabled
-void UMyCheatManager::DisableDebugCamera()
+void UBmrCheatManager::DisableDebugCamera()
 {
 	Super::DisableDebugCamera();
 
-	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPC' is null!"), __LINE__, __FUNCTION__))
 	{
 		// Disable debug camera as late as possible, so during Super call it will be still enabled
-		MyPC->bIsDebugCameraEnabledInternal = false;
+		MyPC->bIsDebugCameraEnabled = false;
 		MyPC->ApplyAllInputContexts();
 	}
 }
 
 // Tweak the custom additive angle to affect the fit distance calculation from camera to the level
-void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
+void UBmrCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
 {
-	if (UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera())
+	if (UBmrCameraComponent* LevelCamera = UBmrBlueprintFunctionLibrary::GetLevelCamera())
 	{
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.FitViewAdditiveAngle = InFitViewAdditiveAngle;
@@ -429,9 +429,9 @@ void UMyCheatManager::FitViewAdditiveAngle(float InFitViewAdditiveAngle)
 }
 
 // Tweak the minimal distance in UU from camera to the level
-void UMyCheatManager::MinDistance(float InMinDistance)
+void UBmrCheatManager::MinDistance(float InMinDistance)
 {
-	if (UMyCameraComponent* LevelCamera = UMyBlueprintFunctionLibrary::GetLevelCamera())
+	if (UBmrCameraComponent* LevelCamera = UBmrBlueprintFunctionLibrary::GetLevelCamera())
 	{
 		FCameraDistanceParams DistanceParams = LevelCamera->GetCameraDistanceParams();
 		DistanceParams.MinDistance = InMinDistance;
@@ -444,9 +444,9 @@ void UMyCheatManager::MinDistance(float InMinDistance)
  ********************************************************************************************* */
 
 // Completely removes all widgets from UI
-void UMyCheatManager::SetUIHideAllWidgets()
+void UBmrCheatManager::SetUIHideAllWidgets()
 {
-	UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem();
 	if (ensureMsgf(WidgetsSubsystem, TEXT("ASSERT: [%i] %hs:\n'WidgetsSubsystem' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		const bool bMakeVisibleInversed = WidgetsSubsystem->AreAllWidgetsHidden();
@@ -459,9 +459,9 @@ void UMyCheatManager::SetUIHideAllWidgets()
  ********************************************************************************************* */
 
 // Sets current game state to the specified one
-void UMyCheatManager::SetGameState(ECurrentGameState GameState)
+void UBmrCheatManager::SetGameState(EBmrCurrentGameState GameState)
 {
-	AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
 	if (!MyGameState
 	    || !MyGameState->HasAuthority())
 	{
@@ -471,14 +471,14 @@ void UMyCheatManager::SetGameState(ECurrentGameState GameState)
 	// Hardcoding the game state values for the state transitions is necessary because:
 	// - We cannot rely on iterating enums using TEnumRange or bitmasks as enum members may not be defined in a logical order.
 	// - This ensures deterministic transitions and avoids potential issues caused by chaotic ordering of enum members.
-	static const TArray<ECurrentGameState> GameStateOrder = {
-	    ECurrentGameState::Menu,
-	    ECurrentGameState::GameStarting,
-	    ECurrentGameState::InGame,
-	    ECurrentGameState::EndGame};
+	static const TArray<EBmrCurrentGameState> GameStateOrder = {
+	    EBmrCurrentGameState::Menu,
+	    EBmrCurrentGameState::GameStarting,
+	    EBmrCurrentGameState::InGame,
+	    EBmrCurrentGameState::EndGame};
 
 	// Find the current position and target position in the transition order
-	const ECurrentGameState CurrentState = MyGameState->GetCurrentGameState();
+	const EBmrCurrentGameState CurrentState = MyGameState->GetCurrentGameState();
 	const int32 CurrentIndex = GameStateOrder.IndexOfByKey(CurrentState);
 	const int32 TargetIndex = GameStateOrder.IndexOfByKey(GameState);
 

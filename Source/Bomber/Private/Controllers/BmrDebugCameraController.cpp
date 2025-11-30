@@ -1,21 +1,21 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Controllers/MyDebugCameraController.h"
+#include "Controllers/BmrDebugCameraController.h"
 
 // Bomber
-#include "GameFramework/MyCheatManager.h"
+#include "GameFramework/BmrCheatManager.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyDebugCameraController)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrDebugCameraController)
 
 // Default constructor
-AMyDebugCameraController::AMyDebugCameraController()
+ABmrDebugCameraController::ABmrDebugCameraController()
 {
-	// Is overridden to have the same cheat manager as the player controller, so UMyCheatManager::DisableDebugCamera is called
-	CheatClass = UMyCheatManager::StaticClass();
+	// Is overridden to have the same cheat manager as the player controller, so UBmrCheatManager::DisableDebugCamera is called
+	CheatClass = UBmrCheatManager::StaticClass();
 }
 
 // Is overridden to prevent spawning the Debug HUD
-void AMyDebugCameraController::PostInitializeComponents()
+void ABmrDebugCameraController::PostInitializeComponents()
 {
 	// Don't call Super::PostInitializeComponents to prevent spawning the Debug HUD,
 	// but still call the APlayerController's method to finish controller initialization

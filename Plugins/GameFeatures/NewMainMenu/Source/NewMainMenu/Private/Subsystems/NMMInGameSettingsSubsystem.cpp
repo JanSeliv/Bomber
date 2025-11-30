@@ -7,7 +7,7 @@
 #include "NMMUtils.h"
 
 // Bomber
-#include "Subsystems/SoundsSubsystem.h"
+#include "Subsystems/BmrSoundsSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMInGameSettingsSubsystem)
 
@@ -22,20 +22,20 @@ UNMMInGameSettingsSubsystem& UNMMInGameSettingsSubsystem::Get()
 // Set to skips previously seen cinematics automatically
 void UNMMInGameSettingsSubsystem::SetAutoSkipCinematics(bool bEnable)
 {
-	bAutoSkipCinematicsInternal = bEnable;
+	bAutoSkipCinematics = bEnable;
 }
 
 // Set new sound volume for Cinematics sound class
 void UNMMInGameSettingsSubsystem::SetCinematicsVolume(double InVolume)
 {
-	CinematicsVolumeInternal = InVolume;
+	CinematicsVolume = InVolume;
 
 	USoundClass* CinematicsSoundClass = UNMMDataAsset::Get().GetCinematicsSoundClass();
-	USoundsSubsystem::Get().SetSoundVolumeByClass(CinematicsSoundClass, InVolume);
+	UBmrSoundsSubsystem::Get().SetSoundVolumeByClass(CinematicsSoundClass, InVolume);
 }
 
 // Set true to enable instant transitions when switching characters in the Main Menu
 void UNMMInGameSettingsSubsystem::SetInstantCharacterSwitchEnabled(bool bEnable)
 {
-	bInstantCharacterSwitchInternal = bEnable;
+	bInstantCharacterSwitch = bEnable;
 }

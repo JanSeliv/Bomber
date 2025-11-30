@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include "DataAssets/LevelActorDataAsset.h"
+#include "DataAssets/BmrLevelActorDataAsset.h"
 
-#include "BombDataAsset.generated.h"
+#include "BmrBombDataAsset.generated.h"
 
 /**
  * Describes bomb by mesh.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UBombRow final : public ULevelActorRow
+class BOMBER_API UBmrBombRow final : public UBmrLevelActorRow
 {
 	GENERATED_BODY()
 
@@ -24,60 +24,57 @@ public:
  * Describes common data for all bombs.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UBombDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UBmrBombDataAsset final : public UBmrLevelActorDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	/** Default constructor. */
-	UBombDataAsset();
+	UBmrBombDataAsset();
 
 	/** Returns the bomb data asset. */
-	static const UBombDataAsset& Get();
+	static const UBmrBombDataAsset& Get();
 
 	/** Get the bomb lifetime. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE float GetDuration() const { return DurationInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE float GetDurationTime() const { return DurationTime; }
 
-	/** Returns the durational gameplay effect applied while the bomb is active.
-	 * @see UBombDataAsset::DurationGameplayEffectInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UGameplayEffect> GetDurationGameplayEffect() const { return DurationGameplayEffectInternal; }
+	/** Returns the durational gameplay effect applied while the bomb is active. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE TSubclassOf<class UGameplayEffect> GetDurationGameplayEffect() const { return DurationGameplayEffect; }
 
-	/** Returns the explosion damage gameplay effect applied when the bomb detonates.
-	 * @see UBombDataAsset::ExplosionDamageEffectInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UGameplayEffect> GetExplosionDamageEffect() const { return ExplosionDamageEffectInternal; }
+	/** Returns the explosion damage gameplay effect applied when the bomb detonates. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE TSubclassOf<class UGameplayEffect> GetExplosionDamageEffect() const { return ExplosionDamageEffect; }
 
 	/** Returns the amount of bomb materials. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetBombMaterialsNum() const { return BombMaterialsInternal.Num(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE int32 GetBombMaterialsNum() const { return BombMaterials.Num(); }
 
-	/** Returns the bomb material by specified index.
-	 * @see UBombDataAsset::BombMaterialInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class UMaterialInterface* GetBombMaterial(int32 Index) const { return BombMaterialsInternal.IsValidIndex(Index) ? BombMaterialsInternal[Index] : nullptr; }
+	/** Returns the bomb material by specified index. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	class UMaterialInterface* GetBombMaterial(int32 Index) const { return BombMaterials.IsValidIndex(Index) ? BombMaterials[Index] : nullptr; }
 
 	/** Returns associated bomb row by associated instigator actor (e.g: Fori character -> Third (Forest) row).
 	 * @param InInstigator - the actor who placed the bomb, used to determine the level type.
 	 * @return The bomb row corresponding to the instigator's type, or nullptr if not found. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const UBombRow* GetBombRow(const AActor* InInstigator) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const UBmrBombRow* GetBombRow(const AActor* InInstigator) const;
 
 protected:
 	/** The lifetime of a bomb. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Duration", ShowOnlyInnerProperties))
-	float DurationInternal = 2.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	float DurationTime = 2.f;
 
 	/** Durational gameplay effect applied while the bomb is active. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Duration Gameplay Effect", ShowOnlyInnerProperties))
-	TSubclassOf<class UGameplayEffect> DurationGameplayEffectInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSubclassOf<class UGameplayEffect> DurationGameplayEffect = nullptr;
 
 	/** Explosion damage gameplay effect applied when the bomb detonates. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Explosion Damage Effect", ShowOnlyInnerProperties))
-	TSubclassOf<class UGameplayEffect> ExplosionDamageEffectInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSubclassOf<class UGameplayEffect> ExplosionDamageEffect = nullptr;
 
 	/** All bomb materials. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Bomb Materials", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class UMaterialInterface>> BombMaterialsInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TArray<TObjectPtr<class UMaterialInterface>> BombMaterials;
 };

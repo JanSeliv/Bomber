@@ -7,22 +7,22 @@
 // UE
 #include "HAL/IConsoleManager.h" // TAutoConsoleVariable
 
-#include "MyCheatManager.generated.h"
+#include "BmrCheatManager.generated.h"
 
-enum class EActorType : uint8;
-enum class ECurrentGameState : uint8;
+enum class EBmrActorType : uint8;
+enum class EBmrCurrentGameState : uint8;
 
 /**
  * Contains debugging cheat command for non-shipping builds to test general game functionality.
  */
 UCLASS()
-class BOMBER_API UMyCheatManager final : public UMetaCheatManager
+class BOMBER_API UBmrCheatManager final : public UMetaCheatManager
 {
 	GENERATED_BODY()
 
 public:
 	/** Default constructor. */
-	UMyCheatManager();
+	UBmrCheatManager();
 
 	/*********************************************************************************************
 	 * Utils
@@ -36,7 +36,7 @@ public:
 	 * "0001"(OR "0 0 0 1") 		-> 8
 	 * "0001"(OR "1 1 1 1") 		-> 15
 	 */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ReverseBitmaskStr"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "ReverseBitmaskStr"))
 	static int32 GetBitmaskFromReverseString(const FString& ReverseBitmaskStr);
 
 	/**
@@ -45,7 +45,7 @@ public:
 	 * "Wall Bomb" (1<<4|1<<0)				-> 17,
 	 * "Wall Bomb Player" (1<<4|1<<0|1<<3)	-> 25,
 	 */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "ActorTypesBitmaskStr"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "ActorTypesBitmaskStr"))
 	static int32 GetBitmaskFromActorTypesString(const FString& ActorTypesBitmaskStr);
 
 	/*********************************************************************************************
@@ -57,7 +57,7 @@ public:
 	 * @param ActorType Bomb, Box, Item, Player, Wall, All
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Destroy.AllByType"))
-	static void DestroyAllByType(EActorType ActorType);
+	static void DestroyAllByType(EBmrActorType ActorType);
 
 	/**
 	 * Destroy characters in specified slots.
@@ -163,7 +163,7 @@ public:
 	 * Bomber.Level.SpawnActorByType Player 2 2 4 - spawn a player at the position (2, 2) with the fifth variant of the player (row 4 - AI).
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Level.SpawnActorByType"))
-	static void SpawnActorByType(EActorType ActorType, int32 ColumnX, int32 RowY, int32 SkinIndex);
+	static void SpawnActorByType(EBmrActorType ActorType, int32 ColumnX, int32 RowY, int32 SkinIndex);
 
 	/** Overrides the percentage of walls spawn during the level generation, it will automatically regenerate the level for given chance.
 	 * @param WallsChance The new walls spawn chance where 100 is maximum, 0 is empty level with no walls, -1 will use the chance from GeneratedMapSettings.
@@ -214,5 +214,5 @@ public:
 	 * Is useful to trigger different game states skipping default transitions.
 	 * Bomber.Game.SetGameState InGame - the match will be started immediately without any countdown. */
 	UFUNCTION(meta = (CheatName = "Bomber.Game.SetGameState"))
-	static void SetGameState(ECurrentGameState GameState);
+	static void SetGameState(EBmrCurrentGameState GameState);
 };

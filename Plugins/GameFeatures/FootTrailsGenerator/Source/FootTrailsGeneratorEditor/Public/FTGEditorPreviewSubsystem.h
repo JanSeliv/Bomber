@@ -2,7 +2,6 @@
 
 #pragma once
 
-
 #include "EditorSubsystem.h"
 
 #include "FTGEditorPreviewSubsystem.generated.h"
@@ -20,8 +19,8 @@ class FOOTTRAILSGENERATOREDITOR_API UFTGEditorPreviewSubsystem : public UEditorS
 	 ********************************************************************************************* */
 protected:
 	/** Runtime component to generate preview of foot trails. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "FootTrailGenerator"))
-	TObjectPtr<class UFTGComponent> FootTrailGeneratorInternal = nullptr;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[FootTrailsGenerator]", meta = (BlueprintProtected))
+	TObjectPtr<class UFTGComponent> FootTrailGenerator = nullptr;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -41,5 +40,5 @@ protected:
 
 	/** Called when Generated Map is initialized and ready to be used, is also called in editor. */
 	UFUNCTION()
-	void OnGeneratedMapReady(class AGeneratedMap* GeneratedMap);
+	void OnGeneratedMapReady(class ABmrGeneratedMap* GeneratedMap);
 };

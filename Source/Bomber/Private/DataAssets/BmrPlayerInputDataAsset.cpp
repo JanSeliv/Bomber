@@ -1,45 +1,45 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/PlayerInputDataAsset.h"
+#include "DataAssets/BmrPlayerInputDataAsset.h"
 
 // Bomber
-#include "DataAssets/DataAssetsContainer.h"
-#include "DataAssets/MyInputMappingContext.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DataAssets/BmrInputMappingContext.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 // UE
 #include "Engine/World.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerInputDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerInputDataAsset)
 
 // Returns the player input data asset
-const UPlayerInputDataAsset& UPlayerInputDataAsset::Get()
+const UBmrPlayerInputDataAsset& UBmrPlayerInputDataAsset::Get()
 {
-	const UPlayerInputDataAsset* PlayerInputDataAsset = UDataAssetsContainer::GetPlayerInputDataAsset();
+	const UBmrPlayerInputDataAsset* PlayerInputDataAsset = UBmrDataAssetsContainer::GetPlayerInputDataAsset();
 	checkf(PlayerInputDataAsset, TEXT("The Player Input Data Asset is not valid")) return *PlayerInputDataAsset;
 }
 
 // Returns all input contexts contained in this data asset
-void UPlayerInputDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& OutInputContexts) const
+void UBmrPlayerInputDataAsset::GetAllInputContexts(TArray<const UBmrInputMappingContext*>& OutInputContexts) const
 {
 	GetAllGameplayInputContexts(OutInputContexts);
 
-	if (const UMyInputMappingContext* InGameMenuInputContext = GetInGameMenuInputContext())
+	if (InGameMenuInputContext)
 	{
 		OutInputContexts.Emplace(InGameMenuInputContext);
 	}
 
-	if (const UMyInputMappingContext* SettingsInputContext = GetSettingsInputContext())
+	if (SettingsInputContext)
 	{
 		OutInputContexts.Emplace(SettingsInputContext);
 	}
 }
 
-void UPlayerInputDataAsset::GetAllGameplayInputContexts(TArray<const UMyInputMappingContext*>& OutGameplayInputContexts) const
+void UBmrPlayerInputDataAsset::GetAllGameplayInputContexts(TArray<const UBmrInputMappingContext*>& OutGameplayInputContexts) const
 {
 	TryCreateGameplayInputContexts();
-	for (const UMyInputMappingContext* GameplayContextIt : GameplayInputContextsInternal)
+	for (const UBmrInputMappingContext* GameplayContextIt : GameplayInputContexts)
 	{
 		if (GameplayContextIt)
 		{
@@ -49,37 +49,37 @@ void UPlayerInputDataAsset::GetAllGameplayInputContexts(TArray<const UMyInputMap
 }
 
 // Returns the Enhanced Input Mapping Context of gameplay actions for specified local player
-const UMyInputMappingContext* UPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
+const UBmrInputMappingContext* UBmrPlayerInputDataAsset::GetGameplayInputContext(int32 LocalPlayerIndex) const
 {
 	TryCreateGameplayInputContexts();
-	return GameplayInputContextsInternal.IsValidIndex(LocalPlayerIndex) ? GameplayInputContextsInternal[LocalPlayerIndex] : nullptr;
+	return GameplayInputContexts.IsValidIndex(LocalPlayerIndex) ? GameplayInputContexts[LocalPlayerIndex] : nullptr;
 }
 
 // Returns the mouse visibility settings by specified game state
-const FMouseVisibilitySettings& UPlayerInputDataAsset::GetMouseVisibilitySettings(ECurrentGameState GameState) const
+const FBmrMouseVisibilitySettings& UBmrPlayerInputDataAsset::GetMouseVisibilitySettings(EBmrCurrentGameState GameState) const
 {
-	const FMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettingsInternal.FindByKey(GameState);
-	return FoundSettingsPtr ? *FoundSettingsPtr : FMouseVisibilitySettings::Invalid;
+	const FBmrMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettings.FindByKey(GameState);
+	return FoundSettingsPtr ? *FoundSettingsPtr : FBmrMouseVisibilitySettings::Invalid;
 }
 
 // Returns the mouse visibility settings by custom game state
-const FMouseVisibilitySettings& UPlayerInputDataAsset::GetMouseVisibilitySettingsCustom(FName CustomGameState) const
+const FBmrMouseVisibilitySettings& UBmrPlayerInputDataAsset::GetMouseVisibilitySettingsCustom(FName CustomGameState) const
 {
-	const FMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettingsInternal.FindByKey(CustomGameState);
-	return FoundSettingsPtr ? *FoundSettingsPtr : FMouseVisibilitySettings::Invalid;
+	const FBmrMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettings.FindByKey(CustomGameState);
+	return FoundSettingsPtr ? *FoundSettingsPtr : FBmrMouseVisibilitySettings::Invalid;
 }
 
 // Returns true if specified key is mapped to any gameplay input context
-bool UPlayerInputDataAsset::IsMappedKey(const UObject* WorldContext, const FKey& Key) const
+bool UBmrPlayerInputDataAsset::IsMappedKey(const UObject* WorldContext, const FKey& Key) const
 {
-	return GameplayInputContextsInternal.ContainsByPredicate([&Key, WorldContext](const UMyInputMappingContext* ContextIt)
+	return GameplayInputContexts.ContainsByPredicate([&Key, WorldContext](const UBmrInputMappingContext* ContextIt)
 	{
 		return ContextIt && UInputUtilsLibrary::IsMappedKeyInContext(WorldContext, Key, ContextIt);
 	});
 }
 
 // Creates new contexts if is needed
-void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
+void UBmrPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 {
 	if (UUtilsLibrary::IsEditorNotPieWorld())
 	{
@@ -88,11 +88,11 @@ void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 	}
 
 	// Create new context if any is null
-	const int32 ClassesNum = GameplayInputContextClassesInternal.Num();
+	const int32 ClassesNum = GameplayInputContextClasses.Num();
 	for (int32 Index = 0; Index < ClassesNum; ++Index)
 	{
-		const bool bIsValidIndex = GameplayInputContextsInternal.IsValidIndex(Index);
-		const UMyInputMappingContext* GameplayInputContextsIt = bIsValidIndex ? GameplayInputContextsInternal[Index] : nullptr;
+		const bool bIsValidIndex = GameplayInputContexts.IsValidIndex(Index);
+		const UBmrInputMappingContext* GameplayInputContextsIt = bIsValidIndex ? GameplayInputContexts[Index] : nullptr;
 		if (GameplayInputContextsIt)
 		{
 			// Is already created
@@ -101,7 +101,7 @@ void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 
 		// Initialize new gameplay contexts
 		UWorld* World = UUtilsLibrary::GetPlayWorld();
-		const TSubclassOf<UMyInputMappingContext>& ContextClassIt = GameplayInputContextClassesInternal[Index];
+		const TSubclassOf<UBmrInputMappingContext>& ContextClassIt = GameplayInputContextClasses[Index];
 		if (!World
 		    || !ContextClassIt)
 		{
@@ -110,15 +110,15 @@ void UPlayerInputDataAsset::TryCreateGameplayInputContexts() const
 		}
 
 		const FName ContextClassName(*FString::Printf(TEXT("%s_%i"), *ContextClassIt->GetName(), Index));
-		UMyInputMappingContext* NewGameplayInputContext = NewObject<UMyInputMappingContext>(World, ContextClassIt, ContextClassName, RF_Public | RF_Transactional);
+		UBmrInputMappingContext* NewGameplayInputContext = NewObject<UBmrInputMappingContext>(World, ContextClassIt, ContextClassName, RF_Public | RF_Transactional);
 
 		if (bIsValidIndex)
 		{
-			GameplayInputContextsInternal[Index] = NewGameplayInputContext;
+			GameplayInputContexts[Index] = NewGameplayInputContext;
 		}
 		else
 		{
-			GameplayInputContextsInternal.EmplaceAt(Index, NewGameplayInputContext);
+			GameplayInputContexts.EmplaceAt(Index, NewGameplayInputContext);
 		}
 	}
 }

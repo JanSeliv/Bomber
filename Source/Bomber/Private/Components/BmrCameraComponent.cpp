@@ -1,24 +1,24 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Components/MyCameraComponent.h"
+#include "Components/BmrCameraComponent.h"
 
 // Bomber
 #include "Bomber.h"
-#include "Controllers/MyPlayerController.h"
-#include "DataAssets/GameStateDataAsset.h"
-#include "Engine/MyGameViewportClient.h"
-#include "GameFramework/MyGameStateBase.h"
+#include "Controllers/BmrPlayerController.h"
+#include "DataAssets/BmrGameStateDataAsset.h"
+#include "Engine/BmrGameViewportClient.h"
+#include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Structures/Cell.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Structures/BmrCell.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyCameraComponent)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrCameraComponent)
 
 // If set, returns additional FOV modifier scaled by level size and current screen aspect ratio
 void FCameraDistanceParams::CalculateFitViewAdditiveAngle(float& InOutFOV) const
@@ -61,7 +61,7 @@ float FCameraDistanceParams::CalculateDistanceToFitViewToFOV(const FVector2D& Vi
 }
 
 // Sets default values
-UMyCameraComponent::UMyCameraComponent()
+UBmrCameraComponent::UBmrCameraComponent()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryComponentTick.bCanEverTick = true;
@@ -88,15 +88,15 @@ UMyCameraComponent::UMyCameraComponent()
 }
 
 /** Returns current FOV of camera manager that is more reliable than own FOV. */
-float UMyCameraComponent::GetCameraManagerFOV() const
+float UBmrCameraComponent::GetCameraManagerFOV() const
 {
-	const AMyPlayerController* PC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	const ABmrPlayerController* PC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	const APlayerCameraManager* PlayerCameraManager = PC ? PC->PlayerCameraManager : nullptr;
 	return PlayerCameraManager ? PlayerCameraManager->GetFOVAngle() : FieldOfView;
 }
 
 // Set the location between players
-bool UMyCameraComponent::UpdateLocation(float DeltaTime /* = 0.f*/)
+bool UBmrCameraComponent::UpdateLocation(float DeltaTime /* = 0.f*/)
 {
 	auto MoveCamera = [this, DeltaTime](FVector NewLocation)
 	{
@@ -108,9 +108,9 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime /* = 0.f*/)
 	};
 
 	// If true, the camera will be forced moving to the start position
-	if (bIsCameraLockedOnCenterInternal
-	    || !UMyBlueprintFunctionLibrary::GetAlivePlayersNum(EPlayerType::Any)
-	    || bForceStartInternal)
+	if (bIsCameraLockedOnCenter
+	    || !UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Any)
+	    || bForceStart)
 	{
 		static constexpr float Tolerance = 10.f;
 		const FVector CameraWorldLocation = GetComponentLocation();
@@ -132,67 +132,67 @@ bool UMyCameraComponent::UpdateLocation(float DeltaTime /* = 0.f*/)
 }
 
 // Calls to set following camera by player locations
-void UMyCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
+void UBmrCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
 {
-	bIsCameraLockedOnCenterInternal = bInCameraLockedOnCenter;
+	bIsCameraLockedOnCenter = bInCameraLockedOnCenter;
 
 	// Enable camera if should be unlocked
 	if (!bInCameraLockedOnCenter
 	    && !IsComponentTickEnabled()
-	    && AMyGameStateBase::GetCurrentGameState() == ECurrentGameState::InGame)
+	    && ABmrGameState::GetCurrentGameState() == EBmrCurrentGameState::InGame)
 	{
 		SetComponentTickEnabled(true);
 	}
 }
 
 // Allows to tweak distance calculation from camera to the level during the game
-void UMyCameraComponent::SetCameraDistanceParams(const FCameraDistanceParams& InCameraDistanceParams)
+void UBmrCameraComponent::SetCameraDistanceParams(const FCameraDistanceParams& InCameraDistanceParams)
 {
-	DistanceParamsInternal = InCameraDistanceParams;
+	DistanceParams = InCameraDistanceParams;
 
 	// Update camera location to apply new distance params
 	UpdateLocation();
 }
 
 // Calculates how faw away the camera should be placed from specified cells
-float UMyCameraComponent::GetCameraDistanceToCells(const FCells& Cells) const
+float UBmrCameraComponent::GetCameraDistanceToCells(const FBmrCells& Cells) const
 {
 	float CurrentFOV = GetCameraManagerFOV();
 
 	// If is set in params, additional FOV modifier will be applied
-	DistanceParamsInternal.CalculateFitViewAdditiveAngle(/*InOut*/ CurrentFOV);
+	DistanceParams.CalculateFitViewAdditiveAngle(/*InOut*/ CurrentFOV);
 
 	// Instead of changing real FOV, we can just change the distance to the camera to avoid the fisheye effect.
 	// Calculate how far away the camera should be placed to fit the given view by specified FOV
-	const FVector2D ViewSizeUU = FCell::GetCellArraySize(Cells) * FCell::CellSize;
+	const FVector2D ViewSizeUU = FBmrCell::GetCellArraySize(Cells) * FBmrCell::CellSize;
 	float CameraDistance = FCameraDistanceParams::CalculateDistanceToFitViewToFOV(ViewSizeUU, CurrentFOV);
 
 	// If is set in params, cut camera distance by min value
-	DistanceParamsInternal.LimitToMinDistance(/*InOut*/ CameraDistance);
+	DistanceParams.LimitToMinDistance(/*InOut*/ CameraDistance);
 
 	return CameraDistance;
 }
 
 // Returns the center location between all players and bots
-FVector UMyCameraComponent::GetCameraLocationBetweenPlayers() const
+FVector UBmrCameraComponent::GetCameraLocationBetweenPlayers() const
 {
-	const FCells PlayersCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
-	FVector NewLocation = FCell::GetCellArrayCenter(PlayersCells).Location;
+	const FBmrCells PlayersCells = UBmrCellUtilsLibrary::GetAllCellsWithActors(TO_FLAG(EAT::Player));
+	FVector NewLocation = FBmrCell::GetCellArrayCenter(PlayersCells).Location;
 	NewLocation.Z = GetCameraLockedLocation().Z; // Z = CameraLock.Z: keep Z axis unchanged to avoid zooming in/out
 	return NewLocation;
 }
 
 // Returns the default location between all players and bots
-FVector UMyCameraComponent::GetCameraLockedLocation() const
+FVector UBmrCameraComponent::GetCameraLockedLocation() const
 {
-	const FCells CornerCells = UCellsUtilsLibrary::GetCornerCellsOnLevel();
-	FVector NewLocation = FCell::GetCellArrayCenter(CornerCells).Location;
+	const FBmrCells CornerCells = UBmrCellUtilsLibrary::GetCornerCellsOnLevel();
+	FVector NewLocation = FBmrCell::GetCellArrayCenter(CornerCells).Location;
 	NewLocation.Z += GetCameraDistanceToCells(CornerCells); // Z = Corners.Z + FitDistance: find the distance to fit the view
 	return NewLocation;
 }
 
 // Called every frame
-void UMyCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UBmrCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -203,7 +203,7 @@ void UMyCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 }
 
 // Activates the SceneComponent, should be overridden by native child classes
-void UMyCameraComponent::Activate(bool bReset)
+void UBmrCameraComponent::Activate(bool bReset)
 {
 	Super::Activate(bReset);
 
@@ -211,7 +211,7 @@ void UMyCameraComponent::Activate(bool bReset)
 }
 
 // Called when the game starts or when spawned
-void UMyCameraComponent::BeginPlay()
+void UBmrCameraComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -219,37 +219,37 @@ void UMyCameraComponent::BeginPlay()
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Listen to recalculate camera location
-	if (UMyGameViewportClient* GameViewportClient = UMyBlueprintFunctionLibrary::GetGameViewportClient())
+	if (UBmrGameViewportClient* GameViewportClient = UBmrBlueprintFunctionLibrary::GetGameViewportClient())
 	{
 		GameViewportClient->OnAspectRatioChanged.AddUniqueDynamic(this, &ThisClass::OnAspectRatioChanged);
 	}
 }
 
 // Listen game states to manage the tick
-void UMyCameraComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void UBmrCameraComponent::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
 {
 	bool bShouldTick = false;
 
 	switch (CurrentGameState)
 	{
-		case ECurrentGameState::GameStarting:
+		case EBmrCurrentGameState::GameStarting:
 		{
-			if (bAutoPossessCameraInternal)
+			if (bAutoPossessCamera)
 			{
 				PossessCamera();
 			}
 			bShouldTick = true;
 			break;
 		}
-		case ECurrentGameState::EndGame:
+		case EBmrCurrentGameState::EndGame:
 		{
-			bForceStartInternal = true;
+			bForceStart = true;
 			bShouldTick = true;
 			break;
 		}
-		case ECurrentGameState::InGame:
+		case EBmrCurrentGameState::InGame:
 		{
-			bForceStartInternal = false;
+			bForceStart = false;
 			bShouldTick = true;
 			break;
 		}
@@ -261,27 +261,27 @@ void UMyCameraComponent::OnGameStateChanged_Implementation(ECurrentGameState Cur
 }
 
 // Listen to recalculate camera location when screen aspect ratio was changed
-void UMyCameraComponent::OnAspectRatioChanged_Implementation(float NewAspectRatio, EAspectRatioAxisConstraint NewAxisConstraint)
+void UBmrCameraComponent::OnAspectRatioChanged_Implementation(float NewAspectRatio, EAspectRatioAxisConstraint NewAxisConstraint)
 {
 	UpdateLocation();
 }
 
 // Starts viewing through this camera
-void UMyCameraComponent::PossessCamera(bool bBlendCamera /* = true*/)
+void UBmrCameraComponent::PossessCamera(bool bBlendCamera /* = true*/)
 {
-	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!MyPC)
 	{
 		// Is not a local player, skip it
 		return;
 	}
 
-	const float BlendTime = bBlendCamera ? UGameStateDataAsset::Get().GetStartingCountdown() : 0.f;
+	const float BlendTime = bBlendCamera ? UBmrGameStateDataAsset::Get().GetStartingCountdown() : 0.f;
 	MyPC->SetViewTargetWithBlend(GetOwner(), BlendTime);
 }
 
 // Disable to prevent automatic possessing on Game Starting state, could be disabled by external systems like to show cinematic etc
-void UMyCameraComponent::SetAutoPossessCameraEnabled(bool bInAutoPossessCamera)
+void UBmrCameraComponent::SetAutoPossessCameraEnabled(bool bInAutoPossessCamera)
 {
-	bAutoPossessCameraInternal = bInAutoPossessCamera;
+	bAutoPossessCamera = bInAutoPossessCamera;
 }

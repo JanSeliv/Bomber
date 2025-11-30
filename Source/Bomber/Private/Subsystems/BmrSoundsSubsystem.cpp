@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Subsystems/SoundsSubsystem.h"
+#include "Subsystems/BmrSoundsSubsystem.h"
 
 // Bomber
 #include "Bomber.h"
-#include "DataAssets/SoundsDataAsset.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
+#include "DataAssets/BmrSoundsDataAsset.h"
+#include "GameFramework/BmrGameState.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Components/AudioComponent.h"
@@ -20,30 +20,30 @@
 #include "Sound/SoundBase.h"
 #include "UObject/Package.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(SoundsSubsystem)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrSoundsSubsystem)
 
 /*********************************************************************************************
  * Static methods
  ********************************************************************************************* */
 
 // Returns the Sounds Manager, is checked and wil crash if can't be obtained
-USoundsSubsystem& USoundsSubsystem::Get()
+UBmrSoundsSubsystem& UBmrSoundsSubsystem::Get()
 {
-	USoundsSubsystem* SoundsSubsystem = GetSoundsSubsystem();
+	UBmrSoundsSubsystem* SoundsSubsystem = GetSoundsSubsystem();
 	checkf(SoundsSubsystem, TEXT("%s: 'SoundsSubsystem' is null"), *FString(__FUNCTION__));
 	return *SoundsSubsystem;
 }
 
 // Returns the pointer to the Sounds Manager
-USoundsSubsystem* USoundsSubsystem::GetSoundsSubsystem(const UObject* WorldContextObject)
+UBmrSoundsSubsystem* UBmrSoundsSubsystem::GetSoundsSubsystem(const UObject* WorldContextObject)
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(WorldContextObject);
-	const TSubclassOf<USoundsSubsystem> SoundsSubsystemClass = USoundsDataAsset::Get().GetSoundsSubsystemClass();
-	return World ? Cast<USoundsSubsystem>(World->GetSubsystemBase(SoundsSubsystemClass)) : nullptr;
+	const TSubclassOf<UBmrSoundsSubsystem> SoundsSubsystemClass = UBmrSoundsDataAsset::Get().GetSoundsSubsystemClass();
+	return World ? Cast<UBmrSoundsSubsystem>(World->GetSubsystemBase(SoundsSubsystemClass)) : nullptr;
 }
 
 // Returns true if sounds can be played
-bool USoundsSubsystem::CanPlaySounds()
+bool UBmrSoundsSubsystem::CanPlaySounds()
 {
 	if (!GEngine || !GEngine->UseSound())
 	{
@@ -57,7 +57,7 @@ bool USoundsSubsystem::CanPlaySounds()
 }
 
 // Play the sound in 2D space with ensuring that this sound component is created only once
-void USoundsSubsystem::PlaySingleSound2D(USoundBase* InSound)
+void UBmrSoundsSubsystem::PlaySingleSound2D(USoundBase* InSound)
 {
 	if (!CanPlaySounds()
 	    || !ensureMsgf(InSound, TEXT("ASSERT: [%i] %hs:\n'InSound' is not valid!"), __LINE__, __FUNCTION__))
@@ -65,14 +65,14 @@ void USoundsSubsystem::PlaySingleSound2D(USoundBase* InSound)
 		return;
 	}
 
-	const TObjectPtr<UAudioComponent>* SoundComponentPtr = SoundComponentsInternal.Find(InSound);
+	const TObjectPtr<UAudioComponent>* SoundComponentPtr = SoundComponents.Find(InSound);
 	if (!SoundComponentPtr)
 	{
 		UAudioComponent* NewSoundComponent = UGameplayStatics::SpawnSound2D(GetWorld(), InSound);
 		checkf(NewSoundComponent, TEXT("ERROR: [%i] %hs:\n'NewSoundComponent' failed to create from '%s' sound!"), __LINE__, __FUNCTION__, *GetNameSafe(InSound));
 
 		// Remember the sound component to reuse all next plays
-		SoundComponentPtr = &SoundComponentsInternal.Add(InSound, NewSoundComponent);
+		SoundComponentPtr = &SoundComponents.Add(InSound, NewSoundComponent);
 		checkf(SoundComponentPtr, TEXT("ERROR: [%i] %hs:\n'SoundComponentPtr' is null, failed to add '%s'!"), __LINE__, __FUNCTION__, *GetNameSafe(NewSoundComponent));
 
 		// Disable auto destroy, so we can reuse it multiple times, otherwise sounds will be playing multiple times
@@ -91,14 +91,14 @@ void USoundsSubsystem::PlaySingleSound2D(USoundBase* InSound)
 }
 
 // Deactivates the given sound if currently playing
-void USoundsSubsystem::StopSingleSound2D(USoundBase* InSound)
+void UBmrSoundsSubsystem::StopSingleSound2D(USoundBase* InSound)
 {
 	if (!ensureMsgf(InSound, TEXT("ASSERT: [%i] %hs:\n'InSound' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	const TObjectPtr<UAudioComponent>* SoundComponentPtr = SoundComponentsInternal.Find(InSound);
+	const TObjectPtr<UAudioComponent>* SoundComponentPtr = SoundComponents.Find(InSound);
 	UAudioComponent* SoundComponent = SoundComponentPtr ? *SoundComponentPtr : nullptr;
 	if (SoundComponent)
 	{
@@ -107,9 +107,9 @@ void USoundsSubsystem::StopSingleSound2D(USoundBase* InSound)
 }
 
 // Destroy sound component by given sound, it's used to perform cleanup when game is finished
-void USoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
+void UBmrSoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
 {
-	const TObjectPtr<UAudioComponent>* SoundComponentPtr = InSound ? SoundComponentsInternal.Find(InSound) : nullptr;
+	const TObjectPtr<UAudioComponent>* SoundComponentPtr = InSound ? SoundComponents.Find(InSound) : nullptr;
 	if (!SoundComponentPtr)
 	{
 		// Is already unloaded
@@ -122,13 +122,13 @@ void USoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
 		SoundComponent->DestroyComponent();
 	}
 
-	SoundComponentsInternal.Remove(InSound);
+	SoundComponents.Remove(InSound);
 }
 
 // Performs cleanup on all known sound components
-void USoundsSubsystem::DestroyAllSoundComponents()
+void UBmrSoundsSubsystem::DestroyAllSoundComponents()
 {
-	for (TTuple<TObjectPtr<USoundBase>, TObjectPtr<UAudioComponent>>& SoundComponentPair : SoundComponentsInternal)
+	for (TTuple<TObjectPtr<USoundBase>, TObjectPtr<UAudioComponent>>& SoundComponentPair : SoundComponents)
 	{
 		if (UAudioComponent* SoundComponent = SoundComponentPair.Value)
 		{
@@ -136,7 +136,7 @@ void USoundsSubsystem::DestroyAllSoundComponents()
 			SoundComponent->DestroyComponent();
 		}
 	}
-	SoundComponentsInternal.Empty();
+	SoundComponents.Empty();
 
 #if WITH_EDITOR
 	// Clean up all potentially leaked editor sounds (such as UScrubbedSound), firstly leaked in UE5.6.0
@@ -165,56 +165,56 @@ void USoundsSubsystem::DestroyAllSoundComponents()
  ********************************************************************************************* */
 
 // Set new sound volume
-void USoundsSubsystem::SetSoundVolumeByClass(USoundClass* InSoundClass, float InVolume)
+void UBmrSoundsSubsystem::SetSoundVolumeByClass(USoundClass* InSoundClass, float InVolume)
 {
 	if (!CanPlaySounds())
 	{
 		return;
 	}
 
-	USoundMix* MainSoundMix = USoundsDataAsset::Get().GetMainSoundMix();
+	USoundMix* MainSoundMix = UBmrSoundsDataAsset::Get().GetMainSoundMix();
 	static constexpr float Pitch = 1.f;
 	static constexpr float FadeInTime = 0.f;
 	UGameplayStatics::SetSoundMixClassOverride(GetWorld(), MainSoundMix, InSoundClass, InVolume, Pitch, FadeInTime);
 }
 
 // Set the general sound volume for all sound classes in game
-void USoundsSubsystem::SetMasterVolume(double InVolume)
+void UBmrSoundsSubsystem::SetMasterVolume(double InVolume)
 {
-	MasterVolumeInternal = InVolume;
+	MasterVolume = InVolume;
 
-	USoundClass* MasterSoundClass = USoundsDataAsset::Get().GetMasterSoundClass();
+	USoundClass* MasterSoundClass = UBmrSoundsDataAsset::Get().GetMasterSoundClass();
 	SetSoundVolumeByClass(MasterSoundClass, InVolume);
 }
 
 // Set new sound volume for music sound class
-void USoundsSubsystem::SetMusicVolume(double InVolume)
+void UBmrSoundsSubsystem::SetMusicVolume(double InVolume)
 {
-	MusicVolumeInternal = InVolume;
+	MusicVolume = InVolume;
 
-	USoundClass* MusicSoundClass = USoundsDataAsset::Get().GetMusicSoundClass();
+	USoundClass* MusicSoundClass = UBmrSoundsDataAsset::Get().GetMusicSoundClass();
 	SetSoundVolumeByClass(MusicSoundClass, InVolume);
 }
 
 // Set new sound volume for SFX sound class
-void USoundsSubsystem::SetSFXVolume(double InVolume)
+void UBmrSoundsSubsystem::SetSFXVolume(double InVolume)
 {
-	SFXVolumeInternal = InVolume;
+	SFXVolume = InVolume;
 
-	USoundClass* SFXSoundClass = USoundsDataAsset::Get().GetSFXSoundClass();
+	USoundClass* SFXSoundClass = UBmrSoundsDataAsset::Get().GetSFXSoundClass();
 	SetSoundVolumeByClass(SFXSoundClass, InVolume);
 }
 
 // Trigger the background music to be played during the match
-void USoundsSubsystem::PlayInGameMusic()
+void UBmrSoundsSubsystem::PlayInGameMusic()
 {
 	if (!CanPlaySounds())
 	{
 		return;
 	}
 
-	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
-	USoundBase* InGameMusic = USoundsDataAsset::Get().GetInGameMusic(LevelType);
+	const EBmrLevelType LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
+	USoundBase* InGameMusic = UBmrSoundsDataAsset::Get().GetInGameMusic(LevelType);
 
 	if (!InGameMusic)
 	{
@@ -227,60 +227,60 @@ void USoundsSubsystem::PlayInGameMusic()
 }
 
 // Stops currently played in-match background music
-void USoundsSubsystem::StopInGameMusic()
+void UBmrSoundsSubsystem::StopInGameMusic()
 {
-	const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
-	if (USoundBase* InGameMusic = USoundsDataAsset::Get().GetInGameMusic(LevelType))
+	const EBmrLevelType LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
+	if (USoundBase* InGameMusic = UBmrSoundsDataAsset::Get().GetInGameMusic(LevelType))
 	{
 		StopSingleSound2D(InGameMusic);
 	}
 }
 
 /** Play the sound that is played right before the match ends. */
-void USoundsSubsystem::PlayEndGameCountdownSFX()
+void UBmrSoundsSubsystem::PlayEndGameCountdownSFX()
 {
 	if (!CanPlaySounds()
-	    || AMyGameStateBase::GetCurrentGameState() != ECGS::InGame)
+	    || ABmrGameState::GetCurrentGameState() != ECGS::InGame)
 	{
 		return;
 	}
 
-	PlaySingleSound2D(USoundsDataAsset::Get().GetEndGameCountdownSFX());
+	PlaySingleSound2D(UBmrSoundsDataAsset::Get().GetEndGameCountdownSFX());
 }
 
 // Stops the sound that is played right before the match ends.
-void USoundsSubsystem::StopEndGameCountdownSFX()
+void UBmrSoundsSubsystem::StopEndGameCountdownSFX()
 {
-	StopSingleSound2D(USoundsDataAsset::Get().GetEndGameCountdownSFX());
+	StopSingleSound2D(UBmrSoundsDataAsset::Get().GetEndGameCountdownSFX());
 }
 
 // Play the sound that is played before the match starts
-void USoundsSubsystem::PlayStartGameCountdownSFX()
+void UBmrSoundsSubsystem::PlayStartGameCountdownSFX()
 {
 	if (!CanPlaySounds()
-	    || AMyGameStateBase::GetCurrentGameState() != ECGS::GameStarting)
+	    || ABmrGameState::GetCurrentGameState() != ECGS::GameStarting)
 	{
 		return;
 	}
 
-	PlaySingleSound2D(USoundsDataAsset::Get().GetStartGameCountdownSFX());
+	PlaySingleSound2D(UBmrSoundsDataAsset::Get().GetStartGameCountdownSFX());
 }
 
-void USoundsSubsystem::StopStartGameCountdownSFX()
+void UBmrSoundsSubsystem::StopStartGameCountdownSFX()
 {
-	StopSingleSound2D(USoundsDataAsset::Get().GetStartGameCountdownSFX());
+	StopSingleSound2D(UBmrSoundsDataAsset::Get().GetStartGameCountdownSFX());
 }
 
 // Play the sound of the clicked UI element
-void USoundsSubsystem::PlayUIClickSFX()
+void UBmrSoundsSubsystem::PlayUIClickSFX()
 {
 	if (!CanPlaySounds()
-	    || AMyGameStateBase::GetCurrentGameState() == ECGS::None)
+	    || ABmrGameState::GetCurrentGameState() == ECGS::None)
 	{
 		return;
 	}
 
-	if (USoundBase* UIClickSFX = USoundsDataAsset::Get().GetUIClickSFX())
+	if (USoundBase* UIClickSFX = UBmrSoundsDataAsset::Get().GetUIClickSFX())
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), UIClickSFX);
 	}
@@ -291,7 +291,7 @@ void USoundsSubsystem::PlayUIClickSFX()
  ********************************************************************************************* */
 
 // Called when world is ready to start gameplay before the game mode transitions to the correct state and call BeginPlay on all actors
-void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
+void UBmrSoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
@@ -303,7 +303,7 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	OnBeginPlay();
 
-	USoundMix* MainSoundMix = USoundsDataAsset::Get().GetMainSoundMix();
+	USoundMix* MainSoundMix = UBmrSoundsDataAsset::Get().GetMainSoundMix();
 	UGameplayStatics::SetBaseSoundMix(&InWorld, MainSoundMix);
 
 	BIND_ON_LOCAL_PLAYER_STATE_READY(this, ThisClass::OnLocalPlayerStateReady);
@@ -312,7 +312,7 @@ void USoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 }
 
 // Is overridden to perform cleanup on ending the game
-void USoundsSubsystem::Deinitialize()
+void UBmrSoundsSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 
@@ -320,21 +320,21 @@ void USoundsSubsystem::Deinitialize()
 }
 
 // Is called on ending the current game to play the End-Game sound
-void USoundsSubsystem::OnEndGameStateChanged_Implementation(EEndGameState EndGameState)
+void UBmrSoundsSubsystem::OnEndGameStateChanged_Implementation(EBmrEndGameState EndGameState)
 {
-	if (EndGameState == EEndGameState::None)
+	if (EndGameState == EBmrEndGameState::None)
 	{
 		return;
 	}
 
-	if (USoundBase* EndGameSFX = USoundsDataAsset::Get().GetEndGameSFX(EndGameState))
+	if (USoundBase* EndGameSFX = UBmrSoundsDataAsset::Get().GetEndGameSFX(EndGameState))
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), EndGameSFX);
 	}
 }
 
 // Listen game states to switch background music
-void USoundsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void UBmrSoundsSubsystem::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{
@@ -355,7 +355,7 @@ void USoundsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState Curre
 }
 
 // Called when the local player state is initialized and its assigned character is ready
-void USoundsSubsystem::OnLocalPlayerStateReady_Implementation(class AMyPlayerState* PlayerState, int32 CharacterID)
+void UBmrSoundsSubsystem::OnLocalPlayerStateReady_Implementation(class ABmrPlayerState* PlayerState, int32 PlayerId)
 {
 	// Listen the ending the current game to play the End-Game sound on
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);

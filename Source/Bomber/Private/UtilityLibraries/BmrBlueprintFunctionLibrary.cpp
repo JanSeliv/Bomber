@@ -1,56 +1,56 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // Bomber
+#include "Actors/BmrGeneratedMap.h"
+#include "Actors/BmrPawn.h"
 #include "Bomber.h"
-#include "Components/MapComponent.h"
-#include "Components/MouseActivityComponent.h"
-#include "Controllers/MyPlayerController.h"
-#include "DataAssets/DataAssetsContainer.h"
-#include "DataAssets/LevelActorDataAsset.h"
-#include "Engine/MyGameViewportClient.h"
-#include "GameFramework/MyGameModeBase.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyGameUserSettings.h"
-#include "GameFramework/MyPlayerState.h"
-#include "GeneratedMap.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "Components/BmrMapComponent.h"
+#include "Components/BmrMouseActivityComponent.h"
+#include "Controllers/BmrPlayerController.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DataAssets/BmrLevelActorDataAsset.h"
+#include "Engine/BmrGameViewportClient.h"
+#include "GameFramework/BmrGameMode.h"
+#include "GameFramework/BmrGameState.h"
+#include "GameFramework/BmrGameUserSettings.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/GeneratedMapSubsystem.h"
-#include "Subsystems/WidgetsSubsystem.h"
+#include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/SettingsWidget.h"
-#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
+#include "UtilityLibraries/BmrActorUtilsLibrary.h"
 
 // UE
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyBlueprintFunctionLibrary)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBlueprintFunctionLibrary)
 
 /* ---------------------------------------------------
  *		Static library functions
  * --------------------------------------------------- */
 
 // Returns number of alive players
-int32 UMyBlueprintFunctionLibrary::GetAlivePlayersNum(EPlayerType InPlayerType)
+int32 UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType InPlayerType)
 {
 	FMapComponents AllPlayers;
-	ULevelActorsUtilsLibrary::GetLevelActors(/*out*/ AllPlayers, TO_FLAG(EActorType::Player));
+	UBmrActorUtilsLibrary::GetLevelActors(/*out*/ AllPlayers, TO_FLAG(EBmrActorType::Player));
 
 	int32 PlayersNum = 0;
-	for (const UMapComponent* MapComponentIt : AllPlayers)
+	for (const UBmrMapComponent* MapComponentIt : AllPlayers)
 	{
-		const APlayerCharacter* PlayerChar = MapComponentIt ? MapComponentIt->GetOwner<APlayerCharacter>() : nullptr;
-		const AMyPlayerState* PlayerState = PlayerChar ? PlayerChar->GetPlayerState<AMyPlayerState>() : nullptr;
+		const ABmrPawn* PlayerChar = MapComponentIt ? MapComponentIt->GetOwner<ABmrPawn>() : nullptr;
+		const ABmrPlayerState* PlayerState = PlayerChar ? PlayerChar->GetPlayerState<ABmrPlayerState>() : nullptr;
 		if (!PlayerState)
 		{
 			continue;
 		}
 
-		const EPlayerType PlayerTypeIt = PlayerState->GetPlayerType();
-		if (InPlayerType == EPlayerType::Any
+		const EBmrPlayerType PlayerTypeIt = PlayerState->GetPlayerType();
+		if (InPlayerType == EBmrPlayerType::Any
 		    || InPlayerType == PlayerTypeIt)
 		{
 			++PlayersNum;
@@ -61,10 +61,10 @@ int32 UMyBlueprintFunctionLibrary::GetAlivePlayersNum(EPlayerType InPlayerType)
 }
 
 // Returns the type of the current level
-ELevelType UMyBlueprintFunctionLibrary::GetLevelType()
+EBmrLevelType UBmrBlueprintFunctionLibrary::GetLevelType()
 {
 	// @TODO JanSeliv StB8orDX: remove level type enum and replace related logic
-	return ELevelType::First;
+	return EBmrLevelType::First;
 }
 
 /* ---------------------------------------------------
@@ -72,51 +72,51 @@ ELevelType UMyBlueprintFunctionLibrary::GetLevelType()
  * --------------------------------------------------- */
 
 // Contains a data of Bomber Level, nullptr otherwise
-AMyGameModeBase* UMyBlueprintFunctionLibrary::GetMyGameMode(const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrGameMode* UBmrBlueprintFunctionLibrary::GetGameMode(const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
-	return World ? World->GetAuthGameMode<AMyGameModeBase>() : nullptr;
+	return World ? World->GetAuthGameMode<ABmrGameMode>() : nullptr;
 }
 
 // Returns the Bomber Game state, nullptr otherwise.
-AMyGameStateBase* UMyBlueprintFunctionLibrary::GetMyGameState(const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrGameState* UBmrBlueprintFunctionLibrary::GetGameState(const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
-	return World ? World->GetGameState<AMyGameStateBase>() : nullptr;
+	return World ? World->GetGameState<ABmrGameState>() : nullptr;
 }
 
 // Returns the Bomber Player Controller, nullptr otherwise
-AMyPlayerController* UMyBlueprintFunctionLibrary::GetMyPlayerController(int32 PlayerIndex, const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrPlayerController* UBmrBlueprintFunctionLibrary::GetPlayerController(int32 PlayerIndex, const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const AMyGameModeBase* MyGameMode = GetMyGameMode(OptionalWorldContext);
-	AMyPlayerController* MyPC = MyGameMode ? MyGameMode->GetPlayerController(PlayerIndex) : nullptr;
+	const ABmrGameMode* MyGameMode = GetGameMode(OptionalWorldContext);
+	ABmrPlayerController* MyPC = MyGameMode ? MyGameMode->GetPlayerController(PlayerIndex) : nullptr;
 	if (MyPC)
 	{
 		return MyPC;
 	}
 
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
-	return Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(World, PlayerIndex));
+	return Cast<ABmrPlayerController>(UGameplayStatics::GetPlayerController(World, PlayerIndex));
 }
 
 // Returns the local Player Controller, nullptr otherwise
-AMyPlayerController* UMyBlueprintFunctionLibrary::GetLocalPlayerController(const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrPlayerController* UBmrBlueprintFunctionLibrary::GetLocalPlayerController(const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	static constexpr int32 LocalPlayerIndex = 0;
-	return GetMyPlayerController(LocalPlayerIndex, OptionalWorldContext);
+	return GetPlayerController(LocalPlayerIndex, OptionalWorldContext);
 }
 
 // Returns the Bomber Player State for specified player, nullptr otherwise
-AMyPlayerState* UMyBlueprintFunctionLibrary::GetMyPlayerState(int32 CharacterID, const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrPlayerState* UBmrBlueprintFunctionLibrary::GetPlayerState(int32 PlayerId, const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const APlayerCharacter* PlayerChar = GetPlayerCharacter(CharacterID, OptionalWorldContext);
-	return PlayerChar ? PlayerChar->GetPlayerState<AMyPlayerState>() : nullptr;
+	const ABmrPawn* PlayerChar = GetPawn(PlayerId, OptionalWorldContext);
+	return PlayerChar ? PlayerChar->GetPlayerState<ABmrPlayerState>() : nullptr;
 }
 
 // Returns the player state of current controller
-AMyPlayerState* UMyBlueprintFunctionLibrary::GetLocalPlayerState(const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrPlayerState* UBmrBlueprintFunctionLibrary::GetLocalPlayerState(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const AMyPlayerController* MyPlayerController = Cast<AMyPlayerController>(OptionalWorldContext);
+	const ABmrPlayerController* MyPlayerController = Cast<ABmrPlayerController>(OptionalWorldContext);
 	if (!MyPlayerController)
 	{
 		MyPlayerController = GetLocalPlayerController(OptionalWorldContext);
@@ -126,132 +126,132 @@ AMyPlayerState* UMyBlueprintFunctionLibrary::GetLocalPlayerState(const UObject* 
 		}
 	}
 
-	if (AMyPlayerState* PlayerState = MyPlayerController->GetPlayerState<AMyPlayerState>())
+	if (ABmrPlayerState* PlayerState = MyPlayerController->GetPlayerState<ABmrPlayerState>())
 	{
 		return PlayerState;
 	}
 
-	if (const AMyGameModeBase* MyGameMode = GetMyGameMode(OptionalWorldContext))
+	if (const ABmrGameMode* MyGameMode = GetGameMode(OptionalWorldContext))
 	{
 		const int32 PCIndex = MyGameMode->GetPlayerControllerIndex(MyPlayerController);
-		return GetMyPlayerState(PCIndex);
+		return GetPlayerState(PCIndex);
 	}
 
 	return nullptr;
 }
 
 // Returns the Bomber settings
-UMyGameUserSettings* UMyBlueprintFunctionLibrary::GetMyGameUserSettings(const UObject* OptionalWorldContext /* = nullptr*/)
+UBmrGameUserSettings* UBmrBlueprintFunctionLibrary::GetGameUserSettings(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	return GEngine ? Cast<UMyGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;
+	return GEngine ? Cast<UBmrGameUserSettings>(GEngine->GetGameUserSettings()) : nullptr;
 }
 
 // Returns the settings widget
-USettingsWidget* UMyBlueprintFunctionLibrary::GetSettingsWidget(const UObject* OptionalWorldContext /* = nullptr*/)
+USettingsWidget* UBmrBlueprintFunctionLibrary::GetSettingsWidget(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem(OptionalWorldContext);
+	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem(OptionalWorldContext);
 	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<USettingsWidget>(BmrGameplayTags::UI::Widget_Settings) : nullptr;
 }
 
 // Returns the Camera Component used on level
-UMyCameraComponent* UMyBlueprintFunctionLibrary::GetLevelCamera(const UObject* OptionalWorldContext /* = nullptr*/)
+UBmrCameraComponent* UBmrBlueprintFunctionLibrary::GetLevelCamera(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const UGeneratedMapSubsystem* Subsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem(OptionalWorldContext);
-	const AGeneratedMap* GeneratedMap = Subsystem ? Subsystem->GetGeneratedMap() : nullptr;
+	const UBmrGeneratedMapSubsystem* Subsystem = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(OptionalWorldContext);
+	const ABmrGeneratedMap* GeneratedMap = Subsystem ? Subsystem->GetGeneratedMap() : nullptr;
 	return GeneratedMap ? GeneratedMap->GetCameraComponent() : nullptr;
 }
 
 // Returns specified player character, by default returns local player
-APlayerCharacter* UMyBlueprintFunctionLibrary::GetPlayerCharacter(int32 CharacterID, const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrPawn* UBmrBlueprintFunctionLibrary::GetPawn(int32 PlayerId, const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	if (CharacterID < 0)
+	if (PlayerId < 0)
 	{
 		// No ID is set, return local player character
-		return GetLocalPlayerCharacter(OptionalWorldContext);
+		return GetLocalPawn(OptionalWorldContext);
 	}
 
-	const UMapComponent* PlayerMapComponent = ULevelActorsUtilsLibrary::GetLevelActorByIndex(CharacterID, TO_FLAG(EAT::Player));
-	return PlayerMapComponent ? PlayerMapComponent->GetOwner<APlayerCharacter>() : nullptr;
+	const UBmrMapComponent* PlayerMapComponent = UBmrActorUtilsLibrary::GetLevelActorByIndex(PlayerId, TO_FLAG(EAT::Player));
+	return PlayerMapComponent ? PlayerMapComponent->GetOwner<ABmrPawn>() : nullptr;
 }
 
 // Returns controlled player character
-APlayerCharacter* UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter(const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrPawn* UBmrBlueprintFunctionLibrary::GetLocalPawn(const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	static constexpr int32 LocalPlayerIndex = 0;
-	const AMyPlayerController* MyPC = GetMyPlayerController(LocalPlayerIndex, OptionalWorldContext);
-	APlayerCharacter* LocalPlayer = MyPC ? MyPC->GetPawn<APlayerCharacter>() : nullptr;
+	const ABmrPlayerController* MyPC = GetPlayerController(LocalPlayerIndex, OptionalWorldContext);
+	ABmrPawn* LocalPlayer = MyPC ? MyPC->GetPawn<ABmrPawn>() : nullptr;
 
 	if (!LocalPlayer)
 	{
 		// In some edge cases, character is not possessed by the controller, try get it from the map
-		LocalPlayer = GetPlayerCharacter(LocalPlayerIndex, OptionalWorldContext);
+		LocalPlayer = GetPawn(LocalPlayerIndex, OptionalWorldContext);
 	}
 
 	return LocalPlayer;
 }
 
 // Returns specified Ability System Component
-class UAbilitySystemComponent* UMyBlueprintFunctionLibrary::GetAbilitySystemComponent(int32 CharacterID, const UObject* OptionalWorldContext)
+class UAbilitySystemComponent* UBmrBlueprintFunctionLibrary::GetAbilitySystemComponent(int32 PlayerId, const UObject* OptionalWorldContext)
 {
-	const AMyPlayerState* PlayerState = GetMyPlayerState(CharacterID, OptionalWorldContext);
+	const ABmrPlayerState* PlayerState = GetPlayerState(PlayerId, OptionalWorldContext);
 	return PlayerState ? PlayerState->GetAbilitySystemComponent() : nullptr;
 }
 
 // Returns the Ability System Component from the local Player State
-class UAbilitySystemComponent* UMyBlueprintFunctionLibrary::GetLocalAbilitySystemComponent(const UObject* OptionalWorldContext)
+class UAbilitySystemComponent* UBmrBlueprintFunctionLibrary::GetLocalAbilitySystemComponent(const UObject* OptionalWorldContext)
 {
-	const AMyPlayerState* PlayerState = GetLocalPlayerState(OptionalWorldContext);
+	const ABmrPlayerState* PlayerState = GetLocalPlayerState(OptionalWorldContext);
 	return PlayerState ? PlayerState->GetAbilitySystemComponent() : nullptr;
 }
 
 // Returns specified Mover Component
-class UBmrMoverComponent* UMyBlueprintFunctionLibrary::GetMoverComponent(int32 CharacterID, const UObject* OptionalWorldContext)
+class UBmrMoverComponent* UBmrBlueprintFunctionLibrary::GetMoverComponent(int32 PlayerId, const UObject* OptionalWorldContext)
 {
-	const APlayerCharacter* PlayerCharacter = GetPlayerCharacter(CharacterID, OptionalWorldContext);
-	return PlayerCharacter ? PlayerCharacter->GetMoverComponent() : nullptr;
+	const ABmrPawn* Pawn = GetPawn(PlayerId, OptionalWorldContext);
+	return Pawn ? Pawn->GetMoverComponent() : nullptr;
 }
 
 // Returns the Mover Component from the local Player Character
-class UBmrMoverComponent* UMyBlueprintFunctionLibrary::GetLocalMoverComponent(const UObject* OptionalWorldContext)
+class UBmrMoverComponent* UBmrBlueprintFunctionLibrary::GetLocalMoverComponent(const UObject* OptionalWorldContext)
 {
-	const APlayerCharacter* PlayerCharacter = GetLocalPlayerCharacter(OptionalWorldContext);
-	return PlayerCharacter ? PlayerCharacter->GetMoverComponent() : nullptr;
+	const ABmrPawn* Pawn = GetLocalPawn(OptionalWorldContext);
+	return Pawn ? Pawn->GetMoverComponent() : nullptr;
 }
 
 // Returns implemented Game Viewport Client on the project side
-UMyGameViewportClient* UMyBlueprintFunctionLibrary::GetGameViewportClient()
+UBmrGameViewportClient* UBmrBlueprintFunctionLibrary::GetGameViewportClient()
 {
-	return GEngine ? Cast<UMyGameViewportClient>(GEngine->GameViewport) : nullptr;
+	return GEngine ? Cast<UBmrGameViewportClient>(GEngine->GameViewport) : nullptr;
 }
 
 // Returns the component that responsible for mouse-related logic like showing and hiding itself
-UMouseActivityComponent* UMyBlueprintFunctionLibrary::GetMouseActivityComponent(const UObject* OptionalWorldContext /* = nullptr*/)
+UBmrMouseActivityComponent* UBmrBlueprintFunctionLibrary::GetMouseActivityComponent(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const AMyPlayerController* MyPC = GetLocalPlayerController(OptionalWorldContext);
+	const ABmrPlayerController* MyPC = GetLocalPlayerController(OptionalWorldContext);
 	return MyPC ? MyPC->GetMouseActivityComponent() : nullptr;
 }
 
 /* ---------------------------------------------------
- *		EActorType functions
+ *		EBmrActorType functions
  * --------------------------------------------------- */
 
 // Returns Actor Type of specified actor, None is not level actor
-EActorType UMyBlueprintFunctionLibrary::GetActorType(const AActor* Actor)
+EBmrActorType UBmrBlueprintFunctionLibrary::GetActorType(const AActor* Actor)
 {
 	const TSubclassOf<AActor> ActorClass = Actor ? Actor->GetClass() : nullptr;
-	const ULevelActorDataAsset* LevelActorDataAsset = ActorClass ? UDataAssetsContainer::GetDataAssetByActorClass(ActorClass) : nullptr;
+	const UBmrLevelActorDataAsset* LevelActorDataAsset = ActorClass ? UBmrDataAssetsContainer::GetDataAssetByActorClass(ActorClass) : nullptr;
 	return LevelActorDataAsset ? LevelActorDataAsset->GetActorType() : EAT::None;
 }
 
 // Returns true if specified actor is the Bomber Level Actor (player, box, wall or item)
-bool UMyBlueprintFunctionLibrary::IsLevelActor(const AActor* Actor)
+bool UBmrBlueprintFunctionLibrary::IsLevelActor(const AActor* Actor)
 {
 	return GetActorType(Actor) != EAT::None;
 }
 
 // Returns true if specified level actor has at least one specified type
-bool UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(const AActor* Actor, int32 ActorsTypesBitmask)
+bool UBmrBlueprintFunctionLibrary::IsActorHasAnyMatchingType(const AActor* Actor, int32 ActorsTypesBitmask)
 {
-	const EActorType ActorType = GetActorType(Actor);
+	const EBmrActorType ActorType = GetActorType(Actor);
 	return BitwiseActorTypes(TO_FLAG(ActorType), ActorsTypesBitmask);
 }

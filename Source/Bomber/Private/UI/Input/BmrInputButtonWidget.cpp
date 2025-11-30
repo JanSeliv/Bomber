@@ -1,23 +1,23 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "UI/Input/InputButtonWidget.h"
+#include "UI/Input/BmrInputButtonWidget.h"
 
 // Bomber
 #include "Data/SettingsDataAsset.h"
-#include "DataAssets/MyInputMappingContext.h"
-#include "DataAssets/PlayerInputDataAsset.h"
+#include "DataAssets/BmrInputMappingContext.h"
+#include "DataAssets/BmrPlayerInputDataAsset.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
-#include "Subsystems/SoundsSubsystem.h"
+#include "Subsystems/BmrSoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 
 // UE
 #include "Components/InputKeySelector.h"
 #include "Components/TextBlock.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(InputButtonWidget)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrInputButtonWidget)
 
 // Sets this button to let player remap input specified in mappable data
-void UInputButtonWidget::InitButton(const FPlayerKeyMapping& InMappableData, const UMyInputMappingContext* InInputMappingContext)
+void UBmrInputButtonWidget::InitButton(const FPlayerKeyMapping& InMappableData, const UBmrInputMappingContext* InInputMappingContext)
 {
 	if (!ensureMsgf(InMappableData.GetAssociatedInputAction(), TEXT("%s: 'InMappableData.Action' is not valid"), *FString(__FUNCTION__))
 	    || !ensureMsgf(InInputMappingContext, TEXT("ASSERT: 'InInputMappingContext' is not valid")))
@@ -25,19 +25,19 @@ void UInputButtonWidget::InitButton(const FPlayerKeyMapping& InMappableData, con
 		return;
 	}
 
-	MappableDataInternal = InMappableData;
-	InputContextInternal = InInputMappingContext;
+	MappableData = InMappableData;
+	InputContext = InInputMappingContext;
 }
 
 // Sets specified key for the current input key selector
-void UInputButtonWidget::SetCurrentKey(const FKey& NewKey)
+void UBmrInputButtonWidget::SetCurrentKey(const FKey& NewKey)
 {
 	const FKey& LastKey = GetCurrentKey();
 
 	bool bMapped = false;
-	if (!UPlayerInputDataAsset::Get().IsMappedKey(this, NewKey))
+	if (!UBmrPlayerInputDataAsset::Get().IsMappedKey(this, NewKey))
 	{
-		bMapped = UInputUtilsLibrary::RemapKeyInContext(this, InputContextInternal, MappableDataInternal.GetAssociatedInputAction(), MappableDataInternal.GetCurrentKey(), NewKey);
+		bMapped = UInputUtilsLibrary::RemapKeyInContext(this, InputContext, MappableData.GetAssociatedInputAction(), MappableData.GetCurrentKey(), NewKey);
 	}
 
 	if (!bMapped)
@@ -48,11 +48,11 @@ void UInputButtonWidget::SetCurrentKey(const FKey& NewKey)
 		return;
 	}
 
-	MappableDataInternal.SetCurrentKey(NewKey);
+	MappableData.SetCurrentKey(NewKey);
 }
 
 // Called after the underlying slate widget is constructed
-void UInputButtonWidget::NativeConstruct()
+void UBmrInputButtonWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
@@ -61,15 +61,15 @@ void UInputButtonWidget::NativeConstruct()
 		return;
 	}
 
-	InputKeySelector->SetSelectedKey(MappableDataInternal.GetCurrentKey());
-	InputKeySelector->OnKeySelected.AddUniqueDynamic(this, &UInputButtonWidget::OnKeySelected);
-	InputKeySelector->OnIsSelectingKeyChanged.AddUniqueDynamic(this, &UInputButtonWidget::OnIsSelectingKeyChanged);
+	InputKeySelector->SetSelectedKey(MappableData.GetCurrentKey());
+	InputKeySelector->OnKeySelected.AddUniqueDynamic(this, &UBmrInputButtonWidget::OnKeySelected);
+	InputKeySelector->OnIsSelectingKeyChanged.AddUniqueDynamic(this, &UBmrInputButtonWidget::OnIsSelectingKeyChanged);
 
 	UpdateStyle();
 }
 
 // Sets the style for this button
-void UInputButtonWidget::UpdateStyle()
+void UBmrInputButtonWidget::UpdateStyle()
 {
 	if (!ensureMsgf(InputKeySelector, TEXT("%s: 'InputKeySelector' is not set as BindWidget"), *FString(__FUNCTION__))
 	    || !ensureMsgf(CaptionWidget, TEXT("%s: 'CaptionWidget' is not set as BindWidget"), *FString(__FUNCTION__))
@@ -101,7 +101,7 @@ void UInputButtonWidget::UpdateStyle()
 	InputKeySelector->SetButtonStyle(ButtonStyleRef);
 
 	// Update text
-	CaptionWidget->SetText(MappableDataInternal.GetDisplayName());
+	CaptionWidget->SetText(MappableData.GetDisplayName());
 	CaptionWidget->SetFont(MiscThemeData.TextAndCaptionFont);
 	CaptionWidget->SetColorAndOpacity(MiscThemeData.TextAndCaptionColor);
 
@@ -110,13 +110,13 @@ void UInputButtonWidget::UpdateStyle()
 }
 
 // Called whenever a new key is selected by the user
-void UInputButtonWidget::OnKeySelected(FInputChord SelectedKey)
+void UBmrInputButtonWidget::OnKeySelected(FInputChord SelectedKey)
 {
 	SetCurrentKey(SelectedKey.Key);
 }
 
 // Called whenever the key selection mode starts or stops
-void UInputButtonWidget::OnIsSelectingKeyChanged()
+void UBmrInputButtonWidget::OnIsSelectingKeyChanged()
 {
-	USoundsSubsystem::Get().PlayUIClickSFX();
+	UBmrSoundsSubsystem::Get().PlayUIClickSFX();
 }

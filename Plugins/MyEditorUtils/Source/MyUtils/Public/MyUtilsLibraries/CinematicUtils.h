@@ -23,23 +23,23 @@ public:
 	 * @param SubsequenceIndex In index of subsequence to find.
 	 * @param MasterSequence The sequence holder to find subsequence in.
 	 * @return The found subsequence or nullptr if not found. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static const UMovieSceneSequence* FindSubsequence(int32 SubsequenceIndex, const UMovieSceneSequence* MasterSequence);
 
 	/** Returns the length of by given subsequence index or -1 if not found.
 	 * @param LevelSequence The sequence to get length of. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static int32 GetSequenceTotalFrames(const UMovieSceneSequence* LevelSequence);
 
 	/** Finds the first Camera Component inside the specified Level sequence player. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static class UCameraComponent* FindSequenceCameraComponent(class UMovieSceneSequencePlayer* LevelSequencePlayer);
 
 	/** Returns all sections of specified class from the Master sequence in sorted order (from the beginning to the end).
 	 * @param MasterSequence The sequence to get sections from.
 	 * @param SectionClass The class of sections.
 	 * @param OutSections The array to fill with found sections. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static void GetAllSectionsByClass(const UMovieSceneSequence* MasterSequence, TSubclassOf<UMovieSceneSection> SectionClass, TArray<UMovieSceneSection*>& OutSections);
 
 	/** Alternative version of GetAllSectionsByClass with auto cast array to the specified class. */

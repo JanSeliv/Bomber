@@ -40,7 +40,7 @@ BOMBER_API DECLARE_LOG_CATEGORY_EXTERN(LogBomber, Log, All);
  * It is possible to make a bitmask of actors types
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class EActorType : uint8
+enum class EBmrActorType : uint8
 {
 	///< None of the types for comparisons
 	None = 0,
@@ -58,8 +58,8 @@ enum class EActorType : uint8
 	All = Bomb | Item | Player | Wall | Box
 };
 
-ENUM_CLASS_FLAGS(EActorType);
-using EAT = EActorType;
+ENUM_CLASS_FLAGS(EBmrActorType);
+using EAT = EBmrActorType;
 
 /**
  * Levels in the game.
@@ -67,7 +67,7 @@ using EAT = EActorType;
  * @see ULevelActorRow::LevelType
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class ELevelType : uint8
+enum class EBmrLevelType : uint8
 {
 	None = 0,
 	///< Represents Maya level
@@ -82,8 +82,8 @@ enum class ELevelType : uint8
 	Max = First | Second | Third | Fourth UMETA(DisplayName = "Any")
 };
 
-ENUM_CLASS_FLAGS(ELevelType);
-using ELT = ELevelType;
+ENUM_CLASS_FLAGS(EBmrLevelType);
+using ELT = EBmrLevelType;
 #define ELT_FIRST_FLAG TO_FLAG(ELT::First)
 #define ELT_LAST_FLAG TO_FLAG(ELT::Fourth)
 
@@ -110,7 +110,7 @@ enum class EPathType : uint8
  * Can be tracked both on host and client by binding with BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
  */
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class ECurrentGameState : uint8
+enum class EBmrCurrentGameState : uint8
 {
 	None = 0,
 	///< Is active while players are in Main-Menu.
@@ -125,15 +125,15 @@ enum class ECurrentGameState : uint8
 	Max = Menu | GameStarting | EndGame | InGame UMETA(DisplayName = "Any")
 };
 
-ENUM_CLASS_FLAGS(ECurrentGameState);
-using ECGS = ECurrentGameState;
+ENUM_CLASS_FLAGS(EBmrCurrentGameState);
+using ECGS = EBmrCurrentGameState;
 
 /**
  * The round result.
- * Can be tracked by listening AMyPlayerState::OnEndGameStateChanged delegate.
+ * Can be tracked by listening ABmrPlayerState::OnEndGameStateChanged delegate.
  */
 UENUM(BlueprintType)
-enum class EEndGameState : uint8
+enum class EBmrEndGameState : uint8
 {
 	None,
 	///< Player is last alive
@@ -150,7 +150,7 @@ enum class EEndGameState : uint8
  * Represents the type of the character.
  */
 UENUM(BlueprintType)
-enum class EPlayerType : uint8
+enum class EBmrPlayerType : uint8
 {
 	None,
 	Human,

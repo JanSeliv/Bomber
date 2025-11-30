@@ -4,12 +4,12 @@
 
 #include "Engine/DeveloperSettings.h"
 
-#include "DataAssetsContainer.generated.h"
+#include "BmrDataAssetsContainer.generated.h"
 
-enum class EActorType : uint8;
-enum class ELevelType : uint8;
+enum class EBmrActorType : uint8;
+enum class EBmrLevelType : uint8;
 
-class ULevelActorDataAsset;
+class UBmrLevelActorDataAsset;
 
 /**
  * Contains all core data of the game.
@@ -17,13 +17,13 @@ class ULevelActorDataAsset;
  * The changes are saved in 'DefaultDataAssets.ini' file.
  */
 UCLASS(Config = "DataAssets", DefaultConfig, DisplayName = "Bomber Data Assets Container")
-class BOMBER_API UDataAssetsContainer final : public UDeveloperSettings
+class BOMBER_API UBmrDataAssetsContainer final : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
 	/** Returns the data assets container. */
-	static const UDataAssetsContainer& Get() { return *GetDefault<ThisClass>(); }
+	static const UBmrDataAssetsContainer& Get() { return *GetDefault<ThisClass>(); }
 
 	/** Gets the settings container name for the settings, either Project or Editor */
 	virtual FName GetContainerName() const override { return TEXT("Project"); }
@@ -32,90 +32,90 @@ public:
 	virtual FName GetCategoryName() const override { return TEXT("Game"); }
 
 	/** Returns the Levels Data Asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static const class UGeneratedMapDataAsset* GetGeneratedMapDataAsset();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const class UBmrGeneratedMapDataAsset* GetGeneratedMapDataAsset();
 
 	/** Returns the UI Data Asset. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get UI Data Asset"))
-	static const class UUIDataAsset* GetUIDataAsset();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "Get UI Data Asset"))
+	static const class UBmrUIDataAsset* GetUIDataAsset();
 
 	/** Returns the AI Data Asset. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get AI Data Asset"))
-	static const class UAIDataAsset* GetAIDataAsset();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "Get AI Data Asset"))
+	static const class UBmrAIDataAsset* GetAIDataAsset();
 
 	/** Returns the Player Input Data Asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static const class UPlayerInputDataAsset* GetPlayerInputDataAsset();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const class UBmrPlayerInputDataAsset* GetPlayerInputDataAsset();
 
 	/** Returns the Sounds Data Asset. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (Keywords = "Sound"))
-	static const class USoundsDataAsset* GetSoundsDataAsset();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (Keywords = "Sound"))
+	static const class UBmrSoundsDataAsset* GetSoundsDataAsset();
 
 	/** Returns the Game State Data Asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static const class UGameStateDataAsset* GetGameStateDataAsset();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const class UBmrGameStateDataAsset* GetGameStateDataAsset();
 
 	/*********************************************************************************************
 	 * Getters of Level Actor's data assets
 	 ********************************************************************************************* */
 public:
 	/** Best suits for blueprints to get the data asset by its class since converts the result to the specified class. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DeterminesOutputType = "DataAssetClass", BlueprintAutocast, Keywords = "Bomb,Box,Item,Player,Character,Wall"))
-	static const ULevelActorDataAsset* GetLevelActorDataAsset(
-	    UPARAM(meta = (AllowAbstract = "false")) TSubclassOf<ULevelActorDataAsset> DataAssetClass);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DeterminesOutputType = "DataAssetClass", BlueprintAutocast, Keywords = "Bomb,Box,Item,Wall,Pawn,Player,Character"))
+	static const UBmrLevelActorDataAsset* GetLevelActorDataAsset(
+	    UPARAM(meta = (AllowAbstract = "false")) TSubclassOf<UBmrLevelActorDataAsset> DataAssetClass);
 
 	/** Returns the data asset by its class, if not found then crash. */
-	template <typename T = ULevelActorDataAsset>
+	template <typename T = UBmrLevelActorDataAsset>
 	static const FORCEINLINE T& GetLevelActorDataAssetChecked()
 	{
-		static_assert(TIsDerivedFrom<T, ULevelActorDataAsset>::IsDerived, "T must be a subclass of ULevelActorDataAsset");
+		static_assert(TIsDerivedFrom<T, UBmrLevelActorDataAsset>::IsDerived, "T must be a subclass of UBmrLevelActorDataAsset");
 		return *CastChecked<T>(GetLevelActorDataAsset(T::StaticClass()));
 	}
 
 	/** Iterates ActorsDataAssets array and returns the found Data Asset by specified actor class. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static const ULevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<class AActor> ActorClass);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const UBmrLevelActorDataAsset* GetDataAssetByActorClass(const TSubclassOf<class AActor> ActorClass);
 
 	/** Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types. */
-	static void GetDataAssetsByActorTypes(TArray<const ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask);
+	static void GetDataAssetsByActorTypes(TArray<const UBmrLevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask);
 
 	/** Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static const ULevelActorDataAsset* GetDataAssetByActorType(EActorType ActorType);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const UBmrLevelActorDataAsset* GetDataAssetByActorType(EBmrActorType ActorType);
 
 	/** Iterate ActorsDataAssets array and returns the found actor class by specified actor type. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	static UClass* GetActorClassByType(EActorType ActorType);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static UClass* GetActorClassByType(EBmrActorType ActorType);
 
 	/*********************************************************************************************
 	 * Data Assets
 	 ********************************************************************************************* */
 protected:
 	/** Contains properties to setup the generated level, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Levels Data Asset", ShowOnlyInnerProperties))
-	TSoftObjectPtr<const class UGeneratedMapDataAsset> GeneratedMapDataAssetInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSoftObjectPtr<const class UBmrGeneratedMapDataAsset> GeneratedMapDataAsset;
 
 	/** Contains properties to setup UI, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "UI Data Asset", ShowOnlyInnerProperties))
-	TSoftObjectPtr<const class UUIDataAsset> UIDataAssetInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSoftObjectPtr<const class UBmrUIDataAsset> UIDataAsset;
 
 	/** AI data, is config property, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "AI Data Asset", ShowOnlyInnerProperties))
-	TSoftObjectPtr<const class UAIDataAsset> AIDataAssetInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSoftObjectPtr<const class UBmrAIDataAsset> AIDataAsset;
 
 	/** Player Input data, is config property, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Player Input Data Asset", ShowOnlyInnerProperties))
-	TSoftObjectPtr<const class UPlayerInputDataAsset> PlayerInputDataAssetInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSoftObjectPtr<const class UBmrPlayerInputDataAsset> PlayerInputDataAsset;
 
 	/** Sounds data, is config property, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Sounds Data Asset", ShowOnlyInnerProperties))
-	TSoftObjectPtr<const class USoundsDataAsset> SoundsDataAssetInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSoftObjectPtr<const class UBmrSoundsDataAsset> SoundsDataAsset;
 
 	/** The data of the game match, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Game State Data Asset", ShowOnlyInnerProperties))
-	TSoftObjectPtr<const class UGameStateDataAsset> GameStateDataAssetInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSoftObjectPtr<const class UBmrGameStateDataAsset> GameStateDataAsset;
 
 	/** Actor type and its associated class, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, DisplayName = "Actors Data Assets", ShowOnlyInnerProperties))
-	TArray<TSoftObjectPtr<const ULevelActorDataAsset>> ActorsDataAssetsInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TArray<TSoftObjectPtr<const UBmrLevelActorDataAsset>> ActorsDataAssets;
 };

@@ -1,22 +1,22 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "MyUnrealEdEngine.h"
+#include "BmrUnrealEdEngine.h"
 
 // UE
 #include "UnrealEdGlobals.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyUnrealEdEngine)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrUnrealEdEngine)
 
 // Will notify on any data asset changes
-UMyUnrealEdEngine::FOnAnyDataAssetChanged UMyUnrealEdEngine::GOnAnyDataAssetChanged;
+UBmrUnrealEdEngine::FOnAnyDataAssetChanged UBmrUnrealEdEngine::GOnAnyDataAssetChanged;
 
 // Binds to update movements of each AI controller.
-UMyUnrealEdEngine::FUpdateAI UMyUnrealEdEngine::GOnAIUpdatedDelegate;
+UBmrUnrealEdEngine::FUpdateAI UBmrUnrealEdEngine::GOnAIUpdatedDelegate;
 
 // Returns this Unreal Editor Engine object
-const UMyUnrealEdEngine& UMyUnrealEdEngine::Get()
+const UBmrUnrealEdEngine& UBmrUnrealEdEngine::Get()
 {
-	const UMyUnrealEdEngine* MyUnrealEdEngine = Cast<UMyUnrealEdEngine>(GUnrealEd);
+	const UBmrUnrealEdEngine* MyUnrealEdEngine = Cast<UBmrUnrealEdEngine>(GUnrealEd);
 	checkf(MyUnrealEdEngine, TEXT("The My Unread Editor Engine is not valid"));
 	return *MyUnrealEdEngine;
 }

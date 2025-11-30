@@ -1,25 +1,25 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "GeneratedMap.h"
+#include "Actors/BmrGeneratedMap.h"
 
 // Bomber
 #include "AbilitySystem/Attributes/BmrHealthAttributeSet.h"
-#include "Components/MapComponent.h"
-#include "Components/MyCameraComponent.h"
-#include "DataAssets/DataAssetsContainer.h"
-#include "DataAssets/GeneratedMapDataAsset.h"
-#include "GameFramework/MyGameStateBase.h"
+#include "Components/BmrCameraComponent.h"
+#include "Components/BmrMapComponent.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DataAssets/BmrGeneratedMapDataAsset.h"
+#include "GameFramework/BmrGameState.h"
 #include "Generators/BmrCellsGenerator_Base.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "PoolManagerSubsystem.h"
-#include "Subsystems/GeneratedMapSubsystem.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
+#include "BmrUnrealEdEngine.h"
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#include "MyUnrealEdEngine.h"
 #endif
 
 // UE
@@ -28,17 +28,17 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GeneratedMap)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGeneratedMap)
 
 // Empty generation settings instance
-const FGeneratedMapSettings FGeneratedMapSettings::Empty = FGeneratedMapSettings();
+const FBmrGeneratedMapSettings FBmrGeneratedMapSettings::Empty = FBmrGeneratedMapSettings();
 
 /* ---------------------------------------------------
  *		Generated Map public functions
  * --------------------------------------------------- */
 
 // Sets default values
-AGeneratedMap::AGeneratedMap()
+ABmrGeneratedMap::ABmrGeneratedMap()
 {
 	// Set this actor to call Tick() every time to update characters locations
 	PrimaryActorTick.bCanEverTick = false;
@@ -51,8 +51,8 @@ AGeneratedMap::AGeneratedMap()
 
 	// Replicate an actor
 	bReplicates = true;
-	static constexpr float NewNewUpdateFrequency = 10.f;
-	SetNetUpdateFrequency(NewNewUpdateFrequency);
+	static constexpr float NewUpdateFrequency = 10.f;
+	SetNetUpdateFrequency(NewUpdateFrequency);
 	bAlwaysRelevant = true;
 
 #if WITH_EDITOR //[Editor]
@@ -67,81 +67,81 @@ AGeneratedMap::AGeneratedMap()
 	RootComponent->SetIsReplicated(true); // Enable to replicate own transform and attached level actors
 
 	// Find blueprint class of the background
-	CollisionComponentInternal = CreateDefaultSubobject<UChildActorComponent>(TEXT("Collision Component"));
-	CollisionComponentInternal->SetupAttachment(RootComponent);
+	CollisionComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("Collision Component"));
+	CollisionComponent->SetupAttachment(RootComponent);
 
 	// Default camera class
-	CameraComponentInternal = CreateDefaultSubobject<UMyCameraComponent>(TEXT("Camera Component"));
-	CameraComponentInternal->SetupAttachment(RootComponent);
+	CameraComponent = CreateDefaultSubobject<UBmrCameraComponent>(TEXT("Camera Component"));
+	CameraComponent->SetupAttachment(RootComponent);
 
 	// Create ASC on Generated Map for environmental abilities and level-related mods (e.g., environmental explosions)
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
-	HealthSetInternal = CreateDefaultSubobject<UBmrHealthAttributeSet>(TEXT("HealthAttributeSet"));
+	HealthSet = CreateDefaultSubobject<UBmrHealthAttributeSet>(TEXT("HealthAttributeSet"));
 }
 
 // Returns the generated map
-AGeneratedMap& AGeneratedMap::Get(const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrGeneratedMap& ABmrGeneratedMap::Get(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	AGeneratedMap* GeneratedMap = UGeneratedMapSubsystem::Get(OptionalWorldContext).GetGeneratedMap();
+	ABmrGeneratedMap* GeneratedMap = UBmrGeneratedMapSubsystem::Get(OptionalWorldContext).GetGeneratedMap();
 	checkf(GeneratedMap, TEXT("%s: ERROR: 'GeneratedMap' is null"), *FString(__FUNCTION__));
 	return *GeneratedMap;
 }
 
 // Attempts to return the generated map, nullptr otherwise
-AGeneratedMap* AGeneratedMap::GetGeneratedMap(const UObject* OptionalWorldContext /* = nullptr*/)
+ABmrGeneratedMap* ABmrGeneratedMap::GetGeneratedMap(const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	constexpr bool bWarnIfNull = false;
-	const UGeneratedMapSubsystem* Subsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem(OptionalWorldContext);
+	const UBmrGeneratedMapSubsystem* Subsystem = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(OptionalWorldContext);
 	return Subsystem ? Subsystem->GetGeneratedMap(bWarnIfNull) : nullptr;
 }
 
 // Returns the settings used for generating the map
-const FGeneratedMapSettings& AGeneratedMap::GetGenerationSetting() const
+const FBmrGeneratedMapSettings& ABmrGeneratedMap::GetGenerationSetting() const
 {
-	if (bOverrideGenerationSettingsInternal
-	    && OverriddenGenerationSettingsInternal.IsValid())
+	if (bOverrideGenerationSettings
+	    && OverriddenGenerationSettings.IsValid())
 	{
-		return OverriddenGenerationSettingsInternal;
+		return OverriddenGenerationSettings;
 	}
 
-	if (const UGeneratedMapDataAsset* GeneratedMapDataAsset = UDataAssetsContainer::GetGeneratedMapDataAsset())
+	if (const UBmrGeneratedMapDataAsset* GeneratedMapDataAsset = UBmrDataAssetsContainer::GetGeneratedMapDataAsset())
 	{
 		return GeneratedMapDataAsset->GetGenerationSettings();
 	}
 
-	return FGeneratedMapSettings::Empty;
+	return FBmrGeneratedMapSettings::Empty;
 }
 
 // Allows to override the default settings used for generating the m
-void AGeneratedMap::SetOverriddenGenerationSettings(bool bEnableOverride, const FGeneratedMapSettings& InSettings)
+void ABmrGeneratedMap::SetOverriddenGenerationSettings(bool bEnableOverride, const FBmrGeneratedMapSettings& InSettings)
 {
 	if (!HasAuthority())
 	{
 		return;
 	}
 
-	bOverrideGenerationSettingsInternal = bEnableOverride;
+	bOverrideGenerationSettings = bEnableOverride;
 
 	if (!bEnableOverride)
 	{
 		// Disable override and cleanup
-		OverriddenGenerationSettingsInternal = FGeneratedMapSettings::Empty;
+		OverriddenGenerationSettings = FBmrGeneratedMapSettings::Empty;
 		return;
 	}
 
-	OverriddenGenerationSettingsInternal = InSettings;
+	OverriddenGenerationSettings = InSettings;
 
-	if (!OverriddenGenerationSettingsInternal.Generator)
+	if (!OverriddenGenerationSettings.Generator)
 	{
 		// Generator is optional and might be not set, use the default one from Data Asset then
-		OverriddenGenerationSettingsInternal.Generator = UGeneratedMapDataAsset::Get().GetGenerationSettings().Generator;
+		OverriddenGenerationSettings.Generator = UBmrGeneratedMapDataAsset::Get().GetGenerationSettings().Generator;
 	}
 }
 
 // Allows to change the size for generated map in runtime, it will automatically regenerate the level
-void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
+void ABmrGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 {
 	if (!HasAuthority()
 	    || !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%hs: 'LevelSize' is invalid: %s"), __FUNCTION__, *LevelSize.ToString()))
@@ -157,21 +157,21 @@ void AGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
  ********************************************************************************************* */
 
 // Spawns level actor on the Generated Map by the specified type
-void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const TFunction<void(UMapComponent&)>& OnSpawned /* = nullptr*/)
+void ABmrGeneratedMap::SpawnActorByType(EBmrActorType Type, const FBmrCell& Cell, const TFunction<void(UBmrMapComponent&)>& OnSpawned /* = nullptr*/)
 {
 	if (!HasAuthority()
-	    || UCellsUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
+	    || UBmrCellUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
 	    || Type == EAT::None) // nothing to spawn
 	{
 		return;
 	}
 
-	TRACE_CPUPROFILER_EVENT_SCOPE(AGeneratedMap::SpawnActorByType);
+	TRACE_CPUPROFILER_EVENT_SCOPE(ABmrGeneratedMap::SpawnActorByType);
 
 	// --- Prepare spawn request
 	const FOnSpawnCallback OnCompleted = [WeakThis = TWeakObjectPtr(this), OnSpawned](const FPoolObjectData& CreatedObject)
 	{
-		AGeneratedMap* This = WeakThis.Get();
+		ABmrGeneratedMap* This = WeakThis.Get();
 		if (!This)
 		{
 			return;
@@ -182,7 +182,7 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 		SpawnedActor.SetFlags(RF_Transient); // Do not save generated actors into the map
 		SpawnedActor.SetOwner(This);
 
-		UMapComponent* MapComponent = UMapComponent::GetMapComponent(&SpawnedActor);
+		UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(&SpawnedActor);
 		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 
 		This->AddToGrid(MapComponent);
@@ -194,16 +194,16 @@ void AGeneratedMap::SpawnActorByType(EActorType Type, const FCell& Cell, const T
 	};
 
 	// --- Spawn actor
-	const UClass* ClassToSpawn = UDataAssetsContainer::GetActorClassByType(Type);
+	const UClass* ClassToSpawn = UBmrDataAssetsContainer::GetActorClassByType(Type);
 	const FPoolObjectHandle Handle = UPoolManagerSubsystem::Get().TakeFromPool(ClassToSpawn, FTransform(Cell), OnCompleted);
 
 	// --- Add Handle if requested spawning, so it can be canceled if regenerate before spawning finished
 	checkf(Handle.IsValid(), TEXT("ERROR: [%i] %s:\n'Handle' is not valid!"), __LINE__, *FString(__FUNCTION__));
-	MapComponentsInternal.FindOrAdd(Handle);
+	MapComponents.FindOrAdd(Handle);
 }
 
 // Spawns multiple level actors at once, mostly used for level generation
-void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSpawn, const TFunction<void(const TArray<UMapComponent*>&)>& OnSpawned /* = nullptr*/)
+void ABmrGeneratedMap::SpawnActorsByTypes(const TMap<FBmrCell, EBmrActorType>& ActorsToSpawn, const TFunction<void(const TArray<UBmrMapComponent*>&)>& OnSpawned /* = nullptr*/)
 {
 	if (!HasAuthority())
 	{
@@ -212,39 +212,39 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 
 	// --- Prepare spawn requests
 	TArray<FSpawnRequest> InRequests;
-	for (const TTuple<FCell, EActorType>& It : ActorsToSpawn)
+	for (const TTuple<FBmrCell, EBmrActorType>& It : ActorsToSpawn)
 	{
-		const FCell& Cell = It.Key;
-		const EActorType& Type = It.Value;
+		const FBmrCell& Cell = It.Key;
+		const EBmrActorType& Type = It.Value;
 
-		if (UCellsUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
+		if (UBmrCellUtilsLibrary::IsCellHasAnyMatchingActor(Cell, TO_FLAG(~EAT::Player)) // the free cell was not found
 		    || Type == EAT::None) // nothing to spawn
 		{
 			continue;
 		}
 
-		FSpawnRequest& NewRequestRef = InRequests.Emplace_GetRef(UDataAssetsContainer::GetActorClassByType(Type));
+		FSpawnRequest& NewRequestRef = InRequests.Emplace_GetRef(UBmrDataAssetsContainer::GetActorClassByType(Type));
 		NewRequestRef.Transform = FTransform(Cell);
 	}
 
 	// --- Prepare On Spawn All callback
 	const FOnSpawnAllCallback OnCompleted = [WeakThis = TWeakObjectPtr(this), OnSpawned](const TArray<FPoolObjectData>& CreatedObjects)
 	{
-		AGeneratedMap* This = WeakThis.Get();
+		ABmrGeneratedMap* This = WeakThis.Get();
 		if (!This)
 		{
 			return;
 		}
 
 		// Setup spawned actors
-		TArray<UMapComponent*> MapComponents;
+		TArray<UBmrMapComponent*> MapComponents;
 		for (const FPoolObjectData& CreatedObject : CreatedObjects)
 		{
 			AActor& SpawnedActor = CreatedObject.GetChecked<AActor>();
 			SpawnedActor.SetFlags(RF_Transient); // Do not save generated actors into the map
 			SpawnedActor.SetOwner(This);
 
-			UMapComponent* MapComponent = UMapComponent::GetMapComponent(&SpawnedActor);
+			UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(&SpawnedActor);
 			checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 			MapComponents.AddUnique(MapComponent);
 
@@ -264,12 +264,12 @@ void AGeneratedMap::SpawnActorsByTypes(const TMap<FCell, EActorType>& ActorsToSp
 	// --- Add handles if requested spawning, so they can be canceled if regenerate before spawning finished
 	for (const FPoolObjectHandle& HandleIt : Handles)
 	{
-		MapComponentsInternal.FindOrAdd(HandleIt);
+		MapComponents.FindOrAdd(HandleIt);
 	}
 }
 
 // Spawns level actor of given type by the specified pattern
-void AGeneratedMap::SpawnActorsByPattern(EActorType ActorsType, const TArray<FIntPoint>& Positions)
+void ABmrGeneratedMap::SpawnActorsByPattern(EBmrActorType ActorsType, const TArray<FIntPoint>& Positions)
 {
 	if (!HasAuthority()
 	    || !ensureMsgf(ActorsType != EAT::None, TEXT("ASSERT: [%i] %hs:\n'ActorsType' is None!"), __LINE__, __FUNCTION__)
@@ -279,21 +279,21 @@ void AGeneratedMap::SpawnActorsByPattern(EActorType ActorsType, const TArray<FIn
 	}
 
 	// Spawn actors by the specified columns (X) and rows (Y)
-	TMap<FCell, EActorType> CellsToSpawn;
+	TMap<FBmrCell, EBmrActorType> CellsToSpawn;
 	for (const FIntPoint& It : Positions)
 	{
-		FCell Cell = UCellsUtilsLibrary::GetCellByPositionOnLevel(It.X, It.Y);
+		FBmrCell Cell = UBmrCellUtilsLibrary::GetCellByPositionOnLevel(It.X, It.Y);
 		CellsToSpawn.Emplace(MoveTemp(Cell), ActorsType);
 	}
 	SpawnActorsByTypes(CellsToSpawn);
 }
 
 // Spawns level actors with the specified mesh data on the Generated Map
-void AGeneratedMap::SpawnActorWithMesh(EActorType ActorType, const FCell& Cell, const FBmrMeshData& MeshData)
+void ABmrGeneratedMap::SpawnActorWithMesh(EBmrActorType ActorType, const FBmrCell& Cell, const FBmrMeshData& MeshData)
 {
 	if (ensureMsgf(MeshData.IsValid(), TEXT("ASSERT: [%i] %hs:\n'MeshData' is not valid!"), __LINE__, __FUNCTION__))
 	{
-		const auto& OnSpawned = [MeshData](UMapComponent& MapComponent)
+		const auto& OnSpawned = [MeshData](UBmrMapComponent& MapComponent)
 		{
 			MapComponent.SetReplicatedMeshData(MeshData);
 		};
@@ -302,7 +302,7 @@ void AGeneratedMap::SpawnActorWithMesh(EActorType ActorType, const FCell& Cell, 
 }
 
 // Adding and attaching the specified Map Component to the Level
-void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
+void ABmrGeneratedMap::AddToGrid(UBmrMapComponent* AddedComponent)
 {
 	AActor* ComponentOwner = AddedComponent ? AddedComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
@@ -315,7 +315,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 	const bool bSnapped = SetNearestCell(AddedComponent);
 
 	if (!bSnapped
-	    && MapComponentsInternal.Contains(AddedComponent))
+	    && MapComponents.Contains(AddedComponent))
 	{
 		// Is already on the same cell and registered
 		return;
@@ -334,7 +334,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 		Handle = ObjectData.Handle;
 	}
 
-	const FCell& Cell = AddedComponent->GetCell();
+	const FBmrCell& Cell = AddedComponent->GetCell();
 	if (!ensureMsgf(Cell.IsValid(), TEXT("ASSERT: 'Cell' is zero")))
 	{
 		// Actor is already added on the level
@@ -344,14 +344,14 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 	AddToGridDragged(AddedComponent);
 
 	// If found, means was spawned before, otherwise is taken from pool
-	FMapComponentSpec& NewSpec = MapComponentsInternal.FindOrAdd(Handle);
+	FBmrMapComponentSpec& NewSpec = MapComponents.FindOrAdd(Handle);
 	NewSpec.MapComponent = AddedComponent;
 	NewSpec.Cell = Cell;
-	MapComponentsInternal.MarkItemDirty(NewSpec);
+	MapComponents.MarkItemDirty(NewSpec);
 
 	// Find transform
 	FRotator ActorRotation = GetActorRotation();
-	const EActorType ActorType = AddedComponent->GetActorType();
+	const EBmrActorType ActorType = AddedComponent->GetActorType();
 	if (TO_FLAG(ActorType) & TO_FLAG(EAT::Box | EAT::Wall))
 	{
 		// Random rotate if is Box or Wall
@@ -379,7 +379,7 @@ void AGeneratedMap::AddToGrid(UMapComponent* AddedComponent)
 }
 
 // Client-only method to resolve a newly spawned Map Component
-void AGeneratedMap::ResolveSpawnedMapComponent(UMapComponent& AddedComponent)
+void ABmrGeneratedMap::ResolveSpawnedMapComponent(UBmrMapComponent& AddedComponent)
 {
 	if (HasAuthority())
 	{
@@ -387,8 +387,8 @@ void AGeneratedMap::ResolveSpawnedMapComponent(UMapComponent& AddedComponent)
 		return;
 	}
 
-	const FCell Cell = UCellsUtilsLibrary::SnapActorOnLevel(AddedComponent.GetOwner());
-	FMapComponentSpec* FoundSpec = MapComponentsInternal.Find(Cell);
+	const FBmrCell Cell = UBmrCellUtilsLibrary::SnapActorOnLevel(AddedComponent.GetOwner());
+	FBmrMapComponentSpec* FoundSpec = MapComponents.Find(Cell);
 	if (!FoundSpec)
 	{
 		// Not found, nothing to resolve
@@ -402,16 +402,16 @@ void AGeneratedMap::ResolveSpawnedMapComponent(UMapComponent& AddedComponent)
 		// Validate the reference to fixup broken reference
 		// It intentionally affects only this client, but not server and other players
 		FoundSpec->MapComponent = &AddedComponent;
-		FoundSpec->PostReplicatedAdd(MapComponentsInternal);
+		FoundSpec->PostReplicatedAdd(MapComponents);
 	}
 }
 
 // Internal method called on both server and client to increment the replication token whenever any level actor is spawned
-void AGeneratedMap::IncrementReplicationToken()
+void ABmrGeneratedMap::IncrementReplicationToken()
 {
-	++MapComponentsInternal.LocalReplicationToken;
+	++MapComponents.LocalReplicationToken;
 
-	if (MapComponentsInternal.LocalReplicationToken == GenerateLevelActorsTokenInternal)
+	if (MapComponents.LocalReplicationToken == GenerateLevelActorsToken)
 	{
 		// All level actors completed spawn (on server) or all replicated (on client)
 		OnGeneratedLevelActors.Broadcast();
@@ -423,24 +423,24 @@ void AGeneratedMap::IncrementReplicationToken()
  ********************************************************************************************* */
 
 // Destroy all actors from the set of cells
-void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* DestroyCauser /* = nullptr*/)
+void ABmrGeneratedMap::DestroyLevelActorsOnCells(const FBmrCells& Cells, UObject* DestroyCauser /* = nullptr*/)
 {
 	if (!HasAuthority()
-	    || !MapComponentsInternal.Num()
+	    || !MapComponents.Num()
 	    || !Cells.Num())
 	{
 		return;
 	}
 
 	// Iterate and destroy
-	for (int32 Index = MapComponentsInternal.Num() - 1; Index >= 0; --Index)
+	for (int32 Index = MapComponents.Num() - 1; Index >= 0; --Index)
 	{
-		if (!MapComponentsInternal.IsValidIndex(Index)) // the element already was removed
+		if (!MapComponents.IsValidIndex(Index)) // the element already was removed
 		{
 			continue;
 		}
 
-		UMapComponent* MapComponentIt = MapComponentsInternal[Index];
+		UBmrMapComponent* MapComponentIt = MapComponents[Index];
 		const AActor* OwnerIt = MapComponentIt ? MapComponentIt->GetOwner() : nullptr;
 		const bool bCellIsOnGrid = MapComponentIt && Cells.Contains(MapComponentIt->GetCell());
 		if (!OwnerIt // if is null, destroy that object from the array
@@ -452,18 +452,18 @@ void AGeneratedMap::DestroyLevelActorsOnCells(const FCells& Cells, UObject* Dest
 			DestroyLevelActor(MapComponentIt, DestroyCauser);
 		}
 	}
-	MapComponentsInternal.Items.Shrink();
+	MapComponents.Items.Shrink();
 }
 
 // Destroy level actor by specified Map Component from the level
-void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* DestroyCauser /* = nullptr*/)
+void ABmrGeneratedMap::DestroyLevelActor(UBmrMapComponent* MapComponent, UObject* DestroyCauser /* = nullptr*/)
 {
 	if (!HasAuthority())
 	{
 		return;
 	}
 
-	TRACE_CPUPROFILER_EVENT_SCOPE(AGeneratedMap::DestroyLevelActor);
+	TRACE_CPUPROFILER_EVENT_SCOPE(ABmrGeneratedMap::DestroyLevelActor);
 
 	AActor* ComponentOwner = MapComponent ? MapComponent->GetOwner() : nullptr;
 	if (!ComponentOwner)
@@ -474,7 +474,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 	// First, unregister from the level
 	RemoveFromGrid(MapComponent, DestroyCauser);
 
-	MapComponentsInternal.Remove(MapComponent);
+	MapComponents.Remove(MapComponent);
 
 	// Perform destroy itself
 	UPoolManagerSubsystem* PoolManager = UPoolManagerSubsystem::GetPoolManager(this);
@@ -496,7 +496,7 @@ void AGeneratedMap::DestroyLevelActor(UMapComponent* MapComponent, UObject* Dest
 }
 
 // Destroys level actor by specified handle
-void AGeneratedMap::DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, UObject* DestroyCauser)
+void ABmrGeneratedMap::DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, UObject* DestroyCauser)
 {
 	if (!HasAuthority()
 	    || !ensureMsgf(Handle.IsValid(), TEXT("ASSERT: [%i] %s:\n'Handle' is not valid!"), __LINE__, *FString(__FUNCTION__)))
@@ -504,13 +504,13 @@ void AGeneratedMap::DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, U
 		return;
 	}
 
-	const FMapComponentSpec* MapComponentData = MapComponentsInternal.Find(Handle);
+	const FBmrMapComponentSpec* MapComponentData = MapComponents.Find(Handle);
 	if (!ensureMsgf(MapComponentData, TEXT("ASSERT: [%i] %s:\n'MapComponentData' is not found by given handle!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		return;
 	}
 
-	if (UMapComponent* MapComponent = MapComponentData->MapComponent)
+	if (UBmrMapComponent* MapComponent = MapComponentData->MapComponent)
 	{
 		DestroyLevelActor(MapComponent, DestroyCauser);
 		return;
@@ -519,11 +519,11 @@ void AGeneratedMap::DestroyLevelActorByHandle(const FPoolObjectHandle& Handle, U
 	// Map component was not found, it could be not spawned, but in spawn request in queue
 	UPoolManagerSubsystem::Get().ReturnToPool(Handle);
 
-	MapComponentsInternal.Remove(Handle);
+	MapComponents.Remove(Handle);
 }
 
 // Destroy all level actors of given type from the level
-void AGeneratedMap::DestroyLevelActorsByType(EActorType ActorsType, UObject* DestroyCauser)
+void ABmrGeneratedMap::DestroyLevelActorsByType(EBmrActorType ActorsType, UObject* DestroyCauser)
 {
 	if (!HasAuthority()
 	    || ActorsType == EAT::None)
@@ -531,12 +531,12 @@ void AGeneratedMap::DestroyLevelActorsByType(EActorType ActorsType, UObject* Des
 		return;
 	}
 
-	const FCells ExistingActorCells = UCellsUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorsType));
+	const FBmrCells ExistingActorCells = UBmrCellUtilsLibrary::GetAllCellsWithActors(TO_FLAG(ActorsType));
 	DestroyLevelActorsOnCells(ExistingActorCells);
 }
 
 // Is called before Destroy happening, which only unregisters the Map Component
-void AGeneratedMap::RemoveFromGrid(UMapComponent* MapComponent, UObject* RemoveCauser)
+void ABmrGeneratedMap::RemoveFromGrid(UBmrMapComponent* MapComponent, UObject* RemoveCauser)
 {
 	if (!HasAuthority()
 	    || !MapComponent)
@@ -547,17 +547,17 @@ void AGeneratedMap::RemoveFromGrid(UMapComponent* MapComponent, UObject* RemoveC
 	MapComponent->OnPreRemoved(RemoveCauser);
 
 	// Invalidate spec now (removal will be performed if only DestroyLevelActor called)
-	if (FMapComponentSpec* Spec = MapComponentsInternal.Find(MapComponent))
+	if (FBmrMapComponentSpec* Spec = MapComponents.Find(MapComponent))
 	{
-		Spec->Cell = FCell::InvalidCell;
-		MapComponentsInternal.MarkItemDirty(*Spec);
+		Spec->Cell = FBmrCell::InvalidCell;
+		MapComponents.MarkItemDirty(*Spec);
 	}
 }
 
 // Applies the snapped cell to the specified Map Component
-bool AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
+bool ABmrGeneratedMap::SetNearestCell(UBmrMapComponent* InMapComponent)
 {
-	const AActor* LevelActor = MapComponent ? MapComponent->GetOwner() : nullptr;
+	const AActor* LevelActor = InMapComponent ? InMapComponent->GetOwner() : nullptr;
 	if (!HasAuthority()
 	    || !LevelActor)
 	{
@@ -565,12 +565,12 @@ bool AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 	}
 
 	// In game, snap the actor to the current cell (even if the cell is occupied by others)
-	const FCell& LastCell = MapComponent->GetCell();
-	FCell FoundFreeCell = UCellsUtilsLibrary::SnapActorOnLevel(LevelActor);
+	const FBmrCell& LastCell = InMapComponent->GetCell();
+	FBmrCell FoundFreeCell = UBmrCellUtilsLibrary::SnapActorOnLevel(LevelActor);
 	const bool bIsSnappedGame = FoundFreeCell != LastCell;
 
 	/// In editor world, always perform additional snaps
-	const bool bIsSnappedDragged = SetNearestCellDragged(MapComponent, /*InOut*/ FoundFreeCell);
+	const bool bIsSnappedDragged = SetNearestCellDragged(InMapComponent, /*InOut*/ FoundFreeCell);
 
 	if (!bIsSnappedGame && !bIsSnappedDragged)
 	{
@@ -578,21 +578,21 @@ bool AGeneratedMap::SetNearestCell(UMapComponent* MapComponent)
 		return false;
 	}
 
-	MapComponent->SetCell(FoundFreeCell);
+	InMapComponent->SetCell(FoundFreeCell);
 
 	// If Map Component is added to the level (spec exists), then update its cell for the replication purpose
 	// It might be not added to the level yet by design, so it will be added and updated later
-	if (FMapComponentSpec* Spec = MapComponentsInternal.Find(MapComponent))
+	if (FBmrMapComponentSpec* Spec = MapComponents.Find(InMapComponent))
 	{
 		Spec->Cell = FoundFreeCell;
-		MapComponentsInternal.MarkItemDirty(*Spec);
+		MapComponents.MarkItemDirty(*Spec);
 	}
 
 	return true;
 }
 
 // Takes transform and returns aligned copy allowed to be used as actor transform for this map
-FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorTransform)
+FTransform ABmrGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorTransform)
 {
 	FTransform NewTransform = FTransform::Identity;
 
@@ -600,7 +600,7 @@ FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorT
 	FVector NewLocation = FVector::ZeroVector;
 	if (!Get().GetGenerationSetting().LockOnZero)
 	{
-		NewLocation = FCell::SnapCell(ActorTransform.GetLocation());
+		NewLocation = FBmrCell::SnapCell(ActorTransform.GetLocation());
 	}
 	NewTransform.SetLocation(NewLocation);
 
@@ -625,7 +625,7 @@ FTransform AGeneratedMap::ActorTransformToGridTransform(const FTransform& ActorT
 }
 
 // Returns ability system component that is used to manage environmental abilities, crash if nullptr
-UAbilitySystemComponent& AGeneratedMap::GetAbilitySystemComponentChecked() const
+UAbilitySystemComponent& ABmrGeneratedMap::GetAbilitySystemComponentChecked() const
 {
 	checkf(AbilitySystemComponent, TEXT("ERROR: [%i] %hs:\n'AbilitySystemComponent' is null!"), __LINE__, __FUNCTION__);
 	return *AbilitySystemComponent;
@@ -636,7 +636,7 @@ UAbilitySystemComponent& AGeneratedMap::GetAbilitySystemComponentChecked() const
  * --------------------------------------------------- */
 
 // Called when an instance of this class is placed (in editor) or spawned
-void AGeneratedMap::OnConstruction(const FTransform& Transform)
+void ABmrGeneratedMap::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
@@ -648,7 +648,7 @@ void AGeneratedMap::OnConstruction(const FTransform& Transform)
 }
 
 // Initialize this Generated Map actor, could be called multiple times
-void AGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransform& Transform)
+void ABmrGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransform& Transform)
 {
 	if (IS_TRANSIENT(this)
 	    || !ensureMsgf(!Transform.GetScale3D().IsZero(), TEXT("ASSERT: [%i] %hs:\n'Transform' has zero scale!"), __LINE__, __FUNCTION__))
@@ -657,29 +657,29 @@ void AGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransform& 
 	}
 
 #if WITH_EDITOR // [GEditor]
-	UGeneratedMapSubsystem::Get().SetGeneratedMap(this);
+	UBmrGeneratedMapSubsystem::Get().SetGeneratedMap(this);
 	if (GEditor // Can be bound before editor is loaded
-	    && !UMyUnrealEdEngine::GOnAnyDataAssetChanged.IsBoundToObject(this))
+	    && !UBmrUnrealEdEngine::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
 		// Should be bind in construction in a case of object reconstructing after blueprint compile
-		UMyUnrealEdEngine::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
+		UBmrUnrealEdEngine::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
 	}
 #endif // WITH_EDITOR [GEditor]
 
 	// Create the background blueprint child actor
-	if (CollisionComponentInternal // Is accessible
-	    && !CollisionComponentInternal->GetChildActor()) // Is not created yet
+	if (CollisionComponent // Is accessible
+	    && !CollisionComponent->GetChildActor()) // Is not created yet
 	{
-		const TSubclassOf<AActor> CollisionsAssetClass = UGeneratedMapDataAsset::Get().GetCollisionsAssetClass();
-		CollisionComponentInternal->SetChildActorClass(CollisionsAssetClass);
-		CollisionComponentInternal->CreateChildActor();
+		const TSubclassOf<AActor> CollisionsAssetClass = UBmrGeneratedMapDataAsset::Get().GetCollisionsAssetClass();
+		CollisionComponent->SetChildActorClass(CollisionsAssetClass);
+		CollisionComponent->CreateChildActor();
 	}
 
 	// If generation settings are overridden, validate the generator
-	if (bOverrideGenerationSettingsInternal
-	    && !OverriddenGenerationSettingsInternal.Generator)
+	if (bOverrideGenerationSettings
+	    && !OverriddenGenerationSettings.Generator)
 	{
-		OverriddenGenerationSettingsInternal.Generator = UGeneratedMapDataAsset::Get().GetGenerationSettings().Generator;
+		OverriddenGenerationSettings.Generator = UBmrGeneratedMapDataAsset::Get().GetGenerationSettings().Generator;
 	}
 
 	// Align transform and build cells
@@ -689,14 +689,14 @@ void AGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransform& 
 	GenerateLevelActors();
 
 	// Update camera position
-	if (CameraComponentInternal)
+	if (CameraComponent)
 	{
-		CameraComponentInternal->UpdateLocation();
+		CameraComponent->UpdateLocation();
 	}
 }
 
 // Called right before components are initialized, only called during gameplay
-void AGeneratedMap::PreInitializeComponents()
+void ABmrGeneratedMap::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 
@@ -705,7 +705,7 @@ void AGeneratedMap::PreInitializeComponents()
 }
 
 // This is called only in the gameplay before calling begin play to generate level actors
-void AGeneratedMap::PostInitializeComponents()
+void ABmrGeneratedMap::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	if (IS_TRANSIENT(this)) // the Generated Map is transient
@@ -714,7 +714,7 @@ void AGeneratedMap::PostInitializeComponents()
 	}
 
 	// Update the gameplay GeneratedMap reference in the singleton library
-	UGeneratedMapSubsystem::Get().SetGeneratedMap(this);
+	UBmrGeneratedMapSubsystem::Get().SetGeneratedMap(this);
 
 	GetAbilitySystemComponentChecked().InitAbilityActorInfo(this, this);
 
@@ -726,7 +726,7 @@ void AGeneratedMap::PostInitializeComponents()
 	checkf(RootComponent, TEXT("ERROR: [%i] %hs:\n'RootComponent' is null!"), __LINE__, __FUNCTION__);
 	RootComponent->TransformUpdated.AddLambda([WeakThis = TWeakObjectPtr(this)](USceneComponent*, EUpdateTransformFlags, ETeleportType)
 	{
-		if (AGeneratedMap* This = WeakThis.Get())
+		if (ABmrGeneratedMap* This = WeakThis.Get())
 		{
 			This->OnConstructionGeneratedMap(This->GetActorTransform());
 		}
@@ -734,7 +734,7 @@ void AGeneratedMap::PostInitializeComponents()
 }
 
 // Called when is explicitly being destroyed to destroy level actors, not called during level streaming or gameplay ending
-void AGeneratedMap::Destroyed()
+void ABmrGeneratedMap::Destroyed()
 {
 	if (!IS_TRANSIENT(this)
 	    && HasAuthority())
@@ -743,17 +743,17 @@ void AGeneratedMap::Destroyed()
 		UPoolManagerSubsystem::Get().EmptyAllPools();
 
 		// Destroy level actors in internal arrays
-		const int32 MapComponentsNum = MapComponentsInternal.Num();
+		const int32 MapComponentsNum = MapComponents.Num();
 		for (int32 Index = MapComponentsNum - 1; Index >= 0; --Index)
 		{
-			DestroyLevelActor(MapComponentsInternal[Index]);
+			DestroyLevelActor(MapComponents[Index]);
 		}
 
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 		if (FEditorUtilsLibrary::IsEditorNotPieWorld())
 		{
 			// Remove editor bound delegates
-			UMyUnrealEdEngine::GOnAnyDataAssetChanged.RemoveAll(this);
+			UBmrUnrealEdEngine::GOnAnyDataAssetChanged.RemoveAll(this);
 		}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 	}
@@ -767,35 +767,35 @@ void AGeneratedMap::Destroyed()
 }
 
 // Returns properties that are replicated for the lifetime of the actor channel
-void AGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ABmrGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MapComponentsInternal, Params);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, GenerateLevelActorsTokenInternal, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MapComponents, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, GenerateLevelActorsToken, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AbilitySystemComponent, Params);
 }
 
 // Spawns and fills the Grid Array values by level actors
-void AGeneratedMap::GenerateLevelActors()
+void ABmrGeneratedMap::GenerateLevelActors()
 {
-	if (!ensureMsgf(!LocalGridCellsInternal.IsEmpty(), TEXT("ASSERT: [%i] %hs:\nThere are no cells on the Generated Map!"), __LINE__, __FUNCTION__)
+	if (!ensureMsgf(!LocalGridCells.IsEmpty(), TEXT("ASSERT: [%i] %hs:\nThere are no cells on the Generated Map!"), __LINE__, __FUNCTION__)
 	    || !HasAuthority()
-	    || bIsCurrentlyGeneratingInternal)
+	    || bIsCurrentlyGenerating)
 	{
 		return;
 	}
 
-	TRACE_CPUPROFILER_EVENT_SCOPE(AGeneratedMap::GenerateLevelActors);
+	TRACE_CPUPROFILER_EVENT_SCOPE(ABmrGeneratedMap::GenerateLevelActors);
 
-	bIsCurrentlyGeneratingInternal = true;
+	bIsCurrentlyGenerating = true;
 
 	// Destroy all actors first
 	// Iterate it by handles to cancel spawning even if the actor is not spawned yet
-	TArray<FMapComponentSpec>& MapComponentsToDestroy = MapComponentsInternal.Items;
+	TArray<FBmrMapComponentSpec>& MapComponentsToDestroy = MapComponents.Items;
 	for (int32 Idx = MapComponentsToDestroy.Num() - 1; Idx >= 0; Idx--)
 	{
 		DestroyLevelActorByHandle(MapComponentsToDestroy[Idx].PoolObjectHandle);
@@ -805,19 +805,19 @@ void AGeneratedMap::GenerateLevelActors()
 	AdditionalDangerousCells.Reset();
 
 	FBmrGeneratorData GeneratorData;
-	GeneratorData.AllCells = LocalGridCellsInternal;
+	GeneratorData.AllCells = LocalGridCells;
 	GeneratorData.MapScale = FIntPoint(GetActorScale3D().X, GetActorScale3D().Y);
-	GeneratorData.AllCellPositions = FCell::GetPositionsByCellsOnGrid(LocalGridCellsInternal, GeneratorData.MapScale.X);
+	GeneratorData.AllCellPositions = FBmrCell::GetPositionsByCellsOnGrid(LocalGridCells, GeneratorData.MapScale.X);
 	GeneratorData.GenerationSettings = GetGenerationSetting();
-	GeneratorData.DraggedCells = DraggedCellsInternal;
+	GeneratorData.DraggedCells = DraggedCells;
 
 	// Compute cells on background thread and finish with spawning on the game thread (copy data for thread safety)
 	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [WeakThis = TWeakObjectPtr(this), InData = MoveTemp(GeneratorData)]() mutable -> void
 	{
-		TMap<FCell, EActorType> ActorsToSpawn = GenerateLevelActors_StartAsync(MoveTemp(InData));
+		TMap<FBmrCell, EBmrActorType> ActorsToSpawn = GenerateLevelActors_StartAsync(MoveTemp(InData));
 		AsyncTaskGameThread(WeakThis.Get(), [WeakThis, InActorsToSpawn = MoveTemp(ActorsToSpawn)]() mutable -> void
 		{
-			if (AGeneratedMap* This = WeakThis.Get())
+			if (ABmrGeneratedMap* This = WeakThis.Get())
 			{
 				This->GenerateLevelActors_Finish(MoveTemp(InActorsToSpawn));
 			}
@@ -826,33 +826,33 @@ void AGeneratedMap::GenerateLevelActors()
 }
 
 // Internal method to compute cells on background thread
-TMap<FCell, EActorType> AGeneratedMap::GenerateLevelActors_StartAsync(FBmrGeneratorData&& GeneratorData)
+TMap<FBmrCell, EBmrActorType> ABmrGeneratedMap::GenerateLevelActors_StartAsync(FBmrGeneratorData&& GeneratorData)
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(AGeneratedMap::GenerateLevelActors_StartAsync);
+	TRACE_CPUPROFILER_EVENT_SCOPE(ABmrGeneratedMap::GenerateLevelActors_StartAsync);
 
 	UBmrCellsGenerator_Base* Generator = GeneratorData.GenerationSettings.Generator;
 	ensureMsgf(Generator, TEXT("ASSERT: [%i] %hs:\n'Generator' is not set in the Data Asset!"), __LINE__, __FUNCTION__);
-	return Generator ? Generator->GenerateLevel(MoveTemp(GeneratorData)) : TMap<FCell, EActorType>{};
+	return Generator ? Generator->GenerateLevel(MoveTemp(GeneratorData)) : TMap<FBmrCell, EBmrActorType>{};
 }
 
 // Internal method to finish with spawning on the game thread
-void AGeneratedMap::GenerateLevelActors_Finish(TMap<FCell, EActorType>&& ActorsToSpawn)
+void ABmrGeneratedMap::GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&& ActorsToSpawn)
 {
 	// --- Part 2: Spawning ---
 
-	const TFunction<void(const TArray<UMapComponent*>&)> OnSpawned = [WeakThis = TWeakObjectPtr(this)](const TArray<UMapComponent*>& MapComponents)
+	const TFunction<void(const TArray<UBmrMapComponent*>&)> OnSpawned = [WeakThis = TWeakObjectPtr(this)](const TArray<UBmrMapComponent*>& MapComponents)
 	{
-		AGeneratedMap* This = WeakThis.Get();
+		ABmrGeneratedMap* This = WeakThis.Get();
 		if (!This)
 		{
 			return;
 		}
 
 		// Replicate the token to clients, so they can track when all actors completed generation
-		This->GenerateLevelActorsTokenInternal = This->MapComponentsInternal.LocalReplicationToken;
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsTokenInternal, This);
+		This->GenerateLevelActorsToken = This->MapComponents.LocalReplicationToken;
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsToken, This);
 
-		This->bIsCurrentlyGeneratingInternal = false;
+		This->bIsCurrentlyGenerating = false;
 		This->OnGeneratedLevelActors.Broadcast();
 	};
 
@@ -860,14 +860,14 @@ void AGeneratedMap::GenerateLevelActors_Finish(TMap<FCell, EActorType>&& ActorsT
 }
 
 // Listen game states to generate level actors
-void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
+void ABmrGeneratedMap::OnGameStateChanged(EBmrCurrentGameState CurrentGameState)
 {
 	if (!HasAuthority())
 	{
 		return;
 	}
 
-	const ECurrentGameState PreviousGameState = AMyGameStateBase::GetPreviousGameState();
+	const EBmrCurrentGameState PreviousGameState = ABmrGameState::GetPreviousGameState();
 	switch (CurrentGameState)
 	{
 		case ECGS::Menu: // Fallthrough
@@ -898,25 +898,25 @@ void AGeneratedMap::OnGameStateChanged(ECurrentGameState CurrentGameState)
 }
 
 // Align transform and build cells
-void AGeneratedMap::BuildGridCells(const FTransform& Transform)
+void ABmrGeneratedMap::BuildGridCells(const FTransform& Transform)
 {
 	const FTransform NewGridTransform = ActorTransformToGridTransform(Transform);
-	if (UCellsUtilsLibrary::GetLevelGridTransform().Equals(NewGridTransform))
+	if (UBmrCellUtilsLibrary::GetLevelGridTransform().Equals(NewGridTransform))
 	{
 		// Do not rebuild if the transform is the same
 		return;
 	}
 
-	const FCells NewGridCells = FCell::MakeCellGridByTransform(NewGridTransform);
+	const FBmrCells NewGridCells = FBmrCell::MakeCellGridByTransform(NewGridTransform);
 
-	ScaleDraggedCellsOnGrid(FCells{LocalGridCellsInternal}, NewGridCells);
+	ScaleDraggedCellsOnGrid(FBmrCells{LocalGridCells}, NewGridCells);
 
 	if (HasAuthority())
 	{
 		SetActorTransform(NewGridTransform);
 	}
 
-	LocalGridCellsInternal = NewGridCells.Array();
+	LocalGridCells = NewGridCells.Array();
 }
 
 /*********************************************************************************************
@@ -924,27 +924,27 @@ void AGeneratedMap::BuildGridCells(const FTransform& Transform)
  ********************************************************************************************* */
 
 // Returns true if specified map component has non-generated owner that is manually dragged to the scene
-bool AGeneratedMap::IsDraggedMapComponent(const UMapComponent* MapComponent) const
+bool ABmrGeneratedMap::IsDraggedMapComponent(const UBmrMapComponent* MapComponent) const
 {
 	if (!MapComponent)
 	{
 		return false;
 	}
 
-	const EActorType ActorType = MapComponent->GetActorType();
-	const FCell& Cell = MapComponent->GetCell();
+	const EBmrActorType ActorType = MapComponent->GetActorType();
+	const FBmrCell& Cell = MapComponent->GetCell();
 	if (MapComponent->GetActorType() == EAT::None
 	    || Cell.IsInvalidCell())
 	{
 		return false;
 	}
 
-	const EActorType* FoundCell = DraggedCellsInternal.Find(Cell);
+	const EBmrActorType* FoundCell = DraggedCells.Find(Cell);
 	return FoundCell && *FoundCell == ActorType;
 }
 
 // Scales dragged cells according new grid if sizes are different
-void AGeneratedMap::ScaleDraggedCellsOnGrid(const FCells& OriginalGrid, const FCells& NewGrid)
+void ABmrGeneratedMap::ScaleDraggedCellsOnGrid(const FBmrCells& OriginalGrid, const FBmrCells& NewGrid)
 {
 	if (OriginalGrid.IsEmpty()
 	    || OriginalGrid.Num() == NewGrid.Num())
@@ -953,19 +953,19 @@ void AGeneratedMap::ScaleDraggedCellsOnGrid(const FCells& OriginalGrid, const FC
 		return;
 	}
 
-	const FCells CornerCells = FCell::GetCornerCellsOnGrid(NewGrid);
-	const FCells NewGridWithoutCorners = NewGrid.Difference(CornerCells);
+	const FBmrCells CornerCells = FBmrCell::GetCornerCellsOnGrid(NewGrid);
+	const FBmrCells NewGridWithoutCorners = NewGrid.Difference(CornerCells);
 
-	for (TTuple<FCell, EActorType>& DraggedCellRefIt : DraggedCellsInternal)
+	for (TTuple<FBmrCell, EBmrActorType>& DraggedCellRefIt : DraggedCells)
 	{
-		FCell& CurrentCellRef = DraggedCellRefIt.Key;
-		const FCell ScaledCell = FCell::ScaleCellToNewGrid(CurrentCellRef, CornerCells);
-		CurrentCellRef = FCell::GetCellArrayNearest(NewGridWithoutCorners, ScaledCell);
+		FBmrCell& CurrentCellRef = DraggedCellRefIt.Key;
+		const FBmrCell ScaledCell = FBmrCell::ScaleCellToNewGrid(CurrentCellRef, CornerCells);
+		CurrentCellRef = FBmrCell::GetCellArrayNearest(NewGridWithoutCorners, ScaledCell);
 	}
 }
 
 // The dragged version of the Add To Grid function to add the dragged actor on the level
-void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
+void ABmrGeneratedMap::AddToGridDragged(UBmrMapComponent* AddedComponent)
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (!FEditorUtilsLibrary::IsEditorNotPieWorld())
@@ -992,16 +992,16 @@ void AGeneratedMap::AddToGridDragged(UMapComponent* AddedComponent)
 	// The game that is not started yet and owner locates in the editor.
 	// Each similar not dragged actor that is generated by Generated Map is preview actor, so is not dragged.
 
-	const FCell& DraggedCell = AddedComponent->GetCell();
-	if (!DraggedCellsInternal.Contains(DraggedCell))
+	const FBmrCell& DraggedCell = AddedComponent->GetCell();
+	if (!DraggedCells.Contains(DraggedCell))
 	{
-		DraggedCellsInternal.Emplace(DraggedCell, AddedComponent->GetActorType());
+		DraggedCells.Emplace(DraggedCell, AddedComponent->GetActorType());
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 }
 
 // The dragged version of the Set Nearest Cell function to find closest cell for the dragged level actor
-bool AGeneratedMap::SetNearestCellDragged(const UMapComponent* MapComponent, FCell& InOutCell)
+bool ABmrGeneratedMap::SetNearestCellDragged(const UBmrMapComponent* MapComponent, FBmrCell& InOutCell)
 {
 #if !WITH_EDITOR
 	return false;
@@ -1013,17 +1013,17 @@ bool AGeneratedMap::SetNearestCellDragged(const UMapComponent* MapComponent, FCe
 		return false;
 	}
 
-	const FCell& CurrentCell = MapComponent->GetCell();
+	const FBmrCell& CurrentCell = MapComponent->GetCell();
 	if (CurrentCell != InOutCell)
 	{
 		// Is dragged to new cell, find free cell without any actors, so dragged actor will never overlap
-		InOutCell = UCellsUtilsLibrary::GetNearestFreeCell(InOutCell);
+		InOutCell = UBmrCellUtilsLibrary::GetNearestFreeCell(InOutCell);
 	}
 
 	if (IsDraggedMapComponent(MapComponent))
 	{
-		DraggedCellsInternal.Remove(CurrentCell);
-		DraggedCellsInternal.Emplace(InOutCell, MapComponent->GetActorType());
+		DraggedCells.Remove(CurrentCell);
+		DraggedCells.Emplace(InOutCell, MapComponent->GetActorType());
 	}
 
 	return true;
@@ -1031,7 +1031,7 @@ bool AGeneratedMap::SetNearestCellDragged(const UMapComponent* MapComponent, FCe
 }
 
 // The dragged version of the Destroy Level Actor function to hide the dragged actor from the level
-void AGeneratedMap::DestroyLevelActorDragged(const UMapComponent* MapComponent)
+void ABmrGeneratedMap::DestroyLevelActorDragged(const UBmrMapComponent* MapComponent)
 {
 #if WITH_EDITOR // [IsEditorNotPieWorld]
 	if (!FEditorUtilsLibrary::IsEditorNotPieWorld()
@@ -1043,8 +1043,8 @@ void AGeneratedMap::DestroyLevelActorDragged(const UMapComponent* MapComponent)
 
 	if (IsDraggedMapComponent(MapComponent))
 	{
-		const FCell& Cell = MapComponent->GetCell();
-		DraggedCellsInternal.Remove(Cell);
+		const FBmrCell& Cell = MapComponent->GetCell();
+		DraggedCells.Remove(Cell);
 	}
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 }

@@ -8,8 +8,8 @@
 #include "Subsystems/NMMBaseSubsystem.h"
 
 // Bomber
-#include "Controllers/MyPlayerController.h"
-#include "Subsystems/WidgetsSubsystem.h"
+#include "Controllers/BmrPlayerController.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
 
 // UE
 #include "Components/Button.h"
@@ -21,15 +21,15 @@
 // Applies the given time to hold the skip progress to skip the cinematic
 void UNMMCinematicStateWidget::SetCurrentHoldTime(float NewHoldTime)
 {
-	CurrentHoldTimeInternal = NewHoldTime;
+	CurrentHoldTime = NewHoldTime;
 
 	const float MaxHoldTime = UNMMDataAsset::Get().GetSkipCinematicHoldTime();
-	const float HoldProgressNormalized = FMath::Clamp(CurrentHoldTimeInternal / MaxHoldTime, 0.f, 1.f);
+	const float HoldProgressNormalized = FMath::Clamp(CurrentHoldTime / MaxHoldTime, 0.f, 1.f);
 
 	checkf(SkipHoldProgress, TEXT("ERROR: [%i] %hs:\n'SkipHoldProgress' is null!"), __LINE__, __FUNCTION__);
 	SkipHoldProgress->SetValue(HoldProgressNormalized);
 
-	if (CurrentHoldTimeInternal >= MaxHoldTime)
+	if (CurrentHoldTime >= MaxHoldTime)
 	{
 		OnCinematicSkipFinished();
 	}
@@ -67,7 +67,7 @@ void UNMMCinematicStateWidget::OnNewMainMenuStateChanged_Implementation(ENMMStat
 	    || PreviousState == ENMMState::Cinematic)
 	{
 		// Hide all other widgets in Cinematic state and display them back when left
-		UWidgetsSubsystem::Get().SetAllWidgetsVisibility(!bIsCinematic);
+		UBmrWidgetsSubsystem::Get().SetAllWidgetsVisibility(!bIsCinematic);
 	}
 
 	// Show this widget in Cinematic state
@@ -85,7 +85,7 @@ void UNMMCinematicStateWidget::OnCinematicSkipOngoing_Implementation()
 {
 	const UWorld* World = GetWorld();
 	checkf(World, TEXT("ERROR: [%i] %hs:\n'World' is null!"), __LINE__, __FUNCTION__);
-	const float NewHoldTime = CurrentHoldTimeInternal + World->GetDeltaSeconds();
+	const float NewHoldTime = CurrentHoldTime + World->GetDeltaSeconds();
 
 	SetCurrentHoldTime(NewHoldTime);
 }
@@ -100,7 +100,7 @@ void UNMMCinematicStateWidget::OnCinematicSkipReleased_Implementation()
 void UNMMCinematicStateWidget::OnCinematicSkipFinished_Implementation()
 {
 	// Skip cinematic
-	if (AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>())
+	if (ABmrPlayerController* MyPC = GetOwningPlayer<ABmrPlayerController>())
 	{
 		MyPC->SetGameStartingState();
 	}

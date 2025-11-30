@@ -7,30 +7,30 @@
 // UE
 #include "AbilitySystemInterface.h"
 
-#include "PlayerCharacter.generated.h"
+#include "BmrPawn.generated.h"
 
-enum class ELevelType : uint8;
-enum class ECurrentGameState : uint8;
-enum class EPlayerType : uint8;
+enum class EBmrLevelType : uint8;
+enum class EBmrCurrentGameState : uint8;
+enum class EBmrPlayerType : uint8;
 
 /**
  * Players and AI, whose goal is to remain the last survivor for the win.
- * @see Access Player's data with UPlayerDataAsset (Content/Bomber/DataAssets/DA_Player).
- * @see Access AI's data with UAIDataAsset (Content/Bomber/DataAssets/DA_AI).
+ * @see Access Player's data with UBmrPlayerDataAsset (Content/Bomber/DataAssets/DA_Player).
+ * @see Access AI's data with UBmrAIDataAsset (Content/Bomber/DataAssets/DA_AI).
  */
 UCLASS(Abstract)
-class BOMBER_API APlayerCharacter : public APawn,
-                                    public IAbilitySystemInterface
+class BOMBER_API ABmrPawn : public APawn,
+                            public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 public:
 	/** Sets default values for this character's properties */
-	APlayerCharacter();
+	ABmrPawn();
 
 	/** Returns the Player Tag associated with player. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const struct FPlayerTag& GetPlayerTag() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const struct FBmrPlayerTag& GetPlayerTag() const;
 
 	/** Returns the Ability System Component from the Player State.
 	 * In blueprints, call 'Get Ability System Component' as interface function. */
@@ -39,12 +39,12 @@ public:
 
 protected:
 	/** Is the root component for this actor, used for collision. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Capsule Component"))
-	TObjectPtr<class UCapsuleComponent> CapsuleComponentInternal = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UCapsuleComponent> CapsuleComponent = nullptr;
 
 	/** The MapComponent manages this actor on the Generated Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UBmrMapComponent> MapComponent = nullptr;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -64,52 +64,52 @@ protected:
 	 ********************************************************************************************* */
 public:
 	/** Is called on server when ANY human player joined the session. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnPostLogin(class AGameModeBase* GameMode, class APlayerController* NewPlayer);
 
 	/** Is called on server when human player, previously possessed by this character, left the session. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnPostLogout(class APlayerController* ExitingPlayer);
 
 protected:
 	/** Called when this level actor is reconstructed or added on the Generated Map.
 	 * Is used by Level Actors instead of the BeginPlay(). */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnAddedToLevel(UMapComponent* MapComponent);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnAddedToLevel(UBmrMapComponent* InMapComponent);
 
 	/** Is called when the Row from current Data Asset is changed for owner on the level, on both server and clients. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnActorTypeChanged(UMapComponent* MapComponent, const class ULevelActorRow* NewRow, const class ULevelActorRow* PreviousRow);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnActorTypeChanged(UBmrMapComponent* InMapComponent, const class UBmrLevelActorRow* NewRow, const class UBmrLevelActorRow* PreviousRow);
 
 	/** Called right before owner actor going to remove from the Generated Map, on both server and clients.
 	 * Is used for handling the in-game dying logic before this character is removed from the level. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPreRemovedFromLevel(class UMapComponent* MapComponent, UObject* DestroyCauser);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPreRemovedFromLevel(UBmrMapComponent* InMapComponent, UObject* DestroyCauser);
 
 	/** Called each time after owner actor was removed from Generated Map, on both server and clients.
 	 * Is used for cleaning up the character's data after it was removed from the level. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPostRemovedFromLevel(class UMapComponent* MapComponent, UObject* DestroyCauser);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPostRemovedFromLevel(UBmrMapComponent* InMapComponent, UObject* DestroyCauser);
 
 	/** Is called for everytime when character changed its position on the Generated Map. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnCellChanged(class UMapComponent* MapComponent, const struct FCell& NewCell, const struct FCell& PreviousCell);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnCellChanged(UBmrMapComponent* InMapComponent, const struct FBmrCell& NewCell, const struct FBmrCell& PreviousCell);
 
 	/** Is called when the player state is fully initialized. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPlayerStateReady(class AMyPlayerState* InPlayerState, int32 CharacterID);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPlayerStateReady(class ABmrPlayerState* InPlayerState, int32 PlayerId);
 
 	/*********************************************************************************************
 	 * Protected functions
 	 ********************************************************************************************* */
 protected:
 	/** Updates collision object type by current character ID. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void UpdateCollisionObjectType();
 
 	/** Sets current config: each character has its own configuration, like different starting attributes. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++", meta = (BlueprintProtected))
-	void ApplyCharacterConfig();
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	void ApplyPreset();
 
 	/*********************************************************************************************
 	 * Controller (AI/Player)
@@ -120,13 +120,13 @@ public:
 
 	/** Possess a player or AI controller in dependence of current Character ID.
 	 * @param PlayerType the type of player to possess: human or bot; or 'Any' to automatically detect.*/
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
-	void TryPossessController(EPlayerType PlayerType);
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
+	void TryPossessController(EBmrPlayerType PlayerType);
 
 protected:
 	/** The character's AI controller */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "My AI Controller"))
-	TObjectPtr<class AAIController> AIControllerInternal = nullptr;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class AAIController> AIController = nullptr;
 
 	/*********************************************************************************************
 	 * Movement
@@ -136,63 +136,63 @@ public:
 	virtual FVector GetVelocity() const override;
 
 	/** Returns the movement component for the player character. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UBmrMoverComponent* GetMoverComponent() const { return MoverComponentInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE class UBmrMoverComponent* GetMoverComponent() const { return MoverComponent; }
 
 protected:
 	/** Movement component for the player character. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mover Component"))
-	TObjectPtr<class UBmrMoverComponent> MoverComponentInternal = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UBmrMoverComponent> MoverComponent = nullptr;
 
 	/*********************************************************************************************
 	 * Nickname
 	 ********************************************************************************************* */
 public:
 	/** Returns the 3D widget component that displays the player name above the character. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UBmrPlayerNameWidgetComponent* GetPlayerName3DWidgetComponent() const { return PlayerName3DWidgetComponentInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE class UBmrPlayerNameWidgetComponent* GetPlayerName3DWidgetComponent() const { return PlayerName3DWidgetComponent; }
 
 protected:
 	/** 3D widget component that displays the player name above the character. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Player Name 3D Widget Component"))
-	TObjectPtr<class UBmrPlayerNameWidgetComponent> PlayerName3DWidgetComponentInternal = nullptr;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UBmrPlayerNameWidgetComponent> PlayerName3DWidgetComponent = nullptr;
 
 	/*********************************************************************************************
 	 * Player ID
 	 ********************************************************************************************* */
 public:
 	/** Returns own character ID, e.g: 0, 1, 2, 3 */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	int32 GetPlayerId() const;
 
 	/*********************************************************************************************
 	 * Player Mesh
 	 ********************************************************************************************* */
 public:
-	friend class UMyCheatManager;
+	friend class UBmrCheatManager;
 
 	/** Returns owned skeletal mesh component. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class UMySkeletalMeshComponent* GetMeshComponent() const { return MeshComponentInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE class UBmrSkeletalMeshComponent* GetMeshComponent() const { return MeshComponent; }
 
 	/** Returns owned skeletal mesh component, or crashes if can't be obtained. */
-	UMySkeletalMeshComponent& GetMeshComponentChecked() const;
+	UBmrSkeletalMeshComponent& GetMeshComponentChecked() const;
 
 	/** Set and apply default skeletal mesh for this player.
 	 * @param bForcePlayerSkin If true, will force the bot to change own skin to look like a player. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
 	void SetDefaultPlayerMeshData(bool bForcePlayerSkin = false);
 
 protected:
 	/** The Skeletal Mesh Component of the player character. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mesh Component"))
-	TObjectPtr<class UMySkeletalMeshComponent> MeshComponentInternal = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UBmrSkeletalMeshComponent> MeshComponent = nullptr;
 
 	/*********************************************************************************************
 	 * Bomb Placement
 	 ********************************************************************************************* */
 public:
 	/** Spawns bomb on character position. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SpawnBomb();
 };

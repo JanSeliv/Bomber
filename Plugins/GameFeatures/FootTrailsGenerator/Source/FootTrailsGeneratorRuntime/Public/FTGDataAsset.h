@@ -17,13 +17,12 @@ class FOOTTRAILSGENERATORRUNTIME_API UFTGDataAsset : public UMyPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
-	/** Returns the data asset that contains all foot trails archetypes.
-	 * @see UFootTrailsGeneratorComponent::FootTrailsDataTableInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE UDataTable* GetFootTrailsDataTable() const { return FootTrailsDataTableInternal; }
+	/** Returns the data asset that contains all foot trails archetypes. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[FootTrailsGenerator]")
+	FORCEINLINE UDataTable* GetFootTrailsDataTable() const { return FootTrailsDataTable; }
 
 protected:
 	/** The data asset that contains all foot trails archetypes. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Foot Trails Data Table", ShowOnlyInnerProperties))
-	TObjectPtr<UDataTable> FootTrailsDataTableInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected))
+	TObjectPtr<UDataTable> FootTrailsDataTable = nullptr;
 };

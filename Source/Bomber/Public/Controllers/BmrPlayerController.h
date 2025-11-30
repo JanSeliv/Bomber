@@ -4,59 +4,59 @@
 
 #include "GameFramework/PlayerController.h"
 
-#include "MyPlayerController.generated.h"
+#include "BmrPlayerController.generated.h"
 
-enum class ECurrentGameState : uint8;
+enum class EBmrCurrentGameState : uint8;
 
-class UMyInputMappingContext;
+class UBmrInputMappingContext;
 
 /**
  * The player controller class.
  * @see Access its data with UPlayerInputDataAsset (Content/Bomber/DataAssets/DA_PlayerInput).
  */
 UCLASS()
-class BOMBER_API AMyPlayerController final : public APlayerController
+class BOMBER_API ABmrPlayerController final : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
 	/** Sets default values for this controller's properties. */
-	AMyPlayerController();
+	ABmrPlayerController();
 
 	/*********************************************************************************************
 	 * Game States
 	 * Is designed for clients to change the game state (if CanChangeGameState is true).
-	 * Server can call AMyGameStateBase::Get().SetGameState(NewState) directly
+	 * Server can call ABmrGameState::Get().SetGameState(NewState) directly
 	 ********************************************************************************************* */
 public:
 	/** Returns true if current game state can be eventually changed. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	bool CanChangeGameState(ECurrentGameState NewGameState) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	bool CanChangeGameState(EBmrCurrentGameState NewGameState) const;
 
 	/** Sets and replicates the Starting game state (3-2-1 countdown). */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetGameStartingState();
 
 	/** Sets and replicates the Menu game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetMenuState();
 
 protected:
 	/** Set the new game state for the current game. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "C++", meta = (BlueprintProtected))
-	void ServerSetGameState(ECurrentGameState NewGameState);
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void ServerSetGameState(EBmrCurrentGameState NewGameState);
 
 	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
 	/** List of all input contexts to be auto turned of or on according current game state. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Input Contexts"))
-	TArray<TObjectPtr<const UMyInputMappingContext>> AllInputContextsInternal;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	TArray<TObjectPtr<const UBmrInputMappingContext>> AllInputContexts;
 
 	/** Component that responsible for mouse-related logic like showing and hiding itself. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Mouse Component"))
-	TObjectPtr<class UMouseActivityComponent> MouseComponentInternal = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UBmrMouseActivityComponent> MouseComponent = nullptr;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -94,20 +94,20 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAnyCinematicStarted, const UObject*, LevelSequence, const UObject*, FromInstigator);
 
 	/** Is called only on local player on started watching an in-game cinematic. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
 	FOnAnyCinematicStarted OnAnyCinematicStarted;
 
 protected:
 	/** Is called when all game widgets are initialized. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnWidgetsInitialized();
 
 	/** Listen to toggle movement input. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
 
 	/** Listens to handle input on opening and closing the Settings widget. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnToggledSettings(bool bIsVisible);
 
 	/*********************************************************************************************
@@ -115,52 +115,52 @@ protected:
 	 ********************************************************************************************* */
 public:
 	/** Returns true if Player Controller is ready to setup all the inputs. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	bool CanBindInputActions() const;
 
 	/** Adds given contexts to the list of auto managed and binds their input actions . */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetupInputContexts(const TArray<UMyInputMappingContext*>& InputContexts);
-	void SetupInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
-	void RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void SetupInputContexts(const TArray<UBmrInputMappingContext*>& InputContexts);
+	void SetupInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts);
+	void RemoveInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts);
 
 	/** Prevents built-in slate input on UMG. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Set UI Input Ignored"))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (DisplayName = "Set UI Input Ignored"))
 	void SetUIInputIgnored();
 
 	/** Takes all cached inputs contexts and turns them on or off according given game state.
 	 * @param bEnable If true, all matching contexts will be enabled. If false, all matching contexts will be disabled.
 	 * @param CurrentGameState Game state to check matching.
 	 * @param bInvertRest If true, all other not matching contexts will be toggled to the opposite of given state (!bEnable).
-	 * @see AMyPlayerController::AddInputContexts */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetAllInputContextsEnabled(bool bEnable, ECurrentGameState CurrentGameState, bool bInvertRest = false);
+	 * @see ABmrPlayerController::AddInputContexts */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void SetAllInputContextsEnabled(bool bEnable, EBmrCurrentGameState CurrentGameState, bool bInvertRest = false);
 
 	/** Enables all managed input contexts by current game state. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void ApplyAllInputContexts();
 
 	/** Enables or disables specified input context.
 	 * @param bEnable If true, the context will be enabled. If false, the context will be disabled.
 	 * @param InInputContext The input context to enable or disable. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InInputContext);
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void SetInputContextEnabled(bool bEnable, const UBmrInputMappingContext* InInputContext);
 
 	/** Set up input bindings in given contexts. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void BindInputActionsInContext(const UMyInputMappingContext* InInputContext);
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void BindInputActionsInContext(const UBmrInputMappingContext* InInputContext);
 
 	/** Adds input contexts to the list to be auto turned of or on according current game state.
-	 * Make sure UMyInputMappingContext::ActiveForStatesInternal is set.
+	 * Make sure UBmrInputMappingContext::ActiveForStates is set.
 	 * @param InputContexts Contexts to manage.
-	 * @see AMyPlayerController::AllInputContextsInternal */
-	void AddNewInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts);
+	 * @see ABmrPlayerController::AllInputContexts */
+	void AddNewInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts);
 
 	/** Returns the component that responsible for mouse-related logic like showing and hiding itself. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	class UMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponentInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	class UBmrMouseActivityComponent* GetMouseActivityComponent() const { return MouseComponent; }
 
-	UMouseActivityComponent& GetMouseActivityComponentChecked() const;
+	UBmrMouseActivityComponent& GetMouseActivityComponentChecked() const;
 
 	/*********************************************************************************************
 	 * Camera
@@ -175,8 +175,8 @@ public:
 	/** Is called by ToggleDebugCamera cheat (in build) and F8 button (in editor).
 	 * @param bEnable true, when player moves the camera around the level freely during the game in editor or build.
 	 * Is not wrapped by WITH_EDITOR as might be called in the build. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (DevelopmentOnly, DisplayName = "Debug Camera Enabled"))
-	bool bIsDebugCameraEnabledInternal = false;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (DevelopmentOnly))
+	bool bIsDebugCameraEnabled = false;
 
 #if WITH_EDITOR
 	/** Is called in editor by F8 button, when switched between PIE and SIE during the game to handle the Debug Camera. */

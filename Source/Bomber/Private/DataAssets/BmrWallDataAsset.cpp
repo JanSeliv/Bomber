@@ -1,20 +1,20 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/WallDataAsset.h"
+#include "DataAssets/BmrWallDataAsset.h"
 
 // Bomber
-#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(WallDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrWallDataAsset)
 
 // Default constructor
-UWallDataAsset::UWallDataAsset()
+UBmrWallDataAsset::UBmrWallDataAsset()
 {
-	ActorTypeInternal = EAT::Wall;
+	ActorType = EAT::Wall;
 }
 
 // Returns the wall data asset
-const UWallDataAsset& UWallDataAsset::Get()
+const UBmrWallDataAsset& UBmrWallDataAsset::Get()
 {
-	return UDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }

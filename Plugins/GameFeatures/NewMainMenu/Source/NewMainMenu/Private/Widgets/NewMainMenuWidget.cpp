@@ -9,11 +9,11 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
-#include "Components/MySkeletalMeshComponent.h"
-#include "Controllers/MyPlayerController.h"
-#include "Subsystems/SoundsSubsystem.h"
+#include "Components/BmrSkeletalMeshComponent.h"
+#include "Controllers/BmrPlayerController.h"
+#include "Subsystems/BmrSoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Components/Button.h"
@@ -80,7 +80,7 @@ void UNewMainMenuWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewS
 // Is called when player pressed the button to start the game
 void UNewMainMenuWidget::OnPlayButtonPressed()
 {
-	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
+	ABmrPlayerController* MyPC = GetOwningPlayer<ABmrPlayerController>();
 	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %hs:\n'MyPc' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
@@ -101,7 +101,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 		return;
 	}
 
-	USoundsSubsystem::Get().PlayUIClickSFX();
+	UBmrSoundsSubsystem::Get().PlayUIClickSFX();
 
 	if (UNMMUtils::ShouldSkipCinematic(CinematicRow))
 	{
@@ -136,7 +136,7 @@ void UNewMainMenuWidget::SwitchCurrentPlayer(int32 Incrementer)
 	}
 
 	// Play the sound
-	USoundsSubsystem::Get().PlayUIClickSFX();
+	UBmrSoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the Main Menu spot
 	UNMMSpotsSubsystem::Get().MoveMainMenuSpot(Incrementer);
@@ -153,10 +153,10 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 		return;
 	}
 
-	USoundsSubsystem::Get().PlayUIClickSFX();
+	UBmrSoundsSubsystem::Get().PlayUIClickSFX();
 
 	// Switch the preview skin on the spot
-	UMySkeletalMeshComponent& MeshComp = MainMenuSpot->GetMeshChecked();
+	UBmrSkeletalMeshComponent& MeshComp = MainMenuSpot->GetMeshChecked();
 	const int32 NextSkinIndex = (MeshComp.GetAppliedSkinIndex() + 1) % MeshComp.GetSkinTexturesNum();
 	MeshComp.ApplySkinByIndex(NextSkinIndex);
 
@@ -167,7 +167,7 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 // Is called when player pressed the button to open the Settings
 void UNewMainMenuWidget::OnSettingsButtonPressed()
 {
-	if (USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget())
+	if (USettingsWidget* SettingsWidget = UBmrBlueprintFunctionLibrary::GetSettingsWidget())
 	{
 		SettingsWidget->OpenSettings();
 	}
@@ -176,6 +176,6 @@ void UNewMainMenuWidget::OnSettingsButtonPressed()
 // Is called when player pressed the button to quit the game
 void UNewMainMenuWidget::OnQuitGameButtonPressed()
 {
-	AMyPlayerController* MyPC = GetOwningPlayer<AMyPlayerController>();
+	ABmrPlayerController* MyPC = GetOwningPlayer<ABmrPlayerController>();
 	UKismetSystemLibrary::QuitGame(this, MyPC, EQuitPreference::Background, false);
 }

@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Engine/MyGameViewportClient.h"
+#include "Engine/BmrGameViewportClient.h"
 
 // Bomber
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -9,18 +9,18 @@
 #include "Engine/Engine.h"
 #include "Engine/LocalPlayer.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameViewportClient)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameViewportClient)
 
 // Returns the Axis Constraint of the viewport based on current aspect ratio
-TEnumAsByte<EAspectRatioAxisConstraint> UMyGameViewportClient::GetAxisConstraint() const
+TEnumAsByte<EAspectRatioAxisConstraint> UBmrGameViewportClient::GetAxisConstraint() const
 {
 	constexpr float SquareAspectRatio = 1.f;
-	const bool bIsWideScreen = LastUpdatedAspectRatioInternal > SquareAspectRatio;
+	const bool bIsWideScreen = LastUpdatedAspectRatio > SquareAspectRatio;
 	return bIsWideScreen ? AspectRatio_MaintainYFOV : AspectRatio_MaintainXFOV;
 }
 
 // Is called on applying different video settings like changing resolution and enabling fullscreen mode
-void UMyGameViewportClient::RedrawRequested(FViewport* InViewport)
+void UBmrGameViewportClient::RedrawRequested(FViewport* InViewport)
 {
 	Super::RedrawRequested(InViewport);
 
@@ -28,7 +28,7 @@ void UMyGameViewportClient::RedrawRequested(FViewport* InViewport)
 }
 
 // Dynamically changes aspect ratio constraint to support all screens like ultra-wide and vertical one
-void UMyGameViewportClient::UpdateAspectRatio()
+void UBmrGameViewportClient::UpdateAspectRatio()
 {
 	const TArray<ULocalPlayer*>& LocalPlayers = GEngine->GetGamePlayers(this);
 	const FIntPoint ViewportResolution = UUtilsLibrary::GetViewportResolution();
@@ -39,8 +39,8 @@ void UMyGameViewportClient::UpdateAspectRatio()
 	}
 
 	const float NewAspectRatio = static_cast<float>(ViewportResolution.X) / static_cast<float>(ViewportResolution.Y);
-	const bool bIsAspectRatioChanged = LastUpdatedAspectRatioInternal != NewAspectRatio;
-	LastUpdatedAspectRatioInternal = NewAspectRatio;
+	const bool bIsAspectRatioChanged = LastUpdatedAspectRatio != NewAspectRatio;
+	LastUpdatedAspectRatio = NewAspectRatio;
 
 	const TEnumAsByte<EAspectRatioAxisConstraint> AxisConstraint = GetAxisConstraint();
 	for (ULocalPlayer* LocalPlayer : LocalPlayers)
@@ -49,7 +49,7 @@ void UMyGameViewportClient::UpdateAspectRatio()
 	}
 
 	if (bIsAspectRatioChanged
-	    && LastUpdatedAspectRatioInternal > 0.f) // do not broadcast on first update
+	    && LastUpdatedAspectRatio > 0.f) // do not broadcast on first update
 	{
 		OnAspectRatioChanged.Broadcast(NewAspectRatio, AxisConstraint);
 	}

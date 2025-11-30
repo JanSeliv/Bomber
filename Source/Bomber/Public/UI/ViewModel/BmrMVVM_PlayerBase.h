@@ -7,23 +7,23 @@
 // UE
 #include "Components/SlateWrapperTypes.h"
 
-#include "MVVM_MyCharacterBase.generated.h"
+#include "BmrMVVM_PlayerBase.generated.h"
 
 class UTexture2D;
 
-enum class EPlayerType : uint8;
+enum class EBmrPlayerType : uint8;
 
 /**
  * Contains UI character-related data to be used only by widgets, it can represent player as well as bot.
  */
-UCLASS(Abstract, DisplayName = "[Abstract] My Character Base View Model")
-class BOMBER_API UMVVM_MyCharacterBase : public UMVVM_MyBaseViewModel
+UCLASS(Abstract, DisplayName = "[Abstract] Bomber Player Base View Model")
+class BOMBER_API UBmrMVVM_PlayerBase : public UMVVM_MyBaseViewModel
 {
 	GENERATED_BODY()
 
 public:
 	/** Has to be overridden in child classes to provide the character ID. */
-	virtual FORCEINLINE int32 GetCharacterId() const PURE_VIRTUAL(UMVVM_BaseCharacter::GetCharacterId, return INDEX_NONE;);
+	virtual FORCEINLINE int32 GetPlayerId() const PURE_VIRTUAL(ThisClass::GetPlayerId, return INDEX_NONE;);
 
 	/** Is overridden to prevent constructing this View Model, but only child classes. */
 	virtual bool CanConstructViewModel_Implementation() const override;
@@ -38,11 +38,11 @@ public:
 
 protected:
 	/** Character's name. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	FText Nickname = FText::GetEmpty();
 
 	/** Called when changed Character's name. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnNicknameChanged(FName NewNickname);
 
 	/*********************************************************************************************
@@ -55,12 +55,12 @@ public:
 
 protected:
 	/** Is 'Visible' when character is dead, collapsed otherwise. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	ESlateVisibility IsDeadVisibility = ESlateVisibility::Collapsed;
 
 	/** Called when changed character Dead status is changed. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnCharacterDeadChanged(bool bIsCharacterDead);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPlayerDeadChanged(bool bIsDead);
 
 	/*********************************************************************************************
 	 * Avatar (Human / Bot / Online)
@@ -71,12 +71,12 @@ public:
 	UTexture2D* GetAvatar() const { return Avatar; }
 
 	/** Assigns current avatar based on player type. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void UpdateAvatar();
 
 protected:
 	/** Character's avatar, is always valid: default human, bot, or player's online avatar. */
-	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "C++")
+	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	TObjectPtr<UTexture2D> Avatar = nullptr;
 
 	/*********************************************************************************************
@@ -91,54 +91,54 @@ protected:
 	virtual void OnViewModelDestruct_Implementation() override;
 
 	/** Called when any player state is initialized and its assigned character is ready. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPlayerStateReady(class AMyPlayerState* PlayerState, int32 CharacterID);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPlayerStateReady(class ABmrPlayerState* PlayerState, int32 PlayerId);
 
 	/** Called when changed character Bot status is changed, applies both bot and human visibility. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPlayerTypeChanged(EPlayerType PlayerType);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPlayerTypeChanged(EBmrPlayerType PlayerType);
 };
 
 /*********************************************************************************************
- * Below View Models per each character: UMVVM_MyCharacter0, UMVVM_MyCharacter1, UMVVM_MyCharacter2, UMVVM_MyCharacter3.
+ * Below View Models per each character: UBmrMVVM_Player0, UBmrMVVM_Player1, UBmrMVVM_Player2, UBmrMVVM_Player3.
  * It's done in such 'hardcoded' way for next reasons:
  * - It is much easier for the UI designer to work with separate View Models
  * by selecting the right View Model for the right character instead of struggling with Conversion Functions.
  * - It is not the problem since the number of character is always limited.
  ********************************************************************************************* */
 
-UCLASS(DisplayName = "My Character #0 View Model")
-class BOMBER_API UMVVM_MyCharacter0 : public UMVVM_MyCharacterBase
+UCLASS(DisplayName = "Bomber Player #0 View Model")
+class BOMBER_API UBmrMVVM_Player0 : public UBmrMVVM_PlayerBase
 {
 	GENERATED_BODY()
 
 public:
-	virtual FORCEINLINE int32 GetCharacterId() const override { return 0; }
+	virtual FORCEINLINE int32 GetPlayerId() const override { return 0; }
 };
 
-UCLASS(DisplayName = "My Character #1 View Model")
-class BOMBER_API UMVVM_MyCharacter1 : public UMVVM_MyCharacterBase
+UCLASS(DisplayName = "Bomber Player #1 View Model")
+class BOMBER_API UBmrMVVM_Player1 : public UBmrMVVM_PlayerBase
 {
 	GENERATED_BODY()
 
 public:
-	virtual FORCEINLINE int32 GetCharacterId() const override { return 1; }
+	virtual FORCEINLINE int32 GetPlayerId() const override { return 1; }
 };
 
-UCLASS(DisplayName = "My Character #2 View Model")
-class BOMBER_API UMVVM_MyCharacter2 : public UMVVM_MyCharacterBase
+UCLASS(DisplayName = "Bomber Player #2 View Model")
+class BOMBER_API UBmrMVVM_Player2 : public UBmrMVVM_PlayerBase
 {
 	GENERATED_BODY()
 
 public:
-	virtual FORCEINLINE int32 GetCharacterId() const override { return 2; }
+	virtual FORCEINLINE int32 GetPlayerId() const override { return 2; }
 };
 
-UCLASS(DisplayName = "My Character #3 View Model")
-class BOMBER_API UMVVM_MyCharacter3 : public UMVVM_MyCharacterBase
+UCLASS(DisplayName = "Bomber Player #3 View Model")
+class BOMBER_API UBmrMVVM_Player3 : public UBmrMVVM_PlayerBase
 {
 	GENERATED_BODY()
 
 public:
-	virtual FORCEINLINE int32 GetCharacterId() const override { return 3; }
+	virtual FORCEINLINE int32 GetPlayerId() const override { return 3; }
 };

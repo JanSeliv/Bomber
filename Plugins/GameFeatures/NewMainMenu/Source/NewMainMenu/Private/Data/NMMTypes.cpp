@@ -11,7 +11,7 @@ const FNMMCinematicRow FNMMCinematicRow::Empty = FNMMCinematicRow();
 bool FNMMCinematicRow::IsValid() const
 {
 	return LevelType != ELT::None
-	       && PlayerTag != FPlayerTag::None
+	       && PlayerTag != FBmrPlayerTag::None
 	       && LevelSequence != nullptr;
 }
 

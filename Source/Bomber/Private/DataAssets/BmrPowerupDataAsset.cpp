@@ -1,34 +1,34 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/ItemDataAsset.h"
+#include "DataAssets/BmrPowerupDataAsset.h"
 
 // Bomber
-#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(ItemDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPowerupDataAsset)
 
 // Default constructor
-UItemDataAsset::UItemDataAsset()
+UBmrPowerupDataAsset::UBmrPowerupDataAsset()
 {
-	ActorTypeInternal = EAT::Item;
-	RowClassInternal = UItemRow::StaticClass();
+	ActorType = EAT::Item;
+	RowClass = UBmrPowerupRow::StaticClass();
 }
 
 // Returns the item data asset
-const UItemDataAsset& UItemDataAsset::Get()
+const UBmrPowerupDataAsset& UBmrPowerupDataAsset::Get()
 {
-	return UDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }
 
 // Return row by specified item type
-const UItemRow* UItemDataAsset::GetRowByItemType(FBmrPowerupTag ItemType, ELevelType LevelType) const
+const UBmrPowerupRow* UBmrPowerupDataAsset::GetRowByItemType(FBmrPowerupTag ItemType, EBmrLevelType LevelType) const
 {
-	TArray<ULevelActorRow*> OutRows;
+	TArray<UBmrLevelActorRow*> OutRows;
 	GetRowsByLevelType(OutRows, TO_FLAG(LevelType));
-	const ULevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType](const ULevelActorRow* RowIt)
+	const UBmrLevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType](const UBmrLevelActorRow* RowIt)
 	{
-		const UItemRow* ItemRow = Cast<UItemRow>(RowIt);
+		const UBmrPowerupRow* ItemRow = Cast<UBmrPowerupRow>(RowIt);
 		return ItemRow && ItemRow->ItemType == ItemType;
 	});
-	return FoundRowPtr ? Cast<UItemRow>(*FoundRowPtr) : nullptr;
+	return FoundRowPtr ? Cast<UBmrPowerupRow>(*FoundRowPtr) : nullptr;
 }

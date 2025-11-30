@@ -3,10 +3,10 @@
 #include "AbilitySystem/Abilities/BmrPlayerDeathAbility.h"
 
 // Bomber
-#include "Components/MapComponent.h"
-#include "DataAssets/PlayerDataAsset.h"
-#include "GeneratedMap.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "Actors/BmrGeneratedMap.h"
+#include "Actors/BmrPawn.h"
+#include "Components/BmrMapComponent.h"
+#include "DataAssets/BmrPlayerDataAsset.h"
 
 // UE
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
@@ -21,20 +21,20 @@ void UBmrPlayerDeathAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	check(ActorInfo && TriggerEventData);
 
-	// Play animation
-	const APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(ActorInfo->AvatarActor.Get());
-	const UPlayerRow* PlayerRow = PlayerCharacter ? UPlayerDataAsset::Get().GetRowByPlayerTag(PlayerCharacter->GetPlayerTag()) : nullptr;
+	const ABmrPawn* Pawn = Cast<ABmrPawn>(ActorInfo->AvatarActor.Get());
+	const UBmrPlayerRow* PlayerRow = Pawn ? UBmrPlayerDataAsset::Get().GetRowByPlayerTag(Pawn->GetPlayerTag()) : nullptr;
 	UAnimMontage* DeathMontage = PlayerRow ? PlayerRow->DeathMontage : nullptr;
-	if (ensureMsgf(DeathMontage, TEXT("ASSERT: [%i] %hs:\n'DeathMontage' failed to play!"), __LINE__, __FUNCTION__))
-	{
-		UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, DeathMontage);
-		MontageTask->ReadyForActivation();
-	}
-	else
+	if (!ensureMsgf(DeathMontage, TEXT("ASSERT: [%i] %hs:\n'DeathMontage' failed to play!"), __LINE__, __FUNCTION__))
 	{
 		K2_EndAbilityLocally();
+		return;
 	}
 
-	AActor* DeathCauserInternal = const_cast<AActor*>(TriggerEventData->Instigator.Get());
-	AGeneratedMap::Get().RemoveFromGrid(UMapComponent::GetMapComponent(ActorInfo->AvatarActor.Get()), DeathCauserInternal);
+	// Play death animation
+	UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, DeathMontage);
+	MontageTask->ReadyForActivation();
+
+	// Unregister from the level, so other players/AI and bombs will not react to this pawn anymore
+	AActor* DeathCauser = const_cast<AActor*>(TriggerEventData->Instigator.Get());
+	ABmrGeneratedMap::Get().RemoveFromGrid(UBmrMapComponent::GetMapComponent(ActorInfo->AvatarActor.Get()), DeathCauser);
 }

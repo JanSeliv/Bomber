@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/AIDataAsset.h"
+#include "DataAssets/BmrAIDataAsset.h"
 
 // Bomber
-#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(AIDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrAIDataAsset)
 
 // Returns the AI data asset
-const UAIDataAsset& UAIDataAsset::Get()
+const UBmrAIDataAsset& UBmrAIDataAsset::Get()
 {
-	const UAIDataAsset* AIDataAsset = UDataAssetsContainer::GetAIDataAsset();
+	const UBmrAIDataAsset* AIDataAsset = UBmrDataAssetsContainer::GetAIDataAsset();
 	checkf(AIDataAsset, TEXT("The AI Data Asset is not valid"));
 	return *AIDataAsset;
 }

@@ -27,6 +27,6 @@ protected:
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 
 	/** Applies given gameplay effect with bomb duration. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	static FActiveGameplayEffectHandle ApplyDurationalEffect(TSubclassOf<UGameplayEffect> GameplayEffect, const FGameplayEffectContextHandle& EffectContext, const FGameplayAbilityActorInfo& ActorInfo, const FGameplayAbilityActivationInfo& ActivationInfo);
 };

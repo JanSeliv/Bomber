@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "GameFramework/MyGameSession.h"
+#include "GameFramework/BmrGameSession.h"
 
 // Bomber
-#include "GameFramework/MyPlayerState.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "GameFramework/PlayerController.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameSession)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameSession)
 
 // Is overridden to set proper ID for the player
-void AMyGameSession::RegisterPlayer(APlayerController* NewPlayer, const FUniqueNetIdRepl& UniqueId, bool bWasFromInvite)
+void ABmrGameSession::RegisterPlayer(APlayerController* NewPlayer, const FUniqueNetIdRepl& UniqueId, bool bWasFromInvite)
 {
 	Super::RegisterPlayer(NewPlayer, UniqueId, bWasFromInvite);
 
-	AMyPlayerState* PlayerState = NewPlayer ? NewPlayer->GetPlayerState<AMyPlayerState>() : nullptr;
+	ABmrPlayerState* PlayerState = NewPlayer ? NewPlayer->GetPlayerState<ABmrPlayerState>() : nullptr;
 	if (PlayerState)
 	{
 		PlayerState->SetHumanId(NewPlayer);

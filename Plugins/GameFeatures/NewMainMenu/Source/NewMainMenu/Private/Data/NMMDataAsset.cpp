@@ -6,7 +6,7 @@
 #include "Subsystems/NMMBaseSubsystem.h"
 
 // Bomber
-#include "DataAssets/MyInputMappingContext.h"
+#include "DataAssets/BmrInputMappingContext.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMDataAsset)
 
@@ -19,25 +19,25 @@ const UNMMDataAsset& UNMMDataAsset::Get(const UObject* OptionalWorldContext /* =
 }
 
 // Returns an input context by given Main Menu State
-const UMyInputMappingContext* UNMMDataAsset::GetInputContext(ENMMState MenuState) const
+const UBmrInputMappingContext* UNMMDataAsset::GetInputContext(ENMMState MenuState) const
 {
-	const TObjectPtr<const UMyInputMappingContext>* FoundContext = InputContextsInternal.Find(MenuState);
+	const TObjectPtr<const UBmrInputMappingContext>* FoundContext = InputContexts.Find(MenuState);
 	return FoundContext ? *FoundContext : nullptr;
 }
 
 // Returns all input contexts
-void UNMMDataAsset::GetAllInputContexts(TArray<const UMyInputMappingContext*>& OutInputContexts) const
+void UNMMDataAsset::GetAllInputContexts(TArray<const UBmrInputMappingContext*>& OutInputContexts) const
 {
-	for (const TTuple<ENMMState, TObjectPtr<const UMyInputMappingContext>>& It : InputContextsInternal)
+	for (const TTuple<ENMMState, TObjectPtr<const UBmrInputMappingContext>>& It : InputContexts)
 	{
 		OutInputContexts.Emplace(It.Value);
 	}
 }
 
 // Returns the main menu music of specified level
-USoundBase* UNMMDataAsset::GetMainMenuMusic(ELevelType LevelType) const
+USoundBase* UNMMDataAsset::GetMainMenuMusic(EBmrLevelType LevelType) const
 {
-	if (const TObjectPtr<USoundBase>* FoundMusic = MainMenuMusicInternal.Find(LevelType))
+	if (const TObjectPtr<USoundBase>* FoundMusic = MainMenuMusic.Find(LevelType))
 	{
 		return *FoundMusic;
 	}
@@ -48,7 +48,7 @@ USoundBase* UNMMDataAsset::GetMainMenuMusic(ELevelType LevelType) const
 // Returns all main menu music
 void UNMMDataAsset::GetAllMainMenuMusic(TArray<USoundBase*>& OutMainMenuMusic) const
 {
-	for (const TTuple<ELevelType, TObjectPtr<USoundBase>>& It : MainMenuMusicInternal)
+	for (const TTuple<EBmrLevelType, TObjectPtr<USoundBase>>& It : MainMenuMusic)
 	{
 		OutMainMenuMusic.AddUnique(It.Value);
 	}

@@ -3,12 +3,12 @@
 #include "FTGEditorPreviewSubsystem.h"
 
 /// Bomber
+#include "Actors/BmrGeneratedMap.h"
 #include "FTGComponent.h"
 #include "FTGEditorUtils.h"
-#include "GeneratedMap.h"
 #include "InstancedStaticMeshActor.h"
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
-#include "Subsystems/GeneratedMapSubsystem.h"
+#include "Subsystems/BmrGeneratedMapSubsystem.h"
 
 // UE
 #include "Engine/World.h"
@@ -37,12 +37,12 @@ void UFTGEditorPreviewSubsystem::Deinitialize()
 void UFTGEditorPreviewSubsystem::OnBeginPlay(UWorld* World, FWorldInitializationValues WorldInitializationValues)
 {
 	if (!FEditorUtilsLibrary::IsEditorNotPieWorld() // Only preview in editor, not in PIE
-	    || IsValid(FootTrailGeneratorInternal)) // skip if already initialized
+	    || IsValid(FootTrailGenerator)) // skip if already initialized
 	{
 		return;
 	}
 
-	UGeneratedMapSubsystem* GeneratedMapSubsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem(World);
+	UBmrGeneratedMapSubsystem* GeneratedMapSubsystem = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(World);
 	if (!GeneratedMapSubsystem)
 	{
 		// Might be null in temporary editor worlds, ignore
@@ -50,7 +50,7 @@ void UFTGEditorPreviewSubsystem::OnBeginPlay(UWorld* World, FWorldInitialization
 	}
 
 	GeneratedMapSubsystem->OnGeneratedMapReady.AddUniqueDynamic(this, &ThisClass::OnGeneratedMapReady);
-	if (AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap(World))
+	if (ABmrGeneratedMap* GeneratedMap = ABmrGeneratedMap::GetGeneratedMap(World))
 	{
 		OnGeneratedMapReady(GeneratedMap);
 	}
@@ -59,22 +59,22 @@ void UFTGEditorPreviewSubsystem::OnBeginPlay(UWorld* World, FWorldInitialization
 // Is used to destroy the foot trails generator
 void UFTGEditorPreviewSubsystem::OnEndPlay(UWorld* World, bool bArg, bool bCond)
 {
-	if (IsValid(FootTrailGeneratorInternal))
+	if (IsValid(FootTrailGenerator))
 	{
-		FootTrailGeneratorInternal->DestroyComponent();
-		FootTrailGeneratorInternal = nullptr;
+		FootTrailGenerator->DestroyComponent();
+		FootTrailGenerator = nullptr;
 	}
 
-	if (UGeneratedMapSubsystem* GeneratedMapSubsystem = UGeneratedMapSubsystem::GetGeneratedMapSubsystem(World))
+	if (UBmrGeneratedMapSubsystem* GeneratedMapSubsystem = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(World))
 	{
 		GeneratedMapSubsystem->OnGeneratedMapReady.RemoveAll(this);
 	}
 }
 
 /// Called when Generated Map is initialized and ready to be used, is also called in editor
-void UFTGEditorPreviewSubsystem::OnGeneratedMapReady(class AGeneratedMap* GeneratedMap)
+void UFTGEditorPreviewSubsystem::OnGeneratedMapReady(class ABmrGeneratedMap* GeneratedMap)
 {
-	if (IsValid(FootTrailGeneratorInternal))
+	if (IsValid(FootTrailGenerator))
 	{
 		// Is already initialized
 		return;
@@ -87,12 +87,12 @@ void UFTGEditorPreviewSubsystem::OnGeneratedMapReady(class AGeneratedMap* Genera
 	}
 
 	checkf(GeneratedMap, TEXT("ERROR: [%i] %hs:\n'GeneratedMap' is null!"), __LINE__, __FUNCTION__);
-	FootTrailGeneratorInternal = NewObject<UFTGComponent>(GeneratedMap, ComponentClass);
-	FootTrailGeneratorInternal->RegisterComponent();
-	FootTrailGeneratorInternal->InitOnce();
+	FootTrailGenerator = NewObject<UFTGComponent>(GeneratedMap, ComponentClass);
+	FootTrailGenerator->RegisterComponent();
+	FootTrailGenerator->InitOnce();
 
 	// Hide editor-only version of trails in PIE
-	AInstancedStaticMeshActor* InstancedFootTrailsActor = FootTrailGeneratorInternal->GetInstancedStaticMeshActor();
+	AInstancedStaticMeshActor* InstancedFootTrailsActor = FootTrailGenerator->GetInstancedStaticMeshActor();
 	checkf(InstancedFootTrailsActor, TEXT("ERROR: [%i] %hs:\n'InstancedFootTrailsActor' is null!"), __LINE__, __FUNCTION__);
 	InstancedFootTrailsActor->SetActorHiddenInGame(true);
 }

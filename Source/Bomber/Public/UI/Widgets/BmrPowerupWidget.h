@@ -22,43 +22,43 @@ public:
 	 * @param NewValue The new value to set the slider to, should be in range [0, MaxValue].
 	 * @param MaxValue The maximum value for the slider, used to display the percentage of the powerup level.
 	 * @param bImmediateUpdate If true, the slider will be updated immediately without interpolation. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetTargetValue(float NewValue, float MaxValue, bool bImmediateUpdate = false);
 
 	/** Updates the icon of the powerup item in the UI.
 	 * @param NewItemType The tag of powerup item to display. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetPowerupIcon(FBmrPowerupTag NewItemType);
 
 protected:
 	/** Exposed property to be set in Details Panel of the type of item this UI or data element is associated with (e.g., Speed, BombCount, etc.) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Design", meta = (BlueprintProtected, DisplayName = "Item Type", ExposeOnSpawn = "true"))
-	FBmrPowerupTag ItemTypeInternal = FBmrPowerupTag::None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Design", meta = (BlueprintProtected, ExposeOnSpawn = "true"))
+	FBmrPowerupTag PowerupTag = FBmrPowerupTag::None;
 
 	/** The image UI widget used to display the icon of the power-up item.
 	 * It automatically sets the icon based on the ItemType property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "[Bomber]", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UImage> PowerUpIcon = nullptr;
 
 	/** Exposed property to be set in Details Panel of the duration of the interpolation when updating visual feedback (e.g., slider value change) */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Design", meta = (BlueprintProtected, DisplayName = "Lerp Duration", ClampMin = "0.01"))
-	float LerpDurationInternal = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Design", meta = (BlueprintProtected, ClampMin = "0.01"))
+	float LerpDuration = 0.5f;
 
 	/** The radial slider UI widget used to display or adjust the power-up level */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "[Bomber]", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class URadialSlider> RadialSlider = nullptr;
 
 	/** Target value to interpolate toward when updating the slider */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Target Value"))
-	float TargetValueInternal = 0.f;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	float TargetValue = 0.f;
 
 	/** Time elapsed since starting the interpolation toward the new target value */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Elapsed Lerp Time"))
-	float ElapsedLerpTimeInternal = 0.f;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	float ElapsedLerpTime = 0.f;
 
 	/** Whether the slider value needs to be updated based on target and elapsed time */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Needs Update"))
-	bool bNeedsUpdateInternal = false;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	bool bNeedsUpdate = false;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -79,8 +79,8 @@ protected:
 	 ********************************************************************************************* */
 protected:
 	/** Called when the local player character is spawned, possessed, and replicated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnLocalPawnReady(class ABmrPawn* Pawn, int32 PlayerId);
 
 	/** Is called when the Skate attribute is changed, e.g: when player picked up given item. */
 	void OnPowerupAttributeChanged(const struct FOnAttributeChangeData& OnAttributeChangeData);

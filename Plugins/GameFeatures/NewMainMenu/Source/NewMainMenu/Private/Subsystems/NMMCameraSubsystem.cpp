@@ -11,11 +11,11 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
-#include "Components/MyCameraComponent.h"
-#include "Controllers/MyPlayerController.h"
+#include "Components/BmrCameraComponent.h"
+#include "Controllers/BmrPlayerController.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Camera/CameraActor.h"
@@ -41,7 +41,7 @@ UCameraComponent* UNMMCameraSubsystem::FindCameraComponent(ENMMState MainMenuSta
 	{
 		case ENMMState::None:
 		{
-			return UMyBlueprintFunctionLibrary::GetLevelCamera();
+			return UBmrBlueprintFunctionLibrary::GetLevelCamera();
 		}
 		case ENMMState::Transition:
 		{
@@ -77,7 +77,7 @@ ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
 	const UNMMSpotComponent* MenuSpot = IsCameraForwardTransition()
 	                                        ? SpotsSubsystem.GetCurrentSpot()
-	                                        : SpotsSubsystem.GetNextSpot(ForwardDir, UMyBlueprintFunctionLibrary::GetLevelType());
+	                                        : SpotsSubsystem.GetNextSpot(ForwardDir, UBmrBlueprintFunctionLibrary::GetLevelType());
 	return MenuSpot ? UGameplayUtilsLibrary::GetAttachedActorByClass<ACineCameraRigRail>(MenuSpot->GetOwner()) : nullptr;
 }
 
@@ -91,7 +91,7 @@ void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 		return;
 	}
 
-	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	const UCameraComponent* CameraComponent = FindCameraComponent(MainMenuState);
 	if (!ensureMsgf(MyPC, TEXT("ASSERT: [%i] %s:\n'MyPC' is not valid!"), __LINE__, *FString(__FUNCTION__))
 	    || !ensureMsgf(CameraComponent, TEXT("ASSERT: [%i] %s:\n'CameraComponent' is not valid!"), __LINE__, *FString(__FUNCTION__))
@@ -144,7 +144,7 @@ void UNMMCameraSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!bIsBlendingInOutInternal
+	if (!bIsBlendingInOut
 	    && UNMMUtils::GetMainMenuState() == ENMMState::Transition)
 	{
 		TickTransition(DeltaTime);
@@ -193,13 +193,13 @@ float UNMMCameraSubsystem::GetCameraLastTransitionValue()
 // Applies the new state of camera rail transition state
 void UNMMCameraSubsystem::SetNewCameraRailTransitionState(ENMMCameraRailTransitionState NewCameraRailState)
 {
-	if (NewCameraRailState == CameraRailTransitionStateInternal)
+	if (NewCameraRailState == CameraRailTransitionState)
 	{
 		return;
 	}
 
-	CameraRailTransitionStateInternal = NewCameraRailState;
-	OnCameraRailTransitionStateChanged.Broadcast(CameraRailTransitionStateInternal);
+	CameraRailTransitionState = NewCameraRailState;
+	OnCameraRailTransitionStateChanged.Broadcast(CameraRailTransitionState);
 }
 
 // Is called on starts blending the camera towards current spot on the rail
@@ -217,7 +217,7 @@ void UNMMCameraSubsystem::OnBeginTransition()
 	CurrentRailRig->AbsolutePositionOnRail = GetCameraStartTransitionValue();
 
 	// Transition state is started, so we need to blend the gap between initial spot and beginning of the rail
-	bIsBlendingInOutInternal = true;
+	bIsBlendingInOut = true;
 	PossessCamera(ENMMState::Transition);
 
 	// Trigger rail once the camera is blended
@@ -225,7 +225,7 @@ void UNMMCameraSubsystem::OnBeginTransition()
 	const float TransitionToIdleBlendTime = UNMMDataAsset::Get().GetCameraBlendTime();
 	GetWorldRef().GetTimerManager().SetTimer(BlendTimerHandle, []
 	{
-		Get().bIsBlendingInOutInternal = false;
+		Get().bIsBlendingInOut = false;
 	}, TransitionToIdleBlendTime, false);
 
 	SetNewCameraRailTransitionState(ENMMCameraRailTransitionState::BeginTransition);
@@ -235,7 +235,7 @@ void UNMMCameraSubsystem::OnBeginTransition()
 void UNMMCameraSubsystem::OnEndTransition()
 {
 	// Rail is finish, so we need to blend the gap between the end of rail and the camera spot
-	bIsBlendingInOutInternal = true;
+	bIsBlendingInOut = true;
 	PossessCamera(ENMMState::Idle);
 
 	// Finish Transition state once the camera is blended
@@ -243,7 +243,7 @@ void UNMMCameraSubsystem::OnEndTransition()
 	const float TransitionToIdleBlendTime = UNMMDataAsset::Get().GetCameraBlendTime();
 	GetWorldRef().GetTimerManager().SetTimer(BlendTimerHandle, []
 	{
-		Get().bIsBlendingInOutInternal = false;
+		Get().bIsBlendingInOut = false;
 		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Idle);
 	}, TransitionToIdleBlendTime, false);
 
@@ -269,7 +269,7 @@ void UNMMCameraSubsystem::TickTransition(float DeltaTime)
 
 	// checks if it's halfway of transition
 	constexpr float HalfwayPosition = 0.5f;
-	if (CameraRailTransitionStateInternal != ENMMCameraRailTransitionState::HalfwayTransition
+	if (CameraRailTransitionState != ENMMCameraRailTransitionState::HalfwayTransition
 	    && FMath::IsNearlyEqual(Progress, HalfwayPosition, DeltaTime))
 	{
 		SetNewCameraRailTransitionState(ENMMCameraRailTransitionState::HalfwayTransition);

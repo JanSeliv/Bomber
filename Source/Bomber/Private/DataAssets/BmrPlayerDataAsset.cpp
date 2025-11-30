@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/PlayerDataAsset.h"
+#include "DataAssets/BmrPlayerDataAsset.h"
 
 // Bomber
-#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
 
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -15,14 +15,14 @@
 #include "Materials/MaterialInstance.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerDataAsset)
 
 // Returns the num of skin textures in the array of diffuse maps specified a player material instance
-int32 UPlayerRow::GetSkinTexturesNum() const
+int32 UBmrPlayerRow::GetSkinTexturesNum() const
 {
-	const UPlayerDataAsset* PlayerDataAsset = Cast<UPlayerDataAsset>(GetOuter());
+	const UBmrPlayerDataAsset* PlayerDataAsset = Cast<UBmrPlayerDataAsset>(GetOuter());
 	if (!PlayerDataAsset
-	    || !MaterialInstanceInternal)
+	    || !MaterialInstance)
 	{
 		return INDEX_NONE;
 	}
@@ -34,17 +34,17 @@ int32 UPlayerRow::GetSkinTexturesNum() const
 	}
 
 	UTexture* FoundTexture = nullptr;
-	MaterialInstanceInternal->GetTextureParameterValue(SkinArrayParameterName, /*out*/ FoundTexture);
+	MaterialInstance->GetTextureParameterValue(SkinArrayParameterName, /*out*/ FoundTexture);
 	const UTexture2DArray* Texture2DArray = Cast<UTexture2DArray>(FoundTexture);
 	return Texture2DArray ? Texture2DArray->GetArraySize() : INDEX_NONE;
 }
 
 // Returns the dynamic material instance of a player with specified skin.
-UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const
+UMaterialInstanceDynamic* UBmrPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex) const
 {
-	if (MaterialInstancesDynamicInternal.IsValidIndex(SkinIndex))
+	if (MaterialInstancesDynamic.IsValidIndex(SkinIndex))
 	{
-		return MaterialInstancesDynamicInternal[SkinIndex];
+		return MaterialInstancesDynamic[SkinIndex];
 	}
 
 	return nullptr;
@@ -52,7 +52,7 @@ UMaterialInstanceDynamic* UPlayerRow::GetMaterialInstanceDynamic(int32 SkinIndex
 
 #if WITH_EDITOR
 // Handle adding and changing material instance to prepare dynamic materials
-void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UBmrPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
@@ -63,7 +63,7 @@ void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	}
 
 	// If material instance was changed
-	static const FName PropertyName = GET_MEMBER_NAME_CHECKED(ThisClass, MaterialInstanceInternal);
+	static const FName PropertyName = GET_MEMBER_NAME_CHECKED(ThisClass, MaterialInstance);
 	const FProperty* Property = PropertyChangedEvent.Property;
 	if (Property
 	    && Property->IsA<FObjectProperty>()
@@ -71,18 +71,18 @@ void UPlayerRow::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	    && Property->GetFName() == PropertyName)
 	{
 		// Force recreation of dynamic material instances
-		MaterialInstancesDynamicInternal.Empty();
+		MaterialInstancesDynamic.Empty();
 		UpdateSkinTextures();
 	}
 }
 #endif // WITH_EDITOR
 
 // Create dynamic material instance for each ski if is not done before.
-void UPlayerRow::UpdateSkinTextures()
+void UBmrPlayerRow::UpdateSkinTextures()
 {
-	UPlayerDataAsset* PlayerDataAsset = Cast<UPlayerDataAsset>(GetOuter());
+	UBmrPlayerDataAsset* PlayerDataAsset = Cast<UBmrPlayerDataAsset>(GetOuter());
 	if (!PlayerDataAsset
-	    || !MaterialInstanceInternal)
+	    || !MaterialInstance)
 	{
 		return;
 	}
@@ -95,7 +95,7 @@ void UPlayerRow::UpdateSkinTextures()
 		return;
 	}
 
-	const int32 MaterialInstancesDynamicNum = MaterialInstancesDynamicInternal.Num();
+	const int32 MaterialInstancesDynamicNum = MaterialInstancesDynamic.Num();
 	if (SkinTexturesNum == MaterialInstancesDynamicNum)
 	{
 		// The same amount, so all dynamic materials are already created
@@ -106,48 +106,48 @@ void UPlayerRow::UpdateSkinTextures()
 	const int32 InstancesToCreateNum = SkinTexturesNum - MaterialInstancesDynamicNum;
 	for (int32 Index = 0; Index < InstancesToCreateNum; ++Index)
 	{
-		UMaterialInstanceDynamic* MaterialInstanceDynamic = UMaterialInstanceDynamic::Create(MaterialInstanceInternal, PlayerDataAsset);
+		UMaterialInstanceDynamic* MaterialInstanceDynamic = UMaterialInstanceDynamic::Create(MaterialInstance, PlayerDataAsset);
 		if (!ensureMsgf(MaterialInstanceDynamic, TEXT("ASSERT: Could not create 'MaterialInstanceDynamic'")))
 		{
 			continue;
 		}
 
 		MaterialInstanceDynamic->SetFlags(RF_Public | RF_Transactional);
-		const int32 SkinPosition = MaterialInstancesDynamicInternal.Emplace(MaterialInstanceDynamic);
+		const int32 SkinPosition = MaterialInstancesDynamic.Emplace(MaterialInstanceDynamic);
 		MaterialInstanceDynamic->SetScalarParameterValue(SkinIndexParameterName, SkinPosition);
 	}
 }
 
 // Default constructor
-UPlayerDataAsset::UPlayerDataAsset()
+UBmrPlayerDataAsset::UBmrPlayerDataAsset()
 {
-	ActorTypeInternal = EAT::Player;
-	RowClassInternal = UPlayerRow::StaticClass();
+	ActorType = EAT::Player;
+	RowClass = UBmrPlayerRow::StaticClass();
 }
 
 // Returns the player data asset
-const UPlayerDataAsset& UPlayerDataAsset::Get()
+const UBmrPlayerDataAsset& UBmrPlayerDataAsset::Get()
 {
-	return UDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }
 
 // Get nameplate material by index, is used by nameplate meshes
-UMaterialInterface* UPlayerDataAsset::GetNameplateMaterial(int32 Index) const
+UMaterialInterface* UBmrPlayerDataAsset::GetNameplateMaterial(int32 Index) const
 {
-	if (NameplateMaterialsInternal.IsValidIndex(Index))
+	if (NameplateMaterials.IsValidIndex(Index))
 	{
-		return NameplateMaterialsInternal[Index];
+		return NameplateMaterials[Index];
 	}
 
 	return nullptr;
 }
 
 // Return first found row by specified player tag
-const UPlayerRow* UPlayerDataAsset::GetRowByPlayerTag(const FPlayerTag& PlayerTag) const
+const UBmrPlayerRow* UBmrPlayerDataAsset::GetRowByPlayerTag(const FBmrPlayerTag& PlayerTag) const
 {
-	for (const ULevelActorRow* RowIt : RowsInternal)
+	for (const UBmrLevelActorRow* RowIt : Rows)
 	{
-		const UPlayerRow* PlayerRow = Cast<UPlayerRow>(RowIt);
+		const UBmrPlayerRow* PlayerRow = Cast<UBmrPlayerRow>(RowIt);
 		if (PlayerRow && PlayerRow->PlayerTag == PlayerTag)
 		{
 			return PlayerRow;

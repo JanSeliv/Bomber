@@ -24,10 +24,10 @@ void UNMMSaveGameData::SaveDataAsync()
 void UNMMSaveGameData::MarkCinematicAsSeen(int32 CinematicRowIndex)
 {
 	const int32 Bitmask = 1 << CinematicRowIndex;
-	const bool bIsNewCinematic = !(AllSeenCinematicsBitmaskInternal & Bitmask);
+	const bool bIsNewCinematic = !(AllSeenCinematicsBitmask & Bitmask);
 	if (bIsNewCinematic)
 	{
-		AllSeenCinematicsBitmaskInternal |= Bitmask;
+		AllSeenCinematicsBitmask |= Bitmask;
 		SaveDataAsync();
 	}
 }

@@ -1,22 +1,22 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "PlayerTagCustomization.h"
+#include "BmrPlayerTagCustomization.h"
 
 // UE
 #include "PropertyEditorModule.h"
 
 /** The name of class to be customized: PlayerTag */
 // @TODO JanSeliv 2dUuTjyT use 'FPlayerTag::StaticStruct()->GetFName()' as soon as the editor module starts referencing the runtime module
-const FName FPlayerTagCustomization::PropertyClassName = TEXT("PlayerTag");
+const FName FBmrPlayerTagCustomization::PropertyClassName = TEXT("PlayerTag");
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
-TSharedRef<IPropertyTypeCustomization> FPlayerTagCustomization::MakeInstance()
+TSharedRef<IPropertyTypeCustomization> FBmrPlayerTagCustomization::MakeInstance()
 {
 	return FGameplayTagCustomizationPublic::MakeInstance();
 }
 
 // Creates customization for the Players Tag
-void FPlayerTagCustomization::RegisterPlayersTagCustomization()
+void FBmrPlayerTagCustomization::RegisterPlayersTagCustomization()
 {
 	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
 	{
@@ -28,13 +28,13 @@ void FPlayerTagCustomization::RegisterPlayersTagCustomization()
 	// Use default GameplayTag customization for inherited PlayerTag to show Tags list
 	PropertyModule.RegisterCustomPropertyTypeLayout(
 	    PropertyClassName,
-	    FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FPlayerTagCustomization::MakeInstance));
+	    FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FBmrPlayerTagCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 // Removes customization for the Players Tag
-void FPlayerTagCustomization::UnregisterPlayersTagCustomization()
+void FBmrPlayerTagCustomization::UnregisterPlayersTagCustomization()
 {
 	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
 	{

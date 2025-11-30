@@ -20,17 +20,17 @@ class BOMBER_API UBmrMoverWalkingMode : public UWalkingMode
 protected:
 	/** Speed bonus per Skate powerup in units/sec.
 	 * If base speed if 500, and this value is 100, then with 2 Skates the speed will be 700. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ClampMin = "0", UIMin = "0", DisplayName = "Skate Speed Bonus"))
-	float SkateSpeedBonusInternal = 100.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]", meta = (BlueprintProtected, ClampMin = "0", UIMin = "0"))
+	float SkateSpeedBonus = 100.f;
 
 	/** Cached initial max speed when the mode is registered.
 	 * Used for calculating the speed bonus from Skates. */
-	UPROPERTY(Transient, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Cached Max Speed"))
-	float CachedMaxSpeedInternal = 0.f;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	float CachedMaxSpeed = 0.f;
 
 	/** Cached common movement settings. */
-	UPROPERTY(Transient, BlueprintReadOnly, Category = "C++", meta = (DisplayName = "Mutable Legacy Settings"))
-	TObjectPtr<UCommonLegacyMovementSettings> MutableLegacySettingsInternal = nullptr;
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<UCommonLegacyMovementSettings> MutableLegacySettings = nullptr;
 
 	/*********************************************************************************************
 	 * Overrides

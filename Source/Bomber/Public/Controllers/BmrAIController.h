@@ -5,18 +5,18 @@
 #include "AIController.h"
 
 // Bomber
-#include "Structures/Cell.h"
+#include "Structures/BmrCell.h"
 
-#include "MyAIController.generated.h"
+#include "BmrAIController.generated.h"
 
-enum class ECurrentGameState : uint8;
+enum class EBmrCurrentGameState : uint8;
 
 /**
  * Characters controlled by bots.
- * @see Access its data with UAIDataAsset (Content/Bomber/DataAssets/DA_AI).
+ * @see Access its data with UBmrAIDataAsset (Content/Bomber/DataAssets/DA_AI).
  */
 UCLASS()
-class BOMBER_API AMyAIController final : public AAIController
+class BOMBER_API ABmrAIController final : public AAIController
 {
 	GENERATED_BODY()
 
@@ -26,23 +26,23 @@ public:
 	 * --------------------------------------------------- */
 
 	/** Sets default values for this character's properties */
-	AMyAIController();
+	ABmrAIController();
 
 	/** Makes AI go toward specified destination cell */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	void MoveToCell(const FCell& DestinationCell);
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void MoveToCell(const FBmrCell& DestinationCell);
 
 	/** Returns true if AI is enabled (move input is not ignored and cheat is not enabled). */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Is AI Enabled"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "Is AI Enabled"))
 	bool IsAIEnabled() const;
 
 	/** Returns true if AI can spawn bombs */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (DisplayName = "Can AI Spawn Bomb"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "Can AI Spawn Bomb"))
 	FORCEINLINE bool CanAISpawnBomb() const { return bCanSpawnBombs; }
 
 	/** Enable or disable spawning bombs for this bot (might be useful for some game modes)
 	 * Main logic still will be running unless move input is disabled as well. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Set AI Can Spawn Bomb"))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (DisplayName = "Set AI Can Spawn Bomb"))
 	void SetAICanSpawnBomb(bool bCanSpawn) { bCanSpawnBombs = bCanSpawn; }
 
 protected:
@@ -50,17 +50,17 @@ protected:
 	 *		Protected properties
 	 * --------------------------------------------------- */
 
-	/** Last time AI was updated, used to control update frequency, once per UGameStateDataAsset::TickInternal. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Update Handle"))
-	float LastAIUpdateTimeInternal = 0.f;
+	/** Last time AI was updated, used to control update frequency, once per UBmrGameStateDataAsset::TickInterval. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category = "[Bomber]", meta = (BlueprintProtected))
+	float LastAIUpdateTime = 0.f;
 
 	/** Cell position of current path segment's end */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "AI Move To"))
-	FCell AIMoveToInternal = FCell::InvalidCell;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	FBmrCell LastMoveToCell = FBmrCell::InvalidCell;
 
 	/** If disabled, AI will not be able to put any bombs. Might be useful for some game modes.
 	 * Main logic still will be running unless move input is disabled as well. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Can Spawn Bombs"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
 	bool bCanSpawnBombs = true;
 
 	/* ---------------------------------------------------
@@ -80,7 +80,7 @@ protected:
 	virtual void Reset() override;
 
 	/** The main AI logic */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void UpdateAI();
 
 	/** Enable or disable AI for this bot. */
@@ -92,14 +92,14 @@ protected:
 	 ********************************************************************************************* */
 protected:
 	/** Listen game states to enable or disable AI. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
 
 	/** Called when this level actor is destroyed on the Generated Map. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPostRemovedFromLevel(class UMapComponent* MapComponent, UObject* DestroyCauser);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPostRemovedFromLevel(class UBmrMapComponent* MapComponent, UObject* DestroyCauser);
 
 	/** Called when owner's movement is completed for the time step. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnOwnerMovementCompleted(const struct FMoverTimeStep& TimeStep);
 };

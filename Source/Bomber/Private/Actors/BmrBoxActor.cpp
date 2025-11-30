@@ -1,23 +1,23 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "LevelActors/BoxActor.h"
+#include "Actors/BmrBoxActor.h"
 
 // Bomber
+#include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
-#include "Components/MapComponent.h"
-#include "DataAssets/BoxDataAsset.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GeneratedMap.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Components/BmrMapComponent.h"
+#include "DataAssets/BmrBoxDataAsset.h"
+#include "GameFramework/BmrGameState.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Math/UnrealMathUtility.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(BoxActor)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBoxActor)
 
 // Sets default values.
-ABoxActor::ABoxActor()
+ABmrBoxActor::ABmrBoxActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -25,8 +25,8 @@ ABoxActor::ABoxActor()
 
 	// Replicate an actor
 	bReplicates = true;
-	static constexpr float NewNewUpdateFrequency = 10.f;
-	SetNetUpdateFrequency(NewNewUpdateFrequency);
+	static constexpr float NewUpdateFrequency = 10.f;
+	SetNetUpdateFrequency(NewUpdateFrequency);
 	bAlwaysRelevant = true;
 	SetReplicatingMovement(true);
 
@@ -34,14 +34,14 @@ ABoxActor::ABoxActor()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 
 	// Initialize MapComponent
-	MapComponentInternal = CreateDefaultSubobject<UMapComponent>(TEXT("MapComponent"));
+	MapComponent = CreateDefaultSubobject<UBmrMapComponent>(TEXT("MapComponent"));
 }
 
 // Spawn item with a chance
-void ABoxActor::TrySpawnItem()
+void ABmrBoxActor::TrySpawnItem()
 {
 	if (!HasAuthority()
-	    || AMyGameStateBase::GetCurrentGameState() != ECurrentGameState::InGame)
+	    || ABmrGameState::GetCurrentGameState() != EBmrCurrentGameState::InGame)
 	{
 		return;
 	}
@@ -49,11 +49,11 @@ void ABoxActor::TrySpawnItem()
 	// Spawn item with the chance
 	constexpr int32 MaxChance = 100;
 	const int32 CurrentChance = FMath::RandHelper(MaxChance);
-	const int32 PowerupsChance = UBoxDataAsset::Get().GetPowerupsChance();
+	const int32 PowerupsChance = UBmrBoxDataAsset::Get().GetPowerupsChance();
 	if (CurrentChance <= PowerupsChance)
 	{
-		checkf(MapComponentInternal, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-		AGeneratedMap::Get().SpawnActorByType(EAT::Item, MapComponentInternal->GetCell());
+		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+		ABmrGeneratedMap::Get().SpawnActorByType(EAT::Item, MapComponent->GetCell());
 	}
 }
 
@@ -62,12 +62,12 @@ void ABoxActor::TrySpawnItem()
  ********************************************************************************************* */
 
 // Called when an instance of this class is placed (in editor) or spawned.
-void ABoxActor::OnConstruction(const FTransform& Transform)
+void ABmrBoxActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
 	BIND_ON_ADDED_TO_LEVEL(this, ThisClass::OnAddedToLevel);
-	AGeneratedMap::Get().AddToGrid(MapComponentInternal);
+	ABmrGeneratedMap::Get().AddToGrid(MapComponent);
 }
 
 /*********************************************************************************************
@@ -75,19 +75,19 @@ void ABoxActor::OnConstruction(const FTransform& Transform)
  ********************************************************************************************* */
 
 // Called when this level actor is reconstructed or added on the Generated Map
-void ABoxActor::OnAddedToLevel_Implementation(UMapComponent* MapComponent)
+void ABmrBoxActor::OnAddedToLevel_Implementation(UBmrMapComponent* InMapComponent)
 {
-	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-	MapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
+	checkf(InMapComponent, TEXT("ERROR: [%i] %hs:\n'InMapComponent' is null!"), __LINE__, __FUNCTION__);
+	InMapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
 }
 
 // Called when this level actor is destroyed on the Generated Map
-void ABoxActor::OnPostRemovedFromLevel_Implementation(UMapComponent* MapComponent, UObject* DestroyCauser)
+void ABmrBoxActor::OnPostRemovedFromLevel_Implementation(UBmrMapComponent* InMapComponent, UObject* DestroyCauser)
 {
-	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-	MapComponent->OnPostRemovedFromLevel.RemoveAll(this);
+	checkf(InMapComponent, TEXT("ERROR: [%i] %hs:\n'InMapComponent' is null!"), __LINE__, __FUNCTION__);
+	InMapComponent->OnPostRemovedFromLevel.RemoveAll(this);
 
-	const bool bIsCauserAllowedForItems = UMyBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EActorType::Player));
+	const bool bIsCauserAllowedForItems = UBmrBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EBmrActorType::Player));
 	if (bIsCauserAllowedForItems)
 	{
 		TrySpawnItem();

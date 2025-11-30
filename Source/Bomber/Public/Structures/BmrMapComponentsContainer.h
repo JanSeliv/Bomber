@@ -5,25 +5,25 @@
 #include "Iris/ReplicationState/IrisFastArraySerializer.h"
 
 // Bomber
-#include "Cell.h"
+#include "BmrCell.h"
 #include "PoolManagerTypes.h" // FPoolObjectHandle
 
 // UE
 #include "Engine/NetSerialization.h" // FVector_NetQuantize
 
-#include "MapComponentsContainer.generated.h"
+#include "BmrMapComponentsContainer.generated.h"
 
 /*********************************************************************************************
  * This file is designed to improve the replication of array of Map Components.
- * Using FFastArraySerializer in FMapComponentsContainer allows for individual element tracking.
+ * Using FFastArraySerializer in FBmrMapComponentsContainer allows for individual element tracking.
  * This way, the array  replicates accurately even if the number of elements remains the same,
  * overcoming Unreal Engine's limitation where OnRep may not trigger in such cases.
  *********************************************************************************************/
 
-struct FMapComponentsContainer;
-struct FCell;
+struct FBmrMapComponentsContainer;
+struct FBmrCell;
 
-class UMapComponent;
+class UBmrMapComponent;
 
 /**
  * Represents a specification for a map component, inheriting from FFastArraySerializerItem
@@ -31,23 +31,23 @@ class UMapComponent;
  * PreReplicatedRemove and PostReplicatedAdd can be added to handle custom logic.
  */
 USTRUCT(BlueprintType)
-struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
+struct BOMBER_API FBmrMapComponentSpec : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
 
-	FMapComponentSpec() = default;
-	FMapComponentSpec(UMapComponent& InMapComponent);
-	FMapComponentSpec(FPoolObjectHandle InPoolObjectHandle);
+	FBmrMapComponentSpec() = default;
+	FBmrMapComponentSpec(UBmrMapComponent& InMapComponent);
+	FBmrMapComponentSpec(FPoolObjectHandle InPoolObjectHandle);
 
 	/** The map component to be replicated. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<UMapComponent> MapComponent = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
+	TObjectPtr<UBmrMapComponent> MapComponent = nullptr;
 
 	/** The position of the map component on the level.
 	 * Replicated here instead of in the component to stay in sync with the array, avoiding component replication delay
 	 * Uses NetQuantize to optimize network traffic */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	FVector_NetQuantize Cell = FCell::InvalidCell;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
+	FVector_NetQuantize Cell = FBmrCell::InvalidCell;
 
 	/** Unique ID of Map Component's owner actor in the Pool Manager.
 	 * Is useful to track the owner actor lifecycle even it is not spawned yet, but its Spawn Request is in queue.
@@ -55,45 +55,45 @@ struct BOMBER_API FMapComponentSpec : public FFastArraySerializerItem
 	FPoolObjectHandle PoolObjectHandle = FPoolObjectHandle::EmptyHandle;
 
 	/** Returns if current data is valid. If not, probably it's pending spawn or not replicated yet. */
-	bool FORCEINLINE IsValid() const { return FCell(Cell).IsValid() && MapComponent != nullptr; }
+	bool FORCEINLINE IsValid() const { return FBmrCell(Cell).IsValid() && MapComponent != nullptr; }
 
 	/*********************************************************************************************
 	 * FFastArraySerializerItem implementation
 	 ********************************************************************************************* */
 
-	void PreReplicatedRemove(const FMapComponentsContainer& InMapComponentsContainer);
-	void PostReplicatedAdd(const FMapComponentsContainer& InMapComponentsContainer);
-	void PostReplicatedChange(const FMapComponentsContainer& InMapComponentsContainer);
+	void PreReplicatedRemove(const FBmrMapComponentsContainer& InMapComponentsContainer);
+	void PostReplicatedAdd(const FBmrMapComponentsContainer& InMapComponentsContainer);
+	void PostReplicatedChange(const FBmrMapComponentsContainer& InMapComponentsContainer);
 
 	/*********************************************************************************************
-	 * Convenience operators to treat FMapComponentSpec as a UMapComponent*
+	 * Convenience operators to treat FBmrMapComponentSpec as a UBmrMapComponent*
 	 ********************************************************************************************* */
 
-	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FMapComponentSpec& B) { return A.MapComponent == B.MapComponent && A.Cell == B.Cell && A.PoolObjectHandle == B.PoolObjectHandle; }
-	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const UMapComponent* B) { return A.MapComponent == B; }
-	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FCell& B) { return FCell(A.Cell) == B; }
-	friend BOMBER_API bool operator==(const FMapComponentSpec& A, const FPoolObjectHandle& B) { return A.PoolObjectHandle == B; }
+	friend BOMBER_API bool operator==(const FBmrMapComponentSpec& A, const FBmrMapComponentSpec& B) { return A.MapComponent == B.MapComponent && A.Cell == B.Cell && A.PoolObjectHandle == B.PoolObjectHandle; }
+	friend BOMBER_API bool operator==(const FBmrMapComponentSpec& A, const UBmrMapComponent* B) { return A.MapComponent == B; }
+	friend BOMBER_API bool operator==(const FBmrMapComponentSpec& A, const FBmrCell& B) { return FBmrCell(A.Cell) == B; }
+	friend BOMBER_API bool operator==(const FBmrMapComponentSpec& A, const FPoolObjectHandle& B) { return A.PoolObjectHandle == B; }
 };
 
 /**
- * Iterator structure for FMapComponentsContainer, designed to simplify the traversal of the container's items.
+ * Iterator structure for FBmrMapComponentsContainer, designed to simplify the traversal of the container's items.
  * Facilitates cleaner and safer access to elements.
  */
-struct BOMBER_API FMapComponentsIterator
+struct BOMBER_API FBmrMapComponentsIterator
 {
 private:
-	const TArray<FMapComponentSpec>& Items;
+	const TArray<FBmrMapComponentSpec>& Items;
 	int32 Index;
 
 public:
-	FMapComponentsIterator(const TArray<FMapComponentSpec>& InItems);
-	FMapComponentsIterator(const TArray<FMapComponentSpec>& InItems, int32 StartIndex);
+	FBmrMapComponentsIterator(const TArray<FBmrMapComponentSpec>& InItems);
+	FBmrMapComponentsIterator(const TArray<FBmrMapComponentSpec>& InItems, int32 StartIndex);
 
-	FMapComponentsIterator& operator++();
+	FBmrMapComponentsIterator& operator++();
 
-	bool FORCEINLINE operator!=(const FMapComponentsIterator& Other) const { return Index != Other.Index; }
+	bool FORCEINLINE operator!=(const FBmrMapComponentsIterator& Other) const { return Index != Other.Index; }
 
-	UMapComponent* operator*() const;
+	UBmrMapComponent* operator*() const;
 };
 
 /**
@@ -105,7 +105,7 @@ public:
  * - ensures each component and its cell replicate together as one package due to its structured design
  */
 USTRUCT(BlueprintType)
-struct BOMBER_API FMapComponentsContainer : public FIrisFastArraySerializer
+struct BOMBER_API FBmrMapComponentsContainer : public FIrisFastArraySerializer
 {
 	GENERATED_BODY()
 
@@ -114,16 +114,16 @@ struct BOMBER_API FMapComponentsContainer : public FIrisFastArraySerializer
 	int32 LocalReplicationToken = 0;
 
 	/** The main data array for replication.
-	 * @warning It shouldn't be accessed directly, use ULevelActorsUtilsLibrary functions instead for obtaining Level Actors. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	TArray<FMapComponentSpec> Items;
+	 * @warning It shouldn't be accessed directly, use UBmrActorUtilsLibrary functions instead for obtaining Level Actors. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
+	TArray<FBmrMapComponentSpec> Items;
 
 	/*********************************************************************************************
 	 * FFastArraySerializer implementation
 	 ********************************************************************************************* */
 
 	/** Custom delta serialization for the map components array. Enables network transmission of changes. */
-	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms) { return FastArrayDeltaSerialize<FMapComponentSpec, FMapComponentsContainer>(Items, DeltaParms, *this); }
+	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms) { return FastArrayDeltaSerialize<FBmrMapComponentSpec, FBmrMapComponentsContainer>(Items, DeltaParms, *this); }
 
 	/** Checks if an item should be written during delta serialization, considering client or server context. */
 	template <typename Type, typename SerializerType>
@@ -133,42 +133,42 @@ struct BOMBER_API FMapComponentsContainer : public FIrisFastArraySerializer
 	void MarkItemDirty(FFastArraySerializerItem& Item);
 
 	/*********************************************************************************************
-	 * Convenience methods to treat FMapComponentsContainer as a TArray<UMapComponent*>
+	 * Convenience methods to treat FBmrMapComponentsContainer as a TArray<UBmrMapComponent*>
 	 ********************************************************************************************* */
 public:
 	/** Iterators to for-each loop through the Items. */
-	FMapComponentsIterator begin() const { return FMapComponentsIterator(Items); }
-	FMapComponentsIterator end() const { return FMapComponentsIterator(Items, Items.Num()); }
+	FBmrMapComponentsIterator begin() const { return FBmrMapComponentsIterator(Items); }
+	FBmrMapComponentsIterator end() const { return FBmrMapComponentsIterator(Items, Items.Num()); }
 
 	FORCEINLINE int32 Num() const { return Items.Num(); }
 
-	FORCEINLINE bool Contains(const UMapComponent* Item) const { return Items.Contains(Item); }
-	FORCEINLINE bool Contains(const FCell& Cell) const { return Items.Contains(Cell); }
+	FORCEINLINE bool Contains(const UBmrMapComponent* Item) const { return Items.Contains(Item); }
+	FORCEINLINE bool Contains(const FBmrCell& Cell) const { return Items.Contains(Cell); }
 	FORCEINLINE bool Contains(const FPoolObjectHandle& PoolObjectHandle) const { return Items.Contains(PoolObjectHandle); }
-	FORCEINLINE bool ContainsByPredicate(const TFunctionRef<bool(const FMapComponentSpec&)>& Predicate) const { return Items.ContainsByPredicate(Predicate); }
+	FORCEINLINE bool ContainsByPredicate(const TFunctionRef<bool(const FBmrMapComponentSpec&)>& Predicate) const { return Items.ContainsByPredicate(Predicate); }
 
-	FMapComponentSpec* Find(const UMapComponent* Item) { return Items.FindByKey(Item); }
-	FMapComponentSpec* Find(const FCell& Cell) { return Cell.IsValid() ? Items.FindByKey(Cell) : nullptr; }
-	FMapComponentSpec* Find(const FPoolObjectHandle& PoolObjectHandle) { return Items.FindByKey(PoolObjectHandle); }
+	FBmrMapComponentSpec* Find(const UBmrMapComponent* Item) { return Items.FindByKey(Item); }
+	FBmrMapComponentSpec* Find(const FBmrCell& Cell) { return Cell.IsValid() ? Items.FindByKey(Cell) : nullptr; }
+	FBmrMapComponentSpec* Find(const FPoolObjectHandle& PoolObjectHandle) { return Items.FindByKey(PoolObjectHandle); }
 
-	FMapComponentSpec& FindOrAdd(UMapComponent& MapComponent);
-	FMapComponentSpec& FindOrAdd(const FPoolObjectHandle& PoolObjectHandle);
+	FBmrMapComponentSpec& FindOrAdd(UBmrMapComponent& MapComponent);
+	FBmrMapComponentSpec& FindOrAdd(const FPoolObjectHandle& PoolObjectHandle);
 
-	void Remove(const UMapComponent* MapComponent);
-	void Remove(const FCell& Cell);
+	void Remove(const UBmrMapComponent* MapComponent);
+	void Remove(const FBmrCell& Cell);
 	void Remove(const FPoolObjectHandle& PoolObjectHandle);
 
 	FORCEINLINE bool IsValidIndex(int32 Index) const { return Items.IsValidIndex(Index); }
 
-	UMapComponent* operator[](const int32 Index) const { return IsValidIndex(Index) ? Items[Index].MapComponent : nullptr; }
+	UBmrMapComponent* operator[](const int32 Index) const { return IsValidIndex(Index) ? Items[Index].MapComponent : nullptr; }
 };
 
 /**
- * Specialization of TStructOpsTypeTraits for FMapComponentsContainer.
+ * Specialization of TStructOpsTypeTraits for FBmrMapComponentsContainer.
  * Enables network delta serialization for efficient and reliable replication.
  */
 template <>
-struct BOMBER_API TStructOpsTypeTraits<FMapComponentsContainer> : public TStructOpsTypeTraitsBase2<FMapComponentsContainer>
+struct BOMBER_API TStructOpsTypeTraits<FBmrMapComponentsContainer> : public TStructOpsTypeTraitsBase2<FBmrMapComponentsContainer>
 {
 	enum
 	{
@@ -177,7 +177,7 @@ struct BOMBER_API TStructOpsTypeTraits<FMapComponentsContainer> : public TStruct
 };
 
 template <typename Type, typename SerializerType>
-bool FMapComponentsContainer::ShouldWriteFastArrayItem(const Type& Item, const bool bIsWritingOnClient)
+bool FBmrMapComponentsContainer::ShouldWriteFastArrayItem(const Type& Item, const bool bIsWritingOnClient)
 {
 	if (bIsWritingOnClient)
 	{

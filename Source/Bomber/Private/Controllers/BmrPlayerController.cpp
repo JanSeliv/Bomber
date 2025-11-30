@@ -1,25 +1,25 @@
 ﻿// Copyright (c) Yevhenii Selivanov.
 
-#include "Controllers/MyPlayerController.h"
+#include "Controllers/BmrPlayerController.h"
 
 // Bomber
+#include "Actors/BmrPawn.h"
 #include "Bomber.h"
+#include "Components/BmrMouseActivityComponent.h"
 #include "Components/BmrMoverComponent.h"
-#include "Components/MouseActivityComponent.h"
 #include "DataAssets/BmrInputAction.h"
-#include "DataAssets/MyInputMappingContext.h"
-#include "DataAssets/PlayerInputDataAsset.h"
+#include "DataAssets/BmrInputMappingContext.h"
+#include "DataAssets/BmrPlayerInputDataAsset.h"
 #include "FunctionPickerData/FunctionPickerTemplate.h"
-#include "GameFramework/MyCheatManager.h"
-#include "GameFramework/MyGameModeBase.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "GameFramework/BmrCheatManager.h"
+#include "GameFramework/BmrGameMode.h"
+#include "GameFramework/BmrGameState.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "Subsystems/WidgetsSubsystem.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/SettingsWidget.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Components/GameFrameworkComponentManager.h"
@@ -32,10 +32,10 @@
 #include "Editor.h"
 #endif // WITH_EDITOR
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyPlayerController)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerController)
 
 // Sets default values for this controller's properties
-AMyPlayerController::AMyPlayerController()
+ABmrPlayerController::ABmrPlayerController()
 {
 	// Set this controller to call the Tick()
 	PrimaryActorTick.bCanEverTick = true;
@@ -44,10 +44,10 @@ AMyPlayerController::AMyPlayerController()
 	bAutoManageActiveCameraTarget = false;
 
 	// Set cheat class
-	CheatClass = UMyCheatManager::StaticClass();
+	CheatClass = UBmrCheatManager::StaticClass();
 
 	// Create the mouse activity component, so it will be responsible for mouse visibility
-	MouseComponentInternal = CreateDefaultSubobject<UMouseActivityComponent>(TEXT("MouseActivityComponent"));
+	MouseComponent = CreateDefaultSubobject<UBmrMouseActivityComponent>(TEXT("MouseActivityComponent"));
 
 	// Attach to pawn by default, so controller has always valid location: is useful for replication
 	bAttachToPawn = true;
@@ -56,13 +56,13 @@ AMyPlayerController::AMyPlayerController()
 /*********************************************************************************************
  * Game States
  * Is designed for clients to change the game state (if CanChangeGameState is true)
- * Server can call AMyGameStateBase::Get().SetGameState(NewState) directly
+ * Server can call ABmrGameState::Get().SetGameState(NewState) directly
  ********************************************************************************************* */
 
 // Returns true if current game state can be eventually changed
-bool AMyPlayerController::CanChangeGameState(ECurrentGameState NewGameState) const
+bool ABmrPlayerController::CanChangeGameState(EBmrCurrentGameState NewGameState) const
 {
-	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState();
+	const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
 	if (!MyGameState
 	    || !MyGameState->CanChangeGameState(NewGameState))
 	{
@@ -74,7 +74,7 @@ bool AMyPlayerController::CanChangeGameState(ECurrentGameState NewGameState) con
 }
 
 // Sets and replicates the Starting game state (3-2-1 countdown)
-void AMyPlayerController::SetGameStartingState()
+void ABmrPlayerController::SetGameStartingState()
 {
 	if (CanChangeGameState(ECGS::GameStarting))
 	{
@@ -83,7 +83,7 @@ void AMyPlayerController::SetGameStartingState()
 }
 
 // Sets and replicates the Menu game state
-void AMyPlayerController::SetMenuState()
+void ABmrPlayerController::SetMenuState()
 {
 	if (CanChangeGameState(ECGS::Menu))
 	{
@@ -92,10 +92,10 @@ void AMyPlayerController::SetMenuState()
 }
 
 // Set the new game state for the current game
-void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState NewGameState)
+void ABmrPlayerController::ServerSetGameState_Implementation(EBmrCurrentGameState NewGameState)
 {
 	// Listen states to manage the tick
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	if (ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState())
 	{
 		MyGameState->SetGameState(NewGameState);
 	}
@@ -106,10 +106,10 @@ void AMyPlayerController::ServerSetGameState_Implementation(ECurrentGameState Ne
  ********************************************************************************************* */
 
 // This is called only in the gameplay before calling begin play
-void AMyPlayerController::PostInitializeComponents()
+void ABmrPlayerController::PostInitializeComponents()
 {
 	// Before calling the parent, register this controller it can be obtained at very beginning
-	if (AMyGameModeBase* MyGameMode = UMyBlueprintFunctionLibrary::GetMyGameMode())
+	if (ABmrGameMode* MyGameMode = UBmrBlueprintFunctionLibrary::GetGameMode())
 	{
 		MyGameMode->AddPlayerController(this);
 	}
@@ -121,7 +121,7 @@ void AMyPlayerController::PostInitializeComponents()
 }
 
 // Called when the game starts or when spawned
-void AMyPlayerController::BeginPlay()
+void ABmrPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -135,8 +135,8 @@ void AMyPlayerController::BeginPlay()
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Adds given contexts to the list of auto managed and binds their input actions
-	TArray<const UMyInputMappingContext*> InputContexts;
-	UPlayerInputDataAsset::Get().GetAllInputContexts(/*out*/ InputContexts);
+	TArray<const UBmrInputMappingContext*> InputContexts;
+	UBmrPlayerInputDataAsset::Get().GetAllInputContexts(/*out*/ InputContexts);
 	SetupInputContexts(InputContexts);
 
 #if WITH_EDITOR
@@ -149,12 +149,12 @@ void AMyPlayerController::BeginPlay()
 }
 
 // Is overriden to be used when Input System is initialized
-void AMyPlayerController::InitInputSystem()
+void ABmrPlayerController::InitInputSystem()
 {
 	Super::InitInputSystem();
 
 	// Handle UI inputs
-	UWidgetsSubsystem& WidgetsSubsystem = UWidgetsSubsystem::Get(this);
+	UBmrWidgetsSubsystem& WidgetsSubsystem = UBmrWidgetsSubsystem::Get(this);
 	WidgetsSubsystem.OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
 	if (WidgetsSubsystem.AreWidgetInitialized())
 	{
@@ -168,9 +168,9 @@ void AMyPlayerController::InitInputSystem()
 	}
 
 	// Register gameplay mappings, so they can be remapped
-	TArray<const UMyInputMappingContext*> GameplayInputContexts;
-	UPlayerInputDataAsset::Get().GetAllGameplayInputContexts(/*out*/ GameplayInputContexts);
-	for (const UMyInputMappingContext* InputContextIt : GameplayInputContexts)
+	TArray<const UBmrInputMappingContext*> GameplayInputContexts;
+	UBmrPlayerInputDataAsset::Get().GetAllGameplayInputContexts(/*out*/ GameplayInputContexts);
+	for (const UBmrInputMappingContext* InputContextIt : GameplayInputContexts)
 	{
 		constexpr bool bRegisterMappings = true;
 		UInputUtilsLibrary::SetAllMappingsRegisteredInContext(this, bRegisterMappings, InputContextIt);
@@ -178,7 +178,7 @@ void AMyPlayerController::InitInputSystem()
 }
 
 // Is overriden to notify when this controller possesses new player character
-void AMyPlayerController::OnPossess(APawn* InPawn)
+void ABmrPlayerController::OnPossess(APawn* InPawn)
 {
 	if (HasAuthority())
 	{
@@ -193,19 +193,19 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 		ApplyAllInputContexts();
 	}
 
-	if (AMyPlayerState* InPlayerState = GetPlayerState<AMyPlayerState>())
+	if (ABmrPlayerState* InPlayerState = GetPlayerState<ABmrPlayerState>())
 	{
 		InPlayerState->OnPawnChanged(InPawn);
 	}
 
-	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(InPawn))
+	if (ABmrPawn* BmrPawn = Cast<ABmrPawn>(InPawn))
 	{
-		UGlobalEventsSubsystem::Get().OnCharactersReadyHandler.Broadcast_OnCharacterPossessed(*PlayerCharacter);
+		UBmrGlobalEventsSubsystem::Get().ReadyHandler.Broadcast_OnPawnPossessed(*BmrPawn);
 	}
 }
 
 // Is overriden to notify the client when this controller possesses new player character
-void AMyPlayerController::OnRep_Pawn()
+void ABmrPlayerController::OnRep_Pawn()
 {
 	Super::OnRep_Pawn();
 
@@ -213,9 +213,9 @@ void AMyPlayerController::OnRep_Pawn()
 }
 
 // Is overridden to spawn player state or reuse existing one
-void AMyPlayerController::InitPlayerState()
+void ABmrPlayerController::InitPlayerState()
 {
-	AMyPlayerState* InPlayerState = UMyBlueprintFunctionLibrary::GetLocalPlayerState(this);
+	ABmrPlayerState* InPlayerState = UBmrBlueprintFunctionLibrary::GetLocalPlayerState(this);
 	if (!InPlayerState)
 	{
 		// If player state is not found, create a new one
@@ -229,7 +229,7 @@ void AMyPlayerController::InitPlayerState()
 }
 
 // Is overridden to prevent destroyed possessed pawn, which is expected to be reused
-void AMyPlayerController::PawnLeavingGame()
+void ABmrPlayerController::PawnLeavingGame()
 {
 	// Don't call super to avoid destroying the pawn
 
@@ -239,19 +239,19 @@ void AMyPlayerController::PawnLeavingGame()
 		PlayerState->UnregisterPlayerWithSession();
 	}
 
-	if (APlayerCharacter* PlayerCharacter = GetPawn<APlayerCharacter>())
+	if (ABmrPawn* InPawn = GetPawn<ABmrPawn>())
 	{
 		// Finally, notify the player character
-		PlayerCharacter->OnPostLogout(this);
+		InPawn->OnPostLogout(this);
 	}
 }
 
 // Is overridden to perform cleanup of the controller when it is destroyed
-void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ABmrPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	UPlayerInputDataAsset::Get().EmptyGameplayInputContexts();
+	UBmrPlayerInputDataAsset::Get().EmptyGameplayInputContexts();
 }
 
 /*********************************************************************************************
@@ -259,10 +259,10 @@ void AMyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
  ********************************************************************************************* */
 
 // Is called when all game widgets are initialized
-void AMyPlayerController::OnWidgetsInitialized_Implementation()
+void ABmrPlayerController::OnWidgetsInitialized_Implementation()
 {
 	// Listens to handle input on opening and closing the Settings widget
-	if (USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget())
+	if (USettingsWidget* SettingsWidget = UBmrBlueprintFunctionLibrary::GetSettingsWidget())
 	{
 		SettingsWidget->OnToggledSettings.AddUniqueDynamic(this, &ThisClass::OnToggledSettings);
 	}
@@ -272,15 +272,15 @@ void AMyPlayerController::OnWidgetsInitialized_Implementation()
 }
 
 // Listen to toggle movement input
-void AMyPlayerController::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void ABmrPlayerController::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
 {
 	ApplyAllInputContexts();
 }
 
 // Listens to handle input on opening and closing the Settings widget
-void AMyPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
+void ABmrPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
 {
-	const ECurrentGameState CurrentGameState = AMyGameStateBase::GetCurrentGameState();
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	if (CurrentGameState == ECGS::Menu)
 	{
 		// Toggle all previous Input Contexts
@@ -289,11 +289,11 @@ void AMyPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
 	else if (CurrentGameState == ECGS::InGame)
 	{
 		// Toggle In-Game Menu Input Context
-		SetInputContextEnabled(!bIsVisible, UPlayerInputDataAsset::Get().GetInGameMenuInputContext());
+		SetInputContextEnabled(!bIsVisible, UBmrPlayerInputDataAsset::Get().GetInGameMenuInputContext());
 	}
 
 	// Turn on or off specific Settings input context (it does not contain any game state)
-	SetInputContextEnabled(bIsVisible, UPlayerInputDataAsset::Get().GetSettingsInputContext());
+	SetInputContextEnabled(bIsVisible, UBmrPlayerInputDataAsset::Get().GetSettingsInputContext());
 }
 
 /*********************************************************************************************
@@ -301,9 +301,9 @@ void AMyPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
  ********************************************************************************************* */
 
 // Returns true if Player Controller is ready to setup all the inputs
-bool AMyPlayerController::CanBindInputActions() const
+bool ABmrPlayerController::CanBindInputActions() const
 {
-	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem();
 	if (!IsLocalController()
 	    || !ensureMsgf(WidgetsSubsystem, TEXT("ASSERT: [%i] %hs:\n'WidgetsSubsystem' condition is FALSE"), __LINE__, __FUNCTION__)
 	    || !WidgetsSubsystem->AreWidgetInitialized())
@@ -311,7 +311,7 @@ bool AMyPlayerController::CanBindInputActions() const
 		return false;
 	}
 
-	const bool bIsStartingState = AMyGameStateBase::GetCurrentGameState() == ECGS::Menu;
+	const bool bIsStartingState = ABmrGameState::GetCurrentGameState() == ECGS::Menu;
 	if (!GetPawn() && bIsStartingState)
 	{
 		// While in menu (or initializing), player has to be possessed to bind inputs
@@ -324,11 +324,11 @@ bool AMyPlayerController::CanBindInputActions() const
 }
 
 // Adds given contexts to the list of auto managed and binds their input actions
-void AMyPlayerController::SetupInputContexts(const TArray<UMyInputMappingContext*>& InputContexts)
+void ABmrPlayerController::SetupInputContexts(const TArray<UBmrInputMappingContext*>& InputContexts)
 {
-	TArray<const UMyInputMappingContext*> ConstInputContexts;
+	TArray<const UBmrInputMappingContext*> ConstInputContexts;
 	ConstInputContexts.Reserve(InputContexts.Num());
-	for (const UMyInputMappingContext* InputContext : InputContexts)
+	for (const UBmrInputMappingContext* InputContext : InputContexts)
 	{
 		ConstInputContexts.Emplace(InputContext);
 	}
@@ -336,7 +336,7 @@ void AMyPlayerController::SetupInputContexts(const TArray<UMyInputMappingContext
 }
 
 // Adds given contexts to the list of auto managed and binds their input actions
-void AMyPlayerController::SetupInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts)
+void ABmrPlayerController::SetupInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts)
 {
 	if (!IsLocalController()
 	    || !ensureMsgf(!InputContexts.IsEmpty(), TEXT("ASSERT: [%i] %s:\n'InputContexts' is empty"), __LINE__, *FString(__FUNCTION__)))
@@ -349,29 +349,29 @@ void AMyPlayerController::SetupInputContexts(const TArray<const UMyInputMappingC
 
 	// Try enable input contexts according current state
 	constexpr bool bInvertRest = true;
-	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
+	SetAllInputContextsEnabled(true, ABmrGameState::GetCurrentGameState(), bInvertRest);
 }
 
 // Removes input contexts from managed list
-void AMyPlayerController::RemoveInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts)
+void ABmrPlayerController::RemoveInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts)
 {
 	if (!IsLocalController())
 	{
 		return;
 	}
 
-	for (const UMyInputMappingContext* InputContextIt : InputContexts)
+	for (const UBmrInputMappingContext* InputContextIt : InputContexts)
 	{
 		if (InputContextIt)
 		{
-			AllInputContextsInternal.RemoveSwap(InputContextIt);
+			AllInputContexts.RemoveSwap(InputContextIt);
 			SetInputContextEnabled(false, InputContextIt);
 		}
 	}
 }
 
 // Prevents built-in slate input on UMG
-void AMyPlayerController::SetUIInputIgnored()
+void ABmrPlayerController::SetUIInputIgnored()
 {
 	struct FMyNullNavigationConfig : public FNullNavigationConfig
 	{
@@ -389,9 +389,9 @@ void AMyPlayerController::SetUIInputIgnored()
 }
 
 // Takes all cached inputs contexts and turns them on or off according given game state
-void AMyPlayerController::SetAllInputContextsEnabled(bool bEnable, ECurrentGameState CurrentGameState, bool bInvertRest /* = false*/)
+void ABmrPlayerController::SetAllInputContextsEnabled(bool bEnable, EBmrCurrentGameState CurrentGameState, bool bInvertRest /* = false*/)
 {
-	for (const UMyInputMappingContext* InputContextIt : AllInputContextsInternal)
+	for (const UBmrInputMappingContext* InputContextIt : AllInputContexts)
 	{
 		if (!InputContextIt)
 		{
@@ -411,14 +411,14 @@ void AMyPlayerController::SetAllInputContextsEnabled(bool bEnable, ECurrentGameS
 }
 
 // Enables all managed input contexts by current game state
-void AMyPlayerController::ApplyAllInputContexts()
+void ABmrPlayerController::ApplyAllInputContexts()
 {
 	constexpr bool bInvertRest = true;
-	SetAllInputContextsEnabled(true, AMyGameStateBase::GetCurrentGameState(), bInvertRest);
+	SetAllInputContextsEnabled(true, ABmrGameState::GetCurrentGameState(), bInvertRest);
 }
 
 // Enables or disables specified input context
-void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMappingContext* InInputContext)
+void ABmrPlayerController::SetInputContextEnabled(bool bEnable, const UBmrInputMappingContext* InInputContext)
 {
 	if (!ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %s:\n'InInputContext' is not valid!"), __LINE__, *FString(__FUNCTION__)))
 	{
@@ -435,7 +435,7 @@ void AMyPlayerController::SetInputContextEnabled(bool bEnable, const UMyInputMap
 }
 
 // Set up input bindings in given contexts
-void AMyPlayerController::BindInputActionsInContext(const UMyInputMappingContext* InInputContext)
+void ABmrPlayerController::BindInputActionsInContext(const UBmrInputMappingContext* InInputContext)
 {
 	if (!CanBindInputActions())
 	{
@@ -493,27 +493,27 @@ void AMyPlayerController::BindInputActionsInContext(const UMyInputMappingContext
 }
 
 // Adds input contexts to the list to be auto turned of or on according current game state
-void AMyPlayerController::AddNewInputContexts(const TArray<const UMyInputMappingContext*>& InputContexts)
+void ABmrPlayerController::AddNewInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts)
 {
 	if (!IsLocalController())
 	{
 		return;
 	}
 
-	for (const UMyInputMappingContext* InputContextIt : InputContexts)
+	for (const UBmrInputMappingContext* InputContextIt : InputContexts)
 	{
 		if (InputContextIt)
 		{
-			AllInputContextsInternal.AddUnique(InputContextIt);
+			AllInputContexts.AddUnique(InputContextIt);
 		}
 	}
 }
 
 // Returns the component that responsible for mouse-related logic, or crash if null
-UMouseActivityComponent& AMyPlayerController::GetMouseActivityComponentChecked() const
+UBmrMouseActivityComponent& ABmrPlayerController::GetMouseActivityComponentChecked() const
 {
-	checkf(MouseComponentInternal, TEXT("ERROR: [%i] %hs:\n'MouseComponentInternal' is null!"), __LINE__, __FUNCTION__);
-	return *MouseComponentInternal;
+	checkf(MouseComponent, TEXT("ERROR: [%i] %hs:\n'MouseComponent' is null!"), __LINE__, __FUNCTION__);
+	return *MouseComponent;
 }
 
 /*********************************************************************************************
@@ -521,7 +521,7 @@ UMouseActivityComponent& AMyPlayerController::GetMouseActivityComponentChecked()
  ********************************************************************************************* */
 
 // Is overriden to setup camera manager once spawned
-void AMyPlayerController::SpawnPlayerCameraManager()
+void ABmrPlayerController::SpawnPlayerCameraManager()
 {
 	Super::SpawnPlayerCameraManager();
 
@@ -531,7 +531,7 @@ void AMyPlayerController::SpawnPlayerCameraManager()
 }
 
 // Is overriden to return correct camera location and rotation for the player
-void AMyPlayerController::GetPlayerViewPoint(FVector& OutLocation, FRotator& OutRotation) const
+void ABmrPlayerController::GetPlayerViewPoint(FVector& OutLocation, FRotator& OutRotation) const
 {
 	Super::GetPlayerViewPoint(OutLocation, OutRotation);
 
@@ -547,7 +547,7 @@ void AMyPlayerController::GetPlayerViewPoint(FVector& OutLocation, FRotator& Out
 	}
 
 #if !UE_BUILD_SHIPPING
-	if (bIsDebugCameraEnabledInternal)
+	if (bIsDebugCameraEnabled)
 	{
 		// Don't use our 2D-camera roll in debug camera to maintain proper rotation in 3D
 		OutRotation.Roll = 0.f;
@@ -557,8 +557,8 @@ void AMyPlayerController::GetPlayerViewPoint(FVector& OutLocation, FRotator& Out
 
 #if WITH_EDITOR
 // Is called in editor by F8 button, when switched between PIE and SIE during the game to handle the Debug Camera
-void AMyPlayerController::OnPreSwitchBeginPIEAndSIE(bool bPIE)
+void ABmrPlayerController::OnPreSwitchBeginPIEAndSIE(bool bPIE)
 {
-	bIsDebugCameraEnabledInternal = !bPIE;
+	bIsDebugCameraEnabled = !bPIE;
 }
 #endif

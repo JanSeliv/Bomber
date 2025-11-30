@@ -11,10 +11,10 @@
 #include "Widgets/NewMainMenuWidget.h"
 
 // Bomber
-#include "LevelActors/PlayerCharacter.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "Subsystems/WidgetsSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Actors/BmrPawn.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "NativeGameplayTags.h"
@@ -34,14 +34,14 @@ UNMMHUDComponent::UNMMHUDComponent()
 // Returns the Main Menu widget
 UNewMainMenuWidget* UNMMHUDComponent::GetMainMenuWidget() const
 {
-	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem();
 	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<UNewMainMenuWidget>(TAG_UI_WIDGET_NEWMAINMENU_MENU) : nullptr;
 }
 
 // Returns the In Cinematic State widget
 UNMMCinematicStateWidget* UNMMHUDComponent::GetInCinematicStateWidget() const
 {
-	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem();
 	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<UNMMCinematicStateWidget>(TAG_UI_WIDGET_NEWMAINMENU_CINEMATIC) : nullptr;
 }
 
@@ -50,8 +50,8 @@ void UNMMHUDComponent::OnRegister()
 {
 	Super::OnRegister();
 
-	// Listen to register widgets OnLocalCharacterReady to guarantee that the player controller is initialized, so we can use Widgets Subsystem
-	BIND_ON_LOCAL_CHARACTER_READY(this, UNMMHUDComponent::OnLocalCharacterReady);
+	// Listen to register widgets OnLocalPawnReady to guarantee that the player controller is initialized, so we can use Widgets Subsystem
+	BIND_ON_LOCAL_PAWN_READY(this, UNMMHUDComponent::OnLocalPawnReady);
 }
 
 // Clears all transient data created by this component
@@ -59,7 +59,7 @@ void UNMMHUDComponent::OnUnregister()
 {
 	// --- Destroy Main Menu widgets
 
-	if (UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem())
+	if (UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem())
 	{
 		WidgetsSubsystem->DestroyManageableWidgetByTag(TAG_UI_WIDGET_NEWMAINMENU_MENU);
 		WidgetsSubsystem->DestroyManageableWidgetByTag(TAG_UI_WIDGET_NEWMAINMENU_CINEMATIC);
@@ -69,12 +69,12 @@ void UNMMHUDComponent::OnUnregister()
 }
 
 // Called when the local player character is spawned, possessed, and replicated
-void UNMMHUDComponent::OnLocalCharacterReady_Implementation(class APlayerCharacter* Character, int32 CharacterID)
+void UNMMHUDComponent::OnLocalPawnReady_Implementation(class ABmrPawn* Character, int32 PlayerId)
 {
-	UWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetMainMenuWidgetData());
-	UWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetInCinematicStateWidgetData());
+	UBmrWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetMainMenuWidgetData());
+	UBmrWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetInCinematicStateWidgetData());
 
-	// Once HUD is displayed, set the Menu state OnLocalCharacterReady
+	// Once HUD is displayed, set the Menu state OnLocalPawnReady
 	// It guarantee that game enters the Menu state only when the character is ready and HUD is displayed
 	if (UNMMPlayerControllerComponent* ControllerComponent = UNMMUtils::GetPlayerControllerComponent())
 	{

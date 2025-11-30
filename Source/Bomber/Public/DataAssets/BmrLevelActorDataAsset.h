@@ -5,32 +5,32 @@
 #include "Data/MyPrimaryDataAsset.h"
 
 // Bomber
-#include "Bomber.h" // ELevelType, EActorType
+#include "Bomber.h" // EBmrLevelType, EBmrActorType
 
 // UE
 #include "Engine/EngineTypes.h" // ECollisionResponse
 
-#include "LevelActorDataAsset.generated.h"
+#include "BmrLevelActorDataAsset.generated.h"
 
 /**
  * The base archetype of level actor rows. Is implemented in player, item rows, etc.
  */
-UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, Const, CollapseCategories, AutoExpandCategories = ("C++"))
-class BOMBER_API ULevelActorRow : public UObject
+UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, Const, CollapseCategories, AutoExpandCategories = ("[Bomber]"))
+class BOMBER_API UBmrLevelActorRow : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	/** The level where should be used a mesh */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	ELevelType LevelType = ELT::None;
+	EBmrLevelType LevelType = ELT::None;
 
 	/** The static mesh, skeletal mesh or texture */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties, ExposeOnSpawn = "true"))
 	TObjectPtr<class UStreamableRenderAsset> Mesh = nullptr;
 
 	/** Returns true if this row contains valid data. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	virtual bool IsValid() const { return Mesh != nullptr; }
 
 protected:
@@ -43,8 +43,8 @@ protected:
 /**
  * The base data asset for the Bomber's data.
  */
-UCLASS(Abstract, Blueprintable, BlueprintType, Const, AutoExpandCategories = ("C++"))
-class BOMBER_API UBomberDataAsset : public UMyPrimaryDataAsset
+UCLASS(Abstract, Blueprintable, BlueprintType, Const, AutoExpandCategories = ("[Bomber]"))
+class BOMBER_API UBmrBaseDataAsset : public UMyPrimaryDataAsset
 {
 	GENERATED_BODY()
 
@@ -59,102 +59,102 @@ protected:
  * The base data asset for any level actor that contains the main data about them.
  */
 UCLASS(Abstract, Blueprintable, BlueprintType)
-class BOMBER_API ULevelActorDataAsset : public UBomberDataAsset
+class BOMBER_API UBmrLevelActorDataAsset : public UBmrBaseDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	/** Return rows by specified level types in the bitmask. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	void GetRowsByLevelType(
-	    TArray<ULevelActorRow*>& OutRows,
-	    UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ELevelType")) int32 LevelsTypesBitmask) const;
+	    TArray<UBmrLevelActorRow*>& OutRows,
+	    UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EBmrLevelType")) int32 LevelsTypesBitmask) const;
 
 	/** Returns first found row by given predicate function. */
-	const ULevelActorRow* GetRowByPredicate(const TFunctionRef<bool(const ULevelActorRow&)>& Predicate) const;
+	const UBmrLevelActorRow* GetRowByPredicate(const TFunctionRef<bool(const UBmrLevelActorRow&)>& Predicate) const;
 
 	template <typename T>
-	const FORCEINLINE T* GetRowByPredicate(const TFunctionRef<bool(const ULevelActorRow&)>& Predicate) const { return Cast<T>(GetRowByPredicate(Predicate)); }
+	const FORCEINLINE T* GetRowByPredicate(const TFunctionRef<bool(const UBmrLevelActorRow&)>& Predicate) const { return Cast<T>(GetRowByPredicate(Predicate)); }
 
 	/** Return first found row by specified level types. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const ULevelActorRow* GetRowByLevelType(ELevelType LevelType) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const UBmrLevelActorRow* GetRowByLevelType(EBmrLevelType LevelType) const;
 
 	template <typename T>
-	const FORCEINLINE T* GetRowByLevelType(ELevelType LevelType) const { return Cast<T>(GetRowByLevelType(LevelType)); }
+	const FORCEINLINE T* GetRowByLevelType(EBmrLevelType LevelType) const { return Cast<T>(GetRowByLevelType(LevelType)); }
 
 	/** Return first found row by specified mesh. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const ULevelActorRow* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const UBmrLevelActorRow* GetRowByMesh(const class UStreamableRenderAsset* Mesh) const;
 
 	/** Returns row by index. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE ULevelActorRow* GetRowByIndex(int32 Index) const { return RowsInternal.IsValidIndex(Index) ? RowsInternal[Index] : nullptr; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const FORCEINLINE UBmrLevelActorRow* GetRowByIndex(int32 Index) const { return Rows.IsValidIndex(Index) ? Rows[Index] : nullptr; }
 
 	template <typename T>
 	const FORCEINLINE T* GetRowByIndex(int32 Index) const { return Cast<T>(GetRowByIndex(Index)); }
 
 	/** Returns index of given row, or -1 if not found. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetIndexByRow(const ULevelActorRow* Row) const { return RowsInternal.IndexOfByKey(Row); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE int32 GetIndexByRow(const UBmrLevelActorRow* Row) const { return Rows.IndexOfByKey(Row); }
 
 	/** Returns overall number of contained rows. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetRowsNum() const { return RowsInternal.Num(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE int32 GetRowsNum() const { return Rows.Num(); }
 
 	/** Returns the class of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	TSubclassOf<class AActor> GetActorClass() const { return ActorClassInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	TSubclassOf<class AActor> GetActorClass() const { return ActorClass; }
 
 	/** Returns the actor type of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE EActorType GetActorType() const { return ActorTypeInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE EBmrActorType GetActorType() const { return ActorType; }
 
 protected:
 	/** DevelopmentOnly: internal class of rows, is overriden by child data assets, used on adding new row. */
-	UPROPERTY(BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Row Class", DevelopmentOnly))
-	TObjectPtr<UClass> RowClassInternal = ULevelActorRow::StaticClass();
+	UPROPERTY(BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected, DevelopmentOnly))
+	TObjectPtr<UClass> RowClass = UBmrLevelActorRow::StaticClass();
 
 	/** All rows contained by this data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (BlueprintProtected, DisplayName = "Rows", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class ULevelActorRow>> RowsInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TArray<TObjectPtr<class UBmrLevelActorRow>> Rows;
 
 	/** Class of an actor, whose data is described by this data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Class", ShowOnlyInnerProperties))
-	TSubclassOf<class AActor> ActorClassInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSubclassOf<class AActor> ActorClass = nullptr;
 
 	/** Actor type of an actor, whose data is described by this data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Actor Type", ShowOnlyInnerProperties))
-	EActorType ActorTypeInternal = EAT::None;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	EBmrActorType ActorType = EAT::None;
 
 	/*********************************************************************************************
 	 * Collision
 	 ********************************************************************************************* */
 public:
 	/** Returns true if the collision is enabled for an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsEnabledCollision() const { return bEnableCollisionInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE bool IsEnabledCollision() const { return bEnableCollision; }
 
 	/** Returns an extent size of the collision box of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	const FORCEINLINE FVector& GetCollisionExtent() const { return CollisionExtentInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const FORCEINLINE FVector& GetCollisionExtent() const { return CollisionExtent; }
 
 	/** Returns a response type of the collision box of an actor, whose data is described by this data asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponseInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE ECollisionResponse GetCollisionResponse() const { return CollisionResponse; }
 
 protected:
 	/** If enabled, the Box Collision component is added to actors, whose data is described by this data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, DisplayName = "Enable Collision", ShowOnlyInnerProperties))
-	bool bEnableCollisionInternal = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	bool bEnableCollision = true;
 
 	/** Extent size of the collision box of an actor, whose data is described by this data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, DisplayName = "Collision Extent", ShowOnlyInnerProperties, EditCondition = "bEnableCollisionInternal"))
-	FVector CollisionExtentInternal = FVector(100.f);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, ShowOnlyInnerProperties, EditCondition = "bEnableCollision"))
+	FVector CollisionExtent = FVector(100.f);
 
 	/** Response type of the collision box of an actor, whose data is described by this data asset. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, DisplayName = "Collision Response", ShowOnlyInnerProperties, EditCondition = "bEnableCollisionInternal"))
-	TEnumAsByte<ECollisionResponse> CollisionResponseInternal = ECR_Overlap;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Collision", meta = (BlueprintProtected, ShowOnlyInnerProperties, EditCondition = "bEnableCollision"))
+	TEnumAsByte<ECollisionResponse> CollisionResponse = ECR_Overlap;
 
 	/*********************************************************************************************
 	 * Editor

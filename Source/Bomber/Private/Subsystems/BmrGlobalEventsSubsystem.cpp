@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Subsystems/GlobalEventsSubsystem.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
 
 // Bomber
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -8,33 +8,33 @@
 // UE
 #include "Engine/World.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GlobalEventsSubsystem)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGlobalEventsSubsystem)
 
 // Returns this Subsystem, is checked and will crash if can't be obtained
-UGlobalEventsSubsystem& UGlobalEventsSubsystem::Get(const UObject* OptionalWorldContext /* = nullptr*/)
+UBmrGlobalEventsSubsystem& UBmrGlobalEventsSubsystem::Get(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	UGlobalEventsSubsystem* Subsystem = GetGlobalEventsSubsystem(OptionalWorldContext);
+	UBmrGlobalEventsSubsystem* Subsystem = GetGlobalEventsSubsystem(OptionalWorldContext);
 	checkf(Subsystem, TEXT("%s: 'Subsystem' is null"), *FString(__FUNCTION__));
 	return *Subsystem;
 }
 
 // Returns the pointer to this Subsystem
-UGlobalEventsSubsystem* UGlobalEventsSubsystem::GetGlobalEventsSubsystem(const UObject* OptionalWorldContext /* = nullptr*/)
+UBmrGlobalEventsSubsystem* UBmrGlobalEventsSubsystem::GetGlobalEventsSubsystem(const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
-	return World ? World->GetSubsystem<UGlobalEventsSubsystem>() : nullptr;
+	return World ? World->GetSubsystem<UBmrGlobalEventsSubsystem>() : nullptr;
 }
 
 // Is called when the Subsystem is created
-void UGlobalEventsSubsystem::Deinitialize()
+void UBmrGlobalEventsSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 
 	BP_OnGameStateChanged.Clear();
 
-	OnCharactersReadyHandler.Reset();
-	BP_OnCharacterReady.Clear();
-	BP_OnLocalCharacterReady.Clear();
+	ReadyHandler.Reset();
+	BP_OnPawnReady.Clear();
+	BP_OnLocalPawnReady.Clear();
 	BP_OnPlayerStateReady.Clear();
 	BP_OnLocalPlayerStateReady.Clear();
 }

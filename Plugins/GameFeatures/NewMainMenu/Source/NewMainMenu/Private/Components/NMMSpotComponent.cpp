@@ -11,16 +11,16 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
+#include "Actors/BmrPawn.h"
 #include "Bomber.h"
-#include "Components/MapComponent.h"
-#include "Controllers/MyPlayerController.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "Components/BmrMapComponent.h"
+#include "Controllers/BmrPlayerController.h"
+#include "GameFramework/BmrGameState.h"
 #include "MyDataTable/MyDataTable.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Engine/AssetManager.h"
@@ -50,7 +50,7 @@ bool UNMMSpotComponent::IsCurrentSpot() const
 // Returns true if this spot is visible, unlocked and can be selected by player
 bool UNMMSpotComponent::IsSpotAvailable() const
 {
-	const UMySkeletalMeshComponent* MeshComponent = GetMySkeletalMeshComponent();
+	const UBmrSkeletalMeshComponent* MeshComponent = GetMeshComponent();
 	return IsActive()
 	       && MeshComponent
 	       && MeshComponent->IsActive()
@@ -60,19 +60,19 @@ bool UNMMSpotComponent::IsSpotAvailable() const
 // Returns true if this spot current skin is unlocked and can be selected by player
 bool UNMMSpotComponent::IsSpotSkinAvailable() const
 {
-	const UMySkeletalMeshComponent* MeshComponent = GetMySkeletalMeshComponent();
+	const UBmrSkeletalMeshComponent* MeshComponent = GetMeshComponent();
 	return MeshComponent && MeshComponent->IsSkinAvailable(MeshComponent->GetAppliedSkinIndex());
 }
 
 // Returns the Skeletal Mesh of the Bomber character
-UMySkeletalMeshComponent* UNMMSpotComponent::GetMySkeletalMeshComponent() const
+UBmrSkeletalMeshComponent* UNMMSpotComponent::GetMeshComponent() const
 {
-	return GetOwner()->FindComponentByClass<UMySkeletalMeshComponent>();
+	return GetOwner()->FindComponentByClass<UBmrSkeletalMeshComponent>();
 }
 
-UMySkeletalMeshComponent& UNMMSpotComponent::GetMeshChecked() const
+UBmrSkeletalMeshComponent& UNMMSpotComponent::GetMeshChecked() const
 {
-	UMySkeletalMeshComponent* Mesh = GetMySkeletalMeshComponent();
+	UBmrSkeletalMeshComponent* Mesh = GetMeshComponent();
 	checkf(Mesh, TEXT("'Mesh' is nullptr, can not get mesh for '%s' spot."), *GetNameSafe(this));
 	return *Mesh;
 }
@@ -80,15 +80,15 @@ UMySkeletalMeshComponent& UNMMSpotComponent::GetMeshChecked() const
 // Sets the look of this spot to the in-game player character
 void UNMMSpotComponent::ApplyMeshOnPlayer()
 {
-	const APlayerCharacter* PlayerCharacter = UMyBlueprintFunctionLibrary::GetLocalPlayerCharacter();
-	if (!ensureMsgf(PlayerCharacter, TEXT("ASSERT: [%i] %hs:\n'PlayerCharacter' is not valid!"), __LINE__, __FUNCTION__))
+	const ABmrPawn* Pawn = UBmrBlueprintFunctionLibrary::GetLocalPawn();
+	if (!ensureMsgf(Pawn, TEXT("ASSERT: [%i] %hs:\n'Pawn' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	// Update the chosen player mesh on the level
 	const FBmrMeshData& PlayerMeshData = GetMeshChecked().GetMeshData();
-	UMapComponent* MapComponent = UMapComponent::GetMapComponent(PlayerCharacter);
+	UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(Pawn);
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 	MapComponent->SetReplicatedMeshData(PlayerMeshData);
 }
@@ -100,14 +100,14 @@ void UNMMSpotComponent::ApplyMeshOnPlayer()
 // Returns main cinematic of this spot
 ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
 {
-	return MasterPlayerInternal ? Cast<ULevelSequence>(MasterPlayerInternal->GetSequence()) : nullptr;
+	return MasterPlayer ? Cast<ULevelSequence>(MasterPlayer->GetSequence()) : nullptr;
 }
 
 // Prevents the spot from playing any cinematic
 void UNMMSpotComponent::StopMasterSequence()
 {
-	if (MasterPlayerInternal
-	    && MasterPlayerInternal->IsPlaying())
+	if (MasterPlayer
+	    && MasterPlayer->IsPlaying())
 	{
 		SetCinematicByState(ENMMState::None);
 	}
@@ -116,12 +116,12 @@ void UNMMSpotComponent::StopMasterSequence()
 // Returns true if current game state can be eventually changed
 bool UNMMSpotComponent::CanChangeCinematicState(ENMMState NewMainMenuState) const
 {
-	if (CinematicStateInternal == NewMainMenuState)
+	if (CinematicState == NewMainMenuState)
 	{
 		return false;
 	}
 
-	const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	const ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!MyPC || !MyPC->IsLocalController())
 	{
 		// Don't play cinematics for non-local players
@@ -146,8 +146,8 @@ void UNMMSpotComponent::SetCinematicByState(ENMMState MainMenuState)
 		MainMenuState = ENMMState::Idle;
 	}
 
-	const ENMMState PrevState = CinematicStateInternal;
-	CinematicStateInternal = MainMenuState;
+	const ENMMState PrevState = CinematicState;
+	CinematicState = MainMenuState;
 
 	if (PrevState != MainMenuState)
 	{
@@ -198,14 +198,14 @@ void UNMMSpotComponent::BeginPlay()
 // Clears all transient data created by this component
 void UNMMSpotComponent::OnUnregister()
 {
-	CinematicRowInternal = FNMMCinematicRow::Empty;
+	CinematicRow = FNMMCinematicRow::Empty;
 
 	// Kill current cinematic player
-	if (IsValid(MasterPlayerInternal))
+	if (IsValid(MasterPlayer))
 	{
 		StopMasterSequence();
-		MasterPlayerInternal->ConditionalBeginDestroy();
-		MasterPlayerInternal = nullptr;
+		MasterPlayer->ConditionalBeginDestroy();
+		MasterPlayer = nullptr;
 	}
 
 	if (UNMMSpotsSubsystem* Subsystem = UNMMUtils::GetSpotsSubsystem(this))
@@ -225,7 +225,7 @@ void UNMMSpotComponent::UpdateCinematicData()
 		return;
 	}
 
-	const FPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
+	const FBmrPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
 
 	int32 RowIndex = 0;
 	TMap<FName, FNMMCinematicRow> CinematicsRows;
@@ -234,28 +234,28 @@ void UNMMSpotComponent::UpdateCinematicData()
 	{
 		if (RowIt.Value.PlayerTag == PlayerTag)
 		{
-			CinematicRowInternal = RowIt.Value;
+			CinematicRow = RowIt.Value;
 			break;
 		}
 		++RowIndex;
 	}
 
-	if (ensureMsgf(!CinematicRowInternal.IsEmpty(), TEXT("%s: 'CinematicRowInternal' is not found for '%s' spot."), *FString(__FUNCTION__), *GetNameSafe(this)))
+	if (ensureMsgf(!CinematicRow.IsEmpty(), TEXT("%s: 'CinematicRow' is not found for '%s' spot."), *FString(__FUNCTION__), *GetNameSafe(this)))
 	{
-		CinematicRowInternal.RowIndex = RowIndex;
+		CinematicRow.RowIndex = RowIndex;
 	}
 }
 
 // Loads cinematic of this spot
 void UNMMSpotComponent::LoadMasterSequencePlayer()
 {
-	if (MasterPlayerInternal)
+	if (MasterPlayer)
 	{
 		// Is already created
 		return;
 	}
 
-	const TSoftObjectPtr<ULevelSequence> FoundMasterSequence = CinematicRowInternal.LevelSequence;
+	const TSoftObjectPtr<ULevelSequence> FoundMasterSequence = CinematicRow.LevelSequence;
 	if (!ensureMsgf(!FoundMasterSequence.IsNull(), TEXT("'LevelSequenceToLoad' is not found, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
 	{
 		return;
@@ -286,7 +286,7 @@ void UNMMSpotComponent::MarkCinematicAsSeen()
 
 	if (UNMMSaveGameData* SaveGameData = UNMMUtils::GetSaveGameData())
 	{
-		SaveGameData->MarkCinematicAsSeen(CinematicRowInternal.RowIndex);
+		SaveGameData->MarkCinematicAsSeen(CinematicRow.RowIndex);
 	}
 }
 
@@ -294,46 +294,46 @@ void UNMMSpotComponent::MarkCinematicAsSeen()
 void UNMMSpotComponent::ApplyCinematicState()
 {
 	// --- Load cinematic synchronously if not loaded yet
-	const bool bIsCinematicLoading = !MasterPlayerInternal || CinematicRowInternal.LevelSequence.IsPending();
+	const bool bIsCinematicLoading = !MasterPlayer || CinematicRow.LevelSequence.IsPending();
 	if (bIsCinematicLoading)
 	{
-		OnMasterSequenceLoaded(CinematicRowInternal.LevelSequence.LoadSynchronous());
+		OnMasterSequenceLoaded(CinematicRow.LevelSequence.LoadSynchronous());
 	}
-	checkf(MasterPlayerInternal, TEXT("ERROR: [%i] %s:\n'MasterPlayerInternal' is null!"), __LINE__, *FString(__FUNCTION__));
+	checkf(MasterPlayer, TEXT("ERROR: [%i] %s:\n'MasterPlayer' is null!"), __LINE__, *FString(__FUNCTION__));
 
 	// --- Set the length of the cinematic
 	constexpr int32 FirstFrame = 0;
-	const int32 TotalFrames = UNMMUtils::GetCinematicTotalFrames(CinematicStateInternal, MasterPlayerInternal);
-	MasterPlayerInternal->SetFrameRange(FirstFrame, TotalFrames);
+	const int32 TotalFrames = UNMMUtils::GetCinematicTotalFrames(CinematicState, MasterPlayer);
+	MasterPlayer->SetFrameRange(FirstFrame, TotalFrames);
 
 	// --- Set the playback settings
-	const FMovieSceneSequencePlaybackSettings& PlaybackSettings = UNMMUtils::GetCinematicSettings(CinematicStateInternal);
-	MasterPlayerInternal->SetPlaybackSettings(PlaybackSettings);
+	const FMovieSceneSequencePlaybackSettings& PlaybackSettings = UNMMUtils::GetCinematicSettings(CinematicState);
+	MasterPlayer->SetPlaybackSettings(PlaybackSettings);
 
 	// --- Set the playback position
-	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(CinematicStateInternal, MasterPlayerInternal);
-	MasterPlayerInternal->SetPlaybackPosition(PlaybackPositionParams);
+	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(CinematicState, MasterPlayer);
+	MasterPlayer->SetPlaybackPosition(PlaybackPositionParams);
 
-	if (CinematicStateInternal == ENMMState::None)
+	if (CinematicState == ENMMState::None)
 	{
 		// No need to stop it physically as playback settings above already paused a sequence
 		return;
 	}
 
-	MasterPlayerInternal->Play();
+	MasterPlayer->Play();
 
-	if (CinematicStateInternal == ENMMState::Cinematic)
+	if (CinematicState == ENMMState::Cinematic)
 	{
-		const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+		const ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 		checkf(MyPC, TEXT("ERROR: [%i] %hs:\n'MyPC' is null, local controller can not be obtained, cinematic can not be played!"), __LINE__, __FUNCTION__);
-		MyPC->OnAnyCinematicStarted.Broadcast(CinematicRowInternal.LevelSequence.Get(), this);
+		MyPC->OnAnyCinematicStarted.Broadcast(CinematicRow.LevelSequence.Get(), this);
 	}
 }
 
 // Is called when the cinematic was loaded to finish creation
 void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence)
 {
-	if (MasterPlayerInternal)
+	if (MasterPlayer)
 	{
 		// Is already initialized
 		return;
@@ -341,14 +341,14 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 
 	// Create and cache the master sequence
 	ALevelSequenceActor* OutActor = nullptr;
-	MasterPlayerInternal = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
-	checkf(MasterPlayerInternal, TEXT("ERROR: 'MasterPlayerInternal' was not created, something went wrong!"));
+	MasterPlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
+	checkf(MasterPlayer, TEXT("ERROR: 'MasterPlayer' was not created, something went wrong!"));
 
 	// Override the aspect ratio of the cinematic to the aspect ratio of the screen
 	FLevelSequenceCameraSettings CameraSettings;
 	CameraSettings.bOverrideAspectRatioAxisConstraint = true;
 	CameraSettings.AspectRatioAxisConstraint = UUtilsLibrary::GetViewportAspectRatioAxisConstraint();
-	MasterPlayerInternal->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
+	MasterPlayer->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
 
 	if (IsCurrentSpot())
 	{
@@ -360,7 +360,7 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 	}
 
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
-	MasterPlayerInternal->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
+	MasterPlayer->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
 }
 
 /*********************************************************************************************
@@ -368,7 +368,7 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
  ********************************************************************************************* */
 
 // Called when the current game state was changed
-void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void UNMMSpotComponent::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
 {
 	if (!IsCurrentSpot())
 	{
@@ -378,11 +378,11 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(ECurrentGameState Curr
 
 	switch (CurrentGameState)
 	{
-		case ECurrentGameState::Menu:
+		case EBmrCurrentGameState::Menu:
 		{
 			// Reset the sequence to the beginning to make it ready for the next play
 			constexpr bool bKeepCamera = true;
-			UCinematicUtils::ResetSequence(MasterPlayerInternal, bKeepCamera);
+			UCinematicUtils::ResetSequence(MasterPlayer, bKeepCamera);
 			break;
 		}
 
@@ -430,7 +430,7 @@ void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewSt
 // Called when the sequence is paused or when cinematic was ended
 void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 {
-	AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController();
+	ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!MyPC
 	    || UNMMUtils::GetMainMenuState() != ENMMState::Cinematic)
 	{
@@ -438,7 +438,7 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 		return;
 	}
 
-	const FFrameNumber CurrentFrame = MasterPlayerInternal->GetCurrentTime().Time.FrameNumber;
+	const FFrameNumber CurrentFrame = MasterPlayer->GetCurrentTime().Time.FrameNumber;
 	const FFrameNumber EndFrame(UCinematicUtils::GetSequenceTotalFrames(GetMasterSequence()) - 1);
 	if (CurrentFrame >= EndFrame)
 	{

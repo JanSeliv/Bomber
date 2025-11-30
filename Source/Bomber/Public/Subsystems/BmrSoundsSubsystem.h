@@ -4,18 +4,18 @@
 
 #include "Subsystems/WorldSubsystem.h"
 
-#include "SoundsSubsystem.generated.h"
+#include "BmrSoundsSubsystem.generated.h"
 
-enum class ELevelType : uint8;
-enum class ECurrentGameState : uint8;
-enum class EEndGameState : uint8;
+enum class EBmrLevelType : uint8;
+enum class EBmrCurrentGameState : uint8;
+enum class EBmrEndGameState : uint8;
 
 /**
  * Is used to manage the game sounds.
- * @see Access its data with USoundsDataAsset (Content/Bomber/DataAssets/DA_Sounds).
+ * @see Access its data with UBmrSoundsDataAsset (Content/Bomber/DataAssets/DA_Sounds).
  */
 UCLASS(Config = "GameUserSettings", DefaultConfig, Blueprintable, BlueprintType)
-class BOMBER_API USoundsSubsystem final : public UWorldSubsystem
+class BOMBER_API UBmrSoundsSubsystem final : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -25,14 +25,14 @@ public:
 	 ********************************************************************************************* */
 public:
 	/** Returns the Sounds Manager, is checked and wil crash if can't be obtained. */
-	static USoundsSubsystem& Get();
+	static UBmrSoundsSubsystem& Get();
 
 	/** Returns the pointer to the Sounds Manager. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (WorldContext = "WorldContextObject"))
-	static USoundsSubsystem* GetSoundsSubsystem(const UObject* WorldContextObject = nullptr);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "WorldContextObject"))
+	static UBmrSoundsSubsystem* GetSoundsSubsystem(const UObject* WorldContextObject = nullptr);
 
 	/** Static method that returns true if sounds can be played. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static bool CanPlaySounds();
 
 	/*********************************************************************************************
@@ -43,25 +43,25 @@ public:
 	/** Play the sound in 2D space with ensuring that this sound component is created only once.
 	 * If component is already created, it will use existing one.
 	 * If sound itself is already playing, it will stop existing one and play new one.
-	 * @warning it does not return UAudioComponent since it's managed internally, call USoundSubsystem::Get().StopSound2D(Sound) to stop the sound. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	 * @warning it does not return UAudioComponent since it's managed internally, call UBmrSoundsSubs::Get().StopSound2D(Sound) to stop the sound. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void PlaySingleSound2D(class USoundBase* InSound);
 
 	/** Deactivates the given sound if currently playing. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void StopSingleSound2D(class USoundBase* InSound);
 
 	/** Destroy sound component by given sound, it's used to perform cleanup when game is finished. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void DestroySingleSound2D(class USoundBase* InSound);
 
 protected:
 	/** All known sound components that are playing single sounds. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Sound Components"))
-	TMap<TObjectPtr<USoundBase>, TObjectPtr<class UAudioComponent>> SoundComponentsInternal;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	TMap<TObjectPtr<USoundBase>, TObjectPtr<class UAudioComponent>> SoundComponents;
 
 	/** Performs cleanup on all known sound components. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void DestroyAllSoundComponents();
 
 	/*********************************************************************************************
@@ -71,76 +71,76 @@ public:
 	/** Set new sound volume.
 	 * @param InSoundClass The of the sounds.
 	 * @param InVolume New value to set. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetSoundVolumeByClass(class USoundClass* InSoundClass, float InVolume);
 
 	/** Set the general sound volume for all sound classes in game. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetMasterVolume(double InVolume);
 
 	/** Returns the general sound volume for all sound classes in game. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE double GetMasterVolume() const { return MasterVolumeInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE double GetMasterVolume() const { return MasterVolume; }
 
 	/** Set new sound volume for music sound class. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetMusicVolume(double InVolume);
 
 	/** Returns the sound volume for music sound class. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE double GetMusicVolume() const { return MusicVolumeInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE double GetMusicVolume() const { return MusicVolume; }
 
 	/** Set new sound volume for SFX sound class. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Set SFX Volume"))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (DisplayName = "Set SFX Volume"))
 	void SetSFXVolume(double InVolume);
 
 	/** Returns the sound volume for SFX sound class. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DisplayName = "Get SFX Volume"))
-	FORCEINLINE double GetSFXVolume() const { return SFXVolumeInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "Get SFX Volume"))
+	FORCEINLINE double GetSFXVolume() const { return SFXVolume; }
 
 protected:
 	/** The general sound volume for all sound classes in game, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Master Volume"))
-	double MasterVolumeInternal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	double MasterVolume;
 
 	/** The sound volume for music sound class, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
-	double MusicVolumeInternal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	double MusicVolume;
 
 	/** The sound volume for SFX sound class, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "SFX Volume"))
-	double SFXVolumeInternal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	double SFXVolume;
 
 	/*********************************************************************************************
 	 * Public API
 	 ********************************************************************************************* */
 public:
 	/** Trigger the background music to be played during the match. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void PlayInGameMusic();
 
 	/** Stops currently played in-match background music. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void StopInGameMusic();
 
 	/** Play the sound that is played right before the match ends. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void PlayEndGameCountdownSFX();
 
 	/** Stops the sound that is played right before the match ends. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void StopEndGameCountdownSFX();
 
 	/** Play the sound that is played before the match starts. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void PlayStartGameCountdownSFX();
 
 	/** Stops the sound that is played right after the match starts. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void StopStartGameCountdownSFX();
 
 	/** Play the sound of the clicked UI element. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (DisplayName = "Play UI Click SFX"))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (DisplayName = "Play UI Click SFX"))
 	void PlayUIClickSFX();
 
 	/*********************************************************************************************
@@ -154,18 +154,18 @@ protected:
 	virtual void Deinitialize() override;
 
 	/** Blueprint even called when the game starts. */
-	UFUNCTION(BlueprintImplementableEvent, Category = "C++", meta = (DisplayName = "Begin Play"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "[Bomber]", meta = (DisplayName = "Begin Play"))
 	void OnBeginPlay();
 
 	/** Is called to play the End-Game sound on ending the current game. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnEndGameStateChanged(EEndGameState EndGameState);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnEndGameStateChanged(EBmrEndGameState EndGameState);
 
 	/** Listen game states to switch background music. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
 
 	/** Called when the local player state is initialized and its assigned character is ready. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnLocalPlayerStateReady(class AMyPlayerState* PlayerState, int32 CharacterID);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnLocalPlayerStateReady(class ABmrPlayerState* PlayerState, int32 PlayerId);
 };

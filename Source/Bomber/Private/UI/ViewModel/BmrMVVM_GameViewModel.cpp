@@ -1,31 +1,31 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "UI/ViewModel/MVVM_MyGameViewModel.h"
+#include "UI/ViewModel/BmrMVVM_GameViewModel.h"
 
 // Bomber
-#include "Components/MouseActivityComponent.h"
-#include "DataAssets/UIDataAsset.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GameFramework/MyPlayerState.h"
-#include "LevelActors/PlayerCharacter.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "Actors/BmrPawn.h"
+#include "Components/BmrMouseActivityComponent.h"
+#include "DataAssets/BmrUIDataAsset.h"
+#include "GameFramework/BmrGameState.h"
+#include "GameFramework/BmrPlayerState.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Engine/World.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MVVM_MyGameViewModel)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrMVVM_GameViewModel)
 
 /*********************************************************************************************
  * Current Game State
  ********************************************************************************************* */
 
 // Called when the current game state was changed
-void UMVVM_MyGameViewModel::OnGameStateChanged_Implementation(ECurrentGameState InGameState)
+void UBmrMVVM_GameViewModel::OnGameStateChanged_Implementation(EBmrCurrentGameState InGameState)
 {
 	SetCurrentGameState(InGameState);
 
-	SetCanRestartGame(AMyGameStateBase::Get().CanStartGame());
+	SetCanRestartGame(ABmrGameState::Get().CanStartGame());
 }
 
 /*********************************************************************************************
@@ -33,12 +33,12 @@ void UMVVM_MyGameViewModel::OnGameStateChanged_Implementation(ECurrentGameState 
  ********************************************************************************************* */
 
 // Called when the player state was changed
-void UMVVM_MyGameViewModel::OnEndGameStateChanged_Implementation(EEndGameState NewEndGameState)
+void UBmrMVVM_GameViewModel::OnEndGameStateChanged_Implementation(EBmrEndGameState NewEndGameState)
 {
-	const ESlateVisibility NewVisibility = NewEndGameState == EEndGameState::None ? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
+	const ESlateVisibility NewVisibility = NewEndGameState == EBmrEndGameState::None ? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
 	SetEndGameStateVisibility(NewVisibility);
 
-	SetEndGameResult(UUIDataAsset::Get().GetEndGameText(NewEndGameState));
+	SetEndGameResult(UBmrUIDataAsset::Get().GetEndGameText(NewEndGameState));
 }
 
 /*********************************************************************************************
@@ -46,14 +46,14 @@ void UMVVM_MyGameViewModel::OnEndGameStateChanged_Implementation(EEndGameState N
  ********************************************************************************************* */
 
 // Called when the 'Three-two-one-GO' timer was updated
-void UMVVM_MyGameViewModel::OnStartingTimerSecRemainChanged_Implementation(float NewStartingTimerSecRemain)
+void UBmrMVVM_GameViewModel::OnStartingTimerSecRemainChanged_Implementation(float NewStartingTimerSecRemain)
 {
 	const int32 Value = FMath::CeilToInt(NewStartingTimerSecRemain);
 	SetStartingTimerSecRemain(FText::AsNumber(Value));
 }
 
 // Called when remain seconds to the end of the match timer was updated
-void UMVVM_MyGameViewModel::OnInGameTimerSecRemainChanged_Implementation(float NewInGameTimerSecRemain)
+void UBmrMVVM_GameViewModel::OnInGameTimerSecRemainChanged_Implementation(float NewInGameTimerSecRemain)
 {
 	const int32 Value = FMath::CeilToInt(NewInGameTimerSecRemain);
 	SetInGameTimerSecRemain(FText::AsNumber(Value));
@@ -64,7 +64,7 @@ void UMVVM_MyGameViewModel::OnInGameTimerSecRemainChanged_Implementation(float N
  ********************************************************************************************* */
 
 // Called when mouse became shown or hidden
-void UMVVM_MyGameViewModel::OnMouseVisibilityChanged_Implementation(bool bIsShown)
+void UBmrMVVM_GameViewModel::OnMouseVisibilityChanged_Implementation(bool bIsShown)
 {
 	const ESlateVisibility NewVisibility = bIsShown ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
 	SetMouseVisibility(NewVisibility);
@@ -75,28 +75,28 @@ void UMVVM_MyGameViewModel::OnMouseVisibilityChanged_Implementation(bool bIsShow
  ********************************************************************************************* */
 
 // Is called when the view is constructed
-void UMVVM_MyGameViewModel::OnViewModelConstruct_Implementation(const UUserWidget* UserWidget)
+void UBmrMVVM_GameViewModel::OnViewModelConstruct_Implementation(const UUserWidget* UserWidget)
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
-	BIND_ON_LOCAL_CHARACTER_READY(this, ThisClass::OnLocalCharacterReady);
+	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
 
 	BIND_ON_GAME_STATE_CREATED(this, ThisClass::OnGameStateCreated);
 }
 
 // Is called when this View Model is destructed
-void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
+void UBmrMVVM_GameViewModel::OnViewModelDestruct_Implementation()
 {
 	Super::OnViewModelDestruct_Implementation();
 
-	if (UGlobalEventsSubsystem* GlobalEventsSubsystem = UGlobalEventsSubsystem::GetGlobalEventsSubsystem())
+	if (UBmrGlobalEventsSubsystem* GlobalEventsSubsystem = UBmrGlobalEventsSubsystem::GetGlobalEventsSubsystem())
 	{
 		GlobalEventsSubsystem->BP_OnGameStateChanged.RemoveAll(this);
 	}
 
-	if (AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState())
+	if (ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState())
 	{
 		MyGameState->OnStartingTimerSecRemainChanged.RemoveAll(this);
 		MyGameState->OnInGameTimerSecRemainChanged.RemoveAll(this);
@@ -104,22 +104,22 @@ void UMVVM_MyGameViewModel::OnViewModelDestruct_Implementation()
 }
 
 // Called when Game State was created in current world
-void UMVVM_MyGameViewModel::OnGameStateCreated_Implementation(AGameStateBase* GameState)
+void UBmrMVVM_GameViewModel::OnGameStateCreated_Implementation(AGameStateBase* GameState)
 {
-	AMyGameStateBase& MyGameState = *CastChecked<AMyGameStateBase>(GameState);
+	ABmrGameState& MyGameState = *CastChecked<ABmrGameState>(GameState);
 	MyGameState.OnStartingTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnStartingTimerSecRemainChanged);
 	MyGameState.OnInGameTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnInGameTimerSecRemainChanged);
 	MyGameState.GetWorld()->GameStateSetEvent.RemoveAll(this);
 }
 
 // Called when the local player character is spawned, possessed, and replicated
-void UMVVM_MyGameViewModel::OnLocalCharacterReady_Implementation(APlayerCharacter* PlayerCharacter, int32 CharacterID)
+void UBmrMVVM_GameViewModel::OnLocalPawnReady_Implementation(ABmrPawn* Pawn, int32 PlayerId)
 {
-	AMyPlayerState* PlayerState = PlayerCharacter->GetPlayerState<AMyPlayerState>();
+	ABmrPlayerState* PlayerState = Pawn->GetPlayerState<ABmrPlayerState>();
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 
-	UMouseActivityComponent* MouseActivityComponent = UMyBlueprintFunctionLibrary::GetMouseActivityComponent();
+	UBmrMouseActivityComponent* MouseActivityComponent = UBmrBlueprintFunctionLibrary::GetMouseActivityComponent();
 	checkf(MouseActivityComponent, TEXT("ERROR: [%i] %hs:\n'MouseActivityComponent' is null!"), __LINE__, __FUNCTION__);
 	MouseActivityComponent->OnMouseVisibilityChanged.AddUniqueDynamic(this, &ThisClass::OnMouseVisibilityChanged);
 }

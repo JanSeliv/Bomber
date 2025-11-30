@@ -1,35 +1,35 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/BoxDataAsset.h"
+#include "DataAssets/BmrBoxDataAsset.h"
 
 // Bomber
-#include "DataAssets/DataAssetsContainer.h"
-#include "GameFramework/MyCheatManager.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
+#include "GameFramework/BmrCheatManager.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(BoxDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBoxDataAsset)
 
 // Default constructor
-UBoxDataAsset::UBoxDataAsset()
+UBmrBoxDataAsset::UBmrBoxDataAsset()
 {
-	ActorTypeInternal = EAT::Box;
+	ActorType = EAT::Box;
 }
 
 // Returns the box data asset
-const UBoxDataAsset& UBoxDataAsset::Get()
+const UBmrBoxDataAsset& UBmrBoxDataAsset::Get()
 {
-	return UDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }
 
 // Returns default value from the data asset of the chance to spawn item after box destroying.
-int32 UBoxDataAsset::GetPowerupsChance() const
+int32 UBmrBoxDataAsset::GetPowerupsChance() const
 {
 #if !UE_BUILD_SHIPPING
-	const int32 CheatOverride = UMyCheatManager::CVarPowerupsChance.GetValueOnAnyThread();
+	const int32 CheatOverride = UBmrCheatManager::CVarPowerupsChance.GetValueOnAnyThread();
 	if (CheatOverride > 0.f)
 	{
 		return CheatOverride;
 	}
 #endif // !UE_BUILD_SHIPPING
 
-	return SpawnItemChanceInternal;
+	return SpawnItemChance;
 }

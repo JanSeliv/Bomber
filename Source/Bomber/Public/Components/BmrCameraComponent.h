@@ -4,9 +4,9 @@
 
 #include "Camera/CameraComponent.h"
 
-#include "MyCameraComponent.generated.h"
+#include "BmrCameraComponent.generated.h"
 
-enum class ECurrentGameState : uint8;
+enum class EBmrCurrentGameState : uint8;
 enum EAspectRatioAxisConstraint : int;
 
 /**
@@ -20,13 +20,13 @@ struct FCameraDistanceParams
 	/** The custom additive angle to affect the fit distance calculation from camera to the level.
 	 * If 0, then do not apply any additional angle to fit the view.
 	 * @see FCameraDistanceParams::CalculateFitViewAdditiveAngle */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
 	float FitViewAdditiveAngle = 10.f;
 
 	/** The minimal distance in UU from camera to the level.
 	 * If 0, then limit is not applied.
 	 * @see FCameraDistanceParams::LimitToMinDistance */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
 	float MinDistance = 1500.f;
 
 	/** If set, returns additional FOV modifier scaled by level size and current screen aspect ratio.
@@ -48,16 +48,16 @@ struct FCameraDistanceParams
  * The main camera viewpoint of the game.
  */
 UCLASS(Config = "GameUserSettings", DefaultConfig, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BOMBER_API UMyCameraComponent final : public UCameraComponent
+class BOMBER_API UBmrCameraComponent final : public UCameraComponent
 {
 	GENERATED_BODY()
 
 public:
 	/** Sets default values for this actor's properties. */
-	UMyCameraComponent();
+	UBmrCameraComponent();
 
 	/** Returns current FOV of camera manager that is more reliable than own FOV. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	float GetCameraManagerFOV() const;
 
 	/**
@@ -65,49 +65,49 @@ public:
 	 * @param DeltaTime Optional parameter, lerp if specified
 	 * @return true for successful update
 	 */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	bool UpdateLocation(float DeltaTime = 0.f);
 
 	/** Returns true if camera does not follow by players.
-	 * @see UMyCameraComponent::bLockCameraOnCenterInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsCameraLockedOnCenter() const { return bIsCameraLockedOnCenterInternal; }
+	 * @see UBmrCameraComponent::bIsCameraLockedOnCenter */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE bool IsCameraLockedOnCenter() const { return bIsCameraLockedOnCenter; }
 
 	/** Calls to set following camera by player locations.
 	 * @param bInCameraLockedOnCenter true to prevent moving camera.
 	 * It does not call SaveConfig() for this config property, call it manually if needed. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetCameraLockedOnCenter(bool bInCameraLockedOnCenter);
 
 	/** Returns parameters to tweak about the distance calculation from camera to the level during the game. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FCameraDistanceParams& GetCameraDistanceParams() const { return DistanceParamsInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const FORCEINLINE FCameraDistanceParams& GetCameraDistanceParams() const { return DistanceParams; }
 
 	/** Allows to tweak distance calculation from camera to the level during the game. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetCameraDistanceParams(const FCameraDistanceParams& InCameraDistanceParams);
 
 	/** Calculates how faw away the camera should be placed from specified cells. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	float GetCameraDistanceToCells(const TSet<struct FCell>& Cells) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	float GetCameraDistanceToCells(const TSet<struct FBmrCell>& Cells) const;
 
 	/** Returns the center camera location between all players and bots. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FVector GetCameraLocationBetweenPlayers() const;
 
 	/** Returns the default camera location between all players and bots.
 	 * Is absolute center position, where the camera starts game and returns to it on endgame.
 	 * Camera always stays there if IsCameraLockedOnCenter() returns true. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FVector GetCameraLockedLocation() const;
 
 	/** Starts viewing through this camera. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void PossessCamera(bool bBlendCamera = true);
 
 	/** Disable to prevent automatic possessing on Game Starting state, could be disabled by external systems like to show cinematic etc.
-	 * @see UMyCameraComponent::bAutoPossessCameraInternal */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	 * @see UBmrCameraComponent::bAutoPossessCamera */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetAutoPossessCameraEnabled(bool bInAutoPossessCamera);
 
 protected:
@@ -116,21 +116,21 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** If true, it will prevent following camera by player locations, is config property. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Config, Category = "C++", meta = (BlueprintProtected, DisplayName = "Is Camera Locked On Center"))
-	bool bIsCameraLockedOnCenterInternal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Config, Category = "[Bomber]", meta = (BlueprintProtected))
+	bool bIsCameraLockedOnCenter;
 
 	/** Contains parameters to tweak the distance calculation from camera to the level during the game.
-	 * @see UMyCameraComponent::GetCameraDistanceToCells */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Camera Distance Params"))
-	FCameraDistanceParams DistanceParamsInternal;
+	 * @see UBmrCameraComponent::GetCameraDistanceToCells */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]", meta = (BlueprintProtected))
+	FCameraDistanceParams DistanceParams;
 
 	/** When true, camera will be automatically possessed on Game Starting state. Could be disabled by extern system could be disabled by external systems like to show cinematic etc. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Possess Camera"))
-	bool bAutoPossessCameraInternal = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]", meta = (BlueprintProtected))
+	bool bAutoPossessCamera = true;
 
 	/** When true, force the moving to the start position. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "C++", meta = (BlueprintProtected, DisplayName = "Force Move To Start"))
-	bool bForceStartInternal = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Transient, Category = "[Bomber]", meta = (BlueprintProtected))
+	bool bForceStart = false;
 
 	/* ---------------------------------------------------
 	 *		Protected functions
@@ -146,10 +146,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	/** Listen game states to manage the tick. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnGameStateChanged(ECurrentGameState CurrentGameState);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
 
 	/** Listen to recalculate camera location when screen aspect ratio was changed. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnAspectRatioChanged(float NewAspectRatio, EAspectRatioAxisConstraint NewAxisConstraint);
 };

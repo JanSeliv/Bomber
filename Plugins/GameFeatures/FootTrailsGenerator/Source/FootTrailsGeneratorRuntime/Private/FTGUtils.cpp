@@ -7,14 +7,14 @@
 #include "FTGDataAsset.h"
 
 // Bomber
-#include "GeneratedMap.h"
+#include "Actors/BmrGeneratedMap.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FTGUtils)
 
 // Returns the Foot Trails Generator component that is responsible for generating foot trails
 const UFTGComponent* UFTGUtils::GetFootTrailsGeneratorComponent()
 {
-	return AGeneratedMap::Get().FindComponentByClass<UFTGComponent>();
+	return ABmrGeneratedMap::Get().FindComponentByClass<UFTGComponent>();
 }
 
 // Returns the data asset that contains all the assets and tweaks of Foot Trails game feature

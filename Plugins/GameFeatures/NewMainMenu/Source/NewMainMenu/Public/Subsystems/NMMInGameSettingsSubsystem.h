@@ -20,46 +20,46 @@ public:
 
 	/** Returns true is setting enabled to skips previously seen cinematics automatically.
 	 * @warning in multiplayer, this setting is ignored, so cinematics are always skipped. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsAutoSkipCinematicsEnabled() const { return bAutoSkipCinematicsInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	FORCEINLINE bool IsAutoSkipCinematicsEnabled() const { return bAutoSkipCinematics; }
 
 	/** Set true to skip previously seen cinematics automatically.
 	 * Is called from Settings menu once its checkbox is changed. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void SetAutoSkipCinematics(bool bEnable);
 
 	/** Set new sound volume for Cinematics sound class.
 	 * Is called from Settings menu once Cinematics slider is changed.*/
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void SetCinematicsVolume(double InVolume);
 
 	/** Returns the sound volume for Cinematics sound class. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE double GetCinematicsVolume() const { return CinematicsVolumeInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	FORCEINLINE double GetCinematicsVolume() const { return CinematicsVolume; }
 
 	/** Returns true if enabled instant transitions when switching characters in the Main Menu. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE bool IsInstantCharacterSwitchEnabled() const { return bInstantCharacterSwitchInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	FORCEINLINE bool IsInstantCharacterSwitchEnabled() const { return bInstantCharacterSwitch; }
 
 	/** Set true to enable instant transitions when switching characters in the main menu.
 	 * Is called from Settings menu once its checkbox is changed. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void SetInstantCharacterSwitchEnabled(bool bEnable);
 
 protected:
 	/** When setting enabled, skips previously seen cinematics automatically.
 	 * Is config property, can be set in Settings menu.
 	 * @warning in multiplayer, this setting is ignored, so cinematics are always skipped. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Auto Skip Cinematics"))
-	bool bAutoSkipCinematicsInternal = true;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	bool bAutoSkipCinematics = true;
 
 	/** The sound volume for Cinematics sound class.
 	 * Is config property, can be set in Settings menu. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Music Volume"))
-	double CinematicsVolumeInternal = 1.f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	double CinematicsVolume = 1.f;
 
 	/** Enable/disable smooth transitions when switching characters in the main menu.
 	 * Is config property, can be set in Settings menu. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Instant Character Switch"))
-	bool bInstantCharacterSwitchInternal = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	bool bInstantCharacterSwitch = false;
 };

@@ -18,9 +18,9 @@ EDataValidationResult UBmrInputAction::IsDataValid(FDataValidationContext& Conte
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(Context), EDataValidationResult::Valid);
 
-	for (int32 Index = 0; Index < InputActionBindingsInternal.Num(); ++Index)
+	for (int32 Index = 0; Index < InputActionBindings.Num(); ++Index)
 	{
-		const FBmrInputActionBinding& CurrentBinding = InputActionBindingsInternal[Index];
+		const FBmrInputActionBinding& CurrentBinding = InputActionBindings[Index];
 
 		const EDataValidationResult StaticContextResult = CurrentBinding.StaticContext.IsDataValid(Context);
 		Result = CombineDataValidationResults(Result, StaticContextResult);

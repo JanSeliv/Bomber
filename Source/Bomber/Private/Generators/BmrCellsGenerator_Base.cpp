@@ -4,12 +4,12 @@
 
 // Bomber
 #include "Bomber.h"
-#include "UtilityLibraries/CellsUtilsLibrary.h"
+#include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrCellsGenerator_Base)
 
 // Main generation function to be overridden by child classes
-TMap<FCell, EActorType> UBmrCellsGenerator_Base::GenerateLevel(FBmrGeneratorData&& Params)
+TMap<FBmrCell, EBmrActorType> UBmrCellsGenerator_Base::GenerateLevel(FBmrGeneratorData&& Params)
 {
 	/**
 	 * This is the fallback implementation for all generators. If a child generator
@@ -27,11 +27,11 @@ TMap<FCell, EActorType> UBmrCellsGenerator_Base::GenerateLevel(FBmrGeneratorData
 	 * . . . . . . . . .
 	 * P . . . . . . . P
 	 */
-	TMap<FCell, EActorType> ActorsToSpawn;
-	const FCells CornerCells = UCellsUtilsLibrary::GetCornerCellsOnGrid(FCells(Params.AllCells));
-	for (const FCell& CornerCell : CornerCells)
+	TMap<FBmrCell, EBmrActorType> ActorsToSpawn;
+	const FBmrCells CornerCells = UBmrCellUtilsLibrary::GetCornerCellsOnGrid(FBmrCells(Params.AllCells));
+	for (const FBmrCell& CornerCell : CornerCells)
 	{
-		ActorsToSpawn.Emplace(CornerCell, EActorType::Player);
+		ActorsToSpawn.Emplace(CornerCell, EBmrActorType::Player);
 	}
 
 	// Always respect user-dragged cells, even in the fallback

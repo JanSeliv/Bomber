@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/GeneratedMapDataAsset.h"
+#include "DataAssets/BmrGeneratedMapDataAsset.h"
 
 // Bomber
-#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GeneratedMapDataAsset)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGeneratedMapDataAsset)
 
 // Returns the generated map data asset
-const UGeneratedMapDataAsset& UGeneratedMapDataAsset::Get()
+const UBmrGeneratedMapDataAsset& UBmrGeneratedMapDataAsset::Get()
 {
-	const UGeneratedMapDataAsset* GeneratedMapDataAsset = UDataAssetsContainer::GetGeneratedMapDataAsset();
+	const UBmrGeneratedMapDataAsset* GeneratedMapDataAsset = UBmrDataAssetsContainer::GetGeneratedMapDataAsset();
 	checkf(GeneratedMapDataAsset, TEXT("The Generated Map Data Asset is not valid")) return *GeneratedMapDataAsset;
 }

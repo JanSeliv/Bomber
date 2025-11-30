@@ -2,18 +2,18 @@
 
 #pragma once
 
-#include "DataAssets/LevelActorDataAsset.h"
+#include "DataAssets/BmrLevelActorDataAsset.h"
 
 // Bomber
-#include "Structures/PlayerTag.h"
+#include "Structures/BmrPlayerTag.h"
 
-#include "PlayerDataAsset.generated.h"
+#include "BmrPlayerDataAsset.generated.h"
 
 /**
  * Determines each mesh to attach.
  */
 USTRUCT(BlueprintType)
-struct BOMBER_API FAttachedMesh
+struct BOMBER_API FBmrAttachedMesh
 {
 	GENERATED_BODY()
 
@@ -34,14 +34,14 @@ struct BOMBER_API FAttachedMesh
  * The player archetype of level actor rows. Determines the individual of the character model
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UPlayerRow final : public ULevelActorRow
+class BOMBER_API UBmrPlayerRow final : public UBmrLevelActorRow
 {
 	GENERATED_BODY()
 
 public:
 	/** The tag of this player character to be used for association of this player with other data. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Row", meta = (ShowOnlyInnerProperties))
-	FPlayerTag PlayerTag = FPlayerTag::None;
+	FBmrPlayerTag PlayerTag = FBmrPlayerTag::None;
 
 	/** Gameplay effect to apply on changing the character from one to another. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
@@ -49,7 +49,7 @@ public:
 
 	/** All meshes that will be attached to the player. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TArray<FAttachedMesh> PlayerProps;
+	TArray<FBmrAttachedMesh> PlayerProps;
 
 	/** The own movement animation for the each character. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
@@ -65,35 +65,35 @@ public:
 
 	/** Returns the num of skin textures in the array of diffuse maps specified a player material instance.
 	 * @return The num of skin textures or INDEX_NONE if not found. */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	int32 GetSkinTexturesNum() const;
 
 	/** Returns the dynamic material instance of a player with specified skin.
 	 * @param SkinIndex The skin position to get.
-	 * @see UPlayerRow::MaterialInstancesDynamicInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	 * @see UBmrPlayerRow::MaterialInstancesDynamic */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	class UMaterialInstanceDynamic* GetMaterialInstanceDynamic(int32 SkinIndex) const;
 
 	/** Creates dynamic material instance for each skin if is not done before.
-	 * UPlayerRow::MaterialInstancesDynamicInternal */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	 * @see UBmrPlayerRow::MaterialInstancesDynamic */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void UpdateSkinTextures();
 
 protected:
 	/** The material instance of a player.
 	 * @warning Is not BlueprintReadOnly and has not getter to prevent being used directly, we have dynamic materials instead.
-	 * @see UPlayerRow::MaterialInstancesDynamicInternal. */
-	UPROPERTY(EditDefaultsOnly, Category = "Row", meta = (BlueprintProtected, DisplayName = "Material Instance", ShowOnlyInnerProperties))
-	TObjectPtr<class UMaterialInstance> MaterialInstanceInternal = nullptr;
+	 * @see UBmrPlayerRow::MaterialInstancesDynamic. */
+	UPROPERTY(EditDefaultsOnly, Category = "Row", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TObjectPtr<class UMaterialInstance> MaterialInstance = nullptr;
 
 	/**
 	 * Contains all created dynamic materials for each skin in the Material Instance.
 	 * Saves memory avoiding creation of dynamic materials for each mesh component, just use the same dynamic material for different meshes with the same skin.
 	 * Is filled on object creating and changing.
 	 * @warning Is NOT transient as it is set in skeletal meshes; if do transient, it will fail the cook with the import error.
-	 * @see UPlayerRow::MaterialInstanceInternal. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "Row", meta = (BlueprintProtected, DisplayName = "Material Instances Dynamic"))
-	TArray<TObjectPtr<class UMaterialInstanceDynamic>> MaterialInstancesDynamicInternal;
+	 * @see UBmrPlayerRow::MaterialInstance. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "Row", meta = (BlueprintProtected))
+	TArray<TObjectPtr<class UMaterialInstanceDynamic>> MaterialInstancesDynamic;
 
 #if WITH_EDITOR
 	/** Handle adding and changing material instance to prepare dynamic materials. */
@@ -105,95 +105,88 @@ protected:
  * The data asset of the Bomber characters
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UPlayerDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UBmrPlayerDataAsset final : public UBmrLevelActorDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	/** Default constructor. */
-	UPlayerDataAsset();
+	UBmrPlayerDataAsset();
 
 	/** Returns the player data asset. */
-	static const UPlayerDataAsset& Get();
+	static const UBmrPlayerDataAsset& Get();
 
 	/** The num of nameplate materials.  */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetNameplateMaterialsNum() const { return NameplateMaterialsInternal.Num(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE int32 GetNameplateMaterialsNum() const { return NameplateMaterials.Num(); }
 
 	/** Returns a nameplate material by index, is used by nameplate meshes.
-	 * @see UPlayerDataAsset::NameplateMaterials */
-	UFUNCTION(BlueprintPure, Category = "C++")
+	 * @see UBmrPlayerDataAsset::NameplateMaterials */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	class UMaterialInterface* GetNameplateMaterial(int32 Index) const;
 
-	/** Returns the Anim Blueprint class to use.
-	 * @see UPlayerDataAsset::AnimInstanceClassInternal. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClassInternal; }
+	/** Returns the Anim Blueprint class to use. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE TSubclassOf<class UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClass; }
 
-	/** Returns the name of a material parameter with a diffuse array.
-	 * @see UPlayerDataAsset::SkinSlotNameInternal. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE FName GetSkinArrayParameter() const { return SkinArrayParameterInternal; }
+	/** Returns the name of a material parameter with a diffuse array. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE FName GetSkinArrayParameter() const { return SkinArrayParameter; }
 
-	/** Returns the name of a material parameter with a diffuse index.
-	 * @see UPlayerDataAsset::SkinSlotNameInternal. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE FName GetSkinIndexParameter() const { return SkinIndexParameterInternal; }
+	/** Returns the name of a material parameter with a diffuse index. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE FName GetSkinIndexParameter() const { return SkinIndexParameter; }
 
 	/** Return first found row by specified player tag. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (AutoCreateRefTerm = "PlayerTag"))
-	const UPlayerRow* GetRowByPlayerTag(const FPlayerTag& PlayerTag) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "PlayerTag"))
+	const UBmrPlayerRow* GetRowByPlayerTag(const FBmrPlayerTag& PlayerTag) const;
 
-	/** Returns the number of startup abilities that will be granted to the player at the start of the game.
-	 * @see ::StartupAbilitiesInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE int32 GetStartupAbilitiesNum() const { return StartupAbilitiesInternal.Num(); }
+	/** Returns the number of startup abilities that will be granted to the player at the start of the game. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE int32 GetStartupAbilitiesNum() const { return StartupAbilities.Num(); }
 
-	/** Returns the startup ability by index.
-	 * @see ::StartupAbilitiesInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UGameplayAbility> GetStartupAbility(int32 Index) const { return StartupAbilitiesInternal.IsValidIndex(Index) ? StartupAbilitiesInternal[Index] : nullptr; }
+	/** Returns the startup ability by index. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE TSubclassOf<class UGameplayAbility> GetStartupAbility(int32 Index) const { return StartupAbilities.IsValidIndex(Index) ? StartupAbilities[Index] : nullptr; }
 
-	/** Returns the gameplay effect that gives immune to incoming damage when applied.
-	 * @see ::BlockIncomingDamageEffectInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UGameplayEffect> GetBlockIncomingDamageEffect() const { return BlockIncomingDamageEffectInternal; }
+	/** Returns the gameplay effect that gives immune to incoming damage when applied. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE TSubclassOf<class UGameplayEffect> GetBlockIncomingDamageEffect() const { return BlockIncomingDamageEffect; }
 
-	/** Returns the gameplay effect that disables movement for the player character when applied.
-	 * @see ::BlockMovementEffectInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE TSubclassOf<class UGameplayEffect> GetBlockMovementEffect() const { return BlockMovementEffectInternal; }
+	/** Returns the gameplay effect that disables movement for the player character when applied. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE TSubclassOf<class UGameplayEffect> GetBlockMovementEffect() const { return BlockMovementEffect; }
 
 protected:
 	/** All materials that are used by nameplate meshes. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Nameplate Materials", ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class UMaterialInterface>> NameplateMaterialsInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TArray<TObjectPtr<class UMaterialInterface>> NameplateMaterials;
 
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Anim Instance Class", ShowOnlyInnerProperties))
-	TSubclassOf<class UAnimInstance> AnimInstanceClassInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSubclassOf<class UAnimInstance> AnimInstanceClass = nullptr;
 
 	/** The name of a material parameter with a diffuse array. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Array Parameter", ShowOnlyInnerProperties))
-	FName SkinArrayParameterInternal = TEXT("DiffuseArray");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	FName SkinArrayParameter = TEXT("DiffuseArray");
 
 	/** The name of a material parameter with a diffuse index. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Skin Index Parameter", ShowOnlyInnerProperties))
-	FName SkinIndexParameterInternal = TEXT("DiffuseIndex");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	FName SkinIndexParameter = TEXT("DiffuseIndex");
 
 	/** Contains all abilities to grant on the player at the start of the game. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability System", meta = (BlueprintProtected, DisplayName = "Startup Abilities", ShowOnlyInnerProperties))
-	TArray<TSubclassOf<class UGameplayAbility>> StartupAbilitiesInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability System", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TArray<TSubclassOf<class UGameplayAbility>> StartupAbilities;
 
 	/** When applied, gives immune to incoming damage.
 	 * Adds BmrGameplayTags::GameplayEffect::Block::IncomingDamage tag.
 	 * E.g: Is used by God cheat, might be useful for shield skill, or when player joins existing game in progress. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability System", meta = (BlueprintProtected, DisplayName = "Block Incoming Damage Effect", ShowOnlyInnerProperties))
-	TSubclassOf<class UGameplayEffect> BlockIncomingDamageEffectInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability System", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSubclassOf<class UGameplayEffect> BlockIncomingDamageEffect = nullptr;
 
 	/** When applied, disables movement for the player character.
 	 * Adds BmrGameplayTags::GameplayEffect::Block::Movement tag.
 	 * E.g: Is used when player is in a menu, during 3-2-1 timer, when died, in cinematics etc. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability System", meta = (BlueprintProtected, DisplayName = "Block Movement Effect", ShowOnlyInnerProperties))
-	TSubclassOf<class UGameplayEffect> BlockMovementEffectInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability System", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TSubclassOf<class UGameplayEffect> BlockMovementEffect = nullptr;
 };

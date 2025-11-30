@@ -5,9 +5,9 @@
 #include "MyPropertyType/MyPropertyTypeCustomization.h"
 
 /**
- * Reuse the socket chooser widget to allow choose the FAttachedMesh::Bone within UPlayerRow::Mesh.
+ * Reuse the socket chooser widget to allow choose the FBmrAttachedMesh::Bone within UBmrPlayerRow::Mesh.
  */
-class FAttachedMeshCustomization final : public FMyPropertyTypeCustomization
+class BOMBEREDITOR_API FBmrAttachedMeshCustomization final : public FMyPropertyTypeCustomization
 {
 public:
 	/* ---------------------------------------------------
@@ -18,7 +18,7 @@ public:
 	static const FName PropertyClassName;
 
 	/** Default constructor. */
-	FAttachedMeshCustomization();
+	FBmrAttachedMeshCustomization();
 
 	/** Makes a new instance of this detail layout class for a specific detail view requesting it. */
 	static TSharedRef<IPropertyTypeCustomization> MakeInstance();
@@ -52,7 +52,7 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** A Skeletal mesh component that contains the parent character mesh. Is transient component. Used as a parameter to push the SSocketChooserPopup. */
-	TWeakObjectPtr<USkeletalMeshComponent> ParentMeshCompInternal = nullptr;
+	TWeakObjectPtr<USkeletalMeshComponent> ParentMeshComponent = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Protected functions
@@ -63,7 +63,7 @@ protected:
 
 	/** Is called on adding the custom property.
 	 * Customize a Socket property, will add the chosen text row, the Select and Clear buttons.
-	 * @see FMyPropertyTypeCustomization::CustomPropertyNameInternal */
+	 * @see FMyPropertyTypeCustomization::CustomPropertyInternal */
 	virtual void AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder) override;
 
 	/** Push the SSocketChooserPopup menu to allow user choose socket. */

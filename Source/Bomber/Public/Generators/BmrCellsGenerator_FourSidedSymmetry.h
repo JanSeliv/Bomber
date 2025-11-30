@@ -11,11 +11,11 @@
  */
 struct FBmrGeneratorQuarterPathParams
 {
-	const FCells& QuarterCells;
-	const FCell& StartCell;
+	const FBmrCells& QuarterCells;
+	const FBmrCell& StartCell;
 	const FIntPoint& QuarterScale;
-	const FCells& DraggedWalls;
-	const FCells& PriorityTargets;
+	const FBmrCells& DraggedWalls;
+	const FBmrCells& PriorityTargets;
 };
 
 /**
@@ -23,8 +23,8 @@ struct FBmrGeneratorQuarterPathParams
  */
 struct FBmrGeneratorQuarterFillParams
 {
-	FCells&& PathCells;
-	const FCell& PlayerStartCell;
+	FBmrCells&& PathCells;
+	const FBmrCell& PlayerStartCell;
 };
 
 /**
@@ -32,8 +32,8 @@ struct FBmrGeneratorQuarterFillParams
  */
 struct FBmrGeneratorPathfindParams
 {
-	const FCell& StartNode;
-	const FCells& TargetCells;
+	const FBmrCell& StartNode;
+	const FBmrCells& TargetCells;
 	const FIntPoint& PrimaryDirection;
 	const TArray<FIntPoint>& SecondaryDirections;
 };
@@ -72,23 +72,23 @@ protected:
 
 public:
 	/** Is overriden to implement custom level generation logic. */
-	virtual TMap<FCell, EActorType> GenerateLevel(FBmrGeneratorData&& GeneratorData) override;
+	virtual TMap<FBmrCell, EBmrActorType> GenerateLevel(FBmrGeneratorData&& GeneratorData) override;
 
 private:
 	// --- Helper Methods ---
 
 	/** Creates a network of paths from the player start to priority targets and quarter borders. */
-	FCells GeneratePathsForQuarter(const FBmrGeneratorQuarterPathParams& PathParams, const FBmrGeneratorData& GeneratorData);
+	FBmrCells GeneratePathsForQuarter(const FBmrGeneratorQuarterPathParams& PathParams, const FBmrGeneratorData& GeneratorData);
 
 	/** Fills the quarter with walls and boxes based on fill percentages. */
-	static TMap<FCell, EActorType> FillObstaclesInQuarter(FBmrGeneratorQuarterFillParams&& FillParams, const FBmrGeneratorQuarterPathParams& PathParams, const FBmrGeneratorData& GeneratorData);
+	static TMap<FBmrCell, EBmrActorType> FillObstaclesInQuarter(FBmrGeneratorQuarterFillParams&& FillParams, const FBmrGeneratorQuarterPathParams& PathParams, const FBmrGeneratorData& GeneratorData);
 
 	/** Applies four-sided symmetry to the generated quarter map to build the full level. */
-	static TMap<FCell, EActorType> ApplySymmetry(TMap<FCell, EActorType>&& QuarterActors, const FBmrGeneratorData& GeneratorData);
+	static TMap<FBmrCell, EBmrActorType> ApplySymmetry(TMap<FBmrCell, EBmrActorType>&& QuarterActors, const FBmrGeneratorData& GeneratorData);
 
 	/** Creates a directed but randomized path. */
-	static FCellsArr FindDirectedPathWithDetours(const FBmrGeneratorPathfindParams& Params, const FBmrGeneratorQuarterPathParams& PathParams, const FBmrGeneratorData& GeneratorData);
+	static FBmrCellsArr FindDirectedPathWithDetours(const FBmrGeneratorPathfindParams& Params, const FBmrGeneratorQuarterPathParams& PathParams, const FBmrGeneratorData& GeneratorData);
 
 	/** Finds all reachable cells from a starting point. */
-	static FCells FindWalkableArea(const FCell& StartCell, const FCells& WallCells, const FBmrGeneratorQuarterPathParams& PathParams, const FBmrGeneratorData& GeneratorData);
+	static FBmrCells FindWalkableArea(const FBmrCell& StartCell, const FBmrCells& WallCells, const FBmrGeneratorQuarterPathParams& PathParams, const FBmrGeneratorData& GeneratorData);
 };

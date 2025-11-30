@@ -9,9 +9,9 @@
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 
 // Bomber
-#include "GameFramework/MyGameStateBase.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "GameFramework/BmrGameState.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotsSubsystem)
 
@@ -34,7 +34,7 @@ void UNMMSpotsSubsystem::AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotCo
 {
 	if (ensureMsgf(NewMainMenuSpotComponent, TEXT("%s: 'NewMainMenuSpotComponent' is null"), *FString(__FUNCTION__)))
 	{
-		MainMenuSpotsInternal.AddUnique(NewMainMenuSpotComponent);
+		MainMenuSpots.AddUnique(NewMainMenuSpotComponent);
 	}
 }
 
@@ -43,16 +43,16 @@ void UNMMSpotsSubsystem::RemoveMainMenuSpot(UNMMSpotComponent* MainMenuSpotCompo
 {
 	if (ensureMsgf(MainMenuSpotComponent, TEXT("%s: 'MainMenuSpotComponent' is null"), *FString(__FUNCTION__)))
 	{
-		MainMenuSpotsInternal.RemoveSwap(MainMenuSpotComponent);
+		MainMenuSpots.RemoveSwap(MainMenuSpotComponent);
 	}
 }
 
 // Returns currently selected Main-Menu spot
 UNMMSpotComponent* UNMMSpotsSubsystem::GetCurrentSpot() const
 {
-	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpotsInternal)
+	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpots)
 	{
-		if (MainMenuSpotComponent && MainMenuSpotComponent->GetCinematicRow().RowIndex == ActiveMenuSpotIdxInternal)
+		if (MainMenuSpotComponent && MainMenuSpotComponent->GetCinematicRow().RowIndex == ActiveMenuSpotIdx)
 		{
 			return MainMenuSpotComponent;
 		}
@@ -62,9 +62,9 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetCurrentSpot() const
 }
 
 // Returns Main-Menu spots by given level type
-void UNMMSpotsSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutSpots, ELevelType LevelType) const
+void UNMMSpotsSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutSpots, EBmrLevelType LevelType) const
 {
-	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpotsInternal)
+	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpots)
 	{
 		if (MainMenuSpotComponent
 		    && MainMenuSpotComponent->GetCinematicRow().LevelType == LevelType)
@@ -81,7 +81,7 @@ void UNMMSpotsSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>&
 }
 
 // Returns next or previous Main-Menu spot by given incrementer
-UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer, ELevelType LevelType) const
+UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer, EBmrLevelType LevelType) const
 {
 	TArray<UNMMSpotComponent*> CurrentLevelTypeSpots;
 	GetMainMenuSpotsByLevelType(/*out*/ CurrentLevelTypeSpots, LevelType);
@@ -93,8 +93,8 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer, ELevelType
 		SpotRowIndices.AddUnique(SpotIt->GetCinematicRow().RowIndex);
 	}
 
-	const bool bFoundActiveIdx = SpotRowIndices.Contains(ActiveMenuSpotIdxInternal);
-	if (!ensureMsgf(bFoundActiveIdx, TEXT("%s: 'ActiveMenuSpotIdxInternal' is not found in the 'SpotRowIndices'"), *FString(__FUNCTION__)))
+	const bool bFoundActiveIdx = SpotRowIndices.Contains(ActiveMenuSpotIdx);
+	if (!ensureMsgf(bFoundActiveIdx, TEXT("%s: 'ActiveMenuSpotIdx' is not found in the 'SpotRowIndices'"), *FString(__FUNCTION__)))
 	{
 		// Most likely the level is switched that could be not supported yet
 		return nullptr;
@@ -102,7 +102,7 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer, ELevelType
 
 	// Find the new index based on the incrementer
 	// If there is no next spot in array, it will take the first one with its index and vise versa for decrementing
-	const int32 ActiveSpotPosition = SpotRowIndices.IndexOfByKey(ActiveMenuSpotIdxInternal);
+	const int32 ActiveSpotPosition = SpotRowIndices.IndexOfByKey(ActiveMenuSpotIdx);
 	const int32 NewSpotIndex = (ActiveSpotPosition + Incrementer + SpotRowIndices.Num()) % SpotRowIndices.Num();
 	checkf(CurrentLevelTypeSpots.IsValidIndex(NewSpotIndex), TEXT("ERROR: [%i] %s:\n'CurrentLevelTypeSpots array has to have NewSpotIndex since it's the same size as SpotRowIndices array!"), __LINE__, *FString(__FUNCTION__));
 	return CurrentLevelTypeSpots[NewSpotIndex];
@@ -111,18 +111,18 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer, ELevelType
 // Goes to another Spot to show another player character on current level
 UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 {
-	UNMMSpotComponent* NextMainMenuSpot = GetNextSpot(Incrementer, UMyBlueprintFunctionLibrary::GetLevelType());
+	UNMMSpotComponent* NextMainMenuSpot = GetNextSpot(Incrementer, UBmrBlueprintFunctionLibrary::GetLevelType());
 	if (!ensureMsgf(NextMainMenuSpot, TEXT("ASSERT: [%i] %s:\n'NextMainMenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		return nullptr;
 	}
 
 	// Set the new active spot index
-	ActiveMenuSpotIdxInternal = NextMainMenuSpot->GetCinematicRow().RowIndex;
-	LastMoveSpotDirectionInternal = Incrementer;
+	ActiveMenuSpotIdx = NextMainMenuSpot->GetCinematicRow().RowIndex;
+	LastMoveSpotDirection = Incrementer;
 
 	// If transition happened in opened menu, change the internal state
-	if (AMyGameStateBase::GetCurrentGameState() == ECGS::Menu)
+	if (ABmrGameState::GetCurrentGameState() == ECGS::Menu)
 	{
 		// If instant, then switch to the next spot, it will possess the camera and start playing its cinematic
 		// Otherwise start transition to the next spot
@@ -143,7 +143,7 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpotByPredicate(int32 Increme
 {
 	const int32 FinalIncrementer = [&]() -> int32
 	{
-		const ELevelType LevelType = UMyBlueprintFunctionLibrary::GetLevelType();
+		const EBmrLevelType LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
 		TArray<UNMMSpotComponent*> LevelTypeSpots;
 		GetMainMenuSpotsByLevelType(LevelTypeSpots, LevelType);
 
@@ -217,7 +217,7 @@ void UNMMSpotsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 // Clears all transient data contained in this subsystem
 void UNMMSpotsSubsystem::Deinitialize()
 {
-	MainMenuSpotsInternal.Empty();
+	MainMenuSpots.Empty();
 
 	Super::Deinitialize();
 }
@@ -231,12 +231,12 @@ void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState NewS
 {
 	if (NewState == ENMMState::None)
 	{
-		LastMoveSpotDirectionInternal = 0;
+		LastMoveSpotDirection = 0;
 	}
 }
 
 // Called when the current game state was changed
-void UNMMSpotsSubsystem::OnGameStateChanged_Implementation(ECurrentGameState CurrentGameState)
+void UNMMSpotsSubsystem::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
 {
 	switch (CurrentGameState)
 	{

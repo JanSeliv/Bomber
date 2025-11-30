@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "AttachedMeshCustomization.h"
+#include "BmrAttachedMeshCustomization.h"
 
 // Bomber
 #include "BomberEditorModule.h"
@@ -17,38 +17,38 @@
 #include "Toolkits/IToolkitHost.h"
 #include "Toolkits/ToolkitManager.h"
 
-typedef FAttachedMeshCustomization ThisClass;
+typedef FBmrAttachedMeshCustomization ThisClass;
 
 // The name of class to be customized
-// @TODO JanSeliv 2dUuTjyT use 'FAttachedMesh::StaticStruct()->GetFName()' as soon as the editor module starts referencing the runtime module
+// @TODO JanSeliv 2dUuTjyT use 'FBmrAttachedMesh::StaticStruct()->GetFName()' as soon as the editor module starts referencing the runtime module
 const FName ThisClass::PropertyClassName = TEXT("AttachedMesh");
 
 // Default constructor
-FAttachedMeshCustomization::FAttachedMeshCustomization()
+FBmrAttachedMeshCustomization::FBmrAttachedMeshCustomization()
 {
 	CustomPropertyInternal.PropertyName = TEXT("Socket");
 }
 
 // Makes a new instance of this detail layout class for a specific detail view requesting it
-TSharedRef<IPropertyTypeCustomization> FAttachedMeshCustomization::MakeInstance()
+TSharedRef<IPropertyTypeCustomization> FBmrAttachedMeshCustomization::MakeInstance()
 {
 	return MakeShareable(new ThisClass());
 }
 
 // Called when the header of the property (the row in the details panel where the property is shown)
-void FAttachedMeshCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
+void FBmrAttachedMeshCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> PropertyHandle, FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	Super::CustomizeHeader(PropertyHandle, HeaderRow, CustomizationUtils);
 }
 
 // Called when the children of the property should be customized or extra rows added.
-void FAttachedMeshCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
+void FBmrAttachedMeshCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> PropertyHandle, IDetailChildrenBuilder& ChildBuilder, IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
 	Super::CustomizeChildren(PropertyHandle, ChildBuilder, CustomizationUtils);
 }
 
 // Creates customization for the Attached Mesh data
-void FAttachedMeshCustomization::RegisterAttachedMeshCustomization()
+void FBmrAttachedMeshCustomization::RegisterAttachedMeshCustomization()
 {
 	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
 	{
@@ -57,16 +57,16 @@ void FAttachedMeshCustomization::RegisterAttachedMeshCustomization()
 
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>(PropertyEditorModule);
 
-	// FAttachedMesh property realizes the functionally of the SSocketChooser
+	// FBmrAttachedMesh property realizes the functionally of the SSocketChooser
 	PropertyModule.RegisterCustomPropertyTypeLayout(
 	    PropertyClassName,
-	    FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FAttachedMeshCustomization::MakeInstance));
+	    FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FBmrAttachedMeshCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 // Removes customization for the Attached Mesh data
-void FAttachedMeshCustomization::UnregisterAttachedMeshCustomization()
+void FBmrAttachedMeshCustomization::UnregisterAttachedMeshCustomization()
 {
 	if (!FModuleManager::Get().IsModuleLoaded(PropertyEditorModule))
 	{
@@ -79,13 +79,13 @@ void FAttachedMeshCustomization::UnregisterAttachedMeshCustomization()
 }
 
 // Is called for each property on building its row
-void FAttachedMeshCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
+void FBmrAttachedMeshCustomization::OnCustomizeChildren(IDetailChildrenBuilder& ChildBuilder, FPropertyData& PropertyData)
 {
 	Super::OnCustomizeChildren(ChildBuilder, PropertyData);
 }
 
 // Is called on adding the custom property
-void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder)
+void FBmrAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDisplayText, IDetailChildrenBuilder& ChildBuilder)
 {
 	// clang-format off
 	ChildBuilder.AddCustomRow(PropertyDisplayText)
@@ -135,12 +135,12 @@ void FAttachedMeshCustomization::AddCustomPropertyRow(const FText& PropertyDispl
 }
 
 // Push menu to allow user choose socket
-void FAttachedMeshCustomization::OnBrowseSocket()
+void FBmrAttachedMeshCustomization::OnBrowseSocket()
 {
 	const UObject* PlayerRowOuter = MyPropertyOuterInternal.Get();
 	if (!PlayerRowOuter)
 	{
-		UE_LOG(LogBomberEditor, Warning, TEXT("--- OnBrowseSocket - FAIL - Can not obtain UPlayerRow data"));
+		UE_LOG(LogBomberEditor, Warning, TEXT("--- OnBrowseSocket - FAIL - Can not obtain UBmrPlayerRow data"));
 		return;
 	}
 
@@ -160,11 +160,9 @@ void FAttachedMeshCustomization::OnBrowseSocket()
 	}
 
 	// Create component if not created yet
-	USkeletalMeshComponent* ParentMeshComponent = ParentMeshCompInternal.Get();
-	if (!ParentMeshComponent)
+	if (ParentMeshComponent.IsExplicitlyNull())
 	{
 		ParentMeshComponent = NewObject<USkeletalMeshComponent>(GetTransientPackage(), NAME_None, RF_Transient);
-		ParentMeshCompInternal = ParentMeshComponent;
 	}
 
 	// Attach mesh and check sockets
@@ -188,7 +186,7 @@ void FAttachedMeshCustomization::OnBrowseSocket()
 		ToolkitEditor->GetToolkitHost()->/*ref*/GetParentWidget(),
 		FWidgetPath(),
 		SNew(SSocketChooserPopup)
-        .SceneComponent(ParentMeshComponent)
+        .SceneComponent(ParentMeshComponent.Get())
         .OnSocketChosen(this, &Super::SetCustomPropertyValue),
 		FSlateApplication::Get().GetCursorPos(),
 		FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu)

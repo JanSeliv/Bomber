@@ -1,29 +1,29 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "UI/Widgets/PlayerNameWidget.h"
+#include "UI/Widgets/BmrPlayerNameWidget.h"
 
 // Bomber
-#include "DataAssets/PlayerDataAsset.h"
+#include "DataAssets/BmrPlayerDataAsset.h"
 
 // UE
 #include "Components/Image.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextBlock.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerNameWidget)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerNameWidget)
 
 /*********************************************************************************************
  * Player Name
  ********************************************************************************************* */
 
 // Returns the player name from the widget
-FText UPlayerNameWidget::GetPlayerName() const
+FText UBmrPlayerNameWidget::GetPlayerName() const
 {
 	return PlayerNameTextWidget ? PlayerNameTextWidget->GetText() : FText::GetEmpty();
 }
 
 // Sets player name to the widget
-void UPlayerNameWidget::SetPlayerName(const FText& NewPlayerName)
+void UBmrPlayerNameWidget::SetPlayerName(const FText& NewPlayerName)
 {
 	checkf(PlayerNameTextWidget, TEXT("ERROR: [%i] %hs:\n'PlayerNameTextWidget' is null!"), __LINE__, __FUNCTION__);
 	if (!PlayerNameTextWidget->GetText().IdenticalTo(NewPlayerName))
@@ -37,20 +37,20 @@ void UPlayerNameWidget::SetPlayerName(const FText& NewPlayerName)
  ********************************************************************************************* */
 
 // Sets the player character to the widget
-void UPlayerNameWidget::SetAssociatedPlayerId(int32 NewPlayerId)
+void UBmrPlayerNameWidget::SetAssociatedPlayerId(int32 NewPlayerId)
 {
 	if (ensureMsgf(NewPlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'NewPlayer' is null!"), __LINE__, __FUNCTION__))
 	{
-		AssociatedPlayerIdInternal = NewPlayerId;
+		AssociatedPlayerId = NewPlayerId;
 		SetBackgroundMaterial(NewPlayerId);
 	}
 }
 
 // Sets the background material for the nameplate
-void UPlayerNameWidget::SetBackgroundMaterial(int32 PlayerId)
+void UBmrPlayerNameWidget::SetBackgroundMaterial(int32 PlayerId)
 {
 	// Retrieve player-specific material configuration
-	const UPlayerDataAsset& PlayerDataAsset = UPlayerDataAsset::Get();
+	const UBmrPlayerDataAsset& PlayerDataAsset = UBmrPlayerDataAsset::Get();
 	const int32 NameplateMaterialsNum = PlayerDataAsset.GetNameplateMaterialsNum();
 
 	if (NameplateMaterialsNum <= 0)
@@ -74,9 +74,9 @@ void UPlayerNameWidget::SetBackgroundMaterial(int32 PlayerId)
  ********************************************************************************************* */
 
 // Called by both the game and the editor.  Allows users to run initial setup for their widgets to better preview
-void UPlayerNameWidget::NativePreConstruct()
+void UBmrPlayerNameWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 
-	SetBackgroundMaterial(AssociatedPlayerIdInternal);
+	SetBackgroundMaterial(AssociatedPlayerId);
 }

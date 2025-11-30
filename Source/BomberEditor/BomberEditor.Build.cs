@@ -12,10 +12,10 @@ public class BomberEditor : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 		{
 			"Core"
-			, "UnrealEd" // Created UMyUnrealEdEngine
+			, "UnrealEd" // Created UBmrUnrealEdEngine
 			, "GameplayTagsEditor" // FGameplayTagCustomizationPublic
 			// My modules
-			, "MyEditorUtils" // Created Created FMorphDataCustomization, FAttachedMeshCustomization
+			, "MyEditorUtils" // Created FBmrAttachedMeshCustomization
 		});
 
 		PrivateDependencyModuleNames.AddRange(new[]

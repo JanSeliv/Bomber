@@ -1,25 +1,29 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
+#include "UtilityLibraries/BmrActorUtilsLibrary.h"
 
 // Bomber
+#include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
-#include "Components/MapComponent.h"
-#include "GeneratedMap.h"
+#include "Components/BmrMapComponent.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(LevelActorsUtilsLibrary)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrActorUtilsLibrary)
+
+/*********************************************************************************************
+ * Level Actors
+ ********************************************************************************************* */
 
 // Level Actors getter
-void ULevelActorsUtilsLibrary::GetLevelActors(FMapComponents& OutBitmaskedComponents, int32 ActorsTypesBitmask)
+void UBmrActorUtilsLibrary::GetLevelActors(FMapComponents& OutBitmaskedComponents, int32 ActorsTypesBitmask)
 {
-	const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap();
+	const ABmrGeneratedMap* GeneratedMap = ABmrGeneratedMap::GetGeneratedMap();
 	if (!GeneratedMap)
 	{
 		// Might be null if called before the map is initialized
 		return;
 	}
 
-	if (!GeneratedMap->MapComponentsInternal.Num())
+	if (!GeneratedMap->MapComponents.Num())
 	{
 		return;
 	}
@@ -29,11 +33,11 @@ void ULevelActorsUtilsLibrary::GetLevelActors(FMapComponents& OutBitmaskedCompon
 		OutBitmaskedComponents.Empty();
 	}
 
-	for (UMapComponent* MapComponentIt : GeneratedMap->MapComponentsInternal)
+	for (UBmrMapComponent* MapComponentIt : GeneratedMap->MapComponents)
 	{
 		if (MapComponentIt
 		    && MapComponentIt->IsActive()
-		    && EnumHasAnyFlags(MapComponentIt->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
+		    && EnumHasAnyFlags(MapComponentIt->GetActorType(), TO_ENUM(EBmrActorType, ActorsTypesBitmask)))
 		{
 			OutBitmaskedComponents.Add(MapComponentIt);
 		}
@@ -41,16 +45,16 @@ void ULevelActorsUtilsLibrary::GetLevelActors(FMapComponents& OutBitmaskedCompon
 }
 
 // Returns level actors that are located on the specified cells
-void ULevelActorsUtilsLibrary::GetLevelActorsOnCells(FMapComponents& OutMapComponents, const FCells& InCells)
+void UBmrActorUtilsLibrary::GetLevelActorsOnCells(FMapComponents& OutMapComponents, const FBmrCells& InCells)
 {
-	const AGeneratedMap* GeneratedMap = AGeneratedMap::GetGeneratedMap();
+	const ABmrGeneratedMap* GeneratedMap = ABmrGeneratedMap::GetGeneratedMap();
 	if (!GeneratedMap)
 	{
 		// Might be null if called before the map is initialized
 		return;
 	}
 
-	if (!GeneratedMap->MapComponentsInternal.Num())
+	if (!GeneratedMap->MapComponents.Num())
 	{
 		return;
 	}
@@ -60,9 +64,9 @@ void ULevelActorsUtilsLibrary::GetLevelActorsOnCells(FMapComponents& OutMapCompo
 		OutMapComponents.Empty();
 	}
 
-	for (UMapComponent* MapComponentIt : GeneratedMap->MapComponentsInternal)
+	for (UBmrMapComponent* MapComponentIt : GeneratedMap->MapComponents)
 	{
-		const FCell& CellIt = MapComponentIt && MapComponentIt->IsActive() ? MapComponentIt->GetCell() : FCell::InvalidCell;
+		const FBmrCell& CellIt = MapComponentIt && MapComponentIt->IsActive() ? MapComponentIt->GetCell() : FBmrCell::InvalidCell;
 		if (CellIt.IsValid()
 		    && InCells.Contains(CellIt))
 		{
@@ -72,7 +76,7 @@ void ULevelActorsUtilsLibrary::GetLevelActorsOnCells(FMapComponents& OutMapCompo
 }
 
 // Returns the index comparing to actors of its type on the Generated Map
-int32 ULevelActorsUtilsLibrary::GetIndexByLevelActor(const UMapComponent* InMapComponent)
+int32 UBmrActorUtilsLibrary::GetIndexByLevelActor(const UBmrMapComponent* InMapComponent)
 {
 	if (!ensureMsgf(InMapComponent, TEXT("ASSERT: [%i] %hs:\n'InMapComponent' is not valid!"), __LINE__, __FUNCTION__))
 	{
@@ -83,9 +87,9 @@ int32 ULevelActorsUtilsLibrary::GetIndexByLevelActor(const UMapComponent* InMapC
 	// It's more reliable for actors, since it contained in the order of creation
 	FMapComponents MapComponents;
 	int32 Index = 0;
-	const EActorType ActorType = InMapComponent->GetActorType();
+	const EBmrActorType ActorType = InMapComponent->GetActorType();
 	GetLevelActors(MapComponents, TO_FLAG(ActorType));
-	for (const UMapComponent* MapComponentIt : MapComponents)
+	for (const UBmrMapComponent* MapComponentIt : MapComponents)
 	{
 		if (MapComponentIt == InMapComponent)
 		{
@@ -98,7 +102,7 @@ int32 ULevelActorsUtilsLibrary::GetIndexByLevelActor(const UMapComponent* InMapC
 }
 
 // Returns the level actor by its index: order of creation in the level
-UMapComponent* ULevelActorsUtilsLibrary::GetLevelActorByIndex(int32 Index, int32 ActorsTypesBitmask)
+UBmrMapComponent* UBmrActorUtilsLibrary::GetLevelActorByIndex(int32 Index, int32 ActorsTypesBitmask)
 {
 	if (Index < 0)
 	{
@@ -113,7 +117,7 @@ UMapComponent* ULevelActorsUtilsLibrary::GetLevelActorByIndex(int32 Index, int32
 	}
 
 	int32 CurrentIndex = 0;
-	for (UMapComponent* MapComponentIt : MapComponents)
+	for (UBmrMapComponent* MapComponentIt : MapComponents)
 	{
 		if (CurrentIndex == Index)
 		{
@@ -126,13 +130,13 @@ UMapComponent* ULevelActorsUtilsLibrary::GetLevelActorByIndex(int32 Index, int32
 }
 
 // Takes level actors and returns only matching with specified actor types
-FMapComponents ULevelActorsUtilsLibrary::FilterLevelActors(const FMapComponents& InActors, int32 ActorsTypesBitmask)
+FMapComponents UBmrActorUtilsLibrary::FilterLevelActors(const FMapComponents& InActors, int32 ActorsTypesBitmask)
 {
 	FMapComponents FilteredActors;
-	for (UMapComponent* It : InActors)
+	for (UBmrMapComponent* It : InActors)
 	{
 		if (It
-		    && EnumHasAnyFlags(It->GetActorType(), TO_ENUM(EActorType, ActorsTypesBitmask)))
+		    && EnumHasAnyFlags(It->GetActorType(), TO_ENUM(EBmrActorType, ActorsTypesBitmask)))
 		{
 			FilteredActors.Add(It);
 		}

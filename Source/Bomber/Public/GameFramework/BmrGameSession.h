@@ -4,13 +4,13 @@
 
 #include "GameFramework/GameSession.h"
 
-#include "MyGameSession.generated.h"
+#include "BmrGameSession.generated.h"
 
 /**
  * Holds server-only data about this session like Session Name etc.
  */
 UCLASS()
-class BOMBER_API AMyGameSession : public AGameSession
+class BOMBER_API ABmrGameSession : public AGameSession
 {
 	GENERATED_BODY()
 

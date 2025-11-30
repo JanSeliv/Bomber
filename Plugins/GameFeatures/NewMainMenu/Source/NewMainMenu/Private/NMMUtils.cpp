@@ -14,12 +14,12 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
-#include "Controllers/MyPlayerController.h"
-#include "GameFramework/MyGameStateBase.h"
+#include "Controllers/BmrPlayerController.h"
+#include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Engine/Engine.h"
@@ -66,14 +66,14 @@ const UNMMDataAsset* UNMMUtils::GetDataAsset(const UObject* OptionalWorldContext
 // Returns the HUD component of the Main Menu
 UNMMHUDComponent* UNMMUtils::GetHUDComponent(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const AMyGameStateBase* MyGameState = UMyBlueprintFunctionLibrary::GetMyGameState(OptionalWorldContext);
+	const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState(OptionalWorldContext);
 	return MyGameState ? MyGameState->FindComponentByClass<UNMMHUDComponent>() : nullptr;
 }
 
 // Returns the Player Controller component of the Main Menu
 UNMMPlayerControllerComponent* UNMMUtils::GetPlayerControllerComponent(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const AMyPlayerController* MyPC = UMyBlueprintFunctionLibrary::GetLocalPlayerController(OptionalWorldContext);
+	const ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController(OptionalWorldContext);
 	return MyPC ? MyPC->FindComponentByClass<UNMMPlayerControllerComponent>() : nullptr;
 }
 
@@ -135,20 +135,20 @@ bool UNMMUtils::ShouldSkipCinematic(const FNMMCinematicRow& CinematicRow)
 // Helper namespace to initialize playback settings once
 namespace NMMPlaybackSettings
 {
-FMovieSceneSequencePlaybackSettings InitPlaybackSettings(ENMMState MainMenuState)
-{
-	FMovieSceneSequencePlaybackSettings Settings;
-	Settings.LoopCount.Value = MainMenuState == ENMMState::Idle ? INDEX_NONE : 0; // Loop infinitely if idle, otherwise play once
-	Settings.bPauseAtEnd = true; // Pause at the end, so gameplay camera can blend-out from correct position
-	Settings.bDisableCameraCuts = true; // Let the Spot to control the camera possessing instead of auto-possessed one that prevents blend-out while active
-	const bool bRestoreState = MainMenuState != ENMMState::Cinematic; // Reset all 'Keep States' tracks when entered to None or Idle states
-	Settings.FinishCompletionStateOverride = bRestoreState ? EMovieSceneCompletionModeOverride::ForceRestoreState : EMovieSceneCompletionModeOverride::None;
-	return Settings;
-}
+	FMovieSceneSequencePlaybackSettings InitPlaybackSettings(ENMMState MainMenuState)
+	{
+		FMovieSceneSequencePlaybackSettings Settings;
+		Settings.LoopCount.Value = MainMenuState == ENMMState::Idle ? INDEX_NONE : 0; // Loop infinitely if idle, otherwise play once
+		Settings.bPauseAtEnd = true; // Pause at the end, so gameplay camera can blend-out from correct position
+		Settings.bDisableCameraCuts = true; // Let the Spot to control the camera possessing instead of auto-possessed one that prevents blend-out while active
+		const bool bRestoreState = MainMenuState != ENMMState::Cinematic; // Reset all 'Keep States' tracks when entered to None or Idle states
+		Settings.FinishCompletionStateOverride = bRestoreState ? EMovieSceneCompletionModeOverride::ForceRestoreState : EMovieSceneCompletionModeOverride::None;
+		return Settings;
+	}
 
-const FMovieSceneSequencePlaybackSettings EmptySettings = InitPlaybackSettings(ENMMState::None);
-const FMovieSceneSequencePlaybackSettings IdlePartSettings = InitPlaybackSettings(ENMMState::Idle);
-const FMovieSceneSequencePlaybackSettings MainPartSettings = InitPlaybackSettings(ENMMState::Cinematic);
+	const FMovieSceneSequencePlaybackSettings EmptySettings = InitPlaybackSettings(ENMMState::None);
+	const FMovieSceneSequencePlaybackSettings IdlePartSettings = InitPlaybackSettings(ENMMState::Idle);
+	const FMovieSceneSequencePlaybackSettings MainPartSettings = InitPlaybackSettings(ENMMState::Cinematic);
 } // namespace NMMPlaybackSettings
 
 // Returns the Playback Settings by given cinematic state

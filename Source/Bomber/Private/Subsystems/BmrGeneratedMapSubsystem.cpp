@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Subsystems/GeneratedMapSubsystem.h"
+#include "Subsystems/BmrGeneratedMapSubsystem.h"
 
 // Bomber
-#include "GeneratedMap.h"
+#include "Actors/BmrGeneratedMap.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 #if WITH_EDITOR
@@ -13,44 +13,44 @@
 // UE
 #include "Engine/World.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GeneratedMapSubsystem)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGeneratedMapSubsystem)
 
 // Returns the Generated Map Subsystem, is checked and will crash if can't be obtained
-UGeneratedMapSubsystem& UGeneratedMapSubsystem::Get(const UObject* WorldContextObject /* = nullptr*/)
+UBmrGeneratedMapSubsystem& UBmrGeneratedMapSubsystem::Get(const UObject* WorldContextObject /* = nullptr*/)
 {
-	UGeneratedMapSubsystem* GeneratedMapSubsystem = GetGeneratedMapSubsystem(WorldContextObject);
+	UBmrGeneratedMapSubsystem* GeneratedMapSubsystem = GetGeneratedMapSubsystem(WorldContextObject);
 	checkf(GeneratedMapSubsystem, TEXT("%s: 'GeneratedMapSubsystem' is null"), *FString(__FUNCTION__));
 	return *GeneratedMapSubsystem;
 }
 
 // Returns the pointer to the Generated Map Subsystem
-UGeneratedMapSubsystem* UGeneratedMapSubsystem::GetGeneratedMapSubsystem(const UObject* WorldContextObject /* = nullptr*/)
+UBmrGeneratedMapSubsystem* UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(const UObject* WorldContextObject /* = nullptr*/)
 {
 	const UWorld* FoundWorld = UUtilsLibrary::GetPlayWorld(WorldContextObject);
-	return FoundWorld ? FoundWorld->GetSubsystem<UGeneratedMapSubsystem>() : nullptr;
+	return FoundWorld ? FoundWorld->GetSubsystem<UBmrGeneratedMapSubsystem>() : nullptr;
 }
 
 // The Generated Map getter, nullptr otherwise
-AGeneratedMap* UGeneratedMapSubsystem::GetGeneratedMap(bool bWarnIfNull /* = true*/) const
+ABmrGeneratedMap* UBmrGeneratedMapSubsystem::GetGeneratedMap(bool bWarnIfNull /* = true*/) const
 {
 #if WITH_EDITOR
 	if (bWarnIfNull)
 	{
-		ensureMsgf(FEditorUtilsLibrary::IsCooking() || GeneratedMapInternal, TEXT("%s: [Editor] 'GeneratedMapInternal' is not valid"), *FString(__FUNCTION__));
+		ensureMsgf(FEditorUtilsLibrary::IsCooking() || GeneratedMap, TEXT("%s: [Editor] 'GeneratedMap' is not valid"), *FString(__FUNCTION__));
 	}
 #endif // WITH_EDITOR
-	return GeneratedMapInternal;
+	return GeneratedMap;
 }
 
 // The Generated Map setter
-void UGeneratedMapSubsystem::SetGeneratedMap(AGeneratedMap* InGeneratedMap)
+void UBmrGeneratedMapSubsystem::SetGeneratedMap(ABmrGeneratedMap* InGeneratedMap)
 {
 	if (!ensureMsgf(InGeneratedMap, TEXT("%s: 'InGeneratedMap' is not valid"), *FString(__FUNCTION__)))
 	{
 		return;
 	}
 
-	GeneratedMapInternal = InGeneratedMap;
+	GeneratedMap = InGeneratedMap;
 
 	if (OnGeneratedMapReady.IsBound())
 	{

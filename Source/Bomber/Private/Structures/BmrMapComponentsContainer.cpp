@@ -1,28 +1,28 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Structures/MapComponentsContainer.h"
+#include "Structures/BmrMapComponentsContainer.h"
 
 // Bomber
-#include "Components/MapComponent.h"
+#include "Components/BmrMapComponent.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MapComponentsContainer)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrMapComponentsContainer)
 
-FMapComponentSpec::FMapComponentSpec(UMapComponent& InMapComponent)
+FBmrMapComponentSpec::FBmrMapComponentSpec(UBmrMapComponent& InMapComponent)
     : MapComponent(&InMapComponent)
     , Cell(InMapComponent.GetCell())
 {
 }
 
-FMapComponentSpec::FMapComponentSpec(FPoolObjectHandle InPoolObjectHandle)
+FBmrMapComponentSpec::FBmrMapComponentSpec(FPoolObjectHandle InPoolObjectHandle)
     : PoolObjectHandle(MoveTemp(InPoolObjectHandle))
 {
 }
 
-void FMapComponentSpec::PreReplicatedRemove(const FMapComponentsContainer& InMapComponentsContainer)
+void FBmrMapComponentSpec::PreReplicatedRemove(const FBmrMapComponentsContainer& InMapComponentsContainer)
 {
 	// On client, level actor removal was just replicated, perform cleanup to avoid unsynced cell data or dangling map component pointer
 
-	Cell = FCell::InvalidCell;
+	Cell = FBmrCell::InvalidCell;
 
 	if (MapComponent)
 	{
@@ -32,7 +32,7 @@ void FMapComponentSpec::PreReplicatedRemove(const FMapComponentsContainer& InMap
 	}
 }
 
-void FMapComponentSpec::PostReplicatedAdd(const FMapComponentsContainer& InMapComponentsContainer)
+void FBmrMapComponentSpec::PostReplicatedAdd(const FBmrMapComponentsContainer& InMapComponentsContainer)
 {
 	// The level actor was added, update both the replicated cell and the map component
 
@@ -43,7 +43,7 @@ void FMapComponentSpec::PostReplicatedAdd(const FMapComponentsContainer& InMapCo
 	}
 }
 
-void FMapComponentSpec::PostReplicatedChange(const FMapComponentsContainer& InMapComponentsContainer)
+void FBmrMapComponentSpec::PostReplicatedChange(const FBmrMapComponentsContainer& InMapComponentsContainer)
 {
 	// The level actor was changed, update the replicated cell e.g: player character moved
 
@@ -53,19 +53,19 @@ void FMapComponentSpec::PostReplicatedChange(const FMapComponentsContainer& InMa
 	}
 }
 
-FMapComponentsIterator::FMapComponentsIterator(const TArray<FMapComponentSpec>& InItems)
+FBmrMapComponentsIterator::FBmrMapComponentsIterator(const TArray<FBmrMapComponentSpec>& InItems)
     : Items(InItems)
     , Index(0)
 {
 }
 
-FMapComponentsIterator::FMapComponentsIterator(const TArray<FMapComponentSpec>& InItems, int32 StartIndex)
+FBmrMapComponentsIterator::FBmrMapComponentsIterator(const TArray<FBmrMapComponentSpec>& InItems, int32 StartIndex)
     : Items(InItems)
     , Index(StartIndex)
 {
 }
 
-FMapComponentsIterator& FMapComponentsIterator::operator++()
+FBmrMapComponentsIterator& FBmrMapComponentsIterator::operator++()
 {
 	if (Items.IsValidIndex(Index + 1))
 	{
@@ -78,7 +78,7 @@ FMapComponentsIterator& FMapComponentsIterator::operator++()
 	return *this;
 }
 
-UMapComponent* FMapComponentsIterator::operator*() const
+UBmrMapComponent* FBmrMapComponentsIterator::operator*() const
 {
 	const bool bValidIndex = Items.IsValidIndex(Index);
 	checkf(bValidIndex, TEXT("ERROR: [%i] %s:\nIndex %i is not valid for array of Map Components with length of %i!"), __LINE__, *FString(__FUNCTION__), Index, Items.Num());
@@ -86,47 +86,47 @@ UMapComponent* FMapComponentsIterator::operator*() const
 }
 
 // Marks this spec as dirty to push changes for replication, if valid
-void FMapComponentsContainer::MarkItemDirty(FFastArraySerializerItem& Item)
+void FBmrMapComponentsContainer::MarkItemDirty(FFastArraySerializerItem& Item)
 {
 	// First, make sure the spec is fully valid
 	// Wait otherwise: it's often called when only Cell or Map Component is set (during construction), but push if only both are set
-	FMapComponentSpec& Spec = static_cast<FMapComponentSpec&>(Item);
+	FBmrMapComponentSpec& Spec = static_cast<FBmrMapComponentSpec&>(Item);
 	if (Spec.IsValid())
 	{
 		FIrisFastArraySerializer::MarkItemDirty(Spec);
 	}
 }
 
-FMapComponentSpec& FMapComponentsContainer::FindOrAdd(UMapComponent& MapComponent)
+FBmrMapComponentSpec& FBmrMapComponentsContainer::FindOrAdd(UBmrMapComponent& MapComponent)
 {
-	if (FMapComponentSpec* FoundSpec = Find(&MapComponent))
+	if (FBmrMapComponentSpec* FoundSpec = Find(&MapComponent))
 	{
 		return *FoundSpec;
 	}
 
-	FMapComponentSpec& AddedSpecRef = Items.Emplace_GetRef(MapComponent);
+	FBmrMapComponentSpec& AddedSpecRef = Items.Emplace_GetRef(MapComponent);
 	AddedSpecRef.Cell = MapComponent.GetCell();
 	MarkItemDirty(AddedSpecRef);
 	return AddedSpecRef;
 }
 
-FMapComponentSpec& FMapComponentsContainer::FindOrAdd(const FPoolObjectHandle& PoolObjectHandle)
+FBmrMapComponentSpec& FBmrMapComponentsContainer::FindOrAdd(const FPoolObjectHandle& PoolObjectHandle)
 {
 	checkf(PoolObjectHandle.IsValid(), TEXT("ERROR: [%i] %s:\n'PoolObjectHandle' is not valid!"), __LINE__, *FString(__FUNCTION__));
 
-	if (FMapComponentSpec* FoundSpec = Find(PoolObjectHandle))
+	if (FBmrMapComponentSpec* FoundSpec = Find(PoolObjectHandle))
 	{
 		return *FoundSpec;
 	}
 
-	FMapComponentSpec& AddedSpecRef = Items.Emplace_GetRef(PoolObjectHandle);
+	FBmrMapComponentSpec& AddedSpecRef = Items.Emplace_GetRef(PoolObjectHandle);
 	MarkItemDirty(AddedSpecRef);
 	return AddedSpecRef;
 }
 
-void FMapComponentsContainer::Remove(const UMapComponent* MapComponent)
+void FBmrMapComponentsContainer::Remove(const UBmrMapComponent* MapComponent)
 {
-	if (const FMapComponentSpec* FoundSpec = Find(MapComponent))
+	if (const FBmrMapComponentSpec* FoundSpec = Find(MapComponent))
 	{
 		// Remove first occurrence since there is only one Map Component
 		const int8 bRemoved = Items.RemoveSingleSwap(*FoundSpec);
@@ -135,9 +135,9 @@ void FMapComponentsContainer::Remove(const UMapComponent* MapComponent)
 	}
 }
 
-void FMapComponentsContainer::Remove(const FCell& Cell)
+void FBmrMapComponentsContainer::Remove(const FBmrCell& Cell)
 {
-	if (const FMapComponentSpec* FoundSpec = Find(Cell))
+	if (const FBmrMapComponentSpec* FoundSpec = Find(Cell))
 	{
 		const int8 bRemoved = Items.RemoveSwap(*FoundSpec);
 		checkf(bRemoved, TEXT("ERROR: [%i] %s:\nFailed to remove next Cell: %s"), __LINE__, *FString(__FUNCTION__), *Cell.ToString());
@@ -145,9 +145,9 @@ void FMapComponentsContainer::Remove(const FCell& Cell)
 	}
 }
 
-void FMapComponentsContainer::Remove(const FPoolObjectHandle& PoolObjectHandle)
+void FBmrMapComponentsContainer::Remove(const FPoolObjectHandle& PoolObjectHandle)
 {
-	if (const FMapComponentSpec* FoundSpec = Find(PoolObjectHandle))
+	if (const FBmrMapComponentSpec* FoundSpec = Find(PoolObjectHandle))
 	{
 		// Remove first occurrence since there is only one Handle
 		const int8 bRemoved = Items.RemoveSingleSwap(*FoundSpec);

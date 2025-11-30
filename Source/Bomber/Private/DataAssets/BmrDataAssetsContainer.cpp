@@ -1,70 +1,70 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/DataAssetsContainer.h"
+#include "DataAssets/BmrDataAssetsContainer.h"
 
 // Bomber
 #include "Bomber.h"
-#include "DataAssets/AIDataAsset.h"
-#include "DataAssets/GameStateDataAsset.h"
-#include "DataAssets/GeneratedMapDataAsset.h"
-#include "DataAssets/LevelActorDataAsset.h"
-#include "DataAssets/PlayerInputDataAsset.h"
-#include "DataAssets/SoundsDataAsset.h"
-#include "DataAssets/UIDataAsset.h"
+#include "DataAssets/BmrAIDataAsset.h"
+#include "DataAssets/BmrGameStateDataAsset.h"
+#include "DataAssets/BmrGeneratedMapDataAsset.h"
+#include "DataAssets/BmrLevelActorDataAsset.h"
+#include "DataAssets/BmrPlayerInputDataAsset.h"
+#include "DataAssets/BmrSoundsDataAsset.h"
+#include "DataAssets/BmrUIDataAsset.h"
 
 // UE
 #include "GameFramework/Actor.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(DataAssetsContainer)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrDataAssetsContainer)
 
 // Returns the Levels Data Asset
-const UGeneratedMapDataAsset* UDataAssetsContainer::GetGeneratedMapDataAsset()
+const UBmrGeneratedMapDataAsset* UBmrDataAssetsContainer::GetGeneratedMapDataAsset()
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce<UGeneratedMapDataAsset>(Get().GeneratedMapDataAssetInternal);
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UBmrGeneratedMapDataAsset>(Get().GeneratedMapDataAsset);
 }
 
 // Returns the UI Data Asset
-const UUIDataAsset* UDataAssetsContainer::GetUIDataAsset()
+const UBmrUIDataAsset* UBmrDataAssetsContainer::GetUIDataAsset()
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce<UUIDataAsset>(Get().UIDataAssetInternal);
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UBmrUIDataAsset>(Get().UIDataAsset);
 }
 
 // Returns the AI Data Asset
-const UAIDataAsset* UDataAssetsContainer::GetAIDataAsset()
+const UBmrAIDataAsset* UBmrDataAssetsContainer::GetAIDataAsset()
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce<UAIDataAsset>(Get().AIDataAssetInternal);
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UBmrAIDataAsset>(Get().AIDataAsset);
 }
 
 // Returns the Player Input Data Asset
-const UPlayerInputDataAsset* UDataAssetsContainer::GetPlayerInputDataAsset()
+const UBmrPlayerInputDataAsset* UBmrDataAssetsContainer::GetPlayerInputDataAsset()
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce<UPlayerInputDataAsset>(Get().PlayerInputDataAssetInternal);
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UBmrPlayerInputDataAsset>(Get().PlayerInputDataAsset);
 }
 
 // Returns the Sounds Data Asset
-const USoundsDataAsset* UDataAssetsContainer::GetSoundsDataAsset()
+const UBmrSoundsDataAsset* UBmrDataAssetsContainer::GetSoundsDataAsset()
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce<USoundsDataAsset>(Get().SoundsDataAssetInternal);
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UBmrSoundsDataAsset>(Get().SoundsDataAsset);
 }
 
 // Returns the Game State Data Asset
-const UGameStateDataAsset* UDataAssetsContainer::GetGameStateDataAsset()
+const UBmrGameStateDataAsset* UBmrDataAssetsContainer::GetGameStateDataAsset()
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce<UGameStateDataAsset>(Get().GameStateDataAssetInternal);
+	return UMyPrimaryDataAsset::GetOrLoadOnce<UBmrGameStateDataAsset>(Get().GameStateDataAsset);
 }
 
 // Best suits for blueprints to get the data asset by its class since converts the result to the specified class
-const ULevelActorDataAsset* UDataAssetsContainer::GetLevelActorDataAsset(TSubclassOf<ULevelActorDataAsset> DataAssetClass)
+const UBmrLevelActorDataAsset* UBmrDataAssetsContainer::GetLevelActorDataAsset(TSubclassOf<UBmrLevelActorDataAsset> DataAssetClass)
 {
 	if (!DataAssetClass)
 	{
 		return nullptr;
 	}
 
-	const UDataAssetsContainer& Container = Get();
-	for (const TSoftObjectPtr<const ULevelActorDataAsset>& DataAssetSoftIt : Container.ActorsDataAssetsInternal)
+	const UBmrDataAssetsContainer& Container = Get();
+	for (const TSoftObjectPtr<const UBmrLevelActorDataAsset>& DataAssetSoftIt : Container.ActorsDataAssets)
 	{
-		const ULevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
+		const UBmrLevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
 		if (DataAssetIt->IsA(DataAssetClass))
 		{
 			return DataAssetIt;
@@ -75,17 +75,17 @@ const ULevelActorDataAsset* UDataAssetsContainer::GetLevelActorDataAsset(TSubcla
 }
 
 // Iterate ActorsDataAssets array and returns the found Level Actor class by specified data asset
-const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorClass(const TSubclassOf<AActor> ActorClass)
+const UBmrLevelActorDataAsset* UBmrDataAssetsContainer::GetDataAssetByActorClass(const TSubclassOf<AActor> ActorClass)
 {
 	if (!ActorClass)
 	{
 		return nullptr;
 	}
 
-	const UDataAssetsContainer& Container = Get();
-	for (const TSoftObjectPtr<const ULevelActorDataAsset>& DataAssetSoftIt : Container.ActorsDataAssetsInternal)
+	const UBmrDataAssetsContainer& Container = Get();
+	for (const TSoftObjectPtr<const UBmrLevelActorDataAsset>& DataAssetSoftIt : Container.ActorsDataAssets)
 	{
-		const ULevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
+		const UBmrLevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
 
 		const UClass* ActorClassIt = DataAssetIt ? DataAssetIt->GetActorClass() : nullptr;
 		if (ActorClassIt
@@ -98,12 +98,12 @@ const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorClass(const
 }
 
 // Iterate ActorsDataAssets array and returns the found Data Assets of level actors by specified types.
-void UDataAssetsContainer::GetDataAssetsByActorTypes(TArray<const ULevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
+void UBmrDataAssetsContainer::GetDataAssetsByActorTypes(TArray<const UBmrLevelActorDataAsset*>& OutDataAssets, int32 ActorsTypesBitmask)
 {
-	const TArray<TSoftObjectPtr<const ULevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssetsInternal;
-	for (const TSoftObjectPtr<const ULevelActorDataAsset>& DataAssetSoftIt : ActorsDataAssets)
+	const TArray<TSoftObjectPtr<const UBmrLevelActorDataAsset>>& ActorsDataAssets = Get().ActorsDataAssets;
+	for (const TSoftObjectPtr<const UBmrLevelActorDataAsset>& DataAssetSoftIt : ActorsDataAssets)
 	{
-		const ULevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
+		const UBmrLevelActorDataAsset* DataAssetIt = UMyPrimaryDataAsset::GetOrLoadOnce(DataAssetSoftIt);
 
 		if (DataAssetIt
 		    && (ActorsTypesBitmask & TO_FLAG(DataAssetIt->GetActorType())) != 0)
@@ -114,16 +114,16 @@ void UDataAssetsContainer::GetDataAssetsByActorTypes(TArray<const ULevelActorDat
 }
 
 // Iterate ActorsDataAssets array and return the first found Data Assets of level actors by specified type
-const ULevelActorDataAsset* UDataAssetsContainer::GetDataAssetByActorType(EActorType ActorType)
+const UBmrLevelActorDataAsset* UBmrDataAssetsContainer::GetDataAssetByActorType(EBmrActorType ActorType)
 {
-	TArray<const ULevelActorDataAsset*> FoundDataAssets;
+	TArray<const UBmrLevelActorDataAsset*> FoundDataAssets;
 	GetDataAssetsByActorTypes(FoundDataAssets, TO_FLAG(ActorType));
 	return FoundDataAssets.IsValidIndex(0) ? FoundDataAssets[0] : nullptr;
 }
 
 // Iterate ActorsDataAssets array and returns the found actor class by specified actor type
-UClass* UDataAssetsContainer::GetActorClassByType(EActorType ActorType)
+UClass* UBmrDataAssetsContainer::GetActorClassByType(EBmrActorType ActorType)
 {
-	const ULevelActorDataAsset* FoundDataAsset = GetDataAssetByActorType(ActorType);
+	const UBmrLevelActorDataAsset* FoundDataAsset = GetDataAssetByActorType(ActorType);
 	return FoundDataAsset ? FoundDataAsset->GetActorClass() : nullptr;
 }

@@ -5,36 +5,36 @@
 #include "Subsystems/LocalPlayerSubsystem.h"
 
 // Bomber
-#include "Structures/ManageableWidgetData.h"
+#include "Structures/BmrManageableWidgetData.h"
 
 // UE
 #include "GameFeatureStateChangeObserver.h"
 
-#include "WidgetsSubsystem.generated.h"
+#include "BmrWidgetsSubsystem.generated.h"
 
 class UUserWidget;
 
-struct FManageableWidgetData;
+struct FBmrManageableWidgetData;
 
 /**
  * Is used to manage User Widgets with lifetime of Local Player (similar to HUD).
- * @see Access its data with UUIDataAsset (Content/Bomber/DataAssets/DA_UI).
+ * @see Access its data with UBmrUIDataAsset (Content/Bomber/DataAssets/DA_UI).
  */
 UCLASS()
-class BOMBER_API UWidgetsSubsystem : public ULocalPlayerSubsystem,
-                                     public IGameFeatureStateChangeObserver
+class BOMBER_API UBmrWidgetsSubsystem : public ULocalPlayerSubsystem,
+                                        public IGameFeatureStateChangeObserver
 {
 	GENERATED_BODY()
 
 public:
 	/** Returns the pointer the UI Subsystem.
 	 * It will return null if Local Player is not initialized yet. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
-	static UWidgetsSubsystem* GetWidgetsSubsystem(const UObject* OptionalWorldContext = nullptr);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static UBmrWidgetsSubsystem* GetWidgetsSubsystem(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the UI subsystem checked: it will crash if player controller is not initialized yet.
-	 * @warning don't call it on BeginPlay, do it not earlier than OnLocalCharacterReady */
-	static UWidgetsSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
+	 * @warning don't call it on BeginPlay, do it not earlier than OnLocalPawnReady */
+	static UBmrWidgetsSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
 
 	/*********************************************************************************************
 	 * Widgets Management
@@ -42,16 +42,16 @@ public:
 	 ********************************************************************************************* */
 public:
 	/** Creates and registers specified widget to the Manageable widgets list, so its visibility can be changed globally. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
-	UUserWidget* CreateManageableWidget(const FManageableWidgetData& WidgetData, const UObject* OptionalWorldContext = nullptr);
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	UUserWidget* CreateManageableWidget(const FBmrManageableWidgetData& WidgetData, const UObject* OptionalWorldContext = nullptr);
 
 	/** Is alternative to CreateManageableWidget, but with templated cast and crashes if widget class is not valid.
 	 * E.g: UMyUserWidget* NewWidget = CreateManageableWidgetChecked<UMyUserWidget>(WidgetData); */
 	template <typename T = UUserWidget>
-	FORCEINLINE T& CreateManageableWidgetChecked(const FManageableWidgetData& WidgetData) { return *CastChecked<T>(CreateManageableWidget(WidgetData)); }
+	FORCEINLINE T& CreateManageableWidgetChecked(const FBmrManageableWidgetData& WidgetData) { return *CastChecked<T>(CreateManageableWidget(WidgetData)); }
 
 	/** The same as CreateManageableWidget, but finds widget data by tag from the UI Data Asset. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	UUserWidget* CreateManageableWidgetByTag(FGameplayTag WidgetTag, const UObject* OptionalWorldContext = nullptr);
 
 	/** Is alternative to CreateManageableWidgetByTag, but with templated cast and crashes if widget class is not valid.
@@ -62,7 +62,7 @@ public:
 	/** Returns the widget instance by its tag.
 	 * @param WidgetTag - the tag associated with the widget to find.
 	 * @param OptionalIndex - if there are multiple widgets with the same tag (like player nicknames), this index will specify which one to return: 0 by default. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	UUserWidget* GetWidgetByTag(FGameplayTag WidgetTag, int32 OptionalIndex = 0) const;
 
 	/** Is alternative to GetManageableWidgetByTag, but with templated cast.
@@ -73,17 +73,17 @@ public:
 	/** Returns all widgets associated with the given tag.
 	 * @param WidgetTag - the tag associated with the widget to find, can partially match multiple tags.
 	 * @param OutWidgets - the array to fill with found widgets, might be empty if nothing was found. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void GetAllWidgetsByTag(FGameplayTag WidgetTag, TArray<UUserWidget*>& OutWidgets) const;
 
 	/** Removes given widget from the list and destroys it by its tag. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void DestroyManageableWidgetByTag(FGameplayTag WidgetTag);
 
 protected:
 	/** Contains all widgets that are managed by this subsystem. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Managable Widgets"))
-	TMap<FGameplayTag, FBmrManageableWidgetsContainer> AllManageableWidgetsInternal;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	TMap<FGameplayTag, FBmrManageableWidgetsContainer> AllManageableWidgets;
 
 	/*********************************************************************************************
 	 * Core Widgets Initialization
@@ -93,28 +93,28 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWidgetsInitialized);
 
 	/** Is called to notify that all widgets were initialized and ready. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "C++")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
 	FOnWidgetsInitialized OnWidgetsInitialized;
 
 	/** Returns true if widgets ere initialized. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool AreWidgetInitialized() const { return bAreWidgetInitializedInternal; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE bool AreWidgetInitialized() const { return bAreWidgetInitialized; }
 
 protected:
 	/** Is true if widgets are initialized. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "Are Widget Initialized"))
-	bool bAreWidgetInitializedInternal = false;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	bool bAreWidgetInitialized = false;
 
 	/** Will try to start the process of initializing all widgets used in game. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void TryInitWidgets();
 
 	/** Create and set widget objects once. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void InitWidgets();
 
 	/** Removes all widgets and transient data. */
-	UFUNCTION(BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void CleanupWidgets();
 
 	/*********************************************************************************************
@@ -124,17 +124,17 @@ public:
 	/** Is called to toggle all manageable widgets visibility.
 	 * @param bMakeVisible - if true, changes all visible manageable widgets to hidden; false, restores visibility of all previously hidden widgets.
 	 * @param bCanRestoreVisibilityLater - if true, original visibilities will be remembered, so they can be restored later if call this function again with reverse value. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetAllWidgetsVisibility(bool bMakeVisible, bool bCanRestoreVisibilityLater = true);
 
 	/** Returns true if all manageable widgets are hidden. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE bool AreAllWidgetsHidden() const { return !AllHiddenWidgetsInternal.IsEmpty(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE bool AreAllWidgetsHidden() const { return !AllHiddenWidgets.IsEmpty(); }
 
 protected:
 	/** Contains widgets that globally were requested to hide, but were visible before, so their visibility will be restored when needed. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "C++", meta = (BlueprintProtected, DisplayName = "All Hidden Widgets"))
-	FGameplayTagContainer AllHiddenWidgetsInternal = FGameplayTagContainer::EmptyContainer;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	FGameplayTagContainer AllHiddenWidgets = FGameplayTagContainer::EmptyContainer;
 
 	/*********************************************************************************************
 	 * Overrides and Events

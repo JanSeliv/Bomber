@@ -3,9 +3,9 @@
 #include "BomberEditorModule.h"
 
 // Bomber
-#include "AttachedMeshCustomization.h"
+#include "BmrAttachedMeshCustomization.h"
+#include "BmrPlayerTagCustomization.h"
 #include "BmrPowerupTagCustomization.h"
-#include "PlayerTagCustomization.h"
 
 // UE
 #include "Modules/ModuleManager.h"
@@ -17,15 +17,15 @@ DEFINE_LOG_CATEGORY(LogBomberEditor);
 // Called right after the module DLL has been loaded and the module object has been created
 void FBomberEditorModule::StartupModule()
 {
-	FAttachedMeshCustomization::RegisterAttachedMeshCustomization();
-	FPlayerTagCustomization::RegisterPlayersTagCustomization();
+	FBmrAttachedMeshCustomization::RegisterAttachedMeshCustomization();
+	FBmrPlayerTagCustomization::RegisterPlayersTagCustomization();
 	FBmrPowerupTagCustomization::RegisterPowerupTagCustomization();
 }
 
 // Called before the module is unloaded, right before the module object is destroyed
 void FBomberEditorModule::ShutdownModule()
 {
-	FAttachedMeshCustomization::UnregisterAttachedMeshCustomization();
-	FPlayerTagCustomization::UnregisterPlayersTagCustomization();
+	FBmrAttachedMeshCustomization::UnregisterAttachedMeshCustomization();
+	FBmrPlayerTagCustomization::UnregisterPlayersTagCustomization();
 	FBmrPowerupTagCustomization::UnregisterPowerupTagCustomization();
 }

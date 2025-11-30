@@ -1,23 +1,23 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "Structures/ManageableWidgetData.h"
+#include "Structures/BmrManageableWidgetData.h"
 
 // UE
 #include "Blueprint/UserWidget.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(ManageableWidgetData)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrManageableWidgetData)
 
 // Contains default widget data with no values set
-const FManageableWidgetData& FManageableWidgetData::Empty = FManageableWidgetData();
+const FBmrManageableWidgetData& FBmrManageableWidgetData::Empty = FBmrManageableWidgetData();
 
 // Returns true if all data is setup correctly
-bool FManageableWidgetData::IsValid() const
+bool FBmrManageableWidgetData::IsValid() const
 {
 	return WidgetClass && WidgetTag.IsValid();
 }
 
 // Returns compact string representation of this widget data
-FString FManageableWidgetData::ToString() const
+FString FBmrManageableWidgetData::ToString() const
 {
 	return FString::Printf(TEXT("WidgetClass: %s, WidgetTag: %s"), *GetNameSafe(WidgetClass), *WidgetTag.ToString());
 }

@@ -1,13 +1,13 @@
 // Copyright (c) Yevhenii Selivanov.
 
-#include "GameFramework/MyGameUserSettings.h"
+#include "GameFramework/BmrGameUserSettings.h"
 
 // Bomber
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/WidgetsSubsystem.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/SettingsWidget.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "DynamicRHI.h"
@@ -15,12 +15,12 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/ConfigCacheIni.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameUserSettings)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameUserSettings)
 
 // Returns the game user settings
-UMyGameUserSettings& UMyGameUserSettings::Get()
+UBmrGameUserSettings& UBmrGameUserSettings::Get()
 {
-	UMyGameUserSettings* MyGameUserSettings = UMyBlueprintFunctionLibrary::GetMyGameUserSettings();
+	UBmrGameUserSettings* MyGameUserSettings = UBmrBlueprintFunctionLibrary::GetGameUserSettings();
 	checkf(MyGameUserSettings, TEXT("My Game User Settings is not valid"));
 	return *MyGameUserSettings;
 }
@@ -30,14 +30,14 @@ UMyGameUserSettings& UMyGameUserSettings::Get()
  ********************************************************************************************* */
 
 // Get all supported resolutions of the primary monitor
-void UMyGameUserSettings::UpdateSupportedResolutions()
+void UBmrGameUserSettings::UpdateSupportedResolutions()
 {
 	if (UUtilsLibrary::IsEditor())
 	{
 		// In editor, engine never applies resolutions
 		static const FText EditorMsg = FText::FromString(TEXT("NO EDITOR SUPPORT"));
-		TextResolutionsInternal.Empty();
-		TextResolutionsInternal.Emplace(EditorMsg);
+		TextResolutions.Empty();
+		TextResolutions.Emplace(EditorMsg);
 		return;
 	}
 
@@ -79,8 +79,8 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 		bIsUltraWide = true;
 	}
 
-	TextResolutionsInternal.Empty();
-	IntResolutionsInternal.Empty();
+	TextResolutions.Empty();
+	IntResolutions.Empty();
 	const int32 ResolutionsArrayNum = ResolutionsArray.Num();
 	for (int32 Index = ResolutionsArrayNum - 1; Index >= 0; --Index)
 	{
@@ -97,8 +97,8 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 
 		const bool bIsCorrectAspectRatio = FMath::IsNearlyEqual(AspectRatioIt, AspectRatio)
 		                                   || (bIsUltraWide && AspectRatioIt >= UltraWideAspectRatio);
-		const bool bIsGreaterThanMin = WidthIt >= MinResolutionSizeXInternal
-		                               && HeightIt >= MinResolutionSizeYInternal;
+		const bool bIsGreaterThanMin = WidthIt >= MinResolutionSizeX
+		                               && HeightIt >= MinResolutionSizeY;
 		const bool bIsLessThanMax = WidthIt <= MaxDisplayWidth
 		                            && HeightIt <= MaxDisplayHeight;
 		const bool bIsEightDivisible = WidthIt % 8 == 0 && HeightIt % 8 == 0;
@@ -113,23 +113,23 @@ void UMyGameUserSettings::UpdateSupportedResolutions()
 
 		static const FString Delimiter = TEXT("x");
 		FText TextResolution = FText::FromString(FString::FromInt(WidthIt) + Delimiter + FString::FromInt(HeightIt));
-		TextResolutionsInternal.Emplace(MoveTemp(TextResolution));
+		TextResolutions.Emplace(MoveTemp(TextResolution));
 
 		FIntPoint IntResolution(WidthIt, HeightIt);
-		const int32 AddedIndex = IntResolutionsInternal.Emplace(MoveTemp(IntResolution));
+		const int32 AddedIndex = IntResolutions.Emplace(MoveTemp(IntResolution));
 
 		if (WidthIt == ResolutionSizeX
 		    && HeightIt == ResolutionSizeY)
 		{
-			CurrentResolutionIndexInternal = AddedIndex;
+			CurrentResolutionIndex = AddedIndex;
 		}
 	}
 }
 
 // Set new resolution by index
-void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
+void UBmrGameUserSettings::SetResolutionByIndex(int32 Index)
 {
-	if (!IntResolutionsInternal.IsValidIndex(Index)
+	if (!IntResolutions.IsValidIndex(Index)
 	    || GetResolutionIndex() == Index
 	    || UUtilsLibrary::IsEditor())
 	{
@@ -137,10 +137,10 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 		return;
 	}
 
-	const FIntPoint& NewResolution = IntResolutionsInternal[Index];
+	const FIntPoint& NewResolution = IntResolutions[Index];
 	SetScreenResolution(NewResolution);
 
-	CurrentResolutionIndexInternal = Index;
+	CurrentResolutionIndex = Index;
 	LastUserConfirmedResolutionSizeX = NewResolution.X;
 	LastUserConfirmedResolutionSizeY = NewResolution.Y;
 
@@ -155,7 +155,7 @@ void UMyGameUserSettings::SetResolutionByIndex(int32 Index)
 }
 
 // Syncs the current resolution index with the actual resolution, is useful when it's changed outside (e.g. by Alt+Enter).
-void UMyGameUserSettings::TryUpdateCurrentResolution()
+void UBmrGameUserSettings::TryUpdateCurrentResolution()
 {
 	const bool bIsResolutionChangedOutside = LastUserConfirmedResolutionSizeX != ResolutionSizeX
 	                                         || LastUserConfirmedResolutionSizeY != ResolutionSizeY;
@@ -165,7 +165,7 @@ void UMyGameUserSettings::TryUpdateCurrentResolution()
 		return;
 	}
 
-	const int32 NewResolutionIndex = IntResolutionsInternal.IndexOfByPredicate([&](const FIntPoint& ResolutionIt)
+	const int32 NewResolutionIndex = IntResolutions.IndexOfByPredicate([&](const FIntPoint& ResolutionIt)
 	{
 		return ResolutionIt.X == ResolutionSizeX
 		       && ResolutionIt.Y == ResolutionSizeY;
@@ -177,7 +177,7 @@ void UMyGameUserSettings::TryUpdateCurrentResolution()
 	}
 
 	// Finally, try update the setting on UI
-	UPDATE_SETTING_BY_FUNCTION(UMyBlueprintFunctionLibrary::GetSettingsWidget(), ThisClass, SetResolutionByIndex);
+	UPDATE_SETTING_BY_FUNCTION(UBmrBlueprintFunctionLibrary::GetSettingsWidget(), ThisClass, SetResolutionByIndex);
 }
 
 /*********************************************************************************************
@@ -185,7 +185,7 @@ void UMyGameUserSettings::TryUpdateCurrentResolution()
  ********************************************************************************************* */
 
 // Set and apply fullscreen mode. If false, the windowed mode will be applied
-void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
+void UBmrGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 {
 	if (IsFullscreenEnabled() == bIsFullscreen)
 	{
@@ -197,7 +197,7 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 
 	LastConfirmedFullscreenMode = NewFullscreenMode;
 
-	const bool bIsMaxRes = CurrentResolutionIndexInternal == 0;
+	const bool bIsMaxRes = CurrentResolutionIndex == 0;
 	if (bIsFullscreen != bIsMaxRes)
 	{
 		// User enabled fullscreen: set max resolution
@@ -212,7 +212,7 @@ void UMyGameUserSettings::SetFullscreenEnabled(bool bIsFullscreen)
 }
 
 // Syncs the current Fullscreen mode with the actual mode, is useful when it's changed outside (e.g. by Alt+Enter)
-void UMyGameUserSettings::TryUpdateCurrentFullscreenMode()
+void UBmrGameUserSettings::TryUpdateCurrentFullscreenMode()
 {
 	if (LastConfirmedFullscreenMode == FullscreenMode)
 	{
@@ -220,7 +220,7 @@ void UMyGameUserSettings::TryUpdateCurrentFullscreenMode()
 		return;
 	}
 
-	const bool bIsMaxRes = CurrentResolutionIndexInternal == 0;
+	const bool bIsMaxRes = CurrentResolutionIndex == 0;
 	if (IsFullscreenEnabled() && !bIsMaxRes)
 	{
 		// Update resolution to maximum to enter in fullscreen
@@ -229,7 +229,7 @@ void UMyGameUserSettings::TryUpdateCurrentFullscreenMode()
 	}
 
 	// Finally, try update the setting on UI
-	UPDATE_SETTING_BY_FUNCTION(UMyBlueprintFunctionLibrary::GetSettingsWidget(), ThisClass, SetFullscreenEnabled);
+	UPDATE_SETTING_BY_FUNCTION(UBmrBlueprintFunctionLibrary::GetSettingsWidget(), ThisClass, SetFullscreenEnabled);
 }
 
 /*********************************************************************************************
@@ -237,9 +237,9 @@ void UMyGameUserSettings::TryUpdateCurrentFullscreenMode()
  ********************************************************************************************* */
 
 // Set the FPS cap by specified member index
-void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
+void UBmrGameUserSettings::SetFPSLockByIndex(int32 Index)
 {
-	const USettingsWidget* SettingsWidget = UMyBlueprintFunctionLibrary::GetSettingsWidget();
+	const USettingsWidget* SettingsWidget = UBmrBlueprintFunctionLibrary::GetSettingsWidget();
 	if (!SettingsWidget
 	    || GetFPSLockIndex() == Index)
 	{
@@ -266,7 +266,7 @@ void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
 		SetFrameRateLimit(MaxFPS);
 		SetFrameRateLimitCVar(MaxFPS);
 
-		FPSLockIndexInternal = Index;
+		FPSLockIndex = Index;
 	};
 
 	// If numeric like '144', then set and return
@@ -303,28 +303,28 @@ void UMyGameUserSettings::SetFPSLockByIndex(int32 Index)
  ********************************************************************************************* */
 
 // Changes all scalability settings at once based on a single overall quality level
-void UMyGameUserSettings::SetOverallScalabilityLevel(int32 Value)
+void UBmrGameUserSettings::SetOverallScalabilityLevel(int32 Value)
 {
-	if (Value == OverallQualityInternal)
+	if (Value == OverallQuality)
 	{
 		return;
 	}
 
-	OverallQualityInternal = Value;
+	OverallQuality = Value;
 	ApplyOverallScalabilityLevel();
 }
 
 // Is called to apply the currently chosen overall quality level
-void UMyGameUserSettings::ApplyOverallScalabilityLevel()
+void UBmrGameUserSettings::ApplyOverallScalabilityLevel()
 {
-	if (!OverallQualityInternal)
+	if (!OverallQuality)
 	{
 		// Custom scalability is set
 		return;
 	}
 
 	static constexpr int32 QualityOffset = 1;
-	Super::SetOverallScalabilityLevel(OverallQualityInternal - QualityOffset);
+	Super::SetOverallScalabilityLevel(OverallQuality - QualityOffset);
 
 	SetQualityLevels(ScalabilityQuality);
 }
@@ -334,24 +334,24 @@ void UMyGameUserSettings::ApplyOverallScalabilityLevel()
  ********************************************************************************************* */
 
 // Set new language by index
-void UMyGameUserSettings::SetLanguageByIndex(int32 Index)
+void UBmrGameUserSettings::SetLanguageByIndex(int32 Index)
 {
-	if (!CulturesInternal.IsValidIndex(Index)
+	if (!Cultures.IsValidIndex(Index)
 	    || UUtilsLibrary::IsEditor())
 	{
 		// Is not supported (editor)
 		return;
 	}
 
-	AppliedCultureInternal = CulturesInternal[Index];
-	CurrentLanguageIndexInternal = Index;
+	AppliedCulture = Cultures[Index];
+	CurrentLanguageIndex = Index;
 	ApplyCurrentLanguage();
 }
 
 // Is called to apply the currently chosen language
-void UMyGameUserSettings::ApplyCurrentLanguage()
+void UBmrGameUserSettings::ApplyCurrentLanguage()
 {
-	const bool bIsApplied = FInternationalization::Get().SetCurrentLanguageAndLocale(AppliedCultureInternal.ToString());
+	const bool bIsApplied = FInternationalization::Get().SetCurrentLanguageAndLocale(AppliedCulture.ToString());
 	if (!bIsApplied)
 	{
 		return;
@@ -361,14 +361,14 @@ void UMyGameUserSettings::ApplyCurrentLanguage()
 }
 
 // Get all supported languages
-void UMyGameUserSettings::UpdateSupportedLanguages()
+void UBmrGameUserSettings::UpdateSupportedLanguages()
 {
 	if (UUtilsLibrary::IsEditor())
 	{
 		// In editor, engine never applies cultures
 		static const FText EditorMsg = FText::FromString(TEXT("NO EDITOR SUPPORT"));
-		DisplayLanguagesInternal.Empty();
-		DisplayLanguagesInternal.Emplace(EditorMsg);
+		DisplayLanguages.Empty();
+		DisplayLanguages.Emplace(EditorMsg);
 		return;
 	}
 
@@ -382,9 +382,9 @@ void UMyGameUserSettings::UpdateSupportedLanguages()
 	}
 
 	// Always add English by default as fallback language to display first if system language is not supported
-	CulturesInternal.Empty();
+	Cultures.Empty();
 	static const FString FallbackDefaultLanguage = TEXT("en");
-	CulturesInternal.Emplace(FallbackDefaultLanguage);
+	Cultures.Emplace(FallbackDefaultLanguage);
 
 	// Make the system (OS) language to be displayed first, if supported: it contains within available cultures
 	const FString SystemCulture = UKismetSystemLibrary::GetDefaultLanguage();
@@ -395,37 +395,37 @@ void UMyGameUserSettings::UpdateSupportedLanguages()
 	if (AvailableSystemCulture
 	    && *AvailableSystemCulture != FallbackDefaultLanguage)
 	{
-		CulturesInternal.Insert(**AvailableSystemCulture, 0);
+		Cultures.Insert(**AvailableSystemCulture, 0);
 	}
 
 	// Add all remaining cultures
 	for (const FString& AvailableCultureIt : AllAvailableCultures)
 	{
-		CulturesInternal.AddUnique(*AvailableCultureIt);
+		Cultures.AddUnique(*AvailableCultureIt);
 	}
 
 	// Convert culture names (en) to localized language names (English) to be displayed on UI, in their translated form
-	DisplayLanguagesInternal.Empty();
-	for (const FName LocalizedCultureNameIt : CulturesInternal)
+	DisplayLanguages.Empty();
+	for (const FName LocalizedCultureNameIt : Cultures)
 	{
 		constexpr bool bLocalized = false;
 		const FString LocalizedCultureName = UKismetInternationalizationLibrary::GetCultureDisplayName(LocalizedCultureNameIt.ToString(), bLocalized);
 		ensureAlwaysMsgf(LocalizedCultureName.Len() == FCString::Strlen(*LocalizedCultureName), TEXT("ASSERT: [%i] %hs:\n'%s' culture name is not supported!"), __LINE__, __FUNCTION__, *LocalizedCultureName);
-		DisplayLanguagesInternal.Emplace(FText::FromString(LocalizedCultureName));
+		DisplayLanguages.Emplace(FText::FromString(LocalizedCultureName));
 	}
 
 	// If very first launch of the game, then set the system language as default
-	if (AppliedCultureInternal.IsNone())
+	if (AppliedCulture.IsNone())
 	{
 		// Set the system language as default
-		checkf(CulturesInternal.IsValidIndex(0), TEXT("ERROR: [%i] %hs:\n'CulturesInternal.IsValidIndex(0)' is null!"), __LINE__, __FUNCTION__);
-		AppliedCultureInternal = CulturesInternal[0];
+		checkf(Cultures.IsValidIndex(0), TEXT("ERROR: [%i] %hs:\n'Cultures.IsValidIndex(0)' is null!"), __LINE__, __FUNCTION__);
+		AppliedCulture = Cultures[0];
 	}
 
 	// Always update current language index
-	if (CurrentLanguageIndexInternal == INDEX_NONE)
+	if (CurrentLanguageIndex == INDEX_NONE)
 	{
-		CurrentLanguageIndexInternal = CulturesInternal.IndexOfByKey(AppliedCultureInternal);
+		CurrentLanguageIndex = Cultures.IndexOfByKey(AppliedCulture);
 	}
 }
 
@@ -434,15 +434,15 @@ void UMyGameUserSettings::UpdateSupportedLanguages()
  ********************************************************************************************* */
 
 // Set true to show the FPS counter widget on the HUD
-void UMyGameUserSettings::SetFPSCounterEnabled(bool bEnable)
+void UBmrGameUserSettings::SetFPSCounterEnabled(bool bEnable)
 {
-	const UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem();
+	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem();
 	UUserWidget* FPSCounterWidget = WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag(BmrGameplayTags::UI::Widget_FpsCounter) : nullptr;
 	if (ensureMsgf(FPSCounterWidget, TEXT("ASSERT: [%i] %hs:\n'FPSCounterWidget' was not found!"), __LINE__, __FUNCTION__))
 	{
 		const ESlateVisibility NewVisibility = bEnable ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed;
 		FPSCounterWidget->SetVisibility(NewVisibility);
-		bIsFPSCounterEnabledInternal = bEnable;
+		bIsFPSCounterEnabled = bEnable;
 	}
 }
 
@@ -451,28 +451,28 @@ void UMyGameUserSettings::SetFPSCounterEnabled(bool bEnable)
  ********************************************************************************************* */
 
 // Loads the user settings from persistent storage
-void UMyGameUserSettings::LoadSettings(bool bForceReload)
+void UBmrGameUserSettings::LoadSettings(bool bForceReload)
 {
 	Super::LoadSettings(bForceReload);
 
-	const bool bUpdateMinResolutions = !MinResolutionSizeXInternal || !MinResolutionSizeYInternal;
+	const bool bUpdateMinResolutions = !MinResolutionSizeX || !MinResolutionSizeY;
 	if (bUpdateMinResolutions
 	    && GConfig
 	    && !GGameIni.IsEmpty())
 	{
 		static const FString Section(TEXT("/Script/EngineSettings.GeneralProjectSettings"));
-		GConfig->GetInt(*Section, TEXT("MinWindowWidth"), MinResolutionSizeXInternal, GGameIni);
-		GConfig->GetInt(*Section, TEXT("MinWindowHeight"), MinResolutionSizeYInternal, GGameIni);
+		GConfig->GetInt(*Section, TEXT("MinWindowWidth"), MinResolutionSizeX, GGameIni);
+		GConfig->GetInt(*Section, TEXT("MinWindowHeight"), MinResolutionSizeY, GGameIni);
 	}
 
-	if (IntResolutionsInternal.IsEmpty())
+	if (IntResolutions.IsEmpty())
 	{
 		UpdateSupportedResolutions();
 	}
 
-	if (DisplayLanguagesInternal.IsEmpty()
-	    || CulturesInternal.IsEmpty()
-	    || CurrentLanguageIndexInternal < 0)
+	if (DisplayLanguages.IsEmpty()
+	    || Cultures.IsEmpty()
+	    || CurrentLanguageIndex < 0)
 	{
 		UpdateSupportedLanguages();
 		ApplyCurrentLanguage();
@@ -482,24 +482,24 @@ void UMyGameUserSettings::LoadSettings(bool bForceReload)
 }
 
 // Validates and resets bad user settings to default. Deletes stale user settings file if necessary
-void UMyGameUserSettings::ValidateSettings()
+void UBmrGameUserSettings::ValidateSettings()
 {
 	Super::ValidateSettings();
 
 	// Validate resolution
-	if (IntResolutionsInternal.IsValidIndex(CurrentResolutionIndexInternal))
+	if (IntResolutions.IsValidIndex(CurrentResolutionIndex))
 	{
-		const FIntPoint ChosenScreenResolution(IntResolutionsInternal[CurrentResolutionIndexInternal]);
+		const FIntPoint ChosenScreenResolution(IntResolutions[CurrentResolutionIndex]);
 		const FIntPoint CurrentScreenResolution(GetScreenResolution());
 		if (ChosenScreenResolution != CurrentScreenResolution)
 		{
-			SetResolutionByIndex(CurrentResolutionIndexInternal);
+			SetResolutionByIndex(CurrentResolutionIndex);
 		}
 	}
 }
 
 // Save the user settings to persistent storage (automatically happens as part of ApplySettings)
-void UMyGameUserSettings::SaveSettings()
+void UBmrGameUserSettings::SaveSettings()
 {
 	Super::SaveSettings();
 
@@ -510,7 +510,7 @@ void UMyGameUserSettings::SaveSettings()
 }
 
 // Returns the overall scalability level
-int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
+int32 UBmrGameUserSettings::GetOverallScalabilityLevel() const
 {
 	static constexpr int32 QualityOffset = 1;
 	const int32 OverallScalabilityLevel = Super::GetOverallScalabilityLevel();
@@ -518,7 +518,7 @@ int32 UMyGameUserSettings::GetOverallScalabilityLevel() const
 }
 
 // Mark current video mode settings (fullscreenmode/resolution) as being confirmed by the user
-void UMyGameUserSettings::ConfirmVideoMode()
+void UBmrGameUserSettings::ConfirmVideoMode()
 {
 	TryUpdateCurrentResolution();
 

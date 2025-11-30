@@ -23,11 +23,11 @@ public:
 	UNMMHUDComponent();
 
 	/** Returns the Main Menu widget. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	class UNewMainMenuWidget* GetMainMenuWidget() const;
 
 	/** Returns the In Cinematic State widget. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	class UNMMCinematicStateWidget* GetInCinematicStateWidget() const;
 
 	/*********************************************************************************************
@@ -41,6 +41,6 @@ protected:
 	virtual void OnUnregister() override;
 
 	/** Called when the local player character is spawned, possessed, and replicated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnLocalCharacterReady(class APlayerCharacter* PlayerCharacter, int32 CharacterID);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnLocalPawnReady(class ABmrPawn* Pawn, int32 PlayerId);
 };

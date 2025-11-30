@@ -5,7 +5,7 @@
 #include "Engine/DataTable.h"
 
 // Bomber
-#include "Bomber.h" // ELevelType
+#include "Bomber.h" // EBmrLevelType
 
 // UE
 #include "Misc/EnumRange.h" // ENUM_RANGE_BY_FIRST_AND_LAST
@@ -37,15 +37,15 @@ struct FOOTTRAILSGENERATORRUNTIME_API FFTGArchetype : public FTableRowBase
 	GENERATED_BODY()
 
 	/** The foot trail type. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[FootTrailsGenerator]")
 	EFTGTrailType FootTrailType = EFTGTrailType::Crossroad;
 
 	/** The level type that this foot trail can be spawned on. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
-	ELevelType LevelType = ELevelType::None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[FootTrailsGenerator]")
+	EBmrLevelType LevelType = EBmrLevelType::None;
 
 	/** The foot trail mesh. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[FootTrailsGenerator]")
 	TSoftObjectPtr<class UStaticMesh> Mesh = nullptr;
 
 	/** Compares for equality.

@@ -5,8 +5,8 @@
 #include "Engine/DataTable.h"
 
 // Bomber
-#include "Bomber.h" // ELevelType
-#include "Structures/PlayerTag.h"
+#include "Bomber.h" // EBmrLevelType
+#include "Structures/BmrPlayerTag.h"
 
 #include "NMMTypes.generated.h"
 
@@ -23,11 +23,11 @@ struct NEWMAINMENU_API FNMMCinematicRow : public FTableRowBase
 
 	/** The level where this cinematic should be played. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ELevelType LevelType = ELT::None;
+	EBmrLevelType LevelType = ELT::None;
 
 	/** The player for which this cinematic should be played. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FPlayerTag PlayerTag = FPlayerTag::None;
+	FBmrPlayerTag PlayerTag = FBmrPlayerTag::None;
 
 	/** The level sequence asset to play. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

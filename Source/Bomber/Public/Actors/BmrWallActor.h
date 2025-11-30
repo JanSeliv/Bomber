@@ -4,20 +4,20 @@
 
 #include "GameFramework/Actor.h"
 
-#include "WallActor.generated.h"
+#include "BmrWallActor.generated.h"
 
 /**
  * Walls are not destroyed by a bomb explosion and break the explosion.
- * @see Access its data with UWallDataAsset (Content/Bomber/DataAssets/DA_Wall).
+ * @see Access its data with UBmrWallDataAsset (Content/Bomber/DataAssets/DA_Wall).
  */
 UCLASS()
-class BOMBER_API AWallActor final : public AActor
+class BOMBER_API ABmrWallActor final : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	/** Sets default values for this actor's properties */
-	AWallActor();
+	ABmrWallActor();
 
 protected:
 	/* ---------------------------------------------------
@@ -25,8 +25,8 @@ protected:
 	 * --------------------------------------------------- */
 
 	/** The MapComponent manages this actor on the Generated Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UBmrMapComponent> MapComponent = nullptr;
 
 	/* ---------------------------------------------------
 	 *		Protected functions
@@ -37,6 +37,6 @@ protected:
 
 	/** Called when this level actor is reconstructed or added on the Generated Map.
 	 * Is used by Level Actors instead of the BeginPlay(). */
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnAddedToLevel(UMapComponent* MapComponent);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnAddedToLevel(UBmrMapComponent* InMapComponent);
 };

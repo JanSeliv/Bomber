@@ -5,14 +5,14 @@
 // Bomber
 #include "AbilitySystem/Attributes/BmrHealthAttributeSet.h"
 #include "AbilitySystem/Attributes/BmrPowerupsAttributeSet.h"
+#include "Actors/BmrBombAbilityActor.h"
+#include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
-#include "Components/MapComponent.h"
-#include "DataAssets/BombDataAsset.h"
-#include "GameFramework/MyGameStateBase.h"
-#include "GeneratedMap.h"
-#include "LevelActors/BombActor.h"
-#include "UtilityLibraries/CellsUtilsLibrary.h"
-#include "UtilityLibraries/LevelActorsUtilsLibrary.h"
+#include "Components/BmrMapComponent.h"
+#include "DataAssets/BmrBombDataAsset.h"
+#include "GameFramework/BmrGameState.h"
+#include "UtilityLibraries/BmrActorUtilsLibrary.h"
+#include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
 #include "AbilitySystemGlobals.h"
@@ -48,17 +48,17 @@ void UBmrExplosionExecution::Execute_Implementation(const FGameplayEffectCustomE
 {
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
 	UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
-	TSubclassOf<UGameplayEffect> ExplosionDamageEffect = UBombDataAsset::Get().GetExplosionDamageEffect();
+	TSubclassOf<UGameplayEffect> ExplosionDamageEffect = UBmrBombDataAsset::Get().GetExplosionDamageEffect();
 	if (!SourceASC || !SourceASC->GetOwner()->HasAuthority()
-	    || !(TO_FLAG(AMyGameStateBase::GetCurrentGameState()) & TO_FLAG(ECGS::InGame | ECGS::EndGame))
+	    || !(TO_FLAG(ABmrGameState::GetCurrentGameState()) & TO_FLAG(ECGS::InGame | ECGS::EndGame))
 	    || !ensureMsgf(ExplosionDamageEffect, TEXT("ASSERT: [%i] %hs:\n'ExplosionDamageEffect' is not set, can not apply explosion damage!"), __LINE__, __FUNCTION__)
 	    || !ensureMsgf(Spec.GetEffectContext().HasOrigin(), TEXT("ASSERT: [%i] %hs:\n'Origin' cell location is not set in effect context, can not apply explosion damage!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	const FCell OriginCell = Spec.GetEffectContext().GetOrigin();
-	if (!UCellsUtilsLibrary::IsCellHasAnyMatchingActor(OriginCell, TO_FLAG(EAT::Bomb)))
+	const FBmrCell OriginCell = Spec.GetEffectContext().GetOrigin();
+	if (!UBmrCellUtilsLibrary::IsCellHasAnyMatchingActor(OriginCell, TO_FLAG(EAT::Bomb)))
 	{
 		// No bomb at origin, which is likely already exploded by another chain reaction
 		return;
@@ -84,9 +84,9 @@ void UBmrExplosionExecution::Execute_Implementation(const FGameplayEffectCustomE
 
 	// Apply damage to all explosion cells
 	FMapComponents TargetMapComponents;
-	const FCells ExplosionCells = UCellsUtilsLibrary::GetCellsAround(OriginCell, EPathType::Explosion, FireRadius);
-	ULevelActorsUtilsLibrary::GetLevelActorsOnCells(TargetMapComponents, ExplosionCells);
-	for (UMapComponent* TargetMapComponent : TargetMapComponents)
+	const FBmrCells ExplosionCells = UBmrCellUtilsLibrary::GetCellsAround(OriginCell, EPathType::Explosion, FireRadius);
+	UBmrActorUtilsLibrary::GetLevelActorsOnCells(TargetMapComponents, ExplosionCells);
+	for (UBmrMapComponent* TargetMapComponent : TargetMapComponents)
 	{
 		AActor* TargetActor = TargetMapComponent ? TargetMapComponent->GetOwner() : nullptr;
 		if (!TargetActor)
@@ -95,7 +95,7 @@ void UBmrExplosionExecution::Execute_Implementation(const FGameplayEffectCustomE
 		}
 
 		// Remove bomb effects from chained bombs: this way their effects interrupt immediately, causing this execution and chain reaction
-		const ABombActor* BombActor = Cast<ABombActor>(TargetActor);
+		const ABmrBombAbilityActor* BombActor = Cast<ABmrBombAbilityActor>(TargetActor);
 		UAbilitySystemComponent* BombInstigatorASC = BombActor ? BombActor->GetInstigatorAbilitySystemComponent() : nullptr;
 		const bool bIsChainedBomb = BombInstigatorASC && TargetMapComponent->GetCell() != OriginCell;
 		if (bIsChainedBomb)
@@ -112,7 +112,7 @@ void UBmrExplosionExecution::Execute_Implementation(const FGameplayEffectCustomE
 		UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor);
 		if (!TargetASC)
 		{
-			AGeneratedMap::Get().DestroyLevelActor(TargetMapComponent, SourceASC->GetAvatarActor());
+			ABmrGeneratedMap::Get().DestroyLevelActor(TargetMapComponent, SourceASC->GetAvatarActor());
 			continue;
 		}
 

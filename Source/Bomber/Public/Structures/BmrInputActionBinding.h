@@ -21,14 +21,14 @@ struct BOMBER_API FBmrInputActionBinding
 	static const FBmrInputActionBinding Empty;
 
 	/** Choose for which state the bound function has to be called. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]", meta = (ShowOnlyInnerProperties))
 	ETriggerEvent TriggerEvent = ETriggerEvent::Triggered;
 
 	/** Contains data about static function object getter of a function to bind. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties, FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterObject__DelegateSignature"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]", meta = (ShowOnlyInnerProperties, FunctionContextTemplate = "/Script/FunctionPicker.FunctionPickerTemplate::OnGetterObject__DelegateSignature"))
 	FFunctionPicker StaticContext = FFunctionPicker::Empty;
 
 	/** Allows to set function that is used to be called when input will be triggered. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++", meta = (ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]", meta = (ShowOnlyInnerProperties))
 	FFunctionPicker FunctionToBind = FFunctionPicker::Empty;
 };

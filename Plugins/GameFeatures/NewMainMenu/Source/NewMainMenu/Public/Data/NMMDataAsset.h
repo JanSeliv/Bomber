@@ -5,12 +5,12 @@
 #include "Data/MyPrimaryDataAsset.h"
 
 // Bomber
-#include "Structures/ManageableWidgetData.h"
+#include "Structures/BmrManageableWidgetData.h"
 
 #include "NMMDataAsset.generated.h"
 
 enum class ENMMState : uint8;
-enum class ELevelType : uint8;
+enum class EBmrLevelType : uint8;
 
 /**
  * Contains common data of the New Main Menu plugin to be tweaked.
@@ -27,111 +27,104 @@ public:
 	/** Returns this Data Asset, is checked and wil crash if can't be obtained, e.g: when is not set. */
 	static const UNMMDataAsset& Get(const UObject* OptionalWorldContext = nullptr);
 
-	/** Returns the data table with the cinematics to be played.
-	 * @see UNMMDataAsset::CinematicsDataTableInternal.*/
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE class UDataTable* GetCinematicsDataTable() const { return CinematicsDataTableInternal; }
+	/** Returns the data table with the cinematics to be played. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	const FORCEINLINE class UDataTable* GetCinematicsDataTable() const { return CinematicsDataTable; }
 
-	/** Returns data for the Main Menu widget.
-	 * @see UNMMDataAsset::MainMenuWidgetDataInternal. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FManageableWidgetData& GetMainMenuWidgetData() const { return MainMenuWidgetDataInternal; }
+	/** Returns data for the Main Menu widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	const FORCEINLINE FBmrManageableWidgetData& GetMainMenuWidgetData() const { return MainMenuWidgetData; }
 
-	/** Returns data for the In Cinematic State widget.
-	 * @see UNMMDataAsset::InCinematicStateWidgetDataInternal. */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const FORCEINLINE FManageableWidgetData& GetInCinematicStateWidgetData() const { return InCinematicStateWidgetDataInternal; }
+	/** Returns data for the In Cinematic State widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	const FORCEINLINE FBmrManageableWidgetData& GetInCinematicStateWidgetData() const { return InCinematicStateWidgetData; }
 
 protected:
 	/** The data table with the cinematics to be played. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, DisplayName = "Cinematics Data Table", ShowOnlyInnerProperties))
-	TObjectPtr<const class UDataTable> CinematicsDataTableInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TObjectPtr<const class UDataTable> CinematicsDataTable = nullptr;
 
 	/** Data for the Main Menu widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected, DisplayName = "Main Menu Widget"))
-	FManageableWidgetData MainMenuWidgetDataInternal = FManageableWidgetData::Empty;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected))
+	FBmrManageableWidgetData MainMenuWidgetData = FBmrManageableWidgetData::Empty;
 
 	/** Data for the In Cinematic State widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected, DisplayName = "In Cinematic State Widget"))
-	FManageableWidgetData InCinematicStateWidgetDataInternal = FManageableWidgetData::Empty;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected))
+	FBmrManageableWidgetData InCinematicStateWidgetData = FBmrManageableWidgetData::Empty;
 
 	/*********************************************************************************************
 	 * Camera
 	 ********************************************************************************************* */
 public:
-	/** Returns the duration of transitioning between Main Menu spots.
-	 * @see UNMMDataAsset::CameraTransitionTimeInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE float GetCameraTransitionTime() const { return CameraTransitionTimeInternal; }
+	/** Returns the duration of transitioning between Main Menu spot. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	FORCEINLINE float GetCameraTransitionTime() const { return CameraTransitionTime; }
 
-	/** Returns the duration of blending on start and end Transition state: from Camera Spot to Rail and from Rail to Camera Spot.
-	 * @see UNMMDataAsset::CameraBlendTimeInternal */
-	UFUNCTION(BlueprintPure, Category = "C++")
-	FORCEINLINE float GetCameraBlendTime() const { return CameraBlendTimeInternal; }
+	/** Returns the duration of blending on start and end Transition state: from Camera Spot to Rail and from Rail to Camera Spot. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	FORCEINLINE float GetCameraBlendTime() const { return CameraBlendTime; }
 
 protected:
 	/** Duration of transitioning between Main Menu spots.
 	 * @warning It has to be greater than 0. To disable camera transition, player has to toggle 'Instant Character Switch' setting. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (BlueprintProtected, DisplayName = "Camera Transition Time", ShowOnlyInnerProperties, ClampMin = "0.01"))
-	float CameraTransitionTimeInternal = 1.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (BlueprintProtected, ShowOnlyInnerProperties, ClampMin = "0.01"))
+	float CameraTransitionTime = 1.f;
 
 	/** Duration of blending on start and end Transition state: from Camera Spot to Rail and from Rail to Camera Spot.
 	 * @warning it is used only when player has enabled 'Instant Character Switch' setting. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (BlueprintProtected, DisplayName = "Camera Blend Time", ShowOnlyInnerProperties, ClampMin = "0.0"))
-	float CameraBlendTimeInternal = 0.25f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (BlueprintProtected, ShowOnlyInnerProperties, ClampMin = "0.0"))
+	float CameraBlendTime = 0.25f;
 
 	/*********************************************************************************************
 	 * Input
 	 ********************************************************************************************* */
 public:
 	/** Returns first input context by given game state.
-	 * @see UNMMDataAsset::InputContextsInternal.*/
-	UFUNCTION(BlueprintPure, Category = "C++")
-	const class UMyInputMappingContext* GetInputContext(ENMMState MenuState) const;
+	 * @see UNMMDataAsset::InputContexts.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	const class UBmrInputMappingContext* GetInputContext(ENMMState MenuState) const;
 
 	/** Returns all input contexts.
-	 * @see UNMMDataAsset::InputContextsInternal.*/
-	void GetAllInputContexts(TArray<const class UMyInputMappingContext*>& OutInputContexts) const;
+	 * @see UNMMDataAsset::InputContexts.*/
+	void GetAllInputContexts(TArray<const class UBmrInputMappingContext*>& OutInputContexts) const;
 
-	/** Returns the time to hold the skip cinematic button to skip the cinematic.
-	 * @see UNMMDataAsset::SkipCinematicHoldTimeInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE float GetSkipCinematicHoldTime() const { return SkipCinematicHoldTimeInternal; }
+	/** Returns the time to hold the skip cinematic button to skip the cinematic. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	FORCEINLINE float GetSkipCinematicHoldTime() const { return SkipCinematicHoldTime; }
 
 protected:
 	/** List of input contexts to manage according their Main Menu States. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Input Contexts", ShowOnlyInnerProperties))
-	TMap<ENMMState, TObjectPtr<const class UMyInputMappingContext>> InputContextsInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TMap<ENMMState, TObjectPtr<const class UBmrInputMappingContext>> InputContexts;
 
 	/** The time to hold the skip cinematic button to skip the cinematic. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, DisplayName = "Skip Cinematic Hold Time", ShowOnlyInnerProperties))
-	float SkipCinematicHoldTimeInternal = 1.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	float SkipCinematicHoldTime = 1.f;
 
 	/*********************************************************************************************
 	 * Sounds
 	 ********************************************************************************************* */
 public:
-	/** Returns the sound of cinematics music.
-	 * @see UNMMDataAsset::CinematicsSoundClassInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClassInternal; }
+	/** Returns the sound of cinematics music. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClass; }
 
 	/** Returns the main menu music of specified level.
-	 * @see USoundsDataAsset::MainMenuMusicInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	class USoundBase* GetMainMenuMusic(ELevelType LevelType) const;
+	 * @see UBmrSoundsDataAsset::MainMenuMusic */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	class USoundBase* GetMainMenuMusic(EBmrLevelType LevelType) const;
 
 	/** Returns all main menu music.
-	 * @see USoundsDataAsset::MainMenuMusicInternal */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	 * @see UBmrSoundsDataAsset::MainMenuMusic */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	void GetAllMainMenuMusic(TArray<class USoundBase*>& OutMainMenuMusic) const;
 
 protected:
 	/** The sound of cinematics music. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, DisplayName = "Music Sound Class", ShowOnlyInnerProperties))
-	TObjectPtr<class USoundClass> CinematicsSoundClassInternal = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TObjectPtr<class USoundClass> CinematicsSoundClass = nullptr;
 
 	/** Contains all sounds of each level in the main menu. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, DisplayName = "Main Menu Music", ShowOnlyInnerProperties))
-	TMap<ELevelType, TObjectPtr<class USoundBase>> MainMenuMusicInternal;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TMap<EBmrLevelType, TObjectPtr<class USoundBase>> MainMenuMusic;
 };

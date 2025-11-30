@@ -3,8 +3,8 @@
 #include "GameFramework/BmrGameInstance.h"
 
 // Bomber
-#include "DataAssets/GameStateDataAsset.h"
-#include "Subsystems/WidgetsSubsystem.h"
+#include "DataAssets/BmrGameStateDataAsset.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
 
 // Steam
 #include "AdvancedSteamFriendsLibrary.h"
@@ -123,7 +123,7 @@ void UBmrGameInstance::TryJoinSession(const FBlueprintSessionResult& SessionToJo
 	// Unpossess the camera and hide widgets, so the player can see the loading screen
 	PlayerController->SetViewTargetWithBlend(nullptr);
 
-	if (UWidgetsSubsystem* WidgetsSubsystem = UWidgetsSubsystem::GetWidgetsSubsystem(PlayerController))
+	if (UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem(PlayerController))
 	{
 		WidgetsSubsystem->SetAllWidgetsVisibility(false);
 	}
@@ -132,7 +132,7 @@ void UBmrGameInstance::TryJoinSession(const FBlueprintSessionResult& SessionToJo
 // Called when server session is created successfully, e.g: when main level is opened
 void UBmrGameInstance::OnCreateSessionComplete(FName Name, bool bArg) const
 {
-	const UGameStateDataAsset& GameStateDataAsset = UGameStateDataAsset::Get();
+	const UBmrGameStateDataAsset& GameStateDataAsset = UBmrGameStateDataAsset::Get();
 	const FString CurrentLevelName = GetNameSafe(GetWorld());
 	if (CurrentLevelName.Contains(GameStateDataAsset.GetStartupLevel().GetAssetName()))
 	{

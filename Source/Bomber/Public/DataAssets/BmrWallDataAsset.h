@@ -2,22 +2,22 @@
 
 #pragma once
 
-#include "DataAssets/LevelActorDataAsset.h"
+#include "DataAssets/BmrLevelActorDataAsset.h"
 
-#include "WallDataAsset.generated.h"
+#include "BmrWallDataAsset.generated.h"
 
 /**
  * Describes common data for all walls.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UWallDataAsset final : public ULevelActorDataAsset
+class BOMBER_API UBmrWallDataAsset final : public UBmrLevelActorDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	/** Default constructor. */
-	UWallDataAsset();
+	UBmrWallDataAsset();
 
 	/** Returns the wall data asset. */
-	static const UWallDataAsset& Get();
+	static const UBmrWallDataAsset& Get();
 };

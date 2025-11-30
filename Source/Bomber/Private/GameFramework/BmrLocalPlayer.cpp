@@ -3,7 +3,7 @@
 #include "GameFramework/BmrLocalPlayer.h"
 
 // Bomber
-#include "Controllers/MyPlayerController.h"
+#include "Controllers/BmrPlayerController.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrLocalPlayer)
 
@@ -11,5 +11,5 @@
 UBmrLocalPlayer::UBmrLocalPlayer()
 {
 	// Ensures the correct PlayerController is spawned locally when the client joins a session
-	PendingLevelPlayerControllerClass = AMyPlayerController::StaticClass();
+	PendingLevelPlayerControllerClass = ABmrPlayerController::StaticClass();
 }

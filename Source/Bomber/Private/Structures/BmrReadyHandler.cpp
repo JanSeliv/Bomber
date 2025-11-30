@@ -1,80 +1,80 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Structures/OnCharactersReadyHandler.h"
+#include "Structures/BmrReadyHandler.h"
 
 // Bomber
-#include "GameFramework/MyPlayerState.h"
-#include "LevelActors/PlayerCharacter.h"
+#include "Actors/BmrPawn.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
 
-// Should be called when character is possessed
-void FOnCharactersReadyHandler::Broadcast_OnCharacterPossessed(APlayerCharacter& Character)
+// Should be called when Pawn is possessed
+void FBmrReadyHandler::Broadcast_OnPawnPossessed(ABmrPawn& Pawn)
 {
 	if (UUtilsLibrary::HasWorldBegunPlay()
-	    && !IsCharacterReady(&Character)) // Skip if already ready
+	    && !IsReady(&Pawn)) // Skip if already ready
 	{
-		FindOrAdd(Character).bIsPossessed = true;
-		TryBroadcastOnReady_Internal(Character);
+		FindOrAdd(Pawn).bIsPossessed = true;
+		TryBroadcastOnReady_Internal(Pawn);
 	}
 }
 
 // Should be called when player state is replicated
-void FOnCharactersReadyHandler::Broadcast_OnPlayerStateInit(const AMyPlayerState& PlayerState)
+void FBmrReadyHandler::Broadcast_OnPlayerStateInit(const ABmrPlayerState& PlayerState)
 {
 	if (!UUtilsLibrary::HasWorldBegunPlay())
 	{
 		return;
 	}
 
-	APlayerCharacter* Character = PlayerState.GetPawn<APlayerCharacter>();
-	if (ensureAlwaysMsgf(Character, TEXT("ERROR: [%i] %hs:\n'Character' is not assigned for next player state: %s"), __LINE__, __FUNCTION__, *PlayerState.GetName())
-	    && !IsCharacterReady(Character)) // Skip if already ready
+	ABmrPawn* Pawn = PlayerState.GetPawn<ABmrPawn>();
+	if (ensureAlwaysMsgf(Pawn, TEXT("ERROR: [%i] %hs:\n'Pawn' is not assigned for next player state: %s"), __LINE__, __FUNCTION__, *PlayerState.GetName())
+	    && !IsReady(Pawn)) // Skip if already ready
 	{
-		FindOrAdd(*Character).PlayerState = &PlayerState;
-		TryBroadcastOnReady_Internal(*Character);
+		FindOrAdd(*Pawn).PlayerState = &PlayerState;
+		TryBroadcastOnReady_Internal(*Pawn);
 	}
 }
 
-// Should be called when character is added to the Generated Map
-void FOnCharactersReadyHandler::Broadcast_OnCharacterAdded(APlayerCharacter& Character)
+// Should be called when Pawn is added to the Generated Map
+void FBmrReadyHandler::Broadcast_OnPawnAdded(ABmrPawn& Pawn)
 {
 	if (UUtilsLibrary::HasWorldBegunPlay()
-	    && !IsCharacterReady(&Character)) // Skip if already ready
+	    && !IsReady(&Pawn)) // Skip if already ready
 	{
-		FindOrAdd(Character).bIsAddedOnGeneratedMap = true;
-		TryBroadcastOnReady_Internal(Character);
+		FindOrAdd(Pawn).bIsAddedOnGeneratedMap = true;
+		TryBroadcastOnReady_Internal(Pawn);
 	}
 }
 
-// Returns true if the character is ready at this moment
-bool FOnCharactersReadyHandler::IsCharacterReady(const APlayerCharacter* Character) const
+// Returns true if the pawn is ready at this moment
+bool FBmrReadyHandler::IsReady(const ABmrPawn* Pawn) const
 {
-	if (!Character)
+	if (!Pawn)
 	{
 		return false;
 	}
 
-	const FOnCharacterReadyData* FoundHandle = OnCharacterReadyHandles.FindByPredicate([&Character](const FOnCharacterReadyData& It)
+	const FOnReadyData* FoundHandle = OnReadyHandles.FindByPredicate([&Pawn](const FOnReadyData& It)
 	{
-		return It.Character == Character;
+		return It.Pawn == Pawn;
 	});
 
 	return FoundHandle
-	       && FoundHandle->Character.IsValid()
+	       && FoundHandle->Pawn.IsValid()
 	       && FoundHandle->PlayerState.IsValid()
 	       && FoundHandle->bIsAddedOnGeneratedMap
-	       && IsCharacterPossessed(*FoundHandle);
+	       && IsPawnPossessed(*FoundHandle);
 }
 
 // Returns true if the player state is ready at this moment
-bool FOnCharactersReadyHandler::IsCharacterReady(const AMyPlayerState* PlayerState) const
+bool FBmrReadyHandler::IsReady(const ABmrPlayerState* PlayerState) const
 {
-	return PlayerState && IsCharacterReady(PlayerState->GetPawn<APlayerCharacter>());
+	return PlayerState && IsReady(PlayerState->GetPawn<ABmrPawn>());
 }
 
 // Returns true if player controller is possessed and ready at this moment
-bool FOnCharactersReadyHandler::IsCharacterPossessed(const FOnCharacterReadyData& FoundHandle)
+bool FBmrReadyHandler::IsPawnPossessed(const FOnReadyData& FoundHandle)
 {
 	/*
 	| Row | Entity  | Details                         | Authority    | Possession   | Locally Controlled | Result |
@@ -92,9 +92,9 @@ bool FOnCharactersReadyHandler::IsCharacterPossessed(const FOnCharacterReadyData
 		return true;
 	}
 
-	const bool bHasAuthority = FoundHandle.Character->HasAuthority();
+	const bool bHasAuthority = FoundHandle.Pawn->HasAuthority();
 	const bool bIsBot = FoundHandle.PlayerState->IsABot();
-	const bool bIsLocallyControlled = FoundHandle.Character->IsLocallyControlled();
+	const bool bIsLocallyControlled = FoundHandle.Pawn->IsLocallyControlled();
 
 	if (bHasAuthority)
 	{
@@ -123,55 +123,55 @@ bool FOnCharactersReadyHandler::IsCharacterPossessed(const FOnCharacterReadyData
 		return true;
 	}
 
-	return ensureMsgf(false, TEXT("ASSERT: [%i] %hs:\nUnhandled condition!\nCharacter: '%s' | PlayerState: '%s' | bIsPossessed: %s | bIsBot: %s | bIsLocallyControlled: %s | HasAuthority: %s | ID: %i"),
-	    __LINE__, __FUNCTION__, *GetNameSafe(FoundHandle.Character.Get()), *GetNameSafe(FoundHandle.PlayerState.Get()), FoundHandle.bIsPossessed ? TEXT("true") : TEXT("false"), bIsBot ? TEXT("true") : TEXT("false"), bIsLocallyControlled ? TEXT("true") : TEXT("false"), FoundHandle.Character->HasAuthority() ? TEXT("true") : TEXT("false"), FoundHandle.PlayerState->GetPlayerId());
+	return ensureMsgf(false, TEXT("ASSERT: [%i] %hs:\nUnhandled condition!\nPawn: '%s' | PlayerState: '%s' | bIsPossessed: %s | bIsBot: %s | bIsLocallyControlled: %s | HasAuthority: %s | ID: %i"),
+	    __LINE__, __FUNCTION__, *GetNameSafe(FoundHandle.Pawn.Get()), *GetNameSafe(FoundHandle.PlayerState.Get()), FoundHandle.bIsPossessed ? TEXT("true") : TEXT("false"), bIsBot ? TEXT("true") : TEXT("false"), bIsLocallyControlled ? TEXT("true") : TEXT("false"), FoundHandle.Pawn->HasAuthority() ? TEXT("true") : TEXT("false"), FoundHandle.PlayerState->GetPlayerId());
 }
 
-// Broadcasts OnCharacterReady event if all conditions are met
-void FOnCharactersReadyHandler::TryBroadcastOnReady_Internal(APlayerCharacter& Character)
+// Broadcasts OnPawnReady event if all conditions are met
+void FBmrReadyHandler::TryBroadcastOnReady_Internal(ABmrPawn& Pawn)
 {
-	if (!IsCharacterReady(&Character))
+	if (!IsReady(&Pawn))
 	{
 		// Not ready yet
 		return;
 	}
 
-	const UGlobalEventsSubsystem& EventsSubsystem = UGlobalEventsSubsystem::Get();
-	AMyPlayerState* PlayerState = CastChecked<AMyPlayerState>(Character.GetPlayerState());
+	const UBmrGlobalEventsSubsystem& EventsSubsystem = UBmrGlobalEventsSubsystem::Get();
+	ABmrPlayerState* PlayerState = CastChecked<ABmrPlayerState>(Pawn.GetPlayerState());
 
-	const int32 CharacterID = PlayerState->GetPlayerId();
+	const int32 PlayerId = PlayerState->GetPlayerId();
 	const bool bIsLocalPlayer = PlayerState->IsPlayerStateLocallyControlled();
 
-	EventsSubsystem.OnCharacterReadyNative.Broadcast(&Character, CharacterID);
-	EventsSubsystem.BP_OnCharacterReady.Broadcast(&Character, CharacterID);
+	EventsSubsystem.OnPawnReadyNative.Broadcast(&Pawn, PlayerId);
+	EventsSubsystem.BP_OnPawnReady.Broadcast(&Pawn, PlayerId);
 
 	if (bIsLocalPlayer)
 	{
-		EventsSubsystem.OnLocalCharacterReadyNative.Broadcast(&Character, CharacterID);
-		EventsSubsystem.BP_OnLocalCharacterReady.Broadcast(&Character, CharacterID);
+		EventsSubsystem.OnLocalPawnReadyNative.Broadcast(&Pawn, PlayerId);
+		EventsSubsystem.BP_OnLocalPawnReady.Broadcast(&Pawn, PlayerId);
 	}
 
-	EventsSubsystem.OnPlayerStateReadyNative.Broadcast(PlayerState, CharacterID);
-	EventsSubsystem.BP_OnPlayerStateReady.Broadcast(PlayerState, CharacterID);
+	EventsSubsystem.OnPlayerStateReadyNative.Broadcast(PlayerState, PlayerId);
+	EventsSubsystem.BP_OnPlayerStateReady.Broadcast(PlayerState, PlayerId);
 
 	if (bIsLocalPlayer)
 	{
-		EventsSubsystem.OnLocalPlayerStateReadyNative.Broadcast(PlayerState, CharacterID);
-		EventsSubsystem.BP_OnLocalPlayerStateReady.Broadcast(PlayerState, CharacterID);
+		EventsSubsystem.OnLocalPlayerStateReadyNative.Broadcast(PlayerState, PlayerId);
+		EventsSubsystem.BP_OnLocalPlayerStateReady.Broadcast(PlayerState, PlayerId);
 	}
 }
 
 // Perform cleanup
-void FOnCharactersReadyHandler::Reset()
+void FBmrReadyHandler::Reset()
 {
-	OnCharacterReadyHandles.Empty();
+	OnReadyHandles.Empty();
 }
 
-FOnCharactersReadyHandler::FOnCharacterReadyData& FOnCharactersReadyHandler::FindOrAdd(APlayerCharacter& Character)
+FBmrReadyHandler::FOnReadyData& FBmrReadyHandler::FindOrAdd(ABmrPawn& Pawn)
 {
-	FOnCharacterReadyData* FoundHandle = OnCharacterReadyHandles.FindByPredicate([&Character](const FOnCharacterReadyData& It)
+	FOnReadyData* FoundHandle = OnReadyHandles.FindByPredicate([&Pawn](const FOnReadyData& It)
 	{
-		return It.Character == &Character;
+		return It.Pawn == &Pawn;
 	});
 
 	if (FoundHandle)
@@ -179,7 +179,7 @@ FOnCharactersReadyHandler::FOnCharacterReadyData& FOnCharactersReadyHandler::Fin
 		return *FoundHandle;
 	}
 
-	FOnCharacterReadyData NewHandle;
-	NewHandle.Character = &Character;
-	return OnCharacterReadyHandles.Emplace_GetRef(MoveTemp(NewHandle));
+	FOnReadyData NewHandle;
+	NewHandle.Pawn = &Pawn;
+	return OnReadyHandles.Emplace_GetRef(MoveTemp(NewHandle));
 }

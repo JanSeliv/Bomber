@@ -1,36 +1,36 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "UtilityLibraries/MyTagUtilsLibrary.h"
+#include "UtilityLibraries/BmrTagUtilsLibrary.h"
 
 // Bomber
 #include "Structures/BmrPowerupTag.h"
-#include "Structures/PlayerTag.h"
+#include "Structures/BmrPlayerTag.h"
 
 // UE
 #include "GameplayTagContainer.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(MyTagUtilsLibrary)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrTagUtilsLibrary)
 
 // Converts a PlayerTag to a GameplayTag
-FPlayerTag UMyTagUtilsLibrary::Conv_GameplayTagToPlayerTag(FGameplayTag InGameplayTag)
+FBmrPlayerTag UBmrTagUtilsLibrary::Conv_GameplayTagToPlayerTag(FGameplayTag InGameplayTag)
 {
-	return FPlayerTag(InGameplayTag);
+	return FBmrPlayerTag(InGameplayTag);
 }
 
 // Converts a GameplayTag to a PlayerTag
-FGameplayTag UMyTagUtilsLibrary::Conv_PlayerTagToGameplayTag(FPlayerTag InPlayerTag)
+FGameplayTag UBmrTagUtilsLibrary::Conv_PlayerTagToGameplayTag(FBmrPlayerTag InPlayerTag)
 {
 	return InPlayerTag;
 }
 
 // Converts a PowerupTag to a GameplayTag
-FBmrPowerupTag UMyTagUtilsLibrary::Conv_GameplayTagToPowerupTag(FGameplayTag InGameplayTag)
+FBmrPowerupTag UBmrTagUtilsLibrary::Conv_GameplayTagToPowerupTag(FGameplayTag InGameplayTag)
 {
 	return FBmrPowerupTag(InGameplayTag);
 }
 
 // Converts a GameplayTag to a PowerupTag
-FGameplayTag UMyTagUtilsLibrary::Conv_PowerupTagToGameplayTag(FBmrPowerupTag InPowerupTag)
+FGameplayTag UBmrTagUtilsLibrary::Conv_PowerupTagToGameplayTag(FBmrPowerupTag InPowerupTag)
 {
 	return InPowerupTag;
 }

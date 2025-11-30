@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "UI/Widgets/HUDWidget.h"
+#include "UI/Widgets/BmrHUDWidget.h"
 
 // Bomber
-#include "GameFramework/MyPlayerState.h"
-#include "Subsystems/GlobalEventsSubsystem.h"
-#include "UtilityLibraries/MyBlueprintFunctionLibrary.h"
+#include "GameFramework/BmrPlayerState.h"
+#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Animation/WidgetAnimation.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(HUDWidget)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrHUDWidget)
 
 //  Called after the underlying slate widget is constructed
-void UHUDWidget::NativeConstruct()
+void UBmrHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
@@ -25,7 +25,7 @@ void UHUDWidget::NativeConstruct()
  ********************************************************************************************* */
 
 // Called when the local player state is initialized and its assigned character is ready
-void UHUDWidget::OnLocalPlayerStateReady_Implementation(class AMyPlayerState* PlayerState, int32 CharacterID)
+void UBmrHUDWidget::OnLocalPlayerStateReady_Implementation(class ABmrPlayerState* PlayerState, int32 PlayerId)
 {
 	// Listen the ending the current game to play the End-Game sound on
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
@@ -33,9 +33,9 @@ void UHUDWidget::OnLocalPlayerStateReady_Implementation(class AMyPlayerState* Pl
 }
 
 // Is called on end-game result change
-void UHUDWidget::OnEndGameStateChanged_Implementation(EEndGameState EndGameState)
+void UBmrHUDWidget::OnEndGameStateChanged_Implementation(EBmrEndGameState EndGameState)
 {
-	if (EndGameState != EEndGameState::None)
+	if (EndGameState != EBmrEndGameState::None)
 	{
 		PlayAnimation(ResultAnimation);
 	}

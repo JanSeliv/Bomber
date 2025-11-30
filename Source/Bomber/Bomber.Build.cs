@@ -17,15 +17,15 @@ public class Bomber : ModuleRules
 		    {
                 "Core" // Core
                 , "UMG" // UUserWidget creation
-                , "EnhancedInput" // Created UMyInputAction, UMyInputMappingContext
-                , "DeveloperSettings" // Created UDataAssetsContainer
+                , "EnhancedInput" // Created UBmrInputAction, UBmrInputMappingContext
+                , "DeveloperSettings" // Created UBmrDataAssetsContainer
                 , "GameFeatures" // Inherited IGameFeatureStateChangeObserver
                 , "GameplayAbilities", "GameplayTags", "GameplayTasks" // Gameplay Ability System (GAS)
                 , "Mover" // Created UBmrMoverComponent, UBmrMoverWalkingMode
                 //My modules
-                , "FunctionPicker" // Created properties in UMyInputAction
-                , "MetaCheatManager" // Created UMyCheatManager
-                , "PoolManager" // Created property in FMapComponentSpec
+                , "FunctionPicker" // Created properties in UBmrInputAction
+                , "MetaCheatManager" // Created UBmrCheatManager
+                , "PoolManager" // Created property in FBmrMapComponentSpec
                 , "MyUtils" // Inherited from Base classes
 		    }
 		);
@@ -56,7 +56,7 @@ public class Bomber : ModuleRules
 				{
 					"UnrealEd" // FEditorDelegates
 					//My modules
-					, "BomberEditor" // UMyUnrealEdEngine
+					, "BomberEditor" // UBmrUnrealEdEngine
 					, "MyEditorUtils" // FEditorUtilsLibrary
 				}
 			);

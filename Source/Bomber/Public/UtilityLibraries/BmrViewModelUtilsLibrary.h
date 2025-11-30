@@ -4,10 +4,10 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 
-#include "MyViewModelUtilsLibrary.generated.h"
+#include "BmrViewModelUtilsLibrary.generated.h"
 
-enum class EEndGameState : uint8;
-enum class ECurrentGameState : uint8;
+enum class EBmrEndGameState : uint8;
+enum class EBmrCurrentGameState : uint8;
 enum class ESlateVisibility : uint8;
 
 /**
@@ -15,7 +15,7 @@ enum class ESlateVisibility : uint8;
  * Is used a lot by the UI View Models as 'Conversion Functions'.
  */
 UCLASS()
-class BOMBER_API UMyViewModelUtilsLibrary : public UBlueprintFunctionLibrary
+class BOMBER_API UBmrViewModelUtilsLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -25,18 +25,18 @@ public:
 	 * @param GameStateProperty Provide the current game state to check. Enum is const-ref to require in blueprints select a property, but not default value.
 	 * @param ByGameStates Select one or multiple game states to check.
 	 * @return 'Visible' if the 'CurrentGameState' is in the 'GameStates', otherwise 'Collapsed'. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintAutocast))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (BlueprintAutocast))
 	static ESlateVisibility GetVisibilityByGameState(
-	    const ECurrentGameState& GameStateProperty, /*const ref to hide default*/
-	    UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECurrentGameState")) int32 ByGameStates);
+	    const EBmrCurrentGameState& GameStateProperty, /*const ref to hide default*/
+	    UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EBmrCurrentGameState")) int32 ByGameStates);
 
 	/** Checks if the current game state matches the specified states
 	 * Used to determine whether a widget should be active or inactive
 	 * @param GameStateProperty Provide the current game state to check. Enum is const-ref to require in blueprints select a property, but not default value.
 	 * @param ByGameStates Select one or multiple game states to check.
 	 * @return True if the 'CurrentGameState' is in the 'GameStates', otherwise false */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (BlueprintAutocast))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (BlueprintAutocast))
 	static bool IsGameStateMatching(
-	    const ECurrentGameState& GameStateProperty, /*const ref to hide default*/
-	    UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.ECurrentGameState")) int32 ByGameStates);
+	    const EBmrCurrentGameState& GameStateProperty, /*const ref to hide default*/
+	    UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EBmrCurrentGameState")) int32 ByGameStates);
 };

@@ -6,19 +6,19 @@
 #include "UObject/WeakObjectPtr.h"
 
 /*********************************************************************************************
- * The FOnCharactersReadyHandler broadcasts the readiness of player characters in multiplayer
- * settings once their possession, player state initialization, and ID assignment are complete.
+ * The FBmrReadyHandler broadcasts the readiness of pawns and player states in multiplayer
+ * once their possession, player state initialization, and ID assignment are complete.
  * These components can be initialized in any order, and the Handler efficiently tracks and
  * synchronizes their status to ensure accurate and timely readiness notifications for gameplay.
  ********************************************************************************************* */
 
-class APlayerCharacter;
-class AMyPlayerState;
+class ABmrPawn;
+class ABmrPlayerState;
 
 /**
  * Encapsulates the managements of 'On Player Ready' delegates from 'GlobalEventsSubsystem'.
  */
-struct BOMBER_API FOnCharactersReadyHandler
+struct BOMBER_API FBmrReadyHandler
 {
 public:
 	/*********************************************************************************************
@@ -27,24 +27,24 @@ public:
 	 * Can be called in any order.
 	 ********************************************************************************************* */
 public:
-	/** Should be called when character is possessed. */
-	void Broadcast_OnCharacterPossessed(APlayerCharacter& Character);
+	/** Should be called when pawn is possessed. */
+	void Broadcast_OnPawnPossessed(ABmrPawn& Pawn);
 
 	/** Should be called when player state is replicated. */
-	void Broadcast_OnPlayerStateInit(const AMyPlayerState& PlayerState);
+	void Broadcast_OnPlayerStateInit(const ABmrPlayerState& PlayerState);
 
-	/** Should be called when character is added to the Generated Map. */
-	void Broadcast_OnCharacterAdded(APlayerCharacter& Character);
+	/** Should be called when pawn is added to the Generated Map. */
+	void Broadcast_OnPawnAdded(ABmrPawn& Pawn);
 
 	/*********************************************************************************************
 	 * Public Helpers
 	 ********************************************************************************************* */
 public:
-	/** Returns true if the character is ready at this moment. */
-	bool IsCharacterReady(const APlayerCharacter* Character) const;
+	/** Returns true if the pawn is ready at this moment. */
+	bool IsReady(const ABmrPawn* Pawn) const;
 
 	/** Returns true if the player state is ready at this moment. */
-	bool IsCharacterReady(const AMyPlayerState* PlayerState) const;
+	bool IsReady(const ABmrPlayerState* PlayerState) const;
 
 	/** Perform cleanup. */
 	void Reset();
@@ -53,24 +53,24 @@ public:
 	 * Internal handling
 	 ********************************************************************************************* */
 private:
-	/** Internal data struct to handle character ready event. */
-	struct FOnCharacterReadyData
+	/** Internal data struct to handle pawn ready event. */
+	struct FOnReadyData
 	{
-		TWeakObjectPtr<APlayerCharacter> Character = nullptr;
-		TWeakObjectPtr<const AMyPlayerState> PlayerState = nullptr;
+		TWeakObjectPtr<ABmrPawn> Pawn = nullptr;
+		TWeakObjectPtr<const ABmrPlayerState> PlayerState = nullptr;
 		bool bIsPossessed = false;
 		bool bIsAddedOnGeneratedMap = false;
 	};
 
-	/** All registered character ready handles. */
-	TArray<FOnCharacterReadyData> OnCharacterReadyHandles;
+	/** All registered pawn ready handles. */
+	TArray<FOnReadyData> OnReadyHandles;
 
-	FOnCharacterReadyData& FindOrAdd(APlayerCharacter& Character);
+	FOnReadyData& FindOrAdd(ABmrPawn& Pawn);
 
 	/** Returns true if player controller is possessed and ready at this moment.*
 	 * It does not check any other conditions, only possession. */
-	static bool IsCharacterPossessed(const FOnCharacterReadyData& FoundHandle);
+	static bool IsPawnPossessed(const FOnReadyData& FoundHandle);
 
 	/** Is internal method, shouldn't be called directly, instead Broadcast_ methods should be used. */
-	void TryBroadcastOnReady_Internal(APlayerCharacter& Character);
+	void TryBroadcastOnReady_Internal(ABmrPawn& Pawn);
 };

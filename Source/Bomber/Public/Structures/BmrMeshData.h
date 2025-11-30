@@ -19,11 +19,11 @@ struct BOMBER_API FBmrMeshData
 	FBmrMeshData() = default;
 
 	/** Constructor that initializes the data directly. */
-	FBmrMeshData(const class ULevelActorRow* InRow, int32 InSkinIndex = 0);
+	FBmrMeshData(const class UBmrLevelActorRow* InRow, int32 InSkinIndex = 0);
 
 	/** The row that is used to visualize the bomber character. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
-	TObjectPtr<const class ULevelActorRow> Row = nullptr;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "[Bomber]")
+	TObjectPtr<const class UBmrLevelActorRow> Row = nullptr;
 
 	/** Returns true is data is valid. */
 	FORCEINLINE bool IsValid() const { return Row != nullptr; }
@@ -36,7 +36,7 @@ struct BOMBER_API FBmrMeshData
 	 ********************************************************************************************* */
 public:
 	/** The index of the texture is currently set, since this data represents the row, where multiple skins can be stored. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
 	int32 SkinIndex = 0;
 
 	/** Bitmask for available skins (up to 32 skins).
@@ -45,6 +45,6 @@ public:
 	 * 0001 -> Only first skin is unlocked
 	 * 0111 -> First three skins are unlocked
 	 * 1111 -> All skins are unlocked */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "C++")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "[Bomber]")
 	int32 SkinAvailabilityMask = TNumericLimits<int32>::Max();
 };

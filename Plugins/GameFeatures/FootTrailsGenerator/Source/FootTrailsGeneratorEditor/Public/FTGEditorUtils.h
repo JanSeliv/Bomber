@@ -16,6 +16,6 @@ class FOOTTRAILSGENERATOREDITOR_API UFTGEditorUtils : public UBlueprintFunctionL
 
 public:
 	/** Tries to obtain the blueprint class of the Foot Trails Generator component from MGF data asset, where it's expected to be set. */
-	UFUNCTION(BlueprintPure, Category = "C++", meta = (DevelopmentOnly))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[FootTrailsGenerator]", meta = (DevelopmentOnly))
 	static TSubclassOf<class UFTGComponent> GetFootTrailsComponentClass();
 };

@@ -4,29 +4,29 @@
 
 #include "GameFramework/Actor.h"
 
-#include "BoxActor.generated.h"
+#include "BmrBoxActor.generated.h"
 
 /**
  * Boxes on destruction with some chances spawns an item.
- * @see Access its data with UBoxDataAsset (Content/Bomber/DataAssets/DA_Box).
+ * @see Access its data with UBmrBoxDataAsset (Content/Bomber/DataAssets/DA_Box).
  */
 UCLASS()
-class BOMBER_API ABoxActor final : public AActor
+class BOMBER_API ABmrBoxActor final : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	/** Sets default values for this actor's properties */
-	ABoxActor();
+	ABmrBoxActor();
 
 	/** Spawn item with a chance. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
 	void TrySpawnItem();
 
 protected:
 	/** The MapComponent manages this actor on the Generated Map */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C++", meta = (BlueprintProtected, DisplayName = "Map Component"))
-	TObjectPtr<class UMapComponent> MapComponentInternal = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UBmrMapComponent> MapComponent = nullptr;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -41,10 +41,10 @@ protected:
 protected:
 	/** Called when this level actor is reconstructed or added on the Generated Map.
 	 * Is used by Level Actors instead of the BeginPlay(). */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnAddedToLevel(UMapComponent* MapComponent);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnAddedToLevel(UBmrMapComponent* InMapComponent);
 
 	/** Called when this level actor is destroyed on the Generated Map. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
-	void OnPostRemovedFromLevel(UMapComponent* MapComponent, UObject* DestroyCauser);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPostRemovedFromLevel(UBmrMapComponent* InMapComponent, UObject* DestroyCauser);
 };

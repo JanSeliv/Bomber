@@ -21,7 +21,7 @@ public:
 	virtual UWorld* GetWorld() const override;
 
 	/** If false, the View Model will not be constructed. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = "C++")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category = "C++")
 	bool CanConstructViewModel() const;
 	virtual bool CanConstructViewModel_Implementation() const;
 
