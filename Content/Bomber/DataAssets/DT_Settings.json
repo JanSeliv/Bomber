@@ -101,7 +101,7 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
 					"FunctionName": "GetSettingsWidget"
 				},
 				"Setter":
@@ -279,17 +279,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "SetLanguageByIndex"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "GetLanguageIndex"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"CAD098984DE1C4FA4FCEF188053EB0B8\", \"Language\")",
@@ -331,7 +331,7 @@
 				},
 				"GetMembers":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "GetTextLanguages"
 				},
 				"Members": [],
@@ -368,17 +368,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.GameDifficultyManagerComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultyManagerComponent'",
 					"FunctionName": "GetGameDifficultyManager"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.GameDifficultyManagerComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultyManagerComponent'",
 					"FunctionName": "SetDifficultyLevel"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.GameDifficultyManagerComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultyManagerComponent'",
 					"FunctionName": "GetDifficultyLevel"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"17E689074C021878363191A8850A44C3\", \"Difficulty\")",
@@ -462,17 +462,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
 					"FunctionName": "GetLocalPlayerState"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrPlayerState'",
 					"FunctionName": "SetPendingPlayerName"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyPlayerState'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrPlayerState'",
 					"FunctionName": "GetPendingPlayerName"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"0A4D44494F98A414FFD6F399B8C3DAFE\", \"Player Name\")",
@@ -551,17 +551,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
 					"FunctionName": "GetLevelCamera"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyCameraComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrCameraComponent'",
 					"FunctionName": "SetCameraLockedOnCenter"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyCameraComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrCameraComponent'",
 					"FunctionName": "IsCameraLockedOnCenter"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"2214E63746C2245B5A145EB3F845C43F\", \"Camera Lock\")",
@@ -818,8 +818,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
@@ -907,17 +907,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "SetFullscreenEnabled"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "IsFullscreenEnabled"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"30E1B9914168CFDFD022ACAAF72408A2\", \"Fullscreen\")",
@@ -1007,17 +1007,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "SetResolutionByIndex"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "GetResolutionIndex"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"CDB22C8D449DFC08EA86DC8127FB526E\", \"Screen Resolution\")",
@@ -1070,7 +1070,7 @@
 				},
 				"GetMembers":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "GetTextResolutions"
 				},
 				"Members": [],
@@ -1107,17 +1107,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "SetFPSLockByIndex"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyGameUserSettings'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "GetFPSLockIndex"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"830704614CB4A9294A1192AC105A706A\", \"Framerate Lock\")",
@@ -1204,17 +1204,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.WidgetsSubsystem'",
-					"FunctionName": "GetWidgetsSubsystem"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.WidgetsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "SetFPSCounterEnabled"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.WidgetsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameUserSettings'",
 					"FunctionName": "IsFPSCounterEnabled"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"E0880BDD4241E60FB2A3008CDB5CCA63\", \"Show FPS\")",
@@ -1382,17 +1382,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "SetMasterVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "GetMasterVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"3FC144E945D22BA8DB903BB7FBD1AE1E\", \"Master Volume\")",
@@ -1471,17 +1471,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "SetMusicVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "GetMusicVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"FDDC03E84D349EAC5743FEB1C9E6B87D\", \"Music Volume\")",
@@ -1560,17 +1560,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "GetSoundsSubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "SetSFXVolume"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.SoundsSubsystem'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrSoundsSubsystem'",
 					"FunctionName": "GetSFXVolume"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"DC1E69F1449E9C4CD8B1D58CFCBB7676\", \"Sound Effects Volume\")",
@@ -1738,8 +1738,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
@@ -1863,8 +1863,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
@@ -1969,8 +1969,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
@@ -2075,8 +2075,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
@@ -2181,8 +2181,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
@@ -2287,8 +2287,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
@@ -2393,8 +2393,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
@@ -2499,8 +2499,8 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.MyBlueprintFunctionLibrary'",
-					"FunctionName": "GetMyGameUserSettings"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrBlueprintFunctionLibrary'",
+					"FunctionName": "GetGameUserSettings"
 				},
 				"Setter":
 				{
