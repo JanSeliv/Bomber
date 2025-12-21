@@ -139,7 +139,7 @@ public:
 	const FORCEINLINE T* GetMeshRow() const { return Cast<T>(GetMeshRow()); }
 
 	/** Applies given mesh on owner actor, or resets the mesh if null is passed.
-	 * Is useful for rows that have more than one mesh per row, like items.
+	 * Is useful for rows that have more than one mesh per row, like powerups.
 	 * @param NewMesh - the mesh to be set on the owner, might be null to reset the mesh, but if provided, then it's required to match with any row from the Data Asset. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetLocalMesh(class UStreamableRenderAsset* NewMesh);

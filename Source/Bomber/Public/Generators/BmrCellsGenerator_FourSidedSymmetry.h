@@ -41,7 +41,7 @@ struct FBmrGeneratorPathfindParams
 /**
  * Creates a random but fair map by generating one-quarter of the level
  * and then mirroring it to create a perfectly symmetrical battlefield.
- * It guarantees that paths exist between all players, boxes and to any dragged items.
+ * It guarantees that paths exist between all players, boxes and to any dragged powerups.
  * Example Layout (P=Player, █=Wall, □=Box):
  * P . □ █ █ □ . P
  * . . □ . . □ . .
@@ -58,7 +58,7 @@ class BOMBER_API UBmrCellsGenerator_FourSidedSymmetry : public UBmrCellsGenerato
 	GENERATED_BODY()
 
 protected:
-	/** If enabled, displays the calculated core path for connecting dragged items. */
+	/** If enabled, displays the calculated core path for connecting dragged powerups. */
 	UPROPERTY(EditDefaultsOnly)
 	bool bDisplayPrimaryPath = false;
 

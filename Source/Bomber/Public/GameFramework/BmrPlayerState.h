@@ -54,7 +54,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "[Bomber]", meta = (BlueprintProtected))
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent = nullptr;
 
-	/** Attribute set for powerup-related attributes (items pick-up, character stats, etc.).
+	/** Attribute set for powerup-related attributes (powerups pick-up, character stats, etc.).
 	 * For read access, can be obtained with UBmrPowerupsAttributeSet::GetPowerupsAttributeSet(Owner) method.
 	 * For write access, apply gameplay effects. */
 	UPROPERTY(Transient)

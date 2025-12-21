@@ -60,7 +60,7 @@ public:
 	 ********************************************************************************************* */
 public:
 	/** Best suits for blueprints to get the data asset by its class since converts the result to the specified class. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DeterminesOutputType = "DataAssetClass", BlueprintAutocast, Keywords = "Bomb,Box,Item,Wall,Pawn,Player,Character"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DeterminesOutputType = "DataAssetClass", BlueprintAutocast, Keywords = "Bomb,Box,Powerup,Wall,Pawn,Player,Character"))
 	static const UBmrLevelActorDataAsset* GetLevelActorDataAsset(
 	    UPARAM(meta = (AllowAbstract = "false")) TSubclassOf<UBmrLevelActorDataAsset> DataAssetClass);
 

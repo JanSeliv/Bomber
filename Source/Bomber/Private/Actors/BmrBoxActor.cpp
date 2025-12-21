@@ -37,8 +37,8 @@ ABmrBoxActor::ABmrBoxActor()
 	MapComponent = CreateDefaultSubobject<UBmrMapComponent>(TEXT("MapComponent"));
 }
 
-// Spawn item with a chance
-void ABmrBoxActor::TrySpawnItem()
+// Spawn powerup with a chance
+void ABmrBoxActor::TrySpawnPowerup()
 {
 	if (!HasAuthority()
 	    || ABmrGameState::GetCurrentGameState() != EBmrCurrentGameState::InGame)
@@ -46,14 +46,13 @@ void ABmrBoxActor::TrySpawnItem()
 		return;
 	}
 
-	// Spawn item with the chance
 	constexpr int32 MaxChance = 100;
 	const int32 CurrentChance = FMath::RandHelper(MaxChance);
 	const int32 PowerupsChance = UBmrBoxDataAsset::Get().GetPowerupsChance();
 	if (CurrentChance <= PowerupsChance)
 	{
 		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-		ABmrGeneratedMap::Get().SpawnActorByType(EAT::Item, MapComponent->GetCell());
+		ABmrGeneratedMap::Get().SpawnActorByType(EAT::Powerup, MapComponent->GetCell());
 	}
 }
 
@@ -87,9 +86,9 @@ void ABmrBoxActor::OnPostRemovedFromLevel_Implementation(UBmrMapComponent* InMap
 	checkf(InMapComponent, TEXT("ERROR: [%i] %hs:\n'InMapComponent' is null!"), __LINE__, __FUNCTION__);
 	InMapComponent->OnPostRemovedFromLevel.RemoveAll(this);
 
-	const bool bIsCauserAllowedForItems = UBmrBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EBmrActorType::Player));
-	if (bIsCauserAllowedForItems)
+	const bool bIsCauserAllowed = UBmrBlueprintFunctionLibrary::IsActorHasAnyMatchingType(Cast<AActor>(DestroyCauser), TO_FLAG(EAT::Bomb | EBmrActorType::Player));
+	if (bIsCauserAllowed)
 	{
-		TrySpawnItem();
+		TrySpawnPowerup();
 	}
 }

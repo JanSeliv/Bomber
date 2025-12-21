@@ -237,7 +237,7 @@ protected:
 	TArray<FBmrCell> LocalGridCells = FBmrCell::EmptyCellsArr;
 
 	/** Stores and replicates map components of currently spawned level actors.
-	 * Updates dynamically during level regeneration, explosions, player movement, and item spawns.
+	 * Updates dynamically during level regeneration, explosions, player movement, and powerup spawns.
 	 * Uses a fast array to replicate efficiently while minimizing network usage.
 	 * Ensures reliable replication even when the number of components remains unchanged. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "[Bomber]", meta = (BlueprintProtected))

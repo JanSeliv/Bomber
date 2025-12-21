@@ -18,9 +18,9 @@ public:
 	/** Returns the AI data asset. */
 	static const UBmrAIDataAsset& Get();
 
-	/** Returns the search radius of items.*/
+	/** Returns the search radius of powerups.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE int32 GetItemSearchRadius() const { return ItemSearchRadius; }
+	FORCEINLINE int32 GetPowerupSearchRadius() const { return PowerupSearchRadius; }
 
 	/** Returns the search radius of crossways.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
@@ -35,9 +35,9 @@ public:
 	FORCEINLINE int32 GetNearDangerousRadius() const { return NearDangerousRadius; }
 
 protected:
-	/** The search radius of items. */
+	/** The search radius of powerups. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	int32 ItemSearchRadius = 2;
+	int32 PowerupSearchRadius = 2;
 
 	/** The search radius of crossways. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))

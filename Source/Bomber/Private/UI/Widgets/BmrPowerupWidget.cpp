@@ -42,17 +42,17 @@ void UBmrPowerupWidget::SetTargetValue(float NewValue, float MaxValue, bool bImm
 	}
 }
 
-// Updates the icon of the powerup item in the UI
-void UBmrPowerupWidget::SetPowerupIcon(FBmrPowerupTag NewItemType)
+// Updates the icon of the powerup powerup in the UI
+void UBmrPowerupWidget::SetPowerupIcon(FBmrPowerupTag InPowerupTag)
 {
 	if (!ensureMsgf(PowerUpIcon, TEXT("ASSERT: [%i] %hs:\n'PowerUpIcon' is not constructed!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	PowerupTag = NewItemType;
+	PowerupTag = InPowerupTag;
 
-	UTexture2D* IconTexture = UBmrUIDataAsset::Get().GetPowerupIcon(NewItemType);
+	UTexture2D* IconTexture = UBmrUIDataAsset::Get().GetPowerupIcon(InPowerupTag);
 	ensureMsgf(PowerUpIcon, TEXT("ASSERT: [%i] %hs:\n'PowerUpIcon' is not set in UI Data Asset"), __LINE__, __FUNCTION__);
 	PowerUpIcon->SetBrushResourceObject(IconTexture);
 }
@@ -71,7 +71,7 @@ void UBmrPowerupWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (!ensureMsgf(PowerupTag != FBmrPowerupTag::None, TEXT("ASSERT: [%i] %hs:\n'ItemType' is not set!"), __LINE__, __FUNCTION__))
+	if (!ensureMsgf(PowerupTag != FBmrPowerupTag::None, TEXT("ASSERT: [%i] %hs:\n'PowerupTag' is not set!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
@@ -126,7 +126,7 @@ void UBmrPowerupWidget::OnLocalPawnReady_Implementation(ABmrPawn* Character, int
 	SetTargetValue(InitialValue, MaxValue, bImmediateUpdate);
 }
 
-// Is called when the Skate attribute is changed, e.g: when player picked up given item
+// Is called when the associated powerup attribute is changed
 void UBmrPowerupWidget::OnPowerupAttributeChanged(const FOnAttributeChangeData& OnAttributeChangeData)
 {
 	const UAbilitySystemComponent* ASC = OnAttributeChangeData.GEModData ? &OnAttributeChangeData.GEModData->Target : UBmrBlueprintFunctionLibrary::GetLocalAbilitySystemComponent();

@@ -130,7 +130,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static EBmrActorType GetActorType(const AActor* Actor);
 
-	/** Returns true if specified actor is the Bomber Level Actor (player, box, wall or item). */
+	/** Returns true if specified actor is the Bomber Level Actor (player, box, wall or powerup). */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static bool IsLevelActor(const AActor* Actor);
 

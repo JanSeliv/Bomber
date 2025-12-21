@@ -447,7 +447,7 @@ void ABmrGeneratedMap::DestroyLevelActorsOnCells(const FBmrCells& Cells, UObject
 		    || bCellIsOnGrid)
 		{
 			// Remove from the array
-			// First removing, because after the box destroying the item can be spawned and starts searching for an empty cell
+			// First removing, because after the box destroying the powerup can be spawned and starts searching for an empty cell
 			// MapComponentIt can be invalid here
 			DestroyLevelActor(MapComponentIt, DestroyCauser);
 		}

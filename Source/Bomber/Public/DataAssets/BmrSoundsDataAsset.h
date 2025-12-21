@@ -57,7 +57,7 @@ public:
 
 	/** Returns the sound that is played on gathering any power-up. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE USoundBase* GetItemPickUpSFX() const { return ItemPickUpSFX; }
+	FORCEINLINE USoundBase* GetPowerupPickUpSFX() const { return PowerupPickUpSFX; }
 
 	/** Returns the sound that is played right before the match ends. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
@@ -107,7 +107,7 @@ protected:
 
 	/** The sound that is played on gathering any power-up. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TObjectPtr<USoundBase> ItemPickUpSFX = nullptr;
+	TObjectPtr<USoundBase> PowerupPickUpSFX = nullptr;
 
 	/** The sound that is played right before the match ends. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
@@ -122,6 +122,6 @@ protected:
 	TMap<EBmrEndGameState, TObjectPtr<USoundBase>> EndGameSFX;
 
 	/** The sound that is played on clicking any UI element. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, DisplayName = "UI Click SFX"))
 	TObjectPtr<USoundBase> UIClickSFX = nullptr;
 };

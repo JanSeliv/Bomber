@@ -7,7 +7,7 @@
 #include "BmrBoxActor.generated.h"
 
 /**
- * Boxes on destruction with some chances spawns an item.
+ * Boxes on destruction with some chances spawns an powerup.
  * @see Access its data with UBmrBoxDataAsset (Content/Bomber/DataAssets/DA_Box).
  */
 UCLASS()
@@ -19,9 +19,9 @@ public:
 	/** Sets default values for this actor's properties */
 	ABmrBoxActor();
 
-	/** Spawn item with a chance. */
+	/** Spawn powerup with a chance. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
-	void TrySpawnItem();
+	void TrySpawnPowerup();
 
 protected:
 	/** The MapComponent manages this actor on the Generated Map */

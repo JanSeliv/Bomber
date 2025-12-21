@@ -243,7 +243,7 @@ EBmrActorType UBmrBlueprintFunctionLibrary::GetActorType(const AActor* Actor)
 	return LevelActorDataAsset ? LevelActorDataAsset->GetActorType() : EAT::None;
 }
 
-// Returns true if specified actor is the Bomber Level Actor (player, box, wall or item)
+// Returns true if specified actor is the Bomber Level Actor (player, box, wall or powerup)
 bool UBmrBlueprintFunctionLibrary::IsLevelActor(const AActor* Actor)
 {
 	return GetActorType(Actor) != EAT::None;

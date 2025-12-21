@@ -13,7 +13,7 @@
 #include "BmrLevelActorDataAsset.generated.h"
 
 /**
- * The base archetype of level actor rows. Is implemented in player, item rows, etc.
+ * The base archetype of level actor rows. Is implemented in player, powerup rows, etc.
  */
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, Const, CollapseCategories, AutoExpandCategories = ("[Bomber]"))
 class BOMBER_API UBmrLevelActorRow : public UObject

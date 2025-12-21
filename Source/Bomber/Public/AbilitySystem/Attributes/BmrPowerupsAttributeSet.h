@@ -12,7 +12,7 @@
 struct FBmrPowerupTag;
 
 /**
- * Attribute set for powerup-related attributes (items pick-up, character stats, etc.).
+ * Attribute set for powerup-related attributes (powerups pick-up, character stats, etc.).
  */
 UCLASS()
 class BOMBER_API UBmrPowerupsAttributeSet : public UAttributeSet
@@ -65,12 +65,12 @@ public:
 	FGameplayAttributeData Powerup_MaxFire;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_MaxFire)
 
-	/** Amount of skate items collected (each adds +100 speed to base movement speed). */
+	/** Amount of skate powerups collected (each adds +100 speed to base movement speed). */
 	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_Skate", Category = "[Bomber]")
 	FGameplayAttributeData Powerup_Skate;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_Skate)
 
-	/** Maximum allowed skate items. */
+	/** Maximum allowed skate powerups. */
 	UPROPERTY(BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_Powerup_MaxSkate", Category = "[Bomber]")
 	FGameplayAttributeData Powerup_MaxSkate;
 	ATTRIBUTE_ACCESSORS_BASIC(ThisClass, Powerup_MaxSkate)

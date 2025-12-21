@@ -8,7 +8,6 @@
 #include "DataAssets/BmrDataAssetsContainer.h"
 #include "DataAssets/BmrPowerupDataAsset.h"
 #include "Structures/BmrGameplayTags.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
@@ -39,7 +38,7 @@ ABmrPowerupActor::ABmrPowerupActor()
 	MapComponent = CreateDefaultSubobject<UBmrMapComponent>(TEXT("MapComponent"));
 }
 
-// Set new item type, can be called on the server-only
+// Set new Powerup type, can be called on the server-only
 void ABmrPowerupActor::SetPowerupTag(FBmrPowerupTag InPowerupTag)
 {
 	if (!HasAuthority()
@@ -52,19 +51,19 @@ void ABmrPowerupActor::SetPowerupTag(FBmrPowerupTag InPowerupTag)
 	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PowerupTag, this);
 }
 
-// Is called on client when item type is replicated
-void ABmrPowerupActor::OnRep_PowerupType()
+// Is called on client when Powerup type is replicated
+void ABmrPowerupActor::OnRep_PowerupTag()
 {
-	UpdateItemMesh();
+	UpdatePowerupMesh();
 }
 
-// Is called on both server and clients to update the item mesh based on the item type
-void ABmrPowerupActor::UpdateItemMesh()
+// Is called on both server and clients to update the Powerup mesh based on the Powerup type
+void ABmrPowerupActor::UpdatePowerupMesh()
 {
-	if (const UBmrPowerupRow* FoundItemRow = UBmrPowerupDataAsset::Get().GetRowByItemType(PowerupTag, UBmrBlueprintFunctionLibrary::GetLevelType()))
+	if (const UBmrPowerupRow* FoundPowerupRow = UBmrPowerupDataAsset::Get().GetRowByPowerupTag(PowerupTag))
 	{
 		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-		MapComponent->SetLocalMesh(FoundItemRow->Mesh);
+		MapComponent->SetLocalMesh(FoundPowerupRow->Mesh);
 	}
 }
 
@@ -102,25 +101,25 @@ void ABmrPowerupActor::OnAddedToLevel_Implementation(UBmrMapComponent* InMapComp
 	checkf(InMapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 	InMapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
 
-	OnActorBeginOverlap.AddUniqueDynamic(this, &ABmrPowerupActor::OnItemBeginOverlap);
+	OnActorBeginOverlap.AddUniqueDynamic(this, &ABmrPowerupActor::OnPowerupBeginOverlap);
 
-	// Rand the item type if not set yet
+	// Rand the Powerup type if not set yet
 	if (HasAuthority()
 	    && PowerupTag == FBmrPowerupTag::None)
 	{
 		const int32 RandomIndex = FMath::RandRange(0, FBmrPowerupTag::GetAll().Num() - 1);
-		const FBmrPowerupTag NewItemType = FBmrPowerupTag::GetAll().GetByIndex(RandomIndex);
-		SetPowerupTag(NewItemType);
-		UpdateItemMesh();
+		const FBmrPowerupTag InPowerupTag = FBmrPowerupTag::GetAll().GetByIndex(RandomIndex);
+		SetPowerupTag(InPowerupTag);
+		UpdatePowerupMesh();
 	}
 }
 
-// Triggers when this item starts overlap a player character to destroy itself
-void ABmrPowerupActor::OnItemBeginOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)
+// Triggers when this Powerup starts overlap a player character to destroy itself
+void ABmrPowerupActor::OnPowerupBeginOverlap_Implementation(AActor* OverlappedActor, AActor* OtherActor)
 {
 	if (IsHidden())
 	{
-		// Might happen on predicted client when the item is already collected
+		// Might happen on predicted client when the Powerup is already collected
 		return;
 	}
 

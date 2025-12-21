@@ -254,13 +254,13 @@ void ABmrAIController::UpdateAI()
 		}
 	}
 
-	// Is there an item nearby?
+	// Is there an powerup nearby?
 	if (bIsDangerous == false)
 	{
-		const FBmrCells ItemsFromF0 = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetItemSearchRadius(), TO_FLAG(EAT::Item));
-		if (!ItemsFromF0.IsEmpty())
+		const FBmrCells PowerupsFromF0 = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetPowerupSearchRadius(), TO_FLAG(EAT::Powerup));
+		if (!PowerupsFromF0.IsEmpty())
 		{
-			MoveToCell(FBmrCell::GetFirstCellInSet(ItemsFromF0));
+			MoveToCell(FBmrCell::GetFirstCellInSet(PowerupsFromF0));
 			return;
 		}
 	}
@@ -268,8 +268,8 @@ void ABmrAIController::UpdateAI()
 
 	FBmrCells AllCrossways; //  cells of all crossways
 	FBmrCells SecureCrossways; // crossways without players
-	FBmrCells FoundItems;
-	bool bIsItemInDirect = false;
+	FBmrCells FoundPowerups;
+	bool bIsPowerupInDirect = false;
 
 	for (auto F = Free.CreateIterator(); F; ++F)
 	{
@@ -296,25 +296,25 @@ void ABmrAIController::UpdateAI()
 				SecureCrossways.Emplace(*F);
 			}
 
-			// Finding items
-			FBmrCells ItemsAround = UBmrCellUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Item));
-			if (ItemsAround.Num() > 0) // Is there items in this crossway?
+			// Finding Powerups
+			FBmrCells PowerupsAround = UBmrCellUtilsLibrary::FilterCellsByActors(ThisCrossway, TO_FLAG(EAT::Powerup));
+			if (PowerupsAround.Num() > 0) // Is there Powerups in this crossway?
 			{
-				ItemsAround = ItemsAround.Intersect(Free); // ItemsAround = ItemsAround ∪ Free
-				if (ItemsAround.Num() > 0) // Is there direct items in this crossway?
+				PowerupsAround = PowerupsAround.Intersect(Free); // PowerupsAround = PowerupsAround ∪ Free
+				if (PowerupsAround.Num() > 0) // Is there direct Powerups in this crossway?
 				{
-					if (bIsItemInDirect == false) // is the first found direct item
+					if (bIsPowerupInDirect == false) // is the first found direct Powerup
 					{
-						bIsItemInDirect = true;
-						FoundItems.Empty(); // clear all previously found corner items
+						bIsPowerupInDirect = true;
+						FoundPowerups.Empty(); // clear all previously found corner Powerups
 					}
-					FoundItems = FoundItems.Union(ItemsAround); // Add found direct items
-				} // item around the corner
-				else if (bIsItemInDirect == false) // Need corner item?
+					FoundPowerups = FoundPowerups.Union(PowerupsAround); // Add found direct Powerups
+				} // Powerup around the corner
+				else if (bIsPowerupInDirect == false) // Need corner Powerup?
 				{
-					FoundItems.Emplace(*F); // Add found corner item
+					FoundPowerups.Emplace(*F); // Add found corner Powerup
 				}
-			} // [has items]
+			} // [has Powerups]
 		} // [is crossway]
 		else if (bIsDangerous && ThisCrossway.Contains(*F) == false)
 		{
@@ -331,7 +331,7 @@ void ABmrAIController::UpdateAI()
 
 	// ----- Part 2: Cells filtration -----
 
-	FBmrCells Filtered = FoundItems.Num() > 0 ? FoundItems : Free; // selected cells
+	FBmrCells Filtered = FoundPowerups.Num() > 0 ? FoundPowerups : Free; // selected cells
 	bool bIsFilteringFailed = false;
 	static constexpr int32 FilteringStepsNum = 4;
 	for (int32 Index = 0; Index < FilteringStepsNum; ++Index)
@@ -377,7 +377,7 @@ void ABmrAIController::UpdateAI()
 	if (bCanSpawnBombs // false meaning manually disabled
 	    && !bIsDangerous // is not dangerous situation
 	    && !bIsFilteringFailed // filtering was not failed
-	    && !bIsItemInDirect) // was not found direct items
+	    && !bIsPowerupInDirect) // was not found direct Powerups
 	{
 		const float Fire = UBmrPowerupsAttributeSet::Get(InOwner).GetPowerup_Fire();
 		FBmrCells BoxesAndPlayers = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Explosion, Fire, TO_FLAG(EAT::Box | EAT::Player));

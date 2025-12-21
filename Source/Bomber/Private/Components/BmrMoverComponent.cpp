@@ -243,7 +243,7 @@ void UBmrMoverComponent::OnMoveInputCompleted_Implementation(const FInputActionV
 	RequestMoveByIntent(FVector::ZeroVector);
 }
 
-// Is called when the Skate attribute is changed, e.g: when player picked up a Skate item
+// Is called when the Skate attribute is changed, e.g: when player picked up a Skate powerup
 void UBmrMoverComponent::OnSkateAttributeChanged(const FOnAttributeChangeData& OnAttributeChangeData)
 {
 	CachedSkatePowerupAttribute = OnAttributeChangeData.NewValue;

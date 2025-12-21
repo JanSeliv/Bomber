@@ -383,7 +383,7 @@ public:
 
 	/** Takes cells and returns only matching with specified actor types.
 	 * If none of actors are chosen, returns matching empty cells without actors.
-	 * Could be useful to extract only items within given cells.
+	 * Could be useful to extract only powerups within given cells.
 	 *
 	 * @param InCells Cells to filter.
 	 * @param ActorsTypesBitmask Bitmask of actors types to filter.
@@ -413,7 +413,7 @@ public:
 
 	/** Returns true if at least one cell has actors of specified types.
 	 * If none of actors are chosen, then returns true if at least one cell along specified is empty, so it does not have own actor.
-	 * Could be useful to determine do input cells contain at least one item. */
+	 * Could be useful to determine do input cells contain at least one powerup. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static bool AreCellsHaveAnyMatchingActors(
 	    const TSet<FBmrCell>& Cells,
@@ -484,7 +484,7 @@ public:
 
 	/** Returns cells that match specified actors in specified radius from a center, according desired type of breaks.
 	 * If none of actors are chosen, returns matching empty cells around without actors.
-	 * Could be useful to determine are there any players or items around.
+	 * Could be useful to determine are there any players or powerups around.
 	 *
 	 * @param CenterCell The start of searching in specified direction.
 	 * @param Radius Distance in number of cells from a center.
@@ -554,7 +554,7 @@ public:
 
 	/** Returns cells that match specified actors in specified direction from a center, according desired type of breaks.
 	 * If none of actors are chosen, returns matching empty cells without actors in chosen direction(s).
-	 * Could be useful to determine are there any players or items on the way.
+	 * Could be useful to determine are there any players or powerups on the way.
 	 *
 	 * @param CenterCell The start of searching in specified direction.
 	 * @param SideLength Distance in number of cells from a center.

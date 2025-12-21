@@ -10,7 +10,7 @@
 #include "BmrPowerupDataAsset.generated.h"
 
 /**
- * Row that describes each unique item.
+ * Row that describes each unique powerup.
  */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API UBmrPowerupRow final : public UBmrLevelActorRow
@@ -18,9 +18,9 @@ class BOMBER_API UBmrPowerupRow final : public UBmrLevelActorRow
 	GENERATED_BODY()
 
 public:
-	/** Of each type this item is. */
+	/** Of each type this powerup is. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
-	FBmrPowerupTag ItemType = FBmrPowerupTag::None;
+	FBmrPowerupTag PowerupTag = FBmrPowerupTag::None;
 
 	/** Gameplay effect to apply on collecting this powerup to change the attributes. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
@@ -28,7 +28,7 @@ public:
 };
 
 /**
- * Describes common data for all items.
+ * Describes common data for all powerups.
  */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API UBmrPowerupDataAsset final : public UBmrLevelActorDataAsset
@@ -39,10 +39,10 @@ public:
 	/** Default constructor. */
 	UBmrPowerupDataAsset();
 
-	/** Returns the item data asset. */
+	/** Returns the powerup data asset. */
 	static const UBmrPowerupDataAsset& Get();
 
-	/** Return row by specified item type. */
+	/** Return row by specified powerup type. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const UBmrPowerupRow* GetRowByItemType(FBmrPowerupTag ItemType, EBmrLevelType LevelType) const;
+	const UBmrPowerupRow* GetRowByPowerupTag(FBmrPowerupTag Tag, EBmrLevelType LevelType = EBmrLevelType::None) const;
 };

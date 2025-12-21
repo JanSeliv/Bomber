@@ -52,7 +52,7 @@ protected:
 	FVector CurrentMoveInput = FVector::ZeroVector;
 
 	/** Cached skate power-up attribute value.
-	 * Is used in walking mode to increase the movement speed when player picked up a Skate item. */
+	 * Is used in walking mode to increase the movement speed when player picked up a Skate powerup. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category = "[Bomber]", meta = (BlueprintProtected))
 	float CachedSkatePowerupAttribute = 0.f;
 
@@ -98,6 +98,6 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnMoveInputCompleted(const struct FInputActionValue& ActionValue);
 
-	/** Is called when the Skate attribute is changed, e.g: when player picked up a Skate item. */
+	/** Is called when the Skate attribute is changed, e.g: when player picked up a Skate powerup. */
 	void OnSkateAttributeChanged(const struct FOnAttributeChangeData& OnAttributeChangeData);
 };

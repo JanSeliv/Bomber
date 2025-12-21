@@ -54,7 +54,7 @@ public:
 public:
 	/**
 	 * Destroy all specified level actors on the map.
-	 * @param ActorType Bomb, Box, Item, Player, Wall, All
+	 * @param ActorType Bomb, Box, Powerup, Player, Wall, All
 	 */
 	UFUNCTION(meta = (CheatName = "Bomber.Destroy.AllByType"))
 	static void DestroyAllByType(EBmrActorType ActorType);
@@ -79,7 +79,7 @@ public:
 	 * Box
 	 ********************************************************************************************* */
 public:
-	/** Override the percentage of items spawn from boxes, where 100 is maximum, 0 is disabled (default chance will be used).
+	/** Override the percentage of powerups spawn from boxes, where 100 is maximum, 0 is disabled (default chance will be used).
 	 * e.g Bomber.Box.SetPowerupsChance 100 - set 100% chance to spawn powerups. */
 	static TAutoConsoleVariable<int32> CVarPowerupsChance;
 
@@ -136,11 +136,11 @@ public:
 	 * Debug
 	 ********************************************************************************************* */
 public:
-	/** Shows coordinates of level actors of specified types (requires regeneration), e.g: 'Box Item'.
+	/** Shows coordinates of level actors of specified types (requires regeneration), e.g: 'Box powerup'.
 	 * Bomber.Debug.DisplayCells Wall - show walls.
 	 * Bomber.Debug.DisplayCells Wall Bomb - show walls and bombs.
 	 * Bomber.Debug.DisplayCells Wall Bomb Player - show walls, bombs and players.
-	 * Bomber.Debug.DisplayCells All - show all actors (walls, bombs, players, items and boxes). */
+	 * Bomber.Debug.DisplayCells All - show all actors (walls, bombs, players, powerups and boxes). */
 	static TAutoConsoleVariable<FString> CVarDisplayCells;
 
 	/*********************************************************************************************
@@ -155,7 +155,7 @@ public:
 
 	/**
 	 * Spawns an actor by type on the level.
-	 * @param ActorType The type of actor to spawn: Bomb, Box, Item, Player, Wall
+	 * @param ActorType The type of actor to spawn: Bomb, Box, powerup, Player, Wall
 	 * @param ColumnX Position on the X-axis by column: 0, 1... N
 	 * @param RowY  Position on the Y-axis by row: 0, 1... N
 	 * @param SkinIndex The row from Data Assets to select across different variants of the same actor type: 0, 1... N

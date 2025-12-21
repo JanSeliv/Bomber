@@ -20,9 +20,9 @@
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrPowerupTag.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
+#include "UtilityLibraries/BmrActorUtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
-#include "UtilityLibraries/BmrActorUtilsLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrCheatManager)
 
@@ -135,7 +135,7 @@ void UBmrCheatManager::DestroyPlayersBySlots(const FString& Slot)
  * Box
  ********************************************************************************************* */
 
-// Override the percentage of items spawn from boxes
+// Override the percentage of powerups spawn from boxes
 TAutoConsoleVariable<int32> UBmrCheatManager::CVarPowerupsChance(
     TEXT("Bomber.Box.SetPowerupsChance"),
     0.f,
@@ -287,7 +287,7 @@ void UBmrCheatManager::AddBot()
  * Debug
  ********************************************************************************************* */
 
-// Override the percentage of items spawn from boxes
+// Shows coordinates of level actors of specified types
 TAutoConsoleVariable<FString> UBmrCheatManager::CVarDisplayCells(
     TEXT("Bomber.Debug.DisplayCells"),
     TEXT(""),

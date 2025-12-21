@@ -20,7 +20,7 @@ const UBmrBoxDataAsset& UBmrBoxDataAsset::Get()
 	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }
 
-// Returns default value from the data asset of the chance to spawn item after box destroying.
+// Returns default value from the data asset of the chance to spawn powerup after box destroying.
 int32 UBmrBoxDataAsset::GetPowerupsChance() const
 {
 #if !UE_BUILD_SHIPPING
@@ -31,5 +31,5 @@ int32 UBmrBoxDataAsset::GetPowerupsChance() const
 	}
 #endif // !UE_BUILD_SHIPPING
 
-	return SpawnItemChance;
+	return SpawnPowerupChance;
 }

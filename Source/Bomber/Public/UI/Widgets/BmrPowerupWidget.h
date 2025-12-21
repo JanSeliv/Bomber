@@ -5,12 +5,12 @@
 #include "Blueprint/UserWidget.h"
 
 // Bomber
-#include "Structures/BmrPowerupTag.h" // ItemType
+#include "Structures/BmrPowerupTag.h"
 
 #include "BmrPowerupWidget.generated.h"
 
 /**
- * Widget that represents the powerup item in the UI.
+ * Widget that represents the powerup powerup in the UI.
  */
 UCLASS(Abstract)
 class BOMBER_API UBmrPowerupWidget : public UUserWidget
@@ -25,18 +25,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetTargetValue(float NewValue, float MaxValue, bool bImmediateUpdate = false);
 
-	/** Updates the icon of the powerup item in the UI.
-	 * @param NewItemType The tag of powerup item to display. */
+	/** Updates the icon of the powerup powerup in the UI.
+	 * @param InPowerupTag The tag of powerup powerup to display. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void SetPowerupIcon(FBmrPowerupTag NewItemType);
+	void SetPowerupIcon(FBmrPowerupTag InPowerupTag);
 
 protected:
-	/** Exposed property to be set in Details Panel of the type of item this UI or data element is associated with (e.g., Speed, BombCount, etc.) */
+	/** Exposed property to be set in Details Panel of the type of powerup this UI or data element is associated with (e.g., Speed, BombCount, etc.) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Design", meta = (BlueprintProtected, ExposeOnSpawn = "true"))
 	FBmrPowerupTag PowerupTag = FBmrPowerupTag::None;
 
-	/** The image UI widget used to display the icon of the power-up item.
-	 * It automatically sets the icon based on the ItemType property. */
+	/** The image UI widget used to display the icon of the power-up powerup.
+	 * It automatically sets the icon based on the powerup PowerupTag property. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "[Bomber]", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UImage> PowerUpIcon = nullptr;
 
@@ -82,6 +82,6 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnLocalPawnReady(class ABmrPawn* Pawn, int32 PlayerId);
 
-	/** Is called when the Skate attribute is changed, e.g: when player picked up given item. */
+	/** Is called when the associated powerup attribute is changed. */
 	void OnPowerupAttributeChanged(const struct FOnAttributeChangeData& OnAttributeChangeData);
 };

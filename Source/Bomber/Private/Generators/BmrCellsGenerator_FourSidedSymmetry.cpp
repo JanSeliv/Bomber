@@ -20,7 +20,7 @@ TMap<FBmrCell, EBmrActorType> UBmrCellsGenerator_FourSidedSymmetry::GenerateLeve
 	}
 
 	// --- Step 1: Initial Setup and Projection ---
-	// Defines the top-left quarter and projects any dragged items/boxes into that quarter
+	// Defines the top-left quarter and projects any dragged powerups/boxes into that quarter
 	// so they can be included in the pathfinding logic.
 	const FBmrCellsArr QuarterCellsArray = FBmrCell::GetTopLeftQuarterOnGrid(GeneratorData.AllCells, GeneratorData.MapScale);
 	const FBmrCells QuarterCellsSet(QuarterCellsArray);
@@ -36,7 +36,7 @@ TMap<FBmrCell, EBmrActorType> UBmrCellsGenerator_FourSidedSymmetry::GenerateLeve
 			DraggedWalls.Add(DraggedPair.Key);
 			continue;
 		}
-		if (DraggedPair.Value == EBmrActorType::Item || DraggedPair.Value == EBmrActorType::Box)
+		if (DraggedPair.Value == EBmrActorType::Powerup || DraggedPair.Value == EBmrActorType::Box)
 		{
 			const FIntPoint OriginalPosition = FBmrCell::GetPositionByCellOnGrid(DraggedPair.Key, GeneratorData.AllCells, GeneratorData.MapScale.X);
 			const int32 ProjectedX = FMath::Min(OriginalPosition.X, MaxIndexX - OriginalPosition.X);

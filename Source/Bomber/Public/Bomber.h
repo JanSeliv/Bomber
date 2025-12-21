@@ -8,9 +8,9 @@
 
 namespace FTransientChecker
 {
-/** Returns true is specified object is pending kill, CDO or exists on the Transient level. */
-BOMBER_API bool IsTransient(const UObject* Obj);
-BOMBER_API bool IsTransientLevel(const UObject* Obj);
+	/** Returns true is specified object is pending kill, CDO or exists on the Transient level. */
+	BOMBER_API bool IsTransient(const UObject* Obj);
+	BOMBER_API bool IsTransientLevel(const UObject* Obj);
 } // namespace FTransientChecker
 
 /**
@@ -49,13 +49,13 @@ enum class EBmrActorType : uint8
 	///< A destroyable Obstacle
 	Box = 1 << 1,
 	///< A picked element giving power-up (FPowerUp struct)
-	Item = 1 << 2,
+	Powerup = 1 << 2,
 	///< A character that is controlled by a person or bot
 	Player = 1 << 3,
 	///< An absolute static and unchangeable block throughout the game
 	Wall = 1 << 4,
 	///< All actor types
-	All = Bomb | Item | Player | Wall | Box
+	All = Bomb | Powerup | Player | Wall | Box
 };
 
 ENUM_CLASS_FLAGS(EBmrActorType);

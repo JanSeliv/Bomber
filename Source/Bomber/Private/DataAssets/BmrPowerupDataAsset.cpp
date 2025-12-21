@@ -4,31 +4,37 @@
 
 // Bomber
 #include "DataAssets/BmrDataAssetsContainer.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPowerupDataAsset)
 
 // Default constructor
 UBmrPowerupDataAsset::UBmrPowerupDataAsset()
 {
-	ActorType = EAT::Item;
+	ActorType = EAT::Powerup;
 	RowClass = UBmrPowerupRow::StaticClass();
 }
 
-// Returns the item data asset
+// Returns the powerup data asset
 const UBmrPowerupDataAsset& UBmrPowerupDataAsset::Get()
 {
 	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
 }
 
-// Return row by specified item type
-const UBmrPowerupRow* UBmrPowerupDataAsset::GetRowByItemType(FBmrPowerupTag ItemType, EBmrLevelType LevelType) const
+// Return row by specified powerup type
+const UBmrPowerupRow* UBmrPowerupDataAsset::GetRowByPowerupTag(FBmrPowerupTag Tag, EBmrLevelType LevelType /* = EBmrLevelType::None*/) const
 {
+	if (LevelType == EBmrLevelType::None)
+	{
+		LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
+	}
+
 	TArray<UBmrLevelActorRow*> OutRows;
 	GetRowsByLevelType(OutRows, TO_FLAG(LevelType));
-	const UBmrLevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([ItemType](const UBmrLevelActorRow* RowIt)
+	const UBmrLevelActorRow* const* FoundRowPtr = OutRows.FindByPredicate([Tag](const UBmrLevelActorRow* RowIt)
 	{
-		const UBmrPowerupRow* ItemRow = Cast<UBmrPowerupRow>(RowIt);
-		return ItemRow && ItemRow->ItemType == ItemType;
+		const UBmrPowerupRow* PowerupRow = Cast<UBmrPowerupRow>(RowIt);
+		return PowerupRow && PowerupRow->PowerupTag == Tag;
 	});
 	return FoundRowPtr ? Cast<UBmrPowerupRow>(*FoundRowPtr) : nullptr;
 }

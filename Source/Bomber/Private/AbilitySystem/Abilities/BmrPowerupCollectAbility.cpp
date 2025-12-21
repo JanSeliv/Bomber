@@ -8,7 +8,6 @@
 #include "Components/BmrMapComponent.h"
 #include "DataAssets/BmrPowerupDataAsset.h"
 #include "Structures/BmrPowerupTag.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "AbilitySystemComponent.h"
@@ -24,12 +23,12 @@ void UBmrPowerupCollectAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 
 	UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
 	checkf(ASC, TEXT("ERROR: [%i] %hs:\n'ASC' is null!"), __LINE__, __FUNCTION__);
-	const ABmrPowerupActor& ItemActor = *CastChecked<ABmrPowerupActor>(TriggerEventData->Instigator);
+	const ABmrPowerupActor& PowerupActor = *CastChecked<ABmrPowerupActor>(TriggerEventData->Instigator);
 
 	// Apply the collect gameplay effect to increase own attribute
 	const FBmrPowerupTag PowerupTag = TriggerEventData->InstigatorTags.GetByIndex(0);
-	const UBmrPowerupRow* ItemRow = UBmrPowerupDataAsset::Get().GetRowByItemType(PowerupTag, UBmrBlueprintFunctionLibrary::GetLevelType());
-	const TSubclassOf<UGameplayEffect> CollectGameplayEffect = ItemRow ? ItemRow->CollectGameplayEffect : nullptr;
+	const UBmrPowerupRow* PowerupRow = UBmrPowerupDataAsset::Get().GetRowByPowerupTag(PowerupTag);
+	const TSubclassOf<UGameplayEffect> CollectGameplayEffect = PowerupRow ? PowerupRow->CollectGameplayEffect : nullptr;
 	if (ensureMsgf(CollectGameplayEffect, TEXT("ASSERT: [%i] %hs:\n'CollectGameplayEffect' failed to obtain!"), __LINE__, __FUNCTION__))
 	{
 		FGameplayEffectContextHandle CollectContext = ASC->MakeEffectContext();
@@ -39,15 +38,15 @@ void UBmrPowerupCollectAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 	}
 
 	// @TODO JanSeliv uL3AzYIa - BEGIN: remove next once provided support for predicted destroy pooled actors
-	if (!ItemActor.HasAuthority())
+	if (!PowerupActor.HasAuthority())
 	{
-		const_cast<ABmrPowerupActor&>(ItemActor).SetActorHiddenInGame(true);
+		const_cast<ABmrPowerupActor&>(PowerupActor).SetActorHiddenInGame(true);
 	}
 	// @TODO JanSeliv uL3AzYIa - END
 	else
 	{
 		// Finally, destroy powerup actor at the end
-		UBmrMapComponent* InstigatorMapComponent = UBmrMapComponent::GetMapComponent(&ItemActor);
+		UBmrMapComponent* InstigatorMapComponent = UBmrMapComponent::GetMapComponent(&PowerupActor);
 		ABmrGeneratedMap::Get().DestroyLevelActor(InstigatorMapComponent, ActorInfo->AvatarActor.Get());
 	}
 
