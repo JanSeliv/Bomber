@@ -25,6 +25,10 @@ public:
 	/** Gameplay effect to apply on collecting this powerup to change the attributes. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
 	TSubclassOf<class UGameplayEffect> CollectGameplayEffect = nullptr;
+
+	/** Gameplay effect to apply when the max amount of this powerup is reached. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
+	TSubclassOf<class UGameplayEffect> MaxCollectGameplayEffect = nullptr;
 };
 
 /**

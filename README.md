@@ -112,6 +112,8 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 ## 📅 Changelog
 #### `2026-XX-XX:`
 - Updated to **Unreal Engine 5.7**.
+- Added sprint speed trail VFX when picked up maximum amount of skate powerups by [Kateryna Shchetinina](https://www.artstation.com/kateseliv):
+> ![SkateMax](https://github.com/user-attachments/assets/0ede3ba0-b26b-4cd0-b2d6-4eb4479b2a63)
 #### `2025-11-17:`
 - Updated to **Unreal Engine 5.6**.
 - Migrated the project to use **Gameplay Ability System (GAS)** for actions (bombs, damage, powerups) and **Mover 2.0** for movement, significantly improving the responsiveness in multiplayer for players with high ping.

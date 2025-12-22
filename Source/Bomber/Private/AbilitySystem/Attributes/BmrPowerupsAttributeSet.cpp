@@ -4,6 +4,7 @@
 
 // UE
 #include "AbilitySystemGlobals.h"
+#include "DataAssets/BmrPowerupDataAsset.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 #include "Structures/BmrPowerupTag.h"
@@ -225,18 +226,40 @@ void UBmrPowerupsAttributeSet::PostAttributeChange(const FGameplayAttribute& Att
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 
-	// E.g: if max attribute was dynamically decreased, so base attribute became larger than max, then clamp the base attribute to new max
-	const FBmrPowerupTag MaxPowerup = Conv_AttributeToTag(Attribute);
-	const FGameplayAttribute BaseAttribute = Conv_TagToBaseAttribute(MaxPowerup);
-	const bool bIsMaxAttribute = Attribute != BaseAttribute;
-	if (bIsMaxAttribute)
+	UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
+	checkf(ASC, TEXT("ERROR: [%i] %hs:\n'ASC' is null!"), __LINE__, __FUNCTION__);
+
+	const FBmrPowerupTag PowerupTag = Conv_AttributeToTag(Attribute);
+	const FGameplayAttribute BaseAttribute = Conv_TagToBaseAttribute(PowerupTag);
+	const float BaseValue = BaseAttribute.GetNumericValue(this);
+
+	// Clamp the base attribute to new max when max attribute was dynamically decreased
+	const bool bIsMaxAttributeChanged = Attribute != BaseAttribute;
+	if (bIsMaxAttributeChanged
+	    && BaseValue > NewValue)
 	{
-		const float BaseValue = BaseAttribute.GetNumericValue(this);
-		if (BaseValue > NewValue)
+		ASC->ApplyModToAttribute(BaseAttribute, EGameplayModOp::Override, NewValue);
+	}
+
+	// Apply max collect gameplay effect if applicable
+	const UBmrPowerupRow* PowerupRow = UBmrPowerupDataAsset::Get().GetRowByPowerupTag(PowerupTag);
+	const TSubclassOf<UGameplayEffect> MaxCollectGameplayEffect = PowerupRow ? PowerupRow->MaxCollectGameplayEffect : nullptr;
+	if (MaxCollectGameplayEffect)
+	{
+		const UGameplayEffect* EffectCDO = MaxCollectGameplayEffect.GetDefaultObject();
+		const FGameplayTagContainer& PowerupTags = EffectCDO ? EffectCDO->GetGrantedTags() : FGameplayTagContainer::EmptyContainer;
+		ensureMsgf(PowerupTags.IsValid(), TEXT("ERROR: [%i] %hs:\nMaxCollectGameplayEffect has no granted tags for powerup '%s'"), __LINE__, __FUNCTION__, *PowerupTag.ToString());
+		const bool bIsEffectCurrentlyActive = ASC->HasAllMatchingGameplayTags(PowerupTags);
+		if (bIsEffectCurrentlyActive != IsPowerupValueAtMax(PowerupTag))
 		{
-			UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
-			checkf(ASC, TEXT("ERROR: [%i] %hs:\n'ASC' is null!"), __LINE__, __FUNCTION__);
-			ASC->ApplyModToAttribute(BaseAttribute, EGameplayModOp::Override, NewValue);
+			if (bIsEffectCurrentlyActive)
+			{
+				ASC->RemoveActiveEffectsWithGrantedTags(PowerupTags);
+			}
+			else
+			{
+				ASC->ApplyGameplayEffectToSelf(EffectCDO, /*Level*/ 1.f, ASC->MakeEffectContext());
+			}
 		}
 	}
 }
