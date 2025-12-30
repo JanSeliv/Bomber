@@ -84,8 +84,8 @@ AActor* UGameplayUtilsLibrary::GetAttachedActorByClass(const AActor* ParentActor
 	return nullptr;
 }
 
-// Is useful for animating actor's transform from values stored in the Curve Table
-bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const FTransform& CenterWorldTransform, UCurveTable* CurveTable, float TotalSecondsSinceStart)
+// Extracts transform values from a Curve Table at a specific time
+bool UGameplayUtilsLibrary::GetTransformFromCurveTable(FTransform& OutTransform, UCurveTable* CurveTable, float TotalSecondsSinceStart)
 {
 	/* Example data (can be imported as csv into your Curve Table):
 
@@ -103,16 +103,14 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const 
 	Where ScaleZ will change from `1` (at 0 sec) to `0` (at 0.5 sec) */
 
 	if (!ensureMsgf(CurveTable, TEXT("ASSERT: [%i] %hs:\n'CurveTable' is not valid!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(InActor, TEXT("ASSERT: [%i] %hs:\n'InActor' is not valid!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(TotalSecondsSinceStart >= 0.f, TEXT("ASSERT: [%i] %hs:\n'TotalSecondsSinceStart' must be greater or equal to 0!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(CenterWorldTransform.IsValid(), TEXT("ASSERT: [%i] %hs:\n'CenterWorldTransform' is not valid, it should be initial transform of actor to apply animation on it!"), __LINE__, __FUNCTION__))
+	    || !ensureMsgf(TotalSecondsSinceStart >= 0.f, TEXT("ASSERT: [%i] %hs:\n'TotalSecondsSinceStart' must be greater or equal to 0!"), __LINE__, __FUNCTION__))
 	{
 		return false;
 	}
 
-	static const TArray<FName> LocationRows = {FName("LocationX"), FName("LocationY"), FName("LocationZ")};
-	static const TArray<FName> RotationRows = {FName("RotationPitch"), FName("RotationYaw"), FName("RotationRoll")};
-	static const TArray<FName> ScaleRows = {FName("ScaleX"), FName("ScaleY"), FName("ScaleZ")};
+	static const TArray<FName> LocationRows = {TEXT("LocationX"), TEXT("LocationY"), TEXT("LocationZ")};
+	static const TArray<FName> RotationRows = {TEXT("RotationPitch"), TEXT("RotationYaw"), TEXT("RotationRoll")};
+	static const TArray<FName> ScaleRows = {TEXT("ScaleX"), TEXT("ScaleY"), TEXT("ScaleZ")};
 
 	FVector NewLocation = FVector::ZeroVector;
 	FVector NewScale = FVector::OneVector;
@@ -120,7 +118,7 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const 
 
 	float EvaluatedValue = 0.f;
 
-	auto EvaluateCurveRow = [](UCurveTable* CurveTable, FName RowName, float InXY, float& OutValue) -> bool
+	auto EvaluateCurveRow = [CurveTable](FName RowName, float InXY, float& OutValue) -> bool
 	{
 		FCurveTableRowHandle Handle;
 		Handle.CurveTable = CurveTable;
@@ -147,7 +145,7 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const 
 
 	for (int32 Index = 0; Index < LocationRows.Num(); ++Index)
 	{
-		if (!EvaluateCurveRow(CurveTable, LocationRows[Index], TotalSecondsSinceStart, EvaluatedValue))
+		if (!EvaluateCurveRow(LocationRows[Index], TotalSecondsSinceStart, EvaluatedValue))
 		{
 			return false;
 		}
@@ -156,7 +154,7 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const 
 
 	for (int32 Index = 0; Index < RotationRows.Num(); ++Index)
 	{
-		if (!EvaluateCurveRow(CurveTable, RotationRows[Index], TotalSecondsSinceStart, EvaluatedValue))
+		if (!EvaluateCurveRow(RotationRows[Index], TotalSecondsSinceStart, EvaluatedValue))
 		{
 			return false;
 		}
@@ -166,19 +164,66 @@ bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const 
 
 	for (int32 Index = 0; Index < ScaleRows.Num(); ++Index)
 	{
-		if (!EvaluateCurveRow(CurveTable, ScaleRows[Index], TotalSecondsSinceStart, EvaluatedValue))
+		if (!EvaluateCurveRow(ScaleRows[Index], TotalSecondsSinceStart, EvaluatedValue))
 		{
 			return false;
 		}
 		NewScale[Index] = EvaluatedValue;
 	}
 
-	FTransform WorldTransform = FTransform::Identity;
-	WorldTransform.SetLocation(CenterWorldTransform.GetLocation() + NewLocation);
-	WorldTransform.SetRotation(CenterWorldTransform.GetRotation() * NewRotation.Quaternion());
-	WorldTransform.SetScale3D(CenterWorldTransform.GetScale3D() * NewScale);
+	OutTransform = FTransform(NewRotation, NewLocation, NewScale);
 
+	return true;
+}
+
+// Applies transform from Curve Table to actor around a center point
+bool UGameplayUtilsLibrary::ApplyTransformFromCurveTable(AActor* InActor, const FTransform& CenterWorldTransform, UCurveTable* CurveTable, float TotalSecondsSinceStart)
+{
+	if (!ensureMsgf(InActor, TEXT("ASSERT: [%i] %hs:\n'InActor' is not valid!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(CenterWorldTransform.IsValid(), TEXT("ASSERT: [%i] %hs:\n'CenterWorldTransform' is not valid, it should be initial transform of actor to apply animation on it!"), __LINE__, __FUNCTION__))
+	{
+		return false;
+	}
+
+	FTransform CurveTransform = FTransform::Identity;
+	if (!GetTransformFromCurveTable(/*out*/ CurveTransform, CurveTable, TotalSecondsSinceStart))
+	{
+		return false;
+	}
+
+	// Combines curve animation with center transform to maintain stable pivot point
+	FTransform WorldTransform = FTransform::Identity;
+	WorldTransform.SetLocation(CenterWorldTransform.GetLocation() + CurveTransform.GetLocation());
+	WorldTransform.SetRotation(CenterWorldTransform.GetRotation() * CurveTransform.GetRotation());
+	WorldTransform.SetScale3D(CenterWorldTransform.GetScale3D() * CurveTransform.GetScale3D());
 	InActor->SetActorTransform(WorldTransform);
+
+	return true;
+}
+
+// Applies transform from Curve Table to scene component using actor transform as center
+bool UGameplayUtilsLibrary::ApplyComponentTransformFromCurveTable(USceneComponent* InComponent, UCurveTable* CurveTable, float TotalSecondsSinceStart)
+{
+	const AActor* OwnerActor = InComponent ? InComponent->GetOwner() : nullptr;
+	if (!ensureMsgf(OwnerActor, TEXT("ASSERT: [%i] %hs:\n'OwnerActor' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return false;
+	}
+
+	FTransform CurveTransform = FTransform::Identity;
+	if (!GetTransformFromCurveTable(/*out*/ CurveTransform, CurveTable, TotalSecondsSinceStart))
+	{
+		return false;
+	}
+
+	// Combines curve animation with actor transform then converts to relative space for component
+	const FTransform ActorWorldTransform = OwnerActor->GetActorTransform();
+	FTransform WorldTransform = FTransform::Identity;
+	WorldTransform.SetLocation(ActorWorldTransform.GetLocation() + CurveTransform.GetLocation());
+	WorldTransform.SetRotation(ActorWorldTransform.GetRotation() * CurveTransform.GetRotation());
+	WorldTransform.SetScale3D(ActorWorldTransform.GetScale3D() * CurveTransform.GetScale3D());
+	const FTransform RelativeTransform = WorldTransform.GetRelativeTransform(ActorWorldTransform);
+	InComponent->SetRelativeTransform(RelativeTransform);
 
 	return true;
 }
