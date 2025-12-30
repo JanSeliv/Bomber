@@ -54,7 +54,7 @@ public:
 
 protected:
 	/** List of all widgets to create, each identified by a gameplay tag. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widgets", meta = (BlueprintProtected))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, TitleProperty = "WidgetTag"))
 	TArray<FBmrManageableWidgetData> AllWidgetData;
 
 	/** Contains the localized texts about specified end game to display on UI. */

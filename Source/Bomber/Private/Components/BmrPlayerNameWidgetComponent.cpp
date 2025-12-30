@@ -114,15 +114,7 @@ void UBmrPlayerNameWidgetComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem()) // Is null on remote clients
-	{
-		WidgetsSubsystem->OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
-		if (WidgetsSubsystem->AreWidgetInitialized())
-		{
-			OnWidgetsInitialized();
-		}
-	}
-
+	BIND_ON_WIDGETS_INITIALIZED(this, ThisClass::OnWidgetsInitialized);
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
 

@@ -55,6 +55,6 @@ struct BOMBER_API FBmrManageableWidgetsContainer
 	GENERATED_BODY()
 
 	/** Widget instances managed by this container. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "[Bomber]")
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (TitleProperty = "WidgetTag"))
 	TArray<TObjectPtr<UUserWidget>> WidgetInstances;
 };

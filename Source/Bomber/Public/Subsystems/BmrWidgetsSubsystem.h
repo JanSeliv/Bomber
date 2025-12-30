@@ -92,7 +92,8 @@ protected:
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWidgetsInitialized);
 
-	/** Is called to notify that all widgets were initialized and ready. */
+	/** Is called to notify that all widgets were initialized and ready.
+	 * In code, can use BIND_ON_WIDGETS_INITIALIZED(this, ThisClass::OnWidgetsInitialized); */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
 	FOnWidgetsInitialized OnWidgetsInitialized;
 
@@ -155,3 +156,16 @@ protected:
 	/** Is called right after the game was started and windows size is set. */
 	void OnViewportResizedWhenInit(class FViewport* Viewport, uint32 Index);
 };
+
+/** Helper macro to bind and call the function when widgets are initialized */
+#define BIND_ON_WIDGETS_INITIALIZED(Obj, Function)                                                \
+	{                                                                                             \
+		if (UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem()) \
+		{                                                                                         \
+			WidgetsSubsystem->OnWidgetsInitialized.AddUniqueDynamic(Obj, &Function);              \
+			if (WidgetsSubsystem->AreWidgetInitialized())                                         \
+			{                                                                                     \
+				Obj->Function();                                                                  \
+			}                                                                                     \
+		}                                                                                         \
+	}

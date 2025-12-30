@@ -154,12 +154,7 @@ void ABmrPlayerController::InitInputSystem()
 	Super::InitInputSystem();
 
 	// Handle UI inputs
-	UBmrWidgetsSubsystem& WidgetsSubsystem = UBmrWidgetsSubsystem::Get(this);
-	WidgetsSubsystem.OnWidgetsInitialized.AddUniqueDynamic(this, &ThisClass::OnWidgetsInitialized);
-	if (WidgetsSubsystem.AreWidgetInitialized())
-	{
-		OnWidgetsInitialized();
-	}
+	BIND_ON_WIDGETS_INITIALIZED(this, ThisClass::OnWidgetsInitialized);
 
 	UEnhancedInputLocalPlayerSubsystem* InputSubsystem = UInputUtilsLibrary::GetEnhancedInputSubsystem(this);
 	if (ensureMsgf(InputSubsystem, TEXT("ASSERT: [%i] %hs:\n'InputSubsystem' is null!"), __LINE__, __FUNCTION__))
