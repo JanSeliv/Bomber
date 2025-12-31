@@ -145,17 +145,25 @@ protected:
 	TObjectPtr<class UBmrMoverComponent> MoverComponent = nullptr;
 
 	/*********************************************************************************************
-	 * Nickname
+	 * UI
 	 ********************************************************************************************* */
 public:
 	/** Returns the 3D widget component that displays the player name above the character. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE class UBmrPlayerNameWidgetComponent* GetPlayerName3DWidgetComponent() const { return PlayerName3DWidgetComponent; }
 
+	/** Returns static mesh component that displays the arrow above the local player during match start. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE class UBmrPlayerArrowStartComponent* GetPlayerArrowStartWidgetComponent() const { return PlayerArrowStartComponent; }
+
 protected:
 	/** 3D widget component that displays the player name above the character. */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
 	TObjectPtr<class UBmrPlayerNameWidgetComponent> PlayerName3DWidgetComponent = nullptr;
+
+	/** Static mesh component that displays the arrow above the local player during match start. */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	TObjectPtr<class UBmrPlayerArrowStartComponent> PlayerArrowStartComponent = nullptr;
 
 	/*********************************************************************************************
 	 * Player ID

@@ -6,6 +6,7 @@
 #include "Actors/BmrGeneratedMap.h"
 #include "Components/BmrMapComponent.h"
 #include "Components/BmrMoverComponent.h"
+#include "Components/BmrPlayerArrowStartComponent.h"
 #include "Components/BmrPlayerNameWidgetComponent.h"
 #include "Components/BmrSkeletalMeshComponent.h"
 #include "Controllers/BmrAIController.h"
@@ -56,9 +57,11 @@ ABmrPawn::ABmrPawn()
 	MeshComponent->SetupAttachment(RootComponent);
 	MapComponent->SetMeshComponent(MeshComponent);
 
-	// Initialize 3D widget component for the player name
 	PlayerName3DWidgetComponent = CreateDefaultSubobject<UBmrPlayerNameWidgetComponent>(TEXT("PlayerName3DWidgetComponent"));
 	PlayerName3DWidgetComponent->SetupAttachment(RootComponent);
+
+	PlayerArrowStartComponent = CreateDefaultSubobject<UBmrPlayerArrowStartComponent>(TEXT("PlayerArrowStartWidgetComponent"));
+	PlayerArrowStartComponent->SetupAttachment(RootComponent);
 
 	// Initialize Mover Component: most setup is done in Details Panel as it is full of instanced properties
 	MoverComponent = CreateDefaultSubobject<UBmrMoverComponent>(TEXT("MoverComponent"));
