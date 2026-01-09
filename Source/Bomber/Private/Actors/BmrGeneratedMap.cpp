@@ -6,6 +6,7 @@
 #include "AbilitySystem/Attributes/BmrHealthAttributeSet.h"
 #include "Components/BmrCameraComponent.h"
 #include "Components/BmrMapComponent.h"
+#include "Data/SpawnRequest.h"
 #include "DataAssets/BmrDataAssetsContainer.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "GameFramework/BmrGameState.h"

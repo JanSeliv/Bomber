@@ -6,7 +6,7 @@
 
 // Bomber
 #include "BmrCell.h"
-#include "PoolManagerTypes.h" // FPoolObjectHandle
+#include "Data/PoolObjectHandle.h"
 
 // UE
 #include "Engine/NetSerialization.h" // FVector_NetQuantize

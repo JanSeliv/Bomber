@@ -5,6 +5,7 @@
 // Bomber
 #include "Actors/BmrPawn.h"
 #include "Components/BmrMoverComponent.h"
+#include "Data/TakeFromPoolPayload.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPoolFactory_Pawn)
 
