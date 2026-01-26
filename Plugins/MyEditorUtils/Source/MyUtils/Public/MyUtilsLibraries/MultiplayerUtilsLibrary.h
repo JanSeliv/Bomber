@@ -46,6 +46,11 @@ public:
 	 * Is only valid on the local client, is 0 on the server or in standalone mode. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static float GetPingMs();
+
+	/** Returns player's ping in seconds.
+	 * @param InPawn Pawn to retrieve player state and ping from. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static float GetPlayerPingSeconds(const APawn* InPawn);
 };
 
 /**

@@ -88,3 +88,10 @@ float UMultiplayerUtilsLibrary::GetPingMs()
 	const APlayerState* LocalPlayerState = PlayerController ? PlayerController->PlayerState : nullptr;
 	return LocalPlayerState ? LocalPlayerState->GetPingInMilliseconds() : 0.f;
 }
+
+// Returns player's ping in seconds
+float UMultiplayerUtilsLibrary::GetPlayerPingSeconds(const APawn* InPawn)
+{
+	const APlayerState* PlayerState = InPawn ? InPawn->GetPlayerState<APlayerState>() : nullptr;
+	return PlayerState ? FTimespan::FromMilliseconds(PlayerState->GetPingInMilliseconds()).GetTotalSeconds() : 0.f;
+}
