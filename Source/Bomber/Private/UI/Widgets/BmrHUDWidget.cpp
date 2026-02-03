@@ -3,12 +3,15 @@
 #include "UI/Widgets/BmrHUDWidget.h"
 
 // Bomber
+#include "Controllers/BmrPlayerController.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "UI/SettingsWidget.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Animation/WidgetAnimation.h"
+#include "Components/Button.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrHUDWidget)
 
@@ -18,6 +21,24 @@ void UBmrHUDWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	BIND_ON_LOCAL_PLAYER_STATE_READY(this, ThisClass::OnLocalPlayerStateReady);
+
+	if (RestartButton)
+	{
+		RestartButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		RestartButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnRestartButtonPressed);
+	}
+
+	if (MenuButton)
+	{
+		MenuButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		MenuButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnMenuButtonPressed);
+	}
+
+	if (SettingsButton)
+	{
+		SettingsButton->SetClickMethod(EButtonClickMethod::PreciseClick);
+		SettingsButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnSettingsButtonPressed);
+	}
 }
 
 /*********************************************************************************************
@@ -38,5 +59,38 @@ void UBmrHUDWidget::OnEndGameStateChanged_Implementation(EBmrEndGameState EndGam
 	if (EndGameState != EBmrEndGameState::None)
 	{
 		PlayAnimation(ResultAnimation);
+	}
+}
+
+// Is called when player pressed the button to restart the match
+void UBmrHUDWidget::OnRestartButtonPressed_Implementation()
+{
+	ABmrPlayerController* MyPC = GetOwningPlayer<ABmrPlayerController>();
+	if (!MyPC)
+	{
+		return;
+	}
+
+	MyPC->SetGameStartingState();
+}
+
+// Is called when player pressed the button to return to the Main Menu
+void UBmrHUDWidget::OnMenuButtonPressed_Implementation()
+{
+	ABmrPlayerController* MyPC = GetOwningPlayer<ABmrPlayerController>();
+	if (!MyPC)
+	{
+		return;
+	}
+
+	MyPC->SetMenuState();
+}
+
+// Is called when player pressed the button to open the Settings
+void UBmrHUDWidget::OnSettingsButtonPressed_Implementation()
+{
+	if (USettingsWidget* SettingsWidget = UBmrBlueprintFunctionLibrary::GetSettingsWidget())
+	{
+		SettingsWidget->OpenSettings();
 	}
 }
