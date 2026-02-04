@@ -9,6 +9,7 @@
 
 // UE
 #include "Components/SlateWrapperTypes.h"
+#include "Engine/TimerHandle.h"
 
 #include "BmrMVVM_GameViewModel.generated.h"
 
@@ -86,13 +87,37 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
 	FText InGameTimerSecRemain = FText::GetEmpty();
 
-	/** Called when the 'Three-two-one-GO' timer was updated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnStartingTimerSecRemainChanged(float NewStartingTimerSecRemain);
+	/** Handles time counting during the Game Starting state. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, meta = (BlueprintProtected))
+	FTimerHandle StartingTimer;
 
-	/** Called when remain seconds to the end of the match timer was updated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnInGameTimerSecRemainChanged(float NewInGameTimerSecRemain);
+	/** Starts counting the 3-2-1-GO timer when match is starting. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void TriggerStartingCountdown();
+
+	/** Clears the Starting timer and stops counting it. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void StopStartingCountdown();
+
+	/** Is called once a second during the Game Starting state to decrement the 'Three-two-one-GO' timer. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnStartingTimerTick();
+
+	/** Handles time counting during the In-Game state. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, meta = (BlueprintProtected))
+	FTimerHandle InGameTimer;
+
+	/** Starts counting the (120...0) timer during the match. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void TriggerInGameCountdown();
+
+	/** Clears the In-Game timer and stops counting it. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void StopInGameCountdown();
+
+	/** Is called once a second during the In-Game state to decrement the match timer. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnInGameTimerTick();
 
 	/*********************************************************************************************
 	 * Mouse Visibility
@@ -134,10 +159,6 @@ protected:
 
 	/** Is called when this View Model is destructed. */
 	virtual void OnViewModelDestruct_Implementation() override;
-
-	/** Called when Game State was created in current world. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGameStateCreated(class AGameStateBase* GameState);
 
 	/** Called when the local player character is spawned, possessed, and replicated. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

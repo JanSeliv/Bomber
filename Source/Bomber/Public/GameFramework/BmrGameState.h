@@ -87,16 +87,6 @@ protected:
 	 * 3-2-1-GO
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStartingTimerSecRemainChanged, float, NewStartingTimerSecRemain);
-
-	/** Called when the 'Three-two-one-GO' timer was updated. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
-	FOnStartingTimerSecRemainChanged OnStartingTimerSecRemainChanged;
-
-	/** Returns the left second of the 'Three-two-one-GO' timer. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE float GetStartingTimerSecondsRemain() const { return StartingTimerSecRemain; }
-
 	/** Returns true if 'Three-two-one-GO' timer was already finished, so the match was started. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE bool IsStartingTimerElapsed() const { return FMath::IsNearlyZero(StartingTimerSecRemain) || StartingTimerSecRemain < 0.f; }
@@ -131,16 +121,6 @@ protected:
 	 * Runs during the match (120...0)
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInGameTimerSecRemainChanged, float, NewInGameTimerSecRemain);
-
-	/** Called when remain seconds to the end of the match timer was updated. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
-	FOnInGameTimerSecRemainChanged OnInGameTimerSecRemainChanged;
-
-	/** Returns the left second to the end of the match. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE float GetInGameTimerSecondsRemain() const { return InGameTimerSecRemain; }
-
 	/** Returns true if there are no seconds remain to the end of the match, so the match was ended. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE bool IsInGameTimerElapsed() const { return FMath::IsNearlyZero(InGameTimerSecRemain) || InGameTimerSecRemain < 0.f; }

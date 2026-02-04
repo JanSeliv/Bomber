@@ -168,11 +168,6 @@ void ABmrGameState::OnRep_CurrentGameState()
 void ABmrGameState::SetStartingTimerSecondsRemain(float NewStartingTimerSecRemain)
 {
 	StartingTimerSecRemain = FMath::Max(NewStartingTimerSecRemain, 0.f);
-
-	if (OnStartingTimerSecRemainChanged.IsBound())
-	{
-		OnStartingTimerSecRemainChanged.Broadcast(StartingTimerSecRemain);
-	}
 }
 
 // Starts counting the 3-2-1-GO timer when match is starting, can be called both on the server and clients
@@ -221,11 +216,6 @@ void ABmrGameState::OnStartingTimerTick()
 void ABmrGameState::SetInGameTimerSecondsRemain(float NewInGameTimerSecRemain)
 {
 	InGameTimerSecRemain = FMath::Max(NewInGameTimerSecRemain, 0.f);
-
-	if (OnInGameTimerSecRemainChanged.IsBound())
-	{
-		OnInGameTimerSecRemainChanged.Broadcast(InGameTimerSecRemain);
-	}
 }
 
 // Starts counting the (120...0) timer during the match, can be called both on the server and clients
@@ -320,7 +310,7 @@ void ABmrGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 
 // Called when the local player character is spawned, possessed, and replicated
-void ABmrGameState::OnLocalPawnReady_Implementation(class ABmrPawn* Pawn, int32 PlayerId)
+void ABmrGameState::OnLocalPawnReady_Implementation(ABmrPawn* Pawn, int32 PlayerId)
 {
 	// Try update the game state when the local character is initialized, if not set yet
 	if (CanChangeGameState(ReplicatedGameState))

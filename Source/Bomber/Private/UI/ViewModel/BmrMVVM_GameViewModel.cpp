@@ -5,6 +5,7 @@
 // Bomber
 #include "Actors/BmrPawn.h"
 #include "Components/BmrMouseActivityComponent.h"
+#include "DataAssets/BmrGameStateDataAsset.h"
 #include "DataAssets/BmrUIDataAsset.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
@@ -13,6 +14,7 @@
 
 // UE
 #include "Engine/World.h"
+#include "TimerManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrMVVM_GameViewModel)
 
@@ -26,6 +28,21 @@ void UBmrMVVM_GameViewModel::OnGameStateChanged_Implementation(EBmrCurrentGameSt
 	SetCurrentGameState(InGameState);
 
 	SetCanRestartGame(ABmrGameState::Get().CanStartGame());
+
+	StopInGameCountdown();
+	StopStartingCountdown();
+
+	switch (InGameState)
+	{
+		case ECGS::GameStarting:
+			TriggerStartingCountdown();
+			break;
+		case ECGS::InGame:
+			TriggerInGameCountdown();
+			break;
+		default:
+			break;
+	}
 }
 
 /*********************************************************************************************
@@ -45,18 +62,86 @@ void UBmrMVVM_GameViewModel::OnEndGameStateChanged_Implementation(EBmrEndGameSta
  * Countdown timers
  ********************************************************************************************* */
 
-// Called when the 'Three-two-one-GO' timer was updated
-void UBmrMVVM_GameViewModel::OnStartingTimerSecRemainChanged_Implementation(float NewStartingTimerSecRemain)
+// Starts counting the 3-2-1-GO timer when match is starting
+void UBmrMVVM_GameViewModel::TriggerStartingCountdown()
 {
-	const int32 Value = FMath::CeilToInt(NewStartingTimerSecRemain);
-	SetStartingTimerSecRemain(FText::AsNumber(Value));
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	const int32 StartingCountdown = UBmrGameStateDataAsset::Get().GetStartingCountdown();
+	SetStartingTimerSecRemain(FText::AsNumber(StartingCountdown));
+
+	constexpr bool bInLoop = true;
+	World->GetTimerManager().SetTimer(StartingTimer, this, &ThisClass::OnStartingTimerTick, ABmrGameState::DefaultTimerIntervalSec, bInLoop);
 }
 
-// Called when remain seconds to the end of the match timer was updated
-void UBmrMVVM_GameViewModel::OnInGameTimerSecRemainChanged_Implementation(float NewInGameTimerSecRemain)
+// Clears the Starting timer and stops counting it
+void UBmrMVVM_GameViewModel::StopStartingCountdown()
 {
-	const int32 Value = FMath::CeilToInt(NewInGameTimerSecRemain);
-	SetInGameTimerSecRemain(FText::AsNumber(Value));
+	if (StartingTimer.IsValid())
+	{
+		if (const UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().ClearTimer(StartingTimer);
+		}
+	}
+}
+
+// Is called once a second during the Game Starting state to decrement the 'Three-two-one-GO' timer
+void UBmrMVVM_GameViewModel::OnStartingTimerTick()
+{
+	const int32 CurrentValue = FCString::Atoi(*StartingTimerSecRemain.ToString());
+	const int32 NewValue = CurrentValue - 1;
+	SetStartingTimerSecRemain(FText::AsNumber(NewValue));
+
+	if (NewValue <= 0)
+	{
+		StopStartingCountdown();
+	}
+}
+
+// Starts counting the (120...0) timer during the match
+void UBmrMVVM_GameViewModel::TriggerInGameCountdown()
+{
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	const int32 InGameCountdown = UBmrGameStateDataAsset::Get().GetInGameCountdown();
+	SetInGameTimerSecRemain(FText::AsNumber(InGameCountdown));
+
+	constexpr bool bInLoop = true;
+	World->GetTimerManager().SetTimer(InGameTimer, this, &ThisClass::OnInGameTimerTick, ABmrGameState::DefaultTimerIntervalSec, bInLoop);
+}
+
+// Clears the In-Game timer and stops counting it
+void UBmrMVVM_GameViewModel::StopInGameCountdown()
+{
+	if (InGameTimer.IsValid())
+	{
+		if (const UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().ClearTimer(InGameTimer);
+		}
+	}
+}
+
+// Is called once a second during the In-Game state to decrement the match timer
+void UBmrMVVM_GameViewModel::OnInGameTimerTick()
+{
+	const int32 CurrentValue = FCString::Atoi(*InGameTimerSecRemain.ToString());
+	const int32 NewValue = CurrentValue - 1;
+	SetInGameTimerSecRemain(FText::AsNumber(NewValue));
+
+	if (NewValue <= 0)
+	{
+		StopInGameCountdown();
+	}
 }
 
 /*********************************************************************************************
@@ -82,8 +167,6 @@ void UBmrMVVM_GameViewModel::OnViewModelConstruct_Implementation(const UUserWidg
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
-
-	BIND_ON_GAME_STATE_CREATED(this, ThisClass::OnGameStateCreated);
 }
 
 // Is called when this View Model is destructed
@@ -96,20 +179,8 @@ void UBmrMVVM_GameViewModel::OnViewModelDestruct_Implementation()
 		GlobalEventsSubsystem->BP_OnGameStateChanged.RemoveAll(this);
 	}
 
-	if (ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState())
-	{
-		MyGameState->OnStartingTimerSecRemainChanged.RemoveAll(this);
-		MyGameState->OnInGameTimerSecRemainChanged.RemoveAll(this);
-	}
-}
-
-// Called when Game State was created in current world
-void UBmrMVVM_GameViewModel::OnGameStateCreated_Implementation(AGameStateBase* GameState)
-{
-	ABmrGameState& MyGameState = *CastChecked<ABmrGameState>(GameState);
-	MyGameState.OnStartingTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnStartingTimerSecRemainChanged);
-	MyGameState.OnInGameTimerSecRemainChanged.AddUniqueDynamic(this, &ThisClass::OnInGameTimerSecRemainChanged);
-	MyGameState.GetWorld()->GameStateSetEvent.RemoveAll(this);
+	StopStartingCountdown();
+	StopInGameCountdown();
 }
 
 // Called when the local player character is spawned, possessed, and replicated

@@ -29,7 +29,6 @@ public:
 	/*********************************************************************************************
 	 * Game States
 	 * - BIND_ON_GAME_STATE_CHANGED - called when the current game state was changed.
-	 * - BIND_ON_GAME_STATE_CREATED - called when the game state actor was created.
 	 ********************************************************************************************* */
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGameStateChanged, EBmrCurrentGameState, CurrentGameState);
@@ -117,19 +116,6 @@ protected:
 		{                                                                                        \
 			Obj->Function(EBmrCurrentGameState::Menu);                                           \
 		}                                                                                        \
-	}
-
-/** Helper macro to bind and call the function when the game state actor was created. */
-#define BIND_ON_GAME_STATE_CREATED(Obj, Function)                                    \
-	{                                                                                \
-		if (ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState()) \
-		{                                                                            \
-			Obj->Function(GameState);                                                \
-		}                                                                            \
-		else if (UWorld* World = GetWorld())                                         \
-		{                                                                            \
-			World->GameStateSetEvent.AddUObject(Obj, &Function);                     \
-		}                                                                            \
 	}
 
 /*********************************************************************************************
