@@ -12,6 +12,7 @@ namespace BmrGameplayTags
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Widget_Settings);
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Widget_Nickname);
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Widget_FpsCounter);
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Widget_HUD);
 	} // namespace UI
 
 	namespace Event

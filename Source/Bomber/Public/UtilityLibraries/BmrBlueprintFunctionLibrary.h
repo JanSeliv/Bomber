@@ -68,6 +68,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class USettingsWidget* GetSettingsWidget(const UObject* OptionalWorldContext = nullptr);
 
+	/** Returns the HUD widget. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static class UBmrHUDWidget* GetHUDWidget(const UObject* OptionalWorldContext = nullptr);
+
 	/** Returns the Camera Component used on level. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class UBmrCameraComponent* GetLevelCamera(const UObject* OptionalWorldContext = nullptr);

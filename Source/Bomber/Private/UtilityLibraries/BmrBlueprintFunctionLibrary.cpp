@@ -21,6 +21,7 @@
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/SettingsWidget.h"
+#include "UI/Widgets/BmrHUDWidget.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 
 // UE
@@ -151,6 +152,13 @@ USettingsWidget* UBmrBlueprintFunctionLibrary::GetSettingsWidget(const UObject* 
 {
 	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem(OptionalWorldContext);
 	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<USettingsWidget>(BmrGameplayTags::UI::Widget_Settings) : nullptr;
+}
+
+// Returns the HUD widget
+class UBmrHUDWidget* UBmrBlueprintFunctionLibrary::GetHUDWidget(const UObject* OptionalWorldContext)
+{
+	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem(OptionalWorldContext);
+	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<UBmrHUDWidget>(BmrGameplayTags::UI::Widget_HUD) : nullptr;
 }
 
 // Returns the Camera Component used on level

@@ -9,6 +9,7 @@ namespace BmrGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(Widget_Settings, "UI.Widget.Settings");
 		UE_DEFINE_GAMEPLAY_TAG(Widget_Nickname, "UI.Widget.Nickname");
 		UE_DEFINE_GAMEPLAY_TAG(Widget_FpsCounter, "UI.Widget.FPSCounter");
+		UE_DEFINE_GAMEPLAY_TAG(Widget_HUD, "UI.Widget.HUD");
 	} // namespace UI
 
 	namespace Event
