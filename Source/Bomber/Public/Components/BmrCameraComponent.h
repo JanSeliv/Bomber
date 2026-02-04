@@ -147,7 +147,7 @@ protected:
 
 	/** Listen game states to manage the tick. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Listen to recalculate camera location when screen aspect ratio was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

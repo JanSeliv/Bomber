@@ -3,13 +3,16 @@
 #include "UI/Widgets/BmrHUDWidget.h"
 
 // Bomber
+#include "Actors/BmrPawn.h"
 #include "Controllers/BmrPlayerController.h"
 #include "GameFramework/BmrPlayerState.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Animation/WidgetAnimation.h"
 #include "Components/Button.h"
 
@@ -20,7 +23,7 @@ void UBmrHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	BIND_ON_LOCAL_PLAYER_STATE_READY(this, ThisClass::OnLocalPlayerStateReady);
+	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPlayerStateReady);
 
 	if (RestartButton)
 	{
@@ -46,9 +49,11 @@ void UBmrHUDWidget::NativeConstruct()
  ********************************************************************************************* */
 
 // Called when the local player state is initialized and its assigned character is ready
-void UBmrHUDWidget::OnLocalPlayerStateReady_Implementation(class ABmrPlayerState* PlayerState, int32 PlayerId)
+void UBmrHUDWidget::OnLocalPlayerStateReady_Implementation(const FGameplayEventData& Payload)
 {
 	// Listen the ending the current game to play the End-Game sound on
+	const APawn* Pawn = Cast<APawn>(Payload.Instigator.Get());
+	ABmrPlayerState* PlayerState = Pawn ? Pawn->GetPlayerState<ABmrPlayerState>() : nullptr;
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }
@@ -71,6 +76,16 @@ void UBmrHUDWidget::OnRestartButtonPressed_Implementation()
 		return;
 	}
 
+	// This button might be pressed locally by user, send event to server if has no authority
+	FGameplayEventData EventData;
+	EventData.EventTag = BmrGameplayTags::Event::HUD_RestartButtonPressed;
+	EventData.Instigator = MyPC->GetPawn();
+	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	if (!MyPC->HasAuthority())
+	{
+		MyPC->ServerSendGameplayEvent(EventData);
+	}
+
 	MyPC->SetGameStartingState();
 }
 
@@ -81,6 +96,16 @@ void UBmrHUDWidget::OnMenuButtonPressed_Implementation()
 	if (!MyPC)
 	{
 		return;
+	}
+
+	// This button might be pressed locally by user, send event to server if has no authority
+	FGameplayEventData EventData;
+	EventData.EventTag = BmrGameplayTags::Event::HUD_MenuButtonPressed;
+	EventData.Instigator = MyPC->GetPawn();
+	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	if (!MyPC->HasAuthority())
+	{
+		MyPC->ServerSendGameplayEvent(EventData);
 	}
 
 	MyPC->SetMenuState();

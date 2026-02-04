@@ -9,10 +9,12 @@
 #include "DataAssets/BmrUIDataAsset.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
 
@@ -23,8 +25,9 @@
  ********************************************************************************************* */
 
 // Called when the current game state was changed
-void UBmrMVVM_GameViewModel::OnGameStateChanged_Implementation(EBmrCurrentGameState InGameState)
+void UBmrMVVM_GameViewModel::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState InGameState = ABmrGameState::GetCurrentGameState();
 	SetCurrentGameState(InGameState);
 
 	SetCanRestartGame(ABmrGameState::Get().CanStartGame());
@@ -174,19 +177,15 @@ void UBmrMVVM_GameViewModel::OnViewModelDestruct_Implementation()
 {
 	Super::OnViewModelDestruct_Implementation();
 
-	if (UBmrGlobalEventsSubsystem* GlobalEventsSubsystem = UBmrGlobalEventsSubsystem::GetGlobalEventsSubsystem())
-	{
-		GlobalEventsSubsystem->BP_OnGameStateChanged.RemoveAll(this);
-	}
-
 	StopStartingCountdown();
 	StopInGameCountdown();
 }
 
 // Called when the local player character is spawned, possessed, and replicated
-void UBmrMVVM_GameViewModel::OnLocalPawnReady_Implementation(ABmrPawn* Pawn, int32 PlayerId)
+void UBmrMVVM_GameViewModel::OnLocalPawnReady_Implementation(const FGameplayEventData& Payload)
 {
-	ABmrPlayerState* PlayerState = Pawn->GetPlayerState<ABmrPlayerState>();
+	const ABmrPawn* Pawn = Cast<ABmrPawn>(Payload.Instigator.Get());
+	ABmrPlayerState* PlayerState = Pawn ? Pawn->GetPlayerState<ABmrPlayerState>() : nullptr;
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 

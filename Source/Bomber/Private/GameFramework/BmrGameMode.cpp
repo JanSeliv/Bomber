@@ -7,6 +7,11 @@
 #include "GameFramework/BmrGameSession.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
+
+// UE
+#include "Abilities/GameplayAbilityTypes.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameMode)
 
@@ -69,6 +74,11 @@ void ABmrGameMode::PostLogin(APlayerController* NewPlayer)
 	// When new player joins to running game (any state is set), return everyone to the menu: joining running match and spectating are not supported at this moment
 	if (ABmrGameState::GetCurrentGameState() != ECGS::None)
 	{
+		FGameplayEventData EventData;
+		EventData.EventTag = BmrGameplayTags::Event::Player_PostLogin;
+		EventData.Instigator = NewPlayer;
+		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+
 		ABmrGameState::Get().SetGameState(ECGS::Menu);
 	}
 

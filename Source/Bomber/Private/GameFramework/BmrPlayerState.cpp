@@ -16,11 +16,13 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrGameUserSettings.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Engine/World.h"
@@ -171,6 +173,12 @@ void ABmrPlayerState::ApplyEndGameState()
 	// Try to end the game globally for all players
 	if (EndGameState != EBmrEndGameState::None)
 	{
+		// Notify that this player's end game state changed, BmrGameState will check conditions and decide whether to end the match
+		FGameplayEventData EventData;
+		EventData.EventTag = BmrGameplayTags::Event::Player_OnEndGame;
+		EventData.Instigator = GetPawn();
+		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+
 		if (UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Any) <= 1 // no characters to play with
 		    || UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Human) == 0) // all human players are dead
 		{
@@ -557,7 +565,7 @@ void ABmrPlayerState::OnPlayerStateInit_Implementation()
 
 	ApplyIsABot();
 
-	UBmrGlobalEventsSubsystem::Get().ReadyHandler.Broadcast_OnPlayerStateInit(*this);
+	UBmrGameplayMessageSubsystem::Get().ReadyHandler.Broadcast_OnPlayerStateInit(*this);
 
 	if (IsPlayerStateLocallyControlled())
 	{
@@ -576,8 +584,9 @@ void ABmrPlayerState::OnPlayerStateInit_Implementation()
 }
 
 // Listen game states to notify server about ending game for controlled player
-void ABmrPlayerState::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void ABmrPlayerState::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	if (!HasAuthority())
 	{
 		return;

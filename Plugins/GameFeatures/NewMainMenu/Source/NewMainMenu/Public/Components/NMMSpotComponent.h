@@ -136,7 +136,7 @@ protected:
 protected:
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

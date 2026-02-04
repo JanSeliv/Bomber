@@ -22,11 +22,12 @@ public class Bomber : ModuleRules
                 , "GameFeatures" // Inherited IGameFeatureStateChangeObserver
                 , "GameplayAbilities", "GameplayTags", "GameplayTasks" // Gameplay Ability System (GAS)
                 , "Mover" // Created UBmrMoverComponent, UBmrMoverWalkingMode
-                //My modules
+                // Bomber plugins
                 , "FunctionPicker" // Created properties in UBmrInputAction
                 , "MetaCheatManager" // Created UBmrCheatManager
                 , "PoolManager" // Created UBmrPoolFactory_Pawn
                 , "MyUtils" // Inherited from Base classes
+                , "GameplayMessageRuntime" // Created BmrGameplayMessageSubsystem
 		    }
 		);
 
@@ -43,7 +44,8 @@ public class Bomber : ModuleRules
 				, "GameplayTags" // FGameplayTag
                 , "ModularGameplay" // Modular Game Features (MGF)
                 , "ModelViewViewModel" // MVVM UI pattern
-				//My modules
+                , "StateTreeModule", "GameplayStateTreeModule" // State Trees
+				// Bomber plugins
 				, "SettingsWidgetConstructor" // Generates settings
 				, "AdvancedSessions", "AdvancedSteamSessions" // Steam
 			}

@@ -95,9 +95,9 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnCellChanged(UBmrMapComponent* InMapComponent, const struct FBmrCell& NewCell, const struct FBmrCell& PreviousCell);
 
-	/** Is called when the player state is fully initialized. */
+	/** Is called when the pawn is fully initialized and ready */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnPlayerStateReady(class ABmrPlayerState* InPlayerState, int32 PlayerId);
+	void OnPawnReady(const struct FGameplayEventData& Payload);
 
 	/*********************************************************************************************
 	 * Protected functions

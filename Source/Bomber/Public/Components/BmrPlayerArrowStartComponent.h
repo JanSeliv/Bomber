@@ -56,7 +56,7 @@ protected:
 protected:
 	/** Manages component state based on game state and local control. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when pawn controller changes. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

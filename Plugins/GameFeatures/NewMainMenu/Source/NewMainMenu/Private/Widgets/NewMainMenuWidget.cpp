@@ -5,18 +5,22 @@
 // NMM
 #include "Components/NMMSpotComponent.h"
 #include "NMMUtils.h"
+#include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
 #include "Components/BmrSkeletalMeshComponent.h"
 #include "Controllers/BmrPlayerController.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/Button.h"
+#include "GameFramework/Pawn.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuWidget)
@@ -105,6 +109,18 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 
 	if (UNMMUtils::ShouldSkipCinematic(CinematicRow))
 	{
+		// Notify that user clicked Play button (cinematic skipped)
+		FGameplayEventData EventData;
+		EventData.EventTag = NmmGameplayTags::Event::PlayButtonPressed;
+		EventData.Instigator = MyPC->GetPawn();
+		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+
+		// This button might be pressed locally by user, send event to server if has no authority
+		if (!MyPC->HasAuthority())
+		{
+			MyPC->ServerSendGameplayEvent(EventData);
+		}
+
 		MyPC->SetGameStartingState();
 	}
 	else

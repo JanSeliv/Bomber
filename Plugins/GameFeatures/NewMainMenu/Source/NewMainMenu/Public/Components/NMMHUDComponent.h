@@ -42,5 +42,5 @@ protected:
 
 	/** Called when the local player character is spawned, possessed, and replicated. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnLocalPawnReady(class ABmrPawn* Pawn, int32 PlayerId);
+	void OnLocalPawnReady(const struct FGameplayEventData& Payload);
 };

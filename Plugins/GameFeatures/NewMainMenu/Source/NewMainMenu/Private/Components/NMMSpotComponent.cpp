@@ -6,6 +6,7 @@
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
 #include "NMMUtils.h"
+#include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
@@ -19,19 +20,17 @@
 #include "MyDataTable/MyDataTable.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "LevelSequencePlayer.h"
-#include "NativeGameplayTags.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotComponent)
-
-// Skeletal mesh actor should own this tag, used to prevent initializing menu spots on other skeletal mesh actors, like from cinematics
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_NMM_SPOT, TEXT("NMM.Spot"));
 
 // Default constructor
 UNMMSpotComponent::UNMMSpotComponent()
@@ -175,7 +174,7 @@ void UNMMSpotComponent::BeginPlay()
 	}
 
 	// Skeletal mesh actor should own this tag, used to prevent initializing menu spots on other skeletal mesh actors, like from cinematics
-	static const FName ExpectedTagName = TAG_NMM_SPOT.GetTag().GetTagName();
+	static const FName ExpectedTagName = NmmGameplayTags::Menu::Spot.GetTag().GetTagName();
 	if (!GetOwner()->ActorHasTag(ExpectedTagName))
 	{
 		UE_LOG(LogBomber, Log, TEXT("[%i] %hs: Skip initializing '%s' spot for '%s' actor, it doesn't have '%s' tag."),
@@ -368,8 +367,9 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
  ********************************************************************************************* */
 
 // Called when the current game state was changed
-void UNMMSpotComponent::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void UNMMSpotComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	if (!IsCurrentSpot())
 	{
 		// Don't handle inactive spot
@@ -442,6 +442,12 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 	const FFrameNumber EndFrame(UCinematicUtils::GetSequenceTotalFrames(GetMasterSequence()) - 1);
 	if (CurrentFrame >= EndFrame)
 	{
+		// Notify that pre-game cinematic finished playing naturally
+		FGameplayEventData EventData;
+		EventData.EventTag = NmmGameplayTags::Event::CinematicPlaybackFinished;
+		EventData.Instigator = MyPC->GetPawn();
+		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+
 		// Cinematic is finished, start the countdown
 		MyPC->SetGameStartingState();
 	}

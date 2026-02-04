@@ -6,9 +6,12 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/Widgets/BmrPlayerNameWidget.h"
+
+// UE
+#include "Abilities/GameplayAbilityTypes.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerNameWidgetComponent)
 
@@ -119,7 +122,7 @@ void UBmrPlayerNameWidgetComponent::BeginPlay()
 }
 
 // Listen to manage the component visibility
-void UBmrPlayerNameWidgetComponent::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void UBmrPlayerNameWidgetComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
 	UpdateVisibility();
 }

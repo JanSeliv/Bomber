@@ -26,6 +26,14 @@
 	"BuiltInInitialFeatureState": "Registered",
 	"Plugins": [
 		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "CineCameraRigs",
+			"Enabled": true
+		},
+		{
 			"Name": "MyEditorUtils",
 			"Enabled": true
 		},
@@ -38,7 +46,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "CineCameraRigs",
+			"Name": "GameplayMessageRouter",
 			"Enabled": true
 		}
 	]

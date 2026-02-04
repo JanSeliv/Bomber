@@ -90,9 +90,9 @@ protected:
 	/** Is called when this View Model is destructed. */
 	virtual void OnViewModelDestruct_Implementation() override;
 
-	/** Called when any player state is initialized and its assigned character is ready. */
+	/** Called when the pawn is initialized and its assigned character is ready */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnPlayerStateReady(class ABmrPlayerState* PlayerState, int32 PlayerId);
+	void OnPawnReady(const struct FGameplayEventData& Payload);
 
 	/** Called when changed character Bot status is changed, applies both bot and human visibility. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

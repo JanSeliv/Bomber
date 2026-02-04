@@ -13,10 +13,11 @@
 #include "GameFramework/BmrGameState.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrMoverSyncState.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemGlobals.h"
 #include "Components/CapsuleComponent.h"
 #include "DefaultMovementSet/InstantMovementEffects/BasicInstantMovementEffects.h"
@@ -161,8 +162,9 @@ void UBmrMoverComponent::ProduceInput(const int32 DeltaTimeMS, FMoverInputCmdCon
  ********************************************************************************************* */
 
 // Is called when this character is ready to be used
-void UBmrMoverComponent::OnPawnReady_Implementation(ABmrPawn* Pawn, int32 PlayerId)
+void UBmrMoverComponent::OnPawnReady_Implementation(const FGameplayEventData& Payload)
 {
+	const ABmrPawn* Pawn = Cast<ABmrPawn>(Payload.Instigator.Get());
 	checkf(Pawn == GetOwner(), TEXT("ERROR: [%i] %hs:\n'Pawn' is not the same as Owner!"), __LINE__, __FUNCTION__);
 
 	// Setup powerups
@@ -178,8 +180,9 @@ void UBmrMoverComponent::OnPawnReady_Implementation(ABmrPawn* Pawn, int32 Player
 }
 
 // Listen to react when entered to different game state
-void UBmrMoverComponent::OnGameStateChanged(EBmrCurrentGameState CurrentGameState)
+void UBmrMoverComponent::OnGameStateChanged(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	const bool bShouldDisableMovement = CurrentGameState != EBmrCurrentGameState::InGame;
 	SetBlockMovement(bShouldDisableMovement);
 }

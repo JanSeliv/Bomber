@@ -41,6 +41,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetMenuState();
 
+	/** Sends a gameplay event to the server, is useful for actions happening only by client such as UI buttons to start the game etc. */
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "[Bomber]")
+	void ServerSendGameplayEvent(const struct FGameplayEventData& Payload);
+
 protected:
 	/** Set the new game state for the current game. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "[Bomber]", meta = (BlueprintProtected))
@@ -104,7 +108,7 @@ protected:
 
 	/** Listen to toggle movement input. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Listens to handle input on opening and closing the Settings widget. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

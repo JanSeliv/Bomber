@@ -6,23 +6,22 @@
 #include "Components/NMMPlayerControllerComponent.h"
 #include "Data/NMMDataAsset.h"
 #include "NMMUtils.h"
+#include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Widgets/NMMCinematicStateWidget.h"
 #include "Widgets/NewMainMenuWidget.h"
 
 // Bomber
 #include "Actors/BmrPawn.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "NativeGameplayTags.h"
+#include "Abilities/GameplayAbilityTypes.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMHUDComponent)
-
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_UI_WIDGET_NEWMAINMENU_MENU, TEXT("UI.Widget.NewMainMenu.Menu"));
-UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_UI_WIDGET_NEWMAINMENU_CINEMATIC, TEXT("UI.Widget.NewMainMenu.Cinematic"));
 
 // Default constructor
 UNMMHUDComponent::UNMMHUDComponent()
@@ -35,14 +34,14 @@ UNMMHUDComponent::UNMMHUDComponent()
 UNewMainMenuWidget* UNMMHUDComponent::GetMainMenuWidget() const
 {
 	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem();
-	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<UNewMainMenuWidget>(TAG_UI_WIDGET_NEWMAINMENU_MENU) : nullptr;
+	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<UNewMainMenuWidget>(NmmGameplayTags::UI::Widget_Menu) : nullptr;
 }
 
 // Returns the In Cinematic State widget
 UNMMCinematicStateWidget* UNMMHUDComponent::GetInCinematicStateWidget() const
 {
 	const UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem();
-	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<UNMMCinematicStateWidget>(TAG_UI_WIDGET_NEWMAINMENU_CINEMATIC) : nullptr;
+	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<UNMMCinematicStateWidget>(NmmGameplayTags::UI::Widget_Cinematic) : nullptr;
 }
 
 // Called when a component is registered, after Scene is set, but before CreateRenderState_Concurrent or OnCreatePhysicsState are called
@@ -51,7 +50,7 @@ void UNMMHUDComponent::OnRegister()
 	Super::OnRegister();
 
 	// Listen to register widgets OnLocalPawnReady to guarantee that the player controller is initialized, so we can use Widgets Subsystem
-	BIND_ON_LOCAL_PAWN_READY(this, UNMMHUDComponent::OnLocalPawnReady);
+	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
 }
 
 // Clears all transient data created by this component
@@ -61,15 +60,15 @@ void UNMMHUDComponent::OnUnregister()
 
 	if (UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem())
 	{
-		WidgetsSubsystem->DestroyManageableWidgetByTag(TAG_UI_WIDGET_NEWMAINMENU_MENU);
-		WidgetsSubsystem->DestroyManageableWidgetByTag(TAG_UI_WIDGET_NEWMAINMENU_CINEMATIC);
+		WidgetsSubsystem->DestroyManageableWidgetByTag(NmmGameplayTags::UI::Widget_Menu);
+		WidgetsSubsystem->DestroyManageableWidgetByTag(NmmGameplayTags::UI::Widget_Cinematic);
 	}
 
 	Super::OnUnregister();
 }
 
 // Called when the local player character is spawned, possessed, and replicated
-void UNMMHUDComponent::OnLocalPawnReady_Implementation(class ABmrPawn* Character, int32 PlayerId)
+void UNMMHUDComponent::OnLocalPawnReady_Implementation(const FGameplayEventData& Payload)
 {
 	UBmrWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetMainMenuWidgetData());
 	UBmrWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetInCinematicStateWidgetData());

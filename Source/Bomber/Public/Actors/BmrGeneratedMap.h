@@ -302,7 +302,7 @@ protected:
 
 	/** Listen game states to generate level actors. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Align transform and build cells, on both server and clients.
 	 * Is called everytime the level size (transform) is changed.

@@ -10,9 +10,13 @@
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrCell.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+#include "Structures/BmrGameplayTags.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
+
+// UE
+#include "Abilities/GameplayAbilityTypes.h"
 
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -226,8 +230,9 @@ void UBmrCameraComponent::BeginPlay()
 }
 
 // Listen game states to manage the tick
-void UBmrCameraComponent::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void UBmrCameraComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	bool bShouldTick = false;
 
 	switch (CurrentGameState)

@@ -13,7 +13,7 @@ public class NewMainMenu : ModuleRules
 			{
 				"Core", "Engine"
 				, "UMG" // UUserWidget creation
-				// My modules
+				// Bomber modules
 				, "Bomber"
 				, "MetaCheatManager" // UNMMCheatExtension
 			}
@@ -25,10 +25,11 @@ public class NewMainMenu : ModuleRules
 				, "MovieScene", "LevelSequence" // Cinematics
 				, "AdvancedWidgets" // URadialSlider
 				, "CineCameraRigs" // Camera rails
-				, "GameplayTags" // UE_DEFINE_GAMEPLAY_TAG_STATIC
-				// My modules
+				, "GameplayTags", "GameplayAbilities" // Tags
+				// Bomber modules
 				, "MyUtils"
 				, "SettingsWidgetConstructor"
+				, "GameplayMessageRuntime" // BmrGameplayMessageSubsystem
 			}
 		);
 	}

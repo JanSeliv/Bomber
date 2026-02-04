@@ -5,16 +5,19 @@
 // NMM
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMTypes.h"
+#include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 
 // Bomber
 #include "Controllers/BmrPlayerController.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/Button.h"
 #include "Components/RadialSlider.h"
-#include "Components/TextBlock.h"
+#include "GameFramework/Pawn.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMCinematicStateWidget)
 
@@ -99,9 +102,18 @@ void UNMMCinematicStateWidget::OnCinematicSkipReleased_Implementation()
 // Is called to skip cinematic on finished holding the skip button or clicked on UI
 void UNMMCinematicStateWidget::OnCinematicSkipFinished_Implementation()
 {
-	// Skip cinematic
-	if (ABmrPlayerController* MyPC = GetOwningPlayer<ABmrPlayerController>())
+	ABmrPlayerController* MyPC = GetOwningPlayer<ABmrPlayerController>();
+	if (!MyPC)
 	{
-		MyPC->SetGameStartingState();
+		return;
 	}
+
+	// Notify that user skipped the pre-game cinematic manually
+	FGameplayEventData EventData;
+	EventData.EventTag = NmmGameplayTags::Event::CinematicSkipped;
+	EventData.Instigator = MyPC->GetPawn();
+	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+
+	// Skip cinematic
+	MyPC->SetGameStartingState();
 }

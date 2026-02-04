@@ -3,11 +3,16 @@
 #include "UI/ViewModel/BmrMVVM_PlayerBase.h"
 
 // Bomber
+#include "Actors/BmrPawn.h"
 #include "AdvancedSteamFriendsLibrary.h"
 #include "DataAssets/BmrUIDataAsset.h"
 #include "GameFramework/BmrPlayerState.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+
+// UE
+#include "Abilities/GameplayAbilityTypes.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrMVVM_PlayerBase)
 
@@ -86,7 +91,7 @@ void UBmrMVVM_PlayerBase::OnViewModelConstruct_Implementation(const UUserWidget*
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
-	BIND_ON_PLAYER_STATE_READY_ID(this, ThisClass::OnPlayerStateReady, GetPlayerId());
+	BIND_ON_PAWN_READY_ID(this, ThisClass::OnPawnReady, GetPlayerId());
 }
 
 // Is called when this View Model is destructed
@@ -101,11 +106,11 @@ void UBmrMVVM_PlayerBase::OnViewModelDestruct_Implementation()
 	}
 }
 
-// Called when any player state is initialized and its assigned character is ready
-void UBmrMVVM_PlayerBase::OnPlayerStateReady_Implementation(ABmrPlayerState* PlayerState, int32 PlayerId)
+// Called when the pawn is initialized and its assigned character is ready
+void UBmrMVVM_PlayerBase::OnPawnReady_Implementation(const FGameplayEventData& Payload)
 {
-	checkf(PlayerId == GetPlayerId(), TEXT("ERROR: [%i] %hs:\n'PlayerId' is different than owned!"), __LINE__, __FUNCTION__);
-
+	const ABmrPawn* Pawn = Cast<ABmrPawn>(Payload.Instigator.Get());
+	ABmrPlayerState* PlayerState = Pawn ? Pawn->GetPlayerState<ABmrPlayerState>() : nullptr;
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 
 	PlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnNicknameChanged);

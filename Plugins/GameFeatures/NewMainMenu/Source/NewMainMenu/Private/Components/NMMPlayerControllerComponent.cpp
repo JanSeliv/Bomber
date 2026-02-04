@@ -7,23 +7,28 @@
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
 #include "NMMUtils.h"
+#include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
-#include "Components/BmrMouseActivityComponent.h"
+#include "Actors/BmrPawn.h"
 #include "Components/BmrCameraComponent.h"
+#include "Components/BmrMouseActivityComponent.h"
 #include "Controllers/BmrPlayerController.h"
 #include "DataAssets/BmrInputMappingContext.h"
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/SaveUtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/AudioComponent.h"
+#include "GameFramework/PlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMPlayerControllerComponent)
 
@@ -163,18 +168,10 @@ void UNMMPlayerControllerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	constexpr int32 FirstPlayerId = 0;
+	BIND_ON_PAWN_READY_ID(this, ThisClass::OnFirstPawnReady, FirstPlayerId);
 
-	// Listen to set Menu game state once active spot is ready
-	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
-	if (SpotsSubsystem.IsActiveMenuSpotReady())
-	{
-		OnActiveMenuSpotReady(SpotsSubsystem.GetCurrentSpot());
-	}
-	else
-	{
-		SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
-	}
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
 
@@ -227,9 +224,25 @@ void UNMMPlayerControllerComponent::OnUnregister()
  * Events
  ********************************************************************************************* */
 
-// Listen to react when entered the Menu state
-void UNMMPlayerControllerComponent::OnGameStateChanged(EBmrCurrentGameState CurrentGameState)
+// Called when the first player character is spawned, possessed, and replicated
+void UNMMPlayerControllerComponent::OnFirstPawnReady_Implementation(const FGameplayEventData& Payload)
 {
+	// Once player is initialized, listen for for menu spots (dont attempt earlier, so we dont attempt to set menu state before player is ready)
+	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	if (SpotsSubsystem.IsActiveMenuSpotReady())
+	{
+		OnActiveMenuSpotReady(SpotsSubsystem.GetCurrentSpot());
+	}
+	else
+	{
+		SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
+	}
+}
+
+// Listen to react when entered the Menu state
+void UNMMPlayerControllerComponent::OnGameStateChanged(const FGameplayEventData& Payload)
+{
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	switch (CurrentGameState)
 	{
 		case ECGS::Menu: // Entered the Main Menu
@@ -271,6 +284,13 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENM
 // Is listen to set Menu game state once first spot is ready
 void UNMMPlayerControllerComponent::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* MainMenuSpotComponent)
 {
+	// Notify that Main Menu camera spot is ready
+	FGameplayEventData EventData;
+	EventData.EventTag = NmmGameplayTags::Event::ActiveSpotReady;
+	EventData.Instigator = UBmrBlueprintFunctionLibrary::GetLocalPawn();
+	EventData.OptionalObject = MainMenuSpotComponent;
+	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+
 	TrySetMenuState();
 
 	UNMMCameraSubsystem::Get().PossessCamera(ENMMState::Idle);

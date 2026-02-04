@@ -17,12 +17,13 @@
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -116,7 +117,7 @@ void ABmrPawn::BeginPlay()
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
 
-	BIND_ON_PLAYER_STATE_READY_ID(this, ThisClass::OnPlayerStateReady, GetPlayerId());
+	BIND_ON_PAWN_READY_ID(this, ThisClass::OnPawnReady, GetPlayerId());
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -201,7 +202,10 @@ void ABmrPawn::OnAddedToLevel_Implementation(UBmrMapComponent* InMapComponent)
 
 	ApplyPreset();
 
-	UBmrGlobalEventsSubsystem::Get().ReadyHandler.Broadcast_OnPawnAdded(*this);
+	if (UBmrGameplayMessageSubsystem* GameplayMessageRouter = UBmrGameplayMessageSubsystem::GetGameplayMessageRouter())
+	{
+		GameplayMessageRouter->ReadyHandler.Broadcast_OnPawnAdded(*this);
+	}
 }
 
 // Is called when the Row from current Data Asset is changed for owner on the level, on both server and clients
@@ -265,8 +269,6 @@ void ABmrPawn::OnPostRemovedFromLevel_Implementation(UBmrMapComponent* InMapComp
 
 	OnActorBeginOverlap.RemoveAll(this);
 
-	UBmrGlobalEventsSubsystem::Get().BP_OnGameStateChanged.RemoveAll(this);
-
 	GetMeshComponentChecked().SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
@@ -286,10 +288,11 @@ void ABmrPawn::OnCellChanged_Implementation(UBmrMapComponent* InMapComponent, co
 	}
 }
 
-// Is called when the player state is fully initialized
-void ABmrPawn::OnPlayerStateReady_Implementation(ABmrPlayerState* InPlayerState, int32 PlayerId)
+// Is called when the pawn is fully initialized and ready
+void ABmrPawn::OnPawnReady_Implementation(const FGameplayEventData& Payload)
 {
-	checkf(InPlayerState == GetPlayerState(), TEXT("ERROR: [%i] %hs:\n'InPlayerState' is different than owned!"), __LINE__, __FUNCTION__);
+	ABmrPlayerState* InPlayerState = GetPlayerState<ABmrPlayerState>();
+	checkf(InPlayerState, TEXT("ERROR: [%i] %hs:\n'InPlayerState' is null!"), __LINE__, __FUNCTION__);
 
 	checkf(PlayerName3DWidgetComponent, TEXT("ERROR: [%i] %hs:\n'PlayerName3DWidgetComponent' is null!"), __LINE__, __FUNCTION__);
 	PlayerName3DWidgetComponent->Init(InPlayerState);
@@ -541,7 +544,8 @@ void ABmrPawn::SpawnBomb()
 
 	// Activate bomb ability
 	FGameplayEventData EventData;
+	EventData.EventTag = BmrGameplayTags::Event::Bomb_Placed;
 	EventData.Instigator = this;
 	EventData.EventMagnitude = UBmrCellUtilsLibrary::GetIndexByCellOnLevel(MapComponent->GetCell());
-	GetAbilitySystemComponentChecked().HandleGameplayEvent(BmrGameplayTags::Event::Bomb_Placed, &EventData);
+	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
 }

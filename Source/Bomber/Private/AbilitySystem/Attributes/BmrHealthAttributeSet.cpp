@@ -2,11 +2,14 @@
 
 #include "AbilitySystem/Attributes/BmrHealthAttributeSet.h"
 
+// Bomber
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
+
 // UE
 #include "AbilitySystemGlobals.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
-#include "Structures/BmrGameplayTags.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrHealthAttributeSet)
 
@@ -159,8 +162,10 @@ void UBmrHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 	if (GetHealth() <= 0.f && !bOutOfHealth)
 	{
 		FGameplayEventData EventData;
+		EventData.EventTag = BmrGameplayTags::Event::Player_Death;
 		EventData.Instigator = Data.EffectSpec.GetEffectContext().GetInstigator();
-		Data.Target.HandleGameplayEvent(BmrGameplayTags::Event::Player_Death, &EventData);
+		EventData.Target = Data.Target.GetAvatarActor();
+		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
 	}
 
 	// Check health again in case an event above changed it.

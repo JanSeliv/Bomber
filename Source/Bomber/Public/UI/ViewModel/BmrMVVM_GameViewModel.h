@@ -39,7 +39,7 @@ protected:
 
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState InGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/*********************************************************************************************
 	 * End-Game State
@@ -162,5 +162,5 @@ protected:
 
 	/** Called when the local player character is spawned, possessed, and replicated. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnLocalPawnReady(class ABmrPawn* Pawn, int32 PlayerId);
+	void OnLocalPawnReady(const struct FGameplayEventData& Payload);
 };

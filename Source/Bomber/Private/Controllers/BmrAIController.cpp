@@ -14,7 +14,8 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
@@ -22,6 +23,7 @@
 #endif
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
 
@@ -140,7 +142,7 @@ void ABmrAIController::OnPossess(APawn* InPawn)
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 
 	// Notify host about bot possession
-	UBmrGlobalEventsSubsystem::Get().ReadyHandler.Broadcast_OnPawnPossessed(*InOwner);
+	UBmrGameplayMessageSubsystem::Get().ReadyHandler.Broadcast_OnPawnPossessed(*InOwner);
 
 	UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InOwner);
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
@@ -477,8 +479,9 @@ void ABmrAIController::SetAI(bool bShouldEnable)
  ********************************************************************************************* */
 
 // Listen game states to enable or disable AI
-void ABmrAIController::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void ABmrAIController::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	const bool bMatchStarted = CurrentGameState == EBmrCurrentGameState::InGame;
 	SetAI(bMatchStarted);
 }

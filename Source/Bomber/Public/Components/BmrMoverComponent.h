@@ -72,11 +72,11 @@ protected:
 protected:
 	/** Is called when this character is ready to be used. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnPawnReady(class ABmrPawn* Pawn, int32 PlayerId);
+	void OnPawnReady(const struct FGameplayEventData& Payload);
 
 	/** Listen to react when entered to different game state. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when owner is unregistered from the Generated Map, on both server and client. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

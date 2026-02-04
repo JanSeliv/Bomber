@@ -16,12 +16,14 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -99,6 +101,12 @@ void ABmrPlayerController::ServerSetGameState_Implementation(EBmrCurrentGameStat
 	{
 		MyGameState->SetGameState(NewGameState);
 	}
+}
+
+// Sends a gameplay event to the server, is useful for actions happening only by client such as UI buttons to start the game etc
+void ABmrPlayerController::ServerSendGameplayEvent_Implementation(const FGameplayEventData& Payload)
+{
+	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
 }
 
 /*********************************************************************************************
@@ -195,7 +203,7 @@ void ABmrPlayerController::OnPossess(APawn* InPawn)
 
 	if (ABmrPawn* BmrPawn = Cast<ABmrPawn>(InPawn))
 	{
-		UBmrGlobalEventsSubsystem::Get().ReadyHandler.Broadcast_OnPawnPossessed(*BmrPawn);
+		UBmrGameplayMessageSubsystem::Get().ReadyHandler.Broadcast_OnPawnPossessed(*BmrPawn);
 	}
 }
 
@@ -267,7 +275,7 @@ void ABmrPlayerController::OnWidgetsInitialized_Implementation()
 }
 
 // Listen to toggle movement input
-void ABmrPlayerController::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void ABmrPlayerController::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
 	ApplyAllInputContexts();
 }

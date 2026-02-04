@@ -14,8 +14,9 @@
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "PoolManagerSubsystem.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
@@ -24,6 +25,7 @@
 #endif
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
@@ -861,8 +863,9 @@ void ABmrGeneratedMap::GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&
 }
 
 // Listen game states to generate level actors
-void ABmrGeneratedMap::OnGameStateChanged(EBmrCurrentGameState CurrentGameState)
+void ABmrGeneratedMap::OnGameStateChanged(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	if (!HasAuthority())
 	{
 		return;

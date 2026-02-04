@@ -7,10 +7,12 @@
 #include "AbilitySystemComponent.h"
 #include "Actors/BmrPawn.h"
 #include "DataAssets/BmrUIDataAsset.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/Image.h"
 #include "Components/RadialSlider.h"
 #include "Engine/Texture2D.h"
@@ -111,8 +113,9 @@ void UBmrPowerupWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
  ********************************************************************************************* */
 
 // Called when the local player state is initialized and its assigned character is ready
-void UBmrPowerupWidget::OnLocalPawnReady_Implementation(ABmrPawn* Character, int32 PlayerId)
+void UBmrPowerupWidget::OnLocalPawnReady_Implementation(const FGameplayEventData& Payload)
 {
+	const ABmrPawn* Character = Cast<ABmrPawn>(Payload.Instigator.Get());
 	checkf(Character, TEXT("ERROR: [%i] %hs:\n'Character' is null!"), __LINE__, __FUNCTION__);
 
 	UAbilitySystemComponent& ASC = Character->GetAbilitySystemComponentChecked();

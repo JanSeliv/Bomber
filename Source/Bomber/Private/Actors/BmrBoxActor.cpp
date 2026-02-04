@@ -8,7 +8,6 @@
 #include "Components/BmrMapComponent.h"
 #include "DataAssets/BmrBoxDataAsset.h"
 #include "GameFramework/BmrGameState.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE

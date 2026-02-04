@@ -3,15 +3,18 @@
 #include "Subsystems/BmrSoundsSubsystem.h"
 
 // Bomber
+#include "Actors/BmrPawn.h"
 #include "Bomber.h"
 #include "DataAssets/BmrSoundsDataAsset.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/AudioComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/Level.h"
@@ -306,7 +309,7 @@ void UBmrSoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	USoundMix* MainSoundMix = UBmrSoundsDataAsset::Get().GetMainSoundMix();
 	UGameplayStatics::SetBaseSoundMix(&InWorld, MainSoundMix);
 
-	BIND_ON_LOCAL_PLAYER_STATE_READY(this, ThisClass::OnLocalPlayerStateReady);
+	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPlayerStateReady);
 
 	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
 }
@@ -334,8 +337,9 @@ void UBmrSoundsSubsystem::OnEndGameStateChanged_Implementation(EBmrEndGameState 
 }
 
 // Listen game states to switch background music
-void UBmrSoundsSubsystem::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void UBmrSoundsSubsystem::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	switch (CurrentGameState)
 	{
 		case ECGS::GameStarting:
@@ -355,9 +359,11 @@ void UBmrSoundsSubsystem::OnGameStateChanged_Implementation(EBmrCurrentGameState
 }
 
 // Called when the local player state is initialized and its assigned character is ready
-void UBmrSoundsSubsystem::OnLocalPlayerStateReady_Implementation(class ABmrPlayerState* PlayerState, int32 PlayerId)
+void UBmrSoundsSubsystem::OnLocalPlayerStateReady_Implementation(const FGameplayEventData& Payload)
 {
 	// Listen the ending the current game to play the End-Game sound on
+	const APawn* Pawn = Cast<APawn>(Payload.Instigator.Get());
+	ABmrPlayerState* PlayerState = Pawn ? Pawn->GetPlayerState<ABmrPlayerState>() : nullptr;
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }

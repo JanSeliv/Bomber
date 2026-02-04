@@ -7,9 +7,11 @@
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "GameFramework/PlayerController.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrMouseActivityComponent)
@@ -213,7 +215,8 @@ void UBmrMouseActivityComponent::OnMouseMove_Implementation()
 }
 
 // Listen to toggle mouse visibility
-void UBmrMouseActivityComponent::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void UBmrMouseActivityComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	SetMouseVisibilitySettingsEnabled(true, CurrentGameState);
 }

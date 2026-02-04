@@ -8,8 +8,12 @@
 
 // Bomber
 #include "GameFramework/BmrGameState.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+
+// UE
+#include "Abilities/GameplayAbilityTypes.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMBaseSubsystem)
 
@@ -69,8 +73,9 @@ void UNMMBaseSubsystem::Deinitialize()
  ********************************************************************************************* */
 
 // Called when the current game state was changed, handles Main Menu states accordingly
-void UNMMBaseSubsystem::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void UNMMBaseSubsystem::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	switch (CurrentGameState)
 	{
 		case EBmrCurrentGameState::Menu:

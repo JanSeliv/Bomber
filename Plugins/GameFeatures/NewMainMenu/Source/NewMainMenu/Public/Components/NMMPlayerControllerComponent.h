@@ -91,9 +91,13 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
+	/** Called when the first player character is spawned, possessed, and replicated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnFirstPawnReady(const struct FGameplayEventData& Payload);
+
 	/** Listen to react when entered the Menu state. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called wen the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

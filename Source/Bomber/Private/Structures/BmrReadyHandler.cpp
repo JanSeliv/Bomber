@@ -6,7 +6,11 @@
 #include "Actors/BmrPawn.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
+
+// UE
+#include "Abilities/GameplayAbilityTypes.h"
 
 // Should be called when Pawn is possessed
 void FBmrReadyHandler::Broadcast_OnPawnPossessed(ABmrPawn& Pawn)
@@ -127,7 +131,7 @@ bool FBmrReadyHandler::IsPawnPossessed(const FOnReadyData& FoundHandle)
 	    __LINE__, __FUNCTION__, *GetNameSafe(FoundHandle.Pawn.Get()), *GetNameSafe(FoundHandle.PlayerState.Get()), FoundHandle.bIsPossessed ? TEXT("true") : TEXT("false"), bIsBot ? TEXT("true") : TEXT("false"), bIsLocallyControlled ? TEXT("true") : TEXT("false"), FoundHandle.Pawn->HasAuthority() ? TEXT("true") : TEXT("false"), FoundHandle.PlayerState->GetPlayerId());
 }
 
-// Broadcasts OnPawnReady event if all conditions are met
+// Broadcasts Pawn Ready event if all conditions are met
 void FBmrReadyHandler::TryBroadcastOnReady_Internal(ABmrPawn& Pawn)
 {
 	if (!IsReady(&Pawn))
@@ -136,29 +140,11 @@ void FBmrReadyHandler::TryBroadcastOnReady_Internal(ABmrPawn& Pawn)
 		return;
 	}
 
-	const UBmrGlobalEventsSubsystem& EventsSubsystem = UBmrGlobalEventsSubsystem::Get();
-	ABmrPlayerState* PlayerState = CastChecked<ABmrPlayerState>(Pawn.GetPlayerState());
-
-	const int32 PlayerId = PlayerState->GetPlayerId();
-	const bool bIsLocalPlayer = PlayerState->IsPlayerStateLocallyControlled();
-
-	EventsSubsystem.OnPawnReadyNative.Broadcast(&Pawn, PlayerId);
-	EventsSubsystem.BP_OnPawnReady.Broadcast(&Pawn, PlayerId);
-
-	if (bIsLocalPlayer)
-	{
-		EventsSubsystem.OnLocalPawnReadyNative.Broadcast(&Pawn, PlayerId);
-		EventsSubsystem.BP_OnLocalPawnReady.Broadcast(&Pawn, PlayerId);
-	}
-
-	EventsSubsystem.OnPlayerStateReadyNative.Broadcast(PlayerState, PlayerId);
-	EventsSubsystem.BP_OnPlayerStateReady.Broadcast(PlayerState, PlayerId);
-
-	if (bIsLocalPlayer)
-	{
-		EventsSubsystem.OnLocalPlayerStateReadyNative.Broadcast(PlayerState, PlayerId);
-		EventsSubsystem.BP_OnLocalPlayerStateReady.Broadcast(PlayerState, PlayerId);
-	}
+	// Broadcast Pawn Ready event via Gameplay Message Router
+	FGameplayEventData PawnPayload;
+	PawnPayload.EventTag = BmrGameplayTags::Event::Player_PawnReady;
+	PawnPayload.Instigator = &Pawn;
+	UBmrGameplayMessageSubsystem::BroadcastMessage(PawnPayload);
 }
 
 // Perform cleanup

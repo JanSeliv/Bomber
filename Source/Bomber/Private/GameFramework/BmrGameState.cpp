@@ -10,11 +10,13 @@
 #include "DataAssets/BmrModularGameFeatureSettings.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
@@ -61,7 +63,7 @@ bool ABmrGameState::CanChangeGameState(EBmrCurrentGameState NewGameState) const
 
 	// Don't allow to change the game state if local character is not initialized or destroyed
 	const ABmrPawn* LocalChar = UBmrBlueprintFunctionLibrary::GetLocalPawn();
-	return UBmrGlobalEventsSubsystem::Get().ReadyHandler.IsReady(LocalChar);
+	return UBmrGameplayMessageSubsystem::Get().ReadyHandler.IsReady(LocalChar);
 }
 
 // Returns the AMyGameState::CurrentGameState property.
@@ -142,12 +144,10 @@ void ABmrGameState::ApplyGameState()
 			break;
 	}
 
-	// Notify listeners
-	const UBmrGlobalEventsSubsystem::FOnGameStateChanged& OnGameStateChanged = UBmrGlobalEventsSubsystem::Get().BP_OnGameStateChanged;
-	if (OnGameStateChanged.IsBound())
-	{
-		OnGameStateChanged.Broadcast(LocalGameState);
-	}
+	// Notify listeners via Gameplay Message Router
+	FGameplayEventData Payload;
+	Payload.EventTag = BmrGameplayTags::Event::GameState_Changed;
+	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
 }
 
 // Called on the AMyGameState::CurrentGameState property updating.
@@ -310,7 +310,7 @@ void ABmrGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 
 // Called when the local player character is spawned, possessed, and replicated
-void ABmrGameState::OnLocalPawnReady_Implementation(ABmrPawn* Pawn, int32 PlayerId)
+void ABmrGameState::OnLocalPawnReady_Implementation(const FGameplayEventData& Payload)
 {
 	// Try update the game state when the local character is initialized, if not set yet
 	if (CanChangeGameState(ReplicatedGameState))

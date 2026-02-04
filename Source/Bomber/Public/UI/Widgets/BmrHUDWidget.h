@@ -49,7 +49,7 @@ protected:
 protected:
 	/** Called when the local player state is initialized and its assigned character is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnLocalPlayerStateReady(class ABmrPlayerState* PlayerState, int32 PlayerId);
+	void OnLocalPlayerStateReady(const struct FGameplayEventData& Payload);
 
 	/** Is called on end-game result change. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

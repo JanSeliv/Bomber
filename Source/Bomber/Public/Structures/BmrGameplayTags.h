@@ -24,6 +24,24 @@ namespace BmrGameplayTags
 
 		/** Event that fires on death*/
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_Death);
+
+		/** Event that fires when new player connected to server while match was already in progress, is called on GeneratedMap ASC */
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_PostLogin);
+
+		/** Event that fires when game over condition met (all humans dead or last player standing), is called on owner pawn ASC */
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_OnEndGame);
+
+		/** Event that fires when user pressed Menu button on HUD to return to Main Menu, is called on local player ASC */
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HUD_MenuButtonPressed);
+
+		/** Event that fires when user pressed Restart button on HUD to restart the match, is called on local player ASC */
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HUD_RestartButtonPressed);
+
+		/** Event that fires when the current game state was changed (Menu, GameStarting, InGame, EndGame), obtain state from ABmrGameState::GetCurrentGameState() */
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameState_Changed);
+
+		/** Event that fires when any pawn is spawned, possessed, and replicated, obtain pawn from Payload.Instigator */
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_PawnReady);
 	} // namespace Event
 
 	namespace GameplayEffect

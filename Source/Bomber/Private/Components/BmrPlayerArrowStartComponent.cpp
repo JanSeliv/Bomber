@@ -5,9 +5,11 @@
 // Bomber
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerArrowStartComponent)
@@ -91,8 +93,9 @@ void UBmrPlayerArrowStartComponent::TickComponent(float DeltaTime, ELevelTick Ti
  ********************************************************************************************* */
 
 // Manages component state based on game state and local control
-void UBmrPlayerArrowStartComponent::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void UBmrPlayerArrowStartComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	switch (CurrentGameState)
 	{
 		case ECGS::GameStarting:

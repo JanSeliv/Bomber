@@ -10,8 +10,12 @@
 
 // Bomber
 #include "GameFramework/BmrGameState.h"
-#include "Subsystems/BmrGlobalEventsSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+
+// UE
+#include "Abilities/GameplayAbilityTypes.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotsSubsystem)
 
@@ -236,8 +240,9 @@ void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState NewS
 }
 
 // Called when the current game state was changed
-void UNMMSpotsSubsystem::OnGameStateChanged_Implementation(EBmrCurrentGameState CurrentGameState)
+void UNMMSpotsSubsystem::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
+	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	switch (CurrentGameState)
 	{
 		case ECGS::GameStarting:

@@ -44,7 +44,7 @@ protected:
 
 	/** Listen to manage the component visibility. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGameStateChanged(EBmrCurrentGameState CurrentGameState);
+	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Is called when all game widgets are initialized to handle UI-related logic.
 	 * Is not called on remote clients. */
