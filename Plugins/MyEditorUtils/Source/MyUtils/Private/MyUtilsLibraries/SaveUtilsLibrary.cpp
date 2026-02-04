@@ -2,56 +2,32 @@
 
 #include "MyUtilsLibraries/SaveUtilsLibrary.h"
 
-// MyUtils
-#include "MyUtilsLibraries/UtilsLibrary.h"
+// My Utils
+#include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
 
 // UE
-#include "Engine/Engine.h"
-#include "Engine/World.h"
 #include "GameFramework/SaveGame.h"
 #include "HAL/FileManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/ConfigCacheIni.h"
-#include "TimerManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SaveUtilsLibrary)
 
 // Is code alternative of blueprintable UGameplayStatics::AsyncLoadGameFromSlot, which does the same, but ensures callback will be called in the correct world context, even in PIE multiplayer
 void USaveUtilsLibrary::AsyncLoadGameFromSlot(const UObject* WorldContextObject, const FString& SlotName, int32 UserIndex, const FAsyncLoadGameFromSlot& Callback)
 {
-	const UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull) : nullptr;
-	if (!ensureMsgf(World, TEXT("ASSERT: [%i] %hs:\n'World' is not valid!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(Callback.IsBound(), TEXT("ASSERT: [%i] %hs:\n'Callback' is not bound!"), __LINE__, __FUNCTION__))
+	if (!ensureMsgf(Callback.IsBound(), TEXT("ASSERT: [%i] %hs:\n'Callback' is not bound!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	// Outside the editor, UGameplayStatics::AsyncLoadGameFromSlot can be used directly as is, since each instance of the game runs in its own process
-	FAsyncLoadGameFromSlotDelegate MappedCallback;
-	MappedCallback.BindLambda([Callback](const FString&, const int32, USaveGame* LoadedSaveGame)
+	FAsyncLoadGameFromSlotDelegate Delegate;
+	Delegate.BindLambda([SafeCallback = PIESafeAsync::MakePIESafeCallback<USaveGame>(WorldContextObject, Callback)](const FString&, int32, USaveGame* LoadedSave)
 	{
-		Callback.Execute(LoadedSaveGame);
+		SafeCallback(LoadedSave);
 	});
 
-#if WITH_EDITOR
-	if (UUtilsLibrary::IsEditor())
-	{
-		// In editor, redirect the callback to the correct world context to avoid issues with PIE multiplayer
-		MappedCallback.Unbind();
-		MappedCallback.BindLambda([WeakWorld = TWeakObjectPtr(World), Callback](const FString&, const int32, USaveGame* LoadedSaveGame)
-		{
-			if (const UWorld* InWorld = WeakWorld.Get())
-			{
-				InWorld->GetTimerManager().SetTimerForNextTick([Callback, SaveGame = TStrongObjectPtr(LoadedSaveGame)]
-				{
-					Callback.ExecuteIfBound(SaveGame.Get());
-				});
-			}
-		});
-	}
-#endif
-
-	UGameplayStatics::AsyncLoadGameFromSlot(SlotName, UserIndex, MappedCallback);
+	UGameplayStatics::AsyncLoadGameFromSlot(SlotName, UserIndex, MoveTemp(Delegate));
 }
 
 // Completely removes given save data and creates new empty one

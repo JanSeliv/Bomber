@@ -19,6 +19,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "MyDataTable/MyDataTable.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
+#include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
@@ -260,18 +261,8 @@ void UNMMSpotComponent::LoadMasterSequencePlayer()
 		return;
 	}
 
-	if (FoundMasterSequence.IsValid())
-	{
-		OnMasterSequenceLoaded(FoundMasterSequence);
-	}
-	else
-	{
-		const TAsyncLoadPriority Priority = IsCurrentSpot() ? FStreamableManager::AsyncLoadHighPriority : FStreamableManager::DefaultAsyncLoadPriority;
-		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
-		StreamableManager.RequestAsyncLoad(FoundMasterSequence.ToSoftObjectPath(),
-		    FStreamableDelegate::CreateUObject(this, &ThisClass::OnMasterSequenceLoaded, FoundMasterSequence),
-		    Priority);
-	}
+	const TAsyncLoadPriority Priority = IsCurrentSpot() ? FStreamableManager::AsyncLoadHighPriority : FStreamableManager::DefaultAsyncLoadPriority;
+	UAsyncLoadUtilsLibrary::AsyncLoadAsset(this, FoundMasterSequence, &ThisClass::OnMasterSequenceLoaded, Priority);
 }
 
 // Marks own cinematic as seen by player for the save system
@@ -330,7 +321,7 @@ void UNMMSpotComponent::ApplyCinematicState()
 }
 
 // Is called when the cinematic was loaded to finish creation
-void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence)
+void UNMMSpotComponent::OnMasterSequenceLoaded(ULevelSequence* LoadedMasterSequence)
 {
 	if (MasterPlayer)
 	{
@@ -340,7 +331,7 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> Lo
 
 	// Create and cache the master sequence
 	ALevelSequenceActor* OutActor = nullptr;
-	MasterPlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence.Get(), {}, OutActor);
+	MasterPlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(this, LoadedMasterSequence, {}, OutActor);
 	checkf(MasterPlayer, TEXT("ERROR: 'MasterPlayer' was not created, something went wrong!"));
 
 	// Override the aspect ratio of the cinematic to the aspect ratio of the screen

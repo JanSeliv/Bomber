@@ -92,11 +92,3 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetGameFeaturesEnabled(bool bEnable, const TArray<FName>& GameFeatures);
 };
-
-/*********************************************************************************************
- * Global functions
- ********************************************************************************************* */
-
-/** Wrapper for AsyncTask to return to the game thread.
- * Is in global scope to mimic AsyncTask function signature. */
-MYUTILS_API void AsyncTaskGameThread(const UObject* WorldContextObject, TFunction<void()> Function);

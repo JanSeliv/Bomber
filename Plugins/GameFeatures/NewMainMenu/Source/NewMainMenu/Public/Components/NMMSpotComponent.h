@@ -120,7 +120,7 @@ protected:
 	void LoadMasterSequencePlayer();
 
 	/** Is called when the cinematic was loaded to finish creation. */
-	void OnMasterSequenceLoaded(TSoftObjectPtr<ULevelSequence> LoadedMasterSequence);
+	void OnMasterSequenceLoaded(ULevelSequence* LoadedMasterSequence);
 
 	/** Marks own cinematic as seen by player for the save system. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

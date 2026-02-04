@@ -123,8 +123,9 @@ void UCinematicUtils::GetAllSectionsByClass(const UMovieSceneSequence* MasterSeq
 // Resets the sequence player to the beginning.
 void UCinematicUtils::ResetSequence(UMovieSceneSequencePlayer* LevelSequencePlayer, bool bKeepCamera /* = false*/)
 {
-	if (!ensureMsgf(LevelSequencePlayer, TEXT("ASSERT: [%i] %hs:\n'LevelSequencePlayer' is not valid!"), __LINE__, __FUNCTION__))
+	if (!LevelSequencePlayer)
 	{
+		// Is already reset
 		return;
 	}
 
