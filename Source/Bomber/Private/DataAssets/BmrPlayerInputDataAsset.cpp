@@ -55,10 +55,10 @@ const UBmrInputMappingContext* UBmrPlayerInputDataAsset::GetGameplayInputContext
 	return GameplayInputContexts.IsValidIndex(LocalPlayerIndex) ? GameplayInputContexts[LocalPlayerIndex] : nullptr;
 }
 
-// Returns the mouse visibility settings by specified game state
-const FBmrMouseVisibilitySettings& UBmrPlayerInputDataAsset::GetMouseVisibilitySettings(EBmrCurrentGameState GameState) const
+// Returns the mouse visibility settings by specified game state tag
+const FBmrMouseVisibilitySettings& UBmrPlayerInputDataAsset::GetMouseVisibilitySettings(FBmrGameStateTag GameStateTag) const
 {
-	const FBmrMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettings.FindByKey(GameState);
+	const FBmrMouseVisibilitySettings* FoundSettingsPtr = MouseVisibilitySettings.FindByKey(GameStateTag);
 	return FoundSettingsPtr ? *FoundSettingsPtr : FBmrMouseVisibilitySettings::Invalid;
 }
 

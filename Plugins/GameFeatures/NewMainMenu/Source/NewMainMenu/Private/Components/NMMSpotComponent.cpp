@@ -18,9 +18,10 @@
 #include "Controllers/BmrPlayerController.h"
 #include "GameFramework/BmrGameState.h"
 #include "MyDataTable/MyDataTable.h"
-#include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
+#include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -360,24 +361,17 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(ULevelSequence* LoadedMasterSeque
 // Called when the current game state was changed
 void UNMMSpotComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	if (!IsCurrentSpot())
 	{
 		// Don't handle inactive spot
 		return;
 	}
 
-	switch (CurrentGameState)
+	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
 	{
-		case EBmrCurrentGameState::Menu:
-		{
-			// Reset the sequence to the beginning to make it ready for the next play
-			constexpr bool bKeepCamera = true;
-			UCinematicUtils::ResetSequence(MasterPlayer, bKeepCamera);
-			break;
-		}
-
-		default: break;
+		// Reset the sequence to the beginning to make it ready for the next play
+		constexpr bool bKeepCamera = true;
+		UCinematicUtils::ResetSequence(MasterPlayer, bKeepCamera);
 	}
 }
 

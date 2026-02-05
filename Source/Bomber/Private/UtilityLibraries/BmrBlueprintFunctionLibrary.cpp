@@ -18,6 +18,7 @@
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/SettingsWidget.h"
@@ -66,6 +67,13 @@ EBmrLevelType UBmrBlueprintFunctionLibrary::GetLevelType()
 {
 	// @TODO JanSeliv StB8orDX: remove level type enum and replace related logic
 	return EBmrLevelType::First;
+}
+
+// Returns true if the local pawn is ready (spawned, possessed, and replicated)
+bool UBmrBlueprintFunctionLibrary::IsLocalPawnReady(const UObject* OptionalWorldContext /* = nullptr*/)
+{
+	const ABmrPawn* LocalPawn = GetLocalPawn(OptionalWorldContext);
+	return UBmrGameplayMessageSubsystem::Get(OptionalWorldContext).ReadyHandler.IsReady(LocalPawn);
 }
 
 /* ---------------------------------------------------

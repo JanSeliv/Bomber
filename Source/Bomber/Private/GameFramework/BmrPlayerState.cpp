@@ -16,6 +16,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrGameUserSettings.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
@@ -73,6 +74,15 @@ UAbilitySystemComponent& ABmrPlayerState::GetAbilitySystemComponentChecked() con
 	return *AbilitySystemComponent;
 }
 
+// Returns the gameplay tags owned by this actor from its ASC
+void ABmrPlayerState::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->GetOwnedGameplayTags(TagContainer);
+	}
+}
+
 // Initializes all attributes with default values
 void ABmrPlayerState::ApplyDefaultAttributes()
 {
@@ -105,16 +115,14 @@ void ABmrPlayerState::UpdateEndGameState()
 		return;
 	}
 
-	const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
-	const EBmrCurrentGameState CurrentGameState = MyGameState ? MyGameState->GetCurrentGameState() : ECGS::None;
-	if (CurrentGameState == ECGS::None // is not valid game state, nullptr or not fully initialized
+	if (!ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::ParentTag) // is not valid game state, nullptr or not fully initialized
 	    || EndGameState != EBmrEndGameState::None) // end state was set already for current game
 	{
 		return;
 	}
 
 	// handle timer is elapsed
-	if (CurrentGameState == ECGS::EndGame)
+	if (ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::EndGame))
 	{
 		SetEndGameState(EBmrEndGameState::Draw);
 		return;
@@ -580,30 +588,21 @@ void ABmrPlayerState::OnPlayerStateInit_Implementation()
 // Listen game states to notify server about ending game for controlled player
 void ABmrPlayerState::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	if (!HasAuthority())
 	{
 		return;
 	}
 
-	switch (CurrentGameState)
+	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::EndGame))
 	{
-		case ECGS::Menu: // Fallthrough
-		case ECGS::GameStarting: // Fallthrough
-		case ECGS::InGame:
-		{
-			SetPlayerDead(false);
-			SetOpponentKilledNum(0);
-			SetEndGameState(EBmrEndGameState::None);
-			break;
-		}
-		case EBmrCurrentGameState::EndGame:
-		{
-			UpdateEndGameState();
-			break;
-		}
-		default:
-			break;
+		UpdateEndGameState();
+	}
+	else
+	{
+		// Reset player state for any non-EndGame state
+		SetPlayerDead(false);
+		SetOpponentKilledNum(0);
+		SetEndGameState(EBmrEndGameState::None);
 	}
 }
 

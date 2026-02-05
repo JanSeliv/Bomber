@@ -4,8 +4,9 @@
 
 #include "GameFramework/GameState.h"
 
-// Bomber
-#include "Bomber.h" // EBmrCurrentGameState
+// UE
+#include "AbilitySystemInterface.h"
+#include "GameplayTagAssetInterface.h"
 
 #include "BmrGameState.generated.h"
 
@@ -14,7 +15,9 @@
  * @see Access its data with UGameStateDataAsset (Content/Bomber/DataAssets/DA_GameState).
  */
 UCLASS()
-class BOMBER_API ABmrGameState final : public AGameStateBase
+class BOMBER_API ABmrGameState final : public AGameStateBase,
+                                       public IAbilitySystemInterface,
+                                       public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
@@ -27,19 +30,16 @@ public:
 
 	/*********************************************************************************************
 	 * Game State Tree
-	 * Can be tracked both on host and client by binding with BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	 * SET:
+	 * - Update ST_GameState asset with new state and transition rules.
+	 * GET:
+	 * - in code, use ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::{Tag}).
+	 * - In blueprints, use 'Get BMR Game State' -> 'Has Matching Gameplay Tag' nodes.
+	 * LISTEN:
+	 * - in code, call BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	 * - in blueprints, call 'Listen Gameplay Message' node to 'Event.GameState.Changed' tag.
 	 ********************************************************************************************* */
 public:
-	/** Returns the Game State that is currently applied. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	static EBmrCurrentGameState GetCurrentGameState();
-
-	/** Returns the Game State that was applied before the current one.
-	 * Is useful to check from which state the game was transitioned
-	 * E.g: if current is GameStarting, but previous is InGame, but not Menu, then it means the game was restarted. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	static EBmrCurrentGameState GetPreviousGameState();
-
 	/** Returns true if the game state State Tree can be started, is false when in Render Movie cinematic mode. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	bool CanStartGameStateTree() const;
@@ -58,28 +58,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
 	TObjectPtr<class UStateTreeComponent> GameStateTreeComponent = nullptr;
 
-	/** Is the replicated game state, set only on the server via SetGameState, replicated to clients via OnRep. */
-	UPROPERTY(Transient, ReplicatedUsing = "OnRep_CurrentGameState")
-	EBmrCurrentGameState ReplicatedGameState = EBmrCurrentGameState::None;
-
-	/** Is not-replicated local game state that always stores the previous one to track from which state the game was transitioned.
-	 * Is updated at the end of ApplyGameState, so during the broadcast listeners see the correct previous state. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, AdvancedDisplay, meta = (BlueprintProtected))
-	EBmrCurrentGameState LocalPreviousGameState = EBmrCurrentGameState::None;
-
-	/** Is the only proper way to change the game state, called by the State Tree on the server.
-	 * No one should change the game state directly, all transitions are managed by the State Tree.
-	 * Can be also changed by `Bomber.Game.SetGameState VALUE` cheat command. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
-	void SetGameState(EBmrCurrentGameState NewGameState);
-
-	/** Updates current game state. */
+	/** Registers to listen for GameState tag changes on ASC, on both server and client. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void ApplyGameState();
+	void BindOnGameStateTagChanged();
 
-	/** Called on the ABmrGameState::ReplicatedGameState property updating. */
-	UFUNCTION()
-	void OnRep_CurrentGameState();
+	/** Broadcasts the BmrGameplayTags::Event::GameState_Changed event via Gameplay Message Router.
+	 * Is called automatically when GameState tag changes on ASC (both server and client).
+	 * Payload.InstigatorTags contains the current GameState tag, so listeners can check via Payload.InstigatorTags.HasTag(). */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void BroadcastGameStateChanged();
 
 	/*********************************************************************************************
 	 * Game Difficulty
@@ -97,10 +84,16 @@ protected:
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
-protected:
-	/** Returns properties that are replicated for the lifetime of the actor channel. */
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+public:
+	/** Returns the Ability System Component from the Generated Map.
+	 * In blueprints, call 'Get Ability System Component' as interface function. */
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	UAbilitySystemComponent& GetAbilitySystemComponentChecked() const;
 
+	/** Returns the gameplay tags owned by this actor via IGameplayTagAssetInterface. */
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
+
+protected:
 	/** This is called only in the gameplay before calling begin play. */
 	virtual void PostInitializeComponents() override;
 

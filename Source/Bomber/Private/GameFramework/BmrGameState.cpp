@@ -5,27 +5,28 @@
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Actors/BmrPawn.h"
+#include "Bomber.h"
 #include "Components/BmrGameDifficultyManagerComponent.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
 #include "DataAssets/BmrModularGameFeatureSettings.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
+#include "AbilitySystemComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Components/StateTreeComponent.h"
 #include "Engine/World.h"
-#include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameState)
 
 // Default constructor
 ABmrGameState::ABmrGameState()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
@@ -45,26 +46,6 @@ ABmrGameState& ABmrGameState::Get()
 /*********************************************************************************************
  * Game State Tree
  ********************************************************************************************* */
-
-// Returns the Game State that is currently applied
-EBmrCurrentGameState ABmrGameState::GetCurrentGameState()
-{
-	if (const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState())
-	{
-		return MyGameState->ReplicatedGameState;
-	}
-	return EBmrCurrentGameState::None;
-}
-
-// Returns the Game State that was applied before the current one
-EBmrCurrentGameState ABmrGameState::GetPreviousGameState()
-{
-	if (const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState())
-	{
-		return MyGameState->LocalPreviousGameState;
-	}
-	return EBmrCurrentGameState::None;
-}
 
 // Returns true if the game state State Tree can be started, is false when in Render Movie cinematic mode
 bool ABmrGameState::CanStartGameStateTree() const
@@ -116,66 +97,77 @@ void ABmrGameState::StopGameStateTree()
 	GameStateTreeComponent->StopLogic(Reason);
 }
 
-// Is the only proper way to change the game state, called by the State Tree on the server
-void ABmrGameState::SetGameState(EBmrCurrentGameState NewGameState)
+// Registers to listen for GameState tag changes on ASC, on both server and client
+void ABmrGameState::BindOnGameStateTagChanged()
+{
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	ASC->RegisterGenericGameplayTagEvent().AddWeakLambda(this, [this](const FGameplayTag Tag, int32 NewCount)
+	{
+		if (NewCount > 0 // Added
+		    && Tag.MatchesTag(FBmrGameStateTag::ParentTag) // Child
+		    && Tag != FBmrGameStateTag::ParentTag) // Not parent itself
+		{
+			BroadcastGameStateChanged();
+		}
+	});
+}
+
+// Broadcasts the GameState_Changed event via Gameplay Message Router
+void ABmrGameState::BroadcastGameStateChanged()
 {
 	if (!HasAuthority()
-	    || ReplicatedGameState == NewGameState)
+	    && !UBmrBlueprintFunctionLibrary::IsLocalPawnReady())
 	{
+		// Client is not ready yet, do not broadcast pawn is loaded
 		return;
 	}
 
-	ReplicatedGameState = NewGameState;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedGameState, this);
+	FGameplayTagContainer OwnedTags;
+	GetOwnedGameplayTags(OwnedTags);
 
-	ApplyGameState();
-}
-
-// Updates current game state
-void ABmrGameState::ApplyGameState()
-{
-	TRACE_BOOKMARK(TEXT("%s"), *UEnum::GetValueAsString(ReplicatedGameState));
-
-	// Notify listeners via Gameplay Message Router
 	FGameplayEventData Payload;
 	Payload.EventTag = BmrGameplayTags::Event::GameState_Changed;
+	Payload.InstigatorTags = OwnedTags.Filter(FBmrGameStateTag::ParentTag.GetSingleTagContainer());
 	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
 
-	// Update previous state after broadcasting, so listeners see the correct previous state during the event
-	LocalPreviousGameState = ReplicatedGameState;
-}
-
-// Called on the AMyGameState::CurrentGameState property updating.
-void ABmrGameState::OnRep_CurrentGameState()
-{
-	if (!UBmrGameplayMessageSubsystem::Get().ReadyHandler.IsReady(UBmrBlueprintFunctionLibrary::GetLocalPawn()))
-	{
-		// Pawn might not be ready on client, apply replicated game state now (otherwise it would be deferred until pawn is ready)
-		return;
-	}
-
-	ApplyGameState();
+	TRACE_BOOKMARK(TEXT("%s"), *Payload.InstigatorTags.ToStringSimple());
 }
 
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
 
-// Returns properties that are replicated for the lifetime of the actor channel.
-void ABmrGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+// Returns the Ability System Component from the Generated Map
+UAbilitySystemComponent* ABmrGameState::GetAbilitySystemComponent() const
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	const ABmrGeneratedMap* GeneratedMap = ABmrGeneratedMap::GetGeneratedMap();
+	return GeneratedMap ? GeneratedMap->GetAbilitySystemComponent() : nullptr;
+}
 
-	FDoRepLifetimeParams Params;
-	Params.bIsPushBased = true;
+UAbilitySystemComponent& ABmrGameState::GetAbilitySystemComponentChecked() const
+{
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	checkf(ASC, TEXT("ERROR: [%i] %hs:\n'ASC' is null!"), __LINE__, __FUNCTION__);
+	return *ASC;
+}
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedGameState, Params);
+// Returns the gameplay tags owned by this actor via IGameplayTagAssetInterface
+void ABmrGameState::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const
+{
+	if (const UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		ASC->GetOwnedGameplayTags(TagContainer);
+	}
 }
 
 // This is called only in the gameplay before calling begin play
 void ABmrGameState::PostInitializeComponents()
 {
-	// Register it to let modular feature to be dynamically added
 	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
 
 	Super::PostInitializeComponents();
@@ -185,6 +177,8 @@ void ABmrGameState::PostInitializeComponents()
 void ABmrGameState::BeginPlay()
 {
 	Super::BeginPlay();
+
+	BindOnGameStateTagChanged();
 
 	StartGameStateTree();
 
@@ -196,21 +190,23 @@ void ABmrGameState::BeginPlay()
 // Overridable function called whenever this actor is being removed from a level
 void ABmrGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		ASC->RegisterGenericGameplayTagEvent().RemoveAll(this);
+	}
 
 	UGameplayUtilsLibrary::SetGameFeaturesEnabled(false, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
+
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called when the local player character is spawned, possessed, and replicated
 void ABmrGameState::OnLocalPawnReady_Implementation(const FGameplayEventData& Payload)
 {
-	if (LocalPreviousGameState == ReplicatedGameState)
+	// On client, the tag might have replicated before pawn was ready
+	if (!HasAuthority()
+	    && HasMatchingGameplayTag(FBmrGameStateTag::ParentTag))
 	{
-		// Game state was already applied or nothing to apply
-		return;
+		BroadcastGameStateChanged();
 	}
-
-	// On client, OnRep_CurrentGameState might have skipped applying if the pawn was not ready at that time,
-	// so immediately apply any pending replicated game state now that the pawn is ready
-	ApplyGameState();
 }

@@ -11,6 +11,7 @@
 #include "Components/BmrMapComponent.h"
 #include "DataAssets/BmrBombDataAsset.h"
 #include "GameFramework/BmrGameState.h"
+#include "Structures/BmrGameStateTag.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
@@ -50,7 +51,7 @@ void UBmrExplosionExecution::Execute_Implementation(const FGameplayEffectCustomE
 	UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
 	TSubclassOf<UGameplayEffect> ExplosionDamageEffect = UBmrBombDataAsset::Get().GetExplosionDamageEffect();
 	if (!SourceASC || !SourceASC->GetOwner()->HasAuthority()
-	    || !(TO_FLAG(ABmrGameState::GetCurrentGameState()) & TO_FLAG(ECGS::InGame | ECGS::EndGame))
+	    || !(ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame) || ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::EndGame))
 	    || !ensureMsgf(ExplosionDamageEffect, TEXT("ASSERT: [%i] %hs:\n'ExplosionDamageEffect' is not set, can not apply explosion damage!"), __LINE__, __FUNCTION__)
 	    || !ensureMsgf(Spec.GetEffectContext().HasOrigin(), TEXT("ASSERT: [%i] %hs:\n'Origin' cell location is not set in effect context, can not apply explosion damage!"), __LINE__, __FUNCTION__))
 	{

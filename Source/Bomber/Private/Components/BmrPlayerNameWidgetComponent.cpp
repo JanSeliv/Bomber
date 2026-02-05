@@ -5,10 +5,12 @@
 // Bomber
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/Widgets/BmrPlayerNameWidget.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
@@ -97,7 +99,7 @@ void UBmrPlayerNameWidgetComponent::UpdateVisibility()
 		return;
 	}
 
-	const bool bMakeVisible = ABmrGameState::GetCurrentGameState() != ECGS::Menu
+	const bool bMakeVisible = !ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu)
 	                          && AssociatedPlayerState
 	                          && !AssociatedPlayerState->IsPlayerDead();
 

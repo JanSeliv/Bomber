@@ -7,8 +7,10 @@
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
@@ -47,15 +49,15 @@ const FBmrMouseVisibilitySettings& UBmrMouseActivityComponent::GetCurrentVisibil
 	return CurrentVisibilitySettings;
 }
 
-// Applies the new mouse visibility settings
-void UBmrMouseActivityComponent::SetMouseVisibilitySettingsEnabled(bool bEnable, EBmrCurrentGameState GameState)
+// Applies the new mouse visibility settings by game state tag
+void UBmrMouseActivityComponent::SetMouseVisibilitySettingsEnabled(bool bEnable, FBmrGameStateTag GameStateTag)
 {
 	if (bEnable)
 	{
-		const FBmrMouseVisibilitySettings& NewSettings = UBmrPlayerInputDataAsset::Get().GetMouseVisibilitySettings(GameState);
+		const FBmrMouseVisibilitySettings& NewSettings = UBmrPlayerInputDataAsset::Get().GetMouseVisibilitySettings(GameStateTag);
 		EnableMouseVisibilitySettings(NewSettings);
 	}
-	else if (CurrentVisibilitySettings.GameState == GameState)
+	else if (CurrentVisibilitySettings.GameStateTag == GameStateTag)
 	{
 		DisableMouseVisibilitySettings();
 	}
@@ -217,6 +219,6 @@ void UBmrMouseActivityComponent::OnMouseMove_Implementation()
 // Listen to toggle mouse visibility
 void UBmrMouseActivityComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
+	const FBmrGameStateTag CurrentGameState = Payload.InstigatorTags.First();
 	SetMouseVisibilitySettingsEnabled(true, CurrentGameState);
 }

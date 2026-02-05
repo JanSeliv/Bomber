@@ -56,25 +56,9 @@ public:
  ********************************************************************************************* */
 
 /** Helper macro to bind and call the function when the game state was changed.
- * Obtain current state inside callback via ABmrGameState::GetCurrentGameState(). */
-#define BIND_ON_GAME_STATE_CHANGED(Obj, Function)                                    \
-	{                                                                                \
-		TWeakObjectPtr WeakObj(Obj);                                                 \
-		UGameplayMessageSubsystem::Get(Obj).RegisterListener<FGameplayEventData>( \
-		    BmrGameplayTags::Event::GameState_Changed,                               \
-		    [WeakObj](FGameplayTag, const FGameplayEventData& Payload) {             \
-			if (auto* StrongObj = WeakObj.Get())                                     \
-			{                                                                        \
-				(StrongObj->*(&Function))(Payload);                                  \
-			}                                                                        \
-		});                                                                          \
-		if (ABmrGameState::GetCurrentGameState() == EBmrCurrentGameState::Menu)      \
-		{                                                                            \
-			FGameplayEventData AutoPayload;                                          \
-			AutoPayload.EventTag = BmrGameplayTags::Event::GameState_Changed;        \
-			(Obj->*(&Function))(AutoPayload);                                        \
-		}                                                                            \
-	}
+ * Obtain current state inside callback via Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu). */
+#define BIND_ON_GAME_STATE_CHANGED(Obj, Function) \
+	INTERNAL_BIND_GAME_STATE_CHANGED(BmrGameplayTags::Event::GameState_Changed, Obj, Function)
 
 /** Helper macro for binding to player pawn ready events using PlayerId.
  * @param Obj Object that owns the callback function
@@ -99,6 +83,31 @@ public:
 /*********************************************************************************************
  * Internal
  ********************************************************************************************* */
+
+/** Internal macro for binding to game state changes via Gameplay Message Router. */
+#define INTERNAL_BIND_GAME_STATE_CHANGED(InEventTag, Obj, Function)                                             \
+	{                                                                                                           \
+		TWeakObjectPtr WeakObj(Obj);                                                                            \
+		UGameplayMessageSubsystem::Get(Obj).RegisterListener<FGameplayEventData>(                               \
+		    InEventTag,                                                                                         \
+		    [WeakObj](FGameplayTag, const FGameplayEventData& Payload)                                          \
+		{                                                                                                       \
+			if (auto* StrongObj = WeakObj.Get())                                                                \
+			{                                                                                                   \
+				(StrongObj->*(&Function))(Payload);                                                             \
+			}                                                                                                   \
+		});                                                                                                     \
+		const ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState();                          \
+		if (GameState && GameState->HasMatchingGameplayTag(FBmrGameStateTag::ParentTag))                        \
+		{                                                                                                       \
+			FGameplayTagContainer OwnedTags;                                                                    \
+			GameState->GetOwnedGameplayTags(OwnedTags);                                                         \
+			FGameplayEventData AutoPayload;                                                                     \
+			AutoPayload.EventTag = InEventTag;                                                                  \
+			AutoPayload.InstigatorTags = OwnedTags.Filter(FBmrGameStateTag::ParentTag.GetSingleTagContainer()); \
+			(Obj->*(&Function))(AutoPayload);                                                                   \
+		}                                                                                                       \
+	}
 
 /** Internal macro for binding with ID filtering via Gameplay Message Router. */
 #define INTERNAL_BIND_READY_ID(InEventTag, Obj, Function, Arg, ID)                            \

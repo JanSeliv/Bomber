@@ -16,6 +16,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
@@ -76,6 +77,10 @@ const FBmrPlayerTag& ABmrPawn::GetPlayerTag() const
 	return PlayerRow ? PlayerRow->PlayerTag : FBmrPlayerTag::None;
 }
 
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
+
 // Returns the Ability System Component from the Player State
 UAbilitySystemComponent* ABmrPawn::GetAbilitySystemComponent() const
 {
@@ -91,9 +96,15 @@ UAbilitySystemComponent& ABmrPawn::GetAbilitySystemComponentChecked() const
 	return *ASC;
 }
 
-/*********************************************************************************************
- * Overrides
- ********************************************************************************************* */
+// Returns the gameplay tags owned by this actor, delegates to PlayerState's ASC
+void ABmrPawn::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const
+{
+	const UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (ASC)
+	{
+		ASC->GetOwnedGameplayTags(TagContainer);
+	}
+}
 
 // Called when the game starts or when spawned
 void ABmrPawn::BeginPlay()
@@ -238,7 +249,7 @@ void ABmrPawn::OnPostLogout_Implementation(APlayerController* ExitingPlayer)
 // Is called when the player was destroyed
 void ABmrPawn::OnPreRemovedFromLevel_Implementation(UBmrMapComponent* InMapComponent, UObject* DestroyCauser)
 {
-	if (ABmrGameState::GetCurrentGameState() != EBmrCurrentGameState::InGame)
+	if (!ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame))
 	{
 		// Ignore, is not gameplay destroy, likely level is regenerated
 		return;

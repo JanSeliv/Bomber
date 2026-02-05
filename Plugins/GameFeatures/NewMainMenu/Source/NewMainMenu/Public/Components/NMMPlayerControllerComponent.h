@@ -9,7 +9,6 @@
 class ABmrPlayerController;
 
 enum class ENMMState : uint8;
-enum class EBmrCurrentGameState : uint8;
 
 /**
  * Represents the Player Controller in the NewMain Menu module, where the Owner is Player Controller actor.
@@ -92,7 +91,7 @@ protected:
 	void OnFirstPawnReady(const struct FGameplayEventData& Payload);
 
 	/** Listen to react when entered the Menu state. */
-	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called wen the Main Menu state was changed. */

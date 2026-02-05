@@ -13,7 +13,6 @@ class USoundMix;
 
 enum class EBmrEndGameState : uint8;
 enum class EBmrLevelType : uint8;
-enum class EBmrCurrentGameState : uint8;
 
 /**
  * Contains all sound assets used in game.

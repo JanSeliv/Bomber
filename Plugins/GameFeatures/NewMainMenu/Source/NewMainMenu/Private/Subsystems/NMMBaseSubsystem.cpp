@@ -9,6 +9,7 @@
 // Bomber
 #include "GameFramework/BmrGameState.h"
 #include "Structures/BmrGameplayTags.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
@@ -75,21 +76,14 @@ void UNMMBaseSubsystem::Deinitialize()
 // Called when the current game state was changed, handles Main Menu states accordingly
 void UNMMBaseSubsystem::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
-	switch (CurrentGameState)
+	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
 	{
-		case EBmrCurrentGameState::Menu:
-		{
-			// Player returns to the Main Menu, means Main Menu is in Idle state
-			SetNewMainMenuState(ENMMState::Idle);
-			break;
-		}
-		case EBmrCurrentGameState::GameStarting:
-		{
-			// Player left the Main Menu
-			SetNewMainMenuState(ENMMState::None);
-			break;
-		}
-		default: break;
+		// Player returns to the Main Menu, means Main Menu is in Idle state
+		SetNewMainMenuState(ENMMState::Idle);
+	}
+	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
+	{
+		// Player left the Main Menu
+		SetNewMainMenuState(ENMMState::None);
 	}
 }

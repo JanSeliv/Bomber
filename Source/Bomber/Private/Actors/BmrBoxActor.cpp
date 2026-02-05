@@ -8,6 +8,7 @@
 #include "Components/BmrMapComponent.h"
 #include "DataAssets/BmrBoxDataAsset.h"
 #include "GameFramework/BmrGameState.h"
+#include "Structures/BmrGameStateTag.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
@@ -40,7 +41,7 @@ ABmrBoxActor::ABmrBoxActor()
 void ABmrBoxActor::TrySpawnPowerup()
 {
 	if (!HasAuthority()
-	    || ABmrGameState::GetCurrentGameState() != EBmrCurrentGameState::InGame)
+	    || !ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame))
 	{
 		return;
 	}

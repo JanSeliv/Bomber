@@ -13,6 +13,7 @@
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "Structures/BmrGameplayTags.h"
+#include "Structures/BmrGameStateTag.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
@@ -143,7 +144,7 @@ void UBmrCameraComponent::SetCameraLockedOnCenter(bool bInCameraLockedOnCenter)
 	// Enable camera if should be unlocked
 	if (!bInCameraLockedOnCenter
 	    && !IsComponentTickEnabled()
-	    && ABmrGameState::GetCurrentGameState() == EBmrCurrentGameState::InGame)
+	    && ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame))
 	{
 		SetComponentTickEnabled(true);
 	}
@@ -232,34 +233,25 @@ void UBmrCameraComponent::BeginPlay()
 // Listen game states to manage the tick
 void UBmrCameraComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	bool bShouldTick = false;
 
-	switch (CurrentGameState)
+	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
 	{
-		case EBmrCurrentGameState::GameStarting:
+		if (bAutoPossessCamera)
 		{
-			if (bAutoPossessCamera)
-			{
-				PossessCamera();
-			}
-			bShouldTick = true;
-			break;
+			PossessCamera();
 		}
-		case EBmrCurrentGameState::EndGame:
-		{
-			bForceStart = true;
-			bShouldTick = true;
-			break;
-		}
-		case EBmrCurrentGameState::InGame:
-		{
-			bForceStart = false;
-			bShouldTick = true;
-			break;
-		}
-		default:
-			break;
+		bShouldTick = true;
+	}
+	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::EndGame))
+	{
+		bForceStart = true;
+		bShouldTick = true;
+	}
+	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::InGame))
+	{
+		bForceStart = false;
+		bShouldTick = true;
 	}
 
 	SetComponentTickEnabled(bShouldTick);

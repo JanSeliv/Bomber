@@ -9,6 +9,7 @@
 struct FBmrPlayerTag;
 struct FBmrPowerupTag;
 struct FGameplayTag;
+struct FBmrGameStateTag;
 
 /**
  * Contains function for blueprint developers to work with custom tag structure like converters to FBmrPlayerTag.
@@ -34,4 +35,12 @@ public:
 	/** Converts a GameplayTag to a PowerupTag. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InPowerupTag", DisplayName = "To GameplayTag (PowerupTag)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FGameplayTag Conv_PowerupTagToGameplayTag(FBmrPowerupTag InPowerupTag);
+
+	/** Converts a GameStateTag to a GameplayTag. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InGameplayTag", DisplayName = "To GameStateTag (GameplayTag)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FBmrGameStateTag Conv_GameplayTagToGameStateTag(FGameplayTag InGameplayTag);
+
+	/** Converts a GameplayTag to a GameStateTag. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InGameStateTag", DisplayName = "To GameplayTag (GameStateTag)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FGameplayTag Conv_GameStateTagToGameplayTag(FBmrGameStateTag InGameStateTag);
 };

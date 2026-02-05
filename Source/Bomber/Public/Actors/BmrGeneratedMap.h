@@ -14,7 +14,7 @@
 
 #include "BmrGeneratedMap.generated.h"
 
-enum class EActorType : uint8;
+enum class EBmrActorType : uint8;
 
 class UBmrMapComponent;
 
@@ -301,7 +301,7 @@ protected:
 	void GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&& ActorsToSpawn);
 
 	/** Listen game states to generate level actors. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Align transform and build cells, on both server and clients.

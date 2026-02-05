@@ -6,11 +6,12 @@
 
 // UE
 #include "AbilitySystemInterface.h"
+#include "GameplayTagAssetInterface.h"
 
 #include "BmrPawn.generated.h"
 
 enum class EBmrLevelType : uint8;
-enum class EBmrCurrentGameState : uint8;
+
 enum class EBmrPlayerType : uint8;
 
 /**
@@ -20,7 +21,8 @@ enum class EBmrPlayerType : uint8;
  */
 UCLASS(Abstract)
 class BOMBER_API ABmrPawn : public APawn,
-                            public IAbilitySystemInterface
+                            public IAbilitySystemInterface,
+                            public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
@@ -31,11 +33,6 @@ public:
 	/** Returns the Player Tag associated with player. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const struct FBmrPlayerTag& GetPlayerTag() const;
-
-	/** Returns the Ability System Component from the Player State.
-	 * In blueprints, call 'Get Ability System Component' as interface function. */
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	UAbilitySystemComponent& GetAbilitySystemComponentChecked() const;
 
 protected:
 	/** Is the root component for this actor, used for collision. */
@@ -49,6 +46,15 @@ protected:
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
+public:
+	/** Returns the Ability System Component from the Player State.
+	 * In blueprints, call 'Get Ability System Component' as interface function. */
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	UAbilitySystemComponent& GetAbilitySystemComponentChecked() const;
+
+	/** Returns the gameplay tags owned by this actor, delegates to PlayerState's ASC. */
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
+
 protected:
 	/** Called when the game starts or when spawned */
 	virtual void BeginPlay() override;

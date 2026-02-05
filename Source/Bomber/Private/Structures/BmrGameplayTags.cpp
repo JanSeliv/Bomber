@@ -21,7 +21,7 @@ namespace BmrGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Player_OnEndGame, "Event.Player.OnEndGame", "Event that fires when game over condition met (all humans dead or last player standing), is called on owner pawn ASC");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(HUD_MenuButtonPressed, "Event.HUD.MenuButtonPressed", "Event that fires when user pressed Menu button on HUD to return to Main Menu, is called on local player ASC");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(HUD_RestartButtonPressed, "Event.HUD.RestartButtonPressed", "Event that fires when user pressed Restart button on HUD to restart the match, is called on local player ASC");
-		UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameState_Changed, "Event.GameState.Changed", "Event that fires when the current game state was changed (Menu, GameStarting, InGame, EndGame), obtain state from ABmrGameState::GetCurrentGameState()");
+		UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameState_Changed, "Event.GameState.Changed", "Event that fires when the current game state was changed (Menu, GameStarting, InGame, EndGame), check via Payload.InstigatorTags.HasTag()");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Player_PawnReady, "Event.Player.PawnReady", "Event that fires when any pawn is spawned, possessed, and replicated, obtain pawn from Payload.Instigator");
 	} // namespace Event
 

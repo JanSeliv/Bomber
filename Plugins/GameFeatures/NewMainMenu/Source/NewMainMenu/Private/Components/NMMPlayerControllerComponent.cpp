@@ -21,6 +21,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/SaveUtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -76,8 +77,8 @@ void UNMMPlayerControllerComponent::SetCinematicInputContextEnabled(bool bEnable
 
 	if (bEnable)
 	{
-		// Disable all other first
-		MyPC.SetAllInputContextsEnabled(false, EBmrCurrentGameState::Max);
+		// Disable all other first (ParentTag matches all game state contexts)
+		MyPC.SetAllInputContextsEnabled(false, FBmrGameStateTag::ParentTag);
 	}
 
 	// Enable Cinematic inputs
@@ -111,7 +112,7 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState New
 	// Add Menu context as auto managed by Game State, so it will be enabled everytime the game is in the Menu state
 	const UBmrInputMappingContext* InputContext = UNMMDataAsset::Get().GetInputContext(NewState);
 	if (InputContext
-	    && InputContext->GetChosenGameStatesBitmask() > 0)
+	    && !InputContext->GetActiveForStates().IsEmpty())
 	{
 		PC.SetupInputContexts({InputContext});
 	}
@@ -228,19 +229,17 @@ void UNMMPlayerControllerComponent::OnFirstPawnReady_Implementation(const FGamep
 }
 
 // Listen to react when entered the Menu state
-void UNMMPlayerControllerComponent::OnGameStateChanged(const FGameplayEventData& Payload)
+void UNMMPlayerControllerComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
-	switch (CurrentGameState)
+	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
 	{
-		case ECGS::Menu: // Entered the Main Menu
-			PlayMainMenuMusic();
-			break;
-		case ECGS::GameStarting: // Left the Main Menu
-			StopMainMenuMusic();
-			break;
-		default:
-			break;
+		// Entered the Main Menu
+		PlayMainMenuMusic();
+	}
+	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
+	{
+		// Left the Main Menu
+		StopMainMenuMusic();
 	}
 }
 

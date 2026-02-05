@@ -6,8 +6,6 @@
 
 #include "BmrMoverComponent.generated.h"
 
-enum class EBmrCurrentGameState : uint8;
-
 /*
  * Replaces the Character Movement Component (CMR) for next purposes:
  * - Better local movement prediction causing less jittering.
@@ -75,7 +73,7 @@ protected:
 	void OnPawnReady(const struct FGameplayEventData& Payload);
 
 	/** Listen to react when entered to different game state. */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when owner is unregistered from the Generated Map, on both server and client. */

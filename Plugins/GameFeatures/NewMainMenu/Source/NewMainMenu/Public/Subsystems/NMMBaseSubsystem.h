@@ -11,8 +11,6 @@
 
 class UNMMDataAsset;
 
-enum class EBmrCurrentGameState : uint8;
-
 /**
  * Provides access to the most important data like Data Asset and current state.
  */

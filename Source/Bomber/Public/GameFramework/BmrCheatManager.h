@@ -10,7 +10,6 @@
 #include "BmrCheatManager.generated.h"
 
 enum class EBmrActorType : uint8;
-enum class EBmrCurrentGameState : uint8;
 
 /**
  * Contains debugging cheat command for non-shipping builds to test general game functionality.

@@ -6,8 +6,6 @@
 
 #include "BmrPlayerArrowStartComponent.generated.h"
 
-enum class EBmrCurrentGameState : uint8;
-
 /**
  * Static mesh component displaying arrow above the local player during match start
  */

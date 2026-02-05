@@ -5,8 +5,10 @@
 // Bomber
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
@@ -95,25 +97,20 @@ void UBmrPlayerArrowStartComponent::TickComponent(float DeltaTime, ELevelTick Ti
 // Manages component state based on game state and local control
 void UBmrPlayerArrowStartComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
-	switch (CurrentGameState)
+	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
 	{
-		case ECGS::GameStarting:
-			SetArrowEnabled(true);
-			break;
-
-		case ECGS::Menu:
-			SetArrowEnabled(false);
-			break;
-
-		default: break;
+		SetArrowEnabled(true);
+	}
+	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
+	{
+		SetArrowEnabled(false);
 	}
 }
 
 // Called when pawn controller changes
 void UBmrPlayerArrowStartComponent::OnPawnControllerChanged_Implementation(APawn* Pawn, AController* OldController, AController* NewController)
 {
-	const bool bIsGameStarting = ABmrGameState::GetCurrentGameState() == ECGS::GameStarting;
+	const bool bIsGameStarting = ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::GameStarting);
 	const bool bShouldEnable = bIsGameStarting && CanEnableArrow();
 	SetArrowEnabled(bShouldEnable);
 }

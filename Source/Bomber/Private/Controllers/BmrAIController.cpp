@@ -14,8 +14,10 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
@@ -153,7 +155,7 @@ void ABmrAIController::OnPossess(APawn* InPawn)
 	checkf(MoverComponent, TEXT("ERROR: [%i] %hs:\n'MoverComponent' is null!"), __LINE__, __FUNCTION__);
 	MoverComponent->OnPostSimulationTick.AddUniqueDynamic(this, &ThisClass::OnOwnerMovementCompleted);
 
-	const bool bMatchStarted = ABmrGameState::GetCurrentGameState() == ECGS::InGame;
+	const bool bMatchStarted = ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame);
 	SetAI(bMatchStarted);
 }
 
@@ -481,8 +483,7 @@ void ABmrAIController::SetAI(bool bShouldEnable)
 // Listen game states to enable or disable AI
 void ABmrAIController::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
-	const bool bMatchStarted = CurrentGameState == EBmrCurrentGameState::InGame;
+	const bool bMatchStarted = Payload.InstigatorTags.HasTag(FBmrGameStateTag::InGame);
 	SetAI(bMatchStarted);
 }
 

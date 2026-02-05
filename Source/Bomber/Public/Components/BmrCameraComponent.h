@@ -6,7 +6,6 @@
 
 #include "BmrCameraComponent.generated.h"
 
-enum class EBmrCurrentGameState : uint8;
 enum EAspectRatioAxisConstraint : int;
 
 /**

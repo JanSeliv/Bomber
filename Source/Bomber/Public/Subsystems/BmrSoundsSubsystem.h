@@ -6,8 +6,6 @@
 
 #include "BmrSoundsSubsystem.generated.h"
 
-enum class EBmrLevelType : uint8;
-enum class EBmrCurrentGameState : uint8;
 enum class EBmrEndGameState : uint8;
 
 /**

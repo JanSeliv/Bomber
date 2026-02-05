@@ -6,7 +6,7 @@
 #include "Components/SkeletalMeshComponent.h" // UBmrSkeletalMeshComponent
 
 // Bomber
-#include "Bomber.h"
+#include "Bomber.h" // EBmrLevelType
 #include "Structures/BmrMeshData.h"
 #include "Structures/BmrPlayerTag.h"
 

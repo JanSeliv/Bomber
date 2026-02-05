@@ -14,9 +14,11 @@
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "PoolManagerSubsystem.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
@@ -865,41 +867,20 @@ void ABmrGeneratedMap::GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&
 }
 
 // Listen game states to generate level actors
-void ABmrGeneratedMap::OnGameStateChanged(const FGameplayEventData& Payload)
+void ABmrGeneratedMap::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
 	if (!HasAuthority())
 	{
 		return;
 	}
 
-	const EBmrCurrentGameState PreviousGameState = ABmrGameState::GetPreviousGameState();
-	switch (CurrentGameState)
+	// Regenerate level actors when:
+	// 1. Returning to the menu (ensures the world resets properly)
+	// 2. Restarting the game (ensures a fresh state between matches)
+	// Note: GenerateLevelActors() internally guards against re-entry via bIsCurrentlyGenerating
+	if (Payload.InstigatorTags.HasAny(FBmrGameStateTag::Menu | FBmrGameStateTag::GameStarting))
 	{
-		case ECGS::Menu: // Fallthrough
-		case ECGS::GameStarting:
-		{
-			if (PreviousGameState == ECGS::None)
-			{
-				// Game is starting for the first time, do nothing, the level is expected to be generated in the OnConstruction
-				break;
-			}
-
-			// Regenerate level actors when:
-			// 1. Returning to the menu (ensures the world resets properly)
-			// 2. Restarting the game (ensures a fresh state between matches)
-			const bool bNowInMenu = CurrentGameState == ECGS::Menu;
-			const bool bRestartedMatch = PreviousGameState != ECGS::Menu;
-			if (bNowInMenu
-			    || bRestartedMatch)
-			{
-				GenerateLevelActors();
-			}
-			break;
-		}
-
-		default:
-			break;
+		GenerateLevelActors();
 	}
 }
 

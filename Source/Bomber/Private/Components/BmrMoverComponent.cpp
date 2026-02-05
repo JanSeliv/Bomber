@@ -6,14 +6,15 @@
 #include "AbilitySystem/Attributes/BmrPowerupsAttributeSet.h"
 #include "Actors/BmrGeneratedMap.h"
 #include "Actors/BmrPawn.h"
-#include "Bomber.h"
 #include "Components/BmrMapComponent.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "DataAssets/BmrPlayerDataAsset.h"
 #include "GameFramework/BmrGameState.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrMoverSyncState.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
@@ -180,10 +181,9 @@ void UBmrMoverComponent::OnPawnReady_Implementation(const FGameplayEventData& Pa
 }
 
 // Listen to react when entered to different game state
-void UBmrMoverComponent::OnGameStateChanged(const FGameplayEventData& Payload)
+void UBmrMoverComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
-	const bool bShouldDisableMovement = CurrentGameState != EBmrCurrentGameState::InGame;
+	const bool bShouldDisableMovement = !Payload.InstigatorTags.HasTag(FBmrGameStateTag::InGame);
 	SetBlockMovement(bShouldDisableMovement);
 }
 
@@ -196,7 +196,7 @@ void UBmrMoverComponent::OnPreRemovedFromLevel_Implementation(UBmrMapComponent* 
 // Event called after a pawn's controller has changed, on the server and owning client
 void UBmrMoverComponent::OnControllerChanged_Implementation(APawn* Pawn, AController* OldController, AController* NewController)
 {
-	const bool bShouldDisableMovement = !NewController || ABmrGameState::GetCurrentGameState() != ECGS::InGame;
+	const bool bShouldDisableMovement = !NewController || !ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame);
 	SetBlockMovement(bShouldDisableMovement);
 }
 

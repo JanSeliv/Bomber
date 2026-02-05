@@ -9,6 +9,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -50,6 +51,12 @@ bool UBmrSoundsSubsystem::CanPlaySounds()
 {
 	if (!GEngine || !GEngine->UseSound())
 	{
+		return false;
+	}
+
+	if (!UBmrBlueprintFunctionLibrary::IsLocalPawnReady())
+	{
+		// Dont play any sounds until local pawn is loaded
 		return false;
 	}
 
@@ -242,8 +249,7 @@ void UBmrSoundsSubsystem::StopInGameMusic()
 /** Play the sound that is played right before the match ends. */
 void UBmrSoundsSubsystem::PlayEndGameCountdownSFX()
 {
-	if (!CanPlaySounds()
-	    || ABmrGameState::GetCurrentGameState() != ECGS::InGame)
+	if (!CanPlaySounds())
 	{
 		return;
 	}
@@ -260,8 +266,7 @@ void UBmrSoundsSubsystem::StopEndGameCountdownSFX()
 // Play the sound that is played before the match starts
 void UBmrSoundsSubsystem::PlayStartGameCountdownSFX()
 {
-	if (!CanPlaySounds()
-	    || ABmrGameState::GetCurrentGameState() != ECGS::GameStarting)
+	if (!CanPlaySounds())
 	{
 		return;
 	}
@@ -277,8 +282,7 @@ void UBmrSoundsSubsystem::StopStartGameCountdownSFX()
 // Play the sound of the clicked UI element
 void UBmrSoundsSubsystem::PlayUIClickSFX()
 {
-	if (!CanPlaySounds()
-	    || ABmrGameState::GetCurrentGameState() == ECGS::None)
+	if (!CanPlaySounds())
 	{
 		return;
 	}
@@ -339,22 +343,19 @@ void UBmrSoundsSubsystem::OnEndGameStateChanged_Implementation(EBmrEndGameState 
 // Listen game states to switch background music
 void UBmrSoundsSubsystem::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
-	switch (CurrentGameState)
+	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
 	{
-		case ECGS::GameStarting:
-			PlayInGameMusic();
-			PlayStartGameCountdownSFX();
-			break;
-		case ECGS::Menu:
-			StopInGameMusic();
-			StopStartGameCountdownSFX();
-			break;
-		case ECGS::EndGame:
-			StopEndGameCountdownSFX();
-			break;
-		default:
-			break;
+		PlayInGameMusic();
+		PlayStartGameCountdownSFX();
+	}
+	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
+	{
+		StopInGameMusic();
+		StopStartGameCountdownSFX();
+	}
+	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::EndGame))
+	{
+		StopEndGameCountdownSFX();
 	}
 }
 

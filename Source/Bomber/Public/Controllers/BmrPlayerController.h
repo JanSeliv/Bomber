@@ -6,8 +6,6 @@
 
 #include "BmrPlayerController.generated.h"
 
-enum class EBmrCurrentGameState : uint8;
-
 class UBmrInputMappingContext;
 
 /**
@@ -118,11 +116,10 @@ public:
 
 	/** Takes all cached inputs contexts and turns them on or off according given game state.
 	 * @param bEnable If true, all matching contexts will be enabled. If false, all matching contexts will be disabled.
-	 * @param CurrentGameState Game state to check matching.
-	 * @param bInvertRest If true, all other not matching contexts will be toggled to the opposite of given state (!bEnable).
+	 * @param GameStateTag Game state tag to check matching.
 	 * @see ABmrPlayerController::AddInputContexts */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void SetAllInputContextsEnabled(bool bEnable, EBmrCurrentGameState CurrentGameState, bool bInvertRest = false);
+	void SetAllInputContextsEnabled(bool bEnable, struct FBmrGameStateTag GameStateTag);
 
 	/** Enables all managed input contexts by current game state. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")

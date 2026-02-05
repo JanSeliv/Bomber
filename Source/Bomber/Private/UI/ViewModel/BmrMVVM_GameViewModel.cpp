@@ -10,6 +10,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -28,24 +29,21 @@
 // Called when the current game state was changed
 void UBmrMVVM_GameViewModel::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState InGameState = ABmrGameState::GetCurrentGameState();
-	SetCurrentGameState(InGameState);
+	const FBmrGameStateTag InGameState = Payload.InstigatorTags.First();
+	SetCurrentGameStateTag(InGameState);
 
 	SetCanRestartGame(CanStartGame());
 
 	StopInGameCountdown();
 	StopStartingCountdown();
 
-	switch (InGameState)
+	if (InGameState == FBmrGameStateTag::GameStarting)
 	{
-		case ECGS::GameStarting:
-			TriggerStartingCountdown();
-			break;
-		case ECGS::InGame:
-			TriggerInGameCountdown();
-			break;
-		default:
-			break;
+		TriggerStartingCountdown();
+	}
+	else if (InGameState == FBmrGameStateTag::InGame)
+	{
+		TriggerInGameCountdown();
 	}
 }
 
@@ -56,9 +54,9 @@ void UBmrMVVM_GameViewModel::OnGameStateChanged_Implementation(const FGameplayEv
 // Returns true if the match can be started or restarted
 bool UBmrMVVM_GameViewModel::CanStartGame() const
 {
-	const EBmrCurrentGameState GameState = ABmrGameState::GetCurrentGameState();
+	const ABmrGameState& GameState = ABmrGameState::Get();
 
-	if (GameState == ECGS::GameStarting)
+	if (GameState.HasMatchingGameplayTag(FBmrGameStateTag::GameStarting))
 	{
 		// The game is already starting (3-2-1)
 		return false;
@@ -67,8 +65,7 @@ bool UBmrMVVM_GameViewModel::CanStartGame() const
 	if (UMultiplayerUtilsLibrary::IsMultiplayerGame())
 	{
 		// In multiplayer, the game can be started only when it is ended or not running yet
-		return GameState == EBmrCurrentGameState::EndGame
-		       || GameState == EBmrCurrentGameState::Menu;
+		return GameState.HasAnyMatchingGameplayTags(FBmrGameStateTag::EndGame | FBmrGameStateTag::Menu);
 	}
 
 	// In singleplayer, the game can be started or restarted at any time

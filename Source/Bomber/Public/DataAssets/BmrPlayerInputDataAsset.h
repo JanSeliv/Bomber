@@ -11,8 +11,6 @@
 
 class UBmrInputMappingContext;
 
-enum class EBmrCurrentGameState : uint8;
-
 struct FKey;
 
 /**
@@ -50,10 +48,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const FORCEINLINE UBmrInputMappingContext* GetSettingsInputContext() const { return SettingsInputContext; }
 
-	/** Returns the mouse visibility settings by specified game state.
+	/** Returns the mouse visibility settings by specified game state tag.
 	 * @see UPlayerInputDataAsset::MouseVisibilitySettings. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const FBmrMouseVisibilitySettings& GetMouseVisibilitySettings(EBmrCurrentGameState GameState) const;
+	const FBmrMouseVisibilitySettings& GetMouseVisibilitySettings(struct FBmrGameStateTag GameStateTag) const;
 
 	/** Returns the mouse visibility settings by custom game state.
 	 * @see UPlayerInputDataAsset::MouseVisibilitySettings. */

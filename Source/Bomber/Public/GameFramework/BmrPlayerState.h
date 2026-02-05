@@ -9,6 +9,7 @@
 
 // UE
 #include "AbilitySystemInterface.h"
+#include "GameplayTagAssetInterface.h"
 
 #include "BmrPlayerState.generated.h"
 
@@ -21,7 +22,8 @@ enum class EBmrPlayerType : uint8;
  */
 UCLASS(Config = "GameUserSettings", DefaultConfig)
 class BOMBER_API ABmrPlayerState : public APlayerState,
-                                   public IAbilitySystemInterface
+                                   public IAbilitySystemInterface,
+                                   public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
@@ -44,6 +46,9 @@ public:
 	/** Returns ability system component that is used to manage abilities and attributes for owned player. */
 	virtual FORCEINLINE UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
 	UAbilitySystemComponent& GetAbilitySystemComponentChecked() const;
+
+	/** Returns the gameplay tags owned by this actor from its ASC. */
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
 
 	/** Initializes all attributes with default values. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")

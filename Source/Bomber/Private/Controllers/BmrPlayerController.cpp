@@ -16,6 +16,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
@@ -250,13 +251,12 @@ void ABmrPlayerController::OnGameStateChanged_Implementation(const FGameplayEven
 // Listens to handle input on opening and closing the Settings widget
 void ABmrPlayerController::OnToggledSettings_Implementation(bool bIsVisible)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
-	if (CurrentGameState == ECGS::Menu)
+	if (ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu))
 	{
 		// Toggle all previous Input Contexts
-		SetAllInputContextsEnabled(!bIsVisible, CurrentGameState);
+		SetAllInputContextsEnabled(!bIsVisible, FBmrGameStateTag::Menu);
 	}
-	else if (CurrentGameState == ECGS::InGame)
+	else if (ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame))
 	{
 		// Toggle In-Game Menu Input Context
 		SetInputContextEnabled(!bIsVisible, UBmrPlayerInputDataAsset::Get().GetInGameMenuInputContext());
@@ -281,7 +281,7 @@ bool ABmrPlayerController::CanBindInputActions() const
 		return false;
 	}
 
-	const bool bIsStartingState = ABmrGameState::GetCurrentGameState() == ECGS::Menu;
+	const bool bIsStartingState = ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu);
 	if (!GetPawn() && bIsStartingState)
 	{
 		// While in menu (or initializing), player has to be possessed to bind inputs
@@ -318,8 +318,7 @@ void ABmrPlayerController::SetupInputContexts(const TArray<const UBmrInputMappin
 	AddNewInputContexts(InputContexts);
 
 	// Try enable input contexts according current state
-	constexpr bool bInvertRest = true;
-	SetAllInputContextsEnabled(true, ABmrGameState::GetCurrentGameState(), bInvertRest);
+	ApplyAllInputContexts();
 }
 
 // Removes input contexts from managed list
@@ -359,7 +358,7 @@ void ABmrPlayerController::SetUIInputIgnored()
 }
 
 // Takes all cached inputs contexts and turns them on or off according given game state
-void ABmrPlayerController::SetAllInputContextsEnabled(bool bEnable, EBmrCurrentGameState CurrentGameState, bool bInvertRest /* = false*/)
+void ABmrPlayerController::SetAllInputContextsEnabled(bool bEnable, FBmrGameStateTag GameStateTag)
 {
 	for (const UBmrInputMappingContext* InputContextIt : AllInputContexts)
 	{
@@ -368,23 +367,31 @@ void ABmrPlayerController::SetAllInputContextsEnabled(bool bEnable, EBmrCurrentG
 			continue;
 		}
 
-		const int32 GameStatesBitmask = InputContextIt->GetChosenGameStatesBitmask();
-		const bool bIsForCurrentState = GameStatesBitmask & TO_FLAG(CurrentGameState);
-		if (!bIsForCurrentState && !bInvertRest)
+		const FGameplayTagContainer& ActiveForStates = InputContextIt->GetActiveForStates();
+		if (!ActiveForStates.HasTag(GameStateTag))
 		{
 			continue;
 		}
 
-		const bool bFinalEnable = bIsForCurrentState ? bEnable : !bEnable;
-		SetInputContextEnabled(bFinalEnable, InputContextIt);
+		SetInputContextEnabled(bEnable, InputContextIt);
 	}
 }
 
 // Enables all managed input contexts by current game state
 void ABmrPlayerController::ApplyAllInputContexts()
 {
-	constexpr bool bInvertRest = true;
-	SetAllInputContextsEnabled(true, ABmrGameState::GetCurrentGameState(), bInvertRest);
+	for (const UBmrInputMappingContext* InputContextIt : AllInputContexts)
+	{
+		if (!InputContextIt)
+		{
+			continue;
+		}
+
+		// Enable if current game state matches any of the context's active states
+		const FGameplayTagContainer& ActiveForStates = InputContextIt->GetActiveForStates();
+		const bool bShouldEnable = !ActiveForStates.IsEmpty() && ABmrGameState::Get().HasAnyMatchingGameplayTags(ActiveForStates);
+		SetInputContextEnabled(bShouldEnable, InputContextIt);
+	}
 }
 
 // Enables or disables specified input context

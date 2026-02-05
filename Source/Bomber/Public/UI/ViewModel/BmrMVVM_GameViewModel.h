@@ -5,13 +5,15 @@
 #include "UI/ViewModel/MVVM_MyBaseViewModel.h"
 
 // Bomber
-#include "Bomber.h"
+#include "Structures/BmrGameStateTag.h"
 
 // UE
 #include "Components/SlateWrapperTypes.h"
 #include "Engine/TimerHandle.h"
 
 #include "BmrMVVM_GameViewModel.generated.h"
+
+enum class EBmrEndGameState : uint8;
 
 /**
  * Contains general data to be used only by widgets.
@@ -25,17 +27,17 @@ class BOMBER_API UBmrMVVM_GameViewModel : public UMVVM_MyBaseViewModel
 	 * Current Game State
 	 ********************************************************************************************* */
 public:
-	/** Setter and Getter widgets about the current game state. */
+	/** Setter and Getter widgets about the current game state tag. */
 	UFUNCTION()
-	void SetCurrentGameState(EBmrCurrentGameState NewCurrentGameState) { UE_MVVM_SET_PROPERTY_VALUE(CurrentGameState, NewCurrentGameState); }
+	void SetCurrentGameStateTag(FBmrGameStateTag NewCurrentGameStateTag) { UE_MVVM_SET_PROPERTY_VALUE(CurrentGameStateTag, NewCurrentGameStateTag); }
 
-	EBmrCurrentGameState GetCurrentGameState() const { return CurrentGameState; }
+	FBmrGameStateTag GetCurrentGameStateTag() const { return CurrentGameStateTag; }
 
 protected:
 	/** Represents the current game state.
-	 * Is commonly used by 'UBmrBlueprintFunctionLibrary::GetVisibilityByGameState' to show or hide own widget. */
+	 * Is commonly used by 'UBmrViewModelUtilsLibrary::GetVisibilityByGameStateTag' to show or hide own widget. */
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter, Getter, Category = "[Bomber]")
-	EBmrCurrentGameState CurrentGameState = EBmrCurrentGameState::None;
+	FBmrGameStateTag CurrentGameStateTag = FBmrGameStateTag::None;
 
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

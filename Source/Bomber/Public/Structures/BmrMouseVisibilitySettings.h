@@ -3,7 +3,7 @@
 #pragma once
 
 // Bomber
-#include "Bomber.h" // EBmrCurrentGameState
+#include "Structures/BmrGameStateTag.h"
 
 #include "BmrMouseVisibilitySettings.generated.h"
 
@@ -15,7 +15,7 @@ struct BOMBER_API FBmrMouseVisibilitySettings
 {
 	GENERATED_BODY()
 
-	/** Default settings */
+	/** Default settings. */
 	static const FBmrMouseVisibilitySettings Invalid;
 
 	/** If true, custom game state will be used instead of default one. */
@@ -24,7 +24,7 @@ struct BOMBER_API FBmrMouseVisibilitySettings
 
 	/** Determines the game state to show or hide the mouse. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mouse", meta = (ShowOnlyInnerProperties, EditCondition = "!bUseCustomGameState", EditConditionHides))
-	EBmrCurrentGameState GameState = EBmrCurrentGameState::None;
+	FBmrGameStateTag GameStateTag = FBmrGameStateTag::None;
 
 	/** Determines the custom game state to show or hide the mouse. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mouse", meta = (ShowOnlyInnerProperties, EditCondition = "bUseCustomGameState", EditConditionHides))
@@ -44,12 +44,12 @@ struct BOMBER_API FBmrMouseVisibilitySettings
 	float SecToAutoHide = -1.f;
 
 	/** Returns true if the visibility settings are valid. */
-	bool FORCEINLINE IsValid() const { return GameState != EBmrCurrentGameState::None || (bUseCustomGameState && CustomGameState != NAME_None); }
+	bool FORCEINLINE IsValid() const { return GameStateTag.IsValid() || (bUseCustomGameState && CustomGameState != NAME_None); }
 
 	/** Returns true if according settings, the mouse can be automatically hidden if inactive for a while. */
 	bool FORCEINLINE IsInactivityEnabled() const { return bIsVisible && bHideOnInactivity && SecToAutoHide > 0.f; }
 
 	/** Allows for FindByKey() in TArray. */
-	FORCEINLINE bool operator==(EBmrCurrentGameState OtherGameState) const { return GameState == OtherGameState; }
+	FORCEINLINE bool operator==(FBmrGameStateTag OtherGameStateTag) const { return GameStateTag == OtherGameStateTag; }
 	FORCEINLINE bool operator==(FName OtherCustomGameState) const { return CustomGameState == OtherCustomGameState; }
 };

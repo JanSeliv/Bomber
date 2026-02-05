@@ -10,7 +10,6 @@ class UNMMSpotComponent;
 
 enum class EBmrLevelType : uint8;
 enum class ENMMState : uint8;
-enum class EBmrCurrentGameState : uint8;
 
 /**
  * Manages Main Menu cinematic spots and keeps their data.

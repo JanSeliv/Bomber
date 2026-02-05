@@ -6,8 +6,6 @@
 
 #include "BmrPlayerNameWidgetComponent.generated.h"
 
-enum class EBmrCurrentGameState : uint8;
-
 /**
  * 3D widget component specialized for displaying player names above characters.
  */

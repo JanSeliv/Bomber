@@ -106,29 +106,6 @@ enum class EPathType : uint8
 };
 
 /**
- * The replicated states of the game. It shares the state between all the players at the same time.
- * Can be tracked both on host and client by binding with BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
- */
-UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class EBmrCurrentGameState : uint8
-{
-	None = 0,
-	///< Is active while players are in Main-Menu.
-	Menu = 1 << 0,
-	///< Is active while players see count-down time (3-2-1).
-	GameStarting = 1 << 1,
-	///< Is active when the match is finished and players see their results of the game.
-	EndGame = 1 << 2,
-	///< Is active during the active match.
-	InGame = 1 << 3,
-	///< Any of the states
-	Max = Menu | GameStarting | EndGame | InGame UMETA(DisplayName = "Any")
-};
-
-ENUM_CLASS_FLAGS(EBmrCurrentGameState);
-using ECGS = EBmrCurrentGameState;
-
-/**
  * The round result.
  * Can be tracked by listening ABmrPlayerState::OnEndGameStateChanged delegate.
  */

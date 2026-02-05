@@ -32,6 +32,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static EBmrLevelType GetLevelType();
 
+	/** Returns true if the local pawn is ready (spawned, possessed, and replicated). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static bool IsLocalPawnReady(const UObject* OptionalWorldContext = nullptr);
+
 	/* ---------------------------------------------------
 	 *		Framework pointer getters
 	 * --------------------------------------------------- */

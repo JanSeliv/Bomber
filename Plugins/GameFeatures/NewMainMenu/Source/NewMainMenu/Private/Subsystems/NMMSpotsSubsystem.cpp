@@ -10,6 +10,7 @@
 
 // Bomber
 #include "GameFramework/BmrGameState.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -126,7 +127,7 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 	LastMoveSpotDirection = Incrementer;
 
 	// If transition happened in opened menu, change the internal state
-	if (ABmrGameState::GetCurrentGameState() == ECGS::Menu)
+	if (ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu))
 	{
 		// If instant, then switch to the next spot, it will possess the camera and start playing its cinematic
 		// Otherwise start transition to the next spot
@@ -242,13 +243,8 @@ void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState NewS
 // Called when the current game state was changed
 void UNMMSpotsSubsystem::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const EBmrCurrentGameState CurrentGameState = ABmrGameState::GetCurrentGameState();
-	switch (CurrentGameState)
+	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
 	{
-		case ECGS::GameStarting:
-			HandleUnavailableMenuSpot();
-			break;
-
-		default: break;
+		HandleUnavailableMenuSpot();
 	}
 }

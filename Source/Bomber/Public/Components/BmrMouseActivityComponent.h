@@ -9,8 +9,6 @@
 
 #include "BmrMouseActivityComponent.generated.h"
 
-enum class EBmrCurrentGameState : uint8;
-
 class APlayerController;
 
 /**
@@ -49,9 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const FBmrMouseVisibilitySettings& GetCurrentVisibilitySettings() const;
 
-	/** Applies the new mouse visibility settings by game state. */
+	/** Applies the new mouse visibility settings by game state tag. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void SetMouseVisibilitySettingsEnabled(bool bEnable, EBmrCurrentGameState GameState);
+	void SetMouseVisibilitySettingsEnabled(bool bEnable, struct FBmrGameStateTag GameStateTag);
 
 	/** Applies the new mouse visibility settings by custom game state. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")

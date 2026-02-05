@@ -9,8 +9,6 @@
 
 #include "BmrAIController.generated.h"
 
-enum class EBmrCurrentGameState : uint8;
-
 /**
  * Characters controlled by bots.
  * @see Access its data with UBmrAIDataAsset (Content/Bomber/DataAssets/DA_AI).

@@ -3,8 +3,9 @@
 #include "UtilityLibraries/BmrTagUtilsLibrary.h"
 
 // Bomber
-#include "Structures/BmrPowerupTag.h"
+#include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrPlayerTag.h"
+#include "Structures/BmrPowerupTag.h"
 
 // UE
 #include "GameplayTagContainer.h"
@@ -33,4 +34,16 @@ FBmrPowerupTag UBmrTagUtilsLibrary::Conv_GameplayTagToPowerupTag(FGameplayTag In
 FGameplayTag UBmrTagUtilsLibrary::Conv_PowerupTagToGameplayTag(FBmrPowerupTag InPowerupTag)
 {
 	return InPowerupTag;
+}
+
+// Converts a GameStateTag to a GameplayTag
+FBmrGameStateTag UBmrTagUtilsLibrary::Conv_GameplayTagToGameStateTag(FGameplayTag InGameplayTag)
+{
+	return FBmrGameStateTag(InGameplayTag);
+}
+
+// Converts a GameplayTag to a GameStateTag
+FGameplayTag UBmrTagUtilsLibrary::Conv_GameStateTagToGameplayTag(FBmrGameStateTag InGameStateTag)
+{
+	return InGameStateTag;
 }

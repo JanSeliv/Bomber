@@ -4,6 +4,9 @@
 
 #include "InputMappingContext.h"
 
+// UE
+#include "GameplayTagContainer.h"
+
 #include "BmrInputMappingContext.generated.h"
 
 /**
@@ -21,7 +24,11 @@ public:
 
 	/** Returns the game states for which this input context is active. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE int32 GetChosenGameStatesBitmask() const { return ActiveForStates; }
+	const FGameplayTagContainer& GetActiveForStates() const { return ActiveForStatesTags; }
+
+	/** Returns true if this input context has any game states assigned. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	bool HasAnyActiveStates() const { return !ActiveForStatesTags.IsEmpty(); }
 
 protected:
 	/** If higher, then block the same consumed inputs other contexts with lower priorities. */
@@ -29,6 +36,6 @@ protected:
 	int32 ContextPriority = 0;
 
 	/** Set the game states for which this input context should be active. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, Bitmask, BitmaskEnum = "/Script/Bomber.EBmrCurrentGameState"))
-	int32 ActiveForStates = 0;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties, Categories = "GameState"))
+	FGameplayTagContainer ActiveForStatesTags = FGameplayTagContainer::EmptyContainer;
 };

@@ -38,7 +38,7 @@ namespace BmrGameplayTags
 		/** Event that fires when user pressed Restart button on HUD to restart the match, is called on local player ASC */
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(HUD_RestartButtonPressed);
 
-		/** Event that fires when the current game state was changed (Menu, GameStarting, InGame, EndGame), obtain state from ABmrGameState::GetCurrentGameState() */
+		/** Event that fires when the current game state was changed (Menu, GameStarting, InGame, EndGame), check via Payload.InstigatorTags.HasTag() */
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GameState_Changed);
 
 		/** Event that fires when any pawn is spawned, possessed, and replicated, obtain pawn from Payload.Instigator */
