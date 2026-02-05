@@ -14,9 +14,9 @@
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "PoolManagerSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
-#include "Structures/BmrGameplayTags.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
@@ -153,6 +153,8 @@ void ABmrGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
 	}
 
 	SetActorScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
+
+	GenerateLevelActors();
 }
 
 /*********************************************************************************************

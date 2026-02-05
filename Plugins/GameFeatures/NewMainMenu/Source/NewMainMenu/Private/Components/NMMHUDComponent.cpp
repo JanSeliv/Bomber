@@ -73,11 +73,8 @@ void UNMMHUDComponent::OnLocalPawnReady_Implementation(const FGameplayEventData&
 	UBmrWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetMainMenuWidgetData());
 	UBmrWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetInCinematicStateWidgetData());
 
-	// Once HUD is displayed, set the Menu state OnLocalPawnReady
-	// It guarantee that game enters the Menu state only when the character is ready and HUD is displayed
 	if (UNMMPlayerControllerComponent* ControllerComponent = UNMMUtils::GetPlayerControllerComponent())
 	{
-		ControllerComponent->TrySetMenuState();
 		ControllerComponent->SetManagedInputContextsEnabled(UNMMBaseSubsystem::Get().GetCurrentMenuState());
 	}
 }

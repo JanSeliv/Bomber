@@ -113,7 +113,4 @@ void UNMMCinematicStateWidget::OnCinematicSkipFinished_Implementation()
 	EventData.EventTag = NmmGameplayTags::Event::CinematicSkipped;
 	EventData.Instigator = MyPC->GetPawn();
 	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
-
-	// Skip cinematic
-	MyPC->SetGameStartingState();
 }

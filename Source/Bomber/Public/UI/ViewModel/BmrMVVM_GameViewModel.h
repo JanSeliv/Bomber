@@ -144,6 +144,13 @@ public:
 	void SetCanRestartGame(const bool bNewIsPartyLeader) { UE_MVVM_SET_PROPERTY_VALUE(bCanRestart, bNewIsPartyLeader); }
 	bool GetCanRestartGame() const { return bCanRestart; }
 
+	/** Returns true if the match can be started or restarted. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	bool CanStartGame() const;
+
+	/** Is interval in seconds between ticks of both Starting (3-2-1-GO) and In-Game (120...0) timers. */
+	static constexpr float DefaultTimerIntervalSec = 1.f;
+
 protected:
 	/** Determines if the player is the party leader */
 	UPROPERTY(BlueprintReadWrite, Transient, FieldNotify, Setter = "SetCanRestartGame", Getter = "GetCanRestartGame", Category = "[Bomber]")

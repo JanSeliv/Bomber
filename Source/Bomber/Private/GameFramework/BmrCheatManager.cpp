@@ -313,13 +313,6 @@ void UBmrCheatManager::SetLevelSize(const FString& LevelSize)
 		return;
 	}
 
-	// Restart the level
-	ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
-	if (ABmrGameState::GetCurrentGameState() == ECGS::InGame)
-	{
-		MyGameState->SetGameState(EBmrCurrentGameState::GameStarting);
-	}
-
 	// Update the level size
 	const FIntPoint NewLevelSize(FCString::Atoi(*Width), FCString::Atoi(*Height));
 	ABmrGeneratedMap::Get().SetLevelSize(NewLevelSize);
@@ -353,16 +346,7 @@ void UBmrCheatManager::SetWallsChance(int32 WallsChance)
 	CurrentSettings.WallsChance = WallsChance >= 0 ? WallsChance : UBmrGeneratedMapDataAsset::Get().GetGenerationSettings().WallsChance;
 	GeneratedMap.SetOverriddenGenerationSettings(/*bEnableOverride*/ true, CurrentSettings);
 
-	// Restart the level
-	ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
-	if (ABmrGameState::GetCurrentGameState() == ECGS::InGame)
-	{
-		MyGameState->SetGameState(EBmrCurrentGameState::GameStarting);
-	}
-	else
-	{
-		GeneratedMap.GenerateLevelActors();
-	}
+	GeneratedMap.GenerateLevelActors();
 }
 
 // Overrides the percentage of boxes spawn during the level generation
@@ -377,16 +361,7 @@ void UBmrCheatManager::SetBoxesChance(int32 BoxesChance)
 	CurrentSettings.BoxesChance = BoxesChance >= 0 ? BoxesChance : UBmrGeneratedMapDataAsset::Get().GetGenerationSettings().BoxesChance;
 	GeneratedMap.SetOverriddenGenerationSettings(/*bEnableOverride*/ true, CurrentSettings);
 
-	// Restart the level
-	ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
-	if (ABmrGameState::GetCurrentGameState() == ECGS::InGame)
-	{
-		MyGameState->SetGameState(EBmrCurrentGameState::GameStarting);
-	}
-	else
-	{
-		GeneratedMap.GenerateLevelActors();
-	}
+	GeneratedMap.GenerateLevelActors();
 }
 
 /*********************************************************************************************
@@ -454,50 +429,5 @@ void UBmrCheatManager::SetUIHideAllWidgets()
 	{
 		const bool bMakeVisibleInversed = WidgetsSubsystem->AreAllWidgetsHidden();
 		WidgetsSubsystem->SetAllWidgetsVisibility(bMakeVisibleInversed);
-	}
-}
-
-/*********************************************************************************************
- * Game
- ********************************************************************************************* */
-
-// Sets current game state to the specified one
-void UBmrCheatManager::SetGameState(EBmrCurrentGameState GameState)
-{
-	ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
-	if (!MyGameState
-	    || !MyGameState->HasAuthority())
-	{
-		return;
-	}
-
-	// Hardcoding the game state values for the state transitions is necessary because:
-	// - We cannot rely on iterating enums using TEnumRange or bitmasks as enum members may not be defined in a logical order.
-	// - This ensures deterministic transitions and avoids potential issues caused by chaotic ordering of enum members.
-	static const TArray<EBmrCurrentGameState> GameStateOrder = {
-	    EBmrCurrentGameState::Menu,
-	    EBmrCurrentGameState::GameStarting,
-	    EBmrCurrentGameState::InGame,
-	    EBmrCurrentGameState::EndGame};
-
-	// Find the current position and target position in the transition order
-	const EBmrCurrentGameState CurrentState = MyGameState->GetCurrentGameState();
-	const int32 CurrentIndex = GameStateOrder.IndexOfByKey(CurrentState);
-	const int32 TargetIndex = GameStateOrder.IndexOfByKey(GameState);
-
-	// Execute immediately if the target state is not part of the standard order, in case if some state is part of additional modes
-	if (TargetIndex == INDEX_NONE)
-	{
-		MyGameState->SetGameState(GameState);
-		return;
-	}
-
-	// Start iterating from the beginning if the target is before the current state, otherwise continue from the current state
-	constexpr int32 InitialIndex = 0;
-	int32 StartIndex = TargetIndex < CurrentIndex ? InitialIndex : CurrentIndex;
-	StartIndex = FMath::Max(InitialIndex, StartIndex);
-	for (int32 Index = StartIndex; Index <= TargetIndex; ++Index)
-	{
-		MyGameState->SetGameState(GameStateOrder[Index]);
 	}
 }

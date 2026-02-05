@@ -55,56 +55,8 @@ ABmrPlayerController::ABmrPlayerController()
 	bAttachToPawn = true;
 }
 
-/*********************************************************************************************
- * Game States
- * Is designed for clients to change the game state (if CanChangeGameState is true)
- * Server can call ABmrGameState::Get().SetGameState(NewState) directly
- ********************************************************************************************* */
-
-// Returns true if current game state can be eventually changed
-bool ABmrPlayerController::CanChangeGameState(EBmrCurrentGameState NewGameState) const
-{
-	const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
-	if (!MyGameState
-	    || !MyGameState->CanChangeGameState(NewGameState))
-	{
-		return false;
-	}
-
-	// Don't change the game state if game is run from the `Render Movie`
-	return !bCinematicMode;
-}
-
-// Sets and replicates the Starting game state (3-2-1 countdown)
-void ABmrPlayerController::SetGameStartingState()
-{
-	if (CanChangeGameState(ECGS::GameStarting))
-	{
-		ServerSetGameState(ECGS::GameStarting);
-	}
-}
-
-// Sets and replicates the Menu game state
-void ABmrPlayerController::SetMenuState()
-{
-	if (CanChangeGameState(ECGS::Menu))
-	{
-		ServerSetGameState(ECGS::Menu);
-	}
-}
-
-// Set the new game state for the current game
-void ABmrPlayerController::ServerSetGameState_Implementation(EBmrCurrentGameState NewGameState)
-{
-	// Listen states to manage the tick
-	if (ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState())
-	{
-		MyGameState->SetGameState(NewGameState);
-	}
-}
-
-// Sends a gameplay event to the server, is useful for actions happening only by client such as UI buttons to start the game etc
-void ABmrPlayerController::ServerSendGameplayEvent_Implementation(const FGameplayEventData& Payload)
+// Sends a gameplay event to the server via Gameplay Message Router, is useful for actions happening only by client such as UI buttons to start the game etc
+void ABmrPlayerController::ServerBroadcastMessage_Implementation(const FGameplayEventData& Payload)
 {
 	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
 }
@@ -246,6 +198,21 @@ void ABmrPlayerController::PawnLeavingGame()
 	{
 		// Finally, notify the player character
 		InPawn->OnPostLogout(this);
+	}
+}
+
+// Is overridden to stop the game state State Tree when entering Render Movie cinematic mode
+void ABmrPlayerController::SetCinematicMode(bool bInCinematicMode, bool bHidePlayer, bool bAffectsHUD, bool bAffectsMovement, bool bAffectsTurning)
+{
+	Super::SetCinematicMode(bInCinematicMode, bHidePlayer, bAffectsHUD, bAffectsMovement, bAffectsTurning);
+
+	if (bInCinematicMode)
+	{
+		// Don't even run game state if game is run from the `Render Movie`
+		if (ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState())
+		{
+			MyGameState->StopGameStateTree();
+		}
 	}
 }
 

@@ -107,25 +107,23 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 
 	UBmrSoundsSubsystem::Get().PlayUIClickSFX();
 
-	if (UNMMUtils::ShouldSkipCinematic(CinematicRow))
+	if (!UNMMUtils::ShouldSkipCinematic(CinematicRow))
 	{
-		// Notify that user clicked Play button (cinematic skipped)
-		FGameplayEventData EventData;
-		EventData.EventTag = NmmGameplayTags::Event::PlayButtonPressed;
-		EventData.Instigator = MyPC->GetPawn();
-		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
-
-		// This button might be pressed locally by user, send event to server if has no authority
-		if (!MyPC->HasAuthority())
-		{
-			MyPC->ServerSendGameplayEvent(EventData);
-		}
-
-		MyPC->SetGameStartingState();
-	}
-	else
-	{
+		// Play button is pressed, run cinematic
 		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Cinematic);
+		return;
+	}
+
+	// Notify that user clicked Play button (cinematic skipped)
+	FGameplayEventData EventData;
+	EventData.EventTag = NmmGameplayTags::Event::PlayButtonPressed;
+	EventData.Instigator = MyPC->GetPawn();
+	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+
+	// This button might be pressed locally by user, send event to server if has no authority
+	if (!MyPC->HasAuthority())
+	{
+		MyPC->ServerBroadcastMessage(EventData);
 	}
 }
 

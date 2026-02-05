@@ -53,10 +53,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void SetManagedInputContextsEnabled(ENMMState NewState);
 
-	/** Tries to set the Menu game state on initializing the Main Menu system. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[NewMainMenu]")
-	void TrySetMenuState();
-
 	/*********************************************************************************************
 	 * Sounds
 	 ********************************************************************************************* */

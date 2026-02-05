@@ -38,6 +38,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const FORCEINLINE TSoftObjectPtr<UWorld>& GetMainLevel() const { return MainLevel; }
 
+	/** Returns the State Tree asset that is used to manage the overall game state. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE class UStateTree* GetGameStateTreeAsset() const { return GameStateTreeAsset; }
+
 protected:
 	/** General value how ofter update actors and states in the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
@@ -60,4 +64,8 @@ protected:
 	/** The main gameplay level to load. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TSoftObjectPtr<UWorld> MainLevel = nullptr;
+
+	/** The State Tree asset that is used to manage the overall game state. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TObjectPtr<UStateTree> GameStateTreeAsset = nullptr;
 };

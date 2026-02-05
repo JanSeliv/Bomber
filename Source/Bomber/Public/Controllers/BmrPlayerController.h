@@ -24,31 +24,12 @@ public:
 	ABmrPlayerController();
 
 	/*********************************************************************************************
-	 * Game States
-	 * Is designed for clients to change the game state (if CanChangeGameState is true).
-	 * Server can call ABmrGameState::Get().SetGameState(NewState) directly
+	 * Server RPCs
 	 ********************************************************************************************* */
 public:
-	/** Returns true if current game state can be eventually changed. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	bool CanChangeGameState(EBmrCurrentGameState NewGameState) const;
-
-	/** Sets and replicates the Starting game state (3-2-1 countdown). */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void SetGameStartingState();
-
-	/** Sets and replicates the Menu game state. */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void SetMenuState();
-
-	/** Sends a gameplay event to the server, is useful for actions happening only by client such as UI buttons to start the game etc. */
+	/** Sends a gameplay event to the server via Gameplay Message Router, is useful for actions happening only by client such as UI buttons to start the game etc. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "[Bomber]")
-	void ServerSendGameplayEvent(const struct FGameplayEventData& Payload);
-
-protected:
-	/** Set the new game state for the current game. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void ServerSetGameState(EBmrCurrentGameState NewGameState);
+	void ServerBroadcastMessage(const struct FGameplayEventData& Payload);
 
 	/*********************************************************************************************
 	 * Protected properties
@@ -87,6 +68,9 @@ protected:
 
 	/** Is overridden to prevent destroyed possessed pawn, which is expected to be reused. */
 	virtual void PawnLeavingGame() override;
+
+	/** Is overridden to stop the game state State Tree when entering Render Movie cinematic mode. */
+	virtual void SetCinematicMode(bool bInCinematicMode, bool bHidePlayer, bool bAffectsHUD, bool bAffectsMovement, bool bAffectsTurning) override;
 
 	/** Is overridden to perform cleanup of the controller when it is destroyed. */
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

@@ -9,6 +9,7 @@
 #include "DataAssets/BmrUIDataAsset.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
+#include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -30,7 +31,7 @@ void UBmrMVVM_GameViewModel::OnGameStateChanged_Implementation(const FGameplayEv
 	const EBmrCurrentGameState InGameState = ABmrGameState::GetCurrentGameState();
 	SetCurrentGameState(InGameState);
 
-	SetCanRestartGame(ABmrGameState::Get().CanStartGame());
+	SetCanRestartGame(CanStartGame());
 
 	StopInGameCountdown();
 	StopStartingCountdown();
@@ -46,6 +47,32 @@ void UBmrMVVM_GameViewModel::OnGameStateChanged_Implementation(const FGameplayEv
 		default:
 			break;
 	}
+}
+
+/*********************************************************************************************
+ * Can Restart Game
+ ********************************************************************************************* */
+
+// Returns true if the match can be started or restarted
+bool UBmrMVVM_GameViewModel::CanStartGame() const
+{
+	const EBmrCurrentGameState GameState = ABmrGameState::GetCurrentGameState();
+
+	if (GameState == ECGS::GameStarting)
+	{
+		// The game is already starting (3-2-1)
+		return false;
+	}
+
+	if (UMultiplayerUtilsLibrary::IsMultiplayerGame())
+	{
+		// In multiplayer, the game can be started only when it is ended or not running yet
+		return GameState == EBmrCurrentGameState::EndGame
+		       || GameState == EBmrCurrentGameState::Menu;
+	}
+
+	// In singleplayer, the game can be started or restarted at any time
+	return true;
 }
 
 /*********************************************************************************************
@@ -78,7 +105,7 @@ void UBmrMVVM_GameViewModel::TriggerStartingCountdown()
 	SetStartingTimerSecRemain(FText::AsNumber(StartingCountdown));
 
 	constexpr bool bInLoop = true;
-	World->GetTimerManager().SetTimer(StartingTimer, this, &ThisClass::OnStartingTimerTick, ABmrGameState::DefaultTimerIntervalSec, bInLoop);
+	World->GetTimerManager().SetTimer(StartingTimer, this, &ThisClass::OnStartingTimerTick, DefaultTimerIntervalSec, bInLoop);
 }
 
 // Clears the Starting timer and stops counting it
@@ -119,7 +146,7 @@ void UBmrMVVM_GameViewModel::TriggerInGameCountdown()
 	SetInGameTimerSecRemain(FText::AsNumber(InGameCountdown));
 
 	constexpr bool bInLoop = true;
-	World->GetTimerManager().SetTimer(InGameTimer, this, &ThisClass::OnInGameTimerTick, ABmrGameState::DefaultTimerIntervalSec, bInLoop);
+	World->GetTimerManager().SetTimer(InGameTimer, this, &ThisClass::OnInGameTimerTick, DefaultTimerIntervalSec, bInLoop);
 }
 
 // Clears the In-Game timer and stops counting it

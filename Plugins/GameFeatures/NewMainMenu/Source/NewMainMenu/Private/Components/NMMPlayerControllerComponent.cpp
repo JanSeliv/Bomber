@@ -117,18 +117,6 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState New
 	}
 }
 
-// Tries to set the Menu game state on initializing the Main Menu system
-void UNMMPlayerControllerComponent::TrySetMenuState()
-{
-	if (ABmrGameState::GetCurrentGameState() != EBmrCurrentGameState::None)
-	{
-		// No need to initialize the Menu state, game state was already set by other systems
-		return;
-	}
-
-	GetPlayerControllerChecked().SetMenuState();
-}
-
 /*********************************************************************************************
  * Sounds
  ********************************************************************************************* */
@@ -291,7 +279,12 @@ void UNMMPlayerControllerComponent::OnActiveMenuSpotReady_Implementation(UNMMSpo
 	EventData.OptionalObject = MainMenuSpotComponent;
 	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
 
-	TrySetMenuState();
+	// This event might be triggered only by local client, which only one enters to menu, so broadcast server that this client has menu system initialized and ready
+	ABmrPlayerController& MyPC = GetPlayerControllerChecked();
+	if (!MyPC.HasAuthority())
+	{
+		MyPC.ServerBroadcastMessage(EventData);
+	}
 
 	UNMMCameraSubsystem::Get().PossessCamera(ENMMState::Idle);
 

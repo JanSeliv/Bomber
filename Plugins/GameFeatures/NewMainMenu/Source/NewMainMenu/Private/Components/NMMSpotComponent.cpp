@@ -438,9 +438,6 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 		EventData.EventTag = NmmGameplayTags::Event::CinematicPlaybackFinished;
 		EventData.Instigator = MyPC->GetPawn();
 		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
-
-		// Cinematic is finished, start the countdown
-		MyPC->SetGameStartingState();
 	}
 }
 

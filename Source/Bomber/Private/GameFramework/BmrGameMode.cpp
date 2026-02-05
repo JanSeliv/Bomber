@@ -78,8 +78,6 @@ void ABmrGameMode::PostLogin(APlayerController* NewPlayer)
 		EventData.EventTag = BmrGameplayTags::Event::Player_PostLogin;
 		EventData.Instigator = NewPlayer;
 		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
-
-		ABmrGameState::Get().SetGameState(ECGS::Menu);
 	}
 
 	if (APlayerState* PlayerState = MyPC->GetPlayerState<APlayerState>())

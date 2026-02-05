@@ -83,10 +83,9 @@ void UBmrHUDWidget::OnRestartButtonPressed_Implementation()
 	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
 	if (!MyPC->HasAuthority())
 	{
-		MyPC->ServerSendGameplayEvent(EventData);
+		MyPC->ServerBroadcastMessage(EventData);
 	}
 
-	MyPC->SetGameStartingState();
 }
 
 // Is called when player pressed the button to return to the Main Menu
@@ -105,10 +104,9 @@ void UBmrHUDWidget::OnMenuButtonPressed_Implementation()
 	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
 	if (!MyPC->HasAuthority())
 	{
-		MyPC->ServerSendGameplayEvent(EventData);
+		MyPC->ServerBroadcastMessage(EventData);
 	}
 
-	MyPC->SetMenuState();
 }
 
 // Is called when player pressed the button to open the Settings

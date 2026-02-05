@@ -9,18 +9,16 @@
 #include "DataAssets/BmrGameStateDataAsset.h"
 #include "DataAssets/BmrModularGameFeatureSettings.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
-#include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
-#include "Subsystems/BmrSoundsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "Components/StateTreeComponent.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
-#include "TimerManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameState)
 
@@ -32,6 +30,8 @@ ABmrGameState::ABmrGameState()
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	GameDifficultyManager = CreateDefaultSubobject<UBmrGameDifficultyManagerComponent>(TEXT("GameFeaturesManager"));
+	GameStateTreeComponent = CreateDefaultSubobject<UStateTreeComponent>(TEXT("GameStateTree"));
+	GameStateTreeComponent->SetStartLogicAutomatically(false);
 }
 
 // Returns the current game state, it will crash if can't be obtained, should be used only when the game is running
@@ -43,50 +43,15 @@ ABmrGameState& ABmrGameState::Get()
 }
 
 /*********************************************************************************************
- * Current Game State enum
+ * Game State Tree
  ********************************************************************************************* */
-
-// Returns true if current game state can be eventually changed
-bool ABmrGameState::CanChangeGameState(EBmrCurrentGameState NewGameState) const
-{
-	if (LocalGameState == NewGameState)
-	{
-		return false;
-	}
-
-	if (NewGameState == EBmrCurrentGameState::GameStarting
-	    && !CanStartGame())
-	{
-		// Game is not allowed to start at current moment
-		return false;
-	}
-
-	// Don't allow to change the game state if local character is not initialized or destroyed
-	const ABmrPawn* LocalChar = UBmrBlueprintFunctionLibrary::GetLocalPawn();
-	return UBmrGameplayMessageSubsystem::Get().ReadyHandler.IsReady(LocalChar);
-}
-
-// Returns the AMyGameState::CurrentGameState property.
-void ABmrGameState::SetGameState(EBmrCurrentGameState NewGameState)
-{
-	if (!HasAuthority()
-	    || !CanChangeGameState(NewGameState))
-	{
-		return;
-	}
-
-	ReplicatedGameState = NewGameState;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedGameState, this);
-
-	ApplyGameState();
-}
 
 // Returns the Game State that is currently applied
 EBmrCurrentGameState ABmrGameState::GetCurrentGameState()
 {
 	if (const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState())
 	{
-		return MyGameState->LocalGameState;
+		return MyGameState->ReplicatedGameState;
 	}
 	return EBmrCurrentGameState::None;
 }
@@ -101,24 +66,69 @@ EBmrCurrentGameState ABmrGameState::GetPreviousGameState()
 	return EBmrCurrentGameState::None;
 }
 
-// Returns true if the match can be started or restarted
-bool ABmrGameState::CanStartGame() const
+// Returns true if the game state State Tree can be started, is false when in Render Movie cinematic mode
+bool ABmrGameState::CanStartGameStateTree() const
 {
-	if (LocalGameState == ECGS::GameStarting)
+	const UWorld* World = GetWorld();
+	const APlayerController* LocalPC = World ? World->GetFirstPlayerController() : nullptr;
+	const bool bCinematicMode = LocalPC && LocalPC->bCinematicMode;
+	return !bCinematicMode
+	       && GameStateTreeComponent
+	       && !GameStateTreeComponent->IsRunning();
+}
+
+// Initializes the State Tree, that is used to manage the overall game state
+void ABmrGameState::StartGameStateTree()
+{
+	if (!HasAuthority()
+	    || !CanStartGameStateTree())
 	{
-		// The game is already starting (3-2-1)
-		return false;
+		UE_LOG(LogBomber, Verbose, TEXT("[%i] %hs:\nCannot start GameStateTree, authority: %i, can start: %i"), __LINE__, __FUNCTION__, HasAuthority(), CanStartGameStateTree());
+		return;
 	}
 
-	if (UMultiplayerUtilsLibrary::IsMultiplayerGame())
+	UStateTree* GameStateTreeAsset = UBmrGameStateDataAsset::Get().GetGameStateTreeAsset();
+	if (!ensureMsgf(GameStateTreeAsset, TEXT("ASSERT: [%i] %hs:\n'GameStateTreeAsset' is not set!"), __LINE__, __FUNCTION__))
 	{
-		// In multiplayer, the game can be started only when it is ended or not running yet
-		return LocalGameState == EBmrCurrentGameState::EndGame
-		       || LocalGameState == EBmrCurrentGameState::Menu;
+		return;
 	}
 
-	// In singleplayer, the game can be started or restarted at any time
-	return true;
+	checkf(GameStateTreeComponent, TEXT("ERROR: [%i] %hs:\n'GameStateTreeComponent' is null!"), __LINE__, __FUNCTION__);
+	GameStateTreeComponent->SetStateTree(GameStateTreeAsset);
+	GameStateTreeComponent->StartLogic();
+}
+
+// Stops the State Tree that manages the overall game state
+void ABmrGameState::StopGameStateTree()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	checkf(GameStateTreeComponent, TEXT("ERROR: [%i] %hs:\n'GameStateTreeComponent' is null!"), __LINE__, __FUNCTION__);
+	if (!GameStateTreeComponent->IsRunning())
+	{
+		return;
+	}
+
+	static const FString Reason{__FUNCTION__};
+	GameStateTreeComponent->StopLogic(Reason);
+}
+
+// Is the only proper way to change the game state, called by the State Tree on the server
+void ABmrGameState::SetGameState(EBmrCurrentGameState NewGameState)
+{
+	if (!HasAuthority()
+	    || ReplicatedGameState == NewGameState)
+	{
+		return;
+	}
+
+	ReplicatedGameState = NewGameState;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedGameState, this);
+
+	ApplyGameState();
 }
 
 // Updates current game state
@@ -126,145 +136,25 @@ void ABmrGameState::ApplyGameState()
 {
 	TRACE_BOOKMARK(TEXT("%s"), *UEnum::GetValueAsString(ReplicatedGameState));
 
-	LocalPreviousGameState = LocalGameState;
-	LocalGameState = ReplicatedGameState;
-
-	StopInGameCountdown();
-	StopStartingCountdown();
-
-	switch (LocalGameState)
-	{
-		case ECGS::GameStarting:
-			TriggerStartingCountdown();
-			break;
-		case ECGS::InGame:
-			TriggerInGameCountdown();
-			break;
-		default:
-			break;
-	}
-
 	// Notify listeners via Gameplay Message Router
 	FGameplayEventData Payload;
 	Payload.EventTag = BmrGameplayTags::Event::GameState_Changed;
 	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
+
+	// Update previous state after broadcasting, so listeners see the correct previous state during the event
+	LocalPreviousGameState = ReplicatedGameState;
 }
 
 // Called on the AMyGameState::CurrentGameState property updating.
 void ABmrGameState::OnRep_CurrentGameState()
 {
-	if (CanChangeGameState(ReplicatedGameState))
+	if (!UBmrGameplayMessageSubsystem::Get().ReadyHandler.IsReady(UBmrBlueprintFunctionLibrary::GetLocalPawn()))
 	{
-		ApplyGameState();
-	}
-}
-
-/*********************************************************************************************
- * Starting Timer
- * 3-2-1-GO
- ********************************************************************************************* */
-
-// Sets the left second of the 'Three-two-one-GO' timer
-void ABmrGameState::SetStartingTimerSecondsRemain(float NewStartingTimerSecRemain)
-{
-	StartingTimerSecRemain = FMath::Max(NewStartingTimerSecRemain, 0.f);
-}
-
-// Starts counting the 3-2-1-GO timer when match is starting, can be called both on the server and clients
-void ABmrGameState::TriggerStartingCountdown()
-{
-	const UWorld* World = GetWorld();
-	if (!World)
-	{
+		// Pawn might not be ready on client, apply replicated game state now (otherwise it would be deferred until pawn is ready)
 		return;
 	}
 
-	SetStartingTimerSecondsRemain(UBmrGameStateDataAsset::Get().GetStartingCountdown());
-
-	constexpr bool bInLoop = true;
-	World->GetTimerManager().SetTimer(StartingTimer, this, &ThisClass::OnStartingTimerTick, DefaultTimerIntervalSec, bInLoop);
-}
-
-// Clears the Starting timer and stops counting it
-void ABmrGameState::StopStartingCountdown()
-{
-	if (StartingTimer.IsValid())
-	{
-		GetWorldTimerManager().ClearTimer(StartingTimer);
-	}
-}
-
-// Is called once a second during the Game Starting state to decrement the 'Three-two-one-GO' timer, both on the server and clients
-void ABmrGameState::OnStartingTimerTick()
-{
-	const float NewValue = StartingTimerSecRemain - DefaultTimerIntervalSec;
-	SetStartingTimerSecondsRemain(NewValue);
-
-	if (IsStartingTimerElapsed())
-	{
-		StopStartingCountdown();
-		SetGameState(EBmrCurrentGameState::InGame);
-	}
-}
-
-/*********************************************************************************************
- * In-Game Timer
- * Runs during the match (120...0)
- ********************************************************************************************* */
-
-// Sets the left second to the end of the match
-void ABmrGameState::SetInGameTimerSecondsRemain(float NewInGameTimerSecRemain)
-{
-	InGameTimerSecRemain = FMath::Max(NewInGameTimerSecRemain, 0.f);
-}
-
-// Starts counting the (120...0) timer during the match, can be called both on the server and clients
-void ABmrGameState::TriggerInGameCountdown()
-{
-	const UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
-	SetInGameTimerSecondsRemain(UBmrGameStateDataAsset::Get().GetInGameCountdown());
-
-	constexpr bool bInLoop = true;
-	World->GetTimerManager().SetTimer(InGameTimer, this, &ThisClass::OnInGameTimerTick, DefaultTimerIntervalSec, bInLoop);
-}
-
-// Clears the In-Game timer and stops counting it
-void ABmrGameState::StopInGameCountdown()
-{
-	if (InGameTimer.IsValid())
-	{
-		GetWorldTimerManager().ClearTimer(InGameTimer);
-	}
-}
-
-// Is called once a second during the In-Game state to decrement the match timer, both on the server and clients
-void ABmrGameState::OnInGameTimerTick()
-{
-	const float NewValue = InGameTimerSecRemain - DefaultTimerIntervalSec;
-	SetInGameTimerSecondsRemain(NewValue);
-
-	// @todo JanSeliv baYkHels Adjust hardcoded value to match the duration of the EndGame SFX from meta sound
-	{
-		constexpr float SoundDuration = 10.f;
-		const UWorld* World = GetWorld();
-		checkf(World, TEXT("ERROR: [%i] %hs:\n'World' is null!"), __LINE__, __FUNCTION__);
-		const float Tolerance = DefaultTimerIntervalSec - World->GetDeltaSeconds();
-		if (FMath::IsNearlyEqual(InGameTimerSecRemain, SoundDuration, Tolerance))
-		{
-			UBmrSoundsSubsystem::Get().PlayEndGameCountdownSFX();
-		}
-	}
-
-	if (IsInGameTimerElapsed())
-	{
-		StopInGameCountdown();
-		SetGameState(EBmrCurrentGameState::EndGame);
-	}
+	ApplyGameState();
 }
 
 /*********************************************************************************************
@@ -296,6 +186,8 @@ void ABmrGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	StartGameStateTree();
+
 	UGameplayUtilsLibrary::SetGameFeaturesEnabled(true, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
 
 	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
@@ -312,9 +204,13 @@ void ABmrGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 // Called when the local player character is spawned, possessed, and replicated
 void ABmrGameState::OnLocalPawnReady_Implementation(const FGameplayEventData& Payload)
 {
-	// Try update the game state when the local character is initialized, if not set yet
-	if (CanChangeGameState(ReplicatedGameState))
+	if (LocalPreviousGameState == ReplicatedGameState)
 	{
-		ApplyGameState();
+		// Game state was already applied or nothing to apply
+		return;
 	}
+
+	// On client, OnRep_CurrentGameState might have skipped applying if the pawn was not ready at that time,
+	// so immediately apply any pending replicated game state now that the pawn is ready
+	ApplyGameState();
 }

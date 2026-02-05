@@ -113,8 +113,8 @@ void ABmrPlayerState::UpdateEndGameState()
 		return;
 	}
 
-	// handle timer is 0
-	if (MyGameState->IsInGameTimerElapsed())
+	// handle timer is elapsed
+	if (CurrentGameState == ECGS::EndGame)
 	{
 		SetEndGameState(EBmrEndGameState::Draw);
 		return;
@@ -178,12 +178,6 @@ void ABmrPlayerState::ApplyEndGameState()
 		EventData.EventTag = BmrGameplayTags::Event::Player_OnEndGame;
 		EventData.Instigator = GetPawn();
 		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
-
-		if (UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Any) <= 1 // no characters to play with
-		    || UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Human) == 0) // all human players are dead
-		{
-			ABmrGameState::Get().SetGameState(ECGS::EndGame);
-		}
 	}
 
 	if (OnEndGameStateChanged.IsBound())
