@@ -180,6 +180,22 @@ void UNMMPlayerControllerComponent::BeginPlay()
 // Clears all transient data created by this component
 void UNMMPlayerControllerComponent::OnUnregister()
 {
+	// Notify that Main Menu is being unloaded before any cleanup
+	ABmrPlayerController* MyPC = GetPlayerController();
+	const ABmrPawn* LocalPawn = MyPC ? MyPC->GetPawn<ABmrPawn>() : nullptr;
+	if (LocalPawn)
+	{
+		FGameplayEventData EventData;
+		EventData.EventTag = NmmGameplayTags::Event::MenuUnloaded;
+		EventData.Instigator = LocalPawn;
+		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+
+		if (!MyPC->HasAuthority())
+		{
+			MyPC->ServerBroadcastMessage(EventData);
+		}
+	}
+
 	// Remove all input contexts managed by Controller
 	if (const UNMMDataAsset* DataAsset = UNMMUtils::GetDataAsset(this))
 	{

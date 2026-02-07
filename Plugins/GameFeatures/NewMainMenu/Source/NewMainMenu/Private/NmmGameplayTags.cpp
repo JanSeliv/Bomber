@@ -21,5 +21,6 @@ namespace NmmGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(PlayButtonPressed, "Event.NewMainMenu.PlayButtonPressed", "Event that fires when user clicked the Play button in Main Menu, is called on local player ASC");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(CinematicSkipped, "Event.NewMainMenu.CinematicSkipped", "Event that fires when user skipped the pre-game cinematic manually, is called on local player ASC");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(CinematicPlaybackFinished, "Event.NewMainMenu.CinematicPlaybackFinished", "Event that fires when pre-game cinematic Level Sequence finished playing naturally, is called on local player ASC");
+		UE_DEFINE_GAMEPLAY_TAG_COMMENT(MenuUnloaded, "Event.NewMainMenu.Unloaded", "Event that fires when New Main Menu game feature is being unloaded, is called on local player ASC");
 	} // namespace Event
 } // namespace NmmGameplayTags

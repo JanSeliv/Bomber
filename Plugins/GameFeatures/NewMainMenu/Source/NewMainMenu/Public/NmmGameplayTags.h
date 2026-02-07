@@ -35,5 +35,8 @@ namespace NmmGameplayTags
 
 		/** Event that fires when pre-game cinematic Level Sequence finished playing naturally, is called on local player ASC */
 		NEWMAINMENU_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CinematicPlaybackFinished);
+
+		/** Event that fires when New Main Menu game feature is being unloaded, is called on local player ASC */
+		NEWMAINMENU_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MenuUnloaded);
 	} // namespace Event
 } // namespace NmmGameplayTags
