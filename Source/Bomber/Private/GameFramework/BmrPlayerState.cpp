@@ -121,15 +121,6 @@ void ABmrPlayerState::UpdateEndGameState()
 		return;
 	}
 
-	// handle timer is elapsed
-	if (ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::EndGame))
-	{
-		SetEndGameState(EBmrEndGameState::Draw);
-		return;
-	}
-
-	// Game is running
-
 	const EBmrEndGameState NewEndGameState = [&]
 	{
 		const int32 PlayerNum = UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType::Any);
@@ -147,7 +138,18 @@ void ABmrPlayerState::UpdateEndGameState()
 		}
 
 		// Win: Is alive owner and is the last player
-		return PlayerNum == 1 ? EBmrEndGameState::Win : EBmrEndGameState::None;
+		if (PlayerNum == 1)
+		{
+			return EBmrEndGameState::Win;
+		}
+
+		// Draw: timer elapsed while multiple players still alive
+		if (ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::EndGame))
+		{
+			return EBmrEndGameState::Draw;
+		}
+
+		return EBmrEndGameState::None;
 	}();
 
 	SetEndGameState(NewEndGameState);
