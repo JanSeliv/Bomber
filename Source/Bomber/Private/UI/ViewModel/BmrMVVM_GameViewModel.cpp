@@ -13,6 +13,7 @@
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/BmrSoundsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
@@ -164,6 +165,16 @@ void UBmrMVVM_GameViewModel::OnInGameTimerTick()
 	const int32 CurrentValue = FCString::Atoi(*InGameTimerSecRemain.ToString());
 	const int32 NewValue = CurrentValue - 1;
 	SetInGameTimerSecRemain(FText::AsNumber(NewValue));
+
+	// @todo JanSeliv baYkHels Adjust hardcoded value to match the duration of the EndGame SFX from meta sound
+	{
+		constexpr float SoundDuration = 10.f;
+		const float Tolerance = DefaultTimerIntervalSec - GetWorld()->GetDeltaSeconds();
+		if (FMath::IsNearlyEqual(NewValue, SoundDuration, Tolerance))
+		{
+			UBmrSoundsSubsystem::Get().PlayEndGameCountdownSFX();
+		}
+	}
 
 	if (NewValue <= 0)
 	{

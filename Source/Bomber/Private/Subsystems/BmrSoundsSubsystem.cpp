@@ -54,12 +54,6 @@ bool UBmrSoundsSubsystem::CanPlaySounds()
 		return false;
 	}
 
-	if (!UBmrBlueprintFunctionLibrary::IsLocalPawnReady())
-	{
-		// Dont play any sounds until local pawn is loaded
-		return false;
-	}
-
 	const UWorld* World = UUtilsLibrary::GetPlayWorld();
 	return World
 	       && World->bAllowAudioPlayback
@@ -254,6 +248,12 @@ void UBmrSoundsSubsystem::PlayEndGameCountdownSFX()
 		return;
 	}
 
+	const ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	if (!GameState || !GameState->HasMatchingGameplayTag(FBmrGameStateTag::InGame))
+	{
+		return;
+	}
+
 	PlaySingleSound2D(UBmrSoundsDataAsset::Get().GetEndGameCountdownSFX());
 }
 
@@ -271,6 +271,12 @@ void UBmrSoundsSubsystem::PlayStartGameCountdownSFX()
 		return;
 	}
 
+	const ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	if (!GameState || !GameState->HasMatchingGameplayTag(FBmrGameStateTag::GameStarting))
+	{
+		return;
+	}
+
 	PlaySingleSound2D(UBmrSoundsDataAsset::Get().GetStartGameCountdownSFX());
 }
 
@@ -283,6 +289,11 @@ void UBmrSoundsSubsystem::StopStartGameCountdownSFX()
 void UBmrSoundsSubsystem::PlayUIClickSFX()
 {
 	if (!CanPlaySounds())
+	{
+		return;
+	}
+
+	if (!UBmrBlueprintFunctionLibrary::IsLocalPawnReady())
 	{
 		return;
 	}
