@@ -113,4 +113,8 @@ void UNMMCinematicStateWidget::OnCinematicSkipFinished_Implementation()
 	EventData.EventTag = NmmGameplayTags::Event::CinematicSkipped;
 	EventData.Instigator = MyPC->GetPawn();
 	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	if (!MyPC->HasAuthority())
+	{
+		MyPC->ServerBroadcastMessage(EventData);
+	}
 }
