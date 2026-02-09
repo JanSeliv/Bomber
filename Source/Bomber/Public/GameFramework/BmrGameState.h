@@ -40,6 +40,10 @@ public:
 	 * - in blueprints, call 'Listen Gameplay Message' node to 'Event.GameState.Changed' tag.
 	 ********************************************************************************************* */
 public:
+	/** Returns the State Tree Component that manages the overall game state. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE class UStateTreeComponent* GetGameStateTreeComponent() const { return GameStateTreeComponent; }
+
 	/** Returns true if the game state State Tree can be started, is false when in Render Movie cinematic mode. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	bool CanStartGameStateTree() const;
