@@ -10,7 +10,6 @@
 #include "DataAssets/BmrLevelActorDataAsset.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
-#include "PoolManagerSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
@@ -276,6 +275,7 @@ void UBmrMapComponent::OnRegister()
 		BoxCollisionComponent->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		BoxCollisionComponent->SetBoxExtent(ActorDataAsset->GetCollisionExtent());
 		BoxCollisionComponent->IgnoreActorWhenMoving(Owner, true);
+		SetCollisionResponses(ActorDataAsset->GetCollisionResponse());
 #if WITH_EDITOR
 		BoxCollisionComponent->SetHiddenInGame(!bShouldShowRenders);
 #endif

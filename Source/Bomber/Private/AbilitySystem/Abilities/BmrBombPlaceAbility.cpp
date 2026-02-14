@@ -7,12 +7,15 @@
 #include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
 #include "Components/BmrMapComponent.h"
+#include "DataAssets/BmrBombDataAsset.h"
+#include "DataAssets/BmrGameStateDataAsset.h"
+#include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
 #include "AbilitySystemComponent.h"
-#include "DataAssets/BmrBombDataAsset.h"
+#include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBombPlaceAbility)
@@ -102,10 +105,9 @@ FActiveGameplayEffectHandle UBmrBombPlaceAbility::ApplyDurationalEffect(const TS
 	    && !ActorInfo.IsLocallyControlled())
 	{
 		// Apply lag compensation on server side, so bombs on clients will detonate at the same time as on server
-		const APlayerState* Owner = ASC->GetOwner<APlayerState>();
-		checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
-		constexpr float MaxCompensatedPing = 0.5f; // 500 ms
-		const float PlayerPing = Owner->GetPingInMilliseconds() * 0.001f;
+		const APawn* AvatarPawn = Cast<APawn>(ASC->GetAvatarActor());
+		const float MaxCompensatedPing = UBmrGameStateDataAsset::Get().GetMaxPingCompensationSec();
+		const float PlayerPing = FMath::Min(UMultiplayerUtilsLibrary::GetPlayerPingSeconds(AvatarPawn), MaxCompensatedPing);
 		BombDuration = FMath::Max(MaxCompensatedPing, BombDuration - PlayerPing);
 	}
 	DurationSpec->SetSetByCallerMagnitude(BmrGameplayTags::SetByCaller::Bomb_Duration, BombDuration);

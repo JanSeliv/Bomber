@@ -8,8 +8,9 @@
 #include "Bomber.h"
 #include "Components/BmrMapComponent.h"
 #include "DataAssets/BmrBombDataAsset.h"
+#include "DataAssets/BmrGameStateDataAsset.h"
 #include "GameFramework/BmrGameState.h"
-#include "Structures/BmrGameplayTags.h"
+#include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
@@ -21,8 +22,10 @@
 // UE
 #include "Components/BoxComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/World.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "TimerManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBombAbilityActor)
 
@@ -47,6 +50,13 @@ ABmrBombAbilityActor::ABmrBombAbilityActor()
 	MapComponent = CreateDefaultSubobject<UBmrMapComponent>(TEXT("MapComponent"));
 }
 
+// Returns true when bomb is fully initialized: both bomb is initialized and added to level
+bool ABmrBombAbilityActor::IsBombReady() const
+{
+	return MapComponent && MapComponent->GetCell().IsValid() // Is added to level
+	       && InstigatorAbilitySystemComponent; // Is initialized
+}
+
 /*********************************************************************************************
  * Detonation
  ********************************************************************************************* */
@@ -62,11 +72,10 @@ void ABmrBombAbilityActor::InitBomb(UAbilitySystemComponent* InASC)
 	InstigatorAbilitySystemComponent = InASC;
 	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, InstigatorAbilitySystemComponent, this);
 
-	UpdateExplosionCells();
-
-	ApplyMesh();
-
-	ApplyMaterial();
+	if (IsBombReady())
+	{
+		OnBombReady();
+	}
 }
 
 // Returns explosion radius from instigator, or -1 if can not be obtained
@@ -199,7 +208,10 @@ void ABmrBombAbilityActor::OnAddedToLevel_Implementation(UBmrMapComponent* InMap
 	checkf(InMapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 	InMapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
 
-	InitCollisionResponseToAllPlayers();
+	if (IsBombReady())
+	{
+		OnBombReady();
+	}
 
 #if WITH_EDITOR //[IsEditorNotPieWorld]
 	if (FEditorUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
@@ -209,12 +221,44 @@ void ABmrBombAbilityActor::OnAddedToLevel_Implementation(UBmrMapComponent* InMap
 #endif // WITH_EDITOR [IsEditorNotPieWorld]
 }
 
+// Called when bomb is fully initialized: both cell is valid and instigator ASC is set
+void ABmrBombAbilityActor::OnBombReady_Implementation()
+{
+	UpdateExplosionCells();
+
+	ApplyMesh();
+
+	ApplyMaterial();
+
+	// Initialize collision, waiting for SROC to reach bomb cell if needed
+	const bool bIsWaiting = TryBindOnInstigatorReachedBombCell();
+	if (!bIsWaiting)
+	{
+		// Not waiting, can init collision immediately
+		InitCollisionResponseToAllPlayers();
+	}
+}
+
 // Is used for cleaning up the bomb's data after it was removed from the level
 void ABmrBombAbilityActor::OnPostRemovedFromLevel_Implementation(UBmrMapComponent* InMapComponent, UObject* DestroyCauser)
 {
 	checkf(InMapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
 	InMapComponent->OnPostRemovedFromLevel.RemoveAll(this);
-	InMapComponent->OnCellChanged.RemoveAll(this);
+
+	// Clear all cell delegates this bomb subscribed to
+	FMapComponents AllPlayerMapComponents;
+	UBmrActorUtilsLibrary::GetLevelActors(AllPlayerMapComponents, TO_FLAG(EAT::Player));
+	for (UBmrMapComponent* PlayerMapComponentIt : AllPlayerMapComponents)
+	{
+		checkf(PlayerMapComponentIt, TEXT("ERROR: [%i] %hs:\n'PlayerMapComponentIt' is null!"), __LINE__, __FUNCTION__);
+		PlayerMapComponentIt->OnCellChanged.RemoveAll(this);
+	}
+
+	const APawn* InstigatorPawn = InstigatorAbilitySystemComponent ? Cast<APawn>(InstigatorAbilitySystemComponent->GetAvatarActor()) : nullptr;
+	if (InstigatorPawn)
+	{
+		InstigatorPawn->GetWorldTimerManager().ClearAllTimersForObject(this);
+	}
 
 	InstigatorAbilitySystemComponent = nullptr;
 	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, InstigatorAbilitySystemComponent, this);
@@ -223,7 +267,7 @@ void ABmrBombAbilityActor::OnPostRemovedFromLevel_Implementation(UBmrMapComponen
 }
 
 // Is called when character leaves the bomb to update collision response
-void ABmrBombAbilityActor::OnPlayerCellChanged_Implementation(UBmrMapComponent* PlayerMapComponent, const FBmrCell& NewCell, const FBmrCell& PreviousCell)
+void ABmrBombAbilityActor::OnAnyPawnCellExit_Implementation(UBmrMapComponent* PlayerMapComponent, const FBmrCell& NewCell, const FBmrCell& PreviousCell)
 {
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 	const UBoxComponent* BoxCollisionComponent = MapComponent->GetBoxCollisionComponent();
@@ -236,6 +280,8 @@ void ABmrBombAbilityActor::OnPlayerCellChanged_Implementation(UBmrMapComponent* 
 	const ECollisionResponse NewResponse = bIsPlayerLeft ? ECR_Block : ECR_Overlap;
 
 	checkf(PlayerMapComponent, TEXT("ERROR: [%i] %hs:\n'PlayerMapComponent' is null!"), __LINE__, __FUNCTION__);
+	PlayerMapComponent->OnCellChanged.RemoveAll(this);
+
 	const APawn* Pawn = PlayerMapComponent ? PlayerMapComponent->GetOwner<APawn>() : nullptr;
 	const APlayerState* PlayerState = Pawn ? Pawn->GetPlayerState<APlayerState>() : nullptr;
 	const int32 PlayerId = PlayerState ? PlayerState->GetPlayerId() : INDEX_NONE;
@@ -248,9 +294,24 @@ void ABmrBombAbilityActor::OnPlayerCellChanged_Implementation(UBmrMapComponent* 
  * Custom Collision Response
  ********************************************************************************************* */
 
+// Returns true if this bomb was spawned for server replica of client (SROC), meaning server is processing bomb placed by client
+bool ABmrBombAbilityActor::IsServerReplicaOfClient() const
+{
+	const APawn* InstigatorPawn = InstigatorAbilitySystemComponent ? Cast<APawn>(InstigatorAbilitySystemComponent->GetAvatarActor()) : nullptr;
+	return HasAuthority()
+	       && InstigatorPawn
+	       && !InstigatorPawn->IsLocallyControlled();
+}
+
 // Sets actual collision responses to all players for this bomb
 void ABmrBombAbilityActor::InitCollisionResponseToAllPlayers()
 {
+	const APawn* InstigatorPawn = InstigatorAbilitySystemComponent ? Cast<APawn>(InstigatorAbilitySystemComponent->GetAvatarActor()) : nullptr;
+	if (UBmrMapComponent* InstigatorMapComponent = UBmrMapComponent::GetMapComponent(InstigatorPawn))
+	{
+		InstigatorMapComponent->OnCellChanged.RemoveAll(this);
+	}
+
 	// Obtain all overlapped level actors on the bomb cell to enable overlap response for players inside the bomb
 	FMapComponents OverlapMapComponents;
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
@@ -285,7 +346,7 @@ void ABmrBombAbilityActor::InitCollisionResponseToAllPlayers()
 		// Listen when character end to overlaps with this bomb to block collision
 		UBmrMapComponent* PlayerMapComponent = UBmrMapComponent::GetMapComponent(Pawn);
 		checkf(PlayerMapComponent, TEXT("ERROR: [%i] %hs:\n'PlayerMapComponent' is null!"), __LINE__, __FUNCTION__);
-		PlayerMapComponent->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnPlayerCellChanged);
+		PlayerMapComponent->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnAnyPawnCellExit);
 	}
 
 	MapComponent->SetCollisionResponses(CollisionResponses);
@@ -319,4 +380,53 @@ void ABmrBombAbilityActor::GetCollisionResponseToPlayerByID(FCollisionResponseCo
 	}
 
 	InOutCollisionResponses.SetResponse(CollisionChannel, NewResponse);
+}
+
+// Attempts to bind bomb to wait for instigator pawn to reach bomb cell before initializing collision
+bool ABmrBombAbilityActor::TryBindOnInstigatorReachedBombCell()
+{
+	if (!IsServerReplicaOfClient())
+	{
+		// Not SROC, no need to wait and can init collision immediately
+		return false;
+	}
+
+	const APawn* InstigatorPawn = InstigatorAbilitySystemComponent ? Cast<APawn>(InstigatorAbilitySystemComponent->GetAvatarActor()) : nullptr;
+	UBmrMapComponent* InstigatorMapComponent = UBmrMapComponent::GetMapComponent(InstigatorPawn);
+	const FBmrCell CurrentPawnCell = InstigatorMapComponent ? InstigatorMapComponent->GetCell() : FBmrCell::InvalidCell;
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+	if (CurrentPawnCell == MapComponent->GetCell())
+	{
+		// Is already at the bomb cell, no need to wait
+		return false;
+	}
+
+	// Wait for pawn to reach the bomb cell before initializing collision
+	InstigatorMapComponent->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnInstigatorPawnCellEnter);
+
+	// Set timeout of waiting
+	FTimerHandle BombSpawnTimeoutHandle;
+	const float MaxPingCompensationSec = UBmrGameStateDataAsset::Get().GetMaxPingCompensationSec();
+	constexpr float TimeoutBuffer = 1.5f;
+	const float PlayerPingSeconds = UMultiplayerUtilsLibrary::GetPlayerPingSeconds(InstigatorPawn);
+	const float TimeoutSeconds = FMath::Min(PlayerPingSeconds * TimeoutBuffer, MaxPingCompensationSec);
+	InstigatorPawn->GetWorldTimerManager().SetTimer(BombSpawnTimeoutHandle, this, &ThisClass::InitCollisionResponseToAllPlayers, TimeoutSeconds);
+
+	return true;
+}
+
+// Called when instigator pawn reaches the bomb cell, initializes collision
+void ABmrBombAbilityActor::OnInstigatorPawnCellEnter_Implementation(UBmrMapComponent* InMapComponent, const FBmrCell& NewCell, const FBmrCell& PreviousCell)
+{
+	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+	if (NewCell != MapComponent->GetCell())
+	{
+		return;
+	}
+
+	checkf(InMapComponent, TEXT("ERROR: [%i] %hs:\n'InMapComponent' is null!"), __LINE__, __FUNCTION__);
+	InMapComponent->OnCellChanged.RemoveAll(this);
+	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+
+	InitCollisionResponseToAllPlayers();
 }

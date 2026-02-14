@@ -30,6 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE int32 GetInGameCountdown() const { return InGameCountdown; }
 
+	/** Returns the maximum ping compensation in seconds for any time-based networked actions, like bomb detonation. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE float GetMaxPingCompensationSec() const { return MaxPingCompensationSec; }
+
 	/** Returns the empty startup map that is used only in builds at launch and designed for fast boot before transitioning to the gameplay level. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const FORCEINLINE TSoftObjectPtr<UWorld>& GetStartupLevel() const { return StartupLevel; }
@@ -54,6 +58,10 @@ protected:
 	/** Seconds to the end of the round. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	int32 InGameCountdown = 120;
+
+	/** Maximum ping compensation in seconds for any time-based networked actions, like bomb detonation. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	float MaxPingCompensationSec = 0.5f;
 
 	/* Empty startup map that is used only in builds at launch.
 	 * Designed for fast boot before transitioning to the gameplay level.

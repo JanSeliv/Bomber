@@ -32,6 +32,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE class UAbilitySystemComponent* GetInstigatorAbilitySystemComponent() const { return InstigatorAbilitySystemComponent; }
 
+	/** Returns true when bomb is fully initialized: both bomb is initialized and added to level. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	bool IsBombReady() const;
+
 protected:
 	/** The MapComponent manages this actor on the Generated Map */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
@@ -108,18 +112,27 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnAddedToLevel(UBmrMapComponent* InMapComponent);
 
+	/** Called when bomb is fully initialized: both bomb is initialized and added to level.
+	 * Is first safe place to execute any logic. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnBombReady();
+
 	/** Is used for cleaning up the bomb's data after it was removed from the level. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnPostRemovedFromLevel(UBmrMapComponent* InMapComponent, UObject* DestroyCauser);
 
 	/** Is called when character leaves the bomb to update collision response. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnPlayerCellChanged(UBmrMapComponent* PlayerMapComponent, const FBmrCell& NewCell, const FBmrCell& PreviousCell);
+	void OnAnyPawnCellExit(UBmrMapComponent* PlayerMapComponent, const FBmrCell& NewCell, const FBmrCell& PreviousCell);
 
 	/*********************************************************************************************
 	 * Custom Collision Response
 	 ********************************************************************************************* */
 public:
+	/** Returns true if this bomb was spawned for server replica of client (SROC), meaning server is processing bomb placed by client. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	bool IsServerReplicaOfClient() const;
+
 	/** Sets actual collision response to all players for this bomb. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void InitCollisionResponseToAllPlayers();
@@ -130,4 +143,14 @@ public:
 	 * @param NewResponse New response to set. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static void GetCollisionResponseToPlayerByID(FCollisionResponseContainer& InOutCollisionResponses, int32 PlayerId, ECollisionResponse NewResponse);
+
+protected:
+	/** Attempts to bind bomb to wait for instigator pawn to reach bomb cell before initializing collision.
+	 * @return true if bomb was bound successfully and is now waiting for pawn to reach bomb cell. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	bool TryBindOnInstigatorReachedBombCell();
+
+	/** Called when instigator pawn reaches the bomb cell, initializes collision. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnInstigatorPawnCellEnter(UBmrMapComponent* InMapComponent, const FBmrCell& NewCell, const FBmrCell& PreviousCell);
 };
