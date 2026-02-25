@@ -114,16 +114,36 @@ void UBmrSoundsSubsystem::StopSingleSound2D(USoundBase* InSound)
 void UBmrSoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
 {
 	const TObjectPtr<UAudioComponent>* SoundComponentPtr = InSound ? SoundComponents.Find(InSound) : nullptr;
-	if (!SoundComponentPtr)
+	UAudioComponent* SoundComponent = SoundComponentPtr ? *SoundComponentPtr : nullptr;
+	if (!SoundComponent)
 	{
 		// Is already unloaded
 		return;
 	}
 
-	if (UAudioComponent* SoundComponent = *SoundComponentPtr)
+	SoundComponent->Stop();
+	SoundComponent->DestroyComponent();
+
+	// Release the sound and all its referenced assets
+	const FString OriginalPackageName = InSound->GetOutermost()->GetName();
+	const int32 SecondSlashIdx = OriginalPackageName.Find(TEXT("/"), ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
+	const FString ModuleMount = SecondSlashIdx != INDEX_NONE ? OriginalPackageName.Left(SecondSlashIdx + 1) : FString();
+	InSound->ClearFlags(RF_Standalone);
+	InSound->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);
+	if (!ModuleMount.IsEmpty())
 	{
-		SoundComponent->Stop();
-		SoundComponent->DestroyComponent();
+		TArray<UObject*> ReferencedObjects;
+		FReferenceFinder ObjectFinder(ReferencedObjects, nullptr, false, true, false, true);
+		ObjectFinder.FindReferences(InSound);
+
+		for (UObject* ReferencedObject : ReferencedObjects)
+		{
+			if (ReferencedObject->GetOutermost()->GetName().StartsWith(ModuleMount))
+			{
+				ReferencedObject->ClearFlags(RF_Standalone);
+				ReferencedObject->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);
+			}
+		}
 	}
 
 	SoundComponents.Remove(InSound);
