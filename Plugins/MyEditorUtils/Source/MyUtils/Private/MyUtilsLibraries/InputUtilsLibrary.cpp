@@ -2,6 +2,9 @@
 
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 
+// Bomber
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+
 // UE
 #include "Engine/Engine.h"
 #include "Engine/LocalPlayer.h"
@@ -93,6 +96,27 @@ void UInputUtilsLibrary::SetInputContextEnabled(const UObject* WorldContext, boo
 	}
 }
 
+/*********************************************************************************************
+ * Input Actions
+ ********************************************************************************************* */
+
+// Returns true if specified input action is bound to the Input Component
+bool UInputUtilsLibrary::IsInputActionBound(const UObject* WorldContext, const UInputAction* InInputAction)
+{
+	const UEnhancedInputComponent* InputComponent = GetEnhancedInputComponent(WorldContext);
+	if (!ensureMsgf(InputComponent, TEXT("ASSERT: [%i] %s:\n'InputComponent' is not valid!"), __LINE__, *FString(__FUNCTION__))
+	    || !ensureMsgf(InInputAction, TEXT("ASSERT: [%i] %s:\n'InInputAction' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		return false;
+	}
+
+	const TArray<TUniquePtr<FEnhancedInputActionEventBinding>>& AllBoundInputs = InputComponent->GetActionEventBindings();
+	return AllBoundInputs.ContainsByPredicate([&InInputAction](const TUniquePtr<FEnhancedInputActionEventBinding>& BindingIt)
+	{
+		return BindingIt && BindingIt->GetAction() == InInputAction;
+	});
+}
+
 // Returns all input actions set in mappings
 void UInputUtilsLibrary::GetAllActionsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext, EInputActionInContextState State, TArray<UInputAction*>& OutInputActions)
 {
@@ -140,25 +164,30 @@ void UInputUtilsLibrary::GetAllActionsInContext(const UObject* WorldContext, con
 	}
 }
 
-/*********************************************************************************************
- * Input Actions
- ********************************************************************************************* */
-
-// Returns true if specified input action is bound to the Input Component
-bool UInputUtilsLibrary::IsInputActionBound(const UObject* WorldContext, const UInputAction* InInputAction)
+// Removes input bindings for all actions in given context
+void UInputUtilsLibrary::UnbindInputActionsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext)
 {
-	const UEnhancedInputComponent* InputComponent = GetEnhancedInputComponent(WorldContext);
-	if (!ensureMsgf(InputComponent, TEXT("ASSERT: [%i] %s:\n'InputComponent' is not valid!"), __LINE__, *FString(__FUNCTION__))
-	    || !ensureMsgf(InInputAction, TEXT("ASSERT: [%i] %s:\n'InInputAction' is not valid!"), __LINE__, *FString(__FUNCTION__)))
+	UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent(WorldContext);
+	if (!ensureMsgf(EnhancedInputComponent, TEXT("ASSERT: 'EnhancedInputComponent' is not valid"))
+	    || !ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %hs:\n'InInputContexts' is not valid!"), __LINE__, __FUNCTION__))
 	{
-		return false;
+		return;
 	}
 
-	const TArray<TUniquePtr<FEnhancedInputActionEventBinding>>& AllBoundInputs = InputComponent->GetActionEventBindings();
-	return AllBoundInputs.ContainsByPredicate([&InInputAction](const TUniquePtr<FEnhancedInputActionEventBinding>& BindingIt)
+	TArray<UInputAction*> InputActions;
+	GetAllActionsInContext(WorldContext, InInputContext, EInputActionInContextState::Any, /*out*/ InputActions);
+
+	const TArray<TUniquePtr<FEnhancedInputActionEventBinding>>& Bindings = EnhancedInputComponent->GetActionEventBindings();
+	for (int32 Index = Bindings.Num() - 1; Index >= 0; --Index)
 	{
-		return BindingIt && BindingIt->GetAction() == InInputAction;
-	});
+		const UInputAction* BoundAction = Bindings[Index] ? Bindings[Index]->GetAction() : nullptr;
+		const int32 InputActionIdx = InputActions.IndexOfByKey(BoundAction);
+		if (InputActionIdx != INDEX_NONE)
+		{
+			EnhancedInputComponent->RemoveActionEventBinding(Index);
+			UGameplayUtilsLibrary::UnloadAsset(InputActions[InputActionIdx]);
+		}
+	}
 }
 
 /*********************************************************************************************

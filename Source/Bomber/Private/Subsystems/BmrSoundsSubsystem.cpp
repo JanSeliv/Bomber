@@ -8,6 +8,7 @@
 #include "DataAssets/BmrSoundsDataAsset.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
@@ -22,7 +23,6 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
-#include "UObject/Package.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrSoundsSubsystem)
 
@@ -125,26 +125,8 @@ void UBmrSoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
 	SoundComponent->DestroyComponent();
 
 	// Release the sound and all its referenced assets
-	const FString OriginalPackageName = InSound->GetOutermost()->GetName();
-	const int32 SecondSlashIdx = OriginalPackageName.Find(TEXT("/"), ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
-	const FString ModuleMount = SecondSlashIdx != INDEX_NONE ? OriginalPackageName.Left(SecondSlashIdx + 1) : FString();
-	InSound->ClearFlags(RF_Standalone);
-	InSound->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);
-	if (!ModuleMount.IsEmpty())
-	{
-		TArray<UObject*> ReferencedObjects;
-		FReferenceFinder ObjectFinder(ReferencedObjects, nullptr, false, true, false, true);
-		ObjectFinder.FindReferences(InSound);
-
-		for (UObject* ReferencedObject : ReferencedObjects)
-		{
-			if (ReferencedObject->GetOutermost()->GetName().StartsWith(ModuleMount))
-			{
-				ReferencedObject->ClearFlags(RF_Standalone);
-				ReferencedObject->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);
-			}
-		}
-	}
+	constexpr bool bUnloadReferences = true;
+	UGameplayUtilsLibrary::UnloadAsset(InSound, bUnloadReferences);
 
 	SoundComponents.Remove(InSound);
 }
@@ -176,8 +158,7 @@ void UBmrSoundsSubsystem::DestroyAllSoundComponents()
 			    && ObjectIt->IsA<USoundBase>()
 			    && ObjectIt->HasAnyFlags(RF_Transient))
 			{
-				ObjectIt->ConditionalBeginDestroy();
-				ObjectIt->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);
+				UGameplayUtilsLibrary::UnloadAsset(ObjectIt);
 			}
 		}
 	}

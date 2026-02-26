@@ -19,9 +19,10 @@
 #include "Controllers/BmrPlayerController.h"
 #include "DataAssets/BmrInputMappingContext.h"
 #include "GameFramework/BmrGameState.h"
+#include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "MyUtilsLibraries/SaveUtilsLibrary.h"
-#include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrGameStateTag.h"
+#include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -196,22 +197,27 @@ void UNMMPlayerControllerComponent::OnUnregister()
 		}
 	}
 
-	// Remove all input contexts managed by Controller
-	if (const UNMMDataAsset* DataAsset = UNMMUtils::GetDataAsset(this))
+	if (const UNMMDataAsset* DataAsset = UNMMUtils::GetDataAsset())
 	{
+		// Unregister all input actions and input contexts
 		TArray<const UBmrInputMappingContext*> MenuInputContexts;
 		DataAsset->GetAllInputContexts(/*out*/ MenuInputContexts);
-		GetPlayerControllerChecked().RemoveInputContexts(MenuInputContexts);
 
-		// Cleanup all sounds
-		if (UBmrSoundsSubsystem* SoundSubsystem = UBmrSoundsSubsystem::GetSoundsSubsystem())
+		for (const UBmrInputMappingContext* InputContextIt : MenuInputContexts)
 		{
-			TArray<class USoundBase*> AllMainMenuMusic;
-			UNMMDataAsset::Get().GetAllMainMenuMusic(/*out*/ AllMainMenuMusic);
-			for (USoundBase* MainMenuMusic : AllMainMenuMusic)
-			{
-				SoundSubsystem->DestroySingleSound2D(MainMenuMusic);
-			}
+			UInputUtilsLibrary::UnbindInputActionsInContext(MyPC, InputContextIt);
+		}
+		MyPC->RemoveInputContexts(MenuInputContexts);
+	}
+
+	// Cleanup all sounds
+	if (UBmrSoundsSubsystem* SoundSubsystem = UBmrSoundsSubsystem::GetSoundsSubsystem())
+	{
+		TArray<USoundBase*> AllMainMenuMusic;
+		UNMMDataAsset::Get().GetAllMainMenuMusic(/*out*/ AllMainMenuMusic);
+		for (USoundBase* MainMenuMusic : AllMainMenuMusic)
+		{
+			SoundSubsystem->DestroySingleSound2D(MainMenuMusic);
 		}
 	}
 

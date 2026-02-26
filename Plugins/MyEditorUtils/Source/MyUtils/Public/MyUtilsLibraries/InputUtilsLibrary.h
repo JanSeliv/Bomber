@@ -67,10 +67,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext"))
 	static void SetInputContextEnabled(const UObject* WorldContext, bool bEnable, const UInputMappingContext* InInputContext, int32 Priority = 0);
 
-	/** Returns all input actions set in mappings. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext"))
-	static void GetAllActionsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext, EInputActionInContextState State, TArray<UInputAction*>& OutInputActions);
-
 	/*********************************************************************************************
 	 * Input Actions
 	 ********************************************************************************************* */
@@ -78,6 +74,14 @@ public:
 	/** Returns true if specified input action is bound to the Input Component. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext"))
 	static bool IsInputActionBound(const UObject* WorldContext, const UInputAction* InInputAction);
+
+	/** Returns all input actions set in mappings. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext"))
+	static void GetAllActionsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext, EInputActionInContextState State, TArray<UInputAction*>& OutInputActions);
+
+	/** Removes input bindings for all actions in given context. */
+	UFUNCTION(BlueprintCallable, Category = "C++", meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext"))
+	static void UnbindInputActionsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext);
 
 	/*********************************************************************************************
 	 * Mappings

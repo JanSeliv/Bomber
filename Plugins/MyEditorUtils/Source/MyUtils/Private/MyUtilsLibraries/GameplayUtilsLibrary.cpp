@@ -13,6 +13,7 @@
 #include "Engine/StaticMesh.h"
 #include "GameFeaturesSubsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "UObject/Package.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayUtilsLibrary)
 
@@ -289,6 +290,56 @@ void UGameplayUtilsLibrary::SetGameFeaturesEnabled(bool bEnable, const TArray<FN
 		else
 		{
 			GameFeaturesSubsystem.UnloadGameFeaturePlugin(GameFeatureURL, EmptyCallback, UUtilsLibrary::IsEditor());
+		}
+	}
+}
+
+// Returns the game feature name from the specified asset, if it is part of a game feature
+FString UGameplayUtilsLibrary::GetModuleNameFromAsset(const UObject* Asset)
+{
+	FString GameFeatureName;
+	if (!Asset)
+	{
+		return GameFeatureName;
+	}
+
+	const FString OriginalPackageName = GetNameSafe(Asset->GetOutermost());
+	const int32 SecondSlashIdx = OriginalPackageName.Find(TEXT("/"), ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
+	return SecondSlashIdx != INDEX_NONE ? OriginalPackageName.Left(SecondSlashIdx + 1) : FString();
+}
+
+// Unloads the specified asset from memory
+void UGameplayUtilsLibrary::UnloadAsset(UObject* AssetToUnload, bool bUnloadReferences /* = false*/)
+{
+	if (!ensureMsgf(AssetToUnload, TEXT("ASSERT: [%i] %hs:\n'AssetToUnload' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	const FString ModuleMount = GetModuleNameFromAsset(AssetToUnload);
+
+	AssetToUnload->ConditionalBeginDestroy();
+	AssetToUnload->ClearFlags(RF_Standalone);
+	AssetToUnload->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);
+
+	if (bUnloadReferences)
+	{
+		TArray<UObject*> ReferencedObjects;
+		constexpr bool bInRequireDirectOuter = false;
+		constexpr bool bInShouldIgnoreArchetype = true;
+		constexpr bool bInSerializeRecursively = false;
+		constexpr bool bInShouldIgnoreTransient = true;
+		FReferenceFinder ObjectFinder(ReferencedObjects, nullptr, bInRequireDirectOuter, bInShouldIgnoreArchetype, bInSerializeRecursively, bInShouldIgnoreTransient);
+		ObjectFinder.FindReferences(AssetToUnload);
+
+		for (UObject* ReferencedObject : ReferencedObjects)
+		{
+			if (ReferencedObject
+			    && GetNameSafe(ReferencedObject->GetOutermost()).StartsWith(ModuleMount))
+			{
+				constexpr bool bRecursiveUnload = false;
+				UnloadAsset(ReferencedObject, bRecursiveUnload);
+			}
 		}
 	}
 }
