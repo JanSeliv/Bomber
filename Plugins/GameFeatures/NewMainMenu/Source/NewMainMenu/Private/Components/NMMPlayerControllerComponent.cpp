@@ -17,6 +17,7 @@
 #include "Components/BmrCameraComponent.h"
 #include "Components/BmrMouseActivityComponent.h"
 #include "Controllers/BmrPlayerController.h"
+#include "DalSubsystem.h"
 #include "DataAssets/BmrInputMappingContext.h"
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
@@ -158,24 +159,7 @@ void UNMMPlayerControllerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	constexpr int32 FirstPlayerId = 0;
-	BIND_ON_PAWN_READY_ID(this, ThisClass::OnFirstPawnReady, FirstPlayerId);
-
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-
-	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
-
-	// Load save game data of the Main Menu
-	FAsyncLoadGameFromSlot AsyncLoadGameFromSlotDelegate;
-	AsyncLoadGameFromSlotDelegate.BindUObject(this, &ThisClass::OnAsyncLoadGameFromSlotCompleted);
-	USaveUtilsLibrary::AsyncLoadGameFromSlot(this, UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex(), AsyncLoadGameFromSlotDelegate);
-
-	// Disable auto camera possess by default, so it can be controlled by the spot
-	UBmrCameraComponent* LevelCamera = UBmrBlueprintFunctionLibrary::GetLevelCamera();
-	if (ensureMsgf(LevelCamera, TEXT("ASSERT: [%i] %s:\n'EXPR' is not valid, can't disable Auto Camera Possess!"), __LINE__, *FString(__FUNCTION__)))
-	{
-		LevelCamera->SetAutoPossessCameraEnabled(false);
-	}
+	UDalSubsystem::Get().ListenForDataAsset<UNMMDataAsset>(this, &ThisClass::OnDataAssetLoaded);
 }
 
 // Clears all transient data created by this component
@@ -234,6 +218,29 @@ void UNMMPlayerControllerComponent::OnUnregister()
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
+
+// Called when the NMM data asset is loaded and available
+void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
+{
+	constexpr int32 FirstPlayerId = 0;
+	BIND_ON_PAWN_READY_ID(this, ThisClass::OnFirstPawnReady, FirstPlayerId);
+
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+
+	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
+
+	// Load save game data of the Main Menu
+	FAsyncLoadGameFromSlot AsyncLoadGameFromSlotDelegate;
+	AsyncLoadGameFromSlotDelegate.BindUObject(this, &ThisClass::OnAsyncLoadGameFromSlotCompleted);
+	USaveUtilsLibrary::AsyncLoadGameFromSlot(this, UNMMSaveGameData::GetSaveSlotName(), UNMMSaveGameData::GetSaveSlotIndex(), AsyncLoadGameFromSlotDelegate);
+
+	// Disable auto camera possess by default, so it can be controlled by the spot
+	UBmrCameraComponent* LevelCamera = UBmrBlueprintFunctionLibrary::GetLevelCamera();
+	if (ensureMsgf(LevelCamera, TEXT("ASSERT: [%i] %s:\n'EXPR' is not valid, can't disable Auto Camera Possess!"), __LINE__, *FString(__FUNCTION__)))
+	{
+		LevelCamera->SetAutoPossessCameraEnabled(false);
+	}
+}
 
 // Called when the first player character is spawned, possessed, and replicated
 void UNMMPlayerControllerComponent::OnFirstPawnReady_Implementation(const FGameplayEventData& Payload)

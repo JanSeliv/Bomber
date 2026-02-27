@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Data/MyPrimaryDataAsset.h"
+#include "DalPrimaryDataAsset.h"
 
 // Bomber
 #include "Structures/BmrMouseVisibilitySettings.h"
@@ -17,7 +17,7 @@ struct FKey;
  * Contains all data that describe player input.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UBmrPlayerInputDataAsset final : public UMyPrimaryDataAsset
+class BOMBER_API UBmrPlayerInputDataAsset final : public UDalPrimaryDataAsset
 {
 	GENERATED_BODY()
 

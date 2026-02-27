@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Data/MyPrimaryDataAsset.h"
+#include "DalPrimaryDataAsset.h"
 
 // Bomber
 #include "Structures/BmrManageableWidgetData.h"
@@ -17,7 +17,7 @@ enum class EBmrPlayerType : uint8;
  * Contains in-game UI data.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UBmrUIDataAsset final : public UMyPrimaryDataAsset
+class BOMBER_API UBmrUIDataAsset final : public UDalPrimaryDataAsset
 {
 	GENERATED_BODY()
 

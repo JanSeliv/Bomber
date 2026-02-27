@@ -134,10 +134,6 @@ public:
 		return (LBitmask & RBitmask) != 0;
 	}
 
-	/** Returns Actor Type of specified actor, None is not level actor. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	static EBmrActorType GetActorType(const AActor* Actor);
-
 	/** Returns true if specified actor is the Bomber Level Actor (player, box, wall or powerup). */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static bool IsLevelActor(const AActor* Actor);
@@ -146,5 +142,34 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static bool IsActorHasAnyMatchingType(
 	    const AActor* Actor,
+	    UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EBmrActorType")) int32 ActorsTypesBitmask);
+
+	/** Returns the actor type for the specified actor, obtaining it from asset registry keys without loading any dependencies, EBmrActorType::None if not found. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static EBmrActorType GetActorTypeByLevelActor(const AActor* Actor);
+
+	/** Returns the level actor data asset associated with the specified level actor */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const class UBmrLevelActorDataAsset* GetDataAssetByLevelActor(const AActor* Actor);
+
+	/** Returns the first found level actor data asset matching the specified actor type */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const class UBmrLevelActorDataAsset* GetDataAssetByActorType(EBmrActorType ActorType);
+
+	/** Returns the data asset class for the specified level actor from asset registry tags without loading */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static TSubclassOf<class UBmrLevelActorDataAsset> GetDataAssetClassByActorClass(TSubclassOf<AActor> ActorClass);
+
+	/** Returns the data asset class for the specified level actor type from asset registry tags without loading */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static TSubclassOf<class UBmrLevelActorDataAsset> GetDataAssetClassByActorType(EBmrActorType ActorType);
+
+	/** Returns the actor class associated with the specified actor type, obtaining it from asset registry keys without loading any dependencies, nullptr if not found */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const UClass* GetActorClassByActorType(EBmrActorType ActorType);
+
+	/** Returns the data asset classes for the specified actor types from asset registry tags without loading */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static void GetDataAssetsByActorTypes(TArray<TSubclassOf<class UDalPrimaryDataAsset>>& OutDataAssetClasses,
 	    UPARAM(meta = (Bitmask, BitmaskEnum = "/Script/Bomber.EBmrActorType")) int32 ActorsTypesBitmask);
 };

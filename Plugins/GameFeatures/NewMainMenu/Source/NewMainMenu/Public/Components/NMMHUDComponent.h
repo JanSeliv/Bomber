@@ -31,14 +31,22 @@ public:
 	class UNMMCinematicStateWidget* GetInCinematicStateWidget() const;
 
 	/*********************************************************************************************
-	 * Protected functions
+	 * Overrides
 	 ********************************************************************************************* */
 protected:
-	/** Called when a component is registered, after Scene is set, but before CreateRenderState_Concurrent or OnCreatePhysicsState are called. */
-	virtual void OnRegister() override;
+	/** Overridable native event for when play begins for this component. */
+	virtual void BeginPlay() override;
 
 	/** Clears all transient data created by this component. */
 	virtual void OnUnregister() override;
+
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
+	/** Called when the NMM data asset is loaded and available. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnDataAssetLoaded(const class UNMMDataAsset* DataAsset);
 
 	/** Called when the local player character is spawned, possessed, and replicated. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Data/MyPrimaryDataAsset.h"
+#include "DalPrimaryDataAsset.h"
 
 // Bomber
 #include "Bomber.h" // EBmrLevelType, EBmrActorType
@@ -44,7 +44,7 @@ protected:
  * The base data asset for the Bomber's data.
  */
 UCLASS(Abstract, Blueprintable, BlueprintType, Const, AutoExpandCategories = ("[Bomber]"))
-class BOMBER_API UBmrBaseDataAsset : public UMyPrimaryDataAsset
+class BOMBER_API UBmrBaseDataAsset : public UDalPrimaryDataAsset
 {
 	GENERATED_BODY()
 
@@ -109,6 +109,15 @@ public:
 	/** Returns the actor type of an actor, whose data is described by this data asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE EBmrActorType GetActorType() const { return ActorType; }
+
+	/** Asset registry tag key for the actor class path */
+	static inline const FName ActorClassTag = TEXT("ActorClass");
+
+	/** Asset registry tag key for the actor type value */
+	static inline const FName ActorTypeTag = TEXT("ActorType");
+
+	/** Adds ActorClass and ActorType as asset registry tags for discovery without loading */
+	virtual void GetAssetRegistryTags(class FAssetRegistryTagsContext Context) const override;
 
 protected:
 	/** DevelopmentOnly: internal class of rows, is overriden by child data assets, used on adding new row. */

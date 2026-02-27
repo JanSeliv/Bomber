@@ -3,7 +3,7 @@
 #include "DataAssets/BmrPlayerDataAsset.h"
 
 // Bomber
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
 
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
@@ -156,7 +156,7 @@ UBmrPlayerDataAsset::UBmrPlayerDataAsset()
 // Returns the player data asset
 const UBmrPlayerDataAsset& UBmrPlayerDataAsset::Get()
 {
-	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
 // Get nameplate material by index, is used by nameplate meshes

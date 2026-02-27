@@ -5,7 +5,7 @@
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
 #include "DataAssets/BmrLevelActorDataAsset.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
@@ -248,7 +248,7 @@ void UBmrMapComponent::OnRegister()
 	}
 
 	// Set the tick disabled by default and decrease the interval
-	Owner->SetActorTickInterval(UBmrGameStateDataAsset::Get().GetTickInterval());
+	Owner->SetActorTickInterval(UBmrGameStateDataAsset::GTickInterval);
 	Owner->SetActorTickEnabled(false);
 
 #if WITH_EDITOR
@@ -262,8 +262,8 @@ void UBmrMapComponent::OnRegister()
 	OwnerRootComponent->SetMobility(EComponentMobility::Movable);
 
 	// Finding the actor data asset
-	ActorDataAsset = UBmrDataAssetsContainer::GetDataAssetByActorClass(Owner->GetClass());
-	if (!ensureMsgf(ActorDataAsset, TEXT("ASSERT: 'The Actor Data Asset' was not found")))
+	ActorDataAsset = UBmrBlueprintFunctionLibrary::GetDataAssetByLevelActor(Owner);
+	if (!ensureMsgf(ActorDataAsset, TEXT("ASSERT: 'The Actor Data Asset' was not found for '%s' actor!"), *GetNameSafe(Owner)))
 	{
 		return;
 	}

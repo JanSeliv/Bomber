@@ -168,7 +168,7 @@ void UInputUtilsLibrary::GetAllActionsInContext(const UObject* WorldContext, con
 void UInputUtilsLibrary::UnbindInputActionsInContext(const UObject* WorldContext, const UInputMappingContext* InInputContext)
 {
 	UEnhancedInputComponent* EnhancedInputComponent = GetEnhancedInputComponent(WorldContext);
-	if (!ensureMsgf(EnhancedInputComponent, TEXT("ASSERT: 'EnhancedInputComponent' is not valid"))
+	if (!EnhancedInputComponent
 	    || !ensureMsgf(InInputContext, TEXT("ASSERT: [%i] %hs:\n'InInputContexts' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;

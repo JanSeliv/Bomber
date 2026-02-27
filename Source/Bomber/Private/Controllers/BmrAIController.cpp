@@ -216,7 +216,7 @@ void ABmrAIController::UpdateAI()
 	// Throttle AI updates to match desired tick rate
 	const float CurrentTime = GetWorld()->GetTimeSeconds();
 	const float TimeSinceLastUpdate = CurrentTime - LastAIUpdateTime;
-	if (TimeSinceLastUpdate < UBmrGameStateDataAsset::Get().GetTickInterval())
+	if (TimeSinceLastUpdate < UBmrGameStateDataAsset::GTickInterval)
 	{
 		return;
 	}

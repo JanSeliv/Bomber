@@ -12,6 +12,7 @@ public class FootTrailsGeneratorRuntime : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core", "Engine"
+				, "DataAssetsLoader" // Created UFTGDataAsset
 			}
 		);
 

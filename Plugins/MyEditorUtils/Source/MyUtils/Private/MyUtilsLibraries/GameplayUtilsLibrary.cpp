@@ -318,7 +318,6 @@ void UGameplayUtilsLibrary::UnloadAsset(UObject* AssetToUnload, bool bUnloadRefe
 
 	const FString ModuleMount = GetModuleNameFromAsset(AssetToUnload);
 
-	AssetToUnload->ConditionalBeginDestroy();
 	AssetToUnload->ClearFlags(RF_Standalone);
 	AssetToUnload->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);
 

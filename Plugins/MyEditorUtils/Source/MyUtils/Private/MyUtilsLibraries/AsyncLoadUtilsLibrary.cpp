@@ -82,5 +82,5 @@ void PIESafeAsync::ExecutePIESafe(UObject* WorldObject, TFunction<void()> Callba
 
 UObject* PIESafeAsync::GetWorldObject(const UObject* WorldContextObject)
 {
-	return GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull) : nullptr;
+	return UUtilsLibrary::GetPlayWorld(WorldContextObject);
 }

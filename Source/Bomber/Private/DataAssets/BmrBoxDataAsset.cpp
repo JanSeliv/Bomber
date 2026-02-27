@@ -3,7 +3,7 @@
 #include "DataAssets/BmrBoxDataAsset.h"
 
 // Bomber
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
 #include "GameFramework/BmrCheatManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBoxDataAsset)
@@ -17,7 +17,7 @@ UBmrBoxDataAsset::UBmrBoxDataAsset()
 // Returns the box data asset
 const UBmrBoxDataAsset& UBmrBoxDataAsset::Get()
 {
-	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
 // Returns default value from the data asset of the chance to spawn powerup after box destroying.

@@ -5,6 +5,7 @@
 // NMM
 #include "Components/NMMHUDComponent.h"
 #include "Components/NMMPlayerControllerComponent.h"
+#include "DalSubsystem.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
 #include "Data/NMMTypes.h"
@@ -57,10 +58,9 @@ UNMMCameraSubsystem* UNMMUtils::GetCameraSubsystem(const UObject* OptionalWorldC
 }
 
 // Returns the Data Asset of the Main Menu
-const UNMMDataAsset* UNMMUtils::GetDataAsset(const UObject* OptionalWorldContext)
+const UNMMDataAsset* UNMMUtils::GetDataAsset()
 {
-	const UNMMBaseSubsystem* Subsystem = GetBaseSubsystem(OptionalWorldContext);
-	return Subsystem ? Subsystem->GetNewMainMenuDataAsset() : nullptr;
+	return UDalSubsystem::GetDataAsset<UNMMDataAsset>();
 }
 
 // Returns the HUD component of the Main Menu

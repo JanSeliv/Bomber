@@ -6,8 +6,8 @@
 #include "AbilitySystem/Attributes/BmrHealthAttributeSet.h"
 #include "Components/BmrCameraComponent.h"
 #include "Components/BmrMapComponent.h"
+#include "DalSubsystem.h"
 #include "Data/SpawnRequest.h"
-#include "DataAssets/BmrDataAssetsContainer.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "GameFramework/BmrGameState.h"
 #include "Generators/BmrCellsGenerator_Base.h"
@@ -111,52 +111,12 @@ const FBmrGeneratedMapSettings& ABmrGeneratedMap::GetGenerationSetting() const
 		return OverriddenGenerationSettings;
 	}
 
-	if (const UBmrGeneratedMapDataAsset* GeneratedMapDataAsset = UBmrDataAssetsContainer::GetGeneratedMapDataAsset())
+	if (const UBmrGeneratedMapDataAsset* GeneratedMapDataAsset = UDalSubsystem::GetDataAsset<UBmrGeneratedMapDataAsset>())
 	{
 		return GeneratedMapDataAsset->GetGenerationSettings();
 	}
 
 	return FBmrGeneratedMapSettings::Empty;
-}
-
-// Allows to override the default settings used for generating the m
-void ABmrGeneratedMap::SetOverriddenGenerationSettings(bool bEnableOverride, const FBmrGeneratedMapSettings& InSettings)
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	bOverrideGenerationSettings = bEnableOverride;
-
-	if (!bEnableOverride)
-	{
-		// Disable override and cleanup
-		OverriddenGenerationSettings = FBmrGeneratedMapSettings::Empty;
-		return;
-	}
-
-	OverriddenGenerationSettings = InSettings;
-
-	if (!OverriddenGenerationSettings.Generator)
-	{
-		// Generator is optional and might be not set, use the default one from Data Asset then
-		OverriddenGenerationSettings.Generator = UBmrGeneratedMapDataAsset::Get().GetGenerationSettings().Generator;
-	}
-}
-
-// Allows to change the size for generated map in runtime, it will automatically regenerate the level
-void ABmrGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
-{
-	if (!HasAuthority()
-	    || !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%hs: 'LevelSize' is invalid: %s"), __FUNCTION__, *LevelSize.ToString()))
-	{
-		return;
-	}
-
-	SetActorScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
-
-	GenerateLevelActors();
 }
 
 /*********************************************************************************************
@@ -201,8 +161,13 @@ void ABmrGeneratedMap::SpawnActorByType(EBmrActorType Type, const FBmrCell& Cell
 	};
 
 	// --- Spawn actor
-	const UClass* ClassToSpawn = UBmrDataAssetsContainer::GetActorClassByType(Type);
-	const FPoolObjectHandle Handle = UPoolManagerSubsystem::Get().TakeFromPool(ClassToSpawn, FTransform(Cell), OnCompleted);
+	const UClass* ActorClass = UBmrBlueprintFunctionLibrary::GetActorClassByActorType(Type);
+	if (!ensureMsgf(ActorClass, TEXT("ASSERT: [%i] %hs:\n'ActorClass' is null for %s type!"), __LINE__, __FUNCTION__, *UEnum::GetValueAsString(Type)))
+	{
+		return;
+	}
+
+	const FPoolObjectHandle Handle = UPoolManagerSubsystem::Get().TakeFromPool(ActorClass, FTransform(Cell), OnCompleted);
 
 	// --- Add Handle if requested spawning, so it can be canceled if regenerate before spawning finished
 	checkf(Handle.IsValid(), TEXT("ERROR: [%i] %s:\n'Handle' is not valid!"), __LINE__, *FString(__FUNCTION__));
@@ -230,8 +195,12 @@ void ABmrGeneratedMap::SpawnActorsByTypes(const TMap<FBmrCell, EBmrActorType>& A
 			continue;
 		}
 
-		FSpawnRequest& NewRequestRef = InRequests.Emplace_GetRef(UBmrDataAssetsContainer::GetActorClassByType(Type));
-		NewRequestRef.Transform = FTransform(Cell);
+		const UClass* ActorClass = UBmrBlueprintFunctionLibrary::GetActorClassByActorType(Type);
+		if (ensureMsgf(ActorClass, TEXT("ASSERT: [%i] %hs:\n'ActorClass' is null for %s type!"), __LINE__, __FUNCTION__, *UEnum::GetValueAsString(Type)))
+		{
+			FSpawnRequest& NewRequestRef = InRequests.Emplace_GetRef(ActorClass);
+			NewRequestRef.Transform = FTransform(Cell);
+		}
 	}
 
 	// --- Prepare On Spawn All callback
@@ -638,9 +607,15 @@ UAbilitySystemComponent& ABmrGeneratedMap::GetAbilitySystemComponentChecked() co
 	return *AbilitySystemComponent;
 }
 
-/* ---------------------------------------------------
- *		Generated Map protected functions
- * --------------------------------------------------- */
+/*********************************************************************************************
+ * Overrides and events
+ ********************************************************************************************* */
+
+// Safe initialization called both in editor and in game when the Generated Map subsystem is fully ready
+void ABmrGeneratedMap::OnGeneratedMapReady_Implementation()
+{
+	OnConstructionGeneratedMap(GetActorTransform());
+}
 
 // Called when an instance of this class is placed (in editor) or spawned
 void ABmrGeneratedMap::OnConstruction(const FTransform& Transform)
@@ -672,6 +647,12 @@ void ABmrGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransfor
 		UBmrUnrealEdEngine::GOnAnyDataAssetChanged.AddUObject(this, &ThisClass::RerunConstructionScripts);
 	}
 #endif // WITH_EDITOR [GEditor]
+
+	if (!UBmrGeneratedMapSubsystem::Get().IsGeneratedMapReady())
+	{
+		// Attempted to construct before Generated Map is fully initialized, will reconstruct later
+		return;
+	}
 
 	// Create the background blueprint child actor
 	if (CollisionComponent // Is accessible
@@ -786,6 +767,68 @@ void ABmrGeneratedMap::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AbilitySystemComponent, Params);
 }
 
+// Listen game states to generate level actors
+void ABmrGeneratedMap::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// Regenerate level actors when:
+	// 1. Returning to the menu (ensures the world resets properly)
+	// 2. Restarting the game (ensures a fresh state between matches)
+	// Note: GenerateLevelActors() internally guards against re-entry via bIsCurrentlyGenerating
+	if (Payload.InstigatorTags.HasAny(FBmrGameStateTag::Menu | FBmrGameStateTag::GameStarting))
+	{
+		GenerateLevelActors();
+	}
+}
+
+/*********************************************************************************************
+ * Generation
+ ********************************************************************************************* */
+
+// Allows to override the default settings used for generating the m
+void ABmrGeneratedMap::SetOverriddenGenerationSettings(bool bEnableOverride, const FBmrGeneratedMapSettings& InSettings)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	bOverrideGenerationSettings = bEnableOverride;
+
+	if (!bEnableOverride)
+	{
+		// Disable override and cleanup
+		OverriddenGenerationSettings = FBmrGeneratedMapSettings::Empty;
+		return;
+	}
+
+	OverriddenGenerationSettings = InSettings;
+
+	if (!OverriddenGenerationSettings.Generator)
+	{
+		// Generator is optional and might be not set, use the default one from Data Asset then
+		OverriddenGenerationSettings.Generator = UBmrGeneratedMapDataAsset::Get().GetGenerationSettings().Generator;
+	}
+}
+
+// Allows to change the size for generated map in runtime, it will automatically regenerate the level
+void ABmrGeneratedMap::SetLevelSize(const FIntPoint& LevelSize)
+{
+	if (!HasAuthority()
+	    || !ensureMsgf(LevelSize.GetMin() > 0, TEXT("%hs: 'LevelSize' is invalid: %s"), __FUNCTION__, *LevelSize.ToString()))
+	{
+		return;
+	}
+
+	SetActorScale3D(FVector(LevelSize.X, LevelSize.Y, 1.f));
+
+	GenerateLevelActors();
+}
+
 // Spawns and fills the Grid Array values by level actors
 void ABmrGeneratedMap::GenerateLevelActors()
 {
@@ -864,24 +907,6 @@ void ABmrGeneratedMap::GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&
 	};
 
 	SpawnActorsByTypes(ActorsToSpawn, OnSpawned);
-}
-
-// Listen game states to generate level actors
-void ABmrGeneratedMap::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	// Regenerate level actors when:
-	// 1. Returning to the menu (ensures the world resets properly)
-	// 2. Restarting the game (ensures a fresh state between matches)
-	// Note: GenerateLevelActors() internally guards against re-entry via bIsCurrentlyGenerating
-	if (Payload.InstigatorTags.HasAny(FBmrGameStateTag::Menu | FBmrGameStateTag::GameStarting))
-	{
-		GenerateLevelActors();
-	}
 }
 
 // Align transform and build cells

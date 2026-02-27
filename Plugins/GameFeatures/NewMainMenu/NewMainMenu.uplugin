@@ -48,6 +48,10 @@
 		{
 			"Name": "GameplayMessageRouter",
 			"Enabled": true
+		},
+		{
+			"Name": "DataAssetsLoader",
+			"Enabled": true
 		}
 	]
 }

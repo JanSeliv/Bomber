@@ -88,11 +88,11 @@ This project could be useful for learners, demonstrating next features:
 - World Partition
 - Model-View-ViewModel (MVVM) UI Pattern
 - Localization
-- Data-Driven Design (Data Assets, Data Tables, Data Registries, _see below_)
+- Primary Data Assets loaded via Asset Manager
 
 Despite this project is fully written in C++, it's extremely **blueprint-friendly**:
 
-- **Data-Driven Design**: No hardcoded values. All data can be tweaked via Data Assets in editor as well as accessed in blueprints [[doc](https://trello.com/c/HGscMUdK)].
+- **Data-Driven Design**: No hardcoded values. All data can be tweaked via Data Assets, Data Tables and Data Registries in editor as well as accessed in blueprints [[doc](https://trello.com/c/HGscMUdK)].
 - **Fully Exposed**: Every class, property, and function is exposed to Blueprints allowing for heavy changes the logic with no code.
 - **Well-Commented**: Every class, property and function is well-commented for easy understanding.
 - **Utility Libraries**: Core static functions are accessible globally like Cell Utils [[doc](https://trello.com/c/b2IzcOhg)]. See more in the `Source\UtilityLibraries` [folder](https://github.com/JanSeliv/Bomber/tree/master/Source/Bomber/Public/UtilityLibraries).
@@ -120,6 +120,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 - Migrated to Lyra's [Gameplay Message Router](https://github.com/JanSeliv/GameplayMessageRouter)
 - Migrated game state management to **State Trees** for cleaner state transitions
 > <img width="640" src="https://github.com/user-attachments/assets/9879e6df-c923-4b24-8137-a91ee933e537">
+- Utilized Asset Manager for async loading and automatic unloading of primary data assets
  ---
 #### `2025-11-17:`
 - Updated to **Unreal Engine 5.6**.

@@ -5,7 +5,7 @@
 // Bomber
 #include "Components/BmrMapComponent.h"
 #include "Components/BmrSkeletalMeshComponent.h"
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBombDataAsset)
 
@@ -19,7 +19,7 @@ UBmrBombDataAsset::UBmrBombDataAsset()
 // Returns the bomb data asset
 const UBmrBombDataAsset& UBmrBombDataAsset::Get()
 {
-	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
 // Returns associated bomb row by associated instigator actor (e.g: Fori character -> Third (Forest) row)

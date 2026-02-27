@@ -7,6 +7,7 @@
 #include "Bomber.h"
 #include "Components/BmrMouseActivityComponent.h"
 #include "Components/BmrMoverComponent.h"
+#include "DalSubsystem.h"
 #include "DataAssets/BmrInputAction.h"
 #include "DataAssets/BmrInputMappingContext.h"
 #include "DataAssets/BmrPlayerInputDataAsset.h"
@@ -92,13 +93,7 @@ void ABmrPlayerController::BeginPlay()
 	// Prevents built-in slate input on UMG
 	SetUIInputIgnored();
 
-	// Listen to handle input for each game state
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-
-	// Adds given contexts to the list of auto managed and binds their input actions
-	TArray<const UBmrInputMappingContext*> InputContexts;
-	UBmrPlayerInputDataAsset::Get().GetAllInputContexts(/*out*/ InputContexts);
-	SetupInputContexts(InputContexts);
+	UDalSubsystem::Get().ListenForDataAsset<UBmrPlayerInputDataAsset>(this, &ThisClass::OnPlayerInputDataAssetLoaded);
 
 #if WITH_EDITOR
 	if (GEditor)
@@ -107,6 +102,17 @@ void ABmrPlayerController::BeginPlay()
 		FEditorDelegates::OnPreSwitchBeginPIEAndSIE.AddUObject(this, &ThisClass::OnPreSwitchBeginPIEAndSIE);
 	}
 #endif // WITH_EDITOR
+}
+
+// Called when the Player Input data asset is loaded and available
+void ABmrPlayerController::OnPlayerInputDataAssetLoaded_Implementation(const UBmrPlayerInputDataAsset* DataAsset)
+{
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+
+	// Adds given contexts to the list of auto managed and binds their input actions
+	TArray<const UBmrInputMappingContext*> InputContexts;
+	DataAsset->GetAllInputContexts(/*out*/ InputContexts);
+	SetupInputContexts(InputContexts);
 }
 
 // Is overriden to be used when Input System is initialized

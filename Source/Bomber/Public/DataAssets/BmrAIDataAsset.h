@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Data/MyPrimaryDataAsset.h"
+#include "DalPrimaryDataAsset.h"
 
 #include "BmrAIDataAsset.generated.h"
 
@@ -10,7 +10,7 @@
  * Contains AI data.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UBmrAIDataAsset final : public UMyPrimaryDataAsset
+class BOMBER_API UBmrAIDataAsset final : public UDalPrimaryDataAsset
 {
 	GENERATED_BODY()
 

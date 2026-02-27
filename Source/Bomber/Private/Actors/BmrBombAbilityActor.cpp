@@ -395,7 +395,8 @@ bool ABmrBombAbilityActor::TryBindOnInstigatorReachedBombCell()
 	UBmrMapComponent* InstigatorMapComponent = UBmrMapComponent::GetMapComponent(InstigatorPawn);
 	const FBmrCell CurrentPawnCell = InstigatorMapComponent ? InstigatorMapComponent->GetCell() : FBmrCell::InvalidCell;
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-	if (CurrentPawnCell == MapComponent->GetCell())
+	if (!CurrentPawnCell.IsValid()
+	    || CurrentPawnCell == MapComponent->GetCell())
 	{
 		// Is already at the bomb cell, no need to wait
 		return false;

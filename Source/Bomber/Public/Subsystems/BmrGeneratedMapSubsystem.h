@@ -24,27 +24,52 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "WorldContextObject"))
 	static UBmrGeneratedMapSubsystem* GetGeneratedMapSubsystem(const UObject* WorldContextObject = nullptr);
 
+	/*********************************************************************************************
+	 * Readiness
+	 ********************************************************************************************* */
+public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGeneratedMapReady, class ABmrGeneratedMap*, GeneratedMap);
 
-	/** Called when Generated Map is initialized and ready to be used, is also called in editor. */
+	/** Called when Generated Map is initialized and ready to be used, is also called in editor.
+	 * Broadcasts only when both the Generated Map actor is set and its data asset is loaded */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
 	FOnGeneratedMapReady OnGeneratedMapReady;
 
-	/** Returns true if level has generated map. */
+	/** Returns true the Generated Map actor is ready to generate actors.  */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE bool HasGeneratedMap() const { return GeneratedMap != nullptr; }
+	FORCEINLINE bool IsGeneratedMapReady() const { return GeneratedMap && bAreDataAssetsLoaded; }
 
+protected:
+	/** Broadcasts OnGeneratedMapReady if both the Generated Map actor and dependent actors' data assets are available */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void TryBroadcastGeneratedMapReady();
+
+	/*********************************************************************************************
+	 * Generated Map
+	 ********************************************************************************************* */
+public:
 	/** The Generated Map getter, nullptr otherwise */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (Keywords = "Level"))
 	ABmrGeneratedMap* GetGeneratedMap(bool bWarnIfNull = true) const;
 
-	/** The Generated Map setter. */
+	/** The Generated Map setter */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetGeneratedMap(ABmrGeneratedMap* InGeneratedMap);
 
-private:
+protected:
 	/** Is main game actor on persistent level.
 	 * @see UGeneratedMapSubsystem::GetGeneratedMap */
 	UPROPERTY(Transient)
 	TObjectPtr<ABmrGeneratedMap> GeneratedMap = nullptr;
+
+	/** Is set to true when all required data assets (level actor + generated map) are loaded */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category = "[Bomber]")
+	bool bAreDataAssetsLoaded = false;
+
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
+	/** Is called on subsystem creation, used for listening the readiness of the Generated Map and its data assets. */
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 };

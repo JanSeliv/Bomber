@@ -62,27 +62,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static ABmrGeneratedMap* GetGeneratedMap(const UObject* OptionalWorldContext = nullptr);
 
-	/** Returns the settings used for generating the map.
-	 * Returns overridden if is set in the Class Defaults of the Generated Map itself, otherwise defaults from the Data Asset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const FBmrGeneratedMapSettings& GetGenerationSetting() const;
-
-	/** Allows to override the default settings used for generating the map.
-	 * Is useful for mods, game features and cheats to change the level generation settings in runtime.
-	 * @param bEnableOverride If true, the InSettings will be used instead of the default ones from Data Asset.
-	 * @param InSettings The new settings to use for generating the map, if bEnableOverride is true.
-	 * @warning It will not regenerate the level automatically, call GenerateLevelActors() manually or restart the game (change the game state). */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InSettings"))
-	void SetOverriddenGenerationSettings(bool bEnableOverride, const FBmrGeneratedMapSettings& InSettings);
-
-	/* Allows to change the size for generated map in runtime, it will automatically regenerate the level.
-	 * Is server-only function, so it will replicate the new transform to clients.
-	 * @warning to change location or rotation, just call SetActorTransform, SetLocation or SetRotation.
-	 * @param LevelSize The new size where length and width have to be unpaired (odd).
-	 * E.g: X:9, Y:7 - set the size of the level to 9 columns (width) and 7 rows (length). */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
-	void SetLevelSize(const FIntPoint& LevelSize);
-
 	/** Returns the camera component of the level. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE class UBmrCameraComponent* GetCameraComponent() const { return CameraComponent; }
@@ -264,12 +243,16 @@ protected:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "[Bomber]", meta = (DevelopmentOnly, Bitmask, BitmaskEnum = "/Script/Bomber.EBmrActorType"))
 	int32 DisplayCellsActorTypes = 0;
 
-	/* ---------------------------------------------------
-	 *		Protected functions
-	 * --------------------------------------------------- */
+	/*********************************************************************************************
+	 * Overrides and events
+	 ********************************************************************************************* */
+public:
+	/** Safe initialization called both in editor and in game when the Generated Map subsystem is fully ready.
+	 * Guaranteed that both the Generated Map actor is set and its data asset is loaded */
+	UFUNCTION(BlueprintNativeEvent, Category = "[Bomber]")
+	void OnGeneratedMapReady();
 
-	friend class UBmrCheatManager;
-
+protected:
 	/** Called when an instance of this class is placed (in editor) or spawned. */
 	virtual void OnConstruction(const FTransform& Transform) override;
 
@@ -292,17 +275,43 @@ protected:
 	/** Returns properties that are replicated for the lifetime of the actor channel. */
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	/** Spawns and fills the Grid Array values by level actors */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "[Bomber]", meta = (BlueprintProtected))
-	void GenerateLevelActors();
-
-	/** Internal methods to compute cells on background thread and finish with spawning on the game thread. */
-	static TMap<FBmrCell, EBmrActorType> GenerateLevelActors_StartAsync(struct FBmrGeneratorData&& GeneratorData);
-	void GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&& ActorsToSpawn);
-
 	/** Listen game states to generate level actors. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
+
+	/*********************************************************************************************
+	 * Generation
+	 ********************************************************************************************* */
+public:
+	/** Returns the settings used for generating the map.
+	 * Returns overridden if is set in the Class Defaults of the Generated Map itself, otherwise defaults from the Data Asset. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const FBmrGeneratedMapSettings& GetGenerationSetting() const;
+
+	/** Allows to override the default settings used for generating the map.
+	 * Is useful for mods, game features and cheats to change the level generation settings in runtime.
+	 * @param bEnableOverride If true, the InSettings will be used instead of the default ones from Data Asset.
+	 * @param InSettings The new settings to use for generating the map, if bEnableOverride is true.
+	 * @warning It will not regenerate the level automatically, call GenerateLevelActors() manually or restart the game (change the game state). */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InSettings"))
+	void SetOverriddenGenerationSettings(bool bEnableOverride, const FBmrGeneratedMapSettings& InSettings);
+
+	/* Allows to change the size for generated map in runtime, it will automatically regenerate the level.
+	 * Is server-only function, so it will replicate the new transform to clients.
+	 * @warning to change location or rotation, just call SetActorTransform, SetLocation or SetRotation.
+	 * @param LevelSize The new size where length and width have to be unpaired (odd).
+	 * E.g: X:9, Y:7 - set the size of the level to 9 columns (width) and 7 rows (length). */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
+	void SetLevelSize(const FIntPoint& LevelSize);
+
+	/** Spawns and fills the Grid Array values by level actors */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, CallInEditor, Category = "[Bomber]")
+	void GenerateLevelActors();
+
+protected:
+	/** Internal methods to compute cells on background thread and finish with spawning on the game thread. */
+	static TMap<FBmrCell, EBmrActorType> GenerateLevelActors_StartAsync(struct FBmrGeneratorData&& GeneratorData);
+	void GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&& ActorsToSpawn);
 
 	/** Align transform and build cells, on both server and clients.
 	 * Is called everytime the level size (transform) is changed.

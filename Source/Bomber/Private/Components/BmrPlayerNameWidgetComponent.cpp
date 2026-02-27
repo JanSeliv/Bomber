@@ -3,6 +3,8 @@
 #include "Components/BmrPlayerNameWidgetComponent.h"
 
 // Bomber
+#include "DalSubsystem.h"
+#include "DataAssets/BmrUIDataAsset.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "Structures/BmrGameStateTag.h"
@@ -53,40 +55,46 @@ void UBmrPlayerNameWidgetComponent::Init(ABmrPlayerState* PlayerState)
 		return;
 	}
 
-	UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem();
-	if (!WidgetsSubsystem)
-	{
-		// UI Subsystem is not initialized yet or called on remote clients
-		return;
-	}
-
 	AssociatedPlayerState = PlayerState;
 
-	const int32 PlayerId = PlayerState->GetPlayerId();
-	UBmrPlayerNameWidget* PlayerNameWidget = WidgetsSubsystem->GetWidgetByTag<UBmrPlayerNameWidget>(BmrGameplayTags::UI::Widget_Nickname, PlayerId);
-	if (!PlayerNameWidget)
+	// Defer widget creation until the UI data asset is loaded
+	UDalSubsystem::Get().ListenForDataAsset<UBmrUIDataAsset>([WeakThis = TWeakObjectPtr(this)](const UBmrUIDataAsset& DataAsset)
 	{
-		// Widget is not created yet for specified player ID, request it now
-		PlayerNameWidget = &WidgetsSubsystem->CreateManageableWidgetByTagChecked<UBmrPlayerNameWidget>(BmrGameplayTags::UI::Widget_Nickname);
-	}
+		UBmrPlayerNameWidgetComponent* This = WeakThis.Get();
+		UBmrWidgetsSubsystem* WidgetsSubsystem = This ? UBmrWidgetsSubsystem::GetWidgetsSubsystem() : nullptr;
+		ABmrPlayerState* InPlayerState = This ? This->AssociatedPlayerState : nullptr;
+		if (!WidgetsSubsystem
+		    || !InPlayerState)
+		{
+			return;
+		}
 
-	// Configure widget content and association
-	PlayerNameWidget->SetPlayerName(FText::FromString(PlayerState->GetPlayerName()));
-	PlayerNameWidget->SetAssociatedPlayerId(PlayerState->GetPlayerId());
+		const int32 PlayerId = InPlayerState->GetPlayerId();
+		UBmrPlayerNameWidget* PlayerNameWidget = WidgetsSubsystem->GetWidgetByTag<UBmrPlayerNameWidget>(BmrGameplayTags::UI::Widget_Nickname, PlayerId);
+		if (!PlayerNameWidget)
+		{
+			// Widget is not created yet for specified player ID, request it now
+			PlayerNameWidget = &WidgetsSubsystem->CreateManageableWidgetByTagChecked<UBmrPlayerNameWidget>(BmrGameplayTags::UI::Widget_Nickname);
+		}
 
-	// Update widget component if changed
-	const UUserWidget* CurrentWidget = GetWidget();
-	if (CurrentWidget != PlayerNameWidget)
-	{
-		SetWidget(PlayerNameWidget);
-	}
+		// Configure widget content and association
+		PlayerNameWidget->SetPlayerName(FText::FromString(InPlayerState->GetPlayerName()));
+		PlayerNameWidget->SetAssociatedPlayerId(InPlayerState->GetPlayerId());
 
-	UpdateVisibility();
+		// Update widget component if changed
+		const UUserWidget* CurrentWidget = This->GetWidget();
+		if (CurrentWidget != PlayerNameWidget)
+		{
+			This->SetWidget(PlayerNameWidget);
+		}
 
-	// Listen further updates
-	PlayerState->OnPlayerNameChanged.AddUniqueDynamic(this, &ThisClass::OnPlayerNameChanged);
-	PlayerState->OnPlayerIdChanged.AddUniqueDynamic(this, &ThisClass::OnPlayerIdChanged);
-	PlayerState->OnPlayerDeadChanged.AddUniqueDynamic(this, &ThisClass::OnPlayerDeadChanged);
+		This->UpdateVisibility();
+
+		// Listen further updates
+		InPlayerState->OnPlayerNameChanged.AddUniqueDynamic(This, &ThisClass::OnPlayerNameChanged);
+		InPlayerState->OnPlayerIdChanged.AddUniqueDynamic(This, &ThisClass::OnPlayerIdChanged);
+		InPlayerState->OnPlayerDeadChanged.AddUniqueDynamic(This, &ThisClass::OnPlayerDeadChanged);
+	});
 }
 
 // Applies new widget visibility based on the current game state

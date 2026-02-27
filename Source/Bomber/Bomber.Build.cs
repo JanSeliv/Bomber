@@ -27,6 +27,7 @@ public class Bomber : ModuleRules
                 , "MetaCheatManager" // Created UBmrCheatManager
                 , "PoolManager" // Created UBmrPoolFactory_Pawn
                 , "MyUtils" // Inherited from Base classes
+                , "DataAssetsLoader" // Created BMR data assets
                 , "GameplayMessageRuntime" // Created BmrGameplayMessageSubsystem
 		    }
 		);

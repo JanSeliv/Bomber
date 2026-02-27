@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Data/MyPrimaryDataAsset.h"
+#include "DalPrimaryDataAsset.h"
 
 #include "BmrSoundsDataAsset.generated.h"
 
@@ -18,7 +18,7 @@ enum class EBmrLevelType : uint8;
  * Contains all sound assets used in game.
  */
 UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UBmrSoundsDataAsset final : public UMyPrimaryDataAsset
+class BOMBER_API UBmrSoundsDataAsset final : public UDalPrimaryDataAsset
 {
 	GENERATED_BODY()
 

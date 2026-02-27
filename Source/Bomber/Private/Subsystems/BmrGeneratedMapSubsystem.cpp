@@ -4,14 +4,20 @@
 
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
+#include "Bomber.h"
+#include "DalSubsystem.h"
+#include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
 
 // UE
+#include "Engine/AssetManager.h"
 #include "Engine/World.h"
+#include "UObject/UObjectThreadContext.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGeneratedMapSubsystem)
 
@@ -30,6 +36,26 @@ UBmrGeneratedMapSubsystem* UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(c
 	return FoundWorld ? FoundWorld->GetSubsystem<UBmrGeneratedMapSubsystem>() : nullptr;
 }
 
+/*********************************************************************************************
+ * Readiness
+ ********************************************************************************************* */
+
+// Broadcasts OnGeneratedMapReady if both the Generated Map actor and dependent actors' data assets are available
+void UBmrGeneratedMapSubsystem::TryBroadcastGeneratedMapReady()
+{
+	if (!IsGeneratedMapReady())
+	{
+		return;
+	}
+
+	GeneratedMap->OnGeneratedMapReady();
+	OnGeneratedMapReady.Broadcast(GeneratedMap);
+}
+
+/*********************************************************************************************
+ * Generated Map
+ ********************************************************************************************* */
+
 // The Generated Map getter, nullptr otherwise
 ABmrGeneratedMap* UBmrGeneratedMapSubsystem::GetGeneratedMap(bool bWarnIfNull /* = true*/) const
 {
@@ -45,15 +71,40 @@ ABmrGeneratedMap* UBmrGeneratedMapSubsystem::GetGeneratedMap(bool bWarnIfNull /*
 // The Generated Map setter
 void UBmrGeneratedMapSubsystem::SetGeneratedMap(ABmrGeneratedMap* InGeneratedMap)
 {
-	if (!ensureMsgf(InGeneratedMap, TEXT("%s: 'InGeneratedMap' is not valid"), *FString(__FUNCTION__)))
+	if (!ensureMsgf(InGeneratedMap, TEXT("ASSERT: [%i] %hs:\n'InGeneratedMap' is not valid!"), __LINE__, __FUNCTION__)
+	    || GeneratedMap == InGeneratedMap)
 	{
 		return;
 	}
 
 	GeneratedMap = InGeneratedMap;
 
-	if (OnGeneratedMapReady.IsBound())
+	TryBroadcastGeneratedMapReady();
+}
+
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
+
+// Is called on subsystem creation, used for listening the readiness of the Generated Map and its data assets
+void UBmrGeneratedMapSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	// Listen for dependent data assets to be loaded
+	UAssetManager::CallOrRegister_OnCompletedInitialScan(FSimpleMulticastDelegate::FDelegate::CreateWeakLambda(this, [this]
 	{
-		OnGeneratedMapReady.Broadcast(InGeneratedMap);
-	}
+		TArray<TSubclassOf<UDalPrimaryDataAsset>> DataAssetClasses;
+		UBmrBlueprintFunctionLibrary::GetDataAssetsByActorTypes(/*out*/ DataAssetClasses, TO_FLAG(EBmrActorType::All));
+		ensureMsgf(!DataAssetClasses.IsEmpty(), TEXT("ASSERT: [%i] %hs:\nNo level actor data asset classes found!"), __LINE__, __FUNCTION__);
+		DataAssetClasses.Add(UBmrGeneratedMapDataAsset::StaticClass());
+		UDalSubsystem::Get().ListenForDataAssets(DataAssetClasses, [World = TWeakObjectPtr(GetWorld())]
+		{
+			if (UBmrGeneratedMapSubsystem* This = GetGeneratedMapSubsystem(World.Get()))
+			{
+				This->bAreDataAssetsLoaded = true;
+				This->TryBroadcastGeneratedMapReady();
+			}
+		});
+	}));
 }

@@ -27,13 +27,9 @@ public:
 	/** Sets default values for this component's properties. */
 	UFTGComponent();
 
-	/** Returns the data asset that contains all the assets and tweaks of Foot Trails game feature.
-	 * @see UFTGComponent::FootTrailsDataAsset */
+	/** Returns the data asset that contains all the assets and tweaks of Foot Trails game feature. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[FootTrailsGenerator]")
 	const class UFTGDataAsset* GetFootTrailsDataAsset() const;
-
-	/** Guarantees that the data asset is loaded, otherwise, it will crash. */
-	const class UFTGDataAsset& GetFootTrailsDataAssetChecked() const;
 
 	/** Returns the random foot trail instance for given types. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[FootTrailsGenerator]")
@@ -56,10 +52,6 @@ public:
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
-	/** Contains all the assets and tweaks of Foot Trails game feature. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "[FootTrailsGenerator]", meta = (BlueprintProtected))
-	TSoftObjectPtr<const class UFTGDataAsset> FootTrailsDataAsset = nullptr;
-
 	/** Converts actors with static meshes to instanced static meshes. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[FootTrailsGenerator]", meta = (BlueprintProtected))
 	TObjectPtr<class AInstancedStaticMeshActor> InstancedStaticMeshActor = nullptr;

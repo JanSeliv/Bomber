@@ -2,16 +2,19 @@
 
 #include "FTGEditorPreviewSubsystem.h"
 
-/// Bomber
-#include "Actors/BmrGeneratedMap.h"
+// FTG
 #include "FTGComponent.h"
 #include "FTGEditorUtils.h"
-#include "InstancedStaticMeshActor.h"
-#include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
+
+/// Bomber
+#include "Actors/BmrGeneratedMap.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Engine/World.h"
+#include "InstancedStaticMeshActor.h"
+#include "MyUtilsLibraries/UtilsLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FTGEditorPreviewSubsystem)
 
@@ -36,7 +39,7 @@ void UFTGEditorPreviewSubsystem::Deinitialize()
 // Is used to initialize the foot trails generator
 void UFTGEditorPreviewSubsystem::OnBeginPlay(UWorld* World, FWorldInitializationValues WorldInitializationValues)
 {
-	if (!FEditorUtilsLibrary::IsEditorNotPieWorld() // Only preview in editor, not in PIE
+	if (!UUtilsLibrary::IsEditorNotPieWorld() // Only preview in editor, not in PIE
 	    || IsValid(FootTrailGenerator)) // skip if already initialized
 	{
 		return;
@@ -72,7 +75,7 @@ void UFTGEditorPreviewSubsystem::OnEndPlay(UWorld* World, bool bArg, bool bCond)
 }
 
 /// Called when Generated Map is initialized and ready to be used, is also called in editor
-void UFTGEditorPreviewSubsystem::OnGeneratedMapReady(class ABmrGeneratedMap* GeneratedMap)
+void UFTGEditorPreviewSubsystem::OnGeneratedMapReady_Implementation(ABmrGeneratedMap* GeneratedMap)
 {
 	if (IsValid(FootTrailGenerator))
 	{
@@ -86,8 +89,7 @@ void UFTGEditorPreviewSubsystem::OnGeneratedMapReady(class ABmrGeneratedMap* Gen
 		return;
 	}
 
-	checkf(GeneratedMap, TEXT("ERROR: [%i] %hs:\n'GeneratedMap' is null!"), __LINE__, __FUNCTION__);
-	FootTrailGenerator = NewObject<UFTGComponent>(GeneratedMap, ComponentClass);
+	FootTrailGenerator = NewObject<UFTGComponent>(ABmrGeneratedMap::GetGeneratedMap(), ComponentClass, NAME_None, RF_Transient);
 	FootTrailGenerator->RegisterComponent();
 	FootTrailGenerator->InitOnce();
 

@@ -9,7 +9,8 @@
 #include "Components/BmrMapComponent.h"
 #include "Components/BmrMouseActivityComponent.h"
 #include "Controllers/BmrPlayerController.h"
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
+#include "DalUtilsLibrary.h"
 #include "DataAssets/BmrLevelActorDataAsset.h"
 #include "Engine/BmrGameViewportClient.h"
 #include "GameFramework/BmrGameMode.h"
@@ -26,6 +27,7 @@
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 
 // UE
+#include "Engine/AssetManager.h"
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -251,23 +253,120 @@ UBmrMouseActivityComponent* UBmrBlueprintFunctionLibrary::GetMouseActivityCompon
  *		EBmrActorType functions
  * --------------------------------------------------- */
 
-// Returns Actor Type of specified actor, None is not level actor
-EBmrActorType UBmrBlueprintFunctionLibrary::GetActorType(const AActor* Actor)
-{
-	const TSubclassOf<AActor> ActorClass = Actor ? Actor->GetClass() : nullptr;
-	const UBmrLevelActorDataAsset* LevelActorDataAsset = ActorClass ? UBmrDataAssetsContainer::GetDataAssetByActorClass(ActorClass) : nullptr;
-	return LevelActorDataAsset ? LevelActorDataAsset->GetActorType() : EAT::None;
-}
-
 // Returns true if specified actor is the Bomber Level Actor (player, box, wall or powerup)
 bool UBmrBlueprintFunctionLibrary::IsLevelActor(const AActor* Actor)
 {
-	return GetActorType(Actor) != EAT::None;
+	return Actor && GetActorTypeByLevelActor(Actor) != EAT::None;
 }
 
 // Returns true if specified level actor has at least one specified type
 bool UBmrBlueprintFunctionLibrary::IsActorHasAnyMatchingType(const AActor* Actor, int32 ActorsTypesBitmask)
 {
-	const EBmrActorType ActorType = GetActorType(Actor);
+	const EBmrActorType ActorType = GetActorTypeByLevelActor(Actor);
 	return BitwiseActorTypes(TO_FLAG(ActorType), ActorsTypesBitmask);
+}
+
+// Returns the actor type for the specified actor, obtaining it from asset registry keys without loading any dependencies, EBmrActorType::None if not found
+EBmrActorType UBmrBlueprintFunctionLibrary::GetActorTypeByLevelActor(const AActor* Actor)
+{
+	const UClass* ActorClass = Actor ? Actor->GetClass() : nullptr;
+	if (!ActorClass)
+	{
+		return EAT::None;
+	}
+
+	const FAssetData FoundAsset = UDalUtilsLibrary::GetAssetByRegistryTag(UBmrLevelActorDataAsset::ActorClassTag, GetPathNameSafe(ActorClass));
+	if (!FoundAsset.IsValid())
+	{
+		return EAT::None;
+	}
+
+	const FString ActorTypeStr = FoundAsset.GetTagValueRef<FString>(UBmrLevelActorDataAsset::ActorTypeTag);
+	const EBmrActorType ActorType = TO_ENUM(EBmrActorType, StaticEnum<EBmrActorType>()->GetValueByNameString(ActorTypeStr));
+	return ActorType;
+}
+
+// Returns the level actor data asset associated with the specified level actor
+const UBmrLevelActorDataAsset* UBmrBlueprintFunctionLibrary::GetDataAssetByLevelActor(const AActor* Actor)
+{
+	const TSubclassOf<UBmrLevelActorDataAsset> DataAssetClass = Actor ? GetDataAssetClassByActorClass(Actor->GetClass()) : nullptr;
+	return UDalSubsystem::Get().GetDataAsset<UBmrLevelActorDataAsset>(DataAssetClass);
+}
+
+// Returns the first found level actor data asset matching the specified actor type
+const UBmrLevelActorDataAsset* UBmrBlueprintFunctionLibrary::GetDataAssetByActorType(EBmrActorType ActorType)
+{
+	const TSubclassOf<UBmrLevelActorDataAsset> DataAssetClass = GetDataAssetClassByActorType(ActorType);
+	return UDalSubsystem::Get().GetDataAsset<UBmrLevelActorDataAsset>(DataAssetClass);
+}
+
+// Returns the data asset class for the specified level actor from asset registry tags without loading
+TSubclassOf<UBmrLevelActorDataAsset> UBmrBlueprintFunctionLibrary::GetDataAssetClassByActorClass(TSubclassOf<AActor> ActorClass)
+{
+	if (!ActorClass)
+	{
+		return nullptr;
+	}
+
+	const FAssetData FoundAsset = UDalUtilsLibrary::GetAssetByRegistryTag(UBmrLevelActorDataAsset::ActorClassTag, GetPathNameSafe(ActorClass));
+	if (!FoundAsset.IsValid())
+	{
+		return nullptr;
+	}
+
+	const FSoftClassPath DataAssetClassPath(FoundAsset.AssetClassPath.ToString());
+	return DataAssetClassPath.ResolveClass();
+}
+
+// Returns the data asset class for the specified level actor type from asset registry tags without loading
+TSubclassOf<class UBmrLevelActorDataAsset> UBmrBlueprintFunctionLibrary::GetDataAssetClassByActorType(EBmrActorType ActorType)
+{
+	const FString ActorTypeStr = ActorType != EAT::None ? UEnum::GetValueAsString(ActorType) : FString();
+	const FAssetData FoundAsset = UDalUtilsLibrary::GetAssetByRegistryTag(UBmrLevelActorDataAsset::ActorTypeTag, ActorTypeStr);
+	if (!FoundAsset.IsValid())
+	{
+		return nullptr;
+	}
+
+	const FSoftClassPath DataAssetClassPath(FoundAsset.AssetClassPath.ToString());
+	return DataAssetClassPath.ResolveClass();
+}
+
+// Returns the actor class associated with the specified actor type, obtaining it from asset registry keys without loading any dependencies, nullptr if not found
+const UClass* UBmrBlueprintFunctionLibrary::GetActorClassByActorType(EBmrActorType ActorType)
+{
+	const FString ActorTypeStr = ActorType != EAT::None ? UEnum::GetValueAsString(ActorType) : FString();
+	const FAssetData FoundAsset = UDalUtilsLibrary::GetAssetByRegistryTag(UBmrLevelActorDataAsset::ActorTypeTag, ActorTypeStr);
+	if (!FoundAsset.IsValid())
+	{
+		return nullptr;
+	}
+
+	const FSoftClassPath ActorClass(FoundAsset.GetTagValueRef<FString>(UBmrLevelActorDataAsset::ActorClassTag));
+	return ActorClass.ResolveClass();
+}
+
+// Returns the data asset classes for the specified actor types from asset registry tags without loading
+void UBmrBlueprintFunctionLibrary::GetDataAssetsByActorTypes(TArray<TSubclassOf<UDalPrimaryDataAsset>>& OutDataAssetClasses, int32 ActorsTypesBitmask)
+{
+	TMultiMap<FName, TOptional<FString>> TagsAndValues;
+	for (int32 It = 1; It < TO_FLAG(EBmrActorType::All); It <<= 1)
+	{
+		if (BitwiseActorTypes(It, ActorsTypesBitmask))
+		{
+			const EBmrActorType ActorType = TO_ENUM(EBmrActorType, It);
+			TagsAndValues.Add(UBmrLevelActorDataAsset::ActorTypeTag, UEnum::GetValueAsString(ActorType));
+		}
+	}
+
+	TArray<FAssetData> AssetsData;
+	UDalUtilsLibrary::GetAssetsByRegistryTags(/*out*/ AssetsData, TagsAndValues);
+	for (const FAssetData& AssetDataIt : AssetsData)
+	{
+		const FSoftClassPath DataAssetClassPath(AssetDataIt.AssetClassPath.ToString());
+		if (UClass* DataAssetClass = DataAssetClassPath.ResolveClass())
+		{
+			OutDataAssetClasses.Add(DataAssetClass);
+		}
+	}
 }

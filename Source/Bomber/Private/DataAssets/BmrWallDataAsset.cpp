@@ -3,7 +3,7 @@
 #include "DataAssets/BmrWallDataAsset.h"
 
 // Bomber
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrWallDataAsset)
 
@@ -16,5 +16,5 @@ UBmrWallDataAsset::UBmrWallDataAsset()
 // Returns the wall data asset
 const UBmrWallDataAsset& UBmrWallDataAsset::Get()
 {
-	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }

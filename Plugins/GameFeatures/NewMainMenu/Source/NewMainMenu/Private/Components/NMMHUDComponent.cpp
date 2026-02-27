@@ -17,6 +17,7 @@
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+#include "DalSubsystem.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
@@ -44,13 +45,16 @@ UNMMCinematicStateWidget* UNMMHUDComponent::GetInCinematicStateWidget() const
 	return WidgetsSubsystem ? WidgetsSubsystem->GetWidgetByTag<UNMMCinematicStateWidget>(NmmGameplayTags::UI::Widget_Cinematic) : nullptr;
 }
 
-// Called when a component is registered, after Scene is set, but before CreateRenderState_Concurrent or OnCreatePhysicsState are called
-void UNMMHUDComponent::OnRegister()
-{
-	Super::OnRegister();
+/*********************************************************************************************
+ * Overrides
+ ********************************************************************************************* */
 
-	// Listen to register widgets OnLocalPawnReady to guarantee that the player controller is initialized, so we can use Widgets Subsystem
-	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
+// Overridable native event for when play begins for this component
+void UNMMHUDComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UDalSubsystem::Get().ListenForDataAsset<UNMMDataAsset>(this, &ThisClass::OnDataAssetLoaded);
 }
 
 // Clears all transient data created by this component
@@ -65,6 +69,16 @@ void UNMMHUDComponent::OnUnregister()
 	}
 
 	Super::OnUnregister();
+}
+
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
+
+// Called when the NMM data asset is loaded and available
+void UNMMHUDComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
+{
+	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
 }
 
 // Called when the local player character is spawned, possessed, and replicated

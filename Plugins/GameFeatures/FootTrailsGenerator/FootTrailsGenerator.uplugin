@@ -41,6 +41,10 @@
 		{
 			"Name": "GameFeatures",
 			"Enabled": true
+		},
+		{
+			"Name": "DataAssetsLoader",
+			"Enabled": true
 		}
 	]
 }

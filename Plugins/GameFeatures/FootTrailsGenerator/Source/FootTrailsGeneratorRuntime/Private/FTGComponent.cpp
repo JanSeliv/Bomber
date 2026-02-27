@@ -3,6 +3,7 @@
 #include "FTGComponent.h"
 
 // FTG
+#include "DalSubsystem.h"
 #include "FTGDataAsset.h"
 
 // Bomber
@@ -31,15 +32,7 @@ UFTGComponent::UFTGComponent()
 // Returns the data asset that contains all the assets and tweaks of Foot Trails game feature
 const UFTGDataAsset* UFTGComponent::GetFootTrailsDataAsset() const
 {
-	return UMyPrimaryDataAsset::GetOrLoadOnce(FootTrailsDataAsset);
-}
-
-// Guarantees that the data asset is loaded, otherwise, it will crash
-const UFTGDataAsset& UFTGComponent::GetFootTrailsDataAssetChecked() const
-{
-	const UFTGDataAsset* InFootTrailsDataAsset = GetFootTrailsDataAsset();
-	checkf(InFootTrailsDataAsset, TEXT("%s: 'FootTrailsDataAsset' is not set"), *FString(__FUNCTION__));
-	return *InFootTrailsDataAsset;
+	return UDalSubsystem::GetDataAsset<UFTGDataAsset>();
 }
 
 // Returns the random foot trail instance for given types
@@ -78,42 +71,53 @@ void UFTGComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	FootTrailInstances.Empty();
 
-	UMyPrimaryDataAsset::ResetDataAsset(FootTrailsDataAsset);
-
 	Super::EndPlay(EndPlayReason);
 }
 
 // Loads all foot trails archetypes
 void UFTGComponent::InitOnce()
 {
-	const UDataTable* FootTrailsDT = GetFootTrailsDataAssetChecked().GetFootTrailsDataTable();
-	if (!ensureMsgf(FootTrailsDT, TEXT("%s: 'FootTrailsDT' is not set"), *FString(__FUNCTION__))
-	    || !FootTrailInstances.IsEmpty())
+	if (!FootTrailInstances.IsEmpty())
 	{
 		// is already initialized
 		return;
 	}
 
-	InstancedStaticMeshActor = GetWorld()->SpawnActor<AInstancedStaticMeshActor>();
-	checkf(InstancedStaticMeshActor, TEXT("%s: ERROR: 'InstancedStaticMeshActor' was not spawned!"), *FString(__FUNCTION__));
-
-	TMap<FName, FFTGArchetype> FootTrailsRows;
-	UMyDataTable::GetRows(*FootTrailsDT, FootTrailsRows);
-	for (const TTuple<FName, FFTGArchetype>& FootTrailsRowIt : FootTrailsRows)
+	UDalSubsystem::Get().ListenForDataAsset<UFTGDataAsset>([WeakThis = TWeakObjectPtr(this)](const UFTGDataAsset& DataAsset)
 	{
-		const FFTGArchetype& ArchetypeIt = FootTrailsRowIt.Value;
-		if (ArchetypeIt.Mesh.IsNull())
+		UFTGComponent* This = WeakThis.Get();
+		if (!This)
 		{
-			// skip empty rows
-			continue;
+			return;
 		}
 
-		FootTrailInstances.Emplace(ArchetypeIt, ArchetypeIt.Mesh.LoadSynchronous());
-	}
+		const UDataTable* FootTrailsDT = DataAsset.GetFootTrailsDataTable();
+		if (!ensureMsgf(FootTrailsDT, TEXT("UFTGComponent::InitOnce: 'FootTrailsDT' is not set")))
+		{
+			return;
+		}
 
-	// Generate first trails and bind to further regenerations
-	BPGenerateFootTrails();
-	ABmrGeneratedMap::Get().OnGeneratedLevelActors.AddUniqueDynamic(this, &ThisClass::BPGenerateFootTrails);
+		This->InstancedStaticMeshActor = This->GetWorld()->SpawnActor<AInstancedStaticMeshActor>();
+		checkf(This->InstancedStaticMeshActor, TEXT("UFTGComponent::InitOnce: ERROR: 'InstancedStaticMeshActor' was not spawned!"));
+
+		TMap<FName, FFTGArchetype> FootTrailsRows;
+		UMyDataTable::GetRows(*FootTrailsDT, FootTrailsRows);
+		for (const TTuple<FName, FFTGArchetype>& FootTrailsRowIt : FootTrailsRows)
+		{
+			const FFTGArchetype& ArchetypeIt = FootTrailsRowIt.Value;
+			if (ArchetypeIt.Mesh.IsNull())
+			{
+				// skip empty rows
+				continue;
+			}
+
+			This->FootTrailInstances.Emplace(ArchetypeIt, ArchetypeIt.Mesh.LoadSynchronous());
+		}
+
+		// Generate first trails and bind to further regenerations
+		This->BPGenerateFootTrails();
+		ABmrGeneratedMap::Get().OnGeneratedLevelActors.AddUniqueDynamic(This, &ThisClass::BPGenerateFootTrails);
+	});
 }
 
 // Spawns given Foot Trail by its type on the specified cell
@@ -127,9 +131,7 @@ void UFTGComponent::SpawnFootTrail(EFTGTrailType FootTrailType, const FBmrCell& 
 		return;
 	}
 
-	const AActor* Owner = GetOwner();
-	checkf(Owner, TEXT("%s: ERROR: 'Owner' is null!"), *FString(__FUNCTION__));
-	const FRotator OwnerLootAtRot = Owner->GetActorRotation();
+	const FRotator OwnerLootAtRot = ABmrGeneratedMap::Get().GetActorRotation();
 	CellRotation += UBmrCellUtilsLibrary::GetCellYawDegree();
 	const FRotator CellRot(OwnerLootAtRot.Pitch, CellRotation, OwnerLootAtRot.Roll);
 	const FTransform CellTransform(CellRot, Cell, FVector::OneVector);

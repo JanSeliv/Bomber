@@ -2,10 +2,8 @@
 
 #include "Data/NMMDataAsset.h"
 
-// NMM
-#include "Subsystems/NMMBaseSubsystem.h"
-
 // Bomber
+#include "DalSubsystem.h"
 #include "DataAssets/BmrInputMappingContext.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMDataAsset)
@@ -13,9 +11,7 @@
 // Returns this Data Asset, is checked and wil crash if can't be obtained, e.g: when is not set
 const UNMMDataAsset& UNMMDataAsset::Get(const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const UNMMDataAsset* DataAsset = UNMMBaseSubsystem::Get(OptionalWorldContext).GetNewMainMenuDataAsset();
-	checkf(DataAsset, TEXT("%s: 'DataAsset' is not set"), *FString(__FUNCTION__));
-	return *DataAsset;
+	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
 // Returns an input context by given Main Menu State

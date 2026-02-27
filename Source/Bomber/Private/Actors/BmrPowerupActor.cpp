@@ -5,7 +5,6 @@
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Components/BmrMapComponent.h"
-#include "DataAssets/BmrDataAssetsContainer.h"
 #include "DataAssets/BmrPowerupDataAsset.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"

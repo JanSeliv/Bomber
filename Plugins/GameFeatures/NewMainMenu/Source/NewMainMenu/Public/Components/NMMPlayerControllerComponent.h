@@ -86,6 +86,10 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
+	/** Called when the NMM data asset is loaded and available. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnDataAssetLoaded(const class UNMMDataAsset* DataAsset);
+
 	/** Called when the first player character is spawned, possessed, and replicated. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnFirstPawnReady(const struct FGameplayEventData& Payload);

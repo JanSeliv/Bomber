@@ -15,6 +15,7 @@ public class NewMainMenu : ModuleRules
 				, "UMG" // UUserWidget creation
 				// Bomber modules
 				, "Bomber"
+				, "DataAssetsLoader" // Created UNMMDataAsset
 				, "MetaCheatManager" // UNMMCheatExtension
 			}
 		);

@@ -39,8 +39,8 @@ public:
 	static class UNMMCameraSubsystem* GetCameraSubsystem(const UObject* OptionalWorldContext = nullptr);
 
 	/** Returns the Data Asset of the Main Menu. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NMM Data Asset", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
-	static const class UNMMDataAsset* GetDataAsset(const UObject* OptionalWorldContext = nullptr);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NMM Data Asset")
+	static const class UNMMDataAsset* GetDataAsset();
 
 	/** Returns the HUD component of the Main Menu. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NMM HUD Component", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))

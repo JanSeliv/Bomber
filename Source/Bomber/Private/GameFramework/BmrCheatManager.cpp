@@ -12,10 +12,8 @@
 #include "Controllers/BmrAIController.h"
 #include "Controllers/BmrDebugCameraController.h"
 #include "Controllers/BmrPlayerController.h"
-#include "DataAssets/BmrDataAssetsContainer.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "DataAssets/BmrPlayerDataAsset.h"
-#include "GameFramework/BmrGameState.h"
 #include "GameFramework/PlayerState.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrPowerupTag.h"
@@ -328,7 +326,7 @@ void UBmrCheatManager::SpawnActorByType(EBmrActorType ActorType, int32 ColumnX, 
 	GeneratedMap.DestroyLevelActorsOnCells({Cell});
 
 	// Spawn new actor on the cell
-	const UBmrLevelActorDataAsset* DataAsset = UBmrDataAssetsContainer::Get().GetDataAssetByActorType(ActorType);
+	const UBmrLevelActorDataAsset* DataAsset = UBmrBlueprintFunctionLibrary::GetDataAssetByActorType(ActorType);
 	checkf(DataAsset, TEXT("ERROR: [%i] %hs:\n'DataAsset' is null!"), __LINE__, __FUNCTION__);
 	const UBmrLevelActorRow* Row = DataAsset->GetRowByIndex(RowIndex);
 	GeneratedMap.SpawnActorWithMesh(ActorType, Cell, {Row});

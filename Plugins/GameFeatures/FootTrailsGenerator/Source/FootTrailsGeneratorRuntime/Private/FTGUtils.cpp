@@ -2,6 +2,9 @@
 
 #include "FTGUtils.h"
 
+// BMR
+#include "DalSubsystem.h"
+
 // FTG
 #include "FTGComponent.h"
 #include "FTGDataAsset.h"
@@ -20,6 +23,5 @@ const UFTGComponent* UFTGUtils::GetFootTrailsGeneratorComponent()
 // Returns the data asset that contains all the assets and tweaks of Foot Trails game feature
 const UFTGDataAsset* UFTGUtils::GetFootTrailsDataAsset()
 {
-	const UFTGComponent* FootTrailsComponent = GetFootTrailsGeneratorComponent();
-	return FootTrailsComponent ? FootTrailsComponent->GetFootTrailsDataAsset() : nullptr;
+	return UDalSubsystem::GetDataAsset<UFTGDataAsset>();
 }

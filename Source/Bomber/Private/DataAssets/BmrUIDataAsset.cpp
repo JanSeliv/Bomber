@@ -4,7 +4,7 @@
 
 // Bomber
 #include "Bomber.h"
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
 
 // UE
 #include "Blueprint/UserWidget.h"
@@ -14,9 +14,7 @@
 // Returns the UI data asset
 const UBmrUIDataAsset& UBmrUIDataAsset::Get()
 {
-	const UBmrUIDataAsset* UIDataAsset = UBmrDataAssetsContainer::GetUIDataAsset();
-	checkf(UIDataAsset, TEXT("The UI Data Asset is not valid"));
-	return *UIDataAsset;
+	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
 // Returns widget data associated with the given tag, or invalid widget data if not found

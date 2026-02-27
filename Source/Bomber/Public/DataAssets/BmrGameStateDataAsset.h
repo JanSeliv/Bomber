@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Data/MyPrimaryDataAsset.h"
+#include "DalPrimaryDataAsset.h"
 
 #include "BmrGameStateDataAsset.generated.h"
 
@@ -10,7 +10,7 @@
  * The data of the game match.
  */
 UCLASS()
-class BOMBER_API UBmrGameStateDataAsset final : public UMyPrimaryDataAsset
+class BOMBER_API UBmrGameStateDataAsset final : public UDalPrimaryDataAsset
 {
 	GENERATED_BODY()
 
@@ -18,9 +18,11 @@ public:
 	/** Returns the Game State data asset. */
 	static const UBmrGameStateDataAsset& Get();
 
+	static constexpr float GTickInterval = 0.2f;
+
 	/** Returns general value how ofter update actors and states in the game. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE float GetTickInterval() const { return TickInterval; }
+	FORCEINLINE float GetTickInterval() const { return GTickInterval; }
 
 	/** Return the summary time required to start the 'Three-two-one-GO' timer. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
@@ -47,10 +49,6 @@ public:
 	FORCEINLINE class UStateTree* GetGameStateTreeAsset() const { return GameStateTreeAsset; }
 
 protected:
-	/** General value how ofter update actors and states in the game. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	float TickInterval = 0.2f;
-
 	/** The summary seconds of launching 'Three-two-one-GO' timer that is used on game starting. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	int32 StartingCountdown = 3;

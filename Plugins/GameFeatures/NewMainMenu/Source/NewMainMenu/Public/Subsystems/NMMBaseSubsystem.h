@@ -14,7 +14,7 @@ class UNMMDataAsset;
 /**
  * Provides access to the most important data like Data Asset and current state.
  */
-UCLASS(BlueprintType, Blueprintable, Config = "NewMainMenu", DefaultConfig)
+UCLASS(BlueprintType, Blueprintable)
 class NEWMAINMENU_API UNMMBaseSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
@@ -49,23 +49,6 @@ protected:
 	 * Is local and not replicated. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	ENMMState CurrentMenuState = ENMMState::None;
-
-	/*********************************************************************************************
-	 * Data Asset
-	 ********************************************************************************************* */
-public:
-	/** Returns the data asset that contains all the assets and tweaks of New Main Menu game feature.
-	 * @see UNMMBaseSubsystem::NewMainMenuDataAsset. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	const UNMMDataAsset* GetNewMainMenuDataAsset() const;
-
-protected:
-	/** Contains all the assets and tweaks of New Main Menu game feature.
-	 * Note: Since Subsystem is code-only, is is config property set in NewMainMenu.ini.
-	 * Property is put to subsystem because its instance is created before any other object.
-	 * It can't be put to DevelopSettings class because it does work properly for MGF-modules. */
-	UPROPERTY(Config, VisibleInstanceOnly, BlueprintReadWrite, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	TSoftObjectPtr<const UNMMDataAsset> NewMainMenuDataAsset;
 
 	/*********************************************************************************************
 	 * Overrides

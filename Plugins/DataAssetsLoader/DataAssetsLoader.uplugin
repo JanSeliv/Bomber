@@ -1,0 +1,35 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "Data Assets Loader",
+	"Description": "Utilizes Asset Registry to automatically load and register data assets on load asynchronously, no manual storing needed, enabling consumers to obtain or listen any data asset by class with no extra setup",
+	"Category": "Programming",
+	"CreatedBy": "Yevhenii Selivanov",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "mailto:janseliw@gmail.com",
+	"EngineVersion": "5.7.0",
+	"EnabledByDefault": true,
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "DataAssetsLoader",
+			"Type": "Runtime",
+			"LoadingPhase": "EarliestPossible"
+		},
+		{
+			"Name": "DataAssetsLoaderEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "GameFeatures",
+			"Enabled": true
+		}
+	]
+}

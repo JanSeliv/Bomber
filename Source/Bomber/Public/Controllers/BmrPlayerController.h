@@ -84,6 +84,10 @@ public:
 	FOnAnyCinematicStarted OnAnyCinematicStarted;
 
 protected:
+	/** Called when the Player Input data asset is loaded and available */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPlayerInputDataAssetLoaded(const class UBmrPlayerInputDataAsset* DataAsset);
+
 	/** Is called when all game widgets are initialized. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnWidgetsInitialized();

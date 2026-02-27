@@ -25,6 +25,7 @@
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+#include "DalSubsystem.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
@@ -184,16 +185,7 @@ void UNMMSpotComponent::BeginPlay()
 		return;
 	}
 
-	UNMMSpotsSubsystem::Get().AddNewMainMenuSpot(this);
-
-	UpdateCinematicData();
-	LoadMasterSequencePlayer();
-
-	UNMMCameraSubsystem::Get().OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
-
-	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
-
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UDalSubsystem::Get().ListenForDataAsset<UNMMDataAsset>(this, &ThisClass::OnDataAssetLoaded);
 }
 
 // Clears all transient data created by this component
@@ -357,6 +349,21 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(ULevelSequence* LoadedMasterSeque
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
+
+// Called when the NMM data asset is loaded and available
+void UNMMSpotComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
+{
+	UNMMSpotsSubsystem::Get().AddNewMainMenuSpot(this);
+
+	UpdateCinematicData();
+	LoadMasterSequencePlayer();
+
+	UNMMCameraSubsystem::Get().OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
+
+	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
+
+	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+}
 
 // Called when the current game state was changed
 void UNMMSpotComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)

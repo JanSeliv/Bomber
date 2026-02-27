@@ -7,6 +7,7 @@
 #include "NMMUtils.h"
 
 // Bomber
+#include "DalSubsystem.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMInGameSettingsSubsystem)
@@ -30,8 +31,10 @@ void UNMMInGameSettingsSubsystem::SetCinematicsVolume(double InVolume)
 {
 	CinematicsVolume = InVolume;
 
-	USoundClass* CinematicsSoundClass = UNMMDataAsset::Get().GetCinematicsSoundClass();
-	UBmrSoundsSubsystem::Get().SetSoundVolumeByClass(CinematicsSoundClass, InVolume);
+	UDalSubsystem::Get().ListenForDataAsset<UNMMDataAsset>([InVolume](const UNMMDataAsset& DataAsset)
+	{
+		UBmrSoundsSubsystem::Get().SetSoundVolumeByClass(DataAsset.GetCinematicsSoundClass(), InVolume);
+	});
 }
 
 // Set true to enable instant transitions when switching characters in the Main Menu

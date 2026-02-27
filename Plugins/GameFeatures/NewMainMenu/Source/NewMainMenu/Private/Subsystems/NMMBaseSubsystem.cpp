@@ -3,7 +3,6 @@
 #include "Subsystems/NMMBaseSubsystem.h"
 
 // NMM
-#include "Data/NMMDataAsset.h"
 #include "NMMUtils.h"
 
 // Bomber
@@ -40,16 +39,6 @@ void UNMMBaseSubsystem::SetNewMainMenuState(ENMMState NewState)
 }
 
 /*********************************************************************************************
- * Data Asset
- ********************************************************************************************* */
-
-// Returns the data asset that contains all the assets and tweaks of New Main Menu game feature
-const UNMMDataAsset* UNMMBaseSubsystem::GetNewMainMenuDataAsset() const
-{
-	return UMyPrimaryDataAsset::GetOrLoadOnce(NewMainMenuDataAsset);
-}
-
-/*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
 
@@ -64,8 +53,6 @@ void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 // Clears all transient data contained in this subsystem
 void UNMMBaseSubsystem::Deinitialize()
 {
-	UMyPrimaryDataAsset::ResetDataAsset(NewMainMenuDataAsset);
-
 	Super::Deinitialize();
 }
 

@@ -3,7 +3,7 @@
 #include "DataAssets/BmrPlayerInputDataAsset.h"
 
 // Bomber
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
 #include "DataAssets/BmrInputMappingContext.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -16,8 +16,7 @@
 // Returns the player input data asset
 const UBmrPlayerInputDataAsset& UBmrPlayerInputDataAsset::Get()
 {
-	const UBmrPlayerInputDataAsset* PlayerInputDataAsset = UBmrDataAssetsContainer::GetPlayerInputDataAsset();
-	checkf(PlayerInputDataAsset, TEXT("The Player Input Data Asset is not valid")) return *PlayerInputDataAsset;
+	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
 // Returns all input contexts contained in this data asset

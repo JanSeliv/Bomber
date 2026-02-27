@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Data/MyPrimaryDataAsset.h"
+#include "DalPrimaryDataAsset.h"
 
 // Bomber
 #include "Structures/BmrManageableWidgetData.h"
@@ -16,7 +16,7 @@ enum class EBmrLevelType : uint8;
  * Contains common data of the New Main Menu plugin to be tweaked.
  */
 UCLASS(Blueprintable, BlueprintType)
-class NEWMAINMENU_API UNMMDataAsset : public UMyPrimaryDataAsset
+class NEWMAINMENU_API UNMMDataAsset : public UDalPrimaryDataAsset
 {
 	GENERATED_BODY()
 

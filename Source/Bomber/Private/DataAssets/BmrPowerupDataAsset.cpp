@@ -3,7 +3,7 @@
 #include "DataAssets/BmrPowerupDataAsset.h"
 
 // Bomber
-#include "DataAssets/BmrDataAssetsContainer.h"
+#include "DalSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPowerupDataAsset)
@@ -18,7 +18,7 @@ UBmrPowerupDataAsset::UBmrPowerupDataAsset()
 // Returns the powerup data asset
 const UBmrPowerupDataAsset& UBmrPowerupDataAsset::Get()
 {
-	return UBmrDataAssetsContainer::GetLevelActorDataAssetChecked<ThisClass>();
+	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
 // Return row by specified powerup type
