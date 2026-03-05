@@ -32,6 +32,3 @@
 [submodule "Plugins/AdvancedSessionsPlugin"]
 	path = Plugins/AdvancedSessionsPlugin
 	url = https://github.com/JanSeliv/AdvancedSessionsPlugin.git
-[submodule "Plugins/GameplayMessageRouter"]
-	path = Plugins/GameplayMessageRouter
-	url = https://github.com/JanSeliv/GameplayMessageRouter.git

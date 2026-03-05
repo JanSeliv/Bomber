@@ -88,7 +88,7 @@ This project could be useful for learners, demonstrating next features:
 - World Partition
 - Model-View-ViewModel (MVVM) UI Pattern
 - Localization
-- Primary Data Assets loaded via Asset Manager
+- Primary Data Assets and Asset Manager
 
 Despite this project is fully written in C++, it's extremely **blueprint-friendly**:
 
@@ -117,7 +117,7 @@ Stay updated with the current progress and plans on the [Trello board](https://t
 > <img height="240" src="https://github.com/user-attachments/assets/0ede3ba0-b26b-4cd0-b2d6-4eb4479b2a63">
 - Added arrow indicator above local player during game start:
 > <img height="240" src="https://github.com/user-attachments/assets/c1f2792d-44ff-4337-83c3-db087c73ddd0">
-- Migrated to Lyra's [Gameplay Message Router](https://github.com/JanSeliv/GameplayMessageRouter)
+- Moved from delegates to global tag-event via Async Message System (aka Lyra's Gameplay Message Router)
 - Migrated game state management to **State Trees** for cleaner state transitions
 > <img width="640" src="https://github.com/user-attachments/assets/9879e6df-c923-4b24-8137-a91ee933e537">
 - Utilized Asset Manager for async loading and automatic unloading of primary data assets

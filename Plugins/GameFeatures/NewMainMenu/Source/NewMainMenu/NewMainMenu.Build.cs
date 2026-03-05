@@ -30,7 +30,7 @@ public class NewMainMenu : ModuleRules
 				// Bomber modules
 				, "MyUtils"
 				, "SettingsWidgetConstructor"
-				, "GameplayMessageRuntime" // BmrGameplayMessageSubsystem
+				, "AsyncMessageSystem" // Aka Lyra's Gameplay Message Router
 			}
 		);
 	}

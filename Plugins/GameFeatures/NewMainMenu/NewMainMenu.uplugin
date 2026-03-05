@@ -46,7 +46,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "GameplayMessageRouter",
+			"Name": "AsyncMessageSystem",
 			"Enabled": true
 		},
 		{
