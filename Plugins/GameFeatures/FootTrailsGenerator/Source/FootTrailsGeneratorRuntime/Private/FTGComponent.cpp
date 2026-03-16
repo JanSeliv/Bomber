@@ -97,7 +97,15 @@ void UFTGComponent::InitOnce()
 			return;
 		}
 
-		This->InstancedStaticMeshActor = This->GetWorld()->SpawnActor<AInstancedStaticMeshActor>();
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = This->GetWorld()->PersistentLevel; // Always keep new objects on Persistent level
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParameters.bNoFail = true;
+#if WITH_EDITORONLY_DATA
+		SpawnParameters.bCreateActorPackage = false; // Do not bake this runtime actor into World Partition level
+#endif
+
+		This->InstancedStaticMeshActor = This->GetWorld()->SpawnActor<AInstancedStaticMeshActor>(SpawnParameters);
 		checkf(This->InstancedStaticMeshActor, TEXT("UFTGComponent::InitOnce: ERROR: 'InstancedStaticMeshActor' was not spawned!"));
 
 		TMap<FName, FFTGArchetype> FootTrailsRows;
