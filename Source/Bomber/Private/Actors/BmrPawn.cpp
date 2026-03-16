@@ -249,7 +249,8 @@ void ABmrPawn::OnPostLogout_Implementation(APlayerController* ExitingPlayer)
 // Is called when the player was destroyed
 void ABmrPawn::OnPreRemovedFromLevel_Implementation(UBmrMapComponent* InMapComponent, UObject* DestroyCauser)
 {
-	if (!ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame))
+	const ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	if (!GameState || !GameState->HasMatchingGameplayTag(FBmrGameStateTag::InGame))
 	{
 		// Ignore, is not gameplay destroy, likely level is regenerated
 		return;
