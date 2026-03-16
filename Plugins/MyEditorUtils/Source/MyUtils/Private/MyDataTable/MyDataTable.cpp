@@ -32,6 +32,12 @@ void UMyDataTable::PostSaveRoot(FObjectPostSaveRootContext ObjectSaveContext)
 {
 	Super::PostSaveRoot(ObjectSaveContext);
 
+	// Skip re-export during cooking and other procedural saves to avoid dirtying the .json in source control
+	if (ObjectSaveContext.IsProceduralSave())
+	{
+		return;
+	}
+
 	ReexportToJson();
 }
 
