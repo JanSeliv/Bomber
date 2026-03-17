@@ -83,20 +83,4 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void OpenListenServerLevel(const TSoftObjectPtr<UWorld>& Level, bool bForceLoad = false);
 
-	/*********************************************************************************************
-	 * Modular Game Features (MGF)
-	 ********************************************************************************************* */
-public:
-	/** Enables or disable all game features.
-	 * @see UGameStateDataAsset::GetGameFeaturesToEnable() */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static void SetGameFeaturesEnabled(bool bEnable, const TArray<FName>& GameFeatures);
-
-	/** Returns the module name from the specified asset, if it is part of a game feature. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FString GetModuleNameFromAsset(const UObject* Asset);
-
-	/** Unloads the specified asset from memory. */
-	UFUNCTION(BlueprintCallable, Category = "C++")
-	static void UnloadAsset(UObject* AssetToUnload, bool bUnloadReferences = false);
 };

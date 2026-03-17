@@ -8,7 +8,7 @@
 #include "DataAssets/BmrSoundsDataAsset.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
-#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
@@ -126,7 +126,7 @@ void UBmrSoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
 
 	// Release the sound and all its referenced assets
 	constexpr bool bUnloadReferences = true;
-	UGameplayUtilsLibrary::UnloadAsset(InSound, bUnloadReferences);
+	UModularGameFeaturePluginUtils::UnloadAsset(InSound, bUnloadReferences);
 
 	SoundComponents.Remove(InSound);
 }
@@ -158,7 +158,7 @@ void UBmrSoundsSubsystem::DestroyAllSoundComponents()
 			    && ObjectIt->IsA<USoundBase>()
 			    && ObjectIt->HasAnyFlags(RF_Transient))
 			{
-				UGameplayUtilsLibrary::UnloadAsset(ObjectIt);
+				UModularGameFeaturePluginUtils::UnloadAsset(ObjectIt);
 			}
 		}
 	}

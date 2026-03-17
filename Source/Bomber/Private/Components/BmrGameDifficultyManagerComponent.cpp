@@ -6,7 +6,7 @@
 #include "Bomber.h"
 #include "DataAssets/BmrModularGameFeatureSettings.h"
 #include "GameFramework/BmrGameState.h"
-#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "Structures/BmrGameDifficultyData.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
@@ -107,10 +107,10 @@ void UBmrGameDifficultyManagerComponent::UpdateGameFeaturesByDifficulty()
 	}
 
 	// First disable irrelevant features
-	UGameplayUtilsLibrary::SetGameFeaturesEnabled(false, FeaturesToDisable);
+	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, FeaturesToDisable);
 
 	// Then enable relevant features
-	UGameplayUtilsLibrary::SetGameFeaturesEnabled(true, FeaturesToEnable);
+	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(true, FeaturesToEnable);
 }
 
 // Applies current difficulty level to the game

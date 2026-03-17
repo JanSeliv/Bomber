@@ -3,7 +3,7 @@
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 
 // Bomber
-#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 
 // UE
 #include "Engine/Engine.h"
@@ -185,7 +185,7 @@ void UInputUtilsLibrary::UnbindInputActionsInContext(const UObject* WorldContext
 		if (InputActionIdx != INDEX_NONE)
 		{
 			EnhancedInputComponent->RemoveActionEventBinding(Index);
-			UGameplayUtilsLibrary::UnloadAsset(InputActions[InputActionIdx]);
+			UModularGameFeaturePluginUtils::UnloadAsset(InputActions[InputActionIdx]);
 		}
 	}
 }

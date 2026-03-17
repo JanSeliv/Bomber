@@ -9,7 +9,7 @@
 #include "Components/BmrGameDifficultyManagerComponent.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
 #include "DataAssets/BmrModularGameFeatureSettings.h"
-#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
+#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
@@ -182,7 +182,7 @@ void ABmrGameState::BeginPlay()
 
 	StartGameStateTree();
 
-	UGameplayUtilsLibrary::SetGameFeaturesEnabled(true, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
+	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(true, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
 
 	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
 }
@@ -195,7 +195,7 @@ void ABmrGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		ASC->RegisterGenericGameplayTagEvent().RemoveAll(this);
 	}
 
-	UGameplayUtilsLibrary::SetGameFeaturesEnabled(false, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
+	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
 
 	Super::EndPlay(EndPlayReason);
 }
