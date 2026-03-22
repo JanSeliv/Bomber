@@ -59,7 +59,8 @@ public:
 public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnDalDataAssetLoaded, const UDalPrimaryDataAsset*, DataAsset);
 
-	/** Blueprint-only listener wrapped by K2Node_ListenForDataAsset */
+	/** Listens for a data asset of the specified class, fires Completed when loaded or immediately if already available.
+	 * Blueprint-only listener node, in code use the templated ListenForDataAsset() instead */
 	UFUNCTION(BlueprintCallable, Category = "[DataAssetsLoader]", DisplayName = "Listen For Data Asset [DAL]", meta = (BlueprintInternalUseOnly = "true"))
 	void BPListenForDataAsset(TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, const FOnDalDataAssetLoaded& Completed);
 

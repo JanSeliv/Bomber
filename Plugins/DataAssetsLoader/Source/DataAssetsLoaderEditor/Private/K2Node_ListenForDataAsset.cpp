@@ -13,7 +13,9 @@
 #include "K2Node_CallFunction.h"
 #include "K2Node_CustomEvent.h"
 #include "K2Node_ExecutionSequence.h"
+#include "K2Node_IfThenElse.h"
 #include "K2Node_TemporaryVariable.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "KismetCompiler.h"
 
@@ -22,7 +24,7 @@
 #define LOCTEXT_NAMESPACE "K2Node_ListenForDataAsset"
 
 // Returns the name of the native function to call
-FName UK2Node_ListenForDataAsset::GetNativeFunctionName() const
+FName UK2Node_ListenForDataAsset::GetNativeFunctionName()
 {
 	return GET_FUNCTION_NAME_CHECKED(UDalSubsystem, BPListenForDataAsset);
 }
@@ -62,7 +64,7 @@ UClass* UK2Node_ListenForDataAsset::GetSelectedClass(const TArray<UEdGraphPin*>*
 }
 
 // Updates the output pin type to match the selected class
-void UK2Node_ListenForDataAsset::OnClassPinChanged()
+void UK2Node_ListenForDataAsset::OnClassPinChanged() const
 {
 	UEdGraphPin* DataAssetPin = FindPin(DataAssetPinName);
 	if (!DataAssetPin)
@@ -93,12 +95,12 @@ void UK2Node_ListenForDataAsset::OnClassPinChanged()
 void UK2Node_ListenForDataAsset::AllocateDefaultPins()
 {
 	CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Exec, UEdGraphSchema_K2::PN_Execute);
-	CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Exec, UEdGraphSchema_K2::PN_Completed);
 
-	UEdGraphPin* TargetPin = CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Object, UDalSubsystem::StaticClass(), UEdGraphSchema_K2::PN_Self);
-	checkf(TargetPin, TEXT("ASSERT: [%i] %hs:\n'TargetPin' is null!"), __LINE__, __FUNCTION__);
-	TargetPin->PinFriendlyName = LOCTEXT("Target", "Target");
-	TargetPin->bDefaultValueIsIgnored = true;
+	UEdGraphPin* CompletedPin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Exec, UEdGraphSchema_K2::PN_Completed);
+	CompletedPin->PinToolTip = LOCTEXT("CompletedTooltip", "Called when the data asset is loaded and valid").ToString();
+
+	UEdGraphPin* FailedPin = CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Exec, FailedPinName);
+	FailedPin->PinToolTip = LOCTEXT("FailedTooltip", "Called when the callback returned null, e.g. the data asset class is not registered or was unloaded").ToString();
 
 	CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Class, UDalPrimaryDataAsset::StaticClass(), DataAssetClassPinName);
 	CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Object, UDalPrimaryDataAsset::StaticClass(), DataAssetPinName);
@@ -205,27 +207,6 @@ void UK2Node_ListenForDataAsset::ExpandNode(FKismetCompilerContext& CompilerCont
 		bIsErrorFree &= LoadedObjectVariablePin && OutputDataAssetPin && CompilerContext.MovePinLinksToIntermediate(*OutputDataAssetPin, *LoadedObjectVariablePin).CanSafeConnect();
 	}
 
-	// Connect to DalSubsystem self input
-	{
-		UEdGraphPin* CallSelfPin = CallListenNode->FindPin(UEdGraphSchema_K2::PN_Self);
-		UEdGraphPin* SelfPin = FindPin(UEdGraphSchema_K2::PN_Self);
-		if (SelfPin && CallSelfPin)
-		{
-			if (SelfPin->LinkedTo.Num() > 0)
-			{
-				bIsErrorFree &= CompilerContext.MovePinLinksToIntermediate(*SelfPin, *CallSelfPin).CanSafeConnect();
-			}
-			else
-			{
-				CallSelfPin->DefaultValue = SelfPin->DefaultValue;
-			}
-		}
-		else
-		{
-			bIsErrorFree = false;
-		}
-	}
-
 	// Connect to DataAssetClass input
 	{
 		UEdGraphPin* CallClassPin = CallListenNode->FindPin(DataAssetClassPinName);
@@ -290,11 +271,26 @@ void UK2Node_ListenForDataAsset::ExpandNode(FKismetCompilerContext& CompilerCont
 		bIsErrorFree &= AssignInputExePin && CompletedEventOutputPin && Schema->TryCreateConnection(AssignInputExePin, CompletedEventOutputPin);
 	}
 
-	// Connect assign exec output to completed output
+	// Branch on result validity: Completed if valid, Failed otherwise
+	UK2Node_CallFunction* IsValidNode = CompilerContext.SpawnIntermediateNode<UK2Node_CallFunction>(this, SourceGraph);
+	IsValidNode->FunctionReference.SetExternalMember(GET_FUNCTION_NAME_CHECKED(UKismetSystemLibrary, IsValid), UKismetSystemLibrary::StaticClass());
+	IsValidNode->AllocateDefaultPins();
+	bIsErrorFree &= Schema->TryCreateConnection(LoadedObjectVariablePin, IsValidNode->FindPinChecked(TEXT("Object")));
+
+	UK2Node_IfThenElse* BranchNode = CompilerContext.SpawnIntermediateNode<UK2Node_IfThenElse>(this, SourceGraph);
+	BranchNode->AllocateDefaultPins();
+
+	bIsErrorFree &= Schema->TryCreateConnection(AssignNode->GetThenPin(), BranchNode->GetExecPin());
+	bIsErrorFree &= Schema->TryCreateConnection(IsValidNode->GetReturnValuePin(), BranchNode->GetConditionPin());
+
 	{
 		UEdGraphPin* OutputCompletedPin = FindPin(UEdGraphSchema_K2::PN_Completed);
-		UEdGraphPin* AssignOutputExePin = AssignNode->GetThenPin();
-		bIsErrorFree &= OutputCompletedPin && AssignOutputExePin && CompilerContext.MovePinLinksToIntermediate(*OutputCompletedPin, *AssignOutputExePin).CanSafeConnect();
+		bIsErrorFree &= OutputCompletedPin && CompilerContext.MovePinLinksToIntermediate(*OutputCompletedPin, *BranchNode->GetThenPin()).CanSafeConnect();
+	}
+
+	{
+		UEdGraphPin* OutputFailedPin = FindPin(FailedPinName);
+		bIsErrorFree &= OutputFailedPin && CompilerContext.MovePinLinksToIntermediate(*OutputFailedPin, *BranchNode->GetElsePin()).CanSafeConnect();
 	}
 
 	if (!bIsErrorFree)

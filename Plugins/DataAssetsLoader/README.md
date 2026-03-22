@@ -26,11 +26,15 @@ Auto-load and access any data asset from anywhere
 - **Batch Listeners**: Wait for multiple data asset classes at once and fire a single callback when all are loaded.
 - **Modular Game Features Support**: Automatically discovers and loads data assets from Game Feature plugins.
 
+![DataAssetsLoader](https://github.com/user-attachments/assets/979e5393-995c-429b-8c43-0e029f22b230)
+
 ## 🎓 Sample Projects
 
 Explore this [game project repository](https://github.com/JanSeliv/Bomber) to view the Data Assets Loader in action.
 
 ## 📅 Changelog
+#### 2026-XX-XX
+- [Editor] Listen node now has a Failed exec output that fires when the data asset unable to load
 #### 2026-02-23
 - 🎉 Initial public release on Unreal Engine 5.7
 

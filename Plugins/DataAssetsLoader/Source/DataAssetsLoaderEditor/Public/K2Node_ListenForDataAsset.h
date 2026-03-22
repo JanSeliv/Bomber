@@ -16,23 +16,19 @@ class DATAASSETSLOADEREDITOR_API UK2Node_ListenForDataAsset : public UK2Node
 	GENERATED_BODY()
 
 public:
-	/** Pin name for the data asset class input */
 	static inline const FName DataAssetClassPinName = TEXT("DataAssetClass");
-
-	/** Pin name for the completed delegate parameter */
 	static inline const FName CompletedPinName = TEXT("Completed");
-
-	/** Pin name for the output data asset */
+	static inline const FName FailedPinName = TEXT("Failed");
 	static inline const FName DataAssetPinName = TEXT("DataAsset");
 
 	/** Returns the name of the native function to call */
-	FName GetNativeFunctionName() const;
+	static FName GetNativeFunctionName();
 
 	/** Returns the selected data asset class from the class input pin, or nullptr if not set */
 	UClass* GetSelectedClass(const TArray<UEdGraphPin*>* InPinsToSearch = nullptr) const;
 
 	/** Updates the output pin type to match the selected class */
-	void OnClassPinChanged();
+	void OnClassPinChanged() const;
 
 	// UEdGraphNode interface
 	virtual void AllocateDefaultPins() override;
