@@ -28,6 +28,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FString GetModuleNameFromAsset(const UObject* Asset);
 
+	/** Returns names of all registered Modular Game Feature plugins
+	 * Is mostly used by `meta = (GetOptions = "MyUtils.ModularGameFeaturePluginUtils.GetAllRegisteredModularGameFeatures"))` */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static TArray<FString> GetAllRegisteredModularGameFeatures();
+
 	/** Unloads the specified asset from memory. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void UnloadAsset(UObject* AssetToUnload, bool bUnloadReferences = false);

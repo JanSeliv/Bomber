@@ -7,6 +7,9 @@
 // Bomber
 #include "Structures/BmrGameDifficultyData.h" // FBmrDifficultyGameFeaturesData
 
+// UE
+#include "GameplayTagContainer.h"
+
 #include "BmrModularGameFeatureSettings.generated.h"
 
 /**
@@ -42,12 +45,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	const FORCEINLINE TArray<FBmrDifficultyGameFeaturesData>& GetDifficultyGameFeatures() const { return DifficultyGameFeatures; }
 
+	/** Returns tag-driven game features map, where key is feature name and value is the set of tags (OR logic: feature loads when ASC has ANY of these tags). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const FORCEINLINE TMap<FName, FGameplayTagContainer>& GetModularGameFeaturesByTags() const { return ModularGameFeaturesByTags; }
+
+	/** Returns aggregated container of all unique tags from tag-driven features map, lazy-cached. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const FGameplayTagContainer& GetAllModularGameFeatureTags() const;
+
 protected:
 	/** All game features need to be loaded and activated on starting the game, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties, GetOptions = "MyUtils.ModularGameFeaturePluginUtils.GetAllRegisteredModularGameFeatures"))
 	TArray<FName> ModularGameFeatures;
 
 	/** Game Features that are enabled by the game difficulty levels, where multiple difficulties can be selected per each feature, is config property. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TArray<FBmrDifficultyGameFeaturesData> DifficultyGameFeatures;
+
+	/** Tag-driven game features: key is feature name, value is the set of gameplay tags (OR logic: feature loads when ASC has ANY of these tags), is config property. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties, GetOptions = "MyUtils.ModularGameFeaturePluginUtils.GetAllRegisteredModularGameFeatures"))
+	TMap<FName, FGameplayTagContainer> ModularGameFeaturesByTags;
 };

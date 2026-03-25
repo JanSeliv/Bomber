@@ -8,8 +8,6 @@
 #include "Bomber.h"
 #include "Components/BmrGameDifficultyManagerComponent.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
-#include "DataAssets/BmrModularGameFeatureSettings.h"
-#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
@@ -30,7 +28,7 @@ ABmrGameState::ABmrGameState()
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	GameDifficultyManager = CreateDefaultSubobject<UBmrGameDifficultyManagerComponent>(TEXT("GameFeaturesManager"));
+	GameDifficultyManager = CreateDefaultSubobject<UBmrGameDifficultyManagerComponent>(TEXT("GameDifficultyManager"));
 	GameStateTreeComponent = CreateDefaultSubobject<UStateTreeComponent>(TEXT("GameStateTree"));
 	GameStateTreeComponent->SetStartLogicAutomatically(false);
 }
@@ -182,8 +180,6 @@ void ABmrGameState::BeginPlay()
 
 	StartGameStateTree();
 
-	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(true, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
-
 	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
 }
 
@@ -194,8 +190,6 @@ void ABmrGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		ASC->RegisterGenericGameplayTagEvent().RemoveAll(this);
 	}
-
-	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
 
 	Super::EndPlay(EndPlayReason);
 }

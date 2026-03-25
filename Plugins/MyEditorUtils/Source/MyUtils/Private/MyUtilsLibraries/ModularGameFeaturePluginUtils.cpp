@@ -57,6 +57,17 @@ void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, 
 	}
 }
 
+// Returns names of all registered Modular Game Feature plugins
+TArray<FString> UModularGameFeaturePluginUtils::GetAllRegisteredModularGameFeatures()
+{
+	TArray<FString> FeatureNames;
+	UGameFeaturesSubsystem::Get().ForEachGameFeature([&FeatureNames](FGameFeatureInfo&& Info)
+	{
+		FeatureNames.Emplace(MoveTemp(Info.Name));
+	});
+	return FeatureNames;
+}
+
 // Returns the module name from the specified asset, if it is part of a game feature
 FString UModularGameFeaturePluginUtils::GetModuleNameFromAsset(const UObject* Asset)
 {
