@@ -110,6 +110,13 @@ void UBmrModularGameFeaturesSubsystem::OnModularGameFeatureTagChanged()
 		}
 	}
 
+	if (FeaturesToDisable.IsEmpty()
+	    && FeaturesToEnable.IsEmpty())
+	{
+		// Nothing to change
+		return;
+	}
+
 	// First disable irrelevant features, then enable relevant ones
 	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, FeaturesToDisable);
 	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(true, FeaturesToEnable);
@@ -146,10 +153,10 @@ void UBmrModularGameFeaturesSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(true, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
 }
 
-// Unloads default features on subsystem removal
-void UBmrModularGameFeaturesSubsystem::Deinitialize()
+// Unloads default features on world end play
+void UBmrModularGameFeaturesSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
-	Super::Deinitialize();
-
 	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
+
+	Super::OnWorldEndPlay(InWorld);
 }

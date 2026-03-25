@@ -73,19 +73,6 @@ protected:
 	void BroadcastGameStateChanged();
 
 	/*********************************************************************************************
-	 * Game Difficulty
-	 ********************************************************************************************* */
-public:
-	/** Returns the manager, which is responsible for the game difficulty settings and logic. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	class UBmrGameDifficultyManagerComponent* GetGameDifficultyManager() const { return GameDifficultyManager; }
-
-protected:
-	/** Manages the game difficulty settings and logic. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))
-	TObjectPtr<class UBmrGameDifficultyManagerComponent> GameDifficultyManager = nullptr;
-
-	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
 public:

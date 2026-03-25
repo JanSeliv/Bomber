@@ -50,6 +50,6 @@ protected:
 	/** Loads default (non-tag-based) features when the world starts playing. */
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
-	/** Unloads default features on subsystem removal. */
-	virtual void Deinitialize() override;
+	/** Unloads default features on world end play. */
+	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 };

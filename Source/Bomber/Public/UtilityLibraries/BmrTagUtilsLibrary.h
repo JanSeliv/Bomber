@@ -6,6 +6,7 @@
 
 #include "BmrTagUtilsLibrary.generated.h"
 
+struct FBmrGameDifficultyTag;
 struct FBmrPlayerTag;
 struct FBmrPowerupTag;
 struct FGameplayTag;
@@ -43,4 +44,12 @@ public:
 	/** Converts a GameplayTag to a GameStateTag. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InGameStateTag", DisplayName = "To GameplayTag (GameStateTag)", CompactNodeTitle = "->", BlueprintAutocast))
 	static FGameplayTag Conv_GameStateTagToGameplayTag(FBmrGameStateTag InGameStateTag);
+
+	/** Converts a GameplayTag to a GameDifficultyTag. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InGameplayTag", DisplayName = "To GameDifficultyTag (GameplayTag)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FBmrGameDifficultyTag Conv_GameplayTagToGameDifficultyTag(FGameplayTag InGameplayTag);
+
+	/** Converts a GameDifficultyTag to a GameplayTag. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InGameDifficultyTag", DisplayName = "To GameplayTag (GameDifficultyTag)", CompactNodeTitle = "->", BlueprintAutocast))
+	static FGameplayTag Conv_GameDifficultyTagToGameplayTag(FBmrGameDifficultyTag InGameDifficultyTag);
 };

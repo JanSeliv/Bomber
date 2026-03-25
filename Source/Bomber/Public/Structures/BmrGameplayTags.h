@@ -43,6 +43,9 @@ namespace BmrGameplayTags
 
 		/** Event that fires when any pawn is spawned, possessed, and replicated, obtain pawn from Payload.Instigator */
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Player_PawnReady);
+
+		/** Event that fires when the game difficulty tag was changed, check via Payload.InstigatorTags.HasTag/MatchesTag */
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Difficulty_Changed);
 	} // namespace Event
 
 	namespace GameplayEffect

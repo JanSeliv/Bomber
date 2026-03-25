@@ -6,7 +6,6 @@
 #include "Actors/BmrGeneratedMap.h"
 #include "Actors/BmrPawn.h"
 #include "Bomber.h"
-#include "Components/BmrGameDifficultyManagerComponent.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
@@ -28,7 +27,6 @@ ABmrGameState::ABmrGameState()
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	GameDifficultyManager = CreateDefaultSubobject<UBmrGameDifficultyManagerComponent>(TEXT("GameDifficultyManager"));
 	GameStateTreeComponent = CreateDefaultSubobject<UStateTreeComponent>(TEXT("GameStateTree"));
 	GameStateTreeComponent->SetStartLogicAutomatically(false);
 }

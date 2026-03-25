@@ -368,17 +368,17 @@
 				},
 				"Owner":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultyManagerComponent'",
-					"FunctionName": "GetGameDifficultyManager"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultySubsystem'",
+					"FunctionName": "GetGameDifficultySubsystem"
 				},
 				"Setter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultyManagerComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultySubsystem'",
 					"FunctionName": "SetDifficultyLevel"
 				},
 				"Getter":
 				{
-					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultyManagerComponent'",
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultySubsystem'",
 					"FunctionName": "GetDifficultyLevel"
 				},
 				"Caption": "NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"17E689074C021878363191A8850A44C3\", \"Difficulty\")",
@@ -420,15 +420,10 @@
 				},
 				"GetMembers":
 				{
-					"FunctionClass": "None",
-					"FunctionName": "None"
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/Bomber.BmrGameDifficultySubsystem'",
+					"FunctionName": "GetAllDifficultyDisplayTexts"
 				},
-				"Members": [
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"2503BD4742C4B5A090040F8662F3745C\", \"Easy Difficulty\")",
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"7BD11C2F446ACF6089175E9887F5CF84\", \"Normal Difficulty\")",
-					"NSLOCTEXT(\"[F67605FD4FE1D83F0EC04D97554FA9A9]\", \"69C060234A1322FB2F98A180AA66382E\", \"Hard Difficulty\")",
-					"INVTEXT(\"Vanilla Difficulty\")"
-				],
+				"Members": [],
 				"TextJustify": "Center"
 			},
 			"Slider":

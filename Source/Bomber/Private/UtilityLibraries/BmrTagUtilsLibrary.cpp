@@ -3,6 +3,7 @@
 #include "UtilityLibraries/BmrTagUtilsLibrary.h"
 
 // Bomber
+#include "Structures/BmrGameDifficultyTag.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrPlayerTag.h"
 #include "Structures/BmrPowerupTag.h"
@@ -46,4 +47,16 @@ FBmrGameStateTag UBmrTagUtilsLibrary::Conv_GameplayTagToGameStateTag(FGameplayTa
 FGameplayTag UBmrTagUtilsLibrary::Conv_GameStateTagToGameplayTag(FBmrGameStateTag InGameStateTag)
 {
 	return InGameStateTag;
+}
+
+// Converts a GameplayTag to a GameDifficultyTag
+FBmrGameDifficultyTag UBmrTagUtilsLibrary::Conv_GameplayTagToGameDifficultyTag(FGameplayTag InGameplayTag)
+{
+	return FBmrGameDifficultyTag(InGameplayTag);
+}
+
+// Converts a GameDifficultyTag to a GameplayTag
+FGameplayTag UBmrTagUtilsLibrary::Conv_GameDifficultyTagToGameplayTag(FBmrGameDifficultyTag InGameDifficultyTag)
+{
+	return InGameDifficultyTag;
 }

@@ -19,7 +19,8 @@ bool UModularGameFeaturePluginUtils::IsModularGameFeatureActive(FName GameFeatur
 		return false;
 	}
 
-	return UGameFeaturesSubsystem::Get().IsGameFeaturePluginActiveByName(GameFeatureName.ToString());
+	constexpr bool bCheckForActivating = true;
+	return UGameFeaturesSubsystem::Get().IsGameFeaturePluginActiveByName(GameFeatureName.ToString(), bCheckForActivating);
 }
 
 // Enables or disable all game features
@@ -34,6 +35,12 @@ void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, 
 	for (const FName GameFeatureName : GameFeatures)
 	{
 		if (GameFeatureName.IsNone())
+		{
+			continue;
+		}
+
+		const bool bAlreadyActive = IsModularGameFeatureActive(GameFeatureName);
+		if (bAlreadyActive == bEnable)
 		{
 			continue;
 		}
