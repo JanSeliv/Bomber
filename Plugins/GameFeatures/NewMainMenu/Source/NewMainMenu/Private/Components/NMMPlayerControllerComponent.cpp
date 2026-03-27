@@ -195,10 +195,13 @@ void UNMMPlayerControllerComponent::OnUnregister()
 	}
 
 	// Cleanup all sounds
-	if (UBmrSoundsSubsystem* SoundSubsystem = UBmrSoundsSubsystem::GetSoundsSubsystem())
+	const UNMMDataAsset* SoundDataAsset = UNMMUtils::GetDataAsset();
+	UBmrSoundsSubsystem* SoundSubsystem = UBmrSoundsSubsystem::GetSoundsSubsystem();
+	if (SoundSubsystem
+	    && SoundDataAsset)
 	{
 		TArray<USoundBase*> AllMainMenuMusic;
-		UNMMDataAsset::Get().GetAllMainMenuMusic(/*out*/ AllMainMenuMusic);
+		SoundDataAsset->GetAllMainMenuMusic(/*out*/ AllMainMenuMusic);
 		for (USoundBase* MainMenuMusic : AllMainMenuMusic)
 		{
 			SoundSubsystem->DestroySingleSound2D(MainMenuMusic);
