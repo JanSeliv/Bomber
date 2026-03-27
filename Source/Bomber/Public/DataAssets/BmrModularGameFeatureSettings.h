@@ -14,6 +14,7 @@
  * Is set up in 'Project Settings' -> 'Game' -> 'Bomber Modular Game Features (MGF)'.
  * The changes are saved in 'DefaultModularGameFeatures.ini' config file.
  * It's not data asset for easier access and better tracking in version control.
+ * Features that should always be loaded must set their BuiltInInitialFeatureState to Active in .uplugin instead.
  */
 UCLASS(Config = "ModularGameFeatures", DefaultConfig, DisplayName = "Bomber Modular Game Features (MGF)")
 class BOMBER_API UBmrModularGameFeatureSettings final : public UDeveloperSettings
@@ -34,11 +35,7 @@ public:
 	 * Data
 	 ********************************************************************************************* */
 public:
-	/** Returns all game features need to be loaded and activated on starting the game. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const FORCEINLINE TArray<FName>& GetModularGameFeatures() const { return ModularGameFeatures; }
-
-	/** Returns tag-driven game features map, where key is feature name and value is the set of tags (OR logic: feature loads when ASC has ANY of these tags). */
+	/** Returns tag-driven game features map, where key is feature name and value is the set of tags (OR logic: feature loads when ASC has ANY of these tags). Registered features are loaded at runtime when ASC has ANY of specified tags. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const FORCEINLINE TMap<FName, FGameplayTagContainer>& GetModularGameFeaturesByTags() const { return ModularGameFeaturesByTags; }
 
@@ -47,11 +44,7 @@ public:
 	const FGameplayTagContainer& GetAllModularGameFeatureTags() const;
 
 protected:
-	/** All game features need to be loaded and activated on starting the game, is config property. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties, GetOptions = "MyUtils.ModularGameFeaturePluginUtils.GetAllRegisteredModularGameFeatures"))
-	TArray<FName> ModularGameFeatures;
-
-	/** Tag-driven game features: key is feature name, value is the set of gameplay tags (OR logic: feature loads when ASC has ANY of these tags), is config property. */
+	/** Tag-driven game features: key is feature name, value is the set of gameplay tags (OR logic: feature loads when ASC has ANY of these tags), is config property. Registered features are loaded at runtime when ASC has ANY of specified tags. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Config, meta = (BlueprintProtected, ShowOnlyInnerProperties, GetOptions = "MyUtils.ModularGameFeaturePluginUtils.GetAllRegisteredModularGameFeatures"))
 	TMap<FName, FGameplayTagContainer> ModularGameFeaturesByTags;
 };

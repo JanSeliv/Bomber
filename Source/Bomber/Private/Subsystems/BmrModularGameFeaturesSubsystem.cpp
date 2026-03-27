@@ -145,18 +145,13 @@ void UBmrModularGameFeaturesSubsystem::Initialize(FSubsystemCollectionBase& Coll
 	}
 }
 
-// Loads default (non-tag-based) features when the world starts playing
-void UBmrModularGameFeaturesSubsystem::OnWorldBeginPlay(UWorld& InWorld)
-{
-	Super::OnWorldBeginPlay(InWorld);
-
-	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(true, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
-}
-
-// Unloads default features on world end play
+// Unloads tag-driven features on world end play so they don't leak across world boundaries
 void UBmrModularGameFeaturesSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
-	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, UBmrModularGameFeatureSettings::Get().GetModularGameFeatures());
-
 	Super::OnWorldEndPlay(InWorld);
+
+	// Unload all tag-driven features
+	TArray<FName> TagDrivenFeatures;
+	UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
+	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, TagDrivenFeatures);
 }

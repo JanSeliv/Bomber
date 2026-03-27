@@ -7,9 +7,8 @@
 #include "BmrModularGameFeaturesSubsystem.generated.h"
 
 /**
- * Manages tag-driven Modular Game Feature loading/unloading.
- * Reacts to any gameplay tag change on GeneratedMap ASC and evaluates which features should be active.
- * Works in editor world: subsystem and GeneratedMap both exist before PIE.
+ * Manages tag-driven Modular Game Feature loading/unloading at runtime.
+ * Features that should always be loaded must set their BuiltInInitialFeatureState to Active in .uplugin instead.
  */
 UCLASS()
 class BOMBER_API UBmrModularGameFeaturesSubsystem final : public UWorldSubsystem
@@ -44,12 +43,9 @@ protected:
 	 * Overrides
 	 ********************************************************************************************* */
 protected:
-	/** Binds to GeneratedMap readiness to subscribe to ASC tag events. */
+	/** Subscribes to GeneratedMap_Ready for tag-driven features. */
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	/** Loads default (non-tag-based) features when the world starts playing. */
-	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
-
-	/** Unloads default features on world end play. */
+	/** Unloads all managed features on world end play. */
 	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 };

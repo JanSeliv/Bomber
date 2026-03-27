@@ -28,7 +28,7 @@
 		}
 	],
 	"ExplicitlyLoaded": true,
-	"BuiltInInitialFeatureState": "Registered",
+	"BuiltInInitialFeatureState": "Active",
 	"Plugins": [
 		{
 			"Name": "InstancedStaticMeshConverter",

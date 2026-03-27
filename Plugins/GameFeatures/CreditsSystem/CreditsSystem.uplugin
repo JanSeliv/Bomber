@@ -16,7 +16,7 @@
 	"IsExperimentalVersion": false,
 	"Installed": false,
 	"ExplicitlyLoaded": true,
-	"BuiltInInitialFeatureState": "Registered",
+	"BuiltInInitialFeatureState": "Active",
 	"Plugins": [
 		{
 			"Name": "SettingsWidgetConstructor",
