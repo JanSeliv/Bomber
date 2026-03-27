@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -57,11 +57,16 @@ public:
  * - Filter to specific pawn/state (vs regular binding that broadcasts for ANY pawn)
  * Callback signature: void Function(const FGameplayEventData& Payload)
  * Next macros are currently available:
+ * BIND_ON_GENERATED_MAP_READY(this, ThisClass::OnGeneratedMapReady);
  * BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
  * BIND_ON_PAWN_READY_ID(this, ThisClass::OnPawnReady, PlayerId);
  * BIND_ON_PAWN_READY_PTR(this, ThisClass::OnPawnReady, Pawn);
  * BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
  ********************************************************************************************* */
+
+/** Helper macro to bind and call when Generated Map is initialized and its data assets are loaded, is also called in editor. */
+#define BIND_ON_GENERATED_MAP_READY(Obj, Function) \
+	INTERNAL_BIND_GENERATED_MAP_READY(BmrGameplayTags::Event::GeneratedMap_Ready, Obj, Function)
 
 /** Helper macro to bind and call the function when the game state was changed.
  * Obtain current state inside callback via Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu). */
@@ -91,6 +96,27 @@ public:
 /*********************************************************************************************
  * Internal
  ********************************************************************************************* */
+
+/** Internal macro for binding when Generated Map is initialized and its data assets are loaded via Async Message System (aka Lyra's Gameplay Message Router). */
+#define INTERNAL_BIND_GENERATED_MAP_READY(InEventTag, Obj, Function)                                           \
+	{                                                                                                          \
+		TWeakObjectPtr WeakObj(Obj);                                                                           \
+		UBmrGameplayMessageSubsystem::RegisterListener(Obj, InEventTag,                                        \
+		    [WeakObj](const FGameplayEventData& Payload)                                                       \
+		{                                                                                                      \
+			{                                                                                                  \
+				(WeakObj.Get()->*(&Function))(Payload);                                                        \
+			}                                                                                                  \
+		});                                                                                                    \
+		const UBmrGeneratedMapSubsystem* GenMapSub = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(Obj); \
+		if (GenMapSub && GenMapSub->IsGeneratedMapReady())                                                     \
+		{                                                                                                      \
+			FGameplayEventData AutoPayload;                                                                    \
+			AutoPayload.EventTag = InEventTag;                                                                 \
+			AutoPayload.Instigator = GenMapSub->GetGeneratedMap();                                             \
+			(Obj->*(&Function))(AutoPayload);                                                                  \
+		}                                                                                                      \
+	}
 
 /** Internal macro for binding to game state changes via Async Message System (aka Lyra's Gameplay Message Router). */
 #define INTERNAL_BIND_GAME_STATE_CHANGED(InEventTag, Obj, Function)                                             \

@@ -8,6 +8,8 @@
 #include "DalSubsystem.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #if WITH_EDITOR
@@ -15,6 +17,7 @@
 #endif
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Engine/AssetManager.h"
 #include "Engine/World.h"
 #include "UObject/UObjectThreadContext.h"
@@ -40,7 +43,7 @@ UBmrGeneratedMapSubsystem* UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(c
  * Readiness
  ********************************************************************************************* */
 
-// Broadcasts OnGeneratedMapReady if both the Generated Map actor and dependent actors' data assets are available
+// Broadcasts GeneratedMap_Ready if both the Generated Map actor and dependent actors' data assets are available
 void UBmrGeneratedMapSubsystem::TryBroadcastGeneratedMapReady()
 {
 	if (!IsGeneratedMapReady())
@@ -49,7 +52,11 @@ void UBmrGeneratedMapSubsystem::TryBroadcastGeneratedMapReady()
 	}
 
 	GeneratedMap->OnGeneratedMapReady();
-	OnGeneratedMapReady.Broadcast(GeneratedMap);
+
+	FGameplayEventData Payload;
+	Payload.EventTag = BmrGameplayTags::Event::GeneratedMap_Ready;
+	Payload.Instigator = GeneratedMap;
+	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
 }
 
 /*********************************************************************************************

@@ -20,6 +20,8 @@ public class FootTrailsGeneratorEditor : ModuleRules
             {
                 "CoreUObject", "Engine" // Core
                 , "GameFeatures" // UGameFeaturesSubsystem
+                , "GameplayAbilities" // FGameplayEventData
+                , "GameplayTags" // FGameplayTagContainer
                 // My modules
                 , "FootTrailsGeneratorRuntime" // UFTGComponent
                 , "Bomber" // ABmrGeneratedMap

@@ -8,10 +8,12 @@
 
 /// Bomber
 #include "Actors/BmrGeneratedMap.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Engine/World.h"
 #include "InstancedStaticMeshActor.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -45,18 +47,7 @@ void UFTGEditorPreviewSubsystem::OnBeginPlay(UWorld* World, FWorldInitialization
 		return;
 	}
 
-	UBmrGeneratedMapSubsystem* GeneratedMapSubsystem = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(World);
-	if (!GeneratedMapSubsystem)
-	{
-		// Might be null in temporary editor worlds, ignore
-		return;
-	}
-
-	GeneratedMapSubsystem->OnGeneratedMapReady.AddUniqueDynamic(this, &ThisClass::OnGeneratedMapReady);
-	if (ABmrGeneratedMap* GeneratedMap = ABmrGeneratedMap::GetGeneratedMap(World))
-	{
-		OnGeneratedMapReady(GeneratedMap);
-	}
+	BIND_ON_GENERATED_MAP_READY(this, ThisClass::OnGeneratedMapReady);
 }
 
 // Is used to destroy the foot trails generator
@@ -67,15 +58,10 @@ void UFTGEditorPreviewSubsystem::OnEndPlay(UWorld* World, bool bArg, bool bCond)
 		FootTrailGenerator->DestroyComponent();
 		FootTrailGenerator = nullptr;
 	}
-
-	if (UBmrGeneratedMapSubsystem* GeneratedMapSubsystem = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(World))
-	{
-		GeneratedMapSubsystem->OnGeneratedMapReady.RemoveAll(this);
-	}
 }
 
-/// Called when Generated Map is initialized and ready to be used, is also called in editor
-void UFTGEditorPreviewSubsystem::OnGeneratedMapReady_Implementation(ABmrGeneratedMap* GeneratedMap)
+/// Called when Generated Map is initialized and its data assets are loaded, is also called in editor
+void UFTGEditorPreviewSubsystem::OnGeneratedMapReady_Implementation(const FGameplayEventData& Payload)
 {
 	if (IsValid(FootTrailGenerator))
 	{

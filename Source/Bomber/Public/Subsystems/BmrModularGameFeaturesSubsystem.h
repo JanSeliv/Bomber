@@ -27,11 +27,11 @@ public:
 	 * Tag-Driven Features
 	 ********************************************************************************************* */
 protected:
-	/** Called when the Generated Map is initialized and ready, subscribes to ASC tag events for tag-driven features. */
+	/** Called when world data assets are loaded, subscribes to ASC tag events for tag-driven features. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGeneratedMapReady(class ABmrGeneratedMap* GeneratedMap);
+	void OnGeneratedMapReady(const struct FGameplayEventData& Payload);
 
-	/** Is called when any of the tag-driven features tags is added or removed from the Generated Map ASC, evaluates all tag-driven features and loads/unloads them accordingly. */
+	/** Is called when any of the tag-driven features tags is added or removed from the world ASC, evaluates all tag-driven features and loads/unloads them accordingly. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnModularGameFeatureTagChanged();
 

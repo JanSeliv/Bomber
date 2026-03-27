@@ -222,6 +222,13 @@ class UAbilitySystemComponent* UBmrBlueprintFunctionLibrary::GetLocalAbilitySyst
 	return PlayerState ? PlayerState->GetAbilitySystemComponent() : nullptr;
 }
 
+// Returns the world-level Ability System Component used for environmental abilities and game-wide tag management
+class UAbilitySystemComponent* UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent(const UObject* OptionalWorldContext)
+{
+	const ABmrGeneratedMap* GeneratedMap = ABmrGeneratedMap::GetGeneratedMap(OptionalWorldContext);
+	return GeneratedMap ? GeneratedMap->GetAbilitySystemComponent() : nullptr;
+}
+
 // Returns specified Mover Component
 class UBmrMoverComponent* UBmrBlueprintFunctionLibrary::GetMoverComponent(int32 PlayerId, const UObject* OptionalWorldContext)
 {

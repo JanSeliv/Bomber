@@ -4,12 +4,17 @@
 
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
+#include "Bomber.h"
 #include "DataAssets/BmrModularGameFeatureSettings.h"
 #include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -35,19 +40,19 @@ UBmrModularGameFeaturesSubsystem* UBmrModularGameFeaturesSubsystem::GetModularGa
  * Tag-Driven Features
  ********************************************************************************************* */
 
-// Called when the Generated Map is initialized and ready, subscribes to ASC tag events for tag-driven features
-void UBmrModularGameFeaturesSubsystem::OnGeneratedMapReady_Implementation(ABmrGeneratedMap* GeneratedMap)
+// Called when world data assets are loaded, subscribes to ASC tag events for tag-driven features
+void UBmrModularGameFeaturesSubsystem::OnGeneratedMapReady_Implementation(const FGameplayEventData& Payload)
 {
-	UAbilitySystemComponent* ASC = GeneratedMap ? GeneratedMap->GetAbilitySystemComponent() : nullptr;
+	UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (!ASC)
 	{
 		return;
 	}
 
-	const FGameplayTagContainer& AllTags = UBmrModularGameFeatureSettings::Get().GetAllModularGameFeatureTags();
-	for (const FGameplayTag& Tag : AllTags)
+	// Listen to tag changes on ASC for tags that drive modular game features
+	const FGameplayTagContainer& AllFeatureTags = UBmrModularGameFeatureSettings::Get().GetAllModularGameFeatureTags();
+	for (const FGameplayTag& Tag : AllFeatureTags)
 	{
-		// Queue evaluation for next frame to batch multiple tag changes within the same frame
 		ASC->RegisterGameplayTagEvent(Tag, EGameplayTagEventType::NewOrRemoved).AddWeakLambda(this, [this](const FGameplayTag, int32)
 		{
 			if (EvaluationTimerHandle.IsValid())
@@ -56,6 +61,7 @@ void UBmrModularGameFeaturesSubsystem::OnGeneratedMapReady_Implementation(ABmrGe
 				return;
 			}
 
+			// Queue evaluation for next frame to batch multiple tag changes within the same frame
 			EvaluationTimerHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]
 			{
 				EvaluationTimerHandle.Invalidate();
@@ -68,11 +74,10 @@ void UBmrModularGameFeaturesSubsystem::OnGeneratedMapReady_Implementation(ABmrGe
 	OnModularGameFeatureTagChanged();
 }
 
-// Is called when any of the tag-driven features tags is added or removed from the Generated Map ASC, evaluates all tag-driven features and loads/unloads them accordingly
+// Is called when any of the tag-driven features tags is added or removed from the world ASC, evaluates all tag-driven features and loads/unloads them accordingly
 void UBmrModularGameFeaturesSubsystem::OnModularGameFeatureTagChanged()
 {
-	const ABmrGeneratedMap* GeneratedMap = ABmrGeneratedMap::GetGeneratedMap();
-	const UAbilitySystemComponent* ASC = GeneratedMap ? GeneratedMap->GetAbilitySystemComponent() : nullptr;
+	const UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (!ensureMsgf(ASC, TEXT("ERROR: [%i] %hs:\nASC is null!"), __LINE__, __FUNCTION__))
 	{
 		return;
@@ -126,31 +131,30 @@ void UBmrModularGameFeaturesSubsystem::OnModularGameFeatureTagChanged()
  * Overrides
  ********************************************************************************************* */
 
-// Binds to GeneratedMap readiness to subscribe to ASC tag events
+// Subscribes to GeneratedMap_Ready for tag-driven features
 void UBmrModularGameFeaturesSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	UBmrGeneratedMapSubsystem* GeneratedMapSubsystem = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(this);
-	if (!ensureMsgf(GeneratedMapSubsystem, TEXT("ERROR: [%i] %hs:\nGenerated Map Subsystem is null!"), __LINE__, __FUNCTION__))
+	if (IS_TRANSIENT(this))
 	{
 		return;
 	}
 
-	// Subscribe when GeneratedMap becomes ready (ASC is initialized at that point)
-	GeneratedMapSubsystem->OnGeneratedMapReady.AddDynamic(this, &ThisClass::OnGeneratedMapReady);
-	if (GeneratedMapSubsystem->IsGeneratedMapReady())
-	{
-		OnGeneratedMapReady(GeneratedMapSubsystem->GetGeneratedMap());
-	}
+	BIND_ON_GENERATED_MAP_READY(this, UBmrModularGameFeaturesSubsystem::OnGeneratedMapReady);
 }
 
-// Unloads tag-driven features on world end play so they don't leak across world boundaries
+// Unloads all managed features on world end play
 void UBmrModularGameFeaturesSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
 	Super::OnWorldEndPlay(InWorld);
 
-	// Unload all tag-driven features
+	if (IS_TRANSIENT(this))
+	{
+		return;
+	}
+
+	// Unload tag-driven features so they don't leak across world boundaries
 	TArray<FName> TagDrivenFeatures;
 	UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
 	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, TagDrivenFeatures);

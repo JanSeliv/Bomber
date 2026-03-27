@@ -78,9 +78,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void BindOnDifficultyTagChanged();
 
-	/** Called when the level actor data is initialized and ready. */
+	/** Called when world data assets are loaded, subscribes to ASC difficulty tag events. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGeneratedMapReady(class ABmrGeneratedMap* GeneratedMap);
+	void OnGeneratedMapReady(const struct FGameplayEventData& Payload);
 
 	/*********************************************************************************************
 	 * Data

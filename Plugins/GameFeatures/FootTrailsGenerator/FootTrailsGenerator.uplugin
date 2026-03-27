@@ -31,6 +31,10 @@
 	"BuiltInInitialFeatureState": "Active",
 	"Plugins": [
 		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
 			"Name": "InstancedStaticMeshConverter",
 			"Enabled": true
 		},

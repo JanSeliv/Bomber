@@ -102,6 +102,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static class UAbilitySystemComponent* GetLocalAbilitySystemComponent(const UObject* OptionalWorldContext = nullptr);
 
+	/** Returns the world-level Ability System Component used for environmental abilities and game-wide tag management. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static class UAbilitySystemComponent* GetWorldAbilitySystemComponent(const UObject* OptionalWorldContext = nullptr);
+
 	/** Returns specified Mover Component.
 	 * @param PlayerId - Global ID of a character in session to find.
 	 * @param OptionalWorldContext - the world context object. */

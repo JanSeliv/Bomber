@@ -38,7 +38,7 @@ protected:
 	/** Is used to destroy the foot trails generator. */
 	void OnEndPlay(UWorld* World, bool bArg, bool bCond);
 
-	/** Called when Generated Map is initialized and ready to be used, is also called in editor */
+	/** Called when Generated Map is initialized and its data assets are loaded, is also called in editor */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[FootTrailsGenerator]", meta = (BlueprintProtected))
-	void OnGeneratedMapReady(class ABmrGeneratedMap* GeneratedMap);
+	void OnGeneratedMapReady(const struct FGameplayEventData& Payload);
 };

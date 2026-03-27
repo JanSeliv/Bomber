@@ -28,19 +28,12 @@ public:
 	 * Readiness
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGeneratedMapReady, class ABmrGeneratedMap*, GeneratedMap);
-
-	/** Called when Generated Map is initialized and ready to be used, is also called in editor.
-	 * Broadcasts only when both the Generated Map actor is set and its data asset is loaded */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
-	FOnGeneratedMapReady OnGeneratedMapReady;
-
 	/** Returns true the Generated Map actor is ready to generate actors.  */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE bool IsGeneratedMapReady() const { return GeneratedMap && bAreDataAssetsLoaded; }
 
 protected:
-	/** Broadcasts OnGeneratedMapReady if both the Generated Map actor and dependent actors' data assets are available */
+	/** Broadcasts GeneratedMap_Ready event if both the Generated Map actor and dependent actors' data assets are available */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void TryBroadcastGeneratedMapReady();
 

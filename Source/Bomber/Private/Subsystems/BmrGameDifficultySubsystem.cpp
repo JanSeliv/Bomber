@@ -8,6 +8,7 @@
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
@@ -40,7 +41,7 @@ UBmrGameDifficultySubsystem* UBmrGameDifficultySubsystem::GetGameDifficultySubsy
 // Returns current difficulty tag from ASC, falls back to config if ASC unavailable
 FBmrGameDifficultyTag UBmrGameDifficultySubsystem::GetGameDifficultyTag() const
 {
-	const UAbilitySystemComponent* ASC = ABmrGeneratedMap::Get().GetAbilitySystemComponent();
+	const UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (!ASC)
 	{
 		return DifficultyTag;
@@ -62,7 +63,7 @@ void UBmrGameDifficultySubsystem::SetGameDifficultyTag(FBmrGameDifficultyTag New
 		return;
 	}
 
-	UAbilitySystemComponent* ASC = ABmrGeneratedMap::Get().GetAbilitySystemComponent();
+	UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__)
 	    || ASC->HasMatchingGameplayTag(NewTag))
 	{
@@ -184,7 +185,7 @@ const FBmrGameDifficultyRow* UBmrGameDifficultySubsystem::FindRowByLevel(int32 L
 // Broadcasts Event::Difficulty_Changed with current difficulty tag in InstigatorTags
 void UBmrGameDifficultySubsystem::BroadcastDifficultyChanged()
 {
-	const UAbilitySystemComponent* ASC = ABmrGeneratedMap::Get().GetAbilitySystemComponent();
+	const UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (!ASC)
 	{
 		return;
@@ -202,7 +203,7 @@ void UBmrGameDifficultySubsystem::BroadcastDifficultyChanged()
 // Subscribes to ASC generic tag event, filters for Difficulty.* tags
 void UBmrGameDifficultySubsystem::BindOnDifficultyTagChanged()
 {
-	UAbilitySystemComponent* ASC = ABmrGeneratedMap::Get().GetAbilitySystemComponent();
+	UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
@@ -219,8 +220,8 @@ void UBmrGameDifficultySubsystem::BindOnDifficultyTagChanged()
 	});
 }
 
-// Called when the level actor data is initialized and ready
-void UBmrGameDifficultySubsystem::OnGeneratedMapReady_Implementation(ABmrGeneratedMap* GeneratedMap)
+// Called when world data assets are loaded, subscribes to ASC difficulty tag events
+void UBmrGameDifficultySubsystem::OnGeneratedMapReady_Implementation(const FGameplayEventData& Payload)
 {
 	BindOnDifficultyTagChanged();
 
@@ -240,25 +241,13 @@ void UBmrGameDifficultySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	UBmrGeneratedMapSubsystem* GeneratedMapSubsystem = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(&InWorld);
-	if (!ensureMsgf(GeneratedMapSubsystem, TEXT("ASSERT: [%i] %hs:\n'GeneratedMapSubsystem' is not valid!"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	GeneratedMapSubsystem->OnGeneratedMapReady.AddDynamic(this, &ThisClass::OnGeneratedMapReady);
-	if (GeneratedMapSubsystem->IsGeneratedMapReady())
-	{
-		OnGeneratedMapReady(GeneratedMapSubsystem->GetGeneratedMap());
-	}
+	BIND_ON_GENERATED_MAP_READY(this, ThisClass::OnGeneratedMapReady);
 }
 
 // Cleans up ASC bindings
 void UBmrGameDifficultySubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
-	const ABmrGeneratedMap* GeneratedMap = ABmrGeneratedMap::GetGeneratedMap(&InWorld);
-	UAbilitySystemComponent* ASC = GeneratedMap ? GeneratedMap->GetAbilitySystemComponent() : nullptr;
-	if (ASC)
+	if (UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent())
 	{
 		ASC->RegisterGenericGameplayTagEvent().RemoveAll(this);
 	}
