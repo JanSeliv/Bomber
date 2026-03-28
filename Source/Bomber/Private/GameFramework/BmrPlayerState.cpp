@@ -25,6 +25,7 @@
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "AbilitySystemGlobals.h"
 #include "Engine/World.h"
 #include "GameplayAbilitiesModule.h"
@@ -642,6 +643,9 @@ void ABmrPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 // This is called only in the gameplay before calling begin play
 void ABmrPlayerState::PostInitializeComponents()
 {
+	// Register player state to let to be implemented by game features
+	UGameFrameworkComponentManager::AddGameFrameworkComponentReceiver(this);
+
 	Super::PostInitializeComponents();
 
 	if (HasAuthority())
