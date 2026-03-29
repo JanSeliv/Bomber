@@ -77,8 +77,24 @@ void UNewMainMenuWidget::NativeConstruct()
 
 void UNewMainMenuWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
 {
-	// Show this widget in Idle Menu state
-	SetVisibility(NewState == ENMMState::Idle ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	const bool bIsBasicMenu = NewState == ENMMState::BasicMenu;
+	const bool bIsVisible = bIsBasicMenu || NewState == ENMMState::Idle;
+	SetVisibility(bIsVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+
+	// Hide spot-related buttons in BasicMenu since no cinematic spots are available
+	const ESlateVisibility SpotButtonsVisibility = bIsBasicMenu ? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
+	if (NextPlayerButton)
+	{
+		NextPlayerButton->SetVisibility(SpotButtonsVisibility);
+	}
+	if (PrevPlayerButton)
+	{
+		PrevPlayerButton->SetVisibility(SpotButtonsVisibility);
+	}
+	if (NextSkinButton)
+	{
+		NextSkinButton->SetVisibility(SpotButtonsVisibility);
+	}
 }
 
 // Is called when player pressed the button to start the game
@@ -90,31 +106,32 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 		return;
 	}
 
-	const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
-	const FNMMCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FNMMCinematicRow::Empty;
-	if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %hs:\n'CinematicRow' is not valid!"), __LINE__, __FUNCTION__)
-	    || !MainMenuSpot->IsSpotAvailable())
-	{
-		// The spot is locked
-		return;
-	}
-
-	if (!MainMenuSpot->IsSpotSkinAvailable())
-	{
-		// the spot's skin unavailable
-		return;
-	}
-
 	UBmrSoundsSubsystem::Get().PlayUIClickSFX();
 
-	if (!UNMMUtils::ShouldSkipCinematic(CinematicRow))
+	// In Idle+ states, validate spot and potentially run cinematic instead of broadcasting directly
+	if (UNMMUtils::GetMainMenuState() != ENMMState::BasicMenu)
 	{
-		// Play button is pressed, run cinematic
-		UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Cinematic);
-		return;
+		const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
+		const FBmrCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FBmrCinematicRow::Empty;
+		if (!ensureMsgf(CinematicRow.IsValid(), TEXT("ASSERT: [%i] %hs:\n'CinematicRow' is not valid!"), __LINE__, __FUNCTION__)
+		    || !MainMenuSpot->IsSpotAvailable())
+		{
+			return;
+		}
+
+		if (!MainMenuSpot->IsSpotSkinAvailable())
+		{
+			return;
+		}
+
+		if (!UNMMUtils::ShouldSkipCinematic(CinematicRow))
+		{
+			UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Cinematic);
+			return;
+		}
 	}
 
-	// Notify that user clicked Play button (cinematic skipped)
+	// Notify that user clicked Play button in BasicMenu or cinematic skipped
 	FGameplayEventData EventData;
 	EventData.EventTag = NmmGameplayTags::Event::PlayButtonPressed;
 	EventData.Instigator = MyPC->GetPawn();

@@ -5,7 +5,8 @@
 #include "Components/BmrSkeletalMeshComponent.h"
 
 // NMM
-#include "Data/NMMTypes.h" // FNMMCinematicRow, ENMMState
+#include "Data/NMMTypes.h" // ENMMState
+#include "Structures/BmrCinematicRow.h"
 
 #include "NMMSpotComponent.generated.h"
 
@@ -62,7 +63,7 @@ public:
 public:
 	/** Returns cinematic row of this spot. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	const FNMMCinematicRow& GetCinematicRow() const { return CinematicRow; }
+	const FBmrCinematicRow& GetCinematicRow() const { return CinematicRow; }
 
 	/** Returns cached cinematic player of this spot. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
@@ -94,7 +95,7 @@ protected:
 
 	/** Cached Cinematic Row that contains data about this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	FNMMCinematicRow CinematicRow = FNMMCinematicRow::Empty;
+	FBmrCinematicRow CinematicRow = FBmrCinematicRow::Empty;
 
 	/** Current cinematic state of this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))

@@ -17,7 +17,7 @@ namespace NmmGameplayTags
 
 	namespace Event
 	{
-		UE_DEFINE_GAMEPLAY_TAG_COMMENT(ActiveSpotReady, "Event.NewMainMenu.ActiveSpotReady", "Event that fires when Main Menu camera spot finished initialization and ready to display, is called on local player ASC");
+		UE_DEFINE_GAMEPLAY_TAG_COMMENT(MenuReady, "Event.NewMainMenu.MenuReady", "Event that fires when Main Menu is ready to display basic menu, is called on local player ASC");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(PlayButtonPressed, "Event.NewMainMenu.PlayButtonPressed", "Event that fires when user clicked the Play button in Main Menu, is called on local player ASC");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(CinematicSkipped, "Event.NewMainMenu.CinematicSkipped", "Event that fires when user skipped the pre-game cinematic manually, is called on local player ASC");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(CinematicPlaybackFinished, "Event.NewMainMenu.CinematicPlaybackFinished", "Event that fires when pre-game cinematic Level Sequence finished playing naturally, is called on local player ASC");

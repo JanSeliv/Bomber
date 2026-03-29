@@ -2,50 +2,7 @@
 
 #pragma once
 
-#include "Engine/DataTable.h"
-
-// Bomber
-#include "Bomber.h" // EBmrLevelType
-#include "Structures/BmrPlayerTag.h"
-
 #include "NMMTypes.generated.h"
-
-/**
- * Represents a row in the Cinematics Data Table.
- */
-USTRUCT(BlueprintType)
-struct NEWMAINMENU_API FNMMCinematicRow : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	/** The row that does not contain any data. */
-	static const FNMMCinematicRow Empty;
-
-	/** The level where this cinematic should be played. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EBmrLevelType LevelType = ELT::None;
-
-	/** The player for which this cinematic should be played. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FBmrPlayerTag PlayerTag = FBmrPlayerTag::None;
-
-	/** The level sequence asset to play. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<class ULevelSequence> LevelSequence = nullptr;
-
-	/** The index of the subsequence, is taken from data table's row index on loading the LevelSequence. */
-	UPROPERTY(BlueprintReadWrite)
-	int32 RowIndex = INDEX_NONE;
-
-	/** Returns true if this row is valid. */
-	bool IsValid() const;
-
-	/** Equal operator. */
-	bool operator==(const FNMMCinematicRow& Other) const;
-
-	/** Returns true is this does not contain any data. */
-	bool FORCEINLINE IsEmpty() const { return *this == Empty; }
-};
 
 /**
  * Represents the state of the Main Menu cinematics.
@@ -53,13 +10,15 @@ struct NEWMAINMENU_API FNMMCinematicRow : public FTableRowBase
 UENUM(BlueprintType, DisplayName = "New Main Menu State")
 enum class ENMMState : uint8
 {
-	///< Is not in the Menu
+	///< Uninitialized
 	None,
-	///< Player has camera moving between Spots, both spots are playing idle in loop
+	///< Basic menu: gameplay camera, Play/Settings/Quit visible, no cinematics loaded
+	BasicMenu,
+	///< Camera moving between spots on rail
 	Transition,
-	///< Player sees chosen character, only this spot is playing idle in loop
+	///< Cinematic lobby: spot camera, character selection buttons, Part 0 loop
 	Idle,
-	///< Is playing the main parts of cinematic after play button is pressed
+	///< Part 1+ playing after Play pressed
 	Cinematic
 };
 

@@ -44,6 +44,7 @@ public class Bomber : ModuleRules
 				, "Niagara" // VFX
 				, "GameplayTags" // FGameplayTag
                 , "DataRegistry" // Dynamic data extensions
+                , "LevelSequence" // FBmrCinematicRow
                 , "ModularGameplay" // Modular Game Features (MGF)
                 , "ModelViewViewModel" // MVVM UI pattern
                 , "StateTreeModule", "GameplayStateTreeModule" // State Trees

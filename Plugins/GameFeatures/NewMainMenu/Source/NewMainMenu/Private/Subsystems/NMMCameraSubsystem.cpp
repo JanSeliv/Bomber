@@ -39,7 +39,8 @@ UCameraComponent* UNMMCameraSubsystem::FindCameraComponent(ENMMState MainMenuSta
 {
 	switch (MainMenuState)
 	{
-		case ENMMState::None:
+		case ENMMState::None: // Fall through
+		case ENMMState::BasicMenu:
 		{
 			return UBmrBlueprintFunctionLibrary::GetLevelCamera();
 		}
@@ -85,7 +86,9 @@ ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 {
 	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
-	if (!SpotsSubsystem.IsActiveMenuSpotReady())
+	if (!SpotsSubsystem.IsActiveMenuSpotReady()
+	    && MainMenuState != ENMMState::None
+	    && MainMenuState != ENMMState::BasicMenu)
 	{
 		// Ignore if there is no active spot initialized yet, it will be called once the spot is ready
 		return;
@@ -160,6 +163,9 @@ void UNMMCameraSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState New
 {
 	switch (NewState)
 	{
+		case ENMMState::BasicMenu:
+			PossessCamera(ENMMState::BasicMenu);
+			break;
 		case ENMMState::Transition:
 			// Start blending the camera towards current spot on the rail
 			OnBeginTransition();

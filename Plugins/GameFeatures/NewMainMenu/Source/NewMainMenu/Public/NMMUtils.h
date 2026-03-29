@@ -77,7 +77,7 @@ public:
 	/** Returns true if given cinematic wants to skip.
 	 * It checks game Settings and save game data. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	static bool ShouldSkipCinematic(const struct FNMMCinematicRow& CinematicRow);
+	static bool ShouldSkipCinematic(const struct FBmrCinematicRow& CinematicRow);
 
 	/** Returns the Playback Settings by given cinematic state. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NNM Cinematic Settings")

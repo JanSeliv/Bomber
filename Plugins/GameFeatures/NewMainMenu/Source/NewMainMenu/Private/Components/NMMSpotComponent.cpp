@@ -17,7 +17,6 @@
 #include "Components/BmrMapComponent.h"
 #include "Controllers/BmrPlayerController.h"
 #include "GameFramework/BmrGameState.h"
-#include "MyDataTable/MyDataTable.h"
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -29,6 +28,8 @@
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
+#include "DataRegistry.h"
+#include "DataRegistrySubsystem.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "LevelSequencePlayer.h"
@@ -191,7 +192,7 @@ void UNMMSpotComponent::BeginPlay()
 // Clears all transient data created by this component
 void UNMMSpotComponent::OnUnregister()
 {
-	CinematicRow = FNMMCinematicRow::Empty;
+	CinematicRow = FBmrCinematicRow::Empty;
 
 	// Kill current cinematic player
 	if (IsValid(MasterPlayer))
@@ -209,11 +210,12 @@ void UNMMSpotComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
-// Obtains and caches cinematic data from the table to this spot
+// Obtains and caches cinematic data from DR_Cinematics Data Registry to this spot
 void UNMMSpotComponent::UpdateCinematicData()
 {
-	const UDataTable* CinematicsDataTable = UNMMDataAsset::Get().GetCinematicsDataTable();
-	if (!ensureMsgf(CinematicsDataTable, TEXT("'CinematicsDataTable' is nullptr, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
+	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
+	const UDataRegistry* Registry = DRSubsystem ? DRSubsystem->GetRegistryForType(FDataRegistryType(FBmrCinematicRow::CinematicsRegistryTypeName)) : nullptr;
+	if (!ensureMsgf(Registry, TEXT("ASSERT: [%i] %hs:\n'DR_Cinematics' Data Registry is not found, make sure it is created with '%s' type"), __LINE__, __FUNCTION__, *FBmrCinematicRow::CinematicsRegistryTypeName.ToString()))
 	{
 		return;
 	}
@@ -221,22 +223,20 @@ void UNMMSpotComponent::UpdateCinematicData()
 	const FBmrPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
 
 	int32 RowIndex = 0;
-	TMap<FName, FNMMCinematicRow> CinematicsRows;
-	UMyDataTable::GetRows(*CinematicsDataTable, CinematicsRows);
-	for (const TTuple<FName, FNMMCinematicRow>& RowIt : CinematicsRows)
+	Registry->ForEachCachedItem<FBmrCinematicRow>(TEXT("UpdateCinematicData"), [this, &PlayerTag, &RowIndex](const FName& /*Name*/, const FBmrCinematicRow& Row)
 	{
-		if (RowIt.Value.PlayerTag == PlayerTag)
+		if (!CinematicRow.IsEmpty())
 		{
-			CinematicRow = RowIt.Value;
-			break;
+			return;
+		}
+
+		if (Row.PlayerTag == PlayerTag)
+		{
+			CinematicRow = Row;
+			CinematicRow.RowIndex = RowIndex;
 		}
 		++RowIndex;
-	}
-
-	if (ensureMsgf(!CinematicRow.IsEmpty(), TEXT("%s: 'CinematicRow' is not found for '%s' spot."), *FString(__FUNCTION__), *GetNameSafe(this)))
-	{
-		CinematicRow.RowIndex = RowIndex;
-	}
+	});
 }
 
 // Loads cinematic of this spot
@@ -356,7 +356,11 @@ void UNMMSpotComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* Da
 	UNMMSpotsSubsystem::Get().AddNewMainMenuSpot(this);
 
 	UpdateCinematicData();
-	LoadMasterSequencePlayer();
+
+	if (!CinematicRow.IsEmpty())
+	{
+		LoadMasterSequencePlayer();
+	}
 
 	UNMMCameraSubsystem::Get().OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
 
@@ -385,6 +389,11 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(const FGameplayEventDa
 // Called wen the Main Menu state was changed
 void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
 {
+	if (NewState == ENMMState::BasicMenu)
+	{
+		return;
+	}
+
 	const bool bIsCurrentSpot = IsCurrentSpot();
 
 	switch (NewState)

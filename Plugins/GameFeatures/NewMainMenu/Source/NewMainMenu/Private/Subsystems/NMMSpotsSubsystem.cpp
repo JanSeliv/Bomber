@@ -234,7 +234,8 @@ void UNMMSpotsSubsystem::Deinitialize()
 // Called when the Main Menu state was changed
 void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
 {
-	if (NewState == ENMMState::None)
+	if (NewState == ENMMState::None
+	    || NewState == ENMMState::BasicMenu)
 	{
 		LastMoveSpotDirection = 0;
 	}

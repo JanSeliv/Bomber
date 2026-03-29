@@ -24,8 +24,8 @@ namespace NmmGameplayTags
 
 	namespace Event
 	{
-		/** Event that fires when Main Menu camera spot finished initialization and ready to display, is called on local player ASC */
-		NEWMAINMENU_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(ActiveSpotReady);
+		/** Event that fires when Main Menu is ready to display basic menu, is called on local player ASC */
+		NEWMAINMENU_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MenuReady);
 
 		/** Event that fires when user clicked the Play button in Main Menu, is called on local player ASC */
 		NEWMAINMENU_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(PlayButtonPressed);

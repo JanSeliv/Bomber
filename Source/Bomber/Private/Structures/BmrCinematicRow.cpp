@@ -1,14 +1,14 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
-#include "Data/NMMTypes.h"
+#include "Structures/BmrCinematicRow.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(NMMTypes)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrCinematicRow)
 
 // The row that does not contain any data
-const FNMMCinematicRow FNMMCinematicRow::Empty = FNMMCinematicRow();
+const FBmrCinematicRow FBmrCinematicRow::Empty = FBmrCinematicRow();
 
 // Returns true if this row is valid
-bool FNMMCinematicRow::IsValid() const
+bool FBmrCinematicRow::IsValid() const
 {
 	return LevelType != ELT::None
 	       && PlayerTag != FBmrPlayerTag::None
@@ -16,7 +16,7 @@ bool FNMMCinematicRow::IsValid() const
 }
 
 // Equal operator
-bool FNMMCinematicRow::operator==(const FNMMCinematicRow& Other) const
+bool FBmrCinematicRow::operator==(const FBmrCinematicRow& Other) const
 {
 	return LevelType == Other.LevelType
 	       && PlayerTag == Other.PlayerTag

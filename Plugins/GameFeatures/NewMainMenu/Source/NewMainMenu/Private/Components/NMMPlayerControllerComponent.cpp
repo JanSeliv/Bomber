@@ -248,15 +248,16 @@ void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMD
 // Called when the first player character is spawned, possessed, and replicated
 void UNMMPlayerControllerComponent::OnFirstPawnReady_Implementation(const FGameplayEventData& Payload)
 {
-	// Once player is initialized, listen for for menu spots (dont attempt earlier, so we dont attempt to set menu state before player is ready)
-	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
-	if (SpotsSubsystem.IsActiveMenuSpotReady())
+	// Broadcast MenuReady immediately, basic menu is ready as soon as pawn exists
+	FGameplayEventData MenuReadyData;
+	MenuReadyData.EventTag = NmmGameplayTags::Event::MenuReady;
+	MenuReadyData.Instigator = UBmrBlueprintFunctionLibrary::GetLocalPawn();
+	UBmrGameplayMessageSubsystem::BroadcastMessage(MenuReadyData);
+
+	ABmrPlayerController& MyPC = GetPlayerControllerChecked();
+	if (!MyPC.HasAuthority())
 	{
-		OnActiveMenuSpotReady(SpotsSubsystem.GetCurrentSpot());
-	}
-	else
-	{
-		SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
+		MyPC.ServerBroadcastMessage(MenuReadyData);
 	}
 }
 
@@ -298,28 +299,6 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENM
 
 	// Update mouse visibility
 	SetCinematicMouseVisibilityEnabled(NewState == ENMMState::Cinematic);
-}
-
-// Is listen to set Menu game state once first spot is ready
-void UNMMPlayerControllerComponent::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* MainMenuSpotComponent)
-{
-	// Notify that Main Menu camera spot is ready
-	FGameplayEventData EventData;
-	EventData.EventTag = NmmGameplayTags::Event::ActiveSpotReady;
-	EventData.Instigator = UBmrBlueprintFunctionLibrary::GetLocalPawn();
-	EventData.OptionalObject = MainMenuSpotComponent;
-	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
-
-	// This event might be triggered only by local client, which only one enters to menu, so broadcast server that this client has menu system initialized and ready
-	ABmrPlayerController& MyPC = GetPlayerControllerChecked();
-	if (!MyPC.HasAuthority())
-	{
-		MyPC.ServerBroadcastMessage(EventData);
-	}
-
-	UNMMCameraSubsystem::Get().PossessCamera(ENMMState::Idle);
-
-	UNMMSpotsSubsystem::Get().OnActiveMenuSpotReady.RemoveAll(this);
 }
 
 // Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load

@@ -44,6 +44,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	FORCEINLINE ENMMState GetCurrentMenuState() const { return CurrentMenuState; }
 
+	/** Returns true if DR_Cinematics Data Registry has any cached rows. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	static bool HasCinematicRows();
+
 protected:
 	/** Contains the current state of New Main Menu game feature.
 	 * Is local and not replicated. */
@@ -67,6 +71,14 @@ protected:
 	/** Called when the current game state was changed, handles Main Menu states accordingly. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
+
+	/** Called when DR_Cinematics Data Registry cache version changes (rows injected or removed). */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnCinematicsRegistryChanged(class UDataRegistry* CinematicsDataRegistry);
+
+	/** Called when a cinematic spot finished loading, re-evaluates whether to transition from BasicMenu to Idle. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnActiveMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
 };
 
 /** Helper macro to bind and call the function when the game state was changed. */

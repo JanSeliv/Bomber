@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "NMMUtils.h"
 
@@ -106,7 +106,7 @@ ENMMState UNMMUtils::GetMainMenuState()
 }
 
 // Returns true if given cinematic wants to skip
-bool UNMMUtils::ShouldSkipCinematic(const FNMMCinematicRow& CinematicRow)
+bool UNMMUtils::ShouldSkipCinematic(const FBmrCinematicRow& CinematicRow)
 {
 	if (UMultiplayerUtilsLibrary::IsMultiplayerGame())
 	{

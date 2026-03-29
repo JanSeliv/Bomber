@@ -20,17 +20,14 @@ class NEWMAINMENU_API UNMMDataAsset : public UDalPrimaryDataAsset
 {
 	GENERATED_BODY()
 
-	/*********************************************************************************************
-	 * General
-	 ********************************************************************************************* */
 public:
 	/** Returns this Data Asset, is checked and wil crash if can't be obtained, e.g: when is not set. */
 	static const UNMMDataAsset& Get(const UObject* OptionalWorldContext = nullptr);
 
-	/** Returns the data table with the cinematics to be played. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	const FORCEINLINE class UDataTable* GetCinematicsDataTable() const { return CinematicsDataTable; }
-
+	/*********************************************************************************************
+	 * General
+	 ********************************************************************************************* */
+public:
 	/** Returns data for the Main Menu widget. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	const FORCEINLINE FBmrManageableWidgetData& GetMainMenuWidgetData() const { return MainMenuWidgetData; }
@@ -40,10 +37,6 @@ public:
 	const FORCEINLINE FBmrManageableWidgetData& GetInCinematicStateWidgetData() const { return InCinematicStateWidgetData; }
 
 protected:
-	/** The data table with the cinematics to be played. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TObjectPtr<const class UDataTable> CinematicsDataTable = nullptr;
-
 	/** Data for the Main Menu widget. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected))
 	FBmrManageableWidgetData MainMenuWidgetData = FBmrManageableWidgetData::Empty;

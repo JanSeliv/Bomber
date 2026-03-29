@@ -78,7 +78,7 @@ public:
 
 protected:
 	/** Index of the currently selected Main-Menu spot, is according row index in Cinematics table.
-	 * @see FNMMCinematicRow::RowIndex. */
+	 * @see FBmrCinematicRow::RowIndex. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	int32 ActiveMenuSpotIdx = 0;
 
