@@ -3,18 +3,15 @@
 #include "Subsystems/BmrModularGameFeaturesSubsystem.h"
 
 // Bomber
-#include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
 #include "DataAssets/BmrModularGameFeatureSettings.h"
 #include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
-#include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
@@ -141,7 +138,7 @@ void UBmrModularGameFeaturesSubsystem::Initialize(FSubsystemCollectionBase& Coll
 		return;
 	}
 
-	BIND_ON_GENERATED_MAP_READY(this, UBmrModularGameFeaturesSubsystem::OnGeneratedMapReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GeneratedMap_Ready, this, &ThisClass::OnGeneratedMapReady);
 }
 
 // Unloads all managed features on world end play

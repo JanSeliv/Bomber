@@ -7,10 +7,9 @@
 #include "Components/BmrMapComponent.h"
 #include "DataAssets/BmrPowerupDataAsset.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPowerupActor)
@@ -126,7 +125,7 @@ void ABmrPowerupActor::OnPowerupBeginOverlap_Implementation(AActor* OverlappedAc
 	EventData.Instigator = this;
 	EventData.Target = OtherActor;
 	EventData.InstigatorTags.AddTag(PowerupTag);
-	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 }
 
 // Called when this level actor is destroyed from the Generated Map

@@ -9,11 +9,10 @@
 #include "DataAssets/BmrGameStateDataAsset.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Components/StateTreeComponent.h"
@@ -129,7 +128,7 @@ void ABmrGameState::BroadcastGameStateChanged()
 	FGameplayEventData Payload;
 	Payload.EventTag = BmrGameplayTags::Event::GameState_Changed;
 	Payload.InstigatorTags = OwnedTags.Filter(FBmrGameStateTag::ParentTag.GetSingleTagContainer());
-	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(Payload);
 
 	TRACE_BOOKMARK(TEXT("%s"), *Payload.InstigatorTags.ToStringSimple());
 }
@@ -178,7 +177,7 @@ void ABmrGameState::BeginPlay()
 
 	StartGameStateTree();
 
-	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_LocalPawnReady, this, &ThisClass::OnLocalPawnReady);
 }
 
 // Overridable function called whenever this actor is being removed from a level

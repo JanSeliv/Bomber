@@ -18,13 +18,13 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/BmrPawnReadySubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -128,7 +128,15 @@ void ABmrPawn::BeginPlay()
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
 
-	BIND_ON_PAWN_READY_ID(this, ThisClass::OnPawnReady, GetPlayerId());
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_PawnReady,
+	    this, [this, PlayerId = GetPlayerId()](const FGameplayEventData& Payload)
+	{
+		const ABmrPawn* CallbackPawn = Cast<ABmrPawn>(Payload.Instigator);
+		if (CallbackPawn && CallbackPawn->GetPlayerId() == PlayerId)
+		{
+			OnPawnReady(Payload);
+		}
+	});
 }
 
 // Called when an instance of this class is placed (in editor) or spawned
@@ -213,9 +221,9 @@ void ABmrPawn::OnAddedToLevel_Implementation(UBmrMapComponent* InMapComponent)
 
 	ApplyPreset();
 
-	if (UBmrGameplayMessageSubsystem* GameplayMessageRouter = UBmrGameplayMessageSubsystem::GetGameplayMessageRouter())
+	if (UBmrPawnReadySubsystem* PawnReadySubsystem = UBmrPawnReadySubsystem::GetPawnReadySubsystem())
 	{
-		GameplayMessageRouter->ReadyHandler.Broadcast_OnPawnAdded(*this);
+		PawnReadySubsystem->Broadcast_OnPawnAdded(*this);
 	}
 }
 
@@ -559,5 +567,5 @@ void ABmrPawn::SpawnBomb()
 	EventData.EventTag = BmrGameplayTags::Event::Bomb_Placed;
 	EventData.Instigator = this;
 	EventData.EventMagnitude = UBmrCellUtilsLibrary::GetIndexByCellOnLevel(MapComponent->GetCell());
-	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 }

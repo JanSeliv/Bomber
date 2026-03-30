@@ -9,11 +9,10 @@
 /// Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Engine/World.h"
 #include "InstancedStaticMeshActor.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -47,7 +46,7 @@ void UFTGEditorPreviewSubsystem::OnBeginPlay(UWorld* World, FWorldInitialization
 		return;
 	}
 
-	BIND_ON_GENERATED_MAP_READY(this, ThisClass::OnGeneratedMapReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GeneratedMap_Ready, this, &ThisClass::OnGeneratedMapReady);
 }
 
 // Is used to destroy the foot trails generator

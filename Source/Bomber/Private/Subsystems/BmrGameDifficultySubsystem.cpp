@@ -3,15 +3,12 @@
 #include "Subsystems/BmrGameDifficultySubsystem.h"
 
 // Bomber
-#include "Actors/BmrGeneratedMap.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
-#include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "DataRegistry.h"
 #include "DataRegistrySubsystem.h"
@@ -197,7 +194,7 @@ void UBmrGameDifficultySubsystem::BroadcastDifficultyChanged()
 	FGameplayEventData Payload;
 	Payload.EventTag = BmrGameplayTags::Event::Difficulty_Changed;
 	Payload.InstigatorTags = OwnedTags.Filter(FBmrGameDifficultyTag::ParentTag.GetSingleTagContainer());
-	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(Payload);
 }
 
 // Subscribes to ASC generic tag event, filters for Difficulty.* tags
@@ -241,7 +238,7 @@ void UBmrGameDifficultySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	BIND_ON_GENERATED_MAP_READY(this, ThisClass::OnGeneratedMapReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GeneratedMap_Ready, this, &ThisClass::OnGeneratedMapReady);
 }
 
 // Cleans up ASC bindings

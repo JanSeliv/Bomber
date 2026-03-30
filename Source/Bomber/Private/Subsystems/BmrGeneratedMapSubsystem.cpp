@@ -9,7 +9,7 @@
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #if WITH_EDITOR
@@ -17,7 +17,6 @@
 #endif
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Engine/AssetManager.h"
 #include "Engine/World.h"
 #include "UObject/UObjectThreadContext.h"
@@ -56,7 +55,7 @@ void UBmrGeneratedMapSubsystem::TryBroadcastGeneratedMapReady()
 	FGameplayEventData Payload;
 	Payload.EventTag = BmrGameplayTags::Event::GeneratedMap_Ready;
 	Payload.Instigator = GeneratedMap;
-	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(Payload);
 }
 
 /*********************************************************************************************

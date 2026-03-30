@@ -1,19 +1,22 @@
 ﻿// Copyright (c) Yevhenii Selivanov
 
-#include "Structures/BmrReadyHandler.h"
+#include "Subsystems/BmrPawnReadySubsystem.h"
 
 // Bomber
 #include "Actors/BmrPawn.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
+#include "Engine/World.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPawnReadySubsystem)
 
 // Should be called when Pawn is possessed
-void FBmrReadyHandler::Broadcast_OnPawnPossessed(ABmrPawn& Pawn)
+void UBmrPawnReadySubsystem::Broadcast_OnPawnPossessed(ABmrPawn& Pawn)
 {
 	if (UUtilsLibrary::HasWorldBegunPlay()
 	    && !IsReady(&Pawn)) // Skip if already ready
@@ -24,7 +27,7 @@ void FBmrReadyHandler::Broadcast_OnPawnPossessed(ABmrPawn& Pawn)
 }
 
 // Should be called when player state is replicated
-void FBmrReadyHandler::Broadcast_OnPlayerStateInit(const ABmrPlayerState& PlayerState)
+void UBmrPawnReadySubsystem::Broadcast_OnPlayerStateInit(const ABmrPlayerState& PlayerState)
 {
 	if (!UUtilsLibrary::HasWorldBegunPlay())
 	{
@@ -41,7 +44,7 @@ void FBmrReadyHandler::Broadcast_OnPlayerStateInit(const ABmrPlayerState& Player
 }
 
 // Should be called when Pawn is added to the Generated Map
-void FBmrReadyHandler::Broadcast_OnPawnAdded(ABmrPawn& Pawn)
+void UBmrPawnReadySubsystem::Broadcast_OnPawnAdded(ABmrPawn& Pawn)
 {
 	if (UUtilsLibrary::HasWorldBegunPlay()
 	    && !IsReady(&Pawn)) // Skip if already ready
@@ -52,7 +55,7 @@ void FBmrReadyHandler::Broadcast_OnPawnAdded(ABmrPawn& Pawn)
 }
 
 // Returns true if the pawn is ready at this moment
-bool FBmrReadyHandler::IsReady(const ABmrPawn* Pawn) const
+bool UBmrPawnReadySubsystem::IsReady(const ABmrPawn* Pawn) const
 {
 	if (!Pawn)
 	{
@@ -72,13 +75,13 @@ bool FBmrReadyHandler::IsReady(const ABmrPawn* Pawn) const
 }
 
 // Returns true if the player state is ready at this moment
-bool FBmrReadyHandler::IsReady(const ABmrPlayerState* PlayerState) const
+bool UBmrPawnReadySubsystem::IsReady(const ABmrPlayerState* PlayerState) const
 {
 	return PlayerState && IsReady(PlayerState->GetPawn<ABmrPawn>());
 }
 
 // Returns true if player controller is possessed and ready at this moment
-bool FBmrReadyHandler::IsPawnPossessed(const FOnReadyData& FoundHandle)
+bool UBmrPawnReadySubsystem::IsPawnPossessed(const FOnReadyData& FoundHandle)
 {
 	/*
 	| Row | Entity  | Details                         | Authority    | Possession   | Locally Controlled | Result |
@@ -132,7 +135,7 @@ bool FBmrReadyHandler::IsPawnPossessed(const FOnReadyData& FoundHandle)
 }
 
 // Broadcasts Pawn Ready event if all conditions are met
-void FBmrReadyHandler::TryBroadcastOnReady_Internal(ABmrPawn& Pawn)
+void UBmrPawnReadySubsystem::TryBroadcastOnReady_Internal(ABmrPawn& Pawn)
 {
 	if (!IsReady(&Pawn))
 	{
@@ -140,20 +143,30 @@ void FBmrReadyHandler::TryBroadcastOnReady_Internal(ABmrPawn& Pawn)
 		return;
 	}
 
-	// Broadcast Pawn Ready event via Gameplay Message Router
+	// Broadcast Pawn Ready event for all pawns
 	FGameplayEventData PawnPayload;
 	PawnPayload.EventTag = BmrGameplayTags::Event::Player_PawnReady;
 	PawnPayload.Instigator = &Pawn;
-	UBmrGameplayMessageSubsystem::BroadcastMessage(PawnPayload);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(PawnPayload);
+
+	if (Pawn.IsLocallyControlled()
+	    && Pawn.IsPlayerControlled())
+	{
+		// Broadcast Local Pawn Ready event only for locally-controlled player-controlled pawns
+		FGameplayEventData LocalPayload;
+		LocalPayload.EventTag = BmrGameplayTags::Event::Player_LocalPawnReady;
+		LocalPayload.Instigator = &Pawn;
+		UGlobalMessageSubsystem::BroadcastGlobalMessage(LocalPayload);
+	}
 }
 
 // Perform cleanup
-void FBmrReadyHandler::Reset()
+void UBmrPawnReadySubsystem::Reset()
 {
 	OnReadyHandles.Empty();
 }
 
-FBmrReadyHandler::FOnReadyData& FBmrReadyHandler::FindOrAdd(ABmrPawn& Pawn)
+UBmrPawnReadySubsystem::FOnReadyData& UBmrPawnReadySubsystem::FindOrAdd(ABmrPawn& Pawn)
 {
 	FOnReadyData* FoundHandle = OnReadyHandles.FindByPredicate([&Pawn](const FOnReadyData& It)
 	{
@@ -168,4 +181,31 @@ FBmrReadyHandler::FOnReadyData& FBmrReadyHandler::FindOrAdd(ABmrPawn& Pawn)
 	FOnReadyData NewHandle;
 	NewHandle.Pawn = &Pawn;
 	return OnReadyHandles.Emplace_GetRef(MoveTemp(NewHandle));
+}
+
+/*********************************************************************************************
+ * UBmrPawnReadySubsystem
+ ********************************************************************************************* */
+
+// Returns the Pawn Ready Subsystem, is checked and will crash if can't be obtained
+UBmrPawnReadySubsystem& UBmrPawnReadySubsystem::Get(const UObject* OptionalWorldContext /* = nullptr*/)
+{
+	UBmrPawnReadySubsystem* Subsystem = GetPawnReadySubsystem(OptionalWorldContext);
+	checkf(Subsystem, TEXT("ERROR: [%i] %hs:\n'PawnReadySubsystem' is null!"), __LINE__, __FUNCTION__);
+	return *Subsystem;
+}
+
+// Returns the pointer to this Subsystem, nullptr if world is not available
+UBmrPawnReadySubsystem* UBmrPawnReadySubsystem::GetPawnReadySubsystem(const UObject* OptionalWorldContext /* = nullptr*/)
+{
+	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
+	return World ? World->GetSubsystem<UBmrPawnReadySubsystem>() : nullptr;
+}
+
+// Clears ready handler data
+void UBmrPawnReadySubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+
+	Reset();
 }

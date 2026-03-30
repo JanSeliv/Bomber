@@ -3,18 +3,17 @@
 #include "UI/Widgets/BmrHUDWidget.h"
 
 // Bomber
-#include "Actors/BmrPawn.h"
 #include "Controllers/BmrPlayerController.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Animation/WidgetAnimation.h"
 #include "Components/Button.h"
+#include "GameFramework/Pawn.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrHUDWidget)
 
@@ -23,7 +22,7 @@ void UBmrHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPlayerStateReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_LocalPawnReady, this, &ThisClass::OnLocalPlayerStateReady);
 
 	if (RestartButton)
 	{
@@ -80,12 +79,11 @@ void UBmrHUDWidget::OnRestartButtonPressed_Implementation()
 	FGameplayEventData EventData;
 	EventData.EventTag = BmrGameplayTags::Event::HUD_RestartButtonPressed;
 	EventData.Instigator = MyPC->GetPawn();
-	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 	if (!MyPC->HasAuthority())
 	{
 		MyPC->ServerBroadcastMessage(EventData);
 	}
-
 }
 
 // Is called when player pressed the button to return to the Main Menu
@@ -101,12 +99,11 @@ void UBmrHUDWidget::OnMenuButtonPressed_Implementation()
 	FGameplayEventData EventData;
 	EventData.EventTag = BmrGameplayTags::Event::HUD_MenuButtonPressed;
 	EventData.Instigator = MyPC->GetPawn();
-	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 	if (!MyPC->HasAuthority())
 	{
 		MyPC->ServerBroadcastMessage(EventData);
 	}
-
 }
 
 // Is called when player pressed the button to open the Settings

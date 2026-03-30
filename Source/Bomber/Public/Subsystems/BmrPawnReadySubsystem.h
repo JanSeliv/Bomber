@@ -2,11 +2,12 @@
 
 #pragma once
 
-// UE
-#include "UObject/WeakObjectPtr.h"
+#include "Subsystems/WorldSubsystem.h"
+
+#include "BmrPawnReadySubsystem.generated.h"
 
 /*********************************************************************************************
- * The FBmrReadyHandler broadcasts the readiness of pawns and player states in multiplayer
+ * The UBmrPawnReadySubsystem broadcasts the readiness of pawns and player states in multiplayer
  * once their possession, player state initialization, and ID assignment are complete.
  * These components can be initialized in any order, and the Handler efficiently tracks and
  * synchronizes their status to ensure accurate and timely readiness notifications for gameplay.
@@ -18,9 +19,18 @@ class ABmrPlayerState;
 /**
  * Encapsulates the managements of 'On Player Ready' delegates from 'GlobalEventsSubsystem'.
  */
-struct BOMBER_API FBmrReadyHandler
+UCLASS()
+class BOMBER_API UBmrPawnReadySubsystem : public UWorldSubsystem
 {
+	GENERATED_BODY()
+
 public:
+	/** Returns the Pawn Ready Subsystem, is checked and will crash if can't be obtained */
+	static UBmrPawnReadySubsystem& Get(const UObject* OptionalWorldContext = nullptr);
+
+	/** Returns the pointer to this Subsystem, nullptr if world is not available */
+	static UBmrPawnReadySubsystem* GetPawnReadySubsystem(const UObject* OptionalWorldContext = nullptr);
+
 	/*********************************************************************************************
 	 * Public Broadcasters.
 	 * Once all are broadcasted, original delegate will be automatically called.
@@ -48,6 +58,13 @@ public:
 
 	/** Perform cleanup. */
 	void Reset();
+
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
+	/** Clears ready handler data */
+	virtual void Deinitialize() override;
 
 	/*********************************************************************************************
 	 * Internal handling

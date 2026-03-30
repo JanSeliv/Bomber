@@ -13,12 +13,10 @@
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrMoverSyncState.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemGlobals.h"
 #include "Components/CapsuleComponent.h"
 #include "DefaultMovementSet/InstantMovementEffects/BasicInstantMovementEffects.h"
@@ -95,9 +93,16 @@ void UBmrMoverComponent::BeginPlay()
 
 	APawn* OwnerPlayer = CastChecked<APawn>(GetOwner());
 
-	BIND_ON_PAWN_READY_PTR(this, ThisClass::OnPawnReady, Cast<ABmrPawn>(OwnerPlayer));
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_PawnReady,
+	    this, [this, WeakTarget = TWeakObjectPtr(OwnerPlayer)](const FGameplayEventData& Payload)
+	{
+		if (Payload.Instigator == WeakTarget.Get())
+		{
+			OnPawnReady(Payload);
+		}
+	});
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(OwnerPlayer);
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);

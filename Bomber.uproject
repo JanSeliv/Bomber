@@ -75,10 +75,6 @@
 		{
 			"Name": "GameplayStateTree",
 			"Enabled": true
-		},
-		{
-			"Name": "AsyncMessageSystem",
-			"Enabled": true
 		}
 	]
 }

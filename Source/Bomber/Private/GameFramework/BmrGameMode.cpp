@@ -7,13 +7,11 @@
 #include "GameFramework/BmrGameSession.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
-#include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrGameStateTag.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameMode)
 
 // Sets default values for this actor's properties
@@ -78,7 +76,7 @@ void ABmrGameMode::PostLogin(APlayerController* NewPlayer)
 		FGameplayEventData EventData;
 		EventData.EventTag = BmrGameplayTags::Event::Player_PostLogin;
 		EventData.Instigator = NewPlayer;
-		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+		UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 	}
 
 	if (APlayerState* PlayerState = MyPC->GetPlayerState<APlayerState>())

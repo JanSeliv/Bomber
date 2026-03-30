@@ -25,7 +25,12 @@
 			"Name": "MyEditorUtils",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
-		}
+		},
+        {
+          "Name": "MyUtilsNodes",
+          "Type": "UncookedOnly",
+          "LoadingPhase": "Default"
+        }
 	],
 	"Plugins": [
 		{
@@ -38,6 +43,14 @@
 		},
 		{
 			"Name": "GameFeatures",
+			"Enabled": true
+		},
+		{
+			"Name": "AsyncMessageSystem",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
 			"Enabled": true
 		}
 	]

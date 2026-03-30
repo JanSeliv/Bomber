@@ -13,6 +13,7 @@ public class MyUtils : ModuleRules
 			{
 				"Core"
 				, "ModelViewViewModel" // Created MVVM base classes
+				, "AsyncMessageSystem" // Created UGlobalMessageSubsystem (Aka Lyra Gameplay Message Router)
 			}
 		);
 
@@ -24,6 +25,7 @@ public class MyUtils : ModuleRules
 				, "EnhancedInput", "InputCore" // UInputUtilsLibrary
 				, "NavigationSystem", "AIModule" // UAIUtilsLibrary
 				, "GameFeatures" // UModularGameFeaturePluginUtils
+				, "GameplayTags", "GameplayAbilities" // Tags
 			}
 		);
 

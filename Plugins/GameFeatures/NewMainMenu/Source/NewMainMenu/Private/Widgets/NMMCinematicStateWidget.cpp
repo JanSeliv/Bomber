@@ -10,11 +10,10 @@
 
 // Bomber
 #include "Controllers/BmrPlayerController.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/Button.h"
 #include "Components/RadialSlider.h"
 #include "GameFramework/Pawn.h"
@@ -112,7 +111,7 @@ void UNMMCinematicStateWidget::OnCinematicSkipFinished_Implementation()
 	FGameplayEventData EventData;
 	EventData.EventTag = NmmGameplayTags::Event::CinematicSkipped;
 	EventData.Instigator = MyPC->GetPawn();
-	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 	if (!MyPC->HasAuthority())
 	{
 		MyPC->ServerBroadcastMessage(EventData);

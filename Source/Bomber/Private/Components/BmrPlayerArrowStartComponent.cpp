@@ -7,11 +7,10 @@
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerArrowStartComponent)
@@ -67,7 +66,7 @@ void UBmrPlayerArrowStartComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	APawn* OwnerPawn = GetOwner<APawn>();
 	if (ensureMsgf(OwnerPawn, TEXT("ASSERT: [%i] %hs:\n'OwnerPawn' is not pawn!"), __LINE__, __FUNCTION__))

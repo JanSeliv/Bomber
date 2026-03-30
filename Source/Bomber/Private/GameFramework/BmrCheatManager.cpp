@@ -17,8 +17,8 @@
 #include "GameFramework/PlayerState.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrPowerupTag.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
@@ -127,7 +127,7 @@ void UBmrCheatManager::DestroyPlayersBySlots(const FString& Slot)
 			EventData.EventTag = BmrGameplayTags::Event::Player_Death;
 			EventData.Instigator = UBmrBlueprintFunctionLibrary::GetLocalPawn();
 			EventData.Target = Pawn;
-			UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+			UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 		}
 	}
 }

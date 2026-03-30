@@ -28,7 +28,6 @@ public class Bomber : ModuleRules
                 , "PoolManager" // Created UBmrPoolFactory_Pawn
                 , "MyUtils" // Inherited from Base classes
                 , "DataAssetsLoader" // Created BMR data assets
-                , "AsyncMessageSystem" // Aka Lyra Gameplay Message Router
 		    }
 		);
 

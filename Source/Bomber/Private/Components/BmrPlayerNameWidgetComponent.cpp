@@ -9,14 +9,12 @@
 #include "GameFramework/BmrPlayerState.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UI/Widgets/BmrPlayerNameWidget.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerNameWidgetComponent)
 
 // Sets default values for this component's properties
@@ -128,7 +126,7 @@ void UBmrPlayerNameWidgetComponent::BeginPlay()
 	Super::BeginPlay();
 
 	BIND_ON_WIDGETS_INITIALIZED(this, ThisClass::OnWidgetsInitialized);
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 }
 
 // Listen to manage the component visibility

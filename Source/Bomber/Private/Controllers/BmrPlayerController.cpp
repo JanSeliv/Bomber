@@ -19,13 +19,13 @@
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/BmrPawnReadySubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -60,7 +60,7 @@ ABmrPlayerController::ABmrPlayerController()
 // Sends a gameplay event to the server via Gameplay Message Router, is useful for actions happening only by client such as UI buttons to start the game etc
 void ABmrPlayerController::ServerBroadcastMessage_Implementation(const FGameplayEventData& Payload)
 {
-	UBmrGameplayMessageSubsystem::BroadcastMessage(Payload);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(Payload);
 }
 
 /*********************************************************************************************
@@ -107,7 +107,7 @@ void ABmrPlayerController::BeginPlay()
 // Called when the Player Input data asset is loaded and available
 void ABmrPlayerController::OnPlayerInputDataAssetLoaded_Implementation(const UBmrPlayerInputDataAsset* DataAsset)
 {
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	// Adds given contexts to the list of auto managed and binds their input actions
 	TArray<const UBmrInputMappingContext*> InputContexts;
@@ -162,7 +162,7 @@ void ABmrPlayerController::OnPossess(APawn* InPawn)
 
 	if (ABmrPawn* BmrPawn = Cast<ABmrPawn>(InPawn))
 	{
-		UBmrGameplayMessageSubsystem::Get().ReadyHandler.Broadcast_OnPawnPossessed(*BmrPawn);
+		UBmrPawnReadySubsystem::Get().Broadcast_OnPawnPossessed(*BmrPawn);
 	}
 }
 

@@ -23,6 +23,7 @@ namespace BmrGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(HUD_RestartButtonPressed, "Event.HUD.RestartButtonPressed", "Event that fires when user pressed Restart button on HUD to restart the match, is called on local player ASC");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameState_Changed, "Event.GameState.Changed", "Event that fires when the current game state was changed (Menu, GameStarting, InGame, EndGame), check via Payload.InstigatorTags.HasTag()");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Player_PawnReady, "Event.Player.PawnReady", "Event that fires when any pawn is spawned, possessed, and replicated, obtain pawn from Payload.Instigator");
+		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Player_LocalPawnReady, "Event.Player.LocalPawnReady", "Event that fires only for locally-controlled player-controlled pawns when ready, obtain pawn from Payload.Instigator");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(Difficulty_Changed, "Event.Difficulty.Changed", "Event that fires when the game difficulty tag was changed, check via Payload.InstigatorTags.HasTag/MatchesTag");
 		UE_DEFINE_GAMEPLAY_TAG_COMMENT(GeneratedMap_Ready, "Event.GeneratedMap.Ready", "Event that fires when Generated Map is initialized and its data assets are loaded, is also called in editor");
 	} // namespace Event

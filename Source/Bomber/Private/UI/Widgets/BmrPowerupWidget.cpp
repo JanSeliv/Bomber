@@ -8,11 +8,10 @@
 #include "Actors/BmrPawn.h"
 #include "DataAssets/BmrUIDataAsset.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/Image.h"
 #include "Components/RadialSlider.h"
 #include "Engine/Texture2D.h"
@@ -78,7 +77,7 @@ void UBmrPowerupWidget::NativeConstruct()
 		return;
 	}
 
-	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_LocalPawnReady, this, &ThisClass::OnLocalPawnReady);
 }
 
 // Is executed every tick when widget is enabled

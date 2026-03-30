@@ -12,13 +12,12 @@
 // Bomber
 #include "Components/BmrSkeletalMeshComponent.h"
 #include "Controllers/BmrPlayerController.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/Button.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -135,7 +134,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 	FGameplayEventData EventData;
 	EventData.EventTag = NmmGameplayTags::Event::PlayButtonPressed;
 	EventData.Instigator = MyPC->GetPawn();
-	UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 
 	// This button might be pressed locally by user, send event to server if has no authority
 	if (!MyPC->HasAuthority())

@@ -4,223 +4,97 @@
 
 #include "Subsystems/WorldSubsystem.h"
 
-// Bomber
-#include "Structures/BmrReadyHandler.h"
+// UE
+#include "Abilities/GameplayAbilityTypes.h" // FGameplayEventData
+#include "AsyncMessageHandle.h"
 
-#include "BmrGameplayMessageSubsystem.generated.h"
+#include "GlobalMessageSubsystem.generated.h"
+
+/** Called when a global message is received with the gameplay event payload */
+DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGlobalMessageReceived, const FGameplayEventData&, Payload);
 
 /**
- * Global event system that lets any part of the game send and receive messages using gameplay tags.
- * Uses engine's Async Message System (aka Lyra's Gameplay Message Router) for tag-based message routing.
+ * World subsystem providing CallOr pattern on top of engine's Async Message System.
+ * Caches broadcast events and replays them to late subscribers, eliminating the need for per-event readiness checks.
+ * Uses internally engine's Async Message System (aka Lyra Gameplay Message Router)
  */
 UCLASS(BlueprintType, Blueprintable)
-class BOMBER_API UBmrGameplayMessageSubsystem : public UWorldSubsystem
+class MYUTILS_API UGlobalMessageSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	/** Returns this Subsystem, is checked and will crash if can't be obtained.*/
-	static UBmrGameplayMessageSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
+	/** Returns this Subsystem, is checked and will crash if can't be obtained */
+	static UGlobalMessageSubsystem& Get(const UObject* OptionalWorldContext = nullptr);
 
-	/** Returns the pointer to this Subsystem. */
-	static UBmrGameplayMessageSubsystem* GetGameplayMessageRouter(const UObject* OptionalWorldContext = nullptr);
+	/** Returns the pointer to this Subsystem, nullptr if world is not available */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Global Messages",
+	    meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static UGlobalMessageSubsystem* GetGlobalMessageSubsystem(const UObject* OptionalWorldContext = nullptr);
 
-	/** Broadcasts Gameplay Event Data via Async Message System (aka Lyra's Gameplay Message Router) and additionally forwards event to ASC if found from Target or Instigator.
-	 * Is optional, UAsyncMessageWorldSubsystem::QueueMessageForBroadcast can be used directly.
-	 * @param Payload Must contain valid EventTag.
-	 * @param OptionalWorldContext If provided, uses this world to get the Message System; otherwise it automatically obtains the world (might be invalid during async actions). */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext, DisplayName = "BMR Broadcast Message"))
-	static void BroadcastMessage(const struct FGameplayEventData& Payload, const UObject* OptionalWorldContext = nullptr);
+	/*********************************************************************************************
+	 * Listeners
+	 ********************************************************************************************* */
+public:
+	/** Blueprint-only listener node, wraps CallOrStartListeningForGlobalMessage.
+	 * In code use the templated CallOrStartListeningForGlobalMessage() instead.
+	 * Returns handle that can be used to unbind the listener later */
+	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (DisplayName = "Call Or Start Listening For Global Message", BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject"))
+	static FAsyncMessageHandle BPCallOrStartListeningForGlobalMessage(UObject* WorldContextObject, FGameplayTag MessageTag, const FOnGlobalMessageReceived& Completed);
 
-	/** Registers a listener for the given event tag via Async Message System (aka Lyra's Gameplay Message Router).
-	 * Is optional, prefer to use BIND_ON_ macros.
-	 * Alternatively, UAsyncMessageWorldSubsystem::BindListener can be used directly.
-	 * In blueprints, use `Start Listening for Async Message` node with the same Event Tag.
-	 * @param WorldContext Used to obtain the world and its message system.
-	 * @param EventTag The gameplay tag channel to listen on.
-	 * @param Callback Invoked with extracted FGameplayEventData payload when a matching message is broadcast. */
-	static void RegisterListener(const UObject* WorldContext, struct FGameplayTag EventTag, TFunction<void(const FGameplayEventData&)>&& Callback);
+	/** Subscribes to an event by function-callback.
+	 * If the event was already broadcast, fires the callback immediately with the cached data.
+	 * Returns handle that can be used to unbind the listener later.
+	 * Example: UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(Tag, this, &ThisClass::OnEvent); */
+	template <typename TOwner>
+	static FAsyncMessageHandle CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, TOwner* Object, void (TOwner::*Function)(const FGameplayEventData&));
 
-	/** Encapsulates the managements of 'On Player Ready' events.
-	 * Contains various Broadcast_ methods. */
-	FBmrReadyHandler ReadyHandler;
+	/** Subscribes to an event via lambda-callback with weak object safety.
+	 * Returns handle that can be used to unbind the listener later.
+	 * Example: UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(Tag, this, [this](const FGameplayEventData& Payload){ ... }); */
+	static FAsyncMessageHandle CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, const UObject* ListenerOwner, TFunction<void(const FGameplayEventData&)>&& Callback);
 
-	/** Is called when this Subsystem is removed. */
+	/** Unbinds a listener so it will no longer receive callbacks.
+	 * Uses the handle returned by CallOrStartListeningForGlobalMessage */
+	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static void StopListeningForGlobalMessage(const FAsyncMessageHandle& Handle, const UObject* OptionalWorldContext = nullptr);
+
+	/*********************************************************************************************
+	 * Broadcast
+	 ********************************************************************************************* */
+public:
+	/** Broadcasts Gameplay Event Data via engine's Async Message System, caches the event for the CallOr pattern,
+	 * and additionally forwards event to Ability System Component if found from Payload.Target or Payload.Instigator.
+	 * Is optional wrapper, engine's QueueMessageForBroadcast can be used directly if CallOr caching and ASC forwarding are not needed */
+	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static void BroadcastGlobalMessage(const FGameplayEventData& Payload, const UObject* OptionalWorldContext = nullptr);
+
+	/*********************************************************************************************
+	 * Overrides
+	 ********************************************************************************************* */
+protected:
+	/** Clears cached broadcast data */
 	virtual void Deinitialize() override;
+
+	/*********************************************************************************************
+	 * Data
+	 ********************************************************************************************* */
+protected:
+	/** Cached last broadcast data per tag, enables the CallOr pattern for late subscribers */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, AdvancedDisplay, Category = "[Global Messages]", meta = (BlueprintProtected))
+	TMap<FGameplayTag, FGameplayEventData> BroadcastedMessagesMap;
 };
 
-/*********************************************************************************************
- * Macro Helpers
- * All macros are optional, Async Message System (aka Lyra's Gameplay Message Router) can be used directly instead.
- * They provide additional benefits in code, such as:
- * - Auto-call if target already ready (vs regular binding that waits for future events)
- * - Filter to specific pawn/state (vs regular binding that broadcasts for ANY pawn)
- * Callback signature: void Function(const FGameplayEventData& Payload)
- * Next macros are currently available:
- * BIND_ON_GENERATED_MAP_READY(this, ThisClass::OnGeneratedMapReady);
- * BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
- * BIND_ON_PAWN_READY_ID(this, ThisClass::OnPawnReady, PlayerId);
- * BIND_ON_PAWN_READY_PTR(this, ThisClass::OnPawnReady, Pawn);
- * BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
- ********************************************************************************************* */
-
-/** Helper macro to bind and call when Generated Map is initialized and its data assets are loaded, is also called in editor. */
-#define BIND_ON_GENERATED_MAP_READY(Obj, Function) \
-	INTERNAL_BIND_GENERATED_MAP_READY(BmrGameplayTags::Event::GeneratedMap_Ready, Obj, Function)
-
-/** Helper macro to bind and call the function when the game state was changed.
- * Obtain current state inside callback via Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu). */
-#define BIND_ON_GAME_STATE_CHANGED(Obj, Function) \
-	INTERNAL_BIND_GAME_STATE_CHANGED(BmrGameplayTags::Event::GameState_Changed, Obj, Function)
-
-/** Helper macro for binding to player pawn ready events using PlayerId.
- * @param Obj Object that owns the callback function
- * @param Function Callback function to bind (signature: void Function(const FGameplayEventData& Payload))
- * @param PlayerId pawn ID to wait for */
-#define BIND_ON_PAWN_READY_ID(Obj, Function, PlayerId) \
-	INTERNAL_BIND_READY_ID(BmrGameplayTags::Event::Player_PawnReady, Obj, Function, Pawn, PlayerId)
-
-/** Helper macro for binding to player pawn ready events using pointer.
- * @param Obj Object that owns the callback function
- * @param Function Callback function to bind (signature: void Function(const FGameplayEventData& Payload))
- * @param PawnPtr Pointer to player pawn to wait for */
-#define BIND_ON_PAWN_READY_PTR(Obj, Function, PawnPtr) \
-	INTERNAL_BIND_READY_PTR(BmrGameplayTags::Event::Player_PawnReady, Obj, Function, PawnPtr)
-
-/** Helper macro for binding to local player pawn ready events.
- * @param Obj Object that owns the callback function
- * @param Function Callback function to bind (signature: void Function(const FGameplayEventData& Payload)) */
-#define BIND_ON_LOCAL_PAWN_READY(Obj, Function) \
-	INTERNAL_BIND_READY_LOCAL(BmrGameplayTags::Event::Player_PawnReady, Obj, Function, Pawn)
-
-/*********************************************************************************************
- * Internal
- ********************************************************************************************* */
-
-/** Internal macro for binding when Generated Map is initialized and its data assets are loaded via Async Message System (aka Lyra's Gameplay Message Router). */
-#define INTERNAL_BIND_GENERATED_MAP_READY(InEventTag, Obj, Function)                                           \
-	{                                                                                                          \
-		TWeakObjectPtr WeakObj(Obj);                                                                           \
-		UBmrGameplayMessageSubsystem::RegisterListener(Obj, InEventTag,                                        \
-		    [WeakObj](const FGameplayEventData& Payload)                                                       \
-		{                                                                                                      \
-			{                                                                                                  \
-				(WeakObj.Get()->*(&Function))(Payload);                                                        \
-			}                                                                                                  \
-		});                                                                                                    \
-		const UBmrGeneratedMapSubsystem* GenMapSub = UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(Obj); \
-		if (GenMapSub && GenMapSub->IsGeneratedMapReady())                                                     \
-		{                                                                                                      \
-			FGameplayEventData AutoPayload;                                                                    \
-			AutoPayload.EventTag = InEventTag;                                                                 \
-			AutoPayload.Instigator = GenMapSub->GetGeneratedMap();                                             \
-			(Obj->*(&Function))(AutoPayload);                                                                  \
-		}                                                                                                      \
-	}
-
-/** Internal macro for binding to game state changes via Async Message System (aka Lyra's Gameplay Message Router). */
-#define INTERNAL_BIND_GAME_STATE_CHANGED(InEventTag, Obj, Function)                                             \
-	{                                                                                                           \
-		TWeakObjectPtr WeakObj(Obj);                                                                            \
-		UBmrGameplayMessageSubsystem::RegisterListener(Obj, InEventTag,                                         \
-		    [WeakObj](const FGameplayEventData& Payload)                                                        \
-		{                                                                                                       \
-			if (WeakObj.IsValid())                                                                              \
-			{                                                                                                   \
-				(WeakObj.Get()->*(&Function))(Payload);                                                         \
-			}                                                                                                   \
-		});                                                                                                     \
-		const ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState();                          \
-		if (GameState && GameState->HasMatchingGameplayTag(FBmrGameStateTag::ParentTag))                        \
-		{                                                                                                       \
-			FGameplayTagContainer OwnedTags;                                                                    \
-			GameState->GetOwnedGameplayTags(OwnedTags);                                                         \
-			FGameplayEventData AutoPayload;                                                                     \
-			AutoPayload.EventTag = InEventTag;                                                                  \
-			AutoPayload.InstigatorTags = OwnedTags.Filter(FBmrGameStateTag::ParentTag.GetSingleTagContainer()); \
-			(Obj->*(&Function))(AutoPayload);                                                                   \
-		}                                                                                                       \
-	}
-
-/** Internal macro for binding with ID filtering via Async Message System (aka Lyra's Gameplay Message Router). */
-#define INTERNAL_BIND_READY_ID(InEventTag, Obj, Function, Arg, ID)                            \
-	{                                                                                         \
-		const int32 TargetPlayerId = ID;                                                      \
-		TWeakObjectPtr WeakObj(Obj);                                                          \
-		UBmrGameplayMessageSubsystem::RegisterListener(Obj, InEventTag,                       \
-		    [WeakObj, TargetPlayerId](const FGameplayEventData& Payload)                      \
-		{                                                                                     \
-			if (!WeakObj.IsValid())                                                           \
-			{                                                                                 \
-				return;                                                                       \
-			}                                                                                 \
-			const APawn* CallbackPawn = Cast<APawn>(Payload.Instigator);                      \
-			const APlayerState* PS = CallbackPawn ? CallbackPawn->GetPlayerState() : nullptr; \
-			if (PS && PS->GetPlayerId() == TargetPlayerId)                                    \
-			{                                                                                 \
-				(WeakObj.Get()->*(&Function))(Payload);                                       \
-			}                                                                                 \
-		});                                                                                   \
-		ABmrPawn* In##Arg = UBmrBlueprintFunctionLibrary::Get##Arg(TargetPlayerId);           \
-		if (UBmrGameplayMessageSubsystem::Get(Obj).ReadyHandler.IsReady(In##Arg))             \
-		{                                                                                     \
-			FGameplayEventData AutoPayload;                                                   \
-			AutoPayload.EventTag = InEventTag;                                                \
-			AutoPayload.Instigator = In##Arg;                                                 \
-			(Obj->*(&Function))(AutoPayload);                                                 \
-		}                                                                                     \
-	}
-
-/** Internal macro for binding with pointer filtering via Async Message System (aka Lyra's Gameplay Message Router). */
-#define INTERNAL_BIND_READY_PTR(InEventTag, Obj, Function, TargetPtr)                \
-	{                                                                                \
-		if (TargetPtr)                                                               \
-		{                                                                            \
-			const ABmrPawn* Target = TargetPtr;                                      \
-			TWeakObjectPtr WeakObj(Obj);                                             \
-			UBmrGameplayMessageSubsystem::RegisterListener(Obj, InEventTag,          \
-			    [WeakObj, Target](const FGameplayEventData& Payload)                 \
-			{                                                                        \
-				if (WeakObj.IsValid() && Payload.Instigator == Target)               \
-				{                                                                    \
-					(WeakObj.Get()->*(&Function))(Payload);                          \
-				}                                                                    \
-			});                                                                      \
-			if (UBmrGameplayMessageSubsystem::Get(Obj).ReadyHandler.IsReady(Target)) \
-			{                                                                        \
-				FGameplayEventData AutoPayload;                                      \
-				AutoPayload.EventTag = InEventTag;                                   \
-				AutoPayload.Instigator = Target;                                     \
-				(Obj->*(&Function))(AutoPayload);                                    \
-			}                                                                        \
-		}                                                                            \
-	}
-
-/** Internal macro for binding to local player events via Async Message System (aka Lyra's Gameplay Message Router). */
-#define INTERNAL_BIND_READY_LOCAL(InEventTag, Obj, Function, Arg)                 \
-	{                                                                             \
-		TWeakObjectPtr WeakObj(Obj);                                              \
-		UBmrGameplayMessageSubsystem::RegisterListener(Obj, InEventTag,           \
-		    [WeakObj](const FGameplayEventData& Payload)                          \
-		{                                                                         \
-			if (!WeakObj.IsValid())                                               \
-			{                                                                     \
-				return;                                                           \
-			}                                                                     \
-			const APawn* CallbackPawn = Cast<APawn>(Payload.Instigator);          \
-			if (CallbackPawn                                                      \
-			    && CallbackPawn->IsLocallyControlled()                            \
-			    && CallbackPawn->IsPlayerControlled())                            \
-			{                                                                     \
-				(WeakObj.Get()->*(&Function))(Payload);                           \
-			}                                                                     \
-		});                                                                       \
-		ABmrPawn* In##Arg = UBmrBlueprintFunctionLibrary::GetLocalPawn();         \
-		if (UBmrGameplayMessageSubsystem::Get(Obj).ReadyHandler.IsReady(In##Arg)) \
-		{                                                                         \
-			FGameplayEventData AutoPayload;                                       \
-			AutoPayload.EventTag = InEventTag;                                    \
-			AutoPayload.Instigator = In##Arg;                                     \
-			(Obj->*(&Function))(AutoPayload);                                     \
-		}                                                                         \
-	}
+// Subscribes to a gameplay event via member function with weak object safety
+template <typename TOwner>
+FAsyncMessageHandle UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, TOwner* Object, void (TOwner::*Function)(const FGameplayEventData&))
+{
+	TWeakObjectPtr<TOwner> WeakObject(Object);
+	return CallOrStartListeningForGlobalMessage(MessageTag, Object, [WeakObject, Function](const FGameplayEventData& Payload)
+	{
+		if (TOwner* StrongObject = WeakObject.Get())
+		{
+			(StrongObject->*Function)(Payload);
+		}
+	});
+}

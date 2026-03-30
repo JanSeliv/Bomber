@@ -4,7 +4,7 @@
 
 // Bomber
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
 #include "AbilitySystemGlobals.h"
@@ -165,7 +165,7 @@ void UBmrHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		EventData.EventTag = BmrGameplayTags::Event::Player_Death;
 		EventData.Instigator = Data.EffectSpec.GetEffectContext().GetInstigator();
 		EventData.Target = Data.Target.GetAvatarActor();
-		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+		UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 	}
 
 	// Check health again in case an event above changed it.

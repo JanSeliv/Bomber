@@ -3,7 +3,6 @@
 #include "Subsystems/BmrSoundsSubsystem.h"
 
 // Bomber
-#include "Actors/BmrPawn.h"
 #include "Bomber.h"
 #include "DataAssets/BmrSoundsDataAsset.h"
 #include "GameFramework/BmrGameState.h"
@@ -12,11 +11,10 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/AudioComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/Level.h"
@@ -325,9 +323,9 @@ void UBmrSoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	USoundMix* MainSoundMix = UBmrSoundsDataAsset::Get().GetMainSoundMix();
 	UGameplayStatics::SetBaseSoundMix(&InWorld, MainSoundMix);
 
-	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPlayerStateReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_LocalPawnReady, this, &ThisClass::OnLocalPlayerStateReady);
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 }
 
 // Is overridden to perform cleanup on ending the game

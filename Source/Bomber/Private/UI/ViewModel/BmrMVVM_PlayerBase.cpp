@@ -8,11 +8,8 @@
 #include "DataAssets/BmrUIDataAsset.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
-
-// UE
-#include "Abilities/GameplayAbilityTypes.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrMVVM_PlayerBase)
 
@@ -91,7 +88,15 @@ void UBmrMVVM_PlayerBase::OnViewModelConstruct_Implementation(const UUserWidget*
 {
 	Super::OnViewModelConstruct_Implementation(UserWidget);
 
-	BIND_ON_PAWN_READY_ID(this, ThisClass::OnPawnReady, GetPlayerId());
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_PawnReady,
+	    this, [this, PlayerId = GetPlayerId()](const FGameplayEventData& Payload)
+	{
+		const ABmrPawn* CallbackPawn = Cast<ABmrPawn>(Payload.Instigator);
+		if (CallbackPawn->GetPlayerId() == PlayerId)
+		{
+			OnPawnReady(Payload);
+		}
+	});
 }
 
 // Is called when this View Model is destructed

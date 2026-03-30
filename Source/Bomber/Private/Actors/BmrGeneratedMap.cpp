@@ -9,15 +9,14 @@
 #include "DalSubsystem.h"
 #include "Data/SpawnRequest.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
-#include "GameFramework/BmrGameState.h"
 #include "Generators/BmrCellsGenerator_Base.h"
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "PoolManagerSubsystem.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
@@ -27,7 +26,6 @@
 #endif
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
@@ -708,7 +706,7 @@ void ABmrGeneratedMap::PostInitializeComponents()
 
 	OnConstructionGeneratedMap(GetActorTransform());
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	// During the game, OnConstruction is not called when location, rotation or scale is changed, so bind to listen transform updates
 	checkf(RootComponent, TEXT("ERROR: [%i] %hs:\n'RootComponent' is null!"), __LINE__, __FUNCTION__);

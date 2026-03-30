@@ -16,8 +16,8 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+#include "Subsystems/BmrPawnReadySubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 #if WITH_EDITOR
@@ -25,7 +25,6 @@
 #endif
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
 
@@ -141,10 +140,10 @@ void ABmrAIController::OnPossess(APawn* InPawn)
 		NewPlayerState->SetDefaultPlayerName();
 	}
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	// Notify host about bot possession
-	UBmrGameplayMessageSubsystem::Get().ReadyHandler.Broadcast_OnPawnPossessed(*InOwner);
+	UBmrPawnReadySubsystem::Get().Broadcast_OnPawnPossessed(*InOwner);
 
 	UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InOwner);
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);

@@ -7,15 +7,13 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
-#include "GameFramework/BmrGameState.h"
 #include "Structures/BmrCinematicRow.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "DataRegistry.h"
 #include "DataRegistrySubsystem.h"
 #include "Engine/World.h"
@@ -71,7 +69,7 @@ void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	// Listen for DR_Cinematics changes to transition between BasicMenu and Idle when map MGF injects or removes rows
 	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();

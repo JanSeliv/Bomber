@@ -46,10 +46,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "AsyncMessageSystem",
-			"Enabled": true
-		},
-		{
 			"Name": "DataAssetsLoader",
 			"Enabled": true
 		}

@@ -18,15 +18,15 @@
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/BmrPawnReadySubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
-#include "Components/GameFrameworkComponentManager.h"
 #include "AbilitySystemGlobals.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "Engine/World.h"
 #include "GameplayAbilitiesModule.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -188,7 +188,7 @@ void ABmrPlayerState::ApplyEndGameState()
 		FGameplayEventData EventData;
 		EventData.EventTag = BmrGameplayTags::Event::Player_OnEndGame;
 		EventData.Instigator = GetPawn();
-		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+		UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 	}
 
 	if (OnEndGameStateChanged.IsBound())
@@ -570,7 +570,7 @@ void ABmrPlayerState::OnPlayerStateInit_Implementation()
 
 	ApplyIsABot();
 
-	UBmrGameplayMessageSubsystem::Get().ReadyHandler.Broadcast_OnPlayerStateInit(*this);
+	UBmrPawnReadySubsystem::Get().Broadcast_OnPlayerStateInit(*this);
 
 	if (IsPlayerStateLocallyControlled())
 	{
@@ -667,7 +667,7 @@ void ABmrPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 }
 
 // Is overridden to prevent the player state from being destroyed to be able to reuse it by bots

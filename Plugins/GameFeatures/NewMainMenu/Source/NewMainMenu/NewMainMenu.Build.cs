@@ -31,7 +31,6 @@ public class NewMainMenu : ModuleRules
 				// Bomber modules
 				, "MyUtils"
 				, "SettingsWidgetConstructor"
-				, "AsyncMessageSystem" // Aka Lyra's Gameplay Message Router
 			}
 		);
 	}

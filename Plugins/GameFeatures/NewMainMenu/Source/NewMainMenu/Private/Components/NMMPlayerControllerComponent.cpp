@@ -9,8 +9,6 @@
 #include "NMMUtils.h"
 #include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
-#include "Subsystems/NMMCameraSubsystem.h"
-#include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
 #include "Actors/BmrPawn.h"
@@ -24,12 +22,11 @@
 #include "MyUtilsLibraries/SaveUtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/PlayerState.h"
 
@@ -173,7 +170,7 @@ void UNMMPlayerControllerComponent::OnUnregister()
 		FGameplayEventData EventData;
 		EventData.EventTag = NmmGameplayTags::Event::MenuUnloaded;
 		EventData.Instigator = LocalPawn;
-		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+		UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 
 		if (!MyPC->HasAuthority())
 		{
@@ -225,10 +222,18 @@ void UNMMPlayerControllerComponent::OnUnregister()
 // Called when the NMM data asset is loaded and available
 void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
 {
-	constexpr int32 FirstPlayerId = 0;
-	BIND_ON_PAWN_READY_ID(this, ThisClass::OnFirstPawnReady, FirstPlayerId);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_PawnReady,
+	    this, [this](const FGameplayEventData& Payload)
+	{
+		constexpr int32 FirstPlayerId = 0;
+		const ABmrPawn* CallbackPawn = Cast<ABmrPawn>(Payload.Instigator);
+		if (CallbackPawn && CallbackPawn->GetPlayerId() == FirstPlayerId)
+		{
+			OnFirstPawnReady(Payload);
+		}
+	});
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
 
@@ -252,7 +257,7 @@ void UNMMPlayerControllerComponent::OnFirstPawnReady_Implementation(const FGamep
 	FGameplayEventData MenuReadyData;
 	MenuReadyData.EventTag = NmmGameplayTags::Event::MenuReady;
 	MenuReadyData.Instigator = UBmrBlueprintFunctionLibrary::GetLocalPawn();
-	UBmrGameplayMessageSubsystem::BroadcastMessage(MenuReadyData);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(MenuReadyData);
 
 	ABmrPlayerController& MyPC = GetPlayerControllerChecked();
 	if (!MyPC.HasAuthority())

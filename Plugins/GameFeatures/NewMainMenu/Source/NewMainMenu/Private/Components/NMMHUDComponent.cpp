@@ -12,15 +12,11 @@
 #include "Widgets/NewMainMenuWidget.h"
 
 // Bomber
-#include "Actors/BmrPawn.h"
-#include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
-#include "Subsystems/BmrWidgetsSubsystem.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "DalSubsystem.h"
-
-// UE
-#include "Abilities/GameplayAbilityTypes.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMHUDComponent)
 
@@ -78,7 +74,7 @@ void UNMMHUDComponent::OnUnregister()
 // Called when the NMM data asset is loaded and available
 void UNMMHUDComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
 {
-	BIND_ON_LOCAL_PAWN_READY(this, ThisClass::OnLocalPawnReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_LocalPawnReady, this, &ThisClass::OnLocalPawnReady);
 }
 
 // Called when the local player character is spawned, possessed, and replicated

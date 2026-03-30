@@ -10,15 +10,13 @@
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrCell.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
-#include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrGameStateTag.h"
+#include "Structures/BmrGameplayTags.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
+#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
-
 #if WITH_EDITOR
 #include "MyEditorUtilsLibraries/EditorUtilsLibrary.h"
 #endif
@@ -221,7 +219,7 @@ void UBmrCameraComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// Listen states to manage the tick
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	// Listen to recalculate camera location
 	if (UBmrGameViewportClient* GameViewportClient = UBmrBlueprintFunctionLibrary::GetGameViewportClient())

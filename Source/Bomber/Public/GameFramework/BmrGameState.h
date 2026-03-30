@@ -36,8 +36,8 @@ public:
 	 * - in code, use ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::{Tag}).
 	 * - In blueprints, use 'Get BMR Game State' -> 'Has Matching Gameplay Tag' nodes.
 	 * LISTEN:
-	 * - in code, call BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
-	 * - in blueprints, call 'Listen Gameplay Message' node to 'Event.GameState.Changed' tag.
+	 * - in code, call UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
+	 * - in blueprints, call 'Call Or Start Listening For Global Message' node with 'Event.GameState.Changed' tag.
 	 ********************************************************************************************* */
 public:
 	/** Returns the State Tree Component that manages the overall game state. */

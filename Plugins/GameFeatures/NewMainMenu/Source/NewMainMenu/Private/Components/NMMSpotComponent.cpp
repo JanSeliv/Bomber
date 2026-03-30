@@ -16,18 +16,16 @@
 #include "Bomber.h"
 #include "Components/BmrMapComponent.h"
 #include "Controllers/BmrPlayerController.h"
-#include "GameFramework/BmrGameState.h"
+#include "DalSubsystem.h"
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGameplayMessageSubsystem.h"
+#include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
-#include "DalSubsystem.h"
 
 // UE
-#include "Abilities/GameplayAbilityTypes.h"
 #include "DataRegistry.h"
 #include "DataRegistrySubsystem.h"
 #include "Engine/AssetManager.h"
@@ -366,7 +364,7 @@ void UNMMSpotComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* Da
 
 	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
 
-	BIND_ON_GAME_STATE_CHANGED(this, ThisClass::OnGameStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 }
 
 // Called when the current game state was changed
@@ -447,7 +445,7 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 		FGameplayEventData EventData;
 		EventData.EventTag = NmmGameplayTags::Event::CinematicPlaybackFinished;
 		EventData.Instigator = MyPC->GetPawn();
-		UBmrGameplayMessageSubsystem::BroadcastMessage(EventData);
+		UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 	}
 }
 
