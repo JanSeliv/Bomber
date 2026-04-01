@@ -50,13 +50,16 @@ FAsyncMessageHandle UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessag
 		return Handle;
 	}
 
-	// If event was already broadcast, replay cached data immediately before moving callback
+	// Replay all cached payloads for this tag to the late subscriber, one per unique instigator
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(ListenerOwner);
 	const UGlobalMessageSubsystem* Subsystem = World ? World->GetSubsystem<UGlobalMessageSubsystem>() : nullptr;
-	const FGameplayEventData* CachedPayload = Subsystem ? Subsystem->BroadcastedMessagesMap.Find(MessageTag) : nullptr;
-	if (CachedPayload)
+	const TMap<TWeakObjectPtr<const AActor>, FGameplayEventData>* CachedPayloads = Subsystem ? Subsystem->BroadcastedMessagesMap.Find(MessageTag) : nullptr;
+	if (CachedPayloads)
 	{
-		Callback(*CachedPayload);
+		for (const TPair<TWeakObjectPtr<const AActor>, FGameplayEventData>& CachedEntry : *CachedPayloads)
+		{
+			Callback(CachedEntry.Value);
+		}
 		// Fall through to bind for future broadcasts
 	}
 
@@ -109,7 +112,8 @@ void UGlobalMessageSubsystem::BroadcastGlobalMessage(const FGameplayEventData& P
 	UGlobalMessageSubsystem* Subsystem = World ? World->GetSubsystem<UGlobalMessageSubsystem>() : nullptr;
 	if (Subsystem)
 	{
-		Subsystem->BroadcastedMessagesMap.Add(Payload.EventTag, Payload);
+		TMap<TWeakObjectPtr<const AActor>, FGameplayEventData>& CachedPayloadsRef = Subsystem->BroadcastedMessagesMap.FindOrAdd(Payload.EventTag);
+		CachedPayloadsRef.Add(Payload.Instigator, Payload);
 	}
 
 	// Broadcast via engine's Async Message System
