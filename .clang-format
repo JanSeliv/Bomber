@@ -19,7 +19,7 @@ BreakTemplateDeclarations: MultiLine
 BreakBeforeBinaryOperators: All
 BreakBeforeBraces: Allman
 BreakBeforeInheritanceComma: true
-BreakInheritanceList: AfterComma
+BreakInheritanceList: BeforeComma
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: BeforeComma
