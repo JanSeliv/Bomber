@@ -24,15 +24,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetModularGameFeaturesActive(bool bEnable, const TArray<FName>& GameFeatures);
 
-	/** Returns the module name from the specified asset, if it is part of a game feature. */
+	/** Returns the content module name from the specified asset package, e.g. "/GameFeatureModule/" from a content asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
-	static FString GetModuleNameFromAsset(const UObject* Asset);
+	static FString GetModuleNameByAsset(const UObject* Asset);
+
+	/** Returns the module name from any object by resolving its class package.
+	 * For C++ objects, extracts from /Script/ package (e.g. "GameFeatureModuleRuntime").
+	 * For Blueprint objects, extracts content root from class package (e.g. "GameFeatureModule"). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static FString GetModuleNameByObject(const UObject* Object);
 
 	/** Returns true if the given object belongs to the same game feature plugin as the specified GameFeatureData.
-	 * For content objects (Blueprints, Data Assets), compares package root paths directly.
-	 * For C++ runtime objects (subsystems, components), resolves the class module name against the plugin content root. */
+	 * Compares the object's module name against the plugin content root. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static bool IsInGameFeatureModule(const UObject* Object, const class UGameFeatureData* GameFeatureData);
+
+	/** Returns true if the given object belongs to any registered game feature plugin.
+	 * For C++ objects, checks module name against registered features; for Blueprint objects, checks class content root. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static bool IsInAnyGameFeatureModule(const UObject* Object);
 
 	/** Returns names of all registered Modular Game Feature plugins
 	 * Is mostly used by `meta = (GetOptions = "MyUtils.ModularGameFeaturePluginUtils.GetAllRegisteredModularGameFeatures"))` */

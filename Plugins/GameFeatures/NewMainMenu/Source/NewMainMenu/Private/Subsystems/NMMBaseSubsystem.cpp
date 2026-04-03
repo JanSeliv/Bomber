@@ -64,11 +64,9 @@ bool UNMMBaseSubsystem::HasCinematicRows()
  * Overrides
  ********************************************************************************************* */
 
-// Is called when the world is initialized
-void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
+// Subscribes to game state events and Data Registry changes
+void UNMMBaseSubsystem::OnGameFeatureInitialize_Implementation()
 {
-	Super::OnWorldBeginPlay(InWorld);
-
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	// Listen for DR_Cinematics changes to transition between BasicMenu and Idle when map MGF injects or removes rows
@@ -91,11 +89,9 @@ void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 }
 
 // Clears all transient data contained in this subsystem
-void UNMMBaseSubsystem::OnWorldEndPlay(UWorld& InWorld)
+void UNMMBaseSubsystem::OnGameFeatureDeinitialize_Implementation()
 {
 	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
-
-	Super::OnWorldEndPlay(InWorld);
 }
 
 /*********************************************************************************************

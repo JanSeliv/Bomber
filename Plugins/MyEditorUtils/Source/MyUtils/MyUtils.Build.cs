@@ -12,6 +12,7 @@ public class MyUtils : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core"
+				, "GameFeatures" // Created UModularGameFeatureWorldSubsystem, UModularGameFeaturePluginUtils
 				, "ModelViewViewModel" // Created MVVM base classes
 				, "AsyncMessageSystem" // Created UGlobalMessageSubsystem (Aka Lyra Gameplay Message Router)
 			}
@@ -24,7 +25,6 @@ public class MyUtils : ModuleRules
 				, "MovieScene", "MovieSceneTracks" // UCinematicUtils
 				, "EnhancedInput", "InputCore" // UInputUtilsLibrary
 				, "NavigationSystem", "AIModule" // UAIUtilsLibrary
-				, "GameFeatures" // UModularGameFeaturePluginUtils
 				, "GameplayTags", "GameplayAbilities" // Tags
 			}
 		);

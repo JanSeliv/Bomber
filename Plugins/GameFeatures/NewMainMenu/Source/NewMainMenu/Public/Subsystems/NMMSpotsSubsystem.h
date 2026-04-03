@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Subsystems/WorldSubsystem.h"
+#include "Subsystems/ModularGameFeaturePluginSubsystem.h"
 
 #include "NMMSpotsSubsystem.generated.h"
 
@@ -15,7 +15,7 @@ enum class ENMMState : uint8;
  * Manages Main Menu cinematic spots and keeps their data.
  */
 UCLASS(BlueprintType, Blueprintable)
-class NEWMAINMENU_API UNMMSpotsSubsystem : public UWorldSubsystem
+class NEWMAINMENU_API UNMMSpotsSubsystem : public UModularGameFeaturePluginSubsystem
 {
 	GENERATED_BODY()
 
@@ -98,11 +98,11 @@ protected:
 	 * Overrides
 	 ********************************************************************************************* */
 protected:
-	/** Is called when the world is initialized. */
-	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	/** Subscribes to menu state and game state events */
+	virtual void OnGameFeatureInitialize_Implementation() override;
 
-	/** Clears all transient data contained in this subsystem. */
-	virtual void OnWorldEndPlay(UWorld& InWorld) override;
+	/** Clears all transient data contained in this subsystem */
+	virtual void OnGameFeatureDeinitialize_Implementation() override;
 
 	/*********************************************************************************************
 	 * Events

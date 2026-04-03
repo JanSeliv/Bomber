@@ -1,8 +1,8 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
-#include "Subsystems/WorldSubsystem.h"
+#include "Subsystems/ModularGameFeaturePluginSubsystem.h"
 
 // NMM
 #include "Data/NMMTypes.h" // ENMMCameraRailTransitionState
@@ -15,7 +15,7 @@ enum class ENMMState : uint8;
  * Manages camera possessing and transitions in the Main Menu
  */
 UCLASS(BlueprintType, Blueprintable)
-class NEWMAINMENU_API UNMMCameraSubsystem : public UTickableWorldSubsystem
+class NEWMAINMENU_API UNMMCameraSubsystem : public UModularGameFeaturePluginSubsystem
 {
 	GENERATED_BODY()
 
@@ -50,12 +50,13 @@ public:
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
-protected:
-	/** Is called when the world is initialized. */
-	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+public:
+	/** Enables ticking for camera transitions */
+	virtual FORCEINLINE bool IsTickable() const override { return true; }
 
-	/** Return the stat id to use for this tickable. */
-	virtual TStatId GetStatId() const override;
+protected:
+	/** Subscribes to menu state events */
+	virtual void OnGameFeatureInitialize_Implementation() override;
 
 	/** Is called every frame to move the camera. */
 	virtual void Tick(float DeltaTime) override;

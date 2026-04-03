@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Subsystems/NMMCameraSubsystem.h"
 
@@ -129,17 +129,10 @@ void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
  * Overrides
  ********************************************************************************************* */
 
-void UNMMCameraSubsystem::OnWorldBeginPlay(UWorld& InWorld)
+// Subscribes to menu state events
+void UNMMCameraSubsystem::OnGameFeatureInitialize_Implementation()
 {
-	Super::OnWorldBeginPlay(InWorld);
-
 	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
-}
-
-// Return the stat id to use for this tickable
-TStatId UNMMCameraSubsystem::GetStatId() const
-{
-	RETURN_QUICK_DECLARE_CYCLE_STAT(ThisClass, STATGROUP_Tickables);
 }
 
 // Is called every frame to move the camera

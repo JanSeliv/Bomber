@@ -208,23 +208,20 @@ void UNMMSpotsSubsystem::HandleUnavailableMenuSpot()
  * Overrides
  ********************************************************************************************* */
 
-void UNMMSpotsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
+// Subscribes to menu state and game state events
+void UNMMSpotsSubsystem::OnGameFeatureInitialize_Implementation()
 {
-	Super::OnWorldBeginPlay(InWorld);
-
 	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 }
 
 // Clears all transient data contained in this subsystem
-void UNMMSpotsSubsystem::OnWorldEndPlay(UWorld& InWorld)
+void UNMMSpotsSubsystem::OnGameFeatureDeinitialize_Implementation()
 {
 	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
 
 	MainMenuSpots.Empty();
-
-	Super::OnWorldEndPlay(InWorld);
 }
 
 /*********************************************************************************************

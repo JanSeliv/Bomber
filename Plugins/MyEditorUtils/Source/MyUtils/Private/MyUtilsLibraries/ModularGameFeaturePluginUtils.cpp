@@ -20,8 +20,26 @@ bool UModularGameFeaturePluginUtils::IsModularGameFeatureActive(FName GameFeatur
 		return false;
 	}
 
+	const FString NameStr = GameFeatureName.ToString();
 	constexpr bool bCheckForActivating = true;
-	return UGameFeaturesSubsystem::Get().IsGameFeaturePluginActiveByName(GameFeatureName.ToString(), bCheckForActivating);
+
+	// Try direct plugin name match first
+	if (UGameFeaturesSubsystem::Get().IsGameFeaturePluginActiveByName(NameStr, bCheckForActivating))
+	{
+		return true;
+	}
+
+	// Fallback: module name might differ from plugin name (e.g. "GameFeatureModuleRuntime" vs "GameFeatureModule"), resolve against registered features
+	const TArray<FString> RegisteredFeatures = GetAllRegisteredModularGameFeatures();
+	for (const FString& FeatureName : RegisteredFeatures)
+	{
+		if (NameStr.StartsWith(FeatureName))
+		{
+			return UGameFeaturesSubsystem::Get().IsGameFeaturePluginActiveByName(FeatureName, bCheckForActivating);
+		}
+	}
+
+	return false;
 }
 
 // Enables or disable all game features
@@ -77,7 +95,7 @@ TArray<FString> UModularGameFeaturePluginUtils::GetAllRegisteredModularGameFeatu
 }
 
 // Returns the module name from the specified asset, if it is part of a game feature
-FString UModularGameFeaturePluginUtils::GetModuleNameFromAsset(const UObject* Asset)
+FString UModularGameFeaturePluginUtils::GetModuleNameByAsset(const UObject* Asset)
 {
 	FString GameFeatureName;
 	if (!Asset)
@@ -90,6 +108,29 @@ FString UModularGameFeaturePluginUtils::GetModuleNameFromAsset(const UObject* As
 	return SecondSlashIdx != INDEX_NONE ? OriginalPackageName.Left(SecondSlashIdx + 1) : FString();
 }
 
+// Returns the module name from any object by resolving its class package
+FString UModularGameFeaturePluginUtils::GetModuleNameByObject(const UObject* Object)
+{
+	if (!Object)
+	{
+		return FString();
+	}
+
+	// For C++ objects, extract module name from /Script/ class package
+	const FString ClassPackageName = GetNameSafe(Object->GetClass()->GetOutermost());
+	static const FString ScriptPrefix = TEXT("/Script/");
+	if (ClassPackageName.StartsWith(ScriptPrefix))
+	{
+		return ClassPackageName.RightChop(ScriptPrefix.Len());
+	}
+
+	// For Blueprint objects, extract content root from class package
+	FString ModuleName = GetModuleNameByAsset(Object->GetClass());
+	ModuleName.RemoveFromStart(TEXT("/"));
+	ModuleName.RemoveFromEnd(TEXT("/"));
+	return ModuleName;
+}
+
 // Returns true if the given object belongs to the same game feature plugin as the specified GameFeatureData
 bool UModularGameFeaturePluginUtils::IsInGameFeatureModule(const UObject* Object, const UGameFeatureData* GameFeatureData)
 {
@@ -98,38 +139,38 @@ bool UModularGameFeaturePluginUtils::IsInGameFeatureModule(const UObject* Object
 		return false;
 	}
 
-	// Get content root from GameFeatureData, e.g. "/GameFeatureModule/"
-	const FString PluginContentRoot = GetModuleNameFromAsset(GameFeatureData);
-	if (PluginContentRoot.IsEmpty())
+	// Extract plugin name from GameFeatureData content root, e.g. "GameFeatureModule" from "/GameFeatureModule/"
+	FString PluginName = GetModuleNameByAsset(GameFeatureData);
+	if (PluginName.IsEmpty())
 	{
 		return false;
 	}
-
-	// Content path comparison works for Blueprint assets, Data Assets in the same content folder
-	const FString ObjectContentRoot = GetModuleNameFromAsset(Object);
-	if (ObjectContentRoot == PluginContentRoot)
-	{
-		return true;
-	}
-
-	// For C++ runtime objects (subsystems, components), resolve from the class module package
-	const FString ClassPackageName = GetNameSafe(Object->GetClass()->GetOutermost());
-	static const FString ScriptPrefix = TEXT("/Script/");
-	if (!ClassPackageName.StartsWith(ScriptPrefix))
-	{
-		return false;
-	}
-
-	// Extract C++ module name, e.g. "GameFeatureModuleRuntime" from "/Script/GameFeatureModuleRuntime"
-	const FString CppModuleName = ClassPackageName.RightChop(ScriptPrefix.Len());
-
-	// Extract plugin name from content root, e.g. "GameFeatureModule" from "/GameFeatureModule/"
-	FString PluginName = PluginContentRoot;
 	PluginName.RemoveFromStart(TEXT("/"));
 	PluginName.RemoveFromEnd(TEXT("/"));
 
-	// C++ module name starts with the plugin name (e.g. "GameFeatureModuleRuntime" starts with "GameFeatureModule")
-	return CppModuleName.StartsWith(PluginName);
+	const FString ModuleName = GetModuleNameByObject(Object);
+	return !ModuleName.IsEmpty() && ModuleName.StartsWith(PluginName);
+}
+
+// Returns true if the given object belongs to any registered game feature plugin
+bool UModularGameFeaturePluginUtils::IsInAnyGameFeatureModule(const UObject* Object)
+{
+	const FString ModuleName = GetModuleNameByObject(Object);
+	if (ModuleName.IsEmpty())
+	{
+		return false;
+	}
+
+	const TArray<FString> RegisteredFeatures = GetAllRegisteredModularGameFeatures();
+	for (const FString& FeatureName : RegisteredFeatures)
+	{
+		if (ModuleName.StartsWith(FeatureName))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // Unloads the specified asset from memory
@@ -140,7 +181,7 @@ void UModularGameFeaturePluginUtils::UnloadAsset(UObject* AssetToUnload, bool bU
 		return;
 	}
 
-	const FString ModuleMount = GetModuleNameFromAsset(AssetToUnload);
+	const FString ModuleMount = GetModuleNameByAsset(AssetToUnload);
 
 	AssetToUnload->ClearFlags(RF_Standalone);
 	AssetToUnload->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);
