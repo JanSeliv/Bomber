@@ -1,19 +1,18 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #include "Subsystems/BmrWidgetsSubsystem.h"
 
 // Bomber
 #include "Controllers/BmrPlayerController.h"
 #include "DataAssets/BmrUIDataAsset.h"
+#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
 #include "Components/Viewport.h"
-#include "GameFeatureData.h"
 #include "GameFeaturesSubsystem.h"
-#include "Misc/PackageName.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrWidgetsSubsystem)
 
@@ -258,27 +257,13 @@ void UBmrWidgetsSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* Gam
 {
 	checkf(GameFeatureData, TEXT("ERROR: [%i] %hs:\n'GameFeatureData' is null!"), __LINE__, __FUNCTION__);
 
-	FString OutModuleRootPath;
-	FString OutPackagePath;
-	FString OutPackageName;
-	FPackageName::SplitLongPackageName(GameFeatureData->GetPathName(), OutModuleRootPath, OutPackagePath, OutPackageName);
-
 	FGameplayTagContainer WidgetsOwnedByModule = FGameplayTagContainer::EmptyContainer;
 	for (const TPair<FGameplayTag, FBmrManageableWidgetsContainer>& It : AllManageableWidgets)
 	{
 		for (const UUserWidget* WidgetInstanceIt : It.Value.WidgetInstances)
 		{
 			const TSubclassOf<UUserWidget> WidgetClassIt = WidgetInstanceIt ? WidgetInstanceIt->GetClass() : nullptr;
-			if (!WidgetClassIt)
-			{
-				continue;
-			}
-
-			FString OutWidgetRootPath;
-			FString OutWidgetPath;
-			FString OutWidgetName;
-			FPackageName::SplitLongPackageName(WidgetClassIt->GetPathName(), OutWidgetRootPath, OutWidgetPath, OutWidgetName);
-			if (OutWidgetRootPath == OutModuleRootPath)
+			if (UModularGameFeaturePluginUtils::IsInGameFeatureModule(WidgetClassIt, GameFeatureData))
 			{
 				WidgetsOwnedByModule.AddTagFast(It.Key);
 				break;

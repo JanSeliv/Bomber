@@ -6,6 +6,7 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 // Unreal
+#include "GameFeatureData.h"
 #include "GameFeaturesSubsystem.h"
 #include "UObject/Package.h"
 
@@ -87,6 +88,48 @@ FString UModularGameFeaturePluginUtils::GetModuleNameFromAsset(const UObject* As
 	const FString OriginalPackageName = GetNameSafe(Asset->GetOutermost());
 	const int32 SecondSlashIdx = OriginalPackageName.Find(TEXT("/"), ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
 	return SecondSlashIdx != INDEX_NONE ? OriginalPackageName.Left(SecondSlashIdx + 1) : FString();
+}
+
+// Returns true if the given object belongs to the same game feature plugin as the specified GameFeatureData
+bool UModularGameFeaturePluginUtils::IsInGameFeatureModule(const UObject* Object, const UGameFeatureData* GameFeatureData)
+{
+	if (!Object || !GameFeatureData)
+	{
+		return false;
+	}
+
+	// Get content root from GameFeatureData, e.g. "/GameFeatureModule/"
+	const FString PluginContentRoot = GetModuleNameFromAsset(GameFeatureData);
+	if (PluginContentRoot.IsEmpty())
+	{
+		return false;
+	}
+
+	// Content path comparison works for Blueprint assets, Data Assets in the same content folder
+	const FString ObjectContentRoot = GetModuleNameFromAsset(Object);
+	if (ObjectContentRoot == PluginContentRoot)
+	{
+		return true;
+	}
+
+	// For C++ runtime objects (subsystems, components), resolve from the class module package
+	const FString ClassPackageName = GetNameSafe(Object->GetClass()->GetOutermost());
+	static const FString ScriptPrefix = TEXT("/Script/");
+	if (!ClassPackageName.StartsWith(ScriptPrefix))
+	{
+		return false;
+	}
+
+	// Extract C++ module name, e.g. "GameFeatureModuleRuntime" from "/Script/GameFeatureModuleRuntime"
+	const FString CppModuleName = ClassPackageName.RightChop(ScriptPrefix.Len());
+
+	// Extract plugin name from content root, e.g. "GameFeatureModule" from "/GameFeatureModule/"
+	FString PluginName = PluginContentRoot;
+	PluginName.RemoveFromStart(TEXT("/"));
+	PluginName.RemoveFromEnd(TEXT("/"));
+
+	// C++ module name starts with the plugin name (e.g. "GameFeatureModuleRuntime" starts with "GameFeatureModule")
+	return CppModuleName.StartsWith(PluginName);
 }
 
 // Unloads the specified asset from memory

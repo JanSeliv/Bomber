@@ -28,6 +28,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static FString GetModuleNameFromAsset(const UObject* Asset);
 
+	/** Returns true if the given object belongs to the same game feature plugin as the specified GameFeatureData.
+	 * For content objects (Blueprints, Data Assets), compares package root paths directly.
+	 * For C++ runtime objects (subsystems, components), resolves the class module name against the plugin content root. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static bool IsInGameFeatureModule(const UObject* Object, const class UGameFeatureData* GameFeatureData);
+
 	/** Returns names of all registered Modular Game Feature plugins
 	 * Is mostly used by `meta = (GetOptions = "MyUtils.ModularGameFeaturePluginUtils.GetAllRegisteredModularGameFeatures"))` */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
