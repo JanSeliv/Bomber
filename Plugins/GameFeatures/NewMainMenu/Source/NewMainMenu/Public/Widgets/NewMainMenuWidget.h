@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -53,6 +53,9 @@ protected:
 	/** Called after the underlying slate widget is constructed.
 	 * May be called multiple times due to adding and removing from the hierarchy. */
 	virtual void NativeConstruct() override;
+
+	/** Called when the widget is removed from the viewport. */
+	virtual void NativeDestruct() override;
 
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

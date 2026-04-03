@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -102,7 +102,7 @@ protected:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 	/** Clears all transient data contained in this subsystem. */
-	virtual void Deinitialize() override;
+	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 
 	/*********************************************************************************************
 	 * Events

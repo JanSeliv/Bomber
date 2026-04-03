@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Components/NMMPlayerControllerComponent.h"
 
@@ -157,11 +157,19 @@ void UNMMPlayerControllerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	UDalSubsystem::Get().ListenForDataAsset<UNMMDataAsset>(this, &ThisClass::OnDataAssetLoaded);
+
+	// Clear stale MenuUnloaded from previous session so fresh load does not replay old unload event
+	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuUnloaded, this);
 }
 
 // Clears all transient data created by this component
 void UNMMPlayerControllerComponent::OnUnregister()
 {
+	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
+
+	// Clear cached MenuReady so late-binding listeners receive fresh data on next menu load
+	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuReady, this);
+
 	// Notify that Main Menu is being unloaded before any cleanup
 	ABmrPlayerController* MyPC = GetPlayerController();
 	const ABmrPawn* LocalPawn = MyPC ? MyPC->GetPawn<ABmrPawn>() : nullptr;

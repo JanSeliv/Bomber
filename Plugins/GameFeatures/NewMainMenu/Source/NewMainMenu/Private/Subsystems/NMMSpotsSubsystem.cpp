@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Subsystems/NMMSpotsSubsystem.h"
 
@@ -218,11 +218,13 @@ void UNMMSpotsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 }
 
 // Clears all transient data contained in this subsystem
-void UNMMSpotsSubsystem::Deinitialize()
+void UNMMSpotsSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
+	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
+
 	MainMenuSpots.Empty();
 
-	Super::Deinitialize();
+	Super::OnWorldEndPlay(InWorld);
 }
 
 /*********************************************************************************************

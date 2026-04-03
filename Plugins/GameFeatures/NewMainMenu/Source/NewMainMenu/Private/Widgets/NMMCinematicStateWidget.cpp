@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Widgets/NMMCinematicStateWidget.h"
 
@@ -58,6 +58,15 @@ void UNMMCinematicStateWidget::NativeConstruct()
 		SkipCinematicButton->SetClickMethod(EButtonClickMethod::PreciseClick);
 		SkipCinematicButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnCinematicSkipFinished);
 	}
+}
+
+// Called when the widget is removed from the viewport
+void UNMMCinematicStateWidget::NativeDestruct()
+{
+	// Clear cached CinematicSkipped so late-binding listeners receive fresh data on next menu load
+	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::CinematicSkipped, this);
+
+	Super::NativeDestruct();
 }
 
 // Called when the Main Menu state was changed

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Components/NMMSpotComponent.h"
 
@@ -190,6 +190,11 @@ void UNMMSpotComponent::BeginPlay()
 // Clears all transient data created by this component
 void UNMMSpotComponent::OnUnregister()
 {
+	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
+
+	// Clear cached CinematicPlaybackFinished so late-binding listeners receive fresh data on next menu load
+	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::CinematicPlaybackFinished, this);
+
 	CinematicRow = FBmrCinematicRow::Empty;
 
 	// Kill current cinematic player

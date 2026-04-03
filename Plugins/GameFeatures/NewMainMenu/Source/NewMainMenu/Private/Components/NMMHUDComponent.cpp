@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Components/NMMHUDComponent.h"
 
@@ -56,6 +56,8 @@ void UNMMHUDComponent::BeginPlay()
 // Clears all transient data created by this component
 void UNMMHUDComponent::OnUnregister()
 {
+	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
+
 	// --- Destroy Main Menu widgets
 
 	if (UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem())

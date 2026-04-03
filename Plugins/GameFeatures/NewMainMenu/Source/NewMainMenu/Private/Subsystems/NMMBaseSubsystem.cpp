@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Subsystems/NMMBaseSubsystem.h"
 
@@ -91,9 +91,11 @@ void UNMMBaseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 }
 
 // Clears all transient data contained in this subsystem
-void UNMMBaseSubsystem::Deinitialize()
+void UNMMBaseSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
-	Super::Deinitialize();
+	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
+
+	Super::OnWorldEndPlay(InWorld);
 }
 
 /*********************************************************************************************

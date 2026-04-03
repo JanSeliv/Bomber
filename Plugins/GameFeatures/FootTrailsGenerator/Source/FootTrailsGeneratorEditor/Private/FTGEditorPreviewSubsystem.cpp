@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "FTGEditorPreviewSubsystem.h"
 
@@ -52,6 +52,8 @@ void UFTGEditorPreviewSubsystem::OnBeginPlay(UWorld* World, FWorldInitialization
 // Is used to destroy the foot trails generator
 void UFTGEditorPreviewSubsystem::OnEndPlay(UWorld* World, bool bArg, bool bCond)
 {
+	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
+
 	if (IsValid(FootTrailGenerator))
 	{
 		FootTrailGenerator->DestroyComponent();

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Widgets/NewMainMenuWidget.h"
 
@@ -74,6 +74,16 @@ void UNewMainMenuWidget::NativeConstruct()
 	}
 }
 
+// Called when the widget is removed from the viewport
+void UNewMainMenuWidget::NativeDestruct()
+{
+	// Clear cached PlayButtonPressed so late-binding listeners receive fresh data on next menu load
+	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::PlayButtonPressed, this);
+
+	Super::NativeDestruct();
+}
+
+// Called when the Main Menu state was changed
 void UNewMainMenuWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
 {
 	const bool bIsBasicMenu = NewState == ENMMState::BasicMenu;
