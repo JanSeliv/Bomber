@@ -20,7 +20,6 @@ public:
 	static inline const FName CompletedPinName = TEXT("Completed");
 	static inline const FName OnMessageReceivedPinName = TEXT("OnMessageReceived");
 	static inline const FName PayloadPinName = TEXT("MessagePayload");
-	static inline const FName HandlePinName = TEXT("Handle");
 
 	/** Returns the name of the native function to call */
 	static FName GetNativeFunctionName();

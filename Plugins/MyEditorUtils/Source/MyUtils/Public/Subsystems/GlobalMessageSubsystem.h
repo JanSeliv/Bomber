@@ -14,9 +14,8 @@
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnGlobalMessageReceived, const FGameplayEventData&, Payload);
 
 /**
- * World subsystem providing CallOr pattern on top of engine's Async Message System.
+ * World subsystem which uses internally and extends Unreal's Async Message System (aka Lyra Gameplay Message Router).
  * Caches broadcast events and replays them to late subscribers, eliminating the need for per-event readiness checks.
- * Uses internally engine's Async Message System (aka Lyra Gameplay Message Router)
  */
 UCLASS(BlueprintType, Blueprintable)
 class MYUTILS_API UGlobalMessageSubsystem : public UWorldSubsystem
@@ -37,27 +36,19 @@ public:
 	 ********************************************************************************************* */
 public:
 	/** Blueprint-only listener node, wraps CallOrStartListeningForGlobalMessage.
-	 * In code use the templated CallOrStartListeningForGlobalMessage() instead.
-	 * Returns handle that can be used to unbind the listener later */
+	 * In code use the templated CallOrStartListeningForGlobalMessage() instead */
 	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (DisplayName = "Call Or Start Listening For Global Message", BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject"))
-	static FAsyncMessageHandle BPCallOrStartListeningForGlobalMessage(UObject* WorldContextObject, FGameplayTag MessageTag, const FOnGlobalMessageReceived& Completed);
+	static void BPCallOrStartListeningForGlobalMessage(UObject* WorldContextObject, FGameplayTag MessageTag, const FOnGlobalMessageReceived& Completed);
 
 	/** Subscribes to an event by function-callback.
 	 * If the event was already broadcast, fires the callback immediately with the cached data.
-	 * Returns handle that can be used to unbind the listener later.
 	 * Example: UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(Tag, this, &ThisClass::OnEvent); */
 	template <typename TOwner>
-	static FAsyncMessageHandle CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, TOwner* Object, void (TOwner::*Function)(const FGameplayEventData&));
+	static void CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, TOwner* Object, void (TOwner::*Function)(const FGameplayEventData&));
 
 	/** Subscribes to an event via lambda-callback with weak object safety.
-	 * Returns handle that can be used to unbind the listener later.
 	 * Example: UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(Tag, this, [this](const FGameplayEventData& Payload){ ... }); */
-	static FAsyncMessageHandle CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, const UObject* ListenerOwner, TFunction<void(const FGameplayEventData&)>&& Callback);
-
-	/** Unbinds a listener so it will no longer receive callbacks.
-	 * Uses the handle returned by CallOrStartListeningForGlobalMessage */
-	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
-	static void StopListeningForGlobalMessage(const FAsyncMessageHandle& Handle, const UObject* OptionalWorldContext = nullptr);
+	static void CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, const UObject* ListenerOwner, TFunction<void(const FGameplayEventData&)>&& Callback);
 
 	/*********************************************************************************************
 	 * Broadcast
@@ -68,6 +59,27 @@ public:
 	 * Is optional wrapper, engine's QueueMessageForBroadcast can be used directly if CallOr caching and ASC forwarding are not needed */
 	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static void BroadcastGlobalMessage(const FGameplayEventData& Payload, const UObject* OptionalWorldContext = nullptr);
+
+	/*********************************************************************************************
+	 * Unbind
+	 ********************************************************************************************* */
+public:
+	/** Unbinds a single event for the given listener while keeping all other events this listener is subscribed to.
+	 * Use when the listener remains alive but no longer needs this specific event */
+	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "ListenerOwner", CallableWithoutWorldContext))
+	static void StopListeningForGlobalMessage(FGameplayTag MessageTag, const UObject* ListenerOwner);
+
+	/** Unbinds all events for the given listener at once.
+	 * Use at the end of the listener's lifetime (EndPlay, OnUnregister, Deinitialize) when the object is about to be destroyed */
+	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "ListenerOwner", CallableWithoutWorldContext))
+	static void StopListeningForAllGlobalMessages(const UObject* ListenerOwner);
+
+	/** Clears all cached broadcast data for the given tag, restarting the logical session.
+	 * Useful for events owned by modular game features that can unload and need to clear their cache,
+	 * so when the feature loads again, early-binding listeners receive fresh data instead of stale payloads from the previous activation.
+	 * Should be called when the broadcaster's lifecycle restarts within the same world session (e.g., in MGF OnDeactivating) */
+	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static void ClearCachedMessages(FGameplayTag MessageTag, const UObject* OptionalWorldContext = nullptr);
 
 	/*********************************************************************************************
 	 * Overrides
@@ -87,14 +99,17 @@ protected:
 	 * - Different instigators accumulate (e.g., 4 pawns broadcasting player state change each get their own cached entry).
 	 * When a late subscriber binds, all cached entries for the tag are replayed, so listeners can filter the correct instigator */
 	TMap<FGameplayTag, TMap<TWeakObjectPtr<const AActor> /*Instigator*/, FGameplayEventData>> BroadcastedMessagesMap;
+
+	/** Internal registry mapping listener owners to their engine handles per tag, enabling unbind-by-owner. */
+	TMap<TWeakObjectPtr<const UObject> /*ListenerOwner*/, TMap<FGameplayTag, FAsyncMessageHandle>> ListenerHandlesMap;
 };
 
 // Subscribes to a gameplay event via member function with weak object safety
 template <typename TOwner>
-FAsyncMessageHandle UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, TOwner* Object, void (TOwner::*Function)(const FGameplayEventData&))
+void UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(FGameplayTag MessageTag, TOwner* Object, void (TOwner::*Function)(const FGameplayEventData&))
 {
 	TWeakObjectPtr<TOwner> WeakObject(Object);
-	return CallOrStartListeningForGlobalMessage(MessageTag, Object, [WeakObject, Function](const FGameplayEventData& Payload)
+	CallOrStartListeningForGlobalMessage(MessageTag, Object, [WeakObject, Function](const FGameplayEventData& Payload)
 	{
 		if (TOwner* StrongObject = WeakObject.Get())
 		{

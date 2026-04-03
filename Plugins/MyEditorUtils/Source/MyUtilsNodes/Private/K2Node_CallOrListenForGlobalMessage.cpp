@@ -6,7 +6,6 @@
 #include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
-#include "AsyncMessageHandle.h"
 #include "BlueprintActionDatabaseRegistrar.h"
 #include "BlueprintNodeSpawner.h"
 #include "K2Node_CallFunction.h"
@@ -35,7 +34,6 @@ void UK2Node_CallOrListenForGlobalMessage::AllocateDefaultPins()
 
 	CreatePin(EGPD_Input, UEdGraphSchema_K2::PC_Struct, FGameplayTag::StaticStruct(), MessageTagPinName);
 	CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Struct, FGameplayEventData::StaticStruct(), PayloadPinName);
-	CreatePin(EGPD_Output, UEdGraphSchema_K2::PC_Struct, FAsyncMessageHandle::StaticStruct(), HandlePinName);
 }
 
 FText UK2Node_CallOrListenForGlobalMessage::GetTooltipText() const
@@ -123,18 +121,11 @@ void UK2Node_CallOrListenForGlobalMessage::ExpandNode(FKismetCompilerContext& Co
 		}
 	}
 
-	// Connect Then output exec: fires immediately after the function call so users can cache the Handle
+	// Connect Then output exec
 	{
 		UEdGraphPin* CallThenPin = CallListenNode->GetThenPin();
 		UEdGraphPin* OurThenPin = FindPin(UEdGraphSchema_K2::PN_Then);
 		bIsErrorFree &= CallThenPin && OurThenPin && CompilerContext.MovePinLinksToIntermediate(*OurThenPin, *CallThenPin).CanSafeConnect();
-	}
-
-	// Connect Handle output: function return value → Handle output pin
-	{
-		UEdGraphPin* CallReturnPin = CallListenNode->GetReturnValuePin();
-		UEdGraphPin* OurHandlePin = FindPin(HandlePinName);
-		bIsErrorFree &= CallReturnPin && OurHandlePin && CompilerContext.MovePinLinksToIntermediate(*OurHandlePin, *CallReturnPin).CanSafeConnect();
 	}
 
 	// Connect delegate
