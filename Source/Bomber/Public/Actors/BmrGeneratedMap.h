@@ -114,6 +114,11 @@ public:
 	/** Internal method called on both server and client to increment the replication token whenever any level actor is spawned. */
 	void IncrementReplicationToken();
 
+	/** Internal client-only callback when GenerateLevelActorsToken is replicated from server.
+	 * Resets the local token when a new generation starts (token=0), or catches up if all actors arrived before the final token packet. */
+	UFUNCTION()
+	void OnRep_GenerateLevelActorsToken();
+
 	/*********************************************************************************************
 	 * Destroy
 	 ********************************************************************************************* */
@@ -225,7 +230,7 @@ protected:
 	/** Is exposed to track when the Generate Level Actors is completed on the client.
 	 * Server updates this token on every Generate Level Actors call.
 	 * Client monitors updates and confirms when tokens match to broadcast the On Generated Level Actors event. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "[Bomber]", meta = (BlueprintProtected))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, ReplicatedUsing = OnRep_GenerateLevelActorsToken, Transient, Category = "[Bomber]", meta = (BlueprintProtected))
 	int32 GenerateLevelActorsToken = 0;
 
 	/** Is server-only, true while the level actors are being generated, is useful to avoid reentry.

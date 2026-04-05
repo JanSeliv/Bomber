@@ -392,6 +392,23 @@ void ABmrGeneratedMap::IncrementReplicationToken()
 	}
 }
 
+// Internal client-only callback when GenerateLevelActorsToken is replicated from server
+void ABmrGeneratedMap::OnRep_GenerateLevelActorsToken()
+{
+	if (GenerateLevelActorsToken == 0)
+	{
+		// Server started a new generation, reset local token to count from 0
+		MapComponents.LocalReplicationToken = 0;
+		return;
+	}
+
+	// Catch-up: all actors arrived before the token packet, so the match in IncrementReplicationToken was missed
+	if (MapComponents.LocalReplicationToken >= GenerateLevelActorsToken)
+	{
+		OnGeneratedLevelActors.Broadcast();
+	}
+}
+
 /*********************************************************************************************
  * Destroy
  ********************************************************************************************* */
@@ -849,6 +866,11 @@ void ABmrGeneratedMap::GenerateLevelActors()
 		DestroyLevelActorByHandle(MapComponentsToDestroy[Idx].PoolObjectHandle);
 	}
 	checkf(MapComponentsToDestroy.IsEmpty(), TEXT("ERROR: [%i] %hs:\n'MapComponentsToDestroy' is not empty after removing all!"), __LINE__, __FUNCTION__);
+
+	// Reset both tokens so the next generation counts from 0 on server and signals clients to reset too
+	MapComponents.LocalReplicationToken = 0;
+	GenerateLevelActorsToken = 0;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsToken, this);
 
 	AdditionalDangerousCells.Reset();
 
