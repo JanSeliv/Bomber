@@ -325,6 +325,11 @@ void UBmrSoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	USoundMix* MainSoundMix = UBmrSoundsDataAsset::Get().GetMainSoundMix();
 	UGameplayStatics::SetBaseSoundMix(&InWorld, MainSoundMix);
 
+	// Apply saved volume settings from config
+	SetMasterVolume(MasterVolume);
+	SetMusicVolume(MusicVolume);
+	SetSFXVolume(SFXVolume);
+
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_LocalPawnReady, this, &ThisClass::OnLocalPlayerStateReady);
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
