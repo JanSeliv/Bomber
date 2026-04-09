@@ -172,6 +172,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static const UClass* GetActorClassByActorType(EBmrActorType ActorType);
 
+	/** Returns the row struct type associated with the given actor type via asset registry lookup (no DA loading) */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const UScriptStruct* GetActorRowTypeByActorType(EBmrActorType ActorType);
+
 	/** Returns the data asset classes for the specified actor types from asset registry tags without loading */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static void GetDataAssetsByActorTypes(TArray<TSubclassOf<class UDalPrimaryDataAsset>>& OutDataAssetClasses,

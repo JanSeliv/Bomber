@@ -20,8 +20,8 @@ struct BOMBER_API FBmrPowerupTag : public FGameplayTag
 	static const FBmrPowerupTag Bomb; // Increases the number of bombs that can be placed at once
 	static const FBmrPowerupTag Fire; // Increases the explosion radius of bombs
 
-	/** Returns all powerup tags, useful for iterating, wrapped in a function for deferred allocation on first call. */
-	static const FGameplayTagContainer& GetAll();
+	/** Returns all powerup tags gathered from Data Registry, falls back to hardcoded tags if DR is not loaded yet */
+	static FGameplayTagContainer GetAll();
 
 	/** Default constructor. */
 	FBmrPowerupTag() = default;

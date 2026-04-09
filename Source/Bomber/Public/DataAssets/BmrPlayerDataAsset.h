@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -10,103 +10,8 @@
 #include "BmrPlayerDataAsset.generated.h"
 
 /**
- * Determines each mesh to attach.
- */
-USTRUCT(BlueprintType)
-struct BOMBER_API FBmrAttachedMesh
-{
-	GENERATED_BODY()
-
-	/** The attached static mesh or skeletal mesh.  */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, ExposeOnSpawn))
-	TObjectPtr<UStreamableRenderAsset> AttachedMesh = nullptr;
-
-	/** In the which socket should attach this prop. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties, GetOptions = "GetRowMeshSockets"))
-	FName Socket = NAME_None;
-
-	/** Prop animation is loop played all the time, starts playing on attaching to the owner. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UAnimSequence> MeshAnimation = nullptr;
-};
-
-/**
- * The player archetype of level actor rows. Determines the individual of the character model
- */
-UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UBmrPlayerRow final : public UBmrLevelActorRow
-{
-	GENERATED_BODY()
-
-public:
-	/** The tag of this player character to be used for association of this player with other data. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Row", meta = (ShowOnlyInnerProperties))
-	FBmrPlayerTag PlayerTag = FBmrPlayerTag::None;
-
-	/** Gameplay effect to apply on changing the character from one to another. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
-	TSubclassOf<class UGameplayEffect> ConfigGameplayEffect = nullptr;
-
-	/** All meshes that will be attached to the player. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TArray<FBmrAttachedMesh> PlayerProps;
-
-	/** The own movement animation for the each character. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UBlendSpace1D> IdleWalkRunBlendSpace = nullptr;
-
-	/** Dance animation that is used mostly in the menu instead of idle. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UAnimSequence> DanceAnimation = nullptr;
-
-	/** Death animation montage that is played on the character death. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row", meta = (ShowOnlyInnerProperties))
-	TObjectPtr<class UAnimMontage> DeathMontage = nullptr;
-
-	/** Returns the num of skin textures in the array of diffuse maps specified a player material instance.
-	 * @return The num of skin textures or INDEX_NONE if not found. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	int32 GetSkinTexturesNum() const;
-
-	/** Returns the dynamic material instance of a player with specified skin.
-	 * @param SkinIndex The skin position to get.
-	 * @see UBmrPlayerRow::MaterialInstancesDynamic */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	class UMaterialInstanceDynamic* GetMaterialInstanceDynamic(int32 SkinIndex) const;
-
-	/** Creates dynamic material instance for each skin if is not done before.
-	 * @see UBmrPlayerRow::MaterialInstancesDynamic */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void UpdateSkinTextures();
-
-protected:
-	/** The material instance of a player.
-	 * @warning Is not BlueprintReadOnly and has not getter to prevent being used directly, we have dynamic materials instead.
-	 * @see UBmrPlayerRow::MaterialInstancesDynamic. */
-	UPROPERTY(EditDefaultsOnly, Category = "Row", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TObjectPtr<class UMaterialInstance> MaterialInstance = nullptr;
-
-	/**
-	 * Contains all created dynamic materials for each skin in the Material Instance.
-	 * Saves memory avoiding creation of dynamic materials for each mesh component, just use the same dynamic material for different meshes with the same skin.
-	 * Is filled on object creating and changing.
-	 * @warning Is NOT transient as it is set in skeletal meshes; if do transient, it will fail the cook with the import error.
-	 * @see UBmrPlayerRow::MaterialInstance. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "Row", meta = (BlueprintProtected))
-	TArray<TObjectPtr<class UMaterialInstanceDynamic>> MaterialInstancesDynamic;
-
-#if WITH_EDITOR
-	/** Handle adding and changing material instance to prepare dynamic materials. */
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-
-	/** Retrieves bones and socket names from skeletal mesh of this row to be displayed as combobox dropdown in editor. */
-	UFUNCTION()
-	TArray<FString> GetRowMeshSockets() const;
-#endif // WITH_EDITOR
-};
-
-/**
- * The data asset of the Bomber characters
+ * Contains configuration data for Bomber characters.
+ * Content is stored in FBmrPlayerRow, FBmrPlayerPropRow and FBmrPlayerSkinRow Data Registry rows
  */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API UBmrPlayerDataAsset final : public UBmrLevelActorDataAsset
@@ -133,17 +38,21 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE TSubclassOf<class UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClass; }
 
-	/** Returns the name of a material parameter with a diffuse array. */
+	/** Returns the Data Registry row name for the given player tag, or NAME_None */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE FName GetSkinArrayParameter() const { return SkinArrayParameter; }
+	static FName GetRowNameByPlayerTag(const FBmrPlayerTag& PlayerTag);
 
-	/** Returns the name of a material parameter with a diffuse index. */
+	/** Returns the total number of skin materials for the given player tag from FBmrPlayerSkinRow */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE FName GetSkinIndexParameter() const { return SkinIndexParameter; }
+	static int32 GetSkinTexturesNum(const FBmrPlayerTag& PlayerTag);
 
-	/** Return first found row by specified player tag. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "PlayerTag"))
-	const UBmrPlayerRow* GetRowByPlayerTag(const FBmrPlayerTag& PlayerTag) const;
+	/** Returns the skin material for the given player tag and skin index from FBmrPlayerSkinRow, or nullptr */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static class UMaterialInterface* GetSkinMaterial(const FBmrPlayerTag& PlayerTag, int32 SkinIndex);
+
+	/** Returns player row data by mesh from Data Registry, returns empty row data if not found */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static const struct FBmrPlayerRow& GetRowByMesh(const class UStreamableRenderAsset* Mesh);
 
 	/** Returns the number of startup abilities that will be granted to the player at the start of the game. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
@@ -169,14 +78,6 @@ protected:
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TSubclassOf<class UAnimInstance> AnimInstanceClass = nullptr;
-
-	/** The name of a material parameter with a diffuse array. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	FName SkinArrayParameter = TEXT("DiffuseArray");
-
-	/** The name of a material parameter with a diffuse index. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	FName SkinIndexParameter = TEXT("DiffuseIndex");
 
 	/** Contains all abilities to grant on the player at the start of the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability System", meta = (BlueprintProtected, ShowOnlyInnerProperties))

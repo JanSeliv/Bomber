@@ -5,8 +5,12 @@
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
+#include "DalRegistrySubsystem.h"
 #include "DalSubsystem.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
+#include "DataRegistries/BmrLevelActorRow.h"
+#include "DataRegistries/BmrPlayerPropRow.h"
+#include "DataRegistries/BmrPlayerSkinRow.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
@@ -41,6 +45,12 @@ UBmrGeneratedMapSubsystem* UBmrGeneratedMapSubsystem::GetGeneratedMapSubsystem(c
 /*********************************************************************************************
  * Readiness
  ********************************************************************************************* */
+
+// Returns true the Generated Map actor is ready to generate actors
+bool UBmrGeneratedMapSubsystem::IsGeneratedMapReady() const
+{
+	return GeneratedMap && bAreDataAssetsLoaded && UDalRegistrySubsystem::Get().IsLoaded(this);
+}
 
 // Broadcasts GeneratedMap_Ready if both the Generated Map actor and dependent actors' data assets are available
 void UBmrGeneratedMapSubsystem::TryBroadcastGeneratedMapReady()
@@ -89,13 +99,18 @@ void UBmrGeneratedMapSubsystem::SetGeneratedMap(ABmrGeneratedMap* InGeneratedMap
 }
 
 /*********************************************************************************************
- * Overrides
+ * Overrides and Events
  ********************************************************************************************* */
 
 // Is called on subsystem creation, used for listening the readiness of the Generated Map and its data assets
 void UBmrGeneratedMapSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	UDalRegistrySubsystem& DalRegistry = UDalRegistrySubsystem::Get();
+	DalRegistry.BindAndLoadFamily<FBmrLevelActorRow>(this, &ThisClass::OnLevelActorRowsChanged);
+	DalRegistry.Add<FBmrPlayerSkinRow>(this);
+	DalRegistry.Add<FBmrPlayerPropRow>(this);
 
 	// Listen for dependent data assets to be loaded
 	UAssetManager::CallOrRegister_OnCompletedInitialScan(FSimpleMulticastDelegate::FDelegate::CreateWeakLambda(this, [this]
@@ -109,8 +124,25 @@ void UBmrGeneratedMapSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 			if (UBmrGeneratedMapSubsystem* This = GetGeneratedMapSubsystem(World.Get()))
 			{
 				This->bAreDataAssetsLoaded = true;
-				This->TryBroadcastGeneratedMapReady();
+				UDalRegistrySubsystem::Get().TryLoad(This);
 			}
 		});
 	}));
+}
+
+// Unsubscribes from Data Registry callbacks during teardown
+void UBmrGeneratedMapSubsystem::Deinitialize()
+{
+	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
+	{
+		DalRegistry->Unbind(this);
+	}
+
+	Super::Deinitialize();
+}
+
+// Called when level actor Data Registry rows change and all their soft references finish async loading
+void UBmrGeneratedMapSubsystem::OnLevelActorRowsChanged_Implementation()
+{
+	TryBroadcastGeneratedMapReady();
 }

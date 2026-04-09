@@ -6,6 +6,7 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 // UE
+#include "Engine/AssetManager.h"
 #include "Engine/Engine.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/World.h"
@@ -17,23 +18,19 @@
  * UAsyncLoadUtilsLibrary
  ********************************************************************************************* */
 
-// Async loads a soft object by path with PIE-safe world context recovery
-void UAsyncLoadUtilsLibrary::AsyncLoadAssetByPath(const UObject* WorldContextObject, const FSoftObjectPath& SoftObjectPath, TFunction<void(UObject*)> Callback, TAsyncLoadPriority Priority)
+// Async loads multiple assets and fires the delegate on completion with PIE-safe world context
+TSharedPtr<FStreamableHandle> UAsyncLoadUtilsLibrary::RequestAsyncLoad(const UObject* WorldContextObject, TArray<FSoftObjectPath> PathsToLoad, TDelegate<void()> OnComplete)
 {
-	if (!ensureMsgf(SoftObjectPath.IsValid(), TEXT("ASSERT: [%i] %hs:\n'SoftObjectPath' is not valid!"), __LINE__, __FUNCTION__))
+	if (PathsToLoad.IsEmpty())
 	{
-		return;
+		return nullptr;
 	}
 
-	FLoadSoftObjectPathAsyncDelegate Delegate;
-	Delegate.BindWeakLambda(WorldContextObject, [SafeCallback = PIESafeAsync::MakePIESafeCallback<UObject>(WorldContextObject, MoveTemp(Callback))](const FSoftObjectPath&, UObject* LoadedObject)
+	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
+	return StreamableManager.RequestAsyncLoad(MoveTemp(PathsToLoad), PIESafeAsync::MakePIESafeCallback(WorldContextObject, [OnComplete = MoveTemp(OnComplete)]()
 	{
-		SafeCallback(LoadedObject);
-	});
-
-	FLoadAssetAsyncOptionalParams Params;
-	Params.PackagePriority = Priority;
-	SoftObjectPath.LoadAsync(MoveTemp(Delegate), MoveTemp(Params));
+		OnComplete.ExecuteIfBound();
+	}));
 }
 
 void AsyncTaskGameThread(const UObject* WorldContextObject, TFunction<void()> Function)
@@ -52,27 +49,33 @@ void AsyncTaskGameThread(const UObject* WorldContextObject, TFunction<void()> Fu
 
 TFunction<void()> PIESafeAsync::MakePIESafeCallback(const UObject* WorldContextObject, TFunction<void()> Callback)
 {
-	TWeakObjectPtr<UObject> WeakWorld(GetWorldObject(WorldContextObject));
-	auto SharedCallback = MakeShared<TFunction<void()>>(MoveTemp(Callback));
+	const TWeakObjectPtr WeakContext(WorldContextObject);
+	const TSharedRef<TFunction<void()>> SharedCallback = MakeShared<TFunction<void()>>(MoveTemp(Callback));
 
-	return [WeakWorld, SharedCallback]()
+	return [WeakContext, SharedCallback]()
 	{
-		ExecutePIESafe(WeakWorld.Get(), *SharedCallback);
+		ExecutePIESafe(WeakContext.Get(), *SharedCallback);
 	};
 }
 
-void PIESafeAsync::ExecutePIESafe(UObject* WorldObject, TFunction<void()> Callback)
+void PIESafeAsync::ExecutePIESafe(const UObject* ContextObject, TFunction<void()> Callback)
 {
-	if (!Callback)
+	if (!Callback || !ContextObject)
 	{
 		return;
 	}
 
 #if WITH_EDITOR
-	UWorld* World = Cast<UWorld>(WorldObject);
+	const UWorld* World = Cast<UWorld>(GetWorldObject(ContextObject));
 	if (UUtilsLibrary::IsEditor() && World)
 	{
-		World->GetTimerManager().SetTimerForNextTick(MoveTemp(Callback));
+		World->GetTimerManager().SetTimerForNextTick([WeakContext = TWeakObjectPtr(ContextObject), Callback = MoveTemp(Callback)]()
+		{
+			if (WeakContext.IsValid())
+			{
+				Callback();
+			}
+		});
 		return;
 	}
 #endif // WITH_EDITOR

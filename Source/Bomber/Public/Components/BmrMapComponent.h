@@ -65,9 +65,9 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
 	FOnPostRemovedFromLevel OnPostRemovedFromLevel;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorTypeChanged, UBmrMapComponent*, InMapComponent, const class UBmrLevelActorRow*, NewRow, const class UBmrLevelActorRow*, PreviousRow);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorTypeChanged, UBmrMapComponent*, InMapComponent);
 
-	/** Is called when the Row from current Data Asset is changed for owner on the level, on both server and clients.
+	/** Is called when the mesh from current Data Asset is changed for owner on the level, on both server and clients.
 	 * Is useful to listen when own actor is applied all visual changes like mesh, material, etc. */
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
 	FOnActorTypeChanged OnActorTypeChanged;
@@ -127,16 +127,6 @@ public:
 	/** Cast-version: e.g: UStaticMesh, USkeletalMesh. */
 	template <typename T>
 	FORCEINLINE T* GetMesh() const { return Cast<T>(GetMesh()); }
-
-	/** Returns the row of the current mesh.
-	 * It assumes that the mesh is set by the row from the Data Asset.
-	 * Is actively used by Players (e.g: EAT::Maya is Bastet player) and for Bombs (EAT::Maya is Bastet's bomb). */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const UBmrLevelActorRow* GetMeshRow() const;
-
-	/** Cast-version: e.g: UBmrBombRow, UBmrPowerupRow. */
-	template <typename T>
-	const FORCEINLINE T* GetMeshRow() const { return Cast<T>(GetMeshRow()); }
 
 	/** Applies given mesh on owner actor, or resets the mesh if null is passed.
 	 * Is useful for rows that have more than one mesh per row, like powerups.

@@ -85,9 +85,14 @@ ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 // Starts viewing through camera of current cinematic
 void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 {
+	if (MainMenuState == ENMMState::None)
+	{
+		// NMM is inactive, no camera to possess
+		return;
+	}
+
 	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
 	if (!SpotsSubsystem.IsActiveMenuSpotReady()
-	    && MainMenuState != ENMMState::None
 	    && MainMenuState != ENMMState::BasicMenu)
 	{
 		// Ignore if there is no active spot initialized yet, it will be called once the spot is ready
@@ -133,6 +138,19 @@ void UNMMCameraSubsystem::PossessCamera(ENMMState MainMenuState)
 void UNMMCameraSubsystem::OnGameFeatureInitialize_Implementation()
 {
 	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
+
+	// Listen for spot readiness to possess camera when async-loaded spot becomes available
+	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
+}
+
+// Clears all transient data contained in this subsystem
+void UNMMCameraSubsystem::OnGameFeatureDeinitialize_Implementation()
+{
+	if (UNMMSpotsSubsystem* SpotsSubsystem = UNMMUtils::GetSpotsSubsystem())
+	{
+		SpotsSubsystem->OnActiveMenuSpotReady.RemoveAll(this);
+	}
 }
 
 // Is called every frame to move the camera
@@ -159,12 +177,24 @@ void UNMMCameraSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState New
 		case ENMMState::BasicMenu:
 			PossessCamera(ENMMState::BasicMenu);
 			break;
+		case ENMMState::Idle: // Fall through
+		case ENMMState::Cinematic:
+			// PossessCamera will early-return if spot is not ready yet, OnActiveMenuSpotReady will handle it later
+			PossessCamera(NewState);
+			break;
 		case ENMMState::Transition:
 			// Start blending the camera towards current spot on the rail
 			OnBeginTransition();
 			break;
 		default: break;
 	}
+}
+
+// Called when a cinematic spot finished loading, possesses camera if it was deferred
+void UNMMCameraSubsystem::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* /*MainMenuSpotComponent*/)
+{
+	const ENMMState CurrentState = UNMMBaseSubsystem::Get().GetCurrentMenuState();
+	PossessCamera(CurrentState);
 }
 
 /*********************************************************************************************

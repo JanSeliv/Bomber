@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "Structures/BmrCinematicRow.h"
+#include "DataRegistries/BmrCinematicRow.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrCinematicRow)
 

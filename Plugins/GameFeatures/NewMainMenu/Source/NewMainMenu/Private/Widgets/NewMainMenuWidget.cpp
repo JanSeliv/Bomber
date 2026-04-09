@@ -195,9 +195,15 @@ void UNewMainMenuWidget::OnNextSkinButtonPressed()
 
 	UBmrSoundsSubsystem::Get().PlayUIClickSFX();
 
-	// Switch the preview skin on the spot
+	// Switch the preview skin on the spot, skip if no skins available yet (DR rows not cached)
 	UBmrSkeletalMeshComponent& MeshComp = MainMenuSpot->GetMeshChecked();
-	const int32 NextSkinIndex = (MeshComp.GetAppliedSkinIndex() + 1) % MeshComp.GetSkinTexturesNum();
+	const int32 SkinsNum = MeshComp.GetSkinTexturesNum();
+	if (!ensureMsgf(SkinsNum > 0, TEXT("ASSERT: [%i] %hs:\nSkin button pressed, but no skins available for current spot!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	const int32 NextSkinIndex = (MeshComp.GetAppliedSkinIndex() + 1) % SkinsNum;
 	MeshComp.ApplySkinByIndex(NextSkinIndex);
 
 	// Update in-game player skin

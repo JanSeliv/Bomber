@@ -20,9 +20,9 @@ enum class EBmrPlayerType : uint8;
  * @see Access AI's data with UBmrAIDataAsset (Content/Bomber/DataAssets/DA_AI).
  */
 UCLASS(Abstract)
-class BOMBER_API ABmrPawn : public APawn,
-                            public IAbilitySystemInterface,
-                            public IGameplayTagAssetInterface
+class BOMBER_API ABmrPawn : public APawn
+    , public IAbilitySystemInterface
+    , public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
@@ -83,9 +83,9 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnAddedToLevel(UBmrMapComponent* InMapComponent);
 
-	/** Is called when the Row from current Data Asset is changed for owner on the level, on both server and clients. */
+	/** Is called when the mesh from current Data Asset is changed for owner on the level, on both server and clients. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnActorTypeChanged(UBmrMapComponent* InMapComponent, const class UBmrLevelActorRow* NewRow, const class UBmrLevelActorRow* PreviousRow);
+	void OnActorTypeChanged(UBmrMapComponent* InMapComponent);
 
 	/** Called right before owner actor going to remove from the Generated Map, on both server and clients.
 	 * Is used for handling the in-game dying logic before this character is removed from the level. */

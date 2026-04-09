@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -15,7 +15,8 @@ enum class EBmrEndGameState : uint8;
 enum class EBmrLevelType : uint8;
 
 /**
- * Contains all sound assets used in game.
+ * Contains configuration sound assets used in game.
+ * Othersounds are stored in FBmrSoundsBackgroundRow Data Registry rows
  */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API UBmrSoundsDataAsset final : public UDalPrimaryDataAsset
@@ -95,10 +96,6 @@ protected:
 	/** The sound of the sound effects like explosions. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TObjectPtr<USoundClass> SFXSoundClass = nullptr;
-
-	/** Contains all sounds of each level to be played during the match. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TMap<EBmrLevelType, TObjectPtr<USoundBase>> InGameMusic;
 
 	/** Returns the blast SFX. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))

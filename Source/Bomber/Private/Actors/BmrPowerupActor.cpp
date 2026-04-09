@@ -5,11 +5,12 @@
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Components/BmrMapComponent.h"
-#include "DataAssets/BmrPowerupDataAsset.h"
+#include "DataRegistries/BmrPowerupRow.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
+#include "Engine/StaticMesh.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPowerupActor)
@@ -57,10 +58,12 @@ void ABmrPowerupActor::OnRep_PowerupTag()
 // Is called on both server and clients to update the Powerup mesh based on the Powerup type
 void ABmrPowerupActor::UpdatePowerupMesh()
 {
-	if (const UBmrPowerupRow* FoundPowerupRow = UBmrPowerupDataAsset::Get().GetRowByPowerupTag(PowerupTag))
+	const FBmrPowerupRow* PowerupRow = FBmrPowerupRow::GetRowByPowerupTag(PowerupTag);
+	UStreamableRenderAsset* PowerupMesh = PowerupRow ? PowerupRow->Mesh.Get() : nullptr;
+	if (PowerupMesh)
 	{
 		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-		MapComponent->SetLocalMesh(FoundPowerupRow->Mesh);
+		MapComponent->SetLocalMesh(PowerupMesh);
 	}
 }
 

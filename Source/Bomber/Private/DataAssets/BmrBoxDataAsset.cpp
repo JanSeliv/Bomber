@@ -1,9 +1,10 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "DataAssets/BmrBoxDataAsset.h"
 
 // Bomber
 #include "DalSubsystem.h"
+#include "DataRegistries/BmrBoxRow.h"
 #include "GameFramework/BmrCheatManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBoxDataAsset)
@@ -12,6 +13,7 @@
 UBmrBoxDataAsset::UBmrBoxDataAsset()
 {
 	ActorType = EAT::Box;
+	RowType = FBmrBoxRow::StaticStruct();
 }
 
 // Returns the box data asset

@@ -110,10 +110,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (AutoCreateRefTerm = "MeshData"))
 	void InitSkeletalMesh(const FBmrMeshData& MeshData);
 
-	/** Creates dynamic material instance for each skin if is not done before. */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void UpdateSkinTextures();
-
 	/** Returns true if mesh data is set. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	bool IsInitialized() const { return PlayerMeshData.IsValid(); }
@@ -133,10 +129,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (AutoCreateRefTerm = "FilterClass"))
 	void GetAttachedPropsByClass(TArray<class UMeshComponent*>& OutMeshComponents, const TSubclassOf<class UMeshComponent>& FilterClass) const;
 
-	/**
-	 * Attach all player props.
-	 * @see FBmrAttachedMesh, UBmrPlayerRow::PlayerProps
-	 */
+	/** Attach all player props from FBmrPlayerPropRow. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void AttachProps();
 
@@ -190,12 +183,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetSkinAvailable(bool bMakeAvailable, int32 SkinIdx);
 
-	/** Returns the skin index that is currently applied to the mesh. */
+	/** Returns the skin row name that is currently applied to the mesh. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE int32 GetAppliedSkinIndex() const { return PlayerMeshData.SkinIndex; }
+	FORCEINLINE FName GetAppliedSkinRowName() const { return PlayerMeshData.SkinRowName; }
 
-	/** Set and apply new skin for current mesh, by index from player row.
-	 * @param SkinIndex The index of the texture to set. */
+	/** Returns the positional index of the currently applied skin among skins for the same PlayerTag. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	int32 GetAppliedSkinIndex() const;
+
+	/** Set and apply new skin for current mesh by FBmrPlayerSkinRow row name. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void ApplySkinByRowName(FName InSkinRowName);
+
+	/** Set and apply new skin for current mesh by positional index among skins for the same PlayerTag. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void ApplySkinByIndex(int32 SkinIndex);
 };

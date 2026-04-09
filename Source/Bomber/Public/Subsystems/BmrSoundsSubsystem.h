@@ -142,7 +142,7 @@ public:
 	void PlayUIClickSFX();
 
 	/*********************************************************************************************
-	 * Events
+	 * Overrides
 	 ********************************************************************************************* */
 protected:
 	/** Called when world is ready to start gameplay before the game mode transitions to the correct state and call BeginPlay on all actors */
@@ -151,6 +151,10 @@ protected:
 	/** Is overridden to perform cleanup on ending the game. */
 	virtual void Deinitialize() override;
 
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
 	/** Blueprint even called when the game starts. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "[Bomber]", meta = (DisplayName = "Begin Play"))
 	void OnBeginPlay();
@@ -166,4 +170,8 @@ protected:
 	/** Called when the local player state is initialized and its assigned character is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnLocalPlayerStateReady(const struct FGameplayEventData& Payload);
+
+	/** Called after background music Data Registry rows change and all new soft references finish async loading. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnSoundRowsChanged();
 };

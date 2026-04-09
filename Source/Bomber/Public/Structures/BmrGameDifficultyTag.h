@@ -4,9 +4,6 @@
 
 #include "GameplayTagContainer.h"
 
-// UE
-#include "Engine/DataTable.h" // FTableRowBase
-
 #include "BmrGameDifficultyTag.generated.h"
 
 /**
@@ -28,26 +25,4 @@ struct BOMBER_API FBmrGameDifficultyTag : public FGameplayTag
 
 	/** Parent tag for all difficulty tags. */
 	static const FGameplayTag ParentTag;
-};
-
-/**
- * Row struct for difficulty data table registered via Data Registry.
- * Mods register their own data tables with custom difficulty rows.
- */
-USTRUCT(BlueprintType)
-struct BOMBER_API FBmrGameDifficultyRow : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	/** The gameplay tag representing this difficulty. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FBmrGameDifficultyTag DifficultyTag = FBmrGameDifficultyTag::None;
-
-	/** Integer for settings combobox index and curve table evaluation. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 DifficultyLevel = INDEX_NONE;
-
-	/** Localized display name shown in settings combobox. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FText DisplayName = FText::GetEmpty();
 };

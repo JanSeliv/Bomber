@@ -16,6 +16,7 @@
 
 // Bomber
 #include "Controllers/BmrPlayerController.h"
+#include "DataRegistries/BmrCinematicRow.h"
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
@@ -120,7 +121,7 @@ bool UNMMUtils::ShouldSkipCinematic(const FBmrCinematicRow& CinematicRow)
 
 	// If given cinematic has been seen already
 	const UNMMSaveGameData* SaveGameData = GetSaveGameData();
-	const bool bHasCinematicBeenPlayed = SaveGameData ? SaveGameData->HasCinematicBeenSeen(CinematicRow.RowIndex) : false;
+	const bool bHasCinematicBeenPlayed = SaveGameData ? SaveGameData->HasCinematicBeenSeen(CinematicRow.Priority) : false;
 
 	// Respect enabled Skip setting if only cinematic has been seen already
 	if (bAutoSkipCinematicsSetting && bHasCinematicBeenPlayed)

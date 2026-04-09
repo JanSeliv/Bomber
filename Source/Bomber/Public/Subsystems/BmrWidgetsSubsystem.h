@@ -21,8 +21,8 @@ struct FBmrManageableWidgetData;
  * @see Access its data with UBmrUIDataAsset (Content/Bomber/DataAssets/DA_UI).
  */
 UCLASS()
-class BOMBER_API UBmrWidgetsSubsystem : public ULocalPlayerSubsystem,
-                                        public IGameFeatureStateChangeObserver
+class BOMBER_API UBmrWidgetsSubsystem : public ULocalPlayerSubsystem
+    , public IGameFeatureStateChangeObserver
 {
 	GENERATED_BODY()
 
@@ -110,9 +110,13 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void TryInitWidgets();
 
-	/** Create and set widget objects once. */
+	/** Marks widgets as initialized and broadcasts OnWidgetsInitialized once, no-op on subsequent calls. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void InitWidgets();
+
+	/** Creates widgets for all Data Registry rows not yet present in AllManageableWidgets. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void CreateMissingWidgets();
 
 	/** Removes all widgets and transient data. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
@@ -138,7 +142,7 @@ protected:
 	FGameplayTagContainer AllHiddenWidgets = FGameplayTagContainer::EmptyContainer;
 
 	/*********************************************************************************************
-	 * Overrides and Events
+	 * Overrides
 	 ********************************************************************************************* */
 protected:
 	/** Is overridden to perform initial bindings (however, is too early to init widgets here until controller ready). */
@@ -153,8 +157,16 @@ protected:
 	/** Is called when this Subsystem is removed. */
 	virtual void Deinitialize() override;
 
+	/*********************************************************************************************
+	 * Events
+	 ********************************************************************************************* */
+protected:
 	/** Is called right after the game was started and windows size is set. */
 	void OnViewportResizedWhenInit(class FViewport* Viewport, uint32 Index);
+
+	/** Called after widget Data Registry rows change and all new soft references finish async loading */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnWidgetRowsChanged();
 };
 
 /** Helper macro to bind and call the function when widgets are initialized */

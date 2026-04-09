@@ -17,7 +17,6 @@
 #include "Components/BmrMapComponent.h"
 #include "Controllers/BmrPlayerController.h"
 #include "DalSubsystem.h"
-#include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
@@ -26,10 +25,6 @@
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "DataRegistry.h"
-#include "DataRegistrySubsystem.h"
-#include "Engine/AssetManager.h"
-#include "Engine/StreamableManager.h"
 #include "LevelSequencePlayer.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotComponent)
@@ -48,11 +43,12 @@ bool UNMMSpotComponent::IsCurrentSpot() const
 	return UNMMSpotsSubsystem::Get().GetCurrentSpot() == this;
 }
 
-// Returns true if this spot is visible, unlocked and can be selected by player
+// Returns true if this spot is visible, unlocked, has loaded cinematic and can be selected by player
 bool UNMMSpotComponent::IsSpotAvailable() const
 {
 	const UBmrSkeletalMeshComponent* MeshComponent = GetMeshComponent();
 	return IsActive()
+	       && MasterPlayer
 	       && MeshComponent
 	       && MeshComponent->IsActive()
 	       && MeshComponent->IsVisible();
@@ -213,52 +209,40 @@ void UNMMSpotComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
+// Reinitializes cinematic data from Data Registry: cleans up current cinematic and re-queries for a matching row
+void UNMMSpotComponent::ReinitializeCinematicData()
+{
+	CinematicState = ENMMState::None;
+	CinematicRow = FBmrCinematicRow::Empty;
+
+	if (IsValid(MasterPlayer))
+	{
+		MasterPlayer->Stop();
+		MasterPlayer->ConditionalBeginDestroy();
+		MasterPlayer = nullptr;
+	}
+
+	UpdateCinematicData();
+}
+
 // Obtains and caches cinematic data from DR_Cinematics Data Registry to this spot
 void UNMMSpotComponent::UpdateCinematicData()
 {
-	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
-	const UDataRegistry* Registry = DRSubsystem ? DRSubsystem->GetRegistryForType(FDataRegistryType(FBmrCinematicRow::CinematicsRegistryTypeName)) : nullptr;
-	if (!ensureMsgf(Registry, TEXT("ASSERT: [%i] %hs:\n'DR_Cinematics' Data Registry is not found, make sure it is created with '%s' type"), __LINE__, __FUNCTION__, *FBmrCinematicRow::CinematicsRegistryTypeName.ToString()))
-	{
-		return;
-	}
-
 	const FBmrPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
-
-	int32 RowIndex = 0;
-	Registry->ForEachCachedItem<FBmrCinematicRow>(TEXT("UpdateCinematicData"), [this, &PlayerTag, &RowIndex](const FName& /*Name*/, const FBmrCinematicRow& Row)
+	if (!ensureMsgf(PlayerTag.IsValid(), TEXT("ASSERT: [%i] %hs:\n'PlayerTag' is not set on '%s' spot actor!"), __LINE__, __FUNCTION__, *GetNameSafe(GetOwner())))
 	{
-		if (!CinematicRow.IsEmpty())
-		{
-			return;
-		}
+		return;
+	}
 
-		if (Row.PlayerTag == PlayerTag)
-		{
-			CinematicRow = Row;
-			CinematicRow.RowIndex = RowIndex;
-		}
-		++RowIndex;
+	const FBmrCinematicRow* FoundRow = FBmrCinematicRow::GetRowByPredicate([&PlayerTag](const FBmrCinematicRow& Row)
+	{
+		return Row.PlayerTag == PlayerTag;
 	});
-}
 
-// Loads cinematic of this spot
-void UNMMSpotComponent::LoadMasterSequencePlayer()
-{
-	if (MasterPlayer)
+	if (FoundRow)
 	{
-		// Is already created
-		return;
+		CinematicRow = *FoundRow;
 	}
-
-	const TSoftObjectPtr<ULevelSequence> FoundMasterSequence = CinematicRow.LevelSequence;
-	if (!ensureMsgf(!FoundMasterSequence.IsNull(), TEXT("'LevelSequenceToLoad' is not found, can not play cinematic for '%s' spot."), *GetNameSafe(this)))
-	{
-		return;
-	}
-
-	const TAsyncLoadPriority Priority = IsCurrentSpot() ? FStreamableManager::AsyncLoadHighPriority : FStreamableManager::DefaultAsyncLoadPriority;
-	UAsyncLoadUtilsLibrary::AsyncLoadAsset(this, FoundMasterSequence, &ThisClass::OnMasterSequenceLoaded, Priority);
 }
 
 // Marks own cinematic as seen by player for the save system
@@ -272,20 +256,18 @@ void UNMMSpotComponent::MarkCinematicAsSeen()
 
 	if (UNMMSaveGameData* SaveGameData = UNMMUtils::GetSaveGameData())
 	{
-		SaveGameData->MarkCinematicAsSeen(CinematicRow.RowIndex);
+		SaveGameData->MarkCinematicAsSeen(CinematicRow.Priority);
 	}
 }
 
 // Triggers or stops cinematic by current state
 void UNMMSpotComponent::ApplyCinematicState()
 {
-	// --- Load cinematic synchronously if not loaded yet
-	const bool bIsCinematicLoading = !MasterPlayer || CinematicRow.LevelSequence.IsPending();
-	if (bIsCinematicLoading)
+	if (!MasterPlayer)
 	{
-		OnMasterSequenceLoaded(CinematicRow.LevelSequence.LoadSynchronous());
+		// Async load is still in progress, will be applied by InitMasterSequencePlayer after batch load completes
+		return;
 	}
-	checkf(MasterPlayer, TEXT("ERROR: [%i] %s:\n'MasterPlayer' is null!"), __LINE__, *FString(__FUNCTION__));
 
 	// --- Set the length of the cinematic
 	constexpr int32 FirstFrame = 0;
@@ -316,12 +298,21 @@ void UNMMSpotComponent::ApplyCinematicState()
 	}
 }
 
-// Is called when the cinematic was loaded to finish creation
-void UNMMSpotComponent::OnMasterSequenceLoaded(ULevelSequence* LoadedMasterSequence)
+// Creates MasterPlayer from a loaded cinematic asset and notifies the Spots Subsystem, no-op if not yet loaded or already initialized
+void UNMMSpotComponent::InitMasterSequencePlayer()
 {
-	if (MasterPlayer)
+	if (MasterPlayer
+	    || CinematicRow.IsEmpty())
 	{
 		// Is already initialized
+		return;
+	}
+
+	// Cinematic assets are batch-loaded by the Spots Subsystem, resolve the soft pointer
+	ULevelSequence* LoadedMasterSequence = CinematicRow.LevelSequence.Get();
+	if (!ensureMsgf(LoadedMasterSequence, TEXT("ASSERT: [%i] %hs:\n'LoadedSequence' is not loaded for '%s' spot, should be called after batch load!"), __LINE__, __FUNCTION__, *GetNameSafe(this))
+	    || CinematicRow.LevelSequence.Get() != LoadedMasterSequence)
+	{
 		return;
 	}
 
@@ -336,17 +327,11 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(ULevelSequence* LoadedMasterSeque
 	CameraSettings.AspectRatioAxisConstraint = UUtilsLibrary::GetViewportAspectRatioAxisConstraint();
 	MasterPlayer->Initialize(GetMasterSequence(), GetWorld()->PersistentLevel, CameraSettings);
 
-	if (IsCurrentSpot())
-	{
-		// This is active spot has created master sequence, start playing to let Engine preload tracks
-		SetCinematicByState(ENMMState::Idle);
-
-		// Notify that the active spot is ready and finished loading
-		UNMMSpotsSubsystem::Get().OnActiveMenuSpotReady.Broadcast(this);
-	}
-
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
 	MasterPlayer->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
+
+	// Notify subsystem that this spot finished loading, it will evaluate active spot once all spots are ready
+	UNMMSpotsSubsystem::Get().NotifySpotLoaded(this);
 }
 
 /*********************************************************************************************
@@ -356,14 +341,9 @@ void UNMMSpotComponent::OnMasterSequenceLoaded(ULevelSequence* LoadedMasterSeque
 // Called when the NMM data asset is loaded and available
 void UNMMSpotComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
 {
-	UNMMSpotsSubsystem::Get().AddNewMainMenuSpot(this);
-
 	UpdateCinematicData();
 
-	if (!CinematicRow.IsEmpty())
-	{
-		LoadMasterSequencePlayer();
-	}
+	UNMMSpotsSubsystem::Get().AddNewMainMenuSpot(this);
 
 	UNMMCameraSubsystem::Get().OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
 
@@ -424,10 +404,6 @@ void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewSt
 	if (bIsCurrentSpot)
 	{
 		SetCinematicByState(NewState);
-
-		// Change the camera according to the cinematic state
-		// Do it after the cinematic is played, otherwise camera will fail to obtain from not loaded sequence
-		UNMMCameraSubsystem::Get().PossessCamera(NewState);
 	}
 }
 

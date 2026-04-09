@@ -3,6 +3,7 @@
 #include "Subsystems/BmrGameDifficultySubsystem.h"
 
 // Bomber
+#include "DataRegistries/BmrGameDifficultyRow.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
@@ -10,8 +11,6 @@
 
 // UE
 #include "AbilitySystemComponent.h"
-#include "DataRegistry.h"
-#include "DataRegistrySubsystem.h"
 #include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrGameDifficultySubsystem)
@@ -133,14 +132,7 @@ void UBmrGameDifficultySubsystem::GetAllDifficultyRows(TArray<FBmrGameDifficulty
 {
 	OutRows.Reset();
 
-	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
-	const UDataRegistry* Registry = DRSubsystem ? DRSubsystem->GetRegistryForType(FDataRegistryType(DifficultyRegistryTypeName)) : nullptr;
-	if (!Registry)
-	{
-		return;
-	}
-
-	Registry->ForEachCachedItem<FBmrGameDifficultyRow>(TEXT("GetAllDifficultyRows"), [&OutRows](const FName& /*Name*/, const FBmrGameDifficultyRow& Row)
+	FBmrGameDifficultyRow::ForEachRow([&OutRows](const FBmrGameDifficultyRow& Row)
 	{
 		OutRows.Emplace(Row);
 	});

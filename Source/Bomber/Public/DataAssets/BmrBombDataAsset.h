@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -7,21 +7,8 @@
 #include "BmrBombDataAsset.generated.h"
 
 /**
- * Describes bomb by mesh.
- */
-UCLASS(Blueprintable, BlueprintType)
-class BOMBER_API UBmrBombRow final : public UBmrLevelActorRow
-{
-	GENERATED_BODY()
-
-public:
-	/** VFX of the bomb. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Row")
-	TObjectPtr<class UNiagaraSystem> BombVFX = nullptr;
-};
-
-/**
- * Describes common data for all bombs.
+ * Contains configuration data for bombs.
+ * Content is stored in FBmrBombRow Data Registry rows
  */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API UBmrBombDataAsset final : public UBmrLevelActorDataAsset
@@ -47,19 +34,17 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE TSubclassOf<class UGameplayEffect> GetExplosionDamageEffect() const { return ExplosionDamageEffect; }
 
-	/** Returns the amount of bomb materials. */
+	/** Finds bomb row data by instigator actor, resolves level type from its MapComponent or SkeletalMeshComponent */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE int32 GetBombMaterialsNum() const { return BombMaterials.Num(); }
+	static const struct FBmrBombRow& GetBombRow(const AActor* InInstigator);
 
-	/** Returns the bomb material by specified index. */
+	/** Returns the amount of unique bomb materials from Data Registry */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	class UMaterialInterface* GetBombMaterial(int32 Index) const { return BombMaterials.IsValidIndex(Index) ? BombMaterials[Index] : nullptr; }
+	static int32 GetBombMaterialsNum();
 
-	/** Returns associated bomb row by associated instigator actor (e.g: Fori character -> Third (Forest) row).
-	 * @param InInstigator - the actor who placed the bomb, used to determine the level type.
-	 * @return The bomb row corresponding to the instigator's type, or nullptr if not found. */
+	/** Returns the bomb material by specified index from Data Registry, or nullptr */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const UBmrBombRow* GetBombRow(const AActor* InInstigator) const;
+	static class UMaterialInterface* GetBombMaterial(int32 Index);
 
 protected:
 	/** The lifetime of a bomb. */
@@ -73,8 +58,4 @@ protected:
 	/** Explosion damage gameplay effect applied when the bomb detonates. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TSubclassOf<class UGameplayEffect> ExplosionDamageEffect = nullptr;
-
-	/** All bomb materials. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TArray<TObjectPtr<class UMaterialInterface>> BombMaterials;
 };

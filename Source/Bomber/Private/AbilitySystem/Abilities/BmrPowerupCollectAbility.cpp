@@ -6,7 +6,7 @@
 #include "Actors/BmrGeneratedMap.h"
 #include "Actors/BmrPowerupActor.h"
 #include "Components/BmrMapComponent.h"
-#include "DataAssets/BmrPowerupDataAsset.h"
+#include "DataRegistries/BmrPowerupRow.h"
 #include "Structures/BmrPowerupTag.h"
 
 // UE
@@ -27,8 +27,8 @@ void UBmrPowerupCollectAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 
 	// Apply the collect gameplay effect to increase own attribute
 	const FBmrPowerupTag PowerupTag = TriggerEventData->InstigatorTags.GetByIndex(0);
-	const UBmrPowerupRow* PowerupRow = UBmrPowerupDataAsset::Get().GetRowByPowerupTag(PowerupTag);
-	const TSubclassOf<UGameplayEffect> CollectGameplayEffect = PowerupRow ? PowerupRow->CollectGameplayEffect : nullptr;
+	const FBmrPowerupRow* PowerupRow = FBmrPowerupRow::GetRowByPowerupTag(PowerupTag);
+	const TSubclassOf<UGameplayEffect> CollectGameplayEffect = PowerupRow ? PowerupRow->CollectGameplayEffect.Get() : nullptr;
 	if (ensureMsgf(CollectGameplayEffect, TEXT("ASSERT: [%i] %hs:\n'CollectGameplayEffect' failed to obtain!"), __LINE__, __FUNCTION__))
 	{
 		FGameplayEffectContextHandle CollectContext = ASC->MakeEffectContext();

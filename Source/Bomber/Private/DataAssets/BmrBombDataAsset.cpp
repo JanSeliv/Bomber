@@ -1,11 +1,10 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "DataAssets/BmrBombDataAsset.h"
 
 // Bomber
-#include "Components/BmrMapComponent.h"
-#include "Components/BmrSkeletalMeshComponent.h"
 #include "DalSubsystem.h"
+#include "DataRegistries/BmrBombRow.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBombDataAsset)
 
@@ -13,7 +12,7 @@
 UBmrBombDataAsset::UBmrBombDataAsset()
 {
 	ActorType = EAT::Bomb;
-	RowClass = UBmrBombRow::StaticClass();
+	RowType = FBmrBombRow::StaticStruct();
 }
 
 // Returns the bomb data asset
@@ -22,23 +21,20 @@ const UBmrBombDataAsset& UBmrBombDataAsset::Get()
 	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
-// Returns associated bomb row by associated instigator actor (e.g: Fori character -> Third (Forest) row)
-const UBmrBombRow* UBmrBombDataAsset::GetBombRow(const AActor* InInstigator) const
+// Finds bomb row data by instigator actor, resolves level type from its MapComponent or SkeletalMeshComponent
+const FBmrBombRow& UBmrBombDataAsset::GetBombRow(const AActor* InInstigator)
 {
-	if (!ensureMsgf(InInstigator, TEXT("ASSERT: [%i] %hs:\n'InInstigator' is not valid!"), __LINE__, __FUNCTION__))
-	{
-		return nullptr;
-	}
+	return FBmrBombRow::GetBombRow(InInstigator);
+}
 
-	EBmrLevelType LevelType = EBmrLevelType::None;
-	if (const UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InInstigator))
-	{
-		const UBmrLevelActorRow* MeshRow = MapComponent->GetMeshRow();
-		LevelType = MeshRow ? MeshRow->LevelType : ELT::None;
-	}
-	else if (const UBmrSkeletalMeshComponent* MeshComponent = InInstigator->FindComponentByClass<UBmrSkeletalMeshComponent>())
-	{
-		LevelType = MeshComponent->GetAssociatedLevelType();
-	}
-	return GetRowByLevelType<UBmrBombRow>(LevelType);
+// Returns the amount of unique bomb materials from Data Registry
+int32 UBmrBombDataAsset::GetBombMaterialsNum()
+{
+	return FBmrBombRow::GetBombMaterialsNum();
+}
+
+// Returns the bomb material by specified index from Data Registry, or nullptr
+UMaterialInterface* UBmrBombDataAsset::GetBombMaterial(int32 Index)
+{
+	return FBmrBombRow::GetBombMaterial(Index);
 }

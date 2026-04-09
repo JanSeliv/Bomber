@@ -4,7 +4,9 @@
 
 // Bomber
 #include "Bomber.h"
+#include "DalRegistrySubsystem.h"
 #include "DataAssets/BmrSoundsDataAsset.h"
+#include "DataRegistries/BmrSoundsBackgroundRow.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
@@ -304,7 +306,7 @@ void UBmrSoundsSubsystem::PlayUIClickSFX()
 }
 
 /*********************************************************************************************
- * Events
+ * Overrides
  ********************************************************************************************* */
 
 // Called when world is ready to start gameplay before the game mode transitions to the correct state and call BeginPlay on all actors
@@ -326,6 +328,8 @@ void UBmrSoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_LocalPawnReady, this, &ThisClass::OnLocalPlayerStateReady);
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
+
+	UDalRegistrySubsystem::Get().BindAndLoad<FBmrSoundsBackgroundRow>(this, &ThisClass::OnSoundRowsChanged);
 }
 
 // Is overridden to perform cleanup on ending the game
@@ -334,7 +338,16 @@ void UBmrSoundsSubsystem::Deinitialize()
 	Super::Deinitialize();
 
 	DestroyAllSoundComponents();
+
+	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
+	{
+		DalRegistry->Unbind(this);
+	}
 }
+
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
 
 // Is called on ending the current game to play the End-Game sound
 void UBmrSoundsSubsystem::OnEndGameStateChanged_Implementation(EBmrEndGameState EndGameState)
@@ -377,4 +390,14 @@ void UBmrSoundsSubsystem::OnLocalPlayerStateReady_Implementation(const FGameplay
 	ABmrPlayerState* PlayerState = Pawn ? Pawn->GetPlayerState<ABmrPlayerState>() : nullptr;
 	checkf(PlayerState, TEXT("ERROR: [%i] %hs:\n'PlayerState' is null!"), __LINE__, __FUNCTION__);
 	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
+}
+
+// Called after background music Data Registry rows change and all new soft references finish async loading
+void UBmrSoundsSubsystem::OnSoundRowsChanged_Implementation()
+{
+	const ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	if (GameState && GameState->HasMatchingGameplayTag(FBmrGameStateTag::InGame))
+	{
+		PlayInGameMusic();
+	}
 }

@@ -14,6 +14,7 @@
 #include "Controllers/BmrPlayerController.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "DataAssets/BmrPlayerDataAsset.h"
+#include "DataRegistries/BmrPlayerRow.h"
 #include "GameFramework/PlayerState.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrPowerupTag.h"
@@ -280,7 +281,7 @@ void UBmrCheatManager::ApplyPlayersSkinOnAI()
 void UBmrCheatManager::AddBot()
 {
 	const FIntPoint CenterPosition = UBmrCellUtilsLibrary::GetCenterCellPositionOnLevel();
-	const int32 LastRowIndex = UBmrPlayerDataAsset::Get().GetRowsNum() - 1;
+	const int32 LastRowIndex = FBmrPlayerRow::GetRowsNum() - 1;
 	SpawnActorByType(EBmrActorType::Player, CenterPosition.X, CenterPosition.Y, LastRowIndex);
 }
 
@@ -328,8 +329,10 @@ void UBmrCheatManager::SpawnActorByType(EBmrActorType ActorType, int32 ColumnX, 
 	// Spawn new actor on the cell
 	const UBmrLevelActorDataAsset* DataAsset = UBmrBlueprintFunctionLibrary::GetDataAssetByActorType(ActorType);
 	checkf(DataAsset, TEXT("ERROR: [%i] %hs:\n'DataAsset' is null!"), __LINE__, __FUNCTION__);
-	const UBmrLevelActorRow* Row = DataAsset->GetRowByIndex(RowIndex);
-	GeneratedMap.SpawnActorWithMesh(ActorType, Cell, {Row});
+	FBmrMeshData MeshData = FBmrMeshData::Empty;
+	const UScriptStruct* RowType = DataAsset->GetRowType();
+	MeshData.RowName = FDalRegistryRow::GetRowNameByIndex(RowType, RowIndex);
+	GeneratedMap.SpawnActorWithMesh(ActorType, Cell, MeshData);
 }
 
 // Overrides the percentage of walls spawn during the level generation

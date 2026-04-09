@@ -19,8 +19,8 @@
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrPawnReadySubsystem.h"
 #include "Subsystems/BmrGeneratedMapSubsystem.h"
+#include "Subsystems/BmrPawnReadySubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "UI/SettingsWidget.h"
 #include "UI/Widgets/BmrHUDWidget.h"
@@ -351,6 +351,20 @@ const UClass* UBmrBlueprintFunctionLibrary::GetActorClassByActorType(EBmrActorTy
 
 	const FSoftClassPath ActorClass(FoundAsset.GetTagValueRef<FString>(UBmrLevelActorDataAsset::ActorClassTag));
 	return ActorClass.ResolveClass();
+}
+
+// Returns the row struct type associated with the given actor type via asset registry lookup (no DA loading)
+const UScriptStruct* UBmrBlueprintFunctionLibrary::GetActorRowTypeByActorType(EBmrActorType ActorType)
+{
+	const FString ActorTypeStr = ActorType != EAT::None ? UEnum::GetValueAsString(ActorType) : FString();
+	const FAssetData FoundAsset = UDalUtilsLibrary::GetAssetByRegistryTag(UBmrLevelActorDataAsset::ActorTypeTag, ActorTypeStr);
+	if (!FoundAsset.IsValid())
+	{
+		return nullptr;
+	}
+
+	const FSoftObjectPath RowTypePath(FoundAsset.GetTagValueRef<FString>(UBmrLevelActorDataAsset::RowTypeTag));
+	return Cast<UScriptStruct>(RowTypePath.ResolveObject());
 }
 
 // Returns the data asset classes for the specified actor types from asset registry tags without loading

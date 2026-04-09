@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -7,7 +7,8 @@
 #include "BmrBoxDataAsset.generated.h"
 
 /**
- * Describes common data for all boxes.
+ * Contains configuration data for boxes.
+ * Content is stored in FBmrBoxRow Data Registry rows
  */
 UCLASS(Blueprintable, BlueprintType)
 class BOMBER_API UBmrBoxDataAsset final : public UBmrLevelActorDataAsset

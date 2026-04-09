@@ -5,7 +5,8 @@
 #include "BmrMeshData.generated.h"
 
 /**
- * Is runtime representation of the read-only Level Actor Row (Player, Bomb etc)
+ * Is runtime representation of a Data Registry row for a level actor (Player, Bomb etc).
+ * All visual data (mesh, player tag, etc) is resolved from the RowName via DR lookup
  */
 USTRUCT(BlueprintType)
 struct BOMBER_API FBmrMeshData
@@ -18,26 +19,23 @@ struct BOMBER_API FBmrMeshData
 	/** Default constructor. */
 	FBmrMeshData() = default;
 
-	/** Constructor that initializes the data directly. */
-	FBmrMeshData(const class UBmrLevelActorRow* InRow, int32 InSkinIndex = 0);
-
-	/** The row that is used to visualize the bomber character. */
+	/** The Data Registry row name that identifies this level actor's visual data. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "[Bomber]")
-	TObjectPtr<const class UBmrLevelActorRow> Row = nullptr;
+	FName RowName = NAME_None;
 
 	/** Returns true is data is valid. */
-	FORCEINLINE bool IsValid() const { return Row != nullptr; }
+	FORCEINLINE bool IsValid() const { return !RowName.IsNone(); }
 
 	/** Equality operator to compare the mesh data. */
-	FORCEINLINE bool operator==(const FBmrMeshData& Other) const { return Row == Other.Row && SkinIndex == Other.SkinIndex; }
+	FORCEINLINE bool operator==(const FBmrMeshData& Other) const { return RowName == Other.RowName && SkinRowName == Other.SkinRowName; }
 
 	/*********************************************************************************************
 	 * Skins
 	 ********************************************************************************************* */
 public:
-	/** The index of the texture is currently set, since this data represents the row, where multiple skins can be stored. */
+	/** The FBmrPlayerSkinRow row name of the currently applied skin, stable across Data Registry mutations. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
-	int32 SkinIndex = 0;
+	FName SkinRowName = NAME_None;
 
 	/** Bitmask for available skins (up to 32 skins).
 	 * Each bit represents a skin: 0 = locked, 1 = unlocked.

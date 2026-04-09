@@ -4,7 +4,7 @@
 
 // UE
 #include "AbilitySystemGlobals.h"
-#include "DataAssets/BmrPowerupDataAsset.h"
+#include "DataRegistries/BmrPowerupRow.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 #include "Structures/BmrPowerupTag.h"
@@ -242,8 +242,8 @@ void UBmrPowerupsAttributeSet::PostAttributeChange(const FGameplayAttribute& Att
 	}
 
 	// Apply max collect gameplay effect if applicable
-	const UBmrPowerupRow* PowerupRow = UBmrPowerupDataAsset::Get().GetRowByPowerupTag(PowerupTag);
-	const TSubclassOf<UGameplayEffect> MaxCollectGameplayEffect = PowerupRow ? PowerupRow->MaxCollectGameplayEffect : nullptr;
+	const FBmrPowerupRow* PowerupRow = FBmrPowerupRow::GetRowByPowerupTag(PowerupTag);
+	const TSubclassOf<UGameplayEffect> MaxCollectGameplayEffect = PowerupRow ? PowerupRow->MaxCollectGameplayEffect.Get() : nullptr;
 	if (MaxCollectGameplayEffect)
 	{
 		const UGameplayEffect* EffectCDO = MaxCollectGameplayEffect.GetDefaultObject();

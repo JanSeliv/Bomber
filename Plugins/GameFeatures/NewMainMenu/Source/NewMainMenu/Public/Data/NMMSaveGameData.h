@@ -29,14 +29,14 @@ public:
 
 	/** Returns true if given cinematic has been seen by player. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	FORCEINLINE bool HasCinematicBeenSeen(int32 CinematicRowIndex) const { return (AllSeenCinematicsBitmask & (1 << CinematicRowIndex)) != 0; }
+	FORCEINLINE bool HasCinematicBeenSeen(int32 CinematicPriority) const { return CinematicPriority != INDEX_NONE && (AllSeenCinematicsBitmask & (1 << CinematicPriority)) != 0; }
 
 	/** Adds given cinematic to the list of cinematics have seen by the player. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
-	void MarkCinematicAsSeen(int32 CinematicRowIndex);
+	void MarkCinematicAsSeen(int32 CinematicPriority);
 
 protected:
-	/** Contains a bitmask of row indexes in Cinematics table that have been seen by the player.
+	/** Contains a bitmask of priorities in Cinematics table that have been seen by the player.
 	 * Is bitmask instead of array since there are less than 32 cinematics in New Main Menu. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, SaveGame, AdvancedDisplay, Category = "[NewMainMenu]")
 	int32 AllSeenCinematicsBitmask = 0;

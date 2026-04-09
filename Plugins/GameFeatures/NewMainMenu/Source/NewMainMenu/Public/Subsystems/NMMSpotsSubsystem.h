@@ -33,9 +33,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	bool IsActiveMenuSpotReady() const;
 
-	/** Returns the index of the currently selected Main-Menu spot. */
+	/** Returns the priority of the currently selected Main-Menu spot. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	FORCEINLINE int32 GetActiveMenuSpotIndex() const { return ActiveMenuSpotIdx; }
+	FORCEINLINE int32 GetActiveSpotPriority() const { return ActiveSpotPriority; }
+
+	/** Sets the active spot priority, allowing external components to select a spot by its priority value. */
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
+	void SetActiveSpotPriority(int32 NewPriority) { ActiveSpotPriority = NewPriority; }
 
 	/** Returns an incrementer of the last Main-Menu spot direction, is used to determine the direction of the last move. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
@@ -44,6 +48,18 @@ public:
 	/** Add new Main-Menu spot, so it can be obtained by other objects. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void AddNewMainMenuSpot(UNMMSpotComponent* NewMainMenuSpotComponent);
+
+	/** Reinitializes cinematic data for all spots from Data Registry. */
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
+	void ReinitializeAllSpots();
+
+	/** Called by a spot when its Master Sequence finished async loading, evaluates active spot once all spots are ready. */
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
+	void NotifySpotLoaded(UNMMSpotComponent* SpotComponent);
+
+	/** Returns true if all spots with cinematic data have finished loading their Master Sequences. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	bool AreAllSpotsLoaded() const;
 
 	/** Removes Main-Menu spot if should not be available by other objects anymore. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
@@ -77,10 +93,9 @@ public:
 	UNMMSpotComponent* MoveMainMenuSpotByPredicate(int32 Incrementer, const TFunctionRef<bool(UNMMSpotComponent*)>& Predicate);
 
 protected:
-	/** Index of the currently selected Main-Menu spot, is according row index in Cinematics table.
-	 * @see FBmrCinematicRow::RowIndex. */
+	/** Priority of the currently selected Main-Menu spot, matches FBmrCinematicRow::Priority. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	int32 ActiveMenuSpotIdx = 0;
+	int32 ActiveSpotPriority = INDEX_NONE;
 
 	/** Incrementer of the last Main-Menu spot direction, is used to determine the direction of the last move. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
@@ -89,6 +104,10 @@ protected:
 	/** All Main Menu spots with characters placed on the level. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	TArray<TObjectPtr<UNMMSpotComponent>> MainMenuSpots;
+
+	/** Selects the highest-priority loaded spot as active and broadcasts OnActiveMenuSpotReady. */
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void TryBroadcastOnActiveMenuSpotReady();
 
 	/** Attempts to switch the active menu spot if current slot is not available for any reason. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
@@ -115,4 +134,8 @@ protected:
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
+
+	/** Called when cinematic Data Registry rows change and all their soft references finish async loading */
+	UFUNCTION(BlueprintNativeEvent, Category = "[NewMainMenu]")
+	void OnCinematicRowsChanged();
 };

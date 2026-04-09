@@ -5,6 +5,10 @@
 // Bomber
 #include "Bomber.h"
 #include "DalSubsystem.h"
+#include "DataRegistries/BmrSoundsBackgroundRow.h"
+
+// UE
+#include "Sound/SoundBase.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrSoundsDataAsset)
 
@@ -17,12 +21,12 @@ const UBmrSoundsDataAsset& UBmrSoundsDataAsset::Get()
 // Returns the music of specified level
 USoundBase* UBmrSoundsDataAsset::GetInGameMusic(EBmrLevelType LevelType) const
 {
-	if (const TObjectPtr<USoundBase>* FoundMusic = InGameMusic.Find(LevelType))
+	const FBmrSoundsBackgroundRow* Row = FBmrSoundsBackgroundRow::GetRowByPredicate([LevelType](const FBmrSoundsBackgroundRow& RowIt)
 	{
-		return *FoundMusic;
-	}
+		return RowIt.LevelType == LevelType || RowIt.LevelType == ELT::Max;
+	});
 
-	return nullptr;
+	return Row ? Row->Music.Get() : nullptr;
 }
 
 // Returns the End-Game sound by specified End-Game state

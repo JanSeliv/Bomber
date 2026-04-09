@@ -5,9 +5,9 @@
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
-#include "DalSubsystem.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
 #include "DataAssets/BmrLevelActorDataAsset.h"
+#include "DataRegistries/BmrLevelActorRow.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -106,24 +106,15 @@ class UStreamableRenderAsset* UBmrMapComponent::GetMesh() const
 	return UGameplayUtilsLibrary::GetMesh(MeshComponent);
 }
 
-// Returns the row of the current mes
-const UBmrLevelActorRow* UBmrMapComponent::GetMeshRow() const
-{
-	// Return the mesh directly from the Mesh Component: optional ReplicatedMeshData is not used here
-	return ActorDataAsset ? ActorDataAsset->GetRowByMesh(GetMesh()) : nullptr;
-}
-
 // Applies given mesh on owner actor, or resets the mesh if null is passed
 void UBmrMapComponent::SetLocalMesh(UStreamableRenderAsset* NewMesh)
 {
 	const AActor* Owner = GetOwner();
 	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
 
-	const UBmrLevelActorRow* PreviousRow = GetMeshRow();
 	UGameplayUtilsLibrary::SetMesh(MeshComponent, NewMesh);
 
-	const UBmrLevelActorRow* NewRow = GetMeshRow();
-	OnActorTypeChanged.Broadcast(this, NewRow, PreviousRow);
+	OnActorTypeChanged.Broadcast(this);
 }
 
 /** Set material to the mesh. */
@@ -157,8 +148,11 @@ void UBmrMapComponent::SetReplicatedMeshData(const FBmrMeshData& MeshData)
 	ReplicatedMeshData = MeshData;
 	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedMeshData, this);
 
-	// Apply the mesh locally first
-	SetLocalMesh(MeshData.Row->Mesh);
+	// Resolve and apply the mesh locally first
+	const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
+	const FBmrLevelActorRow* Row = FBmrLevelActorRow::FindRowByName(RowType, MeshData.RowName);
+	UStreamableRenderAsset* ResolvedMesh = Row ? Row->Mesh.Get() : nullptr;
+	SetLocalMesh(ResolvedMesh);
 
 	// Replicate to all others
 	if (!GetOwner()->HasAuthority())
@@ -176,9 +170,17 @@ void UBmrMapComponent::ServerSetMeshData_Implementation(const FBmrMeshData& Mesh
 // Is called on client to apply replicated mesh data
 void UBmrMapComponent::OnRep_MeshData()
 {
-	if (ReplicatedMeshData.Row)
+	if (!ReplicatedMeshData.IsValid())
 	{
-		SetLocalMesh(ReplicatedMeshData.Row->Mesh);
+		return;
+	}
+
+	const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
+	const FBmrLevelActorRow* Row = FBmrLevelActorRow::FindRowByName(RowType, ReplicatedMeshData.RowName);
+	UStreamableRenderAsset* ResolvedMesh = Row ? Row->Mesh.Get() : nullptr;
+	if (ResolvedMesh)
+	{
+		SetLocalMesh(ResolvedMesh);
 	}
 }
 
@@ -375,9 +377,13 @@ bool UBmrMapComponent::OnAdded_Implementation()
 	// Set the default mesh (if any custom or replicated is not set yet), any system can override it later
 	if (!GetMesh())
 	{
-		const UBmrLevelActorRow* FoundRow = ReplicatedMeshData.Row ? ReplicatedMeshData.Row.Get() : GetActorDataAssetChecked().GetRowByLevelType(UBmrBlueprintFunctionLibrary::GetLevelType());
-		ensureMsgf(FoundRow && FoundRow->Mesh, TEXT("ASSERT: [%i] %hs:\n'FoundRow' is not valid, can not set the default mesh!"), __LINE__, __FUNCTION__);
-		SetLocalMesh(FoundRow->Mesh);
+		const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
+		const FBmrLevelActorRow* FoundRow = ReplicatedMeshData.IsValid()
+		                                        ? FBmrLevelActorRow::FindRowByName(RowType, ReplicatedMeshData.RowName)
+		                                        : FBmrLevelActorRow::FindRowByLevelType(RowType, UBmrBlueprintFunctionLibrary::GetLevelType());
+		UStreamableRenderAsset* DefaultMesh = FoundRow ? FoundRow->Mesh.Get() : nullptr;
+		ensureMsgf(DefaultMesh || !ReplicatedMeshData.IsValid(), TEXT("ASSERT: [%i] %hs:\n'DefaultMesh' is not loaded on server, can not set the default mesh for '%s' actor! Client still might be loading mesh receiving this early call from replication, while server must ensure mesh loaded before spawning actors! "), __LINE__, __FUNCTION__, *GetNameSafe(Owner));
+		SetLocalMesh(DefaultMesh);
 	}
 
 	TryDisplayOwnedCell();

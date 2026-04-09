@@ -58,6 +58,9 @@ protected:
 	/** Subscribes to menu state events */
 	virtual void OnGameFeatureInitialize_Implementation() override;
 
+	/** Clears all transient data contained in this subsystem. */
+	virtual void OnGameFeatureDeinitialize_Implementation() override;
+
 	/** Is called every frame to move the camera. */
 	virtual void Tick(float DeltaTime) override;
 
@@ -68,6 +71,10 @@ protected:
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnNewMainMenuStateChanged(ENMMState NewState, ENMMState PreviousState);
+
+	/** Called when a cinematic spot finished loading, possesses camera if it was deferred. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnActiveMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
 
 	/*********************************************************************************************
 	 * Transitioning

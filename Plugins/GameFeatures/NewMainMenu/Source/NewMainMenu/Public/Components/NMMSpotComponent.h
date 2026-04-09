@@ -6,7 +6,7 @@
 
 // NMM
 #include "Data/NMMTypes.h" // ENMMState
-#include "Structures/BmrCinematicRow.h"
+#include "DataRegistries/BmrCinematicRow.h"
 
 #include "NMMSpotComponent.generated.h"
 
@@ -73,6 +73,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	ULevelSequence* GetMasterSequence() const;
 
+	/** Reinitializes cinematic data from Data Registry: cleans up current cinematic and re-queries for a matching row. */
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
+	void ReinitializeCinematicData();
+
 	/** Prevents the spot from playing any cinematic. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void StopMasterSequence();
@@ -84,6 +88,10 @@ public:
 	/** Activate given cinematic state on this spot. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void SetCinematicByState(ENMMState MainMenuState);
+
+	/** Creates MasterPlayer from a loaded cinematic asset and notifies the Spots Subsystem, no-op if not yet loaded or already initialized. */
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
+	void InitMasterSequencePlayer();
 
 	/*********************************************************************************************
 	 * Protected properties
@@ -115,13 +123,6 @@ protected:
 	 * @see UNMMSpotComponent::CinematicRow */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void UpdateCinematicData();
-
-	/** Loads cinematic of this spot. */
-	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void LoadMasterSequencePlayer();
-
-	/** Is called when the cinematic was loaded to finish creation. */
-	void OnMasterSequenceLoaded(ULevelSequence* LoadedMasterSequence);
 
 	/** Marks own cinematic as seen by player for the save system. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

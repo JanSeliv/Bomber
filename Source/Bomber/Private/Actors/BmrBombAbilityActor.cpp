@@ -7,8 +7,8 @@
 #include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
 #include "Components/BmrMapComponent.h"
-#include "DataAssets/BmrBombDataAsset.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
+#include "DataRegistries/BmrBombRow.h"
 #include "GameFramework/BmrGameState.h"
 #include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "UtilityLibraries/BmrActorUtilsLibrary.h"
@@ -24,6 +24,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerState.h"
+#include "Materials/MaterialInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 
@@ -121,14 +122,16 @@ void ABmrBombAbilityActor::UpdateExplosionCells()
 // Updates current mesh for this bomb actor, based on instigator type, or randomly if no instigator
 void ABmrBombAbilityActor::ApplyMesh()
 {
-	const UBmrBombRow* BombRow = InstigatorAbilitySystemComponent ? UBmrBombDataAsset::Get().GetBombRow(InstigatorAbilitySystemComponent->GetAvatarActor()) : nullptr;
-	if (!ensureMsgf(BombRow, TEXT("ASSERT: [%i] %hs:\n'BombRow' is not valid!"), __LINE__, __FUNCTION__))
+	const AActor* InstigatorActor = InstigatorAbilitySystemComponent ? InstigatorAbilitySystemComponent->GetAvatarActor() : nullptr;
+	const FBmrBombRow& BombRow = FBmrBombRow::GetBombRow(InstigatorActor);
+	UStreamableRenderAsset* BombMesh = BombRow.Mesh.Get();
+	if (!ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %hs:\n'BombMesh' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
-	MapComponent->SetLocalMesh(BombRow->Mesh);
+	MapComponent->SetLocalMesh(BombMesh);
 }
 
 // Updates current material for this bomb actor, based on this bomb and Player placer types
@@ -149,12 +152,12 @@ void ABmrBombAbilityActor::ApplyMaterial()
 			NewBombMaterial = BombMesh->GetMaterial(0);
 		}
 	}
-	else if (const int32 BombMaterialsNum = UBmrBombDataAsset::Get().GetBombMaterialsNum())
+	else if (const int32 BombMaterialsNum = FBmrBombRow::GetBombMaterialsNum())
 	{
 		// If bot character, set material for its default bomb with the same mesh
 		const int32 PlayerIndex = OwnerPlayerState ? OwnerPlayerState->GetPlayerId() : FMath::RandRange(0, BombMaterialsNum - 1);
 		const int32 MaterialIndex = FMath::Abs(PlayerIndex) % BombMaterialsNum;
-		NewBombMaterial = UBmrBombDataAsset::Get().GetBombMaterial(MaterialIndex);
+		NewBombMaterial = FBmrBombRow::GetBombMaterial(MaterialIndex);
 	}
 
 	// Apply material

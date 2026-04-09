@@ -4,7 +4,8 @@
 
 // Bomber
 #include "Controllers/BmrPlayerController.h"
-#include "DataAssets/BmrUIDataAsset.h"
+#include "DalRegistrySubsystem.h"
+#include "DataRegistries/BmrWidgetRow.h"
 #include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
@@ -59,10 +60,27 @@ UUserWidget* UBmrWidgetsSubsystem::CreateManageableWidget(const FBmrManageableWi
 	return Widget;
 }
 
-// The same as CreateManageableWidget, but finds widget data by tag from the UI Data Asset
+// The same as CreateManageableWidget, but finds widget data by tag from Data Registry
 UUserWidget* UBmrWidgetsSubsystem::CreateManageableWidgetByTag(FGameplayTag WidgetTag, const UObject* OptionalWorldContext)
 {
-	return CreateManageableWidget(UBmrUIDataAsset::Get().GetWidgetDataByTag(WidgetTag), OptionalWorldContext);
+	const FBmrWidgetRow* WidgetRowData = FBmrWidgetRow::GetRowByTag(WidgetTag);
+	if (!WidgetRowData)
+	{
+		return nullptr;
+	}
+
+	UClass* WidgetClass = WidgetRowData->WidgetClass.Get();
+	if (!ensureMsgf(WidgetClass, TEXT("ASSERT: [%i] %hs:\n'WidgetClass' is not loaded for widget tag '%s'!"), __LINE__, __FUNCTION__, *WidgetTag.ToString()))
+	{
+		return nullptr;
+	}
+
+	FBmrManageableWidgetData WidgetData;
+	WidgetData.WidgetClass = WidgetClass;
+	WidgetData.WidgetTag = WidgetRowData->WidgetTag;
+	WidgetData.bAddToViewport = WidgetRowData->bAddToViewport;
+	WidgetData.ZOrder = WidgetRowData->ZOrder;
+	return CreateManageableWidget(WidgetData, OptionalWorldContext);
 }
 
 // Returns the widget instance by its tag
@@ -144,7 +162,32 @@ void UBmrWidgetsSubsystem::TryInitWidgets()
 	}
 }
 
-// Create and set widget objects once
+// Creates widgets for all Data Registry rows not yet present in AllManageableWidgets
+void UBmrWidgetsSubsystem::CreateMissingWidgets()
+{
+	FBmrWidgetRow::ForEachRow([this](const FBmrWidgetRow& WidgetRowData)
+	{
+		if (AllManageableWidgets.Contains(WidgetRowData.WidgetTag))
+		{
+			return;
+		}
+
+		UClass* WidgetClass = WidgetRowData.WidgetClass.Get();
+		if (!ensureMsgf(WidgetClass, TEXT("ASSERT: [%i] %hs:\n'WidgetClass' is not loaded for widget tag '%s'!"), __LINE__, __FUNCTION__, *WidgetRowData.WidgetTag.ToString()))
+		{
+			return;
+		}
+
+		FBmrManageableWidgetData WidgetData;
+		WidgetData.WidgetClass = WidgetClass;
+		WidgetData.WidgetTag = WidgetRowData.WidgetTag;
+		WidgetData.bAddToViewport = WidgetRowData.bAddToViewport;
+		WidgetData.ZOrder = WidgetRowData.ZOrder;
+		CreateManageableWidget(WidgetData);
+	});
+}
+
+// Marks widgets as initialized and broadcasts OnWidgetsInitialized once, no-op on subsequent calls
 void UBmrWidgetsSubsystem::InitWidgets()
 {
 	if (AreWidgetInitialized())
@@ -152,12 +195,7 @@ void UBmrWidgetsSubsystem::InitWidgets()
 		return;
 	}
 
-	const TArray<FBmrManageableWidgetData>& AllWidgetData = UBmrUIDataAsset::Get().GetAllWidgetData();
-	for (const FBmrManageableWidgetData& WidgetDataIt : AllWidgetData)
-	{
-		// Automatically create and add all widgets to the viewport from the UI Data Asset
-		CreateManageableWidget(WidgetDataIt);
-	}
+	CreateMissingWidgets();
 
 	bAreWidgetInitialized = true;
 
@@ -297,7 +335,7 @@ void UBmrWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerC
 		CleanupWidgets();
 	}
 
-	TryInitWidgets();
+	UDalRegistrySubsystem::Get().BindAndLoad<FBmrWidgetRow>(this, &ThisClass::OnWidgetRowsChanged);
 }
 
 // Is called when this Subsystem is removed
@@ -305,10 +343,19 @@ void UBmrWidgetsSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 
+	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
+	{
+		DalRegistry->Unbind(this);
+	}
+
 	UGameFeaturesSubsystem::Get().RemoveObserver(this);
 
 	CleanupWidgets();
 }
+
+/*********************************************************************************************
+ * Events
+ ********************************************************************************************* */
 
 // Is called right after the game was started and windows size is set
 void UBmrWidgetsSubsystem::OnViewportResizedWhenInit(FViewport* Viewport, uint32 Index)
@@ -319,4 +366,39 @@ void UBmrWidgetsSubsystem::OnViewportResizedWhenInit(FViewport* Viewport, uint32
 	}
 
 	InitWidgets();
+}
+
+// Called after widget Data Registry rows change and all new soft references finish async loading
+void UBmrWidgetsSubsystem::OnWidgetRowsChanged_Implementation()
+{
+	if (!AreWidgetInitialized())
+	{
+		// Widget rows just became available in DR, trigger initial widget creation respecting viewport readiness
+		TryInitWidgets();
+		return;
+	}
+
+	// Gather current DR row tags to diff against tracked state
+	TSet<FGameplayTag> CurrentTags;
+	FBmrWidgetRow::ForEachRow([&CurrentTags](const FBmrWidgetRow& WidgetRowData)
+	{
+		CurrentTags.Add(WidgetRowData.WidgetTag);
+	});
+
+	// REMOVAL: destroy widgets whose tags vanished from DR
+	TArray<FGameplayTag> TagsToRemove;
+	for (const TPair<FGameplayTag, FBmrManageableWidgetsContainer>& It : AllManageableWidgets)
+	{
+		if (!CurrentTags.Contains(It.Key))
+		{
+			TagsToRemove.Add(It.Key);
+		}
+	}
+	for (const FGameplayTag& Tag : TagsToRemove)
+	{
+		DestroyManageableWidgetByTag(Tag);
+	}
+
+	// ADDITION: create widgets for newly injected rows, assets are already loaded by the handle
+	CreateMissingWidgets();
 }

@@ -58,14 +58,6 @@ void UNMMHUDComponent::OnUnregister()
 {
 	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
 
-	// --- Destroy Main Menu widgets
-
-	if (UBmrWidgetsSubsystem* WidgetsSubsystem = UBmrWidgetsSubsystem::GetWidgetsSubsystem())
-	{
-		WidgetsSubsystem->DestroyManageableWidgetByTag(NmmGameplayTags::UI::Widget_Menu);
-		WidgetsSubsystem->DestroyManageableWidgetByTag(NmmGameplayTags::UI::Widget_Cinematic);
-	}
-
 	Super::OnUnregister();
 }
 
@@ -82,9 +74,6 @@ void UNMMHUDComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* Dat
 // Called when the local player character is spawned, possessed, and replicated
 void UNMMHUDComponent::OnLocalPawnReady_Implementation(const FGameplayEventData& Payload)
 {
-	UBmrWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetMainMenuWidgetData());
-	UBmrWidgetsSubsystem::Get().CreateManageableWidgetChecked(UNMMDataAsset::Get().GetInCinematicStateWidgetData());
-
 	if (UNMMPlayerControllerComponent* ControllerComponent = UNMMUtils::GetPlayerControllerComponent())
 	{
 		ControllerComponent->SetManagedInputContextsEnabled(UNMMBaseSubsystem::Get().GetCurrentMenuState());

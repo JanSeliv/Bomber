@@ -4,7 +4,9 @@
 
 // Bomber
 #include "Components/BmrMapComponent.h"
-#include "DataAssets/BmrPlayerDataAsset.h"
+#include "DataRegistries/BmrPlayerPropRow.h"
+#include "DataRegistries/BmrPlayerRow.h"
+#include "DataRegistries/BmrPlayerSkinRow.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 // UE
@@ -56,8 +58,9 @@ void ABmrSkeletalMeshActor::InitSkeletalMesh(const FBmrPlayerTag& InPlayerTag, i
 	PlayerTag = InPlayerTag;
 	SkinIndex = InSkinIndex;
 
-	const UBmrPlayerRow* PlayerRow = UBmrPlayerDataAsset::Get().GetRowByPlayerTag(InPlayerTag);
-	const FBmrMeshData PlayerMeshData(PlayerRow, InSkinIndex);
+	FBmrMeshData PlayerMeshData = FBmrMeshData::Empty;
+	PlayerMeshData.RowName = FBmrPlayerRow::GetRowNameByPlayerTag(InPlayerTag);
+	PlayerMeshData.SkinRowName = FBmrPlayerSkinRow::GetSkinRowName(InPlayerTag, InSkinIndex);
 	GetMeshChecked().InitSkeletalMesh(PlayerMeshData);
 }
 
@@ -183,7 +186,15 @@ void UBmrSkeletalMeshComponent::SetSkeletalMesh(USkeletalMesh* NewMesh, bool bRe
 // Init this component by specified player data
 void UBmrSkeletalMeshComponent::InitSkeletalMesh(const FBmrMeshData& MeshData)
 {
-	if (!MeshData.Row)
+	if (!MeshData.IsValid())
+	{
+		return;
+	}
+
+	// Resolve mesh from the Data Registry row
+	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByName(MeshData.RowName);
+	USkeletalMesh* NewSkeletalMesh = PlayerRow ? Cast<USkeletalMesh>(PlayerRow->Mesh.Get()) : nullptr;
+	if (!NewSkeletalMesh)
 	{
 		return;
 	}
@@ -194,40 +205,29 @@ void UBmrSkeletalMeshComponent::InitSkeletalMesh(const FBmrMeshData& MeshData)
 		RegisterComponent();
 	}
 
-	// Set the new mesh data first, so it will not recusively call this function
+	// Set the new mesh data first, so it will not recursively call this function
 	PlayerMeshData = MeshData;
 
-	USkeletalMesh* NewSkeletalMesh = Cast<USkeletalMesh>(MeshData.Row->Mesh);
 	SetSkeletalMesh(NewSkeletalMesh, true);
-
-	UpdateSkinTextures();
 
 	AttachProps();
 
-	ApplySkinByIndex(MeshData.SkinIndex);
+	ApplySkinByRowName(MeshData.SkinRowName);
 }
 
-// Creates dynamic material instance for each skin if is not done before
-void UBmrSkeletalMeshComponent::UpdateSkinTextures()
-{
-	const UBmrPlayerRow* PlayerRow = Cast<UBmrPlayerRow>(PlayerMeshData.Row.Get());
-	if (ensureMsgf(PlayerRow, TEXT("ASSERT: [%i] %hs:\n'PlayerRow' is null!"), __LINE__, __FUNCTION__))
-	{
-		const_cast<UBmrPlayerRow*>(PlayerRow)->UpdateSkinTextures();
-	}
-}
+// No longer needed: skins are now separate material instances in FBmrPlayerSkinRow
 
 // Returns level type to which this mesh is associated with
 EBmrLevelType UBmrSkeletalMeshComponent::GetAssociatedLevelType() const
 {
-	const UBmrPlayerRow* PlayerRow = Cast<UBmrPlayerRow>(PlayerMeshData.Row);
+	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByName(PlayerMeshData.RowName);
 	return PlayerRow ? PlayerRow->LevelType : EBmrLevelType::None;
 }
 
 // Returns the Player Tag to which this mesh is associated with
 const FBmrPlayerTag& UBmrSkeletalMeshComponent::GetPlayerTag() const
 {
-	const UBmrPlayerRow* PlayerRow = Cast<UBmrPlayerRow>(PlayerMeshData.Row);
+	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByName(PlayerMeshData.RowName);
 	return PlayerRow ? PlayerRow->PlayerTag : FBmrPlayerTag::None;
 }
 
@@ -244,38 +244,45 @@ void UBmrSkeletalMeshComponent::GetAttachedPropsByClass(TArray<UMeshComponent*>&
 	}
 }
 
-// Attach all FBmrAttachedMeshes to specified parent mesh
+// Attach all player props from Data Registry
 void UBmrSkeletalMeshComponent::AttachProps()
 {
-	const UBmrPlayerRow* PlayerRow = Cast<UBmrPlayerRow>(PlayerMeshData.Row);
+	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByName(PlayerMeshData.RowName);
 	if (!PlayerRow
 	    || !ArePropsWantToUpdate())
 	{
 		return;
 	}
 
+	const FBmrPlayerTag& PlayerTag = PlayerRow->PlayerTag;
 	AttachedMeshesType = PlayerRow->LevelType;
 
 	// Destroy previous meshes
 	DetachProps();
 
+	// Gather prop rows from FBmrPlayerPropRow for this player tag
+	TArray<const FBmrPlayerPropRow*> PropRows;
+	FBmrPlayerPropRow::GetPlayerProps(PlayerTag, PropRows);
+
 	// Spawn new components and attach meshes
-	const TArray<FBmrAttachedMesh>& PlayerProps = PlayerRow->PlayerProps;
-	for (const FBmrAttachedMesh& AttachedMeshIt : PlayerProps)
+	for (const FBmrPlayerPropRow* PropRow : PropRows)
 	{
+		UStreamableRenderAsset* PropAsset = PropRow->Mesh.Get();
+		UAnimSequence* PropAnim = PropRow->MeshAnimation.Get();
+
 		UMeshComponent* MeshComponent = nullptr;
-		if (USkeletalMesh* SkeletalMeshProp = Cast<USkeletalMesh>(AttachedMeshIt.AttachedMesh))
+		if (USkeletalMesh* SkeletalMeshProp = Cast<USkeletalMesh>(PropAsset))
 		{
 			USkeletalMeshComponent* SkeletalComponent = NewObject<USkeletalMeshComponent>(this);
 			SkeletalComponent->SetSkeletalMesh(SkeletalMeshProp);
 			SkeletalComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-			if (AttachedMeshIt.MeshAnimation)
+			if (PropAnim)
 			{
-				SkeletalComponent->OverrideAnimationData(AttachedMeshIt.MeshAnimation);
+				SkeletalComponent->OverrideAnimationData(PropAnim);
 			}
 			MeshComponent = SkeletalComponent;
 		}
-		else if (UStaticMesh* StaticMeshProp = Cast<UStaticMesh>(AttachedMeshIt.AttachedMesh))
+		else if (UStaticMesh* StaticMeshProp = Cast<UStaticMesh>(PropAsset))
 		{
 			UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
 			StaticMeshComponent->SetStaticMesh(StaticMeshProp);
@@ -284,7 +291,7 @@ void UBmrSkeletalMeshComponent::AttachProps()
 			MeshComponent = StaticMeshComponent;
 		}
 
-		if (!ensureMsgf(MeshComponent, TEXT("'MeshComponent' can not be attached with mesh '%s'"), *GetNameSafe(AttachedMeshIt.AttachedMesh)))
+		if (!ensureMsgf(MeshComponent, TEXT("'MeshComponent' can not be attached with mesh '%s'"), *GetNameSafe(PropAsset)))
 		{
 			continue;
 		}
@@ -309,7 +316,7 @@ void UBmrSkeletalMeshComponent::AttachProps()
 		// Before attach, mark it as transient only for this operation to avoid Modify()-call that asks to save the level
 		// However, remove the flag next as props have to be cooked
 		MeshComponent->SetFlags(RF_Transient);
-		MeshComponent->AttachToComponent(this, AttachRules, AttachedMeshIt.Socket);
+		MeshComponent->AttachToComponent(this, AttachRules, PropRow->Socket);
 		MeshComponent->ClearFlags(RF_Transient);
 	}
 }
@@ -331,33 +338,40 @@ void UBmrSkeletalMeshComponent::DetachProps()
 // Returns true when is needed to attach or detach props
 bool UBmrSkeletalMeshComponent::ArePropsWantToUpdate() const
 {
-	const UBmrPlayerRow* PlayerRow = Cast<UBmrPlayerRow>(PlayerMeshData.Row);
-	if (!PlayerRow)
+	const FBmrPlayerTag& PlayerTag = GetPlayerTag();
+	if (!PlayerTag.IsValid())
 	{
 		return false;
 	}
 
-	const TArray<FBmrAttachedMesh>& PlayerProps = PlayerRow->PlayerProps;
-	const bool bEmptyPropsList = PlayerProps.Num() == 0;
-	if (bEmptyPropsList)
+	// Gather expected props from DR
+	TArray<const FBmrPlayerPropRow*> PropRows;
+	FBmrPlayerPropRow::GetPlayerProps(PlayerTag, PropRows);
+
+	if (PropRows.IsEmpty())
 	{
-		// Returns false to do not update when props list is empty and is nothing already attached
-		const bool bAttachedOutdated = AttachedMeshes.Num() > 0;
-		return bAttachedOutdated;
+		// Returns true to detach when props list is empty but something is already attached
+		return !AttachedMeshes.IsEmpty();
 	}
 
-	for (const FBmrAttachedMesh& AttachedMeshIt : PlayerProps)
+	for (const FBmrPlayerPropRow* PropRow : PropRows)
 	{
-		const bool bContains = AttachedMeshes.ContainsByPredicate([&AttachedMeshIt](const UMeshComponent* MeshCompIt)
+		UStreamableRenderAsset* PropAsset = PropRow->Mesh.Get();
+		if (!PropAsset)
 		{
-			if (const auto SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshCompIt))
-			{
-				return SkeletalMeshComp->GetSkinnedAsset() == AttachedMeshIt.AttachedMesh;
-			}
+			// Soft reference not resolved yet, props are not ready for update
+			return false;
+		}
 
-			if (const auto StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
+		const bool bContains = AttachedMeshes.ContainsByPredicate([PropAsset](const UMeshComponent* MeshCompIt)
+		{
+			if (const USkeletalMeshComponent* SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshCompIt))
 			{
-				return StaticMeshComp->GetStaticMesh() == AttachedMeshIt.AttachedMesh;
+				return SkeletalMeshComp->GetSkinnedAsset() == PropAsset;
+			}
+			if (const UStaticMeshComponent* StaticMeshComp = Cast<UStaticMeshComponent>(MeshCompIt))
+			{
+				return StaticMeshComp->GetStaticMesh() == PropAsset;
 			}
 			return false;
 		});
@@ -390,11 +404,31 @@ void UBmrSkeletalMeshComponent::Cleanup()
  * Skins
  ********************************************************************************************* */
 
-// Returns the total number of skins for current mesh (player row)
+// Returns the total number of skins for current mesh from FBmrPlayerSkinRow
 int32 UBmrSkeletalMeshComponent::GetSkinTexturesNum() const
 {
-	const UBmrPlayerRow* PlayerRow = Cast<UBmrPlayerRow>(PlayerMeshData.Row);
-	return PlayerRow ? PlayerRow->GetSkinTexturesNum() : 0;
+	return FBmrPlayerSkinRow::GetSkinTexturesNum(GetPlayerTag());
+}
+
+// Returns the positional index of the currently applied skin among skins for the same PlayerTag
+int32 UBmrSkeletalMeshComponent::GetAppliedSkinIndex() const
+{
+	const FBmrPlayerTag& PlayerTag = GetPlayerTag();
+	int32 MatchIndex = 0;
+	int32 FoundIndex = 0;
+	FBmrPlayerSkinRow::ForEachRowWithName([&](FName ItemName, const FBmrPlayerSkinRow& SkinRow)
+	{
+		if (SkinRow.PlayerTag != PlayerTag)
+		{
+			return;
+		}
+		if (ItemName == PlayerMeshData.SkinRowName)
+		{
+			FoundIndex = MatchIndex;
+		}
+		++MatchIndex;
+	});
+	return FoundIndex;
 }
 
 // Checks if a skin is available and can be applied by index
@@ -439,23 +473,17 @@ void UBmrSkeletalMeshComponent::SetSkinAvailable(bool bMakeAvailable, int32 Skin
 	}
 }
 
-// Set and apply new skin for current mesh, by index from player row
-void UBmrSkeletalMeshComponent::ApplySkinByIndex(int32 SkinIndex)
+// Set and apply new skin for current mesh by FBmrPlayerSkinRow row name
+void UBmrSkeletalMeshComponent::ApplySkinByRowName(FName InSkinRowName)
 {
-	if (!ensureMsgf(PlayerMeshData.Row, TEXT("ASSERT: [%i] %hs:\n'PlayerMeshData.PlayerRow' is not valid!"), __LINE__, __FUNCTION__))
+	const FBmrPlayerSkinRow* SkinRow = InSkinRowName.IsNone() ? nullptr : FBmrPlayerSkinRow::GetRowByName(InSkinRowName);
+	UMaterialInterface* SkinMaterial = SkinRow ? SkinRow->Material.Get() : nullptr;
+	if (!SkinMaterial)
 	{
 		return;
 	}
 
-	const UBmrPlayerRow* PlayerRow = Cast<UBmrPlayerRow>(PlayerMeshData.Row);
-	UMaterialInstanceDynamic* MaterialInstanceDynamic = PlayerRow->GetMaterialInstanceDynamic(SkinIndex);
-	if (!MaterialInstanceDynamic)
-	{
-		// Skin is not found for given index, likely out of range
-		return;
-	}
-
-	auto SetMaterialForAllSlots = [MaterialInstanceDynamic](UMeshComponent* MeshComponent)
+	auto SetMaterialForAllSlots = [SkinMaterial](UMeshComponent* MeshComponent)
 	{
 		if (!MeshComponent)
 		{
@@ -465,7 +493,7 @@ void UBmrSkeletalMeshComponent::ApplySkinByIndex(int32 SkinIndex)
 		const TArray<UMaterialInterface*>& AllMaterials = MeshComponent->GetMaterials();
 		for (int32 Index = 0; Index < AllMaterials.Num(); ++Index)
 		{
-			MeshComponent->SetMaterial(Index, MaterialInstanceDynamic);
+			MeshComponent->SetMaterial(Index, SkinMaterial);
 		}
 	};
 
@@ -476,5 +504,11 @@ void UBmrSkeletalMeshComponent::ApplySkinByIndex(int32 SkinIndex)
 		SetMaterialForAllSlots(AttachedMeshIt);
 	}
 
-	PlayerMeshData.SkinIndex = SkinIndex;
+	PlayerMeshData.SkinRowName = InSkinRowName;
+}
+
+// Set and apply new skin for current mesh by positional index among skins for the same PlayerTag
+void UBmrSkeletalMeshComponent::ApplySkinByIndex(int32 SkinIndex)
+{
+	ApplySkinByRowName(FBmrPlayerSkinRow::GetSkinRowName(GetPlayerTag(), SkinIndex));
 }

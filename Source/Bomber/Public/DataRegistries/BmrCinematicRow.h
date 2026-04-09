@@ -6,24 +6,25 @@
 
 // Bomber
 #include "Bomber.h" // EBmrLevelType
+#include "DalRegistryRow.h"
 #include "Structures/BmrPlayerTag.h"
 
 #include "BmrCinematicRow.generated.h"
 
 /**
  * Row struct for cinematics data table registered via Data Registry.
- * Map MGFs register their own data tables with cinematic rows.
+ * Mods or maps register their own data tables with cinematic rows.
  */
 USTRUCT(BlueprintType)
 struct BOMBER_API FBmrCinematicRow : public FTableRowBase
+#if CPP
+    , public TDalRegistryRow<FBmrCinematicRow>
+#endif
 {
 	GENERATED_BODY()
 
 	/** The row that does not contain any data. */
 	static const FBmrCinematicRow Empty;
-
-	/** The name of the DR_Cinematics Data Registry type used to query cinematic rows. */
-	static inline const FName CinematicsRegistryTypeName = TEXT("DR_Cinematics");
 
 	/** The level where this cinematic should be played. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -37,9 +38,9 @@ struct BOMBER_API FBmrCinematicRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<class ULevelSequence> LevelSequence = nullptr;
 
-	/** The index of the subsequence, is taken from data table's row index on loading the LevelSequence. */
-	UPROPERTY(BlueprintReadWrite)
-	int32 RowIndex = INDEX_NONE;
+	/** User-defined priority that determines cinematic play order and spot selection, higher value = higher priority. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Priority = INDEX_NONE;
 
 	/** Returns true if this row is valid. */
 	bool IsValid() const;

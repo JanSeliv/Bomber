@@ -6,11 +6,12 @@
 #include "Actors/BmrGeneratedMap.h"
 #include "Actors/BmrPawn.h"
 #include "Components/BmrMapComponent.h"
-#include "DataAssets/BmrPlayerDataAsset.h"
+#include "DataRegistries/BmrPlayerRow.h"
 
 // UE
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "AbilitySystemComponent.h"
+#include "Animation/AnimMontage.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPlayerDeathAbility)
 
@@ -22,8 +23,8 @@ void UBmrPlayerDeathAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	check(ActorInfo && TriggerEventData);
 
 	const ABmrPawn* Pawn = Cast<ABmrPawn>(ActorInfo->AvatarActor.Get());
-	const UBmrPlayerRow* PlayerRow = Pawn ? UBmrPlayerDataAsset::Get().GetRowByPlayerTag(Pawn->GetPlayerTag()) : nullptr;
-	UAnimMontage* DeathMontage = PlayerRow ? PlayerRow->DeathMontage : nullptr;
+	const FBmrPlayerRow* PlayerRow = Pawn ? FBmrPlayerRow::GetRowByPlayerTag(Pawn->GetPlayerTag()) : nullptr;
+	UAnimMontage* DeathMontage = PlayerRow ? PlayerRow->DeathMontage.Get() : nullptr;
 	if (!ensureMsgf(DeathMontage, TEXT("ASSERT: [%i] %hs:\n'DeathMontage' failed to play!"), __LINE__, __FUNCTION__))
 	{
 		K2_EndAbilityLocally();

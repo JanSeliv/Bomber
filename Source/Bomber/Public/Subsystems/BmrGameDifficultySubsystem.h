@@ -18,9 +18,6 @@ class BOMBER_API UBmrGameDifficultySubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 
 public:
-	/** Data Registry type name for difficulty rows. */
-	static inline const FName DifficultyRegistryTypeName = TEXT("DR_GameDifficulty");
-
 	/** Returns this subsystem, is checked and will crash if can't be obtained. */
 	static UBmrGameDifficultySubsystem& Get(const UObject* WorldContextObject = nullptr);
 
@@ -58,7 +55,7 @@ public:
 public:
 	/** Returns all difficulty rows gathered from Data Registry, sorted by DifficultyLevel. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	void GetAllDifficultyRows(TArray<FBmrGameDifficultyRow>& OutRows) const;
+	void GetAllDifficultyRows(TArray<struct FBmrGameDifficultyRow>& OutRows) const;
 
 	/** Finds difficulty row by tag, returns nullptr if not found. */
 	const FBmrGameDifficultyRow* FindRowByTag(const FBmrGameDifficultyTag& Tag) const;
@@ -88,7 +85,7 @@ protected:
 protected:
 	/** Config property persisting last chosen difficulty tag. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Config, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
-	FBmrGameDifficultyTag DifficultyTag;
+	FBmrGameDifficultyTag DifficultyTag = FBmrGameDifficultyTag::None;
 
 	/*********************************************************************************************
 	 * Overrides

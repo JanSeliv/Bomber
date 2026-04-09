@@ -30,7 +30,7 @@ public:
 public:
 	/** Returns true the Generated Map actor is ready to generate actors.  */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	FORCEINLINE bool IsGeneratedMapReady() const { return GeneratedMap && bAreDataAssetsLoaded; }
+	bool IsGeneratedMapReady() const;
 
 protected:
 	/** Broadcasts GeneratedMap_Ready event if both the Generated Map actor and dependent actors' data assets are available */
@@ -60,9 +60,16 @@ protected:
 	bool bAreDataAssetsLoaded = false;
 
 	/*********************************************************************************************
-	 * Overrides
+	 * Overrides and Events
 	 ********************************************************************************************* */
 protected:
 	/** Is called on subsystem creation, used for listening the readiness of the Generated Map and its data assets. */
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+
+	/** Unsubscribes from Data Registry callbacks during teardown. */
+	virtual void Deinitialize() override;
+
+	/** Called when level actor Data Registry rows change and all their soft references finish async loading */
+	UFUNCTION(BlueprintNativeEvent, Category = "[Bomber]")
+	void OnLevelActorRowsChanged();
 };

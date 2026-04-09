@@ -42,7 +42,6 @@ public class Bomber : ModuleRules
 				, "AIModule" // AI
 				, "Niagara" // VFX
 				, "GameplayTags" // FGameplayTag
-                , "DataRegistry" // Dynamic data extensions
                 , "LevelSequence" // FBmrCinematicRow
                 , "ModularGameplay" // Modular Game Features (MGF)
                 , "ModelViewViewModel" // MVVM UI pattern

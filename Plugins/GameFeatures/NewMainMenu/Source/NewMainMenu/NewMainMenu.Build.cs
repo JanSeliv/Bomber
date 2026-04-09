@@ -27,7 +27,6 @@ public class NewMainMenu : ModuleRules
 				, "AdvancedWidgets" // URadialSlider
 				, "CineCameraRigs" // Camera rails
 				, "GameplayTags", "GameplayAbilities" // Tags
-				, "DataRegistry" // DR_Cinematics
 				// Bomber modules
 				, "MyUtils"
 				, "SettingsWidgetConstructor"

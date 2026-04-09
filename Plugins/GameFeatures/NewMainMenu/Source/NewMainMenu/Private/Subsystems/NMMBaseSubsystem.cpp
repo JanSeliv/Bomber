@@ -7,16 +7,12 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
-#include "Structures/BmrCinematicRow.h"
+#include "DataRegistries/BmrCinematicRow.h"
+#include "GameFramework/BmrGameState.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
-
-// UE
-#include "DataRegistry.h"
-#include "DataRegistrySubsystem.h"
-#include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMBaseSubsystem)
 
@@ -41,47 +37,14 @@ void UNMMBaseSubsystem::SetNewMainMenuState(ENMMState NewState)
 	OnMainMenuStateChanged.Broadcast(NewState, PreviousState);
 }
 
-// Returns true if DR_Cinematics Data Registry has any cached rows
-bool UNMMBaseSubsystem::HasCinematicRows()
-{
-	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
-	const UDataRegistry* Registry = DRSubsystem ? DRSubsystem->GetRegistryForType(FDataRegistryType(FBmrCinematicRow::CinematicsRegistryTypeName)) : nullptr;
-	if (!ensureMsgf(Registry, TEXT("ASSERT: [%i] %hs:\n'DR_Cinematics' Data Registry is not found, make sure it is created with '%s' type"), __LINE__, __FUNCTION__, *FBmrCinematicRow::CinematicsRegistryTypeName.ToString()))
-	{
-		return false;
-	}
-
-	bool bHasRows = false;
-	Registry->ForEachCachedItem<FBmrCinematicRow>(TEXT("HasCinematicRows"), [&bHasRows](const FName& /*Name*/, const FBmrCinematicRow& /*Row*/)
-	{
-		bHasRows = true;
-	});
-
-	return bHasRows;
-}
-
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
 
-// Subscribes to game state events and Data Registry changes
+// Subscribes to game state events
 void UNMMBaseSubsystem::OnGameFeatureInitialize_Implementation()
 {
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
-
-	// Listen for DR_Cinematics changes to transition between BasicMenu and Idle when map MGF injects or removes rows
-	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
-	UDataRegistry* Registry = DRSubsystem ? DRSubsystem->GetRegistryForType(FDataRegistryType(FBmrCinematicRow::CinematicsRegistryTypeName)) : nullptr;
-	if (!ensureMsgf(Registry, TEXT("ASSERT: [%i] %hs:\n'DR_Cinematics' Data Registry is not found, make sure it is created with '%s' type"), __LINE__, __FUNCTION__, *FBmrCinematicRow::CinematicsRegistryTypeName.ToString()))
-	{
-		return;
-	}
-
-	FDataRegistryCacheVersionCallback& CacheDelegate = Registry->OnCacheVersionInvalidated();
-	if (!CacheDelegate.IsBoundToObject(this))
-	{
-		CacheDelegate.AddUObject(this, &ThisClass::OnCinematicsRegistryChanged);
-	}
 
 	// Listen for spot readiness to re-evaluate state when spots finish loading after DR rows already arrived
 	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
@@ -103,10 +66,19 @@ void UNMMBaseSubsystem::OnGameStateChanged_Implementation(const FGameplayEventDa
 {
 	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
 	{
-		// Always start in BasicMenu, DR change callback will transition to Idle when cinematics are available
-		// Skip BasicMenu when cinematics are already loaded (e.g. returning from game to menu)
-		const ENMMState MenuState = HasCinematicRows() ? ENMMState::Idle : ENMMState::BasicMenu;
-		SetNewMainMenuState(MenuState);
+		// No rows means no MGF cinematics at all (DR itself loads immediately with no softs), enter BasicMenu immediately
+		// Rows exist but spots not ready: stay in current state, OnActiveMenuSpotReady will transition to Idle
+		// Spots ready: enter Idle directly
+		const UNMMSpotsSubsystem* SpotsSubsystem = UNMMUtils::GetSpotsSubsystem();
+		const bool bSpotsReady = SpotsSubsystem && SpotsSubsystem->IsActiveMenuSpotReady();
+		if (bSpotsReady)
+		{
+			SetNewMainMenuState(ENMMState::Idle);
+		}
+		else if (!FBmrCinematicRow::GetRowsNum())
+		{
+			SetNewMainMenuState(ENMMState::BasicMenu);
+		}
 	}
 	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
 	{
@@ -115,43 +87,12 @@ void UNMMBaseSubsystem::OnGameStateChanged_Implementation(const FGameplayEventDa
 	}
 }
 
-// Called when DR_Cinematics Data Registry cache version changes (rows injected or removed)
-void UNMMBaseSubsystem::OnCinematicsRegistryChanged_Implementation(UDataRegistry* CinematicsDataRegistry)
-{
-	const UWorld* World = GetWorld();
-	if (!World
-	    || World->bIsTearingDown
-	    || !CinematicsDataRegistry
-	    || CinematicsDataRegistry->GetLowestAvailability() == EDataRegistryAvailability::DoesNotExist)
-	{
-		return;
-	}
-
-	const bool bHasRows = HasCinematicRows();
-	const UNMMSpotsSubsystem* SpotsSubsystem = UNMMUtils::GetSpotsSubsystem();
-	const bool bSpotsReady = SpotsSubsystem && SpotsSubsystem->IsActiveMenuSpotReady();
-
-	if (bHasRows && bSpotsReady
-	    && CurrentMenuState == ENMMState::BasicMenu)
-	{
-		// Cinematics rows injected by map MGF and spots are ready, activate cinematic lobby
-		SetNewMainMenuState(ENMMState::Idle);
-	}
-	else if (!bHasRows
-	         && CurrentMenuState != ENMMState::None
-	         && CurrentMenuState != ENMMState::BasicMenu)
-	{
-		// DR emptied at runtime (map MGF unloaded), fall back to basic menu
-		SetNewMainMenuState(ENMMState::BasicMenu);
-	}
-}
-
 // Called when a cinematic spot finished loading, re-evaluates whether to transition from BasicMenu to Idle
 void UNMMBaseSubsystem::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* /*MainMenuSpotComponent*/)
 {
-	if (CurrentMenuState != ENMMState::BasicMenu
-	    || !HasCinematicRows())
+	if (!ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu))
 	{
+		// Spots loaded before game entered Menu state, OnGameStateChanged will handle transition to Idle once Menu state is reached
 		return;
 	}
 

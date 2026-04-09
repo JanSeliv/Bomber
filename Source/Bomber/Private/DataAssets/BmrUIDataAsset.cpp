@@ -6,32 +6,12 @@
 #include "Bomber.h"
 #include "DalSubsystem.h"
 
-// UE
-#include "Blueprint/UserWidget.h"
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrUIDataAsset)
 
 // Returns the UI data asset
 const UBmrUIDataAsset& UBmrUIDataAsset::Get()
 {
 	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
-}
-
-// Returns widget data associated with the given tag, or invalid widget data if not found
-const FBmrManageableWidgetData& UBmrUIDataAsset::GetWidgetDataByTag(FGameplayTag InTag) const
-{
-	const FBmrManageableWidgetData* FoundWidgetData = AllWidgetData.FindByKey(InTag);
-	return FoundWidgetData ? *FoundWidgetData : FBmrManageableWidgetData::Empty;
-}
-
-// Returns widget data associated with the given widget class, or null if not found
-const FBmrManageableWidgetData& UBmrUIDataAsset::GetWidgetDataByClass(TSubclassOf<UUserWidget> WidgetClass) const
-{
-	const FBmrManageableWidgetData* FoundWidgetData = AllWidgetData.FindByPredicate([WidgetClass](const FBmrManageableWidgetData& It)
-	{
-		return It.WidgetClass == WidgetClass;
-	});
-	return FoundWidgetData ? *FoundWidgetData : FBmrManageableWidgetData::Empty;
 }
 
 // Returns the localized texts about specified end game to display on UI.

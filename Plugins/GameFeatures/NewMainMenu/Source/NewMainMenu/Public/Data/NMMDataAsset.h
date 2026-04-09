@@ -4,9 +4,6 @@
 
 #include "DalPrimaryDataAsset.h"
 
-// Bomber
-#include "Structures/BmrManageableWidgetData.h"
-
 #include "NMMDataAsset.generated.h"
 
 enum class ENMMState : uint8;
@@ -23,27 +20,6 @@ class NEWMAINMENU_API UNMMDataAsset : public UDalPrimaryDataAsset
 public:
 	/** Returns this Data Asset, is checked and wil crash if can't be obtained, e.g: when is not set. */
 	static const UNMMDataAsset& Get(const UObject* OptionalWorldContext = nullptr);
-
-	/*********************************************************************************************
-	 * General
-	 ********************************************************************************************* */
-public:
-	/** Returns data for the Main Menu widget. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	const FORCEINLINE FBmrManageableWidgetData& GetMainMenuWidgetData() const { return MainMenuWidgetData; }
-
-	/** Returns data for the In Cinematic State widget. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	const FORCEINLINE FBmrManageableWidgetData& GetInCinematicStateWidgetData() const { return InCinematicStateWidgetData; }
-
-protected:
-	/** Data for the Main Menu widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected))
-	FBmrManageableWidgetData MainMenuWidgetData = FBmrManageableWidgetData::Empty;
-
-	/** Data for the In Cinematic State widget. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI", meta = (BlueprintProtected))
-	FBmrManageableWidgetData InCinematicStateWidgetData = FBmrManageableWidgetData::Empty;
 
 	/*********************************************************************************************
 	 * Camera

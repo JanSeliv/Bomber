@@ -12,6 +12,8 @@
 #include "Controllers/BmrAIController.h"
 #include "Controllers/BmrPlayerController.h"
 #include "DataAssets/BmrPlayerDataAsset.h"
+#include "DataRegistries/BmrPlayerRow.h"
+#include "DataRegistries/BmrPlayerSkinRow.h"
 #include "GameFramework/BmrGameMode.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
@@ -28,6 +30,7 @@
 #include "AbilitySystemComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/SkeletalMesh.h"
 #include "GameplayEffect.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPawn)
@@ -73,7 +76,7 @@ ABmrPawn::ABmrPawn()
 // Returns the Player Tag associated with player
 const FBmrPlayerTag& ABmrPawn::GetPlayerTag() const
 {
-	const UBmrPlayerRow* PlayerRow = MapComponent ? MapComponent->GetMeshRow<UBmrPlayerRow>() : nullptr;
+	const FBmrPlayerRow* PlayerRow = MapComponent ? FBmrPlayerRow::GetRowByName(MapComponent->GetReplicatedMeshData().RowName) : nullptr;
 	return PlayerRow ? PlayerRow->PlayerTag : FBmrPlayerTag::None;
 }
 
@@ -227,8 +230,8 @@ void ABmrPawn::OnAddedToLevel_Implementation(UBmrMapComponent* InMapComponent)
 	}
 }
 
-// Is called when the Row from current Data Asset is changed for owner on the level, on both server and clients
-void ABmrPawn::OnActorTypeChanged_Implementation(UBmrMapComponent* InMapComponent, const UBmrLevelActorRow* NewRow, const class UBmrLevelActorRow* PreviousRow)
+// Is called when the mesh from current Data Asset is changed for owner on the level, on both server and clients
+void ABmrPawn::OnActorTypeChanged_Implementation(UBmrMapComponent* InMapComponent)
 {
 	// Handle character change: apply new config to update attributes
 	ApplyPreset();
@@ -371,10 +374,10 @@ void ABmrPawn::ApplyPreset()
 		MyPlayerState->ApplyDefaultAttributes();
 	}
 
-	// Secondly, apply config gameplay effect
+	// Secondly, apply config gameplay effect from Data Registry
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
-	const UBmrPlayerRow* PlayerRow = UBmrPlayerDataAsset::Get().GetRowByPlayerTag(GetPlayerTag());
-	const TSubclassOf<UGameplayEffect> ConfigGameplayEffect = PlayerRow ? PlayerRow->ConfigGameplayEffect : nullptr;
+	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByPlayerTag(GetPlayerTag());
+	const TSubclassOf<UGameplayEffect> ConfigGameplayEffect = PlayerRow ? PlayerRow->ConfigGameplayEffect.Get() : nullptr;
 	if (ASC && ConfigGameplayEffect)
 	{
 		ASC->ApplyGameplayEffectToSelf(ConfigGameplayEffect.GetDefaultObject(), /*Level*/ 1, ASC->MakeEffectContext());
@@ -518,8 +521,7 @@ void ABmrPawn::SetDefaultPlayerMeshData(bool bForcePlayerSkin /* = false*/)
 		return;
 	}
 
-	const UBmrPlayerDataAsset& PlayerDataAsset = UBmrPlayerDataAsset::Get();
-	const int32 MeshesNum = PlayerDataAsset.GetRowsNum();
+	const int32 MeshesNum = FBmrPlayerRow::GetRowsNum();
 	const int32 PlayerId = GetPlayerId();
 	if (!ensureMsgf(MeshesNum > 0, TEXT("ASSERT: [%i] %hs:\n'MeshesNum' is empty!"), __LINE__, __FUNCTION__)
 	    || !ensureMsgf(PlayerId >= 0, TEXT("ASSERT: [%i] %hs:\n'PlayerId' is not valid!"), __LINE__, __FUNCTION__))
@@ -538,16 +540,16 @@ void ABmrPawn::SetDefaultPlayerMeshData(bool bForcePlayerSkin /* = false*/)
 		LevelType = static_cast<EBmrLevelType>(1 << PlayerId);
 	}
 
-	const UBmrPlayerRow* Row = PlayerDataAsset.GetRowByLevelType<UBmrPlayerRow>(TO_ENUM(EBmrLevelType, LevelType));
+	const FBmrPlayerRow* Row = FBmrPlayerRow::GetRowByLevelType(LevelType);
+	const FName RowName = FBmrPlayerRow::GetRowNameByLevelType(LevelType);
 	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	const int32 SkinsNum = Row->GetSkinTexturesNum();
 	FBmrMeshData MeshData = FBmrMeshData::Empty;
-	MeshData.Row = Row;
-	MeshData.SkinIndex = PlayerId % SkinsNum;
+	MeshData.RowName = RowName;
+	MeshData.SkinRowName = FBmrPlayerSkinRow::GetSkinRowName(Row->PlayerTag, PlayerId);
 
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 	MapComponent->SetReplicatedMeshData(MeshData);
