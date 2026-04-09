@@ -136,10 +136,11 @@ void UGlobalMessageSubsystem::BroadcastGlobalMessage(const FGameplayEventData& P
 	}
 
 	// Forward event to Ability System Component if found from Target or Instigator as fallback
-	const AActor* ASCOwner = Payload.Target ? Payload.Target : Payload.Instigator;
-	if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(ASCOwner))
+	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Payload.Target);
+	UAbilitySystemComponent* FinalASC = TargetASC ? TargetASC : UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Payload.Instigator);
+	if (FinalASC)
 	{
-		ASC->HandleGameplayEvent(Payload.EventTag, &Payload);
+		FinalASC->HandleGameplayEvent(Payload.EventTag, &Payload);
 	}
 }
 

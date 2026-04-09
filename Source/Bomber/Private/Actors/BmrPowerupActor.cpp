@@ -125,9 +125,9 @@ void ABmrPowerupActor::OnPowerupBeginOverlap_Implementation(AActor* OverlappedAc
 
 	FGameplayEventData EventData;
 	EventData.EventTag = BmrGameplayTags::Event::Powerup_Collected;
-	EventData.Instigator = this;
-	EventData.Target = OtherActor;
-	EventData.InstigatorTags.AddTag(PowerupTag);
+	EventData.Instigator = OtherActor;
+	EventData.Target = this;
+	EventData.TargetTags.AddTag(PowerupTag);
 	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 }
 
