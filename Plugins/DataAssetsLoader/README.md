@@ -18,8 +18,11 @@ Auto-load and access any data asset from anywhere
 
 ## 🌟 About
 
-**Data Assets Loader** is a plugin that automatically discovers, asynchronously loads, and unloads Primary Data Assets in your project via the Asset Manager, providing instant global access by class from both C++ and Blueprints.
+**Data Assets Loader** is a plugin that:
+- automatically discovers, asynchronously loads, and unloads Primary Data Assets in your project via the Asset Manager, providing instant global access by class from both C++ and Blueprints
+- Manages Data Registry consumer lifecycle so any Data Table can be injected externally (from plugins, DLC, Modular Game Features) while the project side stays boilerplate-free pulling data from Data Registry.
 
+### Data Assets
 - **Zero-Config Loading**: Data assets self-register via `PostLoad`, no manual setup or soft references needed.
 - **Global Access by Class**: Retrieve any data asset instantly with `UDalSubsystem::GetDataAsset<UMyDataAsset>()`.
 - **One-Shot Listeners**: Subscribe to a data asset class and get notified as soon as it is loaded, with automatic weak object safety.
@@ -27,6 +30,12 @@ Auto-load and access any data asset from anywhere
 - **Modular Game Features Support**: Automatically discovers and loads data assets from Game Feature plugins.
 
 ![DataAssetsLoader](https://github.com/user-attachments/assets/979e5393-995c-429b-8c43-0e029f22b230)
+
+### Data Registries
+- **Owner-Based Binding**: Subscribe to Data Registries via `UDalRegistrySubsystem` by owner pointer, auto async-loads soft references and fires callback on cache changes.
+- **MGF Integration**: Modular Game Feature plugins inject their own Data Tables into registries; consumers bind once and automatically pick up new data when features activate.
+
+![DataRegistries](https://github.com/user-attachments/assets/af317698-4e22-46c6-8cb6-92e881a8acee)
 
 ## 🎓 Sample Projects
 

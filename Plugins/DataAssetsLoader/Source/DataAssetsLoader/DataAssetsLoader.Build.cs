@@ -20,7 +20,13 @@ public class DataAssetsLoader : ModuleRules
 			{
 				"CoreUObject", "Engine" // Core
 				, "AssetRegistry" // FARFilter, FAssetData
+				, "DataRegistry" // UDalRegistrySubsystem
 			}
 		);
+
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.Add("UnrealEd"); // GEditor
+		}
 	}
 }

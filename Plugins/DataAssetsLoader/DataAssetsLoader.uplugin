@@ -30,6 +30,10 @@
 		{
 			"Name": "GameFeatures",
 			"Enabled": true
+		},
+		{
+			"Name": "DataRegistry",
+			"Enabled": true
 		}
 	]
 }

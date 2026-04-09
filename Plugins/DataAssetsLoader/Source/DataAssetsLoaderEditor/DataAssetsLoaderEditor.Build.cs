@@ -20,8 +20,8 @@ public class DataAssetsLoaderEditor : ModuleRules
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
 				, "UnrealEd"
-				, "KismetCompiler"
-				, "DataAssetsLoader" // UDalSubsystem
+				, "Kismet", "KismetCompiler"
+				, "DataAssetsLoader"
 			}
 		);
 	}
