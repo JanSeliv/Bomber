@@ -6,6 +6,7 @@
 #include "Components/NMMSpotComponent.h"
 #include "DalRegistrySubsystem.h"
 #include "NMMUtils.h"
+#include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 
@@ -120,7 +121,7 @@ void UNMMSpotsSubsystem::TryBroadcastOnActiveMenuSpotReady()
 	ActiveSpotPriority = BestSpot->GetCinematicRow().Priority;
 
 	// Apply cinematic state that was deferred during async load
-	const ENMMState CurrentState = UNMMBaseSubsystem::Get().GetCurrentMenuState();
+	const FNmmStateTag CurrentState = UNMMBaseSubsystem::Get().GetCurrentMenuState();
 	BestSpot->SetCinematicByState(CurrentState);
 
 	OnActiveMenuSpotReady.Broadcast(BestSpot);
@@ -220,7 +221,7 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 		// If instant, then switch to the next spot, it will possess the camera and start playing its cinematic
 		// Otherwise start transition to the next spot
 		const bool bInstant = UNMMInGameSettingsSubsystem::Get().IsInstantCharacterSwitchEnabled();
-		UNMMBaseSubsystem::Get().SetNewMainMenuState(bInstant ? ENMMState::Idle : ENMMState::Transition);
+		UNMMBaseSubsystem::Get().SetNewMainMenuState(bInstant ? FNmmStateTag::Idle : FNmmStateTag::Transition);
 	}
 	else // In-game
 	{
@@ -301,7 +302,7 @@ void UNMMSpotsSubsystem::HandleUnavailableMenuSpot()
 // Subscribes to menu state and game state events
 void UNMMSpotsSubsystem::OnGameFeatureInitialize_Implementation()
 {
-	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
@@ -328,10 +329,11 @@ void UNMMSpotsSubsystem::OnGameFeatureDeinitialize_Implementation()
  ********************************************************************************************* */
 
 // Called when the Main Menu state was changed
-void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
+void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	if (NewState == ENMMState::None
-	    || NewState == ENMMState::BasicMenu)
+	const FNmmStateTag NewState(Payload.InstigatorTags.First());
+	if (NewState == FNmmStateTag::None
+	    || NewState == FNmmStateTag::BasicMenu)
 	{
 		LastMoveSpotDirection = 0;
 	}
@@ -362,19 +364,19 @@ void UNMMSpotsSubsystem::OnCinematicRowsChanged_Implementation()
 	const bool bHasRows = FBmrCinematicRow::GetRowsNum() > 0;
 
 	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
-	const ENMMState CurrentState = BaseSubsystem.GetCurrentMenuState();
+	const FNmmStateTag CurrentState = BaseSubsystem.GetCurrentMenuState();
 
 	if (bHasRows && IsActiveMenuSpotReady()
-	    && CurrentState == ENMMState::BasicMenu)
+	    && CurrentState == FNmmStateTag::BasicMenu)
 	{
 		// Cinematics rows injected by map MGF and spots are ready, activate cinematic lobby
-		BaseSubsystem.SetNewMainMenuState(ENMMState::Idle);
+		BaseSubsystem.SetNewMainMenuState(FNmmStateTag::Idle);
 	}
 	else if (!bHasRows
-	         && CurrentState != ENMMState::None
-	         && CurrentState != ENMMState::BasicMenu)
+	         && CurrentState != FNmmStateTag::None
+	         && CurrentState != FNmmStateTag::BasicMenu)
 	{
 		// DR emptied at runtime (map MGF unloaded), fall back to basic menu
-		BaseSubsystem.SetNewMainMenuState(ENMMState::BasicMenu);
+		BaseSubsystem.SetNewMainMenuState(FNmmStateTag::BasicMenu);
 	}
 }

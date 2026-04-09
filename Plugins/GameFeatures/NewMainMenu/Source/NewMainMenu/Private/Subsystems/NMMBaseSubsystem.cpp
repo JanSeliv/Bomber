@@ -4,6 +4,7 @@
 
 // NMM
 #include "NMMUtils.h"
+#include "NmmGameplayTags.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
@@ -29,12 +30,14 @@ UNMMBaseSubsystem& UNMMBaseSubsystem::Get(const UObject* OptionalWorldContext /*
  ********************************************************************************************* */
 
 // Applies the new state of New Main Menu game feature
-void UNMMBaseSubsystem::SetNewMainMenuState(ENMMState NewState)
+void UNMMBaseSubsystem::SetNewMainMenuState(FNmmStateTag NewState)
 {
-	const ENMMState PreviousState = CurrentMenuState;
-	CurrentMenuState = NewState;
+	CurrentMenuStateTag = NewState;
 
-	OnMainMenuStateChanged.Broadcast(NewState, PreviousState);
+	FGameplayEventData EventData;
+	EventData.EventTag = NmmGameplayTags::Event::MenuStateChanged;
+	EventData.InstigatorTags.AddTag(NewState);
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 }
 
 /*********************************************************************************************
@@ -55,6 +58,9 @@ void UNMMBaseSubsystem::OnGameFeatureInitialize_Implementation()
 void UNMMBaseSubsystem::OnGameFeatureDeinitialize_Implementation()
 {
 	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
+
+	// Clear cached MenuStateChanged so late-binding listeners receive fresh data on next menu load
+	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuStateChanged);
 }
 
 /*********************************************************************************************
@@ -73,17 +79,17 @@ void UNMMBaseSubsystem::OnGameStateChanged_Implementation(const FGameplayEventDa
 		const bool bSpotsReady = SpotsSubsystem && SpotsSubsystem->IsActiveMenuSpotReady();
 		if (bSpotsReady)
 		{
-			SetNewMainMenuState(ENMMState::Idle);
+			SetNewMainMenuState(FNmmStateTag::Idle);
 		}
 		else if (!FBmrCinematicRow::GetRowsNum())
 		{
-			SetNewMainMenuState(ENMMState::BasicMenu);
+			SetNewMainMenuState(FNmmStateTag::BasicMenu);
 		}
 	}
 	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
 	{
 		// Player left the Main Menu
-		SetNewMainMenuState(ENMMState::None);
+		SetNewMainMenuState(FNmmStateTag::None);
 	}
 }
 
@@ -97,5 +103,5 @@ void UNMMBaseSubsystem::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* 
 	}
 
 	// DR rows are present and spots just became ready, activate cinematic lobby
-	SetNewMainMenuState(ENMMState::Idle);
+	SetNewMainMenuState(FNmmStateTag::Idle);
 }

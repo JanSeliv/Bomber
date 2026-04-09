@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -6,7 +6,7 @@
 
 #include "NMMUtils.generated.h"
 
-enum class ENMMState : uint8;
+enum class ESlateVisibility : uint8;
 
 class UMovieSceneSequencePlayer;
 
@@ -68,7 +68,21 @@ public:
 public:
 	/** Returns the current state of the Main Menu. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NMM Main Menu State")
-	static ENMMState GetMainMenuState();
+	static struct FNmmStateTag GetMainMenuState();
+
+	/*********************************************************************************************
+	 * UI
+	 ********************************************************************************************* */
+public:
+	/** Is used to show or hide own widget by the current menu state tag.
+	 * E.g: used by New Main Menu widget to be visible only during BasicMenu+Idle states.
+	 * @param CurrentMenuStateTag Provide the current menu state tag to check.
+	 * @param MenuStates Select one or multiple menu state tags to check.
+	 * @return 'SelfHitTestInvisible' if the current tag matches any in the container, otherwise 'Collapsed'. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", meta = (BlueprintAutocast, AutoCreateRefTerm = "MenuStates"))
+	static ESlateVisibility GetVisibilityByMenuStateTag(
+	    const struct FNmmStateTag& CurrentMenuStateTag,
+	    UPARAM(meta = (Categories = "NMM.State")) const struct FGameplayTagContainer& MenuStates);
 
 	/*********************************************************************************************
 	 * Cinematic helpers
@@ -81,13 +95,13 @@ public:
 
 	/** Returns the Playback Settings by given cinematic state. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NNM Cinematic Settings")
-	static const struct FMovieSceneSequencePlaybackSettings& GetCinematicSettings(ENMMState MainMenuState);
+	static const struct FMovieSceneSequencePlaybackSettings& GetCinematicSettings(FNmmStateTag MenuState);
 
 	/** Returns the total frames of the cinematic by given cinematic state. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NNM Cinematic Total Frames")
-	static int32 GetCinematicTotalFrames(ENMMState MainMenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
+	static int32 GetCinematicTotalFrames(FNmmStateTag MenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
 
 	/** Return the playback position params by given cinematic state. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NNM Playback Position Params")
-	static struct FMovieSceneSequencePlaybackParams GetPlaybackPositionParams(ENMMState MainMenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
+	static struct FMovieSceneSequencePlaybackParams GetPlaybackPositionParams(FNmmStateTag MenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer);
 };

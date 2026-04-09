@@ -27,6 +27,9 @@ namespace NmmGameplayTags
 		/** Event that fires when Main Menu is ready to display basic menu, is called on local player ASC */
 		NEWMAINMENU_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MenuReady);
 
+		/** Event that fires when the New Main Menu state was changed, InstigatorTags contains the new FNmmStateTag */
+		NEWMAINMENU_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(MenuStateChanged);
+
 		/** Event that fires when user clicked the Play button in Main Menu, is called on local player ASC */
 		NEWMAINMENU_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(PlayButtonPressed);
 

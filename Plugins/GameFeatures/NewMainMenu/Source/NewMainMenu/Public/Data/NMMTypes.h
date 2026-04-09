@@ -1,26 +1,8 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #pragma once
 
 #include "NMMTypes.generated.h"
-
-/**
- * Represents the state of the Main Menu cinematics.
- */
-UENUM(BlueprintType, DisplayName = "New Main Menu State")
-enum class ENMMState : uint8
-{
-	///< Uninitialized
-	None,
-	///< Basic menu: gameplay camera, Play/Settings/Quit visible, no cinematics loaded
-	BasicMenu,
-	///< Camera moving between spots on rail
-	Transition,
-	///< Cinematic lobby: spot camera, character selection buttons, Part 0 loop
-	Idle,
-	///< Part 1+ playing after Play pressed
-	Cinematic
-};
 
 /**
  * Represents the state of the camera rail state.

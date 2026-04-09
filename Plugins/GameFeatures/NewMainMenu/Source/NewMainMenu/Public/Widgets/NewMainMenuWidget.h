@@ -6,8 +6,6 @@
 
 #include "NewMainMenuWidget.generated.h"
 
-enum class ENMMState : uint8;
-
 class UButton;
 
 /**
@@ -56,10 +54,6 @@ protected:
 
 	/** Called when the widget is removed from the viewport. */
 	virtual void NativeDestruct() override;
-
-	/** Called when the Main Menu state was changed. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnNewMainMenuStateChanged(ENMMState NewState, ENMMState PreviousState);
 
 	/** Is called when player pressed the button to start the game. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

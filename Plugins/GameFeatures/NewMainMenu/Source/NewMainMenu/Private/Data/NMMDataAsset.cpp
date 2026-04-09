@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Data/NMMDataAsset.h"
 
@@ -15,7 +15,7 @@ const UNMMDataAsset& UNMMDataAsset::Get(const UObject* OptionalWorldContext /* =
 }
 
 // Returns an input context by given Main Menu State
-const UBmrInputMappingContext* UNMMDataAsset::GetInputContext(ENMMState MenuState) const
+const UBmrInputMappingContext* UNMMDataAsset::GetInputContext(FNmmStateTag MenuState) const
 {
 	const TObjectPtr<const UBmrInputMappingContext>* FoundContext = InputContexts.Find(MenuState);
 	return FoundContext ? *FoundContext : nullptr;
@@ -24,7 +24,7 @@ const UBmrInputMappingContext* UNMMDataAsset::GetInputContext(ENMMState MenuStat
 // Returns all input contexts
 void UNMMDataAsset::GetAllInputContexts(TArray<const UBmrInputMappingContext*>& OutInputContexts) const
 {
-	for (const TTuple<ENMMState, TObjectPtr<const UBmrInputMappingContext>>& It : InputContexts)
+	for (const TTuple<FNmmStateTag, TObjectPtr<const UBmrInputMappingContext>>& It : InputContexts)
 	{
 		OutInputContexts.Emplace(It.Value);
 	}

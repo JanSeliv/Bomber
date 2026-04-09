@@ -6,6 +6,7 @@
 #include "AbilitySystem/Attributes/BmrPowerupsAttributeSet.h"
 #include "AbilitySystemComponent.h"
 #include "Actors/BmrPawn.h"
+#include "DalSubsystem.h"
 #include "DataAssets/BmrUIDataAsset.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
@@ -63,8 +64,14 @@ void UBmrPowerupWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 
-	// Update the icon brush in the editor when tag property is changed
-	SetPowerupIcon(PowerupTag);
+	UDalSubsystem::Get().ListenForDataAsset<UBmrUIDataAsset>([WeakThis = TWeakObjectPtr(this)](const UBmrUIDataAsset& DataAsset)
+	{
+		if (UBmrPowerupWidget* This = WeakThis.Get())
+		{
+			// Update the icon brush in the editor when tag property is changed
+			This->SetPowerupIcon(This->PowerupTag);
+		}
+	});
 }
 
 // Called after the underlying slate widget is constructed

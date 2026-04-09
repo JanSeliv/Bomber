@@ -4,6 +4,7 @@
 
 // NMM
 #include "Components/NMMSpotComponent.h"
+#include "Data/NmmStateTag.h"
 #include "NMMUtils.h"
 #include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
@@ -28,14 +29,6 @@
 void UNewMainMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
-
-	if (UNMMBaseSubsystem::Get().GetCurrentMenuState() == ENMMState::None)
-	{
-		// Hide this widget by default if is none state
-		SetVisibility(ESlateVisibility::Collapsed);
-	}
 
 	if (PlayButton)
 	{
@@ -83,29 +76,6 @@ void UNewMainMenuWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-// Called when the Main Menu state was changed
-void UNewMainMenuWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
-{
-	const bool bIsBasicMenu = NewState == ENMMState::BasicMenu;
-	const bool bIsVisible = bIsBasicMenu || NewState == ENMMState::Idle;
-	SetVisibility(bIsVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-
-	// Hide spot-related buttons in BasicMenu since no cinematic spots are available
-	const ESlateVisibility SpotButtonsVisibility = bIsBasicMenu ? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
-	if (NextPlayerButton)
-	{
-		NextPlayerButton->SetVisibility(SpotButtonsVisibility);
-	}
-	if (PrevPlayerButton)
-	{
-		PrevPlayerButton->SetVisibility(SpotButtonsVisibility);
-	}
-	if (NextSkinButton)
-	{
-		NextSkinButton->SetVisibility(SpotButtonsVisibility);
-	}
-}
-
 // Is called when player pressed the button to start the game
 void UNewMainMenuWidget::OnPlayButtonPressed()
 {
@@ -118,7 +88,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 	UBmrSoundsSubsystem::Get().PlayUIClickSFX();
 
 	// In Idle+ states, validate spot and potentially run cinematic instead of broadcasting directly
-	if (UNMMUtils::GetMainMenuState() != ENMMState::BasicMenu)
+	if (UNMMUtils::GetMainMenuState() != FNmmStateTag::BasicMenu)
 	{
 		const UNMMSpotComponent* MainMenuSpot = UNMMSpotsSubsystem::Get().GetCurrentSpot();
 		const FBmrCinematicRow& CinematicRow = MainMenuSpot ? MainMenuSpot->GetCinematicRow() : FBmrCinematicRow::Empty;
@@ -135,7 +105,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 
 		if (!UNMMUtils::ShouldSkipCinematic(CinematicRow))
 		{
-			UNMMBaseSubsystem::Get().SetNewMainMenuState(ENMMState::Cinematic);
+			UNMMBaseSubsystem::Get().SetNewMainMenuState(FNmmStateTag::Cinematic);
 			return;
 		}
 	}

@@ -9,8 +9,6 @@
 
 #include "NMMCameraSubsystem.generated.h"
 
-enum class ENMMState : uint8;
-
 /**
  * Manages camera possessing and transitions in the Main Menu
  */
@@ -33,7 +31,7 @@ public:
 
 	/** Returns current camera component depending on the current Menu state. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", DisplayName = "Find NNM Camera Component")
-	static class UCameraComponent* FindCameraComponent(ENMMState MainMenuState);
+	static class UCameraComponent* FindCameraComponent(struct FNmmStateTag MenuState);
 
 	/** Returns attached Rail Camera of this spot that follows the camera to the next spot. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", DisplayName = "Get NNM Current Rail Camera")
@@ -45,7 +43,7 @@ public:
 
 	/** Starts viewing through camera of current cinematic or gameplay one depending on given state. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
-	void PossessCamera(ENMMState MainMenuState);
+	void PossessCamera(FNmmStateTag MenuState);
 
 	/*********************************************************************************************
 	 * Overrides
@@ -70,7 +68,7 @@ protected:
 protected:
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnNewMainMenuStateChanged(ENMMState NewState, ENMMState PreviousState);
+	void OnNewMainMenuStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when a cinematic spot finished loading, possesses camera if it was deferred. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

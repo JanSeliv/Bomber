@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 using UnrealBuildTool;
 
@@ -27,6 +27,7 @@ public class NewMainMenu : ModuleRules
 				, "AdvancedWidgets" // URadialSlider
 				, "CineCameraRigs" // Camera rails
 				, "GameplayTags", "GameplayAbilities" // Tags
+				, "ModelViewViewModel" // UNmmMVVM_MenuViewModel
 				// Bomber modules
 				, "MyUtils"
 				, "SettingsWidgetConstructor"

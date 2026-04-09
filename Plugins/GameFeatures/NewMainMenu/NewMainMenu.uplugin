@@ -1,4 +1,4 @@
-﻿{
+{
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
@@ -19,6 +19,11 @@
 		{
 			"Name": "NewMainMenu",
 			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "NewMainMenuEditor",
+			"Type": "Editor",
 			"LoadingPhase": "Default"
 		}
 	],
@@ -47,6 +52,10 @@
 		},
 		{
 			"Name": "DataAssetsLoader",
+			"Enabled": true
+		},
+		{
+			"Name": "ModelViewViewModel",
 			"Enabled": true
 		}
 	]

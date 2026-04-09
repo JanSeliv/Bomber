@@ -9,7 +9,6 @@
 class UNMMSpotComponent;
 
 enum class EBmrLevelType : uint8;
-enum class ENMMState : uint8;
 
 /**
  * Manages Main Menu cinematic spots and keeps their data.
@@ -129,7 +128,7 @@ protected:
 protected:
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnNewMainMenuStateChanged(ENMMState NewState, ENMMState PreviousState);
+	void OnNewMainMenuStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when the current game state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

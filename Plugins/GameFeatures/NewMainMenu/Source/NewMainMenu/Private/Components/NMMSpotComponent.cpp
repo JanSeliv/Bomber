@@ -106,14 +106,14 @@ void UNMMSpotComponent::StopMasterSequence()
 	if (MasterPlayer
 	    && MasterPlayer->IsPlaying())
 	{
-		SetCinematicByState(ENMMState::None);
+		SetCinematicByState(FNmmStateTag::None);
 	}
 }
 
 // Returns true if current game state can be eventually changed
-bool UNMMSpotComponent::CanChangeCinematicState(ENMMState NewMainMenuState) const
+bool UNMMSpotComponent::CanChangeCinematicState(FNmmStateTag NewMenuState) const
 {
-	if (CinematicState == NewMainMenuState)
+	if (CinematicState == NewMenuState)
 	{
 		return false;
 	}
@@ -130,23 +130,23 @@ bool UNMMSpotComponent::CanChangeCinematicState(ENMMState NewMainMenuState) cons
 }
 
 // Activate given cinematic state on this spot
-void UNMMSpotComponent::SetCinematicByState(ENMMState MainMenuState)
+void UNMMSpotComponent::SetCinematicByState(FNmmStateTag MenuState)
 {
-	if (!CanChangeCinematicState(MainMenuState))
+	if (!CanChangeCinematicState(MenuState))
 	{
 		return;
 	}
 
-	if (MainMenuState == ENMMState::Transition)
+	if (MenuState == FNmmStateTag::Transition)
 	{
 		// Don't set Transition state, instead apply idle while camera is moving
-		MainMenuState = ENMMState::Idle;
+		MenuState = FNmmStateTag::Idle;
 	}
 
-	const ENMMState PrevState = CinematicState;
-	CinematicState = MainMenuState;
+	const FNmmStateTag PrevState = CinematicState;
+	CinematicState = MenuState;
 
-	if (PrevState != MainMenuState)
+	if (PrevState != MenuState)
 	{
 		ApplyCinematicState();
 	}
@@ -212,7 +212,7 @@ void UNMMSpotComponent::OnUnregister()
 // Reinitializes cinematic data from Data Registry: cleans up current cinematic and re-queries for a matching row
 void UNMMSpotComponent::ReinitializeCinematicData()
 {
-	CinematicState = ENMMState::None;
+	CinematicState = FNmmStateTag::None;
 	CinematicRow = FBmrCinematicRow::Empty;
 
 	if (IsValid(MasterPlayer))
@@ -282,7 +282,7 @@ void UNMMSpotComponent::ApplyCinematicState()
 	const FMovieSceneSequencePlaybackParams PlaybackPositionParams = UNMMUtils::GetPlaybackPositionParams(CinematicState, MasterPlayer);
 	MasterPlayer->SetPlaybackPosition(PlaybackPositionParams);
 
-	if (CinematicState == ENMMState::None)
+	if (CinematicState == FNmmStateTag::None)
 	{
 		// No need to stop it physically as playback settings above already paused a sequence
 		return;
@@ -290,7 +290,7 @@ void UNMMSpotComponent::ApplyCinematicState()
 
 	MasterPlayer->Play();
 
-	if (CinematicState == ENMMState::Cinematic)
+	if (CinematicState == FNmmStateTag::Cinematic)
 	{
 		const ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 		checkf(MyPC, TEXT("ERROR: [%i] %hs:\n'MyPC' is null, local controller can not be obtained, cinematic can not be played!"), __LINE__, __FUNCTION__);
@@ -347,7 +347,7 @@ void UNMMSpotComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* Da
 
 	UNMMCameraSubsystem::Get().OnCameraRailTransitionStateChanged.AddUniqueDynamic(this, &ThisClass::OnCameraRailTransitionStateChanged);
 
-	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 }
@@ -369,36 +369,33 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(const FGameplayEventDa
 	}
 }
 
-// Called wen the Main Menu state was changed
-void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
+// Called when the Main Menu state was changed
+void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	if (NewState == ENMMState::BasicMenu)
+	const FNmmStateTag NewState(Payload.InstigatorTags.First());
+	if (NewState == FNmmStateTag::BasicMenu)
 	{
 		return;
 	}
 
 	const bool bIsCurrentSpot = IsCurrentSpot();
 
-	switch (NewState)
+	if (NewState == FNmmStateTag::Idle)
 	{
-		case ENMMState::Idle:
-			if (bIsCurrentSpot)
-			{
-				ApplyMeshOnPlayer();
-			}
-			else
-			{
-				// Stop other spots from playing their cinematic
-				StopMasterSequence();
-			}
-			break;
-		case ENMMState::Cinematic:
-			if (bIsCurrentSpot)
-			{
-				MarkCinematicAsSeen();
-			}
-			break;
-		default: break;
+		if (bIsCurrentSpot)
+		{
+			ApplyMeshOnPlayer();
+		}
+		else
+		{
+			// Stop other spots from playing their cinematic
+			StopMasterSequence();
+		}
+	}
+	else if (NewState == FNmmStateTag::Cinematic
+	         && bIsCurrentSpot)
+	{
+		MarkCinematicAsSeen();
 	}
 
 	if (bIsCurrentSpot)
@@ -412,7 +409,7 @@ void UNMMSpotComponent::OnMasterSequencePaused_Implementation()
 {
 	ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (!MyPC
-	    || UNMMUtils::GetMainMenuState() != ENMMState::Cinematic)
+	    || UNMMUtils::GetMainMenuState() != FNmmStateTag::Cinematic)
 	{
 		// Don't handle if not playing Main Part or is not local player
 		return;

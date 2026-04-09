@@ -6,9 +6,9 @@
 #include "Components/NMMSpotComponent.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
+#include "Data/NmmStateTag.h"
 #include "NMMUtils.h"
 #include "NmmGameplayTags.h"
-#include "Subsystems/NMMBaseSubsystem.h"
 
 // Bomber
 #include "Actors/BmrPawn.h"
@@ -81,19 +81,19 @@ void UNMMPlayerControllerComponent::SetCinematicInputContextEnabled(bool bEnable
 	}
 
 	// Enable Cinematic inputs
-	MyPC.SetInputContextEnabled(bEnable, UNMMDataAsset::Get().GetInputContext(ENMMState::Cinematic));
+	MyPC.SetInputContextEnabled(bEnable, UNMMDataAsset::Get().GetInputContext(FNmmStateTag::Cinematic));
 }
 
 // Enables or disables Cinematic mouse settings from Player Input data asset
 void UNMMPlayerControllerComponent::SetCinematicMouseVisibilityEnabled(bool bEnabled)
 {
-	static const FName CinematicStateName = GET_ENUMERATOR_NAME_CHECKED(ENMMState, Cinematic);
+	static const FName CinematicMouseCustom = TEXT("Cinematic");
 	UBmrMouseActivityComponent& MouseActivityComponent = GetPlayerControllerChecked().GetMouseActivityComponentChecked();
-	MouseActivityComponent.SetMouseVisibilitySettingsEnabledCustom(bEnabled, CinematicStateName);
+	MouseActivityComponent.SetMouseVisibilitySettingsEnabledCustom(bEnabled, CinematicMouseCustom);
 }
 
 // Enables or disables the input context according to new menu state
-void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState NewState)
+void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(FNmmStateTag NewMenuState)
 {
 	if (UNMMUtils::GetMainMenuWidget() == nullptr)
 	{
@@ -109,7 +109,7 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(ENMMState New
 	PC.RemoveInputContexts(OutInputContexts);
 
 	// Add Menu context as auto managed by Game State, so it will be enabled everytime the game is in the Menu state
-	const UBmrInputMappingContext* InputContext = UNMMDataAsset::Get().GetInputContext(NewState);
+	const UBmrInputMappingContext* InputContext = UNMMDataAsset::Get().GetInputContext(NewMenuState);
 	if (InputContext
 	    && !InputContext->GetActiveForStates().IsEmpty())
 	{
@@ -243,7 +243,7 @@ void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMD
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
-	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
 
 	// Load save game data of the Main Menu
 	FAsyncLoadGameFromSlot AsyncLoadGameFromSlotDelegate;
@@ -289,29 +289,24 @@ void UNMMPlayerControllerComponent::OnGameStateChanged_Implementation(const FGam
 	}
 }
 
-// Called wen the Main Menu state was changed
-void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
+// Called when the Main Menu state was changed
+void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	ABmrPlayerController& MyPC = GetPlayerControllerChecked();
+	const FNmmStateTag NewState(Payload.InstigatorTags.First());
+	const bool bIsCinematic = NewState == FNmmStateTag::Cinematic;
 
-	switch (NewState)
+	if (bIsCinematic)
 	{
-		case ENMMState::Cinematic:
-			MyPC.SetIgnoreMoveInput(true);
-			StopMainMenuMusic();
-			break;
-		default:
-			break;
+		GetPlayerControllerChecked().SetIgnoreMoveInput(true);
+		StopMainMenuMusic();
 	}
 
 	// Update input contexts
 	SetManagedInputContextsEnabled(NewState);
 
-	// Update input contexts
-	SetCinematicInputContextEnabled(NewState == ENMMState::Cinematic);
-
-	// Update mouse visibility
-	SetCinematicMouseVisibilityEnabled(NewState == ENMMState::Cinematic);
+	// Update cinematic input and mouse visibility
+	SetCinematicInputContextEnabled(bIsCinematic);
+	SetCinematicMouseVisibilityEnabled(bIsCinematic);
 }
 
 // Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load

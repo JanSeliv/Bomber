@@ -4,9 +4,8 @@
 
 // NMM
 #include "Data/NMMDataAsset.h"
-#include "Data/NMMTypes.h"
+#include "Data/NmmStateTag.h"
 #include "NmmGameplayTags.h"
-#include "Subsystems/NMMBaseSubsystem.h"
 
 // Bomber
 #include "Controllers/BmrPlayerController.h"
@@ -51,7 +50,7 @@ void UNMMCinematicStateWidget::NativeConstruct()
 	// Hide this widget by default
 	SetVisibility(ESlateVisibility::Collapsed);
 
-	BIND_ON_MENU_STATE_CHANGED(this, ThisClass::OnNewMainMenuStateChanged);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
 
 	if (SkipCinematicButton)
 	{
@@ -63,6 +62,8 @@ void UNMMCinematicStateWidget::NativeConstruct()
 // Called when the widget is removed from the viewport
 void UNMMCinematicStateWidget::NativeDestruct()
 {
+	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
+
 	// Clear cached CinematicSkipped so late-binding listeners receive fresh data on next menu load
 	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::CinematicSkipped, this);
 
@@ -70,12 +71,15 @@ void UNMMCinematicStateWidget::NativeDestruct()
 }
 
 // Called when the Main Menu state was changed
-void UNMMCinematicStateWidget::OnNewMainMenuStateChanged_Implementation(ENMMState NewState, ENMMState PreviousState)
+void UNMMCinematicStateWidget::OnNewMainMenuStateChanged_Implementation(const FGameplayEventData& Payload)
 {
-	const bool bIsCinematic = NewState == ENMMState::Cinematic;
+	const FNmmStateTag NewState(Payload.InstigatorTags.First());
+	const bool bIsCinematic = NewState == FNmmStateTag::Cinematic;
 
-	if (bIsCinematic
-	    || PreviousState == ENMMState::Cinematic)
+	// Was in cinematic if this widget is currently visible
+	const bool bWasCinematic = GetVisibility() != ESlateVisibility::Collapsed;
+
+	if (bIsCinematic || bWasCinematic)
 	{
 		// Hide all other widgets in Cinematic state and display them back when left
 		UBmrWidgetsSubsystem::Get().SetAllWidgetsVisibility(!bIsCinematic);

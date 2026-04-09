@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -7,8 +7,6 @@
 #include "NMMPlayerControllerComponent.generated.h"
 
 class ABmrPlayerController;
-
-enum class ENMMState : uint8;
 
 /**
  * Represents the Player Controller in the NewMain Menu module, where the Owner is Player Controller actor.
@@ -50,7 +48,7 @@ public:
 
 	/** Enables or disables the input context according to new menu state. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
-	void SetManagedInputContextsEnabled(ENMMState NewState);
+	void SetManagedInputContextsEnabled(struct FNmmStateTag NewMenuState);
 
 	/*********************************************************************************************
 	 * Sounds
@@ -98,9 +96,9 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
-	/** Called wen the Main Menu state was changed. */
+	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnNewMainMenuStateChanged(ENMMState NewState, ENMMState PreviousState);
+	void OnNewMainMenuStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

@@ -8,7 +8,7 @@
 #include "DalSubsystem.h"
 #include "Data/NMMDataAsset.h"
 #include "Data/NMMSaveGameData.h"
-#include "Data/NMMTypes.h"
+#include "Data/NmmStateTag.h"
 #include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
@@ -24,12 +24,17 @@
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Components/SlateWrapperTypes.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "MovieSceneSequencePlaybackSettings.h"
 #include "MovieSceneSequencePlayer.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMUtils)
+
+/*********************************************************************************************
+ * Object getters
+ ********************************************************************************************* */
 
 // Returns Main Menu subsystem that provides access to the most important data like Data Asset and current state
 UNMMBaseSubsystem* UNMMUtils::GetBaseSubsystem(const UObject* OptionalWorldContext /* = nullptr*/)
@@ -99,12 +104,31 @@ UNMMSaveGameData* UNMMUtils::GetSaveGameData(const UObject* OptionalWorldContext
 	return MenuControllerComp ? MenuControllerComp->GetSaveGameData() : nullptr;
 }
 
+/*********************************************************************************************
+ * Public API
+ ********************************************************************************************* */
+
 // Returns the current state of the Main Menu
-ENMMState UNMMUtils::GetMainMenuState()
+FNmmStateTag UNMMUtils::GetMainMenuState()
 {
 	const UNMMBaseSubsystem* BaseSubsystem = GetBaseSubsystem();
-	return BaseSubsystem ? BaseSubsystem->GetCurrentMenuState() : ENMMState::None;
+	return BaseSubsystem ? BaseSubsystem->GetCurrentMenuState() : FNmmStateTag::None;
 }
+
+/*********************************************************************************************
+ * UI
+ ********************************************************************************************* */
+
+// Is used to show or hide own widget by the current menu state tag
+ESlateVisibility UNMMUtils::GetVisibilityByMenuStateTag(const FNmmStateTag& CurrentMenuStateTag, const FGameplayTagContainer& MenuStates)
+{
+	const bool bMatching = CurrentMenuStateTag.GetSingleTagContainer().HasAny(MenuStates);
+	return bMatching ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed;
+}
+
+/*********************************************************************************************
+ * Cinematic helpers
+ ********************************************************************************************* */
 
 // Returns true if given cinematic wants to skip
 bool UNMMUtils::ShouldSkipCinematic(const FBmrCinematicRow& CinematicRow)
@@ -133,41 +157,43 @@ bool UNMMUtils::ShouldSkipCinematic(const FBmrCinematicRow& CinematicRow)
 	return false;
 }
 
-// Helper namespace to initialize playback settings once
-namespace NMMPlaybackSettings
+// Helper to initialize playback settings once
+static FMovieSceneSequencePlaybackSettings InitPlaybackSettings(FNmmStateTag MenuState)
 {
-	FMovieSceneSequencePlaybackSettings InitPlaybackSettings(ENMMState MainMenuState)
-	{
-		FMovieSceneSequencePlaybackSettings Settings;
-		Settings.LoopCount.Value = MainMenuState == ENMMState::Idle ? INDEX_NONE : 0; // Loop infinitely if idle, otherwise play once
-		Settings.bPauseAtEnd = true; // Pause at the end, so gameplay camera can blend-out from correct position
-		Settings.bDisableCameraCuts = true; // Let the Spot to control the camera possessing instead of auto-possessed one that prevents blend-out while active
-		const bool bRestoreState = MainMenuState != ENMMState::Cinematic; // Reset all 'Keep States' tracks when entered to None or Idle states
-		Settings.FinishCompletionStateOverride = bRestoreState ? EMovieSceneCompletionModeOverride::ForceRestoreState : EMovieSceneCompletionModeOverride::None;
-		return Settings;
-	}
-
-	const FMovieSceneSequencePlaybackSettings EmptySettings = InitPlaybackSettings(ENMMState::None);
-	const FMovieSceneSequencePlaybackSettings IdlePartSettings = InitPlaybackSettings(ENMMState::Idle);
-	const FMovieSceneSequencePlaybackSettings MainPartSettings = InitPlaybackSettings(ENMMState::Cinematic);
-} // namespace NMMPlaybackSettings
+	FMovieSceneSequencePlaybackSettings Settings;
+	Settings.LoopCount.Value = MenuState == FNmmStateTag::Idle ? INDEX_NONE : 0; // Loop infinitely if idle, otherwise play once
+	Settings.bPauseAtEnd = true; // Pause at the end, so gameplay camera can blend-out from correct position
+	Settings.bDisableCameraCuts = true; // Let the Spot to control the camera possessing instead of auto-possessed one that prevents blend-out while active
+	const bool bRestoreState = MenuState != FNmmStateTag::Cinematic; // Reset all 'Keep States' tracks when entered to None or Idle states
+	Settings.FinishCompletionStateOverride = bRestoreState ? EMovieSceneCompletionModeOverride::ForceRestoreState : EMovieSceneCompletionModeOverride::None;
+	return Settings;
+}
 
 // Returns the Playback Settings by given cinematic state
-const FMovieSceneSequencePlaybackSettings& UNMMUtils::GetCinematicSettings(ENMMState MainMenuState)
+const FMovieSceneSequencePlaybackSettings& UNMMUtils::GetCinematicSettings(FNmmStateTag MenuState)
 {
-	switch (MainMenuState)
+	static const FMovieSceneSequencePlaybackSettings EmptySettings = InitPlaybackSettings(FNmmStateTag::None);
+	static const FMovieSceneSequencePlaybackSettings IdlePartSettings = InitPlaybackSettings(FNmmStateTag::Idle);
+	static const FMovieSceneSequencePlaybackSettings MainPartSettings = InitPlaybackSettings(FNmmStateTag::Cinematic);
+
+	if (MenuState == FNmmStateTag::Idle)
 	{
-		case ENMMState::Idle: return NMMPlaybackSettings::IdlePartSettings;
-		case ENMMState::Cinematic: return NMMPlaybackSettings::MainPartSettings;
-		default: return NMMPlaybackSettings::EmptySettings;
+		return IdlePartSettings;
 	}
+
+	if (MenuState == FNmmStateTag::Cinematic)
+	{
+		return MainPartSettings;
+	}
+
+	return EmptySettings;
 }
 
 // Returns the total frames of the cinematic by given cinematic state
-int32 UNMMUtils::GetCinematicTotalFrames(ENMMState MainMenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer)
+int32 UNMMUtils::GetCinematicTotalFrames(FNmmStateTag MenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer)
 {
 	const UMovieSceneSequence* LevelSequenceTemplate = LevelSequencePlayer->GetSequence();
-	if (MainMenuState == ENMMState::Idle)
+	if (MenuState == FNmmStateTag::Idle)
 	{
 		// Obtain the first subsequence of the Master sequence or null if not found
 		LevelSequenceTemplate = UCinematicUtils::FindSubsequence(/*Index*/ 0, LevelSequenceTemplate);
@@ -177,24 +203,30 @@ int32 UNMMUtils::GetCinematicTotalFrames(ENMMState MainMenuState, const UMovieSc
 }
 
 // Return the playback position params by given cinematic state
-FMovieSceneSequencePlaybackParams UNMMUtils::GetPlaybackPositionParams(ENMMState MainMenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer)
+FMovieSceneSequencePlaybackParams UNMMUtils::GetPlaybackPositionParams(FNmmStateTag MenuState, const UMovieSceneSequencePlayer* LevelSequencePlayer)
 {
 	FMovieSceneSequencePlaybackParams InPlaybackParams;
-	InPlaybackParams.Frame.FrameNumber.Value = [MainMenuState, LevelSequencePlayer]
+	InPlaybackParams.Frame.FrameNumber.Value = [MenuState, LevelSequencePlayer]
 	{
-		switch (MainMenuState)
+		if (MenuState == FNmmStateTag::None)
 		{
-			case ENMMState::None:
-				// Moving to the last frame will stop the cinematic while regular 'Stop' does not work for clients
-				return UCinematicUtils::GetSequenceTotalFrames(LevelSequencePlayer->GetSequence()) - 1;
-			case ENMMState::Idle:
-				// Start from the beginning
-				return 0;
-			case ENMMState::Cinematic:
-				// Continue from the current frame
-				return LevelSequencePlayer->GetCurrentTime().Time.FrameNumber.Value;
-			default: return -1;
+			// Moving to the last frame will stop the cinematic while regular 'Stop' does not work for clients
+			return UCinematicUtils::GetSequenceTotalFrames(LevelSequencePlayer->GetSequence()) - 1;
 		}
+
+		if (MenuState == FNmmStateTag::Idle)
+		{
+			// Start from the beginning
+			return 0;
+		}
+
+		if (MenuState == FNmmStateTag::Cinematic)
+		{
+			// Continue from the current frame
+			return LevelSequencePlayer->GetCurrentTime().Time.FrameNumber.Value;
+		}
+
+		return -1;
 	}();
 
 	// Scrub instead of Play\Jump, so it stop currently playing tracks before moving to the new position

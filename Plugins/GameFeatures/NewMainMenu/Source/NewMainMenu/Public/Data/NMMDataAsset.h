@@ -1,12 +1,14 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
 #include "DalPrimaryDataAsset.h"
 
+// NMM
+#include "Data/NmmStateTag.h"
+
 #include "NMMDataAsset.generated.h"
 
-enum class ENMMState : uint8;
 enum class EBmrLevelType : uint8;
 
 /**
@@ -48,10 +50,10 @@ protected:
 	 * Input
 	 ********************************************************************************************* */
 public:
-	/** Returns first input context by given game state.
+	/** Returns first input context by given menu state.
 	 * @see UNMMDataAsset::InputContexts.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	const class UBmrInputMappingContext* GetInputContext(ENMMState MenuState) const;
+	const class UBmrInputMappingContext* GetInputContext(FNmmStateTag MenuState) const;
 
 	/** Returns all input contexts.
 	 * @see UNMMDataAsset::InputContexts.*/
@@ -64,7 +66,7 @@ public:
 protected:
 	/** List of input contexts to manage according their Main Menu States. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TMap<ENMMState, TObjectPtr<const class UBmrInputMappingContext>> InputContexts;
+	TMap<FNmmStateTag, TObjectPtr<const class UBmrInputMappingContext>> InputContexts;
 
 	/** The time to hold the skip cinematic button to skip the cinematic. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, ShowOnlyInnerProperties))

@@ -1,18 +1,17 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
 #include "Components/BmrSkeletalMeshComponent.h"
 
 // NMM
-#include "Data/NMMTypes.h" // ENMMState
+#include "Data/NmmStateTag.h"
 #include "DataRegistries/BmrCinematicRow.h"
 
 #include "NMMSpotComponent.generated.h"
 
 class ULevelSequence;
 
-enum class ENMMState : uint8;
 enum class ENMMCameraRailTransitionState : uint8;
 
 /**
@@ -83,11 +82,11 @@ public:
 
 	/** Returns true if current game state can be eventually changed. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	bool CanChangeCinematicState(ENMMState NewMainMenuState) const;
+	bool CanChangeCinematicState(FNmmStateTag NewMenuState) const;
 
 	/** Activate given cinematic state on this spot. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
-	void SetCinematicByState(ENMMState MainMenuState);
+	void SetCinematicByState(FNmmStateTag MenuState);
 
 	/** Creates MasterPlayer from a loaded cinematic asset and notifies the Spots Subsystem, no-op if not yet loaded or already initialized. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
@@ -107,7 +106,7 @@ protected:
 
 	/** Current cinematic state of this spot. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	ENMMState CinematicState = ENMMState::None;
+	FNmmStateTag CinematicState = FNmmStateTag::None;
 
 	/*********************************************************************************************
 	 * Protected functions
@@ -146,7 +145,7 @@ protected:
 
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnNewMainMenuStateChanged(ENMMState NewState, ENMMState PreviousState);
+	void OnNewMainMenuStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when the sequence is paused or when cinematic was ended. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))

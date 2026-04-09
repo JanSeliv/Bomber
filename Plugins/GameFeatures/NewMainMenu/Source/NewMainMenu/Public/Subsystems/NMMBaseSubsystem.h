@@ -5,7 +5,7 @@
 #include "Subsystems/ModularGameFeaturePluginSubsystem.h"
 
 // NMM
-#include "Data/NMMTypes.h" // ENMMState
+#include "Data/NmmStateTag.h"
 
 #include "NMMBaseSubsystem.generated.h"
 
@@ -26,29 +26,25 @@ public:
 	/*********************************************************************************************
 	 * New Main Menu State
 	 * Is local for each player and not replicated.
+	 * State changes are broadcast via NmmGameplayTags::Event::MenuStateChanged global message,
+	 * where InstigatorTags contains the new FNmmStateTag.
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FNMMOnStateChanged, ENMMState, NewState, ENMMState, PreviousState);
-
-	/** Called when the state of New Main Menu game feature was changed.
-	 * Is local and not replicated. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[NewMainMenu]")
-	FNMMOnStateChanged OnMainMenuStateChanged;
-
 	/** Applies the new state of New Main Menu game feature.
-	 * Is local and not replicated. */
+	 * Is local and not replicated.
+	 * Broadcasts NmmGameplayTags::Event::MenuStateChanged global message. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
-	void SetNewMainMenuState(ENMMState NewState);
+	void SetNewMainMenuState(FNmmStateTag NewState);
 
 	/** Returns the current state of New Main Menu game feature. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	FORCEINLINE ENMMState GetCurrentMenuState() const { return CurrentMenuState; }
+	FORCEINLINE FNmmStateTag GetCurrentMenuState() const { return CurrentMenuStateTag; }
 
 protected:
 	/** Contains the current state of New Main Menu game feature.
 	 * Is local and not replicated. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	ENMMState CurrentMenuState = ENMMState::None;
+	FNmmStateTag CurrentMenuStateTag = FNmmStateTag::None;
 
 	/*********************************************************************************************
 	 * Overrides
@@ -72,14 +68,3 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnActiveMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
 };
-
-/** Helper macro to bind and call the function when the game state was changed. */
-#define BIND_ON_MENU_STATE_CHANGED(Obj, Function)                                \
-	{                                                                            \
-		UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();             \
-		BaseSubsystem.OnMainMenuStateChanged.AddUniqueDynamic(Obj, &Function);   \
-		if (BaseSubsystem.GetCurrentMenuState() != ENMMState::None)              \
-		{                                                                        \
-			Obj->Function(BaseSubsystem.GetCurrentMenuState(), ENMMState::None); \
-		}                                                                        \
-	}
