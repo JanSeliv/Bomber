@@ -25,8 +25,8 @@
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMInGameSettingsSubsystem'",
 					"FunctionName": "GetCinematicsVolume"
 				},
-				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"0C3773CA49BBEE805EAFB1B57ED9A4A4\", \"Cinematics Volume\")",
-				"Tooltip": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"810E4989403C675727246A9BBB97549C\", \"Set the sound volume for music in cinematics\")",
+				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"86265E184FAB18B9B9FB90BFC4DE5350\", \"Cinematics Volume\")",
+				"Tooltip": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"203B035045FD7A93D3127EBEF3AB1527\", \"Set the sound volume for music in cinematics\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -36,6 +36,7 @@
 				},
 				"LineHeight": 48,
 				"bStartOnNextColumn": false,
+				"bApplyImmediately": false,
 				"SettingsToUpdate":
 				{
 					"GameplayTags": [],
@@ -113,8 +114,8 @@
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMInGameSettingsSubsystem'",
 					"FunctionName": "IsAutoSkipCinematicsEnabled"
 				},
-				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"E76D8412443F242779726C9825623BB0\", \"Auto Skip Cinematics\")",
-				"Tooltip": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"1835102C4C50DBD336D89F9D389D006F\", \"Skips previously seen cinematics automatically. With other players, cinematics are always skipped.\")",
+				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"FBD836DA43867C99430837AB192AC411\", \"Auto Skip Cinematics\")",
+				"Tooltip": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"D7FDF58942D61D96F3BE3D8A3A768353\", \"Skips previously seen cinematics automatically. With other players, cinematics are always skipped.\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -124,6 +125,7 @@
 				},
 				"LineHeight": 48,
 				"bStartOnNextColumn": false,
+				"bApplyImmediately": false,
 				"SettingsToUpdate":
 				{
 					"GameplayTags": [],
@@ -201,8 +203,8 @@
 					"FunctionClass": "/Script/CoreUObject.Class'/Script/NewMainMenu.NMMInGameSettingsSubsystem'",
 					"FunctionName": "IsInstantCharacterSwitchEnabled"
 				},
-				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"75E882964F91F5D25CA02FAC4882FE61\", \"Instant Character Switch\")",
-				"Tooltip": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"08829C344942CA83BEF10B81181542D3\", \"Enable/disable smooth transitions when switching characters in the Main Menu\")",
+				"Caption": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"133CE1A54FB74149840C359483971700\", \"Instant Character Switch\")",
+				"Tooltip": "NSLOCTEXT(\"[AA1F16E2D6ABE7075C32DD123060C4A5]\", \"2655A68E4BD4612B7F1EFF9309F3F4DC\", \"Enable/disable smooth transitions when switching characters in the Main Menu\")",
 				"Padding":
 				{
 					"Left": 0,
@@ -212,6 +214,7 @@
 				},
 				"LineHeight": 48,
 				"bStartOnNextColumn": false,
+				"bApplyImmediately": false,
 				"SettingsToUpdate":
 				{
 					"GameplayTags": [],
