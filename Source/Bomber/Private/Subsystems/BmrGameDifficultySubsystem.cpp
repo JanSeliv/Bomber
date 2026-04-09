@@ -54,7 +54,8 @@ void UBmrGameDifficultySubsystem::SetGameDifficultyTag(FBmrGameDifficultyTag New
 {
 	const UWorld* World = GetWorld();
 	if (!World
-	    || World->IsNetMode(NM_Client))
+	    || World->IsNetMode(NM_Client)
+	    || !ensureMsgf(NewTag.IsValid(), TEXT("ASSERT: [%i] %hs:\n'NewTag' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
@@ -113,13 +114,24 @@ void UBmrGameDifficultySubsystem::SetDifficultyLevel(int32 InLevel)
 // Populates combobox display names from all Data Registry difficulty rows sorted by DifficultyLevel
 void UBmrGameDifficultySubsystem::GetAllDifficultyDisplayTexts(TArray<FText>& OutMembers) const
 {
-	TArray<FBmrGameDifficultyRow> Rows;
-	GetAllDifficultyRows(Rows);
+	TArray<const FBmrGameDifficultyRow*> Rows;
+	FBmrGameDifficultyRow::GetRowsByPredicate(Rows, [](const FBmrGameDifficultyRow&)
+	{
+		return true;
+	});
+
+	Rows.Sort([](const FBmrGameDifficultyRow& A, const FBmrGameDifficultyRow& B)
+	{
+		return A.DifficultyLevel < B.DifficultyLevel;
+	});
 
 	OutMembers.Reset(Rows.Num());
-	for (const FBmrGameDifficultyRow& Row : Rows)
+	for (const FBmrGameDifficultyRow* Row : Rows)
 	{
-		OutMembers.Emplace(Row.DisplayName);
+		if (Row)
+		{
+			OutMembers.Emplace(Row->DisplayName);
+		}
 	}
 }
 
@@ -127,41 +139,19 @@ void UBmrGameDifficultySubsystem::GetAllDifficultyDisplayTexts(TArray<FText>& Ou
  * Data Registry Row Lookup
  ********************************************************************************************* */
 
-// Returns all difficulty rows gathered from Data Registry, sorted by DifficultyLevel
-void UBmrGameDifficultySubsystem::GetAllDifficultyRows(TArray<FBmrGameDifficultyRow>& OutRows) const
-{
-	OutRows.Reset();
-
-	FBmrGameDifficultyRow::ForEachRow([&OutRows](const FBmrGameDifficultyRow& Row)
-	{
-		OutRows.Emplace(Row);
-	});
-
-	OutRows.Sort([](const FBmrGameDifficultyRow& A, const FBmrGameDifficultyRow& B)
-	{
-		return A.DifficultyLevel < B.DifficultyLevel;
-	});
-}
-
 // Finds difficulty row by tag, returns nullptr if not found
-const FBmrGameDifficultyRow* UBmrGameDifficultySubsystem::FindRowByTag(const FBmrGameDifficultyTag& Tag) const
+const FBmrGameDifficultyRow* UBmrGameDifficultySubsystem::FindRowByTag(const FBmrGameDifficultyTag& Tag)
 {
-	TArray<FBmrGameDifficultyRow> Rows;
-	GetAllDifficultyRows(Rows);
-
-	return Rows.FindByPredicate([&Tag](const FBmrGameDifficultyRow& Row)
+	return FBmrGameDifficultyRow::GetRowByPredicate([&Tag](const FBmrGameDifficultyRow& Row)
 	{
 		return Row.DifficultyTag == Tag;
 	});
 }
 
 // Finds difficulty row by level, returns nullptr if not found
-const FBmrGameDifficultyRow* UBmrGameDifficultySubsystem::FindRowByLevel(int32 Level) const
+const FBmrGameDifficultyRow* UBmrGameDifficultySubsystem::FindRowByLevel(int32 Level)
 {
-	TArray<FBmrGameDifficultyRow> Rows;
-	GetAllDifficultyRows(Rows);
-
-	return Rows.FindByPredicate([Level](const FBmrGameDifficultyRow& Row)
+	return FBmrGameDifficultyRow::GetRowByPredicate([Level](const FBmrGameDifficultyRow& Row)
 	{
 		return Row.DifficultyLevel == Level;
 	});

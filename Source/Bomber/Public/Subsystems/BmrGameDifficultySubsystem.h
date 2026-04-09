@@ -53,15 +53,11 @@ public:
 	 * Data Registry Row Lookup
 	 ********************************************************************************************* */
 public:
-	/** Returns all difficulty rows gathered from Data Registry, sorted by DifficultyLevel. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	void GetAllDifficultyRows(TArray<struct FBmrGameDifficultyRow>& OutRows) const;
-
 	/** Finds difficulty row by tag, returns nullptr if not found. */
-	const FBmrGameDifficultyRow* FindRowByTag(const FBmrGameDifficultyTag& Tag) const;
+	static const struct FBmrGameDifficultyRow* FindRowByTag(const FBmrGameDifficultyTag& Tag);
 
 	/** Finds difficulty row by level, returns nullptr if not found. */
-	const FBmrGameDifficultyRow* FindRowByLevel(int32 Level) const;
+	static const FBmrGameDifficultyRow* FindRowByLevel(int32 Level);
 
 	/*********************************************************************************************
 	 * Event Broadcasting
