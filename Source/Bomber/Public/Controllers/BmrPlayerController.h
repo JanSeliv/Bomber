@@ -112,7 +112,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetupInputContexts(const TArray<UBmrInputMappingContext*>& InputContexts);
 	void SetupInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts);
-	void RemoveInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts);
+
+	/** Removes given contexts from the list of auto managed. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void RemoveInputContexts(const TArray<UBmrInputMappingContext*>& InputContexts);
 
 	/** Prevents built-in slate input on UMG. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (DisplayName = "Set UI Input Ignored"))
@@ -134,6 +137,12 @@ public:
 	 * @param InInputContext The input context to enable or disable. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetInputContextEnabled(bool bEnable, const UBmrInputMappingContext* InInputContext);
+
+	/** Enables or disables specified input contexts.
+	 * @param bEnable If true, contexts will be enabled. If false, contexts will be disabled.
+	 * @param InInputContexts The input contexts to enable or disable. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void SetAllInputContextEnabled(bool bEnable, const TArray<UBmrInputMappingContext*>& InInputContexts);
 
 	/** Set up input bindings in given contexts. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")

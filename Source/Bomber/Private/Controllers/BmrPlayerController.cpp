@@ -328,7 +328,7 @@ void ABmrPlayerController::SetupInputContexts(const TArray<const UBmrInputMappin
 }
 
 // Removes input contexts from managed list
-void ABmrPlayerController::RemoveInputContexts(const TArray<const UBmrInputMappingContext*>& InputContexts)
+void ABmrPlayerController::RemoveInputContexts(const TArray<UBmrInputMappingContext*>& InputContexts)
 {
 	if (!IsLocalController())
 	{
@@ -415,6 +415,15 @@ void ABmrPlayerController::SetInputContextEnabled(bool bEnable, const UBmrInputM
 	}
 
 	UInputUtilsLibrary::SetInputContextEnabled(this, bEnable, InInputContext, InInputContext->GetContextPriority());
+}
+
+// Enables or disables specified input contexts
+void ABmrPlayerController::SetAllInputContextEnabled(bool bEnable, const TArray<UBmrInputMappingContext*>& InInputContexts)
+{
+	for (const UBmrInputMappingContext* InputContextIt : InInputContexts)
+	{
+		SetInputContextEnabled(bEnable, InputContextIt);
+	}
 }
 
 // Set up input bindings in given contexts

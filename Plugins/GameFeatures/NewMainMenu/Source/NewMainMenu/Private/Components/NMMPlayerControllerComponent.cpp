@@ -81,7 +81,9 @@ void UNMMPlayerControllerComponent::SetCinematicInputContextEnabled(bool bEnable
 	}
 
 	// Enable Cinematic inputs
-	MyPC.SetInputContextEnabled(bEnable, UNMMDataAsset::Get().GetInputContext(FNmmStateTag::Cinematic));
+	TArray<UBmrInputMappingContext*> CinematicContexts;
+	UNMMDataAsset::Get().GetInputContexts(FNmmStateTag::Cinematic, /*out*/ CinematicContexts);
+	MyPC.SetAllInputContextEnabled(bEnable, CinematicContexts);
 }
 
 // Enables or disables Cinematic mouse settings from Player Input data asset
@@ -104,16 +106,20 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(FNmmStateTag 
 	ABmrPlayerController& PC = GetPlayerControllerChecked();
 
 	// Remove all previous input contexts managed by Controller
-	TArray<const UBmrInputMappingContext*> OutInputContexts;
-	UNMMDataAsset::Get().GetAllInputContexts(/*out*/ OutInputContexts);
-	PC.RemoveInputContexts(OutInputContexts);
+	TArray<UBmrInputMappingContext*> AllContexts;
+	UNMMDataAsset::Get().GetAllInputContexts(/*out*/ AllContexts);
+	PC.RemoveInputContexts(AllContexts);
 
-	// Add Menu context as auto managed by Game State, so it will be enabled everytime the game is in the Menu state
-	const UBmrInputMappingContext* InputContext = UNMMDataAsset::Get().GetInputContext(NewMenuState);
-	if (InputContext
-	    && !InputContext->GetActiveForStates().IsEmpty())
+	// Add Menu contexts as auto managed by Game State, so they will be enabled everytime the game is in the Menu state
+	TArray<UBmrInputMappingContext*> MatchingContexts;
+	UNMMDataAsset::Get().GetInputContexts(NewMenuState, /*out*/ MatchingContexts);
+	MatchingContexts.RemoveAll([](const UBmrInputMappingContext* It)
 	{
-		PC.SetupInputContexts({InputContext});
+		return It->GetActiveForStates().IsEmpty();
+	});
+	if (!MatchingContexts.IsEmpty())
+	{
+		PC.SetupInputContexts(MatchingContexts);
 	}
 }
 
@@ -186,7 +192,7 @@ void UNMMPlayerControllerComponent::OnUnregister()
 	if (const UNMMDataAsset* DataAsset = UNMMUtils::GetDataAsset())
 	{
 		// Unregister all input actions and input contexts
-		TArray<const UBmrInputMappingContext*> MenuInputContexts;
+		TArray<UBmrInputMappingContext*> MenuInputContexts;
 		DataAsset->GetAllInputContexts(/*out*/ MenuInputContexts);
 
 		for (const UBmrInputMappingContext* InputContextIt : MenuInputContexts)

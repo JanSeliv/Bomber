@@ -50,14 +50,15 @@ protected:
 	 * Input
 	 ********************************************************************************************* */
 public:
-	/** Returns first input context by given menu state.
+	/** Returns all input contexts matching given menu state.
 	 * @see UNMMDataAsset::InputContexts.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	const class UBmrInputMappingContext* GetInputContext(FNmmStateTag MenuState) const;
+	void GetInputContexts(FNmmStateTag MenuState, TArray<class UBmrInputMappingContext*>& OutInputContexts) const;
 
 	/** Returns all input contexts.
 	 * @see UNMMDataAsset::InputContexts.*/
-	void GetAllInputContexts(TArray<const class UBmrInputMappingContext*>& OutInputContexts) const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	void GetAllInputContexts(TArray<class UBmrInputMappingContext*>& OutInputContexts) const;
 
 	/** Returns the time to hold the skip cinematic button to skip the cinematic. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
@@ -65,8 +66,8 @@ public:
 
 protected:
 	/** List of input contexts to manage according their Main Menu States. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TMap<FNmmStateTag, TObjectPtr<const class UBmrInputMappingContext>> InputContexts;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, ShowOnlyInnerProperties, Categories = "NMM.State"))
+	TMap<TObjectPtr<class UBmrInputMappingContext>, FGameplayTagContainer> InputContexts;
 
 	/** The time to hold the skip cinematic button to skip the cinematic. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (BlueprintProtected, ShowOnlyInnerProperties))

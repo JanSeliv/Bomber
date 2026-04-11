@@ -14,19 +14,24 @@ const UNMMDataAsset& UNMMDataAsset::Get(const UObject* OptionalWorldContext /* =
 	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
-// Returns an input context by given Main Menu State
-const UBmrInputMappingContext* UNMMDataAsset::GetInputContext(FNmmStateTag MenuState) const
+// Returns all input contexts matching given Main Menu State
+void UNMMDataAsset::GetInputContexts(FNmmStateTag MenuState, TArray<UBmrInputMappingContext*>& OutInputContexts) const
 {
-	const TObjectPtr<const UBmrInputMappingContext>* FoundContext = InputContexts.Find(MenuState);
-	return FoundContext ? *FoundContext : nullptr;
+	for (const TTuple<TObjectPtr<UBmrInputMappingContext>, FGameplayTagContainer>& It : InputContexts)
+	{
+		if (It.Value.HasTag(MenuState))
+		{
+			OutInputContexts.AddUnique(It.Key);
+		}
+	}
 }
 
 // Returns all input contexts
-void UNMMDataAsset::GetAllInputContexts(TArray<const UBmrInputMappingContext*>& OutInputContexts) const
+void UNMMDataAsset::GetAllInputContexts(TArray<UBmrInputMappingContext*>& OutInputContexts) const
 {
-	for (const TTuple<FNmmStateTag, TObjectPtr<const UBmrInputMappingContext>>& It : InputContexts)
+	for (const TTuple<TObjectPtr<UBmrInputMappingContext>, FGameplayTagContainer>& It : InputContexts)
 	{
-		OutInputContexts.Emplace(It.Value);
+		OutInputContexts.Emplace(It.Key);
 	}
 }
 
