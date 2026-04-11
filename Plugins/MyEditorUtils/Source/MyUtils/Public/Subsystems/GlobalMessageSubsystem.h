@@ -81,6 +81,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static void ClearCachedMessages(FGameplayTag MessageTag, const UObject* OptionalWorldContext = nullptr);
 
+	/** Returns true if the given event has already been broadcast at least once this session.
+	 * Is useful instead of adding a separate bool to track whether something already happened, since the event cache already holds that knowledge */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Global Messages", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static bool HasBroadcastedMessage(FGameplayTag MessageTag, const UObject* OptionalWorldContext = nullptr);
+
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */

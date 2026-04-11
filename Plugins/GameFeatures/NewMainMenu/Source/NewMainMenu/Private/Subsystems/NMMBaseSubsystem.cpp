@@ -8,6 +8,7 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
+#include "Controllers/BmrPlayerController.h"
 #include "DataRegistries/BmrCinematicRow.h"
 #include "GameFramework/BmrGameState.h"
 #include "Structures/BmrGameStateTag.h"
@@ -29,9 +30,59 @@ UNMMBaseSubsystem& UNMMBaseSubsystem::Get(const UObject* OptionalWorldContext /*
  * New Main Menu State
  ********************************************************************************************* */
 
+// Predicts the target menu state based on current cinematic readiness
+FNmmStateTag UNMMBaseSubsystem::GetPredictedMenuState() const
+{
+	// Spots ready: menu is ready with cinematic lobby
+	const UNMMSpotsSubsystem* SpotsSubsystem = UNMMUtils::GetSpotsSubsystem();
+	const bool bSpotsReady = SpotsSubsystem && SpotsSubsystem->IsActiveMenuSpotReady();
+	if (bSpotsReady)
+	{
+		return FNmmStateTag::Idle;
+	}
+
+	// No rows means no MGF cinematics at all (DR itself loads immediately with no softs), menu is ready immediately
+	if (!FBmrCinematicRow::GetRowsNum())
+	{
+		return FNmmStateTag::BasicMenu;
+	}
+
+	// Rows exist but spots not ready: stay in loading screen, OnActiveMenuSpotReady will re-attempt
+	return FNmmStateTag::None;
+}
+
+// Broadcasts MenuReady global message if not already broadcast and menu prerequisites are met
+void UNMMBaseSubsystem::TryBroadcastMenuReady()
+{
+	if (UGlobalMessageSubsystem::HasBroadcastedMessage(NmmGameplayTags::Event::MenuReady)
+	    || !UGlobalMessageSubsystem::HasBroadcastedMessage(BmrGameplayTags::Event::Player_PawnReady)
+	    || GetPredictedMenuState() == FNmmStateTag::None)
+	{
+		// Already entered menu or pawn is not possessed yet or should wait for cinematics loaded
+		return;
+	}
+
+	// Broadcast MenuReady to trigger global Menu game state via StateTree
+	FGameplayEventData MenuReadyData;
+	MenuReadyData.EventTag = NmmGameplayTags::Event::MenuReady;
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(MenuReadyData);
+
+	// Forward to server so its StateTree can transition to Menu state as well
+	ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
+	if (MyPC && !MyPC->HasAuthority())
+	{
+		MyPC->ServerBroadcastMessage(MenuReadyData);
+	}
+}
+
 // Applies the new state of New Main Menu game feature
 void UNMMBaseSubsystem::SetNewMainMenuState(FNmmStateTag NewState)
 {
+	if (NewState == CurrentMenuStateTag)
+	{
+		return;
+	}
+
 	CurrentMenuStateTag = NewState;
 
 	FGameplayEventData EventData;
@@ -49,6 +100,9 @@ void UNMMBaseSubsystem::OnGameFeatureInitialize_Implementation()
 {
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
+	// Listen for first pawn to attempt MenuReady broadcast with prediction
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_PawnReady, this, &ThisClass::OnFirstPawnReady);
+
 	// Listen for spot readiness to re-evaluate state when spots finish loading after DR rows already arrived
 	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
 	SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
@@ -59,31 +113,30 @@ void UNMMBaseSubsystem::OnGameFeatureDeinitialize_Implementation()
 {
 	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
 
-	// Clear cached MenuStateChanged so late-binding listeners receive fresh data on next menu load
+	// Clear cached messages so late-binding listeners receive fresh data on next menu load
 	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuStateChanged);
+	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuReady);
 }
 
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
 
+// Called when the first player character is spawned, possessed, and replicated
+void UNMMBaseSubsystem::OnFirstPawnReady_Implementation(const FGameplayEventData& Payload)
+{
+	TryBroadcastMenuReady();
+}
+
 // Called when the current game state was changed, handles Main Menu states accordingly
 void UNMMBaseSubsystem::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
 	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
 	{
-		// No rows means no MGF cinematics at all (DR itself loads immediately with no softs), enter BasicMenu immediately
-		// Rows exist but spots not ready: stay in current state, OnActiveMenuSpotReady will transition to Idle
-		// Spots ready: enter Idle directly
-		const UNMMSpotsSubsystem* SpotsSubsystem = UNMMUtils::GetSpotsSubsystem();
-		const bool bSpotsReady = SpotsSubsystem && SpotsSubsystem->IsActiveMenuSpotReady();
-		if (bSpotsReady)
+		const FNmmStateTag PredictedState = GetPredictedMenuState();
+		if (PredictedState != FNmmStateTag::None)
 		{
-			SetNewMainMenuState(FNmmStateTag::Idle);
-		}
-		else if (!FBmrCinematicRow::GetRowsNum())
-		{
-			SetNewMainMenuState(FNmmStateTag::BasicMenu);
+			SetNewMainMenuState(PredictedState);
 		}
 	}
 	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
@@ -96,12 +149,13 @@ void UNMMBaseSubsystem::OnGameStateChanged_Implementation(const FGameplayEventDa
 // Called when a cinematic spot finished loading, re-evaluates whether to transition from BasicMenu to Idle
 void UNMMBaseSubsystem::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* /*MainMenuSpotComponent*/)
 {
-	if (!ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu))
-	{
-		// Spots loaded before game entered Menu state, OnGameStateChanged will handle transition to Idle once Menu state is reached
-		return;
-	}
+	TryBroadcastMenuReady();
 
-	// DR rows are present and spots just became ready, activate cinematic lobby
-	SetNewMainMenuState(FNmmStateTag::Idle);
+	// Upgrade BasicMenu to Idle now that cinematic spots are available
+	// Also handle client case where Menu tag replicated but NMM state is still None (spots weren't ready during OnGameStateChanged)
+	if (CurrentMenuStateTag == FNmmStateTag::BasicMenu
+	    || (CurrentMenuStateTag == FNmmStateTag::None && ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu)))
+	{
+		SetNewMainMenuState(FNmmStateTag::Idle);
+	}
 }

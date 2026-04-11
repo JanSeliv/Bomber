@@ -167,9 +167,6 @@ void UNMMPlayerControllerComponent::OnUnregister()
 {
 	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
 
-	// Clear cached MenuReady so late-binding listeners receive fresh data on next menu load
-	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuReady, this);
-
 	// Notify that Main Menu is being unloaded before any cleanup
 	ABmrPlayerController* MyPC = GetPlayerController();
 	const ABmrPawn* LocalPawn = MyPC ? MyPC->GetPawn<ABmrPawn>() : nullptr;
@@ -230,17 +227,6 @@ void UNMMPlayerControllerComponent::OnUnregister()
 // Called when the NMM data asset is loaded and available
 void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
 {
-	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_PawnReady,
-	    this, [this](const FGameplayEventData& Payload)
-	{
-		constexpr int32 FirstPlayerId = 0;
-		const ABmrPawn* CallbackPawn = Cast<ABmrPawn>(Payload.Instigator);
-		if (CallbackPawn && CallbackPawn->GetPlayerId() == FirstPlayerId)
-		{
-			OnFirstPawnReady(Payload);
-		}
-	});
-
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
@@ -255,22 +241,6 @@ void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMD
 	if (ensureMsgf(LevelCamera, TEXT("ASSERT: [%i] %s:\n'EXPR' is not valid, can't disable Auto Camera Possess!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		LevelCamera->SetAutoPossessCameraEnabled(false);
-	}
-}
-
-// Called when the first player character is spawned, possessed, and replicated
-void UNMMPlayerControllerComponent::OnFirstPawnReady_Implementation(const FGameplayEventData& Payload)
-{
-	// Broadcast MenuReady immediately, basic menu is ready as soon as pawn exists
-	FGameplayEventData MenuReadyData;
-	MenuReadyData.EventTag = NmmGameplayTags::Event::MenuReady;
-	MenuReadyData.Instigator = UBmrBlueprintFunctionLibrary::GetLocalPawn();
-	UGlobalMessageSubsystem::BroadcastGlobalMessage(MenuReadyData);
-
-	ABmrPlayerController& MyPC = GetPlayerControllerChecked();
-	if (!MyPC.HasAuthority())
-	{
-		MyPC.ServerBroadcastMessage(MenuReadyData);
 	}
 }
 

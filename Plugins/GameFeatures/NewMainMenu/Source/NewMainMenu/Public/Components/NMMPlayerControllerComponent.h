@@ -88,10 +88,6 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnDataAssetLoaded(const class UNMMDataAsset* DataAsset);
 
-	/** Called when the first player character is spawned, possessed, and replicated. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnFirstPawnReady(const struct FGameplayEventData& Payload);
-
 	/** Listen to react when entered the Menu state. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);

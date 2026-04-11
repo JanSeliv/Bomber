@@ -220,6 +220,15 @@ void UGlobalMessageSubsystem::ClearCachedMessages(FGameplayTag MessageTag, const
 	}
 }
 
+// Returns true if the given event has already been broadcast at least once this session
+bool UGlobalMessageSubsystem::HasBroadcastedMessage(FGameplayTag MessageTag, const UObject* OptionalWorldContext /* = nullptr*/)
+{
+	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
+	const UGlobalMessageSubsystem* Subsystem = World ? World->GetSubsystem<UGlobalMessageSubsystem>() : nullptr;
+	const TMap<TWeakObjectPtr<const AActor>, FGameplayEventData>* CachedPayloads = Subsystem ? Subsystem->BroadcastedMessagesMap.Find(MessageTag) : nullptr;
+	return CachedPayloads && !CachedPayloads->IsEmpty();
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */

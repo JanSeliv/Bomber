@@ -36,6 +36,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void SetNewMainMenuState(FNmmStateTag NewState);
 
+	/** Broadcasts MenuReady global message if not already broadcast and menu prerequisites are met (spots ready or no cinematic rows).
+	 * Is called from multiple places (pawn ready, spots loaded) but only the first successful call takes effect */
+	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
+	void TryBroadcastMenuReady();
+
+	/** Predicts the target menu state based on current cinematic readiness.
+	 * Is useful to know the desired menu destination before entering, so systems can prepare accordingly */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
+	FNmmStateTag GetPredictedMenuState() const;
+
 	/** Returns the current state of New Main Menu game feature. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	FORCEINLINE FNmmStateTag GetCurrentMenuState() const { return CurrentMenuStateTag; }
@@ -60,6 +70,10 @@ protected:
 	 * Events
 	 ********************************************************************************************* */
 protected:
+	/** Called when the first player character is spawned, possessed, and replicated. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnFirstPawnReady(const struct FGameplayEventData& Payload);
+
 	/** Called when the current game state was changed, handles Main Menu states accordingly. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
