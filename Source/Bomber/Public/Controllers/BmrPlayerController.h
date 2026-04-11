@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #pragma once
 
@@ -155,6 +155,9 @@ public:
 	 * Camera
 	 ********************************************************************************************* */
 public:
+	/** Is overridden to refresh camera cache, preventing stale frame from previous view target. */
+	virtual void SetViewTarget(AActor* NewViewTarget, FViewTargetTransitionParams TransitionParams = FViewTargetTransitionParams()) override;
+
 	/** Is overriden to setup camera manager once spawned. */
 	virtual void SpawnPlayerCameraManager() override;
 

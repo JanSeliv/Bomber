@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #include "Controllers/BmrPlayerController.h"
 
@@ -502,6 +502,17 @@ UBmrMouseActivityComponent& ABmrPlayerController::GetMouseActivityComponentCheck
 /*********************************************************************************************
  * Camera
  ********************************************************************************************* */
+
+// Is overridden to refresh camera cache, preventing stale frame from previous view target
+void ABmrPlayerController::SetViewTarget(AActor* NewViewTarget, FViewTargetTransitionParams TransitionParams)
+{
+	Super::SetViewTarget(NewViewTarget, TransitionParams);
+
+	if (PlayerCameraManager)
+	{
+		PlayerCameraManager->UpdateCamera(0.f);
+	}
+}
 
 // Is overriden to setup camera manager once spawned
 void ABmrPlayerController::SpawnPlayerCameraManager()
