@@ -23,6 +23,7 @@
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/BmrSoundsSubsystem.h"
+#include "Subsystems/BmrWidgetsSubsystem.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
@@ -237,6 +238,8 @@ void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMD
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
 
+	BIND_ON_WIDGETS_INITIALIZED(this, ThisClass::OnWidgetsInitialized);
+
 	// Load save game data of the Main Menu
 	FAsyncLoadGameFromSlot AsyncLoadGameFromSlotDelegate;
 	AsyncLoadGameFromSlotDelegate.BindUObject(this, &ThisClass::OnAsyncLoadGameFromSlotCompleted);
@@ -283,6 +286,13 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(con
 	// Update cinematic input and mouse visibility
 	SetCinematicInputContextEnabled(bIsCinematic);
 	SetCinematicMouseVisibilityEnabled(bIsCinematic);
+}
+
+// Is called when all game widgets are initialized
+void UNMMPlayerControllerComponent::OnWidgetsInitialized_Implementation()
+{
+	// Apply input contexts that might be skipped earlier if widgets were not ready yet
+	SetManagedInputContextsEnabled(UNMMUtils::GetMainMenuState());
 }
 
 // Is called from AsyncLoadGameFromSlot once Save Game is loaded, or null if it failed to load
