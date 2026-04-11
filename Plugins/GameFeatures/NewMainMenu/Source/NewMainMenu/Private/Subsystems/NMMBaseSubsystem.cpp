@@ -78,11 +78,6 @@ void UNMMBaseSubsystem::TryBroadcastMenuReady()
 // Applies the new state of New Main Menu game feature
 void UNMMBaseSubsystem::SetNewMainMenuState(FNmmStateTag NewState)
 {
-	if (NewState == CurrentMenuStateTag)
-	{
-		return;
-	}
-
 	CurrentMenuStateTag = NewState;
 
 	FGameplayEventData EventData;

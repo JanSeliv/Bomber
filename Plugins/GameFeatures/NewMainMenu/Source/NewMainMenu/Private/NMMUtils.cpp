@@ -120,10 +120,10 @@ FNmmStateTag UNMMUtils::GetMainMenuState()
  ********************************************************************************************* */
 
 // Is used to show or hide own widget by the current menu state tag
-ESlateVisibility UNMMUtils::GetVisibilityByMenuStateTag(const FNmmStateTag& CurrentMenuStateTag, const FGameplayTagContainer& MenuStates)
+ESlateVisibility UNMMUtils::GetVisibilityByMenuStateTag(const FNmmStateTag& CurrentMenuStateTag, const FGameplayTagContainer& MenuStates, ESlateVisibility MatchedVisibility /* = ESlateVisibility::SelfHitTestInvisible */)
 {
 	const bool bMatching = CurrentMenuStateTag.GetSingleTagContainer().HasAny(MenuStates);
-	return bMatching ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed;
+	return bMatching ? MatchedVisibility : ESlateVisibility::Collapsed;
 }
 
 /*********************************************************************************************

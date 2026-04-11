@@ -78,11 +78,13 @@ public:
 	 * E.g: used by New Main Menu widget to be visible only during BasicMenu+Idle states.
 	 * @param CurrentMenuStateTag Provide the current menu state tag to check.
 	 * @param MenuStates Select one or multiple menu state tags to check.
-	 * @return 'SelfHitTestInvisible' if the current tag matches any in the container, otherwise 'Collapsed'. */
+	 * @param MatchedVisibility Visibility to return when the current tag matches any in the container.
+	 * @return MatchedVisibility if the current tag matches any in the container, otherwise 'Collapsed'. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", meta = (BlueprintAutocast, AutoCreateRefTerm = "MenuStates"))
 	static ESlateVisibility GetVisibilityByMenuStateTag(
 	    const struct FNmmStateTag& CurrentMenuStateTag,
-	    UPARAM(meta = (Categories = "NMM.State")) const struct FGameplayTagContainer& MenuStates);
+	    UPARAM(meta = (Categories = "NMM.State")) const struct FGameplayTagContainer& MenuStates,
+	    ESlateVisibility MatchedVisibility);
 
 	/*********************************************************************************************
 	 * Cinematic helpers
