@@ -8,6 +8,18 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ModularGameFeaturePluginSubsystem)
 
+/*********************************************************************************************
+ * INTERNAL: do not override these in child classes, use OnGameFeatureInitialize/OnGameFeatureDeinitialize instead!
+ ********************************************************************************************* */
+
+void UModularGameFeaturePluginSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	// Tick is disabled by default, call SetTickableTickType to enable/disable it at runtime
+	SetTickableTickType(ETickableTickType::Never);
+}
+
 // Registers as game feature observer and triggers initial activation if the plugin is already active
 void UModularGameFeaturePluginSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {

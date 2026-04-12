@@ -251,6 +251,8 @@ void UNMMCameraSubsystem::OnBeginTransition()
 	}, TransitionToIdleBlendTime, false);
 
 	SetNewCameraRailTransitionState(ENMMCameraRailTransitionState::BeginTransition);
+
+	SetTickableTickType(ETickableTickType::Conditional);
 }
 
 // Is called on finishes blending the camera towards current spot on the rail
@@ -270,6 +272,8 @@ void UNMMCameraSubsystem::OnEndTransition()
 	}, TransitionToIdleBlendTime, false);
 
 	SetNewCameraRailTransitionState(ENMMCameraRailTransitionState::EndTransition);
+
+	SetTickableTickType(ETickableTickType::Never);
 }
 
 // Is called in tick to update the camera transition when transitioning

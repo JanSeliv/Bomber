@@ -14,17 +14,13 @@
  * In comparison to other world subsystems, it properly triggers on each game feature load and unload.
  * Subclasses override OnGameFeatureInitialize/OnGameFeatureDeinitialize instead of OnWorldBeginPlay/OnWorldEndPlay/Initialize/Deinitialize.
  * This subsystem should be created only under game feature plugin modules.
+ * Call SetTickable to enable/disable tick (is disabled by default)
  */
 UCLASS(Abstract)
 class MYUTILS_API UModularGameFeaturePluginSubsystem : public UTickableWorldSubsystem
     , public IGameFeatureStateChangeObserver
 {
 	GENERATED_BODY()
-
-public:
-	/** Returns false by default so non-tickable MGF subsystems pay no tick cost.
-	 * Override to return true in subsystems that need per-frame updates */
-	virtual FORCEINLINE bool IsTickable() const override { return false; }
 
 protected:
 	/** Called when the owning game feature plugin activates or on first world begin play.
@@ -44,7 +40,7 @@ protected:
 	 ********************************************************************************************* */
 public:
 	/** Overridden and marked as final to prevent their overriding in child classes, use OnGameFeatureInitialize/OnGameFeatureDeinitialize instead! */
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override final { Super::Initialize(Collection); }
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override final;
 	virtual void Deinitialize() override final { Super::Deinitialize(); }
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override final;
 	virtual void OnWorldEndPlay(UWorld& InWorld) override final;
