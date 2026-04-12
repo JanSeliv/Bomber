@@ -217,6 +217,9 @@ void UNMMSpotComponent::ReinitializeCinematicData()
 
 	if (IsValid(MasterPlayer))
 	{
+		// Discard pre-animated state, otherwise Stop() would trigger RestorePreAnimatedState() restoring wrong camera
+		MasterPlayer->SetCompletionModeOverride(EMovieSceneCompletionModeOverride::ForceKeepState);
+
 		MasterPlayer->Stop();
 		MasterPlayer->ConditionalBeginDestroy();
 		MasterPlayer = nullptr;
