@@ -153,8 +153,9 @@ void UGlobalMessageSubsystem::StopListeningForGlobalMessage(FGameplayTag Message
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(ListenerOwner);
 	UGlobalMessageSubsystem* Subsystem = World ? World->GetSubsystem<UGlobalMessageSubsystem>() : nullptr;
-	if (!ensureMsgf(Subsystem, TEXT("ASSERT: [%i] %hs:\n'Subsystem' is not valid!"), __LINE__, __FUNCTION__))
+	if (!Subsystem)
 	{
+		// World is tearing down or not a play world; nothing to unbind
 		return;
 	}
 
@@ -183,8 +184,9 @@ void UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(const UObject* L
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(ListenerOwner);
 	UGlobalMessageSubsystem* Subsystem = World ? World->GetSubsystem<UGlobalMessageSubsystem>() : nullptr;
-	if (!ensureMsgf(Subsystem, TEXT("ASSERT: [%i] %hs:\n'Subsystem' is not valid!"), __LINE__, __FUNCTION__))
+	if (!Subsystem)
 	{
+		// World is tearing down or not a play world; nothing to unbind
 		return;
 	}
 

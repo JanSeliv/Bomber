@@ -66,9 +66,15 @@ void PIESafeAsync::ExecutePIESafe(const UObject* ContextObject, TFunction<void()
 	}
 
 #if WITH_EDITOR
-	const UWorld* World = Cast<UWorld>(GetWorldObject(ContextObject));
-	if (UUtilsLibrary::IsEditor() && World)
+	if (GIsEditor)
 	{
+		const UWorld* World = Cast<UWorld>(GetWorldObject(ContextObject));
+		const bool bWorldUsable = World && !World->bIsTearingDown && !IsGarbageCollecting();
+		if (!bWorldUsable)
+		{
+			return;
+		}
+
 		World->GetTimerManager().SetTimerForNextTick([WeakContext = TWeakObjectPtr(ContextObject), Callback = MoveTemp(Callback)]()
 		{
 			if (WeakContext.IsValid())

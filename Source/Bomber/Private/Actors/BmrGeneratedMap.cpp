@@ -949,6 +949,12 @@ TMap<FBmrCell, EBmrActorType> ABmrGeneratedMap::GenerateLevelActors_StartAsync(F
 // Internal method to finish with spawning on the game thread
 void ABmrGeneratedMap::GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&& ActorsToSpawn)
 {
+	const UWorld* World = GetWorld();
+	if (!World || World->bIsTearingDown)
+	{
+		return;
+	}
+
 	// --- Part 2: Spawning ---
 
 	const TFunction<void(const TArray<UBmrMapComponent*>&)> OnSpawned = [WeakThis = TWeakObjectPtr(this)](const TArray<UBmrMapComponent*>& MapComponents)
