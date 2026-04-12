@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #pragma once
 
@@ -60,32 +60,6 @@ enum class EBmrActorType : uint8
 
 ENUM_CLASS_FLAGS(EBmrActorType);
 using EAT = EBmrActorType;
-
-/**
- * Levels in the game.
- * In many cases is used to get the specific mesh of an level actor by the level type.
- * @see ULevelActorRow::LevelType
- */
-UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class EBmrLevelType : uint8
-{
-	None = 0,
-	///< Represents Maya level
-	First = 1 << 0 UMETA(DisplayName = "Maya"),
-	///< Represents City level
-	Second = 1 << 1 UMETA(DisplayName = "City"),
-	///< Represents Forest level
-	Third = 1 << 2 UMETA(DisplayName = "Forest"),
-	///< Represents Water level
-	Fourth = 1 << 3 UMETA(DisplayName = "Water"),
-	///< All the types, also can be used for such levels as menu, sandbox, etc.
-	Max = First | Second | Third | Fourth UMETA(DisplayName = "Any")
-};
-
-ENUM_CLASS_FLAGS(EBmrLevelType);
-using ELT = EBmrLevelType;
-#define ELT_FIRST_FLAG TO_FLAG(ELT::First)
-#define ELT_LAST_FLAG TO_FLAG(ELT::Fourth)
 
 /**
  * Pathfinding types by which cells could be found.

@@ -155,13 +155,13 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetCurrentSpot() const
 	return nullptr;
 }
 
-// Returns Main-Menu spots by given level type
-void UNMMSpotsSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutSpots, EBmrLevelType LevelType) const
+// Returns all valid Main-Menu spots sorted by priority
+void UNMMSpotsSubsystem::GetMainMenuSpots(TArray<UNMMSpotComponent*>& OutSpots) const
 {
 	for (UNMMSpotComponent* MainMenuSpotComponent : MainMenuSpots)
 	{
 		if (MainMenuSpotComponent
-		    && MainMenuSpotComponent->GetCinematicRow().LevelType == LevelType)
+		    && MainMenuSpotComponent->GetCinematicRow().IsValid())
 		{
 			OutSpots.AddUnique(MainMenuSpotComponent);
 		}
@@ -175,10 +175,10 @@ void UNMMSpotsSubsystem::GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>&
 }
 
 // Returns next or previous Main-Menu spot by given incrementer
-UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer, EBmrLevelType LevelType) const
+UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer) const
 {
 	TArray<UNMMSpotComponent*> CurrentLevelTypeSpots;
-	GetMainMenuSpotsByLevelType(/*out*/ CurrentLevelTypeSpots, LevelType);
+	GetMainMenuSpots(/*out*/ CurrentLevelTypeSpots);
 
 	// Extract the priorities, so we can track the bounds
 	TArray<int32> SpotPriorities;
@@ -205,7 +205,7 @@ UNMMSpotComponent* UNMMSpotsSubsystem::GetNextSpot(int32 Incrementer, EBmrLevelT
 // Goes to another Spot to show another player character on current level
 UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpot(int32 Incrementer)
 {
-	UNMMSpotComponent* NextMainMenuSpot = GetNextSpot(Incrementer, UBmrBlueprintFunctionLibrary::GetLevelType());
+	UNMMSpotComponent* NextMainMenuSpot = GetNextSpot(Incrementer);
 	if (!ensureMsgf(NextMainMenuSpot, TEXT("ASSERT: [%i] %s:\n'NextMainMenuSpot' is not valid!"), __LINE__, *FString(__FUNCTION__)))
 	{
 		return nullptr;
@@ -237,23 +237,22 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpotByPredicate(int32 Increme
 {
 	const int32 FinalIncrementer = [&]() -> int32
 	{
-		const EBmrLevelType LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
-		TArray<UNMMSpotComponent*> LevelTypeSpots;
-		GetMainMenuSpotsByLevelType(LevelTypeSpots, LevelType);
+		TArray<UNMMSpotComponent*> AllSpots;
+		GetMainMenuSpots(AllSpots);
 
-		if (LevelTypeSpots.IsEmpty())
+		if (AllSpots.IsEmpty())
 		{
 			return 0;
 		}
 
 		UNMMSpotComponent* Spot = nullptr;
 		int32 Attempts = 0;
-		const int32 MaxAttempts = LevelTypeSpots.Num();
+		const int32 MaxAttempts = AllSpots.Num();
 		int32 NewIncrementer = Incrementer;
 
 		while (Attempts < MaxAttempts)
 		{
-			Spot = GetNextSpot(NewIncrementer, LevelType);
+			Spot = GetNextSpot(NewIncrementer);
 			if (Spot && Predicate(Spot))
 			{
 				return NewIncrementer;

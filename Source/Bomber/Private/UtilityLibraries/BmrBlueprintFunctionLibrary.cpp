@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
@@ -62,13 +62,6 @@ int32 UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType InPlayerTy
 	}
 
 	return PlayersNum;
-}
-
-// Returns the type of the current level
-EBmrLevelType UBmrBlueprintFunctionLibrary::GetLevelType()
-{
-	// @TODO JanSeliv StB8orDX: remove level type enum and replace related logic
-	return EBmrLevelType::First;
 }
 
 // Returns true if the local pawn is ready (spawned, possessed, and replicated)

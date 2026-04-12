@@ -76,9 +76,7 @@ ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 	// The Rail Rig is attached right to the spot
 	constexpr int32 ForwardDir = 1;
 	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
-	const UNMMSpotComponent* MenuSpot = IsCameraForwardTransition()
-	                                        ? SpotsSubsystem.GetCurrentSpot()
-	                                        : SpotsSubsystem.GetNextSpot(ForwardDir, UBmrBlueprintFunctionLibrary::GetLevelType());
+	const UNMMSpotComponent* MenuSpot = IsCameraForwardTransition() ? SpotsSubsystem.GetCurrentSpot() : SpotsSubsystem.GetNextSpot(ForwardDir);
 	return MenuSpot ? UGameplayUtilsLibrary::GetAttachedActorByClass<ACineCameraRigRail>(MenuSpot->GetOwner()) : nullptr;
 }
 

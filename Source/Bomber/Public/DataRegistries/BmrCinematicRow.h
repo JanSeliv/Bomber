@@ -5,7 +5,6 @@
 #include "Engine/DataTable.h"
 
 // Bomber
-#include "Bomber.h" // EBmrLevelType
 #include "DalRegistryRow.h"
 #include "Structures/BmrPlayerTag.h"
 
@@ -25,10 +24,6 @@ struct BOMBER_API FBmrCinematicRow : public FTableRowBase
 
 	/** The row that does not contain any data. */
 	static const FBmrCinematicRow Empty;
-
-	/** The level where this cinematic should be played. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EBmrLevelType LevelType = ELT::None;
 
 	/** The player for which this cinematic should be played. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

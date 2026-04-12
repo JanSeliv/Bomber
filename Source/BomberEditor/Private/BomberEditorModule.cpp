@@ -1,10 +1,11 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #include "BomberEditorModule.h"
 
 // Bomber
 #include "BmrGameDifficultyTagCustomization.h"
 #include "BmrGameStateTagCustomization.h"
+#include "BmrMapTagCustomization.h"
 #include "BmrPlayerTagCustomization.h"
 #include "BmrPowerupTagCustomization.h"
 
@@ -20,6 +21,7 @@ void FBomberEditorModule::StartupModule()
 {
 	FBmrGameDifficultyTagCustomization::RegisterGameDifficultyTagCustomization();
 	FBmrGameStateTagCustomization::RegisterGameStateTagCustomization();
+	FBmrMapTagCustomization::RegisterMapTagCustomization();
 	FBmrPlayerTagCustomization::RegisterPlayersTagCustomization();
 	FBmrPowerupTagCustomization::RegisterPowerupTagCustomization();
 }
@@ -29,6 +31,7 @@ void FBomberEditorModule::ShutdownModule()
 {
 	FBmrGameDifficultyTagCustomization::UnregisterGameDifficultyTagCustomization();
 	FBmrGameStateTagCustomization::UnregisterGameStateTagCustomization();
+	FBmrMapTagCustomization::UnregisterMapTagCustomization();
 	FBmrPlayerTagCustomization::UnregisterPlayersTagCustomization();
 	FBmrPowerupTagCustomization::UnregisterPowerupTagCustomization();
 }

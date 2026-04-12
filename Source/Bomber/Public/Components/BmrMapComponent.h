@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #pragma once
 
@@ -11,7 +11,6 @@
 #include "BmrMapComponent.generated.h"
 
 enum class EBmrActorType : uint8;
-enum class EBmrLevelType : uint8;
 
 /** Typedef to allow for some nicer looking sets of map components */
 typedef TSet<class UBmrMapComponent*> FMapComponents;

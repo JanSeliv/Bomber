@@ -10,15 +10,13 @@ const FBmrCinematicRow FBmrCinematicRow::Empty = FBmrCinematicRow();
 // Returns true if this row is valid
 bool FBmrCinematicRow::IsValid() const
 {
-	return LevelType != ELT::None
-	       && PlayerTag != FBmrPlayerTag::None
+	return PlayerTag != FBmrPlayerTag::None
 	       && LevelSequence != nullptr;
 }
 
 // Equal operator
 bool FBmrCinematicRow::operator==(const FBmrCinematicRow& Other) const
 {
-	return LevelType == Other.LevelType
-	       && PlayerTag == Other.PlayerTag
+	return PlayerTag == Other.PlayerTag
 	       && LevelSequence == Other.LevelSequence;
 }

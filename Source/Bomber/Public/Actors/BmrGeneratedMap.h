@@ -8,6 +8,7 @@
 #include "Structures/BmrCell.h"
 #include "Structures/BmrGeneratedMapSettings.h"
 #include "Structures/BmrMapComponentsContainer.h"
+#include "Structures/BmrMapTag.h"
 
 // UE
 #include "AbilitySystemInterface.h"
@@ -23,8 +24,8 @@ class UBmrMapComponent;
  * @see Access its data with UGeneratedMapDataAsset (Content/Bomber/DataAssets/DA_Levels).
  */
 UCLASS()
-class BOMBER_API ABmrGeneratedMap final : public AActor,
-                                          public IAbilitySystemInterface
+class BOMBER_API ABmrGeneratedMap final : public AActor
+    , public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -179,6 +180,15 @@ public:
 	virtual FORCEINLINE UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
 	UAbilitySystemComponent& GetAbilitySystemComponentChecked() const;
 
+	/** Returns the current map visual theme tag from the ASC, or None if not set. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FBmrMapTag GetMapTag() const;
+
+	/** Replaces the current map tag on the ASC with the given one, removing any existing Map.* tag first.
+	 * Is called automatically from ConstructionScript with CurrentMapTag, but can also be called at runtime to switch map themes. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
+	void SetMapTag(const FBmrMapTag& NewMapTag);
+
 protected:
 	/** Ability System Component that is used to manage abilities (like place bomb) and attributes (like powerups) for owned player. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "[Bomber]", meta = (BlueprintProtected, DisplayName = "Ability System Component"))
@@ -198,6 +208,11 @@ protected:
 	/** Gives access for helper utilities to expand operations on the Generated Map. */
 	friend class UBmrCellUtilsLibrary;
 	friend class UBmrActorUtilsLibrary;
+
+	/** Currently applied map visual theme tag applied.
+	 * Can be set per-instance on the Generated Map actor, is serialized into the level and triggers ConstructionScript updates. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]", meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	FBmrMapTag CurrentMapTag = FBmrMapTag::None;
 
 	/** If toggled, custom data will be used for the level generation instead of the default ones from Data Asset.
 	 * Can be set right in the Details Panel of the Generated Map actor on the scene, individually per each level.

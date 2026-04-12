@@ -16,7 +16,7 @@
 USTRUCT(BlueprintType)
 struct BOMBER_API FBmrPowerupRow : public FBmrLevelActorRow
 #if CPP
-    , public TBmrLevelActorRow<FBmrPowerupRow>
+    , public TDalRegistryRow<FBmrPowerupRow>
 #endif
 {
 	GENERATED_BODY()
@@ -33,6 +33,6 @@ struct BOMBER_API FBmrPowerupRow : public FBmrLevelActorRow
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftClassPtr<class UGameplayEffect> MaxCollectGameplayEffect = nullptr;
 
-	/** Finds powerup row data by powerup tag and level type, resolves current level type automatically if None */
-	static const FBmrPowerupRow* GetRowByPowerupTag(FBmrPowerupTag Tag, EBmrLevelType LevelType = EBmrLevelType::None);
+	/** Finds powerup row data by powerup tag from Data Registry */
+	static const FBmrPowerupRow* GetRowByPowerupTag(FBmrPowerupTag Tag);
 };

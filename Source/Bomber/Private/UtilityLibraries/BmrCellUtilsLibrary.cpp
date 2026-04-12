@@ -171,7 +171,7 @@ FIntPoint UBmrCellUtilsLibrary::GetCenterCellPositionOnLevel()
 // Returns all empty grid cell locations on the Generated Map where none of actors are present
 FBmrCells UBmrCellUtilsLibrary::GetAllEmptyCellsWithoutActors()
 {
-	constexpr int32 NoneActorType = TO_FLAG(EBmrLevelType::None);
+	constexpr int32 NoneActorType = TO_FLAG(EBmrActorType::None);
 	return GetAllCellsWithActors(NoneActorType);
 }
 
@@ -258,7 +258,7 @@ void UBmrCellUtilsLibrary::IntersectCellsByTypes(FBmrCells& InOutCells, int32 Ac
 // Takes cells and returns only empty cells where none of actors are present
 FBmrCells UBmrCellUtilsLibrary::FilterEmptyCellsWithoutActors(const FBmrCells& InCells)
 {
-	constexpr int32 NoneActorType = TO_FLAG(EBmrLevelType::None);
+	constexpr int32 NoneActorType = TO_FLAG(EBmrActorType::None);
 	return FilterCellsByActors(InCells, NoneActorType);
 }
 
@@ -274,7 +274,7 @@ FBmrCells UBmrCellUtilsLibrary::FilterCellsByActors(const FBmrCells& InCells, in
 // Returns true if cell is empty, so it does not have own actor
 bool UBmrCellUtilsLibrary::IsEmptyCellWithoutActor(const FBmrCell& Cell)
 {
-	constexpr int32 NoneActorType = TO_FLAG(EBmrLevelType::None);
+	constexpr int32 NoneActorType = TO_FLAG(EBmrActorType::None);
 	return IsCellHasAnyMatchingActor(Cell, NoneActorType);
 }
 
@@ -290,7 +290,7 @@ bool UBmrCellUtilsLibrary::IsCellHasAnyMatchingActor(const FBmrCell& Cell, int32
 // Returns true if at least one cell is empty, so it does not have own actor
 bool UBmrCellUtilsLibrary::IsAnyCellEmptyWithoutActor(const FBmrCells& Cells)
 {
-	constexpr int32 NoneActorType = TO_FLAG(EBmrLevelType::None);
+	constexpr int32 NoneActorType = TO_FLAG(EBmrActorType::None);
 	return AreCellsHaveAnyMatchingActors(Cells, NoneActorType);
 }
 
@@ -306,7 +306,7 @@ bool UBmrCellUtilsLibrary::AreCellsHaveAnyMatchingActors(const FBmrCells& Cells,
 // Returns true if all cells are empty, so don't have own actors
 bool UBmrCellUtilsLibrary::AreAllCellsEmptyWithoutActors(const FBmrCells& Cells)
 {
-	constexpr int32 NoneActorType = TO_FLAG(EBmrLevelType::None);
+	constexpr int32 NoneActorType = TO_FLAG(EBmrActorType::None);
 	return AreCellsHaveAllMatchingActors(Cells, NoneActorType);
 }
 
@@ -479,7 +479,7 @@ FBmrCells UBmrCellUtilsLibrary::GetCellsAroundWithActors(const FBmrCell& CenterC
 // Returns matching empty cells around without actors, according desired type of breaks
 FBmrCells UBmrCellUtilsLibrary::GetEmptyCellsAroundWithoutActors(const FBmrCell& CenterCell, EPathType Pathfinder, int32 Radius)
 {
-	constexpr int32 NoneActorType = TO_FLAG(EBmrLevelType::None);
+	constexpr int32 NoneActorType = TO_FLAG(EBmrActorType::None);
 	return GetCellsAroundWithActors(CenterCell, Pathfinder, Radius, NoneActorType);
 }
 
@@ -519,7 +519,7 @@ FBmrCells UBmrCellUtilsLibrary::GetCellsInDirectionsWithActors(const FBmrCell& C
 // Returns matching empty cells without actors in chosen direction(s), according desired type of breaks
 FBmrCells UBmrCellUtilsLibrary::GetEmptyCellsInDirectionsWithoutActors(const FBmrCell& CenterCell, EPathType Pathfinder, int32 SideLength, int32 DirectionsBitmask)
 {
-	constexpr int32 NoneActorType = TO_FLAG(EBmrLevelType::None);
+	constexpr int32 NoneActorType = TO_FLAG(EBmrActorType::None);
 	return GetCellsInDirectionsWithActors(CenterCell, Pathfinder, SideLength, DirectionsBitmask, NoneActorType);
 }
 

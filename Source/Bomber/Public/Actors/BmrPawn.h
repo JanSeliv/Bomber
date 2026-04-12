@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #pragma once
 
@@ -9,8 +9,6 @@
 #include "GameplayTagAssetInterface.h"
 
 #include "BmrPawn.generated.h"
-
-enum class EBmrLevelType : uint8;
 
 enum class EBmrPlayerType : uint8;
 

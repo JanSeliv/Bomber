@@ -8,8 +8,6 @@
 
 class UNMMSpotComponent;
 
-enum class EBmrLevelType : uint8;
-
 /**
  * Manages Main Menu cinematic spots and keeps their data.
  */
@@ -68,17 +66,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	UNMMSpotComponent* GetCurrentSpot() const;
 
-	/** Returns Main-Menu spots by given level type. */
+	/** Returns all valid Main-Menu spots sorted by priority */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	void GetMainMenuSpotsByLevelType(TArray<UNMMSpotComponent*>& OutSpots, EBmrLevelType LevelType) const;
+	void GetMainMenuSpots(TArray<UNMMSpotComponent*>& OutSpots) const;
 
 	/** Returns next or previous Main-Menu spot by given incrementer.
 	 * It never exits the bounds of the array by going to the last or first element.
 	 * @param Incrementer 1 to move right, -1 to move left.
-	 * @param LevelType Level type to search in.
 	 * @return New active Main-Menu spot component. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	UNMMSpotComponent* GetNextSpot(int32 Incrementer, EBmrLevelType LevelType) const;
+	UNMMSpotComponent* GetNextSpot(int32 Incrementer) const;
 
 	/** Goes to another Spot to show another player character on current level.
 	 * @param Incrementer 1 to move right, -1 to move left.

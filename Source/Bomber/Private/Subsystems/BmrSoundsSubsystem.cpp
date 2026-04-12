@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Subsystems/BmrSoundsSubsystem.h"
 
@@ -218,8 +218,7 @@ void UBmrSoundsSubsystem::PlayInGameMusic()
 		return;
 	}
 
-	const EBmrLevelType LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
-	USoundBase* InGameMusic = UBmrSoundsDataAsset::Get().GetInGameMusic(LevelType);
+	USoundBase* InGameMusic = UBmrSoundsDataAsset::Get().GetInGameMusic();
 
 	if (!InGameMusic)
 	{
@@ -234,8 +233,7 @@ void UBmrSoundsSubsystem::PlayInGameMusic()
 // Stops currently played in-match background music
 void UBmrSoundsSubsystem::StopInGameMusic()
 {
-	const EBmrLevelType LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
-	if (USoundBase* InGameMusic = UBmrSoundsDataAsset::Get().GetInGameMusic(LevelType))
+	if (USoundBase* InGameMusic = UBmrSoundsDataAsset::Get().GetInGameMusic())
 	{
 		StopSingleSound2D(InGameMusic);
 	}

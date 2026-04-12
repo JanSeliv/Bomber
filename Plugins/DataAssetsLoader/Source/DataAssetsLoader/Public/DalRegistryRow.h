@@ -21,8 +21,14 @@ struct DATAASSETSLOADER_API FDalRegistryRow
 	/** Returns raw pointer to cached item data at specified index for the given struct type, or nullptr */
 	static const uint8* GetRowByIndex(const UScriptStruct* InStruct, int32 Index);
 
+	/** Returns the first cached item for the given struct type, or nullptr */
+	static FORCEINLINE const uint8* GetFirstRow(const UScriptStruct* InStruct) { return GetRowByIndex(InStruct, 0); }
+
 	/** Returns the row name at specified index for the given struct type, or NAME_None */
 	static FName GetRowNameByIndex(const UScriptStruct* InStruct, int32 Index);
+
+	/** Returns the row name of the first cached item for the given struct type, or NAME_None */
+	static FORCEINLINE FName GetFirstRowName(const UScriptStruct* InStruct) { return GetRowNameByIndex(InStruct, 0); }
 
 	/** Iterates all cached items for the given struct type, calling Callback with raw item data */
 	static void ForEachRow(const UScriptStruct* InStruct, const TFunctionRef<void(const uint8*)>& Callback);
@@ -65,6 +71,12 @@ struct TDalRegistryRow
 
 	/** Returns overall number of cached rows */
 	static FORCEINLINE int32 GetRowsNum() { return FDalRegistryRow::GetRowsNum(TDerived::StaticStruct()); }
+
+	/** Returns the first cached row, or nullptr */
+	static FORCEINLINE const TDerived* GetFirstRow() { return FDalRegistryRow::GetTypedRow<TDerived>(FDalRegistryRow::GetFirstRow(TDerived::StaticStruct())); }
+
+	/** Returns the row name of the first cached row, or NAME_None */
+	static FORCEINLINE FName GetFirstRowName() { return FDalRegistryRow::GetFirstRowName(TDerived::StaticStruct()); }
 
 	/** Returns row data by DR row name, O(1) lookup, or nullptr */
 	static FORCEINLINE const TDerived* GetRowByName(FName RowName) { return FDalRegistryRow::GetTypedRow<TDerived>(FDalRegistryRow::GetRowByName(TDerived::StaticStruct(), RowName)); }

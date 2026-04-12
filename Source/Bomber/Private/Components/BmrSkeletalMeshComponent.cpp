@@ -1,8 +1,9 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "Components/BmrSkeletalMeshComponent.h"
 
 // Bomber
+#include "Bomber.h"
 #include "Components/BmrMapComponent.h"
 #include "DataRegistries/BmrPlayerPropRow.h"
 #include "DataRegistries/BmrPlayerRow.h"
@@ -217,13 +218,6 @@ void UBmrSkeletalMeshComponent::InitSkeletalMesh(const FBmrMeshData& MeshData)
 
 // No longer needed: skins are now separate material instances in FBmrPlayerSkinRow
 
-// Returns level type to which this mesh is associated with
-EBmrLevelType UBmrSkeletalMeshComponent::GetAssociatedLevelType() const
-{
-	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByName(PlayerMeshData.RowName);
-	return PlayerRow ? PlayerRow->LevelType : EBmrLevelType::None;
-}
-
 // Returns the Player Tag to which this mesh is associated with
 const FBmrPlayerTag& UBmrSkeletalMeshComponent::GetPlayerTag() const
 {
@@ -255,7 +249,6 @@ void UBmrSkeletalMeshComponent::AttachProps()
 	}
 
 	const FBmrPlayerTag& PlayerTag = PlayerRow->PlayerTag;
-	AttachedMeshesType = PlayerRow->LevelType;
 
 	// Destroy previous meshes
 	DetachProps();

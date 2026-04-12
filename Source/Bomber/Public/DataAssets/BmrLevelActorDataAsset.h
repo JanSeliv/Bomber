@@ -1,11 +1,11 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #pragma once
 
 #include "DalPrimaryDataAsset.h"
 
 // Bomber
-#include "Bomber.h" // EBmrLevelType, EBmrActorType
+#include "Bomber.h" // EBmrActorType
 
 // UE
 #include "Engine/EngineTypes.h" // ECollisionResponse

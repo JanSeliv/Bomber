@@ -16,7 +16,7 @@
 USTRUCT(BlueprintType)
 struct BOMBER_API FBmrPlayerRow : public FBmrLevelActorRow
 #if CPP
-    , public TBmrLevelActorRow<FBmrPlayerRow>
+    , public TDalRegistryRow<FBmrPlayerRow>
 #endif
 {
 	GENERATED_BODY()

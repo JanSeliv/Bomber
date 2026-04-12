@@ -131,12 +131,11 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(FNmmStateTag 
 // Trigger the background music to be played in the Main Menu
 void UNMMPlayerControllerComponent::PlayMainMenuMusic()
 {
-	const EBmrLevelType LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
-	USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic(LevelType);
+	USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic();
 
 	if (!MainMenuMusic)
 	{
-		// Background music is not found for current state or level, disable current
+		// Background music is not found, disable current
 		StopMainMenuMusic();
 		return;
 	}
@@ -147,8 +146,7 @@ void UNMMPlayerControllerComponent::PlayMainMenuMusic()
 // Stops currently played Main Menu background music
 void UNMMPlayerControllerComponent::StopMainMenuMusic()
 {
-	const EBmrLevelType LevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
-	if (USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic(LevelType))
+	if (USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic())
 	{
 		UBmrSoundsSubsystem::Get().StopSingleSound2D(MainMenuMusic);
 	}
@@ -204,17 +202,11 @@ void UNMMPlayerControllerComponent::OnUnregister()
 	}
 
 	// Cleanup all sounds
-	const UNMMDataAsset* SoundDataAsset = UNMMUtils::GetDataAsset();
 	UBmrSoundsSubsystem* SoundSubsystem = UBmrSoundsSubsystem::GetSoundsSubsystem();
-	if (SoundSubsystem
-	    && SoundDataAsset)
+	const UNMMDataAsset* SoundDataAsset = SoundSubsystem ? UNMMUtils::GetDataAsset() : nullptr;
+	if (USoundBase* MainMenuMusic = SoundDataAsset ? SoundDataAsset->GetMainMenuMusic() : nullptr)
 	{
-		TArray<USoundBase*> AllMainMenuMusic;
-		SoundDataAsset->GetAllMainMenuMusic(/*out*/ AllMainMenuMusic);
-		for (USoundBase* MainMenuMusic : AllMainMenuMusic)
-		{
-			SoundSubsystem->DestroySingleSound2D(MainMenuMusic);
-		}
+		SoundSubsystem->DestroySingleSound2D(MainMenuMusic);
 	}
 
 	// Kill current save game object

@@ -9,8 +9,6 @@
 
 #include "NMMDataAsset.generated.h"
 
-enum class EBmrLevelType : uint8;
-
 /**
  * Contains common data of the New Main Menu plugin to be tweaked.
  */
@@ -81,22 +79,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClass; }
 
-	/** Returns the main menu music of specified level.
-	 * @see UBmrSoundsDataAsset::MainMenuMusic */
+	/** Returns the main menu background music */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	class USoundBase* GetMainMenuMusic(EBmrLevelType LevelType) const;
-
-	/** Returns all main menu music.
-	 * @see UBmrSoundsDataAsset::MainMenuMusic */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	void GetAllMainMenuMusic(TArray<class USoundBase*>& OutMainMenuMusic) const;
+	FORCEINLINE class USoundBase* GetMainMenuMusic() const { return MainMenuMusic; }
 
 protected:
 	/** The sound of cinematics music. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TObjectPtr<class USoundClass> CinematicsSoundClass = nullptr;
 
-	/** Contains all sounds of each level in the main menu. */
+	/** The background music played in the main menu */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TMap<EBmrLevelType, TObjectPtr<class USoundBase>> MainMenuMusic;
+	TObjectPtr<class USoundBase> MainMenuMusic = nullptr;
 };

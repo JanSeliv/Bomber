@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #pragma once
 
@@ -6,7 +6,6 @@
 
 #include "BmrBlueprintFunctionLibrary.generated.h"
 
-enum class EBmrLevelType : uint8;
 enum class EBmrActorType : uint8;
 enum class EBmrPlayerType : uint8;
 
@@ -27,10 +26,6 @@ public:
 	 * @param InPlayerType - the type of the characters to count. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static int32 GetAlivePlayersNum(EBmrPlayerType InPlayerType);
-
-	/** Returns the type of the current level. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	static EBmrLevelType GetLevelType();
 
 	/** Returns true if the local pawn is ready (spawned, possessed, and replicated). */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))

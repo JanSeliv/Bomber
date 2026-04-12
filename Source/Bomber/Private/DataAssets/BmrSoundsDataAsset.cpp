@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "DataAssets/BmrSoundsDataAsset.h"
 
@@ -18,14 +18,10 @@ const UBmrSoundsDataAsset& UBmrSoundsDataAsset::Get()
 	return UDalSubsystem::GetDataAssetChecked<ThisClass>();
 }
 
-// Returns the music of specified level
-USoundBase* UBmrSoundsDataAsset::GetInGameMusic(EBmrLevelType LevelType) const
+// Returns the in-game background music from the active map's Data Registry
+USoundBase* UBmrSoundsDataAsset::GetInGameMusic() const
 {
-	const FBmrSoundsBackgroundRow* Row = FBmrSoundsBackgroundRow::GetRowByPredicate([LevelType](const FBmrSoundsBackgroundRow& RowIt)
-	{
-		return RowIt.LevelType == LevelType || RowIt.LevelType == ELT::Max;
-	});
-
+	const FBmrSoundsBackgroundRow* Row = FBmrSoundsBackgroundRow::GetFirstRow();
 	return Row ? Row->Music.Get() : nullptr;
 }
 

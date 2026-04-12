@@ -5,7 +5,6 @@
 #include "Engine/DataTable.h"
 
 // Bomber
-#include "Bomber.h" // EBmrLevelType
 #include "DalRegistryRow.h"
 
 #include "BmrSoundsBackgroundRow.generated.h"
@@ -21,10 +20,6 @@ struct BOMBER_API FBmrSoundsBackgroundRow : public FTableRowBase
 #endif
 {
 	GENERATED_BODY()
-
-	/** The level where this background music should be played. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EBmrLevelType LevelType = ELT::None;
 
 	/** The background music sound asset. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

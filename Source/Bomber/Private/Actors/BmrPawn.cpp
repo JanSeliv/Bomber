@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #include "Actors/BmrPawn.h"
 
@@ -11,6 +11,7 @@
 #include "Components/BmrSkeletalMeshComponent.h"
 #include "Controllers/BmrAIController.h"
 #include "Controllers/BmrPlayerController.h"
+#include "DataAssets/BmrAIDataAsset.h"
 #include "DataAssets/BmrPlayerDataAsset.h"
 #include "DataRegistries/BmrPlayerRow.h"
 #include "DataRegistries/BmrPlayerSkinRow.h"
@@ -529,20 +530,27 @@ void ABmrPawn::SetDefaultPlayerMeshData(bool bForcePlayerSkin /* = false*/)
 		return;
 	}
 
-	const bool bIsPlayer = IsPlayerControlled() || PlayerId == 0;
-	const EBmrLevelType PlayerFlag = UBmrBlueprintFunctionLibrary::GetLevelType();
-	constexpr EBmrLevelType AIFlag = ELT::None;
-	EBmrLevelType LevelType = bIsPlayer ? PlayerFlag : AIFlag;
+	const FBmrPlayerRow* Row = nullptr;
+	FName RowName = NAME_None;
 
-	if (bForcePlayerSkin)
+	if (!bForcePlayerSkin && !IsPlayerControlled())
 	{
-		// Force each bot to look like different player
-		LevelType = static_cast<EBmrLevelType>(1 << PlayerId);
+		// AI players always use the designated character
+		const FBmrPlayerTag& AIPlayerTag = UBmrAIDataAsset::Get().GetDefaultAIPlayerTag();
+		ensureMsgf(AIPlayerTag.IsValid(), TEXT("ASSERT: [%i] %hs:\n'DefaultAIPlayerTag' is not set in the AI Data Asset!"), __LINE__, __FUNCTION__);
+		Row = FBmrPlayerRow::GetRowByPlayerTag(AIPlayerTag);
+		RowName = FBmrPlayerRow::GetRowNameByPlayerTag(AIPlayerTag);
+	}
+	else
+	{
+		// Human players and forced skins rotate through available characters by ID
+		const int32 RowIndex = PlayerId % MeshesNum;
+		Row = FDalRegistryRow::GetTypedRow<FBmrPlayerRow>(FDalRegistryRow::GetRowByIndex(FBmrPlayerRow::StaticStruct(), RowIndex));
+		RowName = FDalRegistryRow::GetRowNameByIndex(FBmrPlayerRow::StaticStruct(), RowIndex);
 	}
 
-	const FBmrPlayerRow* Row = FBmrPlayerRow::GetRowByLevelType(LevelType);
-	const FName RowName = FBmrPlayerRow::GetRowNameByLevelType(LevelType);
-	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__))
+	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(RowName.IsValid(), TEXT("ASSERT: [%i] %hs:\n'RowName' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}

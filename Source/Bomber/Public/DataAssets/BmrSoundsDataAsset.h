@@ -12,7 +12,6 @@ class USoundClass;
 class USoundMix;
 
 enum class EBmrEndGameState : uint8;
-enum class EBmrLevelType : uint8;
 
 /**
  * Contains configuration sound assets used in game.
@@ -47,9 +46,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "Get SFX Sound Class"))
 	FORCEINLINE USoundClass* GetSFXSoundClass() const { return SFXSoundClass; }
 
-	/** Returns the music of specified level. */
+	/** Returns the in-game background music from the active map's Data Registry */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	USoundBase* GetInGameMusic(EBmrLevelType LevelType) const;
+	USoundBase* GetInGameMusic() const;
 
 	/** Returns the blast SFX. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")

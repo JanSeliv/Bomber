@@ -13,7 +13,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBombRow)
 
-// Finds bomb row data by instigator actor, resolves level type from its MapComponent or SkeletalMeshComponent
+// Finds bomb row data by instigator actor, resolves PlayerTag from its MapComponent or SkeletalMeshComponent
 const FBmrBombRow& FBmrBombRow::GetBombRow(const AActor* InInstigator)
 {
 	static const FBmrBombRow EmptyRowData;
@@ -22,7 +22,7 @@ const FBmrBombRow& FBmrBombRow::GetBombRow(const AActor* InInstigator)
 		return EmptyRowData;
 	}
 
-	EBmrLevelType LevelType = EBmrLevelType::None;
+	FBmrPlayerTag PlayerTag = FBmrPlayerTag::None;
 	const UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InInstigator);
 	const UBmrSkeletalMeshComponent* MeshComponent = !MapComponent
 	                                                     ? InInstigator->FindComponentByClass<UBmrSkeletalMeshComponent>()
@@ -30,15 +30,19 @@ const FBmrBombRow& FBmrBombRow::GetBombRow(const AActor* InInstigator)
 
 	if (MeshComponent)
 	{
-		LevelType = MeshComponent->GetAssociatedLevelType();
+		PlayerTag = MeshComponent->GetPlayerTag();
 	}
 	else if (MapComponent)
 	{
 		const FBmrPlayerRow* PlayerRowData = FBmrPlayerRow::GetRowByName(MapComponent->GetReplicatedMeshData().RowName);
-		LevelType = PlayerRowData ? PlayerRowData->LevelType : EBmrLevelType::None;
+		PlayerTag = PlayerRowData ? PlayerRowData->PlayerTag : FBmrPlayerTag::None;
 	}
 
-	const FBmrBombRow* FoundRow = GetRowByLevelType(LevelType);
+	const FBmrBombRow* FoundRow = GetRowByPredicate([&PlayerTag](const FBmrBombRow& Row)
+	{
+		return Row.PlayerTag == PlayerTag;
+	});
+
 	return FoundRow ? *FoundRow : EmptyRowData;
 }
 

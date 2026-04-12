@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #include "Components/BmrMapComponent.h"
 
@@ -380,7 +380,7 @@ bool UBmrMapComponent::OnAdded_Implementation()
 		const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
 		const FBmrLevelActorRow* FoundRow = ReplicatedMeshData.IsValid()
 		                                        ? FBmrLevelActorRow::FindRowByName(RowType, ReplicatedMeshData.RowName)
-		                                        : FBmrLevelActorRow::FindRowByLevelType(RowType, UBmrBlueprintFunctionLibrary::GetLevelType());
+		                                        : FBmrLevelActorRow::FindFirstRow(RowType);
 		UStreamableRenderAsset* DefaultMesh = FoundRow ? FoundRow->Mesh.Get() : nullptr;
 		ensureMsgf(DefaultMesh || !ReplicatedMeshData.IsValid(), TEXT("ASSERT: [%i] %hs:\n'DefaultMesh' is not loaded on server, can not set the default mesh for '%s' actor! Client still might be loading mesh receiving this early call from replication, while server must ensure mesh loaded before spawning actors! "), __LINE__, __FUNCTION__, *GetNameSafe(Owner));
 		SetLocalMesh(DefaultMesh);

@@ -39,10 +39,9 @@ const UFTGDataAsset* UFTGComponent::GetFootTrailsDataAsset() const
 const UStaticMesh* UFTGComponent::GetRandomMesh(EFTGTrailType FootTrailType) const
 {
 	TArray<const UStaticMesh*> MatchingMeshes;
-	const EBmrLevelType CurrentLevelType = UBmrBlueprintFunctionLibrary::GetLevelType();
 	for (const TTuple<FFTGArchetype, TObjectPtr<UStaticMesh>>& It : FootTrailInstances)
 	{
-		if (It.Key.FootTrailType == FootTrailType && It.Key.LevelType == CurrentLevelType)
+		if (It.Key.FootTrailType == FootTrailType)
 		{
 			MatchingMeshes.Emplace(It.Value);
 		}

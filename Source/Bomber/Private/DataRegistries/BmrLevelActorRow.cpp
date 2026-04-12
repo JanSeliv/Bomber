@@ -10,27 +10,8 @@ const FBmrLevelActorRow* FBmrLevelActorRow::FindRowByName(const UScriptStruct* R
 	return FDalRegistryRow::GetTypedRow<FBmrLevelActorRow>(FDalRegistryRow::GetRowByName(RowType, RowName));
 }
 
-// Finds first row matching the given level type with ELT::Max fallback, using runtime struct type
-const FBmrLevelActorRow* FBmrLevelActorRow::FindRowByLevelType(const UScriptStruct* RowType, EBmrLevelType LevelType)
+// Returns the first cached level actor row for the given runtime struct type, or nullptr
+const FBmrLevelActorRow* FBmrLevelActorRow::FindFirstRow(const UScriptStruct* RowType)
 {
-	const FBmrLevelActorRow* FoundRow = nullptr;
-	FDalRegistryRow::ForEachRow(RowType, [&FoundRow, LevelType](const uint8* ItemData)
-	{
-		if (!FoundRow)
-		{
-			const FBmrLevelActorRow* Row = FDalRegistryRow::GetTypedRow<FBmrLevelActorRow>(ItemData);
-			if (Row->LevelType == LevelType
-			    || Row->LevelType == ELT::Max)
-			{
-				FoundRow = Row;
-			}
-		}
-	});
-	return FoundRow;
-}
-
-// Iterates all Data Registries whose ItemStruct inherits FBmrLevelActorRow
-void FBmrLevelActorRow::ForEachLevelActorRegistry(const TFunctionRef<void(UDataRegistry* Registry, const UScriptStruct* ItemStruct)>& Callback)
-{
-	FDalRegistryRow::ForEachRegistry(StaticStruct(), Callback);
+	return FDalRegistryRow::GetTypedRow<FBmrLevelActorRow>(FDalRegistryRow::GetFirstRow(RowType));
 }

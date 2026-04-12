@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -6,7 +6,6 @@
 #include "Components/SkeletalMeshComponent.h" // UBmrSkeletalMeshComponent
 
 // Bomber
-#include "Bomber.h" // EBmrLevelType
 #include "Structures/BmrMeshData.h"
 #include "Structures/BmrPlayerTag.h"
 
@@ -114,10 +113,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	bool IsInitialized() const { return PlayerMeshData.IsValid(); }
 
-	/** Returns level type to which this mesh is associated with. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	EBmrLevelType GetAssociatedLevelType() const;
-
 	/** Returns the Player Tag to which this mesh is associated with. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const FBmrPlayerTag& GetPlayerTag() const;
@@ -154,10 +149,6 @@ protected:
 	/** Determines how this mesh looks like for now. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
 	FBmrMeshData PlayerMeshData = FBmrMeshData::Empty;
-
-	/** Current level type of attached meshes. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
-	EBmrLevelType AttachedMeshesType = ELT::None;
 
 	/** Current attached mesh components. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
