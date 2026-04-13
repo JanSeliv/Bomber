@@ -1,16 +1,21 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
 #include "EditorSubsystem.h"
 
+// UE
+#include "GameFeatureStateChangeObserver.h"
+
 #include "FTGEditorPreviewSubsystem.generated.h"
 
 /**
  * Handles foot trails automatic previewing in Editor before game starts.
+ * Listens to its own Modular Game Feature plugin state to gate the preview lifecycle.
  */
 UCLASS()
 class FOOTTRAILSGENERATOREDITOR_API UFTGEditorPreviewSubsystem : public UEditorSubsystem
+    , public IGameFeatureStateChangeObserver
 {
 	GENERATED_BODY()
 
@@ -32,11 +37,17 @@ protected:
 	/** Is called when the subsystem is deinitialized. */
 	virtual void Deinitialize() override;
 
-	/** Is used to initialize the foot trails generator. */
-	void OnBeginPlay(UWorld* World, struct FWorldInitializationValues WorldInitializationValues);
+	/** Is called when any game feature plugin activates, filtered to the owning plugin to start previewing. */
+	virtual void OnGameFeatureActivating(const class UGameFeatureData* GameFeatureData, const FString& PluginURL) override;
 
-	/** Is used to destroy the foot trails generator. */
-	void OnEndPlay(UWorld* World, bool bArg, bool bCond);
+	/** Is called when any game feature plugin deactivates, filtered to the owning plugin to tear down the preview. */
+	virtual void OnGameFeatureDeactivating(const class UGameFeatureData* GameFeatureData, struct FGameFeatureDeactivatingContext& Context, const FString& PluginURL) override;
+
+	/** Subscribes to Generated Map readiness once the owning plugin becomes active. */
+	void OnGameFeatureInitialize();
+
+	/** Destroys any spawned preview component and unsubscribes once the owning plugin becomes inactive. */
+	void OnGameFeatureDeinitialize();
 
 	/** Called when Generated Map is initialized and its data assets are loaded, is also called in editor */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[FootTrailsGenerator]", meta = (BlueprintProtected))

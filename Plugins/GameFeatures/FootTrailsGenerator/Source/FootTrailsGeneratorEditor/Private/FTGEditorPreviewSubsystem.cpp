@@ -9,12 +9,13 @@
 /// Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrGeneratedMapSubsystem.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 
 // UE
 #include "Engine/World.h"
+#include "GameFeaturesSubsystem.h"
 #include "InstancedStaticMeshActor.h"
+#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FTGEditorPreviewSubsystem)
@@ -24,38 +25,76 @@ void UFTGEditorPreviewSubsystem::Initialize(FSubsystemCollectionBase& Collection
 {
 	Super::Initialize(Collection);
 
-	FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &ThisClass::OnBeginPlay);
-	FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::OnEndPlay);
+	UGameFeaturesSubsystem::Get().AddObserver(this, UGameFeaturesSubsystem::EObserverPluginStateUpdateMode::FutureOnly);
+
+	// Catch the case where the owning plugin is already active before this observer could register
+	const FName ModuleName = FName(*UModularGameFeaturePluginUtils::GetModuleNameByObject(this));
+	if (UModularGameFeaturePluginUtils::IsModularGameFeatureActive(ModuleName))
+	{
+		OnGameFeatureInitialize();
+	}
 }
 
 // Is called when the subsystem is deinitialized
 void UFTGEditorPreviewSubsystem::Deinitialize()
 {
-	FWorldDelegates::OnPostWorldInitialization.RemoveAll(this);
-	FWorldDelegates::OnWorldCleanup.RemoveAll(this);
+	// UGameFeaturesSubsystem::Get() asserts on GEngine, which can be torn down before editor subsystems, so resolve defensively
+	UGameFeaturesSubsystem* GameFeaturesSubsystem = GEngine ? GEngine->GetEngineSubsystem<UGameFeaturesSubsystem>() : nullptr;
+	if (GameFeaturesSubsystem)
+	{
+		const FName ModuleName = FName(*UModularGameFeaturePluginUtils::GetModuleNameByObject(this));
+		if (UModularGameFeaturePluginUtils::IsModularGameFeatureActive(ModuleName))
+		{
+			OnGameFeatureDeinitialize();
+		}
+
+		GameFeaturesSubsystem->RemoveObserver(this);
+	}
 
 	Super::Deinitialize();
 }
 
-// Is used to initialize the foot trails generator
-void UFTGEditorPreviewSubsystem::OnBeginPlay(UWorld* World, FWorldInitializationValues WorldInitializationValues)
+// Filters activating callbacks to the owning game feature plugin
+void UFTGEditorPreviewSubsystem::OnGameFeatureActivating(const UGameFeatureData* GameFeatureData, const FString& PluginURL)
 {
-	if (!UUtilsLibrary::IsEditorNotPieWorld() // Only preview in editor, not in PIE
-	    || IsValid(FootTrailGenerator)) // skip if already initialized
+	if (!UModularGameFeaturePluginUtils::IsInGameFeatureModule(this, GameFeatureData))
 	{
 		return;
 	}
 
+	OnGameFeatureInitialize();
+}
+
+// Filters deactivating callbacks to the owning game feature plugin
+void UFTGEditorPreviewSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& Context, const FString& PluginURL)
+{
+	if (!UModularGameFeaturePluginUtils::IsInGameFeatureModule(this, GameFeatureData))
+	{
+		return;
+	}
+
+	OnGameFeatureDeinitialize();
+}
+
+// Subscribes to Generated Map readiness once the owning plugin becomes active
+void UFTGEditorPreviewSubsystem::OnGameFeatureInitialize()
+{
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GeneratedMap_Ready, this, &ThisClass::OnGeneratedMapReady);
 }
 
-// Is used to destroy the foot trails generator
-void UFTGEditorPreviewSubsystem::OnEndPlay(UWorld* World, bool bArg, bool bCond)
+// Destroys any spawned preview component and unsubscribes once the owning plugin becomes inactive
+void UFTGEditorPreviewSubsystem::OnGameFeatureDeinitialize()
 {
 	UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(this);
 
 	if (IsValid(FootTrailGenerator))
 	{
+		// Editor-preview components never get EndPlay, so the spawned actor must be destroyed manually before the component goes away
+		if (AInstancedStaticMeshActor* InstancedFootTrailsActor = FootTrailGenerator->GetInstancedStaticMeshActor())
+		{
+			InstancedFootTrailsActor->Destroy();
+		}
+
 		FootTrailGenerator->DestroyComponent();
 		FootTrailGenerator = nullptr;
 	}
@@ -64,9 +103,9 @@ void UFTGEditorPreviewSubsystem::OnEndPlay(UWorld* World, bool bArg, bool bCond)
 /// Called when Generated Map is initialized and its data assets are loaded, is also called in editor
 void UFTGEditorPreviewSubsystem::OnGeneratedMapReady_Implementation(const FGameplayEventData& Payload)
 {
-	if (IsValid(FootTrailGenerator))
+	if (!UUtilsLibrary::IsEditorNotPieWorld() // Only preview in editor, not in PIE
+	    || IsValid(FootTrailGenerator)) // skip if already initialized
 	{
-		// Is already initialized
 		return;
 	}
 

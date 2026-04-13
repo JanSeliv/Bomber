@@ -28,7 +28,7 @@
 		}
 	],
 	"ExplicitlyLoaded": true,
-	"BuiltInInitialFeatureState": "Active",
+	"BuiltInInitialFeatureState": "Registered",
 	"Plugins": [
 		{
 			"Name": "GameplayAbilities",
