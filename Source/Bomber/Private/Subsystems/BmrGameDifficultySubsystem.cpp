@@ -199,8 +199,8 @@ void UBmrGameDifficultySubsystem::BindOnDifficultyTagChanged()
 	});
 }
 
-// Called when world data assets are loaded, subscribes to ASC difficulty tag events
-void UBmrGameDifficultySubsystem::OnGeneratedMapReady_Implementation(const FGameplayEventData& Payload)
+// Called when the world ASC becomes available, subscribes to ASC difficulty tag events
+void UBmrGameDifficultySubsystem::OnWorldASCReady_Implementation(const FGameplayEventData& Payload)
 {
 	BindOnDifficultyTagChanged();
 
@@ -215,12 +215,12 @@ void UBmrGameDifficultySubsystem::OnGeneratedMapReady_Implementation(const FGame
  * Overrides
  ********************************************************************************************* */
 
-// Subscribes to readiness events for ASC tag binding
+// Subscribes to WorldASC_Ready for ASC tag binding
 void UBmrGameDifficultySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GeneratedMap_Ready, this, &ThisClass::OnGeneratedMapReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::WorldASC_Ready, this, &ThisClass::OnWorldASCReady);
 }
 
 // Cleans up ASC bindings

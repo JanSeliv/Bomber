@@ -200,6 +200,10 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<class UBmrHealthAttributeSet> HealthSet = nullptr;
 
+	/** Broadcasts WorldASC_Ready event once per world session when the ASC is available. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))	
+	void TryBroadcastWorldASCReady();
+
 protected:
 	/* ---------------------------------------------------
 	 *		Protected properties

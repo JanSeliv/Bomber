@@ -71,9 +71,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void BindOnDifficultyTagChanged();
 
-	/** Called when world data assets are loaded, subscribes to ASC difficulty tag events. */
+	/** Called when the world ASC becomes available, subscribes to ASC difficulty tag events. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGeneratedMapReady(const struct FGameplayEventData& Payload);
+	void OnWorldASCReady(const struct FGameplayEventData& Payload);
 
 	/*********************************************************************************************
 	 * Data
@@ -87,9 +87,9 @@ protected:
 	 * Overrides
 	 ********************************************************************************************* */
 protected:
-	/** Subscribes to readiness events for ASC tag binding. */
+	/** Called when world begins play. */
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
-	/** Cleans up ASC bindings. */
+	/** Called when world ends play. */
 	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 };

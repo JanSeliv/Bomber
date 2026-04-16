@@ -50,6 +50,9 @@ namespace BmrGameplayTags
 		/** Event that fires when the game difficulty tag was changed, check via Payload.InstigatorTags.HasTag/MatchesTag */
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Difficulty_Changed);
 
+		/** Event that fires when the world Ability System Component becomes available */
+		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(WorldASC_Ready);
+
 		/** Event that fires when Generated Map is initialized and its data assets are loaded, is also called in editor */
 		BOMBER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GeneratedMap_Ready);
 	} // namespace Event

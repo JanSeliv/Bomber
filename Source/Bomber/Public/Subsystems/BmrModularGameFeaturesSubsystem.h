@@ -27,9 +27,9 @@ public:
 	 * Tag-Driven Features
 	 ********************************************************************************************* */
 protected:
-	/** Called when world data assets are loaded, subscribes to ASC tag events for tag-driven features. */
+	/** Called when the world ASC becomes available, subscribes to ASC tag events for tag-driven features. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnGeneratedMapReady(const struct FGameplayEventData& Payload);
+	void OnWorldASCReady(const struct FGameplayEventData& Payload);
 
 	/** Is called when any of the tag-driven features tags is added or removed from the world ASC, evaluates all tag-driven features and loads/unloads them accordingly. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
@@ -43,9 +43,9 @@ protected:
 	 * Overrides
 	 ********************************************************************************************* */
 protected:
-	/** Subscribes to GeneratedMap_Ready for tag-driven features. */
+	/** Called when subsystem initializes. */
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	/** Unloads all managed features on world end play. */
+	/** Called when world ends play. */
 	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 };

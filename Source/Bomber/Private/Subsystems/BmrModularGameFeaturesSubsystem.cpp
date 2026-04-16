@@ -37,11 +37,11 @@ UBmrModularGameFeaturesSubsystem* UBmrModularGameFeaturesSubsystem::GetModularGa
  * Tag-Driven Features
  ********************************************************************************************* */
 
-// Called when world data assets are loaded, subscribes to ASC tag events for tag-driven features
-void UBmrModularGameFeaturesSubsystem::OnGeneratedMapReady_Implementation(const FGameplayEventData& Payload)
+// Called when the world ASC becomes available, subscribes to ASC tag events for tag-driven features
+void UBmrModularGameFeaturesSubsystem::OnWorldASCReady_Implementation(const FGameplayEventData& Payload)
 {
 	UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
-	if (!ASC)
+	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
@@ -128,7 +128,7 @@ void UBmrModularGameFeaturesSubsystem::OnModularGameFeatureTagChanged()
  * Overrides
  ********************************************************************************************* */
 
-// Subscribes to GeneratedMap_Ready for tag-driven features
+// Subscribes to WorldASC_Ready for tag-driven features
 void UBmrModularGameFeaturesSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -138,7 +138,7 @@ void UBmrModularGameFeaturesSubsystem::Initialize(FSubsystemCollectionBase& Coll
 		return;
 	}
 
-	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GeneratedMap_Ready, this, &ThisClass::OnGeneratedMapReady);
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::WorldASC_Ready, this, &ThisClass::OnWorldASCReady);
 }
 
 // Unloads all managed features on world end play

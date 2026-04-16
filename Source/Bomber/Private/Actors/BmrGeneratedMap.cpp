@@ -657,6 +657,21 @@ void ABmrGeneratedMap::SetMapTag(const FBmrMapTag& NewMapTag)
 	ASC->AddLooseGameplayTag(NewMapTag);
 }
 
+// Broadcasts WorldASC_Ready event once per world session when the ASC is available
+void ABmrGeneratedMap::TryBroadcastWorldASCReady()
+{
+	if (UGlobalMessageSubsystem::HasBroadcastedMessage(BmrGameplayTags::Event::WorldASC_Ready))
+	{
+		return;
+	}
+
+	FGameplayEventData Payload;
+	Payload.EventTag = BmrGameplayTags::Event::WorldASC_Ready;
+	Payload.Instigator = this;
+	Payload.OptionalObject = AbilitySystemComponent;
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(Payload);
+}
+
 /*********************************************************************************************
  * Overrides and events
  ********************************************************************************************* */
@@ -690,6 +705,7 @@ void ABmrGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransfor
 
 #if WITH_EDITOR // [GEditor]
 	UBmrGeneratedMapSubsystem::Get().SetGeneratedMap(this);
+	TryBroadcastWorldASCReady();
 	if (GEditor // Can be bound before editor is loaded
 	    && !UBmrUnrealEdEngine::GOnAnyDataAssetChanged.IsBoundToObject(this))
 	{
@@ -759,6 +775,7 @@ void ABmrGeneratedMap::PostInitializeComponents()
 
 	// Update the gameplay GeneratedMap reference in the singleton library
 	UBmrGeneratedMapSubsystem::Get().SetGeneratedMap(this);
+	TryBroadcastWorldASCReady();
 
 	GetAbilitySystemComponentChecked().InitAbilityActorInfo(this, this);
 
