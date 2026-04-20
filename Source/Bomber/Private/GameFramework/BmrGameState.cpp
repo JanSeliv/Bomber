@@ -7,6 +7,7 @@
 #include "Actors/BmrPawn.h"
 #include "Bomber.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
@@ -122,12 +123,9 @@ void ABmrGameState::BroadcastGameStateChanged()
 		return;
 	}
 
-	FGameplayTagContainer OwnedTags;
-	GetOwnedGameplayTags(OwnedTags);
-
 	FGameplayEventData Payload;
 	Payload.EventTag = BmrGameplayTags::Event::GameState_Changed;
-	Payload.InstigatorTags = OwnedTags.Filter(FBmrGameStateTag::ParentTag.GetSingleTagContainer());
+	Payload.InstigatorTags = UGameplayUtilsLibrary::GetFilteredGameplayTags(GetAbilitySystemComponent(), FBmrGameStateTag::ParentTag);
 	UGlobalMessageSubsystem::BroadcastGlobalMessage(Payload);
 
 	TRACE_BOOKMARK(TEXT("%s"), *Payload.InstigatorTags.ToStringSimple());

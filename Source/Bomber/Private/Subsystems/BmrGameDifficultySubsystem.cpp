@@ -4,6 +4,7 @@
 
 // Bomber
 #include "DataRegistries/BmrGameDifficultyRow.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
@@ -38,14 +39,7 @@ UBmrGameDifficultySubsystem* UBmrGameDifficultySubsystem::GetGameDifficultySubsy
 FBmrGameDifficultyTag UBmrGameDifficultySubsystem::GetGameDifficultyTag() const
 {
 	const UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
-	if (!ASC)
-	{
-		return DifficultyTag;
-	}
-
-	FGameplayTagContainer OwnedTags;
-	ASC->GetOwnedGameplayTags(OwnedTags);
-	const FGameplayTagContainer DifficultyTags = OwnedTags.Filter(FBmrGameDifficultyTag::ParentTag.GetSingleTagContainer());
+	const FGameplayTagContainer DifficultyTags = UGameplayUtilsLibrary::GetFilteredGameplayTags(ASC, FBmrGameDifficultyTag::ParentTag);
 	return DifficultyTags.IsEmpty() ? DifficultyTag : FBmrGameDifficultyTag(DifficultyTags.First());
 }
 
@@ -72,9 +66,7 @@ void UBmrGameDifficultySubsystem::SetGameDifficultyTag(FBmrGameDifficultyTag New
 	SaveConfig();
 
 	// Remove old difficulty tags
-	FGameplayTagContainer OwnedTags;
-	ASC->GetOwnedGameplayTags(OwnedTags);
-	const FGameplayTagContainer OldTags = OwnedTags.Filter(FBmrGameDifficultyTag::ParentTag.GetSingleTagContainer());
+	const FGameplayTagContainer OldTags = UGameplayUtilsLibrary::GetFilteredGameplayTags(ASC, FBmrGameDifficultyTag::ParentTag);
 	for (const FGameplayTag& OldTag : OldTags)
 	{
 		ASC->RemoveLooseGameplayTag(OldTag, 1, EGameplayTagReplicationState::TagOnly);
@@ -170,12 +162,9 @@ void UBmrGameDifficultySubsystem::BroadcastDifficultyChanged()
 		return;
 	}
 
-	FGameplayTagContainer OwnedTags;
-	ASC->GetOwnedGameplayTags(OwnedTags);
-
 	FGameplayEventData Payload;
 	Payload.EventTag = BmrGameplayTags::Event::Difficulty_Changed;
-	Payload.InstigatorTags = OwnedTags.Filter(FBmrGameDifficultyTag::ParentTag.GetSingleTagContainer());
+	Payload.InstigatorTags = UGameplayUtilsLibrary::GetFilteredGameplayTags(ASC, FBmrGameDifficultyTag::ParentTag);
 	UGlobalMessageSubsystem::BroadcastGlobalMessage(Payload);
 }
 

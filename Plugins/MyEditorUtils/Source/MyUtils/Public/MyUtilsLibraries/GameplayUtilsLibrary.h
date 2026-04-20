@@ -83,4 +83,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void OpenListenServerLevel(const TSoftObjectPtr<UWorld>& Level, bool bForceLoad = false);
 
+	/*********************************************************************************************
+	 * Ability System
+	 ********************************************************************************************* */
+public:
+	/** Returns the tags owned by ASC that are descendants of Parent (Parent itself is excluded).
+	 * Returns empty container if ASC is null or no tags match.
+	 * @param ASC The Ability System Component to read owned tags from.
+	 * @param Parent The parent tag used as the root of the match. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static struct FGameplayTagContainer GetFilteredGameplayTags(const class UAbilitySystemComponent* ASC, struct FGameplayTag Parent);
 };

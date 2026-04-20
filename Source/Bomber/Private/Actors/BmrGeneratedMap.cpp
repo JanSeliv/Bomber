@@ -11,6 +11,7 @@
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "Generators/BmrCellsGenerator_Base.h"
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
+#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "PoolManagerSubsystem.h"
 #include "Structures/BmrGameStateTag.h"
@@ -625,9 +626,7 @@ UAbilitySystemComponent& ABmrGeneratedMap::GetAbilitySystemComponentChecked() co
 // Returns the current map visual theme tag from the ASC, or None if not set
 FBmrMapTag ABmrGeneratedMap::GetMapTag() const
 {
-	FGameplayTagContainer OwnedTags;
-	GetAbilitySystemComponentChecked().GetOwnedGameplayTags(OwnedTags);
-	return OwnedTags.Filter(FBmrMapTag::ParentTag.GetSingleTagContainer()).First();
+	return UGameplayUtilsLibrary::GetFilteredGameplayTags(GetAbilitySystemComponent(), FBmrMapTag::ParentTag).First();
 }
 
 // Replaces the current map tag on the ASC with the given one, removing any existing Map.* tag first
@@ -643,15 +642,8 @@ void ABmrGeneratedMap::SetMapTag(const FBmrMapTag& NewMapTag)
 	}
 
 	// Remove any existing map tags from the ASC
-	FGameplayTagContainer OwnedTags;
-	ASC->GetOwnedGameplayTags(OwnedTags);
-	for (const FGameplayTag& Tag : OwnedTags)
-	{
-		if (Tag.MatchesTag(FBmrMapTag::ParentTag))
-		{
-			ASC->RemoveLooseGameplayTag(Tag);
-		}
-	}
+	const FGameplayTagContainer OldMapTags = UGameplayUtilsLibrary::GetFilteredGameplayTags(ASC, FBmrMapTag::ParentTag);
+	ASC->RemoveLooseGameplayTags(OldMapTags);
 
 	// Apply new tag
 	ASC->AddLooseGameplayTag(NewMapTag);

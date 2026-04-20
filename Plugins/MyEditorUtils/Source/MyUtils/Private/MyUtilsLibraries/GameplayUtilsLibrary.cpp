@@ -6,12 +6,14 @@
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 // UE
+#include "AbilitySystemComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/CurveTable.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "GameplayTagContainer.h"
 #include "Kismet/GameplayStatics.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameplayUtilsLibrary)
@@ -253,4 +255,51 @@ void UGameplayUtilsLibrary::OpenListenServerLevel(const TSoftObjectPtr<UWorld>& 
 	constexpr bool bAbsolute = true;
 	static const FString Options = TEXT("listen");
 	UGameplayStatics::OpenLevelBySoftObjectPtr(UUtilsLibrary::GetPlayWorld(), Level, bAbsolute, Options);
+}
+
+/*********************************************************************************************
+ * Ability System
+ ********************************************************************************************* */
+
+// Returns the tags owned by ASC that are descendants of Parent (Parent itself is excluded)
+FGameplayTagContainer UGameplayUtilsLibrary::GetFilteredGameplayTags(const UAbilitySystemComponent* ASC, FGameplayTag Parent)
+{
+	if (!ASC
+	    || !Parent.IsValid())
+	{
+		return FGameplayTagContainer::EmptyContainer;
+	}
+
+	FGameplayTagContainer OwnedTags;
+	ASC->GetOwnedGameplayTags(OwnedTags);
+	if (OwnedTags.IsEmpty())
+	{
+		return FGameplayTagContainer::EmptyContainer;
+	}
+
+	TStringBuilder<FName::StringBufferSize> ParentBuilder;
+	Parent.GetTagName().ToString(ParentBuilder);
+	const FStringView ParentView = ParentBuilder;
+	const int32 ParentLen = ParentView.Len();
+
+	FGameplayTagContainer Result = FGameplayTagContainer::EmptyContainer;
+	for (const FGameplayTag& Tag : OwnedTags)
+	{
+		if (!Tag.IsValid())
+		{
+			continue;
+		}
+
+		TStringBuilder<FName::StringBufferSize> TagBuilder;
+		Tag.GetTagName().ToString(TagBuilder);
+		const FStringView TagView = TagBuilder;
+		if (TagView.Len() > ParentLen
+		    && TagView[ParentLen] == TEXT('.')
+		    && TagView.StartsWith(ParentView, ESearchCase::CaseSensitive))
+		{
+			Result.AddTagFast(Tag);
+		}
+	}
+
+	return Result;
 }
