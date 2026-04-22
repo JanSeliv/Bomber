@@ -13,6 +13,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrModularGameFeaturesSubsystem.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
@@ -39,6 +40,13 @@ FNmmStateTag UNMMBaseSubsystem::GetPredictedMenuState() const
 	if (bSpotsReady)
 	{
 		return FNmmStateTag::Idle;
+	}
+
+	// Tag-driven MGF still pending activation, can not validate now
+	const UBmrModularGameFeaturesSubsystem* MgfSubsystem = UBmrModularGameFeaturesSubsystem::GetModularGameFeaturesSubsystem(this);
+	if (MgfSubsystem && MgfSubsystem->HasPendingTagDrivenActivations())
+	{
+		return FNmmStateTag::None;
 	}
 
 	// No rows means no MGF cinematics at all (DR itself loads immediately with no softs), menu is ready immediately

@@ -33,6 +33,37 @@ UBmrModularGameFeaturesSubsystem* UBmrModularGameFeaturesSubsystem::GetModularGa
 	return FoundWorld ? FoundWorld->GetSubsystem<UBmrModularGameFeaturesSubsystem>() : nullptr;
 }
 
+// Returns true if any tag-driven MGF should be active for the current ASC tags but is not yet Active
+bool UBmrModularGameFeaturesSubsystem::HasPendingTagDrivenActivations() const
+{
+	const UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
+	if (!ASC)
+	{
+		return true;
+	}
+
+	const TMap<FName, FGameplayTagContainer>& FeaturesByTags = UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags();
+	if (FeaturesByTags.IsEmpty())
+	{
+		return false;
+	}
+
+	FGameplayTagContainer OwnedTags;
+	ASC->GetOwnedGameplayTags(OwnedTags);
+
+	for (const TTuple<FName, FGameplayTagContainer>& Pair : FeaturesByTags)
+	{
+		const bool bShouldBeActive = OwnedTags.HasAny(Pair.Value);
+		if (bShouldBeActive
+		    && !UModularGameFeaturePluginUtils::IsModularGameFeatureActive(Pair.Key))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /*********************************************************************************************
  * Tag-Driven Features
  ********************************************************************************************* */
@@ -67,8 +98,13 @@ void UBmrModularGameFeaturesSubsystem::OnWorldASCReady_Implementation(const FGam
 		});
 	}
 
-	// Immediate evaluation for tags already present on ASC
-	OnModularGameFeatureTagChanged();
+	// Immediate evaluation only if ASC already has any owned tags, otherwise wait for replication to deliver them via the registered tag events
+	FGameplayTagContainer OwnedTags;
+	ASC->GetOwnedGameplayTags(OwnedTags);
+	if (!OwnedTags.IsEmpty())
+	{
+		OnModularGameFeatureTagChanged();
+	}
 }
 
 // Is called when any of the tag-driven features tags is added or removed from the world ASC, evaluates all tag-driven features and loads/unloads them accordingly

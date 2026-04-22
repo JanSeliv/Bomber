@@ -23,6 +23,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "WorldContextObject"))
 	static UBmrModularGameFeaturesSubsystem* GetModularGameFeaturesSubsystem(const UObject* WorldContextObject = nullptr);
 
+	/** Returns true if any tag-driven MGF should be active for the current World ASC tags but has not reached Active state yet. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	bool HasPendingTagDrivenActivations() const;
+
 	/*********************************************************************************************
 	 * Tag-Driven Features
 	 ********************************************************************************************* */
