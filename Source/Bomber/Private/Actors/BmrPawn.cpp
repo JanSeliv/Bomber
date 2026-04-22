@@ -132,11 +132,9 @@ void ABmrPawn::BeginPlay()
 		FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &ThisClass::OnPostLogin);
 	}
 
-	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_PawnReady,
-	    this, [this, PlayerId = GetPlayerId()](const FGameplayEventData& Payload)
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::Player_PawnReady, this, [this](const FGameplayEventData& Payload)
 	{
-		const ABmrPawn* CallbackPawn = Cast<ABmrPawn>(Payload.Instigator);
-		if (CallbackPawn && CallbackPawn->GetPlayerId() == PlayerId)
+		if (Payload.Instigator == this)
 		{
 			OnPawnReady(Payload);
 		}
