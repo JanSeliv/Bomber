@@ -78,7 +78,14 @@ void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, 
 		}
 		else
 		{
-			GameFeaturesSubsystem.UnloadGameFeaturePlugin(GameFeatureURL, EmptyCallback, UUtilsLibrary::IsEditor());
+			// Do not force full unload, but keep registered if next:
+			// - plugin itself has initial state as registered
+			// - editor is running, where packages not fully unload by design, attempting to force it would break package load back
+			FGameFeaturePluginDetails PluginDetails;
+			GameFeaturesSubsystem.GetGameFeaturePluginDetails(GameFeatureURL, PluginDetails);
+			const bool bInitiallyRegistered = PluginDetails.BuiltInAutoState == EBuiltInAutoState::Registered;
+			const bool bKeepRegistered = bInitiallyRegistered || UUtilsLibrary::IsEditor();
+			GameFeaturesSubsystem.UnloadGameFeaturePlugin(GameFeatureURL, EmptyCallback, bKeepRegistered);
 		}
 	}
 }
