@@ -150,6 +150,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (AutoCreateRefTerm = "MeshData"))
 	void SetReplicatedMeshData(const FBmrMeshData& MeshData);
 
+	/** Resolves the Data Registry row by name and applies its mesh locally. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void TryApplyMeshFromRow(FName RowName);
+
 protected:
 	/** Cached mesh component of the owner actor: can be static or skeletal mesh component, is created on this component registration. */
 	UPROPERTY(BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))

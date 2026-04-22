@@ -61,9 +61,6 @@ public:
 	 * Internal Helpers
 	 ********************************************************************************************* */
 public:
-	/** Returns true when running in editor without PIE active, used to skip runtime-only bindings */
-	static bool IsEditorNotPieWorld();
-
 	/** Returns true if the owner's world is in a transitional state where callbacks should be suppressed:
 	 * world is tearing down, network transition in progress, or PIE is ending */
 	static bool IsOwnerWorldStale(const UObject* Owner);

@@ -69,28 +69,29 @@ public:
 	template <typename TOwner>
 	void ListenForDataAsset(TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TOwner* Object, void (TOwner::*Function)(const UDalPrimaryDataAsset*));
 
-	/** Runtime class with typed lambda callback, casts to the specific data asset type.
-	 * Example: ListenForDataAsset<UMyGameDataAsset>(SomeClass, [](const UMyGameDataAsset& DA) { ... }); */
+	/** Runtime class with typed lambda callback and weak object safety.
+	 * Example: ListenForDataAsset<UMyGameDataAsset>(this, SomeClass, [](const UMyGameDataAsset& DA) { ... }); */
 	template <typename T>
-	void ListenForDataAsset(TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TFunction<void(const T&)>&& Callback);
+	void ListenForDataAsset(const UObject* Owner, TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TFunction<void(const T&)>&& Callback);
 
-	/** Compile-time class with typed lambda callback, casts to the specific data asset type.
-	 * Example: ListenForDataAsset<UMyGameDataAsset>([](const UMyGameDataAsset& DA) { DA.Init(); }); */
+	/** Compile-time class with typed lambda callback and weak object safety.
+	 * Example: ListenForDataAsset<UMyGameDataAsset>(this, [](const UMyGameDataAsset& DA) { DA.Init(); }); */
 	template <typename T>
-	void ListenForDataAsset(TFunction<void(const T&)>&& Callback);
+	void ListenForDataAsset(const UObject* Owner, TFunction<void(const T&)>&& Callback);
 
 	/** Compile-time class with typed member function and weak object safety.
 	 * Example: ListenForDataAsset<UMyGameDataAsset>(this, &ThisClass::OnLoaded); where function is `void OnLoaded(const UMyGameDataAsset* DA)` */
 	template <typename T, typename TOwner = UObject>
 	void ListenForDataAsset(TOwner* Object, void (TOwner::*Function)(const T*));
 
-	/** Listens for multiple data asset classes at once, fires Completed callback when ALL are loaded.
+	/** Listens for multiple data asset classes at once, fires Completed callback when ALL are loaded, with weak object safety.
 	 * Already loaded data assets are counted immediately, remaining ones are queued for listening. */
-	void ListenForDataAssets(const TArray<TSubclassOf<UDalPrimaryDataAsset>>& DataAssetClasses, TFunction<void()>&& Completed);
+	void ListenForDataAssets(const UObject* Owner, const TArray<TSubclassOf<UDalPrimaryDataAsset>>& DataAssetClasses, TFunction<void()>&& Completed);
 
 protected:
-	/** Checks if data asset is already loaded and fires callback immediately, otherwise queues for later */
-	void ListenForDataAssetInternal(TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TFunction<void(const UDalPrimaryDataAsset&)>&& Callback);
+	/** Checks if data asset is already loaded and fires callback immediately, otherwise queues for later.
+	 * Guarantees the callback never fires after Owner has been destroyed. */
+	void ListenForDataAssetInternal(const UObject* Owner, TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TFunction<void(const UDalPrimaryDataAsset&)>&& Callback);
 
 	/*********************************************************************************************
 	 * Registration
@@ -141,57 +142,59 @@ protected:
 	/** Tracks the async load request, used to prevent duplicate loads */
 	TSharedPtr<struct FStreamableHandle> LoadStreamableHandle = nullptr;
 
-	/** One-shot callbacks pending per data asset class, consumed when the data asset is registered */
-	TMap<FName /*ClassName*/, TArray<TFunction<void(const UDalPrimaryDataAsset&)>>> PendingListenersMap;
+	/** Passive listener entry, fires exactly once when its observed data asset class is registered */
+	struct FDalPendingDataAssetListener
+	{
+		/** Weak owner, listener is silently dropped if invalid at fire time */
+		TWeakObjectPtr<const UObject> WeakOwner = nullptr;
+
+		/** Erased callback fired with the registered data asset */
+		TFunction<void(const UDalPrimaryDataAsset&)> Callback = nullptr;
+	};
+
+	/** All pending passive listeners waiting for their data asset class to be registered */
+	TMap<FName /*ClassName*/, TArray<FDalPendingDataAssetListener>> PendingListenersMap;
 };
 
-// Subscribes to a specific data asset class by runtime class via member function with weak object safety
+// Subscribes to a specific data asset class by runtime class via member function, lifetime guaranteed by Internal
 template <typename TOwner>
 void UDalSubsystem::ListenForDataAsset(TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TOwner* Object, void (TOwner::*Function)(const UDalPrimaryDataAsset*))
 {
-	TWeakObjectPtr<TOwner> WeakObject(Object);
-	ListenForDataAssetInternal(DataAssetClass, [WeakObject, Function](const UDalPrimaryDataAsset& DataAsset)
+	ListenForDataAssetInternal(Object, DataAssetClass, [Object, Function](const UDalPrimaryDataAsset& DataAsset)
 	{
-		if (TOwner* StrongObject = WeakObject.Get())
-		{
-			(StrongObject->*Function)(&DataAsset);
-		}
+		(Object->*Function)(&DataAsset);
 	});
 }
 
-// Runtime class with typed lambda callback, casts to the specific data asset type
+// Runtime class with typed lambda callback, lifetime guaranteed by Internal
 template <typename T>
-void UDalSubsystem::ListenForDataAsset(TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TFunction<void(const T&)>&& Callback)
+void UDalSubsystem::ListenForDataAsset(const UObject* Owner, TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TFunction<void(const T&)>&& Callback)
 {
 	static_assert(TIsDerivedFrom<T, UDalPrimaryDataAsset>::IsDerived, "T must derive from UDalPrimaryDataAsset");
-	ListenForDataAssetInternal(DataAssetClass, [Callback = MoveTemp(Callback)](const UDalPrimaryDataAsset& DataAsset)
+	ListenForDataAssetInternal(Owner, DataAssetClass, [Callback = MoveTemp(Callback)](const UDalPrimaryDataAsset& DataAsset)
 	{
 		Callback(static_cast<const T&>(DataAsset));
 	});
 }
 
-// Compile-time class with typed lambda callback
+// Compile-time class with typed lambda callback, lifetime guaranteed by Internal
 template <typename T>
-void UDalSubsystem::ListenForDataAsset(TFunction<void(const T&)>&& Callback)
+void UDalSubsystem::ListenForDataAsset(const UObject* Owner, TFunction<void(const T&)>&& Callback)
 {
 	static_assert(TIsDerivedFrom<T, UDalPrimaryDataAsset>::IsDerived, "T must derive from UDalPrimaryDataAsset");
-	ListenForDataAssetInternal(T::StaticClass(), [Callback = MoveTemp(Callback)](const UDalPrimaryDataAsset& DataAsset)
+	ListenForDataAssetInternal(Owner, T::StaticClass(), [Callback = MoveTemp(Callback)](const UDalPrimaryDataAsset& DataAsset)
 	{
 		Callback(static_cast<const T&>(DataAsset));
 	});
 }
 
-// Subscribes to a specific data asset class via member function with weak object safety
+// Subscribes to a specific data asset class via member function, lifetime guaranteed by Internal
 template <typename T, typename TOwner>
 void UDalSubsystem::ListenForDataAsset(TOwner* Object, void (TOwner::*Function)(const T*))
 {
 	static_assert(TIsDerivedFrom<T, UDalPrimaryDataAsset>::IsDerived, "T must derive from UDalPrimaryDataAsset");
-	TWeakObjectPtr<TOwner> WeakObject(Object);
-	ListenForDataAssetInternal(T::StaticClass(), [WeakObject, Function](const UDalPrimaryDataAsset& DataAsset)
+	ListenForDataAssetInternal(Object, T::StaticClass(), [Object, Function](const UDalPrimaryDataAsset& DataAsset)
 	{
-		if (TOwner* StrongObject = WeakObject.Get())
-		{
-			(StrongObject->*Function)(Cast<T>(&DataAsset));
-		}
+		(Object->*Function)(Cast<T>(&DataAsset));
 	});
 }

@@ -52,6 +52,9 @@ public:
 	class UBmrSkeletalMeshComponent* GetMeshComponent() const;
 	class UBmrSkeletalMeshComponent& GetMeshChecked() const;
 
+	/** Returns the owner of this component as Bomber Skeletal Mesh actor. */
+	class ABmrSkeletalMeshActor& GetOwnerChecked() const;
+
 	/** Sets the look of this spot to the in-game player character. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void ApplyMeshOnPlayer();

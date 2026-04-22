@@ -119,13 +119,10 @@ void UBmrGeneratedMapSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		UBmrBlueprintFunctionLibrary::GetDataAssetsByActorTypes(/*out*/ DataAssetClasses, TO_FLAG(EBmrActorType::All));
 		ensureMsgf(!DataAssetClasses.IsEmpty(), TEXT("ASSERT: [%i] %hs:\nNo level actor data asset classes found!"), __LINE__, __FUNCTION__);
 		DataAssetClasses.Add(UBmrGeneratedMapDataAsset::StaticClass());
-		UDalSubsystem::Get().ListenForDataAssets(DataAssetClasses, [World = TWeakObjectPtr(GetWorld())]
+		UDalSubsystem::Get().ListenForDataAssets(this, DataAssetClasses, [this]
 		{
-			if (UBmrGeneratedMapSubsystem* This = GetGeneratedMapSubsystem(World.Get()))
-			{
-				This->bAreDataAssetsLoaded = true;
-				UDalRegistrySubsystem::Get().TryLoad(This);
-			}
+			bAreDataAssetsLoaded = true;
+			UDalRegistrySubsystem::Get().TryLoad(this);
 		});
 	}));
 }
@@ -135,7 +132,7 @@ void UBmrGeneratedMapSubsystem::Deinitialize()
 {
 	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
 	{
-		DalRegistry->Unbind(this);
+		DalRegistry->UnbindFromDataRegistryLoad(this);
 	}
 
 	Super::Deinitialize();

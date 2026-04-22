@@ -5,6 +5,7 @@
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
 #include "Bomber.h"
+#include "DalRegistrySubsystem.h"
 #include "DataAssets/BmrGameStateDataAsset.h"
 #include "DataAssets/BmrLevelActorDataAsset.h"
 #include "DataRegistries/BmrLevelActorRow.h"
@@ -148,17 +149,51 @@ void UBmrMapComponent::SetReplicatedMeshData(const FBmrMeshData& MeshData)
 	ReplicatedMeshData = MeshData;
 	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedMeshData, this);
 
-	// Resolve and apply the mesh locally first
-	const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
-	const FBmrLevelActorRow* Row = FBmrLevelActorRow::FindRowByName(RowType, MeshData.RowName);
-	UStreamableRenderAsset* ResolvedMesh = Row ? Row->Mesh.Get() : nullptr;
-	SetLocalMesh(ResolvedMesh);
+	// Resolve and apply the mesh locally, if the row or its soft-ref mesh isn't ready yet, a DR listener finishes the apply
+	TryApplyMeshFromRow(MeshData.RowName);
 
 	// Replicate to all others
 	if (!GetOwner()->HasAuthority())
 	{
 		ServerSetMeshData(MeshData);
 	}
+}
+
+// Resolves the Data Registry row by name and applies its mesh locally
+void UBmrMapComponent::TryApplyMeshFromRow(FName RowName)
+{
+	const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
+	if (!ensureMsgf(RowType, TEXT("ASSERT: [%i] %hs:\n'RowType' is not valid!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(RowName.IsValid(), TEXT("ASSERT: [%i] %hs:\n'RowName' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	// Row or Mesh might be not loaded yet: try apply now or fallback for listening
+	const FBmrLevelActorRow* Row = RowName.IsNone() ? FBmrLevelActorRow::FindFirstRow(RowType) : FBmrLevelActorRow::FindRowByName(RowType, RowName);
+	UStreamableRenderAsset* ResolvedMesh = Row ? Row->Mesh.Get() : nullptr;
+
+	if (ResolvedMesh)
+	{
+		SetLocalMesh(ResolvedMesh);
+		return;
+	}
+
+	// Fallback to listen for the row to be loaded or updated in the Data Registry, and apply the mesh then
+	UDalRegistrySubsystem::Get().ListenForDataRegistryRow(this, RowType, RowName, [this](FName ResolvedRowName)
+	{
+		if (!ReplicatedMeshData.IsValid()
+		    || ReplicatedMeshData.RowName != ResolvedRowName)
+		{
+			return;
+		}
+
+		const UScriptStruct* ResolvedRowType = GetActorDataAssetChecked().GetRowType();
+		if (const FBmrLevelActorRow* ResolvedRow = FBmrLevelActorRow::FindRowByName(ResolvedRowType, ResolvedRowName))
+		{
+			SetLocalMesh(ResolvedRow->Mesh.Get());
+		}
+	});
 }
 
 // Server RPC to set and apply how a level actor has to look like
@@ -175,13 +210,7 @@ void UBmrMapComponent::OnRep_MeshData()
 		return;
 	}
 
-	const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
-	const FBmrLevelActorRow* Row = FBmrLevelActorRow::FindRowByName(RowType, ReplicatedMeshData.RowName);
-	UStreamableRenderAsset* ResolvedMesh = Row ? Row->Mesh.Get() : nullptr;
-	if (ResolvedMesh)
-	{
-		SetLocalMesh(ResolvedMesh);
-	}
+	TryApplyMeshFromRow(ReplicatedMeshData.RowName);
 }
 
 /*********************************************************************************************
@@ -377,13 +406,18 @@ bool UBmrMapComponent::OnAdded_Implementation()
 	// Set the default mesh (if any custom or replicated is not set yet), any system can override it later
 	if (!GetMesh())
 	{
-		const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
-		const FBmrLevelActorRow* FoundRow = ReplicatedMeshData.IsValid()
-		                                        ? FBmrLevelActorRow::FindRowByName(RowType, ReplicatedMeshData.RowName)
-		                                        : FBmrLevelActorRow::FindFirstRow(RowType);
-		UStreamableRenderAsset* DefaultMesh = FoundRow ? FoundRow->Mesh.Get() : nullptr;
-		ensureMsgf(DefaultMesh || !ReplicatedMeshData.IsValid(), TEXT("ASSERT: [%i] %hs:\n'DefaultMesh' is not loaded on server, can not set the default mesh for '%s' actor! Client still might be loading mesh receiving this early call from replication, while server must ensure mesh loaded before spawning actors! "), __LINE__, __FUNCTION__, *GetNameSafe(Owner));
-		SetLocalMesh(DefaultMesh);
+		if (ReplicatedMeshData.IsValid())
+		{
+			// Replicated target known: sync-resolve or queue a listener for post-async-load
+			TryApplyMeshFromRow(ReplicatedMeshData.RowName);
+		}
+		else
+		{
+			// No replicated target yet: sync-pick the first row only, a later SetReplicatedMeshData overrides via listener if needed
+			const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
+			const FBmrLevelActorRow* FoundRow = FBmrLevelActorRow::FindFirstRow(RowType);
+			SetLocalMesh(FoundRow ? FoundRow->Mesh.Get() : nullptr);
+		}
 	}
 
 	TryDisplayOwnedCell();

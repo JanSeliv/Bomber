@@ -25,7 +25,7 @@ public:
 	static UDalRegistrySubsystem* GetDalRegistrySubsystem();
 
 	/*********************************************************************************************
-	 * Binding
+	 * Load
 	 ********************************************************************************************* */
 public:
 	DECLARE_DYNAMIC_DELEGATE(FOnDalRegistryRowsChanged);
@@ -56,7 +56,7 @@ public:
 
 	/** Unsubscribes the given owner from all bound Data Registries, cancels pending async load, resets binding */
 	UFUNCTION(BlueprintCallable, Category = "[DataAssetsLoader]")
-	void Unbind(const UObject* Owner);
+	void UnbindFromDataRegistryLoad(const UObject* Owner);
 
 	/** Returns true if the given owner is currently bound to at least one Data Registry */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[DataAssetsLoader]")
@@ -70,6 +70,46 @@ public:
 	/** Re-gathers all soft paths for the given owner from all bound sources and starts async load, fires OnChanged on completion */
 	UFUNCTION(BlueprintCallable, Category = "[DataAssetsLoader]")
 	void TryLoad(const UObject* Owner);
+
+	/*********************************************************************************************
+	 * Listeners
+	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnDalRegistryRowLoaded, FName, RowName);
+
+	/** Pure one-shot observer: fires Completed once the specified row and its soft references are resolvable in the Data Registry.
+	 * Does NOT trigger async loading itself, but relies on a separate BindAndLoad / BindAndLoadFamily call for the same struct (anywhere in the project) to drive async loading.
+	 * Automatically unsubscribes after firing, Owner weak-lifetime safe.
+	 * Blueprint-only, in code use the templated ListenForDataRegistryRow() instead */
+	UFUNCTION(BlueprintCallable, Category = "[DataAssetsLoader]", DisplayName = "Listen For Data Registry Row [DAL]", meta = (BlueprintInternalUseOnly = "true"))
+	void BPListenForDataRegistryRow(UObject* Owner, const FDataRegistryId& ItemId, const FOnDalRegistryRowLoaded& Completed);
+
+	/** Runtime class with typed member function and weak object safety.
+	 * Example: ListenForDataRegistryRow<FMyRow>(this, RowName, &ThisClass::OnRowLoaded); where function is `void OnRowLoaded(const FMyRow& Row)` */
+	template <typename TRow, typename TOwner>
+	void ListenForDataRegistryRow(TOwner* Object, FName RowName, void (TOwner::*Function)(const TRow&));
+
+	/** Runtime class with typed lambda callback and weak object safety.
+	 * Example: ListenForDataRegistryRow<FMyRow>(this, RowName, [this](const FMyRow& Row) { ... }); */
+	template <typename TRow>
+	void ListenForDataRegistryRow(UObject* Object, FName RowName, TFunction<void(const TRow&)>&& Callback);
+
+	/** Runtime-struct lambda variant for polymorphic bases where the actual derived row type is only known at runtime, with weak object safety.
+	 * Fires Callback(RowName) once the row and its soft references are resolvable, consumer re-resolves the row itself.
+	 * Example: ListenForDataRegistryRow(this, GetRowType(), RowName, [this](FName RowName){ ... }); */
+	void ListenForDataRegistryRow(UObject* Object, const UScriptStruct* InStruct, FName RowName, TFunction<void(FName)>&& Callback);
+
+	/** Unsubscribes a specific row listener by (Owner, RowName), used for one-shot fire internally and optional explicit cleanup by consumers */
+	UFUNCTION(BlueprintCallable, Category = "[DataAssetsLoader]")
+	void UnbindFromDataRegistryRow(const UObject* Owner, FName RowName);
+
+protected:
+	/** Non-template implementation: queues a one-shot listener for the given row, fires immediately if the row is already available.
+	 * Guarantees the callback never fires after Owner has been destroyed, public overloads rely on this contract and skip their own weak wrapping. */
+	void ListenForDataRegistryRowInternal(UObject* Owner, const UScriptStruct* InStruct, FName RowName, TFunction<void(const uint8*)>&& Callback);
+
+	/** Notifies all pending row listeners for InStruct, fires and removes those whose rows have become resolvable. */
+	void NotifyPendingRowListeners(const UScriptStruct* InStruct);
 
 	/*********************************************************************************************
 	 * Overrides
@@ -104,6 +144,35 @@ private:
 	/** All active bindings keyed by owner */
 	TMap<TWeakObjectPtr<const UObject>, FDalRegistryBinding> OwnerBindings;
 
+	/** Identifies a pending listener by its owner and the specific row it is waiting on */
+	struct FDalRegistryRowListenerKey
+	{
+		/** Weak owner, listener is silently dropped if invalid at fire time */
+		TWeakObjectPtr<UObject> WeakOwner = nullptr;
+
+		/** Specific registry row name this listener is waiting on */
+		FName RowName = NAME_None;
+
+		bool operator==(const FDalRegistryRowListenerKey& Other) const { return WeakOwner == Other.WeakOwner && RowName == Other.RowName; }
+		friend uint32 GetTypeHash(const FDalRegistryRowListenerKey& Key) { return HashCombine(GetTypeHash(Key.WeakOwner), GetTypeHash(Key.RowName)); }
+	};
+
+	/** Passive listener entry, fires exactly once when its observed row becomes resolvable */
+	struct FDalRegistryRowListener
+	{
+		/** Struct this listener is observing, used to match notifications driven by a BindAndLoad for the same struct */
+		TWeakObjectPtr<const UScriptStruct> WeakStruct;
+
+		/** Erased callback, parameter is the raw row data of the bound struct */
+		TFunction<void(const uint8*)> Callback = nullptr;
+	};
+
+	/** All pending passive listeners waiting for their rows to become resolvable */
+	TMap<FDalRegistryRowListenerKey, FDalRegistryRowListener> PendingRowListeners;
+
+	/** Fires and removes the identified listener if its row is now resolvable.  */
+	void TryFireAndRemoveListener(const FDalRegistryRowListenerKey& Key, const UScriptStruct* InStruct);
+
 	/** Non-template implementation of BindAndLoad for a single struct */
 	void BindInternal(const UScriptStruct* InStruct, UObject* Owner, TDelegate<void()> OnChanged);
 
@@ -129,6 +198,30 @@ private:
 	 * and gathers non-null soft paths from every cached row into OutPaths */
 	static void GatherAllSoftPaths(const UScriptStruct* InStruct, TArray<FSoftObjectPath>& OutPaths);
 
+	/** Returns true if every TSoftObjectPtr property on RowData is either null or has a loaded asset.
+	 * Used to gate row-listener callbacks so consumers never observe a row with unresolved soft refs */
+	static bool AreSoftRefsLoadedForRow(const UScriptStruct* InStruct, const uint8* RowData);
+
 	/** PIE-safe async load request: wraps StreamableManager with deferred callback in editor to prevent cross-world interference */
 	static TSharedPtr<struct FStreamableHandle> RequestAsyncLoadPIESafe(const UObject* WorldContextObject, TArray<FSoftObjectPath> PathsToLoad, TDelegate<void()> OnComplete);
 };
+
+// Runtime class with typed member function, lifetime guaranteed by Internal
+template <typename TRow, typename TOwner>
+void UDalRegistrySubsystem::ListenForDataRegistryRow(TOwner* Object, FName RowName, void (TOwner::*Function)(const TRow&))
+{
+	ListenForDataRegistryRowInternal(Object, TRow::StaticStruct(), RowName, [Object, Function](const uint8* RowData)
+	{
+		(Object->*Function)(*reinterpret_cast<const TRow*>(RowData));
+	});
+}
+
+// Runtime class with typed lambda callback, lifetime guaranteed by Internal
+template <typename TRow>
+void UDalRegistrySubsystem::ListenForDataRegistryRow(UObject* Object, FName RowName, TFunction<void(const TRow&)>&& Callback)
+{
+	ListenForDataRegistryRowInternal(Object, TRow::StaticStruct(), RowName, [Callback = MoveTemp(Callback)](const uint8* RowData)
+	{
+		Callback(*reinterpret_cast<const TRow*>(RowData));
+	});
+}

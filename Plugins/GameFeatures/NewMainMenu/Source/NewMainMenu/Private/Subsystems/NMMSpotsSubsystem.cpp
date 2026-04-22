@@ -315,7 +315,7 @@ void UNMMSpotsSubsystem::OnGameFeatureDeinitialize_Implementation()
 
 	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
 	{
-		DalRegistry->Unbind(this);
+		DalRegistry->UnbindFromDataRegistryLoad(this);
 	}
 
 	MainMenuSpots.Empty();

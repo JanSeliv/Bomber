@@ -82,14 +82,8 @@ void UFTGComponent::InitOnce()
 		return;
 	}
 
-	UDalSubsystem::Get().ListenForDataAsset<UFTGDataAsset>([WeakThis = TWeakObjectPtr(this)](const UFTGDataAsset& DataAsset)
+	UDalSubsystem::Get().ListenForDataAsset<UFTGDataAsset>(this, [this](const UFTGDataAsset& DataAsset)
 	{
-		UFTGComponent* This = WeakThis.Get();
-		if (!This)
-		{
-			return;
-		}
-
 		const UDataTable* FootTrailsDT = DataAsset.GetFootTrailsDataTable();
 		if (!ensureMsgf(FootTrailsDT, TEXT("UFTGComponent::InitOnce: 'FootTrailsDT' is not set")))
 		{
@@ -97,15 +91,15 @@ void UFTGComponent::InitOnce()
 		}
 
 		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.OverrideLevel = This->GetWorld()->PersistentLevel; // Always keep new objects on Persistent level
+		SpawnParameters.OverrideLevel = GetWorld()->PersistentLevel; // Always keep new objects on Persistent level
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		SpawnParameters.bNoFail = true;
 #if WITH_EDITORONLY_DATA
 		SpawnParameters.bCreateActorPackage = false; // Do not bake this runtime actor into World Partition level
 #endif
 
-		This->InstancedStaticMeshActor = This->GetWorld()->SpawnActor<AInstancedStaticMeshActor>(SpawnParameters);
-		checkf(This->InstancedStaticMeshActor, TEXT("UFTGComponent::InitOnce: ERROR: 'InstancedStaticMeshActor' was not spawned!"));
+		InstancedStaticMeshActor = GetWorld()->SpawnActor<AInstancedStaticMeshActor>(SpawnParameters);
+		checkf(InstancedStaticMeshActor, TEXT("UFTGComponent::InitOnce: ERROR: 'InstancedStaticMeshActor' was not spawned!"));
 
 		TMap<FName, FFTGArchetype> FootTrailsRows;
 		UMyDataTable::GetRows(*FootTrailsDT, FootTrailsRows);
@@ -118,12 +112,12 @@ void UFTGComponent::InitOnce()
 				continue;
 			}
 
-			This->FootTrailInstances.Emplace(ArchetypeIt, ArchetypeIt.Mesh.LoadSynchronous());
+			FootTrailInstances.Emplace(ArchetypeIt, ArchetypeIt.Mesh.LoadSynchronous());
 		}
 
 		// Generate first trails and bind to further regenerations
-		This->BPGenerateFootTrails();
-		ABmrGeneratedMap::Get().OnGeneratedLevelActors.AddUniqueDynamic(This, &ThisClass::BPGenerateFootTrails);
+		BPGenerateFootTrails();
+		ABmrGeneratedMap::Get().OnGeneratedLevelActors.AddUniqueDynamic(this, &ThisClass::BPGenerateFootTrails);
 	});
 }
 

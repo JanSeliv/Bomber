@@ -344,7 +344,7 @@ void UBmrSoundsSubsystem::Deinitialize()
 
 	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
 	{
-		DalRegistry->Unbind(this);
+		DalRegistry->UnbindFromDataRegistryLoad(this);
 	}
 }
 

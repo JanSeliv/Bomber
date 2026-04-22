@@ -64,13 +64,10 @@ void UBmrPowerupWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 
-	UDalSubsystem::Get().ListenForDataAsset<UBmrUIDataAsset>([WeakThis = TWeakObjectPtr(this)](const UBmrUIDataAsset& DataAsset)
+	UDalSubsystem::Get().ListenForDataAsset<UBmrUIDataAsset>(this, [this](const UBmrUIDataAsset& DataAsset)
 	{
-		if (UBmrPowerupWidget* This = WeakThis.Get())
-		{
-			// Update the icon brush in the editor when tag property is changed
-			This->SetPowerupIcon(This->PowerupTag);
-		}
+		// Update the icon brush in the editor when tag property is changed
+		SetPowerupIcon(PowerupTag);
 	});
 }
 

@@ -154,16 +154,6 @@ FName UDalUtilsLibrary::GetRegistryRowNameByIndex(const UScriptStruct* InStruct,
  * Internal Helpers
  ********************************************************************************************* */
 
-// Returns true when running in editor without PIE active, used to skip runtime-only bindings
-bool UDalUtilsLibrary::IsEditorNotPieWorld()
-{
-#if WITH_EDITOR
-	return GIsEditor && GEditor && !GEditor->IsPlaySessionInProgress();
-#else
-	return false;
-#endif
-}
-
 // Returns true if the owner's world is in a transitional state where callbacks should be suppressed
 bool UDalUtilsLibrary::IsOwnerWorldStale(const UObject* Owner)
 {

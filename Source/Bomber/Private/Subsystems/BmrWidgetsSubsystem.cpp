@@ -374,7 +374,7 @@ void UBmrWidgetsSubsystem::OnEndPlay(UWorld* World, bool bSessionEnded, bool bCl
 
 	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
 	{
-		DalRegistry->Unbind(this);
+		DalRegistry->UnbindFromDataRegistryLoad(this);
 	}
 
 	UGameFeaturesSubsystem::Get().RemoveObserver(this);

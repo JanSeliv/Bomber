@@ -74,6 +74,12 @@ UBmrSkeletalMeshComponent& UNMMSpotComponent::GetMeshChecked() const
 	return *Mesh;
 }
 
+// Returns the owner of this component as Bomber Skeletal Mesh actor
+ABmrSkeletalMeshActor& UNMMSpotComponent::GetOwnerChecked() const
+{
+	return *CastChecked<ABmrSkeletalMeshActor>(GetOwner());
+}
+
 // Sets the look of this spot to the in-game player character
 void UNMMSpotComponent::ApplyMeshOnPlayer()
 {
@@ -231,7 +237,7 @@ void UNMMSpotComponent::ReinitializeCinematicData()
 // Obtains and caches cinematic data from DR_Cinematics Data Registry to this spot
 void UNMMSpotComponent::UpdateCinematicData()
 {
-	const FBmrPlayerTag& PlayerTag = GetMeshChecked().GetPlayerTag();
+	const FBmrPlayerTag& PlayerTag = GetOwnerChecked().GetPlayerTag();
 	if (!ensureMsgf(PlayerTag.IsValid(), TEXT("ASSERT: [%i] %hs:\n'PlayerTag' is not set on '%s' spot actor!"), __LINE__, __FUNCTION__, *GetNameSafe(GetOwner())))
 	{
 		return;

@@ -48,14 +48,14 @@ const UDalPrimaryDataAsset* UDalSubsystem::GetDataAsset(TSubclassOf<UDalPrimaryD
 // Blueprint-only listener wrapped by K2Node_ListenForDataAsset
 void UDalSubsystem::BPListenForDataAsset(TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, const FOnDalDataAssetLoaded& Completed)
 {
-	ListenForDataAssetInternal(DataAssetClass, [Completed](const UDalPrimaryDataAsset& DataAsset)
+	ListenForDataAssetInternal(Completed.GetUObject(), DataAssetClass, [Completed](const UDalPrimaryDataAsset& DataAsset)
 	{
 		Completed.ExecuteIfBound(&DataAsset);
 	});
 }
 
 // Listens for multiple data asset classes at once, fires Completed callback when ALL are loaded
-void UDalSubsystem::ListenForDataAssets(const TArray<TSubclassOf<UDalPrimaryDataAsset>>& DataAssetClasses, TFunction<void()>&& Completed)
+void UDalSubsystem::ListenForDataAssets(const UObject* Owner, const TArray<TSubclassOf<UDalPrimaryDataAsset>>& DataAssetClasses, TFunction<void()>&& Completed)
 {
 	if (DataAssetClasses.IsEmpty())
 	{
@@ -66,7 +66,7 @@ void UDalSubsystem::ListenForDataAssets(const TArray<TSubclassOf<UDalPrimaryData
 	const TSharedRef<int32> RemainingCount = MakeShared<int32>(DataAssetClasses.Num());
 	for (const TSubclassOf<UDalPrimaryDataAsset>& DataAssetClass : DataAssetClasses)
 	{
-		ListenForDataAssetInternal(DataAssetClass, [RemainingCount, Completed](const UDalPrimaryDataAsset&)
+		ListenForDataAssetInternal(Owner, DataAssetClass, [RemainingCount, Completed](const UDalPrimaryDataAsset&)
 		{
 			--(*RemainingCount);
 			if (*RemainingCount <= 0)
@@ -78,8 +78,13 @@ void UDalSubsystem::ListenForDataAssets(const TArray<TSubclassOf<UDalPrimaryData
 }
 
 // Checks if data asset is already loaded and fires callback immediately, otherwise queues for later
-void UDalSubsystem::ListenForDataAssetInternal(TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TFunction<void(const UDalPrimaryDataAsset&)>&& Callback)
+void UDalSubsystem::ListenForDataAssetInternal(const UObject* Owner, TSubclassOf<UDalPrimaryDataAsset> DataAssetClass, TFunction<void(const UDalPrimaryDataAsset&)>&& Callback)
 {
+	if (!ensureMsgf(Owner, TEXT("ASSERT: [%i] %hs:\n'Owner' is null, pass the subsystem itself for lifetime-untracked listeners!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
 	if (const UDalPrimaryDataAsset* DataAsset = GetDataAsset(DataAssetClass))
 	{
 		// Is already registered, fire immediately
@@ -90,7 +95,7 @@ void UDalSubsystem::ListenForDataAssetInternal(TSubclassOf<UDalPrimaryDataAsset>
 	// Queue for later, will be fired in RegisterDataAsset
 	const FName ClassName = *GetNameSafe(DataAssetClass);
 	ensureMsgf(!ClassName.IsNone(), TEXT("ASSERT: [%i] %hs:\n'DataAssetClass' is not valid!"), __LINE__, __FUNCTION__);
-	PendingListenersMap.FindOrAdd(ClassName).Emplace(MoveTemp(Callback));
+	PendingListenersMap.FindOrAdd(ClassName).Emplace(FDalPendingDataAssetListener{Owner, MoveTemp(Callback)});
 }
 
 /*********************************************************************************************
@@ -109,13 +114,16 @@ void UDalSubsystem::RegisterDataAsset(TSubclassOf<UDalPrimaryDataAsset> DataAsse
 	const FName ClassName = DataAssetClass->GetFName();
 	DataAssetsMap.Add(ClassName, DataAsset);
 
-	// Notify and consume pending per-class listeners
-	TArray<TFunction<void(const UDalPrimaryDataAsset&)>> PendingCallbacks;
-	if (PendingListenersMap.RemoveAndCopyValue(ClassName, PendingCallbacks))
+	// Notify and consume pending per-class listeners, silently drop those whose owner has died
+	TArray<FDalPendingDataAssetListener> PendingListeners;
+	if (PendingListenersMap.RemoveAndCopyValue(ClassName, PendingListeners))
 	{
-		for (const TFunction<void(const UDalPrimaryDataAsset&)>& PendingCallback : PendingCallbacks)
+		for (const FDalPendingDataAssetListener& Listener : PendingListeners)
 		{
-			PendingCallback(*DataAsset);
+			if (Listener.WeakOwner.IsValid())
+			{
+				Listener.Callback(*DataAsset);
+			}
 		}
 	}
 }

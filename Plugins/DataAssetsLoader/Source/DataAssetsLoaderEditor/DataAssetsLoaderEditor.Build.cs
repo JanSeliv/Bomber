@@ -22,6 +22,7 @@ public class DataAssetsLoaderEditor : ModuleRules
 				, "UnrealEd"
 				, "Kismet", "KismetCompiler"
 				, "DataAssetsLoader"
+				, "DataRegistry" // K2Node_ListenForDataRegistryRowd
 			}
 		);
 	}

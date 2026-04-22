@@ -31,7 +31,7 @@ void UNMMInGameSettingsSubsystem::SetCinematicsVolume(double InVolume)
 {
 	CinematicsVolume = InVolume;
 
-	UDalSubsystem::Get().ListenForDataAsset<UNMMDataAsset>([InVolume](const UNMMDataAsset& DataAsset)
+	UDalSubsystem::Get().ListenForDataAsset<UNMMDataAsset>(this, [InVolume](const UNMMDataAsset& DataAsset)
 	{
 		UBmrSoundsSubsystem::Get().SetSoundVolumeByClass(DataAsset.GetCinematicsSoundClass(), InVolume);
 	});
