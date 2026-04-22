@@ -12,6 +12,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFeatureData.h"
+#include "TimerManager.h"
 #include "UObject/UnrealType.h"
 
 #if WITH_EDITOR
@@ -153,6 +154,39 @@ FName UDalUtilsLibrary::GetRegistryRowNameByIndex(const UScriptStruct* InStruct,
 /*********************************************************************************************
  * Internal Helpers
  ********************************************************************************************* */
+
+// Executes callback with PIE-safe dispatch: defers in editor with weak context safety, direct call otherwise
+void UDalUtilsLibrary::ExecutePIESafe(const UObject* ContextObject, TFunction<void()> Callback)
+{
+	if (!Callback
+	    || !ContextObject)
+	{
+		return;
+	}
+
+#if WITH_EDITOR
+	if (GIsEditor)
+	{
+		const UWorld* World = GetPlayWorld(ContextObject);
+		const bool bWorldUsable = World && !World->bIsTearingDown && !IsGarbageCollecting();
+		if (!bWorldUsable)
+		{
+			return;
+		}
+
+		World->GetTimerManager().SetTimerForNextTick([WeakContext = TWeakObjectPtr(ContextObject), Callback = MoveTemp(Callback)]()
+		{
+			if (WeakContext.IsValid())
+			{
+				Callback();
+			}
+		});
+		return;
+	}
+#endif // WITH_EDITOR
+
+	Callback();
+}
 
 // Returns true if the owner's world is in a transitional state where callbacks should be suppressed
 bool UDalUtilsLibrary::IsOwnerWorldStale(const UObject* Owner)

@@ -16,10 +16,6 @@
 #include "UObject/SoftObjectPtr.h"
 #include "UObject/UnrealType.h"
 
-#if WITH_EDITOR
-#include "TimerManager.h"
-#endif // WITH_EDITOR
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(DalRegistrySubsystem)
 
 // Returns this Subsystem, is checked and will crash if can't be obtained
@@ -124,40 +120,35 @@ void UDalRegistrySubsystem::TryLoad(const UObject* Owner)
 		GatherAllSoftPaths(StructIt, PathsToLoad);
 	}
 
+	const TWeakObjectPtr WeakOwner(Owner);
+	auto FireLoadedOwner = [WeakOwner]()
+	{
+		UDalRegistrySubsystem* Subsystem = GetDalRegistrySubsystem();
+		FDalRegistryBinding* DeferredBinding = Subsystem ? Subsystem->OwnerBindings.Find(WeakOwner) : nullptr;
+		if (!DeferredBinding
+		    || UDalUtilsLibrary::IsOwnerWorldStale(WeakOwner.Get()))
+		{
+			return;
+		}
+
+		DeferredBinding->bIsLoaded = true;
+		for (const UScriptStruct* StructIt : DeferredBinding->BoundStructs)
+		{
+			Subsystem->NotifyPendingRowListeners(StructIt);
+		}
+		DeferredBinding->ChangedCallback.ExecuteIfBound();
+	};
+
 	if (PathsToLoad.IsEmpty())
 	{
-		Binding->bIsLoaded = true;
-		if (!UDalUtilsLibrary::IsOwnerWorldStale(Owner))
-		{
-			// Drain pending row listeners for each bound struct
-			for (const UScriptStruct* StructIt : Binding->BoundStructs)
-			{
-				NotifyPendingRowListeners(StructIt);
-			}
-			Binding->ChangedCallback.ExecuteIfBound();
-		}
+		UDalUtilsLibrary::ExecutePIESafe(Owner, MoveTemp(FireLoadedOwner));
 		return;
 	}
 
-	// Use weak owner to protect binding access in async callback
-	TWeakObjectPtr<const UObject> WeakOwner(Owner);
-	Binding->StreamableHandle = RequestAsyncLoadPIESafe(Owner, MoveTemp(PathsToLoad), TDelegate<void()>::CreateLambda([WeakOwner]
+	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
+	Binding->StreamableHandle = StreamableManager.RequestAsyncLoad(MoveTemp(PathsToLoad), FStreamableDelegate::CreateLambda([WeakOwner, Callback = MoveTemp(FireLoadedOwner)]()
 	{
-		UDalRegistrySubsystem* Subsystem = GetDalRegistrySubsystem();
-		FDalRegistryBinding* AsyncBinding = Subsystem ? Subsystem->OwnerBindings.Find(WeakOwner) : nullptr;
-		if (AsyncBinding)
-		{
-			AsyncBinding->bIsLoaded = true;
-			if (!UDalUtilsLibrary::IsOwnerWorldStale(WeakOwner.Get()))
-			{
-				// Drain pending row listeners for each bound struct: soft refs are now loaded
-				for (const UScriptStruct* StructIt : AsyncBinding->BoundStructs)
-				{
-					Subsystem->NotifyPendingRowListeners(StructIt);
-				}
-				AsyncBinding->ChangedCallback.ExecuteIfBound();
-			}
-		}
+		UDalUtilsLibrary::ExecutePIESafe(WeakOwner.Get(), Callback);
 	}));
 }
 
@@ -498,43 +489,4 @@ void UDalRegistrySubsystem::GatherAllSoftPaths(const UScriptStruct* InStruct, TA
 			}
 		}
 	}
-}
-
-// PIE-safe async load request
-TSharedPtr<FStreamableHandle> UDalRegistrySubsystem::RequestAsyncLoadPIESafe(const UObject* WorldContextObject, TArray<FSoftObjectPath> PathsToLoad, TDelegate<void()> OnComplete)
-{
-	if (PathsToLoad.IsEmpty())
-	{
-		return nullptr;
-	}
-
-	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-
-#if WITH_EDITOR
-	// In editor, defer callback to next tick to avoid cross-world interference in PIE multiplayer
-	if (UDalUtilsLibrary::IsEditor())
-	{
-		const TWeakObjectPtr WeakContext(WorldContextObject);
-		TSharedRef<TDelegate<void()>> SharedCallback = MakeShared<TDelegate<void()>>(MoveTemp(OnComplete));
-
-		return StreamableManager.RequestAsyncLoad(MoveTemp(PathsToLoad), FStreamableDelegate::CreateLambda([WeakContext, SharedCallback]()
-		{
-			if (const UWorld* World = UDalUtilsLibrary::GetPlayWorld(WeakContext.Get()))
-			{
-				World->GetTimerManager().SetTimerForNextTick([WeakContext, SharedCallback]()
-				{
-					if (WeakContext.IsValid())
-					{
-						SharedCallback->ExecuteIfBound();
-					}
-				});
-			}
-		}));
-	}
-#endif // WITH_EDITOR
-
-	return StreamableManager.RequestAsyncLoad(MoveTemp(PathsToLoad), FStreamableDelegate::CreateLambda([OnComplete = MoveTemp(OnComplete)]()
-	{
-		OnComplete.ExecuteIfBound();
-	}));
 }

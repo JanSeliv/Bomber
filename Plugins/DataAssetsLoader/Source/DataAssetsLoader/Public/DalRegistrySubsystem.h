@@ -201,9 +201,6 @@ private:
 	/** Returns true if every TSoftObjectPtr property on RowData is either null or has a loaded asset.
 	 * Used to gate row-listener callbacks so consumers never observe a row with unresolved soft refs */
 	static bool AreSoftRefsLoadedForRow(const UScriptStruct* InStruct, const uint8* RowData);
-
-	/** PIE-safe async load request: wraps StreamableManager with deferred callback in editor to prevent cross-world interference */
-	static TSharedPtr<struct FStreamableHandle> RequestAsyncLoadPIESafe(const UObject* WorldContextObject, TArray<FSoftObjectPath> PathsToLoad, TDelegate<void()> OnComplete);
 };
 
 // Runtime class with typed member function, lifetime guaranteed by Internal

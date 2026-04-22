@@ -65,6 +65,9 @@ public:
 	 * world is tearing down, network transition in progress, or PIE is ending */
 	static bool IsOwnerWorldStale(const UObject* Owner);
 
+	/** Executes callback with PIE-safe dispatch: defers in editor with weak context safety, direct call otherwise */
+	static void ExecutePIESafe(const UObject* ContextObject, TFunction<void()> Callback);
+
 	/** Returns the current play world as UObject for weak pointer storage */
 	static class UWorld* GetPlayWorld(const UObject* WorldContextObject);
 
