@@ -157,6 +157,12 @@ protected:
 	/** Is called when this Subsystem is removed. */
 	virtual void Deinitialize() override;
 
+	/** Is called when the owning local player's world begins play. */
+	void OnBeginPlay(UWorld* World, struct FWorldInitializationValues WorldInitializationValues);
+
+	/** Is called when the owning local player's world is being cleaned up. */
+	void OnEndPlay(UWorld* World, bool bSessionEnded, bool bCleanupResources);
+
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */

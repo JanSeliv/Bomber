@@ -13,6 +13,7 @@
 
 // UE
 #include "Components/Viewport.h"
+#include "Engine/World.h"
 #include "GameFeaturesSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrWidgetsSubsystem)
@@ -287,7 +288,8 @@ void UBmrWidgetsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	UGameFeaturesSubsystem::Get().AddObserver(this, UGameFeaturesSubsystem::EObserverPluginStateUpdateMode::FutureOnly);
+	FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &ThisClass::OnBeginPlay);
+	FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::OnEndPlay);
 }
 
 // Is overridden to cleanup injected widgets to let them unload properly
@@ -342,6 +344,33 @@ void UBmrWidgetsSubsystem::PlayerControllerChanged(APlayerController* NewPlayerC
 void UBmrWidgetsSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
+
+	FWorldDelegates::OnPostWorldInitialization.RemoveAll(this);
+	FWorldDelegates::OnWorldCleanup.RemoveAll(this);
+}
+
+// Is overridden to perform initial bindings (however, is too early to init widgets here until controller ready)
+void UBmrWidgetsSubsystem::OnBeginPlay(UWorld* World, FWorldInitializationValues WorldInitializationValues)
+{
+	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	if (!LocalPlayer
+	    || LocalPlayer->GetWorld() != World)
+	{
+		return;
+	}
+
+	UGameFeaturesSubsystem::Get().AddObserver(this, UGameFeaturesSubsystem::EObserverPluginStateUpdateMode::FutureOnly);
+}
+
+// Unbinds DAL and removes the game feature observer on world teardown so streamable references release and widgets are cleaned up
+void UBmrWidgetsSubsystem::OnEndPlay(UWorld* World, bool bSessionEnded, bool bCleanupResources)
+{
+	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	if (!LocalPlayer
+	    || LocalPlayer->GetWorld() != World)
+	{
+		return;
+	}
 
 	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
 	{
