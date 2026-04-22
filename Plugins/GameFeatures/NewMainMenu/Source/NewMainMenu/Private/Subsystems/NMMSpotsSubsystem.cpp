@@ -336,6 +336,15 @@ void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(const FGamepla
 	{
 		LastMoveSpotDirection = 0;
 	}
+	else if ((FNmmStateTag::Idle | FNmmStateTag::Cinematic).HasTag(NewState))
+	{
+		UNMMSpotComponent* ActiveSpot = GetCurrentSpot();
+		if (ActiveSpot && ActiveSpot->GetMasterPlayer())
+		{
+			ActiveSpot->SetCinematicByState(NewState);
+			OnActiveMenuSpotReady.Broadcast(ActiveSpot);
+		}
+	}
 }
 
 // Called when the current game state was changed
@@ -350,13 +359,13 @@ void UNMMSpotsSubsystem::OnGameStateChanged_Implementation(const FGameplayEventD
 // Called when cinematic Data Registry rows change and all their soft references finish async loading
 void UNMMSpotsSubsystem::OnCinematicRowsChanged_Implementation()
 {
-	// Reinitialize cinematic data from updated DR rows and init master sequences
+	bool bAnySpotHasValidRow = false;
 	for (UNMMSpotComponent* SpotIt : MainMenuSpots)
 	{
 		if (SpotIt)
 		{
 			SpotIt->ReinitializeCinematicData();
-			SpotIt->InitMasterSequencePlayer();
+			bAnySpotHasValidRow |= SpotIt->GetCinematicRow().IsValid();
 		}
 	}
 
@@ -365,7 +374,8 @@ void UNMMSpotsSubsystem::OnCinematicRowsChanged_Implementation()
 	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
 	const FNmmStateTag CurrentState = BaseSubsystem.GetCurrentMenuState();
 
-	if (bHasRows && IsActiveMenuSpotReady()
+	if (bHasRows
+	    && bAnySpotHasValidRow
 	    && CurrentState == FNmmStateTag::BasicMenu)
 	{
 		// Cinematics rows injected by map MGF and spots are ready, activate cinematic lobby
@@ -377,5 +387,13 @@ void UNMMSpotsSubsystem::OnCinematicRowsChanged_Implementation()
 	{
 		// DR emptied at runtime (map MGF unloaded), fall back to basic menu
 		BaseSubsystem.SetNewMainMenuState(FNmmStateTag::BasicMenu);
+	}
+
+	for (UNMMSpotComponent* SpotIt : MainMenuSpots)
+	{
+		if (SpotIt)
+		{
+			SpotIt->InitMasterSequencePlayer();
+		}
 	}
 }

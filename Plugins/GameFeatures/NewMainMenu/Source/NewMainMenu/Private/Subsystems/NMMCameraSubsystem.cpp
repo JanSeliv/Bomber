@@ -169,9 +169,9 @@ void UNMMCameraSubsystem::OnNewMainMenuStateChanged_Implementation(const FGamepl
 {
 	const FNmmStateTag NewState(Payload.InstigatorTags.First());
 
-	if (Payload.InstigatorTags.HasAny(FNmmStateTag::BasicMenu | FNmmStateTag::Idle | FNmmStateTag::Cinematic))
+	if (NewState == FNmmStateTag::BasicMenu)
 	{
-		// PossessCamera will early-return if spot is not ready yet, OnActiveMenuSpotReady will handle it later
+		// Idle/Cinematic possession flows through OnActiveMenuSpotReady after the spot plays
 		PossessCamera(NewState);
 	}
 	else if (NewState == FNmmStateTag::Transition)
@@ -185,7 +185,10 @@ void UNMMCameraSubsystem::OnNewMainMenuStateChanged_Implementation(const FGamepl
 void UNMMCameraSubsystem::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent* /*MainMenuSpotComponent*/)
 {
 	const FNmmStateTag CurrentState = UNMMBaseSubsystem::Get().GetCurrentMenuState();
-	PossessCamera(CurrentState);
+	if ((FNmmStateTag::Idle | FNmmStateTag::Cinematic).HasTag(CurrentState))
+	{
+		PossessCamera(CurrentState);
+	}
 }
 
 /*********************************************************************************************

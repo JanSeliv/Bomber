@@ -299,6 +299,10 @@ void UNMMSpotComponent::ApplyCinematicState()
 
 	MasterPlayer->Play();
 
+	// Force set first evaluation so camera-cut bindings resolve in this frame
+	const FMovieSceneSequencePlaybackParams JumpParams(MasterPlayer->GetCurrentTime().Time, EUpdatePositionMethod::Jump);
+	MasterPlayer->SetPlaybackPosition(JumpParams);
+
 	if (CinematicState == FNmmStateTag::Cinematic)
 	{
 		const ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
