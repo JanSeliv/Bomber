@@ -184,8 +184,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FBmrMapTag GetMapTag() const;
 
-	/** Replaces the current map tag on the ASC with the given one, removing any existing Map.* tag first.
-	 * Is called automatically from ConstructionScript with CurrentMapTag, but can also be called at runtime to switch map themes. */
+	/** Switches the map by applying new tag on World ASC.
+	 * It's expected every map tag is associated with own modular game feature representing this map in UBmrModularGameFeatureSettings::ModularGameFeaturesByTags.
+	 * When the tag is applied, the corresponding game feature will be loaded and activated, injecting new data layer and data registries for new map. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
 	void SetMapTag(const FBmrMapTag& NewMapTag);
 
@@ -201,7 +202,7 @@ protected:
 	TObjectPtr<class UBmrHealthAttributeSet> HealthSet = nullptr;
 
 	/** Broadcasts WorldASC_Ready event once per world session when the ASC is available. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))	
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
 	void TryBroadcastWorldASCReady();
 
 protected:
@@ -336,6 +337,10 @@ protected:
 	/** Internal methods to compute cells on background thread and finish with spawning on the game thread. */
 	static TMap<FBmrCell, EBmrActorType> GenerateLevelActors_StartAsync(struct FBmrGeneratorData&& GeneratorData);
 	void GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&& ActorsToSpawn);
+
+	/** Destroys all currently spawned level actors and resets generation tokens, leaving the grid empty. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
+	void DestroyAllLevelActors();
 
 	/** Align transform and build cells, on both server and clients.
 	 * Is called everytime the level size (transform) is changed.

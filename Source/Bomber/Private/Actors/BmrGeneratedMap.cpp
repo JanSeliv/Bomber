@@ -626,27 +626,37 @@ UAbilitySystemComponent& ABmrGeneratedMap::GetAbilitySystemComponentChecked() co
 // Returns the current map visual theme tag from the ASC, or None if not set
 FBmrMapTag ABmrGeneratedMap::GetMapTag() const
 {
-	return UGameplayUtilsLibrary::GetFilteredGameplayTags(GetAbilitySystemComponent(), FBmrMapTag::ParentTag).First();
+	return UGameplayUtilsLibrary::GetFilteredGameplayTags(AbilitySystemComponent, FBmrMapTag::ParentTag).First();
 }
 
-// Replaces the current map tag on the ASC with the given one, removing any existing Map.* tag first
+// Switches the map by applying new tag on World ASC
 void ABmrGeneratedMap::SetMapTag(const FBmrMapTag& NewMapTag)
 {
-	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
-	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'AbilitySystemComponent' is null!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(NewMapTag.IsValid(), TEXT("ASSERT: [%i] %hs:\n'NewMapTag' is not set, assign CurrentMapTag on the Generated Map actor!"), __LINE__, __FUNCTION__)
-	    || ASC->HasMatchingGameplayTag(NewMapTag))
+	if (!HasAuthority()
+	    || !ensureMsgf(AbilitySystemComponent, TEXT("ASSERT: [%i] %hs:\n'AbilitySystemComponent' is null!"), __LINE__, __FUNCTION__)
+	    || AbilitySystemComponent->GetOwnedGameplayTags().HasTagExact(NewMapTag))
 	{
 		// Exact tag is already applied
 		return;
 	}
 
-	// Remove any existing map tags from the ASC
-	const FGameplayTagContainer OldMapTags = UGameplayUtilsLibrary::GetFilteredGameplayTags(ASC, FBmrMapTag::ParentTag);
-	ASC->RemoveLooseGameplayTags(OldMapTags);
+	CurrentMapTag = NewMapTag;
 
-	// Apply new tag
-	ASC->AddLooseGameplayTag(NewMapTag);
+	const FGameplayTagContainer OldMapTags = UGameplayUtilsLibrary::GetFilteredGameplayTags(AbilitySystemComponent, FBmrMapTag::ParentTag);
+	if (OldMapTags.IsValid())
+	{
+		// Remove any existing map tags from the ASC
+		AbilitySystemComponent->RemoveLooseGameplayTags(OldMapTags);
+	}
+
+	if (NewMapTag.IsValid())
+	{
+		// Apply new tag
+		AbilitySystemComponent->AddLooseGameplayTag(NewMapTag, 1, EGameplayTagReplicationState::TagOnly);
+
+		// Clear out current level actors immediately; GenerateLevelActors will re-run once the new map's Data Registry rows are injected via the map subsystem callback
+		DestroyAllLevelActors();
+	}
 }
 
 // Broadcasts WorldASC_Ready event once per world session when the ASC is available
@@ -732,10 +742,7 @@ void ABmrGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransfor
 	BuildGridCells(Transform);
 
 	// Apply startup map tag on ASC (might be not set intentionally)
-	if (CurrentMapTag.IsValid())
-	{
-		SetMapTag(CurrentMapTag);
-	}
+	SetMapTag(CurrentMapTag);
 
 	// Actors generation
 	GenerateLevelActors();
@@ -908,21 +915,7 @@ void ABmrGeneratedMap::GenerateLevelActors()
 
 	bIsCurrentlyGenerating = true;
 
-	// Destroy all actors first
-	// Iterate it by handles to cancel spawning even if the actor is not spawned yet
-	TArray<FBmrMapComponentSpec>& MapComponentsToDestroy = MapComponents.Items;
-	for (int32 Idx = MapComponentsToDestroy.Num() - 1; Idx >= 0; Idx--)
-	{
-		DestroyLevelActorByHandle(MapComponentsToDestroy[Idx].PoolObjectHandle);
-	}
-	checkf(MapComponentsToDestroy.IsEmpty(), TEXT("ERROR: [%i] %hs:\n'MapComponentsToDestroy' is not empty after removing all!"), __LINE__, __FUNCTION__);
-
-	// Reset both tokens so the next generation counts from 0 on server and signals clients to reset too
-	MapComponents.LocalReplicationToken = 0;
-	GenerateLevelActorsToken = 0;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsToken, this);
-
-	AdditionalDangerousCells.Reset();
+	DestroyAllLevelActors();
 
 	FBmrGeneratorData GeneratorData;
 	GeneratorData.AllCells = LocalGridCells;
@@ -983,6 +976,30 @@ void ABmrGeneratedMap::GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&
 	};
 
 	SpawnActorsByTypes(ActorsToSpawn, OnSpawned);
+}
+
+// Destroys all currently spawned level actors and resets generation tokens, leaving the grid empty
+void ABmrGeneratedMap::DestroyAllLevelActors()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// Iterate it by handles to cancel spawning even if the actor is not spawned yet
+	TArray<FBmrMapComponentSpec>& MapComponentsToDestroy = MapComponents.Items;
+	for (int32 Idx = MapComponentsToDestroy.Num() - 1; Idx >= 0; Idx--)
+	{
+		DestroyLevelActorByHandle(MapComponentsToDestroy[Idx].PoolObjectHandle);
+	}
+	checkf(MapComponentsToDestroy.IsEmpty(), TEXT("ERROR: [%i] %hs:\n'MapComponentsToDestroy' is not empty after removing all!"), __LINE__, __FUNCTION__);
+
+	// Reset both tokens so the next generation counts from 0 on server and signals clients to reset too
+	MapComponents.LocalReplicationToken = 0;
+	GenerateLevelActorsToken = 0;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsToken, this);
+
+	AdditionalDangerousCells.Reset();
 }
 
 // Align transform and build cells
