@@ -49,6 +49,9 @@ protected:
 	/** Destroys any spawned preview component and unsubscribes once the owning plugin becomes inactive. */
 	void OnGameFeatureDeinitialize();
 
+	/** Releases preview component reference when its owning world is torn down so GC can collect the outgoing world. */
+	void OnWorldCleanup(class UWorld* World, bool bSessionEnded, bool bCleanupResources);
+
 	/** Called when Generated Map is initialized and its data assets are loaded, is also called in editor */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[FootTrailsGenerator]", meta = (BlueprintProtected))
 	void OnGeneratedMapReady(const struct FGameplayEventData& Payload);

@@ -27,6 +27,9 @@ void UFTGEditorPreviewSubsystem::Initialize(FSubsystemCollectionBase& Collection
 
 	UGameFeaturesSubsystem::Get().AddObserver(this, UGameFeaturesSubsystem::EObserverPluginStateUpdateMode::FutureOnly);
 
+	// Editor subsystem outlives each opened map, so release the preview component when its world tears down to avoid world GC leaks on map reopen
+	FWorldDelegates::OnWorldCleanup.AddUObject(this, &ThisClass::OnWorldCleanup);
+
 	// Catch the case where the owning plugin is already active before this observer could register
 	const FName ModuleName = FName(*UModularGameFeaturePluginUtils::GetModuleNameByObject(this));
 	if (UModularGameFeaturePluginUtils::IsModularGameFeatureActive(ModuleName))
@@ -50,6 +53,8 @@ void UFTGEditorPreviewSubsystem::Deinitialize()
 
 		GameFeaturesSubsystem->RemoveObserver(this);
 	}
+
+	FWorldDelegates::OnWorldCleanup.RemoveAll(this);
 
 	Super::Deinitialize();
 }
@@ -98,6 +103,19 @@ void UFTGEditorPreviewSubsystem::OnGameFeatureDeinitialize()
 		FootTrailGenerator->DestroyComponent();
 		FootTrailGenerator = nullptr;
 	}
+}
+
+// Releases preview component reference when its owning world is torn down so GC can collect the outgoing world
+void UFTGEditorPreviewSubsystem::OnWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources)
+{
+	if (!IsValid(FootTrailGenerator)
+	    || FootTrailGenerator->GetWorld() != World)
+	{
+		return;
+	}
+
+	// Outgoing world destroys the component itself, just release the reference here so it no longer pins the world
+	FootTrailGenerator = nullptr;
 }
 
 /// Called when Generated Map is initialized and its data assets are loaded, is also called in editor
