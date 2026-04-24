@@ -11,7 +11,6 @@
 #include "Components/BmrSkeletalMeshComponent.h"
 #include "Controllers/BmrAIController.h"
 #include "Controllers/BmrPlayerController.h"
-#include "DataAssets/BmrAIDataAsset.h"
 #include "DataAssets/BmrPlayerDataAsset.h"
 #include "DataRegistries/BmrPlayerRow.h"
 #include "DataRegistries/BmrPlayerSkinRow.h"
@@ -533,11 +532,9 @@ void ABmrPawn::SetDefaultPlayerMeshData(bool bForcePlayerSkin /* = false*/)
 
 	if (!bForcePlayerSkin && !IsPlayerControlled())
 	{
-		// AI players always use the designated character
-		const FBmrPlayerTag& AIPlayerTag = UBmrAIDataAsset::Get().GetDefaultAIPlayerTag();
-		ensureMsgf(AIPlayerTag.IsValid(), TEXT("ASSERT: [%i] %hs:\n'DefaultAIPlayerTag' is not set in the AI Data Asset!"), __LINE__, __FUNCTION__);
-		Row = FBmrPlayerRow::GetRowByPlayerTag(AIPlayerTag);
-		RowName = FBmrPlayerRow::GetRowNameByPlayerTag(AIPlayerTag);
+		// AI players always use default tag
+		Row = FBmrPlayerRow::GetRowByPlayerTag(FBmrPlayerTag::Default);
+		RowName = FBmrPlayerRow::GetRowNameByPlayerTag(FBmrPlayerTag::Default);
 	}
 	else
 	{

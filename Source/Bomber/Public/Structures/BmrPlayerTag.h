@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -22,4 +22,7 @@ struct BOMBER_API FBmrPlayerTag : public FGameplayTag
 
 	/** The Player Character tag that contains nothing chosen by default. */
 	static const FBmrPlayerTag None;
+
+	/** Fallback character tag, each map declares its own character under this tag, is often used by AI characters, or if all characters are shared. */
+	static const FBmrPlayerTag Default;
 };

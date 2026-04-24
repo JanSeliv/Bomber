@@ -4,9 +4,6 @@
 
 #include "DalPrimaryDataAsset.h"
 
-// Bomber
-#include "Structures/BmrPlayerTag.h"
-
 #include "BmrAIDataAsset.generated.h"
 
 /**
@@ -37,10 +34,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE int32 GetNearDangerousRadius() const { return NearDangerousRadius; }
 
-	/** Returns the player tag used as default character for all AI players. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const FORCEINLINE FBmrPlayerTag& GetDefaultAIPlayerTag() const { return DefaultAIPlayerTag; }
-
 protected:
 	/** The search radius of powerups. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
@@ -57,8 +50,4 @@ protected:
 	/** Determine filter radius of near cells (length <= near radius). */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	int32 NearFilterRadius = 3;
-
-	/** The player tag used as default character for all AI players. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	FBmrPlayerTag DefaultAIPlayerTag = FBmrPlayerTag::None;
 };
