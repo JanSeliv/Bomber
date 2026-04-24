@@ -50,6 +50,14 @@ protected:
 	/** Called when subsystem initializes. */
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+	/** Called when subsystem is destroyed. */
+	virtual void Deinitialize() override;
+
 	/** Called when world ends play. */
 	virtual void OnWorldEndPlay(UWorld& InWorld) override;
+
+#if WITH_EDITOR
+	/** Called after PIE teardown fully completes, re-syncs tag-driven features against the editor world's ASC state. */
+	void OnEditorShutdownPIE(bool bIsSimulating);
+#endif
 };

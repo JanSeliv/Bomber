@@ -16,6 +16,10 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 
+#if WITH_EDITOR
+#include "Editor.h"
+#endif
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrModularGameFeaturesSubsystem)
 
 // Returns this subsystem, is checked and will crash if can't be obtained
@@ -175,6 +179,20 @@ void UBmrModularGameFeaturesSubsystem::Initialize(FSubsystemCollectionBase& Coll
 	}
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::WorldASC_Ready, this, &ThisClass::OnWorldASCReady);
+
+#if WITH_EDITOR
+	FEditorDelegates::ShutdownPIE.AddUObject(this, &ThisClass::OnEditorShutdownPIE);
+#endif
+}
+
+// Unsubscribes from editor delegates
+void UBmrModularGameFeaturesSubsystem::Deinitialize()
+{
+#if WITH_EDITOR
+	FEditorDelegates::ShutdownPIE.RemoveAll(this);
+#endif
+
+	Super::Deinitialize();
 }
 
 // Unloads all managed features on world end play
@@ -192,3 +210,11 @@ void UBmrModularGameFeaturesSubsystem::OnWorldEndPlay(UWorld& InWorld)
 	UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
 	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, TagDrivenFeatures);
 }
+
+#if WITH_EDITOR
+// PIE teardown deactivates MGFs engine-wide via OnWorldEndPlay, re-sync tag-driven features against the editor world's ASC state after teardown completes
+void UBmrModularGameFeaturesSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*/)
+{
+	OnModularGameFeatureTagChanged();
+}
+#endif
