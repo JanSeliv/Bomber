@@ -38,14 +38,16 @@ public:
 	 * Delegates
 	 ********************************************************************************************* */
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAddedToLevel, UBmrMapComponent*, InMapComponent);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBPOnAddedToLevel, UBmrMapComponent*, InMapComponent);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnAddedToLevel, UBmrMapComponent*);
 
 	/** Called when this level actor is reconstructed or added on the Generated Map, on both server and clients.
 	 * Is used by Level Actors instead of the BeginPlay(), but also called in editor preview before game even started.
 	 * In Editor on construction: AActor::RerunConstructionScripts() -> AActor::OnConstruction() -> ABmrGeneratedMap::AddToGrid() -> ThisClass::OnAdded()
 	 * In build: ABmrGeneratedMap::SpawnActorByType() -> ABmrGeneratedMap::AddToGrid() -> ThisClass::OnAdded()
 	 * In code, BIND_ON_ADDED_TO_LEVEL(this, ThisClass::OnAddedToLevel) can be used to bind to this event. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]", meta = (DisplayName = "On Added To Level"))
+	FBPOnAddedToLevel BPOnAddedToLevel;
 	FOnAddedToLevel OnAddedToLevel;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPreRemovedFromLevel, UBmrMapComponent*, InMapComponent, UObject*, DestroyCauser);
@@ -271,7 +273,7 @@ protected:
 	{                                                                                  \
 		if (UBmrMapComponent* InMapComponent = UBmrMapComponent::GetMapComponent(Obj)) \
 		{                                                                              \
-			InMapComponent->OnAddedToLevel.AddUniqueDynamic(Obj, &Function);           \
+			InMapComponent->OnAddedToLevel.AddUObject(Obj, &Function);                 \
 			if (InMapComponent->GetCell().IsValid())                                   \
 			{                                                                          \
 				Obj->Function(InMapComponent);                                         \

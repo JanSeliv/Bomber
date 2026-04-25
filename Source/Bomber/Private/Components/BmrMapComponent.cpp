@@ -481,6 +481,9 @@ void UBmrMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser /* = 
 
 	SetLocalMesh(nullptr);
 
+	ReplicatedMeshData = FBmrMeshData::Empty;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedMeshData, this);
+
 	SetCell(FBmrCell::InvalidCell);
 }
 
