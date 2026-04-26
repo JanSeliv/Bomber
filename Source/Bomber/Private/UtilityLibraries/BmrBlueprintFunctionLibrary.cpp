@@ -113,8 +113,27 @@ ABmrPlayerController* UBmrBlueprintFunctionLibrary::GetLocalPlayerController(con
 // Returns the Bomber Player State for specified player, nullptr otherwise
 ABmrPlayerState* UBmrBlueprintFunctionLibrary::GetPlayerState(int32 PlayerId, const UObject* OptionalWorldContext /* = nullptr*/)
 {
-	const ABmrPawn* PlayerChar = GetPawn(PlayerId, OptionalWorldContext);
-	return PlayerChar ? PlayerChar->GetPlayerState<ABmrPlayerState>() : nullptr;
+	if (PlayerId < 0)
+	{
+		return GetLocalPlayerState(OptionalWorldContext);
+	}
+
+	const ABmrGameState* GameState = GetGameState(OptionalWorldContext);
+	if (!GameState)
+	{
+		return nullptr;
+	}
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		ABmrPlayerState* BmrPlayerState = Cast<ABmrPlayerState>(PlayerState);
+		if (BmrPlayerState && BmrPlayerState->GetPlayerId() == PlayerId)
+		{
+			return BmrPlayerState;
+		}
+	}
+
+	return nullptr;
 }
 
 // Returns the player state of current controller
