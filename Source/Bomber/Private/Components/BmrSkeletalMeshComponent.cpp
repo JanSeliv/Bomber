@@ -5,6 +5,7 @@
 // Bomber
 #include "Bomber.h"
 #include "Components/BmrMapComponent.h"
+#include "DalRegistrySubsystem.h"
 #include "DataRegistries/BmrPlayerPropRow.h"
 #include "DataRegistries/BmrPlayerRow.h"
 #include "DataRegistries/BmrPlayerSkinRow.h"
@@ -253,14 +254,40 @@ void UBmrSkeletalMeshComponent::AttachProps()
 	// Destroy previous meshes
 	DetachProps();
 
-	// Gather prop rows from FBmrPlayerPropRow for this player tag
-	TArray<const FBmrPlayerPropRow*> PropRows;
-	FBmrPlayerPropRow::GetPlayerProps(PlayerTag, PropRows);
+	// Gather all prop rows with names for this player tag
+	TArray<TPair<FName, const FBmrPlayerPropRow*>> NamedPropRows;
+	FBmrPlayerPropRow::ForEachRowWithName([&PlayerTag, &NamedPropRows](FName RowName, const FBmrPlayerPropRow& Row)
+	{
+		if (Row.PlayerTag == PlayerTag)
+		{
+			NamedPropRows.Emplace(RowName, &Row);
+		}
+	});
 
 	// Spawn new components and attach meshes
-	for (const FBmrPlayerPropRow* PropRow : PropRows)
+	for (const TPair<FName, const FBmrPlayerPropRow*>& NamedRow : NamedPropRows)
 	{
+		const FName PropRowName = NamedRow.Key;
+		const FBmrPlayerPropRow* PropRow = NamedRow.Value;
+		if (!ensureMsgf(PropRowName.IsValid(), TEXT("ASSERT: [%i] %hs:\n'PropRowName' is not valid for player tag '%s'!"), __LINE__, __FUNCTION__, *PlayerTag.ToString())
+		    || !ensureMsgf(PropRow, TEXT("ASSERT: [%i] %hs:\n'PropAsset' is not valid for player tag '%s'!"), __LINE__, __FUNCTION__, *PlayerTag.ToString())
+		    || !ensureMsgf(PropRow->Socket.IsValid(), TEXT("ASSERT: [%i] %hs:\n'Socket' is None for prop '%s'!"), __LINE__, __FUNCTION__, *PropRowName.ToString())
+		    || !ensureMsgf(!PropRow->Mesh.IsNull(), TEXT("ASSERT: [%i] %hs:\n'Mesh' is not set for prop '%s'!"), __LINE__, __FUNCTION__, *PropRowName.ToString()))
+		{
+			return;
+		}
+
+		// Defer this prop if mesh not loaded yet, wait for DAL to signal availability
 		UStreamableRenderAsset* PropAsset = PropRow->Mesh.Get();
+		if (!PropAsset)
+		{
+			UDalRegistrySubsystem::Get().ListenForDataRegistryRow<FBmrPlayerPropRow>(this, PropRowName, [this](const FBmrPlayerPropRow&)
+			{
+				AttachProps();
+			});
+			continue;
+		}
+
 		UAnimSequence* PropAnim = PropRow->MeshAnimation.Get();
 
 		UMeshComponent* MeshComponent = nullptr;

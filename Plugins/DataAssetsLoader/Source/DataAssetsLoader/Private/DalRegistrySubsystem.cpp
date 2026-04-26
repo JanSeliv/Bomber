@@ -472,18 +472,31 @@ void UDalRegistrySubsystem::GatherAllSoftPaths(const UScriptStruct* InStruct, TA
 		return;
 	}
 
-	TMap<FDataRegistryId, const uint8*> CachedItems;
-	const UScriptStruct* ItemStruct = nullptr;
-	Registry->GetAllCachedItems(CachedItems, ItemStruct);
-
 	const TArray<const FSoftObjectProperty*>& SoftProps = UDalUtilsLibrary::GetSoftProperties(InStruct);
-
-	for (const FSoftObjectProperty* SoftProp : SoftProps)
+	if (SoftProps.IsEmpty())
 	{
-		for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
+		return;
+	}
+
+	TArray<FDataRegistryId> AllIds;
+	Registry->GetPossibleRegistryIds(AllIds, /*bSortForDisplay=*/false);
+
+	for (const FDataRegistryId& Id : AllIds)
+	{
+		// Bypass the engine cache: the source fills PrecachedDataPtr directly when bPrecacheTable=true, which is the project default
+		FDataRegistryLookup Lookup;
+		const uint8* RowData = nullptr;
+		if (!Registry->ResolveDataRegistryId(Lookup, Id, &RowData)
+		    || !RowData)
 		{
-			const FSoftObjectPtr* SoftPtr = SoftProp->ContainerPtrToValuePtr<FSoftObjectPtr>(Pair.Value);
-			if (SoftPtr && !SoftPtr->IsNull())
+			continue;
+		}
+
+		for (const FSoftObjectProperty* SoftProp : SoftProps)
+		{
+			const FSoftObjectPtr* SoftPtr = SoftProp->ContainerPtrToValuePtr<FSoftObjectPtr>(RowData);
+			if (SoftPtr
+			    && !SoftPtr->IsNull())
 			{
 				OutPaths.AddUnique(SoftPtr->ToSoftObjectPath());
 			}
