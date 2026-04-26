@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "GameFramework/BmrGameSession.h"
 
@@ -17,5 +17,6 @@ void ABmrGameSession::RegisterPlayer(APlayerController* NewPlayer, const FUnique
 	if (PlayerState)
 	{
 		PlayerState->SetHumanId(NewPlayer);
+		PlayerState->SetIsHuman();
 	}
 }

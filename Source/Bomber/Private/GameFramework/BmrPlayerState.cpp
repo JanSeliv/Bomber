@@ -687,8 +687,6 @@ void ABmrPlayerState::RegisterPlayerWithSession(bool bWasFromInvite)
 	}
 
 	Super::RegisterPlayerWithSession(bWasFromInvite);
-
-	SetIsHuman();
 }
 
 // Unregister a player with the online subsystem
