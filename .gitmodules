@@ -25,10 +25,6 @@
 	path = Plugins/GameFeatures/ProgressionSystem
 	url = https://github.com/JanSeliv/ProgressionSystem.git
 	branch = develop
-[submodule "Plugins/LevelSequencerAudioTrimmer"]
-	path = Plugins/LevelSequencerAudioTrimmer
-	url = https://github.com/JanSeliv/LevelSequencerAudioTrimmer.git
-	branch = develop
 [submodule "Plugins/AdvancedSessionsPlugin"]
 	path = Plugins/AdvancedSessionsPlugin
 	url = https://github.com/JanSeliv/AdvancedSessionsPlugin.git
