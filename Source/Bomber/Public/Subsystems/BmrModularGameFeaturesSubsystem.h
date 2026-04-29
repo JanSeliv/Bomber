@@ -2,28 +2,32 @@
 
 #pragma once
 
-#include "Subsystems/WorldSubsystem.h"
+#include "Subsystems/EngineSubsystem.h"
+
+// UE
+#include "Containers/Ticker.h"
+#include "GameplayTagContainer.h"
 
 #include "BmrModularGameFeaturesSubsystem.generated.h"
 
 /**
- * Manages tag-driven Modular Game Feature loading/unloading at runtime.
- * Features that should always be loaded must set their BuiltInInitialFeatureState to Active in .uplugin instead.
+ * Manages tag-driven Modular Game Feature loading/unloading across all worlds (editor, PIE, cook).
+ * Features activate when their required tags appear on world ASC, deactivate when tags are removed.
  */
 UCLASS()
-class BOMBER_API UBmrModularGameFeaturesSubsystem final : public UWorldSubsystem
+class BOMBER_API UBmrModularGameFeaturesSubsystem final : public UEngineSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	/** Returns this subsystem, is checked and will crash if can't be obtained. */
-	static UBmrModularGameFeaturesSubsystem& Get(const UObject* WorldContextObject = nullptr);
+	/** Returns this subsystem, checked. Crashes if unavailable */
+	static UBmrModularGameFeaturesSubsystem& Get();
 
-	/** Returns the pointer to this subsystem. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (WorldContext = "WorldContextObject"))
-	static UBmrModularGameFeaturesSubsystem* GetModularGameFeaturesSubsystem(const UObject* WorldContextObject = nullptr);
+	/** Returns this subsystem or nullptr */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	static UBmrModularGameFeaturesSubsystem* GetModularGameFeaturesSubsystem();
 
-	/** Returns true if any tag-driven MGF should be active for the current World ASC tags but has not reached Active state yet. */
+	/** Whether any tag-driven MGF is pending activation despite owning required tags */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	bool HasPendingTagDrivenActivations() const;
 
@@ -31,33 +35,65 @@ public:
 	 * Tag-Driven Features
 	 ********************************************************************************************* */
 protected:
-	/** Called when the world ASC becomes available, subscribes to ASC tag events for tag-driven features. */
+	/** When a world's ASC becomes available and ready to broadcast tags */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnWorldASCReady(const struct FGameplayEventData& Payload);
 
-	/** Is called when any of the tag-driven features tags is added or removed from the world ASC, evaluates all tag-driven features and loads/unloads them accordingly. */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void OnModularGameFeatureTagChanged();
+	/** Per-ASC tag snapshots across all tracked worlds; only authoritative ASCs drive feature decisions */
+	TMap<TWeakObjectPtr<class UAbilitySystemComponent>, FGameplayTagContainer> AscOwnedTags;
 
-	/** Pending next-frame evaluation handle, is valid when evaluation is already queued. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
-	FTimerHandle EvaluationTimerHandle;
+	/** Features currently active via this subsystem; used to compute activation/deactivation delta */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, AdvancedDisplay, Category = "[Bomber]")
+	TSet<FName> ActiveFeatures;
+
+	/** Pending next-tick recompute handle; coalesces tag-event bursts */
+	FTSTicker::FDelegateHandle DeferredRecomputeHandle;
+
+	/** When an ASC's tag count changes */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnAscTagCountChanged(FGameplayTag ChangedTag, int32 NewCount, UAbilitySystemComponent* SourceAsc);
+
+	/** Defers feature set recomputation to next tick */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void QueueDeferredRecompute();
+
+	/** Recomputes desired feature set and applies activation/deactivation delta */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void ApplyAuthoritativeFeatureSet();
+
+	/** Whether ASC's world is authoritative for MGF decisions */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (BlueprintProtected))
+	bool IsAuthoritativeAsc(const UAbilitySystemComponent* ASC) const;
+
+	/*********************************************************************************************
+	 * World Lifecycle
+	 ********************************************************************************************* */
+protected:
+	/** When a world is about to finish destruction */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPreWorldFinishDestroy(class UWorld* World);
+
+#if WITH_EDITOR
+	/** Whether active features are frozen during editor<->PIE transition, released when first authoritative tag event fires */
+	bool bIsAuthorityTransitioning = false;
+
+	/** When Play In Editor is about to begin */
+	void OnPreBeginPIE(bool bIsSimulating);
+
+	/** When Play In Editor ends */
+	void OnEndPIE(bool bIsSimulating);
+
+	/** When editor finishes shutting down PIE; forces feature cycle (unload then reload from editor authority) */
+	void OnEditorShutdownPIE(bool bIsSimulating);
+#endif
 
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
 protected:
-	/** Called when subsystem initializes. */
+	/** When subsystem initializes */
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	/** Called when subsystem is destroyed. */
+	/** When subsystem is destroyed */
 	virtual void Deinitialize() override;
-
-	/** Called when world ends play. */
-	virtual void OnWorldEndPlay(UWorld& InWorld) override;
-
-#if WITH_EDITOR
-	/** Called after PIE teardown fully completes, re-syncs tag-driven features against the editor world's ASC state. */
-	void OnEditorShutdownPIE(bool bIsSimulating);
-#endif
 };

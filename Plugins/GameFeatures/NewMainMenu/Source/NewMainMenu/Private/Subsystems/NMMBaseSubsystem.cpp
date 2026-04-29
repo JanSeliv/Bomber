@@ -43,7 +43,7 @@ FNmmStateTag UNMMBaseSubsystem::GetPredictedMenuState() const
 	}
 
 	// Tag-driven MGF still pending activation, can not validate now
-	const UBmrModularGameFeaturesSubsystem* MgfSubsystem = UBmrModularGameFeaturesSubsystem::GetModularGameFeaturesSubsystem(this);
+	const UBmrModularGameFeaturesSubsystem* MgfSubsystem = UBmrModularGameFeaturesSubsystem::GetModularGameFeaturesSubsystem();
 	if (MgfSubsystem && MgfSubsystem->HasPendingTagDrivenActivations())
 	{
 		return FNmmStateTag::None;

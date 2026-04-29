@@ -6,6 +6,23 @@
 
 #include "ModularGameFeaturePluginUtils.generated.h"
 
+enum class EGameFeatureTargetState : uint8;
+
+/**
+ * Desired state of particular game feature
+ */
+USTRUCT(BlueprintType)
+struct FGameFeatureStateChange
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Feature")
+	FName GameFeatureName = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Feature")
+	EGameFeatureTargetState TargetState;
+};
+
 /**
  * Function library with Modular Game Feature (MGF) plugin helpers.
  */
@@ -20,9 +37,24 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static bool IsModularGameFeatureActive(FName GameFeatureName);
 
+	/** Returns the built-in initial target state for a game feature.
+	 * @param GameFeatureName The name of the game feature plugin. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static EGameFeatureTargetState GetBuiltInInitialFeatureState(FName GameFeatureName);
+
 	/** Enables or disable all game features. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void SetModularGameFeaturesActive(bool bEnable, const TArray<FName>& GameFeatures);
+
+	/** Changes target state for game features, batching all requests by state.
+	 * @param Changes Array of game features and their desired target states. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static void ChangeGameFeatureTargetState(const TArray<FGameFeatureStateChange>& Changes);
+
+	/** Resets game features to their configured built-in auto state.
+	 * @param GameFeatures Array of game feature names to reset. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static void RestoreGameFeatureTargetState(const TArray<FName>& GameFeatures);
 
 	/** Returns the content module name from the specified asset package, e.g. "/GameFeatureModule/" from a content asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")

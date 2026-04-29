@@ -42,6 +42,43 @@ bool UModularGameFeaturePluginUtils::IsModularGameFeatureActive(FName GameFeatur
 	return false;
 }
 
+// Returns the built-in initial auto state for a game feature
+EGameFeatureTargetState UModularGameFeaturePluginUtils::GetBuiltInInitialFeatureState(FName GameFeatureName)
+{
+	if (GameFeatureName.IsNone())
+	{
+		return EGameFeatureTargetState::Installed;
+	}
+
+	const UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
+
+	FString GameFeatureURL;
+	GameFeaturesSubsystem.GetPluginURLByName(GameFeatureName.ToString(), /*out*/ GameFeatureURL);
+	if (GameFeatureURL.IsEmpty())
+	{
+		return EGameFeatureTargetState::Installed;
+	}
+
+	FGameFeaturePluginDetails PluginDetails;
+	GameFeaturesSubsystem.GetGameFeaturePluginDetails(GameFeatureURL, PluginDetails);
+
+	switch (PluginDetails.BuiltInAutoState)
+	{
+		case EBuiltInAutoState::Invalid:
+			return EGameFeatureTargetState::Installed;
+		case EBuiltInAutoState::Installed:
+			return EGameFeatureTargetState::Installed;
+		case EBuiltInAutoState::Registered:
+			return EGameFeatureTargetState::Registered;
+		case EBuiltInAutoState::Loaded:
+			return EGameFeatureTargetState::Loaded;
+		case EBuiltInAutoState::Active:
+			return EGameFeatureTargetState::Active;
+		default:
+			return EGameFeatureTargetState::Installed;
+	}
+}
+
 // Enables or disable all game features
 void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, const TArray<FName>& GameFeatures)
 {
@@ -50,7 +87,9 @@ void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, 
 		return;
 	}
 
-	UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
+	TArray<FGameFeatureStateChange> Changes;
+	Changes.Reserve(GameFeatures.Num());
+
 	for (const FName GameFeatureName : GameFeatures)
 	{
 		if (GameFeatureName.IsNone())
@@ -64,30 +103,100 @@ void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, 
 			continue;
 		}
 
-		FString GameFeatureURL;
-		GameFeaturesSubsystem.GetPluginURLByName(GameFeatureName.ToString(), /*out*/ GameFeatureURL);
-		if (!ensureMsgf(!GameFeatureURL.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'%s' game feature state can not be changed!"), __LINE__, __FUNCTION__, *GameFeatureName.ToString()))
-		{
-			continue;
-		}
-
-		static const FGameFeaturePluginLoadComplete EmptyCallback{};
+		EGameFeatureTargetState TargetState;
 		if (bEnable)
 		{
-			GameFeaturesSubsystem.LoadAndActivateGameFeaturePlugin(GameFeatureURL, EmptyCallback);
+			TargetState = EGameFeatureTargetState::Active;
 		}
 		else
 		{
 			// Do not force full unload, but keep registered if next:
 			// - plugin itself has initial state as registered
 			// - editor is running, where packages not fully unload by design, attempting to force it would break package load back
-			FGameFeaturePluginDetails PluginDetails;
-			GameFeaturesSubsystem.GetGameFeaturePluginDetails(GameFeatureURL, PluginDetails);
-			const bool bInitiallyRegistered = PluginDetails.BuiltInAutoState == EBuiltInAutoState::Registered;
-			const bool bKeepRegistered = bInitiallyRegistered || UUtilsLibrary::IsEditor();
-			GameFeaturesSubsystem.UnloadGameFeaturePlugin(GameFeatureURL, EmptyCallback, bKeepRegistered);
+			const EGameFeatureTargetState InitialState = GetBuiltInInitialFeatureState(GameFeatureName);
+			const bool bInitiallyInstalled = InitialState == EGameFeatureTargetState::Installed;
+			const bool bKeepRegistered = !bInitiallyInstalled || UUtilsLibrary::IsEditor();
+			TargetState = bKeepRegistered ? EGameFeatureTargetState::Registered : EGameFeatureTargetState::Installed;
+		}
+
+		Changes.Emplace(GameFeatureName, TargetState);
+	}
+
+	ChangeGameFeatureTargetState(Changes);
+}
+
+// Changes target state for game features, batching all requests by state
+void UModularGameFeaturePluginUtils::ChangeGameFeatureTargetState(const TArray<FGameFeatureStateChange>& Changes)
+{
+	if (Changes.IsEmpty())
+	{
+		return;
+	}
+
+	UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
+	static const FGameFeatureProtocolOptions Options = []()
+	{
+		FGameFeatureProtocolOptions Opts;
+		Opts.bBatchProcess = true;
+		Opts.bLogErrorOnForcedDependencyCreation = true;
+		return Opts;
+	}();
+
+	TMap<EGameFeatureTargetState, TArray<FString>> Requests;
+
+	for (const FGameFeatureStateChange& Change : Changes)
+	{
+		if (Change.GameFeatureName.IsNone())
+		{
+			continue;
+		}
+
+		FString GameFeatureURL;
+		GameFeaturesSubsystem.GetPluginURLByName(Change.GameFeatureName.ToString(), /*out*/ GameFeatureURL);
+		if (!ensureMsgf(!GameFeatureURL.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'%s' game feature state can not be changed!"), __LINE__, __FUNCTION__, *Change.GameFeatureName.ToString()))
+		{
+			continue;
+		}
+
+		Requests.FindOrAdd(Change.TargetState).Add(GameFeatureURL);
+	}
+
+
+	static const FMultipleGameFeaturePluginsLoaded EmptyDelegate{};
+
+	// Batch multiple requests per specific target state at once
+	for (const TPair<EGameFeatureTargetState, TArray<FString>>& It : Requests)
+	{
+		if (!It.Value.IsEmpty())
+		{
+			GameFeaturesSubsystem.ChangeGameFeatureTargetState(It.Value, Options, It.Key, EmptyDelegate);
 		}
 	}
+}
+
+// Resets game features to their configured built-in auto state
+void UModularGameFeaturePluginUtils::RestoreGameFeatureTargetState(const TArray<FName>& GameFeatures)
+{
+	if (GameFeatures.IsEmpty())
+	{
+		return;
+	}
+
+	TArray<FGameFeatureStateChange> Changes;
+	Changes.Reserve(GameFeatures.Num());
+
+	for (const FName GameFeatureName : GameFeatures)
+	{
+		if (GameFeatureName.IsNone())
+		{
+			continue;
+		}
+
+		const EGameFeatureTargetState TargetState = GetBuiltInInitialFeatureState(GameFeatureName);
+		Changes.Emplace(GameFeatureName, TargetState);
+	}
+
+	ChangeGameFeatureTargetState(Changes);
 }
 
 // Returns names of all registered Modular Game Feature plugins
