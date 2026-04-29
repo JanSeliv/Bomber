@@ -6,6 +6,7 @@
 
 // Bomber
 #include "Bomber.h" // EBmrEndGameState, EBmrPlayerType
+#include "Structures/BmrMeshData.h"
 
 // UE
 #include "AbilitySystemInterface.h"
@@ -70,6 +71,41 @@ protected:
 	 * For write access, apply gameplay effects. */
 	UPROPERTY(Transient)
 	TObjectPtr<class UBmrHealthAttributeSet> HealthSet = nullptr;
+
+	/*********************************************************************************************
+	 * Chosen Mesh Data
+	 ********************************************************************************************* */
+public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChosenMeshDataChanged, const FBmrMeshData&, NewMeshData);
+
+	/** Called when player visual choice (character row or skin) changes. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
+	FOnChosenMeshDataChanged OnChosenMeshDataChanged;
+
+	/** Returns persistent player visual choice (character row + skin). */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const FORCEINLINE FBmrMeshData& GetChosenMeshData() const { return ChosenMeshData; }
+
+	/** Sets persistent player visual choice. Can be called on server or locally-controlled client (auto-replicates via server RPC). */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InMeshData"))
+	void SetChosenMeshData(const FBmrMeshData& InMeshData);
+
+protected:
+	/** Persistent player visual choice. Replicated so any pool round-trip / dormancy of the pawn keeps the right look. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, ReplicatedUsing = "OnRep_ChosenMeshData", AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
+	FBmrMeshData ChosenMeshData = FBmrMeshData::Empty;
+
+	/** Server RPC, mirrors local SetChosenMeshData call from a locally-controlled client. */
+	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "[Bomber]", meta = (BlueprintProtected, AutoCreateRefTerm = "InMeshData"))
+	void ServerSetChosenMeshData(const FBmrMeshData& InMeshData);
+
+	/** Called on client when ChosenMeshData replicates. */
+	UFUNCTION()
+	void OnRep_ChosenMeshData();
+
+	/** Resolves the chosen row on the owned pawn's MapComponent and broadcasts the change. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void ApplyChosenMeshData();
 
 	/*********************************************************************************************
 	 * End Game State

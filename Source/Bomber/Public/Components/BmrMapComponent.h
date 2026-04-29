@@ -66,13 +66,6 @@ public:
 	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
 	FOnPostRemovedFromLevel OnPostRemovedFromLevel;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnActorTypeChanged, UBmrMapComponent*, InMapComponent);
-
-	/** Is called when the mesh from current Data Asset is changed for owner on the level, on both server and clients.
-	 * Is useful to listen when own actor is applied all visual changes like mesh, material, etc. */
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
-	FOnActorTypeChanged OnActorTypeChanged;
-
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCellChanged, UBmrMapComponent*, InMapComponent, const FBmrCell&, NewCell, const FBmrCell&, PreviousCell);
 
 	/** Called when the cell of the owner is changed on the Generated Map, on both server and clients.
@@ -140,39 +133,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetLocalMeshMaterial(class UMaterialInterface* NewMaterial);
 
-	/** Returns optional data of the mesh component, which is replicated to clients.
-	 * Might be None, since clients are allowed to set mesh and material locally.
-	 * @warning prefer to use other getters to get mesh and material directly. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const FORCEINLINE FBmrMeshData& GetReplicatedMeshData() const { return ReplicatedMeshData; }
-
-	/** Is replicated alternative method to assign specific mesh and material to the owner.
-	 * Can be called on both server and clients, so it will replicate to all others.
-	 * Is optional to call, since clients are allowed to set mesh and material locally. */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (AutoCreateRefTerm = "MeshData"))
-	void SetReplicatedMeshData(const FBmrMeshData& MeshData);
-
-	/** Resolves the Data Registry row by name and applies its mesh locally. */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	/** Resolves the Data Registry row by name and applies its mesh locally.
+	 * Replicated and persistent player mesh data lives on ABmrPlayerState::ChosenMeshData. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void TryApplyMeshFromRow(FName RowName);
 
 protected:
 	/** Cached mesh component of the owner actor: can be static or skeletal mesh component, is created on this component registration. */
 	UPROPERTY(BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
 	TObjectPtr<class UMeshComponent> MeshComponent = nullptr;
-
-	/** Is optional to set, since clients are allowed to set mesh and material locally.
-	 * If set, then it will be replicated to clients. */
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, ReplicatedUsing = "OnRep_MeshData", AdvancedDisplay, Category = "[Bomber]", meta = (BlueprintProtected))
-	FBmrMeshData ReplicatedMeshData = FBmrMeshData::Empty;
-
-	/** Server RPC to set and apply how a level actor has to look like. */
-	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "[Bomber]", meta = (BlueprintProtected, AutoCreateRefTerm = "MeshData"))
-	void ServerSetMeshData(const FBmrMeshData& MeshData);
-
-	/** Is called on client to apply replicated mesh data. */
-	UFUNCTION()
-	void OnRep_MeshData();
 
 	/*********************************************************************************************
 	 * Collision
@@ -223,9 +192,6 @@ protected:
 
 	/** Called when a component is destroyed for removing the owner from the Generated Map. */
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
-
-	/** Returns properties that are replicated for the lifetime of the actor channel. */
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/*********************************************************************************************
 	 * Events

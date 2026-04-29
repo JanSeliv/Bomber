@@ -3,11 +3,12 @@
 #include "DataRegistries/BmrBombRow.h"
 
 // Bomber
-#include "Components/BmrMapComponent.h"
 #include "Components/BmrSkeletalMeshComponent.h"
 #include "DataRegistries/BmrPlayerRow.h"
+#include "GameFramework/BmrPlayerState.h"
 
 // UE
+#include "GameFramework/Pawn.h"
 #include "Materials/MaterialInstance.h"
 #include "Materials/MaterialInterface.h"
 
@@ -23,19 +24,18 @@ const FBmrBombRow& FBmrBombRow::GetBombRow(const AActor* InInstigator)
 	}
 
 	FBmrPlayerTag PlayerTag = FBmrPlayerTag::None;
-	const UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InInstigator);
-	const UBmrSkeletalMeshComponent* MeshComponent = !MapComponent
-	                                                     ? InInstigator->FindComponentByClass<UBmrSkeletalMeshComponent>()
-	                                                     : nullptr;
+	const APawn* InstigatorPawn = Cast<APawn>(InInstigator);
+	const ABmrPlayerState* InstigatorPlayerState = InstigatorPawn ? InstigatorPawn->GetPlayerState<ABmrPlayerState>() : nullptr;
 
-	if (MeshComponent)
+	if (InstigatorPlayerState)
 	{
-		PlayerTag = MeshComponent->GetPlayerTag();
-	}
-	else if (MapComponent)
-	{
-		const FBmrPlayerRow* PlayerRowData = FBmrPlayerRow::GetRowByName(MapComponent->GetReplicatedMeshData().RowName);
+		const FBmrPlayerRow* PlayerRowData = FBmrPlayerRow::GetRowByName(InstigatorPlayerState->GetChosenMeshData().RowName);
 		PlayerTag = PlayerRowData ? PlayerRowData->PlayerTag : FBmrPlayerTag::None;
+	}
+	else if (const UBmrSkeletalMeshComponent* MeshComponent = InInstigator->FindComponentByClass<UBmrSkeletalMeshComponent>())
+	{
+		// Fallback for non-pawn instigators: e.g. main menu skeletal mesh actor
+		PlayerTag = MeshComponent->GetPlayerTag();
 	}
 
 	const FBmrBombRow* FoundRow = GetRowByPredicate([&PlayerTag](const FBmrBombRow& Row)

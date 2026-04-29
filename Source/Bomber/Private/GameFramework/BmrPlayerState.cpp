@@ -105,6 +105,65 @@ void ABmrPlayerState::ApplyDefaultAttributes()
 }
 
 /*********************************************************************************************
+ * Chosen Mesh Data
+ ********************************************************************************************* */
+
+// Sets persistent player visual choice. Routes via server RPC if invoked on a locally-controlled client
+void ABmrPlayerState::SetChosenMeshData(const FBmrMeshData& InMeshData)
+{
+	if (!ensureMsgf(InMeshData.IsValid(), TEXT("ASSERT: [%i] %hs:\n'InMeshData' is not valid!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(InMeshData.SkinRowName.IsValid(), TEXT("ASSERT: [%i] %hs:\n'InMeshData.SkinRowName' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	if (InMeshData == ChosenMeshData)
+	{
+		return;
+	}
+
+	if (!HasAuthority())
+	{
+		if (IsPlayerStateLocallyControlled())
+		{
+			ServerSetChosenMeshData(InMeshData);
+		}
+		return;
+	}
+
+	ChosenMeshData = InMeshData;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ChosenMeshData, this);
+
+	ApplyChosenMeshData();
+}
+
+// Server RPC, mirrors local SetChosenMeshData call from a locally-controlled client
+void ABmrPlayerState::ServerSetChosenMeshData_Implementation(const FBmrMeshData& InMeshData)
+{
+	SetChosenMeshData(InMeshData);
+}
+
+// Called on client when ChosenMeshData replicates
+void ABmrPlayerState::OnRep_ChosenMeshData()
+{
+	ApplyChosenMeshData();
+}
+
+// Resolves the chosen row on the owned pawn's MapComponent and broadcasts the change
+void ABmrPlayerState::ApplyChosenMeshData()
+{
+	if (UBmrMapComponent* PawnMapComponent = UBmrMapComponent::GetMapComponent(GetPawn()))
+	{
+		PawnMapComponent->TryApplyMeshFromRow(ChosenMeshData.RowName);
+	}
+
+	if (OnChosenMeshDataChanged.IsBound())
+	{
+		OnChosenMeshDataChanged.Broadcast(ChosenMeshData);
+	}
+}
+
+/*********************************************************************************************
  * End Game State
  ********************************************************************************************* */
 
@@ -629,6 +688,7 @@ void ABmrPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Params.bIsPushBased = true;
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AbilitySystemComponent, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ChosenMeshData, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, EndGameState, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bIsPlayerDead, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OpponentsKilledNum, Params);

@@ -4,11 +4,11 @@
 
 // Bomber
 #include "Bomber.h"
-#include "Components/BmrMapComponent.h"
 #include "DalRegistrySubsystem.h"
 #include "DataRegistries/BmrPlayerPropRow.h"
 #include "DataRegistries/BmrPlayerRow.h"
 #include "DataRegistries/BmrPlayerSkinRow.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 
 // UE
@@ -17,6 +17,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
+#include "GameFramework/Pawn.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrSkeletalMeshComponent)
@@ -177,8 +178,9 @@ void UBmrSkeletalMeshComponent::SetSkeletalMesh(USkeletalMesh* NewMesh, bool bRe
 		return;
 	}
 
-	const UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(GetOwner());
-	const FBmrMeshData& NewMeshData = MapComponent ? MapComponent->GetReplicatedMeshData() : FBmrMeshData::Empty;
+	const APawn* OwnerPawn = GetOwner<APawn>();
+	const ABmrPlayerState* OwnerPlayerState = OwnerPawn ? OwnerPawn->GetPlayerState<ABmrPlayerState>() : nullptr;
+	const FBmrMeshData& NewMeshData = OwnerPlayerState ? OwnerPlayerState->GetChosenMeshData() : FBmrMeshData::Empty;
 	if (NewMeshData != PlayerMeshData)
 	{
 		InitSkeletalMesh(NewMeshData);
@@ -498,10 +500,6 @@ void UBmrSkeletalMeshComponent::ApplySkinByRowName(FName InSkinRowName)
 {
 	const FBmrPlayerSkinRow* SkinRow = InSkinRowName.IsNone() ? nullptr : FBmrPlayerSkinRow::GetRowByName(InSkinRowName);
 	UMaterialInterface* SkinMaterial = SkinRow ? SkinRow->Material.Get() : nullptr;
-	if (!SkinMaterial)
-	{
-		return;
-	}
 
 	auto SetMaterialForAllSlots = [SkinMaterial](UMeshComponent* MeshComponent)
 	{

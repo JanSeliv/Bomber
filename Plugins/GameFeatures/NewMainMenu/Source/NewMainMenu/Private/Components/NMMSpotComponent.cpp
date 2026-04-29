@@ -7,15 +7,16 @@
 #include "Data/NMMSaveGameData.h"
 #include "NMMUtils.h"
 #include "NmmGameplayTags.h"
-#include "Subsystems/NMMBaseSubsystem.h"
 #include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
 #include "Actors/BmrPawn.h"
 #include "Bomber.h"
-#include "Components/BmrMapComponent.h"
 #include "Controllers/BmrPlayerController.h"
+#include "DataRegistries/BmrPlayerRow.h"
+#include "DataRegistries/BmrPlayerSkinRow.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "DalSubsystem.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -84,16 +85,19 @@ ABmrSkeletalMeshActor& UNMMSpotComponent::GetOwnerChecked() const
 void UNMMSpotComponent::ApplyMeshOnPlayer()
 {
 	const ABmrPawn* Pawn = UBmrBlueprintFunctionLibrary::GetLocalPawn();
-	if (!ensureMsgf(Pawn, TEXT("ASSERT: [%i] %hs:\n'Pawn' is not valid!"), __LINE__, __FUNCTION__))
+	ABmrPlayerState* PlayerState = Pawn ? Pawn->GetPlayerState<ABmrPlayerState>() : nullptr;
+	if (!ensureMsgf(PlayerState, TEXT("ASSERT: [%i] %hs:\n'PlayerState' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	// Update the chosen player mesh on the level
-	const FBmrMeshData& PlayerMeshData = GetMeshChecked().GetMeshData();
-	UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(Pawn);
-	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-	MapComponent->SetReplicatedMeshData(PlayerMeshData);
+    // Spot might have None skin by default, apply first skin then
+	FBmrMeshData PlayerMeshData = GetMeshChecked().GetMeshData();
+	const FBmrPlayerRow* FallbackPlayerRow = PlayerMeshData.SkinRowName.IsNone() ? FBmrPlayerRow::GetRowByName(PlayerMeshData.RowName) : nullptr;
+	PlayerMeshData.SkinRowName = FallbackPlayerRow ? FBmrPlayerSkinRow::GetSkinRowName(FallbackPlayerRow->PlayerTag, /*SkinIndex*/ 0) : PlayerMeshData.SkinRowName;
+
+	// Persist the chosen player visual on the player state, replicates and survives pawn dies
+	PlayerState->SetChosenMeshData(PlayerMeshData);
 }
 
 /*********************************************************************************************

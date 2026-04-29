@@ -24,7 +24,6 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/StreamableRenderAsset.h"
-#include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrMapComponent)
 
@@ -41,8 +40,6 @@ UBmrMapComponent::UBmrMapComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
-
-	SetIsReplicatedByDefault(true);
 }
 
 /*********************************************************************************************
@@ -114,8 +111,6 @@ void UBmrMapComponent::SetLocalMesh(UStreamableRenderAsset* NewMesh)
 	checkf(Owner, TEXT("ERROR: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__);
 
 	UGameplayUtilsLibrary::SetMesh(MeshComponent, NewMesh);
-
-	OnActorTypeChanged.Broadcast(this);
 }
 
 /** Set material to the mesh. */
@@ -130,41 +125,11 @@ void UBmrMapComponent::SetLocalMeshMaterial(UMaterialInterface* NewMaterial)
 	MeshComponent->SetMaterial(0, NewMaterial);
 }
 
-// Is replicated alternative method to assign specific mesh and material to the owner
-void UBmrMapComponent::SetReplicatedMeshData(const FBmrMeshData& MeshData)
-{
-	if (!ensureMsgf(MeshComponent, TEXT("ASSERT: [%i] %hs:\n'MeshComponent' is not valid!"), __LINE__, __FUNCTION__)
-	    || !MeshData.IsValid())
-	{
-		return;
-	}
-
-	const FBmrMeshData& CurrentMeshData = GetReplicatedMeshData();
-	if (CurrentMeshData == MeshData)
-	{
-		// Is the same mesh data
-		return;
-	}
-
-	ReplicatedMeshData = MeshData;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedMeshData, this);
-
-	// Resolve and apply the mesh locally, if the row or its soft-ref mesh isn't ready yet, a DR listener finishes the apply
-	TryApplyMeshFromRow(MeshData.RowName);
-
-	// Replicate to all others
-	if (!GetOwner()->HasAuthority())
-	{
-		ServerSetMeshData(MeshData);
-	}
-}
-
 // Resolves the Data Registry row by name and applies its mesh locally
 void UBmrMapComponent::TryApplyMeshFromRow(FName RowName)
 {
 	const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
-	if (!ensureMsgf(RowType, TEXT("ASSERT: [%i] %hs:\n'RowType' is not valid!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(RowName.IsValid(), TEXT("ASSERT: [%i] %hs:\n'RowName' is not valid!"), __LINE__, __FUNCTION__))
+	if (!ensureMsgf(RowType, TEXT("ASSERT: [%i] %hs:\n'RowType' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
@@ -179,11 +144,16 @@ void UBmrMapComponent::TryApplyMeshFromRow(FName RowName)
 		return;
 	}
 
-	// Fallback to listen for the row to be loaded or updated in the Data Registry, and apply the mesh then
-	UDalRegistrySubsystem::Get().ListenForDataRegistryRow(this, RowType, RowName, [this](FName ResolvedRowName)
+	if (RowName.IsNone())
 	{
-		if (!ReplicatedMeshData.IsValid()
-		    || ReplicatedMeshData.RowName != ResolvedRowName)
+		// No specific row requested and no first row resolvable yet, nothing to listen for
+		return;
+	}
+
+	// Fallback to listen for the row to be loaded or updated in the Data Registry, and apply the mesh then
+	UDalRegistrySubsystem::Get().ListenForDataRegistryRow(this, RowType, RowName, [this, RowName](FName ResolvedRowName)
+	{
+		if (RowName != ResolvedRowName)
 		{
 			return;
 		}
@@ -194,23 +164,6 @@ void UBmrMapComponent::TryApplyMeshFromRow(FName RowName)
 			SetLocalMesh(ResolvedRow->Mesh.Get());
 		}
 	});
-}
-
-// Server RPC to set and apply how a level actor has to look like
-void UBmrMapComponent::ServerSetMeshData_Implementation(const FBmrMeshData& MeshData)
-{
-	SetReplicatedMeshData(MeshData);
-}
-
-// Is called on client to apply replicated mesh data
-void UBmrMapComponent::OnRep_MeshData()
-{
-	if (!ReplicatedMeshData.IsValid())
-	{
-		return;
-	}
-
-	TryApplyMeshFromRow(ReplicatedMeshData.RowName);
 }
 
 /*********************************************************************************************
@@ -378,17 +331,6 @@ void UBmrMapComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
 
-// Returns properties that are replicated for the lifetime of the actor channel
-void UBmrMapComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	FDoRepLifetimeParams Params;
-	Params.bIsPushBased = true;
-
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedMeshData, Params);
-}
-
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */
@@ -406,18 +348,7 @@ bool UBmrMapComponent::OnAdded_Implementation()
 	// Set the default mesh (if any custom or replicated is not set yet), any system can override it later
 	if (!GetMesh())
 	{
-		if (ReplicatedMeshData.IsValid())
-		{
-			// Replicated target known: sync-resolve or queue a listener for post-async-load
-			TryApplyMeshFromRow(ReplicatedMeshData.RowName);
-		}
-		else
-		{
-			// No replicated target yet: sync-pick the first row only, a later SetReplicatedMeshData overrides via listener if needed
-			const UScriptStruct* RowType = GetActorDataAssetChecked().GetRowType();
-			const FBmrLevelActorRow* FoundRow = FBmrLevelActorRow::FindFirstRow(RowType);
-			SetLocalMesh(FoundRow ? FoundRow->Mesh.Get() : nullptr);
-		}
+		TryApplyMeshFromRow(NAME_None);
 	}
 
 	TryDisplayOwnedCell();
@@ -439,6 +370,7 @@ bool UBmrMapComponent::OnAdded_Implementation()
 
 	// Notify listeners about the actor was added to the level
 	OnAddedToLevel.Broadcast(this);
+	BPOnAddedToLevel.Broadcast(this);
 
 	// Increment the token to track the replication changes
 	ABmrGeneratedMap::Get().IncrementReplicationToken();
@@ -480,9 +412,6 @@ void UBmrMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser /* = 
 	}
 
 	SetLocalMesh(nullptr);
-
-	ReplicatedMeshData = FBmrMeshData::Empty;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ReplicatedMeshData, this);
 
 	SetCell(FBmrCell::InvalidCell);
 }

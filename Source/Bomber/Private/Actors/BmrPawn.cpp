@@ -76,7 +76,8 @@ ABmrPawn::ABmrPawn()
 // Returns the Player Tag associated with player
 const FBmrPlayerTag& ABmrPawn::GetPlayerTag() const
 {
-	const FBmrPlayerRow* PlayerRow = MapComponent ? FBmrPlayerRow::GetRowByName(MapComponent->GetReplicatedMeshData().RowName) : nullptr;
+	const ABmrPlayerState* MyPlayerState = GetPlayerState<ABmrPlayerState>();
+	const FBmrPlayerRow* PlayerRow = MyPlayerState ? FBmrPlayerRow::GetRowByName(MyPlayerState->GetChosenMeshData().RowName) : nullptr;
 	return PlayerRow ? PlayerRow->PlayerTag : FBmrPlayerTag::None;
 }
 
@@ -159,9 +160,25 @@ void ABmrPawn::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* 
 {
 	Super::OnPlayerStateChanged(NewPlayerState, OldPlayerState);
 
-	if (ABmrPlayerState* MyPlayerState = Cast<ABmrPlayerState>(NewPlayerState))
+	ABmrPlayerState* MyPlayerState = Cast<ABmrPlayerState>(NewPlayerState);
+	if (!MyPlayerState)
 	{
-		MyPlayerState->OnPlayerStateInit();
+	    // Might become null when repossess
+		return;
+	}
+
+	MyPlayerState->OnPlayerStateInit();
+
+	if (MyPlayerState->GetChosenMeshData().IsValid())
+	{
+		// Re-apply last chosen player mesh
+		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
+		MapComponent->TryApplyMeshFromRow(MyPlayerState->GetChosenMeshData().RowName);
+	}
+	else if (HasAuthority())
+	{
+		// PlayerState just spawned, apply default now
+		SetDefaultPlayerMeshData();
 	}
 }
 
@@ -176,17 +193,23 @@ void ABmrPawn::OnAddedToLevel_Implementation(UBmrMapComponent* InMapComponent)
 	InMapComponent->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
 	InMapComponent->OnPostRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPostRemovedFromLevel);
 	InMapComponent->OnCellChanged.AddUniqueDynamic(this, &ThisClass::OnCellChanged);
-	InMapComponent->OnActorTypeChanged.AddUniqueDynamic(this, &ThisClass::OnActorTypeChanged);
 
 	GetMeshComponentChecked().SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-	if (!MapComponent->GetReplicatedMeshData().IsValid())
+	ABmrPlayerState* MyPlayerState = GetPlayerState<ABmrPlayerState>();
+	if (MyPlayerState && MyPlayerState->GetChosenMeshData().IsValid())
 	{
+		// Persistent choice already known, apply locally so this side's visual matches before any further OnRep fires
+		MapComponent->TryApplyMeshFromRow(MyPlayerState->GetChosenMeshData().RowName);
+	}
+	else if (HasAuthority())
+	{
+		// Server-only: derive default if no persistent choice yet, replicates via PlayerState. Clients without a choice keep the FindFirstRow placeholder set in MapComponent::OnAdded
 		SetDefaultPlayerMeshData();
 	}
 
-	if (ABmrPlayerState* MyPlayerState = GetPlayerState<ABmrPlayerState>())
+	if (MyPlayerState)
 	{
 		checkf(PlayerName3DWidgetComponent, TEXT("ERROR: [%i] %hs:\n'PlayerName3DWidgetComponent' is null!"), __LINE__, __FUNCTION__);
 		PlayerName3DWidgetComponent->Init(MyPlayerState);
@@ -286,7 +309,6 @@ void ABmrPawn::OnPostRemovedFromLevel_Implementation(UBmrMapComponent* InMapComp
 	checkf(InMapComponent, TEXT("ERROR: [%i] %hs:\n'InMapComponent' is null!"), __LINE__, __FUNCTION__);
 	InMapComponent->OnPostRemovedFromLevel.RemoveAll(this);
 	InMapComponent->OnCellChanged.RemoveAll(this);
-	InMapComponent->OnActorTypeChanged.RemoveAll(this);
 
 	OnActorBeginOverlap.RemoveAll(this);
 
@@ -514,11 +536,6 @@ UBmrSkeletalMeshComponent& ABmrPawn::GetMeshComponentChecked() const
 // Set and apply default skeletal mesh for this player
 void ABmrPawn::SetDefaultPlayerMeshData(bool bForcePlayerSkin /* = false*/)
 {
-	if (!HasAuthority())
-	{
-		return;
-	}
-
 	const int32 MeshesNum = FBmrPlayerRow::GetRowsNum();
 	const int32 PlayerId = GetPlayerId();
 	if (!ensureMsgf(MeshesNum > 0, TEXT("ASSERT: [%i] %hs:\n'MeshesNum' is empty!"), __LINE__, __FUNCTION__)
@@ -554,8 +571,26 @@ void ABmrPawn::SetDefaultPlayerMeshData(bool bForcePlayerSkin /* = false*/)
 	MeshData.RowName = RowName;
 	MeshData.SkinRowName = FBmrPlayerSkinRow::GetSkinRowName(Row->PlayerTag, PlayerId);
 
-	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
-	MapComponent->SetReplicatedMeshData(MeshData);
+	if (UUtilsLibrary::IsEditorNotPieWorld())
+	{
+		// Editor preview has no PlayerState, drive the skeletal mesh directly so the editor visual (mesh + skin + props) still resolves
+		if (UBmrSkeletalMeshComponent* SkelMesh = GetMeshComponent())
+		{
+			SkelMesh->InitSkeletalMesh(MeshData);
+		}
+		return;
+	}
+
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	if (ABmrPlayerState* MyPlayerState = GetPlayerState<ABmrPlayerState>())
+	{
+		MyPlayerState->SetChosenMeshData(MeshData);
+	}
+	// No PlayerState yet: OnPlayerStateChanged retries once the controller possesses and PlayerState is assigned
 }
 
 /*********************************************************************************************

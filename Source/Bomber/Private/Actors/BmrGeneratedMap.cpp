@@ -268,9 +268,10 @@ void ABmrGeneratedMap::SpawnActorWithMesh(EBmrActorType ActorType, const FBmrCel
 {
 	if (ensureMsgf(MeshData.IsValid(), TEXT("ASSERT: [%i] %hs:\n'MeshData' is not valid!"), __LINE__, __FUNCTION__))
 	{
+		// Server-only visual override: clients fall back to MapComponent::OnAdded's FindFirstRow, player mesh goes through ABmrPlayerState::SetChosenMeshData
 		const auto& OnSpawned = [MeshData](UBmrMapComponent& MapComponent)
 		{
-			MapComponent.SetReplicatedMeshData(MeshData);
+			MapComponent.TryApplyMeshFromRow(MeshData.RowName);
 		};
 		SpawnActorByType(ActorType, Cell, OnSpawned);
 	}
