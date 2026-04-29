@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "Subsystems/BmrModularGameFeaturesSubsystem.h"
+#include "Subsystems/BmrModularGameFeaturesLoaderSubsystem.h"
 
 // Bomber
 #include "DataAssets/BmrModularGameFeatureSettings.h"
@@ -19,24 +19,24 @@
 #include "Editor.h"
 #endif
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrModularGameFeaturesSubsystem)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrModularGameFeaturesLoaderSubsystem)
 
 // Returns this subsystem, is checked and will crash if can't be obtained
-UBmrModularGameFeaturesSubsystem& UBmrModularGameFeaturesSubsystem::Get()
+UBmrModularGameFeaturesLoaderSubsystem& UBmrModularGameFeaturesLoaderSubsystem::Get()
 {
-	UBmrModularGameFeaturesSubsystem* Subsystem = GetModularGameFeaturesSubsystem();
+	UBmrModularGameFeaturesLoaderSubsystem* Subsystem = GetModularGameFeaturesSubsystem();
 	checkf(Subsystem, TEXT("ERROR: [%i] %hs:\n'Subsystem' is null!"), __LINE__, __FUNCTION__);
 	return *Subsystem;
 }
 
 // Returns the pointer to this subsystem
-UBmrModularGameFeaturesSubsystem* UBmrModularGameFeaturesSubsystem::GetModularGameFeaturesSubsystem()
+UBmrModularGameFeaturesLoaderSubsystem* UBmrModularGameFeaturesLoaderSubsystem::GetModularGameFeaturesSubsystem()
 {
-	return GEngine ? GEngine->GetEngineSubsystem<UBmrModularGameFeaturesSubsystem>() : nullptr;
+	return GEngine ? GEngine->GetEngineSubsystem<UBmrModularGameFeaturesLoaderSubsystem>() : nullptr;
 }
 
 // Returns true if any tag-driven MGF should be active for the current ASC tags but is not yet Active
-bool UBmrModularGameFeaturesSubsystem::HasPendingTagDrivenActivations() const
+bool UBmrModularGameFeaturesLoaderSubsystem::HasPendingTagDrivenActivations() const
 {
 	const UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (!ASC)
@@ -71,7 +71,7 @@ bool UBmrModularGameFeaturesSubsystem::HasPendingTagDrivenActivations() const
  ********************************************************************************************* */
 
 // Snapshots the broadcasting world's ASC tags and registers per-tag listeners
-void UBmrModularGameFeaturesSubsystem::OnWorldASCReady_Implementation(const FGameplayEventData& Payload)
+void UBmrModularGameFeaturesLoaderSubsystem::OnWorldASCReady_Implementation(const FGameplayEventData& Payload)
 {
 	UAbilitySystemComponent* ASC = const_cast<UAbilitySystemComponent*>(Cast<UAbilitySystemComponent>(Payload.OptionalObject.Get()));
 	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__))
@@ -96,7 +96,7 @@ void UBmrModularGameFeaturesSubsystem::OnWorldASCReady_Implementation(const FGam
 }
 
 // Updates the per-ASC tag snapshot and queues a deferred recompute
-void UBmrModularGameFeaturesSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag ChangedTag, int32 NewCount, UAbilitySystemComponent* SourceAsc)
+void UBmrModularGameFeaturesLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag ChangedTag, int32 NewCount, UAbilitySystemComponent* SourceAsc)
 {
 	FGameplayTagContainer* OwnedSnapshot = AscOwnedTags.Find(SourceAsc);
 	if (!OwnedSnapshot)
@@ -126,7 +126,7 @@ void UBmrModularGameFeaturesSubsystem::OnAscTagCountChanged_Implementation(FGame
 }
 
 // Coalesces tag-event bursts and keeps MGF activation out of synchronous callbacks
-void UBmrModularGameFeaturesSubsystem::QueueDeferredRecompute()
+void UBmrModularGameFeaturesLoaderSubsystem::QueueDeferredRecompute()
 {
 	if (DeferredRecomputeHandle.IsValid())
 	{
@@ -143,7 +143,7 @@ void UBmrModularGameFeaturesSubsystem::QueueDeferredRecompute()
 }
 
 // In game builds the Game world is authoritative; in editor builds the play world is authoritative during a play session, otherwise the editor world is
-bool UBmrModularGameFeaturesSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC) const
+bool UBmrModularGameFeaturesLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC) const
 {
 	if (!ASC)
 	{
@@ -171,7 +171,7 @@ bool UBmrModularGameFeaturesSubsystem::IsAuthoritativeAsc(const UAbilitySystemCo
 }
 
 // Aggregates authoritative tags, computes the desired feature set, applies the diff vs the active set
-void UBmrModularGameFeaturesSubsystem::ApplyAuthoritativeFeatureSet()
+void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 {
 #if WITH_EDITOR
 	if (bIsAuthorityTransitioning)
@@ -237,7 +237,7 @@ void UBmrModularGameFeaturesSubsystem::ApplyAuthoritativeFeatureSet()
  ********************************************************************************************* */
 
 // Drains tracked ASCs whose world is dying; editor map switches restore features to baseline, PIE world death recomputes from remaining authority
-void UBmrModularGameFeaturesSubsystem::OnPreWorldFinishDestroy_Implementation(UWorld* World)
+void UBmrModularGameFeaturesLoaderSubsystem::OnPreWorldFinishDestroy_Implementation(UWorld* World)
 {
 	if (!World)
 	{
@@ -293,18 +293,18 @@ void UBmrModularGameFeaturesSubsystem::OnPreWorldFinishDestroy_Implementation(UW
 }
 
 #if WITH_EDITOR
-void UBmrModularGameFeaturesSubsystem::OnPreBeginPIE(bool /*bIsSimulating*/)
+void UBmrModularGameFeaturesLoaderSubsystem::OnPreBeginPIE(bool /*bIsSimulating*/)
 {
 	bIsAuthorityTransitioning = true;
 }
 
-void UBmrModularGameFeaturesSubsystem::OnEndPIE(bool /*bIsSimulating*/)
+void UBmrModularGameFeaturesLoaderSubsystem::OnEndPIE(bool /*bIsSimulating*/)
 {
 	bIsAuthorityTransitioning = true;
 }
 
 // Force-deactivate all tag-driven features so the engine emits Unloaded, then queue a recompute to reactivate from current authoritative ASCs
-void UBmrModularGameFeaturesSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*/)
+void UBmrModularGameFeaturesLoaderSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*/)
 {
 	bIsAuthorityTransitioning = false;
 
@@ -322,7 +322,7 @@ void UBmrModularGameFeaturesSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*
  ********************************************************************************************* */
 
 // Binds world and editor lifecycle delegates
-void UBmrModularGameFeaturesSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void UBmrModularGameFeaturesLoaderSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
@@ -364,7 +364,7 @@ void UBmrModularGameFeaturesSubsystem::Initialize(FSubsystemCollectionBase& Coll
 }
 
 // Unbinds delegates
-void UBmrModularGameFeaturesSubsystem::Deinitialize()
+void UBmrModularGameFeaturesLoaderSubsystem::Deinitialize()
 {
 	if (DeferredRecomputeHandle.IsValid())
 	{

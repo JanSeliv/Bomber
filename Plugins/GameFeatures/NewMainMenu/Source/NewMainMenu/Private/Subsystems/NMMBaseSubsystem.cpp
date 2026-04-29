@@ -13,7 +13,7 @@
 #include "GameFramework/BmrGameState.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrModularGameFeaturesSubsystem.h"
+#include "Subsystems/BmrModularGameFeaturesLoaderSubsystem.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
@@ -43,7 +43,7 @@ FNmmStateTag UNMMBaseSubsystem::GetPredictedMenuState() const
 	}
 
 	// Tag-driven MGF still pending activation, can not validate now
-	const UBmrModularGameFeaturesSubsystem* MgfSubsystem = UBmrModularGameFeaturesSubsystem::GetModularGameFeaturesSubsystem();
+	const UBmrModularGameFeaturesLoaderSubsystem* MgfSubsystem = UBmrModularGameFeaturesLoaderSubsystem::GetModularGameFeaturesSubsystem();
 	if (MgfSubsystem && MgfSubsystem->HasPendingTagDrivenActivations())
 	{
 		return FNmmStateTag::None;

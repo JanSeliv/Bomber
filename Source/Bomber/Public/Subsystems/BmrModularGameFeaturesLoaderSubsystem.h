@@ -8,24 +8,25 @@
 #include "Containers/Ticker.h"
 #include "GameplayTagContainer.h"
 
-#include "BmrModularGameFeaturesSubsystem.generated.h"
+#include "BmrModularGameFeaturesLoaderSubsystem.generated.h"
 
 /**
  * Manages tag-driven Modular Game Feature loading/unloading across all worlds (editor, PIE, cook).
  * Features activate when their required tags appear on world ASC, deactivate when tags are removed.
+ * Features are defined in UBmrModularGameFeatureSettings.
  */
 UCLASS()
-class BOMBER_API UBmrModularGameFeaturesSubsystem final : public UEngineSubsystem
+class BOMBER_API UBmrModularGameFeaturesLoaderSubsystem final : public UEngineSubsystem
 {
 	GENERATED_BODY()
 
 public:
 	/** Returns this subsystem, checked. Crashes if unavailable */
-	static UBmrModularGameFeaturesSubsystem& Get();
+	static UBmrModularGameFeaturesLoaderSubsystem& Get();
 
 	/** Returns this subsystem or nullptr */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	static UBmrModularGameFeaturesSubsystem* GetModularGameFeaturesSubsystem();
+	static UBmrModularGameFeaturesLoaderSubsystem* GetModularGameFeaturesSubsystem();
 
 	/** Whether any tag-driven MGF is pending activation despite owning required tags */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
