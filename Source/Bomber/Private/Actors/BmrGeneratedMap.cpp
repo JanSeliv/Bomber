@@ -9,9 +9,9 @@
 #include "DalSubsystem.h"
 #include "Data/SpawnRequest.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
+#include "Engine/Engine.h"
 #include "Generators/BmrCellsGenerator_Base.h"
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
-#include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "PoolManagerSubsystem.h"
 #include "Structures/BmrGameStateTag.h"
@@ -624,42 +624,6 @@ UAbilitySystemComponent& ABmrGeneratedMap::GetAbilitySystemComponentChecked() co
 	return *AbilitySystemComponent;
 }
 
-// Returns the current map visual theme tag from the ASC, or None if not set
-FBmrMapTag ABmrGeneratedMap::GetMapTag() const
-{
-	return UGameplayUtilsLibrary::GetFilteredGameplayTags(AbilitySystemComponent, FBmrMapTag::ParentTag).First();
-}
-
-// Switches the map by applying new tag on World ASC
-void ABmrGeneratedMap::SetMapTag(const FBmrMapTag& NewMapTag)
-{
-	if (!HasAuthority()
-	    || !ensureMsgf(AbilitySystemComponent, TEXT("ASSERT: [%i] %hs:\n'AbilitySystemComponent' is null!"), __LINE__, __FUNCTION__)
-	    || AbilitySystemComponent->GetOwnedGameplayTags().HasTagExact(NewMapTag))
-	{
-		// Exact tag is already applied
-		return;
-	}
-
-	CurrentMapTag = NewMapTag;
-
-	const FGameplayTagContainer OldMapTags = UGameplayUtilsLibrary::GetFilteredGameplayTags(AbilitySystemComponent, FBmrMapTag::ParentTag);
-	if (OldMapTags.IsValid())
-	{
-		// Remove any existing map tags from the ASC
-		AbilitySystemComponent->RemoveLooseGameplayTags(OldMapTags);
-	}
-
-	if (NewMapTag.IsValid())
-	{
-		// Apply new tag
-		AbilitySystemComponent->AddLooseGameplayTag(NewMapTag, 1, EGameplayTagReplicationState::TagOnly);
-
-		// Clear out current level actors immediately; GenerateLevelActors will re-run once the new map's Data Registry rows are injected via the map subsystem callback
-		DestroyAllLevelActors();
-	}
-}
-
 // Broadcasts WorldASC_Ready event once per world session when the ASC is available
 void ABmrGeneratedMap::TryBroadcastWorldASCReady()
 {
@@ -742,9 +706,6 @@ void ABmrGeneratedMap::OnConstructionGeneratedMap_Implementation(const FTransfor
 	// Align transform and build cells
 	BuildGridCells(Transform);
 
-	// Apply startup map tag on ASC (might be not set intentionally)
-	SetMapTag(CurrentMapTag);
-
 	// Actors generation
 	GenerateLevelActors();
 
@@ -823,6 +784,8 @@ void ABmrGeneratedMap::Destroyed()
 	{
 		RootComponent->TransformUpdated.RemoveAll(this);
 	}
+
+	UGameFrameworkComponentManager::RemoveGameFrameworkComponentReceiver(this);
 
 	Super::Destroyed();
 }

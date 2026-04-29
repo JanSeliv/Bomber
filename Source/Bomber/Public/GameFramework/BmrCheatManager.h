@@ -146,12 +146,6 @@ public:
 	 * Level
 	 ********************************************************************************************* */
 public:
-	/** Switches the map visual theme by partial name match against registered Map.* tags (case-insensitive).
-	 * @param MapName Partial tag name to match (e.g. "Maya" matches "Map.Maya").
-	 * Bomber.Level.SetMap Maya - switch to the Maya map theme. */
-	UFUNCTION(meta = (CheatName = "Bomber.Level.SetMap"))
-	static void SetMap(const FString& MapName);
-
 	/** Sets the size for generated map, it will automatically regenerate the level for given size.
 	 * @param LevelSize The new size where length and width have to be unpaired (odd).
 	 * Bomber.Level.SetSize 9x7 - set the size of the level to 9 columns (width) and 7 rows (length). */

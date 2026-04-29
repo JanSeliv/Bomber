@@ -17,7 +17,6 @@
 #include "DataRegistries/BmrPlayerRow.h"
 #include "GameFramework/PlayerState.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Structures/BmrMapTag.h"
 #include "Structures/BmrPowerupTag.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
@@ -303,27 +302,6 @@ TAutoConsoleVariable<FString> UBmrCheatManager::CVarDisplayCells(
 /*********************************************************************************************
  * Level
  ********************************************************************************************* */
-
-// Switches the map visual theme by partial name match against registered Map.* tags (case-insensitive)
-void UBmrCheatManager::SetMap(const FString& MapName)
-{
-	const FGameplayTagContainer ChildTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(FBmrMapTag::ParentTag);
-
-	FGameplayTag FoundTag = FGameplayTag::EmptyTag;
-	for (const FGameplayTag& TagIt : ChildTags)
-	{
-		if (TagIt.ToString().Contains(MapName, ESearchCase::IgnoreCase))
-		{
-			FoundTag = TagIt;
-			break;
-		}
-	}
-
-	if (ensureMsgf(FoundTag.IsValid(), TEXT("ASSERT: [%i] %hs:\nNo Map.* tag found matching '%s'!"), __LINE__, __FUNCTION__, *MapName))
-	{
-		ABmrGeneratedMap::Get().SetMapTag(FoundTag);
-	}
-}
 
 // Sets the size for generated map, it will automatically regenerate the level for given size
 void UBmrCheatManager::SetLevelSize(const FString& LevelSize)
