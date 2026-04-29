@@ -13,6 +13,7 @@ public class MyUtils : ModuleRules
 			{
 				"Core"
 				, "GameFeatures" // Created UModularGameFeatureWorldSubsystem, UModularGameFeaturePluginUtils
+				, "ModularGameplay" // Created UGameFrameworkComponentManager extension handlers
 				, "ModelViewViewModel" // Created MVVM base classes
 				, "AsyncMessageSystem" // Created UGlobalMessageSubsystem (Aka Lyra Gameplay Message Router)
 			}
@@ -35,6 +36,7 @@ public class MyUtils : ModuleRules
 			PrivateDependencyModuleNames.AddRange(new[]
 				{
 					"MyEditorUtils" // FEditorUtilsLibrary
+					, "UnrealEd" // FEditorDelegates::OnMapOpened
 				}
 			);
 		}
