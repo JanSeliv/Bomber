@@ -121,6 +121,26 @@ void UNMMBaseSubsystem::OnGameFeatureDeinitialize_Implementation()
 	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuReady);
 }
 
+// Recovers menu state after game feature activations
+void UNMMBaseSubsystem::OnGameFeatureActivated(const UGameFeatureData* /*GameFeatureData*/, const FString& /*PluginURL*/)
+{
+	if (CurrentMenuStateTag != FNmmStateTag::None
+	    || !ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu))
+	{
+		// Not in the wait condition, nothing to recover
+		return;
+	}
+
+	TryBroadcastMenuReady();
+
+	const FNmmStateTag PredictedState = GetPredictedMenuState();
+	if (PredictedState != FNmmStateTag::None)
+	{
+		// It's likely client raced replicated Menu game state vs local MGF activating, leaving NMM state stuck at None, apply desired state
+		SetNewMainMenuState(PredictedState);
+	}
+}
+
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */

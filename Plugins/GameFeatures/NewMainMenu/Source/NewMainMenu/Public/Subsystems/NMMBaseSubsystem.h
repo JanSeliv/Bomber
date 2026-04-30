@@ -66,6 +66,9 @@ protected:
 	/** Clears all transient data contained in this subsystem */
 	virtual void OnGameFeatureDeinitialize_Implementation() override;
 
+	/** Recovers menu state after game feature activations. */
+	virtual void OnGameFeatureActivated(const class UGameFeatureData* GameFeatureData, const FString& PluginURL) override;
+
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */
