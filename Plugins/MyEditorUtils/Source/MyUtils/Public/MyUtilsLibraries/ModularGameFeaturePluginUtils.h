@@ -6,22 +6,9 @@
 
 #include "ModularGameFeaturePluginUtils.generated.h"
 
+struct FGameFeatureStateChange;
+
 enum class EGameFeatureTargetState : uint8;
-
-/**
- * Desired state of particular game feature
- */
-USTRUCT(BlueprintType)
-struct FGameFeatureStateChange
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Feature")
-	FName GameFeatureName = NAME_None;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Feature")
-	EGameFeatureTargetState TargetState;
-};
 
 /**
  * Function library with Modular Game Feature (MGF) plugin helpers.

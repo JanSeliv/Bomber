@@ -4,6 +4,7 @@
 
 // MyUtils
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/GameFeatureStateChange.h"
 
 // Unreal
 #include "GameFeatureData.h"
@@ -153,14 +154,14 @@ void UModularGameFeaturePluginUtils::ChangeGameFeatureTargetState(const TArray<F
 
 		FString GameFeatureURL;
 		GameFeaturesSubsystem.GetPluginURLByName(Change.GameFeatureName.ToString(), /*out*/ GameFeatureURL);
-		if (!ensureMsgf(!GameFeatureURL.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'%s' game feature state can not be changed!"), __LINE__, __FUNCTION__, *Change.GameFeatureName.ToString()))
+		if (GameFeatureURL.IsEmpty())
 		{
+			UE_LOG(LogGameFeatures, Log, TEXT("Game feature '%s' is not installed in the project (likely removed or corrupted)"), *Change.GameFeatureName.ToString());
 			continue;
 		}
 
 		Requests.FindOrAdd(Change.TargetState).Add(GameFeatureURL);
 	}
-
 
 	static const FMultipleGameFeaturePluginsLoaded EmptyDelegate{};
 
