@@ -432,3 +432,8 @@ Config/Localization/*
 
 # Bomber specific
 Config/DefaultMetaCheatManager.ini
+
+# Modular Game Features:art content shared separately, too large for repo
+Plugins/GameFeatures/Maps/MayaMap/
+Plugins/GameFeatures/FootTrailsGenerator/
+Plugins/GameFeatures/CreditsSystem/

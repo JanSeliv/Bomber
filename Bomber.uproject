@@ -21,6 +21,14 @@
 			"Enabled": false
 		},
 		{
+			"Name": "NNEDenoiser",
+			"Enabled": false
+		},
+		{
+			"Name": "NNERuntimeORT",
+			"Enabled": false
+		},
+		{
 			"Name": "EnhancedInput",
 			"Enabled": true
 		},
