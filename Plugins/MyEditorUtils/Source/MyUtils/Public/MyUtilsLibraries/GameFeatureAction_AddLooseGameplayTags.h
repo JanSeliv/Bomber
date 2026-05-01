@@ -21,13 +21,19 @@ class MYUTILS_API UGameFeatureAction_AddLooseGameplayTags final : public UGameFe
 	GENERATED_BODY()
 
 public:
+	/** Owner of Ability System Component; the action subscribes to receivers of this class registered via UGameFrameworkComponentManager and resolves the ASC through IAbilitySystemInterface. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tags", meta = (AllowAbstract))
+	TSoftClassPtr<AActor> OwnerActor = nullptr;
+
 	/** Tags granted to the world ASC while the feature is Active. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tags")
 	FGameplayTagContainer LooseTags = FGameplayTagContainer::EmptyContainer;
 
-	/** Owner of the world ASC; the action subscribes to receivers of this class registered via UGameFrameworkComponentManager and resolves the ASC through IAbilitySystemInterface. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tags", meta = (AllowAbstract))
-	TSoftClassPtr<AActor> WorldAscOwnerActorClass = nullptr;
+	/** When true, own LooseTags are removed from the ASC if any other child tag sharing the same direct parent is applied
+	 * E.g. LooseTags is 'Map.A', it will self-remove when 'Map.B' is added by anything else.
+	 * Is useful to unload own tag-driven feature if another one became loaded. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tags")
+	bool bIsExclusiveTag = false;
 
 protected:
 	/** Called by the Game Features system when the owning feature transitions to Active. */
@@ -66,6 +72,9 @@ protected:
 	/** Removes the granted tags from every tracked actor and clears all per-world handles. */
 	void RevokeAllTrackedTags();
 
+	/** Hook for any ASC tag count change; removes own tags when another child tag sharing the same direct parent as one of LooseTags is added. */
+	void OnAnyExclusiveAscTagChanged(FGameplayTag ChangedTag, int32 NewCount, TWeakObjectPtr<AActor> WeakActor);
+
 	/** Handle for the FWorldDelegates::OnStartGameInstance binding. */
 	FDelegateHandle OnStartGameInstanceHandle;
 
@@ -77,6 +86,9 @@ protected:
 
 	/** Actors the action has granted tags to, used to remove them on deactivation. */
 	TSet<TWeakObjectPtr<AActor>> TaggedActors;
+
+	/** Per-ASC generic tag-event handle kept alive while own LooseTags are granted; populated only when bIsExclusiveTag is true. */
+	TMap<TWeakObjectPtr<class UAbilitySystemComponent>, FDelegateHandle> ExclusiveTagSubscriptions;
 
 #if WITH_EDITOR
 	/** Receiver hook for actors spawned into editor worlds while the feature is Active. */

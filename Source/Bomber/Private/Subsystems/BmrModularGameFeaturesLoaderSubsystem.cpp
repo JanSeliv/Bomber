@@ -180,6 +180,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 	}
 #endif
 
+	bool bHasAuthoritativeAsc = false;
 	FGameplayTagContainer Aggregate;
 	for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FGameplayTagContainer>& Pair : AscOwnedTags)
 	{
@@ -188,35 +189,41 @@ void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 		{
 			continue;
 		}
+		bHasAuthoritativeAsc = true;
 		Aggregate.AppendTags(Pair.Value);
+	}
+
+	// Without an authoritative ASC, the aggregate is meaningless; skipping prevents over-deactivating features that the engine activated via .uplugin BuiltInInitialFeatureState before any ASC is registered with this subsystem
+	if (!bHasAuthoritativeAsc)
+	{
+		return;
 	}
 
 	const TMap<FName, FGameplayTagContainer>& FeaturesByTags = UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags();
 	TSet<FName> NewActive;
 	NewActive.Reserve(FeaturesByTags.Num());
+	TArray<FName> ToActivate;
+	TArray<FName> ToDeactivate;
 	for (const TPair<FName, FGameplayTagContainer>& Pair : FeaturesByTags)
 	{
-		if (Aggregate.HasAny(Pair.Value))
-		{
-			NewActive.Add(Pair.Key);
-		}
-	}
+		const FName& Feature = Pair.Key;
+		const bool bShouldBeActive = Aggregate.HasAny(Pair.Value);
+		const bool bIsCurrentlyActive = UModularGameFeaturePluginUtils::IsModularGameFeatureActive(Feature);
 
-	TArray<FName> ToDeactivate;
-	for (const FName& Feature : ActiveFeatures)
-	{
-		if (!NewActive.Contains(Feature))
+		if (bShouldBeActive)
 		{
-			ToDeactivate.Add(Feature);
+			NewActive.Add(Feature);
 		}
-	}
 
-	TArray<FName> ToActivate;
-	for (const FName& Feature : NewActive)
-	{
-		if (!ActiveFeatures.Contains(Feature))
+		if (bShouldBeActive
+		    && !bIsCurrentlyActive)
 		{
 			ToActivate.Add(Feature);
+		}
+		else if (!bShouldBeActive
+		         && bIsCurrentlyActive)
+		{
+			ToDeactivate.Add(Feature);
 		}
 	}
 
