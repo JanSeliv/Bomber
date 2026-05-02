@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov.
+// Copyright (c) Yevhenii Selivanov.
 
 #include "Actors/BmrBombAbilityActor.h"
 
@@ -139,25 +139,29 @@ void ABmrBombAbilityActor::ApplyMaterial()
 {
 	TObjectPtr<UMaterialInterface> NewBombMaterial = nullptr;
 
-	// If bot character, override material with the player type
 	const APawn* OwnedPawn = InstigatorAbilitySystemComponent ? Cast<APawn>(InstigatorAbilitySystemComponent->GetAvatarActor()) : nullptr;
 	const APlayerState* OwnerPlayerState = OwnedPawn ? OwnedPawn->GetPlayerState<APlayerState>() : nullptr;
-	if (OwnerPlayerState && OwnedPawn->IsPlayerControlled())
+	const FBmrBombRow& BombRow = FBmrBombRow::GetBombRow(OwnedPawn);
+	if (BombRow.Material.Get())
 	{
-		// Set material by bomb type (default)
+		if (const int32 BombMaterialsNum = FBmrBombRow::GetBombMaterialsNum())
+		{
+			// Cycle by player index so each player gets own material when sharing the same bomb row tag
+			const int32 PlayerIndex = OwnerPlayerState ? OwnerPlayerState->GetPlayerId() : FMath::RandRange(0, BombMaterialsNum - 1);
+			const int32 MaterialIndex = FMath::Abs(PlayerIndex) % BombMaterialsNum;
+			NewBombMaterial = FBmrBombRow::GetBombMaterial(MaterialIndex);
+		}
+	}
+
+	if (!NewBombMaterial)
+	{
+		// No material set in entry, fall back to the mesh default slot
 		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponentInternal' is null!"), __LINE__, __FUNCTION__);
 		const UStaticMesh* BombMesh = MapComponent->GetMesh<UStaticMesh>();
 		if (ensureMsgf(BombMesh, TEXT("ASSERT: [%i] %hs:\n'BombMesh' is not found"), __LINE__, __FUNCTION__))
 		{
 			NewBombMaterial = BombMesh->GetMaterial(0);
 		}
-	}
-	else if (const int32 BombMaterialsNum = FBmrBombRow::GetBombMaterialsNum())
-	{
-		// If bot character, set material for its default bomb with the same mesh
-		const int32 PlayerIndex = OwnerPlayerState ? OwnerPlayerState->GetPlayerId() : FMath::RandRange(0, BombMaterialsNum - 1);
-		const int32 MaterialIndex = FMath::Abs(PlayerIndex) % BombMaterialsNum;
-		NewBombMaterial = FBmrBombRow::GetBombMaterial(MaterialIndex);
 	}
 
 	// Apply material
