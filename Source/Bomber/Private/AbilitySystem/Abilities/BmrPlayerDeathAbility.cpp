@@ -4,9 +4,9 @@
 
 // Bomber
 #include "Actors/BmrGeneratedMap.h"
-#include "Actors/BmrPawn.h"
 #include "Components/BmrMapComponent.h"
 #include "DataRegistries/BmrPlayerRow.h"
+#include "GameFramework/BmrPlayerState.h"
 
 // UE
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
@@ -22,8 +22,8 @@ void UBmrPlayerDeathAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	check(ActorInfo && TriggerEventData);
 
-	const ABmrPawn* Pawn = Cast<ABmrPawn>(ActorInfo->AvatarActor.Get());
-	const FBmrPlayerRow* PlayerRow = Pawn ? FBmrPlayerRow::GetRowByPlayerTag(Pawn->GetPlayerTag()) : nullptr;
+	const ABmrPlayerState* MyPlayerState = Cast<ABmrPlayerState>(ActorInfo->OwnerActor.Get());
+	const FBmrPlayerRow* PlayerRow = MyPlayerState ? FBmrPlayerRow::GetRowByPlayerTag(MyPlayerState->GetPlayerTag()) : nullptr;
 	UAnimMontage* DeathMontage = PlayerRow ? PlayerRow->DeathMontage.Get() : nullptr;
 	if (!ensureMsgf(DeathMontage, TEXT("ASSERT: [%i] %hs:\n'DeathMontage' failed to play!"), __LINE__, __FUNCTION__))
 	{

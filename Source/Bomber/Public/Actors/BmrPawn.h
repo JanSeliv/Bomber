@@ -28,10 +28,6 @@ public:
 	/** Sets default values for this character's properties */
 	ABmrPawn();
 
-	/** Returns the Player Tag associated with player. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
-	const struct FBmrPlayerTag& GetPlayerTag() const;
-
 protected:
 	/** Is the root component for this actor, used for collision. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "[Bomber]", meta = (BlueprintProtected))

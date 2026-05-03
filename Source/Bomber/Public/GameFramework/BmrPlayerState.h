@@ -86,6 +86,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const FORCEINLINE FBmrMeshData& GetChosenMeshData() const { return ChosenMeshData; }
 
+	/** Returns the Player Tag resolved from the persistent chosen mesh data, survives pawn destruction. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	const struct FBmrPlayerTag& GetPlayerTag() const;
+
 	/** Sets persistent player visual choice. Can be called on server or locally-controlled client (auto-replicates via server RPC). */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InMeshData"))
 	void SetChosenMeshData(const FBmrMeshData& InMeshData);

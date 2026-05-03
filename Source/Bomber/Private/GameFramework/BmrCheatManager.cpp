@@ -15,6 +15,7 @@
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
 #include "DataAssets/BmrPlayerDataAsset.h"
 #include "DataRegistries/BmrPlayerRow.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "GameFramework/PlayerState.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Structures/BmrPowerupTag.h"
@@ -216,16 +217,19 @@ void UBmrCheatManager::SetPlayerPowerups(int32 NewLevel)
 // Enable or disable the Auto Copilot mode to make a controllable player to play automatically
 void UBmrCheatManager::SetAutoCopilot()
 {
-	ABmrPawn* LocalPlayer = UBmrBlueprintFunctionLibrary::GetLocalPawn();
-	APlayerState* PlayerState = LocalPlayer ? LocalPlayer->GetPlayerState() : nullptr;
+	ABmrPlayerState* PlayerState = UBmrBlueprintFunctionLibrary::GetLocalPlayerState();
 	if (!PlayerState)
 	{
 		return;
 	}
 
 	// Toggle the Copilot mode
-	PlayerState->SetIsABot(!PlayerState->IsABot());
-	LocalPlayer->TryPossessController(EBmrPlayerType::Any);
+	PlayerState->Super::SetIsABot(!PlayerState->IsABot());
+
+	if (ABmrPawn* LocalPlayer = UBmrBlueprintFunctionLibrary::GetLocalPawn())
+	{
+		LocalPlayer->TryPossessController(EBmrPlayerType::Any);
+	}
 }
 
 /*********************************************************************************************

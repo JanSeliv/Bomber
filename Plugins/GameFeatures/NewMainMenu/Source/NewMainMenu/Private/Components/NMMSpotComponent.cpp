@@ -14,10 +14,10 @@
 #include "Actors/BmrPawn.h"
 #include "Bomber.h"
 #include "Controllers/BmrPlayerController.h"
+#include "DalSubsystem.h"
 #include "DataRegistries/BmrPlayerRow.h"
 #include "DataRegistries/BmrPlayerSkinRow.h"
 #include "GameFramework/BmrPlayerState.h"
-#include "DalSubsystem.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
@@ -84,14 +84,13 @@ ABmrSkeletalMeshActor& UNMMSpotComponent::GetOwnerChecked() const
 // Sets the look of this spot to the in-game player character
 void UNMMSpotComponent::ApplyMeshOnPlayer()
 {
-	const ABmrPawn* Pawn = UBmrBlueprintFunctionLibrary::GetLocalPawn();
-	ABmrPlayerState* PlayerState = Pawn ? Pawn->GetPlayerState<ABmrPlayerState>() : nullptr;
+	ABmrPlayerState* PlayerState = UBmrBlueprintFunctionLibrary::GetLocalPlayerState();
 	if (!ensureMsgf(PlayerState, TEXT("ASSERT: [%i] %hs:\n'PlayerState' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-    // Spot might have None skin by default, apply first skin then
+	// Spot might have None skin by default, apply first skin then
 	FBmrMeshData PlayerMeshData = GetMeshChecked().GetMeshData();
 	const FBmrPlayerRow* FallbackPlayerRow = PlayerMeshData.SkinRowName.IsNone() ? FBmrPlayerRow::GetRowByName(PlayerMeshData.RowName) : nullptr;
 	PlayerMeshData.SkinRowName = FallbackPlayerRow ? FBmrPlayerSkinRow::GetSkinRowName(FallbackPlayerRow->PlayerTag, /*SkinIndex*/ 0) : PlayerMeshData.SkinRowName;

@@ -12,6 +12,7 @@
 #include "Components/BmrMapComponent.h"
 #include "Controllers/BmrPlayerController.h"
 #include "DataAssets/BmrPlayerDataAsset.h"
+#include "DataRegistries/BmrPlayerRow.h"
 #include "GameFramework/BmrGameMode.h"
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrGameUserSettings.h"
@@ -107,6 +108,13 @@ void ABmrPlayerState::ApplyDefaultAttributes()
 /*********************************************************************************************
  * Chosen Mesh Data
  ********************************************************************************************* */
+
+// Returns the Player Tag resolved from the persistent chosen mesh data
+const FBmrPlayerTag& ABmrPlayerState::GetPlayerTag() const
+{
+	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByName(ChosenMeshData.RowName);
+	return PlayerRow ? PlayerRow->PlayerTag : FBmrPlayerTag::None;
+}
 
 // Sets persistent player visual choice. Routes via server RPC if invoked on a locally-controlled client
 void ABmrPlayerState::SetChosenMeshData(const FBmrMeshData& InMeshData)

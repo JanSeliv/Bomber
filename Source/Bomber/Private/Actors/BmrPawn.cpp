@@ -73,14 +73,6 @@ ABmrPawn::ABmrPawn()
 	SetReplicatingMovement(false); // Mover requires to disable to handle on its own
 }
 
-// Returns the Player Tag associated with player
-const FBmrPlayerTag& ABmrPawn::GetPlayerTag() const
-{
-	const ABmrPlayerState* MyPlayerState = GetPlayerState<ABmrPlayerState>();
-	const FBmrPlayerRow* PlayerRow = MyPlayerState ? FBmrPlayerRow::GetRowByName(MyPlayerState->GetChosenMeshData().RowName) : nullptr;
-	return PlayerRow ? PlayerRow->PlayerTag : FBmrPlayerTag::None;
-}
-
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
@@ -163,7 +155,7 @@ void ABmrPawn::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* 
 	ABmrPlayerState* MyPlayerState = Cast<ABmrPlayerState>(NewPlayerState);
 	if (!MyPlayerState)
 	{
-	    // Might become null when repossess
+		// Might become null when repossess
 		return;
 	}
 
@@ -383,20 +375,25 @@ void ABmrPawn::UpdateCollisionObjectType()
 // Sets current config: each character has its own configuration, like different starting attributes
 void ABmrPawn::ApplyPreset()
 {
-	if (!HasAuthority())
+	if (!HasAuthority()
+	    || UUtilsLibrary::IsEditorNotPieWorld())
 	{
 		return;
 	}
 
-	// Firstly, reset attributes
-	if (ABmrPlayerState* MyPlayerState = GetPlayerState<ABmrPlayerState>())
+	ABmrPlayerState* MyPlayerState = GetPlayerState<ABmrPlayerState>();
+	if (!MyPlayerState)
 	{
-		MyPlayerState->ApplyDefaultAttributes();
+		// Might be null on early launch, will be called again when pawn is ready
+		return;
 	}
 
+	// Firstly, reset attributes
+	MyPlayerState->ApplyDefaultAttributes();
+
 	// Secondly, apply config gameplay effect from Data Registry
-	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
-	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByPlayerTag(GetPlayerTag());
+	UAbilitySystemComponent* ASC = MyPlayerState->GetAbilitySystemComponent();
+	const FBmrPlayerRow* PlayerRow = FBmrPlayerRow::GetRowByPlayerTag(MyPlayerState->GetPlayerTag());
 	const TSubclassOf<UGameplayEffect> ConfigGameplayEffect = PlayerRow ? PlayerRow->ConfigGameplayEffect.Get() : nullptr;
 	if (ASC && ConfigGameplayEffect)
 	{
