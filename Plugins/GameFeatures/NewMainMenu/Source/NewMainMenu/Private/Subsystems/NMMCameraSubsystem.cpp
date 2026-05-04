@@ -83,17 +83,13 @@ ACineCameraRigRail* UNMMCameraSubsystem::GetCurrentRailRig()
 // Starts viewing through camera of current cinematic
 void UNMMCameraSubsystem::PossessCamera(FNmmStateTag MenuState)
 {
-	if (MenuState == FNmmStateTag::None)
-	{
-		// NMM is inactive, no camera to possess
-		return;
-	}
-
 	const UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
 	if (!SpotsSubsystem.IsActiveMenuSpotReady()
-	    && MenuState != FNmmStateTag::BasicMenu)
+	    && MenuState != FNmmStateTag::BasicMenu
+	    && MenuState.IsValid())
 	{
 		// Ignore if there is no active spot initialized yet, it will be called once the spot is ready
+		// BasicMenu and None target the level camera and do not require a spot
 		return;
 	}
 
@@ -169,8 +165,10 @@ void UNMMCameraSubsystem::OnNewMainMenuStateChanged_Implementation(const FGamepl
 {
 	const FNmmStateTag NewState(Payload.InstigatorTags.First());
 
-	if (NewState == FNmmStateTag::BasicMenu)
+	if (NewState == FNmmStateTag::BasicMenu
+	    || !NewState.IsValid())
 	{
+		// BasicMenu and None both target the level camera
 		// Idle/Cinematic possession flows through OnActiveMenuSpotReady after the spot plays
 		PossessCamera(NewState);
 	}
