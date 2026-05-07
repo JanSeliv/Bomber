@@ -61,7 +61,7 @@ ABmrPlayerController& UNMMPlayerControllerComponent::GetPlayerControllerChecked(
 void UNMMPlayerControllerComponent::SetSaveGameData(class USaveGame* NewSaveGameData)
 {
 	UNMMSaveGameData* InSaveGameData = Cast<UNMMSaveGameData>(NewSaveGameData);
-	if (!InSaveGameData
+	if (!ensureMsgf(NewSaveGameData, TEXT("ASSERT: [%i] %hs:\n'NewSaveGameData' is not valid!"), __LINE__, __FUNCTION__)
 	    || InSaveGameData == SaveGameData)
 	{
 		return;
@@ -299,5 +299,5 @@ void UNMMPlayerControllerComponent::OnAsyncLoadGameFromSlotCompleted_Implementat
 		// Fallback to cache it
 	}
 
-	SetSaveGameData(SaveGame);
+	SetSaveGameData(InSaveGameData);
 }
