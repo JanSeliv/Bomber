@@ -5,6 +5,7 @@
 // Bomber
 #include "DataAssets/BmrModularGameFeatureSettings.h"
 #include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
+#include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
 #include "Structures/BmrGameplayTags.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -174,11 +175,15 @@ bool UBmrModularGameFeaturesLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySy
 void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 {
 #if WITH_EDITOR
-	if (bIsAuthorityTransitioning)
+	if (bIsAuthorityTransitioning
+	    || UMultiplayerUtilsLibrary::IsAnyWorldPendingNetTravel())
 	{
+		// Editor<->PIE swap or -game mid client-travel: in editor configs engine creates External Data Layer streaming objects only at world init and only for Active modules,
+		// so deactivating plugin here would leave incoming world without streaming object and runtime map switching would break silently later.
+		// Skip until new world owns authority and retriggers this recompute
 		return;
 	}
-#endif
+#endif // WITH_EDITOR
 
 	bool bHasAuthoritativeAsc = false;
 	FGameplayTagContainer Aggregate;

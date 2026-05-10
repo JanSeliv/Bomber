@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -51,6 +51,10 @@ public:
 	 * @param InPawn Pawn to retrieve player state and ping from. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
 	static float GetPlayerPingSeconds(const APawn* InPawn);
+
+	/** Returns true if any local world context is mid-resolving pending net travel, e.g. client connecting to server. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "C++")
+	static bool IsAnyWorldPendingNetTravel();
 };
 
 /**
