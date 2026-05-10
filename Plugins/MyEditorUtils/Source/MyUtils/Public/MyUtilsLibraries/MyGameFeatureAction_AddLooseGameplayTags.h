@@ -9,14 +9,14 @@
 #include "GameplayTagContainer.h" // FGameplayTagContainer
 #include "UObject/SoftObjectPtr.h" // TSoftClassPtr
 
-#include "GameFeatureAction_AddLooseGameplayTags.generated.h"
+#include "MyGameFeatureAction_AddLooseGameplayTags.generated.h"
 
 /**
  * Game Feature action that grants loose gameplay tags to the Ability System Component owned by an actor of a specified class while the feature is Active.
  * Lets one feature activation chain into other tag-driven features by adding tags onto the world ASC, the action subscribes to UGameFrameworkComponentManager extension events for actors of the configured class in play worlds, and listens for spawns and walks already-loaded actors in the editor world, so chained features apply regardless of when the feature activates relative to world load.
  */
-UCLASS(meta = (DisplayName = "Add Loose Gameplay Tags"))
-class MYUTILS_API UGameFeatureAction_AddLooseGameplayTags final : public UGameFeatureAction
+UCLASS(meta = (DisplayName = "MY Add Loose Gameplay Tags"))
+class MYUTILS_API UMyGameFeatureAction_AddLooseGameplayTags final : public UGameFeatureAction
 {
 	GENERATED_BODY()
 

@@ -8,7 +8,7 @@
 #include "GameFeatureAction_DataRegistrySource.h"
 #include "UObject/ObjectPtr.h"
 
-#include "GameFeatureAction_AddDataRegistrySourceFromOtherRegistry.generated.h"
+#include "DalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry.generated.h"
 
 /**
  * Pairs a Data Registry source spec with the row struct of an upstream registry that gates its application.
@@ -35,8 +35,8 @@ struct DATAASSETSLOADER_API FDalDataRegistrySourceWithDependency
  * Listens passively via UDataRegistry::OnCacheVersionInvalidated, never triggers loading itself, upstream loads must be driven by some other action (engine AddDataRegistrySource, asset bundles, etc).
  * Late-loaded registries that appear after subsystem init are not picked up automatically; if the upstream registry only exists after the action activates, deactivate and reactivate the feature.
  */
-UCLASS(meta = (DisplayName = "Add Data Registry Source (From Other Registry)"))
-class DATAASSETSLOADER_API UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry final : public UGameFeatureAction
+UCLASS(meta = (DisplayName = "DAL Add Data Registry Source (From Other Registry)"))
+class DATAASSETSLOADER_API UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry final : public UGameFeatureAction
 {
 	GENERATED_BODY()
 

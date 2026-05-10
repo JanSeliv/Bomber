@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "MyUtilsLibraries/GameFeatureAction_AddLooseGameplayTags.h"
+#include "MyUtilsLibraries/MyGameFeatureAction_AddLooseGameplayTags.h"
 
 // UE
 #include "AbilitySystemComponent.h"
@@ -16,12 +16,12 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddLooseGameplayTags)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(MyGameFeatureAction_AddLooseGameplayTags)
 
 #define LOCTEXT_NAMESPACE "GameFeatureAction_AddLooseGameplayTags"
 
 // Called by the Game Features system when the owning feature transitions to Active
-void UGameFeatureAction_AddLooseGameplayTags::OnGameFeatureActivated()
+void UMyGameFeatureAction_AddLooseGameplayTags::OnGameFeatureActivated()
 {
 	if (!ensureMsgf(TaggedActors.IsEmpty() && ExtensionRequestHandles.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'TaggedActors' or 'ExtensionRequestHandles' is not empty, attempting to activate already active feature!"), __LINE__, __FUNCTION__))
 	{
@@ -55,7 +55,7 @@ void UGameFeatureAction_AddLooseGameplayTags::OnGameFeatureActivated()
 }
 
 // Called by the Game Features system when the owning feature is leaving the Active state
-void UGameFeatureAction_AddLooseGameplayTags::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
+void UMyGameFeatureAction_AddLooseGameplayTags::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
 	FWorldDelegates::OnStartGameInstance.Remove(OnStartGameInstanceHandle);
 	OnStartGameInstanceHandle.Reset();
@@ -75,7 +75,7 @@ void UGameFeatureAction_AddLooseGameplayTags::OnGameFeatureDeactivating(FGameFea
 
 #if WITH_EDITOR
 // Reports configuration errors to the editor's Data Validation system
-EDataValidationResult UGameFeatureAction_AddLooseGameplayTags::IsDataValid(FDataValidationContext& Context) const
+EDataValidationResult UMyGameFeatureAction_AddLooseGameplayTags::IsDataValid(FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
@@ -96,7 +96,7 @@ EDataValidationResult UGameFeatureAction_AddLooseGameplayTags::IsDataValid(FData
 #endif
 
 // Single dispatch entry per world
-void UGameFeatureAction_AddLooseGameplayTags::RegisterForWorld(UWorld* World)
+void UMyGameFeatureAction_AddLooseGameplayTags::RegisterForWorld(UWorld* World)
 {
 	if (!World)
 	{
@@ -144,7 +144,7 @@ void UGameFeatureAction_AddLooseGameplayTags::RegisterForWorld(UWorld* World)
 }
 
 // Routes Game Framework Component Manager events to add or remove tag operations
-void UGameFeatureAction_AddLooseGameplayTags::OnReceiverExtensionEvent(AActor* Actor, FName EventName)
+void UMyGameFeatureAction_AddLooseGameplayTags::OnReceiverExtensionEvent(AActor* Actor, FName EventName)
 {
 	const bool bIsAddEvent = EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded
 	                         || EventName == UGameFrameworkComponentManager::NAME_ReceiverAdded;
@@ -162,7 +162,7 @@ void UGameFeatureAction_AddLooseGameplayTags::OnReceiverExtensionEvent(AActor* A
 }
 
 // Called when a new game instance starts up while the feature is Active
-void UGameFeatureAction_AddLooseGameplayTags::OnGameInstanceStarted(UGameInstance* GameInstance)
+void UMyGameFeatureAction_AddLooseGameplayTags::OnGameInstanceStarted(UGameInstance* GameInstance)
 {
 	if (!ensureMsgf(GameInstance, TEXT("ASSERT: [%i] %hs:\n'GameInstance' is null!"), __LINE__, __FUNCTION__))
 	{
@@ -173,13 +173,13 @@ void UGameFeatureAction_AddLooseGameplayTags::OnGameInstanceStarted(UGameInstanc
 }
 
 // Called when any world initializes while the feature is Active
-void UGameFeatureAction_AddLooseGameplayTags::OnPostWorldInit(UWorld* World, const UWorld::InitializationValues WorldInitializationValues)
+void UMyGameFeatureAction_AddLooseGameplayTags::OnPostWorldInit(UWorld* World, const UWorld::InitializationValues WorldInitializationValues)
 {
 	RegisterForWorld(World);
 }
 
 // Adds LooseTags to the actor's ASC and remembers the actor for cleanup on deactivation
-void UGameFeatureAction_AddLooseGameplayTags::GrantTagsTo(AActor* Actor)
+void UMyGameFeatureAction_AddLooseGameplayTags::GrantTagsTo(AActor* Actor)
 {
 	if (!ensureMsgf(Actor, TEXT("ASSERT: [%i] %hs:\n'Actor' is null!"), __LINE__, __FUNCTION__)
 	    || !Actor->HasAuthority()
@@ -240,7 +240,7 @@ void UGameFeatureAction_AddLooseGameplayTags::GrantTagsTo(AActor* Actor)
 }
 
 // Removes LooseTags from the actor's ASC and stops tracking it
-void UGameFeatureAction_AddLooseGameplayTags::RevokeTagsFrom(AActor* Actor)
+void UMyGameFeatureAction_AddLooseGameplayTags::RevokeTagsFrom(AActor* Actor)
 {
 	if (!Actor
 	    || !Actor->HasAuthority()
@@ -265,7 +265,7 @@ void UGameFeatureAction_AddLooseGameplayTags::RevokeTagsFrom(AActor* Actor)
 }
 
 // Removes the granted tags from every tracked actor and clears all per-world handles
-void UGameFeatureAction_AddLooseGameplayTags::RevokeAllTrackedTags()
+void UMyGameFeatureAction_AddLooseGameplayTags::RevokeAllTrackedTags()
 {
 	for (auto It = ExclusiveTagSubscriptions.CreateIterator(); It; ++It)
 	{
@@ -304,7 +304,7 @@ void UGameFeatureAction_AddLooseGameplayTags::RevokeAllTrackedTags()
 }
 
 // Hook for any ASC tag count change; removes own tags when another child tag sharing the same direct parent as one of LooseTags is added
-void UGameFeatureAction_AddLooseGameplayTags::OnAnyExclusiveAscTagChanged(FGameplayTag ChangedTag, int32 NewCount, TWeakObjectPtr<AActor> WeakActor)
+void UMyGameFeatureAction_AddLooseGameplayTags::OnAnyExclusiveAscTagChanged(FGameplayTag ChangedTag, int32 NewCount, TWeakObjectPtr<AActor> WeakActor)
 {
 	AActor* Actor = WeakActor.Get();
 	if (NewCount <= 0
@@ -341,7 +341,7 @@ void UGameFeatureAction_AddLooseGameplayTags::OnAnyExclusiveAscTagChanged(FGamep
 
 #if WITH_EDITOR
 // Receiver hook for actors spawned into editor worlds
-void UGameFeatureAction_AddLooseGameplayTags::OnActorSpawnedInEditorWorld(AActor* SpawnedActor)
+void UMyGameFeatureAction_AddLooseGameplayTags::OnActorSpawnedInEditorWorld(AActor* SpawnedActor)
 {
 	if (!SpawnedActor)
 	{
@@ -359,7 +359,7 @@ void UGameFeatureAction_AddLooseGameplayTags::OnActorSpawnedInEditorWorld(AActor
 }
 
 // Re-walks editor worlds after a map finishes loading; catches level-loaded receivers that never go through SpawnActor
-void UGameFeatureAction_AddLooseGameplayTags::OnEditorMapOpened(const FString& Filename, bool bAsTemplate)
+void UMyGameFeatureAction_AddLooseGameplayTags::OnEditorMapOpened(const FString& Filename, bool bAsTemplate)
 {
 	if (!ensureMsgf(GEngine, TEXT("ASSERT: [%i] %hs:\n'GEngine' is null!"), __LINE__, __FUNCTION__))
 	{

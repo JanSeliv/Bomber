@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "GameFeatureAction_AddDataRegistrySourceFromOtherRegistry.h"
+#include "DalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry.h"
 
 // DAL
 #include "DalUtilsLibrary.h"
@@ -19,7 +19,7 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddDataRegistrySourceFromOtherRegistry)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(DalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry)
 
 // @TODO JanSeliv: remove debug logs after fixing registry-dependency drop trace
 namespace RegDepDebug
@@ -58,7 +58,7 @@ namespace RegDepDebug
 #define LOCTEXT_NAMESPACE "GameFeatureAction_AddDataRegistrySourceFromOtherRegistry"
 
 // Called by the Game Features system when the owning feature transitions to Active
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureActivated()
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureActivated()
 {
 	if (!ensureMsgf(RegistryHandles.IsEmpty() && AppliedFlags.IsEmpty() && !OnSubsystemInitHandle.IsValid(), TEXT("ASSERT: [%i] %hs:\n'RegistryHandles', 'AppliedFlags' or 'OnSubsystemInitHandle' is not empty, attempting to activate already active feature!"), __LINE__, __FUNCTION__))
 	{
@@ -95,7 +95,7 @@ void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureAct
 }
 
 // Called by the Game Features system when the owning feature is leaving the Active state
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
 	RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Entries=%d, Handles=%d, AppliedFlags=%d"), SourcesToAdd.Num(), RegistryHandles.Num(), AppliedFlags.Num())); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 
@@ -114,7 +114,7 @@ void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureDea
 
 #if WITH_EDITOR
 // Reports configuration errors to the editor's Data Validation system
-EDataValidationResult UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::IsDataValid(FDataValidationContext& Context) const
+EDataValidationResult UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::IsDataValid(FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
@@ -179,7 +179,7 @@ EDataValidationResult UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry:
 #endif
 
 // Hook bound to UDataRegistrySubsystem::OnSubsystemInitialized when activation occurs before registries are ready
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnDataRegistrySubsystemInitialized()
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnDataRegistrySubsystemInitialized()
 {
 	RegDepDebug::LogOwner(this, __FUNCTION__, TEXT(", DRSubsystem now initialized, proceeding to ResolveAndSubscribeAll")); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 
@@ -193,7 +193,7 @@ void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnDataRegistrySu
 }
 
 // Walks unique upstream row structs, resolves each to its registry via DAL and subscribes to its cache invalidation
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ResolveAndSubscribeAll()
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ResolveAndSubscribeAll()
 {
 	TSet<TObjectPtr<UScriptStruct>> SeenStructs;
 	for (const FDalDataRegistrySourceWithDependency& Entry : SourcesToAdd)
@@ -226,14 +226,14 @@ void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ResolveAndSubscr
 }
 
 // Hook bound to each upstream UDataRegistry::OnCacheVersionInvalidated
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnRegistryCacheInvalidated(UDataRegistry* /*InRegistry*/)
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnRegistryCacheInvalidated(UDataRegistry* /*InRegistry*/)
 {
 	RegDepDebug::LogOwner(this, __FUNCTION__, TEXT(", cache version invalidated, running EvaluateAllEntries (per-entry RowsNum will reveal which dep changed)")); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 	EvaluateAllEntries();
 }
 
 // Re-checks every entry, edge-triggering Apply on rising edge and Remove on falling edge
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::EvaluateAllEntries()
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::EvaluateAllEntries()
 {
 	for (int32 Index = 0; Index < SourcesToAdd.Num(); ++Index)
 	{
@@ -262,7 +262,7 @@ void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::EvaluateAllEntri
 }
 
 // Applies the entry's Source to the Data Registry honoring per-entry client/server flags
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ApplyEntry(int32 EntryIndex)
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ApplyEntry(int32 EntryIndex)
 {
 	RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Index=%d, Target=%s, DataTable=%s, CurveTable=%s"), EntryIndex, *SourcesToAdd[EntryIndex].Source.RegistryToAddTo.ToString(), *SourcesToAdd[EntryIndex].Source.DataTableToAdd.ToString(), *SourcesToAdd[EntryIndex].Source.CurveTableToAdd.ToString())); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 
@@ -317,7 +317,7 @@ void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ApplyEntry(int32
 }
 
 // Removes the entry's Source from the Data Registry
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveEntry(int32 EntryIndex)
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveEntry(int32 EntryIndex)
 {
 	RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Index=%d, Target=%s, DataTable=%s, CurveTable=%s"), EntryIndex, *SourcesToAdd[EntryIndex].Source.RegistryToAddTo.ToString(), *SourcesToAdd[EntryIndex].Source.DataTableToAdd.ToString(), *SourcesToAdd[EntryIndex].Source.CurveTableToAdd.ToString())); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 
@@ -348,7 +348,7 @@ void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveEntry(int3
 }
 
 // Removes every entry whose flag is set
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveAllApplied()
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveAllApplied()
 {
 	for (int32 Index = 0; Index < AppliedFlags.Num(); ++Index)
 	{
@@ -361,7 +361,7 @@ void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveAllApplied
 }
 
 // Drops every per-registry cache subscription held by this action
-void UGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ClearAllRegistrySubscriptions()
+void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ClearAllRegistrySubscriptions()
 {
 	for (auto It = RegistryHandles.CreateIterator(); It; ++It)
 	{
