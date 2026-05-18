@@ -2,9 +2,6 @@
 
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 
-// Bomber
-#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
-
 // UE
 #include "Engine/Engine.h"
 #include "Engine/LocalPlayer.h"
@@ -181,11 +178,9 @@ void UInputUtilsLibrary::UnbindInputActionsInContext(const UObject* WorldContext
 	for (int32 Index = Bindings.Num() - 1; Index >= 0; --Index)
 	{
 		const UInputAction* BoundAction = Bindings[Index] ? Bindings[Index]->GetAction() : nullptr;
-		const int32 InputActionIdx = InputActions.IndexOfByKey(BoundAction);
-		if (InputActionIdx != INDEX_NONE)
+		if (InputActions.Contains(BoundAction))
 		{
 			EnhancedInputComponent->RemoveActionEventBinding(Index);
-			UModularGameFeaturePluginUtils::UnloadAsset(InputActions[InputActionIdx]);
 		}
 	}
 }

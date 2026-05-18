@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Subsystems/ModularGameFeaturePluginSubsystem.h"
+#include "Subsystems/GfpmWorldSubsystem.h"
 
 // NMM
 #include "Data/NmmStateTag.h"
@@ -15,7 +15,7 @@ class UNMMDataAsset;
  * Provides access to the most important data like Data Asset and current state.
  */
 UCLASS(BlueprintType, Blueprintable)
-class NEWMAINMENU_API UNMMBaseSubsystem : public UModularGameFeaturePluginSubsystem
+class NEWMAINMENU_API UNMMBaseSubsystem : public UGfpmWorldSubsystem
 {
 	GENERATED_BODY()
 

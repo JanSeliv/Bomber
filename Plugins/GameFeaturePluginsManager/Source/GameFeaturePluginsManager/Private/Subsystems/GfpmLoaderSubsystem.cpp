@@ -1,18 +1,18 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "Subsystems/BmrModularGameFeaturesLoaderSubsystem.h"
+#include "Subsystems/GfpmLoaderSubsystem.h"
 
-// Bomber
-#include "DataAssets/BmrModularGameFeatureSettings.h"
-#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
-#include "MyUtilsLibraries/MultiplayerUtilsLibrary.h"
-#include "Structures/BmrGameplayTags.h"
-#include "Subsystems/GlobalMessageSubsystem.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
+// GFPM
+#include "Data/GfpmGameplayTags.h"
+#include "Data/GfpmSettings.h"
+#include "GfpmUtils.h"
 
 // UE
 #include "Abilities/GameplayAbilityTypes.h"
 #include "AbilitySystemComponent.h"
+#include "AsyncMessageId.h"
+#include "AsyncMessageSystemBase.h"
+#include "AsyncMessageWorldSubsystem.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 
@@ -20,45 +20,52 @@
 #include "Editor.h"
 #endif
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrModularGameFeaturesLoaderSubsystem)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmLoaderSubsystem)
 
 // Returns this subsystem, is checked and will crash if can't be obtained
-UBmrModularGameFeaturesLoaderSubsystem& UBmrModularGameFeaturesLoaderSubsystem::Get()
+UGfpmLoaderSubsystem& UGfpmLoaderSubsystem::Get()
 {
-	UBmrModularGameFeaturesLoaderSubsystem* Subsystem = GetModularGameFeaturesSubsystem();
+	UGfpmLoaderSubsystem* Subsystem = GetModularGameFeaturesSubsystem();
 	checkf(Subsystem, TEXT("ERROR: [%i] %hs:\n'Subsystem' is null!"), __LINE__, __FUNCTION__);
 	return *Subsystem;
 }
 
 // Returns the pointer to this subsystem
-UBmrModularGameFeaturesLoaderSubsystem* UBmrModularGameFeaturesLoaderSubsystem::GetModularGameFeaturesSubsystem()
+UGfpmLoaderSubsystem* UGfpmLoaderSubsystem::GetModularGameFeaturesSubsystem()
 {
-	return GEngine ? GEngine->GetEngineSubsystem<UBmrModularGameFeaturesLoaderSubsystem>() : nullptr;
+	return GEngine ? GEngine->GetEngineSubsystem<UGfpmLoaderSubsystem>() : nullptr;
 }
 
 // Returns true if any tag-driven MGF should be active for the current ASC tags but is not yet Active
-bool UBmrModularGameFeaturesLoaderSubsystem::HasPendingTagDrivenActivations() const
+bool UGfpmLoaderSubsystem::HasPendingTagDrivenActivations() const
 {
-	const UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
-	if (!ASC)
+	const FGameplayTagContainer* OwnedTags = nullptr;
+	for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FGameplayTagContainer>& Pair : AscOwnedTags)
 	{
+		if (IsAuthoritativeAsc(Pair.Key.Get()))
+		{
+			OwnedTags = &Pair.Value;
+			break;
+		}
+	}
+
+	if (!OwnedTags)
+	{
+		// No authoritative ASC tracked yet, treat as pending until readiness is broadcasted
 		return true;
 	}
 
-	const TMap<FName, FGameplayTagContainer>& FeaturesByTags = UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags();
+	const TMap<FName, FGameplayTagContainer>& FeaturesByTags = UGfpmSettings::Get().GetModularGameFeaturesByTags();
 	if (FeaturesByTags.IsEmpty())
 	{
 		return false;
 	}
 
-	FGameplayTagContainer OwnedTags;
-	ASC->GetOwnedGameplayTags(OwnedTags);
-
 	for (const TPair<FName, FGameplayTagContainer>& Pair : FeaturesByTags)
 	{
-		const bool bShouldBeActive = OwnedTags.HasAny(Pair.Value);
+		const bool bShouldBeActive = OwnedTags->HasAny(Pair.Value);
 		if (bShouldBeActive
-		    && !UModularGameFeaturePluginUtils::IsModularGameFeatureActive(Pair.Key))
+		    && !UGfpmUtils::IsModularGameFeatureActive(Pair.Key))
 		{
 			return true;
 		}
@@ -72,7 +79,7 @@ bool UBmrModularGameFeaturesLoaderSubsystem::HasPendingTagDrivenActivations() co
  ********************************************************************************************* */
 
 // Snapshots the broadcasting world's ASC tags and registers per-tag listeners
-void UBmrModularGameFeaturesLoaderSubsystem::OnWorldASCReady_Implementation(const FGameplayEventData& Payload)
+void UGfpmLoaderSubsystem::OnWorldASCReady_Implementation(const FGameplayEventData& Payload)
 {
 	UAbilitySystemComponent* ASC = const_cast<UAbilitySystemComponent*>(Cast<UAbilitySystemComponent>(Payload.OptionalObject.Get()));
 	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__))
@@ -84,7 +91,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::OnWorldASCReady_Implementation(cons
 	OwnedSnapshot.Reset();
 	ASC->GetOwnedGameplayTags(OwnedSnapshot);
 
-	const FGameplayTagContainer& AllFeatureTags = UBmrModularGameFeatureSettings::Get().GetAllModularGameFeatureTags();
+	const FGameplayTagContainer& AllFeatureTags = UGfpmSettings::Get().GetAllModularGameFeatureTags();
 	for (const FGameplayTag& Tag : AllFeatureTags)
 	{
 		ASC->RegisterGameplayTagEvent(Tag, EGameplayTagEventType::NewOrRemoved).AddWeakLambda(ASC, [ASC](const FGameplayTag ChangedTag, int32 NewCount)
@@ -97,7 +104,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::OnWorldASCReady_Implementation(cons
 }
 
 // Updates the per-ASC tag snapshot and queues a deferred recompute
-void UBmrModularGameFeaturesLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag ChangedTag, int32 NewCount, UAbilitySystemComponent* SourceAsc)
+void UGfpmLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag ChangedTag, int32 NewCount, UAbilitySystemComponent* SourceAsc)
 {
 	FGameplayTagContainer* OwnedSnapshot = AscOwnedTags.Find(SourceAsc);
 	if (!OwnedSnapshot)
@@ -127,7 +134,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::OnAscTagCountChanged_Implementation
 }
 
 // Coalesces tag-event bursts and keeps MGF activation out of synchronous callbacks
-void UBmrModularGameFeaturesLoaderSubsystem::QueueDeferredRecompute()
+void UGfpmLoaderSubsystem::QueueDeferredRecompute()
 {
 	if (DeferredRecomputeHandle.IsValid())
 	{
@@ -144,7 +151,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::QueueDeferredRecompute()
 }
 
 // In game builds the Game world is authoritative; in editor builds the play world is authoritative during a play session, otherwise the editor world is
-bool UBmrModularGameFeaturesLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC) const
+bool UGfpmLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC) const
 {
 	if (!ASC)
 	{
@@ -172,11 +179,11 @@ bool UBmrModularGameFeaturesLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySy
 }
 
 // Aggregates authoritative tags, computes the desired feature set, applies the diff vs the active set
-void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
+void UGfpmLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 {
 #if WITH_EDITOR
 	if (bIsAuthorityTransitioning
-	    || UMultiplayerUtilsLibrary::IsAnyWorldPendingNetTravel())
+	    || UGfpmUtils::IsAnyWorldPendingNetTravel())
 	{
 		// Editor<->PIE swap or -game mid client-travel: in editor configs engine creates External Data Layer streaming objects only at world init and only for Active modules,
 		// so deactivating plugin here would leave incoming world without streaming object and runtime map switching would break silently later.
@@ -204,7 +211,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 		return;
 	}
 
-	const TMap<FName, FGameplayTagContainer>& FeaturesByTags = UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags();
+	const TMap<FName, FGameplayTagContainer>& FeaturesByTags = UGfpmSettings::Get().GetModularGameFeaturesByTags();
 	TSet<FName> NewActive;
 	NewActive.Reserve(FeaturesByTags.Num());
 	TArray<FName> ToActivate;
@@ -213,7 +220,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 	{
 		const FName& Feature = Pair.Key;
 		const bool bShouldBeActive = Aggregate.HasAny(Pair.Value);
-		const bool bIsCurrentlyActive = UModularGameFeaturePluginUtils::IsModularGameFeatureActive(Feature);
+		const bool bIsCurrentlyActive = UGfpmUtils::IsModularGameFeatureActive(Feature);
 
 		if (bShouldBeActive)
 		{
@@ -238,8 +245,8 @@ void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 		return;
 	}
 
-	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(false, ToDeactivate);
-	UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(true, ToActivate);
+	UGfpmUtils::SetModularGameFeaturesActive(false, ToDeactivate);
+	UGfpmUtils::SetModularGameFeaturesActive(true, ToActivate);
 
 	ActiveFeatures = MoveTemp(NewActive);
 }
@@ -249,7 +256,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::ApplyAuthoritativeFeatureSet()
  ********************************************************************************************* */
 
 // Drains tracked ASCs whose world is dying; editor map switches restore features to baseline, PIE world death recomputes from remaining authority
-void UBmrModularGameFeaturesLoaderSubsystem::OnPreWorldFinishDestroy_Implementation(UWorld* World)
+void UGfpmLoaderSubsystem::OnPreWorldFinishDestroy_Implementation(UWorld* World)
 {
 	if (!World)
 	{
@@ -273,8 +280,8 @@ void UBmrModularGameFeaturesLoaderSubsystem::OnPreWorldFinishDestroy_Implementat
 	if (WorldType == EWorldType::Editor)
 	{
 		TArray<FName> TagDrivenFeatures;
-		UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
-		UModularGameFeaturePluginUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
+		UGfpmSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
+		UGfpmUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
 		ActiveFeatures.Reset();
 		return;
 	}
@@ -305,24 +312,24 @@ void UBmrModularGameFeaturesLoaderSubsystem::OnPreWorldFinishDestroy_Implementat
 }
 
 #if WITH_EDITOR
-void UBmrModularGameFeaturesLoaderSubsystem::OnPreBeginPIE(bool /*bIsSimulating*/)
+void UGfpmLoaderSubsystem::OnPreBeginPIE(bool /*bIsSimulating*/)
 {
 	bIsAuthorityTransitioning = true;
 }
 
-void UBmrModularGameFeaturesLoaderSubsystem::OnEndPIE(bool /*bIsSimulating*/)
+void UGfpmLoaderSubsystem::OnEndPIE(bool /*bIsSimulating*/)
 {
 	bIsAuthorityTransitioning = true;
 }
 
 // Force-deactivate all tag-driven features so the engine emits Unloaded, then queue a recompute to reactivate from current authoritative ASCs
-void UBmrModularGameFeaturesLoaderSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*/)
+void UGfpmLoaderSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*/)
 {
 	bIsAuthorityTransitioning = false;
 
 	TArray<FName> TagDrivenFeatures;
-	UBmrModularGameFeatureSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
-	UModularGameFeaturePluginUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
+	UGfpmSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
+	UGfpmUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
 	ActiveFeatures.Reset();
 
 	QueueDeferredRecompute();
@@ -334,7 +341,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::OnEditorShutdownPIE(bool /*bIsSimul
  ********************************************************************************************* */
 
 // Binds world and editor lifecycle delegates
-void UBmrModularGameFeaturesLoaderSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void UGfpmLoaderSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
@@ -359,10 +366,14 @@ void UBmrModularGameFeaturesLoaderSubsystem::Initialize(FSubsystemCollectionBase
 			return;
 		}
 
-		// Pass World as listener owner so registration goes through this world's UGlobalMessageSubsystem
-		UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::WorldASC_Ready, World, [](const FGameplayEventData& Payload)
+		// Listen for Ability System Component to load and unload features
+		const TSharedPtr<FAsyncMessageSystemBase> MessageSystem = UAsyncMessageWorldSubsystem::GetSharedMessageSystem(World);
+		checkf(MessageSystem, TEXT("ERROR: [%i] %hs:\n'MessageSystem' is null!"), __LINE__, __FUNCTION__);
+		MessageSystem->BindListener(FAsyncMessageId(GfpmGameplayTags::Event::WorldASC_Ready), [](const FAsyncMessage& Message)
 		{
-			Get().OnWorldASCReady(Payload);
+			const FGameplayEventData* Payload = Message.GetPayloadData<const FGameplayEventData>();
+			checkf(Payload, TEXT("ERROR: [%i] %hs:\n'Payload' is null, it's expected to pass Gameplay Event Data as payload!"), __LINE__, __FUNCTION__);
+			Get().OnWorldASCReady(*Payload);
 		});
 	});
 
@@ -376,7 +387,7 @@ void UBmrModularGameFeaturesLoaderSubsystem::Initialize(FSubsystemCollectionBase
 }
 
 // Unbinds delegates
-void UBmrModularGameFeaturesLoaderSubsystem::Deinitialize()
+void UGfpmLoaderSubsystem::Deinitialize()
 {
 	if (DeferredRecomputeHandle.IsValid())
 	{

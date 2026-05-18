@@ -7,7 +7,7 @@
 // UE
 #include "GameFeatureStateChangeObserver.h"
 
-#include "ModularGameFeaturePluginSubsystem.generated.h"
+#include "GfpmWorldSubsystem.generated.h"
 
 /**
  * Base world subsystem for Modular Game Feature (MGF) plugins.
@@ -16,8 +16,8 @@
  * This subsystem should be created only under game feature plugin modules.
  * Call SetTickable to enable/disable tick (is disabled by default)
  */
-UCLASS(Abstract)
-class MYUTILS_API UModularGameFeaturePluginSubsystem : public UTickableWorldSubsystem
+UCLASS(Abstract, DisplayName = "Game Feature Plugins World Subsystem")
+class GAMEFEATUREPLUGINSMANAGER_API UGfpmWorldSubsystem : public UTickableWorldSubsystem
     , public IGameFeatureStateChangeObserver
 {
 	GENERATED_BODY()
@@ -25,13 +25,13 @@ class MYUTILS_API UModularGameFeaturePluginSubsystem : public UTickableWorldSubs
 protected:
 	/** Called when the owning game feature plugin activates or on first world begin play.
 	 * Override to subscribe to events and initialize retriggerable state */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	void OnGameFeatureInitialize();
 	virtual void OnGameFeatureInitialize_Implementation() { }
 
 	/** Called when the owning game feature plugin deactivates or on world end play.
 	 * Override to clean up transient state and unsubscribe from events */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "C++", meta = (BlueprintProtected))
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	void OnGameFeatureDeinitialize();
 	virtual void OnGameFeatureDeinitialize_Implementation() { }
 

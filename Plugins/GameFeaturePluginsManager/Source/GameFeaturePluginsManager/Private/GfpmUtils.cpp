@@ -1,20 +1,24 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
+#include "GfpmUtils.h"
 
-// MyUtils
-#include "MyUtilsLibraries/UtilsLibrary.h"
-#include "Structures/GameFeatureStateChange.h"
+// GFPM
+#include "Data/GfpmStateChange.h"
 
-// Unreal
+// UE
 #include "GameFeatureData.h"
 #include "GameFeaturesSubsystem.h"
 #include "UObject/Package.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(ModularGameFeaturePluginUtils)
+#if WITH_EDITOR
+#include "Editor.h"
+#include "Engine/World.h"
+#endif // WITH_EDITOR
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmUtils)
 
 // Returns true if specified Modular Game Feature plugin is currently active
-bool UModularGameFeaturePluginUtils::IsModularGameFeatureActive(FName GameFeatureName)
+bool UGfpmUtils::IsModularGameFeatureActive(FName GameFeatureName)
 {
 	if (GameFeatureName.IsNone())
 	{
@@ -44,7 +48,7 @@ bool UModularGameFeaturePluginUtils::IsModularGameFeatureActive(FName GameFeatur
 }
 
 // Returns the built-in initial auto state for a game feature
-EGameFeatureTargetState UModularGameFeaturePluginUtils::GetBuiltInInitialFeatureState(FName GameFeatureName)
+EGameFeatureTargetState UGfpmUtils::GetBuiltInInitialFeatureState(FName GameFeatureName)
 {
 	if (GameFeatureName.IsNone())
 	{
@@ -81,14 +85,14 @@ EGameFeatureTargetState UModularGameFeaturePluginUtils::GetBuiltInInitialFeature
 }
 
 // Enables or disable all game features
-void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, const TArray<FName>& GameFeatures)
+void UGfpmUtils::SetModularGameFeaturesActive(bool bEnable, const TArray<FName>& GameFeatures)
 {
 	if (GameFeatures.IsEmpty())
 	{
 		return;
 	}
 
-	TArray<FGameFeatureStateChange> Changes;
+	TArray<FGfpmStateChange> Changes;
 	Changes.Reserve(GameFeatures.Num());
 
 	for (const FName GameFeatureName : GameFeatures)
@@ -114,9 +118,14 @@ void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, 
 			// Do not force full unload, but keep registered if next:
 			// - plugin itself has initial state as registered
 			// - editor is running, where packages not fully unload by design, attempting to force it would break package load back
+#if WITH_EDITOR
+			const bool bIsEditor = GIsEditor && GEditor && GWorld && GWorld->IsEditorWorld();
+#else
+			const bool bIsEditor = false;
+#endif // WITH_EDITOR
 			const EGameFeatureTargetState InitialState = GetBuiltInInitialFeatureState(GameFeatureName);
 			const bool bInitiallyInstalled = InitialState == EGameFeatureTargetState::Installed;
-			const bool bKeepRegistered = !bInitiallyInstalled || UUtilsLibrary::IsEditor();
+			const bool bKeepRegistered = !bInitiallyInstalled || bIsEditor;
 			TargetState = bKeepRegistered ? EGameFeatureTargetState::Registered : EGameFeatureTargetState::Installed;
 		}
 
@@ -127,7 +136,7 @@ void UModularGameFeaturePluginUtils::SetModularGameFeaturesActive(bool bEnable, 
 }
 
 // Changes target state for game features, batching all requests by state
-void UModularGameFeaturePluginUtils::ChangeGameFeatureTargetState(const TArray<FGameFeatureStateChange>& Changes)
+void UGfpmUtils::ChangeGameFeatureTargetState(const TArray<FGfpmStateChange>& Changes)
 {
 	if (Changes.IsEmpty())
 	{
@@ -145,7 +154,7 @@ void UModularGameFeaturePluginUtils::ChangeGameFeatureTargetState(const TArray<F
 
 	TMap<EGameFeatureTargetState, TArray<FString>> Requests;
 
-	for (const FGameFeatureStateChange& Change : Changes)
+	for (const FGfpmStateChange& Change : Changes)
 	{
 		if (Change.GameFeatureName.IsNone())
 		{
@@ -176,14 +185,14 @@ void UModularGameFeaturePluginUtils::ChangeGameFeatureTargetState(const TArray<F
 }
 
 // Resets game features to their configured built-in auto state
-void UModularGameFeaturePluginUtils::RestoreGameFeatureTargetState(const TArray<FName>& GameFeatures)
+void UGfpmUtils::RestoreGameFeatureTargetState(const TArray<FName>& GameFeatures)
 {
 	if (GameFeatures.IsEmpty())
 	{
 		return;
 	}
 
-	TArray<FGameFeatureStateChange> Changes;
+	TArray<FGfpmStateChange> Changes;
 	Changes.Reserve(GameFeatures.Num());
 
 	for (const FName GameFeatureName : GameFeatures)
@@ -201,7 +210,7 @@ void UModularGameFeaturePluginUtils::RestoreGameFeatureTargetState(const TArray<
 }
 
 // Returns names of all registered Modular Game Feature plugins
-TArray<FString> UModularGameFeaturePluginUtils::GetAllRegisteredModularGameFeatures()
+TArray<FString> UGfpmUtils::GetAllRegisteredModularGameFeatures()
 {
 	TArray<FString> FeatureNames;
 	UGameFeaturesSubsystem::Get().ForEachGameFeature([&FeatureNames](FGameFeatureInfo&& Info)
@@ -212,7 +221,7 @@ TArray<FString> UModularGameFeaturePluginUtils::GetAllRegisteredModularGameFeatu
 }
 
 // Returns the module name from the specified asset, if it is part of a game feature
-FString UModularGameFeaturePluginUtils::GetModuleNameByAsset(const UObject* Asset)
+FString UGfpmUtils::GetModuleNameByAsset(const UObject* Asset)
 {
 	FString GameFeatureName;
 	if (!Asset)
@@ -226,7 +235,7 @@ FString UModularGameFeaturePluginUtils::GetModuleNameByAsset(const UObject* Asse
 }
 
 // Returns the module name from any object by resolving its class package
-FString UModularGameFeaturePluginUtils::GetModuleNameByObject(const UObject* Object)
+FString UGfpmUtils::GetModuleNameByObject(const UObject* Object)
 {
 	if (!Object)
 	{
@@ -249,7 +258,7 @@ FString UModularGameFeaturePluginUtils::GetModuleNameByObject(const UObject* Obj
 }
 
 // Returns true if the given object belongs to the same game feature plugin as the specified GameFeatureData
-bool UModularGameFeaturePluginUtils::IsInGameFeatureModule(const UObject* Object, const UGameFeatureData* GameFeatureData)
+bool UGfpmUtils::IsInGameFeatureModule(const UObject* Object, const UGameFeatureData* GameFeatureData)
 {
 	if (!Object || !GameFeatureData)
 	{
@@ -270,7 +279,7 @@ bool UModularGameFeaturePluginUtils::IsInGameFeatureModule(const UObject* Object
 }
 
 // Returns true if the given object belongs to any registered game feature plugin
-bool UModularGameFeaturePluginUtils::IsInAnyGameFeatureModule(const UObject* Object)
+bool UGfpmUtils::IsInAnyGameFeatureModule(const UObject* Object)
 {
 	const FString ModuleName = GetModuleNameByObject(Object);
 	if (ModuleName.IsEmpty())
@@ -291,7 +300,7 @@ bool UModularGameFeaturePluginUtils::IsInAnyGameFeatureModule(const UObject* Obj
 }
 
 // Unloads the specified asset from memory
-void UModularGameFeaturePluginUtils::UnloadAsset(UObject* AssetToUnload, bool bUnloadReferences /* = false*/)
+void UGfpmUtils::UnloadAsset(UObject* AssetToUnload, bool bUnloadReferences /* = false*/)
 {
 	if (!ensureMsgf(AssetToUnload, TEXT("ASSERT: [%i] %hs:\n'AssetToUnload' is not valid!"), __LINE__, __FUNCTION__))
 	{
@@ -323,4 +332,17 @@ void UModularGameFeaturePluginUtils::UnloadAsset(UObject* AssetToUnload, bool bU
 			}
 		}
 	}
+}
+
+// Returns true if any world context is mid client-travel
+bool UGfpmUtils::IsAnyWorldPendingNetTravel()
+{
+	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
+	{
+		if (WorldContext.PendingNetGame)
+		{
+			return true;
+		}
+	}
+	return false;
 }

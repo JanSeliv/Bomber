@@ -43,6 +43,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "GameFeaturePluginsManager",
+			"Enabled": true
+		},
+		{
 			"Name": "SettingsWidgetConstructor",
 			"Enabled": true
 		},

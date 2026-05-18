@@ -1,9 +1,9 @@
-﻿{
+{
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "My Editor Utils",
-	"Description": "Plugin that contains useful editor utilities",
+	"FriendlyName": "Game Feature Plugins Manager",
+	"Description": "Plugin that drives tag-based loading and unloading of Modular Game Feature plugins",
 	"Category": "Programming",
 	"CreatedBy": "Yevhenii Selivanov",
 	"CreatedByURL": "https://github.com/JanSeliv/Bomber",
@@ -17,36 +17,26 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "MyUtils",
+			"Name": "GameFeaturePluginsManager",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "MyEditorUtils",
-			"Type": "Editor",
-			"LoadingPhase": "Default"
-		},
-        {
-          "Name": "MyUtilsNodes",
-          "Type": "UncookedOnly",
-          "LoadingPhase": "Default"
-        }
+		}
 	],
 	"Plugins": [
 		{
-			"Name": "EnhancedInput",
+			"Name": "GameFeatures",
 			"Enabled": true
 		},
 		{
-			"Name": "ModelViewViewModel",
-			"Enabled": true
-		},
-		{
-			"Name": "AsyncMessageSystem",
+			"Name": "ModularGameplay",
 			"Enabled": true
 		},
 		{
 			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "AsyncMessageSystem",
 			"Enabled": true
 		}
 	]

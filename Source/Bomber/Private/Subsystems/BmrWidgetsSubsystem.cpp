@@ -6,7 +6,7 @@
 #include "Controllers/BmrPlayerController.h"
 #include "DalRegistrySubsystem.h"
 #include "DataRegistries/BmrWidgetRow.h"
-#include "MyUtilsLibraries/ModularGameFeaturePluginUtils.h"
+#include "GfpmUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
 #include "MyUtilsLibraries/WidgetUtilsLibrary.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
@@ -303,7 +303,7 @@ void UBmrWidgetsSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* Gam
 		for (const UUserWidget* WidgetInstanceIt : It.Value.WidgetInstances)
 		{
 			const TSubclassOf<UUserWidget> WidgetClassIt = WidgetInstanceIt ? WidgetInstanceIt->GetClass() : nullptr;
-			if (UModularGameFeaturePluginUtils::IsInGameFeatureModule(WidgetClassIt, GameFeatureData))
+			if (UGfpmUtils::IsInGameFeatureModule(WidgetClassIt, GameFeatureData))
 			{
 				WidgetsOwnedByModule.AddTagFast(It.Key);
 				break;

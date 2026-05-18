@@ -12,8 +12,6 @@ public class MyUtils : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core"
-				, "GameFeatures" // Created UModularGameFeatureWorldSubsystem, UModularGameFeaturePluginUtils
-				, "ModularGameplay" // Created UGameFrameworkComponentManager extension handlers
 				, "ModelViewViewModel" // Created MVVM base classes
 				, "AsyncMessageSystem" // Created UGlobalMessageSubsystem (Aka Lyra Gameplay Message Router)
 			}

@@ -9,30 +9,30 @@
 #include "GameplayTagContainer.h" // FGameplayTagContainer
 #include "UObject/SoftObjectPtr.h" // TSoftClassPtr
 
-#include "MyGameFeatureAction_AddLooseGameplayTags.generated.h"
+#include "GfpmAction_AddLooseGameplayTags.generated.h"
 
 /**
  * Game Feature action that grants loose gameplay tags to the Ability System Component owned by an actor of a specified class while the feature is Active.
  * Lets one feature activation chain into other tag-driven features by adding tags onto the world ASC, the action subscribes to UGameFrameworkComponentManager extension events for actors of the configured class in play worlds, and listens for spawns and walks already-loaded actors in the editor world, so chained features apply regardless of when the feature activates relative to world load.
  */
-UCLASS(meta = (DisplayName = "MY Add Loose Gameplay Tags"))
-class MYUTILS_API UMyGameFeatureAction_AddLooseGameplayTags final : public UGameFeatureAction
+UCLASS(DisplayName = "GFPM Add Loose Gameplay Tags")
+class GAMEFEATUREPLUGINSMANAGER_API UGfpmAction_AddLooseGameplayTags final : public UGameFeatureAction
 {
 	GENERATED_BODY()
 
 public:
 	/** Owner of Ability System Component; the action subscribes to receivers of this class registered via UGameFrameworkComponentManager and resolves the ASC through IAbilitySystemInterface. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tags", meta = (AllowAbstract))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "[Game Feature Plugins Manager]", meta = (AllowAbstract))
 	TSoftClassPtr<AActor> OwnerActor = nullptr;
 
 	/** Tags granted to the world ASC while the feature is Active. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tags")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "[Game Feature Plugins Manager]")
 	FGameplayTagContainer LooseTags = FGameplayTagContainer::EmptyContainer;
 
 	/** When true, own LooseTags are removed from the ASC if any other child tag sharing the same direct parent is applied
 	 * E.g. LooseTags is 'Map.A', it will self-remove when 'Map.B' is added by anything else.
 	 * Is useful to unload own tag-driven feature if another one became loaded. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Tags")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "[Game Feature Plugins Manager]")
 	bool bIsExclusiveTag = false;
 
 protected:

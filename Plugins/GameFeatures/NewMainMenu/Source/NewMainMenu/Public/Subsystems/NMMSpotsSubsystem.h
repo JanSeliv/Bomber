@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Subsystems/ModularGameFeaturePluginSubsystem.h"
+#include "Subsystems/GfpmWorldSubsystem.h"
 
 #include "NMMSpotsSubsystem.generated.h"
 
@@ -12,7 +12,7 @@ class UNMMSpotComponent;
  * Manages Main Menu cinematic spots and keeps their data.
  */
 UCLASS(BlueprintType, Blueprintable)
-class NEWMAINMENU_API UNMMSpotsSubsystem : public UModularGameFeaturePluginSubsystem
+class NEWMAINMENU_API UNMMSpotsSubsystem : public UGfpmWorldSubsystem
 {
 	GENERATED_BODY()
 

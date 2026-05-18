@@ -18,6 +18,7 @@
 #include "DalSubsystem.h"
 #include "DataAssets/BmrInputMappingContext.h"
 #include "GameFramework/BmrGameState.h"
+#include "GfpmUtils.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "MyUtilsLibraries/SaveUtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
@@ -30,6 +31,7 @@
 // UE
 #include "Components/AudioComponent.h"
 #include "GameFramework/PlayerState.h"
+#include "InputAction.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMPlayerControllerComponent)
 
@@ -196,7 +198,10 @@ void UNMMPlayerControllerComponent::OnUnregister()
 
 		for (const UBmrInputMappingContext* InputContextIt : MenuInputContexts)
 		{
+			TArray<UInputAction*> ContextInputActions;
+			UInputUtilsLibrary::GetAllActionsInContext(MyPC, InputContextIt, EInputActionInContextState::Any, /*out*/ ContextInputActions);
 			UInputUtilsLibrary::UnbindInputActionsInContext(MyPC, InputContextIt);
+			UGfpmUtils::UnloadAssets(ContextInputActions);
 		}
 		MyPC->RemoveInputContexts(MenuInputContexts);
 	}

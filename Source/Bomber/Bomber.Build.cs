@@ -49,6 +49,7 @@ public class Bomber : ModuleRules
 				// Bomber plugins
 				, "SettingsWidgetConstructor" // Generates settings
 				, "AdvancedSessions", "AdvancedSteamSessions" // Steam
+				, "GameFeaturePluginsManager" // UGfpmUtils
 			}
 		);
 

@@ -1,11 +1,11 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "DataAssets/BmrModularGameFeatureSettings.h"
+#include "Data/GfpmSettings.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(BmrModularGameFeatureSettings)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmSettings)
 
 // Returns aggregated container of all unique tags from tag-driven features map, lazy-cached
-const FGameplayTagContainer& UBmrModularGameFeatureSettings::GetAllModularGameFeatureTags() const
+const FGameplayTagContainer& UGfpmSettings::GetAllModularGameFeatureTags() const
 {
 	static FGameplayTagContainer CachedTags;
 	if (!CachedTags.IsEmpty())

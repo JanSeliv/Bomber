@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Subsystems/ModularGameFeaturePluginSubsystem.h"
+#include "Subsystems/GfpmWorldSubsystem.h"
 
 // NMM
 #include "Data/NMMTypes.h" // ENMMCameraRailTransitionState
@@ -13,7 +13,7 @@
  * Manages camera possessing and transitions in the Main Menu
  */
 UCLASS(BlueprintType, Blueprintable)
-class NEWMAINMENU_API UNMMCameraSubsystem : public UModularGameFeaturePluginSubsystem
+class NEWMAINMENU_API UNMMCameraSubsystem : public UGfpmWorldSubsystem
 {
 	GENERATED_BODY()
 
