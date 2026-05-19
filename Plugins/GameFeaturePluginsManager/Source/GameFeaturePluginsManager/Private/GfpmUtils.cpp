@@ -333,16 +333,3 @@ void UGfpmUtils::UnloadAsset(UObject* AssetToUnload, bool bUnloadReferences /* =
 		}
 	}
 }
-
-// Returns true if any world context is mid client-travel
-bool UGfpmUtils::IsAnyWorldPendingNetTravel()
-{
-	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
-	{
-		if (WorldContext.PendingNetGame)
-		{
-			return true;
-		}
-	}
-	return false;
-}

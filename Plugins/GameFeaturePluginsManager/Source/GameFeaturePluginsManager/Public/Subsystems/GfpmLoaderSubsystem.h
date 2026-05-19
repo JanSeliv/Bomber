@@ -43,10 +43,6 @@ protected:
 	/** Per-ASC tag snapshots across all tracked worlds; only authoritative ASCs drive feature decisions */
 	TMap<TWeakObjectPtr<class UAbilitySystemComponent>, FGameplayTagContainer> AscOwnedTags;
 
-	/** Features currently active via this subsystem; used to compute activation/deactivation delta */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, AdvancedDisplay, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
-	TSet<FName> ActiveFeatures;
-
 	/** Pending next-tick recompute handle; coalesces tag-event bursts */
 	FTSTicker::FDelegateHandle DeferredRecomputeHandle;
 
@@ -75,18 +71,9 @@ protected:
 	void OnPreWorldFinishDestroy(class UWorld* World);
 
 #if WITH_EDITOR
-	/** Whether active features are frozen during editor<->PIE transition, released when first authoritative tag event fires */
-	bool bIsAuthorityTransitioning = false;
-
-	/** When Play In Editor is about to begin */
-	void OnPreBeginPIE(bool bIsSimulating);
-
-	/** When Play In Editor ends */
-	void OnEndPIE(bool bIsSimulating);
-
 	/** When editor finishes shutting down PIE; forces feature cycle (unload then reload from editor authority) */
 	void OnEditorShutdownPIE(bool bIsSimulating);
-#endif
+#endif // WITH_EDITOR
 
 	/*********************************************************************************************
 	 * Overrides

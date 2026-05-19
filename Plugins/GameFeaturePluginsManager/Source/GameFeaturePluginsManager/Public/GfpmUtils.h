@@ -76,9 +76,6 @@ public:
 	 * Accepts any array of UObject-derived pointers; loops the array and unloads each element. */
 	template <typename T>
 	static void UnloadAssets(const TArray<T*>& AssetsToUnload, bool bUnloadReferences = false);
-
-	/** Returns true if any world context is mid client-travel. */
-	static bool IsAnyWorldPendingNetTravel();
 };
 
 template <typename T>

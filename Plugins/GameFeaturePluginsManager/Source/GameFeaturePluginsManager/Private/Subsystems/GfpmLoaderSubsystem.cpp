@@ -121,15 +121,6 @@ void UGfpmLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag Chan
 		OwnedSnapshot->RemoveTag(ChangedTag);
 	}
 
-#if WITH_EDITOR
-	// First authoritative tag event after a play-session transition releases the hold
-	if (bIsAuthorityTransitioning
-	    && IsAuthoritativeAsc(SourceAsc))
-	{
-		bIsAuthorityTransitioning = false;
-	}
-#endif
-
 	QueueDeferredRecompute();
 }
 
@@ -150,7 +141,7 @@ void UGfpmLoaderSubsystem::QueueDeferredRecompute()
 	    0.0f);
 }
 
-// In game builds the Game world is authoritative; in editor builds the play world is authoritative during a play session, otherwise the editor world is
+// In game builds Game world is authoritative. In editor builds server-side play world is authoritative during play session excluding client, otherwise editor world is
 bool UGfpmLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC) const
 {
 	if (!ASC)
@@ -170,7 +161,9 @@ bool UGfpmLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC
 	const bool bIsPlaySessionActive = GEditor && GEditor->PlayWorld;
 	if (bIsPlaySessionActive)
 	{
-		return Type == EWorldType::PIE;
+		// Client play world mirrors authority via replication and lags it, so it must not feed the authoritative aggregate
+		return Type == EWorldType::PIE
+		       && World->GetNetMode() != NM_Client;
 	}
 #endif
 
@@ -181,16 +174,6 @@ bool UGfpmLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC
 // Aggregates authoritative tags, computes the desired feature set, applies the diff vs the active set
 void UGfpmLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 {
-#if WITH_EDITOR
-	if (bIsAuthorityTransitioning
-	    || UGfpmUtils::IsAnyWorldPendingNetTravel())
-	{
-		// Editor<->PIE swap or -game mid client-travel: in editor configs engine creates External Data Layer streaming objects only at world init and only for Active modules,
-		// so deactivating plugin here would leave incoming world without streaming object and runtime map switching would break silently later.
-		// Skip until new world owns authority and retriggers this recompute
-		return;
-	}
-#endif // WITH_EDITOR
 
 	bool bHasAuthoritativeAsc = false;
 	FGameplayTagContainer Aggregate;
@@ -212,8 +195,6 @@ void UGfpmLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 	}
 
 	const TMap<FName, FGameplayTagContainer>& FeaturesByTags = UGfpmSettings::Get().GetModularGameFeaturesByTags();
-	TSet<FName> NewActive;
-	NewActive.Reserve(FeaturesByTags.Num());
 	TArray<FName> ToActivate;
 	TArray<FName> ToDeactivate;
 	for (const TPair<FName, FGameplayTagContainer>& Pair : FeaturesByTags)
@@ -221,11 +202,6 @@ void UGfpmLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 		const FName& Feature = Pair.Key;
 		const bool bShouldBeActive = Aggregate.HasAny(Pair.Value);
 		const bool bIsCurrentlyActive = UGfpmUtils::IsModularGameFeatureActive(Feature);
-
-		if (bShouldBeActive)
-		{
-			NewActive.Add(Feature);
-		}
 
 		if (bShouldBeActive
 		    && !bIsCurrentlyActive)
@@ -247,8 +223,6 @@ void UGfpmLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 
 	UGfpmUtils::SetModularGameFeaturesActive(false, ToDeactivate);
 	UGfpmUtils::SetModularGameFeaturesActive(true, ToActivate);
-
-	ActiveFeatures = MoveTemp(NewActive);
 }
 
 /*********************************************************************************************
@@ -282,59 +256,24 @@ void UGfpmLoaderSubsystem::OnPreWorldFinishDestroy_Implementation(UWorld* World)
 		TArray<FName> TagDrivenFeatures;
 		UGfpmSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
 		UGfpmUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
-		ActiveFeatures.Reset();
 		return;
 	}
-
-	// Release the transition hold once the last play-typed ASC has been removed so the upcoming recompute can apply the editor authority
-	if (bIsAuthorityTransitioning)
-	{
-		bool bAnyPlayAscRemains = false;
-		for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FGameplayTagContainer>& Pair : AscOwnedTags)
-		{
-			const UAbilitySystemComponent* OtherAsc = Pair.Key.Get();
-			const UWorld* OtherWorld = OtherAsc ? OtherAsc->GetWorld() : nullptr;
-			if (OtherWorld
-			    && OtherWorld->WorldType == EWorldType::PIE)
-			{
-				bAnyPlayAscRemains = true;
-				break;
-			}
-		}
-		if (!bAnyPlayAscRemains)
-		{
-			bIsAuthorityTransitioning = false;
-		}
-	}
-#endif
+#endif // WITH_EDITOR
 
 	QueueDeferredRecompute();
 }
 
 #if WITH_EDITOR
-void UGfpmLoaderSubsystem::OnPreBeginPIE(bool /*bIsSimulating*/)
-{
-	bIsAuthorityTransitioning = true;
-}
-
-void UGfpmLoaderSubsystem::OnEndPIE(bool /*bIsSimulating*/)
-{
-	bIsAuthorityTransitioning = true;
-}
-
 // Force-deactivate all tag-driven features so the engine emits Unloaded, then queue a recompute to reactivate from current authoritative ASCs
 void UGfpmLoaderSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*/)
 {
-	bIsAuthorityTransitioning = false;
-
 	TArray<FName> TagDrivenFeatures;
 	UGfpmSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
 	UGfpmUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
-	ActiveFeatures.Reset();
 
 	QueueDeferredRecompute();
 }
-#endif
+#endif // WITH_EDITOR
 
 /*********************************************************************************************
  * Overrides
@@ -380,10 +319,8 @@ void UGfpmLoaderSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	FWorldDelegates::OnPreWorldFinishDestroy.AddUObject(this, &ThisClass::OnPreWorldFinishDestroy);
 
 #if WITH_EDITOR
-	FEditorDelegates::PreBeginPIE.AddUObject(this, &ThisClass::OnPreBeginPIE);
-	FEditorDelegates::EndPIE.AddUObject(this, &ThisClass::OnEndPIE);
 	FEditorDelegates::ShutdownPIE.AddUObject(this, &ThisClass::OnEditorShutdownPIE);
-#endif
+#endif // WITH_EDITOR
 }
 
 // Unbinds delegates
@@ -399,10 +336,8 @@ void UGfpmLoaderSubsystem::Deinitialize()
 	FWorldDelegates::OnPreWorldFinishDestroy.RemoveAll(this);
 
 #if WITH_EDITOR
-	FEditorDelegates::PreBeginPIE.RemoveAll(this);
-	FEditorDelegates::EndPIE.RemoveAll(this);
 	FEditorDelegates::ShutdownPIE.RemoveAll(this);
-#endif
+#endif // WITH_EDITOR
 
 	Super::Deinitialize();
 }
