@@ -42,14 +42,14 @@ FNmmStateTag UNMMBaseSubsystem::GetPredictedMenuState() const
 		return FNmmStateTag::Idle;
 	}
 
-	// Tag-driven MGF still pending activation, can not validate now
-	const UGfpmLoaderSubsystem* MgfSubsystem = UGfpmLoaderSubsystem::GetModularGameFeaturesSubsystem();
-	if (MgfSubsystem && MgfSubsystem->HasPendingTagDrivenActivations())
+	// Tag-driven GFP still pending activation, can not validate now
+	const UGfpmLoaderSubsystem* LoaderSubsystem = UGfpmLoaderSubsystem::GetLoaderSubsystem();
+	if (LoaderSubsystem && LoaderSubsystem->HasPendingTagDrivenActivations())
 	{
 		return FNmmStateTag::None;
 	}
 
-	// No rows means no MGF cinematics at all (DR itself loads immediately with no softs), menu is ready immediately
+	// No rows means no GFP cinematics at all (DR itself loads immediately with no softs), menu is ready immediately
 	if (!FBmrCinematicRow::GetRowsNum())
 	{
 		return FNmmStateTag::BasicMenu;
@@ -136,7 +136,7 @@ void UNMMBaseSubsystem::OnGameFeatureActivated(const UGameFeatureData* /*GameFea
 	const FNmmStateTag PredictedState = GetPredictedMenuState();
 	if (PredictedState != FNmmStateTag::None)
 	{
-		// It's likely client raced replicated Menu game state vs local MGF activating, leaving NMM state stuck at None, apply desired state
+		// It's likely client raced replicated Menu game state vs local GFP activating, leaving NMM state stuck at None, apply desired state
 		SetNewMainMenuState(PredictedState);
 	}
 }

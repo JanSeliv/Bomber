@@ -10,7 +10,7 @@
  * Is base class for data assets that self-register in UDalSubsystem via PostLoad
  * These data assets are loaded automatically by Asset Registry if setup in one of the following ways:
  * - Project data assets are discovered by Project Settings -> Asset Manager -> PrimaryAssetTypesToScan.
- * - Modular Game Feature data assets are discovered via GameFeatureData asset -> PrimaryAssetTypesToScan.
+ * - Game Feature Plugin (GFP) data assets are discovered via GameFeatureData asset -> PrimaryAssetTypesToScan.
  */
 UCLASS(Abstract)
 class DATAASSETSLOADER_API UDalPrimaryDataAsset : public UPrimaryDataAsset

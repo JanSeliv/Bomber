@@ -8,7 +8,7 @@
 
 /**
  * The tag that represents a map visual theme.
- * Is designed to be extensible by Modular Game Features (GameFeatures/Maps/...)
+ * Is designed to be extensible by Game Feature Plugins (GFP): Plugins/GameFeatures/Maps/...
  */
 USTRUCT(BlueprintType, meta = (Categories = "Map"))
 struct BOMBER_API FBmrMapTag : public FGameplayTag

@@ -75,9 +75,9 @@ public:
 	static void StopListeningForAllGlobalMessages(const UObject* ListenerOwner);
 
 	/** Clears all cached broadcast data for the given tag, restarting the logical session.
-	 * Useful for events owned by modular game features that can unload and need to clear their cache,
+	 * Useful for events owned by game feature plugins that can unload and need to clear their cache,
 	 * so when the feature loads again, early-binding listeners receive fresh data instead of stale payloads from the previous activation.
-	 * Should be called when the broadcaster's lifecycle restarts within the same world session (e.g., in MGF OnDeactivating) */
+	 * Should be called when the broadcaster's lifecycle restarts within the same world session (e.g., in GFP OnDeactivating) */
 	UFUNCTION(BlueprintCallable, Category = "Global Messages", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
 	static void ClearCachedMessages(FGameplayTag MessageTag, const UObject* OptionalWorldContext = nullptr);
 

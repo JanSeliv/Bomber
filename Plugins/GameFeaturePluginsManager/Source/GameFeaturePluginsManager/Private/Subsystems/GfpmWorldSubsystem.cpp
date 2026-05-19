@@ -30,7 +30,7 @@ void UGfpmWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	UGameFeaturesSubsystem::Get().AddObserver(this, UGameFeaturesSubsystem::EObserverPluginStateUpdateMode::FutureOnly);
 
 	const FName ModuleName = FName(*UGfpmUtils::GetModuleNameByObject(this));
-	if (UGfpmUtils::IsModularGameFeatureActive(ModuleName))
+	if (UGfpmUtils::IsGameFeaturePluginActive(ModuleName))
 	{
 		OnGameFeatureInitialize();
 	}
@@ -40,7 +40,7 @@ void UGfpmWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 void UGfpmWorldSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
 	const FName ModuleName = FName(*UGfpmUtils::GetModuleNameByObject(this));
-	if (UGfpmUtils::IsModularGameFeatureActive(ModuleName))
+	if (UGfpmUtils::IsGameFeaturePluginActive(ModuleName))
 	{
 		OnGameFeatureDeinitialize();
 	}

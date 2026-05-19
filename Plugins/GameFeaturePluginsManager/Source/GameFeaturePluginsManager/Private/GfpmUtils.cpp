@@ -17,8 +17,8 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmUtils)
 
-// Returns true if specified Modular Game Feature plugin is currently active
-bool UGfpmUtils::IsModularGameFeatureActive(FName GameFeatureName)
+// Returns true if specified game feature plugin is currently active
+bool UGfpmUtils::IsGameFeaturePluginActive(FName GameFeatureName)
 {
 	if (GameFeatureName.IsNone())
 	{
@@ -35,7 +35,7 @@ bool UGfpmUtils::IsModularGameFeatureActive(FName GameFeatureName)
 	}
 
 	// Fallback: module name might differ from plugin name (e.g. "GameFeatureModuleRuntime" vs "GameFeatureModule"), resolve against registered features
-	const TArray<FString> RegisteredFeatures = GetAllRegisteredModularGameFeatures();
+	const TArray<FString> RegisteredFeatures = GetAllRegisteredGameFeaturePlugins();
 	for (const FString& FeatureName : RegisteredFeatures)
 	{
 		if (NameStr.StartsWith(FeatureName))
@@ -85,7 +85,7 @@ EGameFeatureTargetState UGfpmUtils::GetBuiltInInitialFeatureState(FName GameFeat
 }
 
 // Enables or disable all game features
-void UGfpmUtils::SetModularGameFeaturesActive(bool bEnable, const TArray<FName>& GameFeatures)
+void UGfpmUtils::SetGameFeaturePluginsActive(bool bEnable, const TArray<FName>& GameFeatures)
 {
 	if (GameFeatures.IsEmpty())
 	{
@@ -102,7 +102,7 @@ void UGfpmUtils::SetModularGameFeaturesActive(bool bEnable, const TArray<FName>&
 			continue;
 		}
 
-		const bool bAlreadyActive = IsModularGameFeatureActive(GameFeatureName);
+		const bool bAlreadyActive = IsGameFeaturePluginActive(GameFeatureName);
 		if (bAlreadyActive == bEnable)
 		{
 			continue;
@@ -209,8 +209,8 @@ void UGfpmUtils::RestoreGameFeatureTargetState(const TArray<FName>& GameFeatures
 	ChangeGameFeatureTargetState(Changes);
 }
 
-// Returns names of all registered Modular Game Feature plugins
-TArray<FString> UGfpmUtils::GetAllRegisteredModularGameFeatures()
+// Returns names of all registered game feature plugins
+TArray<FString> UGfpmUtils::GetAllRegisteredGameFeaturePlugins()
 {
 	TArray<FString> FeatureNames;
 	UGameFeaturesSubsystem::Get().ForEachGameFeature([&FeatureNames](FGameFeatureInfo&& Info)
@@ -287,7 +287,7 @@ bool UGfpmUtils::IsInAnyGameFeatureModule(const UObject* Object)
 		return false;
 	}
 
-	const TArray<FString> RegisteredFeatures = GetAllRegisteredModularGameFeatures();
+	const TArray<FString> RegisteredFeatures = GetAllRegisteredGameFeaturePlugins();
 	for (const FString& FeatureName : RegisteredFeatures)
 	{
 		if (ModuleName.StartsWith(FeatureName))

@@ -10,7 +10,7 @@
 #include "GfpmWorldSubsystem.generated.h"
 
 /**
- * Base world subsystem for Modular Game Feature (MGF) plugins.
+ * Base world subsystem to be used within Game Feature Plugin (GFP).
  * In comparison to other world subsystems, it properly triggers on each game feature load and unload.
  * Subclasses override OnGameFeatureInitialize/OnGameFeatureDeinitialize instead of OnWorldBeginPlay/OnWorldEndPlay/Initialize/Deinitialize.
  * This subsystem should be created only under game feature plugin modules.

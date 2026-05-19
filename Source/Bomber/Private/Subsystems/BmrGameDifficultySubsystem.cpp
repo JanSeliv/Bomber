@@ -43,7 +43,7 @@ FBmrGameDifficultyTag UBmrGameDifficultySubsystem::GetGameDifficultyTag() const
 	return DifficultyTags.IsEmpty() ? DifficultyTag : FBmrGameDifficultyTag(DifficultyTags.First());
 }
 
-// Sets new difficulty tag on ASC, adds new before removing old to prevent unnecessary MGF unload/reload
+// Sets new difficulty tag on ASC, adds new before removing old to prevent unnecessary GFP unload/reload
 void UBmrGameDifficultySubsystem::SetGameDifficultyTag(FBmrGameDifficultyTag NewTag)
 {
 	const UWorld* World = GetWorld();

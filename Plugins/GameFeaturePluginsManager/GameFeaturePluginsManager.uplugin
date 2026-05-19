@@ -3,7 +3,7 @@
 	"Version": 1,
 	"VersionName": "1.0",
 	"FriendlyName": "Game Feature Plugins Manager",
-	"Description": "Plugin that drives tag-based loading and unloading of Modular Game Feature plugins",
+	"Description": "Plugin that drives tag-based loading and unloading of Game Feature Plugins (GFP)",
 	"Category": "Programming",
 	"CreatedBy": "Yevhenii Selivanov",
 	"CreatedByURL": "https://github.com/JanSeliv/Bomber",

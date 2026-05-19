@@ -83,7 +83,7 @@ This project could be useful for learners, demonstrating next features:
 - Procedurally generated playfield
 - Challenging AI
 - Enhanced Input
-- Mods and Modular Game Features
+- Mods and Game Feature Plugins (GFP)
 - Complex cinematics (Level Sequences)
 - World Partition
 - Model-View-ViewModel (MVVM) UI Pattern

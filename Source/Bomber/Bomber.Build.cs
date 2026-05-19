@@ -43,7 +43,7 @@ public class Bomber : ModuleRules
 				, "Niagara" // VFX
 				, "GameplayTags" // FGameplayTag
                 , "LevelSequence" // FBmrCinematicRow
-                , "ModularGameplay" // Modular Game Features (MGF)
+                , "ModularGameplay" // Game Feature Plugins (GFP)
                 , "ModelViewViewModel" // MVVM UI pattern
                 , "StateTreeModule", "GameplayStateTreeModule" // State Trees
 				// Bomber plugins

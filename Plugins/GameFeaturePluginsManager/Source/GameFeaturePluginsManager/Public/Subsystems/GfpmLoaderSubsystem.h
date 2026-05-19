@@ -11,7 +11,7 @@
 #include "GfpmLoaderSubsystem.generated.h"
 
 /**
- * Manages tag-driven Modular Game Feature loading/unloading across all worlds (editor, PIE, cook).
+ * Manages tag-driven Game Feature Plugin (GFP) loading/unloading across all worlds (editor, PIE, cook).
  * Features activate when their required tags appear on world ASC, deactivate when tags are removed.
  * Features are defined in UGfpmSettings.
  */
@@ -26,9 +26,9 @@ public:
 
 	/** Returns this subsystem or nullptr */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
-	static UGfpmLoaderSubsystem* GetModularGameFeaturesSubsystem();
+	static UGfpmLoaderSubsystem* GetLoaderSubsystem();
 
-	/** Whether any tag-driven MGF is pending activation despite owning required tags */
+	/** Whether any tag-driven GFP is pending activation despite owning required tags */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
 	bool HasPendingTagDrivenActivations() const;
 
@@ -58,7 +58,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	void ApplyAuthoritativeFeatureSet();
 
-	/** Whether ASC's world is authoritative for MGF decisions */
+	/** Whether ASC's world is authoritative for GFP decisions */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	bool IsAuthoritativeAsc(const UAbilitySystemComponent* ASC) const;
 

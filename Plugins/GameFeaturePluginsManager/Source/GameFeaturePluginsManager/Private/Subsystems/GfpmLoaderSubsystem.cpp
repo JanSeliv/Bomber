@@ -25,18 +25,18 @@
 // Returns this subsystem, is checked and will crash if can't be obtained
 UGfpmLoaderSubsystem& UGfpmLoaderSubsystem::Get()
 {
-	UGfpmLoaderSubsystem* Subsystem = GetModularGameFeaturesSubsystem();
+	UGfpmLoaderSubsystem* Subsystem = GetLoaderSubsystem();
 	checkf(Subsystem, TEXT("ERROR: [%i] %hs:\n'Subsystem' is null!"), __LINE__, __FUNCTION__);
 	return *Subsystem;
 }
 
 // Returns the pointer to this subsystem
-UGfpmLoaderSubsystem* UGfpmLoaderSubsystem::GetModularGameFeaturesSubsystem()
+UGfpmLoaderSubsystem* UGfpmLoaderSubsystem::GetLoaderSubsystem()
 {
 	return GEngine ? GEngine->GetEngineSubsystem<UGfpmLoaderSubsystem>() : nullptr;
 }
 
-// Returns true if any tag-driven MGF should be active for the current ASC tags but is not yet Active
+// Returns true if any tag-driven GFP should be active for the current ASC tags but is not yet Active
 bool UGfpmLoaderSubsystem::HasPendingTagDrivenActivations() const
 {
 	const FGameplayTagContainer* OwnedTags = nullptr;
@@ -65,7 +65,7 @@ bool UGfpmLoaderSubsystem::HasPendingTagDrivenActivations() const
 	{
 		const bool bShouldBeActive = OwnedTags->HasAny(Pair.Value);
 		if (bShouldBeActive
-		    && !UGfpmUtils::IsModularGameFeatureActive(Pair.Key))
+		    && !UGfpmUtils::IsGameFeaturePluginActive(Pair.Key))
 		{
 			return true;
 		}
@@ -124,7 +124,7 @@ void UGfpmLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag Chan
 	QueueDeferredRecompute();
 }
 
-// Coalesces tag-event bursts and keeps MGF activation out of synchronous callbacks
+// Coalesces tag-event bursts and keeps GFP activation out of synchronous callbacks
 void UGfpmLoaderSubsystem::QueueDeferredRecompute()
 {
 	if (DeferredRecomputeHandle.IsValid())
@@ -201,7 +201,7 @@ void UGfpmLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 	{
 		const FName& Feature = Pair.Key;
 		const bool bShouldBeActive = Aggregate.HasAny(Pair.Value);
-		const bool bIsCurrentlyActive = UGfpmUtils::IsModularGameFeatureActive(Feature);
+		const bool bIsCurrentlyActive = UGfpmUtils::IsGameFeaturePluginActive(Feature);
 
 		if (bShouldBeActive
 		    && !bIsCurrentlyActive)
@@ -221,8 +221,8 @@ void UGfpmLoaderSubsystem::ApplyAuthoritativeFeatureSet()
 		return;
 	}
 
-	UGfpmUtils::SetModularGameFeaturesActive(false, ToDeactivate);
-	UGfpmUtils::SetModularGameFeaturesActive(true, ToActivate);
+	UGfpmUtils::SetGameFeaturePluginsActive(false, ToDeactivate);
+	UGfpmUtils::SetGameFeaturePluginsActive(true, ToActivate);
 }
 
 /*********************************************************************************************

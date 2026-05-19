@@ -33,7 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FBmrGameDifficultyTag GetGameDifficultyTag() const;
 
-	/** Sets new difficulty tag on ASC, adds new before removing old to prevent unnecessary MGF unload/reload. */
+	/** Sets new difficulty tag on ASC, adds new before removing old to prevent unnecessary GFP unload/reload. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
 	void SetGameDifficultyTag(FBmrGameDifficultyTag NewTag);
 

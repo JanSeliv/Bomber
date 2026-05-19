@@ -11,7 +11,7 @@ struct FGfpmStateChange;
 enum class EGameFeatureTargetState : uint8;
 
 /**
- * Function library with Modular Game Feature (MGF) plugin helpers.
+ * Function library with Game Feature Plugin (GFP) helpers.
  */
 UCLASS(DisplayName = "Game Feature Plugins Manager Utils")
 class GAMEFEATUREPLUGINSMANAGER_API UGfpmUtils : public UBlueprintFunctionLibrary
@@ -19,10 +19,10 @@ class GAMEFEATUREPLUGINSMANAGER_API UGfpmUtils : public UBlueprintFunctionLibrar
 	GENERATED_BODY()
 
 public:
-	/** Returns true if specified Modular Game Feature plugin is currently active.
+	/** Returns true if specified game feature plugin is currently active.
 	 * @param GameFeatureName The name of the game feature plugin to check. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
-	static bool IsModularGameFeatureActive(FName GameFeatureName);
+	static bool IsGameFeaturePluginActive(FName GameFeatureName);
 
 	/** Returns the built-in initial target state for a game feature.
 	 * @param GameFeatureName The name of the game feature plugin. */
@@ -31,7 +31,7 @@ public:
 
 	/** Enables or disable all game features. */
 	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]")
-	static void SetModularGameFeaturesActive(bool bEnable, const TArray<FName>& GameFeatures);
+	static void SetGameFeaturePluginsActive(bool bEnable, const TArray<FName>& GameFeatures);
 
 	/** Changes target state for game features, batching all requests by state.
 	 * @param Changes Array of game features and their desired target states. */
@@ -63,10 +63,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
 	static bool IsInAnyGameFeatureModule(const UObject* Object);
 
-	/** Returns names of all registered Modular Game Feature plugins
-	 * Is mostly used by `meta = (GetOptions = "GameFeaturePluginsManager.GfpmUtils.GetAllRegisteredModularGameFeatures"))` */
+	/** Returns names of all registered game feature plugins
+	 * Is mostly used by `meta = (GetOptions = "GameFeaturePluginsManager.GfpmUtils.GetAllRegisteredGameFeaturePlugins"))` */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
-	static TArray<FString> GetAllRegisteredModularGameFeatures();
+	static TArray<FString> GetAllRegisteredGameFeaturePlugins();
 
 	/** Unloads the specified asset from memory. */
 	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]")

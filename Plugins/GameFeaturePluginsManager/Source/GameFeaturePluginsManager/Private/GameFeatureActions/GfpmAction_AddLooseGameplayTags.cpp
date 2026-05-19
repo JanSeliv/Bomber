@@ -203,11 +203,11 @@ void UGfpmAction_AddLooseGameplayTags::GrantTagsTo(AActor* Actor)
 		ExclusiveTagSubscriptions.Emplace(ASC, Handle);
 	}
 
-	// Apply desired tags; always grant first so external observers (MGF loader) see the add event even when we are about to remove for a pre-existing child
+	// Apply desired tags; always grant first so external observers (GFP loader) see the add event even when we are about to remove for a pre-existing child
 	TaggedActors.Add(Actor);
 	ASC->AddLooseGameplayTags(LooseTags, 1, EGameplayTagReplicationState::TagOnly);
 
-	// Snapshot scan after grant: generic event only fires on count change, so pre-existing children need a one-shot check. If found, remove own tags so loader picks up the remove event and deactivates the MGF
+	// Snapshot scan after grant: generic event only fires on count change, so pre-existing children need a one-shot check. If found, remove own tags so loader picks up the remove event and deactivates the GFP
 	if (bIsExclusiveTag)
 	{
 		FGameplayTagContainer ExistingTags;

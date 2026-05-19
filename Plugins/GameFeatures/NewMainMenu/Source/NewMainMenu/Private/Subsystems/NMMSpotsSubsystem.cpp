@@ -378,14 +378,14 @@ void UNMMSpotsSubsystem::OnCinematicRowsChanged_Implementation()
 	    && bAnySpotHasValidRow
 	    && CurrentState == FNmmStateTag::BasicMenu)
 	{
-		// Cinematics rows injected by map MGF and spots are ready, activate cinematic lobby
+		// Cinematics rows injected by map GFP and spots are ready, activate cinematic lobby
 		BaseSubsystem.SetNewMainMenuState(FNmmStateTag::Idle);
 	}
 	else if (!bHasRows
 	         && CurrentState != FNmmStateTag::None
 	         && CurrentState != FNmmStateTag::BasicMenu)
 	{
-		// DR emptied at runtime (map MGF unloaded), fall back to basic menu
+		// DR emptied at runtime (map GFP unloaded), fall back to basic menu
 		BaseSubsystem.SetNewMainMenuState(FNmmStateTag::BasicMenu);
 	}
 
