@@ -12,8 +12,7 @@ public class GameFeaturePluginsManager : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core"
-				, "DeveloperSettings" // Created UGfpmSettings
-				, "GameFeatures" // Created UGfpmAction_AddLooseGameplayTags, inherited IGameFeatureStateChangeObserver
+				, "GameFeatures" // Game Feature Plugins (GFP) framework
 				, "ModularGameplay" // Created UGameFrameworkComponentManager extension handlers
 				, "GameplayTags" // Tags
 			}

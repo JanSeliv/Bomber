@@ -43,15 +43,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]")
 	static void RestoreGameFeatureTargetState(const TArray<FName>& GameFeatures);
 
-	/** Returns the content module name from the specified asset package, e.g. "/GameFeatureModule/" from a content asset. */
+	/** Returns the content module name from the specified asset package, e.g. "GameFeatureModule" from a content asset. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
-	static FString GetModuleNameByAsset(const UObject* Asset);
+	static FName GetModuleNameByAsset(const UObject* Asset);
 
 	/** Returns the module name from any object by resolving its class package.
 	 * For C++ objects, extracts from /Script/ package (e.g. "GameFeatureModuleRuntime").
 	 * For Blueprint objects, extracts content root from class package (e.g. "GameFeatureModule"). */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
-	static FString GetModuleNameByObject(const UObject* Object);
+	static FName GetModuleNameByObject(const UObject* Object);
 
 	/** Returns true if the given object belongs to the same game feature plugin as the specified GameFeatureData.
 	 * Compares the object's module name against the plugin content root. */

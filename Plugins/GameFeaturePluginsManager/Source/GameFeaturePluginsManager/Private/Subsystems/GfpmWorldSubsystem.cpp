@@ -29,7 +29,7 @@ void UGfpmWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	UGameFeaturesSubsystem::Get().AddObserver(this, UGameFeaturesSubsystem::EObserverPluginStateUpdateMode::FutureOnly);
 
-	const FName ModuleName = FName(*UGfpmUtils::GetModuleNameByObject(this));
+	const FName ModuleName = UGfpmUtils::GetModuleNameByObject(this);
 	if (UGfpmUtils::IsGameFeaturePluginActive(ModuleName))
 	{
 		OnGameFeatureInitialize();
@@ -39,7 +39,7 @@ void UGfpmWorldSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 // Triggers deactivation if the plugin is still active and unregisters from game feature observer
 void UGfpmWorldSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
-	const FName ModuleName = FName(*UGfpmUtils::GetModuleNameByObject(this));
+	const FName ModuleName = UGfpmUtils::GetModuleNameByObject(this);
 	if (UGfpmUtils::IsGameFeaturePluginActive(ModuleName))
 	{
 		OnGameFeatureDeinitialize();

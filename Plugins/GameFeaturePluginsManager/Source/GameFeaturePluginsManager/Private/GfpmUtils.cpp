@@ -220,26 +220,26 @@ TArray<FString> UGfpmUtils::GetAllRegisteredGameFeaturePlugins()
 	return FeatureNames;
 }
 
-// Returns the module name from the specified asset, if it is part of a game feature
-FString UGfpmUtils::GetModuleNameByAsset(const UObject* Asset)
+// Returns the content module name from the specified asset package
+FName UGfpmUtils::GetModuleNameByAsset(const UObject* Asset)
 {
-	FString GameFeatureName;
 	if (!Asset)
 	{
-		return GameFeatureName;
+		// Null asset has no package to resolve
+		return NAME_None;
 	}
 
 	const FString OriginalPackageName = GetNameSafe(Asset->GetOutermost());
 	const int32 SecondSlashIdx = OriginalPackageName.Find(TEXT("/"), ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
-	return SecondSlashIdx != INDEX_NONE ? OriginalPackageName.Left(SecondSlashIdx + 1) : FString();
+	return SecondSlashIdx != INDEX_NONE ? FName(*OriginalPackageName.Mid(1, SecondSlashIdx - 1)) : NAME_None;
 }
 
 // Returns the module name from any object by resolving its class package
-FString UGfpmUtils::GetModuleNameByObject(const UObject* Object)
+FName UGfpmUtils::GetModuleNameByObject(const UObject* Object)
 {
 	if (!Object)
 	{
-		return FString();
+		return NAME_None;
 	}
 
 	// For C++ objects, extract module name from /Script/ class package
@@ -247,14 +247,11 @@ FString UGfpmUtils::GetModuleNameByObject(const UObject* Object)
 	static const FString ScriptPrefix = TEXT("/Script/");
 	if (ClassPackageName.StartsWith(ScriptPrefix))
 	{
-		return ClassPackageName.RightChop(ScriptPrefix.Len());
+		return FName(*ClassPackageName.RightChop(ScriptPrefix.Len()));
 	}
 
 	// For Blueprint objects, extract content root from class package
-	FString ModuleName = GetModuleNameByAsset(Object->GetClass());
-	ModuleName.RemoveFromStart(TEXT("/"));
-	ModuleName.RemoveFromEnd(TEXT("/"));
-	return ModuleName;
+	return GetModuleNameByAsset(Object->GetClass());
 }
 
 // Returns true if the given object belongs to the same game feature plugin as the specified GameFeatureData
@@ -265,23 +262,21 @@ bool UGfpmUtils::IsInGameFeatureModule(const UObject* Object, const UGameFeature
 		return false;
 	}
 
-	// Extract plugin name from GameFeatureData content root, e.g. "GameFeatureModule" from "/GameFeatureModule/"
-	FString PluginName = GetModuleNameByAsset(GameFeatureData);
-	if (PluginName.IsEmpty())
+	const FName PluginName = GetModuleNameByAsset(GameFeatureData);
+	if (PluginName.IsNone())
 	{
+		// GameFeatureData has no resolvable plugin name
 		return false;
 	}
-	PluginName.RemoveFromStart(TEXT("/"));
-	PluginName.RemoveFromEnd(TEXT("/"));
 
-	const FString ModuleName = GetModuleNameByObject(Object);
-	return !ModuleName.IsEmpty() && ModuleName.StartsWith(PluginName);
+	const FName ModuleName = GetModuleNameByObject(Object);
+	return !ModuleName.IsNone() && ModuleName.ToString().StartsWith(PluginName.ToString());
 }
 
 // Returns true if the given object belongs to any registered game feature plugin
 bool UGfpmUtils::IsInAnyGameFeatureModule(const UObject* Object)
 {
-	const FString ModuleName = GetModuleNameByObject(Object);
+	const FString ModuleName = GetModuleNameByObject(Object).ToString();
 	if (ModuleName.IsEmpty())
 	{
 		return false;
@@ -307,7 +302,7 @@ void UGfpmUtils::UnloadAsset(UObject* AssetToUnload, bool bUnloadReferences /* =
 		return;
 	}
 
-	const FString ModuleMount = GetModuleNameByAsset(AssetToUnload);
+	const FString ModuleMount = FString::Printf(TEXT("/%s/"), *GetModuleNameByAsset(AssetToUnload).ToString());
 
 	AssetToUnload->ClearFlags(RF_Standalone);
 	AssetToUnload->Rename(nullptr, GetTransientPackage(), REN_ForceNoResetLoaders | REN_DoNotDirty | REN_DontCreateRedirectors | REN_NonTransactional);

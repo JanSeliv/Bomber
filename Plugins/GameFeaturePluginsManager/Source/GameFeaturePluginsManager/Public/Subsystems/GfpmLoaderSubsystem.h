@@ -13,7 +13,7 @@
 /**
  * Manages tag-driven Game Feature Plugin (GFP) loading/unloading across all worlds (editor, PIE, cook).
  * Features activate when their required tags appear on world ASC, deactivate when tags are removed.
- * Features are defined in UGfpmSettings.
+ * Features are populated from UGfpmAction_RegisterGameFeaturePluginActivation entries living inside each plugin's GameFeatureData.
  */
 UCLASS(DisplayName = "Game Feature Plugins Loader Subsystem")
 class GAMEFEATUREPLUGINSMANAGER_API UGfpmLoaderSubsystem final : public UEngineSubsystem
@@ -32,6 +32,18 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
 	bool HasPendingTagDrivenActivations() const;
 
+	/** Collects the union of plugin names appearing across every entry of PluginsByTag. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
+	void GetAllRegisteredPlugins(TArray<FName>& OutNames) const;
+
+	/** Registers or replaces activation entry of owning Game Feature Plugin resolved from given GameFeatureData. Schedules apply when any ASC is already tracked. */
+	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]")
+	void RegisterGameFeaturePluginActivation(const class UGameFeatureData* GameFeatureData, const FGameplayTagContainer& ActivationTags);
+
+	/** Drops activation entry of owning Game Feature Plugin resolved from given GameFeatureData. */
+	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]")
+	void UnregisterGameFeaturePluginActivation(const class UGameFeatureData* GameFeatureData);
+
 	/*********************************************************************************************
 	 * Tag-Driven Features
 	 ********************************************************************************************* */
@@ -40,8 +52,11 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	void OnWorldASCReady(const struct FGameplayEventData& Payload);
 
-	/** Per-ASC tag snapshots across all tracked worlds; only authoritative ASCs drive feature decisions */
-	TMap<TWeakObjectPtr<class UAbilitySystemComponent>, FGameplayTagContainer> AscOwnedTags;
+	/** Per-ASC generic-tag-event delegate handles; presence in this map means the ASC is tracked */
+	TMap<TWeakObjectPtr<class UAbilitySystemComponent>, FDelegateHandle> TrackedAscs;
+
+	/** Contains registered GFPs for auto activation and deactivation by specified tags. */
+	TMap<FGameplayTag, TArray<FName>> PluginsByTag;
 
 	/** Pending next-tick recompute handle; coalesces tag-event bursts */
 	FTimerHandle DeferredRecomputeHandle;
