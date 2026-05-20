@@ -15,6 +15,7 @@
 #include "AsyncMessageWorldSubsystem.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "TimerManager.h"
 
 #if WITH_EDITOR
 #include "Editor.h"
@@ -100,7 +101,7 @@ void UGfpmLoaderSubsystem::OnWorldASCReady_Implementation(const FGameplayEventDa
 		});
 	}
 
-	QueueDeferredRecompute();
+	ScheduleApplyGameFeatures(ASC);
 }
 
 // Updates the per-ASC tag snapshot and queues a deferred recompute
@@ -121,24 +122,26 @@ void UGfpmLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag Chan
 		OwnedSnapshot->RemoveTag(ChangedTag);
 	}
 
-	QueueDeferredRecompute();
+	ScheduleApplyGameFeatures(SourceAsc);
 }
 
-// Coalesces tag-event bursts and keeps GFP activation out of synchronous callbacks
-void UGfpmLoaderSubsystem::QueueDeferredRecompute()
+// Defers GFPs applying to next tick
+void UGfpmLoaderSubsystem::ScheduleApplyGameFeatures(const UObject* WorldContextObject)
 {
-	if (DeferredRecomputeHandle.IsValid())
+	const UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull) : nullptr;
+	if (!ensureMsgf(World, TEXT("ASSERT: [%i] %hs:\n'World' from WorldContextObject is invalid"), __LINE__, __FUNCTION__)
+	    || DeferredRecomputeHandle.IsValid())
 	{
+		// Is already queued
 		return;
 	}
 
-	DeferredRecomputeHandle = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateWeakLambda(this, [this](float)
+	DeferredRecomputeHandle = World->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([]
 	{
-		DeferredRecomputeHandle.Reset();
-		ApplyAuthoritativeFeatureSet();
-		return false;
-	}),
-	    0.0f);
+		UGfpmLoaderSubsystem& Loader = Get();
+		Loader.DeferredRecomputeHandle.Invalidate();
+		Loader.ApplyGameFeatures();
+	}));
 }
 
 // In game builds Game world is authoritative. In editor builds server-side play world is authoritative during play session excluding client, otherwise editor world is
@@ -172,9 +175,8 @@ bool UGfpmLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC
 }
 
 // Aggregates authoritative tags, computes the desired feature set, applies the diff vs the active set
-void UGfpmLoaderSubsystem::ApplyAuthoritativeFeatureSet()
+void UGfpmLoaderSubsystem::ApplyGameFeatures()
 {
-
 	bool bHasAuthoritativeAsc = false;
 	FGameplayTagContainer Aggregate;
 	for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FGameplayTagContainer>& Pair : AscOwnedTags)
@@ -239,6 +241,9 @@ void UGfpmLoaderSubsystem::OnPreWorldFinishDestroy_Implementation(UWorld* World)
 
 	const EWorldType::Type WorldType = World->WorldType;
 
+	// Owner world's TimerManager is about to die, cleanup handle
+	DeferredRecomputeHandle.Invalidate();
+
 	for (auto It = AscOwnedTags.CreateIterator(); It; ++It)
 	{
 		const UAbilitySystemComponent* ASC = It.Key().Get();
@@ -260,7 +265,7 @@ void UGfpmLoaderSubsystem::OnPreWorldFinishDestroy_Implementation(UWorld* World)
 	}
 #endif // WITH_EDITOR
 
-	QueueDeferredRecompute();
+	ApplyGameFeatures();
 }
 
 #if WITH_EDITOR
@@ -271,7 +276,8 @@ void UGfpmLoaderSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*/)
 	UGfpmSettings::Get().GetModularGameFeaturesByTags().GetKeys(TagDrivenFeatures);
 	UGfpmUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
 
-	QueueDeferredRecompute();
+	const UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+	ScheduleApplyGameFeatures(EditorWorld);
 }
 #endif // WITH_EDITOR
 
@@ -326,11 +332,7 @@ void UGfpmLoaderSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 // Unbinds delegates
 void UGfpmLoaderSubsystem::Deinitialize()
 {
-	if (DeferredRecomputeHandle.IsValid())
-	{
-		FTSTicker::GetCoreTicker().RemoveTicker(DeferredRecomputeHandle);
-		DeferredRecomputeHandle.Reset();
-	}
+	DeferredRecomputeHandle.Invalidate();
 
 	FWorldDelegates::OnPostWorldInitialization.RemoveAll(this);
 	FWorldDelegates::OnPreWorldFinishDestroy.RemoveAll(this);

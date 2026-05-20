@@ -5,7 +5,7 @@
 #include "Subsystems/EngineSubsystem.h"
 
 // UE
-#include "Containers/Ticker.h"
+#include "Engine/TimerHandle.h"
 #include "GameplayTagContainer.h"
 
 #include "GfpmLoaderSubsystem.generated.h"
@@ -44,19 +44,21 @@ protected:
 	TMap<TWeakObjectPtr<class UAbilitySystemComponent>, FGameplayTagContainer> AscOwnedTags;
 
 	/** Pending next-tick recompute handle; coalesces tag-event bursts */
-	FTSTicker::FDelegateHandle DeferredRecomputeHandle;
+	FTimerHandle DeferredRecomputeHandle;
 
 	/** When an ASC's tag count changes */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	void OnAscTagCountChanged(FGameplayTag ChangedTag, int32 NewCount, UAbilitySystemComponent* SourceAsc);
 
-	/** Defers feature set recomputation to next tick */
-	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
-	void QueueDeferredRecompute();
+	/** Defers GFPs applying to next tick.
+	 * By design during one frame multiple tags might arrive independently, applying one and immediately removing it,
+	 * so we want to avoid unnecessary intermediate state changes and only react once the tags are settled. */
+	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, WorldContext = "WorldContextObject"))
+	void ScheduleApplyGameFeatures(const UObject* WorldContextObject);
 
 	/** Recomputes desired feature set and applies activation/deactivation delta */
 	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
-	void ApplyAuthoritativeFeatureSet();
+	void ApplyGameFeatures();
 
 	/** Whether ASC's world is authoritative for GFP decisions */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
