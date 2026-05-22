@@ -29,6 +29,12 @@ protected:
 	/** Called by Game Features system when owning plugin is unregistered. */
 	virtual void OnGameFeatureUnregistering() override;
 
+	/** When any world finished initializing. */
+	void OnPostWorldInitialized(class UWorld* World);
+
+	/** Subscription handle feeding each world's loader as it initializes. */
+	FDelegateHandle OnPostWorldInitHandle;
+
 #if WITH_EDITOR
 	/** Called by editor's Data Validation system when validation runs on this object. */
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;

@@ -6,45 +6,103 @@
 #include "Data/GfpmStateChange.h"
 
 // UE
+#include "Engine/World.h"
 #include "GameFeatureData.h"
+#include "GameFeatureTypes.h"
 #include "GameFeaturesSubsystem.h"
 #include "UObject/Package.h"
-
-#if WITH_EDITOR
-#include "Editor.h"
-#include "Engine/World.h"
-#endif // WITH_EDITOR
+#include "UnrealEngine.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmUtils)
 
 // Returns true if specified game feature plugin is currently active
-bool UGfpmUtils::IsGameFeaturePluginActive(FName GameFeatureName)
+bool UGfpmUtils::IsGameFeaturePluginActive(FName GameFeatureName, bool bCheckForPending /*= false*/)
 {
-	if (GameFeatureName.IsNone())
+	const FString GameFeatureURL = FindPluginURLByName(GameFeatureName);
+	if (GameFeatureURL.IsEmpty())
 	{
 		return false;
 	}
 
-	const FString NameStr = GameFeatureName.ToString();
-	constexpr bool bCheckForActivating = true;
+	const EGameFeaturePluginState CurrentState = UGameFeaturesSubsystem::Get().GetPluginState(GameFeatureURL);
 
-	// Try direct plugin name match first
-	if (UGameFeaturesSubsystem::Get().IsGameFeaturePluginActiveByName(NameStr, bCheckForActivating))
+	// Stable active states
+	if (CurrentState == EGameFeaturePluginState::Active
+	    || CurrentState == EGameFeaturePluginState::Activating)
 	{
 		return true;
 	}
 
-	// Fallback: module name might differ from plugin name (e.g. "GameFeatureModuleRuntime" vs "GameFeatureModule"), resolve against registered features
+	if (!bCheckForPending)
+	{
+		return false;
+	}
+
+	// Earlier transition states moving toward Active
+	return CurrentState == EGameFeaturePluginState::Loading
+	       || CurrentState == EGameFeaturePluginState::Loaded
+	       || CurrentState == EGameFeaturePluginState::ActivatingDependencies;
+}
+
+// Returns true if specified game feature plugin is currently inactive
+bool UGfpmUtils::IsGameFeaturePluginInactive(FName GameFeatureName, bool bCheckForPending /*= false*/)
+{
+	const FString GameFeatureURL = FindPluginURLByName(GameFeatureName);
+	if (GameFeatureURL.IsEmpty())
+	{
+		return false;
+	}
+
+	const EGameFeaturePluginState CurrentState = UGameFeaturesSubsystem::Get().GetPluginState(GameFeatureURL);
+
+	// Stable inactive states
+	if (CurrentState == EGameFeaturePluginState::Installed
+	    || CurrentState == EGameFeaturePluginState::Registered)
+	{
+		return true;
+	}
+
+	if (!bCheckForPending)
+	{
+		return false;
+	}
+
+	// Transition states moving toward inactive
+	return CurrentState == EGameFeaturePluginState::Unregistering
+	       || CurrentState == EGameFeaturePluginState::Unloading;
+}
+
+// Resolves URL for a registered game feature plugin by name, with module-suffix fallback
+FString UGfpmUtils::FindPluginURLByName(FName GameFeatureName)
+{
+	if (GameFeatureName.IsNone())
+	{
+		return FString();
+	}
+
+	const FString NameStr = GameFeatureName.ToString();
+	const UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
+
+	// Direct plugin name match first
+	FString GameFeatureURL;
+	GameFeaturesSubsystem.GetPluginURLByName(NameStr, /*out*/ GameFeatureURL);
+	if (!GameFeatureURL.IsEmpty())
+	{
+		return GameFeatureURL;
+	}
+
+	// Fallback: runtime module name may differ from plugin name (e.g. "GameFeatureModuleRuntime" vs "GameFeatureModule"), probe registered features for a prefix match
 	const TArray<FString> RegisteredFeatures = GetAllRegisteredGameFeaturePlugins();
 	for (const FString& FeatureName : RegisteredFeatures)
 	{
 		if (NameStr.StartsWith(FeatureName))
 		{
-			return UGameFeaturesSubsystem::Get().IsGameFeaturePluginActiveByName(FeatureName, bCheckForActivating);
+			GameFeaturesSubsystem.GetPluginURLByName(FeatureName, /*out*/ GameFeatureURL);
+			return GameFeatureURL;
 		}
 	}
 
-	return false;
+	return FString();
 }
 
 // Returns the built-in initial auto state for a game feature
@@ -55,17 +113,14 @@ EGameFeatureTargetState UGfpmUtils::GetBuiltInInitialFeatureState(FName GameFeat
 		return EGameFeatureTargetState::Installed;
 	}
 
-	const UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
-
-	FString GameFeatureURL;
-	GameFeaturesSubsystem.GetPluginURLByName(GameFeatureName.ToString(), /*out*/ GameFeatureURL);
+	const FString GameFeatureURL = FindPluginURLByName(GameFeatureName);
 	if (GameFeatureURL.IsEmpty())
 	{
 		return EGameFeatureTargetState::Installed;
 	}
 
 	FGameFeaturePluginDetails PluginDetails;
-	GameFeaturesSubsystem.GetGameFeaturePluginDetails(GameFeatureURL, PluginDetails);
+	UGameFeaturesSubsystem::Get().GetGameFeaturePluginDetails(GameFeatureURL, PluginDetails);
 
 	switch (PluginDetails.BuiltInAutoState)
 	{
@@ -102,9 +157,11 @@ void UGfpmUtils::SetGameFeaturePluginsActive(bool bEnable, const TArray<FName>& 
 			continue;
 		}
 
-		const bool bAlreadyActive = IsGameFeaturePluginActive(GameFeatureName);
-		if (bAlreadyActive == bEnable)
+		constexpr bool bCheckForPending = true;
+		const bool bSkip = bEnable ? IsGameFeaturePluginActive(GameFeatureName, bCheckForPending) : IsGameFeaturePluginInactive(GameFeatureName, bCheckForPending);
+		if (bSkip)
 		{
+			// GFP is already at or transitioning toward specified state, is likely caused by calling multiple times in this or following frames while request is still processing
 			continue;
 		}
 
@@ -119,7 +176,7 @@ void UGfpmUtils::SetGameFeaturePluginsActive(bool bEnable, const TArray<FName>& 
 			// - plugin itself has initial state as registered
 			// - editor is running, where packages not fully unload by design, attempting to force it would break package load back
 #if WITH_EDITOR
-			const bool bIsEditor = GIsEditor && GEditor && GWorld && GWorld->IsEditorWorld();
+			const bool bIsEditor = GIsEditor && GWorld && GWorld->IsEditorWorld();
 #else
 			const bool bIsEditor = false;
 #endif // WITH_EDITOR
@@ -161,8 +218,7 @@ void UGfpmUtils::ChangeGameFeatureTargetState(const TArray<FGfpmStateChange>& Ch
 			continue;
 		}
 
-		FString GameFeatureURL;
-		GameFeaturesSubsystem.GetPluginURLByName(Change.GameFeatureName.ToString(), /*out*/ GameFeatureURL);
+		const FString GameFeatureURL = FindPluginURLByName(Change.GameFeatureName);
 		if (GameFeatureURL.IsEmpty())
 		{
 			UE_LOG(LogGameFeatures, Log, TEXT("Game feature '%s' is not installed in the project (likely removed or corrupted)"), *Change.GameFeatureName.ToString());

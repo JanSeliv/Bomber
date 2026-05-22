@@ -25,14 +25,5 @@ public class GameFeaturePluginsManager : ModuleRules
                 , "AsyncMessageSystem" // Listen for world-ASC-ready event
 			}
 		);
-
-		if (Target.bBuildEditor)
-		{
-			PrivateDependencyModuleNames.AddRange(new[]
-				{
-					"UnrealEd" // FEditorDelegates, GEditor
-				}
-			);
-		}
 	}
 }

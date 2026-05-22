@@ -6,6 +6,7 @@
 #include "Subsystems/GfpmLoaderSubsystem.h"
 
 // UE
+#include "Engine/World.h"
 #include "GameFeatureData.h"
 
 #if WITH_EDITOR
@@ -19,7 +20,20 @@ void UGfpmAction_RegisterGameFeaturePluginActivation::OnGameFeatureRegistering()
 {
 	Super::OnGameFeatureRegistering();
 
-	UGfpmLoaderSubsystem::Get().RegisterGameFeaturePluginActivation(GetTypedOuter<UGameFeatureData>(), ActivationTags);
+	// Registration fires at engine init before any world exists
+	if (!OnPostWorldInitHandle.IsValid())
+	{
+		OnPostWorldInitHandle = FWorldDelegates::OnPostWorldInitialization.AddWeakLambda(this, [this](UWorld* World, const UWorld::InitializationValues /*IVS*/)
+		{
+			OnPostWorldInitialized(World);
+		});
+	}
+
+	// Feed any world already live at registration (editor world, or single game world on dynamic registration)
+	if (UGfpmLoaderSubsystem* Loader = UGfpmLoaderSubsystem::GetLoaderSubsystem())
+	{
+		Loader->RegisterGameFeaturePluginActivation(GetTypedOuter<UGameFeatureData>(), ActivationTags);
+	}
 }
 
 // Called by Game Features system when owning plugin is unregistered
@@ -27,14 +41,29 @@ void UGfpmAction_RegisterGameFeaturePluginActivation::OnGameFeatureUnregistering
 {
 	Super::OnGameFeatureUnregistering();
 
-	UGfpmLoaderSubsystem* Loader = UGfpmLoaderSubsystem::GetLoaderSubsystem();
+	if (OnPostWorldInitHandle.IsValid())
+	{
+		FWorldDelegates::OnPostWorldInitialization.Remove(OnPostWorldInitHandle);
+		OnPostWorldInitHandle.Reset();
+	}
+
+	if (UGfpmLoaderSubsystem* Loader = UGfpmLoaderSubsystem::GetLoaderSubsystem())
+	{
+		Loader->UnregisterGameFeaturePluginActivation(GetTypedOuter<UGameFeatureData>());
+	}
+}
+
+// When any world finished initializing
+void UGfpmAction_RegisterGameFeaturePluginActivation::OnPostWorldInitialized(UWorld* World)
+{
+	UGfpmLoaderSubsystem* Loader = World ? World->GetSubsystem<UGfpmLoaderSubsystem>() : nullptr;
 	if (!Loader)
 	{
-		// No GFP context or no loader, nothing tracked under this action
+		// World does not host the loader (editor, preview, inactive type), nothing to seed
 		return;
 	}
 
-	Loader->UnregisterGameFeaturePluginActivation(GetTypedOuter<UGameFeatureData>());
+	Loader->RegisterGameFeaturePluginActivation(GetTypedOuter<UGameFeatureData>(), ActivationTags);
 }
 
 #if WITH_EDITOR
@@ -59,6 +88,9 @@ void UGfpmAction_RegisterGameFeaturePluginActivation::PostEditChangeProperty(FPr
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	// Register replaces any stale binding and internally schedules apply against any tracked ASC, so property panel commits before deferred transition
-	UGfpmLoaderSubsystem::Get().RegisterGameFeaturePluginActivation(GetTypedOuter<UGameFeatureData>(), ActivationTags);
+	if (UGfpmLoaderSubsystem* Loader = UGfpmLoaderSubsystem::GetLoaderSubsystem())
+	{
+		Loader->RegisterGameFeaturePluginActivation(GetTypedOuter<UGameFeatureData>(), ActivationTags);
+	}
 }
 #endif // WITH_EDITOR

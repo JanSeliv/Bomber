@@ -12,8 +12,24 @@
 #include "GfpmAction_AddLooseGameplayTags.generated.h"
 
 /**
+ * Per-world granted-tag tracking for the shared UGfpmAction_AddLooseGameplayTags instance.
+ * One action instance services every world (editor preview, PIE server and clients), so granted-tag state is bucketed per world to keep each world's activation independent.
+ */
+struct FGfpmLooseTagsWorldData
+{
+	/** Extension request handles registered for this world, populated for game worlds only. */
+	TArray<TSharedPtr<FComponentRequestHandle>> ExtensionRequestHandles;
+
+	/** Actors this action granted tags to in this world. */
+	TSet<TWeakObjectPtr<AActor>> TaggedActors;
+
+	/** Per-ASC generic tag-event handles for this world, populated only when bIsExclusiveTag is true. */
+	TMap<TWeakObjectPtr<class UAbilitySystemComponent>, FDelegateHandle> ExclusiveTagSubscriptions;
+};
+
+/**
  * Game Feature action that grants loose gameplay tags to the Ability System Component owned by an actor of a specified class while the feature is Active.
- * Lets one feature activation chain into other tag-driven features by adding tags onto the world ASC, the action subscribes to UGameFrameworkComponentManager extension events for actors of the configured class in play worlds, and listens for spawns and walks already-loaded actors in the editor world, so chained features apply regardless of when the feature activates relative to world load.
+ * Lets one feature activation chain into other tag-driven features by adding tags onto the world ASC. Subscribes to UGameFrameworkComponentManager extension events for actors of the configured class in play worlds.
  */
 UCLASS(DisplayName = "GFPM Add Loose Gameplay Tags")
 class GAMEFEATUREPLUGINSMANAGER_API UGfpmAction_AddLooseGameplayTags final : public UGameFeatureAction
@@ -35,6 +51,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "[Game Feature Plugins Manager]")
 	bool bIsExclusiveTag = false;
 
+	/** Adds LooseTags to actor's ASC and remembers it for cleanup on deactivation. */
+	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]")
+	void GrantTagsTo(AActor* Actor);
+
+	/** Removes LooseTags from actor's ASC and stops tracking it. */
+	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]")
+	void RevokeTagsFrom(AActor* Actor);
+
 protected:
 	/** Called by the Game Features system when the owning feature transitions to Active. */
 	virtual void OnGameFeatureActivated() override;
@@ -51,7 +75,7 @@ protected:
 	 * Internal
 	 ********************************************************************************************* */
 protected:
-	/** Single dispatch entry per world: routes play worlds through the GFCM extension handler and editor worlds through receiver enumeration plus spawn listening. */
+	/** Routes play worlds through GFCM extension handler. */
 	void RegisterForWorld(UWorld* World);
 
 	/** Routes UGameFrameworkComponentManager extension events to add or remove tag operations. */
@@ -63,14 +87,11 @@ protected:
 	/** Hook for worlds that initialize while the feature is Active; covers built-in features that activated before any world existed. */
 	void OnPostWorldInit(UWorld* World, struct FWorldInitializationValues WorldInitializationValues);
 
-	/** Adds LooseTags to the actor's ASC and remembers the actor for cleanup on deactivation. */
-	void GrantTagsTo(AActor* Actor);
-
-	/** Removes LooseTags from the actor's ASC and stops tracking it. */
-	void RevokeTagsFrom(AActor* Actor);
-
-	/** Removes the granted tags from every tracked actor and clears all per-world handles. */
+	/** Removes the granted tags from every tracked actor across all worlds. */
 	void RevokeAllTrackedTags();
+
+	/** Removes the granted tags and clears handles for a single world's tracked data. */
+	void RevokeWorldData(FGfpmLooseTagsWorldData& WorldData);
 
 	/** Hook for any ASC tag count change; removes own tags when another child tag sharing the same direct parent as one of LooseTags is added. */
 	void OnAnyExclusiveAscTagChanged(FGameplayTag ChangedTag, int32 NewCount, TWeakObjectPtr<AActor> WeakActor);
@@ -81,26 +102,6 @@ protected:
 	/** Handle for the FWorldDelegates::OnPostWorldInitialization binding. */
 	FDelegateHandle OnPostWorldInitHandle;
 
-	/** Per-world extension request handles, kept alive for the duration of the feature's Active state. */
-	TArray<TSharedPtr<FComponentRequestHandle>> ExtensionRequestHandles;
-
-	/** Actors the action has granted tags to, used to remove them on deactivation. */
-	TSet<TWeakObjectPtr<AActor>> TaggedActors;
-
-	/** Per-ASC generic tag-event handle kept alive while own LooseTags are granted; populated only when bIsExclusiveTag is true. */
-	TMap<TWeakObjectPtr<class UAbilitySystemComponent>, FDelegateHandle> ExclusiveTagSubscriptions;
-
-#if WITH_EDITOR
-	/** Receiver hook for actors spawned into editor worlds while the feature is Active. */
-	void OnActorSpawnedInEditorWorld(AActor* SpawnedActor);
-
-	/** Hook for editor map-load completion; the persistent level's actors are loaded by this point, so a re-walk can catch level-loaded receivers that never go through SpawnActor. */
-	void OnEditorMapOpened(const FString& Filename, bool bAsTemplate);
-
-	/** Per-editor-world spawn-listener handles, kept alive while the editor world exists. */
-	TMap<TWeakObjectPtr<UWorld>, FDelegateHandle> EditorActorSpawnedHandles;
-
-	/** Handle for the FEditorDelegates::OnMapOpened binding. */
-	FDelegateHandle OnEditorMapOpenedHandle;
-#endif
+	/** Per-world granted-tag tracking, this action is one shared instance servicing every world. */
+	TMap<TWeakObjectPtr<class UWorld>, FGfpmLooseTagsWorldData> PerWorldData;
 };

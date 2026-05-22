@@ -17,13 +17,9 @@
 #include "GameFeatureData.h"
 #include "TimerManager.h"
 
-#if WITH_EDITOR
-#include "Editor.h"
-#endif
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmLoaderSubsystem)
 
-// Returns this subsystem, is checked and will crash if can't be obtained
+// Returns this subsystem for current play world, checked. Crashes if unavailable
 UGfpmLoaderSubsystem& UGfpmLoaderSubsystem::Get()
 {
 	UGfpmLoaderSubsystem* Subsystem = GetLoaderSubsystem();
@@ -31,39 +27,44 @@ UGfpmLoaderSubsystem& UGfpmLoaderSubsystem::Get()
 	return *Subsystem;
 }
 
-// Returns the pointer to this subsystem
+// Returns this subsystem for current play world or nullptr
 UGfpmLoaderSubsystem* UGfpmLoaderSubsystem::GetLoaderSubsystem()
 {
-	return GEngine ? GEngine->GetEngineSubsystem<UGfpmLoaderSubsystem>() : nullptr;
-}
-
-// Returns true if any tag-driven GFP should be active for the current ASC tags but is not yet Active
-bool UGfpmLoaderSubsystem::HasPendingTagDrivenActivations() const
-{
-	const UAbilitySystemComponent* AuthAsc = nullptr;
-	for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FDelegateHandle>& Pair : TrackedAscs)
+	const UWorld* World = GEngine ? GEngine->GetCurrentPlayWorld() : nullptr;
+#if WITH_EDITOR
+	if (!World && GEngine)
 	{
-		const UAbilitySystemComponent* ASC = Pair.Key.Get();
-		if (IsAuthoritativeAsc(ASC))
+		// Editor build with no active play world yet: fall back to editor world so registrations at engine init resolve
+		for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
 		{
-			AuthAsc = ASC;
-			break;
+			if (WorldContext.WorldType == EWorldType::Editor && WorldContext.World())
+			{
+				World = WorldContext.World();
+				break;
+			}
 		}
 	}
+#endif // WITH_EDITOR
+	return World ? World->GetSubsystem<UGfpmLoaderSubsystem>() : nullptr;
+}
 
-	if (!AuthAsc)
+// Whether any tag-driven GFP is pending activation despite owning required tags on tracked ASC
+bool UGfpmLoaderSubsystem::HasPendingTagDrivenActivations() const
+{
+	if (!TrackedAsc)
 	{
-		// No authoritative ASC tracked yet, treat as pending until readiness is broadcasted
+		// No ASC tracked yet, treat as pending until readiness is broadcasted
 		return true;
 	}
 
 	if (PluginsByTag.IsEmpty())
 	{
+		// No registered plugins, nothing can be pending
 		return false;
 	}
 
 	FGameplayTagContainer OwnedTags;
-	AuthAsc->GetOwnedGameplayTags(OwnedTags);
+	TrackedAsc->GetOwnedGameplayTags(OwnedTags);
 
 	for (const FGameplayTag& Tag : OwnedTags)
 	{
@@ -88,7 +89,7 @@ bool UGfpmLoaderSubsystem::HasPendingTagDrivenActivations() const
  * Tag-Driven Features
  ********************************************************************************************* */
 
-// Tracks the broadcasting ASC via a single generic tag event subscription and schedules an initial apply
+// When this world's ASC becomes available and ready to broadcast tags
 void UGfpmLoaderSubsystem::OnWorldASCReady_Implementation(const FGameplayEventData& Payload)
 {
 	UAbilitySystemComponent* ASC = const_cast<UAbilitySystemComponent*>(Cast<UAbilitySystemComponent>(Payload.OptionalObject.Get()));
@@ -97,25 +98,39 @@ void UGfpmLoaderSubsystem::OnWorldASCReady_Implementation(const FGameplayEventDa
 		return;
 	}
 
-	if (TrackedAscs.Contains(ASC))
+	if (ASC->GetWorld() != GetWorld())
 	{
-		// Re-broadcast for an already-tracked ASC, just re-apply against the latest tag snapshot
-		ScheduleApplyGameFeatures(ASC);
+		// Per-world subsystem expects ASC to belong to its own world. Ignore foreign ASCs
 		return;
 	}
 
-	const FDelegateHandle Handle = ASC->RegisterGenericGameplayTagEvent().AddWeakLambda(ASC,
-	    [ASC](const FGameplayTag ChangedTag, int32 NewCount)
+	if (TrackedAsc == ASC)
 	{
-		Get().OnAscTagCountChanged(ChangedTag, NewCount, ASC);
-	});
-	TrackedAscs.Emplace(ASC, Handle);
+		// Re-broadcast for already-tracked ASC, no proof tags exist yet so guard against empty-aggregate deactivation
+		ScheduleApplyGameFeatures(/*bAllowEmptyAggregate=*/false);
+		return;
+	}
 
-	ScheduleApplyGameFeatures(ASC);
+	// Replace any prior ASC tracking (e.g. seamless travel swapping ASC) before installing new binding
+	if (TrackedAsc && TagEventHandle.IsValid())
+	{
+		TrackedAsc->RegisterGenericGameplayTagEvent().Remove(TagEventHandle);
+		TagEventHandle.Reset();
+	}
+
+	TrackedAsc = ASC;
+	TagEventHandle = ASC->RegisterGenericGameplayTagEvent().AddWeakLambda(this,
+	    [this](const FGameplayTag ChangedTag, int32 NewCount)
+	{
+		OnAscTagCountChanged(ChangedTag, NewCount);
+	});
+
+	// First binding, ASC may not have its tags populated yet, conservative startup path
+	ScheduleApplyGameFeatures(/*bAllowEmptyAggregate=*/false);
 }
 
-// Updates the per-ASC tag snapshot and queues a deferred recompute
-void UGfpmLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag ChangedTag, int32 NewCount, UAbilitySystemComponent* SourceAsc)
+// When tracked ASC's tag count changes
+void UGfpmLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag ChangedTag, int32 NewCount)
 {
 	if (!PluginsByTag.Contains(ChangedTag))
 	{
@@ -123,100 +138,44 @@ void UGfpmLoaderSubsystem::OnAscTagCountChanged_Implementation(FGameplayTag Chan
 		return;
 	}
 
-	ScheduleApplyGameFeatures(SourceAsc);
+	// Explicit tag-change event, empty aggregate at apply time means relevant tag was just removed and must deactivate
+	ScheduleApplyGameFeatures(/*bAllowEmptyAggregate=*/true);
 }
 
-// Defers GFPs applying to next tick
-void UGfpmLoaderSubsystem::ScheduleApplyGameFeatures(const UObject* WorldContextObject)
+// Defers GFPs applying to next tick, coalescing burst tag events into one pass once tags settle
+void UGfpmLoaderSubsystem::ScheduleApplyGameFeatures(bool bAllowEmptyAggregate)
 {
-	const UWorld* World = nullptr;
-	for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FDelegateHandle>& Pair : TrackedAscs)
-	{
-		const UAbilitySystemComponent* ASC = Pair.Key.Get();
-		if (IsAuthoritativeAsc(ASC))
-		{
-			World = ASC->GetWorld();
-			break;
-		}
-	}
-	if (!World)
-	{
-		// Is likely editor launch
-		World = GEngine ? GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull) : nullptr;
-	}
-
-	if (!ensureMsgf(World, TEXT("ASSERT: [%i] %hs:\n'World' from WorldContextObject is invalid"), __LINE__, __FUNCTION__)
+	const UWorld* World = GetWorld();
+	if (!ensureMsgf(World, TEXT("ASSERT: [%i] %hs:\n'World' is null!"), __LINE__, __FUNCTION__)
 	    || DeferredRecomputeHandle.IsValid())
 	{
 		// Is already queued
 		return;
 	}
 
-	DeferredRecomputeHandle = World->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([]
+	DeferredRecomputeHandle = World->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this, bAllowEmptyAggregate]
 	{
-		UGfpmLoaderSubsystem& Loader = Get();
-		Loader.DeferredRecomputeHandle.Invalidate();
-		Loader.ApplyGameFeatures();
+		DeferredRecomputeHandle.Invalidate();
+		ApplyGameFeatures(bAllowEmptyAggregate);
 	}));
 }
 
-// In game builds Game world is authoritative. In editor builds server-side play world is authoritative during play session excluding client, otherwise editor world is
-bool UGfpmLoaderSubsystem::IsAuthoritativeAsc(const UAbilitySystemComponent* ASC) const
+// Recomputes desired feature set from this world's ASC tags and applies activation/deactivation delta
+void UGfpmLoaderSubsystem::ApplyGameFeatures(bool bAllowEmptyAggregate)
 {
-	if (!ASC)
+	if (!TrackedAsc)
 	{
-		return false;
-	}
-
-	const UWorld* World = ASC->GetWorld();
-	if (!World)
-	{
-		return false;
-	}
-
-	const EWorldType::Type Type = World->WorldType;
-
-#if WITH_EDITOR
-	const bool bIsPlaySessionActive = GEditor && GEditor->PlayWorld;
-	if (bIsPlaySessionActive)
-	{
-		// Client play world mirrors authority via replication and lags it, so it must not feed the authoritative aggregate
-		return Type == EWorldType::PIE
-		       && World->GetNetMode() != NM_Client;
-	}
-#endif
-
-	return Type == EWorldType::Editor
-	       || Type == EWorldType::Game;
-}
-
-// Aggregates authoritative tags, computes the desired feature set, applies the diff vs the active set
-void UGfpmLoaderSubsystem::ApplyGameFeatures()
-{
-	if (TrackedAscs.IsEmpty())
-	{
-		// Nothing to apply
+		// Without tracked ASC for this world, aggregate is meaningless, skipping prevents
+		// over-deactivating features that engine activated via .uplugin BuiltInInitialFeatureState
 		return;
 	}
 
-	bool bHasAuthoritativeAsc = false;
 	FGameplayTagContainer Aggregate;
-	for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FDelegateHandle>& Pair : TrackedAscs)
-	{
-		const UAbilitySystemComponent* ASC = Pair.Key.Get();
-		if (!IsAuthoritativeAsc(ASC))
-		{
-			continue;
-		}
-		bHasAuthoritativeAsc = true;
-		FGameplayTagContainer OwnedTags;
-		ASC->GetOwnedGameplayTags(OwnedTags);
-		Aggregate.AppendTags(OwnedTags);
-	}
+	TrackedAsc->GetOwnedGameplayTags(Aggregate);
 
-	// Without an authoritative ASC, the aggregate is meaningless; skipping prevents over-deactivating features that the engine activated via .uplugin BuiltInInitialFeatureState before any ASC is registered with this subsystem
-	if (!bHasAuthoritativeAsc)
+	if (Aggregate.IsEmpty() && !bAllowEmptyAggregate)
 	{
+		// Caller has no proof tags ever existed, empty aggregate here would deactivate every plugin that came up via .uplugin BuiltInInitialFeatureState
 		return;
 	}
 
@@ -268,139 +227,53 @@ void UGfpmLoaderSubsystem::ApplyGameFeatures()
 }
 
 /*********************************************************************************************
- * World Lifecycle
- ********************************************************************************************* */
-
-// Drains tracked ASCs whose world is dying; editor map switches restore features to baseline, PIE world death recomputes from remaining authority
-void UGfpmLoaderSubsystem::OnPreWorldFinishDestroy_Implementation(UWorld* World)
-{
-	if (!World)
-	{
-		return;
-	}
-
-	const EWorldType::Type WorldType = World->WorldType;
-
-	// Owner world's TimerManager is about to die, cleanup handle
-	DeferredRecomputeHandle.Invalidate();
-
-	for (auto It = TrackedAscs.CreateIterator(); It; ++It)
-	{
-		UAbilitySystemComponent* ASC = It.Key().Get();
-		if (ASC && ASC->GetWorld() != World)
-		{
-			continue;
-		}
-
-		if (ASC)
-		{
-			ASC->RegisterGenericGameplayTagEvent().Remove(It.Value());
-		}
-
-		It.RemoveCurrent();
-	}
-
-#if WITH_EDITOR
-	// Map switch in editor: restore all tag-driven features to their .uplugin baseline instead of deactivating
-	if (WorldType == EWorldType::Editor)
-	{
-		TArray<FName> TagDrivenFeatures;
-		GetAllRegisteredPlugins(TagDrivenFeatures);
-		UGfpmUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
-		return;
-	}
-#endif // WITH_EDITOR
-
-	ApplyGameFeatures();
-}
-
-#if WITH_EDITOR
-// Force-deactivate all tag-driven features so the engine emits Unloaded, then queue a recompute to reactivate from current authoritative ASCs
-void UGfpmLoaderSubsystem::OnEditorShutdownPIE(bool /*bIsSimulating*/)
-{
-	TArray<FName> TagDrivenFeatures;
-	GetAllRegisteredPlugins(TagDrivenFeatures);
-	UGfpmUtils::RestoreGameFeatureTargetState(TagDrivenFeatures);
-
-	const UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
-	ScheduleApplyGameFeatures(EditorWorld);
-}
-#endif // WITH_EDITOR
-
-/*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
 
-// Binds world and editor lifecycle delegates
+// When subsystem initializes
 void UGfpmLoaderSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	FWorldDelegates::OnPostWorldInitialization.AddWeakLambda(this,
-	    [this](const UWorld* World, const UWorld::InitializationValues /*IVS*/)
+	const UWorld* World = GetWorld();
+	if (!ensureMsgf(World, TEXT("ASSERT: [%i] %hs:\n'World' is null!"), __LINE__, __FUNCTION__))
 	{
-		if (!World)
+		return;
+	}
+
+	// Listen for this world's Ability System Component to broadcast its readiness
+	const TSharedPtr<FAsyncMessageSystemBase> MessageSystem = UAsyncMessageWorldSubsystem::GetSharedMessageSystem(World);
+	checkf(MessageSystem, TEXT("ERROR: [%i] %hs:\n'MessageSystem' is null!"), __LINE__, __FUNCTION__);
+	MessageSystem->BindListener(FAsyncMessageId(GfpmGameplayTags::Event::WorldASC_Ready), [WeakThis = TWeakObjectPtr<ThisClass>(this)](const FAsyncMessage& Message)
+	{
+		ThisClass* StrongThis = WeakThis.Get();
+		if (!StrongThis)
 		{
+			// Subsystem was destroyed before the message arrived
 			return;
 		}
-
-		const EWorldType::Type Type = World->WorldType;
-		const bool bRelevantWorld =
-#if WITH_EDITOR
-		    Type == EWorldType::Editor
-		    || Type == EWorldType::PIE
-		    ||
-#endif
-		    Type == EWorldType::Game;
-		if (!bRelevantWorld)
-		{
-			return;
-		}
-
-		// Listen for Ability System Component to load and unload features
-		const TSharedPtr<FAsyncMessageSystemBase> MessageSystem = UAsyncMessageWorldSubsystem::GetSharedMessageSystem(World);
-		checkf(MessageSystem, TEXT("ERROR: [%i] %hs:\n'MessageSystem' is null!"), __LINE__, __FUNCTION__);
-		MessageSystem->BindListener(FAsyncMessageId(GfpmGameplayTags::Event::WorldASC_Ready), [](const FAsyncMessage& Message)
-		{
-			const FGameplayEventData* Payload = Message.GetPayloadData<const FGameplayEventData>();
-			checkf(Payload, TEXT("ERROR: [%i] %hs:\n'Payload' is null, it's expected to pass Gameplay Event Data as payload!"), __LINE__, __FUNCTION__);
-			Get().OnWorldASCReady(*Payload);
-		});
+		const FGameplayEventData* Payload = Message.GetPayloadData<const FGameplayEventData>();
+		checkf(Payload, TEXT("ERROR: [%i] %hs:\n'Payload' is null, it's expected to pass Gameplay Event Data as payload!"), __LINE__, __FUNCTION__);
+		StrongThis->OnWorldASCReady(*Payload);
 	});
-
-	FWorldDelegates::OnPreWorldFinishDestroy.AddUObject(this, &ThisClass::OnPreWorldFinishDestroy);
-
-#if WITH_EDITOR
-	FEditorDelegates::ShutdownPIE.AddUObject(this, &ThisClass::OnEditorShutdownPIE);
-#endif // WITH_EDITOR
 }
 
-// Unbinds delegates and drops every tag subscription
+// When subsystem is destroyed
 void UGfpmLoaderSubsystem::Deinitialize()
 {
 	DeferredRecomputeHandle.Invalidate();
 
-	// Drop every tag subscription and clears tracking
-	for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FDelegateHandle>& Pair : TrackedAscs)
+	if (TrackedAsc && TagEventHandle.IsValid())
 	{
-		if (UAbilitySystemComponent* ASC = Pair.Key.Get())
-		{
-			ASC->RegisterGenericGameplayTagEvent().Remove(Pair.Value);
-		}
+		TrackedAsc->RegisterGenericGameplayTagEvent().Remove(TagEventHandle);
 	}
-	TrackedAscs.Empty();
-
-	FWorldDelegates::OnPostWorldInitialization.RemoveAll(this);
-	FWorldDelegates::OnPreWorldFinishDestroy.RemoveAll(this);
-
-#if WITH_EDITOR
-	FEditorDelegates::ShutdownPIE.RemoveAll(this);
-#endif // WITH_EDITOR
+	TagEventHandle.Reset();
+	TrackedAsc = nullptr;
 
 	Super::Deinitialize();
 }
 
-// Collects the union of plugin names appearing across every entry of PluginsByTag
+// Collects union of plugin names appearing across every entry of this instance's registry
 void UGfpmLoaderSubsystem::GetAllRegisteredPlugins(TArray<FName>& OutNames) const
 {
 	OutNames.Reset();
@@ -413,7 +286,7 @@ void UGfpmLoaderSubsystem::GetAllRegisteredPlugins(TArray<FName>& OutNames) cons
 	}
 }
 
-// Registers or replaces activation entry of owning Game Feature Plugin resolved from given GameFeatureData
+// Registers or replaces this world's activation entry of owning Game Feature Plugin resolved from given GameFeatureData, then schedules apply
 void UGfpmLoaderSubsystem::RegisterGameFeaturePluginActivation(const UGameFeatureData* GameFeatureData, const FGameplayTagContainer& ActivationTags)
 {
 	const FName PluginName = UGfpmUtils::GetModuleNameByAsset(GameFeatureData);
@@ -423,25 +296,17 @@ void UGfpmLoaderSubsystem::RegisterGameFeaturePluginActivation(const UGameFeatur
 	}
 
 	// Clean stale tag entries from prior registration so re-registering with different tag set does not leak old bindings
-	UnregisterGameFeaturePluginActivation(GameFeatureData);
-
+	RemovePluginFromRegistry(PluginName);
 	for (const FGameplayTag& Tag : ActivationTags)
 	{
 		PluginsByTag.FindOrAdd(Tag).AddUnique(PluginName);
 	}
 
-	// Re-apply through any tracked ASC's world
-	for (const TPair<TWeakObjectPtr<UAbilitySystemComponent>, FDelegateHandle>& Pair : TrackedAscs)
-	{
-		if (const UAbilitySystemComponent* ASC = Pair.Key.Get())
-		{
-			ScheduleApplyGameFeatures(ASC);
-			break;
-		}
-	}
+	// Late registration with no proof tags exist yet, conservative startup path semantics
+	ScheduleApplyGameFeatures(/*bAllowEmptyAggregate=*/false);
 }
 
-// Drops activation entry of owning Game Feature Plugin resolved from given GameFeatureData
+// Drops this world's activation entry of owning Game Feature Plugin resolved from given GameFeatureData
 void UGfpmLoaderSubsystem::UnregisterGameFeaturePluginActivation(const UGameFeatureData* GameFeatureData)
 {
 	const FName PluginName = UGfpmUtils::GetModuleNameByAsset(GameFeatureData);
@@ -451,6 +316,12 @@ void UGfpmLoaderSubsystem::UnregisterGameFeaturePluginActivation(const UGameFeat
 		return;
 	}
 
+	RemovePluginFromRegistry(PluginName);
+}
+
+// Removes every PluginsByTag entry pointing at given plugin name from this instance only
+void UGfpmLoaderSubsystem::RemovePluginFromRegistry(FName PluginName)
+{
 	for (auto It = PluginsByTag.CreateIterator(); It; ++It)
 	{
 		TArray<FName>& Plugins = It.Value();

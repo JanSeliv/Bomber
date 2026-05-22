@@ -11,8 +11,6 @@
 #include "Engine/World.h"
 
 #if WITH_EDITOR
-#include "Editor.h"
-#include "EngineUtils.h"
 #include "Misc/DataValidation.h"
 #endif
 
@@ -23,8 +21,9 @@
 // Called by the Game Features system when the owning feature transitions to Active
 void UGfpmAction_AddLooseGameplayTags::OnGameFeatureActivated()
 {
-	if (!ensureMsgf(TaggedActors.IsEmpty() && ExtensionRequestHandles.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'TaggedActors' or 'ExtensionRequestHandles' is not empty, attempting to activate already active feature!"), __LINE__, __FUNCTION__))
+	if (!ensureMsgf(!OnStartGameInstanceHandle.IsValid(), TEXT("ASSERT: [%i] %hs:\n'OnStartGameInstanceHandle' is still valid, attempting to activate already active feature!"), __LINE__, __FUNCTION__))
 	{
+		// Recover from feature activated twice without deactivation in between
 		RevokeAllTrackedTags();
 	}
 
@@ -38,10 +37,6 @@ void UGfpmAction_AddLooseGameplayTags::OnGameFeatureActivated()
 
 	OnStartGameInstanceHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &ThisClass::OnGameInstanceStarted);
 	OnPostWorldInitHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &ThisClass::OnPostWorldInit);
-
-#if WITH_EDITOR
-	OnEditorMapOpenedHandle = FEditorDelegates::OnMapOpened.AddUObject(this, &ThisClass::OnEditorMapOpened);
-#endif
 
 	if (!ensureMsgf(GEngine, TEXT("ASSERT: [%i] %hs:\n'GEngine' is null!"), __LINE__, __FUNCTION__))
 	{
@@ -62,11 +57,6 @@ void UGfpmAction_AddLooseGameplayTags::OnGameFeatureDeactivating(FGameFeatureDea
 
 	FWorldDelegates::OnPostWorldInitialization.Remove(OnPostWorldInitHandle);
 	OnPostWorldInitHandle.Reset();
-
-#if WITH_EDITOR
-	FEditorDelegates::OnMapOpened.Remove(OnEditorMapOpenedHandle);
-	OnEditorMapOpenedHandle.Reset();
-#endif
 
 	RevokeAllTrackedTags();
 
@@ -103,7 +93,7 @@ void UGfpmAction_AddLooseGameplayTags::RegisterForWorld(UWorld* World)
 		return;
 	}
 
-	UGameInstance* GameInstance = World->GetGameInstance();
+	const UGameInstance* GameInstance = World->GetGameInstance();
 	if (World->IsGameWorld()
 	    && GameInstance)
 	{
@@ -113,34 +103,17 @@ void UGfpmAction_AddLooseGameplayTags::RegisterForWorld(UWorld* World)
 			return;
 		}
 
-		const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this, &ThisClass::OnReceiverExtensionEvent);
-		TSharedPtr<FComponentRequestHandle> ExtensionRequestHandle = ComponentManager->AddExtensionHandler(OwnerActor, ExtensionDelegate);
-		ExtensionRequestHandles.Emplace(MoveTemp(ExtensionRequestHandle));
-		return;
-	}
-
-#if WITH_EDITOR
-	if (World->WorldType == EWorldType::Editor)
-	{
-		UClass* OwnerClass = OwnerActor.Get();
-		if (!ensureMsgf(OwnerClass, TEXT("ASSERT: [%i] %hs:\n'OwnerActor' '%s' is not loaded; the owning module is expected to load it before activation!"), __LINE__, __FUNCTION__, *OwnerActor.ToString()))
+		FGfpmLooseTagsWorldData& WorldData = PerWorldData.FindOrAdd(World);
+		if (!WorldData.ExtensionRequestHandles.IsEmpty())
 		{
+			// World already registered, RegisterForWorld is reachable more than once per world via OnPostWorldInit and OnGameInstanceStarted
 			return;
 		}
 
-		if (!EditorActorSpawnedHandles.Contains(World))
-		{
-			const FOnActorSpawned::FDelegate SpawnedDelegate = FOnActorSpawned::FDelegate::CreateUObject(this, &ThisClass::OnActorSpawnedInEditorWorld);
-			const FDelegateHandle SpawnedHandle = World->AddOnActorSpawnedHandler(SpawnedDelegate);
-			EditorActorSpawnedHandles.Emplace(World, SpawnedHandle);
-		}
-
-		for (TActorIterator<AActor> It(World, OwnerClass); It; ++It)
-		{
-			GrantTagsTo(*It);
-		}
+		const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this, &ThisClass::OnReceiverExtensionEvent);
+		TSharedPtr<FComponentRequestHandle> ExtensionRequestHandle = ComponentManager->AddExtensionHandler(OwnerActor, ExtensionDelegate);
+		WorldData.ExtensionRequestHandles.Emplace(MoveTemp(ExtensionRequestHandle));
 	}
-#endif
 }
 
 // Routes Game Framework Component Manager events to add or remove tag operations
@@ -182,9 +155,23 @@ void UGfpmAction_AddLooseGameplayTags::OnPostWorldInit(UWorld* World, const UWor
 void UGfpmAction_AddLooseGameplayTags::GrantTagsTo(AActor* Actor)
 {
 	if (!ensureMsgf(Actor, TEXT("ASSERT: [%i] %hs:\n'Actor' is null!"), __LINE__, __FUNCTION__)
-	    || !Actor->HasAuthority()
-	    || TaggedActors.Contains(Actor))
+	    || !Actor->HasAuthority())
 	{
+		return;
+	}
+
+	UWorld* World = Actor->GetWorld();
+	if (!World)
+	{
+		// Actor outside any world, cannot bucket its tracking
+		return;
+	}
+
+	// Bucket tracking by the actor's world, this action is a shared instance servicing every world
+	FGfpmLooseTagsWorldData& WorldData = PerWorldData.FindOrAdd(World);
+	if (WorldData.TaggedActors.Contains(Actor))
+	{
+		// Already granted in this world
 		return;
 	}
 
@@ -196,15 +183,15 @@ void UGfpmAction_AddLooseGameplayTags::GrantTagsTo(AActor* Actor)
 
 	// Listen to remove self tag if set; subscribe via generic tag event before granting, so future child tags trigger removal
 	if (bIsExclusiveTag
-	    && !ExclusiveTagSubscriptions.Contains(ASC))
+	    && !WorldData.ExclusiveTagSubscriptions.Contains(ASC))
 	{
 		const TWeakObjectPtr<AActor> WeakActor(Actor);
 		const FDelegateHandle Handle = ASC->RegisterGenericGameplayTagEvent().AddUObject(this, &ThisClass::OnAnyExclusiveAscTagChanged, WeakActor);
-		ExclusiveTagSubscriptions.Emplace(ASC, Handle);
+		WorldData.ExclusiveTagSubscriptions.Emplace(ASC, Handle);
 	}
 
 	// Apply desired tags; always grant first so external observers (GFP loader) see the add event even when we are about to remove for a pre-existing child
-	TaggedActors.Add(Actor);
+	WorldData.TaggedActors.Add(Actor);
 	ASC->AddLooseGameplayTags(LooseTags, 1, EGameplayTagReplicationState::TagOnly);
 
 	// Snapshot scan after grant: generic event only fires on count change, so pre-existing children need a one-shot check. If found, remove own tags so loader picks up the remove event and deactivates the GFP
@@ -242,9 +229,12 @@ void UGfpmAction_AddLooseGameplayTags::GrantTagsTo(AActor* Actor)
 // Removes LooseTags from the actor's ASC and stops tracking it
 void UGfpmAction_AddLooseGameplayTags::RevokeTagsFrom(AActor* Actor)
 {
+	UWorld* World = Actor ? Actor->GetWorld() : nullptr;
+	FGfpmLooseTagsWorldData* WorldData = World ? PerWorldData.Find(World) : nullptr;
 	if (!Actor
 	    || !Actor->HasAuthority()
-	    || !TaggedActors.Contains(Actor))
+	    || !WorldData
+	    || !WorldData->TaggedActors.Contains(Actor))
 	{
 		return;
 	}
@@ -252,22 +242,33 @@ void UGfpmAction_AddLooseGameplayTags::RevokeTagsFrom(AActor* Actor)
 	UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor);
 	if (ASC)
 	{
-		if (const FDelegateHandle* Handle = ExclusiveTagSubscriptions.Find(ASC))
+		if (const FDelegateHandle* Handle = WorldData->ExclusiveTagSubscriptions.Find(ASC))
 		{
 			ASC->RegisterGenericGameplayTagEvent().Remove(*Handle);
-			ExclusiveTagSubscriptions.Remove(ASC);
+			WorldData->ExclusiveTagSubscriptions.Remove(ASC);
 		}
 
 		ASC->RemoveLooseGameplayTags(LooseTags, 1, EGameplayTagReplicationState::TagOnly);
 	}
 
-	TaggedActors.Remove(Actor);
+	WorldData->TaggedActors.Remove(Actor);
 }
 
-// Removes the granted tags from every tracked actor and clears all per-world handles
+// Removes the granted tags from every tracked actor across all worlds
 void UGfpmAction_AddLooseGameplayTags::RevokeAllTrackedTags()
 {
-	for (auto It = ExclusiveTagSubscriptions.CreateIterator(); It; ++It)
+	for (TPair<TWeakObjectPtr<UWorld>, FGfpmLooseTagsWorldData>& WorldPair : PerWorldData)
+	{
+		RevokeWorldData(WorldPair.Value);
+	}
+
+	PerWorldData.Empty();
+}
+
+// Removes the granted tags and clears handles for a single world's tracked data
+void UGfpmAction_AddLooseGameplayTags::RevokeWorldData(FGfpmLooseTagsWorldData& WorldData)
+{
+	for (auto It = WorldData.ExclusiveTagSubscriptions.CreateIterator(); It; ++It)
 	{
 		UAbilitySystemComponent* ASC = It->Key.Get();
 		if (ASC)
@@ -277,7 +278,7 @@ void UGfpmAction_AddLooseGameplayTags::RevokeAllTrackedTags()
 		It.RemoveCurrent();
 	}
 
-	for (auto It = TaggedActors.CreateIterator(); It; ++It)
+	for (auto It = WorldData.TaggedActors.CreateIterator(); It; ++It)
 	{
 		const AActor* Actor = It->Get();
 		UAbilitySystemComponent* ASC = Actor ? UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor) : nullptr;
@@ -288,19 +289,7 @@ void UGfpmAction_AddLooseGameplayTags::RevokeAllTrackedTags()
 		It.RemoveCurrent();
 	}
 
-	ExtensionRequestHandles.Empty();
-
-#if WITH_EDITOR
-	for (auto It = EditorActorSpawnedHandles.CreateIterator(); It; ++It)
-	{
-		UWorld* World = It->Key.Get();
-		if (World)
-		{
-			World->RemoveOnActorSpawnedHandler(It->Value);
-		}
-		It.RemoveCurrent();
-	}
-#endif
+	WorldData.ExtensionRequestHandles.Empty();
 }
 
 // Hook for any ASC tag count change; removes own tags when another child tag sharing the same direct parent as one of LooseTags is added
@@ -329,53 +318,16 @@ void UGfpmAction_AddLooseGameplayTags::OnAnyExclusiveAscTagChanged(FGameplayTag 
 		}
 	}
 
+	const UWorld* World = Actor ? Actor->GetWorld() : nullptr;
+	const FGfpmLooseTagsWorldData* WorldData = World ? PerWorldData.Find(World) : nullptr;
 	if (!bIsChild
-	    || !Actor
-	    || !TaggedActors.Contains(Actor))
+	    || !WorldData
+	    || !WorldData->TaggedActors.Contains(Actor))
 	{
 		return;
 	}
 
 	RevokeTagsFrom(Actor);
 }
-
-#if WITH_EDITOR
-// Receiver hook for actors spawned into editor worlds
-void UGfpmAction_AddLooseGameplayTags::OnActorSpawnedInEditorWorld(AActor* SpawnedActor)
-{
-	if (!SpawnedActor)
-	{
-		return;
-	}
-
-	const UClass* OwnerClass = OwnerActor.Get();
-	if (!OwnerClass
-	    || !SpawnedActor->IsA(OwnerClass))
-	{
-		return;
-	}
-
-	GrantTagsTo(SpawnedActor);
-}
-
-// Re-walks editor worlds after a map finishes loading; catches level-loaded receivers that never go through SpawnActor
-void UGfpmAction_AddLooseGameplayTags::OnEditorMapOpened(const FString& Filename, bool bAsTemplate)
-{
-	if (!ensureMsgf(GEngine, TEXT("ASSERT: [%i] %hs:\n'GEngine' is null!"), __LINE__, __FUNCTION__))
-	{
-		return;
-	}
-
-	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
-	{
-		UWorld* World = WorldContext.World();
-		if (World
-		    && World->WorldType == EWorldType::Editor)
-		{
-			RegisterForWorld(World);
-		}
-	}
-}
-#endif
 
 #undef LOCTEXT_NAMESPACE

@@ -20,9 +20,22 @@ class GAMEFEATUREPLUGINSMANAGER_API UGfpmUtils : public UBlueprintFunctionLibrar
 
 public:
 	/** Returns true if specified game feature plugin is currently active.
-	 * @param GameFeatureName The name of the game feature plugin to check. */
+	 * @param GameFeatureName The name of the game feature plugin to check.
+ 	 * @param bCheckForPending When true, also matches plugins still transitioning toward active. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
-	static bool IsGameFeaturePluginActive(FName GameFeatureName);
+	static bool IsGameFeaturePluginActive(FName GameFeatureName, bool bCheckForPending = false);
+
+	/** Returns true if specified game feature plugin is currently inactive.
+	 * @param GameFeatureName The name of the game feature plugin to check.
+	 * @param bCheckForPending When true, also matches plugins still transitioning toward inactive. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
+	static bool IsGameFeaturePluginInactive(FName GameFeatureName, bool bCheckForPending = false);
+
+	/** Resolves URL for a registered game feature plugin by name, accepting runtime-module name variants (e.g. "GameFeatureModuleRuntime" resolves to "GameFeatureModule").
+	 * @param GameFeatureName The name of the game feature plugin or its runtime module.
+	 * @return Resolved plugin URL when found, empty string otherwise. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
+	static FString FindPluginURLByName(FName GameFeatureName);
 
 	/** Returns the built-in initial target state for a game feature.
 	 * @param GameFeatureName The name of the game feature plugin. */

@@ -20,6 +20,11 @@
 			"Name": "GameFeaturePluginsManager",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "GameFeaturePluginsManagerEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
