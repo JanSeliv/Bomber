@@ -72,7 +72,7 @@ void UGfpmWorldSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* Game
 	OnGameFeatureDeinitialize();
 }
 
-// Overridden and marked as final to prevet this subsystem from being created outside a game feature plugin context
+// Overridden to prevent creation outside game feature plugin context
 bool UGfpmWorldSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	if (!Super::ShouldCreateSubsystem(Outer))

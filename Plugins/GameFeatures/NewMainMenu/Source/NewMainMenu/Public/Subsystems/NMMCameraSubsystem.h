@@ -62,6 +62,9 @@ protected:
 	/** Is called every frame to move the camera. */
 	virtual void Tick(float DeltaTime) override;
 
+	/** Overridden to skip creation on dedicated server, where camera should not run. */
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+
 	/*********************************************************************************************
 	 * Events
 	 ********************************************************************************************* */

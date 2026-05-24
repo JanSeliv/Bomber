@@ -156,6 +156,18 @@ void UNMMCameraSubsystem::Tick(float DeltaTime)
 	}
 }
 
+// Overridden to skip creation on dedicated server, where camera should not run
+bool UNMMCameraSubsystem::ShouldCreateSubsystem(UObject* Outer) const
+{
+	if (!Super::ShouldCreateSubsystem(Outer))
+	{
+		return false;
+	}
+
+	const UWorld& World = *CastChecked<UWorld>(Outer);
+	return !World.IsNetMode(NM_DedicatedServer);
+}
+
 /*********************************************************************************************
  * Events
  ********************************************************************************************* */

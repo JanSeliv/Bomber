@@ -35,6 +35,9 @@ protected:
 	void OnGameFeatureDeinitialize();
 	virtual void OnGameFeatureDeinitialize_Implementation() { }
 
+	/** Overridden to prevent creation outside game feature plugin context. Subclasses may override to add criteria, must call Super first. */
+	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
+
 	/*********************************************************************************************
 	 * INTERNAL: do not override these in child classes, use OnGameFeatureInitialize/OnGameFeatureDeinitialize instead!
 	 ********************************************************************************************* */
@@ -46,9 +49,6 @@ public:
 	virtual void OnWorldEndPlay(UWorld& InWorld) override final;
 	virtual void OnGameFeatureActivating(const UGameFeatureData* GameFeatureData, const FString& PluginURL) override final;
 	virtual void OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& Context, const FString& PluginURL) override final;
-
-	/** Overridden and marked as final to prevet this subsystem from being created outside a game feature plugin context. */
-	virtual bool ShouldCreateSubsystem(UObject* Outer) const override final;
 
 	/** Overridden and marked as final to prevent their overriding in child classes, use IsTickable() and Tick() instead if per-frame updates are needed. */
 	virtual TStatId GetStatId() const override final { RETURN_QUICK_DECLARE_CYCLE_STAT(ThisClass, STATGROUP_Tickables); }
