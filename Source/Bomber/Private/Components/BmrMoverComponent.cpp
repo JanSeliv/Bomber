@@ -44,6 +44,9 @@ void UBmrMoverComponent::TeleportToLocation(const FVector& InLocation)
 		return;
 	}
 
+	// Block movement for teleport tick so previous input does not apply in next tick
+	SetBlockMovement(true);
+
 	const TSharedPtr<FTeleportEffect> TeleportEffect = MakeShared<FTeleportEffect>();
 	TeleportEffect->TargetLocation = TargetLocation;
 	TeleportEffect->bUseActorRotation = false;
@@ -109,6 +112,12 @@ void UBmrMoverComponent::BeginPlay()
 	MapComponent->OnPreRemovedFromLevel.AddUniqueDynamic(this, &ThisClass::OnPreRemovedFromLevel);
 
 	OnPostMovement.AddUniqueDynamic(this, &ThisClass::OnPostMove);
+
+	OnTeleportSucceeded.AddUniqueDynamic(this, &ThisClass::OnTeleported);
+
+	FMover_ProcessGeneratedMovement ProcessGeneratedMoveDelegate;
+	ProcessGeneratedMoveDelegate.BindDynamic(this, &ThisClass::OnProcessGeneratedMove);
+	BindProcessGeneratedMovement(ProcessGeneratedMoveDelegate);
 
 	OwnerPlayer->ReceiveControllerChangedDelegate.AddUniqueDynamic(this, &ThisClass::OnControllerChanged);
 }
@@ -231,6 +240,27 @@ void UBmrMoverComponent::OnPostMove_Implementation(const FMoverTimeStep& TimeSte
 		// On local client, directly set a player location for responsiveness while server replicates it
 		const FBmrCell SnappedCell = UBmrCellUtilsLibrary::SnapActorOnLevel(InOwnerPawn);
 		MapComponent->SetCell(SnappedCell);
+	}
+}
+
+// Called when queued teleport effect successfully applies, on every endpoint that ran simulation
+void UBmrMoverComponent::OnTeleported_Implementation(const FVector& FromLocation, const FQuat& FromRotation, const FVector& ToLocation, const FQuat& ToRotation)
+{
+	if (ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::InGame))
+	{
+		// Only release teleport-tick block once game state allows movement
+		SetBlockMovement(false);
+	}
+}
+
+// Called between movement mode's GenerateMove and SimulationTick on every endpoint, with chance to rewrite proposed move before it is consumed
+void UBmrMoverComponent::OnProcessGeneratedMove_Implementation(const FMoverTickStartData& StartState, const FMoverTimeStep& TimeStep, FProposedMove& OutProposedMove)
+{
+	if (IsBlockedMovement())
+	{
+		// Block is applied but velocity might be already accumulated, reset it
+		OutProposedMove.LinearVelocity = FVector::ZeroVector;
+		OutProposedMove.AngularVelocityDegrees = FVector::ZeroVector;
 	}
 }
 
