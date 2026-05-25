@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -46,11 +46,13 @@ public:
 	template <typename T = UMovieSceneSection>
 	static void GetAllSectionsByClass(const UMovieSceneSequence* MasterSequence, TArray<T*>& OutSections);
 
-	/** Resets the sequence player to the beginning.
-	 * @param LevelSequencePlayer The sequence player to reset.
-	 * @param bKeepCamera If true, camera will not be reset, might be useful when disable the sequence in background without affecting the camera. */
+	/** Rewinds sequence player to first frame so it can replay from start. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
-	static void ResetSequence(class UMovieSceneSequencePlayer* LevelSequencePlayer, bool bKeepCamera = false);
+	static void ResetSequenceToStart(class UMovieSceneSequencePlayer* LevelSequencePlayer);
+
+	/** Stops sequence player at last frame so sections complete and release their components. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static void ResetSequenceToEnd(class UMovieSceneSequencePlayer* LevelSequencePlayer);
 };
 
 // Alternative version of GetAllSectionsByClass with auto cast array to the specified class

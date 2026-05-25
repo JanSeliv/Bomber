@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "MyUtilsLibraries/CinematicUtils.h"
 
@@ -120,8 +120,8 @@ void UCinematicUtils::GetAllSectionsByClass(const UMovieSceneSequence* MasterSeq
 	});
 }
 
-// Resets the sequence player to the beginning.
-void UCinematicUtils::ResetSequence(UMovieSceneSequencePlayer* LevelSequencePlayer, bool bKeepCamera /* = false*/)
+// Rewinds sequence player to first frame so it can replay from start
+void UCinematicUtils::ResetSequenceToStart(UMovieSceneSequencePlayer* LevelSequencePlayer)
 {
 	if (!LevelSequencePlayer)
 	{
@@ -129,28 +129,46 @@ void UCinematicUtils::ResetSequence(UMovieSceneSequencePlayer* LevelSequencePlay
 		return;
 	}
 
+	APlayerController* PC = UGameplayStatics::GetPlayerController(LevelSequencePlayer, 0);
 	AActor* PrevViewTarget = nullptr;
-	APlayerController* PC = nullptr;
-	if (bKeepCamera)
+	if (ensureMsgf(PC, TEXT("ASSERT: [%i] %hs:\n'PC' is not found!"), __LINE__, __FUNCTION__))
 	{
-		PC = UGameplayStatics::GetPlayerController(LevelSequencePlayer, 0);
-		if (ensureMsgf(PC, TEXT("ASSERT: [%i] %hs:\n'PC' is not found!"), __LINE__, __FUNCTION__))
-		{
-			PrevViewTarget = PC->GetViewTarget();
-		}
+		PrevViewTarget = PC->GetViewTarget();
 	}
 
 	// Reset all 'Keep States' tracks to default, it also always resets the camera
 	LevelSequencePlayer->RestorePreAnimatedState();
 	LevelSequencePlayer->PreAnimatedState.EnableGlobalPreAnimatedStateCapture();
 
-	if (bKeepCamera
-	    && PC)
+	const AActor* NewViewTarget = PC ? PC->GetViewTarget() : nullptr;
+	if (NewViewTarget && PrevViewTarget != NewViewTarget)
 	{
-		const AActor* NewViewTarget = PC->GetViewTarget();
-		if (PrevViewTarget != NewViewTarget)
-		{
-			PC->SetViewTarget(PrevViewTarget);
-		}
+		PC->SetViewTarget(PrevViewTarget);
+	}
+}
+
+// Stops sequence player at last frame so sections complete and release their components
+void UCinematicUtils::ResetSequenceToEnd(UMovieSceneSequencePlayer* LevelSequencePlayer)
+{
+	if (!LevelSequencePlayer)
+	{
+		// Is already reset
+		return;
+	}
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(LevelSequencePlayer, 0);
+	AActor* PrevViewTarget = nullptr;
+	if (ensureMsgf(PC, TEXT("ASSERT: [%i] %hs:\n'PC' is not found!"), __LINE__, __FUNCTION__))
+	{
+		PrevViewTarget = PC->GetViewTarget();
+	}
+
+	// Stop fires completion mode (ForceRestoreState) which destroys track-spawned components
+	LevelSequencePlayer->Stop();
+
+	const AActor* NewViewTarget = PC ? PC->GetViewTarget() : nullptr;
+	if (NewViewTarget && PrevViewTarget != NewViewTarget)
+	{
+		PC->SetViewTarget(PrevViewTarget);
 	}
 }

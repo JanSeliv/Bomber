@@ -296,7 +296,8 @@ void UNMMSpotComponent::ApplyCinematicState()
 
 	if (CinematicState == FNmmStateTag::None)
 	{
-		// No need to stop it physically as playback settings above already paused a sequence
+		// Stops sequence player at last frame so sections complete and release their components
+		UCinematicUtils::ResetSequenceToEnd(MasterPlayer);
 		return;
 	}
 
@@ -380,8 +381,7 @@ void UNMMSpotComponent::OnGameStateChanged_Implementation(const FGameplayEventDa
 	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
 	{
 		// Reset the sequence to the beginning to make it ready for the next play
-		constexpr bool bKeepCamera = true;
-		UCinematicUtils::ResetSequence(MasterPlayer, bKeepCamera);
+		UCinematicUtils::ResetSequenceToStart(MasterPlayer);
 	}
 }
 
