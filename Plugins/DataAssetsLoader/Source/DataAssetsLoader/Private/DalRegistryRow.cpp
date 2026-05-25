@@ -63,12 +63,17 @@ UDataRegistry* FDalRegistryRow::GetRegistryForStruct(const UScriptStruct* InStru
 	return nullptr;
 }
 
-// Returns overall number of cached rows for the given row struct type
+// Returns total number of cached rows for the given row struct type, including child structs
 int32 FDalRegistryRow::GetRowsNum(const UScriptStruct* InStruct)
 {
-	TMap<FDataRegistryId, const uint8*> CachedItems;
-	DalRegistryRowInternal::GetAllCachedItems(GetRegistryForStruct(InStruct), CachedItems);
-	return CachedItems.Num();
+	int32 Total = 0;
+	ForEachRegistry(InStruct, [&Total](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
+	{
+		TMap<FDataRegistryId, const uint8*> CachedItems;
+		DalRegistryRowInternal::GetAllCachedItems(Registry, CachedItems);
+		Total += CachedItems.Num();
+	});
+	return Total;
 }
 
 // Returns raw pointer to cached item data by struct type and RowName, O(1) lookup, or nullptr

@@ -6,9 +6,11 @@
 #include "AbilitySystem/Attributes/BmrHealthAttributeSet.h"
 #include "Components/BmrCameraComponent.h"
 #include "Components/BmrMapComponent.h"
+#include "DalRegistryRow.h"
 #include "DalSubsystem.h"
 #include "Data/SpawnRequest.h"
 #include "DataAssets/BmrGeneratedMapDataAsset.h"
+#include "DataRegistries/BmrLevelActorRow.h"
 #include "Engine/Engine.h"
 #include "Generators/BmrCellsGenerator_Base.h"
 #include "MyUtilsLibraries/AsyncLoadUtilsLibrary.h"
@@ -880,6 +882,13 @@ void ABmrGeneratedMap::GenerateLevelActors()
 	bIsCurrentlyGenerating = true;
 
 	DestroyAllLevelActors();
+
+	if (!FDalRegistryRow::HasRows<FBmrLevelActorRow>())
+	{
+		// Level Actor Rows might be not loaded yet (level is likely unloaded): skip spawning, next regeneration will retry
+		bIsCurrentlyGenerating = false;
+		return;
+	}
 
 	FBmrGeneratorData GeneratorData;
 	GeneratorData.AllCells = LocalGridCells;

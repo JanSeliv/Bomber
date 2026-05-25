@@ -533,6 +533,12 @@ UBmrSkeletalMeshComponent& ABmrPawn::GetMeshComponentChecked() const
 // Set and apply default skeletal mesh for this player
 void ABmrPawn::SetDefaultPlayerMeshData(bool bForcePlayerSkin /* = false*/)
 {
+	if (!FBmrPlayerRow::HasRows())
+	{
+		// Player Rows might be not loaded yet: skip apply now, next regeneration will retry
+		return;
+	}
+
 	const int32 MeshesNum = FBmrPlayerRow::GetRowsNum();
 	const int32 PlayerId = GetPlayerId();
 	if (!ensureMsgf(MeshesNum > 0, TEXT("ASSERT: [%i] %hs:\n'MeshesNum' is empty!"), __LINE__, __FUNCTION__)

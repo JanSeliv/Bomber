@@ -369,7 +369,7 @@ void UNMMSpotsSubsystem::OnCinematicRowsChanged_Implementation()
 		}
 	}
 
-	const bool bHasRows = FBmrCinematicRow::GetRowsNum() > 0;
+	const bool bHasRows = FBmrCinematicRow::HasRows();
 
 	UNMMBaseSubsystem& BaseSubsystem = UNMMBaseSubsystem::Get();
 	const FNmmStateTag CurrentState = BaseSubsystem.GetCurrentMenuState();

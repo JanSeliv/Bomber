@@ -12,8 +12,12 @@ struct DATAASSETSLOADER_API FDalRegistryRow
 	/** Finds the Data Registry whose ItemStruct matches InStruct, cached for fast repeated access */
 	static class UDataRegistry* GetRegistryForStruct(const UScriptStruct* InStruct);
 
-	/** Returns overall number of cached rows for the given row struct type */
+	/** Returns total number of cached rows for the given row struct type, including child structs */
 	static int32 GetRowsNum(const UScriptStruct* InStruct);
+
+	/** Returns true when at least one row is cached for the given row struct type or any of its child structs */
+	template <typename TRow>
+	static FORCEINLINE bool HasRows() { return GetRowsNum(TRow::StaticStruct()) > 0; }
 
 	/** Returns raw pointer to cached item data by struct type and RowName, O(1) lookup, or nullptr */
 	static const uint8* GetRowByName(const UScriptStruct* InStruct, FName RowName);
@@ -71,6 +75,9 @@ struct TDalRegistryRow
 
 	/** Returns overall number of cached rows */
 	static FORCEINLINE int32 GetRowsNum() { return FDalRegistryRow::GetRowsNum(TDerived::StaticStruct()); }
+
+	/** Returns true when at least one row is cached */
+	static FORCEINLINE bool HasRows() { return GetRowsNum() > 0; }
 
 	/** Returns the first cached row, or nullptr */
 	static FORCEINLINE const TDerived* GetFirstRow() { return FDalRegistryRow::GetTypedRow<TDerived>(FDalRegistryRow::GetFirstRow(TDerived::StaticStruct())); }
