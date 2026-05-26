@@ -26,20 +26,3 @@ void UGfpmAction_AddWorldPartitionContent::OnGameFeatureRegistering()
 	UExternalDataLayerEngineSubsystem::Get().ActivateExternalDataLayerAsset(DataLayerAsset, this);
 #endif // WITH_EDITOR
 }
-
-// Called by the Game Features system when the owning feature transitions to Active
-void UGfpmAction_AddWorldPartitionContent::OnGameFeatureActivating()
-{
-#if !WITH_EDITOR
-	Super::OnGameFeatureActivating();
-#endif // !WITH_EDITOR
-	// Editor builds drive External Data Layer injection separately for runtime map switching, so the engine default is intentionally suppressed there
-}
-
-// Called by the Game Features system when the owning feature is leaving the Active state
-void UGfpmAction_AddWorldPartitionContent::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
-{
-#if !WITH_EDITOR
-	Super::OnGameFeatureDeactivating(Context);
-#endif // !WITH_EDITOR
-}
