@@ -59,25 +59,32 @@ void UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(FGameplayTag 
 	UGlobalMessageSubsystem* Subsystem = World ? World->GetSubsystem<UGlobalMessageSubsystem>() : nullptr;
 	if (Subsystem)
 	{
-		TMap<FGameplayTag, FAsyncMessageHandle>* OwnerHandles = Subsystem->ListenerHandlesMap.Find(ListenerOwner);
-		const FAsyncMessageHandle* ExistingHandle = OwnerHandles ? OwnerHandles->Find(MessageTag) : nullptr;
-		if (ExistingHandle && ExistingHandle->IsValid())
+		TMap<FGameplayTag, FMyListenerEntry>* OwnerEntries = Subsystem->ListenerHandlesMap.Find(ListenerOwner);
+		const FMyListenerEntry* ExistingEntry = OwnerEntries ? OwnerEntries->Find(MessageTag) : nullptr;
+		if (ExistingEntry && ExistingEntry->Handle.IsValid())
 		{
 			if (const TSharedPtr<FAsyncMessageSystemBase> MessageSystem = UAsyncMessageWorldSubsystem::GetSharedMessageSystem(World))
 			{
-				MessageSystem->UnbindListener(*ExistingHandle);
+				MessageSystem->UnbindListener(ExistingEntry->Handle);
 			}
-			OwnerHandles->Remove(MessageTag);
+			OwnerEntries->Remove(MessageTag);
 		}
 	}
 
 	// Replay all cached payloads for this tag to the late subscriber, one per unique instigator
-	const TMap<TWeakObjectPtr<const AActor>, FGameplayEventData>* CachedPayloads = Subsystem ? Subsystem->BroadcastedMessagesMap.Find(MessageTag) : nullptr;
+	uint64 LastReplayedFrame = 0;
+	const TMap<TWeakObjectPtr<const AActor>, FMyBroadcastedEntry>* CachedPayloads = Subsystem ? Subsystem->BroadcastedMessagesMap.Find(MessageTag) : nullptr;
 	if (CachedPayloads)
 	{
-		for (const TPair<TWeakObjectPtr<const AActor>, FGameplayEventData>& CachedEntry : *CachedPayloads)
+		const uint64 CurrentFrame = GFrameCounter;
+		for (const TPair<TWeakObjectPtr<const AActor>, FMyBroadcastedEntry>& CachedEntry : *CachedPayloads)
 		{
-			Callback(CachedEntry.Value);
+			// Skip same-frame entries, engine queue still holds them and will deliver at TG_PostUpdateWork, avoids cache+queue double delivery
+			if (CachedEntry.Value.BroadcastFrame < CurrentFrame)
+			{
+				Callback(CachedEntry.Value.Payload);
+				LastReplayedFrame = CurrentFrame;
+			}
 		}
 		// Fall through to bind for future broadcasts
 	}
@@ -90,19 +97,33 @@ void UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(FGameplayTag 
 		return;
 	}
 
-	const FAsyncMessageHandle Handle = MessageSystem->BindListener(FAsyncMessageId(MessageTag), [WeakOwner, UserCallback = MoveTemp(Callback)](const FAsyncMessage& Message)
+	const FAsyncMessageHandle Handle = MessageSystem->BindListener(FAsyncMessageId(MessageTag), [WeakOwner, WeakSubsystem = TWeakObjectPtr(Subsystem), MessageTag, UserCallback = MoveTemp(Callback)](const FAsyncMessage& Message)
 	{
-		const FGameplayEventData* Payload = WeakOwner.IsValid() ? Message.GetPayloadData<const FGameplayEventData>() : nullptr;
-		if (Payload)
+		const FGameplayEventData* Payload = Message.GetPayloadData<const FGameplayEventData>();
+		if (!ensureMsgf(Payload, TEXT("ASSERT: [%i] %hs:\n'Payload' is was not provided! MessageTag: %s | Listener: %s"), __LINE__, __FUNCTION__, *MessageTag.ToString(), *GetNameSafe(WeakOwner.Get()))
+		    || !WeakOwner.IsValid())
 		{
-			UserCallback(*Payload);
+			// Listener owner gone, nothing to broadcast
+			return;
 		}
+
+		UGlobalMessageSubsystem* StrongSubsystem = WeakSubsystem.Get();
+		TMap<FGameplayTag, FMyListenerEntry>* OwnerEntries = StrongSubsystem ? StrongSubsystem->ListenerHandlesMap.Find(WeakOwner) : nullptr;
+		FMyListenerEntry* Entry = OwnerEntries ? OwnerEntries->Find(MessageTag) : nullptr;
+		if (Entry && Entry->LastReplayedFrame != 0 && Message.GetQueueFrame() <= Entry->LastReplayedFrame)
+		{
+			// Cache replay already delivered same-or-older broadcast this frame, clear marker so subsequent broadcasts fire normally
+			Entry->LastReplayedFrame = 0;
+			return;
+		}
+
+		UserCallback(*Payload);
 	});
 
-	// Store handle internally for unbind-by-owner support
+	// Store entry internally for unbind-by-owner support and queue-dedup state
 	if (Subsystem && Handle.IsValid())
 	{
-		Subsystem->ListenerHandlesMap.FindOrAdd(ListenerOwner).Add(MessageTag, Handle);
+		Subsystem->ListenerHandlesMap.FindOrAdd(ListenerOwner).Add(MessageTag, FMyListenerEntry{Handle, LastReplayedFrame});
 	}
 }
 
@@ -124,8 +145,8 @@ void UGlobalMessageSubsystem::BroadcastGlobalMessage(const FGameplayEventData& P
 	UGlobalMessageSubsystem* Subsystem = World ? World->GetSubsystem<UGlobalMessageSubsystem>() : nullptr;
 	if (Subsystem)
 	{
-		TMap<TWeakObjectPtr<const AActor>, FGameplayEventData>& CachedPayloadsRef = Subsystem->BroadcastedMessagesMap.FindOrAdd(Payload.EventTag);
-		CachedPayloadsRef.Add(Payload.Instigator, Payload);
+		TMap<TWeakObjectPtr<const AActor>, FMyBroadcastedEntry>& CachedPayloadsRef = Subsystem->BroadcastedMessagesMap.FindOrAdd(Payload.EventTag);
+		CachedPayloadsRef.Add(Payload.Instigator, FMyBroadcastedEntry{Payload, GFrameCounter});
 	}
 
 	// Broadcast via engine's Async Message System
@@ -159,9 +180,9 @@ void UGlobalMessageSubsystem::StopListeningForGlobalMessage(FGameplayTag Message
 		return;
 	}
 
-	TMap<FGameplayTag, FAsyncMessageHandle>* OwnerHandles = Subsystem->ListenerHandlesMap.Find(ListenerOwner);
-	const FAsyncMessageHandle* FoundHandle = OwnerHandles ? OwnerHandles->Find(MessageTag) : nullptr;
-	if (!FoundHandle || !FoundHandle->IsValid())
+	TMap<FGameplayTag, FMyListenerEntry>* OwnerEntries = Subsystem->ListenerHandlesMap.Find(ListenerOwner);
+	const FMyListenerEntry* FoundEntry = OwnerEntries ? OwnerEntries->Find(MessageTag) : nullptr;
+	if (!FoundEntry || !FoundEntry->Handle.IsValid())
 	{
 		return;
 	}
@@ -169,11 +190,11 @@ void UGlobalMessageSubsystem::StopListeningForGlobalMessage(FGameplayTag Message
 	const TSharedPtr<FAsyncMessageSystemBase> MessageSystem = UAsyncMessageWorldSubsystem::GetSharedMessageSystem(World);
 	if (ensureMsgf(MessageSystem, TEXT("ASSERT: [%i] %hs:\n'MessageSystem' is not valid!"), __LINE__, __FUNCTION__))
 	{
-		MessageSystem->UnbindListener(*FoundHandle);
+		MessageSystem->UnbindListener(FoundEntry->Handle);
 	}
 
-	OwnerHandles->Remove(MessageTag);
-	if (OwnerHandles->IsEmpty())
+	OwnerEntries->Remove(MessageTag);
+	if (OwnerEntries->IsEmpty())
 	{
 		Subsystem->ListenerHandlesMap.Remove(ListenerOwner);
 	}
@@ -190,8 +211,8 @@ void UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(const UObject* L
 		return;
 	}
 
-	TMap<FGameplayTag, FAsyncMessageHandle>* OwnerHandles = Subsystem->ListenerHandlesMap.Find(ListenerOwner);
-	if (!OwnerHandles)
+	TMap<FGameplayTag, FMyListenerEntry>* OwnerEntries = Subsystem->ListenerHandlesMap.Find(ListenerOwner);
+	if (!OwnerEntries)
 	{
 		return;
 	}
@@ -199,11 +220,11 @@ void UGlobalMessageSubsystem::StopListeningForAllGlobalMessages(const UObject* L
 	const TSharedPtr<FAsyncMessageSystemBase> MessageSystem = UAsyncMessageWorldSubsystem::GetSharedMessageSystem(World);
 	if (ensureMsgf(MessageSystem, TEXT("ASSERT: [%i] %hs:\n'MessageSystem' is not valid!"), __LINE__, __FUNCTION__))
 	{
-		for (const TPair<FGameplayTag, FAsyncMessageHandle>& Entry : *OwnerHandles)
+		for (const TPair<FGameplayTag, FMyListenerEntry>& Entry : *OwnerEntries)
 		{
-			if (Entry.Value.IsValid())
+			if (Entry.Value.Handle.IsValid())
 			{
-				MessageSystem->UnbindListener(Entry.Value);
+				MessageSystem->UnbindListener(Entry.Value.Handle);
 			}
 		}
 	}
@@ -227,7 +248,7 @@ bool UGlobalMessageSubsystem::HasBroadcastedMessage(FGameplayTag MessageTag, con
 {
 	const UWorld* World = UUtilsLibrary::GetPlayWorld(OptionalWorldContext);
 	const UGlobalMessageSubsystem* Subsystem = World ? World->GetSubsystem<UGlobalMessageSubsystem>() : nullptr;
-	const TMap<TWeakObjectPtr<const AActor>, FGameplayEventData>* CachedPayloads = Subsystem ? Subsystem->BroadcastedMessagesMap.Find(MessageTag) : nullptr;
+	const TMap<TWeakObjectPtr<const AActor>, FMyBroadcastedEntry>* CachedPayloads = Subsystem ? Subsystem->BroadcastedMessagesMap.Find(MessageTag) : nullptr;
 	return CachedPayloads && !CachedPayloads->IsEmpty();
 }
 

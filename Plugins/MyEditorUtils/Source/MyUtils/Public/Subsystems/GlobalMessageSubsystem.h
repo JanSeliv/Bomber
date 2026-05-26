@@ -97,16 +97,30 @@ protected:
 	 * Data
 	 ********************************************************************************************* */
 protected:
+	/** Cache entry: payload paired with engine frame it was cached on, used to skip same-frame replay when engine queue will still deliver */
+	struct FMyBroadcastedEntry
+	{
+		FGameplayEventData Payload;
+		uint64 BroadcastFrame = 0;
+	};
+
 	/** Cached broadcast data enabling the CallOr pattern for late subscribers.
 	 * Outer map: gameplay tag identifying the event channel.
 	 * Inner map: keyed by instigator actor so each unique broadcaster keeps its own cached payload.
 	 * - Same instigator broadcasting again overwrites its previous entry (e.g., game state changes keeps only latest state).
 	 * - Different instigators accumulate (e.g., 4 pawns broadcasting player state change each get their own cached entry).
 	 * When a late subscriber binds, all cached entries for the tag are replayed, so listeners can filter the correct instigator */
-	TMap<FGameplayTag, TMap<TWeakObjectPtr<const AActor> /*Instigator*/, FGameplayEventData>> BroadcastedMessagesMap;
+	TMap<FGameplayTag, TMap<TWeakObjectPtr<const AActor> /*Instigator*/, FMyBroadcastedEntry>> BroadcastedMessagesMap;
 
-	/** Internal registry mapping listener owners to their engine handles per tag, enabling unbind-by-owner. */
-	TMap<TWeakObjectPtr<const UObject> /*ListenerOwner*/, TMap<FGameplayTag, FAsyncMessageHandle>> ListenerHandlesMap;
+	/** Per-listener bookkeeping: engine handle for unbind plus last replayed frame, used to skip same-frame queue delivery after cache replay. */
+	struct FMyListenerEntry
+	{
+		FAsyncMessageHandle Handle;
+		uint64 LastReplayedFrame = 0;
+	};
+
+	/** Internal registry mapping listener owners to their per-tag bookkeeping entries, enabling unbind-by-owner. */
+	TMap<TWeakObjectPtr<const UObject> /*ListenerOwner*/, TMap<FGameplayTag, FMyListenerEntry>> ListenerHandlesMap;
 };
 
 // Subscribes to a gameplay event via member function with weak object safety
