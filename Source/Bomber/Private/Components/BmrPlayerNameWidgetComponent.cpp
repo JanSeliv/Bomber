@@ -99,7 +99,8 @@ void UBmrPlayerNameWidgetComponent::UpdateVisibility()
 		return;
 	}
 
-	const bool bMakeVisible = !ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu)
+	const ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState();
+	const bool bMakeVisible = GameState && !GameState->HasMatchingGameplayTag(FBmrGameStateTag::Menu)
 	                          && AssociatedPlayerState
 	                          && !AssociatedPlayerState->IsPlayerDead();
 
