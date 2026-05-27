@@ -17,12 +17,16 @@
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "AbilitySystemComponent.h"
 #include "Components/AudioComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/Level.h"
 #include "Engine/World.h"
+#include "GameFeaturesSubsystem.h"
+#include "GameplayTagContainer.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
+#include "TimerManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrSoundsSubsystem)
 
@@ -61,7 +65,7 @@ bool UBmrSoundsSubsystem::CanPlaySounds()
 }
 
 // Play the sound in 2D space with ensuring that this sound component is created only once
-void UBmrSoundsSubsystem::PlaySingleSound2D(USoundBase* InSound)
+void UBmrSoundsSubsystem::PlaySingleSound2D(USoundBase* InSound, bool bRestartIfPlaying /*= true*/)
 {
 	if (!CanPlaySounds()
 	    || !ensureMsgf(InSound, TEXT("ASSERT: [%i] %hs:\n'InSound' is not valid!"), __LINE__, __FUNCTION__))
@@ -84,8 +88,15 @@ void UBmrSoundsSubsystem::PlaySingleSound2D(USoundBase* InSound)
 	}
 
 	UAudioComponent& SoundComponentRef = **SoundComponentPtr; // It's safe to dereference since both pointers are checked above
+	const bool bIsPlaying = SoundComponentRef.IsPlaying();
 
-	if (SoundComponentRef.IsPlaying())
+	if (bIsPlaying && !bRestartIfPlaying)
+	{
+		// Early return: already playing and restart not requested
+		return;
+	}
+
+	if (bIsPlaying)
 	{
 		// Stop existing sound and play new one
 		SoundComponentRef.Stop();
@@ -123,10 +134,6 @@ void UBmrSoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
 
 	SoundComponent->Stop();
 	SoundComponent->DestroyComponent();
-
-	// Release the sound and all its referenced assets
-	constexpr bool bUnloadReferences = true;
-	UGfpmUtils::UnloadAsset(InSound, bUnloadReferences);
 
 	SoundComponents.Remove(InSound);
 }
@@ -210,35 +217,6 @@ void UBmrSoundsSubsystem::SetSFXVolume(double InVolume)
 	SetSoundVolumeByClass(SFXSoundClass, InVolume);
 }
 
-// Trigger the background music to be played during the match
-void UBmrSoundsSubsystem::PlayInGameMusic()
-{
-	if (!CanPlaySounds())
-	{
-		return;
-	}
-
-	USoundBase* InGameMusic = UBmrSoundsDataAsset::Get().GetInGameMusic();
-
-	if (!InGameMusic)
-	{
-		// Background music is not found for current state or level, disable current
-		StopInGameMusic();
-		return;
-	}
-
-	PlaySingleSound2D(InGameMusic);
-}
-
-// Stops currently played in-match background music
-void UBmrSoundsSubsystem::StopInGameMusic()
-{
-	if (USoundBase* InGameMusic = UBmrSoundsDataAsset::Get().GetInGameMusic())
-	{
-		StopSingleSound2D(InGameMusic);
-	}
-}
-
 /** Play the sound that is played right before the match ends. */
 void UBmrSoundsSubsystem::PlayEndGameCountdownSFX()
 {
@@ -303,6 +281,38 @@ void UBmrSoundsSubsystem::PlayUIClickSFX()
 	}
 }
 
+// Plays or stops each background music row based on world ASC tag state
+void UBmrSoundsSubsystem::TryUpdateBackgroundMusic()
+{
+	const UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
+	if (!ASC)
+	{
+		// ASC is not ready yet, will be called again on ASC ready event
+		return;
+	}
+
+	FBmrSoundsBackgroundRow::ForEachRow([&](const FBmrSoundsBackgroundRow& Row)
+	{
+		USoundBase* Music = Row.Music.Get();
+		if (!ensureMsgf(!Row.ActivityRequirements.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'%s' row has empty 'ActivityRequirements', it will be ignored!"), __LINE__, __FUNCTION__, *Row.Music.GetAssetName())
+		    || !Music)
+		{
+			// Music asset is not loaded yet or intentionally unloaded, will be called later when loaded
+			return;
+		}
+
+		if (ASC->MatchesGameplayTagQuery(Row.ActivityRequirements))
+		{
+			constexpr bool bRestartIfPlaying = false;
+			PlaySingleSound2D(Music, bRestartIfPlaying);
+		}
+		else
+		{
+			StopSingleSound2D(Music);
+		}
+	});
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
@@ -332,7 +342,45 @@ void UBmrSoundsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
 
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::WorldASC_Ready, this, &ThisClass::OnWorldASCReady);
+
 	UDalRegistrySubsystem::Get().BindAndLoad<FBmrSoundsBackgroundRow>(this, &ThisClass::OnSoundRowsChanged);
+
+	UGameFeaturesSubsystem::Get().AddObserver(this, UGameFeaturesSubsystem::EObserverPluginStateUpdateMode::FutureOnly);
+}
+
+// Is overridden to cleanup injected sounds to let them unload properly
+void UBmrSoundsSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& Context, const FString& PluginURL)
+{
+	checkf(GameFeatureData, TEXT("ERROR: [%i] %hs:\n'GameFeatureData' is null!"), __LINE__, __FUNCTION__);
+
+	TArray<TObjectPtr<USoundBase>> SoundsOwnedByModule;
+	for (const TTuple<TObjectPtr<USoundBase>, TObjectPtr<UAudioComponent>>& Pair : SoundComponents)
+	{
+		if (UGfpmUtils::IsInGameFeatureModule(Pair.Key, GameFeatureData))
+		{
+			SoundsOwnedByModule.Add(Pair.Key);
+		}
+	}
+
+	// Destroy all sounds that were created by this game feature module
+	for (USoundBase* Music : SoundsOwnedByModule)
+	{
+		DestroySingleSound2D(Music);
+	}
+}
+
+// Is overridden to release world ASC tag-event bindings before world tears down
+void UBmrSoundsSubsystem::OnWorldEndPlay(UWorld& InWorld)
+{
+	if (UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent())
+	{
+		ASC->RegisterGenericGameplayTagEvent().RemoveAll(this);
+	}
+
+	UGameFeaturesSubsystem::Get().RemoveObserver(this);
+
+	Super::OnWorldEndPlay(InWorld);
 }
 
 // Is overridden to perform cleanup on ending the game
@@ -346,6 +394,41 @@ void UBmrSoundsSubsystem::Deinitialize()
 	{
 		DalRegistry->UnbindFromDataRegistryLoad(this);
 	}
+
+	DeferredBackgroundMusicUpdateHandle.Invalidate();
+}
+
+// Called on any ASC tag count change to handle tag-driven sounds
+void UBmrSoundsSubsystem::OnWorldAscTagChanged_Implementation(FGameplayTag ChangedTag, int32 NewCount)
+{
+	if (DeferredBackgroundMusicUpdateHandle.IsValid())
+	{
+		// Update is already scheduled
+		return;
+	}
+
+	const bool bAnyRowAffected = FBmrSoundsBackgroundRow::ContainsRowByPredicate([&ChangedTag](const FBmrSoundsBackgroundRow& Row)
+	{
+		TArray<FGameplayTag> OutTagDictionary;
+		Row.ActivityRequirements.GetGameplayTagArray(OutTagDictionary);
+		return OutTagDictionary.ContainsByPredicate([&ChangedTag](const FGameplayTag& Tag)
+		{
+			return ChangedTag.MatchesTag(Tag);
+		});
+	});
+
+	if (!bAnyRowAffected)
+	{
+		// No registered row reacts to this tag, skip
+		return;
+	}
+
+	// Schedule update on next tick to batch multiple tag changes that may happen in the same frame, preventing unnecessary multiple updates and music restarts
+	DeferredBackgroundMusicUpdateHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]
+	{
+		DeferredBackgroundMusicUpdateHandle.Invalidate();
+		TryUpdateBackgroundMusic();
+	}));
 }
 
 /*********************************************************************************************
@@ -366,17 +449,15 @@ void UBmrSoundsSubsystem::OnEndGameStateChanged_Implementation(EBmrEndGameState 
 	}
 }
 
-// Listen game states to switch background music
+// Listen game states to gate start and end countdown SFX
 void UBmrSoundsSubsystem::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
 {
 	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
 	{
-		PlayInGameMusic();
 		PlayStartGameCountdownSFX();
 	}
 	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
 	{
-		StopInGameMusic();
 		StopStartGameCountdownSFX();
 	}
 	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::EndGame))
@@ -395,12 +476,23 @@ void UBmrSoundsSubsystem::OnLocalPlayerStateReady_Implementation(const FGameplay
 	PlayerState->OnEndGameStateChanged.AddUniqueDynamic(this, &ThisClass::OnEndGameStateChanged);
 }
 
+// Called when world ASC becomes available, hooks tag-change events that drive background music rows
+void UBmrSoundsSubsystem::OnWorldASCReady_Implementation(const FGameplayEventData& Payload)
+{
+	UAbilitySystemComponent* ASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
+	if (!ensureMsgf(ASC, TEXT("ASSERT: [%i] %hs:\n'ASC' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		return;
+	}
+
+	ASC->RegisterGenericGameplayTagEvent().AddUObject(this, &ThisClass::OnWorldAscTagChanged);
+
+	// Some tags may already be present on ASC by the time we bind, replay them
+	TryUpdateBackgroundMusic();
+}
+
 // Called after background music Data Registry rows change and all new soft references finish async loading
 void UBmrSoundsSubsystem::OnSoundRowsChanged_Implementation()
 {
-	const ABmrGameState* GameState = UBmrBlueprintFunctionLibrary::GetGameState();
-	if (GameState && GameState->HasMatchingGameplayTag(FBmrGameStateTag::InGame))
-	{
-		PlayInGameMusic();
-	}
+	TryUpdateBackgroundMusic();
 }

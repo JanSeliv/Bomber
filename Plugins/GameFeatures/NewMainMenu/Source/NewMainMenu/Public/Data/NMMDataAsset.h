@@ -79,16 +79,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	FORCEINLINE class USoundClass* GetCinematicsSoundClass() const { return CinematicsSoundClass; }
 
-	/** Returns the main menu background music */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
-	FORCEINLINE class USoundBase* GetMainMenuMusic() const { return MainMenuMusic; }
-
 protected:
 	/** The sound of cinematics music. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TObjectPtr<class USoundClass> CinematicsSoundClass = nullptr;
-
-	/** The background music played in the main menu */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sounds", meta = (BlueprintProtected, ShowOnlyInnerProperties))
-	TObjectPtr<class USoundBase> MainMenuMusic = nullptr;
 };

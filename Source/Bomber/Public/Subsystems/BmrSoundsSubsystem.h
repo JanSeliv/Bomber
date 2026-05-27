@@ -4,6 +4,9 @@
 
 #include "Subsystems/WorldSubsystem.h"
 
+// UE
+#include "GameFeatureStateChangeObserver.h"
+
 #include "BmrSoundsSubsystem.generated.h"
 
 enum class EBmrEndGameState : uint8;
@@ -14,6 +17,7 @@ enum class EBmrEndGameState : uint8;
  */
 UCLASS(Config = "GameUserSettings", DefaultConfig, Blueprintable, BlueprintType)
 class BOMBER_API UBmrSoundsSubsystem final : public UWorldSubsystem
+    , public IGameFeatureStateChangeObserver
 {
 	GENERATED_BODY()
 
@@ -40,10 +44,11 @@ public:
 public:
 	/** Play the sound in 2D space with ensuring that this sound component is created only once.
 	 * If component is already created, it will use existing one.
-	 * If sound itself is already playing, it will stop existing one and play new one.
+	 * @param InSound - Sound asset to play.
+	 * @param bRestartIfPlaying - If true and sound itself is already playing, it will stop existing one and play new one.
 	 * @warning it does not return UAudioComponent since it's managed internally, call UBmrSoundsSubs::Get().StopSound2D(Sound) to stop the sound. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void PlaySingleSound2D(class USoundBase* InSound);
+	void PlaySingleSound2D(class USoundBase* InSound, bool bRestartIfPlaying = true);
 
 	/** Deactivates the given sound if currently playing. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
@@ -113,14 +118,6 @@ protected:
 	 * Public API
 	 ********************************************************************************************* */
 public:
-	/** Trigger the background music to be played during the match. */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void PlayInGameMusic();
-
-	/** Stops currently played in-match background music. */
-	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void StopInGameMusic();
-
 	/** Play the sound that is played right before the match ends. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void PlayEndGameCountdownSFX();
@@ -142,11 +139,28 @@ public:
 	void PlayUIClickSFX();
 
 	/*********************************************************************************************
+	 * Background Music
+	 ********************************************************************************************* */
+public:
+	/** Plays or stops each background music row based on world ASC tag state. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void TryUpdateBackgroundMusic();
+
+	/** Handle for deferred background music recompute, prevents burst tag events from restarting tracks mid-transition. */
+	FTimerHandle DeferredBackgroundMusicUpdateHandle;
+
+	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
 protected:
 	/** Called when world is ready to start gameplay before the game mode transitions to the correct state and call BeginPlay on all actors */
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+
+	/** Is overridden to cleanup injected sounds to let them unload properly. */
+	virtual void OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& Context, const FString& PluginURL) override;
+
+	/** Called when world ends play. */
+	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 
 	/** Is overridden to perform cleanup on ending the game. */
 	virtual void Deinitialize() override;
@@ -163,13 +177,21 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnEndGameStateChanged(EBmrEndGameState EndGameState);
 
-	/** Listen game states to switch background music. */
+	/** Listen game states to gate start and end countdown SFX. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when the local player state is initialized and its assigned character is ready. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
 	void OnLocalPlayerStateReady(const struct FGameplayEventData& Payload);
+
+	/** Called when world ASC becomes available. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnWorldASCReady(const struct FGameplayEventData& Payload);
+
+	/** Called on any ASC tag count change to handle tag-driven sounds. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnWorldAscTagChanged(struct FGameplayTag ChangedTag, int32 NewCount);
 
 	/** Called after background music Data Registry rows change and all new soft references finish async loading. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))

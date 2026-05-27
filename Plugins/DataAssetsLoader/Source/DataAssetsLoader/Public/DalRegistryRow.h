@@ -19,6 +19,9 @@ struct DATAASSETSLOADER_API FDalRegistryRow
 	template <typename TRow>
 	static FORCEINLINE bool HasRows() { return GetRowsNum(TRow::StaticStruct()) > 0; }
 
+	/** Returns true when at least one row matches by given predicate. */
+	static FORCEINLINE bool ContainsRowByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8* /*RowPtr*/)>& Predicate) { return GetRowByPredicate(InStruct, Predicate) != nullptr; }
+
 	/** Returns raw pointer to cached item data by struct type and RowName, O(1) lookup, or nullptr */
 	static const uint8* GetRowByName(const UScriptStruct* InStruct, FName RowName);
 
@@ -77,7 +80,10 @@ struct TDalRegistryRow
 	static FORCEINLINE int32 GetRowsNum() { return FDalRegistryRow::GetRowsNum(TDerived::StaticStruct()); }
 
 	/** Returns true when at least one row is cached */
-	static FORCEINLINE bool HasRows() { return GetRowsNum() > 0; }
+	static FORCEINLINE bool HasRows() { return FDalRegistryRow::HasRows<TDerived>(); }
+
+	/** Returns true when at least one row matches by given predicate. */
+	static FORCEINLINE bool ContainsRowByPredicate(const TFunctionRef<bool(const TDerived&)>& Predicate) { return GetRowByPredicate(Predicate) != nullptr; }
 
 	/** Returns the first cached row, or nullptr */
 	static FORCEINLINE const TDerived* GetFirstRow() { return FDalRegistryRow::GetTypedRow<TDerived>(FDalRegistryRow::GetFirstRow(TDerived::StaticStruct())); }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Engine/DataTable.h"
+#include "GameplayTagContainer.h" // FGameplayTagQuery
 
 // Bomber
 #include "DalRegistryRow.h"
@@ -20,6 +21,10 @@ struct BOMBER_API FBmrSoundsBackgroundRow : public FTableRowBase
 #endif
 {
 	GENERATED_BODY()
+
+	/** Gameplay tag listened on world ASC, music plays while requirements are met, removed otherwise. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagQuery ActivityRequirements = FGameplayTagQuery::EmptyQuery;
 
 	/** The background music sound asset. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -17,19 +17,15 @@
 #include "Controllers/BmrPlayerController.h"
 #include "DalSubsystem.h"
 #include "DataAssets/BmrInputMappingContext.h"
-#include "GameFramework/BmrGameState.h"
 #include "GfpmUtils.h"
 #include "MyUtilsLibraries/InputUtilsLibrary.h"
 #include "MyUtilsLibraries/SaveUtilsLibrary.h"
 #include "Structures/BmrGameStateTag.h"
-#include "Structures/BmrGameplayTags.h"
-#include "Subsystems/BmrSoundsSubsystem.h"
 #include "Subsystems/BmrWidgetsSubsystem.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
-#include "Components/AudioComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "InputAction.h"
 
@@ -127,34 +123,6 @@ void UNMMPlayerControllerComponent::SetManagedInputContextsEnabled(FNmmStateTag 
 }
 
 /*********************************************************************************************
- * Sounds
- ********************************************************************************************* */
-
-// Trigger the background music to be played in the Main Menu
-void UNMMPlayerControllerComponent::PlayMainMenuMusic()
-{
-	USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic();
-
-	if (!MainMenuMusic)
-	{
-		// Background music is not found, disable current
-		StopMainMenuMusic();
-		return;
-	}
-
-	UBmrSoundsSubsystem::Get().PlaySingleSound2D(MainMenuMusic);
-}
-
-// Stops currently played Main Menu background music
-void UNMMPlayerControllerComponent::StopMainMenuMusic()
-{
-	if (USoundBase* MainMenuMusic = UNMMDataAsset::Get().GetMainMenuMusic())
-	{
-		UBmrSoundsSubsystem::Get().StopSingleSound2D(MainMenuMusic);
-	}
-}
-
-/*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
 
@@ -206,14 +174,6 @@ void UNMMPlayerControllerComponent::OnUnregister()
 		MyPC->RemoveInputContexts(MenuInputContexts);
 	}
 
-	// Cleanup all sounds
-	UBmrSoundsSubsystem* SoundSubsystem = UBmrSoundsSubsystem::GetSoundsSubsystem();
-	const UNMMDataAsset* SoundDataAsset = SoundSubsystem ? UNMMUtils::GetDataAsset() : nullptr;
-	if (USoundBase* MainMenuMusic = SoundDataAsset ? SoundDataAsset->GetMainMenuMusic() : nullptr)
-	{
-		SoundSubsystem->DestroySingleSound2D(MainMenuMusic);
-	}
-
 	// Kill current save game object
 	if (SaveGameData)
 	{
@@ -231,8 +191,6 @@ void UNMMPlayerControllerComponent::OnUnregister()
 // Called when the NMM data asset is loaded and available
 void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
 {
-	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(BmrGameplayTags::Event::GameState_Changed, this, &ThisClass::OnGameStateChanged);
-
 	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
 
 	BIND_ON_WIDGETS_INITIALIZED(this, ThisClass::OnWidgetsInitialized);
@@ -250,21 +208,6 @@ void UNMMPlayerControllerComponent::OnDataAssetLoaded_Implementation(const UNMMD
 	}
 }
 
-// Listen to react when entered the Menu state
-void UNMMPlayerControllerComponent::OnGameStateChanged_Implementation(const FGameplayEventData& Payload)
-{
-	if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::Menu))
-	{
-		// Entered the Main Menu
-		PlayMainMenuMusic();
-	}
-	else if (Payload.InstigatorTags.HasTag(FBmrGameStateTag::GameStarting))
-	{
-		// Left the Main Menu
-		StopMainMenuMusic();
-	}
-}
-
 // Called when the Main Menu state was changed
 void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(const FGameplayEventData& Payload)
 {
@@ -274,7 +217,6 @@ void UNMMPlayerControllerComponent::OnNewMainMenuStateChanged_Implementation(con
 	if (bIsCinematic)
 	{
 		GetPlayerControllerChecked().SetIgnoreMoveInput(true);
-		StopMainMenuMusic();
 	}
 
 	// Update input contexts

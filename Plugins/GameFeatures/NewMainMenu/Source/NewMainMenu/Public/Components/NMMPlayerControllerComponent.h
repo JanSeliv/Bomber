@@ -51,18 +51,6 @@ public:
 	void SetManagedInputContextsEnabled(struct FNmmStateTag NewMenuState);
 
 	/*********************************************************************************************
-	 * Sounds
-	 ********************************************************************************************* */
-public:
-	/** Trigger the background music to be played in the Main Menu. */
-	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
-	void PlayMainMenuMusic();
-
-	/** Stops currently played Main Menu background music. */
-	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
-	void StopMainMenuMusic();
-
-	/*********************************************************************************************
 	 * Protected properties
 	 ********************************************************************************************* */
 protected:
@@ -87,10 +75,6 @@ protected:
 	/** Called when the NMM data asset is loaded and available. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnDataAssetLoaded(const class UNMMDataAsset* DataAsset);
-
-	/** Listen to react when entered the Menu state. */
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void OnGameStateChanged(const struct FGameplayEventData& Payload);
 
 	/** Called when the Main Menu state was changed. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
