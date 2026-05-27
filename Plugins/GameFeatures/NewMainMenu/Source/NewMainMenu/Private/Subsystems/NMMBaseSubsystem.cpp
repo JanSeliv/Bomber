@@ -8,6 +8,7 @@
 #include "Subsystems/NMMSpotsSubsystem.h"
 
 // Bomber
+#include "AbilitySystemComponent.h"
 #include "Controllers/BmrPlayerController.h"
 #include "DataRegistries/BmrCinematicRow.h"
 #include "GameFramework/BmrGameState.h"
@@ -50,7 +51,7 @@ FNmmStateTag UNMMBaseSubsystem::GetPredictedMenuState() const
 	}
 
 	// No rows means no GFP cinematics at all (DR itself loads immediately with no softs), menu is ready immediately
-	if (!FBmrCinematicRow::GetRowsNum())
+	if (!FBmrCinematicRow::HasRows())
 	{
 		return FNmmStateTag::BasicMenu;
 	}
@@ -86,6 +87,20 @@ void UNMMBaseSubsystem::TryBroadcastMenuReady()
 // Applies the new state of New Main Menu game feature
 void UNMMBaseSubsystem::SetNewMainMenuState(FNmmStateTag NewState)
 {
+	UAbilitySystemComponent* WorldASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
+	if (ensureMsgf(WorldASC, TEXT("ASSERT: [%i] %hs:\n'WorldASC' is not valid!"), __LINE__, __FUNCTION__))
+	{
+		if (CurrentMenuStateTag.IsValid())
+		{
+			WorldASC->RemoveLooseGameplayTag(CurrentMenuStateTag);
+		}
+
+		if (NewState.IsValid())
+		{
+			WorldASC->AddLooseGameplayTag(NewState);
+		}
+	}
+
 	CurrentMenuStateTag = NewState;
 
 	FGameplayEventData EventData;
@@ -119,6 +134,13 @@ void UNMMBaseSubsystem::OnGameFeatureDeinitialize_Implementation()
 	// Clear cached messages so late-binding listeners receive fresh data on next menu load
 	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuStateChanged);
 	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuReady);
+
+	if (UAbilitySystemComponent* WorldASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent())
+	{
+		WorldASC->RemoveLooseGameplayTag(CurrentMenuStateTag);
+	}
+
+	CurrentMenuStateTag = FNmmStateTag::None;
 }
 
 // Recovers menu state after game feature activations
