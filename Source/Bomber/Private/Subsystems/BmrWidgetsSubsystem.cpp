@@ -407,27 +407,5 @@ void UBmrWidgetsSubsystem::OnWidgetRowsChanged_Implementation()
 		return;
 	}
 
-	// Gather current DR row tags to diff against tracked state
-	TSet<FGameplayTag> CurrentTags;
-	FBmrWidgetRow::ForEachRow([&CurrentTags](const FBmrWidgetRow& WidgetRowData)
-	{
-		CurrentTags.Add(WidgetRowData.WidgetTag);
-	});
-
-	// REMOVAL: destroy widgets whose tags vanished from DR
-	TArray<FGameplayTag> TagsToRemove;
-	for (const TPair<FGameplayTag, FBmrManageableWidgetsContainer>& It : AllManageableWidgets)
-	{
-		if (!CurrentTags.Contains(It.Key))
-		{
-			TagsToRemove.Add(It.Key);
-		}
-	}
-	for (const FGameplayTag& Tag : TagsToRemove)
-	{
-		DestroyManageableWidgetByTag(Tag);
-	}
-
-	// ADDITION: create widgets for newly injected rows, assets are already loaded by the handle
 	CreateMissingWidgets();
 }

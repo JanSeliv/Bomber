@@ -325,8 +325,16 @@ bool UGfpmUtils::IsInGameFeatureModule(const UObject* Object, const UGameFeature
 		return false;
 	}
 
-	const FName ModuleName = GetModuleNameByObject(Object);
-	return !ModuleName.IsNone() && ModuleName.ToString().StartsWith(PluginName.ToString());
+	// Resolve by object first
+	FName ModuleName = GetModuleNameByObject(Object);
+	if (ModuleName.ToString().StartsWith(PluginName.ToString()))
+	{
+		return true;
+	}
+
+	// Resolve by asset name
+	ModuleName = GetModuleNameByAsset(Object);
+	return ModuleName.ToString().StartsWith(PluginName.ToString());
 }
 
 // Returns true if the given object belongs to any registered game feature plugin
