@@ -414,7 +414,14 @@ bool ABmrPawn::IsPlayerControlled() const
 	}
 
 	// Player state is not initialized yet (so Super returned false), but 0 is always a player
-	return !GetPlayerState() && GetPlayerId() == 0;
+	const int32 PlayerId = GetPlayerId();
+	if (!GetPlayerState() && PlayerId == 0)
+	{
+		return true;
+	}
+
+	// Check registered PC for this slot: all above can be false for freshly spawned pawns when human PC already joined before generation completed
+	return UBmrBlueprintFunctionLibrary::GetPlayerController(PlayerId) != nullptr;
 }
 
 // Possess a player or AI controller in dependence of current Character ID
