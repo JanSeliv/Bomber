@@ -12,13 +12,19 @@ public class PlayAreaSurrounderRuntime : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 			{
 				"Core"
+				// My modules
+				, "Bomber"
 			}
 		);
 
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
-				, "Bomber"
+				, "GameplayTags" // FGameplayTag
+				, "GameplayAbilities" // FGameplayEventData
+				// My modules
+				, "DataAssetsLoader" // Created UPlayAreaSurrounderData
+				, "MyUtils" // UGlobalMessageSubsystem
 			}
 		);
 	}

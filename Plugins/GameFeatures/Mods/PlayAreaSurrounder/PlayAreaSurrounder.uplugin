@@ -22,6 +22,12 @@
 			"LoadingPhase": "Default"
 		}
 	],
+	"Plugins": [
+		{
+			"Name": "DataAssetsLoader",
+			"Enabled": true
+		}
+	],
 	"ExplicitlyLoaded": true,
 	"BuiltInInitialFeatureState": "Registered"
 }
