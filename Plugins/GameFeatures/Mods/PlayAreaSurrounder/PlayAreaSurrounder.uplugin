@@ -26,6 +26,14 @@
 		{
 			"Name": "DataAssetsLoader",
 			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "MyEditorUtils",
+			"Enabled": true
 		}
 	],
 	"ExplicitlyLoaded": true,
