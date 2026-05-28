@@ -2,9 +2,6 @@
 
 #include "DalRegistryRow.h"
 
-// DAL
-#include "DalRegistrySubsystem.h"
-
 // UE
 #include "DataRegistry.h"
 #include "DataRegistrySubsystem.h"
@@ -266,19 +263,20 @@ int32 FDalRegistryRowAccessor::CountRowsByPredicate(const UScriptStruct* InStruc
 // Returns all Data Registries whose ItemStruct is a child of InBaseStruct
 void FDalRegistryRowAccessor::ForEachRegistry(const UScriptStruct* InBaseStruct, const TFunctionRef<void(UDataRegistry* Registry, const UScriptStruct* ItemStruct)>& Callback)
 {
-	const UDalRegistrySubsystem* Subsystem = UDalRegistrySubsystem::GetDalRegistrySubsystem();
-	if (!Subsystem)
+	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
+	if (!DRSubsystem)
 	{
-		// Subsystem unavailable during engine shutdown
+		// Registries unavailable during engine shutdown
 		return;
 	}
 
-	const TArray<TWeakObjectPtr<UDataRegistry>>& Registries = Subsystem->GetRegistriesForStruct(InBaseStruct);
-	for (const TWeakObjectPtr<UDataRegistry>& WeakRegistry : Registries)
+	TArray<UDataRegistry*> AllRegistries;
+	DRSubsystem->GetAllRegistries(AllRegistries);
+	for (UDataRegistry* Registry : AllRegistries)
 	{
-		UDataRegistry* Registry = WeakRegistry.Get();
 		const UScriptStruct* ItemStruct = Registry ? Registry->GetItemStruct() : nullptr;
-		if (ItemStruct)
+		if (ItemStruct
+		    && ItemStruct->IsChildOf(InBaseStruct))
 		{
 			Callback(Registry, ItemStruct);
 		}

@@ -21,40 +21,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(DalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry)
 
-// @TODO JanSeliv: remove debug logs after fixing registry-dependency drop trace
-namespace RegDepDebug
-{
-	static void LogImpl(ELogVerbosity::Type Verbosity, const UObject* Owner, const ANSICHAR* Callers, const TCHAR* Extra)
-	{
-		const UWorld* World = (Owner && GEngine) ? GEngine->GetWorldFromContextObject(Owner, EGetWorldErrorMode::ReturnNull) : nullptr;
-		const FString WorldType = World ? LexToString(World->WorldType) : TEXT("None");
-		static const TCHAR* NetModeNames[] = {TEXT("Standalone"), TEXT("DedicatedServer"), TEXT("ListenServer"), TEXT("Client")};
-		const ENetMode NetModeValue = World ? World->GetNetMode() : NM_MAX;
-		const FString NetMode = NetModeValue < NM_MAX ? NetModeNames[NetModeValue] : TEXT("None");
-		const FString Message = FString::Printf(TEXT("[REGDEP]%s Owner=%s, World=%s, WorldType=%s, NetMode=%s | %hs"),
-			Extra, *GetNameSafe(Owner), *GetNameSafe(World),
-			*WorldType, *NetMode, Callers);
-		if (Verbosity <= ELogVerbosity::Warning)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *Message);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
-		}
-	}
-
-	static void LogOwner(const UObject* Owner, const ANSICHAR* Callers, const TCHAR* Extra = TEXT(""))
-	{
-		LogImpl(ELogVerbosity::Log, Owner, Callers, Extra);
-	}
-
-	static void WarnOwner(const UObject* Owner, const ANSICHAR* Callers, const TCHAR* Extra = TEXT(""))
-	{
-		LogImpl(ELogVerbosity::Warning, Owner, Callers, Extra);
-	}
-} // namespace RegDepDebug
-
 #define LOCTEXT_NAMESPACE "GameFeatureAction_AddDataRegistrySourceFromOtherRegistry"
 
 // Called by the Game Features system when the owning feature transitions to Active
@@ -81,24 +47,18 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeature
 		return;
 	}
 
-	RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Entries=%d, RegistriesInit=%d, Subsystem=%s"), SourcesToAdd.Num(), DataRegistrySubsystem->AreRegistriesInitialized() ? 1 : 0, *GetNameSafe(DataRegistrySubsystem))); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
-
 	if (DataRegistrySubsystem->AreRegistriesInitialized())
 	{
-		RegDepDebug::LogOwner(this, __FUNCTION__, TEXT(", Path=Init, calling ResolveAndSubscribeAll directly")); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 		ResolveAndSubscribeAll();
 		return;
 	}
 
-	RegDepDebug::LogOwner(this, __FUNCTION__, TEXT(", Path=Deferred, subscribing OnSubsystemInitialized")); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 	OnSubsystemInitHandle = DataRegistrySubsystem->OnSubsystemInitialized().AddUObject(this, &ThisClass::OnDataRegistrySubsystemInitialized);
 }
 
 // Called by the Game Features system when the owning feature is leaving the Active state
 void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
-	RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Entries=%d, Handles=%d, AppliedFlags=%d"), SourcesToAdd.Num(), RegistryHandles.Num(), AppliedFlags.Num())); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
-
 	if (UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get())
 	{
 		DataRegistrySubsystem->OnSubsystemInitialized().Remove(OnSubsystemInitHandle);
@@ -181,8 +141,6 @@ EDataValidationResult UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegist
 // Hook bound to UDataRegistrySubsystem::OnSubsystemInitialized when activation occurs before registries are ready
 void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnDataRegistrySubsystemInitialized()
 {
-	RegDepDebug::LogOwner(this, __FUNCTION__, TEXT(", DRSubsystem now initialized, proceeding to ResolveAndSubscribeAll")); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
-
 	if (UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get())
 	{
 		DataRegistrySubsystem->OnSubsystemInitialized().Remove(OnSubsystemInitHandle);
@@ -211,7 +169,6 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ResolveAndSub
 		}
 
 		UDataRegistry* Registry = UDalUtilsLibrary::GetRegistryForStruct(Entry.DependsOnRowStruct);
-		RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", DepStruct=%s, Registry=%s"), *GetNameSafe(Entry.DependsOnRowStruct), *GetNameSafe(Registry))); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 		if (!Registry)
 		{
 			continue;
@@ -221,14 +178,12 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ResolveAndSub
 		RegistryHandles.Emplace(Registry, Handle);
 	}
 
-	RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Subscribed=%d, runningSnapshotEvaluate"), RegistryHandles.Num())); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 	EvaluateAllEntries();
 }
 
 // Hook bound to each upstream UDataRegistry::OnCacheVersionInvalidated
 void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnRegistryCacheInvalidated(UDataRegistry* /*InRegistry*/)
 {
-	RegDepDebug::LogOwner(this, __FUNCTION__, TEXT(", cache version invalidated, running EvaluateAllEntries (per-entry RowsNum will reveal which dep changed)")); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 	EvaluateAllEntries();
 }
 
@@ -246,7 +201,6 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::EvaluateAllEn
 		const int32 RowsNum = UDalUtilsLibrary::GetRegistryRowsNum(Entry.DependsOnRowStruct);
 		const bool bShouldBeApplied = RowsNum > 0;
 		const bool bIsApplied = AppliedFlags[Index];
-		RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Index=%d, DepStruct=%s, RowsNum=%d, ShouldBeApplied=%d, IsApplied=%d"), Index, *GetNameSafe(Entry.DependsOnRowStruct), RowsNum, bShouldBeApplied ? 1 : 0, bIsApplied ? 1 : 0)); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
 
 		if (bShouldBeApplied && !bIsApplied)
 		{
@@ -264,8 +218,6 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::EvaluateAllEn
 // Applies the entry's Source to the Data Registry honoring per-entry client/server flags
 void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ApplyEntry(int32 EntryIndex)
 {
-	RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Index=%d, Target=%s, DataTable=%s, CurveTable=%s"), EntryIndex, *SourcesToAdd[EntryIndex].Source.RegistryToAddTo.ToString(), *SourcesToAdd[EntryIndex].Source.DataTableToAdd.ToString(), *SourcesToAdd[EntryIndex].Source.CurveTableToAdd.ToString())); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
-
 	UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!ensureMsgf(DataRegistrySubsystem, TEXT("ASSERT: [%i] %hs:\n'DataRegistrySubsystem' is null!"), __LINE__, __FUNCTION__))
 	{
@@ -319,8 +271,6 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ApplyEntry(in
 // Removes the entry's Source from the Data Registry
 void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveEntry(int32 EntryIndex)
 {
-	RegDepDebug::LogOwner(this, __FUNCTION__, *FString::Printf(TEXT(", Index=%d, Target=%s, DataTable=%s, CurveTable=%s"), EntryIndex, *SourcesToAdd[EntryIndex].Source.RegistryToAddTo.ToString(), *SourcesToAdd[EntryIndex].Source.DataTableToAdd.ToString(), *SourcesToAdd[EntryIndex].Source.CurveTableToAdd.ToString())); // @TODO JanSeliv: remove after fixing registry-dependency drop trace
-
 	UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!DataRegistrySubsystem)
 	{
