@@ -2,6 +2,9 @@
 
 #include "DalRegistryRow.h"
 
+// DAL
+#include "DalRegistrySubsystem.h"
+
 // UE
 #include "DataRegistry.h"
 #include "DataRegistrySubsystem.h"
@@ -22,7 +25,7 @@ namespace DalRegistryRowInternal
 } // namespace DalRegistryRowInternal
 
 // Finds the Data Registry whose ItemStruct matches InStruct, cached for fast repeated access
-UDataRegistry* FDalRegistryRow::GetRegistryForStruct(const UScriptStruct* InStruct)
+UDataRegistry* FDalRegistryRowAccessor::GetRegistryForStruct(const UScriptStruct* InStruct)
 {
 	if (!InStruct)
 	{
@@ -64,7 +67,7 @@ UDataRegistry* FDalRegistryRow::GetRegistryForStruct(const UScriptStruct* InStru
 }
 
 // Returns total number of cached rows for the given row struct type, including child structs
-int32 FDalRegistryRow::GetRowsNum(const UScriptStruct* InStruct)
+int32 FDalRegistryRowAccessor::GetRowsNum(const UScriptStruct* InStruct)
 {
 	int32 Total = 0;
 	ForEachRegistry(InStruct, [&Total](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
@@ -77,133 +80,177 @@ int32 FDalRegistryRow::GetRowsNum(const UScriptStruct* InStruct)
 }
 
 // Returns raw pointer to cached item data by struct type and RowName, O(1) lookup, or nullptr
-const uint8* FDalRegistryRow::GetRowByName(const UScriptStruct* InStruct, FName RowName)
+const uint8* FDalRegistryRowAccessor::GetRowByName(const UScriptStruct* InStruct, FName RowName)
 {
-	const UDataRegistry* Registry = GetRegistryForStruct(InStruct);
-	if (!Registry)
+	const uint8* FoundRow = nullptr;
+	ForEachRegistry(InStruct, [&FoundRow, RowName](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
 	{
-		return nullptr;
-	}
-
-	const uint8* OutItemMemory = nullptr;
-	const UScriptStruct* OutItemStruct = nullptr;
-	const FDataRegistryId ItemId(FDataRegistryType(Registry->GetRegistryType()), RowName);
-	Registry->GetCachedItemRaw(OutItemMemory, OutItemStruct, ItemId);
-	return OutItemMemory;
+		if (FoundRow)
+		{
+			// First match already found, skip remaining registries
+			return;
+		}
+		const uint8* OutItemMemory = nullptr;
+		const UScriptStruct* OutItemStruct = nullptr;
+		const FDataRegistryId ItemId(FDataRegistryType(Registry->GetRegistryType()), RowName);
+		Registry->GetCachedItemRaw(OutItemMemory, OutItemStruct, ItemId);
+		FoundRow = OutItemMemory;
+	});
+	return FoundRow;
 }
 
 // Returns raw pointer to cached item data at specified index for the given struct type, or nullptr
-const uint8* FDalRegistryRow::GetRowByIndex(const UScriptStruct* InStruct, int32 Index)
+const uint8* FDalRegistryRowAccessor::GetRowByIndex(const UScriptStruct* InStruct, int32 Index)
 {
-	TMap<FDataRegistryId, const uint8*> CachedItems;
-	if (!DalRegistryRowInternal::GetAllCachedItems(GetRegistryForStruct(InStruct), CachedItems))
+	const uint8* FoundRow = nullptr;
+	int32 RemainingIndex = Index;
+	ForEachRegistry(InStruct, [&FoundRow, &RemainingIndex](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
 	{
-		return nullptr;
-	}
-
-	int32 CurrentIndex = 0;
-	for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
-	{
-		if (CurrentIndex == Index)
+		if (FoundRow)
 		{
-			return Pair.Value;
+			// Target index already resolved in earlier registry
+			return;
 		}
-		++CurrentIndex;
-	}
-	return nullptr;
+		TMap<FDataRegistryId, const uint8*> CachedItems;
+		DalRegistryRowInternal::GetAllCachedItems(Registry, CachedItems);
+		if (RemainingIndex >= CachedItems.Num())
+		{
+			// Index falls beyond this registry, carry remainder onward
+			RemainingIndex -= CachedItems.Num();
+			return;
+		}
+		int32 CurrentIndex = 0;
+		for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
+		{
+			if (CurrentIndex == RemainingIndex)
+			{
+				FoundRow = Pair.Value;
+				break;
+			}
+			++CurrentIndex;
+		}
+	});
+	return FoundRow;
 }
 
 // Returns the row name at specified index for the given struct type, or NAME_None
-FName FDalRegistryRow::GetRowNameByIndex(const UScriptStruct* InStruct, int32 Index)
+FName FDalRegistryRowAccessor::GetRowNameByIndex(const UScriptStruct* InStruct, int32 Index)
 {
-	TMap<FDataRegistryId, const uint8*> CachedItems;
-	if (!DalRegistryRowInternal::GetAllCachedItems(GetRegistryForStruct(InStruct), CachedItems))
+	FName FoundName = NAME_None;
+	bool bFound = false;
+	int32 RemainingIndex = Index;
+	ForEachRegistry(InStruct, [&FoundName, &bFound, &RemainingIndex](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
 	{
-		return NAME_None;
-	}
-
-	int32 CurrentIndex = 0;
-	for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
-	{
-		if (CurrentIndex == Index)
+		if (bFound)
 		{
-			return Pair.Key.ItemName;
+			// Target index already resolved in earlier registry
+			return;
 		}
-		++CurrentIndex;
-	}
-	return NAME_None;
+		TMap<FDataRegistryId, const uint8*> CachedItems;
+		DalRegistryRowInternal::GetAllCachedItems(Registry, CachedItems);
+		if (RemainingIndex >= CachedItems.Num())
+		{
+			// Index falls beyond this registry, carry remainder onward
+			RemainingIndex -= CachedItems.Num();
+			return;
+		}
+		int32 CurrentIndex = 0;
+		for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
+		{
+			if (CurrentIndex == RemainingIndex)
+			{
+				FoundName = Pair.Key.ItemName;
+				bFound = true;
+				break;
+			}
+			++CurrentIndex;
+		}
+	});
+	return FoundName;
 }
 
 // Iterates all cached items for the given struct type, calling Callback with raw item data
-void FDalRegistryRow::ForEachRow(const UScriptStruct* InStruct, const TFunctionRef<void(const uint8*)>& Callback)
+void FDalRegistryRowAccessor::ForEachRow(const UScriptStruct* InStruct, const TFunctionRef<void(const uint8*)>& Callback)
 {
-	TMap<FDataRegistryId, const uint8*> CachedItems;
-	if (!DalRegistryRowInternal::GetAllCachedItems(GetRegistryForStruct(InStruct), CachedItems))
+	ForEachRegistry(InStruct, [&Callback](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
 	{
-		return;
-	}
-
-	for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
-	{
-		Callback(Pair.Value);
-	}
+		TMap<FDataRegistryId, const uint8*> CachedItems;
+		DalRegistryRowInternal::GetAllCachedItems(Registry, CachedItems);
+		for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
+		{
+			Callback(Pair.Value);
+		}
+	});
 }
 
 // Iterates all cached items for the given struct type, calling Callback with item name and raw data
-void FDalRegistryRow::ForEachRowWithName(const UScriptStruct* InStruct, const TFunctionRef<void(FName ItemName, const uint8*)>& Callback)
+void FDalRegistryRowAccessor::ForEachRowWithName(const UScriptStruct* InStruct, const TFunctionRef<void(FName ItemName, const uint8*)>& Callback)
 {
-	TMap<FDataRegistryId, const uint8*> CachedItems;
-	if (!DalRegistryRowInternal::GetAllCachedItems(GetRegistryForStruct(InStruct), CachedItems))
+	ForEachRegistry(InStruct, [&Callback](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
 	{
-		return;
-	}
-
-	for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
-	{
-		Callback(Pair.Key.ItemName, Pair.Value);
-	}
+		TMap<FDataRegistryId, const uint8*> CachedItems;
+		DalRegistryRowInternal::GetAllCachedItems(Registry, CachedItems);
+		for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
+		{
+			Callback(Pair.Key.ItemName, Pair.Value);
+		}
+	});
 }
 
 // Finds first cached item matching predicate, or nullptr
-const uint8* FDalRegistryRow::GetRowByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate)
+const uint8* FDalRegistryRowAccessor::GetRowByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate)
 {
-	TMap<FDataRegistryId, const uint8*> CachedItems;
-	if (!DalRegistryRowInternal::GetAllCachedItems(GetRegistryForStruct(InStruct), CachedItems))
+	const uint8* FoundRow = nullptr;
+	ForEachRegistry(InStruct, [&FoundRow, &Predicate](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
 	{
-		return nullptr;
-	}
-
-	for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
-	{
-		if (Predicate(Pair.Value))
+		if (FoundRow)
 		{
-			return Pair.Value;
+			// First match already found, skip remaining registries
+			return;
 		}
-	}
-	return nullptr;
+		TMap<FDataRegistryId, const uint8*> CachedItems;
+		DalRegistryRowInternal::GetAllCachedItems(Registry, CachedItems);
+		for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
+		{
+			if (Predicate(Pair.Value))
+			{
+				FoundRow = Pair.Value;
+				break;
+			}
+		}
+	});
+	return FoundRow;
 }
 
 // Returns the row name of first cached item matching predicate, or NAME_None
-FName FDalRegistryRow::GetRowNameByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate)
+FName FDalRegistryRowAccessor::GetRowNameByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate)
 {
-	TMap<FDataRegistryId, const uint8*> CachedItems;
-	if (!DalRegistryRowInternal::GetAllCachedItems(GetRegistryForStruct(InStruct), CachedItems))
+	FName FoundName = NAME_None;
+	bool bFound = false;
+	ForEachRegistry(InStruct, [&FoundName, &bFound, &Predicate](const UDataRegistry* Registry, const UScriptStruct* /*ItemStruct*/)
 	{
-		return NAME_None;
-	}
-
-	for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
-	{
-		if (Predicate(Pair.Value))
+		if (bFound)
 		{
-			return Pair.Key.ItemName;
+			// First match already found, skip remaining registries
+			return;
 		}
-	}
-	return NAME_None;
+		TMap<FDataRegistryId, const uint8*> CachedItems;
+		DalRegistryRowInternal::GetAllCachedItems(Registry, CachedItems);
+		for (const TPair<FDataRegistryId, const uint8*>& Pair : CachedItems)
+		{
+			if (Predicate(Pair.Value))
+			{
+				FoundName = Pair.Key.ItemName;
+				bFound = true;
+				break;
+			}
+		}
+	});
+	return FoundName;
 }
 
 // Counts cached items matching predicate
-int32 FDalRegistryRow::CountRowsByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate)
+int32 FDalRegistryRowAccessor::CountRowsByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate)
 {
 	int32 Count = 0;
 	ForEachRow(InStruct, [&Count, &Predicate](const uint8* Data)
@@ -217,22 +264,21 @@ int32 FDalRegistryRow::CountRowsByPredicate(const UScriptStruct* InStruct, const
 }
 
 // Returns all Data Registries whose ItemStruct is a child of InBaseStruct
-void FDalRegistryRow::ForEachRegistry(const UScriptStruct* InBaseStruct, const TFunctionRef<void(UDataRegistry* Registry, const UScriptStruct* ItemStruct)>& Callback)
+void FDalRegistryRowAccessor::ForEachRegistry(const UScriptStruct* InBaseStruct, const TFunctionRef<void(UDataRegistry* Registry, const UScriptStruct* ItemStruct)>& Callback)
 {
-	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
-	if (!DRSubsystem)
+	const UDalRegistrySubsystem* Subsystem = UDalRegistrySubsystem::GetDalRegistrySubsystem();
+	if (!Subsystem)
 	{
+		// Subsystem unavailable during engine shutdown
 		return;
 	}
 
-	TArray<UDataRegistry*> AllRegistries;
-	DRSubsystem->GetAllRegistries(AllRegistries);
-
-	for (UDataRegistry* Registry : AllRegistries)
+	const TArray<TWeakObjectPtr<UDataRegistry>>& Registries = Subsystem->GetRegistriesForStruct(InBaseStruct);
+	for (const TWeakObjectPtr<UDataRegistry>& WeakRegistry : Registries)
 	{
+		UDataRegistry* Registry = WeakRegistry.Get();
 		const UScriptStruct* ItemStruct = Registry ? Registry->GetItemStruct() : nullptr;
-		if (ItemStruct
-		    && ItemStruct->IsChildOf(InBaseStruct))
+		if (ItemStruct)
 		{
 			Callback(Registry, ItemStruct);
 		}

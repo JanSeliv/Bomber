@@ -7,7 +7,7 @@
 /**
  * Row-related helpers heavily used by TDalRegistryRow and utils
  */
-struct DATAASSETSLOADER_API FDalRegistryRow
+struct DATAASSETSLOADER_API FDalRegistryRowAccessor
 {
 	/** Finds the Data Registry whose ItemStruct matches InStruct, cached for fast repeated access */
 	static class UDataRegistry* GetRegistryForStruct(const UScriptStruct* InStruct);
@@ -17,7 +17,7 @@ struct DATAASSETSLOADER_API FDalRegistryRow
 
 	/** Returns true when at least one row is cached for the given row struct type or any of its child structs */
 	template <typename TRow>
-	static FORCEINLINE bool HasRows() { return GetRowsNum(TRow::StaticStruct()) > 0; }
+	static FORCEINLINE bool HasRows() { return GetFirstRow(TRow::StaticStruct()) != nullptr; }
 
 	/** Returns true when at least one row matches by given predicate. */
 	static FORCEINLINE bool ContainsRowByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8* /*RowPtr*/)>& Predicate) { return GetRowByPredicate(InStruct, Predicate) != nullptr; }
@@ -74,62 +74,62 @@ template <typename TDerived>
 struct TDalRegistryRow
 {
 	/** Returns the Data Registry associated with TDerived::StaticStruct() */
-	static FORCEINLINE UDataRegistry* GetRegistry() { return FDalRegistryRow::GetRegistryForStruct(TDerived::StaticStruct()); }
+	static FORCEINLINE UDataRegistry* GetRegistry() { return FDalRegistryRowAccessor::GetRegistryForStruct(TDerived::StaticStruct()); }
 
 	/** Returns overall number of cached rows */
-	static FORCEINLINE int32 GetRowsNum() { return FDalRegistryRow::GetRowsNum(TDerived::StaticStruct()); }
+	static FORCEINLINE int32 GetRowsNum() { return FDalRegistryRowAccessor::GetRowsNum(TDerived::StaticStruct()); }
 
 	/** Returns true when at least one row is cached */
-	static FORCEINLINE bool HasRows() { return FDalRegistryRow::HasRows<TDerived>(); }
+	static FORCEINLINE bool HasRows() { return FDalRegistryRowAccessor::HasRows<TDerived>(); }
 
 	/** Returns true when at least one row matches by given predicate. */
 	static FORCEINLINE bool ContainsRowByPredicate(const TFunctionRef<bool(const TDerived&)>& Predicate) { return GetRowByPredicate(Predicate) != nullptr; }
 
 	/** Returns the first cached row, or nullptr */
-	static FORCEINLINE const TDerived* GetFirstRow() { return FDalRegistryRow::GetTypedRow<TDerived>(FDalRegistryRow::GetFirstRow(TDerived::StaticStruct())); }
+	static FORCEINLINE const TDerived* GetFirstRow() { return FDalRegistryRowAccessor::GetTypedRow<TDerived>(FDalRegistryRowAccessor::GetFirstRow(TDerived::StaticStruct())); }
 
 	/** Returns the row name of the first cached row, or NAME_None */
-	static FORCEINLINE FName GetFirstRowName() { return FDalRegistryRow::GetFirstRowName(TDerived::StaticStruct()); }
+	static FORCEINLINE FName GetFirstRowName() { return FDalRegistryRowAccessor::GetFirstRowName(TDerived::StaticStruct()); }
 
 	/** Returns row data by DR row name, O(1) lookup, or nullptr */
-	static FORCEINLINE const TDerived* GetRowByName(FName RowName) { return FDalRegistryRow::GetTypedRow<TDerived>(FDalRegistryRow::GetRowByName(TDerived::StaticStruct(), RowName)); }
+	static FORCEINLINE const TDerived* GetRowByName(FName RowName) { return FDalRegistryRowAccessor::GetTypedRow<TDerived>(FDalRegistryRowAccessor::GetRowByName(TDerived::StaticStruct(), RowName)); }
 
 	/** Finds first cached item matching predicate, or nullptr */
 	static FORCEINLINE const TDerived* GetRowByPredicate(const TFunctionRef<bool(const TDerived&)>& Predicate)
 	{
-		return FDalRegistryRow::GetTypedRow<TDerived>(FDalRegistryRow::GetRowByPredicate(TDerived::StaticStruct(),
+		return FDalRegistryRowAccessor::GetTypedRow<TDerived>(FDalRegistryRowAccessor::GetRowByPredicate(TDerived::StaticStruct(),
 		    [&Predicate](const uint8* Data)
 		{
-			return Predicate(*FDalRegistryRow::GetTypedRow<TDerived>(Data));
+			return Predicate(*FDalRegistryRowAccessor::GetTypedRow<TDerived>(Data));
 		}));
 	}
 
 	/** Returns DR row name of first cached item matching predicate, or NAME_None */
 	static FORCEINLINE FName GetRowNameByPredicate(const TFunctionRef<bool(const TDerived&)>& Predicate)
 	{
-		return FDalRegistryRow::GetRowNameByPredicate(TDerived::StaticStruct(),
+		return FDalRegistryRowAccessor::GetRowNameByPredicate(TDerived::StaticStruct(),
 		    [&Predicate](const uint8* Data)
 		{
-			return Predicate(*FDalRegistryRow::GetTypedRow<TDerived>(Data));
+			return Predicate(*FDalRegistryRowAccessor::GetTypedRow<TDerived>(Data));
 		});
 	}
 
 	/** Counts cached items matching predicate */
 	static FORCEINLINE int32 CountRowsByPredicate(const TFunctionRef<bool(const TDerived&)>& Predicate)
 	{
-		return FDalRegistryRow::CountRowsByPredicate(TDerived::StaticStruct(),
+		return FDalRegistryRowAccessor::CountRowsByPredicate(TDerived::StaticStruct(),
 		    [&Predicate](const uint8* Data)
 		{
-			return Predicate(*FDalRegistryRow::GetTypedRow<TDerived>(Data));
+			return Predicate(*FDalRegistryRowAccessor::GetTypedRow<TDerived>(Data));
 		});
 	}
 
 	/** Gathers all cached items matching predicate */
 	static FORCEINLINE void GetRowsByPredicate(TArray<const TDerived*>& OutRows, const TFunctionRef<bool(const TDerived&)>& Predicate)
 	{
-		FDalRegistryRow::ForEachRow(TDerived::StaticStruct(), [&OutRows, &Predicate](const uint8* Data)
+		FDalRegistryRowAccessor::ForEachRow(TDerived::StaticStruct(), [&OutRows, &Predicate](const uint8* Data)
 		{
-			const TDerived* Row = FDalRegistryRow::GetTypedRow<TDerived>(Data);
+			const TDerived* Row = FDalRegistryRowAccessor::GetTypedRow<TDerived>(Data);
 			if (Predicate(*Row))
 			{
 				OutRows.Emplace(Row);
@@ -140,18 +140,18 @@ struct TDalRegistryRow
 	/** Iterates all cached rows */
 	static FORCEINLINE void ForEachRow(const TFunctionRef<void(const TDerived&)>& Callback)
 	{
-		FDalRegistryRow::ForEachRow(TDerived::StaticStruct(), [&Callback](const uint8* Data)
+		FDalRegistryRowAccessor::ForEachRow(TDerived::StaticStruct(), [&Callback](const uint8* Data)
 		{
-			Callback(*FDalRegistryRow::GetTypedRow<TDerived>(Data));
+			Callback(*FDalRegistryRowAccessor::GetTypedRow<TDerived>(Data));
 		});
 	}
 
 	/** Iterates all cached rows with their row names */
 	static FORCEINLINE void ForEachRowWithName(const TFunctionRef<void(FName RowName, const TDerived&)>& Callback)
 	{
-		FDalRegistryRow::ForEachRowWithName(TDerived::StaticStruct(), [&Callback](FName RowName, const uint8* Data)
+		FDalRegistryRowAccessor::ForEachRowWithName(TDerived::StaticStruct(), [&Callback](FName RowName, const uint8* Data)
 		{
-			Callback(RowName, *FDalRegistryRow::GetTypedRow<TDerived>(Data));
+			Callback(RowName, *FDalRegistryRowAccessor::GetTypedRow<TDerived>(Data));
 		});
 	}
 };

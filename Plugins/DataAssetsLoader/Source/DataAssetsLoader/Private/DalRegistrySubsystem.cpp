@@ -32,6 +32,14 @@ UDalRegistrySubsystem* UDalRegistrySubsystem::GetDalRegistrySubsystem()
 	return GEngine ? GEngine->GetEngineSubsystem<UDalRegistrySubsystem>() : nullptr;
 }
 
+// Returns cached Data Registries whose ItemStruct is InBaseStruct or any child
+const TArray<TWeakObjectPtr<UDataRegistry>>& UDalRegistrySubsystem::GetRegistriesForStruct(const UScriptStruct* InBaseStruct) const
+{
+	static const TArray<TWeakObjectPtr<UDataRegistry>> EmptyRegistries;
+	const TArray<TWeakObjectPtr<UDataRegistry>>* FoundRegistries = InBaseStruct ? RegistriesByStructCache.Find(InBaseStruct) : nullptr;
+	return FoundRegistries ? *FoundRegistries : EmptyRegistries;
+}
+
 /*********************************************************************************************
  * Load
  ********************************************************************************************* */
@@ -203,7 +211,7 @@ void UDalRegistrySubsystem::ListenForDataRegistryRowInternal(UObject* Owner, con
 		}
 
 		// Try immediate resolution: row is present in the cache and all its soft refs are loaded
-		if (const uint8* RowData = FDalRegistryRow::GetRowByName(InStruct, RowName))
+		if (const uint8* RowData = FDalRegistryRowAccessor::GetRowByName(InStruct, RowName))
 		{
 			if (AreSoftRefsLoadedForRow(InStruct, RowData))
 			{
@@ -251,7 +259,7 @@ void UDalRegistrySubsystem::TryFireAndRemoveListener(const FDalRegistryRowListen
 		return;
 	}
 
-	const uint8* RowData = FDalRegistryRow::GetRowByName(InStruct, Key.RowName);
+	const uint8* RowData = FDalRegistryRowAccessor::GetRowByName(InStruct, Key.RowName);
 	if (!RowData
 	    || !AreSoftRefsLoadedForRow(InStruct, RowData))
 	{
@@ -285,6 +293,22 @@ void UDalRegistrySubsystem::UnbindFromDataRegistryRow(const UObject* Owner, FNam
 void UDalRegistrySubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	// Force Data Registry subsystem up first so cache build and bind run deterministically
+	Collection.InitializeDependency(UDataRegistrySubsystem::StaticClass());
+
+	UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
+	if (!DRSubsystem)
+	{
+		// Engine shutting down or registries unavailable
+		return;
+	}
+
+	DRSubsystem->OnSubsystemInitialized().AddUObject(this, &UDalRegistrySubsystem::RebuildRegistriesCache);
+	if (DRSubsystem->AreRegistriesInitialized())
+	{
+		RebuildRegistriesCache();
+	}
 }
 
 // Called when engine subsystem deinitializes, unbinds all owners
@@ -300,6 +324,12 @@ void UDalRegistrySubsystem::Deinitialize()
 	OwnerBindings.Empty();
 
 	PendingRowListeners.Empty();
+
+	if (UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get())
+	{
+		DRSubsystem->OnSubsystemInitialized().RemoveAll(this);
+	}
+	RegistriesByStructCache.Empty();
 
 	Super::Deinitialize();
 }
@@ -325,7 +355,7 @@ void UDalRegistrySubsystem::BindFamilyInternal(const UScriptStruct* InBaseStruct
 
 	WaitForRegistries(Owner, [Owner, InBaseStruct]()
 	{
-		FDalRegistryRow::ForEachRegistry(InBaseStruct, [Owner](UDataRegistry* /*Registry*/, const UScriptStruct* ItemStruct)
+		FDalRegistryRowAccessor::ForEachRegistry(InBaseStruct, [Owner](UDataRegistry* /*Registry*/, const UScriptStruct* ItemStruct)
 		{
 			Get().AddAndLoad(Owner, ItemStruct);
 		});
@@ -407,7 +437,7 @@ void UDalRegistrySubsystem::BindOnRegistryChanged(const UScriptStruct* InStruct,
 	}
 
 	// WaitForRegistries guarantees registries are initialized before this is called
-	UDataRegistry* Registry = FDalRegistryRow::GetRegistryForStruct(InStruct);
+	UDataRegistry* Registry = FDalRegistryRowAccessor::GetRegistryForStruct(InStruct);
 	if (!ensureMsgf(Registry, TEXT("ASSERT: [%i] %hs:\nRegistry not found for struct '%s'! Struct is not registered in any Data Registry."), __LINE__, __FUNCTION__, *InStruct->GetName()))
 	{
 		return;
@@ -431,7 +461,7 @@ void UDalRegistrySubsystem::BindOnRegistryChanged(const UScriptStruct* InStruct,
 // Removes all Object's bindings from the Data Registry cache change delegate for InStruct
 void UDalRegistrySubsystem::UnbindOnRegistryChanged(const UScriptStruct* InStruct, const UObject* Object)
 {
-	UDataRegistry* Registry = FDalRegistryRow::GetRegistryForStruct(InStruct);
+	UDataRegistry* Registry = FDalRegistryRowAccessor::GetRegistryForStruct(InStruct);
 	if (!Registry)
 	{
 		return;
@@ -466,7 +496,7 @@ bool UDalRegistrySubsystem::AreSoftRefsLoadedForRow(const UScriptStruct* InStruc
 // Auto-discovers all TSoftObjectPtr/TSoftClassPtr properties on InStruct via reflection
 void UDalRegistrySubsystem::GatherAllSoftPaths(const UScriptStruct* InStruct, TArray<FSoftObjectPath>& OutPaths)
 {
-	const UDataRegistry* Registry = FDalRegistryRow::GetRegistryForStruct(InStruct);
+	const UDataRegistry* Registry = FDalRegistryRowAccessor::GetRegistryForStruct(InStruct);
 	if (!Registry)
 	{
 		return;
@@ -500,6 +530,30 @@ void UDalRegistrySubsystem::GatherAllSoftPaths(const UScriptStruct* InStruct, TA
 			{
 				OutPaths.AddUnique(SoftPtr->ToSoftObjectPath());
 			}
+		}
+	}
+}
+
+// Rebuilds registry cache from current registries, bound to Data Registry subsystem reinitialization
+void UDalRegistrySubsystem::RebuildRegistriesCache()
+{
+	RegistriesByStructCache.Empty();
+
+	const UDataRegistrySubsystem* DRSubsystem = UDataRegistrySubsystem::Get();
+	if (!DRSubsystem)
+	{
+		// Registries not available yet, next reinitialization rebuilds
+		return;
+	}
+
+	TArray<UDataRegistry*> AllRegistries;
+	DRSubsystem->GetAllRegistries(AllRegistries);
+	for (UDataRegistry* Registry : AllRegistries)
+	{
+		const UScriptStruct* ItemStruct = Registry ? Registry->GetItemStruct() : nullptr;
+		for (const UScriptStruct* StructIt = ItemStruct; StructIt; StructIt = Cast<UScriptStruct>(StructIt->GetSuperStruct()))
+		{
+			RegistriesByStructCache.FindOrAdd(StructIt).Emplace(Registry);
 		}
 	}
 }

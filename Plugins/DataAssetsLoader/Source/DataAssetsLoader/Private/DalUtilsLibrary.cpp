@@ -110,7 +110,7 @@ void UDalUtilsLibrary::K2_GetAllRegistryRowsGeneric(const UScriptStruct* InRowSt
 	FScriptArrayHelper ArrayHelper(ArrayProp, OutArrayPtr);
 	ArrayHelper.EmptyValues();
 
-	FDalRegistryRow::ForEachRow(InRowStruct, [&ArrayHelper, ElementStruct](const uint8* ItemData)
+	FDalRegistryRowAccessor::ForEachRow(InRowStruct, [&ArrayHelper, ElementStruct](const uint8* ItemData)
 	{
 		const int32 NewIndex = ArrayHelper.AddValue();
 		uint8* DestPtr = ArrayHelper.GetElementPtr(NewIndex);
@@ -136,19 +136,19 @@ DEFINE_FUNCTION(UDalUtilsLibrary::execK2_GetAllRegistryRows)
 // Finds the Data Registry whose ItemStruct matches InStruct, cached for fast repeated access
 UDataRegistry* UDalUtilsLibrary::GetRegistryForStruct(const UScriptStruct* InStruct)
 {
-	return FDalRegistryRow::GetRegistryForStruct(InStruct);
+	return FDalRegistryRowAccessor::GetRegistryForStruct(InStruct);
 }
 
 // Returns overall number of cached rows for the given row struct type
 int32 UDalUtilsLibrary::GetRegistryRowsNum(const UScriptStruct* InStruct)
 {
-	return FDalRegistryRow::GetRowsNum(InStruct);
+	return FDalRegistryRowAccessor::GetRowsNum(InStruct);
 }
 
 // Returns the row name at specified index for the given struct type, or NAME_None
 FName UDalUtilsLibrary::GetRegistryRowNameByIndex(const UScriptStruct* InStruct, int32 Index)
 {
-	return FDalRegistryRow::GetRowNameByIndex(InStruct, Index);
+	return FDalRegistryRowAccessor::GetRowNameByIndex(InStruct, Index);
 }
 
 /*********************************************************************************************

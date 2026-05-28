@@ -338,7 +338,7 @@ void UBmrCheatManager::SpawnActorByType(EBmrActorType ActorType, int32 ColumnX, 
 	checkf(DataAsset, TEXT("ERROR: [%i] %hs:\n'DataAsset' is null!"), __LINE__, __FUNCTION__);
 	FBmrMeshData MeshData = FBmrMeshData::Empty;
 	const UScriptStruct* RowType = DataAsset->GetRowType();
-	MeshData.RowName = FDalRegistryRow::GetRowNameByIndex(RowType, RowIndex);
+	MeshData.RowName = FDalRegistryRowAccessor::GetRowNameByIndex(RowType, RowIndex);
 	GeneratedMap.SpawnActorWithMesh(ActorType, Cell, MeshData);
 }
 

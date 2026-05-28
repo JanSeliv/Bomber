@@ -7,11 +7,11 @@
 // Returns cached level actor row by runtime struct type and row name, cast to base class
 const FBmrLevelActorRow* FBmrLevelActorRow::FindRowByName(const UScriptStruct* RowType, FName RowName)
 {
-	return FDalRegistryRow::GetTypedRow<FBmrLevelActorRow>(FDalRegistryRow::GetRowByName(RowType, RowName));
+	return FDalRegistryRowAccessor::GetTypedRow<FBmrLevelActorRow>(FDalRegistryRowAccessor::GetRowByName(RowType, RowName));
 }
 
 // Returns the first cached level actor row for the given runtime struct type, or nullptr
 const FBmrLevelActorRow* FBmrLevelActorRow::FindFirstRow(const UScriptStruct* RowType)
 {
-	return FDalRegistryRow::GetTypedRow<FBmrLevelActorRow>(FDalRegistryRow::GetFirstRow(RowType));
+	return FDalRegistryRowAccessor::GetTypedRow<FBmrLevelActorRow>(FDalRegistryRowAccessor::GetFirstRow(RowType));
 }

@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[DataAssetsLoader]")
 	static UDalRegistrySubsystem* GetDalRegistrySubsystem();
 
+	/** Returns cached Data Registries whose ItemStruct is InBaseStruct or any child. */
+	const TArray<TWeakObjectPtr<class UDataRegistry>>& GetRegistriesForStruct(const UScriptStruct* InBaseStruct) const;
+
 	/*********************************************************************************************
 	 * Load
 	 ********************************************************************************************* */
@@ -37,7 +40,7 @@ public:
 	void BindAndLoad(UserClass* Owner, void (UserClass::*OnChanged)()) { BindInternal(TRow::StaticStruct(), Owner, TDelegate<void()>::CreateUObject(Owner, OnChanged)); }
 
 	/** Subscribes to all Data Registries whose ItemStruct inherits TBaseRow.
-	 * Discovers child registries at bind time via FDalRegistryRow::ForEachRegistry.
+	 * Discovers child registries at bind time via FDalRegistryRowAccessor::ForEachRegistry.
 	 * All sources share a single batched async load and callback.
 	 * Example: `DalRegistry.BindAndLoadFamily<FMyBaseRow>(this, &ThisClass::OnFamilyLoaded);` */
 	template <typename TBaseRow, typename UserClass>
@@ -201,6 +204,12 @@ private:
 	/** Returns true if every TSoftObjectPtr property on RowData is either null or has a loaded asset.
 	 * Used to gate row-listener callbacks so consumers never observe a row with unresolved soft refs */
 	static bool AreSoftRefsLoadedForRow(const UScriptStruct* InStruct, const uint8* RowData);
+
+	/** Per base row struct, Data Registries whose ItemStruct is that struct or child. */
+	TMap<const UScriptStruct*, TArray<TWeakObjectPtr<class UDataRegistry>>> RegistriesByStructCache;
+
+	/** Rebuilds registry cache from current registries, bound to Data Registry subsystem reinitialization. */
+	void RebuildRegistriesCache();
 };
 
 // Runtime class with typed member function, lifetime guaranteed by Internal

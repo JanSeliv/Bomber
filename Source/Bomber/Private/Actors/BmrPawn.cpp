@@ -567,8 +567,8 @@ void ABmrPawn::SetDefaultPlayerMeshData(bool bForcePlayerSkin /* = false*/)
 	{
 		// Human players and forced skins rotate through available characters by ID
 		const int32 RowIndex = PlayerId % MeshesNum;
-		Row = FDalRegistryRow::GetTypedRow<FBmrPlayerRow>(FDalRegistryRow::GetRowByIndex(FBmrPlayerRow::StaticStruct(), RowIndex));
-		RowName = FDalRegistryRow::GetRowNameByIndex(FBmrPlayerRow::StaticStruct(), RowIndex);
+		Row = FDalRegistryRowAccessor::GetTypedRow<FBmrPlayerRow>(FDalRegistryRowAccessor::GetRowByIndex(FBmrPlayerRow::StaticStruct(), RowIndex));
+		RowName = FDalRegistryRowAccessor::GetRowNameByIndex(FBmrPlayerRow::StaticStruct(), RowIndex);
 	}
 
 	if (!ensureMsgf(Row, TEXT("ASSERT: [%i] %hs:\n'Row' is not found!"), __LINE__, __FUNCTION__)

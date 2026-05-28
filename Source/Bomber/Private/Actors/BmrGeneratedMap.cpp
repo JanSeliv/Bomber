@@ -883,7 +883,7 @@ void ABmrGeneratedMap::GenerateLevelActors()
 
 	DestroyAllLevelActors();
 
-	if (!FDalRegistryRow::HasRows<FBmrLevelActorRow>())
+	if (!FDalRegistryRowAccessor::HasRows<FBmrLevelActorRow>())
 	{
 		// Level Actor Rows might be not loaded yet (level is likely unloaded): skip spawning, next regeneration will retry
 		bIsCurrentlyGenerating = false;
