@@ -68,7 +68,8 @@ int32 UBmrBlueprintFunctionLibrary::GetAlivePlayersNum(EBmrPlayerType InPlayerTy
 bool UBmrBlueprintFunctionLibrary::IsLocalPawnReady(const UObject* OptionalWorldContext /* = nullptr*/)
 {
 	const ABmrPawn* LocalPawn = GetLocalPawn(OptionalWorldContext);
-	return UBmrPawnReadySubsystem::Get(OptionalWorldContext).IsReady(LocalPawn);
+	const UBmrPawnReadySubsystem* PawnReadySubsystem = UBmrPawnReadySubsystem::GetPawnReadySubsystem(OptionalWorldContext);
+	return PawnReadySubsystem && PawnReadySubsystem->IsReady(LocalPawn);
 }
 
 /* ---------------------------------------------------
