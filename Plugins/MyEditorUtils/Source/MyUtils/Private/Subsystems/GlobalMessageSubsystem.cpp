@@ -72,19 +72,15 @@ void UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(FGameplayTag 
 	}
 
 	// Replay all cached payloads for this tag to the late subscriber, one per unique instigator
-	uint64 LastReplayedFrame = 0;
+	TMap<TWeakObjectPtr<const AActor>, uint64> ReplayedFrames;
 	const TMap<TWeakObjectPtr<const AActor>, FMyBroadcastedEntry>* CachedPayloads = Subsystem ? Subsystem->BroadcastedMessagesMap.Find(MessageTag) : nullptr;
 	if (CachedPayloads)
 	{
-		const uint64 CurrentFrame = GFrameCounter;
 		for (const TPair<TWeakObjectPtr<const AActor>, FMyBroadcastedEntry>& CachedEntry : *CachedPayloads)
 		{
-			// Skip same-frame entries, engine queue still holds them and will deliver at TG_PostUpdateWork, avoids cache+queue double delivery
-			if (CachedEntry.Value.BroadcastFrame < CurrentFrame)
-			{
-				Callback(CachedEntry.Value.Payload);
-				LastReplayedFrame = CurrentFrame;
-			}
+			// Always replay so late same-frame subscriber never misses it, engine reads listener set at queue drain and skips listener that bound after broadcast was queued
+			Callback(CachedEntry.Value.Payload);
+			ReplayedFrames.Add(CachedEntry.Key, CachedEntry.Value.BroadcastFrame);
 		}
 		// Fall through to bind for future broadcasts
 	}
@@ -110,10 +106,12 @@ void UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(FGameplayTag 
 		UGlobalMessageSubsystem* StrongSubsystem = WeakSubsystem.Get();
 		TMap<FGameplayTag, FMyListenerEntry>* OwnerEntries = StrongSubsystem ? StrongSubsystem->ListenerHandlesMap.Find(WeakOwner) : nullptr;
 		FMyListenerEntry* Entry = OwnerEntries ? OwnerEntries->Find(MessageTag) : nullptr;
-		if (Entry && Entry->LastReplayedFrame != 0 && Message.GetQueueFrame() <= Entry->LastReplayedFrame)
+		const TWeakObjectPtr<const AActor> InstigatorKey(Payload->Instigator);
+		const uint64* ReplayedFrame = Entry ? Entry->ReplayedFrames.Find(InstigatorKey) : nullptr;
+		if (ReplayedFrame && *ReplayedFrame == Message.GetQueueFrame())
 		{
-			// Cache replay already delivered same-or-older broadcast this frame, clear marker so subsequent broadcasts fire normally
-			Entry->LastReplayedFrame = 0;
+			// Cache replay already delivered this exact broadcast (same instigator and engine queue frame), drop duplicate engine delivery once
+			Entry->ReplayedFrames.Remove(InstigatorKey);
 			return;
 		}
 
@@ -123,7 +121,7 @@ void UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(FGameplayTag 
 	// Store entry internally for unbind-by-owner support and queue-dedup state
 	if (Subsystem && Handle.IsValid())
 	{
-		Subsystem->ListenerHandlesMap.FindOrAdd(ListenerOwner).Add(MessageTag, FMyListenerEntry{Handle, LastReplayedFrame});
+		Subsystem->ListenerHandlesMap.FindOrAdd(ListenerOwner).Add(MessageTag, FMyListenerEntry{Handle, MoveTemp(ReplayedFrames)});
 	}
 }
 

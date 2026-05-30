@@ -112,11 +112,11 @@ protected:
 	 * When a late subscriber binds, all cached entries for the tag are replayed, so listeners can filter the correct instigator */
 	TMap<FGameplayTag, TMap<TWeakObjectPtr<const AActor> /*Instigator*/, FMyBroadcastedEntry>> BroadcastedMessagesMap;
 
-	/** Per-listener bookkeeping: engine handle for unbind plus last replayed frame, used to skip same-frame queue delivery after cache replay. */
+	/** Per-listener bookkeeping: engine handle for unbind plus, per instigator, broadcast frame already delivered via cache replay, so matching engine queue delivery is dropped once to avoid double-fire. */
 	struct FMyListenerEntry
 	{
 		FAsyncMessageHandle Handle;
-		uint64 LastReplayedFrame = 0;
+		TMap<TWeakObjectPtr<const AActor> /*Instigator*/, uint64 /*BroadcastFrame*/> ReplayedFrames;
 	};
 
 	/** Internal registry mapping listener owners to their per-tag bookkeeping entries, enabling unbind-by-owner. */
