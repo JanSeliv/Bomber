@@ -11,6 +11,8 @@ class UInputMappingContext;
 
 struct FKey;
 
+enum EInputEvent : int;
+
 /**
  * Determines the state of the input action in the context.
  */
@@ -115,6 +117,20 @@ public:
 	 * @param InInputContext The input context to register. */
 	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext", AutoCreateRefTerm = "NewKey,PrevKey"))
 	static void SetAllMappingsRegisteredInContext(const UObject* WorldContext, bool bRegister, const UInputMappingContext* InInputContext);
+
+	/*********************************************************************************************
+	 * Input Simulation
+	 ********************************************************************************************* */
+public:
+	/** Injects a simulated key event into the local player input, as if a physical device sent it.
+	 * Works even when no Enhanced Input mapping or Input Action exists for that key.
+	 * @param WorldContext The world context (controller) to inject into.
+	 * @param Key The key to simulate.
+	 * @param Event Whether the key is pressed, released or repeated.
+	 * @param AmountDepressed Analog depression amount, 1 for digital keys.
+	 * @return true if the input was consumed by the player. */
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "C++", meta = (WorldContext = "WorldContext", DefaultToSelf = "WorldContext", AutoCreateRefTerm = "Key", AdvancedDisplay = "AmountDepressed"))
+	static bool InputKey(const UObject* WorldContext, const FKey& Key, TEnumAsByte<EInputEvent> Event, float AmountDepressed = 1.0f);
 
 	/*********************************************************************************************
 	 * Internal helpers

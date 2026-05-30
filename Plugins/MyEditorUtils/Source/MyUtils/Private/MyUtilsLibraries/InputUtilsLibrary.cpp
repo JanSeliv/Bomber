@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedPlayerInput.h"
 #include "GameFramework/PlayerController.h"
+#include "InputKeyEventArgs.h"
 #include "InputMappingContext.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 
@@ -316,6 +317,24 @@ void UInputUtilsLibrary::SetAllMappingsRegisteredInContext(const UObject* WorldC
 	{
 		EnhancedInputUserSettings->UnregisterInputMappingContext(InInputContext);
 	}
+}
+
+/*********************************************************************************************
+ * Input Simulation
+ ********************************************************************************************* */
+
+// Injects a simulated key event into the local player input, as if a physical device sent it
+bool UInputUtilsLibrary::InputKey(const UObject* WorldContext, const FKey& Key, TEnumAsByte<EInputEvent> Event, float AmountDepressed/* = 1.0f*/)
+{
+	APlayerController* PlayerController = GetLocalPlayerController(WorldContext);
+	if (!PlayerController)
+	{
+		// No local player controller, cannot inject input
+		return false;
+	}
+
+	const FInputKeyEventArgs Args = FInputKeyEventArgs::CreateSimulated(Key, Event, AmountDepressed);
+	return PlayerController->InputKey(Args);
 }
 
 /*********************************************************************************************
