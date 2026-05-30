@@ -109,7 +109,8 @@ struct BOMBER_API FBmrMapComponentsContainer : public FIrisFastArraySerializer
 {
 	GENERATED_BODY()
 
-	/** Internal token for tracking replication progress, is not replicated, but is incremented locally on each instance whenever any level actor is spawned. */
+	/** Local progress mirroring GenerateLevelActorsToken on this instance, is not replicated.
+	 * Packs current generation id in high bits with this instance's resolved actor count in low bits, counts add-events so removals never lower it. */
 	UPROPERTY(Transient, NotReplicated)
 	int32 LocalReplicationToken = 0;
 
@@ -177,12 +178,8 @@ struct BOMBER_API TStructOpsTypeTraits<FBmrMapComponentsContainer> : public TStr
 };
 
 template <typename Type, typename SerializerType>
-bool FBmrMapComponentsContainer::ShouldWriteFastArrayItem(const Type& Item, const bool bIsWritingOnClient)
+bool FBmrMapComponentsContainer::ShouldWriteFastArrayItem(const Type& Item, const bool /*bIsWritingOnClient*/)
 {
-	if (bIsWritingOnClient)
-	{
-		return Item.ReplicationID != INDEX_NONE;
-	}
-
-	return true;
+	// Skip specs not yet registered for replication (pending handle-only spawns): they would replicate as phantom unresolved entries that can never be removed afterwards, since they lack tracked ReplicationID
+	return Item.ReplicationID != INDEX_NONE;
 }

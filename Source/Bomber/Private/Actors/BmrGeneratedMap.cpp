@@ -39,6 +39,10 @@
 // Empty generation settings instance
 const FBmrGeneratedMapSettings FBmrGeneratedMapSettings::Empty = FBmrGeneratedMapSettings();
 
+// GenerateLevelActorsToken packs current generation id in high bits with that generation's resolved actor count in low bits
+static constexpr int32 GenerationTokenIdShift = 16;
+static constexpr int32 GenerationTokenCountMask = (1 << GenerationTokenIdShift) - 1;
+
 /* ---------------------------------------------------
  *		Generated Map public functions
  * --------------------------------------------------- */
@@ -384,33 +388,37 @@ void ABmrGeneratedMap::ResolveSpawnedMapComponent(UBmrMapComponent& AddedCompone
 	}
 }
 
-// Internal method called on both server and client to increment the replication token whenever any level actor is spawned
+// Internal method called on both server and client whenever level actor resolves, counts it toward current generation broadcast
 void ABmrGeneratedMap::IncrementReplicationToken()
 {
+	const int32 GenerationId = GenerateLevelActorsToken >> GenerationTokenIdShift;
+	if (GenerationId > MapComponents.LocalReplicationToken >> GenerationTokenIdShift)
+	{
+		// Started counting newer generation, restart its count under it
+		MapComponents.LocalReplicationToken = GenerationId << GenerationTokenIdShift;
+	}
 	++MapComponents.LocalReplicationToken;
 
-	if (MapComponents.LocalReplicationToken == GenerateLevelActorsToken)
-	{
-		// All level actors completed spawn (on server) or all replicated (on client)
-		OnGeneratedLevelActors.Broadcast();
-	}
+	TryBroadcastGeneratedLevelActors();
 }
 
-// Internal client-only callback when GenerateLevelActorsToken is replicated from server
-void ABmrGeneratedMap::OnRep_GenerateLevelActorsToken()
+// Is called on both server and client whenever generation token replicates or any level actor resolves
+void ABmrGeneratedMap::TryBroadcastGeneratedLevelActors()
 {
-	if (GenerateLevelActorsToken == 0)
+	const bool bGenerationFinished = (GenerateLevelActorsToken & GenerationTokenCountMask) > 0;
+	if (!bGenerationFinished || MapComponents.LocalReplicationToken != GenerateLevelActorsToken)
 	{
-		// Server started a new generation, reset local token to count from 0
-		MapComponents.LocalReplicationToken = 0;
+		// Wait until this generation finished on server and this instance counted as many of its actors
 		return;
 	}
 
-	// Catch-up: all actors arrived before the token packet, so the match in IncrementReplicationToken was missed
-	if (MapComponents.LocalReplicationToken >= GenerateLevelActorsToken)
-	{
-		OnGeneratedLevelActors.Broadcast();
-	}
+	OnGeneratedLevelActors.Broadcast();
+}
+
+// Internal client-only callback when GenerateLevelActorsToken is replicated from server, re-evaluates generation broadcast
+void ABmrGeneratedMap::OnRep_GenerateLevelActorsToken()
+{
+	TryBroadcastGeneratedLevelActors();
 }
 
 /*********************************************************************************************
@@ -881,6 +889,11 @@ void ABmrGeneratedMap::GenerateLevelActors()
 
 	bIsCurrentlyGenerating = true;
 
+	// Open new generation: bump its id so this generation's actors are stamped and counted independently of history
+	const int32 NewGenerationId = (GenerateLevelActorsToken >> GenerationTokenIdShift) + 1;
+	GenerateLevelActorsToken = NewGenerationId << GenerationTokenIdShift;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsToken, this);
+
 	DestroyAllLevelActors();
 
 	if (!FDalRegistryRowAccessor::HasRows<FBmrLevelActorRow>())
@@ -945,13 +958,13 @@ void ABmrGeneratedMap::GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsToken, This);
 
 		This->bIsCurrentlyGenerating = false;
-		This->OnGeneratedLevelActors.Broadcast();
+		This->TryBroadcastGeneratedLevelActors();
 	};
 
 	SpawnActorsByTypes(ActorsToSpawn, OnSpawned);
 }
 
-// Destroys all currently spawned level actors and resets generation tokens, leaving the grid empty
+// Destroys all currently spawned level actors, leaving the grid empty
 void ABmrGeneratedMap::DestroyAllLevelActors()
 {
 	if (!HasAuthority())
@@ -966,11 +979,6 @@ void ABmrGeneratedMap::DestroyAllLevelActors()
 		DestroyLevelActorByHandle(MapComponentsToDestroy[Idx].PoolObjectHandle);
 	}
 	checkf(MapComponentsToDestroy.IsEmpty(), TEXT("ERROR: [%i] %hs:\n'MapComponentsToDestroy' is not empty after removing all!"), __LINE__, __FUNCTION__);
-
-	// Reset both tokens so the next generation counts from 0 on server and signals clients to reset too
-	MapComponents.LocalReplicationToken = 0;
-	GenerateLevelActorsToken = 0;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, GenerateLevelActorsToken, this);
 
 	AdditionalDangerousCells.Reset();
 }

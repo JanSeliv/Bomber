@@ -111,11 +111,15 @@ public:
 	 * before the component is spawned. Manually binds the component to its replicated entry. */
 	void ResolveSpawnedMapComponent(UBmrMapComponent& AddedComponent);
 
-	/** Internal method called on both server and client to increment the replication token whenever any level actor is spawned. */
+	/** Internal method called on both server and client whenever level actor resolves, counts it toward current generation broadcast. */
 	void IncrementReplicationToken();
 
-	/** Internal client-only callback when GenerateLevelActorsToken is replicated from server.
-	 * Resets the local token when a new generation starts (token=0), or catches up if all actors arrived before the final token packet. */
+	/** Is called on both server and client whenever generation token replicates or any level actor resolves.
+	 * Fires event once per generation, after this instance resolved every level actor of that generation. */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]")
+	void TryBroadcastGeneratedLevelActors();
+
+	/** Internal client-only callback when GenerateLevelActorsToken is replicated from server, re-evaluates generation broadcast. */
 	UFUNCTION()
 	void OnRep_GenerateLevelActorsToken();
 
@@ -231,9 +235,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, Replicated, Transient, Category = "[Bomber]", meta = (BlueprintProtected))
 	FBmrMapComponentsContainer MapComponents;
 
-	/** Is exposed to track when the Generate Level Actors is completed on the client.
-	 * Server updates this token on every Generate Level Actors call.
-	 * Client monitors updates and confirms when tokens match to broadcast the On Generated Level Actors event. */
+	/** Contains current generation id in high bits with that generation's resolved actor count in low bits.
+	 * Server stamps it once generation finished, each instance broadcasts once that generation's actors resolve.
+	 * Per-generation so each client counts only current generation, working regardless of when it joined. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, AdvancedDisplay, ReplicatedUsing = OnRep_GenerateLevelActorsToken, Transient, Category = "[Bomber]", meta = (BlueprintProtected))
 	int32 GenerateLevelActorsToken = 0;
 
@@ -322,7 +326,7 @@ protected:
 	static TMap<FBmrCell, EBmrActorType> GenerateLevelActors_StartAsync(struct FBmrGeneratorData&& GeneratorData);
 	void GenerateLevelActors_Finish(TMap<FBmrCell, EBmrActorType>&& ActorsToSpawn);
 
-	/** Destroys all currently spawned level actors and resets generation tokens, leaving the grid empty. */
+	/** Destroys all currently spawned level actors, leaving the grid empty. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
 	void DestroyAllLevelActors();
 
