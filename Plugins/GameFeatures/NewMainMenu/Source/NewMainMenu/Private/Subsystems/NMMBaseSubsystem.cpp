@@ -146,10 +146,12 @@ void UNMMBaseSubsystem::OnGameFeatureDeinitialize_Implementation()
 // Recovers menu state after game feature activations
 void UNMMBaseSubsystem::OnGameFeatureActivated(const UGameFeatureData* /*GameFeatureData*/, const FString& /*PluginURL*/)
 {
+	const ABmrGameState* MyGameState = UBmrBlueprintFunctionLibrary::GetGameState();
 	if (CurrentMenuStateTag != FNmmStateTag::None
-	    || !ABmrGameState::Get().HasMatchingGameplayTag(FBmrGameStateTag::Menu))
+	    || !MyGameState
+	    || !MyGameState->HasMatchingGameplayTag(FBmrGameStateTag::Menu))
 	{
-		// Not in the wait condition, nothing to recover
+		// Not in wait condition or Game State not yet replicated on client, nothing to recover, OnGameStateChanged recovers once it arrives
 		return;
 	}
 
