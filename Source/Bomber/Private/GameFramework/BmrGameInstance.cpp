@@ -19,6 +19,9 @@ UBmrGameInstance::UBmrGameInstance(const FObjectInitializer& ObjectInitializer)
 	// Disable auto join (to destroy existing session first), but keep auto travel enabled (to open the level after session is joined)
 	bAutoJoinSessionOnAcceptedUserInviteReceived = false;
 	bAutoTravelOnAcceptedUserInviteReceived = true;
+
+	// Voice chat is disabled, so don't subscribe to talking-status delegate (avoids voice-interface warning when online voice is unavailable)
+	bEnableTalkingStatusDelegate = false;
 }
 
 /*********************************************************************************************
