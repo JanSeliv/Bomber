@@ -14,34 +14,40 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrBombRow)
 
-// Finds bomb row data by instigator actor, resolves PlayerTag from its MapComponent or SkeletalMeshComponent
+// Returns bomb row matching instigator's character, or shared Default row when none resolves
 const FBmrBombRow& FBmrBombRow::GetBombRow(const AActor* InInstigator)
 {
 	static const FBmrBombRow EmptyRowData;
-	if (!ensureMsgf(InInstigator, TEXT("ASSERT: [%i] %hs:\n'InInstigator' is not valid!"), __LINE__, __FUNCTION__))
+	FBmrPlayerTag PlayerTag = FBmrPlayerTag::None;
+	const UBmrSkeletalMeshComponent* MeshComponent = InInstigator ? InInstigator->FindComponentByClass<UBmrSkeletalMeshComponent>() : nullptr;
+	if (MeshComponent)
 	{
-		return EmptyRowData;
+		PlayerTag = MeshComponent->GetPlayerTag();
 	}
 
-	FBmrPlayerTag PlayerTag = FBmrPlayerTag::None;
+	// Fallback to Player State chosen mesh data for instigators without skeletal mesh component
 	const APawn* InstigatorPawn = Cast<APawn>(InInstigator);
 	const ABmrPlayerState* InstigatorPlayerState = InstigatorPawn ? InstigatorPawn->GetPlayerState<ABmrPlayerState>() : nullptr;
-
-	if (InstigatorPlayerState)
+	if (!PlayerTag.IsValid()
+	    && InstigatorPlayerState)
 	{
 		const FBmrPlayerRow* PlayerRowData = FBmrPlayerRow::GetRowByName(InstigatorPlayerState->GetChosenMeshData().RowName);
 		PlayerTag = PlayerRowData ? PlayerRowData->PlayerTag : FBmrPlayerTag::None;
 	}
-	else if (const UBmrSkeletalMeshComponent* MeshComponent = InInstigator->FindComponentByClass<UBmrSkeletalMeshComponent>())
-	{
-		// Fallback for non-pawn instigators: e.g. main menu skeletal mesh actor
-		PlayerTag = MeshComponent->GetPlayerTag();
-	}
 
+	// Match resolved character, otherwise fall back to shared Default-character row so environmental or AI bombs without specific placer still receive valid visual
 	const FBmrBombRow* FoundRow = GetRowByPredicate([&PlayerTag](const FBmrBombRow& Row)
 	{
 		return Row.PlayerTag == PlayerTag;
 	});
+	if (!FoundRow
+	    && PlayerTag != FBmrPlayerTag::Default)
+	{
+		FoundRow = GetRowByPredicate([](const FBmrBombRow& Row)
+		{
+			return Row.PlayerTag == FBmrPlayerTag::Default;
+		});
+	}
 
 	return FoundRow ? *FoundRow : EmptyRowData;
 }

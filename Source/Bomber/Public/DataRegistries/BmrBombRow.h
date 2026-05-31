@@ -33,8 +33,8 @@ struct BOMBER_API FBmrBombRow : public FBmrLevelActorRow
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<class UMaterialInstance> Material = nullptr;
 
-	/** Finds bomb row data by instigator actor, resolves level type from its MapComponent or SkeletalMeshComponent */
-	static const FBmrBombRow& GetBombRow(const class AActor* InInstigator);
+	/** Returns bomb row matching instigator's character, or shared Default row when none resolves. Null instigator is allowed for environmental and AI bombs. */
+	static const FBmrBombRow& GetBombRow(const class AActor* InInstigator = nullptr);
 
 	/** Gathers all unique bomb materials from Data Registry */
 	static void GetAllBombMaterials(TArray<class UMaterialInterface*>& OutMaterials);
