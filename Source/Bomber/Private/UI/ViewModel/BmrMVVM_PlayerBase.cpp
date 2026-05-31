@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #include "UI/ViewModel/BmrMVVM_PlayerBase.h"
 
@@ -50,8 +50,10 @@ void UBmrMVVM_PlayerBase::UpdateAvatar()
 	const ABmrPlayerState* MyPlayerState = UBmrBlueprintFunctionLibrary::GetPlayerState(GetPlayerId());
 	const EBmrPlayerType PlayerType = MyPlayerState ? MyPlayerState->GetPlayerType() : EBmrPlayerType::None;
 	UTexture2D* NewAvatar = UBmrUIDataAsset::Get().GetDefaultAvatar(PlayerType);
-	if (!ensureMsgf(NewAvatar, TEXT("ASSERT: [%i] %hs:\n'NewAvatar' is null, can not obtain any!"), __LINE__, __FUNCTION__))
+	if (PlayerType == EBmrPlayerType::None
+	    || !ensureMsgf(NewAvatar, TEXT("ASSERT: [%i] %hs:\n'NewAvatar' is null, can not obtain any!"), __LINE__, __FUNCTION__))
 	{
+		// None type means player state not ready yet, avatar updates again once valid type arrives from player type changed
 		return;
 	}
 
