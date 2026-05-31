@@ -135,7 +135,9 @@ void UNMMBaseSubsystem::OnGameFeatureDeinitialize_Implementation()
 	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuStateChanged);
 	UGlobalMessageSubsystem::ClearCachedMessages(NmmGameplayTags::Event::MenuReady);
 
-	if (UAbilitySystemComponent* WorldASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent())
+	UAbilitySystemComponent* WorldASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
+	if (WorldASC
+	    && CurrentMenuStateTag.IsValid())
 	{
 		WorldASC->RemoveLooseGameplayTag(CurrentMenuStateTag);
 	}
