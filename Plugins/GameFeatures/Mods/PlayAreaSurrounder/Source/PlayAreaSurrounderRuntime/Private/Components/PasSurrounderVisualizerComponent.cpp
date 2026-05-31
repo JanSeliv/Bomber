@@ -94,6 +94,8 @@ void UPasSurrounderVisualizerComponent::CreateVisualiser()
 		// registers with parent already set and transform applied, avoiding brief
 		// at-origin window before reparent
 		LightComponent = NewObject<URectLightComponent>(MyOwner, TEXT("PasVisualizerLight"));
+		// Deterministic name on server and clients, so mark net-addressable, otherwise replicated owner cannot resolve net GUID for this runtime component
+		LightComponent->SetNetAddressable();
 		LightComponent->SetupAttachment(MyOwner->GetRootComponent());
 		// RelativeTransform_Rotation pitch -90 aims rect's +Y emission down at floor,
 		// yaw/roll 180 orient width/height axes to align with cell grid
