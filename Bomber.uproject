@@ -29,6 +29,10 @@
 			"Enabled": false
 		},
 		{
+			"Name": "EditorPerformance",
+			"Enabled": false
+		},
+		{
 			"Name": "EnhancedInput",
 			"Enabled": true
 		},
