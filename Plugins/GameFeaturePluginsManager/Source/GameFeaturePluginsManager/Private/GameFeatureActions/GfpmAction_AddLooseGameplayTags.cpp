@@ -282,7 +282,9 @@ void UGfpmAction_AddLooseGameplayTags::RevokeWorldData(FGfpmLooseTagsWorldData& 
 	{
 		const AActor* Actor = It->Get();
 		UAbilitySystemComponent* ASC = Actor ? UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor) : nullptr;
-		if (ASC)
+		// Only remove tags ASC still owns, since teardown or exclusive-tag events may have already cleared them
+		if (ASC
+		    && ASC->GetOwnedGameplayTags().HasAnyExact(LooseTags))
 		{
 			ASC->RemoveLooseGameplayTags(LooseTags, 1, EGameplayTagReplicationState::TagOnly);
 		}
