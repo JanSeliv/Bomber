@@ -32,6 +32,9 @@ public:
 #if WITH_EDITOR
 	/** When editor validates Game Feature Data asset that owns this action. */
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+
+	/** When ComponentList entry is added in editor. */
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif // WITH_EDITOR
 
 	/** Mirrors engine ComponentList schema so authored entries round-trip through asset editor.
