@@ -5,6 +5,7 @@
 // Bomber
 #include "Controllers/BmrPlayerController.h"
 #include "DalRegistrySubsystem.h"
+#include "Data/GfpmScopedWorldContext.h"
 #include "DataRegistries/BmrWidgetRow.h"
 #include "GfpmUtils.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
@@ -310,6 +311,11 @@ void UBmrWidgetsSubsystem::OnGameFeatureDeactivating(const UGameFeatureData* Gam
 			}
 		}
 	}
+
+	// Pin GWorld/PIE-ID to this player's world so widget destructors resolve context-less GetPlayWorld correctly, since GFP observer dispatch enters without per-world scope
+	const ULocalPlayer* LocalPlayer = GetLocalPlayer();
+	UWorld* OwningWorld = LocalPlayer ? LocalPlayer->GetWorld() : nullptr;
+	FGfpmScopedWorldContext WorldContextGuard(OwningWorld);
 
 	// Destroy all widgets that were created by this game feature module
 	for (const FGameplayTag& WidgetTagIt : WidgetsOwnedByModule)
