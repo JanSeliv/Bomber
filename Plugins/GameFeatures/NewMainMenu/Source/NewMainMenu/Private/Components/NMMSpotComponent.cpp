@@ -112,6 +112,14 @@ ULevelSequence* UNMMSpotComponent::GetMasterSequence() const
 // Prevents the spot from playing any cinematic
 void UNMMSpotComponent::StopMasterSequence()
 {
+	const UWorld* World = GetWorld();
+	if (!World
+	    || World->bIsTearingDown)
+	{
+		// World is tearing down, stopping it would cause cascade of gameplay changes, MasterPlayer will be directly destroyed instead
+		return;
+	}
+
 	if (MasterPlayer
 	    && MasterPlayer->IsPlaying())
 	{
@@ -226,10 +234,8 @@ void UNMMSpotComponent::ReinitializeCinematicData()
 
 	if (IsValid(MasterPlayer))
 	{
-		// Discard pre-animated state, otherwise Stop() would trigger RestorePreAnimatedState() restoring wrong camera
-		MasterPlayer->SetCompletionModeOverride(EMovieSceneCompletionModeOverride::ForceKeepState);
-
-		MasterPlayer->Stop();
+		// Stop at the last frame so section completion fires and releases track-spawned components like audio
+		UCinematicUtils::ResetSequenceToEnd(MasterPlayer);
 		MasterPlayer->ConditionalBeginDestroy();
 		MasterPlayer = nullptr;
 	}
