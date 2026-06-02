@@ -228,6 +228,12 @@ void UGfpmUtils::ChangeGameFeatureTargetState(const TArray<FGfpmStateChange>& Ch
 		Requests.FindOrAdd(Change.TargetState).Add(GameFeatureURL);
 	}
 
+#if WITH_EDITOR
+	// State change is global across every PIE world, but its synchronous component cascade resolves each touched world via global PIE ID
+	// Neutralize ID so cross-world activation and teardown do not warn on ambiguous PIE world while one instance scope is active
+	const FTemporaryPlayInEditorIDOverride PieIDOverride(INDEX_NONE);
+#endif // WITH_EDITOR
+
 	static const FMultipleGameFeaturePluginsLoaded EmptyDelegate{};
 
 	// Batch multiple requests per specific target state at once
