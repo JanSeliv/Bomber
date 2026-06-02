@@ -33,9 +33,20 @@ void UBmrPlayerDeathAbility::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	// Play death animation
 	UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, DeathMontage);
+	checkf(MontageTask, TEXT("ASSERT: [%i] %hs:\n'MontageTask' is null!"), __LINE__, __FUNCTION__);
+	MontageTask->OnCompleted.AddDynamic(this, &ThisClass::OnDeathMontageFinished);
+	MontageTask->OnBlendOut.AddDynamic(this, &ThisClass::OnDeathMontageFinished);
+	MontageTask->OnInterrupted.AddDynamic(this, &ThisClass::OnDeathMontageFinished);
+	MontageTask->OnCancelled.AddDynamic(this, &ThisClass::OnDeathMontageFinished);
 	MontageTask->ReadyForActivation();
 
 	// Unregister from the level, so other players/AI and bombs will not react to this pawn anymore
 	AActor* DeathCauser = const_cast<AActor*>(TriggerEventData->Instigator.Get());
 	ABmrGeneratedMap::Get().RemoveFromGrid(UBmrMapComponent::GetMapComponent(ActorInfo->AvatarActor.Get()), DeathCauser);
+}
+
+// Called once death montage finished, blended out or was interrupted
+void UBmrPlayerDeathAbility::OnDeathMontageFinished_Implementation()
+{
+	K2_EndAbility();
 }
