@@ -49,6 +49,9 @@ struct DATAASSETSLOADER_API FDalRegistryRowAccessor
 	/** Returns the row name of first cached item matching predicate, or NAME_None */
 	static FName GetRowNameByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate);
 
+	/** Returns this row's DR row name matched by reflection value-equality, or NAME_None. */
+	static FName GetRowName(const UScriptStruct* InStruct, const uint8* RowData);
+
 	/** Counts cached items matching predicate */
 	static int32 CountRowsByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate);
 
@@ -73,6 +76,9 @@ struct DATAASSETSLOADER_API FDalRegistryRowAccessor
 template <typename TDerived>
 struct TDalRegistryRow
 {
+	/** Returns this row's DR row name matched by reflection value-equality, or NAME_None. */
+	FORCEINLINE FName GetRowName() const { return FDalRegistryRowAccessor::GetRowName(TDerived::StaticStruct(), reinterpret_cast<const uint8*>(static_cast<const TDerived*>(this))); }
+
 	/** Returns the Data Registry associated with TDerived::StaticStruct() */
 	static FORCEINLINE UDataRegistry* GetRegistry() { return FDalRegistryRowAccessor::GetRegistryForStruct(TDerived::StaticStruct()); }
 

@@ -106,7 +106,7 @@ public:
 protected:
 	/** Non-template implementation: queues a one-shot listener for the given row, fires immediately if the row is already available.
 	 * Guarantees the callback never fires after Owner has been destroyed, public overloads rely on this contract and skip their own weak wrapping. */
-	void ListenForDataRegistryRowInternal(UObject* Owner, const UScriptStruct* InStruct, FName RowName, TFunction<void(const uint8*)>&& Callback);
+	void ListenForDataRegistryRowInternal(UObject* Owner, const UScriptStruct* InStruct, FName RowName, TFunction<void(FName RowName, const uint8* RowData)>&& Callback);
 
 	/** Notifies all pending row listeners for InStruct, fires and removes those whose rows have become resolvable. */
 	void NotifyPendingRowListeners(const UScriptStruct* InStruct);
@@ -163,8 +163,8 @@ private:
 		/** Struct this listener is observing, used to match notifications driven by a BindAndLoad for the same struct */
 		TWeakObjectPtr<const UScriptStruct> WeakStruct;
 
-		/** Erased callback, parameter is the raw row data of the bound struct */
-		TFunction<void(const uint8*)> Callback = nullptr;
+		/** Erased callback, parameters are the resolved row name and the raw row data of the bound struct */
+		TFunction<void(FName, const uint8*)> Callback = nullptr;
 	};
 
 	/** All pending passive listeners waiting for their rows to become resolvable */
@@ -207,7 +207,7 @@ private:
 template <typename TRow, typename TOwner>
 void UDalRegistrySubsystem::ListenForDataRegistryRow(TOwner* Object, FName RowName, void (TOwner::*Function)(const TRow&))
 {
-	ListenForDataRegistryRowInternal(Object, TRow::StaticStruct(), RowName, [Object, Function](const uint8* RowData)
+	ListenForDataRegistryRowInternal(Object, TRow::StaticStruct(), RowName, [Object, Function](FName /*RowName*/, const uint8* RowData)
 	{
 		(Object->*Function)(*reinterpret_cast<const TRow*>(RowData));
 	});
@@ -217,7 +217,7 @@ void UDalRegistrySubsystem::ListenForDataRegistryRow(TOwner* Object, FName RowNa
 template <typename TRow>
 void UDalRegistrySubsystem::ListenForDataRegistryRow(UObject* Object, FName RowName, TFunction<void(const TRow&)>&& Callback)
 {
-	ListenForDataRegistryRowInternal(Object, TRow::StaticStruct(), RowName, [Callback = MoveTemp(Callback)](const uint8* RowData)
+	ListenForDataRegistryRowInternal(Object, TRow::StaticStruct(), RowName, [Callback = MoveTemp(Callback)](FName /*RowName*/, const uint8* RowData)
 	{
 		Callback(*reinterpret_cast<const TRow*>(RowData));
 	});

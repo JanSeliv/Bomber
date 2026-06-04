@@ -176,14 +176,14 @@ void UDalRegistrySubsystem::BPListenForDataRegistryRow(UObject* Owner, const FDa
 // Runtime-struct lambda variant for polymorphic bases where the actual derived row type is only known at runtime, lifetime guaranteed by Internal
 void UDalRegistrySubsystem::ListenForDataRegistryRow(UObject* Object, const UScriptStruct* InStruct, FName RowName, TFunction<void(FName)>&& Callback)
 {
-	ListenForDataRegistryRowInternal(Object, InStruct, RowName, [RowName, Callback = MoveTemp(Callback)](const uint8* /*RowData*/)
+	ListenForDataRegistryRowInternal(Object, InStruct, RowName, [Callback = MoveTemp(Callback)](FName ResolvedRowName, const uint8* /*RowData*/)
 	{
-		Callback(RowName);
+		Callback(ResolvedRowName);
 	});
 }
 
 // Non-template implementation: queues a one-shot listener for (InStruct, RowName), fires immediately if row is already available
-void UDalRegistrySubsystem::ListenForDataRegistryRowInternal(UObject* Owner, const UScriptStruct* InStruct, FName RowName, TFunction<void(const uint8*)>&& Callback)
+void UDalRegistrySubsystem::ListenForDataRegistryRowInternal(UObject* Owner, const UScriptStruct* InStruct, FName RowName, TFunction<void(FName, const uint8*)>&& Callback)
 {
 	if (!ensureMsgf(Owner, TEXT("ASSERT: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__)
 	    || !ensureMsgf(InStruct, TEXT("ASSERT: [%i] %hs:\n'InStruct' is null!"), __LINE__, __FUNCTION__))
@@ -200,12 +200,13 @@ void UDalRegistrySubsystem::ListenForDataRegistryRowInternal(UObject* Owner, con
 		}
 
 		// Try immediate resolution: row is present in the cache and all its soft refs are loaded (None row name means the first/any row of the type)
-		const uint8* RowData = RowName.IsNone() ? FDalRegistryRowAccessor::GetFirstRow(InStruct) : FDalRegistryRowAccessor::GetRowByName(InStruct, RowName);
+		const FName ResolvedRowName = RowName.IsNone() ? FDalRegistryRowAccessor::GetFirstRowName(InStruct) : RowName;
+		const uint8* RowData = FDalRegistryRowAccessor::GetRowByName(InStruct, ResolvedRowName);
 		if (RowData)
 		{
 			if (AreSoftRefsLoadedForRow(InStruct, RowData))
 			{
-				Callback(RowData);
+				Callback(ResolvedRowName, RowData);
 				return;
 			}
 		}
@@ -249,7 +250,8 @@ void UDalRegistrySubsystem::TryFireAndRemoveListener(const FDalRegistryRowListen
 		return;
 	}
 
-	const uint8* RowData = Key.RowName.IsNone() ? FDalRegistryRowAccessor::GetFirstRow(InStruct) : FDalRegistryRowAccessor::GetRowByName(InStruct, Key.RowName);
+	const FName ResolvedRowName = Key.RowName.IsNone() ? FDalRegistryRowAccessor::GetFirstRowName(InStruct) : Key.RowName;
+	const uint8* RowData = FDalRegistryRowAccessor::GetRowByName(InStruct, ResolvedRowName);
 	if (!RowData
 	    || !AreSoftRefsLoadedForRow(InStruct, RowData))
 	{
@@ -257,10 +259,10 @@ void UDalRegistrySubsystem::TryFireAndRemoveListener(const FDalRegistryRowListen
 	}
 
 	// Extract before Remove to avoid dangling Listener pointer, re-entrant safe if callback mutates the map
-	const TFunction<void(const uint8*)> LocalCallback = MoveTemp(Listener->Callback);
+	const TFunction<void(FName, const uint8*)> LocalCallback = MoveTemp(Listener->Callback);
 	PendingRowListeners.Remove(Key);
 
-	LocalCallback(RowData);
+	LocalCallback(ResolvedRowName, RowData);
 }
 
 // Unsubscribes a specific row listener by (Owner, RowName), used for one-shot fire internally and optional explicit cleanup by consumers

@@ -246,6 +246,21 @@ FName FDalRegistryRowAccessor::GetRowNameByPredicate(const UScriptStruct* InStru
 	return FoundName;
 }
 
+// Returns this row's DR row name matched by reflection value-equality, or NAME_None
+FName FDalRegistryRowAccessor::GetRowName(const UScriptStruct* InStruct, const uint8* RowData)
+{
+	if (!InStruct
+	    || !RowData)
+	{
+		return NAME_None;
+	}
+
+	return GetRowNameByPredicate(InStruct, [InStruct, RowData](const uint8* CachedRowData)
+	{
+		return InStruct->CompareScriptStruct(CachedRowData, RowData, PPF_None);
+	});
+}
+
 // Counts cached items matching predicate
 int32 FDalRegistryRowAccessor::CountRowsByPredicate(const UScriptStruct* InStruct, const TFunctionRef<bool(const uint8*)>& Predicate)
 {
