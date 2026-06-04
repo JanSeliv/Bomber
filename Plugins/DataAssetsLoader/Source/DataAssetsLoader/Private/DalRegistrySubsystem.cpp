@@ -162,16 +162,14 @@ void UDalRegistrySubsystem::BPListenForDataRegistryRow(UObject* Owner, const FDa
 	const UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	const UDataRegistry* Registry = DataRegistrySubsystem ? DataRegistrySubsystem->GetRegistryForType(ItemId.RegistryType.GetName()) : nullptr;
 	const UScriptStruct* RowStruct = Registry ? Registry->GetItemStruct() : nullptr;
-	const FName RowName = ItemId.ItemName;
-	if (!ensureMsgf(RowStruct, TEXT("ASSERT: [%i] %hs:\n'RowStruct' is not valid!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(RowName.IsValid(), TEXT("ASSERT: [%i] %hs:\n'RowName' is None!"), __LINE__, __FUNCTION__))
+	if (!ensureMsgf(RowStruct, TEXT("ASSERT: [%i] %hs:\n'RowStruct' is not valid!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
-	ListenForDataRegistryRowInternal(Owner, RowStruct, RowName, [Completed, RowName](const uint8* /*RowData*/)
+	ListenForDataRegistryRow(Owner, RowStruct, ItemId.ItemName, [Completed](FName NotifiedRowName)
 	{
-		Completed.ExecuteIfBound(RowName);
+		Completed.ExecuteIfBound(NotifiedRowName);
 	});
 }
 
@@ -188,22 +186,22 @@ void UDalRegistrySubsystem::ListenForDataRegistryRow(UObject* Object, const UScr
 void UDalRegistrySubsystem::ListenForDataRegistryRowInternal(UObject* Owner, const UScriptStruct* InStruct, FName RowName, TFunction<void(const uint8*)>&& Callback)
 {
 	if (!ensureMsgf(Owner, TEXT("ASSERT: [%i] %hs:\n'Owner' is null!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(InStruct, TEXT("ASSERT: [%i] %hs:\n'InStruct' is null!"), __LINE__, __FUNCTION__)
-	    || !ensureMsgf(!RowName.IsNone(), TEXT("ASSERT: [%i] %hs:\n'RowName' is None!"), __LINE__, __FUNCTION__))
+	    || !ensureMsgf(InStruct, TEXT("ASSERT: [%i] %hs:\n'InStruct' is null!"), __LINE__, __FUNCTION__))
 	{
 		return;
 	}
 
 	WaitForRegistries(Owner, [WeakOwner = TWeakObjectPtr(Owner), InStruct, RowName, Callback = MoveTemp(Callback)]() mutable
 	{
-		UObject* StrongOwner = WeakOwner.Get();
+		const UObject* StrongOwner = WeakOwner.Get();
 		if (!StrongOwner)
 		{
 			return;
 		}
 
-		// Try immediate resolution: row is present in the cache and all its soft refs are loaded
-		if (const uint8* RowData = FDalRegistryRowAccessor::GetRowByName(InStruct, RowName))
+		// Try immediate resolution: row is present in the cache and all its soft refs are loaded (None row name means the first/any row of the type)
+		const uint8* RowData = RowName.IsNone() ? FDalRegistryRowAccessor::GetFirstRow(InStruct) : FDalRegistryRowAccessor::GetRowByName(InStruct, RowName);
+		if (RowData)
 		{
 			if (AreSoftRefsLoadedForRow(InStruct, RowData))
 			{
@@ -251,7 +249,7 @@ void UDalRegistrySubsystem::TryFireAndRemoveListener(const FDalRegistryRowListen
 		return;
 	}
 
-	const uint8* RowData = FDalRegistryRowAccessor::GetRowByName(InStruct, Key.RowName);
+	const uint8* RowData = Key.RowName.IsNone() ? FDalRegistryRowAccessor::GetFirstRow(InStruct) : FDalRegistryRowAccessor::GetRowByName(InStruct, Key.RowName);
 	if (!RowData
 	    || !AreSoftRefsLoadedForRow(InStruct, RowData))
 	{
@@ -259,7 +257,7 @@ void UDalRegistrySubsystem::TryFireAndRemoveListener(const FDalRegistryRowListen
 	}
 
 	// Extract before Remove to avoid dangling Listener pointer, re-entrant safe if callback mutates the map
-	TFunction<void(const uint8*)> LocalCallback = MoveTemp(Listener->Callback);
+	const TFunction<void(const uint8*)> LocalCallback = MoveTemp(Listener->Callback);
 	PendingRowListeners.Remove(Key);
 
 	LocalCallback(RowData);
@@ -268,8 +266,7 @@ void UDalRegistrySubsystem::TryFireAndRemoveListener(const FDalRegistryRowListen
 // Unsubscribes a specific row listener by (Owner, RowName), used for one-shot fire internally and optional explicit cleanup by consumers
 void UDalRegistrySubsystem::UnbindFromDataRegistryRow(const UObject* Owner, FName RowName)
 {
-	if (!Owner
-	    || RowName.IsNone())
+	if (!Owner)
 	{
 		return;
 	}

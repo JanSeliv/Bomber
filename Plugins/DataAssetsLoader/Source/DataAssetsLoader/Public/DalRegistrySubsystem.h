@@ -77,12 +77,12 @@ public:
 public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FOnDalRegistryRowLoaded, FName, RowName);
 
-	/** Pure one-shot observer: fires Completed once the specified row and its soft references are resolvable in the Data Registry.
+	/** Pure one-shot observer: fires Completed once the specified row (or first row of its type when RowName is None) and its soft references are resolvable in the Data Registry.
 	 * Does NOT trigger async loading itself, but relies on a separate BindAndLoad / BindAndLoadFamily call for the same struct (anywhere in the project) to drive async loading.
 	 * Automatically unsubscribes after firing, Owner weak-lifetime safe.
 	 * Blueprint-only, in code use the templated ListenForDataRegistryRow() instead */
 	UFUNCTION(BlueprintCallable, Category = "[DataAssetsLoader]", DisplayName = "Listen For Data Registry Row [DAL]", meta = (BlueprintInternalUseOnly = "true"))
-	void BPListenForDataRegistryRow(UObject* Owner, const FDataRegistryId& ItemId, const FOnDalRegistryRowLoaded& Completed);
+	void BPListenForDataRegistryRow(UObject* Owner, const struct FDataRegistryId& ItemId, const FOnDalRegistryRowLoaded& Completed);
 
 	/** Runtime class with typed member function and weak object safety.
 	 * Example: ListenForDataRegistryRow<FMyRow>(this, RowName, &ThisClass::OnRowLoaded); where function is `void OnRowLoaded(const FMyRow& Row)` */
@@ -95,7 +95,7 @@ public:
 	void ListenForDataRegistryRow(UObject* Object, FName RowName, TFunction<void(const TRow&)>&& Callback);
 
 	/** Runtime-struct lambda variant for polymorphic bases where the actual derived row type is only known at runtime, with weak object safety.
-	 * Fires Callback(RowName) once the row and its soft references are resolvable, consumer re-resolves the row itself.
+	 * Fires Callback(RowName) once the row (or first row of its type when RowName is None) and its soft references are resolvable, consumer re-resolves the row itself.
 	 * Example: ListenForDataRegistryRow(this, GetRowType(), RowName, [this](FName RowName){ ... }); */
 	void ListenForDataRegistryRow(UObject* Object, const UScriptStruct* InStruct, FName RowName, TFunction<void(FName)>&& Callback);
 
