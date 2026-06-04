@@ -144,25 +144,15 @@ void UBmrMapComponent::TryApplyMeshFromRow(FName RowName)
 		return;
 	}
 
-	if (RowName.IsNone())
-	{
-		// No specific row requested and no first row resolvable yet, nothing to listen for
-		return;
-	}
-
 	// Fallback to listen for the row to be loaded or updated in the Data Registry, and apply the mesh then
-	UDalRegistrySubsystem::Get().ListenForDataRegistryRow(this, RowType, RowName, [this, RowName](FName ResolvedRowName)
+	// None row name waits for the first/any row of this type as default before specific row resolves
+	UDalRegistrySubsystem::Get().ListenForDataRegistryRow(this, RowType, RowName, [this](FName ResolvedRowName)
 	{
-		if (RowName != ResolvedRowName)
-		{
-			return;
-		}
-
 		const UScriptStruct* ResolvedRowType = GetActorDataAssetChecked().GetRowType();
-		if (const FBmrLevelActorRow* ResolvedRow = FBmrLevelActorRow::FindRowByName(ResolvedRowType, ResolvedRowName))
-		{
-			SetLocalMesh(ResolvedRow->Mesh.Get());
-		}
+		const FBmrLevelActorRow* ResolvedRow = FBmrLevelActorRow::FindRowByName(ResolvedRowType, ResolvedRowName);
+		UStreamableRenderAsset* Mesh = ResolvedRow ? ResolvedRow->Mesh.Get() : nullptr;
+		ensureMsgf(Mesh, TEXT("ASSERT: [%i] %hs:\n'Mesh' is not valid for row '%s'!"), __LINE__, __FUNCTION__, *ResolvedRowName.ToString());
+		SetLocalMesh(Mesh);
 	});
 }
 

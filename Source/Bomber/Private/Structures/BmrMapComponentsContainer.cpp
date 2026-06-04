@@ -47,9 +47,17 @@ void FBmrMapComponentSpec::PostReplicatedChange(const FBmrMapComponentsContainer
 {
 	// The level actor was changed, update the replicated cell e.g: player character moved
 
-	if (IsValid())
+	if (!IsValid())
 	{
-		MapComponent->SetCell(Cell);
+		return;
+	}
+
+	MapComponent->SetCell(Cell);
+
+	if (!MapComponent->IsActive())
+	{
+		// Map Component resolved after PostReplicatedAdd ran with it still being not active, likely it was skipped as not valid at that time
+		MapComponent->OnAdded();
 	}
 }
 
