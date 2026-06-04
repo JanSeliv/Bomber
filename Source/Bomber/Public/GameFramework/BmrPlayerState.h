@@ -90,6 +90,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const struct FBmrPlayerTag& GetPlayerTag() const;
 
+	/** Returns true when persistent chosen mesh data is set and points to still an injected row. */ 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	bool IsChosenMeshDataValid() const;
+
 	/** Sets persistent player visual choice. Can be called on server or locally-controlled client (auto-replicates via server RPC). */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InMeshData"))
 	void SetChosenMeshData(const FBmrMeshData& InMeshData);

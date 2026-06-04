@@ -161,7 +161,7 @@ void ABmrPawn::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* 
 
 	MyPlayerState->OnPlayerStateInit();
 
-	if (MyPlayerState->GetChosenMeshData().IsValid())
+	if (MyPlayerState->IsChosenMeshDataValid())
 	{
 		// Re-apply last chosen player mesh
 		checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
@@ -190,7 +190,7 @@ void ABmrPawn::OnAddedToLevel_Implementation(UBmrMapComponent* InMapComponent)
 
 	checkf(MapComponent, TEXT("ERROR: [%i] %hs:\n'MapComponent' is null!"), __LINE__, __FUNCTION__);
 	ABmrPlayerState* MyPlayerState = GetPlayerState<ABmrPlayerState>();
-	if (MyPlayerState && MyPlayerState->GetChosenMeshData().IsValid())
+	if (MyPlayerState && MyPlayerState->IsChosenMeshDataValid())
 	{
 		// Persistent choice already known, apply locally so this side's visual matches before any further OnRep fires
 		MapComponent->TryApplyMeshFromRow(MyPlayerState->GetChosenMeshData().RowName);

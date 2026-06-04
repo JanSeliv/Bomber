@@ -116,6 +116,13 @@ const FBmrPlayerTag& ABmrPlayerState::GetPlayerTag() const
 	return PlayerRow ? PlayerRow->PlayerTag : FBmrPlayerTag::None;
 }
 
+// Returns true when persistent chosen mesh data is set and points to still an injected row
+bool ABmrPlayerState::IsChosenMeshDataValid() const
+{
+	return ChosenMeshData.IsValid()
+	       && FBmrPlayerRow::GetRowByName(ChosenMeshData.RowName);
+}
+
 // Sets persistent player visual choice. Routes via server RPC if invoked on a locally-controlled client
 void ABmrPlayerState::SetChosenMeshData(const FBmrMeshData& InMeshData)
 {
