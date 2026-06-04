@@ -17,4 +17,10 @@ class GAMEFEATUREPLUGINSMANAGER_API UGfpmAction_AddWorldPartitionContent final :
 protected:
 	/** Called by the Game Features system when the owning feature is registered. */
 	virtual void OnGameFeatureRegistering() override;
+
+	/** Called by the Game Features system when the owning feature transitions to Active. */
+	virtual void OnGameFeatureActivating() override;
+
+	/** Called by the Game Features system when the owning feature is leaving the Active state. */
+	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 };

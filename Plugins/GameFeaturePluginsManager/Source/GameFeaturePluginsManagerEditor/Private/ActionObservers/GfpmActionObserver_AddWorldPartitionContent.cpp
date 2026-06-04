@@ -13,6 +13,7 @@
 #include "WorldPartition/DataLayer/DataLayerManager.h"
 #include "WorldPartition/DataLayer/ExternalDataLayerAsset.h"
 #include "WorldPartition/DataLayer/ExternalDataLayerEngineSubsystem.h"
+#include "WorldPartition/WorldPartition.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmActionObserver_AddWorldPartitionContent)
 
@@ -36,6 +37,14 @@ void UGfpmActionObserver_AddWorldPartitionContent::OnGameFeatureRegistering()
 	if (!PostPIEStartedHandle.IsValid())
 	{
 		PostPIEStartedHandle = FEditorDelegates::PostPIEStarted.AddUObject(this, &ThisClass::OnPostPIEStarted);
+	}
+	if (!PostWorldInitHandle.IsValid())
+	{
+		// Reopened game worlds fire no GFP transition, so catch world init here to re-assert content there
+		PostWorldInitHandle = FWorldDelegates::OnPostWorldInitialization.AddWeakLambda(this, [this](UWorld* World, const UWorld::InitializationValues /*IVS*/)
+		{
+			OnGameWorldInitialized(World);
+		});
 	}
 }
 
@@ -72,6 +81,11 @@ void UGfpmActionObserver_AddWorldPartitionContent::OnGameFeatureUnregistering()
 	{
 		FEditorDelegates::PostPIEStarted.Remove(PostPIEStartedHandle);
 		PostPIEStartedHandle.Reset();
+	}
+	if (PostWorldInitHandle.IsValid())
+	{
+		FWorldDelegates::OnPostWorldInitialization.Remove(PostWorldInitHandle);
+		PostWorldInitHandle.Reset();
 	}
 }
 
@@ -169,6 +183,43 @@ void UGfpmActionObserver_AddWorldPartitionContent::OnPostPIEStarted(bool /*bIsSi
 	const EDataLayerRuntimeState DesiredState = bIsActive ? EDataLayerRuntimeState::Activated : EDataLayerRuntimeState::Unloaded;
 	SetContentRuntimeStateAcrossWorlds(DesiredState);
 	RefreshInjectionAcrossWorlds();
+}
+
+// When any world finished initializing, binds reopened game worlds so their partition-init can re-assert content
+void UGfpmActionObserver_AddWorldPartitionContent::OnGameWorldInitialized(UWorld* World)
+{
+	if (!World
+	    || !World->IsGameWorld())
+	{
+		// Editor preview worlds are driven by GFP lifecycle hooks, only reopened game worlds need re-assert
+		return;
+	}
+
+	// World partition not initialized yet here, bind its initialized event which fires right after External Data Layer injection
+	World->OnWorldPartitionInitialized().RemoveAll(this);
+	World->OnWorldPartitionInitialized().AddUObject(this, &ThisClass::OnWorldPartitionInitialized);
+}
+
+// When reopened game world's partition is initialized, re-asserts own content so world drops this layer when its feature is not Active
+void UGfpmActionObserver_AddWorldPartitionContent::OnWorldPartitionInitialized(UWorldPartition* WorldPartition)
+{
+	const UWorld* World = WorldPartition ? WorldPartition->GetWorld() : nullptr;
+	UDataLayerManager* DataLayerManager = UDataLayerManager::GetDataLayerManager(World);
+	const UExternalDataLayerAsset* DataLayerAsset = GetObservedDataLayerAsset();
+	if (!DataLayerManager
+	    || !DataLayerAsset)
+	{
+		// World without data layers, or observed action already gone, nothing to drive
+		return;
+	}
+
+	// Engine seeds every injected External Data Layer at its Activated initial state, so reopened world comes up with all maps loaded. Re-assert content only to this map's feature state, content never engine-deactivates so session-active layer keeps its streaming object
+	constexpr bool bCheckForActivating = true;
+	const UGameFeatureAction* Action = ObservedAction.Get();
+	const bool bIsActive = Action && Action->IsGameFeaturePluginActive(bCheckForActivating);
+	const EDataLayerRuntimeState DesiredState = bIsActive ? EDataLayerRuntimeState::Activated : EDataLayerRuntimeState::Unloaded;
+	constexpr bool bIsRecursive = true;
+	DataLayerManager->SetDataLayerRuntimeState(DataLayerAsset, DesiredState, bIsRecursive);
 }
 
 // Returns observed action's External Data Layer asset

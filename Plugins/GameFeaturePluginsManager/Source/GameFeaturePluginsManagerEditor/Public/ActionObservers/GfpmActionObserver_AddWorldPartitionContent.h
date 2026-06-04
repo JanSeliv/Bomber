@@ -52,6 +52,12 @@ protected:
 	/** When play world is up, restores single-map editor preview while the play world keeps its streaming object. */
 	void OnPostPIEStarted(bool bIsSimulating);
 
+	/** When any world finished initializing, binds reopened game worlds so their partition-init can re-assert content. */
+	void OnGameWorldInitialized(class UWorld* World);
+
+	/** When reopened game world's partition is initialized, re-asserts own content so world drops this layer when its feature is not Active. */
+	void OnWorldPartitionInitialized(class UWorldPartition* WorldPartition);
+
 	/** Returns observed action's External Data Layer asset. */
 	const class UExternalDataLayerAsset* GetObservedDataLayerAsset() const;
 
@@ -63,6 +69,9 @@ protected:
 
 	/** Handle for own play started binding, force-injection window closes here. */
 	FDelegateHandle PostPIEStartedHandle;
+
+	/** Handle for own post world init binding, catches reopened game worlds to re-assert content there. */
+	FDelegateHandle PostWorldInitHandle;
 
 	/** True only during the play start window, force-allows editor world injection of own layer so its streaming object gets generated into the play start snapshot. */
 	bool bForcePiePrepassInjection = false;
