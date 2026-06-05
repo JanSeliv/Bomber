@@ -174,6 +174,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
 	void SetSkinAvailable(bool bMakeAvailable, int32 SkinIdx);
 
+	/** Sets availability bitmask for all skins at once.
+	 * @see FBmrMeshData::AllSkinsAvailableMask to unlock every skin. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
+	void SetSkinAvailabilityMask(int32 NewMask);
+
 	/** Returns the skin row name that is currently applied to the mesh. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE FName GetAppliedSkinRowName() const { return PlayerMeshData.SkinRowName; }

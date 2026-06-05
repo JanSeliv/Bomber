@@ -495,6 +495,12 @@ void UBmrSkeletalMeshComponent::SetSkinAvailable(bool bMakeAvailable, int32 Skin
 	}
 }
 
+// Sets availability bitmask for all skins at once
+void UBmrSkeletalMeshComponent::SetSkinAvailabilityMask(int32 NewMask)
+{
+	PlayerMeshData.SkinAvailabilityMask = NewMask;
+}
+
 // Set and apply new skin for current mesh by FBmrPlayerSkinRow row name
 void UBmrSkeletalMeshComponent::ApplySkinByRowName(FName InSkinRowName)
 {

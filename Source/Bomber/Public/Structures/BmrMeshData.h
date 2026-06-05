@@ -37,6 +37,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "[Bomber]")
 	FName SkinRowName = NAME_None;
 
+	/** Bitmask value where every skin bit is set, meaning all skins are unlocked. */
+	static constexpr int32 AllSkinsAvailableMask = TNumericLimits<int32>::Max();
+
 	/** Bitmask for available skins (up to 32 skins).
 	 * Each bit represents a skin: 0 = locked, 1 = unlocked.
 	 * By default, all skins are unlocked.
@@ -44,5 +47,5 @@ public:
 	 * 0111 -> First three skins are unlocked
 	 * 1111 -> All skins are unlocked */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = "[Bomber]")
-	int32 SkinAvailabilityMask = TNumericLimits<int32>::Max();
+	int32 SkinAvailabilityMask = AllSkinsAvailableMask;
 };
