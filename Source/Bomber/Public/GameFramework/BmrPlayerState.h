@@ -94,7 +94,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	bool IsChosenMeshDataValid() const;
 
-	/** Sets persistent player visual choice. Can be called on server or locally-controlled client (auto-replicates via server RPC). */
+	/** Sets persistent player visual choice on both server and autonomous client locally with server RPC. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (AutoCreateRefTerm = "InMeshData"))
 	void SetChosenMeshData(const FBmrMeshData& InMeshData);
 

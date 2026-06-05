@@ -123,7 +123,7 @@ bool ABmrPlayerState::IsChosenMeshDataValid() const
 	       && FBmrPlayerRow::GetRowByName(ChosenMeshData.RowName);
 }
 
-// Sets persistent player visual choice. Routes via server RPC if invoked on a locally-controlled client
+// Sets persistent player visual choice on both server and autonomous client locally with server RPC
 void ABmrPlayerState::SetChosenMeshData(const FBmrMeshData& InMeshData)
 {
 	if (!ensureMsgf(InMeshData.IsValid(), TEXT("ASSERT: [%i] %hs:\n'InMeshData' is not valid!"), __LINE__, __FUNCTION__)
@@ -137,19 +137,26 @@ void ABmrPlayerState::SetChosenMeshData(const FBmrMeshData& InMeshData)
 		return;
 	}
 
-	if (!HasAuthority())
+	const bool bHasAuthority = HasAuthority();
+	const bool bPredictsOnClient = !bHasAuthority && IsPlayerStateLocallyControlled();
+	if (!bHasAuthority && !bPredictsOnClient)
 	{
-		if (IsPlayerStateLocallyControlled())
-		{
-			ServerSetChosenMeshData(InMeshData);
-		}
+		// Proxy client: never predict, wait for OnRep to deliver authoritative look
 		return;
 	}
 
 	ChosenMeshData = InMeshData;
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ChosenMeshData, this);
+	if (bHasAuthority)
+	{
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ChosenMeshData, this);
+	}
 
 	ApplyChosenMeshData();
+
+	if (bPredictsOnClient)
+	{
+		ServerSetChosenMeshData(InMeshData);
+	}
 }
 
 // Server RPC, mirrors local SetChosenMeshData call from a locally-controlled client
