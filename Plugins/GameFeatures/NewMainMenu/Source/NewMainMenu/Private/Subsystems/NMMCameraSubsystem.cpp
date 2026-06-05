@@ -15,6 +15,7 @@
 // Bomber
 #include "Components/BmrCameraComponent.h"
 #include "Controllers/BmrPlayerController.h"
+#include "DalSubsystem.h"
 #include "MyUtilsLibraries/CinematicUtils.h"
 #include "MyUtilsLibraries/GameplayUtilsLibrary.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
@@ -126,11 +127,7 @@ void UNMMCameraSubsystem::PossessCamera(FNmmStateTag MenuState)
 // Subscribes to menu state events
 void UNMMCameraSubsystem::OnGameFeatureInitialize_Implementation()
 {
-	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
-
-	// Listen for spot readiness to possess camera when async-loaded spot becomes available
-	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
-	SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
+	UDalSubsystem::Get().ListenForDataAsset<UNMMDataAsset>(this, &ThisClass::OnDataAssetLoaded);
 }
 
 // Clears all transient data contained in this subsystem
@@ -199,6 +196,16 @@ void UNMMCameraSubsystem::OnActiveMenuSpotReady_Implementation(UNMMSpotComponent
 	{
 		PossessCamera(CurrentState);
 	}
+}
+
+// Called when the NMM data asset is loaded and available
+void UNMMCameraSubsystem::OnDataAssetLoaded_Implementation(const UNMMDataAsset* DataAsset)
+{
+	UGlobalMessageSubsystem::CallOrStartListeningForGlobalMessage(NmmGameplayTags::Event::MenuStateChanged, this, &ThisClass::OnNewMainMenuStateChanged);
+
+	// Listen for spot readiness to possess camera when async-loaded spot becomes available
+	UNMMSpotsSubsystem& SpotsSubsystem = UNMMSpotsSubsystem::Get();
+	SpotsSubsystem.OnActiveMenuSpotReady.AddUniqueDynamic(this, &ThisClass::OnActiveMenuSpotReady);
 }
 
 /*********************************************************************************************

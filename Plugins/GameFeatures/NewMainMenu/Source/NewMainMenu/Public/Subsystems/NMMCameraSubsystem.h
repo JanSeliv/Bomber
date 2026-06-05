@@ -77,6 +77,10 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnActiveMenuSpotReady(class UNMMSpotComponent* MainMenuSpotComponent);
 
+	/** Called when the NMM data asset is loaded and available. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnDataAssetLoaded(const class UNMMDataAsset* DataAsset);
+
 	/*********************************************************************************************
 	 * Transitioning
 	 ********************************************************************************************* */
