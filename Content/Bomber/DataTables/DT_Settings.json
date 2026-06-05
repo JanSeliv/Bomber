@@ -2586,5 +2586,94 @@
 				"CustomWidgetClass": "None"
 			}
 		}
+	},
+	{
+		"Name": "Settings.Button.Mods",
+		"SettingsPicker":
+		{
+			"SettingsType": "Button",
+			"PrimaryData":
+			{
+				"Tag":
+				{
+					"TagName": "Settings.Button.Mods"
+				},
+				"Owner":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/GameFeaturePluginsManager.GfpmSwitcherWidget'",
+					"FunctionName": "GetRuntimeSwitcherWidget"
+				},
+				"Setter":
+				{
+					"FunctionClass": "/Script/CoreUObject.Class'/Script/GameFeaturePluginsManager.GfpmSwitcherWidget'",
+					"FunctionName": "OnSwitcherOpened"
+				},
+				"Getter":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Caption": "NSLOCTEXT(\"\", \"GfpmModsCaption\", \"Mods\")",
+				"Tooltip": "NSLOCTEXT(\"\", \"GfpmModsTooltip\", \"Switch Game Feature Plugins on or off\")",
+				"Padding":
+				{
+					"Left": 0,
+					"Top": 10,
+					"Right": 0,
+					"Bottom": 0
+				},
+				"LineHeight": 48,
+				"bStartOnNextColumn": false,
+				"bApplyImmediately": false,
+				"SettingsToUpdate":
+				{
+					"GameplayTags": [],
+					"ParentTags": []
+				},
+				"ShowNextToSettingOverride":
+				{
+					"TagName": "None"
+				}
+			},
+			"Button":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"Checkbox":
+			{
+			},
+			"Combobox":
+			{
+				"SetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"GetMembers":
+				{
+					"FunctionClass": "None",
+					"FunctionName": "None"
+				},
+				"Members": [],
+				"TextJustify": "Center"
+			},
+			"Slider":
+			{
+			},
+			"TextLine":
+			{
+				"VerticalAlignment": "Content",
+				"HorizontalAlignment": "HAlign_Fill"
+			},
+			"UserInput":
+			{
+				"MaxCharactersNumber": 0
+			},
+			"CustomWidget":
+			{
+				"CustomWidgetClass": "None"
+			}
+		}
 	}
 ]

@@ -18,10 +18,14 @@ public class GameFeaturePluginsManagerEditor : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
-				"CoreUObject", "Engine" // Core
+				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
 				, "UnrealEd" // FEditorDelegates
 				, "GameFeatures" // Game Feature Plugins (GFP) framework
 				, "GameFeaturePluginsManager" // Own runtime module
+				 // Switcher dockable tab (SDockTab, FGlobalTabmanager)
+				 , "UMG"
+				, "WorkspaceMenuStructure" // Switcher tab Window-menu category
+				, "LevelEditor" // Dock switcher tab next to Scene Outliner via layout extension
 			}
 		);
 	}

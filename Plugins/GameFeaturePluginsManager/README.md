@@ -23,6 +23,11 @@ Load and swap Game Feature Plugins automatically by gameplay tags
 - **Tag-Driven Activation**: A plugin declares which gameplay tags switch it on. Once the tag appears on the game state the plugin loads, and once it is gone the plugin unloads, with no manual activation calls.
 - **Feature Chaining**: An active plugin can apply tags that switch other plugins on, so one feature triggers another. Exclusive tags make sibling features replace each other, for example selecting Map A turns Map B off.
 - **Runtime In Every Mode**: Features activate, swap, and unload reliably during play across editor preview worlds, PIE, `-game`, and cooked builds, with each server and client managing its own features independently.
+- **Plugins Switcher**: A built-in panel lists every registered Game Feature Plugin with an on/off toggle that redirects to the same activation API. It is shown as an editor tab docked next to the Scene Outliner by default, and can additionally be spawned in a shipping game.
+
+<p align="center">
+<img width="312" height="458" alt="Game Feature Plugins switcher editor tab, also spawnable in a shipping game" src="https://github.com/user-attachments/assets/8ade0942-7003-4f50-8729-00ce41b3ef99">
+</p>
 
 ## 🎓 Sample Projects
 

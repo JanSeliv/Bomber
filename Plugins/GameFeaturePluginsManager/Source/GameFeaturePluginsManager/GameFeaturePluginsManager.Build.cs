@@ -15,6 +15,7 @@ public class GameFeaturePluginsManager : ModuleRules
 				, "GameFeatures" // Game Feature Plugins (GFP) framework
 				, "ModularGameplay" // Created UGameFrameworkComponentManager extension handlers
 				, "GameplayTags" // Tags
+				, "UMG" // Created UGfpmSwitcherWidget
 			}
 		);
 
