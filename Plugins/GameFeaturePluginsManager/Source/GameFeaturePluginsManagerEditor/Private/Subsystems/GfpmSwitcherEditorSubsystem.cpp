@@ -27,9 +27,6 @@ namespace GfpmSwitcherTab
 
 	/** Level-editor tab switcher docks next to by default. */
 	static const FName OutlinerTabName(TEXT("LevelEditorSceneOutliner"));
-
-	/** Generated class of shared switcher Widget Blueprint shipped in plugin content. */
-	static constexpr const TCHAR* WidgetClassPath = TEXT("/GameFeaturePluginsManager/UI/WBP_GfpmSwitcher.WBP_GfpmSwitcher_C");
 } // namespace GfpmSwitcherTab
 
 // Returns level-editor tab manager that owns docked switcher tab, nullptr when unavailable
@@ -82,7 +79,7 @@ TSharedRef<SDockTab> UGfpmSwitcherEditorSubsystem::OnSpawnTab(const FSpawnTabArg
 	// Drop kept-alive widget once its tab goes away so reopen rebuilds fresh one
 	DockTab->SetOnTabClosed(SDockTab::FOnTabClosedCallback::CreateWeakLambda(this, [this](TSharedRef<SDockTab>)
 	{
-		SwitcherWidgetInternal = nullptr;
+		SwitcherWidget = nullptr;
 	}));
 
 	return DockTab;
@@ -91,24 +88,19 @@ TSharedRef<SDockTab> UGfpmSwitcherEditorSubsystem::OnSpawnTab(const FSpawnTabArg
 // Creates switcher widget on editor world and returns its Slate content for tab
 TSharedRef<SWidget> UGfpmSwitcherEditorSubsystem::MakeSwitcherTabContent()
 {
-	UClass* SwitcherClass = LoadClass<UUserWidget>(nullptr, GfpmSwitcherTab::WidgetClassPath);
 	UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
-	if (!SwitcherClass
-	    || !EditorWorld)
+	if (!ensureMsgf(EditorWorld, TEXT("ASSERT: [%i] %hs:\n'EditorWorld' is not available!"), __LINE__, __FUNCTION__)
+	    || !ensureMsgf(!SwitcherWidgetClass.IsNull(), TEXT("ASSERT: [%i] %hs:\n'SwitcherWidgetClass' is not set!"), __LINE__, __FUNCTION__))
 	{
-		// Class or editor world missing, nothing to host
 		return SNullWidget::NullWidget;
 	}
 
-	SwitcherWidgetInternal = CreateWidget<UUserWidget>(EditorWorld, SwitcherClass);
-	if (!SwitcherWidgetInternal)
-	{
-		// Widget creation failed, nothing to host
-		return SNullWidget::NullWidget;
-	}
+	// Editor-only subsystem, which is never running in build, so blocking load widget for editor tab
+	SwitcherWidget = CreateWidget<UUserWidget>(EditorWorld, SwitcherWidgetClass.LoadSynchronous());
+	checkf(SwitcherWidget, TEXT("ERROR: [%i] %hs:\nFailed to create switcher widget from class: %s!"), __LINE__, __FUNCTION__, *SwitcherWidgetClass.ToString());
 
-	const TSharedRef<SWidget> TabContent = SwitcherWidgetInternal->TakeWidget();
-	if (UGfpmSwitcherWidget* Switcher = Cast<UGfpmSwitcherWidget>(SwitcherWidgetInternal))
+	const TSharedRef<SWidget> TabContent = SwitcherWidget->TakeWidget();
+	if (UGfpmSwitcherWidget* Switcher = Cast<UGfpmSwitcherWidget>(SwitcherWidget))
 	{
 		// Present as always-open embedded panel, tab owns closing
 		Switcher->ShowInEditorTab();
@@ -207,7 +199,7 @@ void UGfpmSwitcherEditorSubsystem::Deinitialize()
 	LayoutExtensionHandle.Reset();
 	BlueprintReinstancedHandle.Reset();
 
-	SwitcherWidgetInternal = nullptr;
+	SwitcherWidget = nullptr;
 
 	Super::Deinitialize();
 }

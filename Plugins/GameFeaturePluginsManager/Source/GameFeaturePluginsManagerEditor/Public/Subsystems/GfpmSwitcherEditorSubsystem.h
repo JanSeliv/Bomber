@@ -3,6 +3,7 @@
 #pragma once
 
 #include "EditorSubsystem.h"
+#include "UObject/SoftObjectPtr.h"
 
 #include "GfpmSwitcherEditorSubsystem.generated.h"
 
@@ -10,7 +11,7 @@
  * Manages Swicher widget editor tab.
  * Docks next to Scene Outliner, by default, open on startup.
  */
-UCLASS(DisplayName = "Game Feature Plugins Switcher Editor Subsystem")
+UCLASS(Config = "GameFeaturePluginsManager", DefaultConfig, DisplayName = "Game Feature Plugins Switcher Editor Subsystem")
 class GAMEFEATUREPLUGINSMANAGEREDITOR_API UGfpmSwitcherEditorSubsystem : public UEditorSubsystem
 {
 	GENERATED_BODY()
@@ -29,9 +30,13 @@ public:
 	bool IsSwitcherTabOpen() const;
 
 protected:
+	/** Switcher Widget Blueprint hosted in editor tab, config-backed so any project can override it. */
+	UPROPERTY(Config, VisibleInstanceOnly, BlueprintReadOnly, Category = "[Game Feature Plugins Manager Editor]", meta = (BlueprintProtected))
+	TSoftClassPtr<class UUserWidget> SwitcherWidgetClass;
+
 	/** Editor switcher instance kept alive while its tab is open, distinct from any runtime-world instance. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Transient, Category = "[Game Feature Plugins Manager Editor]", meta = (BlueprintProtected))
-	TObjectPtr<class UUserWidget> SwitcherWidgetInternal = nullptr;
+	TObjectPtr<class UUserWidget> SwitcherWidget = nullptr;
 
 	/** Level-editor layout-extension subscription handle, docks tab next to Scene Outliner. */
 	FDelegateHandle LayoutExtensionHandle;
