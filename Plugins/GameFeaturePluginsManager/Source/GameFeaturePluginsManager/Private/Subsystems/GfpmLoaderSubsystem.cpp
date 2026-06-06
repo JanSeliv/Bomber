@@ -63,6 +63,12 @@ bool UGfpmLoaderSubsystem::HasPendingTagDrivenActivations() const
 		return false;
 	}
 
+	if (DeferredRecomputeHandle.IsValid())
+	{
+		// Apply pass already queued for next tick, tag-driven states are about to change
+		return true;
+	}
+
 	FGameplayTagContainer OwnedTags;
 	TrackedAsc->GetOwnedGameplayTags(OwnedTags);
 
@@ -75,7 +81,10 @@ bool UGfpmLoaderSubsystem::HasPendingTagDrivenActivations() const
 		}
 		for (const FName& Plugin : *Plugins)
 		{
-			if (!UGfpmUtils::IsGameFeaturePluginActive(Plugin))
+			const bool bIsActive = UGfpmUtils::IsGameFeaturePluginActive(Plugin);
+			const bool bIsTransitioning = UGfpmUtils::IsGameFeaturePluginActive(Plugin, /*bCheckForPending=*/true);
+			if (bIsTransitioning
+			    && !bIsActive)
 			{
 				return true;
 			}
