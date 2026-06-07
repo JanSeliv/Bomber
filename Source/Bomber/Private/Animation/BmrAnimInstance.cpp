@@ -37,7 +37,11 @@ void UBmrAnimInstance::NativeInitializeAnimation()
 // Called when animation instance is torn down
 void UBmrAnimInstance::NativeUninitializeAnimation()
 {
-	UGameFeaturesSubsystem::Get().RemoveObserver(this);
+	UGameFeaturesSubsystem* GameFeatureSubsystem = GEngine ? GEngine->GetEngineSubsystem<UGameFeaturesSubsystem>() : nullptr;
+	if (GameFeatureSubsystem)
+	{
+		GameFeatureSubsystem->RemoveObserver(this);
+	}
 
 	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
 	{
