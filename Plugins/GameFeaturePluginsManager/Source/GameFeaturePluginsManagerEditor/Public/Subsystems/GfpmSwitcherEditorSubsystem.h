@@ -47,6 +47,12 @@ protected:
 	/** Blueprint-reinstanced subscription handle, refreshes tab content after switcher Widget Blueprint recompiles. */
 	FDelegateHandle BlueprintReinstancedHandle;
 
+	/** World-cleanup subscription handle, releases hosted widget before its editor world tears down. */
+	FDelegateHandle WorldCleanupHandle;
+
+	/** Map-opened subscription handle, rebuilds tab content on new editor world after level change. */
+	FDelegateHandle MapOpenedHandle;
+
 	/** Registers switcher tab spawner on level-editor tab manager, no-op if already registered or unavailable. */
 	void RegisterTabSpawner(TSharedPtr<class FTabManager> InTabManager);
 
@@ -62,6 +68,12 @@ protected:
 
 	/** Creates switcher widget on editor world and returns its Slate content for tab. */
 	TSharedRef<class SWidget> MakeSwitcherTabContent();
+
+	/** Releases hosted widget when its editor world tears down, so dying world can be collected. */
+	void ReleaseTabForWorld(class UWorld* World);
+
+	/** Recreates open tab content on current editor world, no-op when tab is closed. */
+	void RebuildOpenTab();
 
 	/** When Blueprint asset is reinstanced in editor. */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Game Feature Plugins Manager Editor]", meta = (BlueprintProtected))

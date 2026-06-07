@@ -8,6 +8,7 @@
 // UE
 #include "Blueprint/UserWidget.h"
 #include "Editor.h"
+#include "Engine/World.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Docking/LayoutExtender.h"
 #include "Framework/Docking/TabManager.h"
@@ -111,6 +112,31 @@ TSharedRef<SWidget> UGfpmSwitcherEditorSubsystem::MakeSwitcherTabContent()
 // When Blueprint asset is reinstanced in editor
 void UGfpmSwitcherEditorSubsystem::OnBlueprintReinstanced_Implementation()
 {
+	RebuildOpenTab();
+}
+
+// Releases hosted widget when its editor world tears down, so dying world can be collected
+void UGfpmSwitcherEditorSubsystem::ReleaseTabForWorld(UWorld* World)
+{
+	if (!SwitcherWidget
+	    || SwitcherWidget->GetWorld() != World)
+	{
+		// Hosted widget lives in another world, nothing to release for this teardown
+		return;
+	}
+
+	const TSharedPtr<SDockTab> SwitcherTab = FindSwitcherTab();
+	if (SwitcherTab.IsValid())
+	{
+		// Drop Slate content so widget destructs and removes its observer, freeing dying world for GC
+		SwitcherTab->SetContent(SNullWidget::NullWidget);
+	}
+	SwitcherWidget = nullptr;
+}
+
+// Recreates open tab content on current editor world, no-op when tab is closed
+void UGfpmSwitcherEditorSubsystem::RebuildOpenTab()
+{
 	const TSharedPtr<SDockTab> SwitcherTab = FindSwitcherTab();
 	if (SwitcherTab.IsValid())
 	{
@@ -164,6 +190,18 @@ void UGfpmSwitcherEditorSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 		BlueprintReinstancedHandle = GEditor->OnBlueprintReinstanced().AddUObject(this, &ThisClass::OnBlueprintReinstanced);
 	}
 
+	// Release hosted widget before its editor world is destroyed, so opening another level does not leak old world
+	WorldCleanupHandle = FWorldDelegates::OnWorldCleanup.AddWeakLambda(this, [this](UWorld* World, bool /*bSessionEnded*/, bool /*bCleanupResources*/)
+	{
+		ReleaseTabForWorld(World);
+	});
+
+	// Rebuild tab content on new editor world once another level finishes opening
+	MapOpenedHandle = FEditorDelegates::OnMapOpened.AddWeakLambda(this, [this](const FString& /*Filename*/, bool /*bAsTemplate*/)
+	{
+		RebuildOpenTab();
+	});
+
 	// Cover late initialization, register now if layout was already built so Window menu entry works this session
 	RegisterTabSpawner(LevelEditorModule.GetLevelEditorTabManager());
 }
@@ -195,9 +233,20 @@ void UGfpmSwitcherEditorSubsystem::Deinitialize()
 		GEditor->OnBlueprintReinstanced().Remove(BlueprintReinstancedHandle);
 	}
 
+	if (WorldCleanupHandle.IsValid())
+	{
+		FWorldDelegates::OnWorldCleanup.Remove(WorldCleanupHandle);
+	}
+	if (MapOpenedHandle.IsValid())
+	{
+		FEditorDelegates::OnMapOpened.Remove(MapOpenedHandle);
+	}
+
 	RegisterTabsHandle.Reset();
 	LayoutExtensionHandle.Reset();
 	BlueprintReinstancedHandle.Reset();
+	WorldCleanupHandle.Reset();
+	MapOpenedHandle.Reset();
 
 	SwitcherWidget = nullptr;
 
