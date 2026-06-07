@@ -13,8 +13,10 @@
 // Bomber
 #include "DataRegistries/BmrCinematicRow.h"
 #include "GameFramework/BmrGameState.h"
+#include "GameFramework/BmrPlayerState.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
+#include "Structures/BmrPlayerTag.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
@@ -65,16 +67,29 @@ void UNMMSpotsSubsystem::ReinitializeAllSpots()
 	UDalRegistrySubsystem::Get().TryLoad(this);
 }
 
-// Called by a spot when its Master Sequence finished async loading, evaluates active spot once all spots are ready
-void UNMMSpotsSubsystem::NotifySpotLoaded(UNMMSpotComponent* SpotComponent)
+// Activates local player's spot once all spots finished loading, nothing otherwise
+void UNMMSpotsSubsystem::TryActivateMenuSpot()
 {
-	if (!ensureMsgf(SpotComponent, TEXT("ASSERT: [%i] %hs:\n'SpotComponent' is not valid!"), __LINE__, __FUNCTION__)
-	    || !AreAllSpotsLoaded())
+	if (!AreAllSpotsLoaded())
 	{
+		// Spots still loading, wait for last one
 		return;
 	}
 
-	TryBroadcastOnActiveMenuSpotReady();
+	UNMMSpotComponent* ActiveSpot = FindLocalPlayerSpot();
+	if (!ActiveSpot)
+	{
+		// Local player's spot not loaded yet, defer until it does
+		return;
+	}
+
+	ActiveSpotPriority = ActiveSpot->GetCinematicRow().Priority;
+
+	// Apply cinematic state that was deferred during async load
+	const FNmmStateTag CurrentState = UNMMBaseSubsystem::Get().GetCurrentMenuState();
+	ActiveSpot->SetCinematicByState(CurrentState);
+
+	NotifyActiveMenuSpotReady(ActiveSpot);
 }
 
 // Returns true if all spots with cinematic data have finished loading their Master Sequences
@@ -94,37 +109,49 @@ bool UNMMSpotsSubsystem::AreAllSpotsLoaded() const
 	return !MainMenuSpots.IsEmpty();
 }
 
-// Selects the highest-priority loaded spot as active and broadcasts OnActiveMenuSpotReady
-void UNMMSpotsSubsystem::TryBroadcastOnActiveMenuSpotReady()
+// Returns deterministic highest-priority spot on first resolution, then local player's chosen-character spot once menu owns selection, null while that spot is still loading
+UNMMSpotComponent* UNMMSpotsSubsystem::FindLocalPlayerSpot() const
 {
-	// Find the highest-priority spot that has its Master Sequence loaded
-	UNMMSpotComponent* BestSpot = nullptr;
+	const bool bHasMenuSelection = ActiveSpotPriority != INDEX_NONE;
+	const ABmrPlayerState* PlayerState = UBmrBlueprintFunctionLibrary::GetLocalPlayerState();
+	const FBmrPlayerTag ChosenPlayerTag = bHasMenuSelection && PlayerState ? PlayerState->GetPlayerTag() : FBmrPlayerTag::None;
+
+	UNMMSpotComponent* HighestPrioritySpot = nullptr;
 	for (UNMMSpotComponent* SpotIt : MainMenuSpots)
 	{
 		if (!SpotIt || !SpotIt->GetMasterPlayer())
 		{
+			// Skip spots that have not finished loading their Master Sequence
 			continue;
 		}
 
-		const bool bIsHigherPriority = !BestSpot || SpotIt->GetCinematicRow().Priority > BestSpot->GetCinematicRow().Priority;
+		if (ChosenPlayerTag.IsValid()
+		    && SpotIt->GetCinematicRow().PlayerTag == ChosenPlayerTag)
+		{
+			// Chosen character spot is target as soon as it loaded
+			return SpotIt;
+		}
+
+		const bool bIsHigherPriority = !HighestPrioritySpot || SpotIt->GetCinematicRow().Priority > HighestPrioritySpot->GetCinematicRow().Priority;
 		if (bIsHigherPriority)
 		{
-			BestSpot = SpotIt;
+			HighestPrioritySpot = SpotIt;
 		}
 	}
 
-	if (!BestSpot)
+	if (ChosenPlayerTag.IsValid())
 	{
-		return;
+		// Selection exists but its spot is still loading: defer so non-selected spot never activates and clobbers selection
+		return nullptr;
 	}
 
-	ActiveSpotPriority = BestSpot->GetCinematicRow().Priority;
+	return HighestPrioritySpot;
+}
 
-	// Apply cinematic state that was deferred during async load
-	const FNmmStateTag CurrentState = UNMMBaseSubsystem::Get().GetCurrentMenuState();
-	BestSpot->SetCinematicByState(CurrentState);
-
-	OnActiveMenuSpotReady.Broadcast(BestSpot);
+// Notifies listeners that active menu spot is ready
+void UNMMSpotsSubsystem::NotifyActiveMenuSpotReady(UNMMSpotComponent* Spot)
+{
+	OnActiveMenuSpotReady.Broadcast(Spot);
 }
 
 // Removes Main-Menu spot if should not be available by other objects anymore
@@ -342,7 +369,7 @@ void UNMMSpotsSubsystem::OnNewMainMenuStateChanged_Implementation(const FGamepla
 		if (ActiveSpot && ActiveSpot->GetMasterPlayer())
 		{
 			ActiveSpot->SetCinematicByState(NewState);
-			OnActiveMenuSpotReady.Broadcast(ActiveSpot);
+			NotifyActiveMenuSpotReady(ActiveSpot);
 		}
 	}
 }

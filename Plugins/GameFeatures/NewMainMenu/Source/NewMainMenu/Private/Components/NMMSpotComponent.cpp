@@ -353,8 +353,7 @@ void UNMMSpotComponent::InitMasterSequencePlayer()
 	// Bind to react on cinematic finished, is pause instead of stop because of Settings.bPauseAtEnd
 	MasterPlayer->OnPause.AddUniqueDynamic(this, &ThisClass::OnMasterSequencePaused);
 
-	// Notify subsystem that this spot finished loading, it will evaluate active spot once all spots are ready
-	UNMMSpotsSubsystem::Get().NotifySpotLoaded(this);
+	UNMMSpotsSubsystem::Get().TryActivateMenuSpot();
 }
 
 /*********************************************************************************************

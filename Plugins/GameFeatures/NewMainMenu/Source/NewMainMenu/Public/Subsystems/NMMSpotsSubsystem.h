@@ -50,9 +50,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void ReinitializeAllSpots();
 
-	/** Called by a spot when its Master Sequence finished async loading, evaluates active spot once all spots are ready. */
+	/** Activates local player's spot once all spots finished loading, nothing otherwise. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
-	void NotifySpotLoaded(UNMMSpotComponent* SpotComponent);
+	void TryActivateMenuSpot();
 
 	/** Returns true if all spots with cinematic data have finished loading their Master Sequences. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
@@ -101,9 +101,13 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	TArray<TObjectPtr<UNMMSpotComponent>> MainMenuSpots;
 
-	/** Selects the highest-priority loaded spot as active and broadcasts OnActiveMenuSpotReady. */
+	/** Returns deterministic highest-priority spot on first resolution, then local player's chosen-character spot once menu owns selection, null while that spot is still loading. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	UNMMSpotComponent* FindLocalPlayerSpot() const;
+
+	/** Notifies listeners that active menu spot is ready. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
-	void TryBroadcastOnActiveMenuSpotReady();
+	void NotifyActiveMenuSpotReady(UNMMSpotComponent* Spot);
 
 	/** Attempts to switch the active menu spot if current slot is not available for any reason. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
