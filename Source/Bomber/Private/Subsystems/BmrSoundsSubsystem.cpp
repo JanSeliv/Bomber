@@ -18,6 +18,7 @@
 
 // UE
 #include "AbilitySystemComponent.h"
+#include "AudioDevice.h"
 #include "Components/AudioComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/Level.h"
@@ -134,6 +135,14 @@ void UBmrSoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
 
 	SoundComponent->Stop();
 	SoundComponent->DestroyComponent();
+
+	// Release the sound and all its referenced assets
+	const UWorld* World = GetWorld();
+	checkf(World, TEXT("ERROR: [%i] %hs:\n'World' is null!"), __LINE__, __FUNCTION__);
+	if (FAudioDevice* AudioDevice = World->GetAudioDeviceRaw())
+	{
+		AudioDevice->Flush(nullptr);
+	}
 
 	SoundComponents.Remove(InSound);
 }
