@@ -3,6 +3,7 @@
 #include "Animation/BmrAnimInstance.h"
 
 // Bomber
+#include "Animation/BmrAnimInstanceProxy.h"
 #include "Components/BmrSkeletalMeshComponent.h"
 #include "DataRegistries/BmrPlayerRow.h"
 
@@ -63,6 +64,15 @@ void UBmrAnimInstance::OnGameFeatureDeactivating(const UGameFeatureData* GameFea
 	{
 		MovementBlendspace = nullptr;
 	}
+
+	// Release the blend spaces cached deeper in the anim proxy and graph nodes, they survive past unload otherwise
+	GetProxyOnGameThread<FBmrAnimInstanceProxy>().ResetBlendSpacesInModule(GameFeatureData);
+}
+
+// Called by engine when anim instance proxy needs to be allocated
+FAnimInstanceProxy* UBmrAnimInstance::CreateAnimInstanceProxy()
+{
+	return new FBmrAnimInstanceProxy(this);
 }
 
 // Returns player Data Registry row name of owning mesh, None when owner is not Bomber mesh

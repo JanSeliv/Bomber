@@ -36,4 +36,7 @@ protected:
 	/** Returns player Data Registry row name of owning mesh, None when owner is not Bomber mesh. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (BlueprintProtected))
 	FName GetOwnerPlayerRowName() const;
+
+	/** Called by engine when anim instance proxy needs to be allocated. */
+	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
 };
