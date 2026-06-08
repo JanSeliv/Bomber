@@ -26,6 +26,7 @@
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "LevelSequenceActor.h"
 #include "LevelSequencePlayer.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotComponent)
@@ -214,7 +215,7 @@ void UNMMSpotComponent::OnUnregister()
 	if (IsValid(MasterPlayer))
 	{
 		StopMasterSequence();
-		MasterPlayer->ConditionalBeginDestroy();
+		UCinematicUtils::DestroyLevelSequenceActor(MasterPlayer);
 		MasterPlayer = nullptr;
 	}
 
@@ -236,7 +237,7 @@ void UNMMSpotComponent::ReinitializeCinematicData()
 	{
 		// Stop at the last frame so section completion fires and releases track-spawned components like audio
 		UCinematicUtils::ResetSequenceToEnd(MasterPlayer);
-		MasterPlayer->ConditionalBeginDestroy();
+		UCinematicUtils::DestroyLevelSequenceActor(MasterPlayer);
 		MasterPlayer = nullptr;
 	}
 

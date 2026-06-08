@@ -53,6 +53,10 @@ public:
 	/** Stops sequence player at last frame so sections complete and release their components. */
 	UFUNCTION(BlueprintCallable, Category = "C++")
 	static void ResetSequenceToEnd(class UMovieSceneSequencePlayer* LevelSequencePlayer);
+
+	/** Destroys actor that spawned given sequence player, releasing its cinematic content. */
+	UFUNCTION(BlueprintCallable, Category = "C++")
+	static void DestroyLevelSequenceActor(class UMovieSceneSequencePlayer* LevelSequencePlayer);
 };
 
 // Alternative version of GetAllSectionsByClass with auto cast array to the specified class

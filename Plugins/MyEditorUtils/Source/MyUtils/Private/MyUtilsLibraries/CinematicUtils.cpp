@@ -4,6 +4,7 @@
 
 // UE
 #include "Camera/CameraComponent.h"
+#include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "MovieScene.h"
 #include "MovieSceneSequence.h"
@@ -170,5 +171,21 @@ void UCinematicUtils::ResetSequenceToEnd(UMovieSceneSequencePlayer* LevelSequenc
 	if (NewViewTarget && PrevViewTarget != NewViewTarget)
 	{
 		PC->SetViewTarget(PrevViewTarget);
+	}
+}
+
+// Destroys actor that spawned given sequence player, releasing its cinematic content
+void UCinematicUtils::DestroyLevelSequenceActor(UMovieSceneSequencePlayer* LevelSequencePlayer)
+{
+	if (!LevelSequencePlayer)
+	{
+		// Nothing to destroy
+		return;
+	}
+
+	AActor* SequenceActor = LevelSequencePlayer->GetTypedOuter<AActor>();
+	if (ensureMsgf(SequenceActor, TEXT("ASSERT: [%i] %hs:\n'SequenceActor' is null!"), __LINE__, __FUNCTION__))
+	{
+		SequenceActor->Destroy();
 	}
 }
