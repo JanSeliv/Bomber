@@ -101,7 +101,7 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Transient, AdvancedDisplay, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	TArray<TObjectPtr<UNMMSpotComponent>> MainMenuSpots;
 
-	/** Returns deterministic highest-priority spot on first resolution, then local player's chosen-character spot once menu owns selection, null while that spot is still loading. */
+	/** Returns deterministic highest-priority spot on first resolution, then spot matching active spot priority once it is set, null while that spot is still loading. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	UNMMSpotComponent* FindLocalPlayerSpot() const;
 

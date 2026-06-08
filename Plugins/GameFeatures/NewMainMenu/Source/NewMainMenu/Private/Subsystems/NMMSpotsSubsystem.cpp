@@ -13,12 +13,9 @@
 // Bomber
 #include "DataRegistries/BmrCinematicRow.h"
 #include "GameFramework/BmrGameState.h"
-#include "GameFramework/BmrPlayerState.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
-#include "Structures/BmrPlayerTag.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
-#include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NMMSpotsSubsystem)
 
@@ -70,7 +67,9 @@ void UNMMSpotsSubsystem::ReinitializeAllSpots()
 // Activates local player's spot once all spots finished loading, nothing otherwise
 void UNMMSpotsSubsystem::TryActivateMenuSpot()
 {
-	if (!AreAllSpotsLoaded())
+	// Once menu owns selection, resolve its spot as soon as it loads so one stuck sibling never blocks re-activation, only first resolution waits for all spots to pick highest
+	const bool bHasMenuSelection = ActiveSpotPriority != INDEX_NONE;
+	if (!bHasMenuSelection && !AreAllSpotsLoaded())
 	{
 		// Spots still loading, wait for last one
 		return;
@@ -84,6 +83,8 @@ void UNMMSpotsSubsystem::TryActivateMenuSpot()
 	}
 
 	ActiveSpotPriority = ActiveSpot->GetCinematicRow().Priority;
+	// Reset player to resolved spot's character, so match's in-game per-player character never lingers in menu when re-activated without state change
+	ActiveSpot->ApplyMeshOnPlayer();
 
 	// Apply cinematic state that was deferred during async load
 	const FNmmStateTag CurrentState = UNMMBaseSubsystem::Get().GetCurrentMenuState();
@@ -109,13 +110,10 @@ bool UNMMSpotsSubsystem::AreAllSpotsLoaded() const
 	return !MainMenuSpots.IsEmpty();
 }
 
-// Returns deterministic highest-priority spot on first resolution, then local player's chosen-character spot once menu owns selection, null while that spot is still loading
+// Returns deterministic highest-priority spot on first resolution, then spot matching active spot priority once it is set, null while that spot is still loading
 UNMMSpotComponent* UNMMSpotsSubsystem::FindLocalPlayerSpot() const
 {
 	const bool bHasMenuSelection = ActiveSpotPriority != INDEX_NONE;
-	const ABmrPlayerState* PlayerState = UBmrBlueprintFunctionLibrary::GetLocalPlayerState();
-	const FBmrPlayerTag ChosenPlayerTag = bHasMenuSelection && PlayerState ? PlayerState->GetPlayerTag() : FBmrPlayerTag::None;
-
 	UNMMSpotComponent* HighestPrioritySpot = nullptr;
 	for (UNMMSpotComponent* SpotIt : MainMenuSpots)
 	{
@@ -125,10 +123,10 @@ UNMMSpotComponent* UNMMSpotsSubsystem::FindLocalPlayerSpot() const
 			continue;
 		}
 
-		if (ChosenPlayerTag.IsValid()
-		    && SpotIt->GetCinematicRow().PlayerTag == ChosenPlayerTag)
+		if (bHasMenuSelection
+		    && SpotIt->GetCinematicRow().Priority == ActiveSpotPriority)
 		{
-			// Chosen character spot is target as soon as it loaded
+			// Spot matching active spot priority loaded: resolve to it, not to chosen mesh data, which a match overwrites with the in-game per-player character
 			return SpotIt;
 		}
 
@@ -139,7 +137,7 @@ UNMMSpotComponent* UNMMSpotsSubsystem::FindLocalPlayerSpot() const
 		}
 	}
 
-	if (ChosenPlayerTag.IsValid())
+	if (bHasMenuSelection)
 	{
 		// Selection exists but its spot is still loading: defer so non-selected spot never activates and clobbers selection
 		return nullptr;
