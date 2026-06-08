@@ -401,6 +401,11 @@ void UBmrMapComponent::OnPostRemoved_Implementation(UObject* DestroyCauser /* = 
 		UBmrCellUtilsLibrary::ClearDisplayedCells(GetOwner());
 	}
 
+	if (MeshComponent)
+	{
+		MeshComponent->EmptyOverrideMaterials();
+	}
+
 	SetLocalMesh(nullptr);
 
 	SetCell(FBmrCell::InvalidCell);
