@@ -1,6 +1,6 @@
 // Copyright (c) Yevhenii Selivanov
 
-#include "DalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry.h"
+#include "DalGameFeatureAction_AddDataRegistrySource.h"
 
 // DAL
 #include "DalUtilsLibrary.h"
@@ -19,12 +19,12 @@
 #include "Misc/DataValidation.h"
 #endif
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(DalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(DalGameFeatureAction_AddDataRegistrySource)
 
 #define LOCTEXT_NAMESPACE "GameFeatureAction_AddDataRegistrySourceFromOtherRegistry"
 
 // Called by the Game Features system when the owning feature transitions to Active
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureActivated()
+void UDalGameFeatureAction_AddDataRegistrySource::OnGameFeatureActivated()
 {
 	if (!ensureMsgf(RegistryHandles.IsEmpty() && AppliedFlags.IsEmpty() && !OnSubsystemInitHandle.IsValid(), TEXT("ASSERT: [%i] %hs:\n'RegistryHandles', 'AppliedFlags' or 'OnSubsystemInitHandle' is not empty, attempting to activate already active feature!"), __LINE__, __FUNCTION__))
 	{
@@ -57,7 +57,7 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeature
 }
 
 // Called by the Game Features system when the owning feature is leaving the Active state
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
+void UDalGameFeatureAction_AddDataRegistrySource::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
 	if (UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get())
 	{
@@ -74,7 +74,7 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnGameFeature
 
 #if WITH_EDITOR
 // Reports configuration errors to the editor's Data Validation system
-EDataValidationResult UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::IsDataValid(FDataValidationContext& Context) const
+EDataValidationResult UDalGameFeatureAction_AddDataRegistrySource::IsDataValid(FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);
 
@@ -139,7 +139,7 @@ EDataValidationResult UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegist
 #endif
 
 // Hook bound to UDataRegistrySubsystem::OnSubsystemInitialized when activation occurs before registries are ready
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnDataRegistrySubsystemInitialized()
+void UDalGameFeatureAction_AddDataRegistrySource::OnDataRegistrySubsystemInitialized()
 {
 	if (UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get())
 	{
@@ -151,7 +151,7 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnDataRegistr
 }
 
 // Walks unique upstream row structs, resolves each to its registry via DAL and subscribes to its cache invalidation
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ResolveAndSubscribeAll()
+void UDalGameFeatureAction_AddDataRegistrySource::ResolveAndSubscribeAll()
 {
 	TSet<TObjectPtr<UScriptStruct>> SeenStructs;
 	for (const FDalDataRegistrySourceWithDependency& Entry : SourcesToAdd)
@@ -182,13 +182,13 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ResolveAndSub
 }
 
 // Hook bound to each upstream UDataRegistry::OnCacheVersionInvalidated
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::OnRegistryCacheInvalidated(UDataRegistry* /*InRegistry*/)
+void UDalGameFeatureAction_AddDataRegistrySource::OnRegistryCacheInvalidated(UDataRegistry* /*InRegistry*/)
 {
 	EvaluateAllEntries();
 }
 
 // Re-checks every entry, edge-triggering Apply on rising edge and Remove on falling edge
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::EvaluateAllEntries()
+void UDalGameFeatureAction_AddDataRegistrySource::EvaluateAllEntries()
 {
 	for (int32 Index = 0; Index < SourcesToAdd.Num(); ++Index)
 	{
@@ -216,7 +216,7 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::EvaluateAllEn
 }
 
 // Applies the entry's Source to the Data Registry honoring per-entry client/server flags
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ApplyEntry(int32 EntryIndex)
+void UDalGameFeatureAction_AddDataRegistrySource::ApplyEntry(int32 EntryIndex)
 {
 	UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!ensureMsgf(DataRegistrySubsystem, TEXT("ASSERT: [%i] %hs:\n'DataRegistrySubsystem' is null!"), __LINE__, __FUNCTION__))
@@ -269,7 +269,7 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ApplyEntry(in
 }
 
 // Removes the entry's Source from the Data Registry
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveEntry(int32 EntryIndex)
+void UDalGameFeatureAction_AddDataRegistrySource::RemoveEntry(int32 EntryIndex)
 {
 	UDataRegistrySubsystem* DataRegistrySubsystem = UDataRegistrySubsystem::Get();
 	if (!DataRegistrySubsystem)
@@ -298,7 +298,7 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveEntry(i
 }
 
 // Removes every entry whose flag is set
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveAllApplied()
+void UDalGameFeatureAction_AddDataRegistrySource::RemoveAllApplied()
 {
 	for (int32 Index = 0; Index < AppliedFlags.Num(); ++Index)
 	{
@@ -311,7 +311,7 @@ void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::RemoveAllAppl
 }
 
 // Drops every per-registry cache subscription held by this action
-void UDalGameFeatureAction_AddDataRegistrySourceFromOtherRegistry::ClearAllRegistrySubscriptions()
+void UDalGameFeatureAction_AddDataRegistrySource::ClearAllRegistrySubscriptions()
 {
 	for (auto It = RegistryHandles.CreateIterator(); It; ++It)
 	{
