@@ -279,6 +279,8 @@ TArray<FString> UGfpmUtils::GetAllRegisteredGameFeaturePlugins()
 	{
 		FeatureNames.Emplace(MoveTemp(Info.Name));
 	});
+	// Plugins register in arbitrary order, sort alphabetically so consumers get stable order
+	FeatureNames.Sort();
 	return FeatureNames;
 }
 
