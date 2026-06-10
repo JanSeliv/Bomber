@@ -40,28 +40,20 @@ ABmrAIController::ABmrAIController()
 	bAttachToPawn = true;
 }
 
-// Makes AI go toward specified destination cell
-void ABmrAIController::MoveToCell(const FBmrCell& DestinationCell)
+// Sets desired destination cell, actual movement driven each mover tick
+void ABmrAIController::SetMoveToCell(const FBmrCell& DestinationCell)
 {
 	ABmrPawn* InOwner = GetPawn<ABmrPawn>();
 	const UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InOwner);
-	UBmrMoverComponent* MoverComponent = InOwner ? InOwner->GetMoverComponent() : nullptr;
-	if (!MapComponent
-	    || !MoverComponent)
+	if (!MapComponent)
 	{
 		return;
 	}
 
-	if (!MoverComponent->IsBlockedMovement())
-	{
-		const FBmrCell& CurrentCell = MapComponent->GetCell();
-		const bool bHasArrived = CurrentCell == DestinationCell;
-		LastMoveToCell = bHasArrived ? FBmrCell::InvalidCell : DestinationCell;
-
-		// AI is moving directly in desired direction without navmesh usage (instead of MoveToLocation with navmesh)
-		const FVector Direction = bHasArrived ? FVector::ZeroVector : (DestinationCell.Location - InOwner->GetActorLocation()).GetSafeNormal2D();
-		MoverComponent->RequestMoveByIntent(Direction);
-	}
+	// Cache desired destination only, TickMoveToCell drives actual movement each mover tick
+	const FBmrCell& CurrentCell = MapComponent->GetCell();
+	const bool bHasArrived = CurrentCell == DestinationCell;
+	LastMoveToCell = bHasArrived ? FBmrCell::InvalidCell : DestinationCell;
 
 #if WITH_EDITOR // [IsEditor]
 	if (UUtilsLibrary::IsEditor())
@@ -79,6 +71,30 @@ void ABmrAIController::MoveToCell(const FBmrCell& DestinationCell)
 		}
 	}
 #endif
+}
+
+// Drives owner toward cached destination cell each mover tick
+void ABmrAIController::TickMoveToCell()
+{
+	const ABmrPawn* InOwner = GetPawn<ABmrPawn>();
+	const UBmrMapComponent* MapComponent = UBmrMapComponent::GetMapComponent(InOwner);
+	UBmrMoverComponent* MoverComponent = InOwner ? InOwner->GetMoverComponent() : nullptr;
+	if (!MapComponent
+	    || !MoverComponent
+	    || MoverComponent->IsBlockedMovement())
+	{
+		// Owner or mover not ready, or movement blocked this tick
+		return;
+	}
+
+	// Stop only once owner reaches cached cell centre, not at cell border (border-stop would strand it between cells and ping-pongs on every retarget)
+	const FVector OwnerLocation = InOwner->GetActorLocation();
+	constexpr float ArriveToleranceSq = FMath::Square(FBmrCell::CellSize * 0.25f);
+	const bool bHasArrived = !LastMoveToCell.IsValid() || FVector::DistSquared2D(OwnerLocation, LastMoveToCell.Location) <= ArriveToleranceSq;
+
+	// AI is moving directly in desired direction without navmesh usage (instead of MoveToLocation with navmesh)
+	const FVector Direction = bHasArrived ? FVector::ZeroVector : (LastMoveToCell.Location - OwnerLocation).GetSafeNormal2D();
+	MoverComponent->RequestMoveByIntent(Direction);
 }
 
 // Returns true if AI is enabled (move input is not ignored and cheat is not enabled)
@@ -120,7 +136,7 @@ void ABmrAIController::OnPossess(APawn* InPawn)
 	{
 		if (!UBmrUnrealEdEngine::GOnAIUpdatedDelegate.IsBoundToObject(this))
 		{
-			UBmrUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::UpdateAI);
+			UBmrUnrealEdEngine::GOnAIUpdatedDelegate.AddUObject(this, &ThisClass::TickUpdateAI);
 		}
 
 		// ! It's editor not Pie World, don't continue further runtime logic
@@ -178,7 +194,7 @@ void ABmrAIController::OnUnPossess()
 
 		UBmrMoverComponent* MoverComponent = InOwner->GetMoverComponent();
 		checkf(MoverComponent, TEXT("ERROR: [%i] %hs:\n'MoverComponent' is null!"), __LINE__, __FUNCTION__);
-		MoverComponent->OnPostSimulationTick.AddUniqueDynamic(this, &ThisClass::OnOwnerMovementCompleted);
+		MoverComponent->OnPostSimulationTick.RemoveAll(this);
 	}
 
 	Super::OnUnPossess();
@@ -202,7 +218,7 @@ void ABmrAIController::Reset()
 }
 
 // The main AI logic
-void ABmrAIController::UpdateAI()
+void ABmrAIController::TickUpdateAI()
 {
 	ABmrPawn* InOwner = GetPawn<ABmrPawn>();
 	const UBmrMapComponent* MapComponent = InOwner ? UBmrMapComponent::GetMapComponent(InOwner) : nullptr;
@@ -263,7 +279,7 @@ void ABmrAIController::UpdateAI()
 		const FBmrCells PowerupsFromF0 = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetPowerupSearchRadius(), TO_FLAG(EAT::Powerup));
 		if (!PowerupsFromF0.IsEmpty())
 		{
-			MoveToCell(FBmrCell::GetFirstCellInSet(PowerupsFromF0));
+			SetMoveToCell(FBmrCell::GetFirstCellInSet(PowerupsFromF0));
 			return;
 		}
 	}
@@ -407,7 +423,7 @@ void ABmrAIController::UpdateAI()
 		return;
 	}
 
-	MoveToCell(Filtered.Array()[FMath::RandRange(0, Filtered.Num() - 1)]);
+	SetMoveToCell(Filtered.Array()[FMath::RandRange(0, Filtered.Num() - 1)]);
 
 #if WITH_EDITOR // [Editor]
 	if (MapComponent->bShouldShowRenders)
@@ -495,5 +511,6 @@ void ABmrAIController::OnPostRemovedFromLevel_Implementation(UBmrMapComponent* M
 // Called when owner's movement is completed for the time step
 void ABmrAIController::OnOwnerMovementCompleted_Implementation(const FMoverTimeStep& TimeStep)
 {
-	UpdateAI();
+	TickUpdateAI();
+	TickMoveToCell();
 }

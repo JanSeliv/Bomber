@@ -26,9 +26,9 @@ public:
 	/** Sets default values for this character's properties */
 	ABmrAIController();
 
-	/** Makes AI go toward specified destination cell */
+	/** Sets desired destination cell, actual movement driven each mover tick */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void MoveToCell(const FBmrCell& DestinationCell);
+	void SetMoveToCell(const FBmrCell& DestinationCell);
 
 	/** Returns true if AI is enabled (move input is not ignored and cheat is not enabled). */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (DisplayName = "Is AI Enabled"))
@@ -79,10 +79,14 @@ protected:
 
 	/** The main AI logic */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
-	void UpdateAI();
+	void TickUpdateAI();
+
+	/** Drives owner toward cached destination cell each mover tick */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void TickMoveToCell();
 
 	/** Enable or disable AI for this bot. */
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, meta = (BlueprintProtected))
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "[Bomber]", meta = (BlueprintProtected))
 	void SetAI(bool bShouldEnable);
 
 	/*********************************************************************************************
