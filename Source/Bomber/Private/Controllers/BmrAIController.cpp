@@ -14,8 +14,10 @@
 #include "GameFramework/BmrGameState.h"
 #include "GameFramework/BmrPlayerState.h"
 #include "MyUtilsLibraries/UtilsLibrary.h"
+#include "Structures/BmrGameDifficultyTag.h"
 #include "Structures/BmrGameStateTag.h"
 #include "Structures/BmrGameplayTags.h"
+#include "Subsystems/BmrGameDifficultySubsystem.h"
 #include "Subsystems/BmrPawnReadySubsystem.h"
 #include "Subsystems/GlobalMessageSubsystem.h"
 #include "UtilityLibraries/BmrCellUtilsLibrary.h"
@@ -228,10 +230,15 @@ void ABmrAIController::TickUpdateAI()
 		return;
 	}
 
+	const UBmrAIDataAsset& AIDataAsset = UBmrAIDataAsset::Get();
+	const FBmrGameDifficultyTag CurrentDifficulty = UBmrGameDifficultySubsystem::Get().GetGameDifficultyTag();
+
 	// Throttle AI updates to match desired tick rate
 	const float CurrentTime = GetWorld()->GetTimeSeconds();
 	const float TimeSinceLastUpdate = CurrentTime - LastAIUpdateTime;
-	if (TimeSinceLastUpdate < UBmrGameStateDataAsset::GTickInterval)
+	const float ReactionSlowdown = AIDataAsset.GetReactionSlowdown(CurrentDifficulty);
+	const float ReactionInterval = UBmrGameStateDataAsset::GTickInterval * ReactionSlowdown;
+	if (TimeSinceLastUpdate < ReactionInterval)
 	{
 		return;
 	}
@@ -245,7 +252,11 @@ void ABmrAIController::TickUpdateAI()
 		// Fall through to choose new destination
 	}
 
-	const UBmrAIDataAsset& AIDataAsset = UBmrAIDataAsset::Get();
+	const bool bSeesPowerups = !AIDataAsset.GetIgnorePowerups().HasTagExact(CurrentDifficulty);
+	const bool bSeesPlayers = !AIDataAsset.GetIgnorePlayers().HasTagExact(CurrentDifficulty);
+	const bool bAvoidsTraps = !AIDataAsset.GetIgnoreTraps().HasTagExact(CurrentDifficulty);
+	const bool bPlacesBombs = !AIDataAsset.GetIgnoreBombPlacement().HasTagExact(CurrentDifficulty);
+	const bool bAvoidsDanger = !AIDataAsset.GetIgnoreDanger().HasTagExact(CurrentDifficulty);
 
 	if (UUtilsLibrary::IsEditorNotPieWorld()) // [IsEditorNotPieWorld]
 	{
@@ -260,11 +271,12 @@ void ABmrAIController::TickUpdateAI()
 
 	// Searching 'SAFE NEIGHBORS'
 	static constexpr int32 MaxInteger = TNumericLimits<int32>::Max();
+	const EPathType SafePathType = bAvoidsDanger ? EPathType::Safe : EPathType::Free; // reckless bots treat danger cells as walkable
 	FBmrCells Free;
 	uint8 bIsDangerous;
 	for (bIsDangerous = 0; bIsDangerous <= 1; ++bIsDangerous) // two searches (safe and free)
 	{
-		Free = UBmrCellUtilsLibrary::GetCellsAround(F0, bIsDangerous ? EPathType::Free : EPathType::Safe, MaxInteger);
+		Free = UBmrCellUtilsLibrary::GetCellsAround(F0, bIsDangerous ? EPathType::Free : SafePathType, MaxInteger);
 		if (!bIsDangerous && Free.Num() > 0)
 		{
 			// Remove this cell from array
@@ -274,7 +286,8 @@ void ABmrAIController::TickUpdateAI()
 	}
 
 	// Is there an powerup nearby?
-	if (bIsDangerous == false)
+	if (bIsDangerous == false
+	    && bSeesPowerups) // blind bots skip powerup hunting
 	{
 		const FBmrCells PowerupsFromF0 = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Safe, AIDataAsset.GetPowerupSearchRadius(), TO_FLAG(EAT::Powerup));
 		if (!PowerupsFromF0.IsEmpty())
@@ -350,7 +363,7 @@ void ABmrAIController::TickUpdateAI()
 
 	// ----- Part 2: Cells filtration -----
 
-	FBmrCells Filtered = FoundPowerups.Num() > 0 ? FoundPowerups : Free; // selected cells
+	FBmrCells Filtered = bSeesPowerups && !FoundPowerups.IsEmpty() ? FoundPowerups : Free; // selected cells
 	bool bIsFilteringFailed = false;
 	static constexpr int32 FilteringStepsNum = 4;
 	for (int32 Index = 0; Index < FilteringStepsNum; ++Index)
@@ -362,11 +375,11 @@ void ABmrAIController::TickUpdateAI()
 				FilteringStep = Filtered.Intersect(AllCrossways);
 				break;
 			case 1: // Without players
-				FilteringStep = UBmrCellUtilsLibrary::GetCellsAround(F0, EPathType::Secure, MaxInteger);
+				FilteringStep = UBmrCellUtilsLibrary::GetCellsAround(F0, bSeesPlayers ? EPathType::Secure : EPathType::Free, MaxInteger); // blind bots use Free, making intersection no-op
 				FilteringStep = Filtered.Intersect(FilteringStep);
 				break;
 			case 2: // Without crossways with another players
-				FilteringStep = Filtered.Intersect(SecureCrossways);
+				FilteringStep = Filtered.Intersect(bSeesPlayers ? SecureCrossways : AllCrossways); // blind bots use all crossways, no-op
 				break;
 			case 3: // Only nearest cells (length <= near radius)
 				for (const FBmrCell& It : Filtered)
@@ -394,12 +407,14 @@ void ABmrAIController::TickUpdateAI()
 	// ----- Part 2: Deciding whether to put the bomb -----
 
 	if (bCanSpawnBombs // false meaning manually disabled
+	    && bPlacesBombs // disabled placing bombs on this difficulty
 	    && !bIsDangerous // is not dangerous situation
 	    && !bIsFilteringFailed // filtering was not failed
-	    && !bIsPowerupInDirect) // was not found direct Powerups
+	    && (!bIsPowerupInDirect || !bSeesPowerups)) // blind bots ignore unseen powerups
 	{
 		const float Fire = UBmrPowerupsAttributeSet::Get(InOwner).GetPowerup_Fire();
-		FBmrCells BoxesAndPlayers = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Explosion, Fire, TO_FLAG(EAT::Box | EAT::Player));
+		const int32 ActorsMask = TO_FLAG(EAT::Box) | (bSeesPlayers ? TO_FLAG(EAT::Player) : 0); // blind bots only target boxes
+		FBmrCells BoxesAndPlayers = UBmrCellUtilsLibrary::GetCellsAroundWithActors(F0, EPathType::Explosion, Fire, ActorsMask);
 		BoxesAndPlayers.Remove(MapComponent->GetCell());
 		if (BoxesAndPlayers.Num() > 0) // Are bombs or players in own bomb radius
 		{
@@ -423,7 +438,9 @@ void ABmrAIController::TickUpdateAI()
 		return;
 	}
 
-	SetMoveToCell(Filtered.Array()[FMath::RandRange(0, Filtered.Num() - 1)]);
+	// Bots ignoring traps pick random safe cell instead of best one, so wander into corners
+	const FBmrCells& MoveCandidates = (bAvoidsTraps || Free.IsEmpty()) ? Filtered : Free;
+	SetMoveToCell(MoveCandidates.Array()[FMath::RandRange(0, MoveCandidates.Num() - 1)]);
 
 #if WITH_EDITOR // [Editor]
 	if (MapComponent->bShouldShowRenders)

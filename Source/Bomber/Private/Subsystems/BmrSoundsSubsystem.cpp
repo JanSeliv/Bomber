@@ -136,13 +136,15 @@ void UBmrSoundsSubsystem::DestroySingleSound2D(USoundBase* InSound)
 	SoundComponent->Stop();
 	SoundComponent->DestroyComponent();
 
-	// Release the sound and all its referenced assets
+#if WITH_EDITOR
+	// Release the sound and all its referenced assets: meta sounds leak in editor-only
 	const UWorld* World = GetWorld();
 	checkf(World, TEXT("ERROR: [%i] %hs:\n'World' is null!"), __LINE__, __FUNCTION__);
 	if (FAudioDevice* AudioDevice = World->GetAudioDeviceRaw())
 	{
 		AudioDevice->Flush(nullptr);
 	}
+#endif
 
 	SoundComponents.Remove(InSound);
 }
