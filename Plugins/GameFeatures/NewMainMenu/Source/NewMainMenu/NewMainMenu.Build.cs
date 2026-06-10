@@ -24,6 +24,7 @@ public class NewMainMenu : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new[]
 			{
 				"CoreUObject", "Slate", "SlateCore" // Core
+				, "EnhancedInput" // Input
 				, "MovieScene", "LevelSequence" // Cinematics
 				, "AdvancedWidgets" // URadialSlider
 				, "CineCameraRigs" // Camera rails

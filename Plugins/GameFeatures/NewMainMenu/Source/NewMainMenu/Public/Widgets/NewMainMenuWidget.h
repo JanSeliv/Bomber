@@ -67,6 +67,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
 	void OnPrevPlayerButtonPressed();
 
+	/** Is called when player switches previewed character by input keys.
+	 * Positive axis value selects next player, negative selects previous. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[NewMainMenu]", meta = (BlueprintProtected))
+	void OnSwitchPlayer(const struct FInputActionValue& Value);
+
 	/** Sets the preview mesh of a player depending on specified incrementer.
 	 * @param Incrementer 1 set the next player, -1 set previous. */
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")

@@ -21,6 +21,7 @@
 // UE
 #include "Components/Button.h"
 #include "GameFramework/Pawn.h"
+#include "InputActionValue.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NewMainMenuWidget)
@@ -135,6 +136,13 @@ void UNewMainMenuWidget::OnPrevPlayerButtonPressed()
 {
 	static constexpr int32 PrevPlayer = -1;
 	SwitchCurrentPlayer(PrevPlayer);
+}
+
+// Is called when player switches previewed character by input keys
+void UNewMainMenuWidget::OnSwitchPlayer_Implementation(const FInputActionValue& Value)
+{
+	const int32 Incrementer = FMath::Sign(Value.Get<float>());
+	SwitchCurrentPlayer(Incrementer);
 }
 
 // Sets the preview mesh of a player depending on specified incrementer
