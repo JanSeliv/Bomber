@@ -90,7 +90,8 @@ void UNMMBaseSubsystem::SetNewMainMenuState(FNmmStateTag NewState)
 	UAbilitySystemComponent* WorldASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (ensureMsgf(WorldASC, TEXT("ASSERT: [%i] %hs:\n'WorldASC' is not valid!"), __LINE__, __FUNCTION__))
 	{
-		if (CurrentMenuStateTag.IsValid())
+		if (CurrentMenuStateTag.IsValid()
+		    && WorldASC->HasMatchingGameplayTag(CurrentMenuStateTag))
 		{
 			WorldASC->RemoveLooseGameplayTag(CurrentMenuStateTag);
 		}
@@ -137,7 +138,8 @@ void UNMMBaseSubsystem::OnGameFeatureDeinitialize_Implementation()
 
 	UAbilitySystemComponent* WorldASC = UBmrBlueprintFunctionLibrary::GetWorldAbilitySystemComponent();
 	if (WorldASC
-	    && CurrentMenuStateTag.IsValid())
+	    && CurrentMenuStateTag.IsValid()
+	    && WorldASC->HasMatchingGameplayTag(CurrentMenuStateTag))
 	{
 		WorldASC->RemoveLooseGameplayTag(CurrentMenuStateTag);
 	}
