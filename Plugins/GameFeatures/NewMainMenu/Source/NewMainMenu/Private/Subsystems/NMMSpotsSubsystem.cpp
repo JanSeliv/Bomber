@@ -8,6 +8,7 @@
 #include "NMMUtils.h"
 #include "NmmGameplayTags.h"
 #include "Subsystems/NMMBaseSubsystem.h"
+#include "Subsystems/NMMCameraSubsystem.h"
 #include "Subsystems/NMMInGameSettingsSubsystem.h"
 
 // Bomber
@@ -303,11 +304,23 @@ UNMMSpotComponent* UNMMSpotsSubsystem::MoveMainMenuSpotByPredicate(int32 Increme
 // Attempts to switch to the active menu spot if current slot is not available for any reason
 void UNMMSpotsSubsystem::HandleUnavailableMenuSpot()
 {
-	const UNMMSpotComponent* CurrentSpot = GetCurrentSpot();
-	if (CurrentSpot && CurrentSpot->IsSpotAvailable())
+	if (UNMMSpotComponent* CurrentSpot = GetCurrentSpot())
 	{
-		// No need to switch, the current spot is valid
-		return;
+		const UNMMCameraSubsystem* CameraSubsystem = UNMMUtils::GetCameraSubsystem();
+		const ENMMCameraRailTransitionState RailState = CameraSubsystem ? CameraSubsystem->GetCurrentCameraRailTransitionState() : ENMMCameraRailTransitionState::None;
+		if (RailState == ENMMCameraRailTransitionState::BeginTransition
+		    || RailState == ENMMCameraRailTransitionState::HalfwayTransition)
+		{
+			// Match started while transition is happening between spots, apply mesh early as interruption scenario
+			CurrentSpot->ApplyMeshOnPlayer();
+		}
+
+		if (CurrentSpot->IsSpotAvailable())
+		{
+			// Current spot available, keep it
+			return;
+		}
+		// Fallthrough to move to last available spot
 	}
 
 	// Current is inactive (hidden), likely it's locked by different systems
