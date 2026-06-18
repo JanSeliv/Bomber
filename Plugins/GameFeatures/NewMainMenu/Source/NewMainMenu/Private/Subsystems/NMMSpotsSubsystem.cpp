@@ -94,21 +94,32 @@ void UNMMSpotsSubsystem::TryActivateMenuSpot()
 	NotifyActiveMenuSpotReady(ActiveSpot);
 }
 
-// Returns true if all spots with cinematic data have finished loading their Master Sequences
+// Returns true once every cinematic spot has registered and finished loading its Master Sequence
 bool UNMMSpotsSubsystem::AreAllSpotsLoaded() const
 {
+	int32 LoadedSpots = 0;
 	for (const UNMMSpotComponent* SpotIt : MainMenuSpots)
 	{
-		// Spot has cinematic data but hasn't finished loading its sequence yet
-		if (SpotIt
-		    && !SpotIt->GetCinematicRow().IsEmpty()
-		    && !SpotIt->GetMasterPlayer())
+		if (!SpotIt
+		    || SpotIt->GetCinematicRow().IsEmpty())
 		{
+			// Spot carries no cinematic data, it is not part of menu
+			continue;
+		}
+
+		if (!SpotIt->GetMasterPlayer())
+		{
+			// Spot has cinematic data but hasn't finished loading its sequence yet
 			return false;
 		}
+
+		++LoadedSpots;
 	}
 
-	return !MainMenuSpots.IsEmpty();
+	// Each cinematic row maps to one menu spot, so this is determenistic way to verify all of their cinematics are loaded
+	const int32 ExpectedSpots = FBmrCinematicRow::GetRowsNum();
+	return LoadedSpots > 0
+	       && LoadedSpots >= ExpectedSpots;
 }
 
 // Returns deterministic highest-priority spot on first resolution, then spot matching active spot priority once it is set, null while that spot is still loading

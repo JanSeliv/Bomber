@@ -54,7 +54,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[NewMainMenu]")
 	void TryActivateMenuSpot();
 
-	/** Returns true if all spots with cinematic data have finished loading their Master Sequences. */
+	/** Returns true once every cinematic spot has registered and finished loading its Master Sequence. */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[NewMainMenu]")
 	bool AreAllSpotsLoaded() const;
 
