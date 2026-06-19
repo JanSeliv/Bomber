@@ -24,20 +24,47 @@ void UBmrAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	const FName RowName = GetOwnerPlayerRowName();
-	UDalRegistrySubsystem::Get().ListenForDataRegistryRow<FBmrPlayerRow>(this, RowName, [this](const FBmrPlayerRow& PlayerRow)
+	ApplyMovementBlendspace();
+
+	if (UBmrSkeletalMeshComponent* OwningMesh = Cast<UBmrSkeletalMeshComponent>(GetOwningComponent()))
 	{
-		MovementBlendspace = PlayerRow.IdleWalkRunBlendSpace.Get();
-	});
+		// Re-resolve blend space when owner swaps character on shared skeleton, where engine reuses this instance and skips this init
+		OwningMesh->OnMeshDataChanged.AddUniqueDynamic(this, &ThisClass::OnOwnerMeshDataChanged);
+	}
 
 	UGameFeaturesSubsystem& GameFeaturesSubsystem = UGameFeaturesSubsystem::Get();
 	GameFeaturesSubsystem.RemoveObserver(this);
 	GameFeaturesSubsystem.AddObserver(this, UGameFeaturesSubsystem::EObserverPluginStateUpdateMode::FutureOnly);
 }
 
+// Re-resolves movement blend space from current owning mesh row, applied when character mesh swaps on shared skeleton
+void UBmrAnimInstance::ApplyMovementBlendspace()
+{
+	UDalRegistrySubsystem& DalRegistryRef = UDalRegistrySubsystem::Get();
+
+	// Drop previous row listener so repeated swaps do not accumulate pending listeners
+	DalRegistryRef.UnbindFromDataRegistryRows(this);
+
+	DalRegistryRef.ListenForDataRegistryRow<FBmrPlayerRow>(this, GetOwnerPlayerRowName(), [this](const FBmrPlayerRow& PlayerRow)
+	{
+		MovementBlendspace = PlayerRow.IdleWalkRunBlendSpace.Get();
+	});
+}
+
+// Called when owning mesh swaps to different character
+void UBmrAnimInstance::OnOwnerMeshDataChanged_Implementation()
+{
+	ApplyMovementBlendspace();
+}
+
 // Called when animation instance is torn down
 void UBmrAnimInstance::NativeUninitializeAnimation()
 {
+	if (UBmrSkeletalMeshComponent* OwningMesh = Cast<UBmrSkeletalMeshComponent>(GetOwningComponent()))
+	{
+		OwningMesh->OnMeshDataChanged.RemoveDynamic(this, &ThisClass::OnOwnerMeshDataChanged);
+	}
+
 	UGameFeaturesSubsystem* GameFeatureSubsystem = GEngine ? GEngine->GetEngineSubsystem<UGameFeaturesSubsystem>() : nullptr;
 	if (GameFeatureSubsystem)
 	{
@@ -46,7 +73,7 @@ void UBmrAnimInstance::NativeUninitializeAnimation()
 
 	if (UDalRegistrySubsystem* DalRegistry = UDalRegistrySubsystem::GetDalRegistrySubsystem())
 	{
-		DalRegistry->UnbindFromDataRegistryRow(this, GetOwnerPlayerRowName());
+		DalRegistry->UnbindFromDataRegistryRows(this);
 	}
 
 	MovementBlendspace = nullptr;

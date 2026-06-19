@@ -102,6 +102,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	const FORCEINLINE FBmrMeshData& GetMeshData() const { return PlayerMeshData; }
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMeshDataChanged);
+
+	/** Called when character mesh data changes. */
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Transient, Category = "[Bomber]")
+	FOnMeshDataChanged OnMeshDataChanged;
+
 	/**
 	 * Init this component by specified player data.
 	 * @param MeshData Data to init.

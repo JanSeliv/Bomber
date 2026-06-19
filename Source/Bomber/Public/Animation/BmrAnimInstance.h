@@ -37,6 +37,14 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]", meta = (BlueprintProtected))
 	FName GetOwnerPlayerRowName() const;
 
+	/** Re-resolves movement blend space from current owning mesh row, applied when character mesh swaps on shared skeleton. */
+	UFUNCTION(BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void ApplyMovementBlendspace();
+
+	/** Called when owning mesh swaps to different character. */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnOwnerMeshDataChanged();
+
 	/** Called by engine when anim instance proxy needs to be allocated. */
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
 };

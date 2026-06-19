@@ -217,6 +217,8 @@ void UBmrSkeletalMeshComponent::InitSkeletalMesh(const FBmrMeshData& MeshData)
 	AttachProps();
 
 	ApplySkinByRowName(MeshData.SkinRowName);
+
+	OnMeshDataChanged.Broadcast();
 }
 
 // No longer needed: skins are now separate material instances in FBmrPlayerSkinRow
