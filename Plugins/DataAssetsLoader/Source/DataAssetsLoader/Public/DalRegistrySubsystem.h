@@ -103,6 +103,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "[DataAssetsLoader]")
 	void UnbindFromDataRegistryRow(const UObject* Owner, FName RowName);
 
+	/** Unsubscribes all row listeners registered by given owner. */
+	UFUNCTION(BlueprintCallable, Category = "[DataAssetsLoader]")
+	void UnbindFromDataRegistryRows(const UObject* Owner);
+
 protected:
 	/** Non-template implementation: queues a one-shot listener for the given row, fires immediately if the row is already available.
 	 * Guarantees the callback never fires after Owner has been destroyed, public overloads rely on this contract and skip their own weak wrapping. */

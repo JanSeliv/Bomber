@@ -276,6 +276,23 @@ void UDalRegistrySubsystem::UnbindFromDataRegistryRow(const UObject* Owner, FNam
 	PendingRowListeners.Remove({const_cast<UObject*>(Owner), RowName});
 }
 
+// Unsubscribes all row listeners registered by given owner
+void UDalRegistrySubsystem::UnbindFromDataRegistryRows(const UObject* Owner)
+{
+	if (!Owner)
+	{
+		return;
+	}
+
+	for (TMap<FDalRegistryRowListenerKey, FDalRegistryRowListener>::TIterator It(PendingRowListeners); It; ++It)
+	{
+		if (It.Key().WeakOwner.Get() == Owner)
+		{
+			It.RemoveCurrent();
+		}
+	}
+}
+
 /*********************************************************************************************
  * Overrides
  ********************************************************************************************* */
