@@ -25,6 +25,11 @@
 			"Name": "GameFeaturePluginsManagerEditor",
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "GameFeaturePluginsManagerCookPolicy",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PostConfigInit"
 		}
 	],
 	"Plugins": [

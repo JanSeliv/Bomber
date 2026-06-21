@@ -25,6 +25,14 @@ public:
 	void RefreshActiveState();
 
 	/*********************************************************************************************
+	 * Package events
+	 ********************************************************************************************* */
+public:
+	/** Fired when this row Package button is pressed. Not exposed: editor-only package event bound in C++. */
+	DECLARE_MULTICAST_DELEGATE_OneParam(FGfpmOnRowPackageRequested, FName /*GameFeatureName*/);
+	FGfpmOnRowPackageRequested OnPackageRequested;
+
+	/*********************************************************************************************
 	 * Widgets
 	 ********************************************************************************************* */
 protected:
@@ -35,6 +43,10 @@ protected:
 	/** Toggles plugin on or off. */
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UCheckBox> ActiveCheckBox = nullptr;
+
+	/** Packages mod, triggers directory picker: installs into packaged build or extracts standalone. Shown only in editor-not-PIE world. */
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, BindWidgetOptional, DevelopmentOnly))
+	TObjectPtr<class UButton> PackageButton = nullptr;
 
 	/** Plugin this row toggles. */
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, AdvancedDisplay, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
@@ -47,6 +59,10 @@ protected:
 	/** When active check state changes. */
 	UFUNCTION(BlueprintNativeEvent, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	void OnActiveCheckStateChanged(bool bIsChecked);
+
+	/** When Package button is pressed. */
+	UFUNCTION(BlueprintNativeEvent, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
+	void OnPackageButtonPressed();
 
 	/** When this widget is constructed. Not exposed: parent virtual override parent didn't expose. */
 	virtual void NativeConstruct() override;

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Yevhenii Selivanov
+// Copyright (c) Yevhenii Selivanov
 
 #pragma once
 
@@ -6,7 +6,7 @@
 
 // UE
 #include "GameFeatureStateChangeObserver.h"
-#include "Templates/SubclassOf.h"
+#include "Templates/SubclassOf.h" // TSubclassOf
 
 #include "GfpmSwitcherWidget.generated.h"
 
@@ -23,9 +23,9 @@ class GAMEFEATUREPLUGINSMANAGER_API UGfpmSwitcherWidget : public UUserWidget
 public:
 	/** Returns switcher added to viewport of given context's play world, nullptr if none.
 	 * Serves as Settings owner-context getter for Mods button that opens this widget.
-	 * @param WorldContext Any object whose play world hosts switcher. */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]", meta = (WorldContext = "WorldContext"))
-	static UGfpmSwitcherWidget* GetRuntimeSwitcherWidget(const UObject* WorldContext);
+	 * @param OptionalWorldContext Any object whose play world hosts switcher. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]", meta = (WorldContext = "OptionalWorldContext", CallableWithoutWorldContext))
+	static UGfpmSwitcherWidget* GetRuntimeSwitcherWidget(const UObject* OptionalWorldContext = nullptr);
 
 	/** When Mods settings button is pressed. */
 	UFUNCTION(BlueprintNativeEvent, Category = "[Game Feature Plugins Manager]")
@@ -48,16 +48,32 @@ public:
 	 ********************************************************************************************* */
 protected:
 	/** Container that hosts one toggle row per registered Game Feature Plugin. */
-	UPROPERTY(BlueprintReadOnly, Transient, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UPanelWidget> PluginsList = nullptr;
 
 	/** Collapses switcher when pressed, hidden in editor-not-PIE world where host tab owns closing. */
-	UPROPERTY(BlueprintReadOnly, Transient, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, BindWidget))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, BindWidget))
 	TObjectPtr<class UButton> CloseButton = nullptr;
+
+	/** Packages every registered plugin as separate mod, shown only for developer in editor-not-PIE world. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Transient, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, BindWidgetOptional, DevelopmentOnly))
+	TObjectPtr<class UButton> PackageAllButton = nullptr;
 
 	/** Designer-assigned row widget spawned per plugin, all its styling lives in its own Widget Blueprint. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	TSubclassOf<class UGfpmSwitcherRowWidget> RowWidgetClass = nullptr;
+
+	/*********************************************************************************************
+	 * Package events
+	 ********************************************************************************************* */
+public:
+	/** Fired when developer requests packaging one plugin as mod. Not exposed: editor-only package event bound in C++. */
+	DECLARE_MULTICAST_DELEGATE_OneParam(FGfpmOnPackageGameFeatureRequested, FName /*GameFeatureName*/);
+	FGfpmOnPackageGameFeatureRequested OnPackageGameFeatureRequested;
+
+	/** Fired when developer requests packaging all plugins as mods. Not exposed: editor-only package event bound in C++. */
+	DECLARE_MULTICAST_DELEGATE(FGfpmOnPackageAllRequested);
+	FGfpmOnPackageAllRequested OnPackageAllRequested;
 
 	/*********************************************************************************************
 	 * Logic
@@ -75,6 +91,10 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	void OnCloseButtonPressed();
 
+	/** When Package All button is pressed. */
+	UFUNCTION(BlueprintNativeEvent, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
+	void OnPackageAllButtonPressed();
+
 	/*********************************************************************************************
 	 * Overrides
 	 ********************************************************************************************* */
@@ -89,5 +109,5 @@ protected:
 	virtual void OnGameFeatureActivating(const UGameFeatureData* GameFeatureData, const FString& PluginURL) override;
 
 	/** When owning game feature plugin starts deactivating. Not exposed: parent virtual override parent didn't expose. */
-	virtual void OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& Context, const FString& PluginURL) override;
+	virtual void OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& ContextRef, const FString& PluginURL) override;
 };

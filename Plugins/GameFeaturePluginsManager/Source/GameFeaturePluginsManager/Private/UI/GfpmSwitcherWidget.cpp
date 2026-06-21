@@ -101,6 +101,10 @@ void UGfpmSwitcherWidget::RebuildRows()
 		}
 
 		Row->InitRow(FName(*PluginName));
+		Row->OnPackageRequested.AddWeakLambda(this, [this](FName GameFeatureName)
+		{
+			OnPackageGameFeatureRequested.Broadcast(GameFeatureName);
+		});
 		PluginsList->AddChild(Row);
 	}
 }
@@ -130,6 +134,12 @@ void UGfpmSwitcherWidget::OnCloseButtonPressed_Implementation()
 	CloseSwitcher();
 }
 
+// When Package All button is pressed
+void UGfpmSwitcherWidget::OnPackageAllButtonPressed_Implementation()
+{
+	OnPackageAllRequested.Broadcast();
+}
+
 // When widget is constructed and added to viewport
 void UGfpmSwitcherWidget::NativeConstruct()
 {
@@ -138,6 +148,18 @@ void UGfpmSwitcherWidget::NativeConstruct()
 	if (CloseButton)
 	{
 		CloseButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnCloseButtonPressed);
+	}
+
+	if (PackageAllButton)
+	{
+		// Packaging is developer action, hide Package All outside editor-not-PIE world
+		const UWorld* World = GetWorld();
+		const bool bIsEditorNotPie = World && World->WorldType == EWorldType::Editor;
+		PackageAllButton->SetVisibility(bIsEditorNotPie ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+
+#if WITH_EDITOR
+		PackageAllButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnPackageAllButtonPressed);
+#endif // WITH_EDITOR
 	}
 
 	RebuildRows();
@@ -158,6 +180,13 @@ void UGfpmSwitcherWidget::NativeDestruct()
 		CloseButton->OnClicked.RemoveAll(this);
 	}
 
+#if WITH_EDITOR
+	if (PackageAllButton)
+	{
+		PackageAllButton->OnClicked.RemoveAll(this);
+	}
+#endif // WITH_EDITOR
+
 	Super::NativeDestruct();
 }
 
@@ -168,7 +197,7 @@ void UGfpmSwitcherWidget::OnGameFeatureActivating(const UGameFeatureData* GameFe
 }
 
 // When owning game feature plugin starts deactivating
-void UGfpmSwitcherWidget::OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& Context, const FString& PluginURL)
+void UGfpmSwitcherWidget::OnGameFeatureDeactivating(const UGameFeatureData* GameFeatureData, FGameFeatureDeactivatingContext& ContextRef, const FString& PluginURL)
 {
 	RefreshRowStates();
 }

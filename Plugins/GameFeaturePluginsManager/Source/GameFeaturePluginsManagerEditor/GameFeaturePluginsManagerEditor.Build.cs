@@ -26,6 +26,9 @@ public class GameFeaturePluginsManagerEditor : ModuleRules
 				 , "UMG"
 				, "WorkspaceMenuStructure" // Switcher tab Window-menu category
 				, "LevelEditor" // Dock switcher tab next to Scene Outliner via layout extension
+				, "UATHelper" // Run BuildCookRun mod cook from editor
+				, "DesktopPlatform" // Build folder picker
+				, "DeveloperToolSettings" // Package Project platform + build configuration settings
 			}
 		);
 	}

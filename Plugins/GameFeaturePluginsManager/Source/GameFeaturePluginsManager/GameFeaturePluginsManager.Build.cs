@@ -24,6 +24,7 @@ public class GameFeaturePluginsManager : ModuleRules
 				"CoreUObject", "Engine", "Slate", "SlateCore" // Core
 				, "GameplayAbilities" // Ability System Component tags listening
                 , "AsyncMessageSystem" // Listen for world-ASC-ready event
+				, "AssetRegistry" // Discover External Data Layer host worlds for mod cook
 			}
 		);
 	}

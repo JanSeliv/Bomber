@@ -3,6 +3,7 @@
 #include "Subsystems/GfpmSwitcherEditorSubsystem.h"
 
 // GFPM
+#include "Subsystems/GfpmPackageEditorSubsystem.h"
 #include "UI/GfpmSwitcherWidget.h"
 
 // UE
@@ -105,6 +106,24 @@ TSharedRef<SWidget> UGfpmSwitcherEditorSubsystem::MakeSwitcherTabContent()
 	{
 		// Present as always-open embedded panel, tab owns closing
 		Switcher->ShowInEditorTab();
+
+		// Editor owns this switcher instance, drive packaging from its buttons
+		Switcher->OnPackageGameFeatureRequested.AddWeakLambda(this, [](FName GameFeatureName)
+		{
+			UGfpmPackageEditorSubsystem* PackageSubsystem = GEditor ? GEditor->GetEditorSubsystem<UGfpmPackageEditorSubsystem>() : nullptr;
+			if (PackageSubsystem)
+			{
+				PackageSubsystem->PromptPackageGameFeature(GameFeatureName);
+			}
+		});
+		Switcher->OnPackageAllRequested.AddWeakLambda(this, []
+		{
+			UGfpmPackageEditorSubsystem* PackageSubsystem = GEditor ? GEditor->GetEditorSubsystem<UGfpmPackageEditorSubsystem>() : nullptr;
+			if (PackageSubsystem)
+			{
+				PackageSubsystem->PromptPackageAllGameFeatures();
+			}
+		});
 	}
 	return TabContent;
 }

@@ -10,6 +10,7 @@
 #include "GameFeatureData.h"
 #include "GameFeatureTypes.h"
 #include "GameFeaturesSubsystem.h"
+#include "HAL/IConsoleManager.h"
 #include "UObject/Package.h"
 #include "UnrealEngine.h"
 
@@ -400,3 +401,24 @@ void UGfpmUtils::UnloadAsset(UObject* AssetToUnload, bool bUnloadReferences /* =
 		}
 	}
 }
+
+#if !UE_BUILD_SHIPPING
+// Dumps all registered GFPs and their active state to the log
+static void DumpRegisteredGameFeaturePlugins()
+{
+	const TArray<FString> RegisteredFeatures = UGfpmUtils::GetAllRegisteredGameFeaturePlugins();
+	UE_LOG(LogGameFeatures, Display, TEXT("GFPDump: Registered game feature plugins (%d):"), RegisteredFeatures.Num());
+	for (const FString& FeatureName : RegisteredFeatures)
+	{
+		const bool bActive = UGfpmUtils::IsGameFeaturePluginActive(FName(*FeatureName));
+		UE_LOG(LogGameFeatures, Display, TEXT("GFPDump:   %s = %s"), *FeatureName, bActive ? TEXT("Active") : TEXT("Inactive"));
+	}
+	UE_LOG(LogGameFeatures, Display, TEXT("GFPDump: END"));
+}
+
+// Dev console command to dump all registered GFPs and their active state
+static FAutoConsoleCommand GfpmDumpRegisteredCmd(
+	TEXT("GFP.DumpRegistered"),
+	TEXT("Logs all registered game feature plugins and whether each is active"),
+	FConsoleCommandDelegate::CreateStatic(&DumpRegisteredGameFeaturePlugins));
+#endif // !UE_BUILD_SHIPPING

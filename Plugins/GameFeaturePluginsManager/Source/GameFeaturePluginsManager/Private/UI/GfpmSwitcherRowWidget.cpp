@@ -6,8 +6,10 @@
 #include "GfpmUtils.h"
 
 // UE
+#include "Components/Button.h"
 #include "Components/CheckBox.h"
 #include "Components/TextBlock.h"
+#include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmSwitcherRowWidget)
 
@@ -47,6 +49,12 @@ void UGfpmSwitcherRowWidget::OnActiveCheckStateChanged_Implementation(bool bIsCh
 	UGfpmUtils::SetGameFeaturePluginsActive(bIsChecked, {GameFeatureName});
 }
 
+// When Package button is pressed
+void UGfpmSwitcherRowWidget::OnPackageButtonPressed_Implementation()
+{
+	OnPackageRequested.Broadcast(GameFeatureName);
+}
+
 // When this widget is constructed
 void UGfpmSwitcherRowWidget::NativeConstruct()
 {
@@ -56,15 +64,40 @@ void UGfpmSwitcherRowWidget::NativeConstruct()
 	{
 		ActiveCheckBox->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::OnActiveCheckStateChanged);
 	}
+
+	if (PackageButton)
+	{
+		// Packaging plugin as mod is developer action, hide button outside editor-not-PIE world
+		const UWorld* World = GetWorld();
+		const bool bIsEditorNotPie = World && World->WorldType == EWorldType::Editor;
+		PackageButton->SetVisibility(bIsEditorNotPie ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+
+#if WITH_EDITOR
+		PackageButton->OnClicked.AddUniqueDynamic(this, &ThisClass::OnPackageButtonPressed);
+
+		// Set tooltip from reflection property comment
+		if (const FProperty* PackageButtonProperty = GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UGfpmSwitcherRowWidget, PackageButton)))
+		{
+			PackageButton->SetToolTipText(PackageButtonProperty->GetToolTipText());
+		}
+#endif // WITH_EDITOR
+	}
 }
 
-// When this widget is destructed
+// When this widget is destroyed
 void UGfpmSwitcherRowWidget::NativeDestruct()
 {
 	if (ActiveCheckBox)
 	{
 		ActiveCheckBox->OnCheckStateChanged.RemoveAll(this);
 	}
+
+#if WITH_EDITOR
+	if (PackageButton)
+	{
+		PackageButton->OnClicked.RemoveAll(this);
+	}
+#endif // WITH_EDITOR
 
 	Super::NativeDestruct();
 }
