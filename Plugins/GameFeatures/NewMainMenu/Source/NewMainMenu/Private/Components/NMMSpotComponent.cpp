@@ -166,6 +166,25 @@ void UNMMSpotComponent::SetCinematicByState(FNmmStateTag MenuState)
 
 	if (PrevState != MenuState)
 	{
+		if (MenuState == FNmmStateTag::None
+		    && PrevState == FNmmStateTag::Idle
+		    && MasterPlayer)
+		{
+			// Pause this spot's cinematic instead of full stop, keeping it ready to resume later
+			MasterPlayer->Pause();
+			return;
+		}
+
+		if (MenuState == FNmmStateTag::Idle
+		    && PrevState == FNmmStateTag::None
+		    && MasterPlayer
+		    && MasterPlayer->IsPaused())
+		{
+			// Spot active again, resume its cinematic from where it paused rather than replay
+			MasterPlayer->Play();
+			return;
+		}
+
 		ApplyCinematicState();
 	}
 }
@@ -212,7 +231,7 @@ void UNMMSpotComponent::OnUnregister()
 	CinematicRow = FBmrCinematicRow::Empty;
 
 	// Kill current cinematic player
-	if (IsValid(MasterPlayer))
+	if (MasterPlayer)
 	{
 		StopMasterSequence();
 		UCinematicUtils::DestroyLevelSequenceActor(MasterPlayer);
@@ -233,7 +252,7 @@ void UNMMSpotComponent::ReinitializeCinematicData()
 	CinematicState = FNmmStateTag::None;
 	CinematicRow = FBmrCinematicRow::Empty;
 
-	if (IsValid(MasterPlayer))
+	if (MasterPlayer)
 	{
 		// Stop at the last frame so section completion fires and releases track-spawned components like audio
 		UCinematicUtils::ResetSequenceToEnd(MasterPlayer);
@@ -414,10 +433,17 @@ void UNMMSpotComponent::OnNewMainMenuStateChanged_Implementation(const FGameplay
 			StopMasterSequence();
 		}
 	}
-	else if (NewState == FNmmStateTag::Cinematic
-	         && bIsCurrentSpot)
+	else if (NewState == FNmmStateTag::Cinematic)
 	{
-		MarkCinematicAsSeen();
+		if (bIsCurrentSpot)
+		{
+			MarkCinematicAsSeen();
+		}
+		else if (MasterPlayer)
+		{
+			// Pause non-current spots while current spot plays its cinematic, so they stay paused instead of playing
+			MasterPlayer->Pause();
+		}
 	}
 
 	if (bIsCurrentSpot)
