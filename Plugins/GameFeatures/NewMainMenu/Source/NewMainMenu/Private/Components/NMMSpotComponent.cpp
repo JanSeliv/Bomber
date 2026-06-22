@@ -180,9 +180,8 @@ void UNMMSpotComponent::SetCinematicByState(FNmmStateTag MenuState)
 		    && MasterPlayer
 		    && MasterPlayer->IsPaused())
 		{
-			// Spot active again, resume its cinematic from where it paused rather than replay
-			MasterPlayer->Play();
-			return;
+			// Reselected spot restarts cinematic fresh so spawnables invalidated while paused respawn
+			UCinematicUtils::ResetSequenceToEnd(MasterPlayer);
 		}
 
 		ApplyCinematicState();
