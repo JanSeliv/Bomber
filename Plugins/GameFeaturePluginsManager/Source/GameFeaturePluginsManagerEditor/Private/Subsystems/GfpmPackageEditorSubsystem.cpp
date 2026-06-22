@@ -7,6 +7,9 @@
 #include "GfpmUtils.h"
 
 // UE
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryState.h"
+#include "AssetRegistry/IAssetRegistry.h"
 #include "Async/Async.h"
 #include "DesktopPlatformModule.h"
 #include "Framework/Application/SlateApplication.h"
@@ -77,6 +80,45 @@ namespace GfpmPackageEditorInternal
 		Target.Architecture = MenuSettingsRef.GetArchitectureForPlatform(PlatformName);
 		Target.Configuration = LexToString(UProjectPackagingSettings::ConfigurationInfo[static_cast<int32>(BuildConfig)].Configuration);
 		return Target;
+	}
+
+	// Returns base release AssetRegistry mod cook diffs against, file project package emits via createreleaseversion
+	static FString GetBaseReleaseAssetRegistryPath(const FString& ReleaseVersion, const FString& Configuration, const FString& CookedPlatform)
+	{
+		const FString ReleaseName = FString::Printf(TEXT("%s_%s"), *ReleaseVersion, *Configuration);
+		return FPaths::Combine(FPaths::ProjectDir(), TEXT("Releases"), ReleaseName, CookedPlatform, TEXT("AssetRegistry.bin"));
+	}
+
+	// Writes based-on Asset Registry for mod cook, derived from editor Asset Registry minus mod's own packages so cook excludes base content
+	static bool GenerateBaseReleaseRegistry(FName GameFeatureName, const FString& OutPath)
+	{
+		IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry")).Get();
+		AssetRegistry.WaitForCompletion();
+
+		TArray<FAssetData> ModAssets;
+		AssetRegistry.GetAssetsByPath(FName(*FString::Printf(TEXT("/%s"), *GameFeatureName.ToString())), ModAssets, /*bRecursive*/ true, /*bIncludeOnlyOnDiskAssets*/ false);
+		TSet<FName> ModPackages;
+		for (const FAssetData& ModAsset : ModAssets)
+		{
+			ModPackages.Add(ModAsset.PackageName);
+		}
+
+		const FAssetRegistrySerializationOptions Options(UE::AssetRegistry::ESerializationTarget::ForDevelopment);
+		FAssetRegistryState BaseState;
+		AssetRegistry.InitializeTemporaryAssetRegistryState(BaseState, Options, /*bRefreshExisting*/ false, TSet<FName>(), ModPackages);
+
+		IFileManager& FileManager = IFileManager::Get();
+		FileManager.MakeDirectory(*FPaths::GetPath(OutPath), /*Tree*/ true);
+		const TUniquePtr<FArchive> Writer(FileManager.CreateFileWriter(*OutPath));
+		if (!Writer)
+		{
+			// Output path not writable
+			return false;
+		}
+
+		const bool bSaved = BaseState.Serialize(*Writer, Options);
+		Writer->Close();
+		return bSaved;
 	}
 
 	// Returns global Content/Paks dir of build found at or under picked path, empty when none
@@ -226,6 +268,16 @@ FString UGfpmPackageEditorSubsystem::PromptBuildDir(const FString& DialogTitle) 
 void UGfpmPackageEditorSubsystem::LaunchModPackage(FName GameFeatureName, const FString& BuildPath, TFunction<void()> OnComplete)
 {
 	const GfpmPackageEditorInternal::FPackageTarget Target = GfpmPackageEditorInternal::ResolvePackageTarget();
+
+	const FString BaseRegistryPath = GfpmPackageEditorInternal::GetBaseReleaseAssetRegistryPath(ProjectReleaseVersion, Target.Configuration, Target.CookedPlatform);
+	if (!FPaths::FileExists(BaseRegistryPath))
+	{
+		const bool bGenerated = GfpmPackageEditorInternal::GenerateBaseReleaseRegistry(GameFeatureName, BaseRegistryPath);
+		if (!ensureMsgf(bGenerated, TEXT("ASSERT: [%i] %hs:\nFailed to write base release registry at '%s'"), __LINE__, __FUNCTION__, *BaseRegistryPath))
+		{
+			return;
+		}
+	}
 
 	// Install into build's Content/Paks when picked path is one, otherwise use picked folder directly so mod ships standalone
 	const FString FoundPaksDir = GfpmPackageEditorInternal::FindBuildContentPaksDir(BuildPath, Target.CookedPlatform);

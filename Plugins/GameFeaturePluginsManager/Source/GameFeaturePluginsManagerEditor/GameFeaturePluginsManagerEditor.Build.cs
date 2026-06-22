@@ -29,6 +29,7 @@ public class GameFeaturePluginsManagerEditor : ModuleRules
 				, "UATHelper" // Run BuildCookRun mod cook from editor
 				, "DesktopPlatform" // Build folder picker
 				, "DeveloperToolSettings" // Package Project platform + build configuration settings
+				, "AssetRegistry" // IAssetRegistry, FAssetRegistryState
 			}
 		);
 	}
