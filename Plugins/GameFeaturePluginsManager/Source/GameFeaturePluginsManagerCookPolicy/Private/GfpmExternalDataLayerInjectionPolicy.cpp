@@ -6,6 +6,7 @@
 #include "CoreGlobals.h"
 #include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
+#include "Misc/CoreDelegates.h"
 #include "Misc/Parse.h"
 #include "Modules/ModuleManager.h"
 #include "UObject/Package.h"
@@ -21,13 +22,52 @@ public:
 	virtual void StartupModule() override
 	{
 		FString ConfiguredInjectionPolicy;
-		GConfig->GetString(TEXT("/Script/Engine.ExternalDataLayerEngineSubsystem"), TEXT("InjectionPolicyClass"), ConfiguredInjectionPolicy, GEngineIni);
+		static const FString EdlSubsystemSection = TEXT("/Script/Engine.ExternalDataLayerEngineSubsystem");
+		static const FString InjectionPolicyKey = TEXT("InjectionPolicyClass");
+		GConfig->GetString(*EdlSubsystemSection, *InjectionPolicyKey, ConfiguredInjectionPolicy, GEngineIni);
 		if (ConfiguredInjectionPolicy.IsEmpty())
 		{
 			static const FString GfpmInjectionPolicyPath = TEXT("/Script/GameFeaturePluginsManagerCookPolicy.GfpmExternalDataLayerInjectionPolicy");
-			GConfig->SetString(TEXT("/Script/Engine.ExternalDataLayerEngineSubsystem"), TEXT("InjectionPolicyClass"), *GfpmInjectionPolicyPath, GEngineIni);
+			GConfig->SetString(*EdlSubsystemSection, *InjectionPolicyKey, *GfpmInjectionPolicyPath, GEngineIni);
+		}
+
+		// External Data Layers ship as game feature mods, experimental editor setting must default enabled before project config loads
+		bool bExternalDataLayersEnabled = false;
+		static const FString EditorExperimentalSection = TEXT("/Script/UnrealEd.EditorExperimentalSettings");
+		static const FString ExternalDataLayersKey = TEXT("bEnableWorldPartitionExternalDataLayers");
+		if (!GConfig->GetBool(*EditorExperimentalSection, *ExternalDataLayersKey, bExternalDataLayersEnabled, GEditorPerProjectIni))
+		{
+			// Host project sets nothing, write default to enable it
+			GConfig->SetBool(*EditorExperimentalSection, *ExternalDataLayersKey, true, GEditorPerProjectIni);
+		}
+
+		// Engine settings classes load after this early phase, defer key validation so engine rename surfaces as warning here instead of silent dead-key write
+		PostEngineInitHandle = FCoreDelegates::OnPostEngineInit.AddLambda([]
+		{
+			ValidateConfigKey(EdlSubsystemSection, InjectionPolicyKey);
+			ValidateConfigKey(EditorExperimentalSection, ExternalDataLayersKey);
+		});
+	}
+
+	virtual void ShutdownModule() override
+	{
+		FCoreDelegates::OnPostEngineInit.Remove(PostEngineInitHandle);
+	}
+
+private:
+	/** Warns when engine config section\key stops resolving to a real settings property, so engine rename surfaces instead of silent dead-key write. */
+	static void ValidateConfigKey(const FString& Section, const FString& Key)
+	{
+		const UClass* SettingsClass = FindObject<UClass>(nullptr, *Section);
+		if (ensureMsgf(SettingsClass, TEXT("ASSERT: [%i] %hs:\nConfig section '%s' no longer resolves to a settings class, engine likely renamed it"), __LINE__, __FUNCTION__, *Section))
+		{
+			// Section resolves, confirm its key still names a real property
+			ensureMsgf(SettingsClass->FindPropertyByName(*Key), TEXT("ASSERT: [%i] %hs:\nConfig key '%s' in section '%s' no longer resolves to a property, engine likely renamed it"), __LINE__, __FUNCTION__, *Key, *Section);
 		}
 	}
+
+	/** Tracks deferred config-key validation bound after engine settings classes load. */
+	FDelegateHandle PostEngineInitHandle;
 };
 
 IMPLEMENT_MODULE(FGameFeaturePluginsManagerCookPolicyModule, GameFeaturePluginsManagerCookPolicy)
