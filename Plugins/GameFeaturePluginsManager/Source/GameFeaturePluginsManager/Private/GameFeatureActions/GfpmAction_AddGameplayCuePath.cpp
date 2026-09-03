@@ -4,11 +4,22 @@
 
 // UE
 #include "AbilitySystemGlobals.h"
+#include "CoreGlobals.h"
 #include "GameFeatureData.h"
 #include "GameFeaturesSubsystem.h"
 #include "GameplayCueManager.h"
 #include "Misc/PackageName.h"
 #include "UObject/Package.h"
+
+#if WITH_EDITORONLY_DATA
+#include "AssetRegistry/AssetBundleData.h"
+#include "AssetRegistry/AssetData.h"
+#include "Engine/AssetManager.h"
+#include "Engine/ObjectLibrary.h"
+#include "GameFeaturesSubsystemSettings.h"
+#include "GameplayCueNotify_Actor.h"
+#include "GameplayCueNotify_Static.h"
+#endif // WITH_EDITORONLY_DATA
 
 #if WITH_EDITOR
 #include "Internationalization/Text.h"
@@ -46,6 +57,18 @@ EDataValidationResult UGfpmAction_AddGameplayCuePath::IsDataValid(FDataValidatio
 }
 #endif // WITH_EDITOR
 
+// Called by Game Features system when owning plugin is registered
+void UGfpmAction_AddGameplayCuePath::OnGameFeatureRegistering()
+{
+	Super::OnGameFeatureRegistering();
+
+	if (GIsEditor)
+	{
+		// In editor, preload early, so Cues can be validated and cooked
+		RegisterCuePaths();
+	}
+}
+
 // When owning Game Feature Plugin transitions into Active state
 void UGfpmAction_AddGameplayCuePath::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
@@ -57,10 +80,55 @@ void UGfpmAction_AddGameplayCuePath::OnGameFeatureActivating(FGameFeatureActivat
 // When owning Game Feature Plugin transitions out of Active state
 void UGfpmAction_AddGameplayCuePath::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
-	RemoveCuePaths();
+	if (!GIsEditor)
+	{
+		// Only outside editor itself unload early, e.g: when stop PIE Cues must remain registered
+		RemoveCuePaths();
+	}
 
 	Super::OnGameFeatureDeactivating(Context);
 }
+
+// Called by Game Features system when owning plugin is unregistered
+void UGfpmAction_AddGameplayCuePath::OnGameFeatureUnregistering()
+{
+	RemoveCuePaths();
+
+	Super::OnGameFeatureUnregistering();
+}
+
+#if WITH_EDITORONLY_DATA
+// When cooker gathers asset bundle data for owning plugin
+void UGfpmAction_AddGameplayCuePath::AddAdditionalAssetBundleData(FAssetBundleData& AssetBundleData)
+{
+	const FString PluginRootPath = GetPluginRootPath();
+	if (!UAssetManager::IsInitialized()
+	    || PluginRootPath.IsEmpty())
+	{
+		return;
+	}
+
+	constexpr bool bHasBlueprintClasses = true;
+	constexpr bool bUseWeakReferences = true;
+	const TArray<FString> CuePaths = GetOwnCuePaths(PluginRootPath);
+	const TArray NotifyClasses = {UGameplayCueNotify_Static::StaticClass(), AGameplayCueNotify_Actor::StaticClass()};
+	for (UClass* NotifyClassIt : NotifyClasses)
+	{
+		UObjectLibrary* NotifyLibrary = UObjectLibrary::CreateLibrary(NotifyClassIt, bHasBlueprintClasses, bUseWeakReferences);
+		NotifyLibrary->LoadBlueprintAssetDataFromPaths(CuePaths);
+
+		TArray<FAssetData> NotifyAssets;
+		NotifyLibrary->GetAssetDataList(/*out*/ NotifyAssets);
+		for (const FAssetData& NotifyAssetIt : NotifyAssets)
+		{
+			// Cue notify resolves by tag only, so bundle keeps it referenced for cook and preloads it with owning plugin
+			const FTopLevelAssetPath NotifyAssetPath = NotifyAssetIt.GetSoftObjectPath().GetAssetPath();
+			AssetBundleData.AddBundleAsset(UGameFeaturesSubsystemSettings::LoadStateClient, NotifyAssetPath);
+			AssetBundleData.AddBundleAsset(UGameFeaturesSubsystemSettings::LoadStateServer, NotifyAssetPath);
+		}
+	}
+}
+#endif // WITH_EDITORONLY_DATA
 
 #if WITH_EDITOR
 // Called by editor when any property on this object is changed in details panel
@@ -69,9 +137,9 @@ void UGfpmAction_AddGameplayCuePath::PostEditChangeProperty(FPropertyChangedEven
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, DirectoryPathsToAdd)
-	    && IsGameFeaturePluginActive())
+	    && IsGameFeaturePluginRegistered())
 	{
-		// Folder list is changed while plugin stays Active, re-register so designer sees own cues resolve without plugin restart
+		// Folder list is changed while plugin stays Registered, re-register so designer sees own cues resolve without plugin restart
 		RegisterCuePaths();
 	}
 }
@@ -92,20 +160,20 @@ void UGfpmAction_AddGameplayCuePath::RegisterCuePaths()
 		return;
 	}
 
+	const TArray<FString> CuePaths = GetOwnCuePaths(PluginRootPath);
+	if (CuePaths == RegisteredCuePaths)
+	{
+		// Likely same folders are registered already, e.g: editor registers on Registered state and again on activation
+		return;
+	}
+
 	if (!RegisteredCuePaths.IsEmpty())
 	{
-		// Likely previous registration is still live, e.g: designer changed folder list while plugin stays Active
+		// Likely previous registration is still live, e.g: designer changed folder list while plugin stays Registered
 		RemoveCuePaths();
 	}
 
-	constexpr bool bMakeRelativeToPluginRoot = false;
-	for (const FDirectoryPath& DirectoryIt : DirectoryPathsToAdd)
-	{
-		FString CuePath = DirectoryIt.Path;
-		UGameFeaturesSubsystem::FixPluginPackagePath(/*out*/CuePath, PluginRootPath, bMakeRelativeToPluginRoot);
-		RegisteredCuePaths.AddUnique(CuePath);
-	}
-
+	RegisteredCuePaths = CuePaths;
 	if (RegisteredCuePaths.IsEmpty())
 	{
 		// Likely no folder is set, so nothing to register
@@ -147,6 +215,20 @@ void UGfpmAction_AddGameplayCuePath::RemoveCuePaths()
 	{
 		CueManager->InitializeRuntimeObjectLibrary();
 	}
+}
+
+// Returns own content folders resolved against given plugin content root
+TArray<FString> UGfpmAction_AddGameplayCuePath::GetOwnCuePaths(const FString& PluginRootPath) const
+{
+	TArray<FString> CuePaths;
+	constexpr bool bMakeRelativeToPluginRoot = false;
+	for (const FDirectoryPath& DirectoryIt : DirectoryPathsToAdd)
+	{
+		FString CuePath = DirectoryIt.Path;
+		UGameFeaturesSubsystem::FixPluginPackagePath(/*out*/ CuePath, PluginRootPath, bMakeRelativeToPluginRoot);
+		CuePaths.AddUnique(CuePath);
+	}
+	return CuePaths;
 }
 
 // Returns own plugin content root, empty string if this action does not belong to any plugin
