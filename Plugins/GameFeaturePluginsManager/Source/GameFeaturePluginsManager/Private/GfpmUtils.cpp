@@ -11,6 +11,7 @@
 #include "GameFeatureTypes.h"
 #include "GameFeaturesSubsystem.h"
 #include "HAL/IConsoleManager.h"
+#include "Misc/PackageName.h"
 #include "UObject/Package.h"
 #include "UnrealEngine.h"
 
@@ -297,6 +298,14 @@ FName UGfpmUtils::GetModuleNameByAsset(const UObject* Asset)
 	const FString OriginalPackageName = GetNameSafe(Asset->GetOutermost());
 	const int32 SecondSlashIdx = OriginalPackageName.Find(TEXT("/"), ESearchCase::CaseSensitive, ESearchDir::FromStart, 1);
 	return SecondSlashIdx != INDEX_NONE ? FName(*OriginalPackageName.Mid(1, SecondSlashIdx - 1)) : NAME_None;
+}
+
+// Returns plugin content root from specified asset package
+FString UGfpmUtils::GetPluginRootPathByAsset(const UObject* Asset)
+{
+	const UPackage* AssetPackage = Asset ? Asset->GetOutermost() : nullptr;
+	const FName MountPoint = AssetPackage ? FPackageName::GetPackageMountPoint(AssetPackage->GetName()) : NAME_None;
+	return MountPoint.IsNone() ? FString() : TEXT("/") + MountPoint.ToString();
 }
 
 // Returns the module name from any object by resolving its class package

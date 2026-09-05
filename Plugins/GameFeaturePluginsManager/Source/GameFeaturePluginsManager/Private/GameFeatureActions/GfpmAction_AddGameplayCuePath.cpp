@@ -2,14 +2,25 @@
 
 #include "GameFeatureActions/GfpmAction_AddGameplayCuePath.h"
 
+// GFPM
+#include "Data/GfpmScopedWorldContext.h"
+#include "GfpmUtils.h"
+
 // UE
 #include "AbilitySystemGlobals.h"
 #include "CoreGlobals.h"
+#include "Engine/World.h"
 #include "GameFeatureData.h"
 #include "GameFeaturesSubsystem.h"
 #include "GameplayCueManager.h"
+#include "GameplayCueNotify_Actor.h"
+#include "GameplayCueSet.h"
+#include "GameplayCue_Types.h"
 #include "Misc/PackageName.h"
-#include "UObject/Package.h"
+#include "Misc/PathViews.h"
+#include "UObject/ObjectMacros.h"
+#include "UObject/UObjectHash.h"
+#include "UObject/UnrealType.h"
 
 #if WITH_EDITORONLY_DATA
 #include "AssetRegistry/AssetBundleData.h"
@@ -17,14 +28,12 @@
 #include "Engine/AssetManager.h"
 #include "Engine/ObjectLibrary.h"
 #include "GameFeaturesSubsystemSettings.h"
-#include "GameplayCueNotify_Actor.h"
 #include "GameplayCueNotify_Static.h"
 #endif // WITH_EDITORONLY_DATA
 
 #if WITH_EDITOR
 #include "Internationalization/Text.h"
 #include "Misc/DataValidation.h"
-#include "UObject/UnrealType.h"
 #endif // WITH_EDITOR
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GfpmAction_AddGameplayCuePath)
@@ -57,6 +66,78 @@ EDataValidationResult UGfpmAction_AddGameplayCuePath::IsDataValid(FDataValidatio
 }
 #endif // WITH_EDITOR
 
+// Returns own content folders resolved against given plugin content root
+TArray<FString> UGfpmAction_AddGameplayCuePath::GetOwnCuePaths(const FString& PluginRootPath) const
+{
+	TArray<FString> CuePaths;
+	constexpr bool bMakeRelativeToPluginRoot = false;
+	for (const FDirectoryPath& DirectoryIt : DirectoryPathsToAdd)
+	{
+		FString CuePath = DirectoryIt.Path;
+		UGameFeaturesSubsystem::FixPluginPackagePath(/*out*/ CuePath, PluginRootPath, bMakeRelativeToPluginRoot);
+		CuePaths.AddUnique(CuePath);
+	}
+	return CuePaths;
+}
+
+// Returns own cue actor classes currently registered in Gameplay Cue Manager, so unload releases exactly what registration added
+TArray<TSubclassOf<AGameplayCueNotify_Actor>> UGfpmAction_AddGameplayCuePath::GetOwnCueClasses() const
+{
+	TArray<TSubclassOf<AGameplayCueNotify_Actor>> OwnCueClasses;
+	UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
+	const UGameplayCueSet* CueSet = CueManager ? CueManager->GetRuntimeCueSet() : nullptr;
+	if (RegisteredCuePaths.IsEmpty()
+	    || !CueSet)
+	{
+		// Likely nothing is registered yet, or Gameplay Cue Manager is already gone during engine teardown
+		return OwnCueClasses;
+	}
+
+	for (const FGameplayCueNotifyData& CueDataIt : CueSet->GameplayCueData)
+	{
+		UClass* CueClass = CueDataIt.LoadedGameplayCueClass;
+		if (!CueClass
+		    || !CueClass->IsChildOf<AGameplayCueNotify_Actor>())
+		{
+			// Likely class not loaded yet, or static cue that has no actor to release
+			continue;
+		}
+
+		const FString CueFolder = FPackageName::GetLongPackagePath(CueDataIt.GameplayCueNotifyObj.GetLongPackageName());
+		const bool bIsOwnFolder = RegisteredCuePaths.ContainsByPredicate([&CueFolder](const FString& RegisteredPathIt)
+		{
+			return FPathViews::IsParentPathOf(RegisteredPathIt, CueFolder);
+		});
+		if (bIsOwnFolder)
+		{
+			OwnCueClasses.AddUnique(CueClass);
+		}
+	}
+	return OwnCueClasses;
+}
+
+// Returns the pointer to pool list of preallocated cue actors of Gameplay Cue Manager, nullptr if manager is already gone or no longer exposes it under own name and shape
+TArray<FPreallocationInfo>* UGfpmAction_AddGameplayCuePath::FindCueManagerPoolList() const
+{
+	UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
+	if (!CueManager)
+	{
+		// Likely Gameplay Cue Manager is already gone during engine teardown
+		return nullptr;
+	}
+
+	// Pool list is protected member of engine manager, but its extremely important to cleanup (engine issue itself), so reach out it by reflection
+	static const FName PoolListName = TEXT("PreallocationInfoList_Internal");
+	const FArrayProperty* PoolListProperty = CastField<FArrayProperty>(UGameplayCueManager::StaticClass()->FindPropertyByName(PoolListName));
+	const FStructProperty* PoolInfoProperty = PoolListProperty ? CastField<FStructProperty>(PoolListProperty->Inner) : nullptr;
+	const bool bIsPoolList = PoolInfoProperty && PoolInfoProperty->Struct == FPreallocationInfo::StaticStruct();
+	if (!ensureMsgf(bIsPoolList, TEXT("ASSERT: [%i] %hs:\n'%s' no longer resolves to pool list of Gameplay Cue Manager, engine likely renamed it, so pooled cue classes outlive plugin unload!"), __LINE__, __FUNCTION__, *PoolListName.ToString()))
+	{
+		return nullptr;
+	}
+	return PoolListProperty->ContainerPtrToValuePtr<TArray<FPreallocationInfo>>(CueManager);
+}
+
 // Called by Game Features system when owning plugin is registered
 void UGfpmAction_AddGameplayCuePath::OnGameFeatureRegistering()
 {
@@ -77,16 +158,20 @@ void UGfpmAction_AddGameplayCuePath::OnGameFeatureActivating(FGameFeatureActivat
 	RegisterCuePaths();
 }
 
-// When owning Game Feature Plugin transitions out of Active state
-void UGfpmAction_AddGameplayCuePath::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
+// Called by Game Features system when owning plugin is unloaded
+void UGfpmAction_AddGameplayCuePath::OnGameFeatureUnloading()
 {
+	const TArray<TSubclassOf<AGameplayCueNotify_Actor>> OwnCueClasses = GetOwnCueClasses();
+	DestroyOwnCueActors(OwnCueClasses);
+	RemoveOwnCueClassesFromPool(OwnCueClasses);
+
 	if (!GIsEditor)
 	{
 		// Only outside editor itself unload early, e.g: when stop PIE Cues must remain registered
 		RemoveCuePaths();
 	}
 
-	Super::OnGameFeatureDeactivating(Context);
+	Super::OnGameFeatureUnloading();
 }
 
 // Called by Game Features system when owning plugin is unregistered
@@ -101,7 +186,7 @@ void UGfpmAction_AddGameplayCuePath::OnGameFeatureUnregistering()
 // When cooker gathers asset bundle data for owning plugin
 void UGfpmAction_AddGameplayCuePath::AddAdditionalAssetBundleData(FAssetBundleData& AssetBundleData)
 {
-	const FString PluginRootPath = GetPluginRootPath();
+	const FString PluginRootPath = UGfpmUtils::GetPluginRootPathByAsset(GetGameFeatureData());
 	if (!UAssetManager::IsInitialized()
 	    || PluginRootPath.IsEmpty())
 	{
@@ -153,7 +238,7 @@ void UGfpmAction_AddGameplayCuePath::PostEditChangeProperty(FPropertyChangedEven
 void UGfpmAction_AddGameplayCuePath::RegisterCuePaths()
 {
 	UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
-	const FString PluginRootPath = GetPluginRootPath();
+	const FString PluginRootPath = UGfpmUtils::GetPluginRootPathByAsset(GetGameFeatureData());
 	if (!ensureMsgf(CueManager, TEXT("ASSERT: [%i] %hs:\n'CueManager' is null!"), __LINE__, __FUNCTION__)
 	    || !ensureMsgf(!PluginRootPath.IsEmpty(), TEXT("ASSERT: [%i] %hs:\n'PluginRootPath' is empty!"), __LINE__, __FUNCTION__))
 	{
@@ -217,31 +302,53 @@ void UGfpmAction_AddGameplayCuePath::RemoveCuePaths()
 	}
 }
 
-// Returns own content folders resolved against given plugin content root
-TArray<FString> UGfpmAction_AddGameplayCuePath::GetOwnCuePaths(const FString& PluginRootPath) const
+// Destroys actors of given cue classes in every game world, pooled or live, ending live ones first so cue end releases what it spawned
+void UGfpmAction_AddGameplayCuePath::DestroyOwnCueActors(const TArray<TSubclassOf<AGameplayCueNotify_Actor>>& CueClasses)
 {
-	TArray<FString> CuePaths;
-	constexpr bool bMakeRelativeToPluginRoot = false;
-	for (const FDirectoryPath& DirectoryIt : DirectoryPathsToAdd)
+	constexpr bool bIncludeDerivedClasses = false;
+	for (const TSubclassOf<AGameplayCueNotify_Actor>& CueClassIt : CueClasses)
 	{
-		FString CuePath = DirectoryIt.Path;
-		UGameFeaturesSubsystem::FixPluginPackagePath(/*out*/ CuePath, PluginRootPath, bMakeRelativeToPluginRoot);
-		CuePaths.AddUnique(CuePath);
+		TArray<UObject*> OutCueObjects;
+		GetObjectsOfClass(CueClassIt, OutCueObjects, bIncludeDerivedClasses, RF_ClassDefaultObject | RF_ArchetypeObject, EInternalObjectFlags::Garbage);
+		for (UObject* CueObjectIt : OutCueObjects)
+		{
+			AGameplayCueNotify_Actor& CueActorRef = *CastChecked<AGameplayCueNotify_Actor>(CueObjectIt);
+			UWorld* World = CueActorRef.GetWorld();
+			if (!World
+			    || !World->IsGameWorld())
+			{
+				// Likely actor of editor or preview world that never pools cues
+				continue;
+			}
+
+			// Own cue releases what it spawned inside that world, so globals point at it while cue end runs
+			FGfpmScopedWorldContext WorldContextGuard(World);
+			if (!CueActorRef.bInRecycleQueue)
+			{
+				// Live actor still represents running cue, so it is ended first and releases own effects before it leaves
+				CueActorRef.K2_EndGameplayCue();
+			}
+
+			CueActorRef.Destroy();
+		}
 	}
-	return CuePaths;
 }
 
-// Returns own plugin content root, empty string if this action does not belong to any plugin
-FString UGfpmAction_AddGameplayCuePath::GetPluginRootPath() const
+// Removes given cue classes from Gameplay Cue Manager pool, so no pooled class key pins plugin content past unload
+void UGfpmAction_AddGameplayCuePath::RemoveOwnCueClassesFromPool(const TArray<TSubclassOf<AGameplayCueNotify_Actor>>& CueClasses)
 {
-	const UGameFeatureData* GameFeatureData = GetGameFeatureData();
-	const UPackage* OwnPackage = GameFeatureData ? GameFeatureData->GetOutermost() : nullptr;
-	if (!OwnPackage)
+	TArray<FPreallocationInfo>* PoolList = FindCueManagerPoolList();
+	if (!PoolList)
 	{
-		// Likely action is inspected outside any owning Game Feature Data, e.g: class default object in editor action picker
-		return FString();
+		// Likely Gameplay Cue Manager is already gone during engine teardown, or engine no longer exposes own pool
+		return;
 	}
 
-	const FName MountPoint = FPackageName::GetPackageMountPoint(OwnPackage->GetName());
-	return MountPoint.IsNone() ? FString() : TEXT("/") + MountPoint.ToString();
+	for (FPreallocationInfo& PoolInfoIt : *PoolList)
+	{
+		for (const TSubclassOf<AGameplayCueNotify_Actor>& CueClassIt : CueClasses)
+		{
+			PoolInfoIt.PreallocatedInstances.Remove(CueClassIt);
+		}
+	}
 }

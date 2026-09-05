@@ -5,9 +5,12 @@
 #include "GameFeatureAction.h"
 
 // UE
+#include "Templates/SubclassOf.h"
 #include "UObject/SoftObjectPath.h" // FDirectoryPath
 
 #include "GfpmAction_AddGameplayCuePath.generated.h"
+
+class AGameplayCueNotify_Actor;
 
 /**
  * Game Feature action that registers own plugin content folders in Gameplay Cue Manager while owning Game Feature Plugin is Active.
@@ -29,6 +32,17 @@ public:
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
 #endif // WITH_EDITOR
 
+	/** Returns own content folders resolved against given plugin content root. */
+	UFUNCTION(BlueprintPure, Category = "[Game Feature Plugins Manager]")
+	TArray<FString> GetOwnCuePaths(const FString& PluginRootPath) const;
+
+	/** Returns own cue actor classes currently registered in Gameplay Cue Manager, so unload releases exactly what registration added. */
+	UFUNCTION(BlueprintPure, Category = "[Game Feature Plugins Manager]")
+	TArray<TSubclassOf<AGameplayCueNotify_Actor>> GetOwnCueClasses() const;
+
+	/** Returns the pointer to pool list of preallocated cue actors of Gameplay Cue Manager, nullptr if manager is already gone or no longer exposes it under own name and shape. */
+	TArray<struct FPreallocationInfo>* FindCueManagerPoolList() const;
+
 protected:
 	/** Called by Game Features system when owning plugin is registered. */
 	virtual void OnGameFeatureRegistering() override;
@@ -36,8 +50,8 @@ protected:
 	/** When owning Game Feature Plugin transitions into Active state. */
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
 
-	/** When owning Game Feature Plugin transitions out of Active state. */
-	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
+	/** Called by Game Features system when owning plugin is unloaded. */
+	virtual void OnGameFeatureUnloading() override;
 
 	/** Called by Game Features system when owning plugin is unregistered. */
 	virtual void OnGameFeatureUnregistering() override;
@@ -67,11 +81,11 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
 	void RemoveCuePaths();
 
-	/** Returns own content folders resolved against given plugin content root. */
-	UFUNCTION(BlueprintPure, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
-	TArray<FString> GetOwnCuePaths(const FString& PluginRootPath) const;
+	/** Destroys actors of given cue classes in every game world, pooled or live, ending live ones first so cue end releases what it spawned. */
+	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, AutoCreateRefTerm = "CueClasses"))
+	void DestroyOwnCueActors(const TArray<TSubclassOf<AGameplayCueNotify_Actor>>& CueClasses);
 
-	/** Returns own plugin content root, empty string if this action does not belong to any plugin. */
-	UFUNCTION(BlueprintPure, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected))
-	FString GetPluginRootPath() const;
+	/** Removes given cue classes from Gameplay Cue Manager pool, so no pooled class key pins plugin content past unload. */
+	UFUNCTION(BlueprintCallable, Category = "[Game Feature Plugins Manager]", meta = (BlueprintProtected, AutoCreateRefTerm = "CueClasses"))
+	void RemoveOwnCueClassesFromPool(const TArray<TSubclassOf<AGameplayCueNotify_Actor>>& CueClasses);
 };

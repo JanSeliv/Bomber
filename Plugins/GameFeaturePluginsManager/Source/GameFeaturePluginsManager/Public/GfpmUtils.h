@@ -60,6 +60,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Game Feature Plugins Manager]")
 	static FName GetModuleNameByAsset(const UObject* Asset);
 
+	/** Returns plugin content root from specified asset package, e.g. "/GameFeatureModule" from content asset, empty string if it belongs to no plugin. */
+	UFUNCTION(BlueprintPure, Category = "[Game Feature Plugins Manager]")
+	static FString GetPluginRootPathByAsset(const UObject* Asset);
+
 	/** Returns the module name from any object by resolving its class package.
 	 * For C++ objects, extracts from /Script/ package (e.g. "GameFeatureModuleRuntime").
 	 * For Blueprint objects, extracts content root from class package (e.g. "GameFeatureModule"). */
