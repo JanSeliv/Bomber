@@ -32,3 +32,7 @@
 	path = Plugins/GameFeatures/Mods/SkillDash
 	url = https://github.com/marko-ue/SkillDash
 	branch = develop
+[submodule "Plugins/GameFeatures/Mods/SkillShield"]
+	path = Plugins/GameFeatures/Mods/SkillShield
+	url = https://github.com/Antokior/SkillShield.git
+	branch = develop
