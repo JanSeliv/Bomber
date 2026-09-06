@@ -28,3 +28,7 @@
 [submodule "Plugins/AdvancedSessionsPlugin"]
 	path = Plugins/AdvancedSessionsPlugin
 	url = https://github.com/JanSeliv/AdvancedSessionsPlugin.git
+[submodule "Plugins/GameFeatures/Mods/SkillDash"]
+	path = Plugins/GameFeatures/Mods/SkillDash
+	url = https://github.com/marko-ue/SkillDash
+	branch = develop
