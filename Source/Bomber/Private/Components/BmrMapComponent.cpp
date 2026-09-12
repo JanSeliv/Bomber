@@ -122,7 +122,7 @@ void UBmrMapComponent::SetLocalMesh(UStreamableRenderAsset* NewMesh)
 }
 
 /** Set material to the mesh. */
-void UBmrMapComponent::SetLocalMeshMaterial(UMaterialInterface* NewMaterial)
+void UBmrMapComponent::SetLocalMeshMaterial(UMaterialInterface* NewMaterial, int32 MaterialIndex /* = 0*/)
 {
 	if (!ensureMsgf(NewMaterial, TEXT("ASSERT: [%i] %hs:\n'Material' is not valid!"), __LINE__, __FUNCTION__)
 	    || !ensureMsgf(MeshComponent, TEXT("ASSERT: [%i] %hs:\n'MeshComponent' is null!"), __LINE__, __FUNCTION__))
@@ -130,7 +130,7 @@ void UBmrMapComponent::SetLocalMeshMaterial(UMaterialInterface* NewMaterial)
 		return;
 	}
 
-	MeshComponent->SetMaterial(0, NewMaterial);
+	MeshComponent->SetMaterial(MaterialIndex, NewMaterial);
 }
 
 // Resolves the Data Registry row by name and applies its mesh locally

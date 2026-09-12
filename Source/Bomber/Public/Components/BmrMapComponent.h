@@ -137,9 +137,10 @@ public:
 	void SetLocalMesh(class UStreamableRenderAsset* NewMesh);
 
 	/** Overrides default material of current mesh component.
-	 * @param NewMaterial - the material to be set on the mesh component. */
+	 * @param NewMaterial Material to be set on mesh component.
+	 * @param MaterialIndex Material slot to override. */
 	UFUNCTION(BlueprintCallable, Category = "[Bomber]")
-	void SetLocalMeshMaterial(class UMaterialInterface* NewMaterial);
+	void SetLocalMeshMaterial(class UMaterialInterface* NewMaterial, int32 MaterialIndex = 0);
 
 	/** Resolves the Data Registry row by name and applies its mesh locally.
 	 * Replicated and persistent player mesh data lives on ABmrPlayerState::ChosenMeshData. */
