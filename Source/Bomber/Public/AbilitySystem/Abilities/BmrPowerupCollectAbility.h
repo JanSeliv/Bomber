@@ -18,10 +18,18 @@ class BOMBER_API UBmrPowerupCollectAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
+public:
+	/** Default constructor. */
+	UBmrPowerupCollectAbility();
+
 protected:
 	/** Is overridden to prevent event-based activation if pickup is not allowed. */
 	virtual bool ShouldAbilityRespondToEvent(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayEventData* TriggerEventData) const override;
 
 	/** Actually activate ability, do not call this directly. */
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+
+	/** Called when pickup montage finishes, blends out or is interrupted. */
+	UFUNCTION(BlueprintNativeEvent, Category = "[Bomber]", meta = (BlueprintProtected))
+	void OnPickupMontageFinished();
 };

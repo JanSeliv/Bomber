@@ -38,6 +38,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	FORCEINLINE TSubclassOf<class UAnimInstance> GetAnimInstanceClass() const { return AnimInstanceClass; }
 
+	/** Returns montage played when character collects powerup. */
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
+	FORCEINLINE class UAnimMontage* GetPickupMontage() const { return PickupMontage; }
+
 	/** Returns the Data Registry row name for the given player tag, or NAME_None */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "[Bomber]")
 	static FName GetRowNameByPlayerTag(const FBmrPlayerTag& PlayerTag);
@@ -78,6 +82,10 @@ protected:
 	/** The AnimBlueprint class to use, can set it only in the gameplay. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
 	TSubclassOf<class UAnimInstance> AnimInstanceClass = nullptr;
+
+	/** The montage played on upper body when character collects powerup. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BlueprintProtected, ShowOnlyInnerProperties))
+	TObjectPtr<class UAnimMontage> PickupMontage = nullptr;
 
 	/** Contains all abilities to grant on the player at the start of the game. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability System", meta = (BlueprintProtected, ShowOnlyInnerProperties))

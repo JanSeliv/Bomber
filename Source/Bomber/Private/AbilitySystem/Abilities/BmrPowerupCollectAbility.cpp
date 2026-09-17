@@ -6,13 +6,23 @@
 #include "Actors/BmrGeneratedMap.h"
 #include "Actors/BmrPowerupActor.h"
 #include "Components/BmrMapComponent.h"
+#include "DataAssets/BmrPlayerDataAsset.h"
 #include "DataRegistries/BmrPowerupRow.h"
 #include "Structures/BmrPowerupTag.h"
 
 // UE
+#include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "AbilitySystemComponent.h"
+#include "Animation/AnimMontage.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BmrPowerupCollectAbility)
+
+// Default constructor
+UBmrPowerupCollectAbility::UBmrPowerupCollectAbility()
+{
+	// Next pickup retriggers instance while its montage is still playing
+	bRetriggerInstancedAbility = true;
+}
 
 // Is overridden to prevent event-based activation if pickup is not allowed
 bool UBmrPowerupCollectAbility::ShouldAbilityRespondToEvent(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayEventData* TriggerEventData) const
@@ -63,5 +73,25 @@ void UBmrPowerupCollectAbility::ActivateAbility(const FGameplayAbilitySpecHandle
 		ABmrGeneratedMap::Get().DestroyLevelActor(InstigatorMapComponent, ActorInfo->AvatarActor.Get());
 	}
 
+	UAnimMontage* PickupMontage = UBmrPlayerDataAsset::Get().GetPickupMontage();
+	if (!ensureMsgf(PickupMontage, TEXT("ASSERT: [%i] %hs:\n'PickupMontage' is null!"), __LINE__, __FUNCTION__))
+	{
+		K2_EndAbilityLocally();
+		return;
+	}
+
+	UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, NAME_None, PickupMontage);
+	checkf(MontageTask, TEXT("ERROR: [%i] %hs:\n'MontageTask' is null!"), __LINE__, __FUNCTION__);
+	MontageTask->OnCompleted.AddDynamic(this, &ThisClass::OnPickupMontageFinished);
+	MontageTask->OnBlendOut.AddDynamic(this, &ThisClass::OnPickupMontageFinished);
+	MontageTask->OnInterrupted.AddDynamic(this, &ThisClass::OnPickupMontageFinished);
+	MontageTask->OnCancelled.AddDynamic(this, &ThisClass::OnPickupMontageFinished);
+	MontageTask->ReadyForActivation();
+	ASC->ForceReplication();
+}
+
+// Called when pickup montage finishes, blends out or is interrupted
+void UBmrPowerupCollectAbility::OnPickupMontageFinished_Implementation()
+{
 	K2_EndAbilityLocally();
 }

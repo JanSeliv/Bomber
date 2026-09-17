@@ -65,6 +65,7 @@ Despite this project is mostly written in C++, it's extremely **blueprint-friend
 ## 📅 Changelog
 #### `2026-XX-XX:`
 - Updated to **Unreal Engine 5.8**.
+- Players now play pickup animation when collecting powerups by [Kateryna Shchetinina](https://www.artstation.com/kateseliv).
 #### `2026-06-23:`
 - Updated to **Unreal Engine 5.7**.
 - Reduced repo size from ~20 GB to ~100 MB: added Blockout Map with minimal content (full content with Maya Map can be downloaded from [Releases](https://github.com/JanSeliv/Bomber/releases/))
