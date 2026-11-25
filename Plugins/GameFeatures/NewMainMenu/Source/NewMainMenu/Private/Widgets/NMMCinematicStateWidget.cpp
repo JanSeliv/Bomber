@@ -127,6 +127,6 @@ void UNMMCinematicStateWidget::OnCinematicSkipFinished_Implementation()
 	UGlobalMessageSubsystem::BroadcastGlobalMessage(EventData);
 	if (!MyPC->HasAuthority())
 	{
-		MyPC->ServerBroadcastMessage(EventData);
+		MyPC->ServerBroadcastMessage(EventData.EventTag);
 	}
 }

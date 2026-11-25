@@ -120,7 +120,7 @@ void UNewMainMenuWidget::OnPlayButtonPressed()
 	// This button might be pressed locally by user, send event to server if has no authority
 	if (!MyPC->HasAuthority())
 	{
-		MyPC->ServerBroadcastMessage(EventData);
+		MyPC->ServerBroadcastMessage(EventData.EventTag);
 	}
 }
 

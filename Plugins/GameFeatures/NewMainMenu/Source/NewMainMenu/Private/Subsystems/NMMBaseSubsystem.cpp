@@ -91,7 +91,7 @@ void UNMMBaseSubsystem::TryBroadcastMenuReady()
 	ABmrPlayerController* MyPC = UBmrBlueprintFunctionLibrary::GetLocalPlayerController();
 	if (MyPC && !MyPC->HasAuthority())
 	{
-		MyPC->ServerBroadcastMessage(MenuReadyData);
+		MyPC->ServerBroadcastMessage(MenuReadyData.EventTag);
 	}
 }
 

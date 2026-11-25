@@ -154,7 +154,7 @@ void UNMMPlayerControllerComponent::OnUnregister()
 
 		if (!MyPC->HasAuthority())
 		{
-			MyPC->ServerBroadcastMessage(EventData);
+			MyPC->ServerBroadcastMessage(EventData.EventTag);
 		}
 	}
 

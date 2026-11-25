@@ -26,11 +26,13 @@
 #include "UtilityLibraries/BmrBlueprintFunctionLibrary.h"
 
 // UE
+#include "Abilities/GameplayAbilityTypes.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Framework/Application/NavigationConfig.h"
 #include "Framework/Application/SlateApplication.h"
+#include "GameplayTagContainer.h"
 
 #if WITH_EDITOR
 #include "Editor.h"
@@ -58,9 +60,13 @@ ABmrPlayerController::ABmrPlayerController()
 }
 
 // Sends a gameplay event to the server via Gameplay Message Router, is useful for actions happening only by client such as UI buttons to start the game etc
-void ABmrPlayerController::ServerBroadcastMessage_Implementation(const FGameplayEventData& Payload)
+void ABmrPlayerController::ServerBroadcastMessage_Implementation(FGameplayTag EventTag)
 {
-	UGlobalMessageSubsystem::BroadcastGlobalMessage(Payload);
+	FGameplayEventData ServerPayload;
+	ServerPayload.EventTag = EventTag;
+	ServerPayload.Instigator = GetPawn();
+
+	UGlobalMessageSubsystem::BroadcastGlobalMessage(ServerPayload);
 }
 
 /*********************************************************************************************

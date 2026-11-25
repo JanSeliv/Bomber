@@ -27,7 +27,7 @@ public:
 public:
 	/** Sends a gameplay event to the server via Gameplay Message Router, is useful for actions happening only by client such as UI buttons to start the game etc. */
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "[Bomber]")
-	void ServerBroadcastMessage(const struct FGameplayEventData& Payload);
+	void ServerBroadcastMessage(UPARAM(meta = (Categories = "Event")) struct FGameplayTag EventTag);
 
 	/*********************************************************************************************
 	 * Protected properties
